@@ -6,11 +6,13 @@ import { NewChat } from './NewChat';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
 import { useServices } from '../../logic/store';
+import useStorage from 'renderer/logic/lib/useStorage';
 
 export const MessagesTrayApp = observer(() => {
   const { theme } = useServices();
   const { dimensions } = useTrayApps();
   const { dmApp } = useTrayApps();
+  const storage = useStorage();
 
   const headerSize = 50;
   let viewSwitcher: React.ReactElement = (
@@ -66,19 +68,10 @@ export const MessagesTrayApp = observer(() => {
     case 'dm-chat':
       viewSwitcher = (
         <ChatView
-          headerOffset={headerSize}
           height={dimensions.height}
-          dimensions={dimensions}
           theme={theme.currentTheme as any}
-          // s3Client={s3Client}
+          storage={storage}
           selectedChat={dmApp.selectedChat!}
-          setSelectedChat={(chat: any) => {
-            if (!chat) dmApp.setView('dm-list');
-            dmApp.setSelectedChat(chat);
-          }}
-          onSend={(message: any) => {
-            console.log('dm message', message);
-          }}
         />
       );
       break;

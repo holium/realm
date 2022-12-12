@@ -5,6 +5,9 @@ import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from '@holium/realm-wallet/src/wallet.model';
+import { useServices } from 'renderer/logic/store';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
 interface IPassport {
   patp: string;
@@ -22,7 +25,8 @@ interface IPassport {
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
   const { patp, sigilColor, avatar, nickname, description, onClose } = props;
   const { textColor, windowColor } = props.theme!;
-  const { setActiveApp, walletApp } = useTrayApps();
+  const { courier } = useServices();
+  const { setActiveApp, dmApp } = useTrayApps();
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
@@ -85,16 +89,17 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
             onClick={(evt: any) => {
-              // setActiveApp('messages-tray');
-              setActiveApp('messages-tray', {
-                willOpen: true,
-                position: 'top-left',
-                anchorOffset: { x: 4, y: 26 },
-                dimensions: {
-                  height: 600,
-                  width: 390,
-                },
-              });
+              if (courier.previews.has(`/dm-inbox/${patp}`)) {
+                const dmPreview = courier.previews.get(`/dm-inbox/${patp}`)!;
+                openDMsToChat(dmApp, dmPreview, setActiveApp);
+              } else {
+                ShipActions.draftDm(
+                  [patp],
+                  [{ color: sigilColor, avatar, nickname }]
+                ).then((dmDraft) => {
+                  openDMsToChat(dmApp, dmDraft!, setActiveApp);
+                });
+              }
               onClose();
               evt.stopPropagation();
             }}
@@ -107,9 +112,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
             <Text fontSize={2}>{description}</Text>
           </Flex>
         )}
-        {/* <Flex flexDirection="column" gap={4}>
-          Mutuals
-        </Flex> */}
       </Flex>
     </Flex>
   );

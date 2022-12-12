@@ -18,6 +18,7 @@
       %group  `block:c`[%cite [%group group.reference.con]]
       %app    `block:c`[%cite [%desk flag=[ship.reference.con desk.reference.con] path.reference.con]]
     ==
+    ~&  >>  ['into-chat-block-type' ref]
     ?~  ref  ~
     `ref
   ==
@@ -31,9 +32,9 @@
     %code       [%code p=expression.con]
     %reference
     ?-  -.reference.con
-      %graph  ''
-      %group  ''
-      %app    ''
+      %graph  ''  
+      %group  ''  :: [%group ship=@ name=@ ~]
+      %app    ''  :: [%desk ship=@ name=@ rest=*]
     ==
   ==
 ++  textified-content
@@ -178,6 +179,7 @@
       =/  diff  !<(diff:writs:c q.cage)
       =/  crew  (get-crew club-id bowl)
       =/  new-dm  (chat-from-crew club-id crew bowl)
+      
       (send-updates new-dm bowl state)
   ==
 ++  on-graph-action
@@ -210,8 +212,16 @@
   ++  read-dm
     |=  [=ship =bowl:gall]
     ~&  >  "signaling read-dm for {(scow %p ship)}"
+    =/  rop
+      [
+        gop=~ 
+        can=~ 
+        des=%talk 
+        ted=[/dm/(scot %p ship)]
+      ]
     :~
       [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]
+      [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
     ==
   ++  create-group-dm
     |=  [ships=(set ship) =bowl:gall]
@@ -234,16 +244,17 @@
       :: watch the new club that we created
       [%pass /g2/club/(scot %uv now.bowl)/ui %agent [our.bowl %chat] %watch /club/(scot %uv now.bowl)/ui/writs]
     ==
+  ::
   ++  send-group-dm
     |=  [act=[=resource =post] =bowl:gall state=state-1]
     =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource.act)
     ?~  club-id-unit  !!
-    =/  crew  (get-crew +:club-id-unit bowl)
+    =/  crew          (get-crew +:club-id-unit bowl)
     =/  group-ships   (~(uni in team.crew) hive.crew)
     =/  messages  :_  ~
-    :*  index=~[now.bowl]
+    :*  index=~[time-sent.post.act]
         author=our.bowl
-        time-sent=now.bowl
+        time-sent=time-sent.post.act
         contents.post.act
     ==
     =/  new-dm
@@ -256,17 +267,25 @@
       messages=messages
       metadata=(turn ~(tap in group-ships) |=([s=ship] (form-contact-mtd (get-rolo bowl) s)))
     ==
-    ~&  >  'giving /updates a dm-received'
-    ~&  >  new-dm
     :~
       [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
     ==
   ++  read-group-dm
     |=  [=resource =bowl:gall]
-    :: ~&  %read-group-dm
-    :: ~&  resource
+    ~&  %read-group-dm
+    ~&  resource
+    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
+    ?~  club-id-unit  !!
+    =/  rop
+      [
+        gop=~ 
+        can=~ 
+        des=%talk
+        ted=[/club/(scot %uv +:club-id-unit)]
+      ]
     :~
       [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-resource resource))]
+      [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
     ==
   --
 ++  test-scry
@@ -363,10 +382,11 @@
   |=  =writs:c
   ^-  (list graph-dm)
   %+  turn   (tap:on:writs:c writs)
+  ::  BE WARNED time IS NOT AS PRECISE AS sent.memo
   |=  [=time [=seal:c =memo:c]]
-    :*  index=~[time]
+    :*  index=~[sent.memo]
         author=author.memo
-        time-sent=time
+        time-sent=sent.memo
         (transform-content content.memo author.memo)
     ==
 ++  transform-content
@@ -439,7 +459,6 @@
       (turn ~(tap in team.crew) |=(=ship (form-contact-mtd rolo ship)))
     =/  our-in-team    (~(has in team.crew) our.bowl)
     =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
-    :: ~&  writs
     =/  recent-msg      (snag 0 (messages-from-writs writs))
     =/  prev-contents   (weld [[%mention author.recent-msg] ~] contents.recent-msg)
     :-  ~
@@ -509,7 +528,11 @@
     =/  inlines
       ^-  (list inline:c)
       (turn contents.post into-chat-inline-type)
-    =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [*(list) (snoc inlines [%break ~])]])]
+    =/  blocks
+      ^-  (list block:c)
+      (murn contents.post into-chat-block-type)
+    ~&  >>  ['blocks' blocks]
+    =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [blocks (snoc inlines [%break ~])]])]
     =/  writ-diff  [[author.post time-sent.post] delta-for-chat]
     [id `diff:club:c`[0 `delta:club:c`[%writ writ-diff]]]
 ::
@@ -570,11 +593,14 @@
           %flag  ~
           %ship
             =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)
+            =/  msg     (snag 0 messages.new-dm)
+            ?:  =(author.msg our.bowl)  ~
             (send-updates new-dm bowl state)
+            :: =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)
+            :: (send-updates new-dm bowl state)
         ==
+        ?~  dm-received-cards  ~
         =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl])
-        :: ~&  >  'the-preview in propagate-briefs-fact'
-        :: ~&  >  the-preview
         ?~  the-preview  dm-received-cards
         ::  don't send the dm-received-cards, which may include a push
         ::  notification, if the unread-count is zero, because
