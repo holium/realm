@@ -12,7 +12,6 @@ import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
-import axios from 'axios';
 import { getCookie } from '../../lib/shipHelpers';
 
 export type ShipCredentials = {
@@ -364,15 +363,7 @@ export class AuthService extends BaseService {
     newShip: { ship: string; url: string; code: string }
   ) {
     const { ship, url, code } = newShip;
-    const response = await axios.post(
-      `${url}/~/login`,
-      `password=${code.trim()}`,
-      {
-        withCredentials: true,
-      }
-    );
-
-    const cookie = response.headers['set-cookie']![0];
+    const cookie = await getCookie({ patp: ship, url, code });
     const id = `auth${ship}`;
 
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(

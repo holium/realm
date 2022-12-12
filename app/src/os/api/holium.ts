@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-let baseURL = `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+let baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
 if (process.env.NODE_ENV === 'production') {
-  baseURL = 'https://realm-api-prod-jjzzq.ondigitalocean.app';
+  baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
 } else if (process.env.USE_LOCAL_API) {
   baseURL = 'http://localhost:8080';
 }
@@ -44,13 +44,32 @@ export class HoliumAPI {
   async createAccount(
     email: string,
     accessCode?: string
-  ): Promise<{ id: string; verificationCode: string }> {
-    const { data } = await client.post(
-      `accounts/create?email=${email}${
-        accessCode ? `&accessCode=${accessCode}` : ''
-      }`
-    );
-    return { id: data.id, verificationCode: data.verificationCode };
+  ): Promise<{
+    id: string | null;
+    verificationCode: string | null;
+    errorCode: number | null;
+  }> {
+    try {
+      const { data } = await client.post(
+        `accounts/create?email=${email}${
+          accessCode ? `&accessCode=${accessCode}` : ''
+        }`
+      );
+      return {
+        id: data.id,
+        verificationCode: data.verificationCode,
+        errorCode: null,
+      };
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.status &&
+        error.response.status === 441
+      ) {
+        return { id: null, verificationCode: null, errorCode: 441 };
+      }
+      return { id: null, verificationCode: null, errorCode: null };
+    }
   }
 
   async resendVerificationCode(accountId: string): Promise<boolean> {
@@ -67,12 +86,12 @@ export class HoliumAPI {
     return data.success;
   }
 
-  async checkVerificationCode(
+  async verifyEmail(
     accountId: string,
     verificationCode: string
   ): Promise<{ success: boolean; email: string | null }> {
     const { data } = await client.post(
-      `/accounts/${accountId}/check-verification-code?verificationCode=${verificationCode}`
+      `/accounts/${accountId}/verify-email?verificationCode=${verificationCode}`
     );
     return { success: data.success, email: data.email };
   }
@@ -85,7 +104,6 @@ export class HoliumAPI {
     verificationCode: string | null;
     errorCode: number | null;
   }> {
-    console.log(`api: change email ${newEmail}`);
     try {
       const { data } = await client.post(
         `/accounts/${accountId}/change-email?email=${newEmail}`
@@ -114,20 +132,30 @@ export class HoliumAPI {
     const { data } = await client.post(
       `/accounts/${accountId}/verify-new-email?verificationCode=${verificationCode}`
     );
-    console.log(data);
     return { success: data.success, email: data.newEmail };
   }
 
   async getPlanets(
     accountId: string,
-    accessCode?: string
+    inviteCode?: string
   ): Promise<HostingPlanet[]> {
     const { data } = await client.post(
       `accounts/${accountId}/assign-planets${
-        accessCode ? `?accessCode=${accessCode}` : ''
+        inviteCode ? `?accessCode=${inviteCode}` : ''
       }`
     );
     return data.planets;
+  }
+
+  async confirmPlanetAvailable(
+    accountId: string,
+    patp: string
+  ): Promise<boolean> {
+    const { data } = await client.post(
+      `accounts/${accountId}/confirm-planet-available?patp=${patp}`
+    );
+
+    return data.available === true;
   }
 
   async prepareCheckout(
@@ -141,15 +169,30 @@ export class HoliumAPI {
     return { clientSecret: data.clientSecret };
   }
 
-  async completeCheckout(accountId: string, patp: string) {
-    const { data } = await client.post(
-      `accounts/${accountId}/complete-checkout?patp=${patp}`
-    );
-    return {
-      id: data.id,
-      patp: data.patp,
-      checkoutComplete: data.checkoutComplete,
-    };
+  async completeCheckout(
+    accountId: string,
+    patp: string
+  ): Promise<{
+    id?: string;
+    patp?: string;
+    success: boolean;
+    errorCode?: number;
+  }> {
+    try {
+      const { data } = await client.post(
+        `accounts/${accountId}/complete-checkout?patp=${patp}`
+      );
+      return {
+        id: data.id,
+        patp: data.patp,
+        success: data.checkoutComplete,
+      };
+    } catch (error: any) {
+      if (error.response && error.response.status) {
+        return { success: false, errorCode: error.response.status };
+      }
+      return { success: false };
+    }
   }
 
   async getShips(accountId: string): Promise<HostingPurchasedShip[]> {
@@ -167,13 +210,17 @@ export class HoliumAPI {
     }
   }
 
-  async redeemAccessCode(code: string): Promise<boolean> {
+  async redeemAccessCode(
+    code: string
+  ): Promise<{ success: boolean; errorCode: number | null; email?: string }> {
     try {
-      await client.post(`access-codes/${code}/redeem`);
-      return true;
-    } catch (e) {
-      console.error('Redeeming access code failed.');
-      return false;
+      const { data } = await client.post(`access-codes/${code}/redeem`);
+      return { success: true, email: data.email, errorCode: null };
+    } catch (error: any) {
+      if (error.response && error.response.status) {
+        return { success: false, errorCode: error.response.status };
+      }
+      return { success: false, errorCode: null };
     }
   }
 }
