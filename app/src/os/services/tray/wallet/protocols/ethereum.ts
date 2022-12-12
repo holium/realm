@@ -24,22 +24,28 @@ export class EthereumProtocol implements BaseProtocol {
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
+    let baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
+    if (process.env.NODE_ENV === 'production') {
+      baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
+    } else if (process.env.USE_LOCAL_API) {
+      baseURL = 'http://localhost:8080';
+    }
     let alchemySettings: AlchemySettings;
     if (protocol === ProtocolType.ETH_MAIN) {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'http://localhost:8080/eth'
+        baseURL + '/eth'
       );
       alchemySettings = {
-        url: 'http://localhost:8080/eth',
+        url: baseURL + '/eth',
         network: Network.ETH_MAINNET,
       };
       // etherscan
     } else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'http://localhost:8080/gorli'
+        baseURL + '/gorli'
       );
       alchemySettings = {
-        url: 'http://localhost:8080/gorli',
+        url: baseURL + '/gorli',
         network: Network.ETH_GOERLI,
       };
     }
