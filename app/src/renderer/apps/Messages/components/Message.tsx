@@ -107,8 +107,10 @@ export const Message = ({
       messageContainer = <Mention color={color} patp={message} />;
       break;
     case 'code':
-      console.log('code!', message);
-      messageContainer = <Text fontSize={2}>{message}</Text>;
+      // console.log('code!', message);
+      messageContainer = (
+        <Text fontSize={2}>{(message as any)?.expression || 'No code'}</Text>
+      );
       break;
   }
 
