@@ -37,6 +37,11 @@ export enum InstallStatus {
   treaty = 'treaty',
   suspended = 'suspended',
   resuming = 'resuming',
+  // this is set when joining a space and you do not have the app
+  //  installed, but want it to appear on the home screen. this
+  //  is different than uninstalled which has %suspend implications
+  //  on the back-end. %desktop requires a fresh install.
+  desktop = 'desktop',
 }
 
 export enum AppTypes {

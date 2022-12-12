@@ -32,7 +32,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const { app } = props;
     const { theme, spaces } = useServices();
     const space = spaces.selected;
-    let installStatus = InstallStatus.uninstalled;
+    let installStatus = InstallStatus.desktop;
     let info = '';
     if (app.type === 'urbit') {
       info = app.info;
