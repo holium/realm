@@ -107,7 +107,8 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
 };
 
 const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
-  const { theme } = useServices();
+  const { theme, onboarding } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const loading = planets.length === 0;
@@ -170,6 +171,17 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
             ))
           )}
         </Flex>
+        {onboarding.planetWasTaken && (
+          <Text
+            color={baseTheme.colors.text.error}
+            fontSize={1}
+            textAlign="center"
+            mt={3}
+          >
+            Your planet was taken before you completed checkout, please select
+            another one.
+          </Text>
+        )}
       </Flex>
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
         <TextButton>Next</TextButton>
