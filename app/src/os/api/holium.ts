@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-let baseURL = `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+let baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
 if (process.env.NODE_ENV === 'production') {
-  baseURL = 'https://realm-api-prod-jjzzq.ondigitalocean.app';
+  baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
 } else if (process.env.USE_LOCAL_API) {
   baseURL = 'http://localhost:8080';
 }

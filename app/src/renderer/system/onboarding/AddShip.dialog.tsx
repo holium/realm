@@ -128,7 +128,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     }
                     onChange={(e: any) => {
                       setError('');
-                      urbitId.actions.onChange(e.target.value)
+                      urbitId.actions.onChange(e.target.value);
                     }}
                     onFocus={() => urbitId.actions.onFocus()}
                     onBlur={() => urbitId.actions.onBlur()}
