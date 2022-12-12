@@ -25,6 +25,12 @@
           [%install-app install-app]
           [%uninstall-app uninstall-app]
           [%initialize ul]
+          [%nuke nuke]
+      ==
+    ::
+    ++  nuke
+      %-  ot
+      :~  [%store so]
       ==
     ::
     ++  install-app
@@ -110,7 +116,7 @@
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       
+        %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned

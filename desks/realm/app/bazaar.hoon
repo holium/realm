@@ -416,7 +416,17 @@
       :: sent during onboarding after realm desk is fully installed and ready
       ::  use this opportunity to refresh app-catalog
       %initialize        (initialize +.action)
+      %nuke              (nuke +.action)
     ==
+    ::  nuke a particular store
+    ++  nuke
+      |=  [store=cord]
+      %-  (slog leaf+"{<dap.bowl>}: [nuke] {<store>}" ~)
+      ?+  store  `state
+        %pending-installs
+          =.  pending-installs.state  `(map ship desk)`~
+          `state
+      ==
     ::
     ++  add-pin
       |=  [path=space-path:spaces-store =app-id:store index=(unit @ud)]
