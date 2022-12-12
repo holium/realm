@@ -1,5 +1,6 @@
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { ethers } from 'ethers';
+import { safeStorage } from 'electron';
 import Realm from '../../../..';
 
 export class RealmSigner implements BaseSigner {
@@ -8,9 +9,12 @@ export class RealmSigner implements BaseSigner {
     this.core = core;
   }
   setMnemonic(mnemonic: string) {
+    const encryptedMnemonic = safeStorage
+      .encryptString(mnemonic)
+      .toString('base64');
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
-      mnemonic
+      encryptedMnemonic
     );
   }
   signTransaction(path: string, transaction: any): any {
@@ -19,9 +23,12 @@ export class RealmSigner implements BaseSigner {
     return wallet.signTransaction(transaction);
   }
   private getPrivateKey() {
-    return ethers.utils.HDNode.fromMnemonic(
-      this.core.services.identity.auth.getMnemonic(null)
+    const encryptedMnemonic =
+      this.core.services.identity.auth.getMnemonic(null);
+    const mnemonic = safeStorage.decryptString(
+      Buffer.from(encryptedMnemonic, 'base64')
     );
+    return ethers.utils.HDNode.fromMnemonic(mnemonic);
   }
   getXpub(path: string): string {
     return this.getPrivateKey().derivePath(path).neuter().extendedKey;
