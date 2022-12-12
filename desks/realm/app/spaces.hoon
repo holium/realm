@@ -281,7 +281,6 @@
         =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
         =/  cards
           :~  [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
-              [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
           ==
         [cards state]
       ::
@@ -305,7 +304,21 @@
             =.  status.u.member  %joined
             (~(put by space-members) [ship u.member])
           (~(put by membership.state) [path space-members])
-        `state
+        ::  just created a new member, so we need to tell everyone they joined
+        =/  new-members             (~(got by membership.state) path)
+        =/  member                  (~(got by new-members) ship)
+        =/  member-path             /spaces/(scot %p ship.path)/(scot %tas space.path)
+        =/  watch-paths             [member-path /updates ~]
+        :_  state
+        ::  temporarily using %invite-accepted until we can add a new action
+        :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
+            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+            [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
+        ==
+        :: :~
+        ::   [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]
+        ::   [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
+        :: ==
     ::
     ++  handle-leave
       |=  [path=space-path:store]
@@ -368,7 +381,11 @@
     ++  on-replace
       |=  [space=space:store]
       ^-  (quip card _state)
-      `state(spaces (~(put by spaces.state) path.space space))
+      =.  spaces.state      (~(put by spaces.state) path.space space)
+      =/  watch-paths                     [/updates ~]
+      :_  state
+      [%give %fact [/updates ~] spaces-reaction+!>([%replace space])]~
+    
     ::
     ++  on-remove
       |=  [path=space-path:store]
@@ -409,6 +426,7 @@
       ^-  (quip card _state)
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
+      ~&  >>  [%remote-space path members]
       :_  state
       :~
         [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
@@ -517,7 +535,7 @@
         =/  watch-paths                 [/updates member-path ~]
         :_  state
         :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
             [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
         ==
     ::
@@ -616,6 +634,7 @@
     ++  on-accepted
       |=  [path=space-path:store =ship =member:membership-store]
       ^-  (quip card _state)
+      :: ?:  =(our.bowl ship)            ::  we've accepted an invite
       =/  passes                      (~(gut by membership.state) path `members:membership-store`[~])
       =.  passes                      (~(put by passes) [ship member])
       =.  membership.state            (~(put by membership.state) [path passes])

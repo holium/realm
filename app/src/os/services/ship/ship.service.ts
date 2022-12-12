@@ -4,8 +4,6 @@ import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 import S3Client, { StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
-//
-
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import EncryptedStore from '../../lib/encryptedStore';
@@ -30,11 +28,6 @@ import {
   PreviewGroupDMType,
 } from './models/courier';
 import { toJS } from 'mobx';
-// import {
-//   NotificationStore,
-//   NotificationStoreType,
-// } from './models/notifications';
-// import { NotificationApi } from '../../api/notifications';
 import { DiskStore } from '../base.store';
 
 // upload support
@@ -43,10 +36,8 @@ const fs = require('fs');
 export interface ShipModels {
   friends: FriendsType;
   contacts?: ContactStoreType;
-  // docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
-  // notifications: NotificationStoreType;
 }
 
 /**
@@ -58,14 +49,6 @@ export class ShipService extends BaseService {
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
     contacts: undefined,
-    // docket: DocketStore.create({ apps: {} }),
-    chat: undefined,
-    // notifications: NotificationStore.create({
-    //   unseen: [],
-    //   seen: [],
-    //   all: [],
-    //   recent: [],
-    // }),
   };
 
   private readonly metadataStore: {
@@ -97,8 +80,6 @@ export class ShipService extends BaseService {
     'realm.ship.add-friend': this.addFriend,
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
-    'realm.ship.get-notifications': this.getNotifications,
-    'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
     'realm.ship.get-group': this.getGroup,
@@ -190,14 +171,6 @@ export class ShipService extends BaseService {
     //
     removeFriend: async (patp: Patp) =>
       await ipcRenderer.invoke('realm.ship.remove-friend', patp),
-    // getNotifications: async (timestamp: number, length: number) =>
-    //   await ipcRenderer.invoke(
-    //     'realm.ship.get-notifications',
-    //     timestamp,
-    //     length
-    //   ),
-    // openedNotifications: async () =>
-    //   await ipcRenderer.invoke('realm.ship.opened-notifications'),
     uploadFile: async (params: FileUploadParams) =>
       await ipcRenderer.invoke('realm.ship.upload-file', params),
   };
@@ -218,13 +191,9 @@ export class ShipService extends BaseService {
 
   get modelSnapshots() {
     return {
-      chat: this.models.chat ? getSnapshot(this.models.chat) : null,
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
-      // notifications: this.models.notifications
-      //   ? getSnapshot(this.models.notifications)
-      //   : null,
     };
   }
 
@@ -234,9 +203,7 @@ export class ShipService extends BaseService {
 
   async subscribe(ship: string, shipInfo: any) {
     //
-    console.log('subscribing');
     let secretKey: string | null = this.core.passwords.getPassword(ship);
-    this.core.sendLog(`secretKey: ${secretKey}`);
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
@@ -249,10 +216,7 @@ export class ShipService extends BaseService {
     //     : new EncryptedStore<ShipModelType>(storeParams);
     this.db = new Store<ShipModelType>(storeParams);
 
-    this.core.sendLog(`db: ${JSON.stringify(this.db)}`);
-
     const persistedState: ShipModelType = this.db.store;
-    this.core.sendLog(`persistedState: ${JSON.stringify(persistedState)}`);
 
     // TODO set up multiple ships properly
     this.state = ShipModel.create({
@@ -266,17 +230,7 @@ export class ShipService extends BaseService {
       loader: { state: 'initial' },
     });
     this.state.loader.set('loading');
-    console.log('before load froms disk');
-    this.core.sendLog('before load from disk');
 
-    // const notificationStore = new DiskStore(
-    //   'notifications',
-    //   ship,
-    //   secretKey!,
-    //   NotificationStore,
-    //   { unseen: [], seen: [], all: [], recent: [] }
-    // );
-    // this.models.notifications = notificationStore.model;
     const courierStore = new DiskStore(
       'courier',
       ship,
@@ -302,8 +256,6 @@ export class ShipService extends BaseService {
     this.models.friends = friendsStore.model;
 
     secretKey = null;
-    this.core.sendLog('after load from disk');
-    // notificationStore.registerPatches(this.core.onEffect);
     courierStore.registerPatches(this.core.onEffect);
     contactStore.registerPatches(this.core.onEffect);
     friendsStore.registerPatches(this.core.onEffect);
@@ -314,14 +266,14 @@ export class ShipService extends BaseService {
       this.db!.store = snapshot;
     });
     // 1. Send initial snapshot
-    // const syncEffect = {
-    //   model: getSnapshot(this.state!),
-    //   resource: 'ship',
-    //   key: ship,
-    //   response: 'initial',
-    // };
+    const syncEffect = {
+      model: getSnapshot(this.state!),
+      resource: 'ship',
+      key: ship,
+      response: 'initial',
+    };
     // console.log(syncEffect);
-    // this.core.onEffect(syncEffect);
+    this.core.onEffect(syncEffect);
 
     try {
       // TODO rewrite the contact store logic
@@ -338,7 +290,6 @@ export class ShipService extends BaseService {
       } catch {
         console.log('Subscription failed');
       }
-      this.core.sendLog(`after contact watch`);
 
       FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
@@ -351,15 +302,8 @@ export class ShipService extends BaseService {
       // register dm update handler
       DmApi.updates(this.core.conduit!, this.models.courier!);
       CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-      // NotificationApi.updates(
-      //   this.core.conduit!,
-      //   this.models.notifications,
-      //   this.models.courier
-      // );
-
       this.state.loader.set('loaded');
 
-      this.services.slip?.subscribe();
       this.rooms?.watch();
       this.wallet?.onLogin(ship);
 
@@ -383,10 +327,6 @@ export class ShipService extends BaseService {
     return { ship: this.state, models: this.modelSnapshots };
   }
 
-  // get roomSnapshot() {
-  //   return this.rooms?.snapshot;
-  // }
-
   get walletSnapshot() {
     return this.wallet?.snapshot;
   }
@@ -404,13 +344,9 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
-    // this.rooms?.onLogout();
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
-    // this.models.notifications = NotificationStore.create({});
-    // this.models.docket = undefined;
-    // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
   }
 
@@ -430,10 +366,14 @@ export class ShipService extends BaseService {
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<ShipModelType>(storeParams)
-        : new EncryptedStore<ShipModelType>(storeParams);
+
+    // TODO this should use DiskStore and be encrypted
+    this.db = new Store<ShipModelType>(storeParams);
+
+    // this.db =
+    // process.env.NODE_ENV === 'development'
+    //   ? new Store<ShipModelType>(storeParams)
+    //   : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;
@@ -626,17 +566,6 @@ export class ShipService extends BaseService {
       ...credentials,
       ...configuration,
     };
-  }
-
-  async getNotifications(_event: any, timestamp: number, length: number) {
-    // console.log('getNotifications: %o, %o', timestamp, length);
-    // const timeboxes = this.state?.notifications.timeboxes();
-    // console.log(timeboxes);
-    return [];
-  }
-
-  openedNotifications(_event: any) {
-    // NotificationApi.opened(this.core.conduit!);
   }
 
   async uploadFile(
