@@ -45,28 +45,13 @@
     ^-  vase
     !>(state)
   ::
-  :: ++  on-load
-  ::   |=  old-state=vase
-  ::   ^-  (quip card:agent:gall agent:gall)
-  ::   =/  old  !<(versioned-state old-state)
-  ::   ?-  -.old
-  ::     %0  `this(state old)
-  ::   ==
   ++  on-load
-    |=  =vase
+    |=  old-state=vase
     ^-  (quip card _this)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %spaces state' ::  temporarily doing this for making development easier
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  `this(state old)
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -84,7 +69,7 @@
     |=  =path
     ^-  (unit (unit cage))
     ?+    path                  (on-peek:def path)
-        [%x %all ~]     
+        [%x %all ~]
       ``spaces-view+!>([%spaces spaces.state])
       ::
         [%x %groups ~]
@@ -137,7 +122,7 @@
     ^-  (quip card _this)
     =/  cards=(list card)
       ?+    path                      (on-watch:def path)
-          [%updates ~] 
+          [%updates ~]
         ?>  =(our.bowl src.bowl)      ::  only host should get all updates
         [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state])]~
         ::
@@ -341,8 +326,8 @@
             [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
             [%pass watch-path %agent [our.bowl %spaces] %leave ~]
           ==
-        ?~  has-incoming  
-          :_  state   
+        ?~  has-incoming
+          :_  state
           cards
         =.  invitations.state    (~(del by invitations.state) path)
         :_  state
@@ -393,7 +378,7 @@
         (member-on-remove path)
       (host-on-remove path)
       ::
-      ++  member-on-remove 
+      ++  member-on-remove
         |=  [path=space-path:store]
         =/  has-incoming                    (~(get by invitations.state) path)
         ?~  has-incoming                    ::  we dont have an invitation, so we are a member, simply remove
@@ -474,8 +459,8 @@
       ?.  (is-host:core ship.path)
         (member-handle-send path ship new-visa)
       (host-handle-send path ship role new-visa)
-      ::  
-      ++  member-handle-send 
+      ::
+      ++  member-handle-send
         |=  [path=space-path:store =ship new-visa=invite:vstore]
         :_  state
         [%pass / %agent [ship.path dap.bowl] %poke visa-action+!>(act)]~   ::  Send invite request to host
@@ -505,8 +490,8 @@
       =/  notify=action:hark          (notify path /invite (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
       :_  state
       :~  [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]                      ::  send notification to ship
-          [%give %fact [/updates ~] visa-reaction+!>([%invite-received path invite])]                    
-      ==               
+          [%give %fact [/updates ~] visa-reaction+!>([%invite-received path invite])]
+      ==
     ::
     ++  handle-accept
       |=  [path=space-path:store]
@@ -540,7 +525,7 @@
       |=  [path=space-path:store]
       ^-  (quip card _state)
       ?.  (is-host:core ship.path)
-        (member-handle-decline path)                     
+        (member-handle-decline path)
       (host-handle-decline path)
       ::
       ++  member-handle-decline  ::  If we are invited we will send the invite action to the host
@@ -549,7 +534,7 @@
         =/  watch-path                /spaces/(scot %p ship.path)/(scot %tas space.path)
         :_  state
         :~  [%pass watch-path %agent [ship.path %spaces] %poke visa-action+!>(act)]
-            [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]  
+            [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]
         ==
       ::
       ++  host-handle-decline
@@ -578,8 +563,8 @@
       ^-  (quip card _state)
       ?>  (has-auth:security path src.bowl %admin)
       ?.  (is-host:core ship.path)
-        (member-handle-kick path)                     
-      (host-handle-kick path ship)                    
+        (member-handle-kick path)
+      (host-handle-kick path ship)
       ::
       ++  member-handle-kick
         |=  [path=space-path:store]
