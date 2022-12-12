@@ -30,7 +30,6 @@ import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/Wallet';
-import _ from 'lodash';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -282,8 +281,8 @@ export class WalletService extends BaseService {
       return await ipcRenderer.invoke('realm.tray.wallet.toggle-uqbar');
     },
     watchUpdates: async () => {
-      return await ipcRenderer.invoke('realm.tray.wallet.watch-updates')
-    }
+      return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
+    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -389,8 +388,8 @@ export class WalletService extends BaseService {
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
-      this.wallet!.updateWalletState(this.state!);
-    })
+      this.wallet!.updateWalletState(this.core.conduit!, this.state!);
+    });
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -453,7 +452,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.network !== network) {
       this.state!.setNetwork(network);
-      this.wallet!.watchUpdates(this.state!);
+      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
     }
   }
 
@@ -461,7 +460,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.protocol !== protocol) {
       this.state!.setProtocol(protocol);
-      this.wallet!.watchUpdates(this.state!);
+      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
     }
   }
 
@@ -571,10 +570,12 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
-    const stateTx = currentWallet.getTransaction(
+    const stateTx = currentWallet.getAgentTransaction(
       this.state!.navState.protocol,
       hash
     );
+    console.log('sendEthhhhhh', stateTx);
+
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
@@ -601,13 +602,18 @@ export class WalletService extends BaseService {
     console.log(path);
     // console.log(this.privateKey!.mnemonic!.phrase);
     const ethAmount = ethers.utils.parseEther(amount);
-    const tx = (this.wallet!.protocols.get(this.state!.navState.protocol)! as EthereumProtocol).populateERC20(
+    const tx = (
+      this.wallet!.protocols.get(
+        this.state!.navState.protocol
+      )! as EthereumProtocol
+    ).populateERC20(
       contractAddress,
       to,
       amount,
-      this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.coins.get(contractAddress)!
-        .decimals
-    )
+      this.state!.ethereum.wallets.get(walletIndex)!
+        .data.get(this.state!.navState.protocol)!
+        .coins.get(contractAddress)!.decimals
+    );
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
@@ -624,7 +630,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.getTransaction(
+    const stateTx = currentWallet.getAgentTransaction(
       this.state!.navState.protocol,
       hash
     );
@@ -649,7 +655,7 @@ export class WalletService extends BaseService {
       this.state!.settings.passcodeHash!
     );
     if (result) {
-      this.wallet!.watchUpdates(this.state!)
+      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
     }
     return result;
   }
@@ -697,10 +703,10 @@ export class WalletService extends BaseService {
     if (this.state!.navState.network === NetworkType.ETHEREUM) {
       if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
         this.state!.setProtocol(ProtocolType.ETH_GORLI);
-        this.wallet!.watchUpdates(this.state!);
+        this.wallet!.watchUpdates(this.core.conduit!, this.state!);
       } else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
         this.state!.setProtocol(ProtocolType.ETH_MAIN);
-        this.wallet!.watchUpdates(this.state!);
+        this.wallet!.watchUpdates(this.core.conduit!, this.state!);
       }
     }
   }
@@ -720,10 +726,10 @@ export class WalletService extends BaseService {
     this.state!.navState.protocol !== ProtocolType.UQBAR
       ? this.state!.setProtocol(ProtocolType.UQBAR)
       : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
-    this.wallet!.watchUpdates(this.state!);
+    this.wallet!.watchUpdates(this.core.conduit!, this.state!);
   }
-  
+
   async watchUpdates(_evt: any) {
-    await this.wallet!.watchUpdates(this.state!);
+    await this.wallet!.watchUpdates(this.core.conduit!, this.state!);
   }
 }

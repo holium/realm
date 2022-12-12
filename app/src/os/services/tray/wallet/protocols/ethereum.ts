@@ -1,4 +1,4 @@
-import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol'
+import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
 import {
   Alchemy,
   AlchemySettings,
@@ -25,7 +25,7 @@ export class EthereumProtocol implements BaseProtocol {
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
   private interval: any;
-  private baseURL: string
+  private baseURL: string;
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
@@ -49,9 +49,7 @@ export class EthereumProtocol implements BaseProtocol {
       };
       // etherscan
     } else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        this.baseURL
-      );
+      this.ethProvider = new ethers.providers.JsonRpcProvider(this.baseURL);
       alchemySettings = {
         url: this.baseURL,
         network: Network.ETH_GOERLI,
@@ -67,21 +65,21 @@ export class EthereumProtocol implements BaseProtocol {
     this.interval = null;
   }
 
-  watchUpdates(walletStore: WalletStoreType) {
-    this.updateWalletState(walletStore);
+  watchUpdates(conduit: any, walletStore: WalletStoreType) {
+    this.updateWalletState(conduit, walletStore);
     this.interval = setInterval(async () => {
-      await this.updateWalletState(walletStore);
+      await this.updateWalletState(conduit, walletStore);
       if (
         !(this.protocol === ProtocolType.ETH_GORLI) &&
         !(this.protocol === ProtocolType.UQBAR)
-    ) {
+      ) {
         walletStore.currentStore.setBlock(await this.getBlockNumber());
       }
     }, 30000);
   }
 
-  async updateWalletState(walletStore: WalletStoreType) {
-    for (let walletKey of walletStore.currentStore.wallets.keys()) {
+  async updateWalletState(conduit: any, walletStore: WalletStoreType) {
+    for (const walletKey of walletStore.currentStore?.wallets.keys()) {
       const wallet = walletStore.currentStore.wallets.get(walletKey)!;
       this.getAccountBalance(wallet.address).then((balance: string) =>
         wallet.setBalance(this.protocol, balance)
@@ -90,7 +88,7 @@ export class EthereumProtocol implements BaseProtocol {
         wallet.address,
         walletStore.currentStore.block
       ).then((response: any) => {
-        wallet.applyTransactions(this.protocol, response);
+        wallet.applyTransactions(conduit, this.protocol, response);
       });
       if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
@@ -197,7 +195,6 @@ export class EthereumProtocol implements BaseProtocol {
               category: [
                 AssetTransfersCategory.INTERNAL,
                 AssetTransfersCategory.EXTERNAL,
-
               ],
               withMetadata: true,
             },
@@ -206,8 +203,7 @@ export class EthereumProtocol implements BaseProtocol {
       });
       const to = toTransfers.data.result.transfers;
       return from.concat(to);
-    }
-    catch {
+    } catch {
       return [];
     }
   }
@@ -249,12 +245,13 @@ export class EthereumProtocol implements BaseProtocol {
     amount: string,
     decimals: number
   ) {
-    const contract = new ethers.Contract(contractAddress, abi, this.ethProvider);
-    const erc20Amount = ethers.utils.parseUnits(
-      amount,
-      decimals
+    const contract = new ethers.Contract(
+      contractAddress,
+      abi,
+      this.ethProvider
     );
-    return await contract.populateTransaction.transfer(toAddress, erc20Amount)
+    const erc20Amount = ethers.utils.parseUnits(amount, decimals);
+    return await contract.populateTransaction.transfer(toAddress, erc20Amount);
   }
   async getAsset(
     contract: string,
@@ -342,7 +339,7 @@ export class EthereumProtocol implements BaseProtocol {
               category: [
                 AssetTransfersCategory.ERC20,
                 AssetTransfersCategory.ERC721,
-                AssetTransfersCategory.ERC1155
+                AssetTransfersCategory.ERC1155,
               ],
               withMetadata: true,
             },
@@ -350,10 +347,7 @@ export class EthereumProtocol implements BaseProtocol {
         },
       });
       from = fromTransfers.data.result.transfers;
-    }
-    catch {
-
-    }
+    } catch {}
     let to: any[] = [];
     try {
       const toTransfers = await axios.request({
@@ -374,7 +368,7 @@ export class EthereumProtocol implements BaseProtocol {
               category: [
                 AssetTransfersCategory.ERC20,
                 AssetTransfersCategory.ERC721,
-                AssetTransfersCategory.ERC1155
+                AssetTransfersCategory.ERC1155,
               ],
               withMetadata: true,
             },
@@ -382,10 +376,7 @@ export class EthereumProtocol implements BaseProtocol {
         },
       });
       to = toTransfers.data.result.transfers;
-    }
-    catch {
-
-    }
+    } catch {}
     return from.concat(to);
   }
   async transferAsset(
