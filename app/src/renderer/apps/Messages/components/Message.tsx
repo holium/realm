@@ -108,7 +108,11 @@ export const Message = ({
       break;
     case 'code':
       console.log('code!', message);
-      messageContainer = <Text fontSize={2}>{message}</Text>;
+      if (typeof message === 'string') {
+        messageContainer = <Text fontSize={2}>{message}</Text>;
+      } else {
+        messageContainer = <Text fontSize={2}>{message.expression}</Text>;
+      }
       break;
   }
 
