@@ -3,7 +3,10 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
-import { WalletView } from 'os/services/tray/wallet.model';
+import {
+  NetworkStoreType,
+  WalletView,
+} from 'os/services/tray/wallet-lib';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}
@@ -65,7 +68,7 @@ export const WalletList: FC<WalletListProps> = observer(
               You haven't created any{' '}
               {walletApp.navState.network === 'ethereum'
                 ? 'Ethereum'
-                : walletApp.navState.btcNetwork === 'mainnet'
+                : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
                 ? 'Bitcoin'
                 : 'Bitcoin Testnet'}{' '}
               wallets yet.

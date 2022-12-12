@@ -25,7 +25,7 @@ import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -61,7 +61,7 @@ export const WalletSettings: FC = observer(() => {
   const [state, setState] = useState<UISettingsType>({
     ...settings,
     provider: settings.provider!,
-    blocked: [...settings.blocked],
+    blocked: [...walletApp.blacklist],
   });
 
   const { theme } = useServices();

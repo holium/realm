@@ -6,14 +6,6 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { Network, Alchemy } from 'alchemy-sdk';
-
-const alchemySettings = {
-  apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-  network: Network.ETH_GOERLI, // Replace with your network.
-};
-
-const alchemy = new Alchemy(alchemySettings);
 
 export enum WalletView {
   LIST = 'list',
@@ -41,13 +33,27 @@ export enum SharingMode {
   ANYBODY = 'anybody',
 }
 
-const Settings = types.model('Settings', {
-  walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
-  sharingMode: types.enumeration(Object.values(SharingMode)),
-  blocked: types.array(types.string),
-  defaultIndex: types.integer,
-  provider: types.maybe(types.string),
-});
+const Settings = types
+  .model('Settings', {
+    walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
+    sharingMode: types.enumeration(Object.values(SharingMode)),
+    defaultIndex: types.integer,
+    provider: types.maybe(types.string),
+  })
+  .actions((self) => ({
+    setWalletCreationMode(mode: WalletCreationMode) {
+      self.walletCreationMode = mode;
+    },
+    setSharingMode(mode: SharingMode) {
+      self.sharingMode = mode;
+    },
+    setDefaultIndex(index: number) {
+      self.defaultIndex = index;
+    },
+    setProvider(provider: string) {
+      self.provider = provider;
+    },
+  }));
 
 export type SettingsType = Instance<typeof Settings>;
 export interface UISettingsType {
@@ -58,8 +64,65 @@ export interface UISettingsType {
   provider: string;
 }
 
-export const BitcoinTransaction = types.model('BitcoinTransaction', {
+export const WalletSettings = types.model('WalletSettings', {
+  passcodeHash: types.string,
+});
+
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+const Networks = types.enumeration(Object.values(NetworkType));
+
+export enum ProtocolType {
+  ETH_MAIN = 'Ethereum Mainnet',
+  ETH_GORLI = 'Görli Testnet',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
+  UQBAR = 'Uqbar Network',
+}
+const Protocols = types.enumeration(Object.values(ProtocolType));
+
+export type Asset = {
+  addr: string; // smart contract address for eth
+  id?: string; // chainId for eth, id for uqbar
+  type: 'coin' | 'token' | 'multisig' | string;
+  data: NFTAsset | CoinAsset | MultiAsset;
+};
+
+// ERC-20
+export type CoinAsset = {
+  logo: string | null; // url of token logo image
+  symbol: string; // USDC, DAI, BNB, etc
+  decimals: number; // 8 - used to convert to human readable number
+  balance: number; // current account balance
+  totalSupply: number; // total supply of the coin
+  allowances: { [addr: string]: number };
+};
+
+// ERC-721
+export type NFTAsset = {
+  name: string;
+  tokenId: string;
+  description: string;
+  image: string;
+  transferable?: boolean;
+  properties: { [key: string]: string | object };
+};
+
+// ERC-1155
+export type MultiAsset = {
+  name: string;
+  decimals: number; // 8 - used to convert to human readable number
+  description: string;
+  image: string;
+  balance: number; // current account balance
+  properties: { [key: string]: string | object };
+};
+
+export const Transaction = types.model('Transaction', {
   hash: types.identifier,
+  walletIndex: types.number,
   amount: types.string,
   network: types.enumeration(['ethereum', 'bitcoin']),
   ethType: types.maybe(types.string),
@@ -78,7 +141,7 @@ export const BitcoinTransaction = types.model('BitcoinTransaction', {
   notes: types.string,
 });
 
-export type BitcoinTransactionType = Instance<typeof BitcoinTransaction>;
+export type TransactionType = Instance<typeof Transaction>;
 
 const BitcoinWallet = types
   .model('BitcoinWallet', {
@@ -88,7 +151,7 @@ const BitcoinWallet = types
     address: types.string,
     nickname: types.string,
     balance: types.string,
-    transactions: types.map(types.map(BitcoinTransaction)),
+    transactions: types.map(types.map(Transaction)),
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -101,6 +164,7 @@ export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
 const BitcoinStore = types
   .model('BitcoinStore', {
+    block: types.number,
     wallets: types.map(BitcoinWallet),
     settings: Settings,
     conversions: types
@@ -143,7 +207,6 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       let walletObj;
-      console.log('applyWalletUpdate', wallet);
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
@@ -154,9 +217,7 @@ const BitcoinStore = types
           nickname: wallet.nickname,
           transactions: {},
         };
-        console.log(self.wallets);
         const bitcoinWallet = BitcoinWallet.create(walletObj);
-        console.log(wallet.key);
         self.wallets.set(wallet.key, bitcoinWallet);
       }
       for (const transaction in wallet.transactions) {
@@ -166,7 +227,12 @@ const BitcoinStore = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    setBlock(block: number) {
+      self.block = block;
+    },
   }));
+
+export type BitcoinStoreType = Instance<typeof BitcoinStore>;
 
 const ERC20 = types
   .model('ERC20', {
@@ -186,6 +252,7 @@ const ERC20 = types
           self.usd = usd;
         },
       })),
+    transactions: types.map(Transaction),
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -194,30 +261,40 @@ const ERC20 = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    applyTransactions(index: number, transactions: any) {
+      let formattedTransactions: any = {};
+      let previousTransactions = self.transactions.toJSON();
+      for (const transaction of transactions) {
+        // console.log('applyTransaction', transaction);
+        const previousTransaction = previousTransactions[transaction.hash];
+        formattedTransactions[transaction.hash] = {
+          hash: transaction.hash,
+          walletIndex: index,
+          amount: transaction.value?.toString() || '0',
+          network: 'ethereum',
+          ethType: transaction.contractAddress || 'ERC20',
+          type: self.address === transaction.from ? 'sent' : 'received',
+          initiatedAt: previousTransaction?.initiatedAt,
+          completedAt: transaction.metadata.blockTimestamp,
+          ourAddress: transaction.from,
+          theirPatp: previousTransaction?.theirPatp,
+          theirAddress: transaction.to,
+          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
+          failureReason: previousTransaction?.failureReason,
+          notes: previousTransaction?.notes || '',
+        };
+      }
+      formattedTransactions = {
+        ...previousTransactions,
+        ...formattedTransactions,
+      };
+      const map = types.map(Transaction);
+      const newTransactions = map.create(formattedTransactions);
+      applySnapshot(self.transactions, getSnapshot(newTransactions));
+    },
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
-
-// const ERC721Token = types
-//   .model('ERC721Token', {
-//     name: types.string,
-//     // collection name - null if single
-//     // last price or floor price
-//     imageUrl: types.string,
-//     tokenId: types.number,
-//   })
-// const ERC721Token = types
-//   .model('ERC721Token', {
-//     name: types.string,
-//     imageUrl: types.string,
-//     tokenId: types.string,
-//   })
-
-// const ERC721 = types.model('ERC721', {
-//   name: types.string,
-//   address: types.string,
-//   tokens: types.map(ERC721Token),//types.map(types.number),
-// });
 
 const ERC721 = types.model('ERC721', {
   name: types.string,
@@ -227,32 +304,23 @@ const ERC721 = types.model('ERC721', {
   imageUrl: types.string,
   lastPrice: types.string,
   floorPrice: types.maybe(types.string),
+  transactions: types.map(Transaction),
 });
 
 export type ERC721Type = Instance<typeof ERC721>;
 
-export const EthTransaction = types.model('EthTransaction', {
-  hash: types.identifier,
-  walletIndex: types.number,
-  amount: types.string,
-  network: types.enumeration(['ethereum', 'bitcoin']),
-  ethType: types.maybe(types.string),
-  type: types.enumeration(['sent', 'received']),
-
-  initiatedAt: types.maybeNull(types.string),
-  completedAt: types.maybeNull(types.string),
-
-  ourAddress: types.string,
-  theirPatp: types.maybeNull(types.string),
-  theirAddress: types.string,
-
-  status: types.enumeration(['pending', 'failed', 'succeeded']),
-  failureReason: types.maybeNull(types.string),
-
-  notes: types.string,
-});
-
-export type TransactionType = Instance<typeof EthTransaction>;
+const EthWalletData = types
+  .model('EthWalletData', {
+    balance: types.string,
+    coins: types.map(ERC20),
+    nfts: types.map(ERC721),
+    transactions: types.map(Transaction),
+  })
+  .actions((self) => ({
+    setCoins(coins: any) {
+      applySnapshot(self.coins, coins);
+    },
+  }));
 
 const EthWallet = types
   .model('EthWallet', {
@@ -260,44 +328,11 @@ const EthWallet = types
     network: types.string,
     path: types.string,
     address: types.string,
-    balance: types.string,
-    coins: types.map(ERC20),
-    nfts: types.map(ERC721),
     nickname: types.string,
-    transactions: types.map(types.map(EthTransaction)),
+    data: types.map(EthWalletData),
   })
   .actions((self) => ({
-    addSmartContract(
-      contractType: string,
-      name: string,
-      contractAddress: string,
-      decimals: number
-    ) {
-      /* if (contractType === 'erc721') {
-        *const contract = ERC721.create({
-          name: name,
-          collectionName: '',
-          address: contractAddress,
-          tokenId: 0,
-          imageUrl: '',
-          lastPrice: '',
-          floorPrice: '',
-        })
-        self.nfts.set(contract.address, contract);
-      } */
-      if (contractType === 'erc20') {
-        const contract = ERC20.create({
-          name,
-          logo: '',
-          address: contractAddress,
-          balance: '0',
-          decimals,
-          conversions: {},
-        });
-        self.coins.set(contract.address, contract);
-      }
-    },
-    setCoins(coins: any) {
+    setCoins(protocol: ProtocolType, coins: any) {
       const formattedCoins: any = {};
       for (const Coin of coins) {
         const coin: any = Coin;
@@ -312,9 +347,9 @@ const EthWallet = types
       }
       const map = types.map(ERC20);
       const newCoins = map.create(formattedCoins);
-      applySnapshot(self.coins, getSnapshot(newCoins));
+      applySnapshot(self.data.get(protocol)!.coins, getSnapshot(newCoins));
     },
-    setNFTs(nfts: any) {
+    setNFTs(protocol: ProtocolType, nfts: any) {
       const formattedNft: any = {};
       for (const NFT of nfts) {
         const nft: any = NFT;
@@ -329,15 +364,44 @@ const EthWallet = types
       }
       const map = types.map(ERC721);
       const newNft = map.create(formattedNft);
-      applySnapshot(self.nfts, getSnapshot(newNft));
+      applySnapshot(self.data.get(protocol)!.nfts, getSnapshot(newNft));
     },
-    setBalance(balance: string) {
-      self.balance = balance;
+    updateCoin(protocol: ProtocolType, coin: Asset) {
+      const coinData = coin.data as CoinAsset;
+      self.data.get(protocol)!.coins.set(coin.addr, {
+        name: coinData.symbol,
+        logo: coinData.logo || '',
+        address: coin.addr,
+        balance: coinData.balance.toString(),
+        decimals: coinData.decimals,
+        conversions: {},
+      });
     },
-    clearWallet() {
+    updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
+      self.data
+        .get(protocol)!
+        .coins.get(coin)!
+        .applyTransactions(self.index, transfers);
+    },
+    updateNft(protocol: ProtocolType, nft: Asset) {
+      const nftData = nft.data as NFTAsset;
+      self.data.get(protocol)!.nfts.set(nft.addr + nftData.tokenId, {
+        name: nftData.name,
+        collectionName: '',
+        address: nft.addr,
+        tokenId: nftData.tokenId,
+        imageUrl: nftData.image,
+        lastPrice: '',
+      });
+    },
+    updateNftTransfers(protocol: ProtocolType, transfers: any) {},
+    setBalance(protocol: ProtocolType, balance: string) {
+      self.data.get(protocol)!.balance = balance;
+    },
+    /*clearWallet() {
       self.coins.clear();
       self.nfts.clear();
-    },
+    },*/
     /* applyHistory(history: any) {
       console.log(history);
       let formattedHistory: any = {};
@@ -364,9 +428,8 @@ const EthWallet = types
       const newHistory = map.create(formattedHistory);
       applySnapshot(self.transactions, getSnapshot(newHistory));
     }, */
-    getTransaction(network: string, hash: string) {
-      const tx: any = self.transactions.get(network)!.get(hash);
-      console.log(tx);
+    getTransaction(protocol: ProtocolType, hash: string) {
+      const tx: any = self.data.get(protocol)!.transactions.get(hash);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -384,7 +447,7 @@ const EthWallet = types
       };
     },
     enqueueTransaction(
-      network: string,
+      protocol: ProtocolType,
       hash: any,
       toAddress: any,
       toPatp: any,
@@ -407,31 +470,15 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      const netMap =
-        self.transactions.get(network)?.toJSON() ||
-        types.map(EthTransaction).create().toJSON();
-      const newMap = {
-        ...netMap,
-        [hash]: tx,
-      };
-      self.transactions.set(
-        network,
-        getSnapshot(types.map(EthTransaction).create(newMap))
-      );
+      self.data.get(protocol)!.transactions.set(hash, tx);
     },
-    applyTransactionUpdate(network: string, transaction: any) {
-      let netMap = self.transactions.get(network);
-      if (!netMap) {
-        self.transactions.set(network, {});
-      }
-      netMap = self.transactions.get(network)!;
+    applyTransactionUpdate(protocol: ProtocolType, transaction: any) {
+      let netMap = self.data.get(protocol)!.transactions;
       const tx = netMap?.get(transaction.hash);
-      console.log('applying update');
       if (tx) {
         tx.walletIndex = self.index;
         tx.notes = transaction.notes;
         netMap.set(transaction.hash, tx);
-        self.transactions.set(network, netMap);
       } else {
         const tx = {
           ...transaction,
@@ -440,28 +487,23 @@ const EthWallet = types
           notes: '',
         };
         netMap.set(transaction.hash, tx);
-        self.transactions.set(network, netMap);
       }
     },
-    applyTransactions(network: string, transactions: any) {
+    applyTransactions(protocol: ProtocolType, transactions: any) {
       let formattedTransactions: any = {};
-      let previousTransactions = self.transactions.toJSON()[network];
-      if (!previousTransactions) self.transactions.set(network, {});
-      previousTransactions = self.transactions.toJSON()[network];
+      let previousTransactions = self.data.get(protocol)!.transactions.toJSON();
       for (const transaction of transactions) {
         // console.log('applyTransaction', transaction);
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
           walletIndex: self.index,
-          amount: gweiToEther(transaction.value).toString(),
+          amount: transaction.value.toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: self.address === transaction.from ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt,
-          completedAt: new Date(
-            Number(transaction.timeStamp) * 1000
-          ).toISOString(),
+          completedAt: transaction.metadata.blockTimestamp,
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
           theirAddress: transaction.to,
@@ -474,7 +516,7 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            //            WalletApi.setTransaction(transaction);
+            // WalletApi.setTransaction(transaction);
           }
         }
       }
@@ -482,12 +524,12 @@ const EthWallet = types
         ...previousTransactions,
         ...formattedTransactions,
       };
-      formattedTransactions = {
-        [network]: formattedTransactions,
-      };
-      const map = types.map(types.map(EthTransaction));
+      const map = types.map(Transaction);
       const newTransactions = map.create(formattedTransactions);
-      applySnapshot(self.transactions, getSnapshot(newTransactions));
+      applySnapshot(
+        self.data.get(protocol)!.transactions,
+        getSnapshot(newTransactions)
+      );
     },
   }));
 
@@ -495,7 +537,9 @@ export type EthWalletType = Instance<typeof EthWallet>;
 
 export const EthStore = types
   .model('EthStore', {
-    network: types.enumeration(['mainnet', 'gorli']),
+    block: types.number,
+    gorliBlock: types.number,
+    protocol: Protocols,
     wallets: types.map(EthWallet),
     settings: Settings,
     initialized: types.boolean,
@@ -517,7 +561,7 @@ export const EthStore = types
         key,
         nickname: wallet.nickname,
         address: wallet.address,
-        balance: wallet.balance,
+        balance: wallet.data.get(self.protocol)!.balance,
       }));
     },
   }))
@@ -528,11 +572,13 @@ export const EthStore = types
         const walletUpdate = {
           ...(wallet as any),
           key,
-          coins: {},
-          nfts: {},
-          transactions: {},
+          data: {
+            coins: {},
+            nfts: {},
+            transactions: {},
+          },
         };
-        this.applyWalletUpdate(self.network, walletUpdate);
+        this.applyWalletUpdate(walletUpdate);
       });
     },
     // pokes
@@ -542,7 +588,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings.defaultIndex = index;
     },
-    applyWalletUpdate: flow(function* (network: string, wallet: any) {
+    applyWalletUpdate: flow(function* (wallet: any) {
       let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
@@ -550,25 +596,44 @@ export const EthStore = types
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
-          balance: '0',
-          coins: {},
-          nfts: {},
           nickname: wallet.nickname,
-          transactions: {},
+          data: {
+            [ProtocolType.ETH_MAIN]: {
+              balance: '0',
+              coins: {},
+              nfts: {},
+              transactions: {},
+            },
+            [ProtocolType.ETH_GORLI]: {
+              balance: '0',
+              coins: {},
+              nfts: {},
+              transactions: {},
+            },
+            [ProtocolType.UQBAR]: {
+              balance: '0',
+              coins: {},
+              nfts: {},
+              transactions: {},
+            },
+          },
         };
-        console.log(self.wallets);
         const ethWallet = EthWallet.create(walletObj);
-        console.log(wallet.key);
         self.wallets.set(wallet.key, ethWallet);
       }
-      for (const transaction in wallet.transactions) {
-        self.wallets
-          .get(wallet.key)!
-          .applyTransactionUpdate(network, transaction);
+      for (const protocol of Object.keys(wallet.transactions)) {
+        const protocolTransactions = wallet.transactions[protocol];
+        for (const transactionKey of Object.keys(protocolTransactions)) {
+          const transaction = protocolTransactions[transactionKey];
+          self.wallets
+            .get(wallet.key)!
+            .applyTransactionUpdate(protocol as ProtocolType, transaction);
+        }
       }
     }),
-    setNetwork(network: string) {
-      self.network = network;
+    setProtocol(protocol: ProtocolType) {
+      self.protocol = protocol;
+      self.wallets.forEach((wallet: any) => (wallet.protocol = protocol));
     },
     deleteWallets() {
       self.wallets.clear();
@@ -579,36 +644,87 @@ export const EthStore = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    setBlock(block: number) {
+      self.block = block;
+    },
   }));
+export type EthStoreType = Instance<typeof EthStore>;
 
-export enum NetworkType {
-  ETHEREUM = 'ethereum',
-  BITCOIN = 'bitcoin',
+export enum NetworkStoreType {
+  ETHEREUM = 'Ethereum',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
 }
-const Networks = types.enumeration(Object.values(NetworkType));
+const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
-export const WalletNavState = types.model('WalletNavState', {
-  view: types.enumeration(Object.values(WalletView)),
-  network: Networks,
-  btcNetwork: types.enumeration(['mainnet', 'testnet']),
-  walletIndex: types.maybe(types.string),
-  detail: types.maybe(
-    types.model({
-      type: types.enumeration(['transaction', 'coin', 'nft']),
-      key: types.string,
-    })
-  ),
-  action: types.maybe(
-    types.model({
-      type: types.string,
-      data: types.frozen(),
-    })
-  ),
-});
+export const WalletNavState = types
+  .model('WalletNavState', {
+    view: types.enumeration(Object.values(WalletView)),
+    protocol: Protocols,
+    lastEthProtocol: Protocols,
+    btcNetwork: NetworkStores,
+    walletIndex: types.maybe(types.string),
+    detail: types.maybe(
+      types.model({
+        type: types.enumeration(['transaction', 'coin', 'nft']),
+        key: types.string,
+      })
+    ),
+    action: types.maybe(
+      types.model({
+        type: types.string,
+        data: types.frozen(),
+      })
+    ),
+  })
+  .views((self) => ({
+    get network(): NetworkType {
+      switch (self.protocol) {
+        case ProtocolType.ETH_MAIN:
+          return NetworkType.ETHEREUM;
+        case ProtocolType.ETH_GORLI:
+          return NetworkType.ETHEREUM;
+        case ProtocolType.UQBAR:
+          return NetworkType.ETHEREUM;
+        case ProtocolType.BTC_MAIN:
+          return NetworkType.BITCOIN;
+        case ProtocolType.BTC_TEST:
+          return NetworkType.BITCOIN;
+        default:
+          return NetworkType.ETHEREUM;
+      }
+    },
+    get networkStore(): NetworkStoreType {
+      switch (self.protocol) {
+        case ProtocolType.ETH_MAIN:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.ETH_GORLI:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.UQBAR:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.BTC_MAIN:
+          return NetworkStoreType.BTC_MAIN;
+          break;
+        case ProtocolType.BTC_TEST:
+          return NetworkStoreType.BTC_TEST;
+          break;
+        default:
+          return NetworkStoreType.ETHEREUM;
+          break;
+      }
+    },
+  }));
+export type WalletNavStateType = Instance<typeof WalletNavState>;
 
 export interface WalletNavOptions {
   canReturn?: boolean;
   network?: NetworkType;
+  networkStore?: NetworkStoreType;
+  protocol?: ProtocolType;
+  lastEthProtocol?: ProtocolType;
   walletIndex?: string;
   detail?: {
     type: 'transaction' | 'coin' | 'nft';
@@ -623,36 +739,38 @@ export interface WalletNavOptions {
 export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    bitcoin: BitcoinStore,
-    testnet: BitcoinStore,
     ethereum: EthStore,
+    bitcoin: BitcoinStore,
+    btctest: BitcoinStore,
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
-    blacklist: types.map(types.string),
+    blacklist: types.array(types.string),
     ourPatp: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
     lastInteraction: types.Date,
     initialized: types.boolean,
     navState: WalletNavState,
     navHistory: types.array(WalletNavState),
+    settings: WalletSettings,
   })
   .views((self) => ({
     get currentStore() {
-      return self.navState.network === 'ethereum'
-        ? self.ethereum
-        : self.navState.btcNetwork === 'mainnet'
-        ? self.bitcoin
-        : self.testnet;
+      // return self.[self.navState.networkStore];
+      switch (self.navState.networkStore) {
+        case NetworkStoreType.ETHEREUM:
+          return self.ethereum;
+        case NetworkStoreType.BTC_MAIN:
+          return self.bitcoin;
+        case NetworkStoreType.BTC_MAIN:
+          return self.btctest;
+        default:
+          return self.ethereum;
+      }
     },
 
     get currentWallet() {
-      const walletStore =
-        self.navState.network === 'ethereum'
-          ? self.ethereum
-          : self.navState.btcNetwork === 'mainnet'
-          ? self.bitcoin
-          : self.testnet;
+      const walletStore = this.currentStore;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -663,21 +781,42 @@ export const WalletStore = types
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
-      self.navState.network = network;
       /* @ts-expect-error */
       self.resetNavigation();
+      if (network !== self.navState.network) {
+        switch (network) {
+          case NetworkType.ETHEREUM:
+            self.navState.protocol = self.ethereum.protocol;
+            break;
+          case NetworkType.BITCOIN:
+            self.navState.protocol =
+              self.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+                ? ProtocolType.BTC_MAIN
+                : ProtocolType.BTC_TEST;
+            break;
+        }
+      }
     },
-    setBtcNetwork(network: string) {
-      self.navState.btcNetwork = network;
-      // @ts-expect-error
+    setProtocol(protocol: ProtocolType) {
+      /* @ts-expect-error */
       self.resetNavigation();
+      if (protocol === ProtocolType.UQBAR) {
+        self.navState.lastEthProtocol =
+          self.navState.protocol === ProtocolType.UQBAR
+            ? ProtocolType.ETH_MAIN
+            : self.navState.protocol;
+      }
+      self.navState.protocol = protocol;
+      self.ethereum.setProtocol(protocol);
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
       const canReturn = options?.canReturn || true;
       const walletIndex = options?.walletIndex || self.navState.walletIndex;
       const detail = options?.detail;
       const action = options?.action;
-      const network = options?.network || self.navState.network;
+      const protocol = options?.protocol || self.navState.protocol;
+      const lastEthProtocol =
+        options?.lastEthProtocol || self.navState.lastEthProtocol;
 
       if (
         canReturn &&
@@ -692,7 +831,8 @@ export const WalletStore = types
         walletIndex,
         detail,
         action,
-        network,
+        protocol,
+        lastEthProtocol,
         btcNetwork: self.navState.btcNetwork,
       });
       self.navState = newState;
@@ -702,7 +842,8 @@ export const WalletStore = types
       let returnSnapshot = getSnapshot(
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
-          network: self.navState.network,
+          protocol: self.navState.protocol,
+          lastEthProtocol: self.navState.lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
         })
       );
@@ -716,7 +857,8 @@ export const WalletStore = types
     resetNavigation() {
       self.navState = WalletNavState.create({
         view: WalletView.LIST,
-        network: self.navState.network,
+        protocol: self.navState.protocol,
+        lastEthProtocol: self.navState.lastEthProtocol,
         btcNetwork: self.navState.btcNetwork,
       });
       self.navHistory = cast([]);
@@ -724,15 +866,30 @@ export const WalletStore = types
     setReturnView(view: WalletView) {
       self.returnView = view;
     },
-    setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
-      if (network == 'bitcoin') self.bitcoin.setProvider(provider);
-      else if (network == 'ethereum') self.ethereum.setProvider(provider);
+    setNetworkProvider(provider: string) {
+      self.currentStore.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;
     },
     setLastInteraction(date: Date) {
       self.lastInteraction = date;
+    },
+    setSettings(settings: any) {
+      self.settings.passcodeHash = settings.passcodeHash;
+      self.blacklist = settings.blocked;
+      for (let network of Object.keys(settings.networks)) {
+        const store =
+          network === 'ethereum'
+            ? self.ethereum
+            : network === 'bitcoin'
+            ? self.bitcoin
+            : self.btctest;
+        const netSettings = settings.networks[network];
+        store.settings.setDefaultIndex(netSettings.defaultIndex);
+        store.settings.setWalletCreationMode(netSettings.walletCreationMode);
+        store.settings.setSharingMode(netSettings.sharingMode);
+      }
     },
   }));
 
