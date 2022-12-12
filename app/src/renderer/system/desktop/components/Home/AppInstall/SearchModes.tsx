@@ -131,7 +131,6 @@ const AppInstallStart = observer(() => {
 
 const renderApps = (space: string, apps: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
-  console.log(apps);
 
   if (!apps || apps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -139,7 +138,8 @@ const renderApps = (space: string, apps: any, theme: any) => {
 
   const installedApps = apps?.filter(
     (app: any) =>
-      app.type !== 'urbit' || app.installStatus === InstallStatus.installed
+      app &&
+      (app.type !== 'urbit' || app.installStatus === InstallStatus.installed)
   );
   if (!installedApps || installedApps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
