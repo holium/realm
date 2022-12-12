@@ -12,7 +12,6 @@ import {
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkStoreType,
-  NetworkType,
   ProtocolType,
   SharingMode,
   WalletCreationMode,

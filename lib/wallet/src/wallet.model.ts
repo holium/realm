@@ -647,22 +647,16 @@ export const WalletNavState = types
       switch (self.protocol) {
         case ProtocolType.ETH_MAIN:
           return NetworkType.ETHEREUM;
-          break;
         case ProtocolType.ETH_GORLI:
           return NetworkType.ETHEREUM;
-          break;
         case ProtocolType.UQBAR:
           return NetworkType.ETHEREUM;
-          break;
         case ProtocolType.BTC_MAIN:
           return NetworkType.BITCOIN;
-          break;
         case ProtocolType.BTC_TEST:
           return NetworkType.BITCOIN;
-          break;
         default:
           return NetworkType.ETHEREUM;
-          break;
       }
     },
     get networkStore(): NetworkStoreType {
