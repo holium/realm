@@ -19,6 +19,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 
 interface HomeSidebarProps {
   filterMode: 'light' | 'dark';
@@ -128,105 +129,108 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
   );
 
   return (
-    <HomeSidebar
-      filterMode={mode as 'light' | 'dark'}
-      customBg={windowColor}
-      onContextMenu={(evt: any) => {
-        evt.stopPropagation();
-      }}
-      initial={{ background: backgroundColor }}
-      animate={{
-        background: backgroundColor,
-      }}
-      exit={{
-        background: backgroundColor,
-      }}
-      transition={{ background: { duration: 0.5 } }}
-    >
-      <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
-        <Icons name="Members" size="18px" opacity={0.5} />
-        <Text fontWeight={500} fontSize={4} opacity={1}>
-          {our ? 'Friends' : 'Members'}
-        </Text>
-      </Flex>
-      <Flex position="relative">
-        {/* Search and dropdown */}
-        <Input
-          tabIndex={1}
-          autoCapitalize="false"
-          autoCorrect="false"
-          autoComplete="false"
-          name="person"
-          ref={searchRef}
-          height={34}
-          placeholder="Search..."
-          // bg={
-          //   mode === 'light'
-          //     ? lighten(0.2, inputColor)
-          //     : darken(0.005, inputColor)
-          // }
-          wrapperMotionProps={{
-            initial: {
-              backgroundColor: themeInputColor,
-            },
-            animate: {
-              backgroundColor: themeInputColor,
-            },
-            transition: {
-              backgroundColor: { duration: 0.3 },
-              borderColor: { duration: 0.3 },
-              color: { duration: 0.5 },
-            },
-          }}
-          wrapperStyle={{
-            borderRadius: 6,
-            paddingRight: 4,
-          }}
-          rightInteractive
-          rightIcon={
-            <TextButton
-              disabled={!person.computed.parsed}
-              onClick={(evt: any) => {
-                onShipSelected([person.computed.parsed!, '']);
-                person.actions.onChange('');
-              }}
-            >
-              {our ? 'Add' : 'Invite'}
-            </TextButton>
-          }
-          value={person.state.value}
-          error={
-            person.computed.isDirty && person.computed.ifWasEverBlurredThenError
-          }
-          onKeyDown={(evt: any) => {
-            if (evt.key === 'Enter' && person.computed.parsed) {
-              onShipSelected([person.computed.parsed, '']);
-              person.actions.onChange('');
+    <PassportMenuProvider>
+      <HomeSidebar
+        filterMode={mode as 'light' | 'dark'}
+        customBg={windowColor}
+        onContextMenu={(evt: any) => {
+          evt.stopPropagation();
+        }}
+        initial={{ background: backgroundColor }}
+        animate={{
+          background: backgroundColor,
+        }}
+        exit={{
+          background: backgroundColor,
+        }}
+        transition={{ background: { duration: 0.5 } }}
+      >
+        <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
+          <Icons name="Members" size="18px" opacity={0.5} />
+          <Text fontWeight={500} fontSize={4} opacity={1}>
+            {our ? 'Friends' : 'Members'}
+          </Text>
+        </Flex>
+        <Flex position="relative">
+          {/* Search and dropdown */}
+          <Input
+            tabIndex={1}
+            autoCapitalize="false"
+            autoCorrect="false"
+            autoComplete="false"
+            name="person"
+            ref={searchRef}
+            height={34}
+            placeholder="Search..."
+            // bg={
+            //   mode === 'light'
+            //     ? lighten(0.2, inputColor)
+            //     : darken(0.005, inputColor)
+            // }
+            wrapperMotionProps={{
+              initial: {
+                backgroundColor: themeInputColor,
+              },
+              animate: {
+                backgroundColor: themeInputColor,
+              },
+              transition: {
+                backgroundColor: { duration: 0.3 },
+                borderColor: { duration: 0.3 },
+                color: { duration: 0.5 },
+              },
+            }}
+            wrapperStyle={{
+              borderRadius: 6,
+              paddingRight: 4,
+            }}
+            rightInteractive
+            rightIcon={
+              <TextButton
+                disabled={!person.computed.parsed}
+                onClick={(evt: any) => {
+                  onShipSelected([person.computed.parsed!, '']);
+                  person.actions.onChange('');
+                }}
+              >
+                {our ? 'Add' : 'Invite'}
+              </TextButton>
             }
-          }}
-          onChange={(e: any) => {
-            person.actions.onChange(e.target.value);
-          }}
-          onFocus={() => {
-            person.actions.onFocus();
-          }}
-          onBlur={() => {
-            person.actions.onBlur();
-          }}
-        />
-        <ShipSearch
-          isDropdown
-          search={person.state.value}
-          selected={selectedPatp}
-          customBg={windowColor}
-          onSelected={(ship: [string, string?], metadata: any) => {
-            onShipSelected(ship, metadata);
-            person.actions.onChange('');
-          }}
-        />
-      </Flex>
-      {our && <FriendsList friends={friends.list} />}
-      {!our && <MembersList path={spaces.selected!.path} />}
-    </HomeSidebar>
+            value={person.state.value}
+            error={
+              person.computed.isDirty &&
+              person.computed.ifWasEverBlurredThenError
+            }
+            onKeyDown={(evt: any) => {
+              if (evt.key === 'Enter' && person.computed.parsed) {
+                onShipSelected([person.computed.parsed, '']);
+                person.actions.onChange('');
+              }
+            }}
+            onChange={(e: any) => {
+              person.actions.onChange(e.target.value);
+            }}
+            onFocus={() => {
+              person.actions.onFocus();
+            }}
+            onBlur={() => {
+              person.actions.onBlur();
+            }}
+          />
+          <ShipSearch
+            isDropdown
+            search={person.state.value}
+            selected={selectedPatp}
+            customBg={windowColor}
+            onSelected={(ship: [string, string?], metadata: any) => {
+              onShipSelected(ship, metadata);
+              person.actions.onChange('');
+            }}
+          />
+        </Flex>
+        {our && <FriendsList />}
+        {!our && <MembersList path={spaces.selected!.path} />}
+      </HomeSidebar>
+    </PassportMenuProvider>
   );
 });

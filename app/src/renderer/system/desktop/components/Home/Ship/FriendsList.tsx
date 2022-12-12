@@ -1,22 +1,16 @@
-import { FC, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-
 import { Flex, Text, PersonRow } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { FriendType } from 'os/services/ship/models/friends';
 import { WindowedList } from '@holium/design-system';
 
-interface IFriendsList {
-  friends: any[];
-}
-
-export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
+export const FriendsList = observer(() => {
   const paneRef = useRef(null);
   const { theme, contacts, friends } = useServices();
-  const { textColor, windowColor } = theme.currentTheme;
-  const rowBg = rgba(darken(0.075, windowColor), 0.5);
+  const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
   const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
   const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
@@ -44,17 +38,17 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     [friends.list.length, pinned, unpinned]
   );
 
-  const onUnpin = (person: any) => {
-    ShipActions.editFriend(person.patp, {
+  const onUnpin = (friend: any) => {
+    ShipActions.editFriend(friend.patp, {
       pinned: false,
-      tags: person.tags,
+      tags: friend.tags,
     });
   };
 
-  const onPin = (person: any) => {
-    ShipActions.editFriend(person.patp, {
+  const onPin = (friend: any) => {
+    ShipActions.editFriend(friend.patp, {
       pinned: true,
-      tags: person.tags,
+      tags: friend.tags,
     });
   };
 
@@ -87,37 +81,34 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     </Flex>
   );
 
-  const FriendRow = ({ person }: { person: FriendType & { patp: string } }) => {
-    const contact = contacts.getContactAvatarMetadata(person.patp);
+  const FriendRow = ({ friend }: { friend: FriendType & { patp: string } }) => {
+    const contact = contacts.getContactAvatarMetadata(friend.patp);
     const pinOption = [
       {
-        label: person.pinned ? 'Unpin' : 'Pin',
+        label: friend.pinned ? 'Unpin' : 'Pin',
         onClick: (_evt: any) => {
-          person.pinned ? onUnpin(person) : onPin(person);
+          friend.pinned ? onUnpin(friend) : onPin(friend);
         },
       },
     ];
 
     return (
       <PersonRow
-        key={person.patp}
-        patp={person.patp}
+        key={friend.patp}
+        patp={friend.patp}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}
         description={contact.bio}
         listId="member-list"
         rowBg={rowBg}
-        theme={{
-          textColor,
-          windowColor,
-        }}
+        theme={theme.currentTheme}
         contextMenuOptions={[
           ...pinOption,
           {
             label: 'Remove',
             onClick: (_evt: any) => {
-              ShipActions.removeFriend(person.patp);
+              ShipActions.removeFriend(friend.patp);
             },
           },
         ]}
@@ -141,7 +132,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
           rowRenderer={(rowData) => {
             if (rowData.type === 'friend') {
               const friend = rowData.data;
-              return <FriendRow person={friend} />;
+              return <FriendRow friend={friend} />;
             } else if (rowData.type === 'title') {
               const title = rowData.data;
               return <TitleRow title={title} />;

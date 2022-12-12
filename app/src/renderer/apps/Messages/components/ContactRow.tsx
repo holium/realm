@@ -80,7 +80,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     if (isGroup) {
       let type = 'text';
       let content;
-      if (dm.lastMessage.length > 0 && !isPending) {
+      if (dm.lastMessage?.length > 0 && !isPending) {
         const lastSender = dm.lastMessage[0];
         content = dm.lastMessage[1];
         type = Object.keys(content)[0];
