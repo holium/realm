@@ -31,6 +31,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 type AppEmptyProps = {
   isSelected: boolean;
   accentColor: string;
+  isAdmin: boolean | undefined;
 } & BoxProps;
 
 const AppEmpty = styled(Box)<AppEmptyProps>`
@@ -41,15 +42,14 @@ const AppEmpty = styled(Box)<AppEmptyProps>`
   align-items: center;
   justify-content: center;
   transition: 0.2s ease;
-  background: ${rgba('#FBFBFB', 0.4)};
-  &:hover {
-    transition: 0.2s ease;
-    background: ${rgba('#FFFFFF', 0.5)};
-  }
   ${(props: AppEmptyProps) =>
-    props.isSelected &&
     css`
-      border: 2px solid ${props.accentColor};
+      ${props.isSelected && `border: 2px solid ${props.accentColor}`};
+      background: ${rgba('#FBFBFB', props.isAdmin ? 0.4 : 0.1)};
+      &:hover {
+        transition: 0.2s ease;
+        background: ${rgba('#FFFFFF', props.isAdmin ? 0.5 : 0.2)};
+      }
     `};
 `;
 
@@ -201,9 +201,12 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
       width={160}
       isSelected={selected}
       accentColor={accentColor}
+      isAdmin={isAdmin}
       onClick={(e) => onClick && onClick(e, undefined)}
     >
-      <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
+      {isAdmin && (
+        <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
+      )}
     </AppEmpty>
   );
 });

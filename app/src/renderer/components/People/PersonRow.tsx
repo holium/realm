@@ -48,7 +48,11 @@ export const PersonRow = ({
   }
 
   useEffect(() => {
-    if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
+    if (
+      contextMenuOptions &&
+      contextMenuOptions.length &&
+      contextMenuOptions !== getOptions(id)
+    ) {
       setOptions(id, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, id, setOptions]);
