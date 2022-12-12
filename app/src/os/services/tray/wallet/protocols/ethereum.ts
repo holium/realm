@@ -37,7 +37,7 @@ export class EthereumProtocol implements BaseProtocol {
       baseURL = 'http://localhost:8080';
     }
     let alchemySettings: AlchemySettings;
-    if (protocol === ProtocolType.ETH_MAIN) {
+    if (this.protocol === ProtocolType.ETH_MAIN) {
       this.ethProvider = new ethers.providers.JsonRpcProvider(baseURL + '/eth');
       alchemySettings = {
         url: baseURL + '/eth',
@@ -55,11 +55,6 @@ export class EthereumProtocol implements BaseProtocol {
     }
     this.ethProvider!.removeAllListeners();
     this.alchemy = new Alchemy(alchemySettings);
-    this.getAssetTransfers(
-      '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-      '0x9DbF0b968C395c09b78c9De2c9e486879B1a0089',
-      0
-    );
   }
 
   removeListener() {
@@ -73,9 +68,9 @@ export class EthereumProtocol implements BaseProtocol {
     this.interval = setInterval(async () => {
       await this.updateWalletState(walletStore);
       if (
-        !(walletStore.navState.protocol === ProtocolType.ETH_GORLI) &&
-        !(walletStore.navState.protocol === ProtocolType.UQBAR)
-      ) {
+        !(this.protocol === ProtocolType.ETH_GORLI) &&
+        !(this.protocol === ProtocolType.UQBAR)
+    ) {
         walletStore.currentStore.setBlock(await this.getBlockNumber());
       }
     }, 30000);
@@ -134,43 +129,83 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    // try {
-    const from = (
-      await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(0),
-        fromAddress: addr,
-        category: [
-          AssetTransfersCategory.INTERNAL,
-          AssetTransfersCategory.EXTERNAL,
-        ],
-        withMetadata: true,
-      })
-    ).transfers;
-    const to = (
-      await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(0),
-        toAddress: addr,
-        category: [
-          AssetTransfersCategory.INTERNAL,
-          AssetTransfersCategory.EXTERNAL,
-        ],
-        withMetadata: true,
-      })
-    ).transfers;
-    return from.concat(to);
-    // } catch (e) {
-    //   // console.log(e);
-    //   return [];
-    // }
-    /*txns.forEach(async (txn, index) => {
-      txns[index] = {
-        timeStamp: await this.getBlockTime(Number(txn.blockNum)),
-        ...txn
-      }
-    })
-    for (let txn of txns) {
-      console.log(txn.timeStamp)
-    }*/
+    /*const from = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(0),
+      toBlock: 'latest',
+      fromAddress: addr,
+      category: [
+        AssetTransfersCategory.INTERNAL,
+        AssetTransfersCategory.EXTERNAL,
+      ],
+      withMetadata: true,
+    })).transfers;
+
+    const to = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(0),
+      toBlock: 'latest',
+      toAddress: addr,
+      category: [
+        AssetTransfersCategory.INTERNAL,
+        AssetTransfersCategory.EXTERNAL,
+      ],
+      withMetadata: true,
+    })).transfers;
+    return from.concat(to);*/
+    try {
+      const fromTransfers = await axios.request({
+        method: 'POST',
+        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        data: {
+          method: 'alchemy_getAssetTransfers',
+          params: [
+            {
+              fromBlock: ethers.utils.hexlify(startBlock),
+              toBlock: 'latest',
+              fromAddress: addr,
+              category: [
+                AssetTransfersCategory.INTERNAL,
+                AssetTransfersCategory.EXTERNAL,
+              ],
+              withMetadata: true,
+            },
+          ],
+        },
+      });
+      const from = fromTransfers.data.result.transfers;
+      const toTransfers = await axios.request({
+        method: 'POST',
+        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        data: {
+          method: 'alchemy_getAssetTransfers',
+          params: [
+            {
+              fromBlock: ethers.utils.hexlify(startBlock),
+              toBlock: 'latest',
+              toAddress: addr,
+              category: [
+                AssetTransfersCategory.INTERNAL,
+                AssetTransfersCategory.EXTERNAL,
+
+              ],
+              withMetadata: true,
+            },
+          ],
+        },
+      });
+      const to = toTransfers.data.result.transfers;
+      return from.concat(to);
+    }
+    catch {
+      return [];
+    }
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
     const coins = await this.alchemy.core.getTokenBalances(addr);
@@ -252,57 +287,79 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    const fromTransfers = await axios.request({
-      method: 'POST',
-      url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-      data: {
-        method: 'alchemy_getAssetTransfers',
-        params: [
-          {
-            fromBlock: ethers.utils.hexlify(0),
-            toBlock: 'latest',
-            fromAddress: addr,
-            contractAddresses: [contract],
-            category: ['erc20', 'erc721', 'erc1155'],
-            withMetadata: true,
-          },
-        ],
-      },
-    });
-    const from = fromTransfers.data.result.transfers;
-    const toTransfers = await axios.request({
-      method: 'POST',
-      url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-      data: {
-        method: 'alchemy_getAssetTransfers',
-        params: [
-          {
-            fromBlock: ethers.utils.hexlify(0),
-            toBlock: 'latest',
-            toAddress: addr,
-            category: [
-              AssetTransfersCategory.ERC20,
-              AssetTransfersCategory.ERC721,
-              AssetTransfersCategory.ERC1155,
-            ],
-            contractAddresses: [contract],
-            withMetadata: true,
-          },
-        ],
-      },
-    });
+    /*const from = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(0),
+      toBlock: 'latest',
+      fromAddress: addr,
+      contractAddresses: [contract],
+      category: [AssetTransfersCategory.ERC20, AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
+      withMetadata: true,
+    })).transfers;
 
-    const to = toTransfers.data.result.transfers;
-    const merged = from.concat(to);
-    return merged;
+    const to = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(0),
+      toBlock: 'latest',
+      toAddress: addr,
+      contractAddresses: [contract],
+      category: [AssetTransfersCategory.ERC20, AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
+      withMetadata: true,
+    })).transfers;
+    return from.concat(to);*/
+    try {
+      const fromTransfers = await axios.request({
+        method: 'POST',
+        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        data: {
+          method: 'alchemy_getAssetTransfers',
+          params: [
+            {
+              fromBlock: ethers.utils.hexlify(startBlock),
+              toBlock: 'latest',
+              fromAddress: addr,
+              contractAddresses: [contract],
+              category: ['erc20', 'erc721', 'erc1155'],
+              withMetadata: true,
+            },
+          ],
+        },
+      });
+      const from = fromTransfers.data.result.transfers;
+      const toTransfers = await axios.request({
+        method: 'POST',
+        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        data: {
+          method: 'alchemy_getAssetTransfers',
+          params: [
+            {
+              fromBlock: ethers.utils.hexlify(startBlock),
+              toBlock: 'latest',
+              toAddress: addr,
+              category: [
+                AssetTransfersCategory.ERC20,
+                AssetTransfersCategory.ERC721,
+                AssetTransfersCategory.ERC1155,
+              ],
+              contractAddresses: [contract],
+              withMetadata: true,
+            },
+          ],
+        },
+      });
+
+      const to = toTransfers.data.result.transfers;
+      return from.concat(to);
+    }
+    catch {
+      return [];
+    }
   }
   async transferAsset(
     contract: string,

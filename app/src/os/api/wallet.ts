@@ -186,7 +186,10 @@ export const WalletApi = {
           handleWalletReactions(data, walletState, onWallet);
         }
       },
-      onError: () => console.log('Subscription rejected'),
+      onError: () => {
+        console.log('lblah')
+        console.log('Subscription rejected')
+      },
       onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
@@ -200,6 +203,7 @@ export const handleWalletReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'wallet':
+      console.log('got wallet update')
       const wallet = data.wallet;
       if (wallet.network === 'ethereum') {
         walletState!.ethereum.applyWalletUpdate(wallet);

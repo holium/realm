@@ -1,6 +1,7 @@
-import { Patp } from 'types';
-import { BaseProtocol } from 'wallets';
+import { Patp } from './types';
+import { BaseProtocol } from './wallets/BaseProtocol';
 import { NetworkType, ProtocolType } from './wallet.model';
+import { EthereumProtocol } from '../wallet/protocols/ethereum';
 
 export class Wallet {
   protocols: Map<ProtocolType, BaseProtocol>;
@@ -26,6 +27,12 @@ export class Wallet {
     this.currentProtocol = walletState.navState.protocol;
     if (walletState.navState.network === NetworkType.ETHEREUM) {
       this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
+    }
+  }
+
+  async updateWalletState(walletState: any) {
+    if (walletState.navState.network === NetworkType.ETHEREUM) {
+      await (this.protocols.get(this.currentProtocol)! as EthereumProtocol).updateWalletState(walletState);
     }
   }
 }

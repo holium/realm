@@ -378,10 +378,12 @@ const EthWallet = types
       });
     },
     updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
-      self.data
-        .get(protocol)!
-        .coins.get(coin)!
-        .applyTransactions(self.index, transfers);
+      if (self.data.get(protocol)!.coins.has(coin)) {
+        self.data
+          .get(protocol)!
+          .coins.get(coin)!
+          .applyTransactions(self.index, transfers);
+      }
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;

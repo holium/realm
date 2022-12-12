@@ -30,6 +30,7 @@ import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/Wallet';
+import _ from 'lodash';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -71,6 +72,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.get-coin-txns': this.getCoinTxns,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
+    'realm.tray.wallet.watch-updates': this.watchUpdates,
   };
 
   static preload = {
@@ -279,6 +281,9 @@ export class WalletService extends BaseService {
     toggleUqbar: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.toggle-uqbar');
     },
+    watchUpdates: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.watch-updates')
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -383,7 +388,9 @@ export class WalletService extends BaseService {
       [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
-    // this.wallet!.watchUpdates(this.state!);
+    WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
+      this.wallet!.updateWalletState(this.state!);
+    })
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -590,10 +597,7 @@ export class WalletService extends BaseService {
       this.state!.settings.passcodeHash!
     );
     if (result) {
-      WalletApi.watchUpdates(this.core.conduit!, this.state!, () =>
-        this.wallet!.watchUpdates(this.state!)
-      );
-      // this.wallet?.watchUpdates(this.state!);
+      this.wallet!.watchUpdates(this.state!)
     }
     return result;
   }
@@ -665,5 +669,9 @@ export class WalletService extends BaseService {
       ? this.state!.setProtocol(ProtocolType.UQBAR)
       : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
     this.wallet!.watchUpdates(this.state!);
+  }
+  
+  async watchUpdates(_evt: any) {
+    await this.wallet!.watchUpdates(this.state!);
   }
 }
