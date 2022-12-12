@@ -1,7 +1,9 @@
 import { observer } from 'mobx-react';
+import { trayStore } from 'renderer/apps/store';
 import { Flex } from 'renderer/components';
 import { Speaker } from '../components/Speaker';
 import { useRooms } from '../useRooms';
+import { useEffect } from 'react';
 
 export const VoiceView = observer(() => {
   const roomsManager = useRooms();
@@ -9,11 +11,23 @@ export const VoiceView = observer(() => {
     return null;
   }
 
-  const us = roomsManager.protocol.our;
+  const { setTrayAppHeight } = trayStore;
+
   const host = roomsManager.protocol.provider;
-  const remainingPeers = Array.from(roomsManager.protocol.peers.keys()).filter(
-    (patp) => patp !== host
-  );
+  const speakers = [
+    ...Array.from(roomsManager.protocol.peers.keys()),
+    roomsManager.protocol.our,
+  ].filter((person: string) => person !== host);
+
+  useEffect(() => {
+    const regularHeight = 500;
+    if (speakers.length + 1 > 4) {
+      const tallHeight = 500 + 181 + 12;
+      setTrayAppHeight(tallHeight);
+    } else {
+      setTrayAppHeight(regularHeight);
+    }
+  }, [speakers.length, setTrayAppHeight]);
 
   return (
     <Flex
@@ -21,15 +35,12 @@ export const VoiceView = observer(() => {
       gap={12}
       py={2}
       display="grid"
-      gridTemplateColumns={
-        remainingPeers.length + 1 ? `repeat(2, 1fr)` : '.5fr'
-      }
+      gridTemplateColumns={speakers.length + 1 ? `repeat(2, 1fr)` : '.5fr'}
       gridAutoColumns="1fr"
       gridAutoRows={'.5fr'}
     >
-      <Speaker type="host" person={host} />
-      <Speaker type="speaker" person={us} />
-      {remainingPeers.map((person: string) => (
+      <Speaker key={host} type="host" person={host} />
+      {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}
     </Flex>
