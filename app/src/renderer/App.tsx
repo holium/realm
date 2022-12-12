@@ -17,6 +17,7 @@ import { Mouse } from './system/desktop/components/Mouse';
 import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { SelectionProvider } from './logic/lib/selection';
+import { ErrorBoundary } from './logic/ErrorBoundary';
 // import * as RealmMultiplayer from '@holium/realm-multiplayer';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
@@ -67,18 +68,20 @@ export const App = observer(() => {
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
-          {/* Modal provider */}
-          <ServiceProvider value={servicesStore}>
-            <SelectionProvider>
-              <ContextMenuProvider>
-                {mouseMemo}
-                {shellMemo}
-                {contextMenuMemo}
-                {/* <MultiplayerMouse /> */}
-                <div id="portal-root" />
-              </ContextMenuProvider>
-            </SelectionProvider>
-          </ServiceProvider>
+          <ErrorBoundary>
+            {/* Modal provider */}
+            <ServiceProvider value={servicesStore}>
+              <SelectionProvider>
+                <ContextMenuProvider>
+                  {mouseMemo}
+                  {shellMemo}
+                  {contextMenuMemo}
+                  {/* <MultiplayerMouse /> */}
+                  <div id="portal-root" />
+                </ContextMenuProvider>
+              </SelectionProvider>
+            </ServiceProvider>
+          </ErrorBoundary>
         </MotionConfig>
       </ThemeProvider>
     </CoreProvider>
