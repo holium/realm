@@ -479,6 +479,9 @@ export const CourierStore = types
         const newMessage = dmLog.messages[0];
         self.dms.get(dmLog.path)?.receiveDM(newMessage);
         self.previews.get(dmLog.path)?.receiveDM(newMessage);
+        // const updatePreview = self.previews.get(dmLog.path)!;
+        // updatePreview.receiveDM(newMessage);
+        // self.previews.set(dmLog.path, updatePreview);
       } else {
         // set a new log entry
         self.dms.set(dmLog.path, dmLog);
