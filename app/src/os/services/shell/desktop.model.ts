@@ -4,11 +4,6 @@ import { getInitialWindowDimensions } from './lib/window-manager';
 import { Glob } from '../ship/models/docket';
 import { AppType } from '../spaces/models/bazaar';
 
-// const Grid = types.model({
-//   width: types.enumeration(['1', '2', '3']),
-//   height: types.enumeration(['1', '2']),
-// });
-
 const DimensionsModel = types.model({
   x: types.number,
   y: types.number,
@@ -31,11 +26,6 @@ const Window = types
     ),
     dimensions: DimensionsModel,
     minimized: types.optional(types.boolean, false),
-    // _dev: types.optional(RealmConfig, {
-    //   size: [10, 10],
-    //   showTitlebar: true,
-    //   titlebarBorder: false,
-    // }),
   })
   .actions((self) => ({
     setZIndex(newZ: number) {
@@ -50,7 +40,7 @@ export interface WindowModelProps {
   glob?: boolean;
   href?: { site: string; glob: any };
   zIndex: number;
-  type: 'urbit' | 'web' | 'native' | 'dialog';
+  type: 'urbit' | 'web' | 'native' | 'dialog' | 'dev';
   dimensions: {
     x: number;
     y: number;
