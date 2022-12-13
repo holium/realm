@@ -262,7 +262,7 @@ const ERC20 = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
-    applyTransactions(index: number, transactions: any) {
+    applyERC20Transactions(index: number, transactions: any) {
       let formattedTransactions: any = {};
       let previousTransactions = self.transactions.toJSON();
       for (const transaction of transactions) {
@@ -383,7 +383,7 @@ const EthWallet = types
         self.data
           .get(protocol)!
           .coins.get(coin)!
-          .applyTransactions(self.index, transfers);
+          .applyERC20Transactions(self.index, transfers);
       }
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
@@ -455,7 +455,7 @@ const EthWallet = types
         hash: tx.hash,
         network: tx.network,
         type: tx.type,
-        'initiated-at': tx.initiatedAt,
+        'initiated-at': tx.initiatedAt || '',
         'completed-at': tx.completedAt || '',
         'our-address': tx.ourAddress,
         'their-patp': tx.theirPatp || null,
@@ -521,7 +521,7 @@ const EthWallet = types
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: self.address === transaction.from ? 'sent' : 'received',
-          initiatedAt: previousTransaction ? previousTransaction.initiatedAt : '',
+          initiatedAt: previousTransaction?.initiatedAt || '',
           completedAt: transaction.metadata.blockTimestamp,
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
@@ -530,25 +530,7 @@ const EthWallet = types
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
         };
-        if (previousTransactions[transaction.hash]) {
-          if (
-            formattedTransactions[transaction.hash].status !==
-            previousTransactions[transaction.hash].status
-          ) {
-            const tx = formattedTransactions[transaction.hash]
-            delete tx.walletIndex;
-            delete tx.amount;
-            console.log(tx)
-            WalletApi.setTransaction(
-              conduit,
-              'ethereum',
-              protocol,
-              self.index,
-              transaction.hash,
-              tx
-            );
-          }
-        }
+
       }
       formattedTransactions = {
         ...previousTransactions,
@@ -560,6 +542,25 @@ const EthWallet = types
         self.data.get(protocol)!.transactions,
         getSnapshot(newTransactions)
       );
+      for (let transaction of transactions) {
+        if (previousTransactions[transaction.hash]) {
+          if (
+            formattedTransactions[transaction.hash].status !==
+            previousTransactions[transaction.hash].status
+          ) {
+            const tx = this.getAgentTransaction(protocol, transaction.hash)
+            WalletApi.setTransaction(
+              conduit,
+              'ethereum',
+              protocol,
+              self.index,
+              transaction.hash,
+              tx
+            );
+          }
+        }
+      }
+
     },
   }));
 
@@ -651,13 +652,15 @@ export const EthStore = types
         const ethWallet = EthWallet.create(walletObj);
         self.wallets.set(wallet.key, ethWallet);
       }
-      for (const protocol of Object.keys(wallet.transactions)) {
-        const protocolTransactions = wallet.transactions[protocol];
-        for (const transactionKey of Object.keys(protocolTransactions)) {
-          const transaction = protocolTransactions[transactionKey];
-          self.wallets
-            .get(wallet.key)!
-            .applyTransactionUpdate(protocol as ProtocolType, transaction);
+      if (wallet.transactions) {
+        for (const protocol of Object.keys(wallet.transactions)) {
+          const protocolTransactions = wallet.transactions[protocol];
+          for (const transactionKey of Object.keys(protocolTransactions)) {
+            const transaction = protocolTransactions[transactionKey];
+            self.wallets
+              .get(wallet.key)!
+              .applyTransactionUpdate(protocol as ProtocolType, transaction);
+          }
         }
       }
     }),
