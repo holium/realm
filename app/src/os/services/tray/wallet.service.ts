@@ -68,7 +68,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
-    'realm.tray.wallet.get-coin-txns': this.getCoinTxns,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
     'realm.tray.wallet.watch-updates': this.watchUpdates,
@@ -260,18 +259,6 @@ export class WalletService extends BaseService {
         name,
         contractAddress,
         walletIndex
-      );
-    },
-    getCoinTxns: async (
-      walletAddr: string,
-      tokenType: 'erc20' | 'erc721' | 'erc1155',
-      contractAddr: string
-    ) => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.get-coin-txns',
-        walletAddr,
-        tokenType,
-        contractAddr
       );
     },
     toggleNetwork: async () => {
@@ -711,16 +698,6 @@ export class WalletService extends BaseService {
     }
   }
 
-  async getCoinTxns(
-    _evt: any,
-    walletAddr: string,
-    tokenType: 'erc20' | 'erc721' | 'erc1155',
-    contractAddr: string
-  ) {
-    return await (
-      this.wallet!.protocols.get(this.wallet!.currentProtocol)! as BaseProtocol
-    ).getAssetTransfers(contractAddr, walletAddr, 0);
-  }
 
   toggleUqbar(_evt: any) {
     this.state!.navState.protocol !== ProtocolType.UQBAR
