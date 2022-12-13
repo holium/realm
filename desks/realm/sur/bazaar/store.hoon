@@ -87,7 +87,7 @@
       [%suite-removed path=space-path:spaces index=@ud]
       [%app-install-update =app-id =urbit-app =grid-index]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
-      [%stall-update =path:spaces-path:spaces =stall]
+      [%stall-update =path:spaces-path:spaces =stall det=(unit [=app-id =app])]
       [%treaties-loaded =ship]
       [%new-ally =ship =alliance:treaty]
       [%ally-deleted =ship]

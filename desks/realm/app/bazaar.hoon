@@ -526,7 +526,7 @@
           =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])])
+          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id app])])])
           result
         ::  we need to poke host
         =.  cards.result            (snoc cards.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-recommend path app-id app])])
@@ -553,7 +553,7 @@
             (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])])
+          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall ~])])
           result
         =.  cards.result            (snoc cards.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-unrecommend path app-id])])
         result
@@ -626,10 +626,10 @@
 
     ::
     ++  on-stall-update
-      |=  [path=space-path:spaces-store =stall:store]
+      |=  [path=space-path:spaces-store =stall:store det=(unit [=app-id:store =app:store])]
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det])]~
     --
   ++  interaction
     |=  [itc=interaction:store]
@@ -662,7 +662,7 @@
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       :~
-        [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id app])])]
       ==
     ::
     ++  member-unrecommend
@@ -683,7 +683,7 @@
       =.  stalls.state            (~(put by stalls.state) [path stall])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
-      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
+      [%give %fact paths bazaar-reaction+!>([%stall-update path stall ~])]~
     --
   ++  scry
     |%
@@ -945,7 +945,7 @@
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
       :~
-        [%give %fact [update-path /updates ~] bazaar-reaction+!>([%stall-update path stall])]
+        [%give %fact [update-path /updates ~] bazaar-reaction+!>([%stall-update path stall ~])]
         [%give %kick ~[update-path] (some ship)]
       ==
     --
@@ -976,7 +976,7 @@
       =.  stalls.state        (~(put by stalls.state) [path.space stall])
       =.  docks.state         (~(put by docks.state) [path.space [~]])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path.space stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path.space stall ~])]~
     ::
     ++  on-remove
       |=  [path=space-path:spaces-store]
@@ -1045,14 +1045,6 @@
     ::    send the UI and update indicating its safe to scry the treaties
     =/  allis  allies:scry:bazaar:core
     =/  treats  (treaties:scry:bazaar:core ship.treaty %.n)
-    :: get rid of the pending-install that may have been added
-    =/  pending-install  (~(get by pending-installs.state) ship.treaty)
-    =.  pending-installs.state
-      ?~  pending-install  pending-installs.state
-      ?:  =(u.pending-install desk.treaty)
-        ~&  >>  "{<dap.bowl>}: {<[ship.treaty desk.treaty]>} removing pending install"
-        (~(del by pending-installs.state) ship.treaty desk.treaty)
-      pending-installs.state
     =/  alli  (~(get by allis) ship.treaty)
     =/  effects  ?~  alli  effects
       ?:  %-  ~(all in u.alli)
@@ -1061,6 +1053,13 @@
         ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
         (snoc effects [%give %fact [/updates ~] bazaar-reaction+!>([%treaties-loaded ship.treaty])])
       effects
+    :: get rid of the pending-install that may have been added
+    =/  pending-install  (~(get by pending-installs.state) ship.treaty)
+    ?~  pending-install  [effects state]
+    ?:  =(u.pending-install desk.treaty)
+      ~&  >>  "{<dap.bowl>}: {<[ship.treaty desk.treaty]>} removing pending install"
+      :_  state(pending-installs (~(del by pending-installs.state) ship.treaty desk.treaty))
+      (snoc effects [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])])
     [effects state]
   --
 ::

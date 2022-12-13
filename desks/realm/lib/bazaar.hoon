@@ -168,6 +168,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%stall (stall-js:encode stall.rct)]
+          [%app ?~(det.rct ~ (app-detail:encode app-id.u.det.rct app.u.det.rct))]
       ==
       ::
         %treaties-loaded

@@ -239,8 +239,13 @@ export const NewBazaarStore = types
     _updateStall(data: {
       path: string;
       stall: { recommended: any; suite: any };
+      app: AppType;
     }) {
       self.stalls.set(data.path, data.stall);
+      if (data.app.type === 'urbit') {
+        data.app.color = cleanNounColor(data.app.color);
+      }
+      self.catalog.set(data.app.id, data.app);
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
@@ -559,6 +564,7 @@ export const NewBazaarStore = types
       const stall = self.stalls.get(path);
       if (!stall) return [];
       if (stall.recommended.size === 0) return [];
+      console.log(Object.entries(getSnapshot(stall.recommended)));
       return Array.from(
         Object.entries(getSnapshot(stall.recommended))
           .sort((entry: [string, number], entry2: [string, number]) => {
