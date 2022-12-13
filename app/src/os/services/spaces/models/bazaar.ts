@@ -242,10 +242,12 @@ export const NewBazaarStore = types
       app: AppType;
     }) {
       self.stalls.set(data.path, data.stall);
-      if (data.app.type === 'urbit') {
-        data.app.color = cleanNounColor(data.app.color);
+      if (data.app) {
+        if (data.app.type === 'urbit') {
+          data.app.color = cleanNounColor(data.app.color);
+        }
+        self.catalog.set(data.app.id, data.app);
       }
-      self.catalog.set(data.app.id, data.app);
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
