@@ -37,6 +37,11 @@ export enum InstallStatus {
   treaty = 'treaty',
   suspended = 'suspended',
   resuming = 'resuming',
+  // this is set when joining a space and you do not have the app
+  //  installed, but want it to appear on the home screen. this
+  //  is different than uninstalled which has %suspend implications
+  //  on the back-end. %desktop requires a fresh install.
+  desktop = 'desktop',
 }
 
 export enum AppTypes {
@@ -234,8 +239,15 @@ export const NewBazaarStore = types
     _updateStall(data: {
       path: string;
       stall: { recommended: any; suite: any };
+      app: AppType;
     }) {
       self.stalls.set(data.path, data.stall);
+      if (data.app) {
+        if (data.app.type === 'urbit') {
+          data.app.color = cleanNounColor(data.app.color);
+        }
+        self.catalog.set(data.app.id, data.app);
+      }
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
@@ -554,6 +566,7 @@ export const NewBazaarStore = types
       const stall = self.stalls.get(path);
       if (!stall) return [];
       if (stall.recommended.size === 0) return [];
+      console.log(Object.entries(getSnapshot(stall.recommended)));
       return Array.from(
         Object.entries(getSnapshot(stall.recommended))
           .sort((entry: [string, number], entry2: [string, number]) => {

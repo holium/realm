@@ -68,20 +68,20 @@ export const App = observer(() => {
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
-          <ErrorBoundary>
-            {/* Modal provider */}
-            <ServiceProvider value={servicesStore}>
-              <SelectionProvider>
-                <ContextMenuProvider>
-                  {mouseMemo}
+          {/* Modal provider */}
+          <ServiceProvider value={servicesStore}>
+            <SelectionProvider>
+              <ContextMenuProvider>
+                {mouseMemo}
+                <ErrorBoundary>
                   {shellMemo}
                   {contextMenuMemo}
                   {/* <MultiplayerMouse /> */}
                   <div id="portal-root" />
-                </ContextMenuProvider>
-              </SelectionProvider>
-            </ServiceProvider>
-          </ErrorBoundary>
+                </ErrorBoundary>
+              </ContextMenuProvider>
+            </SelectionProvider>
+          </ServiceProvider>
         </MotionConfig>
       </ThemeProvider>
     </CoreProvider>

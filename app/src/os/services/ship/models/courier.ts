@@ -440,12 +440,12 @@ export const CourierStore = types
       return self.previews.get(path);
     },
     draftGroupDM: (preview: PreviewGroupDMType) => {
-      preview.metadata.forEach((mtd: any) => {
-        mtd.color = cleanNounColor(mtd.color);
-      });
+      // preview.metadata.forEach((mtd: any) => {
+      //   mtd.color = cleanNounColor(mtd.color);
+      // });
       self.previews.set(
         preview.path,
-        DMPreview.create({
+        PreviewGroupDM.create({
           path: preview.path,
           to: preview.to,
           type: preview.type,

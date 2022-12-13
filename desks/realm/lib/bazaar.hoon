@@ -110,7 +110,7 @@
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       
+        %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned
@@ -168,6 +168,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%stall (stall-js:encode stall.rct)]
+          [%app ?~(det.rct ~ (app-detail:encode app-id.u.det.rct app.u.det.rct))]
       ==
       ::
         %treaties-loaded
