@@ -6,10 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-} from 'os/services/tray/wallet-lib';
+import { EthWalletType, BitcoinWalletType } from 'os/services/tray/wallet-lib';
 
 interface WalletInfoProps {
   wallet: EthWalletType | BitcoinWalletType;

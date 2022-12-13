@@ -34,10 +34,9 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
             <PasscodeInput
               checkAgainst={props.correctPasscode}
               onSuccess={() => {
-                  props.setScreen(NewWalletScreen.FINALIZING)
-                  WalletActions.watchUpdates();
-                }
-              }
+                props.setScreen(NewWalletScreen.FINALIZING);
+                WalletActions.watchUpdates();
+              }}
             />
           </Flex>
         </Flex>

@@ -3,10 +3,7 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
-import {
-  NetworkStoreType,
-  WalletView,
-} from 'os/services/tray/wallet-lib';
+import { NetworkStoreType, WalletView } from 'os/services/tray/wallet-lib';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}

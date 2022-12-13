@@ -10,7 +10,7 @@ import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
-  ProtocolType
+  ProtocolType,
 } from 'os/services/tray/wallet-lib';
 
 const abbrMap = {
@@ -71,7 +71,9 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           max={
             props.coin
               ? Number(props.coin.balance)
-              : Number(props.wallet.data.get(walletApp.navState.protocol)!.balance)
+              : Number(
+                  props.wallet.data.get(walletApp.navState.protocol)!.balance
+                )
           }
           onScreenChange={props.onScreenChange}
           close={props.close}

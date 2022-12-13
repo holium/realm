@@ -26,7 +26,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
   const { patp, sigilColor, avatar, nickname, description, onClose } = props;
   const { textColor, windowColor } = props.theme!;
   const { courier } = useServices();
-  const { setActiveApp, dmApp } = useTrayApps();
+  const { setActiveApp, dmApp, walletApp } = useTrayApps();
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
@@ -62,29 +62,31 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          <PassportButton
-            style={{ backgroundColor: buttonColor }}
-            data-prevent-menu-close="true"
-            onClick={(evt: any) => {
-              setActiveApp('wallet-tray', {
-                willOpen: true,
-                position: 'top-left',
-                anchorOffset: { x: 4, y: 26 },
-                dimensions: {
-                  height: 580,
-                  width: 330,
-                },
-              });
-              // TODO: placeholder, we need to implement the actual send coins functionality
-              WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-                walletIndex: '0',
-              });
-              onClose();
-              evt.stopPropagation();
-            }}
-          >
-            <Icons name="SendCoins" color={iconColor} size="16px" />
-          </PassportButton>
+          {walletApp.initialized && (
+            <PassportButton
+              style={{ backgroundColor: buttonColor }}
+              data-prevent-menu-close="true"
+              onClick={(evt: any) => {
+                setActiveApp('wallet-tray', {
+                  willOpen: true,
+                  position: 'top-left',
+                  anchorOffset: { x: 4, y: 26 },
+                  dimensions: {
+                    height: 580,
+                    width: 330,
+                  },
+                });
+                // TODO: placeholder, we need to implement the actual send coins functionality
+                WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+                  walletIndex: '0',
+                });
+                onClose();
+                evt.stopPropagation();
+              }}
+            >
+              <Icons name="SendCoins" color={iconColor} size="16px" />
+            </PassportButton>
+          )}
           <PassportButton
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
