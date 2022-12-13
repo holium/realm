@@ -561,7 +561,6 @@ export class WalletService extends BaseService {
       this.state!.navState.protocol,
       hash
     );
-    console.log('sendEthhhhhh', stateTx);
 
     await WalletApi.setTransaction(
       this.core.conduit!,
