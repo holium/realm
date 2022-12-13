@@ -236,17 +236,20 @@ export const NewBazaarStore = types
       });
       self.catalog.merge(data.catalog);
     },
-    _updateStall(data: {
-      path: string;
-      stall: { recommended: any; suite: any };
-      app: AppType;
-    }) {
+    _updateStall(data: any) {
+      //   path: string;
+      //   stall: { recommended: any; suite: any };
+      //   appInfo: any;
+      // }) {
       self.stalls.set(data.path, data.stall);
-      if (data.app) {
-        if (data.app.type === 'urbit') {
-          data.app.color = cleanNounColor(data.app.color);
+      if ('add-app' in data) {
+        const app: AppType = data['add-app'];
+        if (app.type === 'urbit') {
+          app.color = cleanNounColor(app.color);
         }
-        self.catalog.set(data.app.id, data.app);
+        self.catalog.set(app.id, app);
+      } else if ('remove-app' in data) {
+        self.catalog.delete(data['remove-app']);
       }
     },
     _allyAdded(ship: string, desks: string[]) {
