@@ -42,8 +42,9 @@ export const MembershipStore = types
   })
   .views((self) => ({
     isAdmin(path: string, patp: Patp) {
-      const roles = self.spaces.get(path)?.get(patp)!.roles;
-      return roles?.includes('admin');
+      const member = self.spaces.get(path)?.get(patp);
+      if (!member) return false;
+      return member.roles?.includes('admin');
     },
     getMemberCount(path: SpacePath) {
       const members = self.spaces.get(path);

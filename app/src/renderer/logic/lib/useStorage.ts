@@ -19,9 +19,13 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
 
   useEffect(() => {
     if (!s3) {
-      ShipActions.getS3Bucket().then((response: any) => {
-        setS3(response);
-      });
+      ShipActions.getS3Bucket()
+        .then((response: any) => {
+          setS3(response);
+        })
+        .catch((err: any) => {
+          console.error(err);
+        });
     }
   }, [s3]);
 

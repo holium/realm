@@ -278,12 +278,12 @@ OSActions.onBoot((_event: any, response: any, session: any) => {
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
   console.log('on connected', response);
-  applySnapshot(trayStore.walletApp, walletAppDefault);
+  // applySnapshot(trayStore.walletApp, walletAppDefault);
 });
 
-// OSActions.onLogout((_event: any) => {
-
-// })
+OSActions.onLogout((_event: any) => {
+  applySnapshot(trayStore.walletApp, walletAppDefault);
+});
 
 // OSActions.onEffect((_event: any, value: any) => {
 //   if (value.response === 'initial') {
@@ -298,10 +298,12 @@ OSActions.onConnected((_event: any, response: any) => {
 
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {
+  if (value.response === 'initial') {
+    if (value.resource === 'wallet') {
+      applySnapshot(trayStore.walletApp, value.model);
+    }
+  }
   if (value.response === 'patch') {
-    // if (value.resource === 'rooms') {
-    //   applyPatch(trayStore.roomsApp, value.patch);
-    // }
     if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
