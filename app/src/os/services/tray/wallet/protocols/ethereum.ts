@@ -100,11 +100,12 @@ export class EthereumProtocol implements BaseProtocol {
               );
               this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
                 (transfers: any) => {
-                  ethWallet.updateCoinTransfers(
-                    this.protocol,
-                    asset.addr,
-                    transfers
-                  );
+                  if (ethWallet.data.get(this.protocol)!.coins.has(asset.addr) && transfers.length > 0) {
+                    ethWallet.data
+                      .get(this.protocol)!
+                      .coins.get(asset.addr)!
+                      .applyERC20Transactions(ethWallet.index, transfers);
+                  }
                 }
               );
             }

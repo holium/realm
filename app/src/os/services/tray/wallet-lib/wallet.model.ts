@@ -221,9 +221,9 @@ const BitcoinStore = types
         const bitcoinWallet = BitcoinWallet.create(walletObj);
         self.wallets.set(wallet.key, bitcoinWallet);
       }
-      for (const transaction in wallet.transactions) {
-        //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
-      }
+      /*for (const transaction in wallet.transactions) {
+        self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
+      }*/
     },
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
@@ -235,6 +235,18 @@ const BitcoinStore = types
 
 export type BitcoinStoreType = Instance<typeof BitcoinStore>;
 
+const conversions = types
+.model({
+  usd: types.maybe(types.number),
+  cad: types.maybe(types.number),
+  euro: types.maybe(types.number),
+})
+.actions((self) => ({
+  setUsd(usd: number) {
+    self.usd = usd;
+  },
+}));
+
 const ERC20 = types
   .model('ERC20', {
     name: types.string,
@@ -242,17 +254,7 @@ const ERC20 = types
     address: types.string,
     balance: types.string,
     decimals: types.number,
-    conversions: types
-      .model({
-        usd: types.maybe(types.number),
-        cad: types.maybe(types.number),
-        euro: types.maybe(types.number),
-      })
-      .actions((self) => ({
-        setUsd(usd: number) {
-          self.usd = usd;
-        },
-      })),
+    conversions,
     transactions: types.map(Transaction),
   })
   .actions((self) => ({
@@ -260,7 +262,7 @@ const ERC20 = types
       self.balance = balance;
     },
     setExchangeRate(usd: number) {
-      self.conversions.setUsd(usd);
+      self.conversions?.setUsd(usd);
     },
     applyERC20Transactions(index: number, transactions: any) {
       let formattedTransactions: any = {};
@@ -273,7 +275,7 @@ const ERC20 = types
           walletIndex: index,
           amount: transaction.value?.toString() || '0',
           network: 'ethereum',
-          ethType: transaction.contractAddress || 'ERC20',
+          ethType: self.address,
           type: self.address === transaction.from ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt,
           completedAt: transaction.metadata.blockTimestamp,
@@ -369,22 +371,16 @@ const EthWallet = types
     },
     updateCoin(protocol: ProtocolType, coin: Asset) {
       const coinData = coin.data as CoinAsset;
+      const prevCoin = self.data.get(protocol)!.coins.get(coin.addr);
       self.data.get(protocol)!.coins.set(coin.addr, {
         name: coinData.symbol,
         logo: coinData.logo || '',
         address: coin.addr,
         balance: coinData.balance.toString(),
         decimals: coinData.decimals,
-        conversions: {},
+        conversions: conversions.create(),
+        transactions: prevCoin?.transactions.toJSON() || {},
       });
-    },
-    updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
-      if (self.data.get(protocol)!.coins.has(coin) && transfers.length > 0) {
-        self.data
-          .get(protocol)!
-          .coins.get(coin)!
-          .applyERC20Transactions(self.index, transfers);
-      }
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;
