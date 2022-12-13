@@ -21,6 +21,7 @@
         =docks:store
         =grid-index:store
         =recommendations:store
+        pending-installs=(map ship desk)
     ==
   --
 =|  state-0
@@ -469,6 +470,15 @@
       :: :_  state
       :: :~  [%pass /install %agent [our.bowl %hood] %poke kiln-install+!>([desk ship desk])]
       :: ==
+      =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
+      =/  allies      allies:scry:bazaar
+      ?.  (~(has by allies) ship)
+        %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
+        ::  queue this installation request, so that once alliance is complete,
+        ::  we can automatically kick off the install
+        =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
+        :_  state
+        [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])]~
       :_  state
       :~
         [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship desk])]
@@ -641,7 +651,7 @@
       =.  stalls.state            (~(put by stalls.state) [path stall])
       ::  per #319, ensure installed status is relative to our ship/catalog
       =/  entry                   (~(get by catalog.state) app-id)
-      =/  local-install-status    ?~(entry %uninstalled (get-install-status:helpers:bazaar u.entry))
+      =/  local-install-status    ?~(entry %desktop (get-install-status:helpers:bazaar u.entry))
       =/  app
       ?+  -.app  app
         %urbit
@@ -1035,7 +1045,14 @@
     ::    send the UI and update indicating its safe to scry the treaties
     =/  allis  allies:scry:bazaar:core
     =/  treats  (treaties:scry:bazaar:core ship.treaty %.n)
-    :: ?>  ?=(%ini allis)
+    :: get rid of the pending-install that may have been added
+    =/  pending-install  (~(get by pending-installs.state) ship.treaty)
+    =.  pending-installs.state
+      ?~  pending-install  pending-installs.state
+      ?:  =(u.pending-install desk.treaty)
+        ~&  >>  "{<dap.bowl>}: {<[ship.treaty desk.treaty]>} removing pending install"
+        (~(del by pending-installs.state) ship.treaty desk.treaty)
+      pending-installs.state
     =/  alli  (~(get by allis) ship.treaty)
     =/  effects  ?~  alli  effects
       ?:  %-  ~(all in u.alli)
