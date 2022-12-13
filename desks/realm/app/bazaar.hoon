@@ -345,7 +345,11 @@
           =.  install-status.u.app
             ?:(=(install-status.u.app %uninstalled) %suspended %started)
           =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-          `state(catalog (~(put by catalog.state) desk.wave u.app))
+          =.  grid-index            (set-grid-index:helpers:bazaar desk.wave grid-index.state)
+          :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<install-status.u.app>}"
+          :_  state(catalog (~(put by catalog.state) desk.wave u.app))
+          :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index.state])]
+          ==
         ==
       ==
 
@@ -464,7 +468,6 @@
       :: :_  state
       :: :~  [%pass /install %agent [our.bowl %hood] %poke kiln-install+!>([desk ship desk])]
       :: ==
-      =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
         %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
@@ -1123,6 +1126,10 @@
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
         ?>  ?=(%urbit -.u.app)
         :: ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
+        =.  install-status.u.app
+          ?:  ?&  =(install-status.u.app %suspended)
+                  =(status %installed)
+              ==  %installed  install-status.u.app
         =.  docket.u.app          docket.charge
         =.  config.u.app          (config:scry:bazaar:core app-id)
         u.app
