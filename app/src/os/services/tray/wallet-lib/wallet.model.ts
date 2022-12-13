@@ -521,7 +521,7 @@ const EthWallet = types
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: self.address === transaction.from ? 'sent' : 'received',
-          initiatedAt: previousTransaction?.initiatedAt,
+          initiatedAt: previousTransaction ? previousTransaction.initiatedAt : '',
           completedAt: transaction.metadata.blockTimestamp,
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
@@ -535,15 +535,17 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            delete formattedTransactions.walletIndex;
-            delete formattedTransactions.amount;
+            const tx = formattedTransactions[transaction.hash]
+            delete tx.walletIndex;
+            delete tx.amount;
+            console.log(tx)
             WalletApi.setTransaction(
               conduit,
               'ethereum',
               protocol,
               self.index,
               transaction.hash,
-              formattedTransactions
+              tx
             );
           }
         }
