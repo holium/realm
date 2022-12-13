@@ -1,7 +1,6 @@
-import { FC, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-
 import { AnimatePresence } from 'framer-motion';
 import { Flex, Icons, IconButton, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -15,13 +14,13 @@ interface OurHomeProps {
   isOpen?: boolean;
 }
 
-export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
+export const OurHome = observer((props: OurHomeProps) => {
   const { isOpen } = props;
   const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
-  const sidebarComponent = useMemo(() => {
-    return (
+  const sidebarComponent = useMemo(
+    () => (
       <AnimatePresence>
         {sidebar !== null && (
           <Flex
@@ -40,8 +39,9 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           </Flex>
         )}
       </AnimatePresence>
-    );
-  }, [sidebar]);
+    ),
+    [sidebar]
+  );
 
   const highlightColor = '#4E9EFD';
 
