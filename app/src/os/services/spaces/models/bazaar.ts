@@ -566,7 +566,6 @@ export const NewBazaarStore = types
       const stall = self.stalls.get(path);
       if (!stall) return [];
       if (stall.recommended.size === 0) return [];
-      console.log(Object.entries(getSnapshot(stall.recommended)));
       return Array.from(
         Object.entries(getSnapshot(stall.recommended))
           .sort((entry: [string, number], entry2: [string, number]) => {

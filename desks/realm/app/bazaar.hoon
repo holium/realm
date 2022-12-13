@@ -297,9 +297,6 @@
       =+  peaks=get-pikes
       =;  catalog-apps=catalog:store
         `state(catalog (~(uni by catalog.state) catalog-apps))
-      %-  (slog leaf+"{<dap.bowl>}: [on-rock]" ~)
-      %-  (slog leaf+"     rock={<rock>}" ~)
-      %-  (slog leaf+"     peaks={<peaks>}" ~)
       %-  ~(rep by rock)
       |=  [[=desk z=zest:clay wic=(set weft)] cat=catalog:store]
       ?~  app=(~(get by catalog.state) desk)  cat
@@ -321,9 +318,6 @@
       |=  =wave:tire:clay
       ^-  (quip card _state)
       =+  peaks=get-pikes
-      %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
-      %-  (slog leaf+"    wave={<wave>}" ~)
-      %-  (slog leaf+"    peaks={<peaks>}" ~)
       ?-  -.wave
         %wait  `state  ::  XX: blocked - take action?
         %warp  `state  ::  XX: unblocked - take action?
@@ -1128,14 +1122,12 @@
       =/  app                     (~(get by catalog.state) app-id)
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
         ?>  ?=(%urbit -.u.app)
-        ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
+        :: ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
         =.  docket.u.app          docket.charge
         =.  config.u.app          (config:scry:bazaar:core app-id)
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
-      %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
-      %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::
