@@ -67,7 +67,8 @@ export const ChatView = observer(
     const { dmApp } = useTrayApps();
 
     const isGroup = useMemo(
-      () => selectedChat.type === 'group',
+      () =>
+        selectedChat.type === 'group' || selectedChat.type === 'group-pending',
       [selectedChat.type]
     );
 
