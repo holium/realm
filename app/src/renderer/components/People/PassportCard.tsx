@@ -89,7 +89,12 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                 // evt.stopPropagation();
               }}
             >
-              <Icons name="SendCoins" color={iconColor} size="16px" />
+              <Icons
+                name="SendCoins"
+                color={iconColor}
+                size="16px"
+                opacity={0.5}
+              />
             </PassportButton>
           </Tooltip>
           <PassportButton
