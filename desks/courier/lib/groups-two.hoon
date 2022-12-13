@@ -1,5 +1,5 @@
 /-  contact-store, agd-type=accept-group-dm
-/-  notify, c=chat, dm-hook-sur=dm-hook
+/-  notify, c=chat, dm-hook-sur=dm-hook, cs=contact-store
 /-  *courier, *versioned-state
 /+  lib=courier, notif-lib=notify
 |%
@@ -342,6 +342,9 @@
     ``graph-dm-view+!>([%dm-log (crew-messages `@uvH`(slav %uv i.t.t.t.t.path) bowl)])
       [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
     ``graph-dm-view+!>([%dm-log (messages-with `@p`(slav %p i.t.t.path) bowl)])
+      [%x %rolodex ~]
+    :-  ~  :-  ~  :-  %rolodex
+    !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
   ==
 ++  previews-for-inbox
   |=  [=bowl:gall]

@@ -40,6 +40,7 @@ import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { GraphDMType } from 'os/services/ship/models/courier';
 
 type Props = {
   theme: ThemeModelType;
@@ -61,18 +62,25 @@ export const ChatView = observer(
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string>();
     const [loading, setLoading] = useState(false);
-    const { courier } = useServices();
+    const { courier, ship } = useServices();
     const resetLoading = () => setLoading(false);
     const { dmApp } = useTrayApps();
 
     const isGroup = useMemo(
-      () => selectedChat.type === 'group',
+      () =>
+        selectedChat.type === 'group' || selectedChat.type === 'group-pending',
       [selectedChat.type]
     );
 
-    const messages = useMemo(
+    const latestMessages = useMemo(
       () => courier.dms.get(selectedChat.path)?.messages || [],
       [courier.dms, selectedChat.path]
+    );
+    const [messages, setMessages] = useState<GraphDMType[]>(
+      courier.dms.get(selectedChat.path)?.messages || []
+    );
+    const [optimisticMessages, setOptimisticMessages] = useState<GraphDMType[]>(
+      []
     );
 
     const getPath = useCallback(() => {
@@ -84,14 +92,30 @@ export const ChatView = observer(
       }
     }, [isGroup, selectedChat.path]);
 
-    const reloadDms = useCallback(() => {
+    const fetchDms = useCallback(async () => {
       setLoading(true);
-      ShipActions.getDMLog(getPath()).finally(resetLoading);
+      const res = await ShipActions.getDMLog(getPath()).finally(resetLoading);
+      if (res && res.length > 0) {
+        setMessages(res);
+      }
     }, [getPath]);
 
     useEffect(() => {
+      // Watch for new incoming messages.
+      const diff = latestMessages.filter((msg) => {
+        return (
+          msg.author !== ship?.patp &&
+          !messages.find((m) => m.index === msg.index)
+        );
+      });
+      if (diff.length) {
+        setMessages((msgs) => [...msgs, ...diff]);
+      }
+    }, [latestMessages, latestMessages.length, messages, ship?.patp]);
+
+    useEffect(() => {
       if (!selectedChat.isNew) {
-        reloadDms();
+        fetchDms();
         if (isGroup) {
           ShipActions.readGroupDm(selectedChat.path.substring(1));
         } else {
@@ -105,7 +129,7 @@ export const ChatView = observer(
       };
     }, [
       isGroup,
-      reloadDms,
+      fetchDms,
       selectedChat.isNew,
       selectedChat.path,
       selectedChat.to,
@@ -114,9 +138,10 @@ export const ChatView = observer(
     const { canUpload, promptUpload } = useFileUpload({ storage });
 
     const onBack = () => {
+      // In case we have any outstanding optimistic messages we want to refresh
+      // so the next time we open the chat we have real messages.
+      if (optimisticMessages.length) fetchDms();
       dmApp.setSelectedChat(null);
-      setIsSending(false);
-      setLoading(false);
     };
 
     const uploadFile = useCallback(
@@ -202,8 +227,28 @@ export const ChatView = observer(
           chatInputRef.current.focus();
         }
 
+        const timeSent = Date.now();
+        const index = String(timeSent);
+        const optimisticResponse: GraphDMType = {
+          index,
+          timeSent,
+          author: ship!.patp,
+          pending: true,
+          contents: dmMessageContent,
+        };
+        setOptimisticMessages((prev) => [...prev, optimisticResponse]);
+
         DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then(reloadDms)
+          .then(() => {
+            // Replace the same optimistic message with a non-pending one.
+            const nonPendingMessage = { ...optimisticResponse, pending: false };
+            setOptimisticMessages((prev) =>
+              prev.map((msg) => {
+                if (msg.index === index) return nonPendingMessage;
+                return msg;
+              })
+            );
+          })
           .catch((err) => {
             console.error('dm send error', err);
           })
@@ -211,7 +256,7 @@ export const ChatView = observer(
             setIsSending(false);
           });
       }
-    }, [dmForm.actions, dmForm.computed.isValid, reloadDms, selectedChat.path]);
+    }, [dmForm.actions, dmForm.computed.isValid, selectedChat.path, ship]);
 
     const onKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
       (event) => {
@@ -257,8 +302,22 @@ export const ChatView = observer(
     }, [isGroup, selectedChat]);
 
     const ChatLogMemo = useMemo(
-      () => <ChatLog loading={loading} messages={messages} isGroup={isGroup} />,
-      [isGroup, loading, messages]
+      () => (
+        <ChatLog
+          key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${messages.length}-${optimisticMessages.length}`}
+          loading={loading}
+          messages={[...optimisticMessages, ...messages]}
+          isGroup={isGroup}
+        />
+      ),
+      [
+        isGroup,
+        loading,
+        messages,
+        optimisticMessages,
+        selectedChat.lastTimeSent,
+        selectedChat.path,
+      ]
     );
 
     const AttachmentIcon = () => {

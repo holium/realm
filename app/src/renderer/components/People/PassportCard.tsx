@@ -69,7 +69,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
             show
           >
             <PassportButton
-              style={{ backgroundColor: buttonColor }}
+              style={{ backgroundColor: rgba(buttonColor, 0.3) }}
               data-prevent-menu-close="true"
               onClick={(evt: any) => {
                 // setActiveApp('wallet-tray', {
@@ -89,7 +89,12 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                 // evt.stopPropagation();
               }}
             >
-              <Icons name="SendCoins" color={iconColor} size="16px" />
+              <Icons
+                name="SendCoins"
+                color={iconColor}
+                size="16px"
+                opacity={0.3}
+              />
             </PassportButton>
           </Tooltip>
           <PassportButton

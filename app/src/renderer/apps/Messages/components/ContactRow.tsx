@@ -83,9 +83,13 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       if (dm.lastMessage?.length > 0 && !isPending) {
         const lastSender = dm.lastMessage[0];
         content = dm.lastMessage[1];
-        type = Object.keys(content)[0];
-        // @ts-expect-error
-        content = { text: `${lastSender.mention}: ${content[type]}` };
+        if (content) {
+          type = Object.keys(content)[0];
+          // @ts-expect-error
+          content = { text: `${lastSender.mention}: ${content[type]}` };
+        } else {
+          content = { text: `` };
+        }
       } else {
         content = {
           text: isPending ? 'Group chat invite' : 'No messages yet',

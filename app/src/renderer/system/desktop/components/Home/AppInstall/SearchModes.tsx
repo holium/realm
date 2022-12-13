@@ -93,6 +93,7 @@ export const SearchModes = observer(() => {
 const AppInstallStart = observer(() => {
   const { bazaar, theme, spaces } = useServices();
   const spacePath: string = spaces.selected?.path!;
+  const appInstaller = useAppInstaller();
 
   const textFaded = useMemo(
     () => rgba(theme.currentTheme.textColor, 0.7),
@@ -122,7 +123,7 @@ const AppInstallStart = observer(() => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaar.recentDevs, theme.currentTheme)}
+          {renderDevs(bazaar.recentDevs, theme.currentTheme, appInstaller)}
         </Flex>
       </Flex>
     </>
@@ -167,8 +168,11 @@ const renderAppSummary = () => {
   return <ViewComponent />;
 };
 
-const renderDevs = (devs: any, theme: any) => {
-  const appInstaller = useAppInstaller();
+const renderDevs = (
+  devs: any,
+  theme: any,
+  appInstaller: ReturnType<typeof useAppInstaller>
+) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!devs || devs.length === 0) {

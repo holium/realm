@@ -38,6 +38,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       info = app.info;
       installStatus = app.installStatus as InstallStatus;
     }
+
     const {
       isInstalling,
       isInstalled,
@@ -91,6 +92,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           app={app}
           installStatus={InstallStatus.installed}
           onAppClick={(selectedApp: AppType) => {
+
             if (!(isInstalling || isInstalled)) {
               ShellActions.openDialogWithStringProps('app-detail-dialog', {
                 appId: selectedApp.id,
