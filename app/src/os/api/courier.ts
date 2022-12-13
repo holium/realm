@@ -12,11 +12,15 @@ export const CourierApi = {
     return response.inbox;
   },
   getDMLog: async (to: Patp, conduit: Conduit) => {
-    const response = await conduit.scry({
-      app: 'courier',
-      path: `/dms/${to}`,
-    });
-    return response['dm-log'];
+    try {
+      const response = await conduit.scry({
+        app: 'courier',
+        path: `/dms/${to}`,
+      });
+      return response['dm-log'];
+    } catch (e) {
+      console.log(e);
+    }
   },
 
   dmUpdates: async (
