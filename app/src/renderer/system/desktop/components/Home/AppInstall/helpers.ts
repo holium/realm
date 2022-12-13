@@ -22,23 +22,16 @@ export const handleInstallation = (
   desk: string,
   status: InstallStatus
 ) => {
-  if (
-    [
-      InstallStatus.uninstalled,
-      InstallStatus.desktop,
-      InstallStatus.failed,
-    ].includes(status) &&
-    !host
-  ) {
-    console.error('No host found for app', desk);
-    return;
-  }
   switch (status) {
     case InstallStatus.installed:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.uninstalled:
     case InstallStatus.desktop:
+      if (!host) {
+        console.error('No host found for app', desk);
+        return;
+      }
       SpacesActions.installApp(host!, desk);
       return;
     case InstallStatus.started:
