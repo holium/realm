@@ -324,7 +324,6 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._removeRecommended(data.unrecommended);
       break;
     case 'stall-update':
-      // console.log(data['stall-update']);
       model._updateStall(data['stall-update']);
       break;
     case 'joined-bazaar':
