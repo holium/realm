@@ -530,7 +530,6 @@ const EthWallet = types
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
         };
-
       }
       formattedTransactions = {
         ...previousTransactions,
@@ -548,7 +547,7 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            const tx = this.getAgentTransaction(protocol, transaction.hash)
+            const tx = this.getAgentTransaction(protocol, transaction.hash);
             WalletApi.setTransaction(
               conduit,
               'ethereum',
@@ -560,7 +559,6 @@ const EthWallet = types
           }
         }
       }
-
     },
   }));
 

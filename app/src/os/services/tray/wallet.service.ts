@@ -697,7 +697,6 @@ export class WalletService extends BaseService {
     }
   }
 
-
   toggleUqbar(_evt: any) {
     this.state!.navState.protocol !== ProtocolType.UQBAR
       ? this.state!.setProtocol(ProtocolType.UQBAR)

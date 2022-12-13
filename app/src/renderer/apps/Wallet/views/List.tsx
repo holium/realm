@@ -3,7 +3,11 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
-import { NetworkStoreType, WalletView } from 'os/services/tray/wallet-lib';
+import {
+  NetworkStoreType,
+  NetworkType,
+  WalletView,
+} from 'os/services/tray/wallet-lib';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}
@@ -88,7 +92,21 @@ export const WalletList: FC<WalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        <Empty network={walletApp.navState.network} />
+        {walletApp.navState.network === NetworkType.BITCOIN ? (
+          <Flex
+            width="100%"
+            height="100%"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text variant="h3" textAlign="center">
+              Coming soon...
+            </Text>{' '}
+          </Flex>
+        ) : (
+          <Empty network={walletApp.navState.network} />
+        )}
       </Flex>
     );
   }
