@@ -1142,7 +1142,7 @@
       =/  app                     (~(get by catalog.state) app-id)
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
         ?>  ?=(%urbit -.u.app)
-        ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
+        :: ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
         =.  docket.u.app          docket.charge
         =.  config.u.app          (config:scry:bazaar:core app-id)
         u.app
