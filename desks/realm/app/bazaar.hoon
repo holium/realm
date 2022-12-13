@@ -863,7 +863,7 @@
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
         =/  install-status      (chad-to-status:helpers:bazaar:core chad.charge)
-        ~&  >>  [desk -.chad.charge install-status]
+        :: ~&  >>  [desk -.chad.charge install-status]
         [(~(put by catalog.acc) desk [%urbit docket.charge ~ install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
