@@ -501,12 +501,12 @@
   ==
 ++  scry-for-prev-contents-club
   |=  [=bowl:gall id=@uvH]
-    =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun)
+    =/  =writs:c  (writs:c .^(* %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun))
     =/  recent-msg      (snag 0 (messages-from-writs writs))
     (weld [[%mention author.recent-msg] ~] contents.recent-msg)
 ++  scry-for-prev-contents-dm
   |=  [=bowl:gall =ship]
-  =/  newest-msg-list  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ship)/writs/newest/1/noun)
+  =/  newest-msg-list  (writs:c .^(* %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ship)/writs/newest/1/noun))
   =/  newest-msg  (snag 0 (tap:on:writs:c newest-msg-list))
   =/  memo  ^-(memo:c +.+.newest-msg)
   (transform-content content.memo author.memo)
