@@ -114,7 +114,7 @@ const baseMotionProps = {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.2,
         delay: 1,
         ease: 'easeOut',
       },
@@ -123,7 +123,7 @@ const baseMotionProps = {
       opacity: 0,
       y: 4,
       transition: {
-        duration: 0.2,
+        duration: 0.1,
       },
     },
   },
