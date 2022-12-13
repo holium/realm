@@ -73,8 +73,8 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           mt={40}
           flexDirection="row"
           alignItems="center"
-          justifyContent={'center'}
-          width={'100%'}
+          justifyContent="center"
+          width="100%"
         >
           <Flex>
             {ship && (
@@ -87,7 +87,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               />
             )}
           </Flex>
-          <AppSearchApp mode={'home'} />
+          <AppSearchApp mode="home" />
           <Flex justifyContent="flex-end">
             <IconButton
               size={3}
@@ -139,7 +139,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             flexWrap="wrap"
             flexDirection="row"
           >
-            <AppGrid isOpen={isOpen} tileSize="xl2" />
+            <AppGrid tileSize="xl2" />
           </Flex>
           {sidebarComponent}
         </Flex>
