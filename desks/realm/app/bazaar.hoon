@@ -45,12 +45,26 @@
     !>(state)
   ::
   ++  on-load
-    |=  old-state=vase
-    ^-  (quip card _this)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    :: |=  old-state=vase
+    :: ^-  (quip card _this)
+    :: =/  old  !<(versioned-state old-state)
+    :: ?-  -.old
+    ::   %0  `this(state old)
+    :: ==
+    |=  =vase
+    ^-  (quip card:agent:gall agent:gall)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))  
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term] 
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -297,6 +311,9 @@
       =+  peaks=get-pikes
       =;  catalog-apps=catalog:store
         `state(catalog (~(uni by catalog.state) catalog-apps))
+      %-  (slog leaf+"{<dap.bowl>}: [on-rock]" ~)
+      %-  (slog leaf+"     rock={<rock>}" ~)
+      %-  (slog leaf+"     peaks={<peaks>}" ~)
       %-  ~(rep by rock)
       |=  [[=desk z=zest:clay wic=(set weft)] cat=catalog:store]
       ?~  app=(~(get by catalog.state) desk)  cat
@@ -318,6 +335,9 @@
       |=  =wave:tire:clay
       ^-  (quip card _state)
       =+  peaks=get-pikes
+      %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
+      %-  (slog leaf+"    wave={<wave>}" ~)
+      %-  (slog leaf+"    peaks={<peaks>}" ~)
       ?-  -.wave
         %wait  `state  ::  XX: blocked - take action?
         %warp  `state  ::  XX: unblocked - take action?
@@ -1135,6 +1155,8 @@
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
+      %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
+      %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::

@@ -147,11 +147,7 @@ export class SpacesService extends BaseService {
       return await ipcRenderer.invoke('realm.spaces.create-space', form);
     },
     updateSpace: async (path: any, update: any) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.update-space',
-        path,
-        update
-      );
+      return ipcRenderer.invoke('realm.spaces.update-space', path, update);
     },
     deleteSpace: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.delete-space', path);
@@ -435,7 +431,7 @@ export class SpacesService extends BaseService {
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.joinSpace(this.core.conduit!, { path });
+    return SpacesApi.joinSpace(this.core.conduit!, { path });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
