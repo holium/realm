@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { trayStore } from 'renderer/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { Flex } from 'renderer/components';
 import { Speaker } from '../components/Speaker';
 import { useRooms } from '../useRooms';
@@ -11,13 +11,10 @@ export const VoiceView = observer(() => {
     return null;
   }
 
-  const { setTrayAppHeight } = trayStore;
+  const { setTrayAppHeight } = useTrayApps();
 
-  const host = roomsManager.protocol.provider;
-  const speakers = [
-    ...Array.from(roomsManager.protocol.peers.keys()),
-    roomsManager.protocol.our,
-  ].filter((person: string) => person !== host);
+  const our = roomsManager.local.patp;
+  const speakers = [...Array.from(roomsManager.protocol.peers.keys())]; //.filter((patp) => patp !== our);
 
   useEffect(() => {
     const regularHeight = 500;
@@ -39,7 +36,7 @@ export const VoiceView = observer(() => {
       gridAutoColumns="1fr"
       gridAutoRows={'.5fr'}
     >
-      <Speaker key={host} type="host" person={host} />
+      <Speaker key={our} type="our" person={our} />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}

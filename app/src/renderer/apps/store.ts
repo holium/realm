@@ -8,7 +8,6 @@ import {
   onSnapshot,
   applySnapshot,
 } from 'mobx-state-tree';
-
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkType,
@@ -17,7 +16,6 @@ import {
   WalletStore,
   WalletView,
 } from 'os/services/tray/wallet.model';
-
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
 

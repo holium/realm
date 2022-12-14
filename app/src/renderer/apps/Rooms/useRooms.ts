@@ -17,6 +17,7 @@ const config = {
 export const createManager = (our: Patp) => {
   const protocol = new RealmProtocol(our, config, handlers);
   const manager = new RoomsManager(protocol);
+
   protocol.getSession();
   RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
     protocol.onSignal(data, mark);
@@ -34,6 +35,7 @@ export function useRooms() {
       'roomManager cannot be null, please add a context provider'
     );
   }
+
   return roomsManager;
 }
 
