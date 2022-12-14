@@ -505,6 +505,7 @@
 ++  scry-for-prev-contents-club
   |=  [=bowl:gall id=@uvH]
     =/  =writs:c  (writs:c .^(* %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun))
+    ?:  =(0 ~(wyt by writs))    [[%text ''] ~] :: no contents
     =/  recent-msg      (snag 0 (messages-from-writs writs))
     (weld [[%mention author.recent-msg] ~] contents.recent-msg)
 ++  scry-for-prev-contents-dm

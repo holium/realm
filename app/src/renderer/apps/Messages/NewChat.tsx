@@ -85,7 +85,7 @@ export const NewChat = observer((props: IProps) => {
     const contactNicknames = Array.from(selectedNickname.values());
     contactArray = (
       <Flex
-        overflowX="scroll"
+        overflowX="auto"
         ml={2}
         gap={8}
         height={36}

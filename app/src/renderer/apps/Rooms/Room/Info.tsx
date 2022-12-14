@@ -65,7 +65,7 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
           minWidth={bwid}
           flexDirection={'column'}
           maxHeight={'120px'}
-          overflowY={'scroll'}
+          overflowY={'auto'}
         >
           {room.whitelist.map((patp: Patp, index: number) => {
             return (

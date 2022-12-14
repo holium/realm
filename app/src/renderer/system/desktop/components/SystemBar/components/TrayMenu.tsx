@@ -18,6 +18,7 @@ const Wrapper = styled(motion.div)`
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   position: absolute;
+  /* overflow: hidden; */
   bottom: 0;
   z-index: 4;
   --webkit-backface-visibility: hidden;

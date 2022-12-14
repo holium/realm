@@ -67,7 +67,7 @@ export const App = observer(() => {
     <CoreProvider value={coreStore}>
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle blur={true} />
+          <GlobalStyle blur={true} realmTheme={theme.currentTheme} />
           {/* Modal provider */}
           <ServiceProvider value={servicesStore}>
             <SelectionProvider>
