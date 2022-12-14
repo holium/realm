@@ -111,14 +111,14 @@ export class AppUpdater implements IAppUpdater {
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
-    setInterval(() => {
-      if (!this.manualCheck) {
-        // gracefully ignore if no internet when attempting to auto update
-        if (net.isOnline()) {
-          autoUpdater.checkForUpdates();
-        }
-      }
-    }, 600000);
+    // setInterval(() => {
+    //   if (!this.manualCheck) {
+    //     // gracefully ignore if no internet when attempting to auto update
+    //     if (net.isOnline()) {
+    //       autoUpdater.checkForUpdates();
+    //     }
+    //   }
+    // }, 600000);
     // gracefully ignore if no internet when attempting to auto update
     if (net.isOnline()) {
       autoUpdater.checkForUpdates();
