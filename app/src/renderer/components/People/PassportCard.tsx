@@ -98,8 +98,8 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                 opacity={0.3}
               />
               </PassportButton>
+            )}
           </Tooltip>
-          )}
           <PassportButton
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"

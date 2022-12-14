@@ -7,7 +7,6 @@
     "lib/multiplayer",
     "lib/conduit",
     "lib/room",
-    "lib/wallet"
   ],
   "scripts": {
     "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm dev:cursor && yarn build:app",
@@ -15,14 +14,12 @@
     "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
     "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
     "link:design-system": "yarn build --cwd lib/design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
-    "link:wallet": "yarn build --cwd lib/wallet && yarn link --cwd lib/wallet && yarn link '@holium/realm-wallet'",
     "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
     "build:room": "yarn workspace @holium/realm-room build",
-    "build:wallet": "yarn workspace @holium/realm-wallet build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
