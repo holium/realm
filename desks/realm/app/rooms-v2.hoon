@@ -281,7 +281,6 @@
                 path.room      path
             ==
           =/  old-rooms               (get-created-rooms:helpers:rooms:hol src.bol)
-          ~&  >>  [src.bol old-rooms]
           =.  rooms.provider.state    (~(dif by rooms.provider.state) old-rooms)  :: remove old rooms
           =.  present.room            (~(put in present.room) src.bol)        :: enter new room
           =.  whitelist.room          (~(put in whitelist.room) src.bol)      :: creator is always on the whitelist
