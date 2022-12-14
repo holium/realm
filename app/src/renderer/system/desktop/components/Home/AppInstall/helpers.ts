@@ -44,9 +44,6 @@ export const handleInstallation = (
     case InstallStatus.started:
       SpacesActions.uninstallApp(desk);
       return;
-    case InstallStatus.suspended:
-      SpacesActions.uninstallApp(desk);
-      return;
     case InstallStatus.failed:
       SpacesActions.uninstallApp(desk);
       return;
