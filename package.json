@@ -32,7 +32,6 @@
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
-    "@icons/material": "^0.4.1",
     "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",
