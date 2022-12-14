@@ -304,7 +304,11 @@ export class OnboardingService extends BaseService {
         }
       }
 
-      this.state.setInviteCode(code);
+      this.state.setInviteCode(
+        code,
+        accessCode.affiliateId,
+        accessCode.preJoinGroup
+      );
       if (accessCode.email) {
         this.state.setEmail(accessCode.email);
       }
@@ -631,6 +635,12 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
+
+    if (this.state.preJoinGroup) {
+      // TODO: patrick, here's where you'd want to do the prejoin. That state field is set to the
+      // group that needs to be joined
+    }
+
     // send one last poke to bazaar to inform it that it is now safe to initialize
     //   its internal app catalog
     // const result = await this.conduit!.poke({

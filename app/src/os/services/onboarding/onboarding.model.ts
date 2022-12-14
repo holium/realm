@@ -75,6 +75,8 @@ export const OnboardingStore = types
     checkoutComplete: false,
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
+    affiliateId: types.maybe(types.string),
+    preJoinGroup: types.maybe(types.string),
     encryptedPassword: types.maybe(types.string),
     code: types.maybe(types.string),
     planetWasTaken: false,
@@ -91,8 +93,10 @@ export const OnboardingStore = types
       self.agreedToDisclaimer = true;
     },
 
-    setInviteCode(code: string) {
+    setInviteCode(code: string, affiliateId?: string, preJoinGroup?: string) {
       self.inviteCode = code;
+      self.affiliateId = affiliateId;
+      self.preJoinGroup = preJoinGroup;
     },
 
     setEmail(email: string) {

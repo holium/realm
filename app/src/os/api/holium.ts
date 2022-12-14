@@ -210,12 +210,23 @@ export class HoliumAPI {
     }
   }
 
-  async redeemAccessCode(
-    code: string
-  ): Promise<{ success: boolean; errorCode: number | null; email?: string }> {
+  async redeemAccessCode(code: string): Promise<{
+    success: boolean;
+    errorCode: number | null;
+    email?: string;
+    preJoinGroup?: string;
+    affiliateId?: string;
+  }> {
     try {
       const { data } = await client.post(`access-codes/${code}/redeem`);
-      return { success: true, email: data.email, errorCode: null };
+      const { email, affiliateId, preJoinGroup } = data;
+      return {
+        success: true,
+        email,
+        affiliateId,
+        preJoinGroup,
+        errorCode: null,
+      };
     } catch (error: any) {
       if (error.response && error.response.status) {
         return { success: false, errorCode: error.response.status };
