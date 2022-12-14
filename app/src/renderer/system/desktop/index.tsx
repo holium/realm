@@ -11,8 +11,9 @@ import { RoomsManager } from '@holium/realm-room';
 
 export const Desktop = observer(() => {
   const { ship, desktop } = useServices();
+  const our = ship!.patp;
 
-  const manager = useMemo<RoomsManager>(() => createManager(ship!.patp), []);
+  const manager = useMemo<RoomsManager>(() => createManager(our), [our]);
 
   return (
     <RoomsProvider value={manager}>
