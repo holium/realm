@@ -110,7 +110,7 @@
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       
+        %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned
@@ -165,10 +165,18 @@
       ==
       ::
         %stall-update
+      =/  data=(list [@tas json])
+          ?~  det.rct         [%none ~]~
+          ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+      =/  data
+        %+  weld  data
+        ^-  (list [@tas json])
+        :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+            [%stall (stall-js:encode stall.rct)]
+        ==
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%stall (stall-js:encode stall.rct)]
-      ==
+      data
       ::
         %treaties-loaded
       %-  pairs

@@ -37,6 +37,11 @@ export enum InstallStatus {
   treaty = 'treaty',
   suspended = 'suspended',
   resuming = 'resuming',
+  // this is set when joining a space and you do not have the app
+  //  installed, but want it to appear on the home screen. this
+  //  is different than uninstalled which has %suspend implications
+  //  on the back-end. %desktop requires a fresh install.
+  desktop = 'desktop',
 }
 
 export enum AppTypes {
@@ -231,11 +236,21 @@ export const NewBazaarStore = types
       });
       self.catalog.merge(data.catalog);
     },
-    _updateStall(data: {
-      path: string;
-      stall: { recommended: any; suite: any };
-    }) {
+    _updateStall(data: any) {
+      //   path: string;
+      //   stall: { recommended: any; suite: any };
+      //   appInfo: any;
+      // }) {
       self.stalls.set(data.path, data.stall);
+      if ('add-app' in data) {
+        const app: AppType = data['add-app'];
+        if (app.type === 'urbit') {
+          app.color = cleanNounColor(app.color);
+        }
+        self.catalog.set(app.id, app);
+      } else if ('remove-app' in data) {
+        self.catalog.delete(data['remove-app']);
+      }
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {

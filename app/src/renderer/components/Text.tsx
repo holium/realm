@@ -112,6 +112,9 @@ export const Text = styled(motion.p)<TextProps>`
   ${textVariants}
   ${typographyFunctions};
   user-select: text;
+  &::placeholder {
+    user-select: none;
+  }
   ${(props) =>
     props.fontByName &&
     css`

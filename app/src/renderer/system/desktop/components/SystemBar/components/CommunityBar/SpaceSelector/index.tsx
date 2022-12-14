@@ -54,6 +54,8 @@ export const SpaceSelector = observer(() => {
     [activeApp, setTrayAppCoords, setTrayAppDimensions, setActiveApp]
   );
 
+  const isLoaded = spaces.isLoaded || spaces.selected;
+
   return (
     <Flex
       id="spaces-tray-icon"
@@ -61,9 +63,9 @@ export const SpaceSelector = observer(() => {
       className="realm-cursor-hover"
       position="relative"
       alignItems="center"
-      onClick={onButtonClick}
+      onClick={isLoaded && onButtonClick}
     >
-      {spaces.isLoaded || spaces.selected ? (
+      {isLoaded ? (
         <SelectedSpace selectorRef={selectorRef} />
       ) : (
         <TrayButton

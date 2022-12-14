@@ -9,7 +9,13 @@ export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {
     return getReferenceData(content.reference);
   } else {
-    return content[type];
+    if (typeof content[type] === 'string') {
+      return content[type];
+    } else {
+      if (content[type] && content[type].expression) {
+        return content[type].expression;
+      }
+    }
   }
 };
 
