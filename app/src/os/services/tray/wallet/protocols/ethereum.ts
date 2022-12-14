@@ -26,6 +26,8 @@ export class EthereumProtocol implements BaseProtocol {
   private alchemy: Alchemy;
   private interval: any;
   private baseURL: string;
+  private nodeURL: string;
+  private blockURL: string;
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
@@ -36,22 +38,24 @@ export class EthereumProtocol implements BaseProtocol {
       this.baseURL = 'http://localhost:8080';
     }
     if (this.protocol === ProtocolType.ETH_MAIN) {
-      this.baseURL += '/eth';
+      this.nodeURL = this.baseURL + '/eth';
+      this.blockURL = this.baseURL + '/block';
     } else {
-      this.baseURL += '/gorli';
+      this.nodeURL = this.baseURL + '/gorli';
+      this.blockURL = this.baseURL + '/gorli';
     }
     let alchemySettings: AlchemySettings;
     if (this.protocol === ProtocolType.ETH_MAIN) {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(this.baseURL);
+      this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
       alchemySettings = {
-        url: this.baseURL,
+        url: this.nodeURL,
         network: Network.ETH_MAINNET,
       };
       // etherscan
     } else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(this.baseURL);
+      this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
       alchemySettings = {
-        url: this.baseURL,
+        url: this.nodeURL,
         network: Network.ETH_GOERLI,
       };
     }
@@ -67,15 +71,15 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     this.updateWalletState(conduit, walletStore);
-    this.interval = setInterval(async () => {
-      await this.updateWalletState(conduit, walletStore);
+    axios.get(this.blockURL).then((res: any) => res.on('data', (block: number) => {
+      this.updateWalletState(conduit, walletStore);
       if (
         !(this.protocol === ProtocolType.ETH_GORLI) &&
         !(this.protocol === ProtocolType.UQBAR)
       ) {
-        walletStore.currentStore.setBlock(await this.getBlockNumber());
+        walletStore.currentStore.setBlock(block);
       }
-    }, 30000);
+    }))
   }
 
   async updateWalletState(conduit: any, walletStore: WalletStoreType) {
@@ -157,7 +161,7 @@ export class EthereumProtocol implements BaseProtocol {
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
-        url: this.baseURL,
+        url: this.nodeURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -181,7 +185,7 @@ export class EthereumProtocol implements BaseProtocol {
       const from = fromTransfers.data.result.transfers;
       const toTransfers = await axios.request({
         method: 'POST',
-        url: this.baseURL,
+        url: this.nodeURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -324,7 +328,7 @@ export class EthereumProtocol implements BaseProtocol {
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
-        url: this.baseURL,
+        url: this.nodeURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -353,7 +357,7 @@ export class EthereumProtocol implements BaseProtocol {
     try {
       const toTransfers = await axios.request({
         method: 'POST',
-        url: this.baseURL,
+        url: this.nodeURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
