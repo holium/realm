@@ -165,11 +165,18 @@
       ==
       ::
         %stall-update
+      =/  data=(list [@tas json])
+          ?~  det.rct         [%none ~]~
+          ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+      =/  data
+        %+  weld  data
+        ^-  (list [@tas json])
+        :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+            [%stall (stall-js:encode stall.rct)]
+        ==
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%stall (stall-js:encode stall.rct)]
-          [%app ?~(det.rct ~ (app-detail:encode app-id.u.det.rct app.u.det.rct))]
-      ==
+      data
       ::
         %treaties-loaded
       %-  pairs
