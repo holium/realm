@@ -224,11 +224,10 @@ const completeProfileDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <InstallAgent {...props} />,
+    component: () => <InstallAgent />,
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
-    onNext: () => {},
     window: {
       id: OnboardingStep.INSTALL_AGENT,
       zIndex: 13,
