@@ -71,15 +71,19 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     this.updateWalletState(conduit, walletStore);
-    axios.get(this.blockURL).then((res: any) => res.on('data', (block: number) => {
-      this.updateWalletState(conduit, walletStore);
-      if (
-        !(this.protocol === ProtocolType.ETH_GORLI) &&
-        !(this.protocol === ProtocolType.UQBAR)
-      ) {
-        walletStore.currentStore.setBlock(block);
-      }
-    }))
+    console.log('watching for blocks')
+    axios.get(this.blockURL).then((res: any) => {
+      res.on('data', (block: number) => {
+        console.log('GOT BLOCK');
+        this.updateWalletState(conduit, walletStore);
+        if (
+          !(this.protocol === ProtocolType.ETH_GORLI) &&
+          !(this.protocol === ProtocolType.UQBAR)
+        ) {
+          walletStore.currentStore.setBlock(block);
+        }
+      });
+    });
   }
 
   async updateWalletState(conduit: any, walletStore: WalletStoreType) {
