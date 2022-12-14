@@ -637,8 +637,15 @@ export class OnboardingService extends BaseService {
     }
 
     if (this.state.preJoinGroup) {
-      // TODO: patrick, here's where you'd want to do the prejoin. That state field is set to the
-      // group that needs to be joined
+      // TODO: confirm this works as expected
+      tempConduit.poke({
+        app: 'groups',
+        mark: 'group-join',
+        json: {
+          flag: this.state.preJoinGroup,
+          'join-all': true,
+        },
+      });
     }
 
     // send one last poke to bazaar to inform it that it is now safe to initialize
