@@ -156,7 +156,7 @@ export const ThemePanel: FC<any> = observer(() => {
       flexDirection="column"
       p="12px"
       width="100%"
-      overflowX={'scroll'}
+      overflowX={'auto'}
     >
       <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
         <Text fontSize={7} fontWeight={600}>
