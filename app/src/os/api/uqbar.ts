@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { WalletStoreType } from 'os/services/tray/wallet-lib';
+import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
 
 export const WalletApi = {
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {

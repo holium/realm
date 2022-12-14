@@ -28,7 +28,7 @@ import {
   NetworkType,
   EthWalletType,
   BitcoinWalletType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import styled from 'styled-components';
 

@@ -1,9 +1,9 @@
-import { BaseProtocol } from '../../wallet-lib';
+import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { WalletStoreType, Asset } from 'os/services/tray/wallet-lib';
+import { WalletStoreType, Asset } from 'os/services/tray/wallet-lib/wallet.model';
 
 export class UqbarProtocol extends BaseProtocol {
   watchUpdates(walletState: WalletStoreType) {}

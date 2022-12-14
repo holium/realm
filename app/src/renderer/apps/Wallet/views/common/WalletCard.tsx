@@ -16,7 +16,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 interface CardStyleProps {
   isSelected: boolean;

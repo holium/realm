@@ -18,7 +18,7 @@ import {
   BitcoinWalletType,
   EthWalletType,
   NetworkType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';

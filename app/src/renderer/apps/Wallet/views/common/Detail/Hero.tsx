@@ -23,7 +23,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';

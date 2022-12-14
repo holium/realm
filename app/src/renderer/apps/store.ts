@@ -17,7 +17,7 @@ import {
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';

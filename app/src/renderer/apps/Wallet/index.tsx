@@ -19,7 +19,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   WalletView,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 import { Wallet } from 'ethers';

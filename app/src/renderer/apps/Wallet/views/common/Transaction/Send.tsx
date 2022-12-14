@@ -11,7 +11,7 @@ import {
   EthWalletType,
   ERC20Type,
   ProtocolType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',

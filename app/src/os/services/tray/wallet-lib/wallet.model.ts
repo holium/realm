@@ -256,6 +256,7 @@ const ERC20 = types
     decimals: types.number,
     conversions,
     transactions: types.map(Transaction),
+    block: types.number,
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -308,6 +309,7 @@ const ERC721 = types.model('ERC721', {
   lastPrice: types.string,
   floorPrice: types.maybe(types.string),
   transactions: types.map(Transaction),
+  block: types.number,
 });
 
 export type ERC721Type = Instance<typeof ERC721>;
@@ -380,6 +382,7 @@ const EthWallet = types
         decimals: coinData.decimals,
         conversions: conversions.create(),
         transactions: prevCoin?.transactions.toJSON() || {},
+        block: 0,
       });
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
@@ -391,6 +394,7 @@ const EthWallet = types
         tokenId: nftData.tokenId,
         imageUrl: nftData.image,
         lastPrice: '',
+        block: 0,
       });
     },
     updateNftTransfers(protocol: ProtocolType, transfers: any) {},

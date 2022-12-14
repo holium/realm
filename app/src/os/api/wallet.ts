@@ -7,7 +7,7 @@ import {
   NetworkStoreType,
   EthStoreType,
   BitcoinStoreType,
-} from '../services/tray/wallet-lib';
+} from '../services/tray/wallet-lib/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {

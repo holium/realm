@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
@@ -13,14 +12,12 @@ import {
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
-  getTransactions,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   TransactionType,
   WalletView,
-  EthWalletType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {

@@ -7,7 +7,7 @@ import {
   NetworkStoreType,
   NetworkType,
   WalletView,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}

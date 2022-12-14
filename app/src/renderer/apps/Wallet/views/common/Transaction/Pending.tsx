@@ -13,7 +13,7 @@ import {
   WalletView,
   TransactionType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {

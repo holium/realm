@@ -7,7 +7,7 @@ import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Input, ContainerFlex, FlexHider } from './styled';
-import { ERC20Type, ProtocolType } from 'os/services/tray/wallet-lib';
+import { ERC20Type, ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
 
 // TODO: replace with actual exchange rate
 const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));

@@ -25,7 +25,7 @@ import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {

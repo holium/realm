@@ -17,7 +17,7 @@ import {
   CoinAsset,
   NFTAsset,
   NetworkStoreType,
-} from '../../wallet-lib';
+} from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
 
 export class EthereumProtocol implements BaseProtocol {

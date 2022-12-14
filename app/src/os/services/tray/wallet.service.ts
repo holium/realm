@@ -14,7 +14,7 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
-} from './wallet-lib';
+} from './wallet-lib/wallet.model';
 import { BaseSigner } from './wallet-lib/wallets/BaseSigner';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
@@ -29,7 +29,7 @@ import {
 import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
-import { Wallet } from './wallet-lib/Wallet';
+import { Wallet } from './wallet-lib/ProtocolManager';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
