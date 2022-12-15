@@ -249,7 +249,7 @@ export const NewBazaarStore = types
         }
         self.catalog.set(app.id, app);
       } else if ('remove-app' in data) {
-        self.catalog.delete(data['remove-app']);
+        // const appId: string = data['remove-app'];
       }
     },
     _allyAdded(ship: string, desks: string[]) {
