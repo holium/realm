@@ -19,6 +19,7 @@ import {
   NetworkStoreType,
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
+import { TransactionDescription } from 'ethers/lib/utils';
 
 export class EthereumProtocol implements BaseProtocol {
   private protocol: ProtocolType;
@@ -81,18 +82,19 @@ export class EthereumProtocol implements BaseProtocol {
       responseType: 'stream'
     }).then((res: any) => {
       res.data.on('data', (data: any) => {
-        this.updateWalletState(conduit, walletStore);
+        const currentBlock = Number(data.toString());
+        this.updateWalletState(conduit, walletStore, currentBlock);
         if (
           !(this.protocol === ProtocolType.ETH_GORLI) &&
           !(this.protocol === ProtocolType.UQBAR)
         ) {
-          walletStore.currentStore.setBlock(Number(data.toString()));
+          walletStore.currentStore.setBlock(currentBlock);
         }
       });
     });
   }
 
-  async updateWalletState(conduit: any, walletStore: WalletStoreType) {
+  async updateWalletState(conduit: any, walletStore: WalletStoreType, currentBlock: number) {
     for (const walletKey of walletStore.currentStore?.wallets.keys()) {
       const wallet = walletStore.currentStore.wallets.get(walletKey)!;
       this.getAccountBalance(wallet.address).then((balance: string) =>
@@ -100,9 +102,13 @@ export class EthereumProtocol implements BaseProtocol {
       );
       this.getAccountTransactions(
         wallet.address,
-        walletStore.currentStore.block
-      ).then((response: any) => {
-        wallet.applyTransactions(conduit, this.protocol, response);
+        walletStore.currentStore.block,
+        currentBlock
+      ).then((response: any[]) => {
+        if (response.length > 0) {
+          wallet.applyTransactions(conduit, this.protocol, response);
+          walletStore.currentStore.setBlock(currentBlock);
+        }
       });
       if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
@@ -112,7 +118,7 @@ export class EthereumProtocol implements BaseProtocol {
               this.getAsset(asset.addr, ethWallet.address, 'coin').then(
                 (coin: Asset) => ethWallet.updateCoin(this.protocol, coin)
               );
-              this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
+              this.getAssetTransfers(asset.addr, ethWallet.address, ethWallet.data.get(this.protocol)!.coins.get(asset.addr)!.block, currentBlock).then(
                 (transfers: any) => {
                   if (ethWallet.data.get(this.protocol)!.coins.has(asset.addr) && transfers.length > 0) {
                     ethWallet.data
@@ -144,30 +150,9 @@ export class EthereumProtocol implements BaseProtocol {
   }
   async getAccountTransactions(
     addr: string,
-    startBlock: number
+    fromBlock: number,
+    toBlock: number,
   ): Promise<any[]> {
-    /*const from = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(0),
-      toBlock: 'latest',
-      fromAddress: addr,
-      category: [
-        AssetTransfersCategory.INTERNAL,
-        AssetTransfersCategory.EXTERNAL,
-      ],
-      withMetadata: true,
-    })).transfers;
-
-    const to = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(0),
-      toBlock: 'latest',
-      toAddress: addr,
-      category: [
-        AssetTransfersCategory.INTERNAL,
-        AssetTransfersCategory.EXTERNAL,
-      ],
-      withMetadata: true,
-    })).transfers;
-    return from.concat(to);*/
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
@@ -180,8 +165,8 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(0),
-              toBlock: 'latest',
+              fromBlock: ethers.utils.hexlify(fromBlock),
+              toBlock: ethers.utils.hexlify(toBlock),
               fromAddress: addr,
               category: [
                 AssetTransfersCategory.INTERNAL,
@@ -204,8 +189,8 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(0),
-              toBlock: 'latest',
+              fromBlock: ethers.utils.hexlify(fromBlock),
+              toBlock: ethers.utils.hexlify(toBlock),
               toAddress: addr,
               category: [
                 AssetTransfersCategory.INTERNAL,
@@ -314,26 +299,9 @@ export class EthereumProtocol implements BaseProtocol {
   async getAssetTransfers(
     contract: string,
     addr: string,
-    startBlock: number
+    fromBlock: number,
+    toBlock: number,
   ): Promise<any[]> {
-    /*const from = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(0),
-      toBlock: 'latest',
-      fromAddress: addr,
-      contractAddresses: [contract],
-      category: [AssetTransfersCategory.ERC20, AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
-      withMetadata: true,
-    })).transfers;
-
-    const to = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(0),
-      toBlock: 'latest',
-      toAddress: addr,
-      contractAddresses: [contract],
-      category: [AssetTransfersCategory.ERC20, AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
-      withMetadata: true,
-    })).transfers;
-    return from.concat(to);*/
     let from: any[] = [];
     try {
       const fromTransfers = await axios.request({
@@ -347,8 +315,8 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(0),
-              toBlock: 'latest',
+              fromBlock: ethers.utils.hexlify(fromBlock),
+              toBlock: ethers.utils.hexlify(toBlock),
               fromAddress: addr,
               contractAddresses: [contract],
               category: [
@@ -362,9 +330,7 @@ export class EthereumProtocol implements BaseProtocol {
         },
       });
       from = fromTransfers.data.result.transfers;
-    } catch {}
-    let to: any[] = [];
-    try {
+      let to: any[] = [];
       const toTransfers = await axios.request({
         method: 'POST',
         url: this.nodeURL,
@@ -376,8 +342,8 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(0),
-              toBlock: 'latest',
+              fromBlock: ethers.utils.hexlify(fromBlock),
+              toBlock: ethers.utils.hexlify(toBlock),
               fromAddress: addr,
               contractAddresses: [contract],
               category: [
@@ -391,8 +357,10 @@ export class EthereumProtocol implements BaseProtocol {
         },
       });
       to = toTransfers.data.result.transfers;
-    } catch {}
-    return from.concat(to);
+      return from.concat(to);
+    } catch {
+      return [];
+    }
   }
   async transferAsset(
     contract: string,

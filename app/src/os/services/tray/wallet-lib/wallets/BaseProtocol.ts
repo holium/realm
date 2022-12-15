@@ -12,7 +12,8 @@ export abstract class BaseProtocol {
 
   abstract getAccountTransactions(
     addr: string,
-    startBlock?: number
+    fromBlock?: number,
+    toBlock?: number
   ): Promise<any[]>;
 
   abstract getAccountAssets(addr: string): Promise<Asset[]>;
@@ -42,7 +43,8 @@ export abstract class BaseProtocol {
   abstract getAssetTransfers(
     contract: string,
     addr: string,
-    startBlock?: number
+    fromBlock?: number,
+    toBlock?: number
   ): Promise<any[]>;
 
   /**
