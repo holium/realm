@@ -29,8 +29,8 @@ export const AppSearchPopover = () => {
         outline: 'none',
         boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
         borderRadius: 12,
-        maxHeight: '50vh',
-        overflowY: 'auto',
+        maxHeight: '55vh',
+        // overflowY: 'auto',
         background: backgroundColor,
       }}
     >

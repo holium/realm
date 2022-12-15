@@ -24,25 +24,31 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
 
   /* Scroll bar stylings */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
+    
   }
 
   /* Track */
   ::-webkit-scrollbar-track {
     border-radius: 4px;
-    background: ${(props) => darken(0.02, props.realmTheme.backgroundColor)}; 
+    margin-top: 4px;
+    margin-bottom: 4px;
+    background: ${(props) => darken(0.02, props.realmTheme.windowColor)}; 
   }
   
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: ${(props) => darken(0.08, props.realmTheme.backgroundColor)}; 
+    width: 6px;
+    background: ${(props) => darken(0.08, props.realmTheme.windowColor)}; 
     border-radius: 5px;
+    transition: .25s ease;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: ${(props) => darken(0.1, props.realmTheme.backgroundColor)}; 
+    transition: .25s ease;
+    background: ${(props) => darken(0.1, props.realmTheme.windowColor)}; 
   }
   :root {
     ${(props: StyleProps) => css`
