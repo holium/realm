@@ -368,7 +368,7 @@ function BlockedInput(props: BlockedInputProps) {
         width="100%"
         flexDirection="column"
         margin="auto"
-        overflow="scroll"
+        overflow="auto"
       >
         {props.blocked.map((patp) => (
           <Flex

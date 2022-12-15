@@ -75,7 +75,7 @@ export const Rooms = observer(() => {
         gap={8}
         flex={1}
         flexDirection="column"
-        overflowY={'scroll'}
+        overflowY={'auto'}
       >
         {rooms.length === 0 && (
           <Flex

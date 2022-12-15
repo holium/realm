@@ -15,11 +15,12 @@ import {
 interface ISpeaker {
   person: string;
   cursors?: boolean;
-  type: 'host' | 'speaker' | 'listener';
+  type: 'our' | 'speaker' | 'listener' | 'creator';
 }
 
 const speakerType = {
-  host: 'Host',
+  our: 'You',
+  creator: 'Creator',
   speaker: 'Speaker',
   listener: 'Listener',
 };

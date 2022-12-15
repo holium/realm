@@ -5,7 +5,7 @@
 /-  store=courier, post, graph-store, *post, *resource, *versioned-state, group, inv=invite-store, met=metadata-store,
     hark=hark-store, dm-hook-sur=dm-hook, notify, agd-type=accept-group-dm, cs=contact-store
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
-=|  state-1
+=|  state-2
 =*  state  -
 :: ^-  agent:gall
 =<
@@ -99,7 +99,7 @@
     ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
       ?:  =(groups-target %2)
-        (on-watch:groups-two path bowl)
+        (on-watch:groups-two path bowl state)
       :: ~&  "on-watch called in %courier"
       :: ~&  path
       ?+    path      (on-watch:def path)
@@ -113,7 +113,7 @@
     |=  =path
     ^-  (unit (unit cage))
     ?:  =(groups-target %2)
-      (peek:groups-two path bowl devices.state)
+      (peek:groups-two path bowl devices.state state)
     ?+    path  (on-peek:def path)
     ::
       [%x %devices ~]
@@ -205,7 +205,10 @@
             `this
           %fact
             :: ~&  ['club fact' cage.sign]
-            [(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
+            =^  cards  state
+              (handle-club-ui-fact:groups-two wire cage.sign bowl state)
+            [cards this]
+            ::[(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
         ==
       [%g2 %briefs ~]
         ?+    -.sign  (on-agent:def wire sign)
@@ -236,7 +239,10 @@
             ~&  >  "{<dap.bowl>}: groups-two /dm/ui kicked us, giving up..."
             `this
           %fact
-            [(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
+            =^  cards  state
+              (handle-dm-ui-fact:groups-two wire cage.sign bowl state)
+            [cards this]
+            ::[(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
         ==
       [%g2 %club %new ~]
         :: ~&  -.sign

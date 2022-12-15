@@ -214,7 +214,7 @@ export class ShipService extends BaseService {
     //   process.env.NODE_ENV === 'development'
     //     ? new Store<ShipModelType>(storeParams)
     //     : new EncryptedStore<ShipModelType>(storeParams);
-    this.db = new Store<ShipModelType>(storeParams);
+    this.db = new Store(storeParams);
 
     const persistedState: ShipModelType = this.db.store;
 
@@ -263,7 +263,9 @@ export class ShipService extends BaseService {
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
     onSnapshot(this.state, (snapshot: any) => {
-      this.db!.store = snapshot;
+      if (this.db) {
+        this.db.store = snapshot;
+      }
     });
     // 1. Send initial snapshot
     const syncEffect = {
@@ -386,7 +388,8 @@ export class ShipService extends BaseService {
       cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
-    deletedShip.clear();
+    // deletedShip.clear();
+    // this.db?.clear();
   }
 
   async getOurGroups(_event: any): Promise<any> {
