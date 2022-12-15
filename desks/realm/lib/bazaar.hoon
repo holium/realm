@@ -25,6 +25,9 @@
           [%install-app install-app]
           [%uninstall-app uninstall-app]
           [%initialize ul]
+          [%rebuild-catalog ul]
+          [%rebuild-stall rebuild-stall]
+          [%clear-stall clear-stall]
       ==
     ::
     ++  install-app
@@ -85,6 +88,17 @@
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
+    ::
+    ++  rebuild-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ++  clear-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
     --
   --
 ::
@@ -101,6 +115,7 @@
     ^-  [cord json]
     :-  -.rct
     ?-  -.rct
+      ::
         %initial
       %-  pairs
       :~  [%catalog (catalog-js:encode catalog.rct)]
@@ -201,6 +216,23 @@
       ::     [%desk s+desk.rct]
       ::     [%docket (dkt:encode docket.rct)]
       :: ==
+        %rebuild-catalog
+      %-  pairs
+      :~  [%catalog (catalog-js:encode catalog.rct)]
+          [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
+        %rebuild-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%catalog (catalog-js:encode catalog.rct)]
+          [%stall (stall-js:encode stall.rct)]
+      ==
+      ::
+        %clear-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     ==
   ::
   ++  view  :: encodes for on-peek

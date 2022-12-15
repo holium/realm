@@ -15,14 +15,10 @@ interface MiniAppStyleProps {
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
   overflow: hidden;
-  backdrop-filter: var(--blur-enabled);
-  backface-visibility: hidden;
-  perspective: 1000;
-  --webkit-transform: translateZ(0);
-  --webkit-backface-visibility: hidden;
-  --webkit-perspective: 1000;
-  transform: translateZ(0);
   width: 270px;
+  ::-webkit-scrollbar {
+    display: none;
+  }
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
   border: 1px solid
     ${(props: MiniAppStyleProps) => darken(0.1, props.customBg!)};

@@ -7,7 +7,6 @@ import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { toJS } from 'mobx';
-import { snakeify } from 'os/lib/obj';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
@@ -26,7 +25,6 @@ export const spacesDialogs: DialogRenderers = {
     workflow: true,
     firstStep: true,
     customNext: true,
-    // stateKey: 'create-space',
     component: (props: any) => <CreateSpaceModal {...props} />,
     hasPrevious: () => true,
     onOpen: () => {
@@ -65,7 +63,7 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any) => {
       ShellActions.nextDialog('create-space-3');
     },
     onPrevious: () => {
@@ -90,7 +88,6 @@ export const spacesDialogs: DialogRenderers = {
   },
   'create-space-3': {
     workflow: true,
-    // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
     onNext: (_evt: any, _state: any, _setState: any) => {
@@ -143,20 +140,16 @@ export const spacesDialogs: DialogRenderers = {
       if (!createForm.archetype) createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
-      // DesktopActions.setDialogLoading(true);
-
       createForm = {
         name: createForm.name,
         description: createForm.description || '',
         access: createForm.access,
-        picture: createForm.picture,
+        picture: createForm.image,
         color: createForm.color,
         theme: toJS(createForm.theme),
       };
       SpacesActions.updateSpace(state.path, createForm).then(() => {
-        // DesktopActions.closeDialog();
         setState({ loading: false });
-        // DesktopActions.setBlur(false);
       });
     },
     onPrevious: () => {},
@@ -191,7 +184,6 @@ export const spacesDialogs: DialogRenderers = {
   }),
   'create-space-4': {
     workflow: true,
-    // stateKey: 'create-space',
     component: (props: any) => <InviteMembers {...props} />,
     hasPrevious: () => true,
     nextButtonText: 'Create Space',

@@ -327,21 +327,30 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._updateStall(data['stall-update']);
       break;
     case 'joined-bazaar':
-      // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
       break;
     case 'treaties-loaded':
-      console.log(data);
       model._treatiesLoaded();
       break;
     case 'new-ally':
-      // console.log(data);
       const ally = data['new-ally'];
       model._allyAdded(ally.ship, ally.desks);
       break;
     case 'ally-deleted':
       // console.log(data);
       model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-catalog':
+      model._rebuildCatalog(data['rebuild-catalog']);
+      // model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-stall':
+      // model._allyDeleted(data['ally-deleted'].ship);
+      model._rebuildStall(data['rebuild-stall']);
+      break;
+    case 'clear-stall':
+      model._clearStall(data['clear-stall']);
+      // model._allyDeleted(data['ally-deleted'].ship);
       break;
     default:
       break;
