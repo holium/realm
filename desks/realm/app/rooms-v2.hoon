@@ -354,6 +354,7 @@
         ::  TODO remove from other rooms if present
         :: =/  remove-result         (remove-present:helpers:rooms:hol src.bol rid)
         =/  room                      (~(got by rooms.provider.state) rid)
+        ?>  (lth ~(wyt in present.room) capacity.room)
         =.  present.room              (~(put in present.room) src.bol)
         =.  rooms.provider.state      (~(put by rooms.provider.state) [rid room])
         =/  fact-path                 [/provider-updates/(scot %p our.bol) ~]
