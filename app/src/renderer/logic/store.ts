@@ -222,7 +222,7 @@ OSActions.onSetTheme((_event: any, data: any) => {
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  console.log('onBoot', response);
+  // console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,

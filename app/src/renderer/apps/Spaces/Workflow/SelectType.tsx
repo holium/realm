@@ -2,13 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import {
-  Grid,
-  Text,
-  Flex,
-  Skeleton,
-  isValidImageUrl,
-} from 'renderer/components';
+import { Grid, Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -24,7 +18,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { theme } = useServices();
     const { windowColor } = theme.currentTheme;
-    const { workflowState, setState } = props;
+    const { setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -131,19 +125,9 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                   image: '',
                   archetype: 'community',
                   archetypeTitle: 'Community',
+                  crestOption: 'color',
                 });
-              // setWorkspaceState({
-              //   archetype: 'community',
-              //   archetypeTitle: 'Community',
-              // });
-              // workflowState.set({
-              //   title: 'New Space',
-              //   type: 'space',
-              // });
               props.onNext && props.onNext(null, data);
-              // props.setState &&
-              //   props.setState({ title: 'New Space', type: 'space' });
-              // props.onNext && props.onNext(data);
             }}
           />
           <Flex mt={8} flex={1} flexDirection="column">

@@ -311,9 +311,9 @@
       =+  peaks=get-pikes
       =;  catalog-apps=catalog:store
         `state(catalog (~(uni by catalog.state) catalog-apps))
-      %-  (slog leaf+"{<dap.bowl>}: [on-rock]" ~)
-      %-  (slog leaf+"     rock={<rock>}" ~)
-      %-  (slog leaf+"     peaks={<peaks>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [on-rock]" ~)
+      :: %-  (slog leaf+"     rock={<rock>}" ~)
+      :: %-  (slog leaf+"     peaks={<peaks>}" ~)
       %-  ~(rep by rock)
       |=  [[=desk z=zest:clay wic=(set weft)] cat=catalog:store]
       ?~  app=(~(get by catalog.state) desk)  cat
@@ -335,9 +335,9 @@
       |=  =wave:tire:clay
       ^-  (quip card _state)
       =+  peaks=get-pikes
-      %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
-      %-  (slog leaf+"    wave={<wave>}" ~)
-      %-  (slog leaf+"    peaks={<peaks>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
+      :: %-  (slog leaf+"    wave={<wave>}" ~)
+      :: %-  (slog leaf+"    peaks={<peaks>}" ~)
       ?-  -.wave
         %wait  `state  ::  XX: blocked - take action?
         %warp  `state  ::  XX: unblocked - take action?
@@ -350,8 +350,12 @@
           %dead
           ?~  pyk=(~(get by peaks) desk.wave)  `state
             =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-            =.  install-status.u.app  %uninstalled
-            `state(catalog (~(put by catalog.state) desk.wave u.app))
+            =.  install-status.u.app  %suspended
+            =.  grid-index            (set-grid-index:helpers:bazaar desk.wave grid-index.state)
+            :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<install-status.u.app>}"
+            :_  state(catalog (~(put by catalog.state) desk.wave u.app))
+            :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
+            ==
             ::
             %live
           ?~  pyk=(~(get by peaks) desk.wave)  `state
@@ -368,7 +372,7 @@
           =.  grid-index            (set-grid-index:helpers:bazaar desk.wave grid-index.state)
           :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<install-status.u.app>}"
           :_  state(catalog (~(put by catalog.state) desk.wave u.app))
-          :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index.state])]
+          :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
           ==
         ==
       ==
@@ -604,7 +608,7 @@
     ++  recommend
       |=  [=app-id:store]
       ?>  =(our.bowl src.bowl)
-      ~&  >  ['recommend' our.bowl src.bowl]
+      :: ~&  >  ['recommend' our.bowl src.bowl]
       =.  recommendations.state     (~(put in recommendations.state) app-id)
       =/  app                       (~(got by catalog.state) app-id)
       =/  updated-stalls=[=stalls:store cards=(list card)]
@@ -612,7 +616,7 @@
         |=  [[path=space-path:spaces-store =stall:store] result=[=stalls:store cards=(list card)]]
         ?:  =('our' space.path)  result  ::  return result if our
         ?:  (we-host:helpers path)
-          ~&  >  ['we host, set recommended']
+          :: ~&  >  ['we host, set recommended']
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(put in rec-members) our.bowl)
           =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
@@ -797,7 +801,7 @@
     ++  member-recommend
       |=  [path=space-path:spaces-store =app-id:store =app:store]
       ?>  (check-member:security path src.bowl)
-      ~&  >  ['recommending' path src.bowl app-id]
+      :: ~&  >  ['recommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
       =/  rec-members             (~(gut by recommended.stall) app-id ~)
       =.  rec-members             (~(put in rec-members) src.bowl)
@@ -822,7 +826,7 @@
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  (check-member:security path src.bowl)
-      ~&  >  ['unrecommending' path src.bowl app-id]
+      :: ~&  >  ['unrecommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
       =/  rec-members=member-set:store
         ?:  (~(has by recommended.stall) app-id)
@@ -1343,8 +1347,8 @@
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
-      %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
-      %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
+      :: %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::
