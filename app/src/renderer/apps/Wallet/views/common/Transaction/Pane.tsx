@@ -8,7 +8,11 @@ import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
-import { ProtocolType, ERC20Type, NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
+import {
+  ProtocolType,
+  ERC20Type,
+  NetworkType,
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',

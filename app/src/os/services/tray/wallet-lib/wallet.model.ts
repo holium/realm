@@ -236,16 +236,16 @@ const BitcoinStore = types
 export type BitcoinStoreType = Instance<typeof BitcoinStore>;
 
 const conversions = types
-.model({
-  usd: types.maybe(types.number),
-  cad: types.maybe(types.number),
-  euro: types.maybe(types.number),
-})
-.actions((self) => ({
-  setUsd(usd: number) {
-    self.usd = usd;
-  },
-}));
+  .model({
+    usd: types.maybe(types.number),
+    cad: types.maybe(types.number),
+    euro: types.maybe(types.number),
+  })
+  .actions((self) => ({
+    setUsd(usd: number) {
+      self.usd = usd;
+    },
+  }));
 
 const ERC20 = types
   .model('ERC20', {
@@ -382,7 +382,7 @@ const EthWallet = types
         decimals: coinData.decimals,
         conversions: conversions.create(),
         transactions: prevCoin?.transactions.toJSON() || {},
-        block: 0,
+        block: prevCoin?.block || 0,
       });
     },
     updateNft(protocol: ProtocolType, nft: Asset) {

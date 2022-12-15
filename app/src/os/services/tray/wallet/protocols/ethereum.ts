@@ -72,29 +72,36 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     // this.updateWalletState(conduit, walletStore);
-    console.log('watching for blocks')
+    console.log('watching updates')
     const config = {
-      headers:{
-        Accept: 'text/event-stream'
-      }
+      headers: {
+        Accept: 'text/event-stream',
+      },
     };
-    axios.get(this.blockURL, {
-      responseType: 'stream'
-    }).then((res: any) => {
-      res.data.on('data', (data: any) => {
-        const currentBlock = Number(data.toString());
-        this.updateWalletState(conduit, walletStore, currentBlock);
-        if (
-          !(this.protocol === ProtocolType.ETH_GORLI) &&
-          !(this.protocol === ProtocolType.UQBAR)
-        ) {
-          walletStore.currentStore.setBlock(currentBlock);
-        }
+    axios
+      .get(this.blockURL, {
+        responseType: 'stream',
+      })
+      .then((res: any) => {
+        res.data.on('data', (data: any) => {
+          const currentBlock = Number(data.toString());
+          console.log('got block', currentBlock);
+          this.updateWalletState(conduit, walletStore, currentBlock);
+          if (
+            !(this.protocol === ProtocolType.ETH_GORLI) &&
+            !(this.protocol === ProtocolType.UQBAR)
+          ) {
+            walletStore.currentStore.setBlock(currentBlock);
+          }
+        });
       });
-    });
   }
 
-  async updateWalletState(conduit: any, walletStore: WalletStoreType, currentBlock: number) {
+  async updateWalletState(
+    conduit: any,
+    walletStore: WalletStoreType,
+    currentBlock: number
+  ) {
     for (const walletKey of walletStore.currentStore?.wallets.keys()) {
       const wallet = walletStore.currentStore.wallets.get(walletKey)!;
       this.getAccountBalance(wallet.address).then((balance: string) =>
@@ -118,16 +125,25 @@ export class EthereumProtocol implements BaseProtocol {
               this.getAsset(asset.addr, ethWallet.address, 'coin').then(
                 (coin: Asset) => ethWallet.updateCoin(this.protocol, coin)
               );
-              this.getAssetTransfers(asset.addr, ethWallet.address, ethWallet.data.get(this.protocol)!.coins.get(asset.addr)!.block, currentBlock).then(
-                (transfers: any) => {
-                  if (ethWallet.data.get(this.protocol)!.coins.has(asset.addr) && transfers.length > 0) {
-                    ethWallet.data
-                      .get(this.protocol)!
-                      .coins.get(asset.addr)!
-                      .applyERC20Transactions(ethWallet.index, transfers);
-                  }
+              this.getAssetTransfers(
+                asset.addr,
+                ethWallet.address,
+                ethWallet.data.get(this.protocol)!.coins.get(asset.addr)!.block,
+                currentBlock
+              ).then((transfers: any) => {
+                if (
+                  ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
+                  transfers.length > 0
+                ) {
+                  ethWallet.data
+                    .get(this.protocol)!
+                    .coins.get(asset.addr)!
+                    .applyERC20Transactions(ethWallet.index, transfers);
+                  ethWallet.data
+                    .get(this.protocol)!
+                    .coins.get(asset.addr)!.block = currentBlock;
                 }
-              );
+              });
             }
             if (asset.type === 'nft') {
               this.getAsset(
@@ -151,7 +167,7 @@ export class EthereumProtocol implements BaseProtocol {
   async getAccountTransactions(
     addr: string,
     fromBlock: number,
-    toBlock: number,
+    toBlock: number
   ): Promise<any[]> {
     try {
       const fromTransfers = await axios.request({
@@ -300,7 +316,7 @@ export class EthereumProtocol implements BaseProtocol {
     contract: string,
     addr: string,
     fromBlock: number,
-    toBlock: number,
+    toBlock: number
   ): Promise<any[]> {
     let from: any[] = [];
     try {

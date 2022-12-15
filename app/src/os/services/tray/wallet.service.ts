@@ -636,14 +636,10 @@ export class WalletService extends BaseService {
   sendBitcoinTransaction() {}
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
-    const result = await bcrypt.compare(
+    return await bcrypt.compare(
       passcode.toString(),
       this.state!.settings.passcodeHash!
     );
-    if (result) {
-      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
-    }
-    return result;
   }
 
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {

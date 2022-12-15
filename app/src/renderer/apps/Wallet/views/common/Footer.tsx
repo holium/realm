@@ -4,9 +4,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
-import {
-  WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...

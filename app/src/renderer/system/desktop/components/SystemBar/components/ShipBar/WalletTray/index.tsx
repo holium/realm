@@ -50,17 +50,17 @@ export const WalletTray: FC<WalletTrayProps> = observer(
     );
 
     return (
-        <IconButton
-          id="wallet-tray-icon"
-          size={28}
-          customBg={iconHoverColor}
-          color={textColor}
-          whileTap={{ scale: 0.95 }}
-          transition={{ scale: 0.1 }}
-          onClick={onButtonClick}
-        >
-          <Icons name="Wallet" pointerEvents="none" />
-        </IconButton>
+      <IconButton
+        id="wallet-tray-icon"
+        size={28}
+        customBg={iconHoverColor}
+        color={textColor}
+        whileTap={{ scale: 0.95 }}
+        transition={{ scale: 0.1 }}
+        onClick={onButtonClick}
+      >
+        <Icons name="Wallet" pointerEvents="none" />
+      </IconButton>
     );
   }
 );
