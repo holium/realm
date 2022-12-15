@@ -77,7 +77,6 @@ export class EthereumProtocol implements BaseProtocol {
         Accept: 'text/event-stream'
       }
     };
-    console.log(this.blockURL);
     axios.get(this.blockURL, {
       responseType: 'stream'
     }).then((res: any) => {
