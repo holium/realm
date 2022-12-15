@@ -73,11 +73,6 @@ export class EthereumProtocol implements BaseProtocol {
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     // this.updateWalletState(conduit, walletStore);
     console.log('watching updates')
-    const config = {
-      headers: {
-        Accept: 'text/event-stream',
-      },
-    };
     axios
       .get(this.blockURL, {
         responseType: 'stream',
