@@ -237,10 +237,6 @@ export const NewBazaarStore = types
       self.catalog.merge(data.catalog);
     },
     _updateStall(data: any) {
-      //   path: string;
-      //   stall: { recommended: any; suite: any };
-      //   appInfo: any;
-      // }) {
       self.stalls.set(data.path, data.stall);
       if ('add-app' in data) {
         const app: AppType = data['add-app'];
@@ -251,6 +247,34 @@ export const NewBazaarStore = types
       } else if ('remove-app' in data) {
         // const appId: string = data['remove-app'];
       }
+    },
+    _rebuildCatalog(data: any) {
+      self.gridIndex.clear();
+      self.gridIndex.merge(data.grid);
+      if (data.catalog) {
+        for (let i = 0; i < data.catalog.length; i++) {
+          const app: AppType = data.catalog[i];
+          if (app.type === 'urbit') {
+            app.color = cleanNounColor(app.color);
+          }
+          self.catalog.set(app.id, app);
+        }
+      }
+    },
+    _rebuildStall(data: any) {
+      self.stalls.set(data.path, data.stall);
+      if (data.catalog) {
+        for (let i = 0; i < data.catalog.length; i++) {
+          const app: AppType = data.catalog[i];
+          if (app.type === 'urbit') {
+            app.color = cleanNounColor(app.color);
+          }
+          self.catalog.set(app.id, app);
+        }
+      }
+    },
+    _clearStall(data: any) {
+      self.stalls.set(data.path, StallModel.create());
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {

@@ -68,6 +68,9 @@
       [%install-app =ship =desk]
       [%uninstall-app =desk]
       [%initialize args=(map cord cord)]
+      [%rebuild-catalog args=(map cord cord)]
+      [%rebuild-stall path=space-path:spaces args=(map cord cord)]
+      [%clear-stall path=space-path:spaces args=(map cord cord)]
   ==
 ::
 +$  interaction
@@ -91,6 +94,9 @@
       [%treaties-loaded =ship]
       [%new-ally =ship =alliance:treaty]
       [%ally-deleted =ship]
+      [%rebuild-catalog =catalog =grid-index]
+      [%rebuild-stall path=space-path:spaces =catalog =stall]
+      [%clear-stall path=space-path:spaces]
   ==
 +$  view
   $%  [%catalog =catalog]

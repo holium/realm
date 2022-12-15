@@ -404,7 +404,76 @@
       :: sent during onboarding after realm desk is fully installed and ready
       ::  use this opportunity to refresh app-catalog
       %initialize        (initialize +.action)
+      %rebuild-catalog   (rebuild-catalog +.action)
+      %rebuild-stall     (rebuild-stall +.action)
+      %clear-stall       (clear-stall +.action)
     ==
+    ::
+    ++  rebuild-catalog
+      |=  [args=(map cord cord)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: [rebuild-catalog] => {<args>}" ~)
+      ::  you can only request this of yourself
+      ?.  =(our.bowl src.bowl)
+        ~&  >>  "{<dap.bowl>}: [rebuild-catalog] denied. not self."
+        `state
+      =/  init  (build-catalog:helpers ~)
+      :_  state(catalog catalog.init, grid-index grid-index.init)
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%rebuild-catalog catalog.init grid-index.init])]
+      ==
+    ::
+    ++  rebuild-stall
+      |=  [path=space-path:spaces-store args=(map cord cord)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: [rebuild-stall] => {<[path args]>}" ~)
+      ::  if we are not the space host, poke space host so it can push updates
+      ::   to members
+      ?:  (we-host:helpers path)
+        ?.  (check-member:security path src.bowl)
+          ~&  >>  "{<dap.bowl>}: [rebuild-stall] denied. host received request from non-member."
+          `state
+        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+        =/  stal                (~(get by stalls.state) path)
+        ?~  stal                `state
+        =/  apps                (get-stall-apps:helpers path args)
+        ?~  apps                `state
+        :_  state
+        :~  [%give %fact paths bazaar-reaction+!>([%rebuild-stall path u.apps u.stal])]
+        ==
+      ::
+      ?.  (check-member:security path our.bowl)
+        ~&  >>  "{<dap.bowl>}: [rebuild-stall] denied. not owner, admin, or member of space"
+        `state
+      ::
+      :_  state
+      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%rebuild-stall path args])]
+      ==
+    ::
+    ++  clear-stall
+      |=  [path=space-path:spaces-store args=(map cord cord)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: [clear-stall] => {<[path args]>}" ~)
+      ::  if we are not the space host, poke space host so it can push updates
+      ::   to members
+      ?:  (we-host:helpers path)
+        ?.  (check-member:security path src.bowl)
+          ~&  >>  "{<dap.bowl>}: [clear-stall] denied. host received request from non-member."
+          `state
+        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+        =/  stal                (clear-stall:helpers path args)
+        ?~  stal                `state
+        =.  stalls.state        (~(put by stalls.state) path u.stal)
+        :_  state
+        :~  [%give %fact paths bazaar-reaction+!>([%clear-stall path])]
+        ==
+      ::
+      ?.  (check-member:security path our.bowl)
+        ~&  >>  "{<dap.bowl>}: [clear-stall] denied. not owner, admin, or member of space"
+        `state
+      ::
+      :_  state
+      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%clear-stall path args])]
+      ==
     ::
     ++  add-pin
       |=  [path=space-path:spaces-store =app-id:store index=(unit @ud)]
@@ -597,6 +666,9 @@
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
       %stall-update       (on-stall-update +.rct)
+      %rebuild-catalog    (on-rebuild-catalog +.rct)
+      %rebuild-stall      (on-rebuild-stall +.rct)
+      %clear-stall        (on-clear-stall +.rct)
     ==
     ::
     ++  on-rec
@@ -686,6 +758,32 @@
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]~
+    ::
+    ++  on-rebuild-catalog
+      |=  [=catalog:store =grid-index:store]
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%rebuild-catalog path catalog grid-index])]
+      ==
+    ::
+    ++  on-rebuild-stall
+      |=  [path=space-path:spaces-store =catalog:store =stall:store]
+      ::  only process if received from space host or admin
+      ?.  (~(has by stalls.state) path)  `state
+      =.  stalls.state    (~(put by stalls.state) path stall)
+      =.  catalog.state   (~(gas by catalog) ~(tap by catalog.state))
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%rebuild-stall path catalog stall])]
+      ==
+    ::
+    ++  on-clear-stall
+      |=  [path=space-path:spaces-store]
+      =/  stal                (clear-stall:helpers path ~)
+      ?~  stal                `state
+      =.  stalls.state        (~(put by stalls.state) path u.stal)
+
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%clear-stall path])]
+      ==
     --
   ++  interaction
     |=  [itc=interaction:store]
@@ -794,23 +892,7 @@
     ::
     ++  initialize
       ^-  (quip card _state)
-      =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-      ?>  ?=([%initial *] charge-update)
-      =/  our-space                     [our.bowl 'our']
-      =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
-      =|  =native-app:store
-        =.  title.native-app            'Relic Browser'
-        =.  color.native-app            '#92D4F9'
-        =.  icon.native-app             'AppIconCompass'
-        =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
-      =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
-      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
-      =|  =native-app:store
-        =.  title.native-app            'Settings'
-        =.  color.native-app            '#ACBCCB'
-        =.  icon.native-app             'AppIconSettings'
-        =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
-      =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
+      =/  init                          (build-catalog ~)
       =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
       =.  grid-index.state              grid-index.init
       =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
@@ -833,6 +915,66 @@
           [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
           [%pass /tire %arvo %c %tire `~]
       ==
+    ::
+    ++  build-catalog
+      |=  [args=(map cord cord)]
+      =/  =charge-update:docket         .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      ?>  ?=([%initial *] charge-update)
+      =/  our-space                     [our.bowl 'our']
+      =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
+      =|  =native-app:store
+        =.  title.native-app            'Relic Browser'
+        =.  color.native-app            '#92D4F9'
+        =.  icon.native-app             'AppIconCompass'
+        =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+      =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
+      =|  =native-app:store
+        =.  title.native-app            'Settings'
+        =.  color.native-app            '#ACBCCB'
+        =.  icon.native-app             'AppIconSettings'
+        =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
+      =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
+      init
+    ::
+    ++  get-stall-apps
+      |=  [=space-path:spaces-store args=(map cord cord)]
+      ^-  (unit catalog:store)
+      =/  stal  (~(get by stalls.state) space-path)
+      ?~  stal
+        ~&  >>>  "{<dap.bowl>}: [get-stall-apps] error. space {<space-path>} does not exist."
+        ~
+      :: extract all app ids across both the suite and recommended lists
+      =/  app-ids
+        %+  weld
+          %+  turn  ~(tap by recommended.u.stal)
+            |=  [=app-id:store =member-set:store]
+            app-id
+          %+  turn  ~(tap by suite.u.stal)
+            |=  [idx=@ud =app-id:store]
+            app-id
+      :: build a catalog from the app ids
+      %-  some
+      %-  malt
+        %+  turn
+        %+  skim  app-ids
+          |=  [=app-id:store]
+          =/  app  (~(get by catalog.state) app-id)
+          ?~  app
+            ~&  >>  "{<dap.bowl>}: [rebuild-stall] warn. app {<app-id>} missing from catalog."
+            %.n
+          %.y
+        |=  [=app-id:store]
+        [app-id (~(got by catalog.state) app-id)]
+    ::
+    ++  clear-stall
+      |=  [=space-path:spaces-store args=(map cord cord)]
+      ^-  (unit stall:store)
+      =/  stal  (~(get by stalls.state) space-path)
+      ?~  stal
+        ~&  >>>  "{<dap.bowl>}: [rebuild-stall] error. space {<space-path>} does not exist."
+        ~
+      (some [suite=~ recommended=~])
     ::
     ++  is-app-installed
       |=  [=app-id:store]
