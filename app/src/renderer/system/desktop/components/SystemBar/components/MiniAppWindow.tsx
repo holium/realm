@@ -14,6 +14,7 @@ interface MiniAppStyleProps {
 
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
+  overflow: hidden;
   backdrop-filter: var(--blur-enabled);
   backface-visibility: hidden;
   perspective: 1000;

@@ -179,7 +179,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
           gap={4}
           width="100%"
           maxHeight="300px"
-          overflowY={'scroll'}
+          overflowY={'auto'}
           overflowX={'hidden'}
         >
           {invited.map((patp: string, index: number) => {

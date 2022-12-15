@@ -26,7 +26,7 @@ export const WalletList: FC<WalletListProps> = observer(
           layoutScroll
           gap={6}
           overflowX="visible"
-          overflowY="scroll"
+          overflowY="auto"
         >
           {list.map((walletEntry) => {
             const fullWallet = walletApp.currentStore.wallets.get(

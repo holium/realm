@@ -147,7 +147,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
         height={pending && !props.hidePending ? '165px' : '210px'}
         flexDirection="column"
         margin="auto"
-        overflow="scroll"
+        overflow="auto"
       >
         {transactions.length ? (
           transactions.map((transaction, index) => (

@@ -100,7 +100,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     () => (
       <View
         style={{
-          overflowY: 'scroll',
+          overflowY: 'auto',
           overflowX: 'hidden',
           width: 'inherit',
           height: 'inherit',

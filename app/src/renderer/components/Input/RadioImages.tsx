@@ -78,7 +78,7 @@ export const RadioImages: FC<IRadioImages> = (props: IRadioImages) => {
       width="fit-content"
       maxWidth="100%"
       justifyContent="flex-start"
-      overflowX="scroll"
+      overflowX="auto"
       //   backgroundColor={optionBg}
       mb={10}
       gap={6}

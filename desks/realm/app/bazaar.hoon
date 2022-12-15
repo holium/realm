@@ -660,12 +660,12 @@
       ::  are we deleting the app, or adding it?
       :: %-  (slog leaf+"{<dap.bowl>}: [on-stall-update] {<det>}" ~)
       =/  wha  (what det)
-      =.  catalog.state
-        ?+  wha     catalog.state
-          %none     catalog.state
+      =/  updates=[det=(unit [=app-id:store app=(unit app:store)]) =catalog:store]
+        ?+  wha     [det catalog.state]
+          %none     [det catalog.state]
           ::
           %delete
-            ?~(det ~ (~(del by catalog.state) app-id.u.det))
+            [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
             =/  det  (need det)
@@ -679,12 +679,13 @@
                 app
               ::  if it exists in docket, it must exist in catalog
               (~(got by catalog.state) app-id.det)
-            (~(put by catalog.state) app-id.det app)
+            [(some [app-id.det (some app)]) (~(put by catalog.state) app-id.det app)]
         ==
       ::
+      =.  catalog.state       catalog.updates
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]~
     --
   ++  interaction
     |=  [itc=interaction:store]

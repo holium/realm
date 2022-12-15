@@ -8,7 +8,6 @@ import {
   onSnapshot,
   applySnapshot,
 } from 'mobx-state-tree';
-
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkStoreType,
