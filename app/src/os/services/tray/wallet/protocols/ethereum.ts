@@ -77,19 +77,18 @@ export class EthereumProtocol implements BaseProtocol {
         Accept: 'text/event-stream'
       }
     };
-    axios.get(this.blockURL, config).then((res: any) => {
-      console.log('got res')
-      console.log(res)
-      res.on('data', (data: any) => {
-        console.log(data)
-        console.log('GOT BLOCK');
-        /*this.updateWalletState(conduit, walletStore);
+    console.log(this.blockURL);
+    axios.get(this.blockURL, {
+      responseType: 'stream'
+    }).then((res: any) => {
+      res.data.on('data', (data: any) => {
+        this.updateWalletState(conduit, walletStore);
         if (
           !(this.protocol === ProtocolType.ETH_GORLI) &&
           !(this.protocol === ProtocolType.UQBAR)
         ) {
-          walletStore.currentStore.setBlock(Number(block));
-        }*/
+          walletStore.currentStore.setBlock(Number(data.toString()));
+        }
       });
     });
   }
