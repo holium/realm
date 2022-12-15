@@ -42,7 +42,7 @@ export class EthereumProtocol implements BaseProtocol {
       this.blockURL = this.baseURL + '/block';
     } else {
       this.nodeURL = this.baseURL + '/gorli';
-      this.blockURL = this.baseURL + '/gorli';
+      this.blockURL = this.baseURL + '/gorliblock';
     }
     let alchemySettings: AlchemySettings;
     if (this.protocol === ProtocolType.ETH_MAIN) {
@@ -70,18 +70,26 @@ export class EthereumProtocol implements BaseProtocol {
   }
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
-    this.updateWalletState(conduit, walletStore);
+    // this.updateWalletState(conduit, walletStore);
     console.log('watching for blocks')
-    axios.get(this.blockURL).then((res: any) => {
-      res.on('data', (block: number) => {
+    const config = {
+      headers:{
+        Accept: 'text/event-stream'
+      }
+    };
+    axios.get(this.blockURL, config).then((res: any) => {
+      console.log('got res')
+      console.log(res)
+      res.on('data', (data: any) => {
+        console.log(data)
         console.log('GOT BLOCK');
-        this.updateWalletState(conduit, walletStore);
+        /*this.updateWalletState(conduit, walletStore);
         if (
           !(this.protocol === ProtocolType.ETH_GORLI) &&
           !(this.protocol === ProtocolType.UQBAR)
         ) {
-          walletStore.currentStore.setBlock(block);
-        }
+          walletStore.currentStore.setBlock(Number(block));
+        }*/
       });
     });
   }
