@@ -26,7 +26,6 @@
 ::
 +$  rooms  (map rid room)
 ::
-
 +$  live-state  room
 +$  context-state
   $:  provider=ship
