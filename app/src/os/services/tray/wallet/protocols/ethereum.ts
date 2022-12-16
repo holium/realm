@@ -1,4 +1,4 @@
-import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
+import { BaseBlockProtocol } from '../../wallet-lib/wallets/BaseBlockProtocol';
 import {
   Alchemy,
   AlchemySettings,
@@ -19,9 +19,8 @@ import {
   NetworkStoreType,
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
-import { TransactionDescription } from 'ethers/lib/utils';
 
-export class EthereumProtocol implements BaseProtocol {
+export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
@@ -95,8 +94,11 @@ export class EthereumProtocol implements BaseProtocol {
   async updateWalletState(
     conduit: any,
     walletStore: WalletStoreType,
-    currentBlock: number
+    currentBlock?: number
   ) {
+    if (!currentBlock) {
+      currentBlock = await this.getBlockNumber()
+    }
     for (const walletKey of walletStore.currentStore?.wallets.keys()) {
       const wallet = walletStore.currentStore.wallets.get(walletKey)!;
       this.getAccountBalance(wallet.address).then((balance: string) =>
@@ -109,7 +111,7 @@ export class EthereumProtocol implements BaseProtocol {
       ).then((response: any[]) => {
         if (response.length > 0) {
           wallet.applyTransactions(conduit, this.protocol, response);
-          walletStore.currentStore.setBlock(currentBlock);
+          walletStore.currentStore.setBlock(currentBlock!);
         }
       });
       if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
@@ -124,7 +126,7 @@ export class EthereumProtocol implements BaseProtocol {
                 asset.addr,
                 ethWallet.address,
                 ethWallet.data.get(this.protocol)!.coins.get(asset.addr)!.block,
-                currentBlock
+                currentBlock!
               ).then((transfers: any) => {
                 if (
                   ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
@@ -136,7 +138,7 @@ export class EthereumProtocol implements BaseProtocol {
                     .applyERC20Transactions(ethWallet.index, transfers);
                   ethWallet.data
                     .get(this.protocol)!
-                    .coins.get(asset.addr)!.block = currentBlock;
+                    .coins.get(asset.addr)!.block = currentBlock!;
                 }
               });
             }
@@ -165,53 +167,77 @@ export class EthereumProtocol implements BaseProtocol {
     toBlock: number
   ): Promise<any[]> {
     try {
-      const fromTransfers = await axios.request({
-        method: 'POST',
-        url: this.nodeURL,
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        data: {
-          method: 'alchemy_getAssetTransfers',
-          params: [
-            {
-              fromBlock: ethers.utils.hexlify(fromBlock),
-              toBlock: ethers.utils.hexlify(toBlock),
-              fromAddress: addr,
-              category: [
-                AssetTransfersCategory.INTERNAL,
-                AssetTransfersCategory.EXTERNAL,
-              ],
-              withMetadata: true,
+      let fromTransfers: any;
+      let retries = 3;
+      for (let i = 0; i < retries; i++) {
+        try {
+          fromTransfers = await axios.request({
+            method: 'POST',
+            url: this.nodeURL,
+            headers: {
+              accept: 'application/json',
+              'content-type': 'application/json',
             },
-          ],
-        },
-      });
-      const from = fromTransfers.data.result.transfers;
-      const toTransfers = await axios.request({
-        method: 'POST',
-        url: this.nodeURL,
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        data: {
-          method: 'alchemy_getAssetTransfers',
-          params: [
-            {
-              fromBlock: ethers.utils.hexlify(fromBlock),
-              toBlock: ethers.utils.hexlify(toBlock),
-              toAddress: addr,
-              category: [
-                AssetTransfersCategory.INTERNAL,
-                AssetTransfersCategory.EXTERNAL,
+            data: {
+              method: 'alchemy_getAssetTransfers',
+              params: [
+                {
+                  fromBlock: ethers.utils.hexlify(fromBlock),
+                  toBlock: ethers.utils.hexlify(toBlock),
+                  fromAddress: addr,
+                  category: [
+                    AssetTransfersCategory.INTERNAL,
+                    AssetTransfersCategory.EXTERNAL,
+                  ],
+                  withMetadata: true,
+                },
               ],
-              withMetadata: true,
             },
-          ],
-        },
-      });
+          });
+        } catch (error) {
+          if (i < retries - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
+      const from = fromTransfers!.data.result.transfers;
+      let toTransfers: any;
+      retries = 3;
+      for (let i = 0; i < retries; i++) {
+        try {
+          toTransfers = await axios.request({
+            method: 'POST',
+            url: this.nodeURL,
+            headers: {
+              accept: 'application/json',
+              'content-type': 'application/json',
+            },
+            data: {
+              method: 'alchemy_getAssetTransfers',
+              params: [
+                {
+                  fromBlock: ethers.utils.hexlify(fromBlock),
+                  toBlock: ethers.utils.hexlify(toBlock),
+                  toAddress: addr,
+                  category: [
+                    AssetTransfersCategory.INTERNAL,
+                    AssetTransfersCategory.EXTERNAL,
+                  ],
+                  withMetadata: true,
+                },
+              ],
+            },
+          });
+        } catch (error) {
+          if (i < retries - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
       const to = toTransfers.data.result.transfers;
       return from.concat(to);
     } catch {
@@ -313,61 +339,83 @@ export class EthereumProtocol implements BaseProtocol {
     fromBlock: number,
     toBlock: number
   ): Promise<any[]> {
-    let from: any[] = [];
     try {
-      const fromTransfers = await axios.request({
-        method: 'POST',
-        url: this.nodeURL,
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        data: {
-          method: 'alchemy_getAssetTransfers',
-          params: [
-            {
-              fromBlock: ethers.utils.hexlify(fromBlock),
-              toBlock: ethers.utils.hexlify(toBlock),
-              fromAddress: addr,
-              contractAddresses: [contract],
-              category: [
-                AssetTransfersCategory.ERC20,
-                AssetTransfersCategory.ERC721,
-                AssetTransfersCategory.ERC1155,
-              ],
-              withMetadata: true,
+      let fromTransfers: any;
+      let retries = 3;
+      for (let i = 0; i < retries; i++) {
+        try {
+          fromTransfers = await axios.request({
+            method: 'POST',
+            url: this.nodeURL,
+            headers: {
+              accept: 'application/json',
+              'content-type': 'application/json',
             },
-          ],
-        },
-      });
-      from = fromTransfers.data.result.transfers;
-      let to: any[] = [];
-      const toTransfers = await axios.request({
-        method: 'POST',
-        url: this.nodeURL,
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        data: {
-          method: 'alchemy_getAssetTransfers',
-          params: [
-            {
-              fromBlock: ethers.utils.hexlify(fromBlock),
-              toBlock: ethers.utils.hexlify(toBlock),
-              fromAddress: addr,
-              contractAddresses: [contract],
-              category: [
-                AssetTransfersCategory.ERC20,
-                AssetTransfersCategory.ERC721,
-                AssetTransfersCategory.ERC1155,
+            data: {
+              method: 'alchemy_getAssetTransfers',
+              params: [
+                {
+                  fromBlock: ethers.utils.hexlify(fromBlock),
+                  toBlock: ethers.utils.hexlify(toBlock),
+                  fromAddress: addr,
+                  contractAddresses: [contract],
+                  category: [
+                    AssetTransfersCategory.ERC20,
+                    AssetTransfersCategory.ERC721,
+                    AssetTransfersCategory.ERC1155,
+                  ],
+                  withMetadata: true,
+                },
               ],
-              withMetadata: true,
             },
-          ],
-        },
-      });
-      to = toTransfers.data.result.transfers;
+          });
+        } catch (error) {
+          if (i < retries - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
+      const from = fromTransfers!.data.result.transfers;
+      let toTransfers: any;
+      retries = 3;
+      for (let i = 0; i < retries; i++) {
+        try {
+          toTransfers = await axios.request({
+            method: 'POST',
+            url: this.nodeURL,
+            headers: {
+              accept: 'application/json',
+              'content-type': 'application/json',
+            },
+            data: {
+              method: 'alchemy_getAssetTransfers',
+              params: [
+                {
+                  fromBlock: ethers.utils.hexlify(fromBlock),
+                  toBlock: ethers.utils.hexlify(toBlock),
+                  fromAddress: addr,
+                  contractAddresses: [contract],
+                  category: [
+                    AssetTransfersCategory.ERC20,
+                    AssetTransfersCategory.ERC721,
+                    AssetTransfersCategory.ERC1155,
+                  ],
+                  withMetadata: true,
+                },
+              ],
+            },
+          });
+        } catch (error) {
+          if (i < retries - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
+      const to = toTransfers.data.result.transfers;
       return from.concat(to);
     } catch {
       return [];

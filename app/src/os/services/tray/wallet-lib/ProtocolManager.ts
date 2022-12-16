@@ -16,28 +16,31 @@ export class Wallet {
   }
 
   pauseUpdates() {
-    this.protocols.get(this.currentProtocol)!.removeListener();
+    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
+      (this.protocols.get(this.currentProtocol)! as EthereumProtocol).removeListener();
+    }
   }
 
   watchUpdates(conduit: any, walletState: WalletStoreType) {
-    const lastProtocol: BaseProtocol = this.protocols.get(
-      this.currentProtocol
-    )!;
-    lastProtocol?.removeListener();
+    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
+      const lastProtocol = this.protocols.get(
+        this.currentProtocol
+      )! as EthereumProtocol;
+      lastProtocol?.removeListener();
+    }
     this.currentProtocol = walletState.navState.protocol;
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      const protocol = this.protocols.get(
+      this.protocols.get(
         this.currentProtocol
-      ) as EthereumProtocol;
-      protocol.watchUpdates(conduit, walletState);
+      )!.watchUpdates(conduit, walletState);
     }
   }
 
   updateWalletState(conduit: any, walletState: WalletStoreType) {
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      this.protocols
-        .get(walletState.navState.protocol)!
-        .watchUpdates(conduit, walletState);
+      (this.protocols
+        .get(walletState.navState.protocol)! as EthereumProtocol)
+        .updateWalletState(conduit, walletState);
     }
   }
 }
