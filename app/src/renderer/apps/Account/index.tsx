@@ -18,6 +18,7 @@ import { useTrayApps } from '../store';
 import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { trackEvent } from 'renderer/logic/lib/track';
 
 export const AccountTrayApp = observer(() => {
   const { ship, theme, beacon } = useServices();
@@ -157,6 +158,7 @@ export const AccountTrayApp = observer(() => {
             onClick={async () => {
               AuthActions.logout(currentShip.patp);
               setActiveApp(null);
+              trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
           >
             <Icons name="Lock" />
