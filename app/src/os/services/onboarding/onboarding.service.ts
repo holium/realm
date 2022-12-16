@@ -622,6 +622,13 @@ export class OnboardingService extends BaseService {
       this.state.installRealm();
       return;
     }
+
+    if (this.state.checkoutComplete) {
+      // hosted ship, we shouldn't try to install
+      this.state.installRealm();
+      return;
+    }
+
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
     // example: INSTALL_MOON=~hostyv:realm,courier,wallet
     const parts: string[] = process.env.INSTALL_MOON.split(':');

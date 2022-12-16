@@ -6,13 +6,10 @@ import App from './App';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
-const isDebug = process.env.DEBUG_PROD === 'true';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
   Sentry.init({
-    enabled: isProd,
-    debug: isDebug,
     environment,
     dsn: process.env.SENTRY_DSN,
     integrations: [new BrowserTracing()],
