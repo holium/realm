@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
 // import _ from 'lodash';
-import styled from 'styled-components';
 import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 
@@ -16,6 +15,7 @@ import {
   Button,
   IconButton,
   TextButton,
+  NoScrollBar,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
@@ -26,12 +26,6 @@ import {
   SharingMode,
   UISettingsType,
 } from 'os/services/tray/wallet.model';
-
-const NoScrollBar = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-`;
 
 type CreateMode = 'default' | 'on-demand';
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';

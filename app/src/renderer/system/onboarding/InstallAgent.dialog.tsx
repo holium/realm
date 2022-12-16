@@ -19,6 +19,7 @@ import { trackEvent } from 'renderer/logic/lib/track';
 export const InstallAgent = observer(() => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
+  const [installing, setInstalling] = useState(false);
 
   const shipName = onboarding.ship!.patp;
   const shipNick = onboarding.ship!.nickname;
@@ -29,6 +30,8 @@ export const InstallAgent = observer(() => {
     setLoading(true);
     OnboardingActions.installRealm().finally(() => setLoading(false));
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
+    setInstalling(true);
+    OnboardingActions.installRealm().finally(() => setInstalling(false));
   };
 
   return (
@@ -124,7 +127,7 @@ export const InstallAgent = observer(() => {
           justifyContent="space-between"
         >
           <TextButton
-            // disabled={!onboarding.installer.isLoaded || loading}
+            disabled={!onboarding.installer.isLoaded || installing}
             style={{ minWidth: 45 }}
             onClick={async (_evt: any) => {
               setLoading(true);
