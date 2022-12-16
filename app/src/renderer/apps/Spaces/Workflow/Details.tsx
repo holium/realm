@@ -10,10 +10,10 @@ import {
   RadioGroup,
   FormControl,
   RadioList,
-  isValidImageUrl,
   isValidHexColor,
+  isImgUrl,
+  TextButton,
 } from 'renderer/components';
-import { toJS } from 'mobx';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { observer } from 'mobx-react';
@@ -62,13 +62,11 @@ export const createSpaceForm = (
     id: 'picture',
     form: spaceForm,
     initialValue: defaults.picture || '',
-    validationSchema: yup
-      .string()
-      .optional()
-      .matches(
-        /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-        'Enter correct url!'
-      ),
+    validationSchema: yup.string().optional(),
+    // .matches(
+    //   /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+    //   'Enter correct url!'
+    // ),
   });
   return {
     spaceForm,
@@ -87,7 +85,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
   const { inputColor, windowColor, textColor } = theme.currentTheme;
   const { workflowState, setState } = props;
   const colorPickerRef = useRef(null);
-
+  const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [crestOption, setCrestOption] = useState<CrestOptionType>(
     workflowState.image ? 'image' : 'color'
@@ -120,6 +118,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
         ...workflowState,
         ...obj,
       });
+    // console.log(workflowState);
   };
 
   useEffect(() => {
@@ -136,8 +135,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
     }
     if (props.edit) {
       const space = spaces.spaces.get(props.edit.space)!;
-      console.log('space', space);
-
       setWorkspaceState({
         ...space,
         description: space.description || '',
@@ -203,20 +200,31 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
             size="md"
           />
           <Flex flex={1} flexDirection="column" gap={4}>
-            <RadioGroup
-              customBg={windowColor}
-              textColor={textColor}
-              selected={crestOption}
-              options={[
-                { label: 'Color', value: 'color' },
-                { label: 'Image', value: 'image' },
-              ]}
-              onClick={(value: CrestOptionType) => {
-                setCrestOption(value);
-                setWorkspaceState({ crestOption: value });
-                setWorkspaceState({ crestOption: value });
-              }}
-            />
+            <Flex
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="flex-end"
+            >
+              <RadioGroup
+                customBg={windowColor}
+                textColor={textColor}
+                selected={crestOption}
+                options={[
+                  { label: 'Color', value: 'color' },
+                  { label: 'Image', value: 'image' },
+                ]}
+                onClick={(value: CrestOptionType) => {
+                  setCrestOption(value);
+                  setWorkspaceState({ crestOption: value });
+                  setWorkspaceState({ crestOption: value });
+                }}
+              />
+              {invalidImg ? (
+                <FormControl.Error>Invalid image</FormControl.Error>
+              ) : (
+                <></>
+              )}
+            </Flex>
 
             <Flex
               animate={{
@@ -301,6 +309,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
 
             <Flex
               flex={1}
+              flexDirection="column"
               initial={{ display: 'none', width: '100%' }}
               animate={{
                 display: crestOption === 'image' ? 'flex' : 'none',
@@ -318,17 +327,12 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                 wrapperStyle={{
                   borderRadius: 6,
                   paddingLeft: 6,
+                  paddingRight: 4,
                   backgroundColor: inputColor,
                 }}
                 value={picture.state.value}
                 // error={!avatar.computed.isDirty || avatar.computed.error}
-                onChange={(e: any) => {
-                  if (isValidImageUrl(e.target.value)) {
-                    setWorkspaceState({
-                      image: e.target.value,
-                      crestOption: 'image',
-                    });
-                  }
+                onChange={async (e: any) => {
                   if (e.target.value === '') {
                     setWorkspaceState({
                       image: '',
@@ -339,6 +343,27 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                 }}
                 onFocus={() => picture.actions.onFocus()}
                 onBlur={() => picture.actions.onBlur()}
+                rightInteractive
+                rightIcon={
+                  <TextButton
+                    onClick={async () => {
+                      const isImage: boolean = await isImgUrl(
+                        picture.state.value
+                      );
+                      if (isImage) {
+                        setInvalidImg(false);
+                        setWorkspaceState({
+                          image: picture.state.value,
+                          crestOption: 'image',
+                        });
+                      } else {
+                        setInvalidImg(true);
+                      }
+                    }}
+                  >
+                    Apply
+                  </TextButton>
+                }
               />
             </Flex>
           </Flex>
