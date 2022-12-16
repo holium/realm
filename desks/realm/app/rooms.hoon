@@ -14,8 +14,8 @@
 +$  state-0
   $:  %0
       live=live-state:store
+      list=list-state:store
       provider=provider-state:store
-      session=session-state:store
   ==
 ::
 --
