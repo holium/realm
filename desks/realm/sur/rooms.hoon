@@ -26,8 +26,9 @@
 ::
 +$  rooms  (map rid room)
 ::
-+$  live-state  room
-+$  context-state
+::
+:: +$  live-state  room
++$  session-state
   $:  provider=ship
       =rooms
   ==
@@ -74,6 +75,15 @@
       [%unban =ship]
   ==
 ::
++$  room-events
+  $%  [%entered =rid =ship]
+      [%left =rid =ship]
+      [%updated =room]
+      [%deleted =rid]
+      [%invited provider=ship =rid =title =ship]
+      [%kicked =rid =ship] 
+      [%chat-received from=ship content=cord]
+  ==
 +$  signal-action
   $%  
       [%signal from=ship to=ship rid=cord data=cord]

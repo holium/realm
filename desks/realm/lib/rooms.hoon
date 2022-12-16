@@ -2,155 +2,148 @@
 =<  [sur .]
 =,  sur
 |%
-++  server             %rooms
-++  client             %room
 ++  max-occupancy      6
 ++  max-rooms          256
 ::
-:: ++  leave-rooms
-::   :: remove ship from all rooms
-::   ::
-::   :: this enforces cleanliness
-::   |=  [rooms=(map rid room) =ship]
-::   ^-  (map rid room)
-::   :: TODO should this return bump %exit =ship cards?
-::   =/  looms  ~(val by rooms)
-::   :: create list of rooms to use |-
-::   :: -
-::   :: remove ship from every room
-::   =.  looms
-::     |-
-::     ?~  looms  ~
-::     =*  loom  i.looms
-::     =?  present.loom
-::         %-
-::         ~(has in present.loom)
-::         ship
-::       ::
-::       (~(del in present.loom) ship)
-::       ::
-::     [loom $(looms t.looms)]
-::   ::
-::   :: turn the list back into a map
-::   %-  ~(gas by rooms)
-::   |-
-::   ?~  looms  ~
-::   :-  [rid.i.looms i.looms]
-::   $(looms t.looms)
 ::
-::
-:: welcome to the fun part
 ++  enjs
   =,  enjs:format
   |%
-  ++  action
-    |=  act=^action
+  ++  signal-action
+    |=  act=^signal-action
     ^-  json
-    :: not used
-    ::
-    *json
-  ++  update
-    |=  upd=^update
-    ^-  json
-    %+  frond  %rooms-update
     %-  pairs
     :_  ~
     ^-  [cord json]
-    :-  -.upd
-    ?-  -.upd
-    %room
+    :-  -.act
+    ?-  -.act
+        %signal
       %-  pairs
       :~
-      ['room' (room:encode room.upd)]
-      ['diff' (update-diff:encode diff.upd)]
+        ['from' s+(scot %p from.act)]
+        ['to' s+(scot %p to.act)]
+        ['rid' s+rid.act]
+        ['data' s+data.act]
       ==
-    %rooms
-      :-  %a
-      %+  turn
-        ~(tap in rooms.upd)
-        |=  =room
-        (room:encode room)
-    %invited
+    ==
+  ::
+  ++  reaction
+    |=  rct=reaction:sur
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    :-  -.rct
+    ?-  -.rct
+        %room-entered 
       %-  pairs
       :~
-      ['provider' %s (scot %p provider.upd)]
-      ['id' %s rid.upd]
-      ['title' %s title.upd]
-      ['invitedBy' %s (scot %p ship.upd)]
+        ['rid' %s rid.rct]
+        ['ship' %s (scot %p ship.rct)]
       ==
-    %kicked
+        %room-left 
       %-  pairs
       :~
-      ['provider' %s (scot %p provider.upd)]
-      ['id' %s rid.upd]
-      ['title' %s title.upd]
-      ['kickedBy' %s (scot %p ship.upd)]
+        ['rid' %s rid.rct]
+        ['ship' %s (scot %p ship.rct)]
       ==
-    %chat 
+      ::
+        %room-created
+      %-  pairs
+      ['room' (room:encode room.rct)]~
+      ::
+        %room-updated
+      %-  pairs
+      ['rooms' (room:encode room.rct)]~
+      ::
+        %room-deleted
+      %-  pairs
+      ['rid' %s rid.rct]~
+      ::
+        %provider-changed
       %-  pairs
       :~
-      ['from' %s (scot %p from.upd)]
-      ['content' %s content.upd]
+        ['provider' %s (scot %p provider.rct)]
+        ['rooms' (rooms:encode rooms.rct)]
+      ==
+      ::
+        %invited
+      %-  pairs
+      :~
+        ['provider' %s (scot %p provider.rct)]
+        ['rid' %s rid.rct]
+        ['title' %s title.rct]
+        ['invitedBy' %s (scot %p ship.rct)]
+      ==
+      ::
+        %kicked
+      %-  pairs
+      :~
+        ['rid' %s rid.rct]
+        ['ship' %s (scot %p ship.rct)]
+      ==
+      ::
+        %chat-received 
+      %-  pairs
+      :~
+        ['from' %s (scot %p from.rct)]
+        ['content' %s content.rct]
       ==
     ==
   ++  view
-    |=  viw=^view
+    |=  vi=view:sur
     ^-  json
-    %+  frond  %rooms-view
     %-  pairs
     :_  ~
-    :-  -.viw
-    ?-  -.viw
-    %full
-      %-  pairs
-      :~
-      :-  %my-room
-        ?~  my-room.viw  ~
-        (room:encode u.my-room.viw)
-      :-  %provider
-        ?~  provider.viw  ~
-        [%s (scot %p u.provider.viw)]
-      ==
-    %present
-      (set-ship:encode ships.viw)
-    %whitelist
-      (set-ship:encode ships.viw)
-    %provider
-      (unit-ship:encode who.viw)
+    ^-  [cord json]
+    :-  -.vi
+    ?-  -.vi
+        %session
+      (session:encode session-state.vi)
+      ::
+        %room
+      (room:encode room.vi)
+      ::
+        %provider
+      s+(scot %p ship.vi)
     ==
   --
+::
 ++  encode
   =,  enjs:format
   |%
-  ++  room
-    |=  =^room
+  ++  session
+    |=  ses=session-state:sur
     ^-  json
     %-  pairs
     :~
-    ['id' %s rid.room]
-    ['provider' %s (scot %p provider.room)]
-    ['creator' %s (scot %p creator.room)]
-    ['access' %s access.room]
-    ['title' %s title.room]
-    ['capacity' (numb capacity.room)]
-    :-  'space'
-      :-  %s
-      ?~  space.room
-        ''
-      u.space.room
-    ['present' (set-ship present.room)]
-    ['whitelist' (set-ship whitelist.room)]
+      ['provider' s+(scot %p provider.ses)]
+      ['rooms' (rooms rooms.ses)]
     ==
-  ++  update-diff
-    |=  diff=^update-diff
+  ::
+  ++  rooms
+    |=  =rooms:sur
     ^-  json
-    %+  frond  -.diff
-    ?-  -.diff
-      %enter
-        [%s (scot %p ship.diff)]
-      %exit
-        [%s (scot %p ship.diff)]
-      %other  ~
+    %-  pairs
+    %+  turn  ~(tap by rooms)
+      |=  [=rid:sur =room:sur]
+      ^-  [cord json]
+      [rid (room:encode room)]
+  ::
+  ++  room
+    |=  =room:sur
+    ^-  json
+    %-  pairs
+    :~
+      ['rid' s+rid.room]
+      ['provider' s+(scot %p provider.room)]
+      ['creator' s+(scot %p creator.room)]
+      ['access' s+access.room]
+      ['title' s+title.room]
+      ['present' (set-ship present.room)]
+      ['whitelist' (set-ship whitelist.room)]
+      ['capacity' (numb capacity.room)]
+      ['path' ?~(path.room ~ s+u.path.room)]
     ==
   ++  set-ship
     |=  ships=(set @p)
@@ -159,76 +152,79 @@
     %+  turn
       ~(tap in ships)
       |=  her=@p
-      [%s (scot %p her)]
-  ++  unit-ship
-    |=  who=(unit @p)
+      s+(scot %p her)
+  ::
+  ++  current
+    |=  current=(unit @t)
     ^-  json
-    ?~  who
+    ?~  current
       ~
-    [%s (scot %p u.who)]
+    s+u.current
+    
   --
 ::
 ++  dejs
   =,  dejs:format
   |%
-  ++  update
+  ++  signal-action
     |=  jon=json
-    ^-  ^update
-    *^update
-    :: not used
-  ++  action
+    ^-  ^signal-action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~
+        [%signal signal]
+      ==
+    ::
+    ++  signal
+      %-  ot
+      :~  [%from patp]
+          [%to patp]
+          [%rid so]
+          [%data so]
+      ==
+    ++  patp
+      (su ;~(pfix sig fed:ag))
+  ::
+    ::
+  --
+  ++  session-action
     |=  jon=json
-    ^-  ^action
+    ^-  ^session-action
     =<  (decode jon)
     |%
     ++  decode
       %-  of
       :~  [%set-provider patp]
-          [%logout ul]
-          [%enter so]
-          [%exit ul]
-          [%create create]
-          [%set-title set-title]
-          [%set-access set-access]
-          [%set-capacity set-capacity]
-          [%set-space set-space]
+          [%reset-provider ul]
+          [%create-room add]
+          [%edit-room edit]
+          [%delete-room so]
+          [%enter-room so]
+          [%leave-room so]
           [%invite invite]
           [%kick kick]
-          [%delete so]
-          [%request so]
-          [%request-all ul]
-          [%chat so]
+          [%send-chat so]
       ==
     ++  patp
       (su ;~(pfix sig fed:ag))
     :: ::
-    ++  create
+    ++  add
       %-  ot
       :~  [%rid so]
           [%access access]
           [%title so]
-          :: [%enter bo]
+          [%path (mu so)]
       ==
-    ++  set-title
+    ::
+    ++  edit
       %-  ot
       :~  [%rid so]
           [%title so]
-      ==
-    ++  set-access
-      %-  ot
-      :~  [%rid so]
           [%access access]
       ==
-    ++  set-capacity
-      %-  ot
-      :~  [%rid so]
-          [%capacity ni]
-      ==
-    ++  set-space
-      %-  ot
-      :~  [%rid so]
-          [%space so]
-      ==
+    ::
     ++  invite
       %-  ot
       :~  [%rid so]
@@ -248,6 +244,31 @@
       ?:  =('public' p.json)
         %public
       !!
+    ::
+    ++  spc-pth
+      %-  ot
+      :~  [%ship patp]
+          [%space so]
+      ==
+     
+    ::
+    --
+  ::
+  ++  provider-action
+    |=  jon=json
+    ^-  provider-action:sur
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%set-online bo]
+          [%ban patp]
+          [%unban patp]
+      ==
+    ::
+    ++  patp
+      (su ;~(pfix sig fed:ag))
+    ::
     --
   --
 --
