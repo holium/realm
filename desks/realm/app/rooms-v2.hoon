@@ -132,7 +132,7 @@
 ++  abet
   ^-  (quip card _state)
   [(flop dek) state]
-::
+:: 
 ++  init
   ^+  hol
   =/  wire       [/provider-updates/(scot %p our.bol)]
@@ -350,7 +350,7 @@
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
         ?>  (~(has by rooms.provider.state) rid)  ::  room exists
-        ?>  (can-enter:hol rid src.bol)       ::  src.bol can enter
+        ?>  (can-enter:hol rid src.bol)           ::  src.bol can enter
         ::  TODO remove from other rooms if present
         :: =/  remove-result         (remove-present:helpers:rooms:hol src.bol rid)
         =/  room                      (~(got by rooms.provider.state) rid)
@@ -439,7 +439,6 @@
       %room-entered       (on-entered +.rct)
       %room-left          (on-left +.rct)
       %provider-changed   (on-provider +.rct)
-      :: %present          (on-suite-add +.rct)
       :: %invited          (on-joined +.rct)
       %kicked             (on-kicked +.rct)
     ==
@@ -589,48 +588,31 @@
     ::
     --
 ::
+
+::
+++  is-host    |=(p=@p =(our.bol p))
+++  is-banned  |=(p=@p (~(has in banned.provider.state) p))
+++  is-whitelisted
+  |=([=room:store =ship] (~(has in whitelist.room) ship))
+++  is-creator
+  |=  [=ship =rid:store]
+  ?~(rom=(~(get by rooms.provider.state) rid) | =(creator.u.rom ship))
+++  is-present
+  |=  [sip=ship =rid:store]
+  ^-  ?
+  ?~(rom=(~(get by rooms.provider.state) rid) | (~(has in present.u.rom) sip))
 ++  can-enter
   |=  [=rid:store =ship]
   ^-  ?
-  =/  room      (~(got by rooms.provider.state) rid)
-  ?:  =(%private access.room)
-    (is-whitelisted:hol room ship)
-  %.y
-::
-++  is-whitelisted
-  |=  [=room:store =ship]
-  ^-  ?
-  (~(has in whitelist.room) ship)
-::
-++  is-creator
-  |=  [=ship =rid:store]
-  ^-  ?
-  =/  room  (~(get by rooms.provider.state) rid)
-  ?~  room  %.n
-  =(creator.u.room ship)
-::
-++  is-banned
-  |=  [=ship]
-  ^-  ?
-  (~(has in banned.provider.state) ship)
-::
-++  is-present
-  |=  [=ship =rid:store]
-  ^-  ?
-  =/  room    (~(get by rooms.provider.state) rid)
-  ?~  room    %.n
-  (~(has in present.u.room) ship)
-::
-++  is-host
-  |=  [=ship]
-  ^-  ?
-  =(our.bol ship)
-
+  =+  room=(~(got by rooms.provider.state) rid)
+  ?.(=(%private access.room) & (is-whitelisted room ship))
 ++  is-provider
-  |=  [provider=ship src=ship]
+  |=  [hos=ship src=ship]
   ^-  ?
-  ?|
-    ?!(=(src our.bol))  ::  if the action is not from the provider
-    =(provider our.bol) ::  if the action is from the provider, and we are the provider
+  ::  XX: not sure the comments below are correct for
+  ::      the listed conditions.
+  ?|  ?!(=(src our.bol))  ::  if the action is not from the provider           
+      =(hos our.bol)      ::  if the action is from the provider, and we are the provider
   ==
+
 --
