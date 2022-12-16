@@ -63,6 +63,9 @@ const TrayAppStore = types
     setTrayAppHeight(height: number) {
       self.dimensions.height = height;
     },
+    getTrayAppHeight() {
+      return self.dimensions.height;
+    },
     closeActiveApp() {
       self.activeApp = null;
     },
