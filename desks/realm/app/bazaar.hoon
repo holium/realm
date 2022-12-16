@@ -21,7 +21,7 @@
         =docks:store
         =grid-index:store
         =recommendations:store
-        pending-installs=(map ship desk)
+        pending-installs=(map desk ship)
     ==
   --
 =|  state-0
@@ -359,9 +359,20 @@
             ::
             %live
           ?~  pyk=(~(get by peaks) desk.wave)  `state
-          =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-          =.  install-status.u.app  %installed
-          `state(catalog (~(put by catalog.state) desk.wave u.app))
+          =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs
+          =/  desks=(map desk ship)
+            %-  ~(rep by syncs)
+              |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+              (~(put by acc) sud.det her.det)
+          =.  host.u.app              (~(get by desks) desk.wave)
+          :: get rid of the pending-install that may have been added
+          =/  pending-install         (~(get by pending-installs.state) desk.wave)
+          =.  pending-installs.state  ?~(pending-install pending-installs.state (~(del by pending-installs) desk.wave))
+          =.  grid-index              (set-grid-index:helpers:bazaar desk.wave grid-index.state)
+          =.  catalog.state           (~(put by catalog.state) desk.wave u.app)
+          :_  state
+          :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
+          ==
         ::
             %held
           ?~  pyk=(~(get by peaks) desk.wave)  `state
@@ -411,7 +422,27 @@
       %rebuild-catalog   (rebuild-catalog +.action)
       %rebuild-stall     (rebuild-stall +.action)
       %clear-stall       (clear-stall +.action)
-    ==
+    ==    ::  +pre: prefix for scries to hood
+    ::
+    ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
+    ::  +get-sources:  (map desk [ship desk])
+    ::
+    ++  get-sources
+      ^-  (map desk [=ship =desk])
+      .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::  +get-syncs:
+    ::
+    ::    (map kiln-sync sync-state)
+    ::    where:
+    ::    %+  map
+    ::       (map [local=desk foreign=ship foreign=desk])
+    ::    [nun=@ta kid=(unit desk) let=@ud]
+    ++  get-syncs
+      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
+      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
+        %gx
+        (welp pre /kiln/syncs/noun)
+      ==
     ::
     ++  rebuild-catalog
       |=  [args=(map cord cord)]
@@ -571,7 +602,7 @@
         %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
         ::  queue this installation request, so that once alliance is complete,
         ::  we can automatically kick off the install
-        =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
+        =.  pending-installs.state  (~(put by pending-installs.state) desk ship)
         :_  state
         (snoc effects [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])])
       :_  state
@@ -919,6 +950,27 @@
           [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
           [%pass /tire %arvo %c %tire `~]
       ==
+    ::  +pre: prefix for scries to hood
+    ::
+    ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
+    ::  +get-sources:  (map desk [ship desk])
+    ::
+    ++  get-sources
+      ^-  (map desk [=ship =desk])
+      .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::  +get-syncs:
+    ::
+    ::    (map kiln-sync sync-state)
+    ::    where:
+    ::    %+  map
+    ::       (map [local=desk foreign=ship foreign=desk])
+    ::    [nun=@ta kid=(unit desk) let=@ud]
+    ++  get-syncs
+      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
+      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
+        %gx
+        (welp pre /kiln/syncs/noun)
+      ==
     ::
     ++  build-catalog
       |=  [args=(map cord cord)]
@@ -1052,14 +1104,21 @@
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs
+      =/  desks=(map desk ship)
+        %-  ~(rep by syncs)
+          |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+          (~(put by acc) sud.det her.det)
+      %-  (slog leaf+"{<desks>}" ~)
       ^-  [=catalog:store =grid-index:store]
-
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
         =/  install-status      (chad-to-status:helpers:bazaar:core chad.charge)
+        =/  sync                (~(get by desks) desk)
+        =/  host=(unit ship)    sync
         :: ~&  >>  [desk -.chad.charge install-status]
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge host install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
@@ -1262,13 +1321,6 @@
         ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
         (snoc effects [%give %fact [/updates ~] bazaar-reaction+!>([%treaties-loaded ship.treaty])])
       effects
-    :: get rid of the pending-install that may have been added
-    =/  pending-install  (~(get by pending-installs.state) ship.treaty)
-    ?~  pending-install  [effects state]
-    ?:  =(u.pending-install desk.treaty)
-      ~&  >>  "{<dap.bowl>}: {<[ship.treaty desk.treaty]>} removing pending install"
-      :_  state(pending-installs (~(del by pending-installs.state) ship.treaty desk.treaty))
-      (snoc effects [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])])
     [effects state]
   --
 ::
