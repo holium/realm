@@ -14,19 +14,29 @@ import {
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { trackEvent } from 'renderer/logic/lib/track';
 
 export const InstallAgent = observer(() => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
+  const [installing, setInstalling] = useState(false);
 
+  const completedCheckout = onboarding.checkoutComplete;
   const shipName = onboarding.ship!.patp;
   const shipNick = onboarding.ship!.nickname;
   const shipColor = onboarding.ship!.color!;
   const avatar = onboarding.ship!.avatar;
 
   const installRealm = () => {
+    if (completedCheckout) {
+      return;
+    }
+
     setLoading(true);
     OnboardingActions.installRealm().finally(() => setLoading(false));
+    trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
+    setInstalling(true);
+    OnboardingActions.installRealm().finally(() => setInstalling(false));
   };
 
   return (
@@ -87,7 +97,7 @@ export const InstallAgent = observer(() => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : onboarding.installer.isLoaded ? (
+              ) : onboarding.installer.isLoaded || completedCheckout ? (
                 <Icons ml={2} size={1} name="CheckCircle" />
               ) : (
                 <Icons ml={2} size={1} name="DownloadCircle" />
@@ -108,7 +118,7 @@ export const InstallAgent = observer(() => {
           >
             {onboarding.installer.state === 'error'
               ? `${onboarding.installer.errorMessage}`
-              : !onboarding.installer.isLoaded
+              : !onboarding.installer.isLoaded && !completedCheckout
               ? 'This will just take a minute'
               : 'Congrats! You are ready to enter a new world.'}
           </Text>
@@ -122,7 +132,7 @@ export const InstallAgent = observer(() => {
           justifyContent="space-between"
         >
           <TextButton
-            // disabled={!onboarding.installer.isLoaded || loading}
+            disabled={!onboarding.installer.isLoaded || installing}
             style={{ minWidth: 45 }}
             onClick={async (_evt: any) => {
               setLoading(true);

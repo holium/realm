@@ -7,6 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
+import { NoScrollBar } from 'renderer/components/NoScrollbar';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -52,7 +53,7 @@ export const OurHome = observer((props: OurHomeProps) => {
 
   return (
     <Flex flexDirection="row" height="calc(100vh - 50px)">
-      <Flex
+      <NoScrollBar
         flex={8}
         overflowY="auto"
         height="100%"
@@ -143,7 +144,7 @@ export const OurHome = observer((props: OurHomeProps) => {
           </Flex>
           {sidebarComponent}
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 });

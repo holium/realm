@@ -32,10 +32,13 @@ export const AppDock = observer(() => {
   const spacePath = spaces.selected?.path!;
   const dock = bazaar.getDock(spacePath);
 
+  // DO NOT REMOVE dock variable from useMemo dependencies
   const orderedList = useMemo(
     () => (spacePath ? bazaar.getDockApps(spacePath) : []),
-    [bazaar, spacePath]
+    [dock?.length, spacePath]
   );
+
+  console.log('orderedList', orderedList);
 
   const pinnedApps = useMemo(() => {
     return (

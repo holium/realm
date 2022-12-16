@@ -2,9 +2,8 @@ import { FC, useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import { rgba } from 'polished';
-import styled from 'styled-components';
 
-import { Flex, Text, Button, Spinner } from 'renderer/components';
+import { Flex, Text, Button, Spinner, NoScrollBar } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -18,12 +17,6 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { toJS } from 'mobx';
-
-const NoScrollBar = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none !important;
-  }
-`;
 
 export const SearchModes = observer(() => {
   const { bazaar, theme } = useServices();

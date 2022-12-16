@@ -19,6 +19,7 @@ import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
 import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
 import AccessGatePassed from 'renderer/system/onboarding/AccessGatePassed.dialog';
 import ViewCode from './ViewCode.dialog';
+import CheckInstallationDialog from './CheckInstallation.dialog';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
@@ -161,7 +162,7 @@ const selfHostedDialogs: DialogRenderers = {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
     onNext: async () =>
-      await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+      await OnboardingActions.setStep(OnboardingStep.PRE_INSTALLATION_CHECK),
     window: {
       id: OnboardingStep.ADD_SHIP,
       zIndex: 13,
@@ -177,6 +178,34 @@ const selfHostedDialogs: DialogRenderers = {
 };
 
 const completeProfileDialogs: DialogRenderers = {
+  [OnboardingStep.PRE_INSTALLATION_CHECK]: {
+    workflow: true,
+    firstStep: false,
+    hasCloseButton: false,
+    customNext: false,
+    component: (props: any) => <CheckInstallationDialog {...props} />,
+    isValidated: (state: any) => {
+      console.log('isValidated => %o', state.versionVerified);
+      return state && state.versionVerified;
+    },
+    onOpen: () => {
+      ShellActions.setBlur(true);
+    },
+    onNext: (data: any) => {
+      OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);
+    },
+    window: {
+      id: OnboardingStep.PRE_INSTALLATION_CHECK,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 520,
+        height: 490,
+      },
+    },
+  },
   [OnboardingStep.PROFILE_SETUP]: {
     workflow: true,
     hasCloseButton: false,

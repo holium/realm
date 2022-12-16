@@ -1,8 +1,11 @@
 import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
 import { AccessCode, HostingPlanet } from 'os/api/holium';
+import { DocketApi } from '../../api/docket';
+import { Conduit } from '@holium/conduit';
 
 export enum OnboardingStep {
+  PRE_INSTALLATION_CHECK = 'onboarding:pre-installation-check',
   DISCLAIMER = 'onboarding:disclaimer',
   ACCESS_GATE = 'onboarding:gated-access',
   ACCESS_GATE_PASSED = 'onboarding:access-gate-passed',
@@ -78,6 +81,7 @@ export const OnboardingStore = types
     encryptedPassword: types.maybe(types.string),
     code: types.maybe(types.string),
     planetWasTaken: false,
+    versionVerified: false,
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -155,6 +159,33 @@ export const OnboardingStore = types
     installRealm: flow(function* () {
       self.installer.set('loading');
       self.installer.set('loaded');
+    }),
+
+    preInstallSysCheck: flow(function* (conduit: Conduit) {
+      self.installer.set('loading');
+      try {
+        const apps = yield DocketApi.getApps(conduit);
+        if (!('groups' in apps)) throw new Error('groups 2 not installed');
+        const ver = apps['groups'].version;
+        console.log(ver);
+        const parts = ver.split('.');
+        // change version if needed . this is latest groups based on my latest ship OTA
+        if (
+          !(
+            Number.parseInt(parts[0]) >= 2 &&
+            Number.parseInt(parts[1]) >= 1 &&
+            Number.parseInt(parts[2]) >= 1
+          )
+        )
+          throw new Error('needs upgrade');
+        self.versionVerified = true;
+        self.installer.set('loaded');
+      } catch (error) {
+        console.error(error);
+        self.versionVerified = false;
+        self.installer.set('error');
+      }
+      return self.versionVerified;
     }),
 
     reset() {
