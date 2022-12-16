@@ -168,7 +168,15 @@ export const OnboardingStore = types
         if (!('groups' in apps)) throw new Error('groups 2 not installed');
         const ver = apps['groups'].version;
         console.log(ver);
-        if (Number.parseInt(ver.split('.')[0]) < 2)
+        const parts = ver.split('.');
+        // change version if needed . this is latest groups based on my latest ship OTA
+        if (
+          !(
+            Number.parseInt(parts[0]) >= 2 &&
+            Number.parseInt(parts[1]) >= 1 &&
+            Number.parseInt(parts[2]) >= 1
+          )
+        )
           throw new Error('needs upgrade');
         self.versionVerified = true;
         self.installer.set('loaded');
