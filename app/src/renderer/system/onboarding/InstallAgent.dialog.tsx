@@ -14,6 +14,7 @@ import {
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { trackEvent } from 'renderer/logic/lib/track';
 
 export const InstallAgent = observer(() => {
   const { onboarding } = useServices();
@@ -26,6 +27,9 @@ export const InstallAgent = observer(() => {
   const avatar = onboarding.ship!.avatar;
 
   const installRealm = () => {
+    setLoading(true);
+    OnboardingActions.installRealm().finally(() => setLoading(false));
+    trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => setInstalling(false));
   };
