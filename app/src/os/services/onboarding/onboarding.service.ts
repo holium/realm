@@ -56,6 +56,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.closeConduit': this.closeConduit,
     'realm.onboarding.confirmPlanetAvailable': this.confirmPlanetAvailable,
     'realm.onboarding.getStripeKey': this.getStripeKey,
+    'realm.onboarding.pre-install-syscheck': this.preInstallSysCheck,
   };
 
   static preload = {
@@ -120,6 +121,10 @@ export class OnboardingService extends BaseService {
 
     async getStripeKey() {
       return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
+    },
+
+    async preInstallSysCheck() {
+      return await ipcRenderer.invoke('realm.onboarding.pre-install-syscheck');
     },
 
     async prepareCheckout(billingPeriod: string) {
@@ -399,6 +404,13 @@ export class OnboardingService extends BaseService {
   ): Promise<{ invalid: boolean; accessCode: AccessCode | null }> {
     const accessCode = await this.core.holiumClient.getAccessCode(code);
     return { invalid: !accessCode, accessCode };
+  }
+
+  async preInstallSysCheck(_event: any) {
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    this.state.preInstallSysCheck(tempConduit);
   }
 
   async prepareCheckout(_event: any, billingPeriod: string) {

@@ -306,6 +306,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       );
       break;
     case 'pinned':
+      console.log(data);
       model._addPinned(data.pinned);
       break;
     case 'unpinned':
