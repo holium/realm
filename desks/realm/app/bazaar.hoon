@@ -286,19 +286,6 @@
     ++  get-sources
       ^-  (map desk [=ship =desk])
       .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
-    ::  +get-syncs:
-    ::
-    ::    (map kiln-sync sync-state)
-    ::    where:
-    ::    %+  map
-    ::       (map [local=desk foreign=ship foreign=desk])
-    ::    [nun=@ta kid=(unit desk) let=@ud]
-    ++  get-syncs
-      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
-      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
-        %gx
-        (welp pre /kiln/syncs/noun)
-      ==
     ::  +get-pikes:  (map desk [(unit [@p desk]) hash zest wic])
     ++  get-pikes
       ^-  pikes:hood
@@ -359,7 +346,7 @@
             ::
             %live
           ?~  pyk=(~(get by peaks) desk.wave)  `state
-          =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs
+          =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:helpers:bazaar
           =/  desks=(map desk ship)
             %-  ~(rep by syncs)
               |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
@@ -430,19 +417,6 @@
     ++  get-sources
       ^-  (map desk [=ship =desk])
       .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
-    ::  +get-syncs:
-    ::
-    ::    (map kiln-sync sync-state)
-    ::    where:
-    ::    %+  map
-    ::       (map [local=desk foreign=ship foreign=desk])
-    ::    [nun=@ta kid=(unit desk) let=@ud]
-    ++  get-syncs
-      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
-      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
-        %gx
-        (welp pre /kiln/syncs/noun)
-      ==
     ::
     ++  rebuild-catalog
       |=  [args=(map cord cord)]
@@ -639,7 +613,7 @@
     ++  recommend
       |=  [=app-id:store]
       ?>  =(our.bowl src.bowl)
-      :: ~&  >  ['recommend' our.bowl src.bowl]
+      ~&  >  ['recommend' our.bowl src.bowl]
       =.  recommendations.state     (~(put in recommendations.state) app-id)
       =/  app                       (~(got by catalog.state) app-id)
       =/  updated-stalls=[=stalls:store cards=(list card)]
@@ -647,7 +621,7 @@
         |=  [[path=space-path:spaces-store =stall:store] result=[=stalls:store cards=(list card)]]
         ?:  =('our' space.path)  result  ::  return result if our
         ?:  (we-host:helpers path)
-          :: ~&  >  ['we host, set recommended']
+          ~&  >  ['we host, set recommended']
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(put in rec-members) our.bowl)
           =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
@@ -660,6 +634,7 @@
         result
       =.  stalls.state            (~(uni by stalls.state) stalls.updated-stalls)
       =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%recommended app-id stalls.state])])
+      ~&  >>  "{<cards.updated-stalls>}"
       :_  state
       cards.updated-stalls
     ::
@@ -700,7 +675,9 @@
       %suite-added        (on-suite-add +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
-      %stall-update       (on-stall-update +.rct)
+      %stall-update
+        ~&  >>  "{<+.rct>}"
+        (on-stall-update +.rct)
       %rebuild-catalog    (on-rebuild-catalog +.rct)
       %rebuild-stall      (on-rebuild-stall +.rct)
       %clear-stall        (on-clear-stall +.rct)
@@ -765,7 +742,7 @@
     ++  on-stall-update
       |=  [path=space-path:spaces-store =stall:store det=(unit [=app-id:store app=(unit app:store)])]
       ::  are we deleting the app, or adding it?
-      :: %-  (slog leaf+"{<dap.bowl>}: [on-stall-update] {<det>}" ~)
+      %-  (slog leaf+"{<dap.bowl>}: [on-stall-update] {<det>}" ~)
       =/  wha  (what det)
       =/  updates=[det=(unit [=app-id:store app=(unit app:store)]) =catalog:store]
         ?+  wha     [det catalog.state]
@@ -775,6 +752,7 @@
             [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
+            ~&  >>   "add"
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
@@ -786,6 +764,17 @@
                 app
               ::  if it exists in docket, it must exist in catalog
               (~(got by catalog.state) app-id.det)
+            =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:helpers:bazaar
+            =/  desks=(map desk ship)
+              %-  ~(rep by syncs)
+                |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+                (~(put by acc) sud.det her.det)
+            =.  app
+              ?:  =(-.app %urbit)
+                ?>  ?=(%urbit -.app)
+                :: =.  host.app  (~(get by desks) desk)
+                app
+              app
             [(some [app-id.det (some app)]) (~(put by catalog.state) app-id.det app)]
         ==
       ::
@@ -924,6 +913,19 @@
     --
   ++  helpers
     |%
+        ::  +get-syncs:
+    ::
+    ::    (map kiln-sync sync-state)
+    ::    where:
+    ::    %+  map
+    ::       (map [local=desk foreign=ship foreign=desk])
+    ::    [nun=@ta kid=(unit desk) let=@ud]
+    ++  get-syncs
+      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
+      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
+        %gx
+        (welp pre /kiln/syncs/noun)
+      ==
     ::
     ++  initialize
       ^-  (quip card _state)
@@ -958,19 +960,6 @@
     ++  get-sources
       ^-  (map desk [=ship =desk])
       .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
-    ::  +get-syncs:
-    ::
-    ::    (map kiln-sync sync-state)
-    ::    where:
-    ::    %+  map
-    ::       (map [local=desk foreign=ship foreign=desk])
-    ::    [nun=@ta kid=(unit desk) let=@ud]
-    ++  get-syncs
-      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
-      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
-        %gx
-        (welp pre /kiln/syncs/noun)
-      ==
     ::
     ++  build-catalog
       |=  [args=(map cord cord)]
@@ -1104,7 +1093,7 @@
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
-      =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs
+      =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:helpers:bazaar
       =/  desks=(map desk ship)
         %-  ~(rep by syncs)
           |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
