@@ -897,7 +897,6 @@
     ++  initialize
       ^-  (quip card _state)
       =/  init                          (build-catalog ~)
-      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
       =.  grid-index.state              grid-index.init
       =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
       ?>  ?=(%spaces -.spaces-scry)
@@ -912,6 +911,7 @@
           [path [~]]
       =.  stalls.state        (~(gas by stalls.state) stalls)
       =.  docks.state         (~(gas by docks.state) docks)
+      =.  catalog.state       catalog.init
       :_  state
       :~  [%pass /docket %agent [our.bowl %docket] %watch /charges]
           [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
@@ -939,6 +939,7 @@
         =.  icon.native-app             'AppIconSettings'
         =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
       init
     ::
     ++  get-stall-apps
