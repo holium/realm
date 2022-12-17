@@ -7,7 +7,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-interface SelectPlanProps extends BaseDialogProps {
+export interface SelectPlanProps extends BaseDialogProps {
   patp: string;
 }
 
