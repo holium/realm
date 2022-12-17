@@ -296,6 +296,9 @@ const ERC20 = types
       const newTransactions = map.create(formattedTransactions);
       applySnapshot(self.transactions, getSnapshot(newTransactions));
     },
+    setBlock(block: number) {
+      self.block = block;
+    }
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;

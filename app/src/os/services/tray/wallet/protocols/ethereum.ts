@@ -70,8 +70,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
-    // this.updateWalletState(conduit, walletStore);
     console.log('watching updates')
+    this.updateWalletState(conduit, walletStore);
     axios
       .get(this.blockURL, {
         responseType: 'stream',
@@ -138,7 +138,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
                     .applyERC20Transactions(ethWallet.index, transfers);
                   ethWallet.data
                     .get(this.protocol)!
-                    .coins.get(asset.addr)!.block = currentBlock!;
+                    .coins.get(asset.addr)!.setBlock(currentBlock!);
                 }
               });
             }
@@ -194,10 +194,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
               ],
             },
           });
+          break;
         } catch (error) {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error);
             throw error;
           }
         }
@@ -230,10 +232,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
               ],
             },
           });
+          break;
         } catch (error) {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error)
             throw error;
           }
         }
@@ -369,10 +373,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
               ],
             },
           });
+          break;
         } catch (error) {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error)
             throw error;
           }
         }
@@ -407,10 +413,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
               ],
             },
           });
+          break;
         } catch (error) {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error);
             throw error;
           }
         }

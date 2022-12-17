@@ -22,6 +22,7 @@ export class Wallet {
   }
 
   watchUpdates(conduit: any, walletState: WalletStoreType) {
+    console.log('service watching updates')
     if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
       const lastProtocol = this.protocols.get(
         this.currentProtocol
