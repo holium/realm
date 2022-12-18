@@ -12,15 +12,9 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
-interface ViewCodeProps extends BaseDialogProps {
-  patp: string;
-}
-
-const ViewCode: FC<ViewCodeProps> = observer((props: ViewCodeProps) => {
+const ViewCode: FC<BaseDialogProps> = observer((_props: BaseDialogProps) => {
   const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const [accessCode, setAccessCode] = useState('');
   const { onboarding } = useServices();
   const planet = onboarding.planet!;

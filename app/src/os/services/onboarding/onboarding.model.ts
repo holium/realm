@@ -66,6 +66,7 @@ export const OnboardingShipModel = types
 
 export const OnboardingStore = types
   .model({
+    firstTime: types.optional(types.boolean, true),
     currentStep: OnboardingStep.DISCLAIMER,
     agreedToDisclaimer: false,
     email: types.maybe(types.string),
@@ -75,6 +76,7 @@ export const OnboardingStore = types
     planet: types.maybe(PlanetModel),
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
+    versionLoader: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
@@ -156,13 +158,12 @@ export const OnboardingStore = types
       }
     },
 
-    installRealm: flow(function* () {
-      self.installer.set('loading');
+    setRealmInstalled() {
       self.installer.set('loaded');
-    }),
+    },
 
     preInstallSysCheck: flow(function* (conduit: Conduit) {
-      self.installer.set('loading');
+      self.versionLoader.set('loading');
       try {
         const apps = yield DocketApi.getApps(conduit);
         if (!('groups' in apps)) throw new Error('groups 2 not installed');
@@ -179,11 +180,11 @@ export const OnboardingStore = types
         )
           throw new Error('needs upgrade');
         self.versionVerified = true;
-        self.installer.set('loaded');
+        self.versionLoader.set('loaded');
       } catch (error) {
         console.error(error);
         self.versionVerified = false;
-        self.installer.set('error');
+        self.versionLoader.set('error');
       }
       return self.versionVerified;
     }),
