@@ -39,12 +39,15 @@ export const DMs = observer((props: IProps) => {
   const [searchString, setSearchString] = useState<string>('');
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const previews = Array.from(courier.previews.values());
+  const previews = Array.from(courier.previews.values()).sort(
+    (a, b) => b.lastTimeSent - a.lastTimeSent
+  );
+  const lastTimeSent = previews[0]?.lastTimeSent;
 
   const fetchPreviews = useCallback(async () => {
     setIsFetching(true);
-    const previews = await ShipActions.getDMs();
-    courier.setPreviews(previews);
+    const newPreviews = await ShipActions.getDMs();
+    courier.setPreviews(newPreviews);
     setIsFetching(false);
   }, [courier]);
 
@@ -68,7 +71,7 @@ export const DMs = observer((props: IProps) => {
     [searchString]
   );
 
-  const dMList = useCallback(() => {
+  const DMList = () => {
     if (isFetching) {
       return (
         <Flex
@@ -102,19 +105,19 @@ export const DMs = observer((props: IProps) => {
       );
     }
 
-    const lastMessageText = previews[0].lastMessage[0]?.text;
-
     return (
       <WindowedList
-        key={lastMessageText}
+        key={lastTimeSent}
         width={388}
         height={544}
         rowHeight={57}
         data={previews}
-        sort={(a, b) => b.lastTimeSent - a.lastTimeSent}
         filter={searchFilter}
         rowRenderer={(dm, index) => (
-          <Box display="block" key={`${lastMessageText}-${index}`}>
+          <Box
+            display="block"
+            key={`dm-${index}-${dm.lastTimeSent}-${dm.pending}`}
+          >
             <ContactRow
               theme={theme}
               dm={dm}
@@ -127,7 +130,7 @@ export const DMs = observer((props: IProps) => {
         )}
       />
     );
-  }, [onSelectDm, previews, searchFilter, textColor, theme]);
+  };
 
   return (
     <Grid.Column
@@ -208,7 +211,7 @@ export const DMs = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {dMList()}
+              <DMList />
             </>
           )}
         </Grid.Column>
