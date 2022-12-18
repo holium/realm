@@ -71,7 +71,12 @@ export const ChatView = observer(
       [selectedChat.type]
     );
 
-    const messages = courier.dms.get(selectedChat.path)?.messages ?? [];
+    const messages =
+      courier.dms
+        .get(selectedChat.path)
+        ?.messages.slice()
+        .sort((a, b) => a.timeSent - b.timeSent) ?? [];
+    const lastMessage = messages[messages.length - 1];
 
     const getPath = useCallback(() => {
       const path = selectedChat.path.substring(1);
@@ -101,7 +106,7 @@ export const ChatView = observer(
     }, [selectedChat.isNew, fetchDms]);
 
     useEffect(() => {
-      const isFromUs = messages[0]?.author === ship?.patp;
+      const isFromUs = lastMessage?.author === ship?.patp;
       if (!isFromUs) {
         // Set current chat as read on new messages.
         if (isGroup) {
@@ -110,7 +115,7 @@ export const ChatView = observer(
           ShipActions.readDm(selectedChat.to as string);
         }
       }
-    }, [ship, isGroup, selectedChat.path, selectedChat.to, messages[0]?.index]);
+    }, [ship, isGroup, selectedChat.path, selectedChat.to, lastMessage?.index]);
 
     const { canUpload, promptUpload } = useFileUpload({ storage });
 
@@ -357,7 +362,7 @@ export const ChatView = observer(
             alignContent="center"
           >
             <ChatLog
-              key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${messages.length}-${messages[0]?.pending}-${loading}`}
+              key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${messages.length}-${lastMessage?.index}`}
               loading={loading}
               messages={messages}
               isGroup={isGroup}
