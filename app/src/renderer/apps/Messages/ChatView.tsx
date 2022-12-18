@@ -62,7 +62,7 @@ export const ChatView = observer(
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string>();
     const [loading, setLoading] = useState(false);
-    const { courier } = useServices();
+    const { courier, ship } = useServices();
     const { dmApp } = useTrayApps();
 
     const isGroup = useMemo(
@@ -92,24 +92,25 @@ export const ChatView = observer(
     useEffect(() => {
       if (!selectedChat.isNew) {
         fetchDms();
+      }
+
+      return () => {
+        setIsSending(false);
+        setLoading(false);
+      };
+    }, [selectedChat.isNew, fetchDms]);
+
+    useEffect(() => {
+      const isFromUs = messages[0]?.author === ship?.patp;
+      if (!isFromUs) {
+        // Set current chat as read on new messages.
         if (isGroup) {
           ShipActions.readGroupDm(selectedChat.path.substring(1));
         } else {
           ShipActions.readDm(selectedChat.to as string);
         }
       }
-      // when unmounted
-      return () => {
-        setIsSending(false);
-        setLoading(false);
-      };
-    }, [
-      isGroup,
-      fetchDms,
-      selectedChat.isNew,
-      selectedChat.path,
-      selectedChat.to,
-    ]);
+    }, [ship, isGroup, selectedChat.path, selectedChat.to, messages[0]?.index]);
 
     const { canUpload, promptUpload } = useFileUpload({ storage });
 
