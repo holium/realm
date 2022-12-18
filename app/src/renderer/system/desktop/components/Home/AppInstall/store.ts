@@ -108,9 +108,8 @@ export const AppInstallStore = types
       self.popoverId = popoverId;
       self.dimensions = dimensions;
       self.coords = calculatePopoverAnchorById(popoverId, {
-        dimensions,
         anchorOffset: {
-          x: 40,
+          x: -40,
           y: 20,
         },
       });

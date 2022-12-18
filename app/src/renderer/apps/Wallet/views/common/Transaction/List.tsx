@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 import { darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
+import { Flex, Icons, NoScrollBar, Text } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -17,11 +16,6 @@ import {
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 
-const NoScrollBar = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-`;
 interface InputProps {
   hoverBg: string;
 }
@@ -154,7 +148,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
         height={pending && !props.hidePending ? '165px' : '210px'}
         flexDirection="column"
         margin="auto"
-        overflow="scroll"
+        overflow="auto"
       >
         {transactions.length ? (
           transactions.map((transaction, index) => (

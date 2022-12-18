@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/prop-types */
 import { AnimatePresence, motion } from 'framer-motion';
 import * as React from 'react';
@@ -74,7 +73,7 @@ export const TooltipStyle = styled(
     flex-direction: column;
     width: max-content;
     height: max-content;
-    overflow: visible;
+    overflow: hidden;
     color: ${(props) => props.theme.colors.text.primary};
     box-shadow: ${(props) => props.theme.elevations.one};
     ${(
@@ -114,7 +113,7 @@ const baseMotionProps = {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.2,
         delay: 1,
         ease: 'easeOut',
       },
@@ -123,7 +122,7 @@ const baseMotionProps = {
       opacity: 0,
       y: 4,
       transition: {
-        duration: 0.2,
+        duration: 0.1,
       },
     },
   },

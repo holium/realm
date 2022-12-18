@@ -48,6 +48,20 @@ export const BazaarApi = {
     });
     return response.treaties;
   },
+  suspendApp: async (conduit: Conduit, desk: string) => {
+    conduit.poke({
+      app: 'hood',
+      mark: 'kiln-suspend',
+      json: desk,
+    });
+  },
+  resumeApp: async (conduit: Conduit, desk: string) => {
+    conduit.poke({
+      app: 'hood',
+      mark: 'kiln-revive',
+      json: desk,
+    });
+  },
   installApp: async (conduit: Conduit, body: InstallPoke) => {
     conduit.poke({
       app: 'bazaar',
@@ -284,8 +298,12 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
-      const { appId, app } = data['app-install-update'];
-      model._setAppStatus(appId, app);
+      const installUpdate = data['app-install-update'];
+      model._setAppStatus(
+        installUpdate.appId,
+        installUpdate.app,
+        installUpdate.grid
+      );
       break;
     case 'pinned':
       model._addPinned(data.pinned);
@@ -309,21 +327,30 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._updateStall(data['stall-update']);
       break;
     case 'joined-bazaar':
-      // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
       break;
     case 'treaties-loaded':
-      console.log(data);
       model._treatiesLoaded();
       break;
     case 'new-ally':
-      // console.log(data);
       const ally = data['new-ally'];
       model._allyAdded(ally.ship, ally.desks);
       break;
     case 'ally-deleted':
       // console.log(data);
       model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-catalog':
+      model._rebuildCatalog(data['rebuild-catalog']);
+      // model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-stall':
+      // model._allyDeleted(data['ally-deleted'].ship);
+      model._rebuildStall(data['rebuild-stall']);
+      break;
+    case 'clear-stall':
+      model._clearStall(data['clear-stall']);
+      // model._allyDeleted(data['ally-deleted'].ship);
       break;
     default:
       break;

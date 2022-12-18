@@ -1,17 +1,12 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { observer } from 'mobx-react';
 import { Input, Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-
-import { darken } from 'polished';
 import { useAppInstaller } from './store';
-import { RealmPopover } from '../Popover';
 import * as yup from 'yup';
-
 import { createField, createForm } from 'mobx-easy-form';
-import { SearchModes } from './SearchModes';
+import { AppSearchPopover } from './AppSearchPopover';
 
 interface AppSearchProps {
   mode: 'home' | 'space';
@@ -41,16 +36,15 @@ export const searchForm = (
   };
 };
 
+const dimensions = { height: 450, width: 550 };
+
 const AppSearchApp = observer((props: AppSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { spaces, theme } = useServices();
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
   const searchMode = appInstaller.searchMode;
   const searchPlaceholder = appInstaller.searchPlaceholder;
   const selectedShip = appInstaller.selectedShip;
-
-  const spacePath: string = spaces.selected?.path!;
 
   useEffect(() => {
     SpacesActions.scryAllies();
@@ -62,18 +56,18 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     appInstaller.setSearchString('');
     appInstaller.setSearchPlaceholder('Search...');
     appInstaller.setSelectedShip('');
-  }, [spacePath]);
+  }, [appInstaller]);
 
   const { search } = useMemo(() => searchForm(), []);
 
-  const clearInput = () => {
+  const clearInput = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.value = '';
       if (selectedShip !== '') {
         inputRef.current.focus();
       }
     }
-  };
+  }, [selectedShip]);
 
   useEffect(() => {
     if (searchString === '' && search.state.value !== '') {
@@ -81,43 +75,15 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       clearInput();
       console.log('selectedShip', selectedShip);
     }
-  }, [searchString]);
-
-  const isOpen = useMemo(() => searchMode !== 'none', [searchMode !== 'none']);
-  const backgroundColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? theme.currentTheme.windowColor
-        : darken(0.1, theme.currentTheme.windowColor),
-    [theme.currentTheme]
-  );
-  const dimensions = { height: 450, width: 550 };
+  }, [
+    clearInput,
+    search.actions,
+    search.state.value,
+    searchString,
+    selectedShip,
+  ]);
 
   const popoverId = 'app-install';
-  const popover = useMemo(
-    () => (
-      <RealmPopover
-        id={popoverId}
-        isOpen={isOpen}
-        coords={appInstaller.coords}
-        dimensions={appInstaller.dimensions}
-        onClose={() => {
-          appInstaller.setSearchMode('none');
-        }}
-        style={{
-          outline: 'none',
-          boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
-          borderRadius: 12,
-          maxHeight: '50vh',
-          overflowY: 'auto',
-          background: backgroundColor,
-        }}
-      >
-        <SearchModes />
-      </RealmPopover>
-    ),
-    [isOpen, appInstaller.coords, appInstaller.dimensions, theme.currentTheme]
-  );
 
   const width = props.mode === 'home' ? 500 : 450;
 
@@ -180,7 +146,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           }
         }}
         defaultValue={search.state.value}
-        onChange={(evt: any) => {
+        onChange={(evt) => {
           evt.stopPropagation();
           search.actions.onChange(evt.target.value);
           appInstaller.setSearchString(evt.target.value);
@@ -197,7 +163,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
             }
           }
         }}
-        onFocus={(evt: any) => {
+        onFocus={(evt) => {
           evt.stopPropagation();
           appInstaller.open(`${popoverId}-trigger`, dimensions);
           if (selectedShip) {
@@ -214,11 +180,11 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           }
           search.actions.onFocus();
         }}
-        onBlur={(e: any) => {
+        onBlur={() => {
           search.actions.onBlur();
         }}
       />
-      {popover}
+      <AppSearchPopover />
     </Flex>
   );
 });

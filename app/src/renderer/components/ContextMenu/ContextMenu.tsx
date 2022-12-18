@@ -1,114 +1,93 @@
-import React from 'react';
-import useContextMenu from './useContextMenu';
-import useSystemContextMenu from './useSystemContextMenu';
-
-import { MenuItem, MenuItemProps } from '../MenuItem';
+import {
+  MouseEventHandler,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
-import { MenuOrientation } from 'os/lib/anchor-point';
+import { useContextMenu } from 'renderer/components/ContextMenu';
+import { MenuItem } from '../MenuItem';
 
-export interface ContextMenuProps {
-  isComponentContext?: boolean;
-  position?: 'above' | 'below';
-  orientation?: MenuOrientation;
-  adaptive?: boolean;
-  style?: any;
-  textColor: string;
-  containerId: string;
-  parentRef: any;
-  customBg?: string;
-  menuItemtype?: 'neutral' | 'brand';
-  menu: any[] | (() => any[]);
-}
+const WIDTH = 180;
+const MAX_HEIGHT = 300;
 
-export const ContextMenu = (props: ContextMenuProps) => {
-  const {
-    position,
-    containerId,
-    parentRef,
-    style,
-    menu,
-    menuItemtype,
-    customBg,
-    textColor,
-    isComponentContext,
-    orientation,
-    adaptive,
-  } = props;
-  const contextMenuRef = React.useRef();
-  let anchorPoint;
-  let show;
-  let setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  let _menu: any[] =
-    (typeof menu === 'function' && menu()) || (menu as any[]) || [];
-  if (isComponentContext) {
-    const context = useContextMenu(
-      containerId,
-      parentRef,
-      contextMenuRef,
-      (_menu.length + 1) * 32 + 16, // the padding plus each element,
-      position,
-      orientation,
-      adaptive
-    );
-    anchorPoint = context.anchorPoint;
-    show = context.show;
-    setShow = context.setShow;
-  } else {
-    const systemContext = useSystemContextMenu();
-    anchorPoint = systemContext.anchorPoint;
-    show = systemContext.show;
-    setShow = systemContext.setShow;
-  }
+const getAnchorPoint = (e: MouseEvent, menu: HTMLDivElement | null) => {
+  const menuWidth = WIDTH;
+  const menuHeight = Math.min(menu?.scrollHeight || 0, MAX_HEIGHT);
 
-  const sectionsArray = _menu.reduce(
-    (arr, obj: MenuItemProps, index: number) => {
-      if (!index || arr[arr.length - 1][0].section !== obj.section) {
-        return arr.concat([
-          [
-            <MenuItem
-              key={index}
-              id={obj.id}
-              color={obj.disabled ? rgba(textColor, 0.7) : textColor}
-              customBg={customBg}
-              type={menuItemtype}
-              {...obj}
-              onClick={(evt: React.MouseEventHandler<HTMLElement>) => {
-                setShow(false);
-                obj.onClick(evt);
-              }}
-            />,
-          ],
-        ]);
-      }
-      arr[arr.length - 1].push(
-        <MenuItem
-          key={index}
-          id={obj.id}
-          color={obj.disabled ? rgba(textColor, 0.7) : textColor}
-          customBg={customBg}
-          type={menuItemtype}
-          {...obj}
-          onClick={(evt: React.MouseEventHandler<HTMLElement>) => {
-            setShow(false);
-            obj.onClick(evt);
-          }}
-        />
-      );
-      return arr;
+  const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
+  const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
+
+  const offset = 3;
+  const x = willGoOffScreenHorizontally
+    ? e.pageX - menuWidth - offset
+    : e.pageX + offset;
+  const y = willGoOffScreenVertically
+    ? e.pageY - menuHeight - offset
+    : e.pageY + offset;
+
+  return { x, y };
+};
+
+export type ContextMenuOption = {
+  id?: string;
+  label: string;
+  disabled?: boolean;
+  section?: number;
+  onClick: (e: MouseEventHandler<HTMLElement>) => void;
+};
+
+export const ContextMenu = () => {
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const { getColors, getOptions } = useContextMenu();
+  const root = document.getElementById('root');
+
+  const [show, setShow] = useState(false);
+  const clickedRef = useRef<HTMLElement | null>(null);
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+
+  const handleClick = useCallback((e: MouseEvent) => {
+    setShow(false);
+    if (contextMenuRef.current?.contains(e.target as Node)) {
+      return;
+    }
+  }, []);
+
+  const handleContextMenu = useCallback(
+    (e: MouseEvent) => {
+      setAnchorPoint(getAnchorPoint(e, contextMenuRef.current));
+      clickedRef.current = e.target as HTMLElement;
+      e.preventDefault();
+      setShow(true);
     },
-    []
+    [setAnchorPoint]
   );
 
-  // if (show) {
+  useEffect(() => {
+    if (!root) return;
+    root.addEventListener('click', handleClick);
+    root.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      root.removeEventListener('click', handleClick);
+      root.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [handleClick, handleContextMenu, root]);
+
+  if (!clickedRef.current) return <div />;
+
+  const containerId = clickedRef.current.id;
+  const contextualOptions = getOptions(containerId);
+  const contextualColors = getColors(containerId);
+
   return (
     <Portal>
       <MenuWrapper
-        key={containerId}
-        id={`${containerId}-context-menu`}
         className="menu"
-        customBg={customBg}
+        customBg={contextualColors.backgroundColor}
         initial={{
           opacity: 0,
         }}
@@ -125,38 +104,46 @@ export const ContextMenu = (props: ContextMenuProps) => {
             duration: 0.1,
           },
         }}
-        // @ts-expect-error
         ref={contextMenuRef}
         style={{
           y: anchorPoint.y,
           x: anchorPoint.x,
           display: show ? 'block' : 'none',
-          ...style,
+          width: WIDTH,
+          maxHeight: MAX_HEIGHT,
+          overflowY: 'auto',
         }}
       >
-        {sectionsArray.map((menuSection: any[], index: number) => {
-          let divider = <hr />;
-          if (index === sectionsArray.length - 1) {
-            // @ts-expect-error
-            divider = undefined;
-          }
+        {contextualOptions.map((option, index: number) => {
+          const divider =
+            index > 0 &&
+            contextualOptions[index - 1].section !== option.section;
+
           return (
-            <section key={`section-${index}`}>
-              {menuSection}
-              {divider}
-            </section>
+            <div key={option.label}>
+              {divider && <hr />}
+              <MenuItem
+                id={option.id}
+                label={option.label}
+                color={
+                  option.disabled
+                    ? rgba(contextualColors.textColor, 0.7)
+                    : contextualColors.textColor
+                }
+                customBg={contextualColors.backgroundColor}
+                type="neutral"
+                onClick={(e) => {
+                  setShow(false);
+                  clickedRef.current = null;
+                  option.onClick(e);
+                }}
+              />
+            </div>
           );
         })}
       </MenuWrapper>
     </Portal>
   );
-  // }
-  // return <></>;
-};
-
-ContextMenu.defaultProps = {
-  menuItemtype: 'neutral',
-  position: 'below',
 };
 
 export default ContextMenu;

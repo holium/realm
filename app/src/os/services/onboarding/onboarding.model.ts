@@ -1,8 +1,11 @@
 import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
 import { AccessCode, HostingPlanet } from 'os/api/holium';
+import { DocketApi } from '../../api/docket';
+import { Conduit } from '@holium/conduit';
 
 export enum OnboardingStep {
+  PRE_INSTALLATION_CHECK = 'onboarding:pre-installation-check',
   DISCLAIMER = 'onboarding:disclaimer',
   ACCESS_GATE = 'onboarding:gated-access',
   ACCESS_GATE_PASSED = 'onboarding:access-gate-passed',
@@ -14,6 +17,7 @@ export enum OnboardingStep {
   SELECT_HOSTING_PLAN = 'onboarding:hosted:select-hosting-plan',
   STRIPE_PAYMENT = 'onboarding:hosted:stripe_payment',
   CONFIRMATION = 'onboarding:hosted:confirmation',
+  VIEW_CODE = 'onboarding:hosted:view-code',
   CONNECTING_SHIP = 'onboarding:connecting-ship',
   PROFILE_SETUP = 'onboarding:profile-setup',
   SET_PASSWORD = 'onboarding:set-password',
@@ -23,8 +27,8 @@ export enum OnboardingStep {
 export const PlanetModel = types.model({
   patp: types.string,
   booted: types.boolean,
-  priceMonthly: types.number,
-  priceAnnual: types.number,
+  priceMonthly: types.maybe(types.number),
+  priceAnnual: types.maybe(types.number),
 });
 
 export const AccessCodeModel = types.model({
@@ -62,6 +66,7 @@ export const OnboardingShipModel = types
 
 export const OnboardingStore = types
   .model({
+    firstTime: types.optional(types.boolean, true),
     currentStep: OnboardingStep.DISCLAIMER,
     agreedToDisclaimer: false,
     email: types.maybe(types.string),
@@ -71,11 +76,14 @@ export const OnboardingStore = types
     planet: types.maybe(PlanetModel),
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
+    versionLoader: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
     code: types.maybe(types.string),
+    planetWasTaken: false,
+    versionVerified: false,
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -107,6 +115,10 @@ export const OnboardingStore = types
 
     setPlanet(planet: HostingPlanet) {
       self.planet = PlanetModel.create(planet);
+    },
+
+    setPlanetWasTaken(wasTaken: boolean) {
+      self.planetWasTaken = wasTaken;
     },
 
     setEncryptedPassword(passwordHash: string) {
@@ -146,9 +158,35 @@ export const OnboardingStore = types
       }
     },
 
-    installRealm: flow(function* () {
-      self.installer.set('loading');
+    setRealmInstalled() {
       self.installer.set('loaded');
+    },
+
+    preInstallSysCheck: flow(function* (conduit: Conduit) {
+      self.versionLoader.set('loading');
+      try {
+        const apps = yield DocketApi.getApps(conduit);
+        if (!('groups' in apps)) throw new Error('groups 2 not installed');
+        const ver = apps['groups'].version;
+        console.log(ver);
+        const parts = ver.split('.');
+        // change version if needed . this is latest groups based on my latest ship OTA
+        if (
+          !(
+            Number.parseInt(parts[0]) >= 2 &&
+            Number.parseInt(parts[1]) >= 1 &&
+            Number.parseInt(parts[2]) >= 1
+          )
+        )
+          throw new Error('needs upgrade');
+        self.versionVerified = true;
+        self.versionLoader.set('loaded');
+      } catch (error) {
+        console.error(error);
+        self.versionVerified = false;
+        self.versionLoader.set('error');
+      }
+      return self.versionVerified;
     }),
 
     reset() {

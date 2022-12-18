@@ -5,10 +5,6 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-interface SelectPlanProps extends BaseDialogProps {
-  patp: string;
-}
-
 function useInterval(callback: any, delay: number) {
   const savedCallback = useRef();
 
@@ -28,9 +24,13 @@ function useInterval(callback: any, delay: number) {
   }, [delay]);
 }
 
-const HostingConfirmation: FC<SelectPlanProps> = observer(
-  (props: SelectPlanProps) => {
+const ASSUME_ERROR_DURATION = 1000 * 60 * 30;
+
+const HostingConfirmation: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
     const [loading, setLoading] = useState(true);
+    const [startTime, _] = useState(Date.now());
+    const [error, setError] = useState('');
     const { onboarding } = useServices();
     const planet = onboarding.planet!;
 
@@ -41,7 +41,12 @@ const HostingConfirmation: FC<SelectPlanProps> = observer(
             setLoading(false);
             props.onNext && props.onNext();
           } else {
-            console.log('still loading...');
+            const now = Date.now();
+            if (now - startTime > ASSUME_ERROR_DURATION) {
+              setError(
+                'Something may have gone wrong, please contact support@holium.com'
+              );
+            }
           }
         })
         .catch((reason) => {
@@ -74,7 +79,7 @@ const HostingConfirmation: FC<SelectPlanProps> = observer(
             </Box>
             <Text> {planet.patp} </Text>
           </Flex>
-          {loading ? (
+          {!error ? (
             <>
               <Box>
                 <Text variant="body">

@@ -10,15 +10,16 @@
     "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish always --config.publish.releaseType=prerelease",
-    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish always --config.publish.releaseType=prerelease",
-    "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish always --config.publish.releaseType=prerelease",
+    "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
+    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
+    "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish never",
     "package:release:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish always --config.publish.releaseType=release",
     "package:release:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish always --config.publish.releaseType=release",
     "package:release:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish always --config.publish.releaseType=release",
     "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env DEBUG_PROD=true INSTALL_MOON=bypass NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
+    "start:onboard": "cross-env DEBUG_PROD=true INSTALL_MOON='~hostyv:realm,courier' NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
     "dev:cursor": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",
@@ -39,10 +40,13 @@
     ]
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^1.6.6",
     "@cliqz/adblocker-electron": "^1.23.8",
     "@dhaiwat10/react-link-preview": "^1.14.0",
     "@radix-ui/react-popover": "^1.0.0",
     "@react-hook/mouse-position": "^4.1.3",
+    "@sentry/react": "^7.24.2",
+    "@sentry/tracing": "^7.24.2",
     "@stitches/react": "^1.2.8",
     "@stripe/react-stripe-js": "^1.9.0",
     "@stripe/stripe-js": "^1.32.0",
@@ -130,7 +134,7 @@
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^3.4.1",
     "detect-port": "^1.3.0",
-    "electron": "^19.0.0",
+    "electron": "^22.0.0",
     "electron-builder": "^23.3.3",
     "electron-devtools-installer": "^3.2.0",
     "electron-notarize": "^1.2.1",
@@ -176,7 +180,7 @@
     ]
   },
   "build": {
-    "electronVersion": "21.0.0-alpha.5",
+    "electronVersion": "22.0.0",
     "productName": "Realm",
     "appId": "org.holium.Realm",
     "asar": true,
@@ -218,7 +222,8 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "appx"
       ]
     },
     "linux": {

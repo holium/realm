@@ -29,7 +29,7 @@ export const SystemApp: FC<any> = observer(() => {
 
   return (
     <Flex height={'100%'}>
-      <Flex gap={0} flexDirection="row" flex={5} overflowX={'scroll'}>
+      <Flex gap={0} flexDirection="row" flex={5} overflowX="hidden">
         {/* left hand side, list selector view */}
         <Flex gap={12} flexDirection="column" p="12px">
           <Flex
@@ -87,7 +87,7 @@ export const SystemApp: FC<any> = observer(() => {
             />
           </Flex> */}
 
-          <Flex overflowY="scroll" flexDirection="row" flex={4}>
+          <Flex overflowY="auto" flexDirection="row" flex={4}>
             {/* menu / list  */}
             <RadioList
               customBg={windowColor}

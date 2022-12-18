@@ -4,7 +4,7 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 ## Getting started
 
-Install all dependencies with `yarn` or `npm install`.
+You should build the project from root with `yarn` so that all the libs build properly.
 
 **Note**: Run `yarn dev:cursor` one time to build the `mouse.js` preload. Need to refactor the default build
 process to include this step.
@@ -22,15 +22,15 @@ You can add a record for your development application in the following format:
   "ballot-dev": {
     "id": "ballot-dev",
     "title": "Ballot - Dev",
-    "type": "web",
+    "type": "dev",
     "color": "#cebef0",
     "icon": "https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg",
+    "config": {
+      "size": [6, 8],
+      "showTitlebar": true,
+      "titlebarBorder": false
+    },
     "web": {
-      // "openFullscreen": true,
-      "dimensions": {
-        "width": 1024,
-        "height": 768
-      },
       "url": "http://localhost:3000/apps/ballot/"
     }
   }
@@ -60,14 +60,6 @@ The project is structured with the goal of having a seperate process sync data f
 - `/core` is the core background process libs for syncing state and managing data.
 - `/background` is the background process logic, starts a tray icon for Realm.
 
-## Layers of the UI
-
-Layer 0: Background
-Layer 1: WindowManager
-Layer 2: SystemBar
-Layer 3: TrayMenus
-Layer 4: Modals, ContextMenu, Tooltips, Popovers
-
 ## Packaging for release
 
 Running the below command will place the build output at `/release/build`.
@@ -80,4 +72,73 @@ If you include `DEBUG_PROD=true` you can open dev tools and check for errors.
 
 ```zsh
 npx cross-env DEBUG_PROD=true yarn package
+```
+
+## Linking the libs
+
+#### Yarn
+
+```zsh
+# In the root directory
+yarn
+```
+
+#### Yarn link /libs
+
+Link all libs (It'll take a little while):
+
+```zsh
+yarn link:all
+```
+
+Or link them individually:
+
+`@holium/design-system`:
+
+```zsh
+cd lib/design-system
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/design-system"
+```
+
+`@holium/realm-multiplayer`:
+
+```zsh
+cd lib/multiplayer
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/realm-multiplayer"
+```
+
+`@holium/conduit`:
+
+```zsh
+cd lib/conduit
+
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/conduit"
+```
+
+`@holium/realm-room`:
+
+```zsh
+cd lib/room
+
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/realm-room"
 ```

@@ -56,8 +56,6 @@ export interface IAppUpdater {
 }
 
 log.transports.file.level = isDevelopment ? 'debug' : 'info';
-// log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
-// log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
 
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
@@ -66,6 +64,11 @@ export class AppUpdater implements IAppUpdater {
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     autoUpdater.autoDownload = false;
+    // proxy private github repo requests
+    autoUpdater.setFeedURL({
+      provider: 'generic',
+      url: process.env.AUTOUPDATE_FEED_URL,
+    });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
         'Error: ',
@@ -108,14 +111,14 @@ export class AppUpdater implements IAppUpdater {
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
-    setInterval(() => {
-      if (!this.manualCheck) {
-        // gracefully ignore if no internet when attempting to auto update
-        if (net.isOnline()) {
-          autoUpdater.checkForUpdates();
-        }
-      }
-    }, 600000);
+    // setInterval(() => {
+    //   if (!this.manualCheck) {
+    //     // gracefully ignore if no internet when attempting to auto update
+    //     if (net.isOnline()) {
+    //       autoUpdater.checkForUpdates();
+    //     }
+    //   }
+    // }, 600000);
     // gracefully ignore if no internet when attempting to auto update
     if (net.isOnline()) {
       autoUpdater.checkForUpdates();
@@ -182,9 +185,10 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-  if (isDevelopment) {
-    await installExtensions();
-  }
+  // TODO fix the warnings and errors with this
+  // if (isDevelopment) {
+  //   await installExtensions();
+  // }
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
@@ -223,7 +227,7 @@ const createWindow = async () => {
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
-  MediaHelper.registerListeners(mainWindow);
+  MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

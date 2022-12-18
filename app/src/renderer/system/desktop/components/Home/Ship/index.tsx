@@ -1,13 +1,13 @@
-import { FC, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-
 import { AnimatePresence } from 'framer-motion';
 import { Flex, Icons, IconButton, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
+import { NoScrollBar } from 'renderer/components/NoScrollbar';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -15,13 +15,13 @@ interface OurHomeProps {
   isOpen?: boolean;
 }
 
-export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
+export const OurHome = observer((props: OurHomeProps) => {
   const { isOpen } = props;
   const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
-  const sidebarComponent = useMemo(() => {
-    return (
+  const sidebarComponent = useMemo(
+    () => (
       <AnimatePresence>
         {sidebar !== null && (
           <Flex
@@ -40,8 +40,9 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           </Flex>
         )}
       </AnimatePresence>
-    );
-  }, [sidebar]);
+    ),
+    [sidebar]
+  );
 
   const highlightColor = '#4E9EFD';
 
@@ -52,7 +53,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
 
   return (
     <Flex flexDirection="row" height="calc(100vh - 50px)">
-      <Flex
+      <NoScrollBar
         flex={8}
         overflowY="auto"
         height="100%"
@@ -73,8 +74,8 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           mt={40}
           flexDirection="row"
           alignItems="center"
-          justifyContent={'center'}
-          width={'100%'}
+          justifyContent="center"
+          width="100%"
         >
           <Flex>
             {ship && (
@@ -87,7 +88,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               />
             )}
           </Flex>
-          <AppSearchApp mode={'home'} />
+          <AppSearchApp mode="home" />
           <Flex justifyContent="flex-end">
             <IconButton
               size={3}
@@ -139,11 +140,11 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             flexWrap="wrap"
             flexDirection="row"
           >
-            <AppGrid isOpen={isOpen} tileSize="xl2" />
+            <AppGrid tileSize="xl2" />
           </Flex>
           {sidebarComponent}
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 });

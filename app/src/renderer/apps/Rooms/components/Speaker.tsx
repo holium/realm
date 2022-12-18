@@ -1,42 +1,37 @@
-import { FC, useRef, useState } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import {
-  ContextMenu,
-  Flex,
-  Icons,
-  Text,
-  Sigil,
-  FlexProps,
-} from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Icons, Text, Sigil, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
-import { rgba, darken } from 'polished';
+import { darken } from 'polished';
 import { useRooms } from '../useRooms';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 interface ISpeaker {
   person: string;
   cursors?: boolean;
-  type: 'host' | 'speaker' | 'listener';
+  type: 'our' | 'speaker' | 'listener' | 'creator';
 }
 
 const speakerType = {
-  host: 'Host',
+  our: 'You',
+  creator: 'Creator',
   speaker: 'Speaker',
   listener: 'Listener',
 };
 
-export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
+export const Speaker = observer((props: ISpeaker) => {
   const { person, type } = props;
   const { ship, theme, contacts } = useServices();
-  const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
   const roomsManager = useRooms();
+  const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
-  // const [peer, setPeer] = useState<RemoteParticipant | undefined>();
-  const [isStarted, setIsStarted] = useState(false);
   const metadata = contacts.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
@@ -44,38 +39,38 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
     ? roomsManager.protocol.local
     : roomsManager.protocol.peers.get(person);
 
-  const contextMenuItems = [
-    {
-      id: `room-speaker-${person}-reconnect`,
-      label: 'Reconnect',
-      disabled: peer?.status === PeerConnectionState.Connected,
-      onClick: (evt: any) => {
-        console.log('reconnect', peer);
-        // if (peer) {
-        //   (peer as RemotePeer).dial();
-        // } else {
-        //   roomsManager.protocol.retry(person);
-        // }
-        (roomsManager.protocol as RealmProtocol).retry(person);
-        evt.stopPropagation();
-      },
-    },
-  ];
-
-  // only the creator can kick people
-  if (ship!.patp === roomsManager.currentRoom!.room!.creator) {
-    contextMenuItems.push({
-      // @ts-expect-error
-      style: { color: '#FD4E4E' },
-      id: `room-speaker-${person}-kick`,
-      label: 'Kick',
-      loading: false,
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        roomsManager.protocol.kick(person);
-      },
-    });
-  }
+  const contextMenuOptions = useMemo(
+    () =>
+      [
+        {
+          id: `room-speaker-${person}-reconnect`,
+          label: 'Reconnect',
+          disabled: peer?.status === PeerConnectionState.Connected,
+          onClick: (evt: any) => {
+            (roomsManager.protocol as RealmProtocol).retry(person);
+            evt.stopPropagation();
+          },
+        },
+        // only the creator can kick people
+        ship!.patp === roomsManager.currentRoom!.room!.creator && {
+          style: { color: '#FD4E4E' },
+          id: `room-speaker-${person}-kick`,
+          label: 'Kick',
+          loading: false,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            roomsManager.protocol.kick(person);
+          },
+        },
+      ].filter(Boolean) as ContextMenuOption[],
+    [
+      peer?.status,
+      person,
+      roomsManager.currentRoom,
+      roomsManager.protocol,
+      ship,
+    ]
+  );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
 
@@ -99,7 +94,16 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
     sublabel = <BeatLoader size={6} speedMultiplier={0.65} />;
 
   if (peerState === PeerConnectionState.Disconnected)
-    sublabel = <Sublabel {...textProps}>Bad connection</Sublabel>;
+    sublabel = <Sublabel {...textProps}>Disconnected</Sublabel>;
+
+  useEffect(() => {
+    if (
+      person !== ship?.patp &&
+      contextMenuOptions !== getOptions(`room-speaker-${person}`)
+    ) {
+      setOptions(`room-speaker-${person}`, contextMenuOptions);
+    }
+  }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
 
   return (
     <SpeakerWrapper
@@ -156,18 +160,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         </Flex>
         {sublabel}
       </Flex>
-      {person !== ship?.patp && (
-        <ContextMenu
-          isComponentContext
-          textColor={theme.currentTheme.textColor}
-          customBg={rgba(theme.currentTheme.windowColor, 0.9)}
-          containerId={`room-speaker-${person}`}
-          parentRef={speakerRef}
-          style={{ minWidth: 180 }}
-          position="below"
-          menu={contextMenuItems}
-        />
-      )}
     </SpeakerWrapper>
   );
 });

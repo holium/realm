@@ -6,6 +6,7 @@ import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
+import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -46,6 +47,7 @@ export const dialogRenderers: DialogRenderers = {
   'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
+  'change-email-dialog': ChangeEmailDialogConfig,
   ...spacesDialogs,
   ...onboardingDialogs,
 };

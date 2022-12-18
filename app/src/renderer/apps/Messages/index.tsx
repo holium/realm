@@ -1,24 +1,18 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
+import { useServices } from '../../logic/store';
+import useStorage from 'renderer/logic/lib/useStorage';
 
-interface ChatProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
-export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
-  const { dimensions } = props;
+export const MessagesTrayApp = observer(() => {
+  const { theme } = useServices();
+  const { dimensions } = useTrayApps();
   const { dmApp } = useTrayApps();
+  const storage = useStorage();
 
   const headerSize = 50;
   let viewSwitcher: React.ReactElement = (
@@ -41,7 +35,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'new-chat':
       viewSwitcher = (
         <NewChat
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onBack={() => {
@@ -57,7 +51,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'dm-list':
       viewSwitcher = (
         <DMs
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onNewChat={(evt: any) => {
@@ -74,19 +68,10 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'dm-chat':
       viewSwitcher = (
         <ChatView
-          headerOffset={headerSize}
           height={dimensions.height}
-          dimensions={dimensions}
-          theme={props.theme}
-          // s3Client={s3Client}
+          theme={theme.currentTheme as any}
+          storage={storage}
           selectedChat={dmApp.selectedChat!}
-          setSelectedChat={(chat: any) => {
-            if (!chat) dmApp.setView('dm-list');
-            dmApp.setSelectedChat(chat);
-          }}
-          onSend={(message: any) => {
-            console.log('dm message', message);
-          }}
         />
       );
       break;

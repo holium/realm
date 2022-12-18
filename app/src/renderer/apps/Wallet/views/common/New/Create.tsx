@@ -20,10 +20,9 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
   const { theme } = useServices();
   const themeData = useMemo(
     () => getBaseTheme(theme.currentTheme),
-    [theme.currentTheme.mode]
+    [theme.currentTheme]
   );
-  console.log(theme.currentTheme);
-  console.log(themeData);
+
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex flex={4} flexDirection="column" alignItems="center">

@@ -4,11 +4,6 @@ import { getInitialWindowDimensions } from './lib/window-manager';
 import { Glob } from '../ship/models/docket';
 import { AppType } from '../spaces/models/bazaar';
 
-// const Grid = types.model({
-//   width: types.enumeration(['1', '2', '3']),
-//   height: types.enumeration(['1', '2']),
-// });
-
 const DimensionsModel = types.model({
   x: types.number,
   y: types.number,
@@ -26,7 +21,7 @@ const Window = types
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
-      types.enumeration(['urbit', 'web', 'native', 'dialog']),
+      types.enumeration(['urbit', 'web', 'native', 'dialog', 'dev']),
       'urbit'
     ),
     dimensions: DimensionsModel,
@@ -45,7 +40,7 @@ export interface WindowModelProps {
   glob?: boolean;
   href?: { site: string; glob: any };
   zIndex: number;
-  type: 'urbit' | 'web' | 'native' | 'dialog';
+  type: 'urbit' | 'web' | 'native' | 'dialog' | 'dev';
   dimensions: {
     x: number;
     y: number;

@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, safeStorage } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
 import {
@@ -12,7 +12,6 @@ import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
-import axios from 'axios';
 import { getCookie } from '../../lib/shipHelpers';
 
 export type ShipCredentials = {
@@ -39,6 +38,12 @@ export class AuthService extends BaseService {
     'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
     'realm.auth.cancel-login': this.cancelLogin,
+    'realm.auth.set-email': this.setEmail,
+    'realm.auth.change-email': this.changeEmail,
+    'realm.auth.resend-new-email-verification-code':
+      this.resendNewEmailVerificationCode,
+    'realm.auth.verify-new-email': this.verifyNewEmail,
+    'realm.auth.get-code': this.getCode,
   };
 
   static preload = {
@@ -66,6 +71,17 @@ export class AuthService extends BaseService {
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
     ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
+    setEmail: async (email: string) =>
+      await ipcRenderer.invoke('realm.auth.set-email', email),
+    changeEmail: async (
+      email: string
+    ): Promise<{ verificationCode: string | null; error: string | null }> =>
+      await ipcRenderer.invoke('realm.auth.change-email', email),
+    resendNewEmailVerificationCode: async () =>
+      await ipcRenderer.invoke('realm.auth.resend-new-email-verification-code'),
+    verifyNewEmail: async (verificationCode: string): Promise<boolean> =>
+      await ipcRenderer.invoke('realm.auth.verify-new-email', verificationCode),
+    getCode: async () => await ipcRenderer.invoke('realm.auth.get-code'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -113,8 +129,77 @@ export class AuthService extends BaseService {
     return this.state.accountId;
   }
 
+  get email() {
+    return this.state.email;
+  }
+
   setAccountId(accountId: string) {
     this.state.setAccountId(accountId);
+  }
+
+  setEmail(email: string) {
+    this.state.setEmail(email);
+  }
+
+  async getCode(): Promise<string> {
+    const session = this.core.getSession();
+    return session.code;
+  }
+
+  async changeEmail(
+    _event: any,
+    newEmail: string
+  ): Promise<{ verificationCode: string | null; error: string | null }> {
+    if (!this.state.accountId) {
+      throw new Error('Cannot change email, account ID not set.');
+    }
+
+    const result = await this.core.holiumClient.changeEmail(
+      this.state.accountId,
+      newEmail
+    );
+    if (!result.success) {
+      return {
+        verificationCode: null,
+        error:
+          result.errorCode === 441
+            ? 'An account with that email already exists.'
+            : 'Failed to change email.',
+      };
+    }
+
+    return { verificationCode: result.verificationCode, error: null };
+  }
+
+  async resendNewEmailVerificationCode(): Promise<boolean> {
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId)
+      throw new Error('Accout must be set before resending verification code.');
+
+    const success = await this.core.holiumClient.resendNewEmailVerificationCode(
+      auth.accountId
+    );
+
+    return success;
+  }
+
+  async verifyNewEmail(
+    _event: any,
+    verificationCode: string
+  ): Promise<boolean> {
+    if (!this.state.accountId) {
+      throw new Error('Cannot verify new email, account ID not set.');
+    }
+
+    const result = await this.core.holiumClient.verifyNewEmail(
+      this.state.accountId,
+      verificationCode
+    );
+    if (result.success) {
+      this.state.setEmail(result.email!);
+    }
+
+    return result.success;
   }
 
   get clientSecret() {
@@ -157,7 +242,6 @@ export class AuthService extends BaseService {
     secretKey: string,
     credentials: ShipCredentials
   ): ShipCredentials {
-    // console.log('storeCredentials => %o', { patp, secretKey, credentials });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -174,7 +258,6 @@ export class AuthService extends BaseService {
   }
 
   readCredentials(patp: string, secretKey: string): ShipCredentials {
-    // console.log('readCredentials => %o', { patp, secretKey });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -190,50 +273,54 @@ export class AuthService extends BaseService {
   }
 
   async login(_event: any, patp: string, password: string): Promise<boolean> {
-    let shipId = `auth${patp}`;
-    this.state.setLoader('loading');
+    try {
+      const shipId = `auth${patp}`;
+      this.state.setLoader('loading');
 
-    let ship = this.state.ships.get(`auth${patp}`)!;
-    if (!ship) return false;
+      const ship = this.state.ships.get(`auth${patp}`)!;
+      if (!ship) {
+        throw new Error('ship not found');
+      }
 
-    if (ship.passwordHash === null) {
-      throw new Error('login: passwordHash is null');
-    }
-    let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
-    this.core.sendLog(`passwordHash: ${ship.passwordHash}`);
-    this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
+      if (ship.passwordHash === null) {
+        throw new Error('login: passwordHash is null');
+      }
+      const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
 
-    if (!passwordCorrect) {
-      this.core.sendLog(`password incorrect`);
+      if (!passwordCorrect) {
+        throw new Error('login: password is incorrect');
+      }
+
+      this.core.passwords.setPassword(patp, password);
+
+      this.state.login(shipId);
+
+      // this.core.services.desktop.setMouseColor(
+      //   null,
+      //   this.state.selected?.color!
+      // );
+
+      this.core.services.shell.setBlur(null, false);
+
+      const { code } = this.readCredentials(patp, password);
+      const cookie = await getCookie({
+        patp,
+        url: ship.url,
+        code,
+      });
+
+      this.core.setSession({
+        ship: ship.patp,
+        url: ship.url,
+        code,
+        cookie,
+      });
+      return true;
+    } catch (e) {
+      this.core.sendLog(e);
       this.state.setLoader('error');
       return false;
     }
-    this.core.sendLog(`ship: ${patp}`);
-    this.core.passwords.setPassword(patp, password);
-    this.core.sendLog(
-      `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
-    );
-
-    this.state.login(shipId);
-
-    this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
-    this.core.services.shell.setBlur(null, false);
-
-    const { code } = this.readCredentials(patp, password);
-    const cookie = await getCookie({
-      patp,
-      url: ship.url,
-      code,
-    });
-
-    this.core.setSession({
-      ship: ship.patp,
-      url: ship.url,
-      code,
-      cookie,
-    });
-
-    return true;
   }
 
   cancelLogin(_event: any) {
@@ -278,15 +365,7 @@ export class AuthService extends BaseService {
     newShip: { ship: string; url: string; code: string }
   ) {
     const { ship, url, code } = newShip;
-    const response = await axios.post(
-      `${url}/~/login`,
-      `password=${code.trim()}`,
-      {
-        withCredentials: true,
-      }
-    );
-
-    const cookie = response.headers['set-cookie']![0];
+    const cookie = await getCookie({ patp: ship, url, code });
     const id = `auth${ship}`;
 
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(

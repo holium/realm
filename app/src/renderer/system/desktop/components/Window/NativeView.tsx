@@ -21,7 +21,7 @@ export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
   return (
     <View
       style={{
-        overflowY: 'scroll',
+        overflowY: 'auto',
         overflowX: 'hidden',
         width: 'inherit',
         height: 'inherit',

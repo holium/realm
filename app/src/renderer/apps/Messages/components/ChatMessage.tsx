@@ -1,14 +1,15 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { darken, lighten } from 'polished';
-import { Flex, Text } from 'renderer/components';
+import { Box, Flex, Text } from 'renderer/components';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
-import { displayDate } from 'os/lib/time';
+import { displayDate, displayTimestamp } from 'os/lib/time';
 import { GraphDMType } from 'os/services/ship/models/courier';
 
 interface IProps {
   isSending?: boolean;
   showAuthor: boolean;
+  showDate: boolean;
   theme: any;
   author: string;
   primaryBubble: boolean;
@@ -18,12 +19,13 @@ interface IProps {
   onImageLoad?: () => void;
 }
 
-export const ChatMessage: FC<IProps> = ({
+export const ChatMessage = ({
   theme,
   ourColor,
   contents,
   author,
   showAuthor,
+  showDate,
   isSending,
   primaryBubble,
   timeSent,
@@ -64,6 +66,18 @@ export const ChatMessage: FC<IProps> = ({
         pl={2}
         pr={2}
       >
+        {showDate && (
+          <Box width="100%" mb={2}>
+            <Text
+              opacity={0.5}
+              fontSize="11px"
+              fontWeight={500}
+              textAlign="center"
+            >
+              {displayDate(timeSent)}
+            </Text>
+          </Box>
+        )}
         {showAuthor && (
           <Flex mb="2px" mr={primaryBubble ? 1 : 0} ml={primaryBubble ? 0 : 1}>
             <Text opacity={0.5} fontSize={1}>
@@ -105,15 +119,14 @@ export const ChatMessage: FC<IProps> = ({
             })}
           </Flex>
 
-          {/* TODO detect if time is today, yesterday or full */}
           <Text
             mt="2px"
             color={color}
-            textAlign="right"
+            textAlign={primaryBubble ? 'right' : 'left'}
             fontSize={0}
             opacity={0.3}
           >
-            {displayDate(timeSent)}
+            {displayTimestamp(timeSent)}
           </Text>
         </Bubble>
       </Flex>
@@ -129,6 +142,7 @@ export const ChatMessage: FC<IProps> = ({
       primaryBubble,
       referenceColor,
       showAuthor,
+      showDate,
       theme.mode,
       theme.textColor,
       theme.windowColor,

@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-const baseURL = process.env.USE_LOCAL_API
-  ? 'http://localhost:8080'
-  : `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+let baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
+if (process.env.NODE_ENV === 'production') {
+  baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
+} else if (process.env.USE_LOCAL_API) {
+  baseURL = 'http://localhost:8080';
+}
 
 const client = axios.create({ baseURL });
 
@@ -41,32 +44,118 @@ export class HoliumAPI {
   async createAccount(
     email: string,
     accessCode?: string
-  ): Promise<{ id: string; verificationCode: string }> {
-    const { data } = await client.post(
-      `accounts/create?email=${email}${
-        accessCode ? `&accessCode=${accessCode}` : ''
-      }`
-    );
-    return { id: data.id, verificationCode: data.verificationCode };
+  ): Promise<{
+    id: string | null;
+    verificationCode: string | null;
+    errorCode: number | null;
+  }> {
+    try {
+      const { data } = await client.post(
+        `accounts/create?email=${email}${
+          accessCode ? `&accessCode=${accessCode}` : ''
+        }`
+      );
+      return {
+        id: data.id,
+        verificationCode: data.verificationCode,
+        errorCode: null,
+      };
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.status &&
+        error.response.status === 441
+      ) {
+        return { id: null, verificationCode: null, errorCode: 441 };
+      }
+      return { id: null, verificationCode: null, errorCode: null };
+    }
   }
 
-  async resendVerificationCode(accountId: string): Promise<string> {
+  async resendVerificationCode(accountId: string): Promise<boolean> {
     const { data } = await client.post(
       `accounts/${accountId}/resend-email-verification`
     );
-    return data.verificationCode;
+    return data.success;
+  }
+
+  async resendNewEmailVerificationCode(accountId: string): Promise<boolean> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/resend-new-email-verification-code`
+    );
+    return data.success;
+  }
+
+  async verifyEmail(
+    accountId: string,
+    verificationCode: string
+  ): Promise<{ success: boolean; email: string | null }> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/verify-email?verificationCode=${verificationCode}`
+    );
+    return { success: data.success, email: data.email };
+  }
+
+  async changeEmail(
+    accountId: string,
+    newEmail: string
+  ): Promise<{
+    success: boolean;
+    verificationCode: string | null;
+    errorCode: number | null;
+  }> {
+    try {
+      const { data } = await client.post(
+        `/accounts/${accountId}/change-email?email=${newEmail}`
+      );
+      return {
+        success: data.verificationCode !== null,
+        verificationCode: data.verificationCode,
+        errorCode: null,
+      };
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.status &&
+        error.response.status === 441
+      ) {
+        return { success: false, verificationCode: null, errorCode: 441 };
+      }
+      return { success: false, verificationCode: null, errorCode: null };
+    }
+  }
+
+  async verifyNewEmail(
+    accountId: string,
+    verificationCode: string
+  ): Promise<{ success: boolean; email: string | null }> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/verify-new-email?verificationCode=${verificationCode}`
+    );
+    return { success: data.success, email: data.newEmail };
   }
 
   async getPlanets(
     accountId: string,
-    accessCode?: string
+    inviteCode?: string
   ): Promise<HostingPlanet[]> {
     const { data } = await client.post(
       `accounts/${accountId}/assign-planets${
-        accessCode ? `?accessCode=${accessCode}` : ''
+        inviteCode ? `?accessCode=${inviteCode}` : ''
       }`
     );
     return data.planets;
+  }
+
+  async confirmPlanetAvailable(
+    accountId: string,
+    patp: string
+  ): Promise<boolean> {
+    const { data } = await client.post(
+      `accounts/${accountId}/confirm-planet-available?patp=${patp}`
+    );
+
+    return data.available === true;
   }
 
   async prepareCheckout(
@@ -80,15 +169,30 @@ export class HoliumAPI {
     return { clientSecret: data.clientSecret };
   }
 
-  async completeCheckout(accountId: string, patp: string) {
-    const { data } = await client.post(
-      `accounts/${accountId}/complete-checkout?patp=${patp}`
-    );
-    return {
-      id: data.id,
-      patp: data.patp,
-      checkoutComplete: data.checkoutComplete,
-    };
+  async completeCheckout(
+    accountId: string,
+    patp: string
+  ): Promise<{
+    id?: string;
+    patp?: string;
+    success: boolean;
+    errorCode?: number;
+  }> {
+    try {
+      const { data } = await client.post(
+        `accounts/${accountId}/complete-checkout?patp=${patp}`
+      );
+      return {
+        id: data.id,
+        patp: data.patp,
+        success: data.checkoutComplete,
+      };
+    } catch (error: any) {
+      if (error.response && error.response.status) {
+        return { success: false, errorCode: error.response.status };
+      }
+      return { success: false };
+    }
   }
 
   async getShips(accountId: string): Promise<HostingPurchasedShip[]> {
@@ -106,13 +210,17 @@ export class HoliumAPI {
     }
   }
 
-  async redeemAccessCode(code: string): Promise<boolean> {
+  async redeemAccessCode(
+    code: string
+  ): Promise<{ success: boolean; errorCode: number | null; email?: string }> {
     try {
-      await client.post(`access-codes/${code}/redeem`);
-      return true;
-    } catch (e) {
-      console.error('Redeeming access code failed.');
-      return false;
+      const { data } = await client.post(`access-codes/${code}/redeem`);
+      return { success: true, email: data.email, errorCode: null };
+    } catch (error: any) {
+      if (error.response && error.response.status) {
+        return { success: false, errorCode: error.response.status };
+      }
+      return { success: false, errorCode: null };
     }
   }
 }

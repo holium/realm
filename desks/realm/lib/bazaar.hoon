@@ -24,12 +24,10 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
-          [%initialize initialize]
-      ==
-    ::
-    ++  initialize
-      %-  ot
-      :~  [%args (om so)]
+          [%initialize ul]
+          [%rebuild-catalog ul]
+          [%rebuild-stall rebuild-stall]
+          [%clear-stall clear-stall]
       ==
     ::
     ++  install-app
@@ -90,6 +88,17 @@
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
+    ::
+    ++  rebuild-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ++  clear-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
     --
   --
 ::
@@ -106,15 +115,18 @@
     ^-  [cord json]
     :-  -.rct
     ?-  -.rct
+      ::
         %initial
       %-  pairs
       :~  [%catalog (catalog-js:encode catalog.rct)]
           [%stalls (stalls-js:encode stalls.rct)]
           [%docks (docks-js:encode docks.rct)]
           [%recommendations a+(turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
+          [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       (urbit-app-update:encode app-id.rct urbit-app.rct)
+        %app-install-update
+      (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned
       %-  pairs
@@ -168,10 +180,18 @@
       ==
       ::
         %stall-update
+      =/  data=(list [@tas json])
+          ?~  det.rct         [%none ~]~
+          ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+      =/  data
+        %+  weld  data
+        ^-  (list [@tas json])
+        :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+            [%stall (stall-js:encode stall.rct)]
+        ==
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%stall (stall-js:encode stall.rct)]
-      ==
+      data
       ::
         %treaties-loaded
       %-  pairs
@@ -196,6 +216,23 @@
       ::     [%desk s+desk.rct]
       ::     [%docket (dkt:encode docket.rct)]
       :: ==
+        %rebuild-catalog
+      %-  pairs
+      :~  [%catalog (catalog-js:encode catalog.rct)]
+          [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
+        %rebuild-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%catalog (catalog-js:encode catalog.rct)]
+          [%stall (stall-js:encode stall.rct)]
+      ==
+      ::
+        %clear-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     ==
   ::
   ++  view  :: encodes for on-peek
@@ -225,12 +262,23 @@
 ++  encode
   =,  enjs:format
   |%
+  ::
+  ++  grid-index-js
+    |=  =grid-index:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by grid-index)
+      |=  [idx=@ud desk=@tas]
+      ^-  [cord json]
+      [(cord (scot %ud idx)) s+(scot %tas desk)]
+  ::
   ++  urbit-app-update
-    |=  [=app-id app=urbit-app:store]
+    |=  [=app-id app=urbit-app:store =grid-index:store]
     ^-  json
     %-  pairs
     :~  ['appId' s+app-id]
         ['app' (urbit-app:encode app-id app)]
+        ['grid' (grid-index-js:encode grid-index)]
     ==
   ::
   ++  merge

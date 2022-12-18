@@ -6,6 +6,7 @@
 +$  rest-api-key      cord 
 +$  uuid              @uvH
 +$  devices           (map device-id player-id)
++$  mem-meta          (map @t [@ux (unit @t) @t])
 ::
 ::
 +$  notification
@@ -18,6 +19,7 @@
 ::
 +$  mtd
   $:  path=cord 
+      member-meta=mem-meta
   ==
 ::
 +$  action

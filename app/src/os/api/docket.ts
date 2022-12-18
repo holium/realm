@@ -347,11 +347,18 @@ export const DocketApi = {
       }
     });
   },
+  reviveApp: (conduit: Conduit, desk: string) => {
+    return conduit.poke({
+      app: 'hood',
+      mark: 'kiln-revive',
+      json: desk,
+    });
+  },
   installApp: (conduit: Conduit, ship: string, desk: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
         let subscriptionId: number = -1;
-        let timeout: NodeJS.Timeout;
+        // let timeout: NodeJS.Timeout;
         await conduit.watch({
           app: 'docket',
           path: '/charges',
@@ -360,16 +367,21 @@ export const DocketApi = {
             // upon subscribing, start a timer. if we don't get the 'add-charge'
             //  event (see below) within the allotted time, it "usually" means the configured
             //  INSTALL_MOON is offline or down
-            timeout = setTimeout(async () => {
-              await conduit.unsubscribe(subscriptionId);
-              console.log(
-                `timeout installing ${ship}/${desk}. has ${desk} been published? also check the glob-ames value in the ${desk}'s docket file to ensure match with '${ship}'.`
-              );
-              reject(`timeout installing ${ship}/${desk}`);
-            }, 60000);
+            // timeout = setTimeout(
+            //   async () => {
+            //     await conduit.unsubscribe(subscriptionId);
+            //     console.log(
+            //       `timeout installing ${ship}/${desk}. has ${desk} been published? also check the glob-ames value in the ${desk}'s docket file to ensure match with '${ship}'.`
+            //     );
+            //     reject(`timeout installing ${ship}/${desk}`);
+            //   },
+            //   // new ships can take a REALLY long time to install Realm. 5 mins should do it,
+            //   //  but bump if needed
+            //   300000
+            // );
             conduit.poke(docketInstall(ship, desk)).catch((e) => {
               console.log(e);
-              if (timeout) clearTimeout(timeout);
+              // if (timeout) clearTimeout(timeout);
               reject('install app error');
             });
           },
@@ -378,9 +390,9 @@ export const DocketApi = {
               const charge = data['add-charge'].charge;
               // according to Tlon source, this determines when the app is fully installed
               if ('glob' in charge.chad || 'site' in charge.chad) {
-                if (timeout) {
-                  clearTimeout(timeout);
-                }
+                // if (timeout) {
+                //   clearTimeout(timeout);
+                // }
                 await conduit.unsubscribe(subscriptionId);
                 resolve(data);
               } else if ('hung' in charge.chad) {

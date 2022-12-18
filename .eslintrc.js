@@ -14,7 +14,6 @@ module.exports = {
       './lib/conduit/tsconfig.json',
       './lib/multiplayer/tsconfig.json',
       './lib/design-system/tsconfig.json',
-      './playground/ui/tsconfig.json',
       './tsconfig.eslint.json',
     ],
     ecmaVersion: 'latest',
@@ -27,7 +26,7 @@ module.exports = {
     'no-unused-vars': 'off',
     'unused-imports/no-unused-imports': 'error',
     'react-hooks/rules-of-hooks': 'warn',
-    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/exhaustive-deps': 'off', // many cases where we need other variables in the deps
     'react/no-unescaped-entities': 'off',
     'react/react-in-jsx-scope': 'off',
     'prefer-const': 'warn',

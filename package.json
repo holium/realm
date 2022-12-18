@@ -9,7 +9,7 @@
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn build:app",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm dev:cursor && yarn build:app",
     "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
     "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
     "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
@@ -22,6 +22,7 @@
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
+    "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
     "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
@@ -32,7 +33,6 @@
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
-    "@icons/material": "^0.4.1",
     "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",

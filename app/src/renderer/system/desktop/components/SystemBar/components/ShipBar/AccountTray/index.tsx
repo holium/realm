@@ -9,6 +9,13 @@ import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { motion } from 'framer-motion';
 
+const position = 'top-left';
+const anchorOffset = { x: 8, y: 26 };
+const dimensions = {
+  height: 450,
+  width: 400,
+};
+
 interface AccountTrayProps {
   theme: ThemeModelType;
 }
@@ -16,21 +23,13 @@ interface AccountTrayProps {
 export const AccountTray: FC<AccountTrayProps> = observer(
   (props: AccountTrayProps) => {
     const { theme } = props;
-    const { ship, notifications } = useServices();
+    const { ship, beacon } = useServices();
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
 
-    const dimensions = {
-      height: 450,
-      width: 400,
-    };
-
-    const position = 'top-left';
-    // const anchorOffset = { x: 60, y: 26 };
-    const anchorOffset = { x: 8, y: 26 };
     const unreadCount = useMemo(
-      () => notifications.unseen.length,
-      [notifications.unseen.length]
+      () => beacon.unseen.length,
+      [beacon.unseen.length]
     );
 
     const onButtonClick = useCallback(
@@ -53,7 +52,7 @@ export const AccountTray: FC<AccountTrayProps> = observer(
         setTrayAppDimensions(dimensions);
         setActiveApp('account-tray');
       },
-      [activeApp, anchorOffset, position, dimensions]
+      [activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions]
     );
 
     return (

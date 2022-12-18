@@ -38,8 +38,9 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
   const isLiveColor = useMemo(() => darken(0.02, bgColor), [bgColor]);
 
+  const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   let peopleText = 'people';
-  if (present!.length === 1) {
+  if (presentCount === 1) {
     peopleText = 'person';
   }
   // const creator = roomsApp.liveRoom?.creator;
@@ -79,7 +80,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               {/* {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />} */}
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
-                {present!.length} {peopleText}{' '}
+                {presentCount} {peopleText}{' '}
                 {/* {present!.includes(ship!.patp) && ` - (You)`} */}
               </Text>
               {creator === ship!.patp && (

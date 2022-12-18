@@ -51,7 +51,7 @@ interface AppWindowProps {
 export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { window, desktopRef } = props;
-    const { shell, desktop, theme } = useServices();
+    const { shell, bazaar, desktop, theme } = useServices();
     const { textColor, windowColor } = theme.currentTheme;
 
     const [unmaximize, setUnmaximize] = useState<
@@ -97,7 +97,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const resizeRightX = useMotionValue(0);
     const resizeRightY = useMotionValue(0);
 
-    const handleResize = useCallback((event, info) => {
+    const handleResize = useCallback((event: any, info: any) => {
       event.stopPropagation();
       event.preventDefault();
       resizeRightX.set(resizeRightX.get() - info.offset.x);
@@ -190,6 +190,11 @@ export const AppWindow: FC<AppWindowProps> = observer(
     let preventClickEvents = true;
     let maximizeButton = true;
     let borderRadius = 12;
+    const appInfo = bazaar.getApp(window.id);
+    if (appInfo?.type === 'urbit') {
+      hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
+      // noTitlebar = !appInfo.config?.showTitlebar || false;
+    }
     let titlebar = (
       <Titlebar
         isAppWindow
@@ -443,6 +448,15 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
           window={window}
         />
       );
+    case 'dev':
+      return (
+        <WebView
+          hasTitlebar={hasTitlebar}
+          isResizing={isResizing}
+          window={window}
+        />
+      );
+
     case 'dialog':
       return <DialogView window={window} />;
     default:

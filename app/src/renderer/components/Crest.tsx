@@ -12,6 +12,15 @@ export const isValidImageUrl = (url: string) => {
   return urlRegex.test(url);
 };
 
+export const isImgUrl = (url: string): Promise<boolean> => {
+  const img = new Image();
+  img.src = url;
+  return new Promise((resolve) => {
+    img.onerror = () => resolve(false);
+    img.onload = () => resolve(true);
+  });
+};
+
 const crestSize = {
   xsm: 16,
   sm: 32,
@@ -54,6 +63,7 @@ export const ImageCrest = styled(motion.img)<CrestStyleProps>`
   border-radius: ${(p) => p.borderRadius}px;
   position: relative;
   box-sizing: content-box;
+  object-fit: cover;
   img {
     position: absolute;
   }

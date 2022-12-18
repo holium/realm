@@ -1,15 +1,19 @@
-import { FC, useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import styled, { css } from 'styled-components';
+import { darken, desaturate } from 'polished';
+import { Flex, Box, Text, Spinner } from 'renderer/components';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { lighten, rgba } from 'polished';
-import { Flex, Box, Text, ContextMenu, Spinner } from '..';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
-import { Portal } from 'renderer/system/dialog/Portal';
-import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 const sizes = {
   sm: 32,
@@ -75,7 +79,10 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
     `}
 `;
 
-interface TileStyleProps {}
+interface TileStyleProps {
+  highlightOnHover?: boolean;
+}
+
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;
   display: flex;
@@ -83,6 +90,16 @@ const TileStyle = styled(Box)<TileStyleProps>`
   justify-content: center;
   align-items: center;
   user-select: none;
+  transition: var(--transition);
+  ${(props: TileStyleProps) =>
+    props.highlightOnHover &&
+    css`
+      &:hover {
+        transition: var(--transition);
+        filter: brightness(0.92);
+      }
+    `}
+
   img {
     --webkit-user-select: none;
     --khtml-user-select: none;
@@ -94,49 +111,39 @@ const TileStyle = styled(Box)<TileStyleProps>`
 
 export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
-  isPinned?: boolean;
-  contextPosition?: 'above' | 'below';
-  allowContextMenu?: boolean;
-  contextMenu?: any[] | (() => any[]); // todo types
+  contextMenuOptions?: ContextMenuOption[];
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
   app: AppType | any;
+  tileId: string;
   variants?: any;
-  isVisible?: boolean;
   isAnimated?: boolean;
   tileSize: AppTileSize;
-  isInstalling?: boolean;
-  isUninstalled?: boolean;
+  installStatus?: InstallStatus;
   hasTitle?: boolean;
-  isRecommended?: boolean;
+  highlightOnHover?: boolean;
 }
 
-export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
-  const {
+export const AppTile = observer(
+  ({
     app,
-    contextMenu,
-    contextPosition,
+    tileId,
+    contextMenuOptions,
     variants,
     selected,
-    tileSize,
-    allowContextMenu,
-    isPinned,
+    tileSize = 'md',
     open,
-    isAnimated,
+    isAnimated = true,
     onAppClick,
     hasTitle,
-    isRecommended,
-    isInstalling,
-    isUninstalled,
-  } = props;
-  const { theme } = useServices();
+    installStatus = InstallStatus.installed,
+  }: AppTileProps) => {
+    const { theme } = useServices();
+    const { getOptions, setOptions, getColors, setColors } = useContextMenu();
+    const tileRef = useRef(null);
 
-  const tileRef = useRef(null);
-
-  return useMemo(() => {
     const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-    let title;
     const isAppGrid =
       tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
     const boxShadowStyle = isAppGrid
@@ -145,229 +152,294 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     const boxShadowHover = isAppGrid
       ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
-    const isLight = lightOrDark === 'light';
-    const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
-    if (isAppGrid) {
-      const appColor = app.color;
-      title = (
-        <Text
-          position="absolute"
-          style={{ pointerEvents: 'none' }}
-          left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
-          padding=".2rem"
-          borderRadius={4}
-          backgroundColor={app.image && appColor}
-          bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
-          fontWeight={500}
-          fontSize={2}
-          color={textColor}
-        >
-          {app.title}
-        </Text>
-      );
-    }
-    const tileId = `app-tile-grid-${app.id}`;
+    const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+    const textColor = useMemo(
+      () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
+      [isLight]
+    );
+    const contextMenuColors = useMemo(
+      () => ({ textColor, backgroundColor: app.color }),
+      [app.color, textColor]
+    );
 
-    // set image or icon
-    let graphic;
-    if (app.image) {
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          animate={{
-            opacity: isInstalling || isUninstalled ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-          }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
-          minWidth={sizes[tileSize]}
-          style={{
-            borderRadius: radius[tileSize],
-            overflow: 'hidden',
-          }}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
-        >
-          <img
-            style={{ pointerEvents: 'none' }}
-            draggable="false"
-            height={sizes[tileSize]}
-            width={sizes[tileSize]}
-            key={app.title}
-            src={app.image}
-          />
-          {title}
-        </TileStyle>
-      );
-    } else if (app.icon) {
-      const iconTileSize = sizes[tileSize];
-      const iconSize =
-        iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
+    useEffect(() => {
+      if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+        setOptions(tileId, contextMenuOptions);
+      }
 
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          animate={{
-            opacity: isInstalling || isUninstalled ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-          }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
-          minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
-        >
-          <Icons name={app.icon} height={iconSize} width={iconSize} />
-          {title}
-        </TileStyle>
-      );
-    } else {
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          animate={{
-            opacity: isInstalling ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-          }}
-          transition={{
-            scale: { duration: 0.5 },
-            boxShadow: { duration: 0.5 },
-          }}
-          minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-          key={app.title}
-          backgroundColor={app.color}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-        >
-          {title}
-        </TileStyle>
-      );
-    }
-    return (
-      <Flex flexDirection="column" alignItems="center">
-        <Flex
-          position="relative"
-          ref={tileRef}
-          variants={variants}
-          onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
-            evt.stopPropagation();
-            onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
-          }}
-          className="app-dock-icon"
-        >
-          {isInstalling && (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              position="absolute"
-              left={0}
-              top={0}
-              right={0}
-              bottom={0}
-            >
-              <Spinner size={loaderSizes[tileSize]} />
-            </Flex>
-          )}
-          {allowContextMenu && (
-            <Portal>
-              <AnimatePresence>
-                <ContextMenu
-                  position={contextPosition}
-                  isComponentContext
-                  textColor={textColor}
-                  customBg={app.color}
-                  containerId={tileId}
-                  parentRef={tileRef}
-                  style={{ minWidth: 180 }}
-                  menu={contextMenu || []}
-                />
-              </AnimatePresence>
-            </Portal>
-          )}
-          {graphic}
-          <TileHighlight
-            layoutId="active-app"
-            isSelected={selected}
-            isOpen={open}
-            transition={{ duration: 0.2 }}
-          />
-        </Flex>
-        {hasTitle && (
+      if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+        setColors(tileId, contextMenuColors);
+      }
+    }, [
+      contextMenuColors,
+      contextMenuOptions,
+      getColors,
+      getOptions,
+      setColors,
+      setOptions,
+      tileId,
+    ]);
+
+    const { isInstalling, isFaded, isSuspended, isUninstalled, isFailed } =
+      getAppTileFlags(installStatus || InstallStatus.installed);
+
+    return useMemo(() => {
+      let title;
+      let status;
+      if (isAppGrid) {
+        const appColor = app.color;
+        title = (
           <Text
+            position="absolute"
             style={{ pointerEvents: 'none' }}
-            color={theme.currentTheme.textColor}
-            mt={2}
+            left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+            padding=".2rem"
+            borderRadius={4}
+            backgroundColor={app.image && appColor}
+            bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+            fontWeight={500}
+            fontSize={2}
+            color={textColor}
           >
             {app.title}
           </Text>
-        )}
-        {/* {app.type === 'urbit' && app.installed && (
-          <IconButton
-            tabIndex={-1}
-            mt={5}
-            height={32}
-            onClick={() => alert('hi')}
-          >
-            {app.glob ? (<Spinner size={0} />) : (<Icons name="DownloadCircle" />)}
-          </IconButton>
-        )} */}
-      </Flex>
-    );
-  }, [app, isRecommended, isPinned, selected, open, theme.currentTheme]);
-});
+        );
+        if (isSuspended || isFailed) {
+          let statusBadgeColor = isLight
+            ? darken(0.05, desaturate(1, app.color))
+            : lighten(0.1, desaturate(1, app.color));
+          if (isFailed) {
+            statusBadgeColor = isLight
+              ? rgba(darken(0.05, '#D0384E'), 0.1)
+              : rgba(lighten(0.1, '#D0384E'), 0.1);
+          }
+          status = (
+            <Text
+              position="absolute"
+              style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+              left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+              padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
+              borderRadius={6}
+              backgroundColor={app.image && rgba(statusBadgeColor, 0.5)}
+              top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+              fontWeight={500}
+              textStyle="capitalize"
+              fontSize={tileSize === 'xl1' ? '13px' : 2}
+              color={isFailed ? '#5e0b18' : textColor}
+            >
+              {app.installStatus}
+            </Text>
+          );
+        }
+      }
 
-AppTile.defaultProps = {
-  tileSize: 'md',
-  allowContextMenu: false,
-  isAnimated: true,
-  isRecommended: false,
-  isInstalling: false,
-};
+      const tileBg = app.color || '#F2F3EF';
+      const filter =
+        isSuspended || isFailed
+          ? { filter: 'grayscale(1)' }
+          : { filter: 'grayscale(0)' };
+
+      // set image or icon
+      let graphic;
+      if (app.image) {
+        graphic = (
+          <TileStyle
+            id={tileId}
+            onContextMenu={(evt: any) => {
+              evt.stopPropagation();
+            }}
+            {...(isAnimated
+              ? {
+                  whileHover: {
+                    scale: 1 + scales[tileSize] / 2,
+                    boxShadow: boxShadowHover,
+                  },
+                  whileTap: {
+                    scale: 1 - scales[tileSize],
+                    boxShadow: boxShadowHover,
+                  },
+                }
+              : {})}
+            initial={{
+              opacity: isFaded ? 0.5 : 1,
+              ...filter,
+            }}
+            animate={{
+              opacity: isFaded ? 0.5 : 1,
+              boxShadow: boxShadowStyle,
+              ...filter,
+            }}
+            transition={{
+              scale: { duration: 0.1 },
+              boxShadow: { duration: 0.1 },
+            }}
+            minWidth={sizes[tileSize]}
+            style={{
+              borderRadius: radius[tileSize],
+              overflow: 'hidden',
+            }}
+            height={sizes[tileSize]}
+            width={sizes[tileSize]}
+            backgroundColor={tileBg}
+          >
+            <img
+              style={{ pointerEvents: 'none' }}
+              draggable="false"
+              height={sizes[tileSize]}
+              width={sizes[tileSize]}
+              key={app.title}
+              src={app.image}
+            />
+            {title}
+          </TileStyle>
+        );
+      } else if (app.icon) {
+        const iconTileSize = sizes[tileSize];
+        const iconSize =
+          iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
+
+        graphic = (
+          <TileStyle
+            id={tileId}
+            onContextMenu={(evt: any) => {
+              evt.stopPropagation();
+            }}
+            {...(isAnimated
+              ? {
+                  whileHover: {
+                    scale: 1 + scales[tileSize] / 2,
+                    boxShadow: boxShadowHover,
+                  },
+                  whileTap: {
+                    scale: 1 - scales[tileSize],
+                    boxShadow: boxShadowHover,
+                  },
+                }
+              : {})}
+            animate={{
+              opacity: isFaded ? 0.5 : 1,
+              boxShadow: boxShadowStyle,
+            }}
+            transition={{
+              scale: { duration: 0.1 },
+              boxShadow: { duration: 0.1 },
+            }}
+            minWidth={sizes[tileSize]}
+            style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+            height={sizes[tileSize]}
+            width={sizes[tileSize]}
+            backgroundColor={tileBg}
+          >
+            <Icons name={app.icon} height={iconSize} width={iconSize} />
+            {title}
+          </TileStyle>
+        );
+      } else {
+        graphic = (
+          <TileStyle
+            id={tileId}
+            onContextMenu={(evt: any) => {
+              evt.stopPropagation();
+            }}
+            {...(isAnimated
+              ? {
+                  whileHover: {
+                    scale: 1 + scales[tileSize] / 2,
+                    boxShadow: boxShadowHover,
+                  },
+                  whileTap: {
+                    scale: 1 - scales[tileSize],
+                    boxShadow: boxShadowHover,
+                  },
+                }
+              : {})}
+            animate={{
+              opacity: isFaded ? 0.5 : 1,
+              boxShadow: boxShadowStyle,
+            }}
+            transition={{
+              scale: { duration: 0.1 },
+              boxShadow: { duration: 0.1 },
+            }}
+            minWidth={sizes[tileSize]}
+            style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+            key={app.title}
+            backgroundColor={tileBg}
+            height={sizes[tileSize]}
+            width={sizes[tileSize]}
+          >
+            {title}
+          </TileStyle>
+        );
+      }
+
+      return (
+        <Flex flexDirection="column" alignItems="center">
+          <Flex
+            position="relative"
+            ref={tileRef}
+            variants={variants}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAppClick &&
+                !isSuspended &&
+                !isFailed &&
+                !isUninstalled &&
+                !isInstalling &&
+                onAppClick(app);
+            }}
+            className="app-dock-icon"
+          >
+            {status}
+            {isInstalling && !isUninstalled && (
+              <Flex
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                position="absolute"
+                left={0}
+                top={0}
+                right={0}
+                bottom={0}
+              >
+                <Spinner color="#FFF" size={loaderSizes[tileSize]} />
+              </Flex>
+            )}
+            {graphic}
+            <TileHighlight
+              layoutId="active-app"
+              isSelected={selected}
+              isOpen={open}
+              transition={{ duration: 0.2 }}
+            />
+          </Flex>
+          {hasTitle && (
+            <Text
+              style={{ pointerEvents: 'none' }}
+              color={theme.currentTheme.textColor}
+              mt={2}
+            >
+              {app.title}
+            </Text>
+          )}
+        </Flex>
+      );
+    }, [
+      app,
+      hasTitle,
+      isAnimated,
+      isFaded,
+      isFailed,
+      isInstalling,
+      isSuspended,
+      isUninstalled,
+      onAppClick,
+      open,
+      selected,
+      theme.currentTheme.textColor,
+      tileId,
+      tileSize,
+      variants,
+    ]);
+  }
+);

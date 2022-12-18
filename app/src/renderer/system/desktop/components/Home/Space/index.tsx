@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useMemo } from 'react';
+import { FC, useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
@@ -19,20 +19,12 @@ type SidebarType = 'members' | null;
 
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, theme, spaces, membership, bazaar } = useServices();
+  const { ship, spaces, membership } = useServices();
   const currentSpace = spaces.selected;
-  const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
 
   const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp);
-
-  useEffect(() => {
-    if (currentSpace) {
-      const memberMap = membership.getMembersList(currentSpace.path);
-      setMembers(memberMap);
-    }
-  }, [currentSpace]);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -55,14 +47,15 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, members]);
+  }, [sidebar]);
+
   if (!currentSpace) return null;
+
   const membersCount = membership.getMemberCount(currentSpace.path);
   const maxWidth = 880;
-  const headerWidth = '50%';
-  const paneWidth = '50%';
+
   return (
-    <Flex flexDirection="row" width="100%" height="calc(100vh - 58px)">
+    <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
       <Flex
         flex={1}
         overflowY="auto"
@@ -80,7 +73,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
-          // maxWidth={maxWidth}
           width={maxWidth}
           variants={{
             hidden: {
@@ -121,7 +113,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           justifyContent="space-between"
           gap={36}
           width={maxWidth}
-          // width={paneWidth}
         >
           {appGrid && (
             <Flex
@@ -152,11 +143,10 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 style={{ position: 'relative' }}
                 gap={32}
                 width={maxWidth}
-                // mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid isOpen tileSize="xl2" />
+                <AppGrid tileSize="xl2" />
               </Flex>
             </Flex>
           )}

@@ -1,10 +1,8 @@
-import { FC, useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import {
   AppType,
-  AppTypes,
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
@@ -12,110 +10,120 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { handleInstallation, installLabel } from '../AppInstall/helpers';
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from '../AppInstall/helpers';
 
 interface AppGridProps {
-  isOpen?: boolean;
   tileSize: AppTileSize;
 }
 
-export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
-  const { isOpen, tileSize } = props;
+export const AppGrid = observer(({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
-
   const currentSpace = spaces.selected!;
-  const dock = bazaar.getDock(currentSpace.path);
+  const apps = [...bazaar.installed, ...bazaar.devApps];
 
-  return useMemo(() => {
-    const apps = [...bazaar.installed, ...bazaar.installing, ...bazaar.devApps];
-    return (
-      <>
-        {apps.map((app: any, index: number) => {
-          const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
-          const weRecommended = bazaar.isRecommended(app.id);
-          let isInstalling = app.installStatus !== InstallStatus.installed;
-          if (app.type === AppTypes.Web) {
-            isInstalling = false;
-          }
-          return (
-            <AppTile
-              key={`${app.title} ${index} grid`}
-              isPinned={isAppPinned}
-              isRecommended={weRecommended}
-              allowContextMenu
-              isInstalling={isInstalling}
-              tileSize={tileSize}
-              app={app}
-              isVisible={isOpen}
-              contextMenu={[
-                {
-                  label: isAppPinned ? 'Unpin app' : 'Pin app',
-                  disabled: app.type === 'web',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    isAppPinned
-                      ? SpacesActions.unpinApp(currentSpace?.path, app.id)
-                      : SpacesActions.pinApp(currentSpace?.path, app.id);
-                  },
+  return (
+    <>
+      {apps.map((app: any, index: number) => {
+        const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
+        const weRecommended = bazaar.isRecommended(app.id);
+        const installStatus = app.installStatus as InstallStatus;
+
+        const canSuspend =
+          (installStatus === InstallStatus.installed ||
+            installStatus === InstallStatus.suspended) &&
+          app.type === 'urbit';
+
+        const suspendRow = canSuspend
+          ? [
+              {
+                label: resumeSuspendLabel(installStatus),
+                section: 2,
+                disabled: false,
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  return handleResumeSuspend(app.id, installStatus);
                 },
+              },
+            ]
+          : [];
+
+        const installRow =
+          app.type === 'urbit'
+            ? [
                 {
-                  label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-                  disabled: app.type === 'web',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    weRecommended
-                      ? SpacesActions.unrecommendApp(app.id)
-                      : SpacesActions.recommendApp(app.id);
-                  },
-                },
-                {
-                  label: 'App info',
-                  disabled: app.type === 'web',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    ShellActions.openDialogWithStringProps(
-                      'app-detail-dialog',
-                      { appId: app.id }
-                    );
-                  },
-                },
-                {
-                  label: installLabel(app.installStatus as InstallStatus),
+                  label: installLabel(installStatus),
                   section: 2,
                   disabled: false,
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     const appHost = (app as UrbitAppType).host;
-                    return handleInstallation(
-                      appHost,
-                      app.id,
-                      app.installStatus as InstallStatus
-                    );
+                    return handleInstallation(appHost, app.id, installStatus);
                   },
                 },
-              ]}
-              onAppClick={(selectedApp: AppType) => {
-                SpacesActions.addRecentApp(currentSpace.path, selectedApp.id);
-                DesktopActions.openAppWindow(
-                  currentSpace.path,
-                  toJS(selectedApp)
-                );
-                DesktopActions.setHomePane(false);
-              }}
-            />
-          );
-        })}
-      </>
-    );
-  }, [
-    bazaar.catalog,
-    bazaar.installed.length,
-    bazaar.installing.length,
-    dock?.length,
-    bazaar.recommendations.length,
-  ]);
-});
+              ]
+            : [];
+        const tileId = `${app.title}-${index}-grid`;
 
-AppGrid.defaultProps = {
-  tileSize: 'xxl',
-};
+        return (
+          <AppTile
+            key={tileId}
+            tileId={tileId}
+            isAnimated={
+              installStatus !== InstallStatus.suspended &&
+              installStatus !== InstallStatus.failed
+            }
+            installStatus={installStatus}
+            tileSize={tileSize}
+            app={app}
+            contextMenuOptions={[
+              {
+                label: isAppPinned ? 'Unpin app' : 'Pin app',
+                disabled: app.type === 'web',
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  isAppPinned
+                    ? SpacesActions.unpinApp(currentSpace?.path, app.id)
+                    : SpacesActions.pinApp(currentSpace?.path, app.id);
+                },
+              },
+              {
+                label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+                disabled: app.type === 'web',
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  weRecommended
+                    ? SpacesActions.unrecommendApp(app.id)
+                    : SpacesActions.recommendApp(app.id);
+                },
+              },
+              {
+                label: 'App info',
+                disabled: app.type === 'web',
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  ShellActions.openDialogWithStringProps('app-detail-dialog', {
+                    appId: app.id,
+                  });
+                },
+              },
+              ...suspendRow,
+              ...installRow,
+            ]}
+            onAppClick={(selectedApp: AppType) => {
+              DesktopActions.openAppWindow(
+                currentSpace.path,
+                toJS(selectedApp)
+              );
+              DesktopActions.setHomePane(false);
+            }}
+          />
+        );
+      })}
+    </>
+  );
+});

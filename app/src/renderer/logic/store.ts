@@ -23,20 +23,18 @@ import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
-import { NotificationStore } from 'os/services/ship/models/notifications';
+// import { NotificationStore } from 'os/services/ship/models/notifications';
+import {
+  NotificationStore,
+  NotificationStoreType,
+} from 'os/services/spaces/models/beacon';
 // import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 
-const loadSnapshot = (serviceKey: string) => {
-  const localStore = localStorage.getItem('servicesStore');
-  if (localStore) return JSON.parse(localStore)[serviceKey];
-  return {};
-};
-
-export const Services = types
+const Services = types
   .model('ServicesStore', {
     desktop: DesktopStore,
     shell: ShellStore,
@@ -54,7 +52,7 @@ export const Services = types
     courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
-    notifications: NotificationStore,
+    beacon: NotificationStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -62,6 +60,26 @@ export const Services = types
     },
     clearShip() {
       self.ship = undefined;
+    },
+    clearAll() {
+      self.spaces = castToSnapshot({
+        loader: { state: 'initial' },
+        join: { state: 'initial' },
+        spaces: undefined,
+      });
+      self.bazaar = castToSnapshot({});
+      self.membership = castToSnapshot({});
+      self.courier = castToSnapshot({});
+      self.contacts = castToSnapshot({
+        ourPatp: '',
+        rolodex: {},
+      });
+      self.friends = castToSnapshot({});
+      self.beacon = castToSnapshot({});
+      self.visas = castToSnapshot({
+        incoming: {},
+        outgoing: {},
+      });
     },
   }));
 
@@ -112,7 +130,7 @@ const services = Services.create({
   courier: {},
   contacts: { ourPatp: '' },
   friends: {},
-  notifications: { unseen: [], seen: [], all: [], recent: [] },
+  beacon: { notes: {} },
 });
 
 export const servicesStore = services;
@@ -120,7 +138,7 @@ export const servicesStore = services;
 // -------------------------------
 // Create core context
 // -------------------------------
-export type ServiceInstance = Instance<typeof Services>;
+type ServiceInstance = Instance<typeof Services>;
 const ServicesContext = createContext<null | ServiceInstance>(services);
 
 export const ServiceProvider = ServicesContext.Provider;
@@ -187,7 +205,6 @@ coreStore.reset(); // need to reset coreStore for proper boot sequence
 coreStore.setResuming(true); // need to start the renderer with resuming
 watchOnlineStatus(coreStore);
 OSActions.onConnectionStatus((_event: any, status: any) => {
-  console.log(status);
   coreStore.setConnectionStatus(status);
 });
 
@@ -205,7 +222,7 @@ OSActions.onSetTheme((_event: any, data: any) => {
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  console.log('onBoot', response);
+  // console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
@@ -226,12 +243,6 @@ OSActions.onBoot((_event: any, response: any) => {
       applySnapshot(
         servicesStore.courier,
         castToSnapshot(response.models.courier)
-      );
-    }
-    if (response.models.notifications) {
-      applySnapshot(
-        servicesStore.notifications,
-        castToSnapshot(response.models.notifications)
       );
     }
   }
@@ -260,6 +271,9 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
+  }
+  if (response.beacon) {
+    applySnapshot(servicesStore.beacon, response.beacon);
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
@@ -304,7 +318,14 @@ OSActions.onLogin((_event: any) => {
 });
 
 OSActions.onConnected(
-  (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+  (
+    _event: any,
+    initials: {
+      ship: ShipModelType;
+      models: ShipModels;
+      beacon: NotificationStoreType;
+    }
+  ) => {
     console.log('onConnected', initials.models);
     if (initials.models.courier) {
       applySnapshot(
@@ -322,10 +343,7 @@ OSActions.onConnected(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
     );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(initials.models.notifications)
-    );
+    applySnapshot(servicesStore.beacon, castToSnapshot(initials.beacon));
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -338,10 +356,11 @@ OSActions.onConnected(
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
   // LiveRoom.leave();
+  SoundActions.playLogout();
+  servicesStore.clearAll();
   servicesStore.clearShip();
   coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);
-  SoundActions.playLogout();
 });
 
 // --------------------------------------
@@ -356,8 +375,8 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
     }
-    if (value.resource === 'notifications') {
-      applyPatch(servicesStore.notifications, value.patch);
+    if (value.resource === 'beacon') {
+      applyPatch(servicesStore.beacon, value.patch);
     }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);
@@ -406,6 +425,7 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
+      applySnapshot(servicesStore.beacon, castToSnapshot(value.model.beacon));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
         servicesStore.membership,

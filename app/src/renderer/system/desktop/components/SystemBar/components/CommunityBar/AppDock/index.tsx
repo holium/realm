@@ -1,6 +1,10 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
+import {
+  AppType,
+  InstallStatus,
+  UrbitAppType,
+} from 'os/services/spaces/models/bazaar';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -9,10 +13,15 @@ import { Reorder, AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 
-interface AppDockProps {}
-
-export const AppDock: FC<AppDockProps> = observer(() => {
+export const AppDock = observer(() => {
   const { desktop, spaces, bazaar, theme } = useServices();
 
   const dividerBg = useMemo(
@@ -23,7 +32,11 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const spacePath = spaces.selected?.path!;
   const dock = bazaar.getDock(spacePath);
 
-  const orderedList = spacePath ? bazaar.getDockApps(spacePath) : [];
+  // DO NOT REMOVE dock variable from useMemo dependencies
+  const orderedList = useMemo(
+    () => (spacePath ? bazaar.getDockApps(spacePath) : []),
+    [dock?.length, spacePath]
+  );
 
   const pinnedApps = useMemo(() => {
     return (
@@ -41,12 +54,50 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
         }}
       >
-        {orderedList?.map((app: AppType | any, index: number) => {
+        {orderedList?.map((app: AppType | any) => {
           const selected = desktop.isActiveWindow(app.id);
           const open = desktop.isOpenWindow(app.id);
+          const { isSuspended, isUninstalled } = getAppTileFlags(
+            app.installStatus || InstallStatus.installed
+          );
+          const suspendRow = isSuspended
+            ? [
+                {
+                  label: resumeSuspendLabel(app.installStatus),
+                  section: 2,
+                  disabled: false,
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    return handleResumeSuspend(app.id, app.installStatus);
+                  },
+                },
+              ]
+            : [];
+
+          const installRow =
+            app.type === 'urbit' && isUninstalled
+              ? [
+                  {
+                    label: installLabel(app.installStatus),
+                    // section: 2,
+                    disabled: false,
+                    onClick: (evt: any) => {
+                      evt.stopPropagation();
+                      const appHost = (app as UrbitAppType).host;
+                      return handleInstallation(
+                        appHost,
+                        app.id,
+                        app.installStatus
+                      );
+                    },
+                  },
+                ]
+              : [];
+          const tileId = `pinned-${app.id}-${spaces.selected?.path}`;
+
           return (
             <Reorder.Item
-              key={`pinned-${app.id}-${spaces.selected?.path}`}
+              key={tileId}
               value={app}
               style={{ zIndex: 1 }}
               initial={{
@@ -64,7 +115,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   opacity: { duration: 1, delay: 0 },
                 },
               }}
-              onClick={(evt: any) => {
+              onClick={() => {
                 const selectedApp = app;
                 if (desktop.isOpenWindow(selectedApp.id)) {
                   DesktopActions.setActive(spacePath, selectedApp.id);
@@ -76,19 +127,17 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               whileDrag={{ zIndex: 20 }}
             >
               <AppTile
-                allowContextMenu
-                contextPosition="above"
+                tileId={tileId}
                 tileSize="sm"
-                isRecommended={false}
-                isUninstalled={app.installStatus === InstallStatus.uninstalled}
-                isInstalling={
-                  app.installStatus === InstallStatus.started ||
-                  app.installStatus === InstallStatus.treaty
+                installStatus={app.installStatus}
+                isAnimated={
+                  app.installStatus !== InstallStatus.suspended &&
+                  app.installStatus !== InstallStatus.failed
                 }
                 app={app}
                 selected={selected}
                 open={open}
-                onAppClick={(evt: any) => {
+                onAppClick={() => {
                   const selectedApp = app;
                   if (desktop.isOpenWindow(selectedApp.id)) {
                     DesktopActions.setActive(spacePath, selectedApp.id);
@@ -96,7 +145,9 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     DesktopActions.openAppWindow(spacePath, selectedApp);
                   }
                 }}
-                contextMenu={[
+                contextMenuOptions={[
+                  ...installRow,
+                  ...suspendRow,
                   {
                     label: 'Unpin',
                     onClick: (evt: any) => {
@@ -120,45 +171,35 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         })}
       </Reorder.Group>
     );
-  }, [
-    desktop.activeWindow?.id,
-    desktop.openAppIds,
-    spacePath,
-    orderedList,
-    dock?.length,
-  ]);
+  }, [desktop, orderedList, spacePath, spaces.selected]);
 
-  const activeAndUnpinned = desktop.openApps.filter(
-    (appWindow: any) =>
-      dock && dock.findIndex((pinned: any) => appWindow.id === pinned) === -1
+  const activeAndUnpinned = useMemo(
+    () =>
+      desktop.openApps.filter(
+        (appWindow: any) =>
+          dock &&
+          dock.findIndex((pinned: any) => appWindow.id === pinned) === -1
+      ),
+    [desktop.openApps, dock]
   );
 
-  return (
-    <Flex position="relative" flexDirection="row" alignItems="center">
-      <AnimatePresence>
-        {pinnedApps}
-        {activeAndUnpinned.length && orderedList?.length ? (
-          <Divider key="app-dock-divider" customBg={dividerBg} ml={2} mr={2} />
-        ) : (
-          []
-        )}
-      </AnimatePresence>
+  const activeAndUnpinnedApps = useMemo(
+    () => (
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = bazaar.getApp(unpinnedApp.id)!;
           const selected = desktop.isActiveWindow(app.id);
           const open = desktop.isOpenWindow(app.id);
+          const tileId = `unpinned-${app.id}`;
           return (
             <AppTile
-              key={`unpinned-${app.id}`}
-              allowContextMenu
-              contextPosition="above"
+              key={tileId}
+              tileId={tileId}
               tileSize="sm"
               app={app}
-              isRecommended={false}
               selected={selected}
               open={open}
-              contextMenu={[
+              contextMenuOptions={[
                 {
                   label: 'Pin',
                   onClick: (evt: any) => {
@@ -203,6 +244,21 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           );
         })}
       </Flex>
+    ),
+    [activeAndUnpinned, bazaar, desktop, spaces.selected]
+  );
+
+  return (
+    <Flex position="relative" flexDirection="row" alignItems="center">
+      <AnimatePresence>
+        {pinnedApps}
+        {activeAndUnpinned.length && orderedList?.length ? (
+          <Divider key="app-dock-divider" customBg={dividerBg} ml={2} mr={2} />
+        ) : (
+          []
+        )}
+      </AnimatePresence>
+      {activeAndUnpinnedApps}
     </Flex>
   );
 });

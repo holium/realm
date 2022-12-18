@@ -12,11 +12,15 @@ export const CourierApi = {
     return response.inbox;
   },
   getDMLog: async (to: Patp, conduit: Conduit) => {
-    const response = await conduit.scry({
-      app: 'courier',
-      path: `/dms/${to}`,
-    });
-    return response['dm-log'];
+    try {
+      const response = await conduit.scry({
+        app: 'courier',
+        path: `/dms/${to}`,
+      });
+      return response['dm-log'];
+    } catch (e) {
+      console.log(e);
+    }
   },
 
   dmUpdates: async (
@@ -27,7 +31,6 @@ export const CourierApi = {
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -37,12 +40,9 @@ export const CourierApi = {
             store.setReceivedDM(payload);
             break;
           case 'group-dm-created':
-            // console.log('group-dm-created', payload);
-            // if()
-            // store.setReceivedDM(payload);
+            store.setNewPreview(payload);
             break;
           case 'invite-dm':
-            console.log('invited to dm', payload);
             store.setNewPreview(payload);
             break;
           default:
@@ -140,8 +140,8 @@ export const CourierApi = {
   acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         accept: toShip,
       },
@@ -149,16 +149,9 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   declineDm: async (conduit: Conduit, toShip: string) => {
-    console.log({
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
-      json: {
-        decline: toShip,
-      },
-    });
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         decline: toShip,
       },
@@ -168,13 +161,10 @@ export const CourierApi = {
   // Group invite flow
   acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
     const payload = {
-      app: 'invite-store',
-      mark: 'invite-action',
+      app: 'courier',
+      mark: 'accept-group-dm',
       json: {
-        accept: {
-          term: 'graph',
-          uid: inviteId,
-        },
+        accept: inviteId,
       },
     };
     console.log('accepting dm', payload);

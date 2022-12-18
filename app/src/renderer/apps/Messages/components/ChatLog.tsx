@@ -16,7 +16,6 @@ export const ChatLog = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
-  console.log(loading);
 
   const isBlank = !loading && messages.length === 0;
 
@@ -50,10 +49,22 @@ export const ChatLog = observer((props: ChatLogProps) => {
         width={388}
         data={messages}
         sort={(a, b) => a.timeSent - b.timeSent}
-        rowRenderer={(message, index, measure) => (
+        rowRenderer={(message, index, measure, sortedMessages) => (
           <ChatMessage
             isSending={message.pending}
-            showAuthor={isGroup}
+            // Only show author if it's a group
+            // and the previous message was not from the same author
+            showAuthor={
+              isGroup &&
+              (index === 0 ||
+                message.author !== sortedMessages[index - 1].author)
+            }
+            // Only show date if the previous message was sent on a different day
+            showDate={
+              index === 0 ||
+              new Date(message.timeSent).toDateString() !==
+                new Date(sortedMessages[index - 1].timeSent).toDateString()
+            }
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={theme.currentTheme}
             author={message.author}

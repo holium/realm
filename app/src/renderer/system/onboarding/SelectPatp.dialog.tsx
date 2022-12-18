@@ -1,7 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
-// @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
 import {
   Box,
   Sigil,
@@ -10,12 +8,14 @@ import {
   Flex,
   Spinner,
   TextButton,
+  UrbitSVG,
 } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
-import { theme } from 'renderer/theme';
+import { useServices } from 'renderer/logic/store';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -28,8 +28,13 @@ interface AvailablePlanetProps
 const AvailablePlanet: FC<AvailablePlanetProps> = (
   props: AvailablePlanetProps
 ) => {
+  const { theme } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
   const background = darken(0.01, props.theme.windowColor);
-  const border = `1px solid ${transparentize(0.9, '#000000')}`;
+  const border = `1px solid ${transparentize(
+    0.9,
+    theme.currentTheme.mode === 'light' ? '#000000' : '#ffffff'
+  )}`;
   const Unselected = (props: any) => (
     <Box
       pl={2}
@@ -60,11 +65,11 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
 
   const selectedBackground = transparentize(
     0.8,
-    theme.light.colors.brand.primary
+    baseTheme.colors.brand.primary
   );
   const selectedBorder = `1px solid ${transparentize(
     0.5,
-    theme.light.colors.brand.primary
+    baseTheme.colors.brand.primary
   )}`;
   const Selected = (props: any) => (
     <Box
@@ -102,6 +107,8 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
 };
 
 const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+  const { theme, onboarding } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const loading = planets.length === 0;
@@ -130,14 +137,13 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
         alignItems="center"
         justifyContent="center"
       >
-        <img
-          height={55}
-          style={{ marginBottom: '32px' }}
-          src={UrbitSVG}
-          alt="urbit logo"
+        <UrbitSVG
+          mode={theme.currentTheme.mode as 'light' | 'dark'}
+          size={55}
         />
         <Text
           textAlign="center"
+          mt={2}
           mb={28}
           fontSize={2}
           fontWeight={400}
@@ -165,6 +171,17 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
             ))
           )}
         </Flex>
+        {onboarding.planetWasTaken && (
+          <Text
+            color={baseTheme.colors.text.error}
+            fontSize={1}
+            textAlign="center"
+            mt={3}
+          >
+            Your planet was taken before you completed checkout, please select
+            another one.
+          </Text>
+        )}
       </Flex>
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
         <TextButton>Next</TextButton>

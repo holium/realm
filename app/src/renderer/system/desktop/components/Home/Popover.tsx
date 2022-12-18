@@ -1,18 +1,19 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable react/prop-types */
-import React, { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
-import { Portal } from 'renderer/system/dialog/Portal';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { MiniApp } from '../SystemBar/components/MiniAppWindow';
+import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
+import { Box } from '@holium/design-system';
 
 export interface RealmPopoverProps {
   id: string;
   isOpen: boolean;
-  coords?: any;
+  coords?: {
+    top: number;
+    left: number;
+  };
   style?: any;
   children?: any;
   buttonOffset?: {
@@ -20,8 +21,8 @@ export interface RealmPopoverProps {
     y?: number;
   };
   dimensions: {
-    height: number;
     width: number;
+    height?: number;
   };
   onClose: () => void;
 }
@@ -35,19 +36,13 @@ export const RealmPopoverWrapper = styled(styled.div<
   Partial<RealmPopoverProps>
 >`
   z-index: 4;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
-  backface-visibility: hidden;
-  perspective: 1000;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 `)(compose(space, color, typography));
 
 export const RealmPopover = observer((props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
   const { theme } = useServices();
-  // const isOpen = searchMode !== 'none';
+  const { textColor, windowColor } = theme.currentTheme;
+
   const handleClickOutside = useCallback(
     (event: any) => {
       // If we aren't clicking on a tray icon, close tray
@@ -66,7 +61,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
         }
       }
     },
-    [onClose, id]
+    [id, onClose]
   );
 
   useEffect(() => {
@@ -74,65 +69,77 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [handleClickOutside, isOpen]);
+  }, [handleClickOutside]);
 
-  return useMemo(
-    () => (
+  return (
+    <Box
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+        zIndex: 4,
+      }}
+    >
       <RealmPopoverWrapper id={`${id}-wrapper`} style={style}>
         <AnimatePresence>
-          <Portal>
-            {isOpen && (
-              <Wrapper
-                key={`${id}-wrapper`}
+          {isOpen && (
+            <Wrapper
+              key={`${id}-wrapper`}
+              style={{
+                ...coords,
+                ...dimensions,
+                maxHeight: dimensions.height,
+              }}
+              initial={{
+                opacity: 0,
+                y: -8,
+                width: dimensions.width,
+                height: 'fit-content',
+                maxHeight: dimensions.height,
+              }}
+              animate={{
+                opacity: isOpen ? 1 : 0,
+                y: 0,
+                width: dimensions.width,
+                height: 'fit-content',
+                maxHeight: dimensions.height,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: -8,
+                height: 'fit-content',
+                width: dimensions.width,
+                maxHeight: dimensions.height,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+            >
+              <MiniAppWindow
+                id={`${id}-app`}
                 style={{
-                  ...coords,
                   ...dimensions,
-                  maxHeight: dimensions.height,
-                }}
-                initial={{
-                  opacity: 0,
-                  y: -8,
-                  width: dimensions.width,
                   height: 'fit-content',
-                  maxHeight: dimensions.height,
+                  overflowY: 'auto',
+                  maxHeight: '55vh',
                 }}
-                animate={{
-                  opacity: isOpen ? 1 : 0,
-                  y: 0,
-                  width: dimensions.width,
-                  height: 'fit-content',
-                  maxHeight: dimensions.height,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  y: -8,
-                  height: 'fit-content',
-                  width: dimensions.width,
-                  maxHeight: dimensions.height,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
+                color={textColor}
+                customBg={windowColor}
+                onContextMenu={(evt) => evt.stopPropagation()}
               >
-                <MiniApp
-                  id={`${id}-app`}
-                  dimensions={{ ...dimensions, height: 'fit-content' }}
-                  backgroundColor={theme.currentTheme.windowColor}
-                  textColor={theme.currentTheme.textColor}
-                >
-                  <motion.div style={{ ...coords, padding: 20 }}>
-                    {children}
-                  </motion.div>
-                </MiniApp>
-              </Wrapper>
-            )}
-          </Portal>
+                <motion.div style={{ ...coords, padding: 20 }}>
+                  {children}
+                </motion.div>
+              </MiniAppWindow>
+            </Wrapper>
+          )}
         </AnimatePresence>
       </RealmPopoverWrapper>
-    ),
-    [isOpen, coords, dimensions, theme.currentTheme]
+    </Box>
   );
 });
