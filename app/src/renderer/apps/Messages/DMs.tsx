@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -20,7 +20,8 @@ import {
   PreviewGroupDMType,
   DMPreviewType,
 } from 'os/services/ship/models/courier';
-import { WindowedList } from '@holium/design-system';
+import { Skeleton, WindowedList } from '@holium/design-system';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface IProps {
   theme: ThemeModelType;
@@ -36,12 +37,20 @@ export const DMs = observer((props: IProps) => {
 
   const { courier } = useServices();
   const [searchString, setSearchString] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const previews = useMemo(() => {
-    return Array.from(courier.previews.values()).sort(
-      (a, b) => b.lastTimeSent - a.lastTimeSent
-    );
-  }, [courier.previews]);
+  const previews = Array.from(courier.previews.values());
+
+  const fetchPreviews = useCallback(async () => {
+    setIsFetching(true);
+    const previews = await ShipActions.getDMs();
+    courier.setPreviews(previews);
+    setIsFetching(false);
+  }, [courier]);
+
+  useEffect(() => {
+    if (previews.length === 0) fetchPreviews();
+  }, []);
 
   const searchFilter = useCallback(
     (preview: DMPreviewType) => {
@@ -60,6 +69,23 @@ export const DMs = observer((props: IProps) => {
   );
 
   const dMList = useCallback(() => {
+    if (isFetching) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="start"
+          overflow="hidden"
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Box key={index} mb={2} mx={4}>
+              <Skeleton height={57} borderRadius={8} />
+            </Box>
+          ))}
+        </Flex>
+      );
+    }
+
     if (previews.length === 0) {
       return (
         <Flex
@@ -85,6 +111,7 @@ export const DMs = observer((props: IProps) => {
         height={544}
         rowHeight={57}
         data={previews}
+        sort={(a, b) => b.lastTimeSent - a.lastTimeSent}
         filter={searchFilter}
         rowRenderer={(dm, index) => (
           <Box display="block" key={`${lastMessageText}-${index}`}>
