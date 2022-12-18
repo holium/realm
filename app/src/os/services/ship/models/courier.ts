@@ -423,7 +423,7 @@ export const CourierStore = types
       });
       self.loader.set('loaded');
     },
-    setPreview: (dmLog: DMLogType) => {
+    updatePreviewsFromDmLog: (dmLog: DMLogType) => {
       if (self.dms.has(dmLog.path)) {
         const sentMessage = dmLog.messages[0];
         self.previews.get(dmLog.path)?.setLastMessage(sentMessage);

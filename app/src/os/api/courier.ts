@@ -1,6 +1,6 @@
 import { Conduit } from '@holium/conduit';
 import { Post } from '@urbit/api';
-import { CourierStoreType } from '../services/ship/models/courier';
+import { CourierStoreType, DMLogType } from '../services/ship/models/courier';
 import { Patp } from '../types';
 
 type CourierApiType = {
@@ -53,11 +53,11 @@ export const CourierApi: CourierApiType = {
           case 'dm-received':
             /* TODO: don't send this event to self */
             const self = `~${conduit.ship}`;
-            const isFromSelf = payload.messages[0].author === self;
+            const isFromSelf = payload.messages?.[0].author === self;
             if (isFromSelf) {
-              store.setPreview(payload);
+              store.updatePreviewsFromDmLog(payload as DMLogType);
             } else {
-              store.setReceivedDm(payload);
+              store.setReceivedDm(payload as DMLogType);
             }
             break;
           case 'group-dm-created':
