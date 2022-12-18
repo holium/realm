@@ -15,29 +15,28 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { BaseDialogProps } from '../dialog/dialogs';
 
-export const InstallAgent = observer(() => {
+export const InstallAgent = observer((props: BaseDialogProps) => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  const completedCheckout = onboarding.checkoutComplete;
   const shipName = onboarding.ship!.patp;
   const shipNick = onboarding.ship!.nickname;
   const shipColor = onboarding.ship!.color!;
   const avatar = onboarding.ship!.avatar;
 
   const installRealm = () => {
-    if (completedCheckout) {
-      return;
-    }
-
-    setLoading(true);
-    OnboardingActions.installRealm().finally(() => setLoading(false));
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
     setInstalling(true);
-    OnboardingActions.installRealm().finally(() => setInstalling(false));
+    OnboardingActions.installRealm().finally(() => {
+      setInstalling(false);
+    });
   };
+
+  const isError = onboarding.installer.state === 'error';
+  const isInstalled = onboarding.installer.state === 'loaded';
 
   return (
     <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
@@ -97,7 +96,7 @@ export const InstallAgent = observer(() => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : onboarding.installer.isLoaded || completedCheckout ? (
+              ) : onboarding.installer.isLoaded ? (
                 <Icons ml={2} size={1} name="CheckCircle" />
               ) : (
                 <Icons ml={2} size={1} name="DownloadCircle" />
@@ -113,14 +112,14 @@ export const InstallAgent = observer(() => {
             variant="body"
             opacity={0.6}
             mt={3}
-            fontWeight={onboarding.installer.state === 'error' ? 500 : 200}
-            color={onboarding.installer.state === 'error' ? 'red' : ''}
+            fontWeight={isError ? 500 : 200}
+            color={isError ? 'red' : ''}
           >
-            {onboarding.installer.state === 'error'
-              ? `${onboarding.installer.errorMessage}`
-              : !onboarding.installer.isLoaded && !completedCheckout
-              ? 'This will just take a minute'
-              : 'Congrats! You are ready to enter a new world.'}
+            {isError && onboarding.installer.errorMessage}
+            {!isInstalled && !isError && 'This will just take a minute'}
+            {isInstalled &&
+              !isError &&
+              'Congrats! You are ready to enter a new world.'}
           </Text>
         </Flex>
       </Flex>

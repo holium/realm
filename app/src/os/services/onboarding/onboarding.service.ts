@@ -542,7 +542,7 @@ export class OnboardingService extends BaseService {
           errorMessage: `Urbit ID does not match, did you mean ${cookiePatp}?`,
         };
       }
-
+      // TODO this should be removed.
       this.core.saveSession({ ship: patp, url, cookie, code });
       this.state.setShip({ patp, url });
       return { success: true, url, cookie, patp, code: code };
@@ -619,18 +619,12 @@ export class OnboardingService extends BaseService {
       console.error(
         "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
       );
-      this.state.installRealm();
-      return;
-    }
-
-    if (this.state.checkoutComplete) {
-      // hosted ship, we shouldn't try to install
-      this.state.installRealm();
+      this.state.setRealmInstalled();
       return;
     }
 
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
-    // example: INSTALL_MOON=~hostyv:realm,courier,wallet
+    // example: INSTALL_MOON=~hostyv:realm,courier
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
@@ -664,7 +658,7 @@ export class OnboardingService extends BaseService {
     // console.log('refresh-app-catalog => %o', result);
     await this.closeConduit();
     this.state.endRealmInstall('success');
-    this.state.installRealm();
+    this.state.setRealmInstalled();
   }
 
   async completeOnboarding(_event: any) {

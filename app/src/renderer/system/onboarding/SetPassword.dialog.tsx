@@ -30,7 +30,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
     const passwordForm = useForm({
       async onSubmit({ values }) {
         await OnboardingActions.setPassword(values.password);
-        props.onNext && props.onNext();
+        props.onNext && props.onNext(onboarding.selfHosted);
       },
     });
 

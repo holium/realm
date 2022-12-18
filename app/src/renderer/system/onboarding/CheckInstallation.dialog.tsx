@@ -10,7 +10,6 @@ const CheckInstallationDialog: FC<BaseDialogProps> = observer(
     const { onboarding } = useServices();
 
     useEffect(() => {
-      onboarding.installer.set('initial');
       OnboardingActions.preInstallSysCheck();
     }, []);
 
@@ -33,23 +32,25 @@ const CheckInstallationDialog: FC<BaseDialogProps> = observer(
           <Text fontSize={3} fontWeight={500} mb={20}>
             Checking System Version
           </Text>
-          {['initial', 'loading'].indexOf(onboarding.installer.state) !== -1 ? (
+          {['initial', 'loading'].indexOf(onboarding.versionLoader.state) !==
+          -1 ? (
             <Spinner size={1} />
-          ) : onboarding.installer.state === 'loaded' ? (
+          ) : onboarding.versionLoader.state === 'loaded' ? (
             <Icons ml={2} size={3} name="CheckCircle" color="#008b00" />
           ) : (
-            onboarding.installer.state === 'error' && (
+            onboarding.versionLoader.state === 'error' && (
               <Icons ml={2} size={3} name="Error" color="red" />
             )
           )}
-          {['initial', 'loading'].indexOf(onboarding.installer.state) !== -1 ? (
+          {['initial', 'loading'].indexOf(onboarding.versionLoader.state) !==
+          -1 ? (
             <Text mt={20}>
               Please wait while we determine the state of your ship...
             </Text>
-          ) : onboarding.installer.state === 'loaded' ? (
+          ) : onboarding.versionLoader.state === 'loaded' ? (
             <Text mt={20}>System check complete. You're good to go.</Text>
           ) : (
-            onboarding.installer.state === 'error' && (
+            onboarding.versionLoader.state === 'error' && (
               <>
                 <Text mt={20}>Unable to complete onboarding</Text>
                 <Text mt={20} textAlign="center">

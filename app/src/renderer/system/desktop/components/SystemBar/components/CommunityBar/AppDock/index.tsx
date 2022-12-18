@@ -38,8 +38,6 @@ export const AppDock = observer(() => {
     [dock?.length, spacePath]
   );
 
-  console.log('orderedList', orderedList);
-
   const pinnedApps = useMemo(() => {
     return (
       <Reorder.Group

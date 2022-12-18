@@ -23,7 +23,7 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
-interface StripePaymentProps extends BaseDialogProps {
+export interface StripePaymentProps extends BaseDialogProps {
   patp: string;
 }
 

@@ -3,7 +3,10 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { servicesStore } from 'renderer/logic/store';
 
-import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+import {
+  BaseDialogProps,
+  DialogRenderers,
+} from 'renderer/system/dialog/dialogs';
 import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
 import EmailDialog from 'renderer/system/onboarding/Email.dialog';
 import HaveUrbitDialog from 'renderer/system/onboarding/HaveUrbit.dialog';
@@ -12,8 +15,12 @@ import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
 import SetPassword from 'renderer/system/onboarding/SetPassword.dialog';
 import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
 import SelectPatp from 'renderer/system/onboarding/SelectPatp.dialog';
-import SelectPlan from 'renderer/system/onboarding/SelectPlan.dialog';
-import StripePayment from 'renderer/system/onboarding/StripePayment.dialog';
+import SelectPlan, {
+  SelectPlanProps,
+} from 'renderer/system/onboarding/SelectPlan.dialog';
+import StripePayment, {
+  StripePaymentProps,
+} from 'renderer/system/onboarding/StripePayment.dialog';
 import HostingConfirmation from 'renderer/system/onboarding/HostingConfirmation.dialog';
 import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
 import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
@@ -27,7 +34,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     firstStep: true,
     hasCloseButton: false,
     customNext: false,
-    component: (props: any) => <DisclaimerDialog {...props} />,
+    component: (props: BaseDialogProps) => <DisclaimerDialog {...props} />,
     isValidated: (state: any) => {
       return state && state.disclaimerAccepted;
     },
@@ -55,7 +62,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     firstStep: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <AccessGate {...props} />,
+    component: (props: BaseDialogProps) => <AccessGate {...props} />,
     onOpen: () => {
       ShellActions.setBlur(true);
     },
@@ -79,7 +86,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     firstStep: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <AccessGatePassed {...props} />,
+    component: (props: BaseDialogProps) => <AccessGatePassed {...props} />,
     onOpen: () => {
       ShellActions.setBlur(true);
     },
@@ -102,7 +109,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <EmailDialog {...props} />,
+    component: (props: BaseDialogProps) => <EmailDialog {...props} />,
     onOpen: () => {
       ShellActions.setBlur(true);
     },
@@ -125,7 +132,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <HaveUrbitDialog {...props} />,
+    component: (props: BaseDialogProps) => <HaveUrbitDialog {...props} />,
     hasPrevious: () => !servicesStore.identity.auth.firstTime,
     onPrevious: () => {
       ShellActions.closeDialog();
@@ -156,7 +163,7 @@ const selfHostedDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <AddShip {...props} />,
+    component: (props: BaseDialogProps) => <AddShip {...props} />,
     hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
@@ -183,7 +190,9 @@ const completeProfileDialogs: DialogRenderers = {
     firstStep: false,
     hasCloseButton: false,
     customNext: false,
-    component: (props: any) => <CheckInstallationDialog {...props} />,
+    component: (props: BaseDialogProps) => (
+      <CheckInstallationDialog {...props} />
+    ),
     isValidated: (state: any) => {
       console.log('isValidated => %o', state.versionVerified);
       return state && state.versionVerified;
@@ -210,7 +219,7 @@ const completeProfileDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <ProfileSetup {...props} />,
+    component: (props: BaseDialogProps) => <ProfileSetup {...props} />,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
     onNext: async () =>
@@ -231,12 +240,24 @@ const completeProfileDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <SetPassword {...props} />,
+    component: (props: BaseDialogProps) => <SetPassword {...props} />,
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
-    onNext: async () =>
-      await OnboardingActions.setStep(OnboardingStep.INSTALL_AGENT),
+    onNext: async (isSelfHosted: boolean) => {
+      console.log('is self hosted', isSelfHosted);
+      if (!isSelfHosted) {
+        OnboardingActions.completeOnboarding()
+          .then(() => {
+            console.log('completeOnboarding success');
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        await OnboardingActions.setStep(OnboardingStep.INSTALL_AGENT);
+      }
+    },
     window: {
       id: OnboardingStep.SET_PASSWORD,
       zIndex: 13,
@@ -253,7 +274,7 @@ const completeProfileDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: () => <InstallAgent />,
+    component: (props: BaseDialogProps) => <InstallAgent {...props} />,
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
@@ -276,7 +297,7 @@ const hostingProviderDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <AccessCode {...props} />,
+    component: (props: BaseDialogProps) => <AccessCode {...props} />,
     hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
@@ -299,7 +320,7 @@ const hostingProviderDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <SelectPatp {...props} />,
+    component: (props: BaseDialogProps) => <SelectPatp {...props} />,
     hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
@@ -322,7 +343,7 @@ const hostingProviderDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <SelectPlan {...props} />,
+    component: (props: SelectPlanProps) => <SelectPlan {...props} />,
     hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.SELECT_PATP);
@@ -345,7 +366,7 @@ const hostingProviderDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <StripePayment {...props} />,
+    component: (props: StripePaymentProps) => <StripePayment {...props} />,
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
@@ -367,7 +388,7 @@ const hostingProviderDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: any) => <HostingConfirmation {...props} />,
+    component: (props: BaseDialogProps) => <HostingConfirmation {...props} />,
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.VIEW_CODE),
     window: {
@@ -387,9 +408,11 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: false,
     isValidated: () => true,
-    component: (props: any) => <ViewCode {...props} />,
-    onNext: async () =>
-      await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    component: (props: BaseDialogProps) => <ViewCode {...props} />,
+    onNext: async (_evt: any, state: any, setState: any) => {
+      setState({ ...state, isHosted: true });
+      await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);
+    },
     window: {
       id: OnboardingStep.VIEW_CODE,
       zIndex: 13,
