@@ -2,6 +2,7 @@ import { S3Api } from './../../api/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
+import { Content } from '@urbit/api';
 import S3Client, { StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
 import Realm from '../..';
@@ -25,6 +26,7 @@ import { CourierApi } from '../../api/courier';
 import {
   CourierStore,
   CourierStoreType,
+  DMLogType,
   PreviewGroupDMType,
 } from './models/courier';
 import { toJS } from 'mobx';
@@ -63,7 +65,7 @@ export class ShipService extends BaseService {
 
   handlers = {
     'realm.ship.get-dms': this.getDMs,
-    'realm.ship.get-dm-log': this.getDMLog,
+    'realm.ship.get-dm-log': this.getDmLog,
     'realm.ship.send-dm': this.sendDm,
     'realm.ship.get-metadata': this.getMetadata,
     'realm.ship.get-contact': this.getContact,
@@ -121,8 +123,8 @@ export class ShipService extends BaseService {
     getDMs: async () => {
       return await ipcRenderer.invoke('realm.ship.get-dms');
     },
-    getDMLog: async (toShip: string) => {
-      return await ipcRenderer.invoke('realm.ship.get-dm-log', toShip);
+    getDmLog: async (path: string): Promise<DMLogType> => {
+      return await ipcRenderer.invoke('realm.ship.get-dm-log', path);
     },
     acceptDm: async (toShip: string) => {
       return await ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
@@ -145,8 +147,8 @@ export class ShipService extends BaseService {
     setScreen: async (screen: boolean) => {
       return await ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
     },
-    sendDm: async (toShip: string, content: any) => {
-      return await ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
+    sendDm: async (path: string, contents: Content[]) => {
+      return await ipcRenderer.invoke('realm.ship.send-dm', path, contents);
     },
     draftDm: async (patps: Patp[], metadata: any[]) => {
       return await ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
@@ -464,14 +466,13 @@ export class ShipService extends BaseService {
     if (!this.core.conduit) {
       return;
     }
-    return await CourierApi.getDMList(this.core.conduit);
+    return await CourierApi.getDmList(this.core.conduit);
   }
 
-  async getDMLog(_event: any, ship: Patp) {
-    const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
-    this.models.courier?.setDMLog(dmLog);
-    const dms = this.models.courier?.dms.get(dmLog.path);
-    return toJS(dms?.messages);
+  async getDmLog(_event: any, ship: Patp) {
+    const dmLog = await CourierApi.getDmLog(this.core.conduit!, ship);
+    this.models.courier?.setDmLog(dmLog);
+    return dmLog;
   }
 
   async acceptDm(_event: any, toShip: string) {
@@ -529,29 +530,25 @@ export class ShipService extends BaseService {
   async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
     let draft: any;
     if (patps.length > 1) {
-      const reaction: any = await CourierApi.createGroupDM(
+      const reaction: any = await CourierApi.createGroupDm(
         this.core.conduit!,
         patps
       );
-      draft = this.models.courier?.draftGroupDM(
+      draft = this.models.courier?.draftGroupDm(
         reaction['group-dm-created'] as PreviewGroupDMType
       );
     } else {
       // single dm
-      draft = this.models.courier?.draftDM(patps, metadata);
+      draft = this.models.courier?.draftDm(patps, metadata);
     }
     return toJS(draft);
   }
 
-  async sendDm(_event: any, path: string, contents: any[]) {
-    const dmLog = this.models.courier?.dms.get(path)!;
-    const post = dmLog.sendDM(this.state!.patp, contents);
+  async sendDm(_event: any, path: string, contents: Content[]) {
+    const dmLog = this.models.courier?.dms.get(path);
+    if (!dmLog) throw new Error('DM log not found, check path');
 
-    if (dmLog.type === 'group') {
-      return await CourierApi.sendGroupDM(this.core.conduit!, path, post);
-    } else {
-      return await CourierApi.sendDM(this.core.conduit!, path, post);
-    }
+    return dmLog.sendDm(this.core.conduit!, this.state!.patp, path, contents);
   }
 
   async removeDm(_event: any, toShip: string, removeIndex: any) {

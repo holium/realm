@@ -5,12 +5,12 @@ import { Patp } from '../types';
 
 type CourierApiType = {
   /* TODO: Typeset Counduit returns */
-  getDMList: (conduit: Conduit) => Promise<any>;
-  getDMLog: (conduit: Conduit, ship: Patp) => Promise<any>;
+  getDmList: (conduit: Conduit) => Promise<any>;
+  getDmLog: (conduit: Conduit, ship: Patp) => Promise<any>;
   dmUpdates: (conduit: Conduit, store: CourierStoreType) => Promise<any>;
-  sendDM: (conduit: Conduit, path: string, post: Post) => Promise<number>;
-  sendGroupDM: (conduit: Conduit, path: string, post: Post) => Promise<number>;
-  createGroupDM: (conduit: Conduit, ships: Patp[]) => Promise<any>;
+  sendDm: (conduit: Conduit, path: string, post: Post) => Promise<number>;
+  sendGroupDm: (conduit: Conduit, path: string, post: Post) => Promise<number>;
+  createGroupDm: (conduit: Conduit, ships: Patp[]) => Promise<any>;
   readDm: (conduit: Conduit, ship: Patp) => Promise<any>;
   readGroupDm: (conduit: Conduit, host: Patp, name: string) => Promise<any>;
   acceptDm: (conduit: Conduit, toShip: string) => Promise<any>;
@@ -21,14 +21,14 @@ type CourierApiType = {
 };
 
 export const CourierApi: CourierApiType = {
-  getDMList: async (conduit) => {
+  getDmList: async (conduit) => {
     const response = await conduit.scry({
       app: 'courier',
       path: `/dms`,
     });
     return response.inbox;
   },
-  getDMLog: async (conduit, to) => {
+  getDmLog: async (conduit, to) => {
     try {
       const response = await conduit.scry({
         app: 'courier',
@@ -57,7 +57,7 @@ export const CourierApi: CourierApiType = {
             if (isFromSelf) {
               store.setPreview(payload);
             } else {
-              store.setReceivedDM(payload);
+              store.setReceivedDm(payload);
             }
             break;
           case 'group-dm-created':
@@ -80,7 +80,7 @@ export const CourierApi: CourierApiType = {
       onQuit: () => console.log('Kicked from courier subscription'),
     });
   },
-  sendDM: async (conduit, path, post) => {
+  sendDm: async (conduit, path, post) => {
     const to = path.split('/')[2]; // /dm-inbox/<to @p>
     const payload = {
       app: 'courier',
@@ -94,7 +94,7 @@ export const CourierApi: CourierApiType = {
     };
     return await conduit.poke(payload);
   },
-  sendGroupDM: async (conduit, path, post) => {
+  sendGroupDm: async (conduit, path, post) => {
     const split = path.split('/'); // Path example: /~fes/~2022.8.31..18.41.37
     const host = split[1];
     const timestamp = split[2];
@@ -110,7 +110,7 @@ export const CourierApi: CourierApiType = {
     };
     return await conduit.poke(payload);
   },
-  createGroupDM: async (conduit, ships) => {
+  createGroupDm: async (conduit, ships) => {
     return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'courier',
