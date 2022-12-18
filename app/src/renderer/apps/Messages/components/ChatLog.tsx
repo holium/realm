@@ -3,7 +3,7 @@ import { GraphDMType } from 'os/services/ship/models/courier';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Text } from 'renderer/components';
-import { Flex, WindowedList } from '@holium/design-system';
+import { Box, Flex, Skeleton, WindowedList } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 
 interface ChatLogProps {
@@ -17,16 +17,35 @@ export const ChatLog = observer((props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
 
-  const isBlank = !loading && messages.length === 0;
+  if (messages.length === 0) {
+    if (loading) {
+      return (
+        <Flex
+          width="100%"
+          justifyContent="end"
+          flexDirection="column"
+          mb="60px"
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Box
+              key={index}
+              mb={2}
+              mx={2}
+              alignSelf={index % 3 === 1 ? 'end' : 'start'}
+            >
+              <Skeleton width={170} height={62} borderRadius={4} />
+            </Box>
+          ))}
+        </Flex>
+      );
+    }
 
-  if (isBlank) {
     return (
       <Flex
-        height={dimensions.height}
         width="100%"
-        alignContent="center"
-        justifyContent="center"
+        height={dimensions.height}
         flexDirection="column"
+        justifyContent="center"
       >
         <Text textAlign="center" opacity={0.3} fontSize={3}>
           No messages
