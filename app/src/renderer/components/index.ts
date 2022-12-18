@@ -41,3 +41,4 @@ export * from './ConnectionStatus';
 export * from './AccessCode';
 export * from './CopyButton';
 export * from './urbitSvg';
+export * from './NoScrollbar';

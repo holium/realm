@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 import { darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
+import { Flex, Icons, NoScrollBar, Text } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -19,11 +18,6 @@ import {
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
-const NoScrollBar = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-`;
 interface InputProps {
   hoverBg: string;
 }

@@ -56,6 +56,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.closeConduit': this.closeConduit,
     'realm.onboarding.confirmPlanetAvailable': this.confirmPlanetAvailable,
     'realm.onboarding.getStripeKey': this.getStripeKey,
+    'realm.onboarding.pre-install-syscheck': this.preInstallSysCheck,
   };
 
   static preload = {
@@ -120,6 +121,10 @@ export class OnboardingService extends BaseService {
 
     async getStripeKey() {
       return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
+    },
+
+    async preInstallSysCheck() {
+      return await ipcRenderer.invoke('realm.onboarding.pre-install-syscheck');
     },
 
     async prepareCheckout(billingPeriod: string) {
@@ -401,6 +406,13 @@ export class OnboardingService extends BaseService {
     return { invalid: !accessCode, accessCode };
   }
 
+  async preInstallSysCheck(_event: any) {
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    this.state.preInstallSysCheck(tempConduit);
+  }
+
   async prepareCheckout(_event: any, billingPeriod: string) {
     if (!['monthly', 'annual'].includes(billingPeriod))
       throw new Error('invalid billing period');
@@ -530,7 +542,7 @@ export class OnboardingService extends BaseService {
           errorMessage: `Urbit ID does not match, did you mean ${cookiePatp}?`,
         };
       }
-
+      // TODO this should be removed.
       this.core.saveSession({ ship: patp, url, cookie, code });
       this.state.setShip({ patp, url });
       return { success: true, url, cookie, patp, code: code };
@@ -607,11 +619,12 @@ export class OnboardingService extends BaseService {
       console.error(
         "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
       );
-      this.state.installRealm();
+      this.state.setRealmInstalled();
       return;
     }
+
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
-    // example: INSTALL_MOON=~hostyv:realm,courier,wallet
+    // example: INSTALL_MOON=~hostyv:realm,courier
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
@@ -645,7 +658,7 @@ export class OnboardingService extends BaseService {
     // console.log('refresh-app-catalog => %o', result);
     await this.closeConduit();
     this.state.endRealmInstall('success');
-    this.state.installRealm();
+    this.state.setRealmInstalled();
   }
 
   async completeOnboarding(_event: any) {

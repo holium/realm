@@ -227,7 +227,6 @@ export const NewBazaarStore = types
       applySnapshot(self.gridIndex, data.grid);
     },
     _addJoined(data: { path: string; stall: any; catalog: any }) {
-      self.stalls.set(data.path, data.stall);
       Object.keys(data.catalog).forEach((key: string) => {
         const docket = data.catalog[key];
         if (docket.type === 'urbit') {
@@ -235,9 +234,9 @@ export const NewBazaarStore = types
         }
       });
       self.catalog.merge(data.catalog);
+      self.stalls.set(data.path, data.stall);
     },
     _updateStall(data: any) {
-      self.stalls.set(data.path, data.stall);
       if ('add-app' in data) {
         const app: AppType = data['add-app'];
         if (app.type === 'urbit') {
@@ -247,10 +246,9 @@ export const NewBazaarStore = types
       } else if ('remove-app' in data) {
         // const appId: string = data['remove-app'];
       }
+      self.stalls.set(data.path, data.stall);
     },
     _rebuildCatalog(data: any) {
-      self.gridIndex.clear();
-      self.gridIndex.merge(data.grid);
       if (data.catalog) {
         for (let i = 0; i < data.catalog.length; i++) {
           const app: AppType = data.catalog[i];
@@ -259,10 +257,11 @@ export const NewBazaarStore = types
           }
           self.catalog.set(app.id, app);
         }
+        self.gridIndex.clear();
+        self.gridIndex.merge(data.grid);
       }
     },
     _rebuildStall(data: any) {
-      self.stalls.set(data.path, data.stall);
       if (data.catalog) {
         for (let i = 0; i < data.catalog.length; i++) {
           const app: AppType = data.catalog[i];
@@ -272,6 +271,7 @@ export const NewBazaarStore = types
           self.catalog.set(app.id, app);
         }
       }
+      self.stalls.set(data.path, data.stall);
     },
     _clearStall(data: any) {
       self.stalls.set(data.path, StallModel.create());
