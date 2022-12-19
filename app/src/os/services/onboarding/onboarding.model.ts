@@ -174,8 +174,8 @@ export const OnboardingStore = types
         if (
           !(
             Number.parseInt(parts[0]) >= 2 &&
-            Number.parseInt(parts[1]) >= 1 &&
-            Number.parseInt(parts[2]) >= 1
+            Number.parseInt(parts[1]) >= 0 &&
+            Number.parseInt(parts[2]) >= 0
           )
         )
           throw new Error('needs upgrade');
