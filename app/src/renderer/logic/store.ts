@@ -6,7 +6,6 @@ import {
   applySnapshot,
   types,
 } from 'mobx-state-tree';
-
 import { DesktopStore } from 'os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from 'os/services/spaces/models/spaces';
@@ -33,6 +32,7 @@ import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
+import { BulletinStore } from 'os/services/spaces/models/bulletin';
 
 const Services = types
   .model('ServicesStore', {
@@ -53,6 +53,7 @@ const Services = types
     contacts: ContactStore,
     friends: FriendsStore,
     beacon: NotificationStore,
+    bulletin: BulletinStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -131,6 +132,7 @@ const services = Services.create({
   contacts: { ourPatp: '' },
   friends: {},
   beacon: { notes: {} },
+  bulletin: {},
 });
 
 export const servicesStore = services;
@@ -260,6 +262,7 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
     applySnapshot(servicesStore.visas, castToSnapshot(response.visas));
+    // console.log(res);
     if (servicesStore.spaces.selected) {
       const selected = servicesStore.spaces.selected;
       const bootTheme: any = {
@@ -269,12 +272,16 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.theme.setCurrentTheme(bootTheme);
     }
   }
+  if (response.bulletin) {
+    applySnapshot(servicesStore.bulletin, response.bulletin);
+  }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
   }
   if (response.beacon) {
     applySnapshot(servicesStore.beacon, response.beacon);
   }
+
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
   }
@@ -309,10 +316,6 @@ export function useCore() {
   return store;
 }
 
-// onSnapshot(servicesStore, (snapshot) => {
-//   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
-// });
-
 OSActions.onLogin((_event: any) => {
   SoundActions.playLogin();
 });
@@ -326,7 +329,6 @@ OSActions.onConnected(
       beacon: NotificationStoreType;
     }
   ) => {
-    console.log('onConnected', initials.models);
     if (initials.models.courier) {
       applySnapshot(
         servicesStore.courier,
@@ -378,6 +380,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'beacon') {
       applyPatch(servicesStore.beacon, value.patch);
     }
+    if (value.resource === 'bulletin') {
+      applyPatch(servicesStore.bulletin, value.patch);
+    }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);
     }
@@ -417,21 +422,24 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
     }
-    if (value.resource === 'courier') {
-      applySnapshot(servicesStore.courier, value.model);
-    }
-    if (value.resource === 'ship') {
-      servicesStore.setShip(ShipModel.create(value.model));
-    }
+    // if (value.resource === 'courier') {
+    //   applySnapshot(servicesStore.courier, value.model);
+    // }
+    // if (value.resource === 'ship') {
+    //   servicesStore.setShip(ShipModel.create(value.model));
+    // }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
       applySnapshot(servicesStore.beacon, castToSnapshot(value.model.beacon));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
+        servicesStore.bulletin,
+        castToSnapshot(value.model.bulletin)
+      );
+      applySnapshot(
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
-      // applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
