@@ -45,14 +45,18 @@ export const DMs = observer((props: IProps) => {
   const lastTimeSent = previews[0]?.lastTimeSent;
 
   const fetchPreviews = useCallback(async () => {
-    setIsFetching(true);
     const newPreviews = await ShipActions.getDMs();
     courier.setPreviews(newPreviews);
-    setIsFetching(false);
   }, [courier]);
 
   useEffect(() => {
-    if (previews.length === 0) fetchPreviews();
+    const fetchPreviewsWithSkeleton = async () => {
+      setIsFetching(true);
+      await fetchPreviews();
+      setIsFetching(false);
+    };
+
+    if (previews.length === 0) fetchPreviewsWithSkeleton();
   }, []);
 
   const searchFilter = useCallback(
@@ -121,6 +125,7 @@ export const DMs = observer((props: IProps) => {
             <ContactRow
               theme={theme}
               dm={dm}
+              refreshDms={fetchPreviews}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onSelectDm(dm);
