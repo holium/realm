@@ -18,8 +18,9 @@ import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
 import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
-import { FeaturedApi } from '../../api/featured';
+import { BulletinApi } from '../../api/bulletin';
 import { NotificationStore, NotificationStoreType } from './models/beacon';
+import { BulletinStore, BulletinStoreType } from './models/bulletin';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: any = null;
@@ -38,6 +39,7 @@ interface SpaceModels {
   membership: MembershipType;
   visas: VisaModelType;
   beacon: NotificationStoreType;
+  bulletin: BulletinStoreType;
 }
 /**
  * SpacesService
@@ -53,7 +55,7 @@ export class SpacesService extends BaseService {
     }),
     bazaar: NewBazaarStore.create(),
     beacon: NotificationStore.create(),
-    // bazaar: BazaarStore.create({ my: {} }),
+    bulletin: BulletinStore.create(),
   };
 
   handlers = {
@@ -93,7 +95,6 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.add-ally': this.addAlly,
     'realm.spaces.bazaar.add-app': this.addApp,
     'realm.spaces.bazaar.remove-app': this.removeApp,
-    'realm.spaces.featured.get-featured-spaces': this.getFeaturedSpaces,
     'realm.spaces.bazaar.suspend-app': this.suspendApp,
     'realm.spaces.bazaar.revive-app': this.reviveApp,
     'realm.spaces.beacon.saw-note': this.sawNote,
@@ -266,6 +267,7 @@ export class SpacesService extends BaseService {
       bazaar: getSnapshot(this.models.bazaar),
       visas: getSnapshot(this.models.visas),
       beacon: getSnapshot(this.models.beacon),
+      bulletin: getSnapshot(this.models.bulletin),
     };
   }
 
@@ -295,8 +297,16 @@ export class SpacesService extends BaseService {
       NotificationStore,
       {}
     );
+    const bulletinStore = new DiskStore(
+      'bulletin',
+      patp,
+      secretKey!,
+      BulletinStore,
+      {}
+    );
     this.models.membership = membershipStore.model;
     this.models.bazaar = bazaarStore.model;
+    this.models.bulletin = bulletinStore.model;
     if (devApps) {
       this.models.bazaar.loadDevApps(devApps);
     }
@@ -325,6 +335,7 @@ export class SpacesService extends BaseService {
         membership: getSnapshot(this.models.membership),
         bazaar: getSnapshot(this.models.bazaar),
         beacon: getSnapshot(this.models.beacon),
+        bulletin: getSnapshot(this.models.bulletin),
       },
       resource: 'spaces',
       key: null,
@@ -338,6 +349,7 @@ export class SpacesService extends BaseService {
     membershipStore.registerPatches(this.core.onEffect);
     bazaarStore.registerPatches(this.core.onEffect);
     beaconStore.registerPatches(this.core.onEffect);
+    bulletinStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -349,6 +361,8 @@ export class SpacesService extends BaseService {
       this.core.services.ship.rooms,
       this.setTheme
     );
+
+    BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
 
     // setting provider to current space host
     if (this.state.selected) {
@@ -674,10 +688,6 @@ export class SpacesService extends BaseService {
 
   async removeApp(_event: IpcMainInvokeEvent, appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
-  }
-
-  async getFeaturedSpaces(_event: IpcMainInvokeEvent) {
-    return await FeaturedApi.getFeaturedSpaces(this.core.conduit!);
   }
 
   async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {

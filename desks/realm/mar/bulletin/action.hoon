@@ -1,4 +1,4 @@
-/+  *featured
+/+  *bulletin
 ::
 |_  act=action
 ++  grad  %noun
@@ -10,7 +10,7 @@
 ::
 ++  grab
   |%
-  ++  noun  action
+  ++  noun  action:store
   ++  json  action:dejs
   --
 --

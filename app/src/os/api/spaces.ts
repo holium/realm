@@ -115,7 +115,7 @@ export const SpacesApi = {
       ship: pathArr[0],
       space: pathArr[1],
     };
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -124,7 +124,7 @@ export const SpacesApi = {
             path: pathObj,
           },
         },
-        reaction: 'spaces-reaction.join',
+        reaction: 'spaces-reaction.remote-space',
         onReaction: (data: any) => {
           resolve(data);
         },
@@ -140,7 +140,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
