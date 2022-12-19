@@ -180,6 +180,7 @@ export class Realm extends EventEmitter {
     let membership = null;
     let bazaar = null;
     let beacon = null;
+    let bulletin = null;
     let wallet = null;
     let visas = null;
     let models = {};
@@ -191,6 +192,7 @@ export class Realm extends EventEmitter {
       wallet = this.services.ship.walletSnapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       beacon = this.services.spaces.modelSnapshots.beacon;
+      bulletin = this.services.spaces.modelSnapshots.bulletin;
       membership = this.services.spaces.modelSnapshots.membership;
       visas = this.services.spaces.modelSnapshots.visas;
     }
@@ -212,6 +214,7 @@ export class Realm extends EventEmitter {
       visas,
       wallet,
       models,
+      bulletin,
       loggedIn: !!this.session,
     };
     // if (spaces?.selected) {
