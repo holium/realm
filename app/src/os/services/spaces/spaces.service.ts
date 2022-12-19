@@ -231,8 +231,6 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
     removeApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
-    getFeaturedSpaces: async () =>
-      await ipcRenderer.invoke('realm.spaces.featured.get-featured-spaces'),
     suspendApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
     reviveApp: async (appId: string) =>

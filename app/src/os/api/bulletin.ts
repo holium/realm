@@ -2,12 +2,6 @@ import { Conduit } from '@holium/conduit';
 import { BulletinStoreType } from '../services/spaces/models/bulletin';
 
 export const BulletinApi = {
-  getFeaturedSpaces: async (conduit: Conduit) => {
-    return await conduit.scry({
-      app: 'featured',
-      path: '/spaces',
-    });
-  },
   watchUpdates: async (
     conduit: Conduit,
     store: BulletinStoreType
