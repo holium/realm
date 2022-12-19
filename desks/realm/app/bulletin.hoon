@@ -24,8 +24,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =.  provider.state  ~zod
-    :: =.  provider.state  ~hostyv
+    =.  provider.state  ~hostyv
     =.  spaces.state    ~
     :_  this
     [%pass /updates %agent [provider.state dap.bowl] %watch /updates]~
