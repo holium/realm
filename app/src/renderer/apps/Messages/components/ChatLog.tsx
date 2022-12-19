@@ -18,6 +18,8 @@ export const ChatLog = observer((props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
 
+  const lastMessage = messages[messages.length - 1];
+
   if (messages.length === 0) {
     if (loading) {
       return (
@@ -99,8 +101,8 @@ export const ChatLog = observer((props: ChatLogProps) => {
       </Flex>
     ),
     [
-      messages[messages.length - 1]?.index,
-      messages[messages.length - 1]?.pending,
+      lastMessage?.index,
+      lastMessage?.pending,
       isGroup,
       dimensions.height,
       ship,

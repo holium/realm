@@ -362,7 +362,7 @@ export const ChatView = observer(
             alignContent="center"
           >
             <ChatLog
-              key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${messages.length}-${lastMessage?.index}`}
+              key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${lastMessage?.index}`}
               loading={loading}
               messages={messages}
               isGroup={isGroup}
