@@ -21,14 +21,21 @@
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
     =.  uuid.state              (sham our.bowl)
     =.  push-enabled.state      %.y
-    :_  this
-    ::  %watch: all incoming dms and convert to our simple structure
-    :~
-      [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
-      [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
-    ==
+    `this
+    :: :_  this
+    :: ::  %watch: all incoming dms and convert to our simple structure
+    :: :~
+    ::   [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+    ::   [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
+    :: ==
   ++  on-save   !>(state)
   ++  on-load
+    :: |=  old-state=vase
+    :: ^-  (quip card _this)
+    :: =/  old  !<(versioned-state old-state)
+    :: ?-  -.old
+    ::   %0  `this(state old)
+    :: ==
     |=  =vase
     ^-  (quip card _this)
     ~&  %on-load
@@ -52,7 +59,6 @@
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %test  [(test-scry:groups-two 0 bowl) state]
       %accept-dm
         ?-  groups-target
           %1
@@ -98,10 +104,6 @@
     ^-  (quip card _this)
     ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
-      ?:  =(groups-target %2)
-        (on-watch:groups-two path bowl state)
-      :: ~&  "on-watch called in %courier"
-      :: ~&  path
       ?+    path      (on-watch:def path)
           [%updates ~]
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
@@ -112,8 +114,6 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    ?:  =(groups-target %2)
-      (peek:groups-two path bowl devices.state state)
     ?+    path  (on-peek:def path)
     ::
       [%x %devices ~]
@@ -152,48 +152,8 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    :: ~&  wire
     ?+    wire  (on-agent:def wire sign)
-      [%graph-store ~]
-        ?+    -.sign  (on-agent:def wire sign)
-          %watch-ack
-            ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: graph-store subscription failed"
-            `this
-          %kick
-            ~&  >  "{<dap.bowl>}: graph-store kicked us, resubscribing..."
-            :_  this
-            :~
-              [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
-            ==
-          %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
-                %graph-update-3
-              =^  cards  state
-                (on-graph-update !<(=update:graph-store q.cage.sign) now.bowl our.bowl)
-              [cards this]
-            ==
-        ==
-      [%dm-hook ~]
-        ?+    -.sign  (on-agent:def wire sign)
-          %watch-ack
-            ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: dm-hook subscription failed"
-            `this
-          %kick
-            ~&  >  "{<dap.bowl>}: dm-hook kicked us, resubscribing..."
-            :_  this
-            :~
-              [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
-            ==
-          %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
-                %dm-hook-action
-              =^  cards  state
-                (on-hook-action !<(=action:dm-hook-sur q.cage.sign) now.bowl our.bowl)
-              [cards this]
-            ==
-        ==
+      ::
       [%g2 %club @ %ui ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -204,12 +164,11 @@
             ~&  >  "{<dap.bowl>}: groups-two /club/id/ui kicked us, giving up..."
             `this
           %fact
-            :: ~&  ['club fact' cage.sign]
             =^  cards  state
               (handle-club-ui-fact:groups-two wire cage.sign bowl state)
             [cards this]
-            ::[(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
         ==
+      ::
       [%g2 %briefs ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -226,8 +185,8 @@
             ~&  'groups-two /briefs fact'
             ~&  cage.sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
-            :: [whom:c brief:briefs:c]
         ==
+      ::
       [%g2 %dm @ %ui ~]
         :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
@@ -244,6 +203,7 @@
             [cards this]
             ::[(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
         ==
+      ::
       [%g2 %club %new ~]
         :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
@@ -260,6 +220,7 @@
           %fact
             [(handle-club-invite:groups-two cage.sign bowl) this]
         ==
+      ::
       [%g2 %dm %invited ~]
         :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
@@ -279,7 +240,6 @@
     ==
   ::
   ++  on-leave    on-leave:def
-  ::
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
@@ -294,15 +254,13 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  this  .
-++  core  .
+++  hol  .
 ::
 ++  on-graph-action
   |=  [act=action:store]
   ^-  (quip card _state)
   |^
   ?-  -.act
-    :: %accept-dm            `state
-    :: %decline-dm           `state
     %send-dm               (send-dm +.act)
     %read-dm               (read-dm +.act)
     %create-group-dm       (create-group-dm +.act)
