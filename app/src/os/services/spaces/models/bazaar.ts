@@ -257,9 +257,9 @@ export const NewBazaarStore = types
           }
           self.catalog.set(app.id, app);
         }
-        self.gridIndex.clear();
-        self.gridIndex.merge(data.grid);
       }
+      self.gridIndex.clear();
+      self.gridIndex.merge(data.grid);
     },
     _rebuildStall(data: any) {
       if (data.catalog) {
