@@ -20,6 +20,7 @@ export const BrowserModel = types
       url: 'https://neeva.com',
       title: 'New tab',
       favicon: '',
+      loader: { state: 'initial' },
     }),
     tabs: types.array(TabModel),
   })
@@ -31,11 +32,15 @@ export const BrowserModel = types
         url,
         title: 'New tab',
         favicon: '',
+        loader: { state: 'initial' },
       });
       // if (!self.tabs.includes(newTab)) {
       //   self.tabs.push(newTab);
       // }
       self.currentTab = newTab;
+    },
+    setFailedToLoad() {
+      self.currentTab.loader.state = 'error';
     },
   }));
 

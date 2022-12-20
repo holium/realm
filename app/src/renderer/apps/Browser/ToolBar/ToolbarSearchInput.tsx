@@ -36,6 +36,7 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
 
   const onKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.currentTarget.blur();
       search();
     }
   };

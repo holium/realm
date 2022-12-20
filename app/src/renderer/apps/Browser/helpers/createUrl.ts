@@ -28,5 +28,6 @@ export const createUrl = (query: string) => {
   if (isValidUrl(potentialUrl)) {
     return potentialUrl;
   }
-  return `${searchBase}${query}`;
+
+  return `${searchBase}${encodeURIComponent(query)}`;
 };
