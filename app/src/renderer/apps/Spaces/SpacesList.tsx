@@ -23,10 +23,11 @@ interface SpacesListProps {
   selected?: SpaceModelType;
   spaces: SpaceModelType[];
   onSelect: (spaceKey: string) => void;
+  onFindMore: () => void;
 }
 
 export const SpacesList = observer(
-  ({ selected, spaces, onSelect }: SpacesListProps) => {
+  ({ selected, spaces, onSelect, onFindMore }: SpacesListProps) => {
     const { theme, visas } = useServices();
     const { textColor } = theme.currentTheme;
 
@@ -88,7 +89,10 @@ export const SpacesList = observer(
               rightContent={
                 <Icons mr="2px" size="22px" name="ArrowRightLine" />
               }
-              data-close-tray="true"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onFindMore();
+              }}
             >
               Find spaces
             </ActionButton>

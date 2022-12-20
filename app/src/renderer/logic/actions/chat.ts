@@ -1,3 +1,4 @@
+import { Content } from '@urbit/api';
 import { Patp } from 'os/types';
 /**
  * DmActions for interfacing with core process
@@ -6,8 +7,8 @@ export const DmActions = {
   getDMs: async () => {
     return await window.electron.os.ship.getDMs();
   },
-  sendDm: async (toShip: string, content: any[]) => {
-    return await window.electron.os.ship.sendDm(toShip, content);
+  sendDm: async (toShip: string, contents: Content[]) => {
+    return await window.electron.os.ship.sendDm(toShip, contents);
   },
   draftDm: async (patps: Patp[], metadata: any[]) => {
     return await window.electron.os.ship.draftDm(patps, metadata);
