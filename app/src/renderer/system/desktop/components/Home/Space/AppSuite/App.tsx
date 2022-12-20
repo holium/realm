@@ -186,10 +186,8 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
           installStatus={installStatus}
           contextMenuOptions={contextMenuOptions}
           onAppClick={(selectedApp: AppType) => {
-            if (selectedApp.installStatus === InstallStatus.installed) {
-              DesktopActions.openAppWindow(space.path, selectedApp);
-              DesktopActions.setHomePane(false);
-            }
+            DesktopActions.openAppWindow(space.path, selectedApp);
+            DesktopActions.setHomePane(false);
           }}
         />
       </Box>

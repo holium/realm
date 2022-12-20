@@ -180,8 +180,14 @@ export const AppTile = observer(
       tileId,
     ]);
 
-    const { isInstalling, isFaded, isSuspended, isUninstalled, isFailed } =
-      getAppTileFlags(installStatus || InstallStatus.installed);
+    const {
+      isInstalling,
+      isFaded,
+      isSuspended,
+      isUninstalled,
+      isFailed,
+      isDesktop,
+    } = getAppTileFlags(installStatus || InstallStatus.installed);
 
     return useMemo(() => {
       let title;
@@ -386,6 +392,7 @@ export const AppTile = observer(
                 !isFailed &&
                 !isUninstalled &&
                 !isInstalling &&
+                !isDesktop &&
                 onAppClick(app);
             }}
             className="app-dock-icon"
