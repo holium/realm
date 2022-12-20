@@ -171,11 +171,12 @@ export const OnboardingStore = types
         console.log(ver);
         const parts = ver.split('.');
         // change version if needed . this is latest groups based on my latest ship OTA
+        console.log(parts)
         if (
           !(
             Number.parseInt(parts[0]) >= 2 &&
-            Number.parseInt(parts[1]) >= 1 &&
-            Number.parseInt(parts[2]) >= 1
+            Number.parseInt(parts[1]) >= 0 && //1 &&
+            Number.parseInt(parts[2]) >= 0 // 1
           )
         )
           throw new Error('needs upgrade');

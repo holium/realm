@@ -125,7 +125,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
               this.getAssetTransfers(
                 asset.addr,
                 ethWallet.address,
-                ethWallet.data.get(this.protocol)!.coins.get(asset.addr)!.block,
+                ethWallet.data.get(this.protocol)!.coins.get(asset.addr)?.block || 0,
                 currentBlock!
               ).then((transfers: any) => {
                 if (

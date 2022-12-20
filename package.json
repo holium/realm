@@ -33,7 +33,6 @@
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
-    "@icons/material": "^0.4.1",
     "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",
@@ -43,7 +42,6 @@
     "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
-    "path-browserify": "^1.0.1",
     "qrcode.react": "^3.1.0"
   },
   "version": "0.0.1",
