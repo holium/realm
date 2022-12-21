@@ -1,4 +1,10 @@
-import { useState, ChangeEventHandler, KeyboardEvent, RefObject } from 'react';
+import {
+  ChangeEventHandler,
+  KeyboardEvent,
+  RefObject,
+  useEffect,
+  useState,
+} from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -7,30 +13,36 @@ import { useBrowser } from '../store';
 import { ToolbarLockIcon } from './ToolbarLockIcon';
 import { ToolbarSearchIcon } from './ToolbarSearchIcon';
 
-const isUrlSafe = (url: string) => {
-  return url.startsWith('https://');
-};
-
 type Props = {
   innerRef: RefObject<HTMLDivElement>;
 };
 
 export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
-  const { currentTab, setCurrentTab } = useBrowser();
+  const { currentTab, navigate } = useBrowser();
   const { theme } = useServices();
-  const [url, setUrl] = useState(currentTab.url || '');
-  const [isSafe, setIsSafe] = useState(isUrlSafe(url));
+  const [input, setInput] = useState(currentTab.url || '');
+
+  useEffect(() => {
+    const webView = document.getElementById(
+      currentTab.id
+    ) as Electron.WebviewTag;
+
+    if (!webView) return;
+
+    webView.addEventListener('did-navigate', (e) => {
+      setInput(e.url);
+    });
+  }, [currentTab.url, currentTab.id]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setUrl(e.target.value);
+    setInput(e.target.value);
   };
 
   const search = () => {
-    if (url) {
-      const normalizedUrl = createUrl(url);
-      setUrl(normalizedUrl);
-      setCurrentTab(normalizedUrl);
-      setIsSafe(isUrlSafe(normalizedUrl));
+    if (input) {
+      const normalizedUrl = createUrl(input);
+      setInput(normalizedUrl);
+      navigate(normalizedUrl);
     }
   };
 
@@ -46,7 +58,9 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
       <Input
         autoFocus
         tabIndex={0}
-        leftIcon={<ToolbarLockIcon loading={false} isSafe={isSafe} />}
+        leftIcon={
+          <ToolbarLockIcon loading={false} isSafe={currentTab.isSafe} />
+        }
         rightIcon={<ToolbarSearchIcon onClick={search} />}
         placeholder="Search Qwant or enter url"
         wrapperStyle={{
@@ -54,7 +68,7 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
           height: 32,
           backgroundColor: theme.currentTheme.inputColor,
         }}
-        value={url}
+        value={input}
         onChange={onInputChange}
         onKeyPress={onKeyPress}
       />

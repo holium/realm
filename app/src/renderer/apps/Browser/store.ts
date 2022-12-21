@@ -4,12 +4,14 @@ import { createContext, useContext } from 'react';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { nativeApps } from '..';
+import { isUrlSafe } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
   favicon: types.string,
   title: types.string,
   url: types.string,
+  isSafe: types.optional(types.boolean, true),
   loader: types.optional(LoaderModel, { state: 'initial' }),
 });
 
@@ -18,6 +20,7 @@ export const BrowserModel = types
     currentTab: types.optional(TabModel, {
       id: 'tab-0',
       url: 'https://neeva.com',
+      isSafe: true,
       title: 'New tab',
       favicon: '',
       loader: { state: 'initial' },
@@ -25,11 +28,11 @@ export const BrowserModel = types
     tabs: types.array(TabModel),
   })
   .actions((self) => ({
-    setCurrentTab(url: string) {
-      // TODO update to https if possible
+    navigate(url: string) {
       const newTab = TabModel.create({
         id: `tab-${self.tabs.length + 1}`,
         url,
+        isSafe: isUrlSafe(url),
         title: 'New tab',
         favicon: '',
         loader: { state: 'initial' },
@@ -39,7 +42,7 @@ export const BrowserModel = types
       // }
       self.currentTab = newTab;
     },
-    setFailedToLoad() {
+    setError() {
       self.currentTab.loader.state = 'error';
     },
   }));
@@ -71,6 +74,6 @@ export function useBrowser() {
 
 RealmActions.onBrowserOpen((_event: any, url: string) => {
   DesktopActions.openAppWindow('', nativeApps['os-browser']).then(() =>
-    browserState.setCurrentTab(url)
+    browserState.navigate(url)
   );
 });

@@ -1,6 +1,10 @@
 const hasProtocol = (query: string) =>
   Boolean(query.match(/(http(s)?):\/\//gi));
 
+export const isUrlSafe = (url: string) => {
+  return url.startsWith('https://');
+};
+
 const hasDot = (query: string) => Boolean(query.match(/\./gi));
 
 const hasPort = (query: string) => Boolean(query.match(/:\d+/gi));
