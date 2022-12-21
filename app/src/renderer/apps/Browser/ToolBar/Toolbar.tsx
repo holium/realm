@@ -43,9 +43,9 @@ export const BrowserToolbar = observer(
     const { iconColor } = theme.currentTheme;
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const webview = document.getElementById(
-      currentTab.id
-    ) as Electron.WebviewTag | null;
+
+    const getWebView = () =>
+      document.getElementById(currentTab.id) as Electron.WebviewTag | null;
 
     const isInInputField = (e: PointerEvent<HTMLDivElement>) =>
       e.target === inputRef.current ||
@@ -63,21 +63,26 @@ export const BrowserToolbar = observer(
     };
 
     const onBack = () => {
-      webview?.goBack();
+      const webView = getWebView();
+      if (webView) webView.goBack();
     };
 
     const onForward = () => {
-      webview?.goForward();
+      const webView = getWebView();
+      if (webView) webView.goForward();
     };
 
     const onRefresh = () => {
-      webview?.reload();
+      const webView = getWebView();
+      if (webView) webView.reload();
     };
 
     const toggleDevTools = () => {
-      webview?.isDevToolsOpened()
-        ? webview?.closeDevTools()
-        : webview?.openDevTools();
+      const webView = getWebView();
+      if (webView)
+        webView.isDevToolsOpened()
+          ? webView.closeDevTools()
+          : webView.openDevTools();
     };
 
     return (
@@ -92,8 +97,8 @@ export const BrowserToolbar = observer(
         <Icons name="AppIconCompass" size="28px" />
         <ToolbarNavigationButtons
           iconColor={iconColor}
-          canGoBack={webview?.canGoBack() ?? false}
-          canGoForward={webview?.canGoForward() ?? false}
+          canGoBack={getWebView()?.canGoBack() ?? false}
+          canGoForward={getWebView()?.canGoForward() ?? false}
           onBack={onBack}
           onForward={onForward}
           onRefresh={onRefresh}
