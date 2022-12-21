@@ -574,7 +574,11 @@
       ~&  >>  [%install-app app]
       =.  install-status.u.app
         ?:  =(%uninstalled install-status.u.app)  %suspended
-        ?:  =(%desktop install-status.u.app)      install-status.u.app
+        ?:  =(%desktop install-status.u.app)
+          ::  @trent - we can add a check to clay for the desk existing
+          ::  and that would do the same skip of suspended that the fresh install does
+          =+  peaks=get-pikes:core
+          ?.((~(has by peaks) desk) %started install-status.u.app)
         %started
       =.  host.u.app              (some ship)
       =.  catalog.state           (~(put by catalog.state) desk u.app)
@@ -1379,7 +1383,10 @@
         ?:  ?&(=(%started install-status.u.app) =(%suspended status))
           %started
         ?:  ?&(=(%desktop install-status.u.app) =(%started status))
-          %desktop
+          ::  @trent - we can add a check to clay for the desk existing
+          ::  and that would do the same skip of suspended that the fresh install does
+          =+  peaks=get-pikes:core
+          ?.((~(has by peaks) app-id) %started status)
         status
       ::
       =.  docket.u.app          docket.charge
