@@ -19,11 +19,10 @@ export const WebView = observer(({ isLocked }: Props) => {
 
     if (!webView) return;
 
-    webView.addEventListener('did-start-navigation', (e) => {
-      startNavigation(e.url);
+    webView.addEventListener('did-start-loading', () => {
+      startNavigation(currentTab.url);
     });
-
-    webView.addEventListener('did-navigate', () => {
+    webView.addEventListener('did-stop-loading', () => {
       setLoaded();
     });
 
