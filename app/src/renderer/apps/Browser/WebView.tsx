@@ -81,9 +81,9 @@ export const WebView = observer(({ isLocked }: Props) => {
           style={{
             background: 'white',
             width: 'inherit',
-            height: 'calc(100% - 50px)',
+            height: 'calc(100% - 54px)',
             position: 'relative',
-            marginTop: 50,
+            marginTop: 54,
             pointerEvents: isLocked ? 'none' : 'auto',
           }}
         />
