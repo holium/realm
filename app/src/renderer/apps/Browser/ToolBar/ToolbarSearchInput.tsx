@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
-  const { currentTab, startNavigation } = useBrowser();
+  const { currentTab, setUrl } = useBrowser();
   const { theme } = useServices();
   const [input, setInput] = useState(currentTab.url || '');
 
@@ -42,7 +42,7 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
     if (input) {
       const normalizedUrl = createUrl(input);
       setInput(normalizedUrl);
-      startNavigation(normalizedUrl);
+      setUrl(normalizedUrl);
     }
   };
 

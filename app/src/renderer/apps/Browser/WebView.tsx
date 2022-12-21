@@ -9,21 +9,28 @@ type Props = {
 };
 
 export const WebView = observer(({ isLocked }: Props) => {
-  const { currentTab, startNavigation, setLoaded, setError } = useBrowser();
+  const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
   const { shell } = useServices();
 
+  const { id, loader } = currentTab;
+
   useEffect(() => {
-    const webView = document.getElementById(
-      currentTab.id
-    ) as Electron.WebviewTag;
+    const webView = document.getElementById(id) as Electron.WebviewTag;
 
     if (!webView) return;
 
     webView.addEventListener('did-start-loading', () => {
-      startNavigation(currentTab.url);
+      setLoading();
     });
     webView.addEventListener('did-stop-loading', () => {
       setLoaded();
+    });
+    webView.addEventListener('did-navigate', (e) => {
+      setUrl(e.url);
+    });
+    // Account for SPA navigation.
+    webView.addEventListener('did-navigate-in-page', (e) => {
+      setUrl(e.url);
     });
 
     webView.addEventListener('did-fail-load', (e) => {
@@ -32,7 +39,7 @@ export const WebView = observer(({ isLocked }: Props) => {
         setError();
       }
     });
-  }, [currentTab.url, currentTab.id]);
+  }, [id]);
 
   const onMouseEnter = useCallback(() => {
     shell.setIsMouseInWebview(true);
@@ -44,7 +51,7 @@ export const WebView = observer(({ isLocked }: Props) => {
 
   return (
     <>
-      {currentTab.loader.state === 'error' ? (
+      {loader.state === 'error' ? (
         <Text
           style={{
             position: 'absolute',
