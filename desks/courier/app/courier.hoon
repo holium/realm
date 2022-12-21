@@ -7,7 +7,6 @@
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
 =|  state-2
 =*  state  -
-:: ^-  agent:gall
 =<
   %-  agent:dbug
   |_  =bowl:gall
