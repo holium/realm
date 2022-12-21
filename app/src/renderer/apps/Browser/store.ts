@@ -28,19 +28,22 @@ export const BrowserModel = types
     tabs: types.array(TabModel),
   })
   .actions((self) => ({
-    navigate(url: string) {
+    startNavigation(url: string) {
       const newTab = TabModel.create({
         id: `tab-${self.tabs.length + 1}`,
         url,
         isSafe: isUrlSafe(url),
         title: 'New tab',
         favicon: '',
-        loader: { state: 'initial' },
+        loader: { state: 'loading' },
       });
       // if (!self.tabs.includes(newTab)) {
       //   self.tabs.push(newTab);
       // }
       self.currentTab = newTab;
+    },
+    setLoaded() {
+      self.currentTab.loader.state = 'loaded';
     },
     setError() {
       self.currentTab.loader.state = 'error';
@@ -74,6 +77,6 @@ export function useBrowser() {
 
 RealmActions.onBrowserOpen((_event: any, url: string) => {
   DesktopActions.openAppWindow('', nativeApps['os-browser']).then(() =>
-    browserState.navigate(url)
+    browserState.startNavigation(url)
   );
 });

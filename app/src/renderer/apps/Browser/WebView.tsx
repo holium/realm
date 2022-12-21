@@ -9,7 +9,7 @@ type Props = {
 };
 
 export const WebView = observer(({ isLocked }: Props) => {
-  const { currentTab, navigate, setError } = useBrowser();
+  const { currentTab, startNavigation, setLoaded, setError } = useBrowser();
   const { shell } = useServices();
 
   useEffect(() => {
@@ -19,8 +19,12 @@ export const WebView = observer(({ isLocked }: Props) => {
 
     if (!webView) return;
 
-    webView.addEventListener('did-navigate', (e) => {
-      navigate(e.url);
+    webView.addEventListener('did-start-navigation', (e) => {
+      startNavigation(e.url);
+    });
+
+    webView.addEventListener('did-navigate', () => {
+      setLoaded();
     });
 
     webView.addEventListener('did-fail-load', (e) => {

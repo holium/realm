@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
-  const { currentTab, navigate } = useBrowser();
+  const { currentTab, startNavigation } = useBrowser();
   const { theme } = useServices();
   const [input, setInput] = useState(currentTab.url || '');
 
@@ -42,7 +42,7 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
     if (input) {
       const normalizedUrl = createUrl(input);
       setInput(normalizedUrl);
-      navigate(normalizedUrl);
+      startNavigation(normalizedUrl);
     }
   };
 
@@ -59,7 +59,10 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
         autoFocus
         tabIndex={0}
         leftIcon={
-          <ToolbarLockIcon loading={false} isSafe={currentTab.isSafe} />
+          <ToolbarLockIcon
+            isSafe={currentTab.isSafe}
+            loading={currentTab.loader.state === 'loading'}
+          />
         }
         rightIcon={<ToolbarSearchIcon onClick={search} />}
         placeholder="Search Qwant or enter url"
