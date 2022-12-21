@@ -1,18 +1,18 @@
 import { SystemApp } from './System';
-import { Browser, BrowserProps } from './Browser';
-import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
+import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar/Toolbar';
+import { TabView, TabViewProps } from './Browser/TabView';
 
-export interface NativeRenders {
-  [key: string]: {
-    titlebar?: React.FC<any>;
-    component: React.FC<any>;
-  };
+export enum WindowId {
+  Browser = 'os-browser',
+  Settings = 'os-settings',
 }
 
-export const nativeRenderers: NativeRenders = {
+export const nativeRenderers = {
   'os-browser': {
     titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
-    component: (props: BrowserProps) => <Browser {...props} />,
+    component: ({ isResizing }: TabViewProps) => (
+      <TabView isResizing={isResizing} />
+    ),
   },
   'os-settings': {
     component: (props: any) => <SystemApp {...props} />,
