@@ -8,8 +8,6 @@ import { isUrlSafe } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
-  favicon: types.string,
-  title: types.string,
   url: types.string,
   isSafe: types.optional(types.boolean, true),
   loader: types.optional(LoaderModel, { state: 'initial' }),
@@ -21,18 +19,12 @@ export const BrowserModel = types
       id: 'tab-0',
       url: 'https://neeva.com',
       isSafe: true,
-      title: 'New tab',
-      favicon: '',
       loader: { state: 'initial' },
     }),
     tabs: types.array(TabModel),
   })
   .actions((self) => ({
     setUrl(url: string) {
-      // if (!self.tabs.includes(newTab)) {
-      //   self.tabs.push(newTab);
-      // }
-      self.currentTab.id = 'tab-0';
       self.currentTab.url = url;
       self.currentTab.isSafe = isUrlSafe(url);
       self.currentTab.loader.state = 'initial';
@@ -74,7 +66,7 @@ export function useBrowser() {
 }
 
 RealmActions.onBrowserOpen((_event: any, url: string) => {
-  DesktopActions.openAppWindow('', nativeApps['os-browser']).then(() =>
-    browserState.setUrl(url)
-  );
+  DesktopActions.openAppWindow('', nativeApps['os-browser']).then(() => {
+    browserState.setUrl(url);
+  });
 });
