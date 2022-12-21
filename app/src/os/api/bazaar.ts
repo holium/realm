@@ -341,6 +341,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._allyDeleted(data['ally-deleted'].ship);
       break;
     case 'rebuild-catalog':
+      console.log('rebuild-catalog => %o', data['rebuild-catalog']);
       model._rebuildCatalog(data['rebuild-catalog']);
       // model._allyDeleted(data['ally-deleted'].ship);
       break;
