@@ -564,9 +564,14 @@
       :: :~  [%pass /install %agent [our.bowl %hood] %poke kiln-install+!>([desk ship desk])]
       :: ==
       =/  app  (~(get by catalog.state) desk)
-      =/  effects=(list card)
-        ?~  app  ~
+      =/  result
+        ?~  app  `state
           =.  grid-index              (set-grid-index:helpers:bazaar desk grid-index.state)
+          ::  believe it or not, the are some cases where kiln/docket will not trigger events we can key off
+          ::    of to set the host ship
+          =.  host.u.app              (some ship)
+          =.  catalog.state           (~(put by catalog.state) desk u.app)
+          :_  state
           [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
