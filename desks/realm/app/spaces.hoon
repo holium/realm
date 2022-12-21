@@ -150,6 +150,34 @@
     ^-  (quip card _this)
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
+      [%groups @ @ %updates ~]  ::  getting new group members
+        ?+    -.sign            (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: spaces to groups subscription failed"
+            `this
+          %kick
+            =/  =ship           `@p`(slav %p i.t.wire)
+            =/  space-pth       `@t`i.t.t.wire
+            ~&  >  "{<dap.bowl>}: groups kicked us, resubscribing... {<ship>} {<space-pth>}"
+            =/  watch-path      [/groups/(scot %p ship)/(scot %tas space-pth)]
+            :_  this
+            :~  [%pass watch-path %agent [our.bowl %groups] %watch watch-path]
+            ==
+          %fact
+            ~&  p.cage.sign
+            `this
+::            ?+    p.cage.sign   (on-agent:def wire sign)
+::                %spaces-reaction
+::              =^  cards  state
+::                (reaction:spaces:core !<(=reaction:store q.cage.sign))
+::              [cards this]
+::                %visa-reaction
+::              =^  cards  state
+::                (reaction:visas:core !<(=reaction:vstore q.cage.sign))
+::              [cards this]
+::            ==
+        ==
       [%spaces @ @ ~]  ::  only members will subscribe on this wire
         ?+    -.sign            (on-agent:def wire sign)
           %watch-ack
@@ -223,13 +251,19 @@
       =/  visa-cards            (initial-visas:helpers path.new-space members new-space)
       ::  return updated state and a combination of invitations (pokes)
       ::   to new members and gifts to any existing/current subscribers (weld)
-      :_  state
-      %+  weld   visa-cards
-      ^-  (list card)
-      :~
-        [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]
-        [%give %fact [/spaces ~] spaces-reaction+!>([%add new-space members])]
-      ==
+      =/  cards
+        ^-  (list card)
+        %+  weld   visa-cards
+        ^-  (list card)
+        :~
+          [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]
+          [%give %fact [/spaces ~] spaces-reaction+!>([%add new-space members])]
+        ==
+      =?  cards  =(%group type.payload)
+        %+  weld  cards
+        =/  watch-path  /groups/(scot %p our.bowl)/[name.payload]/updates
+        `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
+      [cards state]
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -309,12 +343,18 @@
         =/  member                  (~(got by new-members) ship)
         =/  member-path             /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths             [member-path /updates ~]
-        :_  state
+        =/  cards
+          ^-  (list card)
+          :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
+              :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+              [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
+          ==
+        =?  cards  =(%group type:(~(got by spaces.state) path))
+          %+  weld  cards
+            =/  action  [flag now.bowl %fleet (silt ~[ship]) %add ~]
+            `(list card)`[%pass / %agent [our.bowl dap.bowl] %poke group-action+!>(action)]~  :: Add member to group
+        [cards state]
         ::  temporarily using %invite-accepted until we can add a new action
-        :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
-            [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
-        ==
         :: :~
         ::   [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]
         ::   [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
