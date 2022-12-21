@@ -32,6 +32,7 @@ export const BrowserModel = types
       // if (!self.tabs.includes(newTab)) {
       //   self.tabs.push(newTab);
       // }
+      self.currentTab.id = 'tab-0';
       self.currentTab.url = url;
       self.currentTab.isSafe = isUrlSafe(url);
       self.currentTab.loader.state = 'initial';
