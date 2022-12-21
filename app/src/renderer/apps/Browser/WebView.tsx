@@ -29,9 +29,7 @@ export const WebView = observer(({ isLocked }: Props) => {
 
     webView.addEventListener('did-fail-load', (e) => {
       // Error code 3 is a bug and not a terminal error.
-      if (e.errorCode === -3) {
-        e.preventDefault();
-      } else {
+      if (e.errorCode !== -3) {
         setError();
       }
     });
