@@ -328,10 +328,10 @@
           %dead
             ?~  pyk=(~(get by peaks) desk.wave)  `state
             ~&  >>  ["{<dap.bowl>}: %wave %dead" desk.wave install-status.u.app]
-            =.  grid-index          
-              :: if the status is %uninstalled and %dead, then we should remove 
+            =.  grid-index
+              :: if the status is %uninstalled and %dead, then we should remove
               :: the app from the grid index
-              ?:  =(%uninstalled install-status.u.app) 
+              ?:  =(%uninstalled install-status.u.app)
                 (rem-grid-index:helpers:bazaar:core desk.wave grid-index.state)
               grid-index.state
             :: ~&  >>  "{<dap.bowl>}: %dead [app-install-update] {<[host.u.app install-status.u.app]>}"
@@ -361,7 +361,7 @@
         ::
             %held
           ::  %held seems to be hit when the desk exists and there are no updates, so we should
-          ::  set the install status to %suspended if it is %uninstalled. 
+          ::  set the install status to %suspended if it is %uninstalled.
           ?~  pyk=(~(get by peaks) desk.wave)  `state
           ::  if exists in catalog and not installed, set to suspend
           ~&  >>  ["{<dap.bowl>}: %wave %held pre-status: " desk.wave u.pyk install-status.u.app]
@@ -568,18 +568,18 @@
         ~&  >>  "{<dap.bowl>}: skipping {<[ship desk]>} install. pending installation running..."
         `state
       =/  app                     (~(get by catalog.state) desk)
-      ?~  app                     (docket-install ship desk ~) 
+      ?~  app                     (docket-install ship desk ~)
       ?>  ?=(%urbit -.u.app)
       =.  grid-index              (set-grid-index:helpers:bazaar:core desk grid-index.state)
       ~&  >>  [%install-app app]
-      =.  install-status.u.app    
-        ?:  =(%uninstalled install-status.u.app)  %suspended  
+      =.  install-status.u.app
+        ?:  =(%uninstalled install-status.u.app)  %suspended
         ?:  =(%desktop install-status.u.app)      install-status.u.app
         %started
       =.  host.u.app              (some ship)
       =.  catalog.state           (~(put by catalog.state) desk u.app)
       (docket-install ship desk [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~)
-      
+
       :: =^  cards  state
     ::
     ++  docket-install
@@ -762,8 +762,8 @@
         ?+  wha     [det catalog.state]
           %none     [det catalog.state]
           ::
-          %delete
-            [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
+          %delete   [det catalog.state]
+            :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
             ~&  >>   "add"
@@ -777,7 +777,11 @@
                 =.  install-status.app  %desktop
                 app
               ::  if it exists in docket, it must exist in catalog
-              (~(got by catalog.state) app-id.det)
+              =/  app  (~(get by catalog.state) app-id.det)
+              ?~  app  ~&  >>>  "{<dap.bowl>}: unexpected error. {<app-id.det>} exists in docket, but not in catalog"  !!
+              ?>  ?=(%urbit -.u.app)
+              =.  install-status.u.app  %installed
+              u.app
             =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
             =/  desks=(map desk ship)
               %-  ~(rep by syncs)
@@ -1352,7 +1356,7 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    ?-  -.chad.charge   
+    ?-  -.chad.charge
       %install          (update-catalog-app desk charge %started)
       %hung             (update-catalog-app desk charge %failed)
       %suspend          (update-catalog-app desk charge %suspended)
@@ -1369,9 +1373,9 @@
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
       ?>  ?=(%urbit -.u.app)
       ~&  >>  "{<dap.bowl>}: update-catalog-app => {<app-id>}, {<install-status.u.app>}, {<status>}"
-      =.  install-status.u.app  
+      =.  install-status.u.app
         ?:  ?&(=(%suspended install-status.u.app) =(%started status))
-          install-status.u.app 
+          install-status.u.app
         ?:  ?&(=(%started install-status.u.app) =(%suspended status))
           %started
         ?:  ?&(=(%desktop install-status.u.app) =(%started status))
