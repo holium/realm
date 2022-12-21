@@ -298,6 +298,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
+      // eslint-disable-next-line no-case-declarations
       const installUpdate = data['app-install-update'];
       model._setAppStatus(
         installUpdate.appId,
