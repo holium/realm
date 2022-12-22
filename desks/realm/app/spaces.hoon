@@ -161,7 +161,7 @@
             =/  =ship           `@p`(slav %p i.t.wire)
             =/  space-pth       `@t`i.t.t.wire
             ~&  >  "{<dap.bowl>}: groups kicked us, resubscribing... {<ship>} {<space-pth>}"
-            =/  watch-path      [/groups/(scot %p ship)/(scot %tas space-pth)]
+            =/  watch-path  /groups/(scot %p our.bowl)/[+.path.new-space]/updates/init
             :_  this
             :~  [%pass watch-path %agent [our.bowl %groups] %watch watch-path]
             ==
@@ -276,7 +276,6 @@
       =?  cards  =(%group type.payload)
         %+  weld  cards
         =/  watch-path  /groups/(scot %p our.bowl)/[+.path.new-space]/updates/init
-        ~&  watch-path
         `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
       [cards state]
     ::
@@ -360,6 +359,7 @@
         =/  watch-paths             [member-path /updates ~]
         =/  cards
           ^-  (list card)
+          ::  temporarily using %invite-accepted until we can add a new action
           :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
               :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
               [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
@@ -369,7 +369,6 @@
             =/  action  [path now.bowl %fleet (silt ~[ship]) %add ~]
             `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
         [cards state]
-        ::  temporarily using %invite-accepted until we can add a new action
         :: :~
         ::   [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]
         ::   [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
