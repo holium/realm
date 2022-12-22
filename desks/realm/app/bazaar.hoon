@@ -410,6 +410,7 @@
       %rebuild-catalog   (rebuild-catalog +.action)
       %rebuild-stall     (rebuild-stall +.action)
       %clear-stall       (clear-stall +.action)
+      %set-host          (set-host +.action)
     ==    ::  +pre: prefix for scries to hood
     ::
     ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
@@ -418,6 +419,24 @@
     ++  get-sources
       ^-  (map desk [=ship =desk])
       .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::
+    ::  $set-host:
+    ::    set the host of an app in the catalog
+    ++  set-host
+      |=  [app-id=desk host=ship]
+      ^-  (quip card _state)
+      =/  app  (~(get by catalog.state) app-id)
+      ?~  app
+        ~&  >>>  "{<dap.bowl>}: [set-host] error. {<desk>} not found in app catalog"
+        `state
+      ?>  ?=(%urbit -.u.app)
+      %-  (slog leaf+"{<dap.bowl>} setting host for catalog app {<app-id>} to {<host>}" ~)
+      =.  host.u.app          (some host)
+      =.  catalog.state       (~(put by catalog.state) app-id u.app)
+      =.  grid-index.state    (set-grid-index:helpers:bazaar:core app-id grid-index.state)
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.u.app grid-index.state])]
+      ==
     ::
     ++  rebuild-catalog
       |=  [args=(map cord cord)]

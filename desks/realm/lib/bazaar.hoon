@@ -28,6 +28,7 @@
           [%rebuild-catalog ul]
           [%rebuild-stall rebuild-stall]
           [%clear-stall clear-stall]
+          [%set-host set-host]
       ==
     ::
     ++  install-app
@@ -94,10 +95,17 @@
       :~  [%path pth]
           [%args ul]
       ==
+    ::
     ++  clear-stall
       %-  ot
       :~  [%path pth]
           [%args ul]
+      ==
+    ::
+    ++  set-host
+      %-  ot
+      :~  [%app-id so]
+          [%host (su ;~(pfix sig fed:ag))]
       ==
     --
   --
