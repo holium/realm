@@ -78,36 +78,6 @@ export const RoomTray = observer(() => {
     [theme.currentTheme.dockColor]
   );
 
-  // const IconBadge = useMemo(
-  //   () => (
-  //     <Flex
-  //       style={{ pointerEvents: 'none' }}
-  //       position="relative"
-  //       flexDirection="row"
-  //       alignItems="center"
-  //     >
-  //       <Icons
-  //         mt="2px"
-  //         size={iconSize - 4}
-  //         color={textColor}
-  //         name="Connect"
-  //         pointerEvents="none"
-  //       />
-  //       <Text
-  //         position="absolute"
-  //         ml={2}
-  //         right={-8}
-  //         bottom={-4}
-  //         fontWeight={400}
-  //         fontSize={16}
-  //       >
-  //         10
-  //       </Text>
-  //     </Flex>
-  //   ),
-  //   [roomsManager.rooms.length]
-  // );
-
   const IconBadge = useMemo(
     () => (
       <Badge
@@ -117,14 +87,10 @@ export const RoomTray = observer(() => {
         wrapperWidth={iconSize + 6}
         wrapperHeight={iconSize + 3}
         textColor={'#FFFFFF'}
-        background={
-          rgba(theme.currentTheme.accentColor, 1)
-          // presentRoom ? 'transparent' : rgba(theme.currentTheme.accentColor, 1)
-        }
+        background={rgba(theme.currentTheme.accentColor, 1)}
         count={presentRoom ? 0 : roomsManager.rooms.length}
       >
         <Icons
-          // animate={{ marginRight: roomsManager.rooms.length ? 4 : 0 }}
           mr="4px"
           size={iconSize}
           color={textColor}
@@ -173,16 +139,6 @@ export const RoomTray = observer(() => {
             color={textColor}
           >
             {IconBadge}
-            {/* <Badge
-            right={-8}
-            bottom={-2}
-            wrapperWidth={iconSize + 6}
-            wrapperHeight={iconSize + 3}
-            background={rgba(theme.currentTheme.accentColor, 0)}
-            count={10}
-          > */}
-
-            {/* <Icons name="Connect" pointerEvents="none" /> */}
           </IconButton>
         </Flex>
       )}
