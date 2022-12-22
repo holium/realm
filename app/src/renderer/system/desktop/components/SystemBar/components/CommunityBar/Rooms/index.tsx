@@ -121,7 +121,9 @@ export const RoomTray = observer(() => {
             rightChildren={
               <IconButton
                 size={iconSize}
+                ref={roomsButtonRef}
                 customBg={iconHoverColor}
+                style={{ pointerEvents: 'none' }}
                 color={textColor}
               >
                 {IconBadge}
