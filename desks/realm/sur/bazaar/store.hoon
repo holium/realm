@@ -71,6 +71,7 @@
       [%rebuild-catalog args=(map cord cord)]
       [%rebuild-stall path=space-path:spaces args=(map cord cord)]
       [%clear-stall path=space-path:spaces args=(map cord cord)]
+      [%set-host app-id=desk host=ship]
   ==
 ::
 +$  interaction
