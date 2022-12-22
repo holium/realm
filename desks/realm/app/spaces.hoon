@@ -183,7 +183,6 @@
                         role=%member
                         message='Join the space for the group'
                     ==
-                  ~&  join-action
                   =^  cards  state
                     %-  action:visas:core
                     join-action
