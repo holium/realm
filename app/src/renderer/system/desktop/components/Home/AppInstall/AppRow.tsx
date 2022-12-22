@@ -99,7 +99,7 @@ export const AppRow = ({
   const rowRef = useRef<any>(null);
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   let image = app.image;
-  if (app && app.href && app.href.site) {
+  if (app && !app.image && app.href && app.href.site) {
     // for the case an image is served by the ship
     // we wont have it until install, so set to null
     image = null;

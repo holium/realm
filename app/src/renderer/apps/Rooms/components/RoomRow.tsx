@@ -1,12 +1,10 @@
-import React, { FC, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
 import { darken } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
-// import { id } from 'ethers/lib/utils';
 import { RoomType } from '@holium/realm-room';
 import { useRooms } from '../useRooms';
 
@@ -23,16 +21,14 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     title,
     present,
     creator,
-    provider,
     // cursors,
     onClick,
     rightChildren,
   } = props;
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
-  const { roomsApp } = useTrayApps();
 
-  const { mode, dockColor, windowColor, accentColor } = theme.currentTheme;
+  const { mode, dockColor, windowColor } = theme.currentTheme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
@@ -43,7 +39,6 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  // const creator = roomsApp.liveRoom?.creator;
   const peopleNoHost = present!.filter(
     (person: string) => person !== ship?.patp
   );
@@ -55,13 +50,14 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
 
   return (
     <Row
+      style={{ position: 'relative' }}
       small={tray}
       className="realm-cursor-hover"
       baseBg={!tray && isLive ? isLiveColor : undefined}
       customBg={isLive ? bgColor : windowColor}
       {...(onClick
         ? { onClick: (evt: any) => onClick(evt) }
-        : { style: { pointerEvents: 'none' } })}
+        : { style: { pointerEvents: 'none', position: 'relative' } })}
     >
       <Flex
         flex={1}

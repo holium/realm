@@ -54,7 +54,7 @@ export const Row = styled(motion.div)<RowProps>`
       `}
        ${props.small &&
       css`
-        padding: 2px 2px;
+        padding: 0px 2px;
       `}
       ${props.disabled &&
       css`
