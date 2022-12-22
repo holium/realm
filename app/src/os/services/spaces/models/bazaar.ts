@@ -237,7 +237,6 @@ export const NewBazaarStore = types
       applySnapshot(self.gridIndex, data.grid);
     },
     _addJoined(data: { path: string; stall: any; catalog: any }) {
-      console.log('add joined', data);
       Object.keys(data.catalog).forEach((key: string) => {
         const docket = data.catalog[key];
         if (docket.type === 'urbit') {
