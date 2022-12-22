@@ -1,9 +1,10 @@
-import React, { FC, useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
+import styled from 'styled-components';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -15,13 +16,22 @@ export type MediaAccessStatus =
 const colorMap: any = {
   granted: '#39a839',
   denied: '#ae2828',
+  connected: '#38CD7C',
+  disconnected: '#EA2424',
 };
 
-export const SystemPanel: FC<any> = observer(() => {
+const StatusIndicator = styled.div<{ connected: boolean }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${(props) =>
+    props.connected ? colorMap.connected : colorMap.disconnected};
+`;
+
+export const SystemPanel = observer(() => {
   const { theme, ship, contacts } = useServices();
 
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+  const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<{
     camera: MediaAccessStatus;
@@ -38,6 +48,34 @@ export const SystemPanel: FC<any> = observer(() => {
   }, []);
 
   const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
+
+  const subscriptions = [
+    {
+      name: '%spaces',
+      path: '/updates',
+      connected: true,
+    },
+    {
+      name: '%bazaar',
+      path: '/updates',
+      connected: true,
+    },
+    {
+      name: '%courier',
+      path: '/updates',
+      connected: false,
+    },
+    {
+      name: '%bulletin',
+      path: '/ui',
+      connected: true,
+    },
+    {
+      name: '%friends',
+      path: '/all',
+      connected: true,
+    },
+  ];
 
   return (
     <Flex gap={12} flexDirection="column" p="12px" width="100%">
@@ -146,6 +184,47 @@ export const SystemPanel: FC<any> = observer(() => {
             </Flex>
           </Flex>
         </Flex>
+      </Card>
+
+      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+        SUBSCRIPTIONS
+      </Text>
+      <Card
+        p="20px"
+        width="100%"
+        gap={16}
+        elevation="none"
+        customBg={cardColor}
+        flexDirection={'column'}
+      >
+        {subscriptions.map((sub) => (
+          <Flex
+            key={sub.name}
+            flexDirection="row"
+            alignItems="center"
+            height={24}
+            gap={12}
+          >
+            <StatusIndicator connected={sub.connected} />
+            <Text fontWeight={500} width={100}>
+              {sub.name}
+            </Text>
+            <Text fontSize={2} opacity={0.7} flex={1}>
+              {sub.path}
+            </Text>
+            <Text
+              fontSize={2}
+              opacity={0.7}
+              flexDirection="row"
+              alignItems="center"
+              color={colorMap[sub.connected ? 'connected' : 'disconnected']}
+            >
+              {!sub.connected && (
+                <TextButton style={{ fontWeight: 600 }}>Reconnect</TextButton>
+              )}
+            </Text>
+          </Flex>
+        ))}
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
