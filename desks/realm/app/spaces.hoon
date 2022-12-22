@@ -2,6 +2,7 @@
 /-  membership-store=membership
 /-  vstore=visas
 /-  hark=hark-store
+/-  g=new-groups
 /+  default-agent, verb, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
 ^-  agent:gall
 ::
@@ -150,7 +151,7 @@
     ^-  (quip card _this)
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
-      [%groups @ @ %updates ~]  ::  getting new group members
+      [%groups @ @ *]  ::  getting new group members
         ?+    -.sign            (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -165,18 +166,31 @@
             :~  [%pass watch-path %agent [our.bowl %groups] %watch watch-path]
             ==
           %fact
-            ~&  p.cage.sign
-            `this
-::            ?+    p.cage.sign   (on-agent:def wire sign)
-::                %spaces-reaction
-::              =^  cards  state
-::                (reaction:spaces:core !<(=reaction:store q.cage.sign))
-::              [cards this]
-::                %visa-reaction
-::              =^  cards  state
-::                (reaction:visas:core !<(=reaction:vstore q.cage.sign))
-::              [cards this]
-::            ==
+            ?+  p.cage.sign  `this
+                %group-update-0
+              =/  groups-update  q:!<(update:g q.cage.sign)
+              ?+  -.groups-update  `this
+                  %fleet
+                ?+  -.q.groups-update  `this
+                    %add
+                  =/  join-action
+                    ^-  action:vstore
+                    :*  %send-invite
+                        ^-  space-path:store
+                        :-  (slav %p (snag 1 `(list knot)`wire))
+                        (snag 2 `(list knot)`wire)
+                        ship=(snag 0 ~(tap in p.groups-update))
+                        role=%member
+                        message='Join the space for the group'
+                    ==
+                  ~&  join-action
+                  =^  cards  state
+                    %-  action:visas:core
+                    join-action
+                  [cards this]
+                ==
+              ==
+            ==
         ==
       [%spaces @ @ ~]  ::  only members will subscribe on this wire
         ?+    -.sign            (on-agent:def wire sign)
@@ -261,7 +275,8 @@
         ==
       =?  cards  =(%group type.payload)
         %+  weld  cards
-        =/  watch-path  /groups/(scot %p our.bowl)/[name.payload]/updates
+        =/  watch-path  /groups/(scot %p our.bowl)/[+.path.new-space]/updates/init
+        ~&  watch-path
         `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
       [cards state]
     ::
@@ -351,8 +366,8 @@
           ==
         =?  cards  =(%group type:(~(got by spaces.state) path))
           %+  weld  cards
-            =/  action  [flag now.bowl %fleet (silt ~[ship]) %add ~]
-            `(list card)`[%pass / %agent [our.bowl dap.bowl] %poke group-action+!>(action)]~  :: Add member to group
+            =/  action  [path now.bowl %fleet (silt ~[ship]) %add ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
         [cards state]
         ::  temporarily using %invite-accepted until we can add a new action
         :: :~
