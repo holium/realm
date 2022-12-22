@@ -138,7 +138,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
               src={app.image}
             />
           );
-          if (app && app.href && app.href.site) {
+          if (app && !app.image && app.href && app.href.site) {
             // for the case an image is served by the ship
             // we wont have it until install, so set to null
             graphic = null;
@@ -191,6 +191,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
                 value={
                   <LinkPreview
                     fontSize={15}
+                    customBg={darken(0.035, theme.currentTheme.windowColor)}
                     textColor={theme.currentTheme.accentColor}
                     link="https://holium.com"
                     onClick={() => {
@@ -202,6 +203,8 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
             </>
           );
         }
+
+        // let
 
         return (
           <Flex flex={1} flexDirection="column" justifyContent="flex-start">
@@ -240,58 +243,61 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
                 >
                   {app.info}
                 </Text>
-                <Flex
-                  mt={3}
-                  flexDirection="row"
-                  justifyContent="flex-start"
-                  gap={10}
-                >
-                  <Button
-                    borderRadius={6}
-                    paddingTop="6px"
-                    paddingBottom="6px"
-                    variant={isInstalled ? 'disabled' : 'primary'}
-                    fontWeight={500}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      !isInstalled &&
-                        SpacesActions.installApp(
-                          (app as UrbitAppType).host!,
-                          app.id
-                        );
-                      // TODO should we close on install?
-                      onClose();
-                    }}
+                {app.type === 'urbit' && (
+                  <Flex
+                    mt={3}
+                    flexDirection="row"
+                    justifyContent="flex-start"
+                    gap={10}
                   >
-                    {isInstalled ? 'Installed' : 'Install'}
-                  </Button>
-                  <Button
-                    borderRadius={6}
-                    paddingTop="6px"
-                    paddingBottom="6px"
-                    // variant="disabled"
-                    fontWeight={500}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const content = `web+urbitgraph://${app.host || ''}/${
-                        app.id
-                      }`;
-                      navigator.clipboard.writeText(content);
-                      setCopied(true);
-                    }}
-                  >
-                    <>
-                      <div style={{ marginRight: '3px', fontWeight: '500' }}>
-                        Copy app link
-                      </div>
-                      {!copied ? (
-                        <Icons name="Copy" />
-                      ) : (
-                        <Icons name="CheckCircle" />
-                      )}
-                    </>
-                  </Button>
-                </Flex>
+                    <Button
+                      borderRadius={6}
+                      paddingTop="6px"
+                      paddingBottom="6px"
+                      variant={isInstalled ? 'disabled' : 'primary'}
+                      fontWeight={500}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        !isInstalled &&
+                          SpacesActions.installApp(
+                            (app as UrbitAppType).host!,
+                            app.id
+                          );
+                        // TODO should we close on install?
+                        onClose();
+                      }}
+                    >
+                      {isInstalled ? 'Installed' : 'Install'}
+                    </Button>
+
+                    <Button
+                      borderRadius={6}
+                      paddingTop="6px"
+                      paddingBottom="6px"
+                      // variant="disabled"
+                      fontWeight={500}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const content = `web+urbitgraph://${
+                          (app as UrbitAppType).host || ''
+                        }/${app.id}`;
+                        navigator.clipboard.writeText(content);
+                        setCopied(true);
+                      }}
+                    >
+                      <>
+                        <div style={{ marginRight: '3px', fontWeight: '500' }}>
+                          Copy app link
+                        </div>
+                        {!copied ? (
+                          <Icons name="Copy" />
+                        ) : (
+                          <Icons name="CheckCircle" />
+                        )}
+                      </>
+                    </Button>
+                  </Flex>
+                )}
               </Flex>
             </Flex>
             <Flex mt={40} gap={40} flex={1} flexDirection="column">

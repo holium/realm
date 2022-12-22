@@ -35,6 +35,7 @@ export const handleInstallation = (
   }
   switch (status) {
     case InstallStatus.installed:
+    case InstallStatus.suspended:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.uninstalled:

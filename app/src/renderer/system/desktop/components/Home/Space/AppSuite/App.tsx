@@ -19,6 +19,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { bgIsLightOrDark } from 'os/lib/color';
 import {
   handleInstallation,
   handleResumeSuspend,
@@ -80,7 +81,8 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
     const installStatus =
       ((app as UrbitAppType).installStatus as InstallStatus) ||
       InstallStatus.installed;
-    const { isInstalled, isUninstalled } = getAppTileFlags(installStatus);
+    const { isInstalled, isUninstalled, isDesktop } =
+      getAppTileFlags(installStatus);
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
@@ -168,12 +170,24 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
         weRecommended,
       ]
     );
-
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+    const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+    const iconColor = useMemo(
+      () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
+      [isLight]
+    );
+    // const iconColor
     return (
       <Box position="relative">
-        {isUninstalled && (
+        {(isUninstalled || isDesktop) && (
           <Box zIndex={3} position="absolute" right="14px" top="14px">
-            <IconButton size={26} color={accentColor} onClick={onInstallation}>
+            <IconButton
+              size={26}
+              hoverFill={iconColor}
+              customBg={rgba(iconColor, 0.12)}
+              color={iconColor}
+              onClick={onInstallation}
+            >
               <Icons name="CloudDownload" />
             </IconButton>
           </Box>
