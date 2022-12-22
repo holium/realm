@@ -161,7 +161,7 @@
             =/  =ship           `@p`(slav %p i.t.wire)
             =/  space-pth       `@t`i.t.t.wire
             ~&  >  "{<dap.bowl>}: groups kicked us, resubscribing... {<ship>} {<space-pth>}"
-            =/  watch-path  /groups/(scot %p our.bowl)/[+.path.new-space]/updates/init
+            =/  watch-path  /groups/(scot %p our.bowl)/[(snag 2 `(list knot)`wire)]/updates/init
             :_  this
             :~  [%pass watch-path %agent [our.bowl %groups] %watch watch-path]
             ==
