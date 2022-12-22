@@ -24,7 +24,7 @@ type IProps = {
   LayoutProps &
   SpaceProps;
 
-export const TrayButton = styled(styled(motion.div)`
+export const TrayButton = styled(motion.div)<IProps>`
   padding: 4px 4px;
   padding-right: 16px;
   margin-left: 3px;
@@ -50,4 +50,5 @@ export const TrayButton = styled(styled(motion.div)`
           : 'inherit'};
       }
     `}
-`)<IProps>(compose(space, size, color, layout, typography));
+  ${compose(space, size, color, layout, typography)}
+`;

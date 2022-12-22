@@ -1,7 +1,7 @@
 import { createRef, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Badge, Flex, IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
@@ -78,6 +78,64 @@ export const RoomTray = observer(() => {
     [theme.currentTheme.dockColor]
   );
 
+  // const IconBadge = useMemo(
+  //   () => (
+  //     <Flex
+  //       style={{ pointerEvents: 'none' }}
+  //       position="relative"
+  //       flexDirection="row"
+  //       alignItems="center"
+  //     >
+  //       <Icons
+  //         mt="2px"
+  //         size={iconSize - 4}
+  //         color={textColor}
+  //         name="Connect"
+  //         pointerEvents="none"
+  //       />
+  //       <Text
+  //         position="absolute"
+  //         ml={2}
+  //         right={-8}
+  //         bottom={-4}
+  //         fontWeight={400}
+  //         fontSize={16}
+  //       >
+  //         10
+  //       </Text>
+  //     </Flex>
+  //   ),
+  //   [roomsManager.rooms.length]
+  // );
+
+  const IconBadge = useMemo(
+    () => (
+      <Badge
+        style={{ pointerEvents: 'none' }}
+        right={-6}
+        bottom={-4}
+        wrapperWidth={iconSize + 6}
+        wrapperHeight={iconSize + 3}
+        textColor={'#FFFFFF'}
+        background={
+          rgba(theme.currentTheme.accentColor, 1)
+          // presentRoom ? 'transparent' : rgba(theme.currentTheme.accentColor, 1)
+        }
+        count={presentRoom ? 0 : roomsManager.rooms.length}
+      >
+        <Icons
+          // animate={{ marginRight: roomsManager.rooms.length ? 4 : 0 }}
+          mr="4px"
+          size={iconSize}
+          color={textColor}
+          name="Connect"
+          pointerEvents="none"
+        />
+      </Badge>
+    ),
+    [roomsManager.rooms.length, theme.currentTheme.accentColor, presentRoom]
+  );
+
   return (
     <motion.div
       id="rooms-tray-icon"
@@ -95,26 +153,38 @@ export const RoomTray = observer(() => {
             creator={presentRoom.creator}
             provider={presentRoom.provider}
             rightChildren={
-              <Icons
-                size={iconSize - 4}
+              <IconButton
+                size={iconSize}
+                customBg={iconHoverColor}
                 color={textColor}
-                name="Connect"
-                pointerEvents="none"
-              />
+              >
+                {IconBadge}
+              </IconButton>
             }
           />
         </Flex>
       ) : (
-        <IconButton
-          id="rooms-tray-icon"
-          ref={roomsButtonRef}
-          size={iconSize}
-          customBg={iconHoverColor}
-          color={textColor}
-          mt="2px"
-        >
-          <Icons name="Connect" pointerEvents="none" />
-        </IconButton>
+        <Flex padding="2px">
+          <IconButton
+            id="rooms-tray-icon"
+            ref={roomsButtonRef}
+            size={iconSize}
+            customBg={iconHoverColor}
+            color={textColor}
+          >
+            {IconBadge}
+            {/* <Badge
+            right={-8}
+            bottom={-2}
+            wrapperWidth={iconSize + 6}
+            wrapperHeight={iconSize + 3}
+            background={rgba(theme.currentTheme.accentColor, 0)}
+            count={10}
+          > */}
+
+            {/* <Icons name="Connect" pointerEvents="none" /> */}
+          </IconButton>
+        </Flex>
       )}
     </motion.div>
   );
