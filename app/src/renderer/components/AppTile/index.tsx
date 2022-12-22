@@ -142,8 +142,6 @@ export const AppTile = observer(
     const { theme } = useServices();
     const { getOptions, setOptions, getColors, setColors } = useContextMenu();
     const tileRef = useRef(null);
-
-    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     const isAppGrid =
       tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
     const boxShadowStyle = isAppGrid
@@ -152,7 +150,11 @@ export const AppTile = observer(
     const boxShadowHover = isAppGrid
       ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
-    const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+
+    const isLight = useMemo(() => {
+      return bgIsLightOrDark(app.color) === 'light';
+    }, [app.color]);
+
     const textColor = useMemo(
       () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
       [isLight]
@@ -226,7 +228,7 @@ export const AppTile = observer(
               left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
               padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
               borderRadius={6}
-              backgroundColor={app.image && rgba(statusBadgeColor, 0.5)}
+              backgroundColor={rgba(statusBadgeColor, 0.5)}
               top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
               fontWeight={500}
               textStyle="capitalize"
@@ -359,9 +361,14 @@ export const AppTile = observer(
                   },
                 }
               : {})}
+            initial={{
+              opacity: isFaded ? 0.5 : 1,
+              ...filter,
+            }}
             animate={{
               opacity: isFaded ? 0.5 : 1,
               boxShadow: boxShadowStyle,
+              ...filter,
             }}
             transition={{
               scale: { duration: 0.1 },
@@ -444,6 +451,7 @@ export const AppTile = observer(
       open,
       selected,
       theme.currentTheme.textColor,
+      textColor,
       tileId,
       tileSize,
       variants,
