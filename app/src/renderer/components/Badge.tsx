@@ -1,6 +1,8 @@
 import React, { FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
+import { Text } from './Text';
+import { Box } from '@holium/design-system';
 import { lighten } from 'polished';
 import { ThemeType } from '../theme';
 
@@ -21,7 +23,7 @@ interface BadgeStyleProps {
   textColor?: string;
 }
 
-const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
+const BadgeStyle = styled(Box)<BadgeStyleProps>`
   position: absolute;
   display: block;
 
@@ -48,8 +50,14 @@ const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
     css`
       left: ${props.left}px;
     `}
-    bottom: ${props.bottom}px;
-    right: ${props.right}px;
+    ${props.bottom &&
+    css`
+      bottom: ${props.bottom}px;
+    `}
+     ${props.right &&
+    css`
+      right: ${props.right}px;
+    `}
     height: ${props.minimal ? '6px' : 'fit-content'};
     width: ${props.minimal ? '6px' : 'fit-content'};
   `}
@@ -108,7 +116,7 @@ export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
             minimal={minimal}
             textColor={textColor}
           >
-            {!minimal && count}
+            {!minimal && <Text fontWeight={500}>{count}</Text>}
           </BadgeStyle>
         )}
       </AnimatePresence>
@@ -116,7 +124,7 @@ export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
   );
 };
 Badge.defaultProps = {
-  top: 0,
-  right: 0,
+  // top: 0,
+  // right: 0,
   count: 0,
 };
