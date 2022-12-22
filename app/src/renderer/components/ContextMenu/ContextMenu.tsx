@@ -13,10 +13,11 @@ import { MenuItem } from '../MenuItem';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;
+const MIN_HEIGHT = 84;
 
 const getAnchorPoint = (e: MouseEvent, menu: HTMLDivElement | null) => {
   const menuWidth = WIDTH;
-  const menuHeight = Math.min(menu?.scrollHeight || 0, MAX_HEIGHT);
+  const menuHeight = Math.min(menu?.scrollHeight || MIN_HEIGHT, MAX_HEIGHT);
 
   const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
   const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
