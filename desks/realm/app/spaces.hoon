@@ -186,6 +186,19 @@
                     %-  action:visas:core
                     join-action
                   [cards this]
+                    %del
+                  =/  kick-action
+                    ^-  action:vstore
+                    :*  %group-kick-member
+                        ^-  space-path:store
+                        :-  (slav %p (snag 1 `(list knot)`wire))
+                        (snag 2 `(list knot)`wire)
+                        ship=(snag 0 ~(tap in p.groups-update))
+                    ==
+                  =^  cards  state
+                    %-  action:visas:core
+                    kick-action
+                  [cards this]
                 ==
               ==
             ==
@@ -404,8 +417,12 @@
         =.  membs                   (~(del by membs) ship)
         =.  membership.state        (~(put by membership.state) [path membs])
         =/  watch-paths             [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
-        :_  state
-        [%give %fact watch-paths visa-reaction+!>([%kicked path ship])]~
+        =/  cards  `(list card)`[%give %fact watch-paths visa-reaction+!>([%kicked path ship])]~
+        =?  cards  =(%group type:(~(got by spaces.state) path))
+          %+  weld  cards
+            =/  action  [path now.bowl %fleet (silt ~[ship]) %del ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
+        [cards state]
     ::
     --
   ++  reaction
@@ -515,6 +532,7 @@
       %decline-invite       (handle-decline +.act)
       %stamped              (handle-stamped +.act)
       %kick-member          (handle-kick +.act)
+      %group-kick-member    (group-handle-kick +.act)
       %revoke-invite        (handle-deported +.act)
     ==
     ::
@@ -628,13 +646,20 @@
         [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]                   ::  we want to remove the invite after accepted
       ==
     ::
+    ++  group-handle-kick
+      |=  [path=space-path:store =ship]
+      ^-  (quip card _state)
+      ?>  (has-auth:security path src.bowl %admin)
+      ?>  (is-host:core ship.path)
+      (host-handle-kick path ship %.y)
+    ::
     ++  handle-kick
       |=  [path=space-path:store =ship]
       ^-  (quip card _state)
       ?>  (has-auth:security path src.bowl %admin)
       ?.  (is-host:core ship.path)
         (member-handle-kick path)
-      (host-handle-kick path ship)
+      (host-handle-kick path ship %.n)
       ::
       ++  member-handle-kick
         |=  [path=space-path:store]
@@ -642,17 +667,26 @@
         [%pass / %agent [ship.path %spaces] %poke visa-action+!>(act)]~
       ::
       ++  host-handle-kick
-        |=  [path=space-path:store =ship]
+        |=  [path=space-path:store =ship group=?]
         =/  membs                   (~(got by membership.state) path)
         =.  membs                   (~(del by membs) ship)
         =.  membership.state        (~(put by membership.state) [path membs])
         :: =/  notify=action:hark        (notify path /realm (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
         =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
-        :_  state
-        :~  [%give %fact [watch-path /updates ~] visa-reaction+!>([%kicked path ship])]
-            [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]
-            [%pass / %agent [ship %spaces] %poke visa-action+!>([%revoke-invite path])]
-        ==
+        =/  cards
+          ^-  (list card)
+          :~  [%give %fact [watch-path /updates ~] visa-reaction+!>([%kicked path ship])]
+              [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]
+              [%pass / %agent [ship %spaces] %poke visa-action+!>([%revoke-invite path])]
+          ==
+        =?  cards
+          ?&  =(%group type:(~(got by spaces.state) path))
+              !group
+          ==
+          %+  weld  cards
+            =/  action  [path now.bowl %fleet (silt ~[ship]) %del ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
+        [cards state]
     ::
     ++  handle-deported
       |=  [path=space-path:store]
