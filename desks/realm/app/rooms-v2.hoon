@@ -227,13 +227,29 @@
         =/  old-wire       [/provider-updates/(scot %p old-provider)]
         =/  wire           [/provider-updates/(scot %p new-provider)]
         ~&  >>  "{<dap.bol>}: [set-provider]. {<src.bol>} setting provider from {<old-provider>} to {<new-provider>}"
-        :_  state
-        %+  weld  leave-cards
+        =/  outgoing-sub-wire-leave-cards
           ^-  (list card)
-          :~
-            [%pass old-wire %agent [old-provider %rooms-v2] %leave ~]
-            [%pass wire %agent [new-provider %rooms-v2] %watch wire]
+          %+  murn
+            ^-  (list path)
+            %~  tap  in
+            ^-  (set path)
+            %-  %~  run  in
+                  ~(key by wex.bol)
+            |=  [sub=path =ship =term]
+            sub
+          |=  =path
+          ?+  path  ~
+              [%provider-updates @ ~]
+            `[%pass wire %agent [(slav %p i.t.path) %rooms-v2] %leave ~]
           ==
+        :_  state
+        %+  weld  outgoing-sub-wire-leave-cards
+          %+  weld  leave-cards
+            ^-  (list card)
+            :~
+              [%pass old-wire %agent [old-provider %rooms-v2] %leave ~]
+              [%pass wire %agent [new-provider %rooms-v2] %watch wire]
+            ==
       ::
       ++  reset-provider
         =/  old-provider            provider.session.state
