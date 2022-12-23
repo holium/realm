@@ -142,7 +142,7 @@ export const DesktopStore = types
         ),
       });
       self.windows.set(newWindow.id, newWindow);
-      self.activeWindow = self.windows.get(newWindow.id);
+      this.setActive(newWindow.id);
       if (self.showHomePane) {
         self.showHomePane = false;
       }
