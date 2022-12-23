@@ -206,7 +206,7 @@ export class Conduit extends EventEmitter {
 
       // console.log(`EventSource => ['${channelUrl}', '${this.cookie}']`);
       this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie },
+        headers: { Cookie: this.cookie.split('; ')[0] },
       });
       // this.sse = new EventSource(channelUrl);
 
@@ -478,7 +478,7 @@ export class Conduit extends EventEmitter {
   private get headers() {
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie,
+      Cookie: this.cookie.split('; ')[0],
     };
   }
 
