@@ -240,7 +240,7 @@
           |=  =path
           ?+  path  ~
               [%provider-updates @ ~]
-            `[%pass wire %agent [(slav %p i.t.path) %rooms-v2] %leave ~]
+            `[%pass path %agent [(slav %p i.t.path) %rooms-v2] %leave ~]
           ==
         :_  state
         %+  weld  outgoing-sub-wire-leave-cards
