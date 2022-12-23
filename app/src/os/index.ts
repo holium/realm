@@ -392,7 +392,6 @@ export class Realm extends EventEmitter {
   }
 
   async onWebViewAttached(e: Event, webContents: WebContents) {
-    // console.log('onWebViewAttached');
     webContents.on('will-redirect', (e: Event, url: string) =>
       this.onWillRedirect(e, url, webContents)
     );

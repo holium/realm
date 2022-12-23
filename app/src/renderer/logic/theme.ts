@@ -12,6 +12,46 @@ import { bgIsLightOrDark } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
 
+export const genCSSVariables = (theme: ThemeType) => {
+  return `
+      * { cursor: none !important; }
+      :root {
+        --rlm-font: 'Rubik', sans-serif;
+        --rlm-base-color: ${theme.backgroundColor};
+        --rlm-accent-color: ${theme.accentColor};
+        --rlm-input-color: ${theme.inputColor};
+        --rlm-border-color: ${
+          theme.mode === 'light'
+            ? darken(0.1, theme.windowColor)
+            : darken(0.075, theme.windowColor)
+        };
+        --rlm-window-color: ${theme.windowColor};
+        --rlm-card-color: ${
+          theme.mode === 'light'
+            ? lighten(0.05, theme.windowColor)
+            : darken(0.025, theme.windowColor)
+        };
+        --rlm-theme-mode: ${theme.mode};
+        --rlm-text-color: ${theme.textColor};
+        --rlm-icon-color: ${theme.iconColor};
+      }
+   
+      div[data-radix-portal] {
+        z-index: 2000 !important;
+      }
+
+      body {
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+
+      #rlm-cursor {
+        position: absolute;
+        z-index: 2147483646 !important;
+      }
+    `;
+};
+
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
 
