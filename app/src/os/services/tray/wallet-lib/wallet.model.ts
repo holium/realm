@@ -317,12 +317,40 @@ const ERC721 = types.model('ERC721', {
 
 export type ERC721Type = Instance<typeof ERC721>;
 
+const TransactionList = types
+  .model('TransactionList', {
+    transactions: types.map(Transaction),
+  })
+  .actions((self) => ({
+    applyAgentTransaction(index: number, transaction: any) {
+      const tx = self.transactions.get(transaction.hash);
+      if (tx) {
+        tx.walletIndex = index;
+        tx.notes = transaction.notes;
+        self.transactions.set(transaction.hash, tx);
+      } else {
+        const tx = {
+          ...transaction,
+          walletIndex: index,
+          amount: '0',
+          notes: '',
+        };
+        self.transactions.set(transaction.hash, tx);
+      }
+    },
+    applyChainTransactions(transactions: any) {
+
+    }
+  }));
+
+export type TransactionListType = Instance<typeof TransactionList>;
+
 const EthWalletData = types
   .model('EthWalletData', {
     balance: types.string,
     coins: types.map(ERC20),
     nfts: types.map(ERC721),
-    transactions: types.map(Transaction),
+    transactionList: TransactionList, //types.map(Transaction),
   })
   .actions((self) => ({
     setCoins(coins: any) {
@@ -435,7 +463,7 @@ const EthWallet = types
       applySnapshot(self.transactions, getSnapshot(newHistory));
     }, */
     getTransaction(protocol: ProtocolType, hash: string) {
-      const tx: any = self.data.get(protocol)!.transactions.get(hash);
+      const tx: any = self.data.get(protocol)!.transactionList.transactions.get(hash);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -453,7 +481,7 @@ const EthWallet = types
       };
     },
     getAgentTransaction(protocol: ProtocolType, hash: string) {
-      const tx: any = self.data.get(protocol)!.transactions.get(hash);
+      const tx: any = self.data.get(protocol)!.transactionList.transactions.get(hash);
       return {
         hash: tx.hash,
         network: tx.network,
@@ -492,28 +520,15 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      self.data.get(protocol)!.transactions.set(hash, tx);
+      self.data.get(protocol)!.transactionList.transactions.set(hash, tx);
     },
     applyTransactionUpdate(protocol: ProtocolType, transaction: any) {
-      let netMap = self.data.get(protocol)!.transactions;
-      const tx = netMap?.get(transaction.hash);
-      if (tx) {
-        tx.walletIndex = self.index;
-        tx.notes = transaction.notes;
-        netMap.set(transaction.hash, tx);
-      } else {
-        const tx = {
-          ...transaction,
-          walletIndex: self.index,
-          amount: '0',
-          notes: '',
-        };
-        netMap.set(transaction.hash, tx);
-      }
+      let netMap = self.data.get(protocol)!.transactionList;
+      netMap.applyAgentTransaction(self.index, transaction);
     },
     applyTransactions(conduit: any, protocol: ProtocolType, transactions: any) {
       let formattedTransactions: any = {};
-      let previousTransactions = self.data.get(protocol)!.transactions.toJSON();
+      let previousTransactions = self.data.get(protocol)!.transactionList.transactions.toJSON();
       for (const transaction of transactions) {
         // console.log('applyTransaction', transaction);
         const previousTransaction = previousTransactions[transaction.hash];
@@ -541,7 +556,7 @@ const EthWallet = types
       const map = types.map(Transaction);
       const newTransactions = map.create(formattedTransactions);
       applySnapshot(
-        self.data.get(protocol)!.transactions,
+        self.data.get(protocol)!.transactionList.transactions,
         getSnapshot(newTransactions)
       );
       for (let transaction of transactions) {
@@ -634,19 +649,19 @@ export const EthStore = types
               balance: '0',
               coins: {},
               nfts: {},
-              transactions: {},
+              transactionList: {},
             },
             [ProtocolType.ETH_GORLI]: {
               balance: '0',
               coins: {},
               nfts: {},
-              transactions: {},
+              transactionList: {},
             },
             [ProtocolType.UQBAR]: {
               balance: '0',
               coins: {},
               nfts: {},
-              transactions: {},
+              transactionList: {},
             },
           },
         };
