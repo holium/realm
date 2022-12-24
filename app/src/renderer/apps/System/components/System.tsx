@@ -5,7 +5,7 @@ import { Flex, Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
-import { ShipActions } from 'renderer/logic/actions/ship';
+import { OSActions } from 'renderer/logic/actions/os';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -53,34 +53,29 @@ export const SystemPanel = observer(() => {
     {
       name: '%spaces',
       path: '/updates',
-      isSubscribed: spaces.isSubscribed,
+      subscriptionState: spaces.subscriptionState,
     },
     {
       name: '%bazaar',
       path: '/updates',
-      isSubscribed: bazaar.isSubscribed,
+      subscriptionState: bazaar.subscriptionState,
     },
     {
       name: '%courier',
       path: '/updates',
-      isSubscribed: courier.isSubscribed,
+      subscriptionState: courier.subscriptionState,
     },
     {
       name: '%bulletin',
       path: '/ui',
-      isSubscribed: bulletin.isSubscribed,
+      subscriptionState: bulletin.subscriptionState,
     },
     {
       name: '%friends',
       path: '/all',
-      isSubscribed: friends.isSubscribed,
+      subscriptionState: friends.subscriptionState,
     },
   ];
-
-  const resubscribe = (appName: string) => {
-    courier.setSubscriptionStatus('subscribing');
-    ShipActions.reconnectSubscription(appName);
-  };
 
   return (
     <Flex gap={12} flexDirection="column" p="12px" width="100%">
@@ -210,17 +205,19 @@ export const SystemPanel = observer(() => {
             height={24}
             gap={12}
           >
-            <StatusIndicator isSubscribed={sub.isSubscribed} />
+            <StatusIndicator
+              isSubscribed={sub.subscriptionState === 'subscribed'}
+            />
             <Text fontWeight={500} width={100}>
               {sub.name}
             </Text>
             <Text fontSize={2} opacity={0.7} flex={1}>
               {sub.path}
             </Text>
-            {!sub.isSubscribed && (
+            {sub.subscriptionState === 'unsubscribed' && (
               <TextButton
                 style={{ fontWeight: 600 }}
-                onClick={() => resubscribe(sub.name)}
+                onClick={OSActions.reconnect}
               >
                 Reconnect
               </TextButton>

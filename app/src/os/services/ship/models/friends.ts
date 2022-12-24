@@ -6,7 +6,7 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp } from '../../../types';
-import { SubscriptionStatusModel } from '../../common.model';
+import { SubscriptionModel } from '../../common.model';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',
@@ -26,7 +26,7 @@ export type FriendType = Instance<typeof FriendModel>;
 export const FriendsStore = types
   .model('FriendsStore', {
     all: types.map(FriendModel),
-    subscriptionStatus: types.optional(SubscriptionStatusModel, {
+    subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
   })
@@ -63,8 +63,8 @@ export const FriendsStore = types
         })
       );
     },
-    get isSubscribed() {
-      return self.subscriptionStatus.isSubscribed;
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }))
   .actions((self) => ({
@@ -83,7 +83,7 @@ export const FriendsStore = types
     setSubscriptionStatus: (
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
-      self.subscriptionStatus.set(newSubscriptionStatus);
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

@@ -1,5 +1,5 @@
 import { types, Instance, applySnapshot } from 'mobx-state-tree';
-import { SubscriptionStatusModel } from '../../common.model';
+import { SubscriptionModel } from '../../common.model';
 
 export const SpaceListingModel = types.model('SpaceListingModel', {
   path: types.string,
@@ -16,7 +16,7 @@ export const BulletinStore = types
   .model('BulletinStore', {
     spaces: types.map(SpaceListingModel),
     // apps: types.map(AppBulletinModel),
-    subscriptionStatus: types.optional(SubscriptionStatusModel, {
+    subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
   })
@@ -24,8 +24,8 @@ export const BulletinStore = types
     get list() {
       return Array.from(self.spaces.values());
     },
-    get isSubscribed() {
-      return self.subscriptionStatus.isSubscribed;
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }))
   .actions((self) => ({
@@ -41,7 +41,7 @@ export const BulletinStore = types
     setSubscriptionStatus: (
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
-      self.subscriptionStatus.set(newSubscriptionStatus);
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

@@ -20,7 +20,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
-import { SubscriptionStatusModel } from '../../common.model';
+import { SubscriptionModel } from '../../common.model';
 
 const setAppStatus = (app: AppType, status: InstallStatus) => {
   if (app.type !== 'urbit') return app;
@@ -188,7 +188,7 @@ export const NewBazaarStore = types
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
-    subscriptionStatus: types.optional(SubscriptionStatusModel, {
+    subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
   })
@@ -519,7 +519,7 @@ export const NewBazaarStore = types
     setSubscriptionStatus: (
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
-      self.subscriptionStatus.set(newSubscriptionStatus);
+      self.subscription.set(newSubscriptionStatus);
     },
   }))
   .views((self) => ({
@@ -645,8 +645,8 @@ export const NewBazaarStore = types
       );
       return suite;
     },
-    get isSubscribed() {
-      return self.subscriptionStatus.isSubscribed;
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }));
 

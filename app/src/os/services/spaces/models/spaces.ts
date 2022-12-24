@@ -5,7 +5,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { ThemeModel } from '../../theme.model';
-import { LoaderModel, SubscriptionStatusModel } from '../../common.model';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { VisaModel } from './visas';
 
@@ -55,7 +55,7 @@ export const SpacesStore = types
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
     // friends: types.optional(FriendsStore, { all: {} }),
-    subscriptionStatus: types.optional(SubscriptionStatusModel, {
+    subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
   })
@@ -81,8 +81,8 @@ export const SpacesStore = types
       return self.spaces.get(spacePath);
       // }
     },
-    get isSubscribed() {
-      return self.subscriptionStatus.isSubscribed;
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }))
   .actions((self) => ({
@@ -177,7 +177,7 @@ export const SpacesStore = types
     setSubscriptionStatus: (
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
-      self.subscriptionStatus.set(newSubscriptionStatus);
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

@@ -48,7 +48,7 @@ export const LoaderModel = types
 
 export type LoaderModelType = Instance<typeof LoaderModel>;
 
-export const SubscriptionStatusModel = types
+export const SubscriptionModel = types
   .model({
     state: types.optional(
       types.enumeration('LoaderState', [
@@ -59,11 +59,6 @@ export const SubscriptionStatusModel = types
       'subscribing'
     ),
   })
-  .views((self) => ({
-    get isSubscribed() {
-      return self.state === 'subscribed';
-    },
-  }))
   .actions((self) => ({
     set(state: 'subscribed' | 'subscribing' | 'unsubscribed') {
       self.state = state;
