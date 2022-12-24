@@ -87,6 +87,7 @@ export class ShipService extends BaseService {
     'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
     'realm.ship.upload-file': this.uploadFile,
+    'realm.ship.reconnect-subscription': this.reconnectSubscription,
   };
 
   static preload = {
@@ -175,6 +176,8 @@ export class ShipService extends BaseService {
       await ipcRenderer.invoke('realm.ship.remove-friend', patp),
     uploadFile: async (params: FileUploadParams) =>
       await ipcRenderer.invoke('realm.ship.upload-file', params),
+    reconnectSubscription: async (app: string) =>
+      await ipcRenderer.invoke('realm.ship.reconnect-subscription', app),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -304,8 +307,8 @@ export class ShipService extends BaseService {
       MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
       // register dm update handler
-      DmApi.updates(this.core.conduit!, this.models.courier!);
-      CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
+      this.subscribeToDmUpdates();
+
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
@@ -611,5 +614,22 @@ export class ShipService extends BaseService {
         })
         .catch(reject);
     });
+  }
+
+  subscribeToDmUpdates() {
+    DmApi.updates(this.core.conduit!, this.models.courier!);
+    CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
+  }
+
+  reconnectSubscription(app: string) {
+    console.log('reconnecting subscription', app);
+
+    switch (app) {
+      case '%courier':
+        this.subscribeToDmUpdates();
+        break;
+      default:
+        break;
+    }
   }
 }

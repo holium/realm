@@ -1,10 +1,11 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
 import { Flex, Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
-import styled from 'styled-components';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -16,21 +17,20 @@ export type MediaAccessStatus =
 const colorMap: any = {
   granted: '#39a839',
   denied: '#ae2828',
-  connected: '#38CD7C',
+  isSubscribed: '#38CD7C',
   disconnected: '#EA2424',
 };
 
-const StatusIndicator = styled.div<{ connected: boolean }>`
+const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${(props) =>
-    props.connected ? colorMap.connected : colorMap.disconnected};
+  background-color: ${({ isSubscribed }) =>
+    isSubscribed ? colorMap.isSubscribed : colorMap.disconnected};
 `;
 
 export const SystemPanel = observer(() => {
-  const { theme, ship, contacts } = useServices();
-
+  const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<{
@@ -53,29 +53,34 @@ export const SystemPanel = observer(() => {
     {
       name: '%spaces',
       path: '/updates',
-      connected: true,
+      isSubscribed: spaces.isSubscribed,
     },
     {
       name: '%bazaar',
       path: '/updates',
-      connected: true,
+      isSubscribed: bazaar.isSubscribed,
     },
     {
       name: '%courier',
       path: '/updates',
-      connected: false,
+      isSubscribed: courier.isSubscribed,
     },
     {
       name: '%bulletin',
       path: '/ui',
-      connected: true,
+      isSubscribed: bulletin.isSubscribed,
     },
     {
       name: '%friends',
       path: '/all',
-      connected: true,
+      isSubscribed: friends.isSubscribed,
     },
   ];
+
+  const resubscribe = (appName: string) => {
+    courier.setSubscriptionStatus('subscribing');
+    ShipActions.reconnectSubscription(appName);
+  };
 
   return (
     <Flex gap={12} flexDirection="column" p="12px" width="100%">
@@ -205,24 +210,21 @@ export const SystemPanel = observer(() => {
             height={24}
             gap={12}
           >
-            <StatusIndicator connected={sub.connected} />
+            <StatusIndicator isSubscribed={sub.isSubscribed} />
             <Text fontWeight={500} width={100}>
               {sub.name}
             </Text>
             <Text fontSize={2} opacity={0.7} flex={1}>
               {sub.path}
             </Text>
-            <Text
-              fontSize={2}
-              opacity={0.7}
-              flexDirection="row"
-              alignItems="center"
-              color={colorMap[sub.connected ? 'connected' : 'disconnected']}
-            >
-              {!sub.connected && (
-                <TextButton style={{ fontWeight: 600 }}>Reconnect</TextButton>
-              )}
-            </Text>
+            {!sub.isSubscribed && (
+              <TextButton
+                style={{ fontWeight: 600 }}
+                onClick={() => resubscribe(sub.name)}
+              >
+                Reconnect
+              </TextButton>
+            )}
           </Flex>
         ))}
       </Card>
