@@ -19,6 +19,7 @@ import { lighten, darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
+import { FeaturedList } from './FeaturedList';
 
 export const SpacesTrayApp = observer(() => {
   const { ship, theme, spaces } = useServices();
@@ -137,7 +138,7 @@ export const SpacesTrayApp = observer(() => {
           overflowY="hidden"
         >
           <Grid.Column>
-            <Flex mt={2} mb={1} position="relative">
+            <Flex position="relative">
               <Input
                 tabIndex={1}
                 autoCapitalize="false"
@@ -208,11 +209,19 @@ export const SpacesTrayApp = observer(() => {
                 &nbsp;&nbsp;&nbsp;
               </Text>
             </Flex>
-            {/*<Flex position="relative" width="100%" mt={3} ml={2}>
-            <Text opacity={0.8} color={textColor} fontWeight={450}>
-              Featured spaces
-            </Text>
-            </Flex>*/}
+            <Flex flexDirection="column" width="100%">
+              <Text ml={1} mt={1} fontSize={2} opacity={0.7} fontWeight={500}>
+                Featured
+              </Text>
+              <Flex
+                position="absolute"
+                width="100%"
+                style={{ bottom: bottomHeight, top: 80, left: 0, right: 0 }}
+                overflowY="hidden"
+              >
+                <FeaturedList />
+              </Flex>
+            </Flex>
           </Grid.Column>
         </Flex>
       ) : (
@@ -223,6 +232,9 @@ export const SpacesTrayApp = observer(() => {
           overflowY="hidden"
         >
           <SpacesList
+            onFindMore={() => {
+              setSearchVisible(true);
+            }}
             selected={spaces.selected}
             spaces={spaces.spacesList}
             onSelect={async (path: string) =>

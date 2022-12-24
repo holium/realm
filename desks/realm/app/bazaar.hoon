@@ -21,7 +21,7 @@
         =docks:store
         =grid-index:store
         =recommendations:store
-        pending-installs=(map ship desk)
+        pending-installs=(map desk ship)
     ==
   --
 =|  state-0
@@ -278,37 +278,13 @@
           %|  (on-wave p.p.sig)
         ==
       [cards this]
-    ::  +pre: prefix for scries to hood
-    ::
-    ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
-    ::  +get-sources:  (map desk [ship desk])
-    ::
-    ++  get-sources
-      ^-  (map desk [=ship =desk])
-      .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
-    ::  +get-syncs:
-    ::
-    ::    (map kiln-sync sync-state)
-    ::    where:
-    ::    %+  map
-    ::       (map [local=desk foreign=ship foreign=desk])
-    ::    [nun=@ta kid=(unit desk) let=@ud]
-    ++  get-syncs
-      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
-      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
-        %gx
-        (welp pre /kiln/syncs/noun)
-      ==
-    ::  +get-pikes:  (map desk [(unit [@p desk]) hash zest wic])
-    ++  get-pikes
-      ^-  pikes:hood
-      .^(pikes:hood %gx (welp pre /kiln/pikes/noun))
     ::  +on-rock:  handles rock:tire from kiln, see XX
     ::
     ++  on-rock
       |=  =rock:tire:clay
       ^-  (quip card _state)
-      =+  peaks=get-pikes
+      :: ~&  >>  "{<dap.bowl>}: [on-rock] rock={<rock>}"
+      =+  peaks=get-pikes:core
       =;  catalog-apps=catalog:store
         `state(catalog (~(uni by catalog.state) catalog-apps))
       :: %-  (slog leaf+"{<dap.bowl>}: [on-rock]" ~)
@@ -324,8 +300,8 @@
       ?.  =(%live z)
         ?.  =(%held z)  cat
         cat
-      =.  host.u.app
-        ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
+      =.  host.u.app  ?~(sync.u.pyk ~ `ship.u.sync.u.pyk)
+      :: ~&  >>  "{<dap.bowl>}: %rock [app-install-update] {<[host.u.app install-status.u.app]>}"
       (~(put by cat) `app-id:store`desk u.app)
     ::  +on-wave: handles wave:tire from kiln, see XXs
     ::
@@ -334,7 +310,9 @@
     ++  on-wave
       |=  =wave:tire:clay
       ^-  (quip card _state)
-      =+  peaks=get-pikes
+      :: ~&  >>  "{<dap.bowl>}: [on-wave] wave={<wave>}"
+      =+  peaks=get-pikes:core
+      :: ~&  >>  "{<dap.bowl>}: [on-wave] peaks={<peaks>}"
       :: %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
       :: %-  (slog leaf+"    wave={<wave>}" ~)
       :: %-  (slog leaf+"    peaks={<peaks>}" ~)
@@ -348,29 +326,50 @@
         ?-  zest.wave
         ::  XX: is it right to no-op here?
           %dead
-          ?~  pyk=(~(get by peaks) desk.wave)  `state
-            =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-            =.  install-status.u.app  %suspended
-            =.  grid-index            (set-grid-index:helpers:bazaar desk.wave grid-index.state)
-            :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<install-status.u.app>}"
-            :_  state(catalog (~(put by catalog.state) desk.wave u.app))
+            ?~  pyk=(~(get by peaks) desk.wave)  `state
+            :: ~&  >>  ["{<dap.bowl>}: %wave %dead" desk.wave install-status.u.app]
+            =.  grid-index
+              :: if the status is %uninstalled and %dead, then we should remove
+              :: the app from the grid index
+              ?:  =(%uninstalled install-status.u.app)
+                (rem-grid-index:helpers:bazaar:core desk.wave grid-index.state)
+              grid-index.state
+            :: ~&  >>  "{<dap.bowl>}: %dead [app-install-update] {<[host.u.app install-status.u.app]>}"
+            :_  state
             :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
             ==
             ::
             %live
           ?~  pyk=(~(get by peaks) desk.wave)  `state
-          =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-          =.  install-status.u.app  %installed
-          `state(catalog (~(put by catalog.state) desk.wave u.app))
+          :: ~&  >>  ["{<dap.bowl>}: %wave %live" desk.wave install-status.u.app]
+          =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
+          =/  desks=(map desk ship)
+            %-  ~(rep by syncs)
+              |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+              (~(put by acc) sud.det her.det)
+          =.  host.u.app              (~(get by desks) desk.wave)
+          :: =.  install-status.u.app    %installed
+          :: get rid of the pending-install that may have been added
+          =/  pending-install         (~(get by pending-installs.state) desk.wave)
+          =.  pending-installs.state  ?~(pending-install pending-installs.state (~(del by pending-installs) desk.wave))
+          =.  grid-index              (set-grid-index:helpers:bazaar:core desk.wave grid-index.state)
+          =.  catalog.state           (~(put by catalog.state) desk.wave u.app)
+          :: ~&  >>  "{<dap.bowl>}: %live [app-install-update] {<[host.u.app install-status.u.app]>}"
+          :_  state
+          :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
+          ==
         ::
             %held
+          ::  %held seems to be hit when the desk exists and there are no updates, so we should
+          ::  set the install status to %suspended if it is %uninstalled.
           ?~  pyk=(~(get by peaks) desk.wave)  `state
           ::  if exists in catalog and not installed, set to suspend
-          =.  install-status.u.app
-            ?:(=(install-status.u.app %uninstalled) %suspended %started)
-          =.  host.u.app            ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
-          =.  grid-index            (set-grid-index:helpers:bazaar desk.wave grid-index.state)
-          :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<install-status.u.app>}"
+          :: ~&  >>  ["{<dap.bowl>}: %wave %held pre-status: " desk.wave u.pyk install-status.u.app]
+          =.  install-status.u.app  ?:(=(install-status.u.app %uninstalled) %suspended install-status.u.app)
+          :: ~&  >>  ["{<dap.bowl>}: %wave %held post-status: " install-status.u.app]
+          =.  host.u.app            ?~(sync.u.pyk ~ `ship.u.sync.u.pyk)
+          =.  grid-index            (set-grid-index:helpers:bazaar:core desk.wave grid-index.state)
+          :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<[host.u.app install-status.u.app]>}"
           :_  state(catalog (~(put by catalog.state) desk.wave u.app))
           :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
           ==
@@ -411,25 +410,51 @@
       %rebuild-catalog   (rebuild-catalog +.action)
       %rebuild-stall     (rebuild-stall +.action)
       %clear-stall       (clear-stall +.action)
-    ==
+      %set-host          (set-host +.action)
+    ==    ::  +pre: prefix for scries to hood
+    ::
+    ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
+    ::  +get-sources:  (map desk [ship desk])
+    ::
+    ++  get-sources
+      ^-  (map desk [=ship =desk])
+      .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::
+    ::  $set-host:
+    ::    set the host of an app in the catalog
+    ++  set-host
+      |=  [app-id=desk host=ship]
+      ^-  (quip card _state)
+      =/  app  (~(get by catalog.state) app-id)
+      ?~  app
+        ~&  >>>  "{<dap.bowl>}: [set-host] error. {<desk>} not found in app catalog"
+        `state
+      ?>  ?=(%urbit -.u.app)
+      %-  (slog leaf+"{<dap.bowl>} setting host for catalog app {<app-id>} to {<host>}" ~)
+      =.  host.u.app          (some host)
+      =.  catalog.state       (~(put by catalog.state) app-id u.app)
+      =.  grid-index.state    (set-grid-index:helpers:bazaar:core app-id grid-index.state)
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.u.app grid-index.state])]
+      ==
     ::
     ++  rebuild-catalog
       |=  [args=(map cord cord)]
       ^-  (quip card _state)
-      %-  (slog leaf+"{<dap.bowl>}: [rebuild-catalog] => {<args>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [rebuild-catalog] => {<args>}" ~)
       ::  you can only request this of yourself
       ?.  =(our.bowl src.bowl)
         ~&  >>  "{<dap.bowl>}: [rebuild-catalog] denied. not self."
         `state
       =/  init  (build-catalog:helpers ~)
-      :_  state(catalog catalog.init, grid-index grid-index.init)
+      :_  state(catalog catalog.init, grid-index grid-index.init, pending-installs ~)
       :~  [%give %fact [/updates ~] bazaar-reaction+!>([%rebuild-catalog catalog.init grid-index.init])]
       ==
     ::
     ++  rebuild-stall
       |=  [path=space-path:spaces-store args=(map cord cord)]
       ^-  (quip card _state)
-      %-  (slog leaf+"{<dap.bowl>}: [rebuild-stall] => {<[path args]>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [rebuild-stall] => {<[path args]>}" ~)
       ::  if we are not the space host, poke space host so it can push updates
       ::   to members
       ?:  (we-host:helpers path)
@@ -456,7 +481,7 @@
     ++  clear-stall
       |=  [path=space-path:spaces-store args=(map cord cord)]
       ^-  (quip card _state)
-      %-  (slog leaf+"{<dap.bowl>}: [clear-stall] => {<[path args]>}" ~)
+      :: %-  (slog leaf+"{<dap.bowl>}: [clear-stall] => {<[path args]>}" ~)
       ::  if we are not the space host, poke space host so it can push updates
       ::   to members
       ?:  (we-host:helpers path)
@@ -556,26 +581,43 @@
       |=  [=ship =desk]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
-      ::  kiln direct
-      :: =/  fresh=[desk ship desk]  [%base spo %kids]
-      :: :_  state
-      :: :~  [%pass /install %agent [our.bowl %hood] %poke kiln-install+!>([desk ship desk])]
-      :: ==
-      =/  app  (~(get by catalog.state) desk)
-      =/  effects=(list card)
-        ?~  app  ~
-          =.  grid-index              (set-grid-index:helpers:bazaar desk grid-index.state)
-          [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~
-      =/  allies      allies:scry:bazaar
-      ?.  (~(has by allies) ship)
-        %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
-        ::  queue this installation request, so that once alliance is complete,
-        ::  we can automatically kick off the install
-        =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
+      :: is an installation already happening for this desk?
+      =/  pending-install         (~(get by pending-installs.state) desk)
+      ?.  =(~ pending-install)
+        ~&  >>  "{<dap.bowl>}: skipping {<[ship desk]>} install. pending installation running..."
+        `state
+      =/  app                     (~(get by catalog.state) desk)
+      ?~  app                     (docket-install ship desk ~)
+      ?>  ?=(%urbit -.u.app)
+      =.  grid-index              (set-grid-index:helpers:bazaar:core desk grid-index.state)
+      :: ~&  >>  [%install-app app]
+      =.  install-status.u.app
+        ?:  =(%uninstalled install-status.u.app)  %suspended
+        ?:  =(%desktop install-status.u.app)
+          ::  @trent - we can add a check to clay for the desk existing
+          ::  and that would do the same skip of suspended that the fresh install does
+          =+  peaks=get-pikes:core
+          ?.((~(has by peaks) desk) %started install-status.u.app)
+        %started
+      =.  host.u.app              (some ship)
+      =.  catalog.state           (~(put by catalog.state) desk u.app)
+      (docket-install ship desk [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~)
+
+      :: =^  cards  state
+    ::
+    ++  docket-install
+      |=  [=ship =desk cards=(list card)]
+      ^-  (quip card _state)
+      =/  allies         allies:scry:bazaar
+        ?.  (~(has by allies) ship)
+          %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
+          ::  queue this installation request, so that once alliance is complete,
+          ::  we can automatically kick off the install
+          =.  pending-installs.state  (~(put by pending-installs.state) desk ship)
+          :_  state
+          (snoc cards [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])])
         :_  state
-        (snoc effects [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])])
-      :_  state
-      (snoc effects [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship desk])])
+        (snoc cards [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship desk])])
     ::
     ++  initialize
       |=  [args=(map cord cord)]
@@ -597,12 +639,12 @@
       ?>  ?=(%urbit -.app)
       =.  install-status.app        %uninstalled
       =.  catalog.state             (~(put by catalog.state) desk app)
-      :: =.  grid-index.state          (rem-grid-index:helpers:bazaar desk grid-index.state)
-      :: ~&  >  ['uninstall-app' (rem-grid-index:helpers:bazaar desk grid-index.state)]
+      :: =.  grid-index.state          (rem-grid-index:helpers:bazaar:core desk grid-index.state)
+      :: ~&  >  ['uninstall-app' (rem-grid-index:helpers:bazaar:core desk grid-index.state)]
       :_  state
       :: ::  if apps have come in from other ships (e.g. recommending) and do not exist in
       :: ::   our catalog, they will not exist in docket. only informat
-      :: ?.  (is-app-installed:helpers:bazaar desk)   ~
+      :: ?.  (is-app-installed:helpers:bazaar:core desk)   ~
       [%pass / %agent [our.bowl %docket] %poke docket-uninstall+!>([desk])]~
     ::
     ++  recommend
@@ -629,6 +671,7 @@
         result
       =.  stalls.state            (~(uni by stalls.state) stalls.updated-stalls)
       =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%recommended app-id stalls.state])])
+      :: ~&  >>  "{<cards.updated-stalls>}"
       :_  state
       cards.updated-stalls
     ::
@@ -669,7 +712,9 @@
       %suite-added        (on-suite-add +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
-      %stall-update       (on-stall-update +.rct)
+      %stall-update
+        :: ~&  >>  "{<+.rct>}"
+        (on-stall-update +.rct)
       %rebuild-catalog    (on-rebuild-catalog +.rct)
       %rebuild-stall      (on-rebuild-stall +.rct)
       %clear-stall        (on-clear-stall +.rct)
@@ -740,21 +785,37 @@
         ?+  wha     [det catalog.state]
           %none     [det catalog.state]
           ::
-          %delete
-            [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
+          %delete   [det catalog.state]
+            :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
+            :: ~&  >>   "add"
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
-              ?.  (is-app-installed:helpers:bazaar app-id.det)
+              ?.  (is-app-installed:helpers:bazaar:core app-id.det)
                 ::  if the app is not in our catalog, update it's installed
                 ::   status relative to our ship . %desktop
                 ?>  ?=(%urbit -.app)
                 =.  install-status.app  %desktop
                 app
               ::  if it exists in docket, it must exist in catalog
-              (~(got by catalog.state) app-id.det)
+              =/  app  (~(get by catalog.state) app-id.det)
+              ?~  app  ~&  >>>  "{<dap.bowl>}: unexpected error. {<app-id.det>} exists in docket, but not in catalog"  !!
+              ?>  ?=(%urbit -.u.app)
+              =.  install-status.u.app  %installed
+              u.app
+            =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
+            =/  desks=(map desk ship)
+              %-  ~(rep by syncs)
+                |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+                (~(put by acc) sud.det her.det)
+            =.  app
+              ?:  =(-.app %urbit)
+                ?>  ?=(%urbit -.app)
+                :: =.  host.app  (~(get by desks) desk)
+                app
+              app
             [(some [app-id.det (some app)]) (~(put by catalog.state) app-id.det app)]
         ==
       ::
@@ -809,7 +870,7 @@
       =.  stalls.state            (~(put by stalls.state) [path stall])
       ::  per #319, ensure installed status is relative to our ship/catalog
       =/  entry                   (~(get by catalog.state) app-id)
-      =/  local-install-status    ?~(entry %desktop (get-install-status:helpers:bazaar u.entry))
+      =/  local-install-status    ?~(entry %desktop (get-install-status:helpers:bazaar:core u.entry))
       =/  app
       ?+  -.app  app
         %urbit
@@ -932,14 +993,14 @@
         =.  icon.native-app             'AppIconCompass'
         =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
-      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-browser grid-index.init)
       =|  =native-app:store
         =.  title.native-app            'Settings'
         =.  color.native-app            '#ACBCCB'
         =.  icon.native-app             'AppIconSettings'
         =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
-      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-settings grid-index.init)
       init
     ::
     ++  get-stall-apps
@@ -1012,7 +1073,7 @@
     ::
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
-      =/  grid-list         (sort-grid:helpers:bazaar grid-index)
+      =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
         ::  if the app is not in the grid, add it to the end
@@ -1022,7 +1083,7 @@
     ::
     ++  rem-grid-index
       |=  [=app-id:store =grid-index:store]
-      =/  grid-list         (sort-grid:helpers:bazaar grid-index)
+      =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index     grid-index
       =.  grid-list         (oust [u.current-index 1] grid-list)
@@ -1053,33 +1114,28 @@
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
+      =+  peaks=get-pikes:core
+      =/  desks=(map desk ship)
+        %-  ~(rep by syncs)
+          |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
+          (~(put by acc) sud.det her.det)
+      :: %-  (slog leaf+"{<desks>}" ~)
       ^-  [=catalog:store =grid-index:store]
-
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        =/  install-status      (chad-to-status:helpers:bazaar:core chad.charge)
+        =/  pyk             (~(get by peaks) desk)
+        =/  install-status  ?~  pyk  %desktop
+          ?-  zest.u.pyk
+            %live  %installed
+            %held  %suspended
+            %dead  %uninstalled
+          ==
+        =/  sync                (~(get by desks) desk)
+        =/  host=(unit ship)    sync
         :: ~&  >>  [desk -.chad.charge install-status]
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
-    ::
-    ++  gen-bare-app
-      |=  [=ship =desk]
-      ^-  urbit-app:store
-      =/  bare-docket  *docket:docket
-      =.  title.bare-docket  desk
-      =.  href.bare-docket  [%site /(scot %tas desk)]
-      [docket=bare-docket host=(some ship) install-status=%started *config:store]
-    ::
-    ++  chad-to-status
-      |=  [=chad:docket]
-      ^-  install-status:store
-      ?-  -.chad
-        %glob           %installed
-        %site           %installed
-        %install        %started
-        %suspend        %suspended
-        %hung           %failed
-      ==
+        [(~(put by catalog.acc) desk [%urbit docket.charge host install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -1232,15 +1288,17 @@
   ++  on-ini
     |=  [init=(map [=ship =desk] =treaty:treaty)]
     ^-  (quip card _state)
+    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-ini] => init={<init>}, treaty={<treaty>}"
     =/  updated-catalog=catalog:store
       %-  ~(rep by init)
         |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+        :: ~&  >>  "{<dap.bowl>}: treaty-update [on-ini] => ship={<ship>}, desk={<desk>}, treaty"
         =/  app  (~(get by catalog.state) desk)
         ?~  app  result
 
         ?.  =(%urbit -.u.app)   (~(put by result) desk u.app) ::  host only applies to urbit apps
         ?>  ?=(%urbit -.u.app)                                :: update app host
-        =.  host.u.app          (determine-app-host:helpers:bazaar ship u.app)
+        =.  host.u.app          (determine-app-host:helpers:bazaar:core ship u.app)
         (~(put by result) desk u.app)
     ::
     =.  catalog.state     (~(uni by catalog.state) updated-catalog)
@@ -1251,6 +1309,11 @@
     ^-  (quip card _state)
     :: ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
     =|  effects=(list card)
+    :: if a pending install, auto kick off the docket-install. %live from kiln will remove the
+    =/  pending-install         (~(get by pending-installs.state) desk.treaty)
+    =.  effects  ?~  pending-install  effects
+      %-  (slog leaf+"{<dap.bowl>}: treaty added for pending-install {<desk.treaty>}. sending docket-install..." ~)
+      (snoc effects [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])])
     ::  if every desk in the alliance has been added to the treaties listing for the ship,
     ::    send the UI and update indicating its safe to scry the treaties
     =/  allis  allies:scry:bazaar:core
@@ -1260,16 +1323,9 @@
       ?:  %-  ~(all in u.alli)
           |=  [[=ship =desk]]
             (~(has by treats) [ship desk])
-        ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
+        :: ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
         (snoc effects [%give %fact [/updates ~] bazaar-reaction+!>([%treaties-loaded ship.treaty])])
       effects
-    :: get rid of the pending-install that may have been added
-    =/  pending-install  (~(get by pending-installs.state) ship.treaty)
-    ?~  pending-install  [effects state]
-    ?:  =(u.pending-install desk.treaty)
-      ~&  >>  "{<dap.bowl>}: {<[ship.treaty desk.treaty]>} removing pending install"
-      :_  state(pending-installs (~(del by pending-installs.state) ship.treaty desk.treaty))
-      (snoc effects [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])])
     [effects state]
   --
 ::
@@ -1296,7 +1352,8 @@
     |=  [=ship]
     ^-  (quip card _state)
     %-  (slog leaf+"{<dap.bowl>}: ally-update [on-add] => {<ship>}" ~)
-    :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
+    :: =/  treaty    .^(update:treaty:treaty  %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<update.treaty>}"
     `state
   ::
   ++  on-del
@@ -1323,11 +1380,11 @@
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
     ?-  -.chad.charge
-      %install    (update-catalog-app desk charge %started)
-      %hung       (update-catalog-app desk charge %failed)
-      %suspend    (update-catalog-app desk charge %suspended)
-      %glob       (update-catalog-app desk charge %installed)
-      %site       (update-catalog-app desk charge %installed)
+      %install          (update-catalog-app desk charge %started)
+      %hung             (update-catalog-app desk charge %failed)
+      %suspend          (update-catalog-app desk charge %suspended)
+      %glob             (update-catalog-app desk charge %installed)
+      %site             (update-catalog-app desk charge %installed)
     ==
     ::
     ++  update-catalog-app
@@ -1337,17 +1394,25 @@
         `state
       =/  app                     (~(get by catalog.state) app-id)
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
-        ?>  ?=(%urbit -.u.app)
-        :: ~&  >>  "{<dap.bowl>}: statuses => {<install-status.u.app>}, {<status>}"
-        =.  install-status.u.app
-          ?:  ?&  =(install-status.u.app %suspended)
-                  =(status %installed)
-              ==  %installed  install-status.u.app
-        =.  docket.u.app          docket.charge
-        =.  config.u.app          (config:scry:bazaar:core app-id)
-        u.app
+      ?>  ?=(%urbit -.u.app)
+      :: ~&  >>  "{<dap.bowl>}: update-catalog-app => {<app-id>}, {<install-status.u.app>}, {<status>}"
+      =.  install-status.u.app
+        ?:  ?&(=(%suspended install-status.u.app) =(%started status))
+          install-status.u.app
+        ?:  ?&(=(%started install-status.u.app) =(%suspended status))
+          %started
+        ?:  ?&(=(%desktop install-status.u.app) =(%started status))
+          ::  @trent - we can add a check to clay for the desk existing
+          ::  and that would do the same skip of suspended that the fresh install does
+          =+  peaks=get-pikes:core
+          ?.((~(has by peaks) app-id) %started status)
+        status
+      ::
+      =.  docket.u.app          docket.charge
+      =.  config.u.app          (config:scry:bazaar:core app-id)
+      u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
-      =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
+      =.  grid-index              (set-grid-index:helpers:bazaar:core app-id grid-index.state)
       :: %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
       :: %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state
@@ -1356,15 +1421,15 @@
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
-    ::  TODO check if installed
     ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
     =/  app  (~(get by catalog.state) desk)
     ?~  app  `state
     ?>  ?=(%urbit -.u.app)
+    ::  set to uninstalled, don't delete
     =.  install-status.u.app  %uninstalled
-    =.  catalog.state         (~(put by catalog.state) desk u.app)
-    ::  remove from grid index
-    =.  grid-index.state      (rem-grid-index:helpers:bazaar desk grid-index.state)
+    =.  catalog.state         (~(put by catalog.state) [desk u.app])
+    ::  remove from grid index to "uninstall"
+    =.  grid-index.state      (rem-grid-index:helpers:bazaar:core desk grid-index.state)
     :_  state
     [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~
   --
@@ -1391,5 +1456,33 @@
 ++  is-host
   |=  [=ship]
   =(our.bowl ship)
+::  +pre: prefix for scries to hood
+::
+++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
+::  +get-sources:  (map desk [ship desk])
+::
+++  get-sources
+  ^-  (map desk [=ship =desk])
+  .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+::
+::  +get-pikes:  (map desk [(unit [@p desk]) hash zest wic])
+++  get-pikes
+  ^-  pikes:hood
+  :: ~&  >>  "{<dap.bowl>}: [get-pikes]"
+  .^(pikes:hood %gx (welp pre /kiln/pikes/noun))
+::
+::  +get-syncs:
+::
+::    (map kiln-sync sync-state)
+::    where:
+::    %+  map
+::       (map [local=desk foreign=ship foreign=desk])
+::    [nun=@ta kid=(unit desk) let=@ud]
+++  get-syncs
+  ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
+  .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
+    %gx
+    (welp pre /kiln/syncs/noun)
+  ==
 ::
 --
