@@ -246,77 +246,7 @@ const conversions = types
       self.usd = usd;
     },
   }));
-
-const ERC20 = types
-  .model('ERC20', {
-    name: types.string,
-    logo: types.string,
-    address: types.string,
-    balance: types.string,
-    decimals: types.number,
-    conversions,
-    transactions: types.map(Transaction),
-    block: types.number,
-  })
-  .actions((self) => ({
-    setBalance(balance: string) {
-      self.balance = balance;
-    },
-    setExchangeRate(usd: number) {
-      self.conversions?.setUsd(usd);
-    },
-    applyERC20Transactions(index: number, transactions: any) {
-      let formattedTransactions: any = {};
-      let previousTransactions = self.transactions.toJSON();
-      for (const transaction of transactions) {
-        // console.log('applyTransaction', transaction);
-        const previousTransaction = previousTransactions[transaction.hash];
-        formattedTransactions[transaction.hash] = {
-          hash: transaction.hash,
-          walletIndex: index,
-          amount: transaction.value?.toString() || '0',
-          network: 'ethereum',
-          ethType: self.address,
-          type: self.address === transaction.from ? 'sent' : 'received',
-          initiatedAt: previousTransaction?.initiatedAt,
-          completedAt: transaction.metadata.blockTimestamp,
-          ourAddress: transaction.from,
-          theirPatp: previousTransaction?.theirPatp,
-          theirAddress: transaction.to,
-          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
-          failureReason: previousTransaction?.failureReason,
-          notes: previousTransaction?.notes || '',
-        };
-      }
-      formattedTransactions = {
-        ...previousTransactions,
-        ...formattedTransactions,
-      };
-      const map = types.map(Transaction);
-      const newTransactions = map.create(formattedTransactions);
-      applySnapshot(self.transactions, getSnapshot(newTransactions));
-    },
-    setBlock(block: number) {
-      self.block = block;
-    }
-  }));
-
-export type ERC20Type = Instance<typeof ERC20>;
-
-const ERC721 = types.model('ERC721', {
-  name: types.string,
-  collectionName: types.maybe(types.string),
-  address: types.string,
-  tokenId: types.string,
-  imageUrl: types.string,
-  lastPrice: types.string,
-  floorPrice: types.maybe(types.string),
-  transactions: types.map(Transaction),
-  block: types.number,
-});
-
-export type ERC721Type = Instance<typeof ERC721>;
-
+  
 const TransactionList = types
   .model('TransactionList', {
     transactions: types.map(Transaction),
@@ -344,6 +274,76 @@ const TransactionList = types
   }));
 
 export type TransactionListType = Instance<typeof TransactionList>;
+
+const ERC20 = types
+  .model('ERC20', {
+    name: types.string,
+    logo: types.string,
+    address: types.string,
+    balance: types.string,
+    decimals: types.number,
+    conversions,
+    transactionList: TransactionList,
+    block: types.number,
+  })
+  .actions((self) => ({
+    setBalance(balance: string) {
+      self.balance = balance;
+    },
+    setExchangeRate(usd: number) {
+      self.conversions?.setUsd(usd);
+    },
+    applyERC20Transactions(index: number, transactions: any) {
+      let formattedTransactions: any = {};
+      let previousTransactions = self.transactionList.transactions.toJSON();
+      for (const transaction of transactions) {
+        // console.log('applyTransaction', transaction);
+        const previousTransaction = previousTransactions[transaction.hash];
+        formattedTransactions[transaction.hash] = {
+          hash: transaction.hash,
+          walletIndex: index,
+          amount: transaction.value?.toString() || '0',
+          network: 'ethereum',
+          ethType: self.address,
+          type: self.address === transaction.from ? 'sent' : 'received',
+          initiatedAt: previousTransaction?.initiatedAt,
+          completedAt: transaction.metadata.blockTimestamp,
+          ourAddress: transaction.from,
+          theirPatp: previousTransaction?.theirPatp,
+          theirAddress: transaction.to,
+          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
+          failureReason: previousTransaction?.failureReason,
+          notes: previousTransaction?.notes || '',
+        };
+      }
+      formattedTransactions = {
+        ...previousTransactions,
+        ...formattedTransactions,
+      };
+      const map = types.map(Transaction);
+      const newTransactions = map.create(formattedTransactions);
+      applySnapshot(self.transactionList.transactions, getSnapshot(newTransactions));
+    },
+    setBlock(block: number) {
+      self.block = block;
+    }
+  }));
+
+export type ERC20Type = Instance<typeof ERC20>;
+
+const ERC721 = types.model('ERC721', {
+  name: types.string,
+  collectionName: types.maybe(types.string),
+  address: types.string,
+  tokenId: types.string,
+  imageUrl: types.string,
+  lastPrice: types.string,
+  floorPrice: types.maybe(types.string),
+  transactionList: TransactionList,
+  block: types.number,
+});
+
+export type ERC721Type = Instance<typeof ERC721>;
 
 const EthWalletData = types
   .model('EthWalletData', {
@@ -412,7 +412,7 @@ const EthWallet = types
         balance: coinData.balance.toString(),
         decimals: coinData.decimals,
         conversions: conversions.create(),
-        transactions: prevCoin?.transactions.toJSON() || {},
+        transactionList: prevCoin?.transactionList.transactions.toJSON() || {},
         block: prevCoin?.block || 0,
       });
     },
@@ -426,6 +426,7 @@ const EthWallet = types
         imageUrl: nftData.image,
         lastPrice: '',
         block: 0,
+        transactionList: {},
       });
     },
     updateNftTransfers(protocol: ProtocolType, transfers: any) {},
