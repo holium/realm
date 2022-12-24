@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { Flex, Text, Card, TextButton } from 'renderer/components';
+import { Flex, Text, Card, TextButton, Spinner } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
@@ -49,33 +49,46 @@ export const SystemPanel = observer(() => {
 
   const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
 
-  const subscriptions = [
+  const apps = [
     {
       name: '%spaces',
       path: '/updates',
       subscriptionState: spaces.subscriptionState,
+      subscribe: () => spaces.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%bazaar',
       path: '/updates',
       subscriptionState: bazaar.subscriptionState,
+      subscribe: () => bazaar.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%courier',
       path: '/updates',
       subscriptionState: courier.subscriptionState,
+      subscribe: () => courier.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%bulletin',
       path: '/ui',
       subscriptionState: bulletin.subscriptionState,
+      subscribe: () => bulletin.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%friends',
       path: '/all',
       subscriptionState: friends.subscriptionState,
+      subscribe: () => friends.setSubscriptionStatus('subscribing'),
     },
   ];
+
+  const subscribe = (appName: string) => {
+    const app = apps.find((a) => a.name === appName);
+    if (app) app.subscribe();
+    OSActions.reconnect();
+  };
+
+  const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
 
   return (
     <Flex gap={12} flexDirection="column" p="12px" width="100%">
@@ -197,31 +210,33 @@ export const SystemPanel = observer(() => {
         customBg={cardColor}
         flexDirection={'column'}
       >
-        {subscriptions.map((sub) => (
+        {apps.map((app) => (
           <Flex
-            key={sub.name}
+            key={app.name}
             flexDirection="row"
             alignItems="center"
             height={24}
             gap={12}
           >
             <StatusIndicator
-              isSubscribed={sub.subscriptionState === 'subscribed'}
+              isSubscribed={app.subscriptionState === 'subscribed'}
             />
             <Text fontWeight={500} width={100}>
-              {sub.name}
+              {app.name}
             </Text>
             <Text fontSize={2} opacity={0.7} flex={1}>
-              {sub.path}
+              {app.path}
             </Text>
-            {sub.subscriptionState === 'unsubscribed' && (
+            {app.subscriptionState === 'unsubscribed' && (
               <TextButton
                 style={{ fontWeight: 600 }}
-                onClick={OSActions.reconnect}
+                disabled={isSubscribing}
+                onClick={() => subscribe(app.name)}
               >
                 Reconnect
               </TextButton>
             )}
+            {app.subscriptionState === 'subscribing' && <Spinner size={0} />}
           </Flex>
         ))}
       </Card>
