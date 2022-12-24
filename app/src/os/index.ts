@@ -58,6 +58,7 @@ export class Realm extends EventEmitter {
   readonly handlers = {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
+    'realm.resubscribe': this.resubscribe,
     'realm.disconnect': this.disconnect,
     'realm.refresh': this.refresh,
     'realm.show-open-dialog': this.showOpenDialog,
@@ -72,6 +73,9 @@ export class Realm extends EventEmitter {
     },
     reconnect: async () => {
       return await ipcRenderer.invoke('realm.reconnect');
+    },
+    resubscribe: async (appName: string): Promise<boolean> => {
+      return await ipcRenderer.invoke('realm.resubscribe', appName);
     },
     disconnect: async () => {
       return await ipcRenderer.invoke('realm.disconnect');
@@ -273,6 +277,15 @@ export class Realm extends EventEmitter {
         reconnecting: true,
       });
     }
+  }
+
+  async resubscribe(_: any, appName: string) {
+    const app = appName.replace('%', '');
+    const idleWatches = this.conduit?.idleWatches.entries();
+    if (!idleWatches) return false;
+    const watch = Array.from(idleWatches).find(([_, w]) => w.app === app);
+    if (!watch) return false;
+    return this.conduit?.resubscribe(watch[0]);
   }
 
   async connect(

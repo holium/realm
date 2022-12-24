@@ -54,38 +54,38 @@ export const SystemPanel = observer(() => {
       name: '%spaces',
       path: '/updates',
       subscriptionState: spaces.subscriptionState,
-      subscribe: () => spaces.setSubscriptionStatus('subscribing'),
+      subscribing: () => spaces.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%bazaar',
       path: '/updates',
       subscriptionState: bazaar.subscriptionState,
-      subscribe: () => bazaar.setSubscriptionStatus('subscribing'),
+      subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%courier',
       path: '/updates',
       subscriptionState: courier.subscriptionState,
-      subscribe: () => courier.setSubscriptionStatus('subscribing'),
+      subscribing: () => courier.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%bulletin',
       path: '/ui',
       subscriptionState: bulletin.subscriptionState,
-      subscribe: () => bulletin.setSubscriptionStatus('subscribing'),
+      subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%friends',
       path: '/all',
       subscriptionState: friends.subscriptionState,
-      subscribe: () => friends.setSubscriptionStatus('subscribing'),
+      subscribing: () => friends.setSubscriptionStatus('subscribing'),
     },
   ];
 
-  const subscribe = (appName: string) => {
+  const resubscribe = async (appName: string) => {
     const app = apps.find((a) => a.name === appName);
-    if (app) app.subscribe();
-    OSActions.reconnect();
+    if (app) app.subscribing();
+    await OSActions.resubscribe(appName);
   };
 
   const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
@@ -231,7 +231,7 @@ export const SystemPanel = observer(() => {
               <TextButton
                 style={{ fontWeight: 600 }}
                 disabled={isSubscribing}
-                onClick={() => subscribe(app.name)}
+                onClick={() => resubscribe(app.name)}
               >
                 Reconnect
               </TextButton>
