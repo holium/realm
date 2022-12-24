@@ -17,8 +17,8 @@ export type MediaAccessStatus =
 const colorMap: any = {
   granted: '#39a839',
   denied: '#ae2828',
-  isSubscribed: '#38CD7C',
-  disconnected: '#EA2424',
+  subscribed: '#38CD7C',
+  unsubscribed: '#EA2424',
 };
 
 const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
@@ -26,7 +26,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
   height: 8px;
   border-radius: 50%;
   background-color: ${({ isSubscribed }) =>
-    isSubscribed ? colorMap.isSubscribed : colorMap.disconnected};
+    isSubscribed ? colorMap.subscribed : colorMap.unsubscribed};
 `;
 
 export const SystemPanel = observer(() => {
