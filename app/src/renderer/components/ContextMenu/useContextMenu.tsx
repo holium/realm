@@ -48,6 +48,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
   const [menuOptions, setMenuOptions] = useState<ContextMenuOptionsMap>();
   const [menuColors, setMenuColors] = useState<ContextMenuColorsMap>();
+  const [copied, setCopied] = useState('');
 
   const showDevTools = useMemo(
     () =>
@@ -56,9 +57,23 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     []
   );
 
+  const isInputOrTextArea = useCallback(
+    (t: EventTarget | null | undefined) =>
+      t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement,
+    []
+  );
+
   const isValidCopy = useMemo(
-    () => selected?.text && selected.element === mouseRef?.target,
-    [mouseRef?.target, selected]
+    () =>
+      selected?.text &&
+      (selected.element === mouseRef?.target ||
+        selected.element.contains(mouseRef?.target as Node)),
+    [isInputOrTextArea, mouseRef?.target, selected?.text, selected?.element]
+  );
+
+  const isValidPaste = useMemo(
+    () => copied.length && isInputOrTextArea(mouseRef?.target),
+    [copied.length, isInputOrTextArea, mouseRef?.target]
   );
 
   const defaultOptions = useMemo(
@@ -70,7 +85,30 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            if (isValidCopy) navigator.clipboard.writeText(selected!.text);
+            if (isValidCopy) {
+              setCopied(selected!.text);
+              navigator.clipboard.writeText(selected!.text);
+            }
+          },
+        },
+        {
+          id: 'paste-text',
+          label: 'Paste',
+          disabled: !isValidPaste,
+          onClick: (e: MouseEvent) => {
+            e.stopPropagation();
+            if (isValidPaste) {
+              // Insert copied text into focused input at cursor position
+              const input = mouseRef?.target as HTMLInputElement;
+              const startPos = input.selectionStart ?? 0;
+              const endPos = input.selectionEnd ?? 0;
+              input.value =
+                input.value.substring(0, startPos) +
+                copied +
+                input.value.substring(endPos, input.value.length);
+              input.selectionStart = startPos + copied.length;
+              input.selectionEnd = startPos + copied.length;
+            }
           },
         },
         showDevTools && {
@@ -81,7 +119,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [mouseRef?.target, selected, showDevTools]
+    [isValidCopy, mouseRef?.target, selected, showDevTools]
   );
 
   const setOptions = useCallback(
