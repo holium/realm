@@ -14,11 +14,12 @@ export type MediaAccessStatus =
   | 'restricted'
   | 'unknown';
 
-const colorMap: any = {
+const colorMap: Record<MediaAccessStatus, string> = {
   granted: '#39a839',
   denied: '#ae2828',
-  subscribed: '#38CD7C',
-  unsubscribed: '#EA2424',
+  'not-determined': '#ae2828',
+  restricted: '#ae2828',
+  unknown: '#ae2828',
 };
 
 const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
@@ -26,7 +27,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
   height: 8px;
   border-radius: 50%;
   background-color: ${({ isSubscribed }) =>
-    isSubscribed ? colorMap.subscribed : colorMap.unsubscribed};
+    isSubscribed ? '#38CD7C' : '#EA2424'};
 `;
 
 export const SystemPanel = observer(() => {
