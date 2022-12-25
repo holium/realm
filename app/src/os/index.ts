@@ -279,13 +279,13 @@ export class Realm extends EventEmitter {
     }
   }
 
-  async resubscribe(_: any, appName: string) {
+  resubscribe(_: any, appName: string) {
     const app = appName.replace('%', '');
     const idleWatches = this.conduit?.idleWatches.entries();
     if (!idleWatches) return false;
     const watch = Array.from(idleWatches).find(([_, w]) => w.app === app);
-    if (!watch) return false;
-    return this.conduit?.resubscribe(watch[0]);
+    if (!watch || !this.conduit) return false;
+    return this.conduit.resubscribe(watch[0]);
   }
 
   async connect(
