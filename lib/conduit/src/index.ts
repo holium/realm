@@ -369,6 +369,13 @@ export class Conduit extends EventEmitter {
     return res;
   }
 
+  /**
+   * watch
+   *
+   * @param params the app and path to watch as well as handler functions.
+   *
+   * @returns whether the watch was successful
+   */
   async watch(params: SubscribeParams & SubscribeCallbacks): Promise<boolean> {
     const handlers: SubscribeParams & SubscribeCallbacks = {
       onEvent: (_data) => {},
@@ -396,11 +403,11 @@ export class Conduit extends EventEmitter {
   }
 
   /**
-   * watch
+   * Unsubscribe from a watch.
    *
-   * @param params
+   * @param subscription the id of the subscription to unsubscribe from
    */
-  async unsubscribe(subscription: number) {
+  unsubscribe(subscription: number) {
     const message: Message = {
       id: this.nextMsgId,
       action: Action.Unsubscribe,
@@ -412,6 +419,12 @@ export class Conduit extends EventEmitter {
     });
   }
 
+  /**
+   * Tries to re-subscribe to a watch that has gone idle.
+   *
+   * @param watchId the id of the watch to re-subscribe to
+   * @returns boolean indicating if the re-subscription was successful
+   */
   async resubscribe(watchId: number, retryCount = 0) {
     const idleWatch = this.idleWatches.get(watchId);
     if (!idleWatch) {
@@ -437,22 +450,6 @@ export class Conduit extends EventEmitter {
     }
 
     return false;
-  }
-
-  setAsIdleWatch(watchId: number) {
-    const watch = this.watches.get(watchId);
-    if (watch) {
-      this.watches.delete(watchId);
-      this.idleWatches.set(watchId, watch);
-    }
-  }
-
-  setAsActiveWatch(watchId: number) {
-    const watch = this.idleWatches.get(watchId);
-    if (watch) {
-      this.idleWatches.delete(watchId);
-      this.watches.set(watchId, watch);
-    }
   }
 
   /**
@@ -542,6 +539,32 @@ export class Conduit extends EventEmitter {
   /**************************************************************/
 
   /**
+   * Sets a watch as idle.
+   *
+   * @param watchId the id of the active watch to set as idle
+   */
+  private setAsIdleWatch(watchId: number) {
+    const watch = this.watches.get(watchId);
+    if (watch) {
+      this.watches.delete(watchId);
+      this.idleWatches.set(watchId, watch);
+    }
+  }
+
+  /**
+   * Sets a watch as active.
+   *
+   * @param watchId the id of the idle watch to set as active
+   */
+  private setAsActiveWatch(watchId: number) {
+    const watch = this.idleWatches.get(watchId);
+    if (watch) {
+      this.idleWatches.delete(watchId);
+      this.watches.set(watchId, watch);
+    }
+  }
+
+  /**
    * TODO add a limit here
    */
   private async reconnectToChannel() {
@@ -566,7 +589,7 @@ export class Conduit extends EventEmitter {
    * postToChannel
    *
    * @param body
-   * @returns {Promise} - whether the post was successful
+   * @returns boolean indicating if the post was successful
    */
   private async postToChannel(body: Message): Promise<boolean> {
     try {
@@ -620,7 +643,7 @@ export class Conduit extends EventEmitter {
   /**
    * closeChannel
    *
-   * @returns {Promise} - whether the close was successful
+   * @returns boolean indicating if the close was successful
    */
   async closeChannel(): Promise<boolean> {
     const res = await this.postToChannel({
