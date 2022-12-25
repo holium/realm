@@ -1,4 +1,4 @@
-import { MouseEventHandler, useCallback, useEffect, useState } from 'react';
+import { MouseEventHandler } from 'react';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
@@ -44,36 +44,11 @@ export type ContextMenuOption = {
 };
 
 export const ContextMenu = () => {
-  const { getColors, getOptions } = useContextMenu();
-  const root = document.getElementById('root');
-
-  const [show, setShow] = useState(false);
-  const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
-
-  const handleClick = useCallback(() => {
-    setShow(false);
-  }, []);
-
-  const handleContextMenu = useCallback((e: MouseEvent) => {
-    setMouseRef(e);
-    e.preventDefault();
-    setShow(true);
-  }, []);
-
-  useEffect(() => {
-    if (!root) return;
-    root.addEventListener('click', handleClick);
-    root.addEventListener('contextmenu', handleContextMenu);
-
-    return () => {
-      root.removeEventListener('click', handleClick);
-      root.removeEventListener('contextmenu', handleContextMenu);
-    };
-  }, [handleClick, handleContextMenu, root]);
+  const { getColors, getOptions, mouseRef, setMouseRef } = useContextMenu();
 
   if (!mouseRef) return <div />;
 
-  const containerId = mouseRef.target?.id;
+  const containerId = (mouseRef.target as HTMLElement).id;
   const contextualOptions = getOptions(containerId);
   const contextualColors = getColors(containerId);
   const anchorPoint = getAnchorPoint(mouseRef, contextualOptions);
@@ -102,7 +77,7 @@ export const ContextMenu = () => {
         style={{
           y: anchorPoint.y,
           x: anchorPoint.x,
-          display: show ? 'block' : 'none',
+          display: mouseRef ? 'block' : 'none',
           width: WIDTH,
           maxHeight: MAX_HEIGHT,
           overflowY: 'auto',
@@ -127,8 +102,7 @@ export const ContextMenu = () => {
                 customBg={contextualColors.backgroundColor}
                 type="neutral"
                 onClick={(e) => {
-                  setShow(false);
-                  mouseRef.current = null;
+                  setMouseRef(null);
                   option.onClick(e);
                 }}
               />

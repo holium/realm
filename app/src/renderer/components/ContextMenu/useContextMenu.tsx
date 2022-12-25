@@ -3,6 +3,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -25,6 +26,8 @@ type ContextMenuColorsMap = {
 };
 
 type ContextMenuContextValue = {
+  mouseRef: MouseEvent | null;
+  setMouseRef: (e: MouseEvent | null) => void;
   getOptions: (containerId: string) => ContextMenuOption[];
   setOptions: (containerId: string, Options: ContextMenuOption[]) => void;
   getColors: (containerId: string) => ColorConfig;
@@ -38,9 +41,11 @@ type ContextMenuProviderProps = {
 };
 
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
+  const root = document.getElementById('root');
   const selected = useSelection();
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
+  const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
   const [menuOptions, setMenuOptions] = useState<ContextMenuOptionsMap>();
   const [menuColors, setMenuColors] = useState<ContextMenuColorsMap>();
 
@@ -50,16 +55,22 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
       process.env.DEBUG_PROD === 'true',
     []
   );
+
+  const isValidCopy = useMemo(
+    () => selected?.text && selected.element === mouseRef?.target,
+    [mouseRef?.target, selected]
+  );
+
   const defaultOptions = useMemo(
     () =>
       [
         {
           id: 'copy-text',
           label: 'Copy',
-          disabled: !selected,
+          disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            if (selected) navigator.clipboard.writeText(selected);
+            if (isValidCopy) navigator.clipboard.writeText(selected!.text);
           },
         },
         showDevTools && {
@@ -70,7 +81,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [selected, showDevTools]
+    [mouseRef?.target, selected, showDevTools]
   );
 
   const setOptions = useCallback(
@@ -101,9 +112,31 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     [menuColors, textColor, windowColor]
   );
 
+  const handleClick = useCallback(() => {
+    setMouseRef(null);
+  }, []);
+
+  const handleContextMenu = useCallback((e: MouseEvent) => {
+    setMouseRef(e);
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (!root) return;
+    root.addEventListener('click', handleClick);
+    root.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      root.removeEventListener('click', handleClick);
+      root.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [handleClick, handleContextMenu, root]);
+
   return (
     <ContextMenuContext.Provider
       value={{
+        mouseRef,
+        setMouseRef,
         getOptions,
         setOptions,
         getColors,
