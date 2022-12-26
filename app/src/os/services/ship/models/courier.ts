@@ -3,7 +3,7 @@ import { Content, createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
 import { cleanNounColor } from '../../../lib/color';
-import { LoaderModel } from '../../common.model';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 import moment from 'moment';
 import { pathToDmInbox } from '../../../lib/graph-store';
 import { CourierApi } from '../../../api/courier';
@@ -330,12 +330,18 @@ export const CourierStore = types
     dms: types.map(CourierLog),
     previews: types.map(DMPreview),
     loader: types.optional(LoaderModel, { state: 'initial' }),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .views((self) => ({
     get list() {
       return Array.from(self.previews.values()).sort(
         (a, b) => b.lastTimeSent - a.lastTimeSent
       );
+    },
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }))
   .actions((self) => ({
@@ -532,6 +538,11 @@ export const CourierStore = types
     },
     declineDm: (path: string) => {
       self.previews.delete(path);
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

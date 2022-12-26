@@ -5,7 +5,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { ThemeModel } from '../../theme.model';
-import { LoaderModel } from '../../common.model';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { VisaModel } from './visas';
 
@@ -55,6 +55,9 @@ export const SpacesStore = types
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
     // friends: types.optional(FriendsStore, { all: {} }),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .views((self) => ({
     get isLoading() {
@@ -77,6 +80,9 @@ export const SpacesStore = types
       // } else {
       return self.spaces.get(spacePath);
       // }
+    },
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }))
   .actions((self) => ({
@@ -167,6 +173,11 @@ export const SpacesStore = types
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath)!;
       return self.selected;
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

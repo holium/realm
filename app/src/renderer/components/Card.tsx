@@ -1,14 +1,9 @@
 import styled from 'styled-components';
-import {
-  border,
-  BorderProps,
-  ShadowProps,
-  shadow,
-  compose,
-} from 'styled-system';
+import { BorderProps, ShadowProps } from 'styled-system';
 import { ThemeType } from '../theme';
 
-import { Box, BoxProps } from './Box';
+import { BoxProps } from './Box';
+import { Flex } from './Flex';
 
 export type CardProps = {
   theme: ThemeType;
@@ -18,8 +13,7 @@ export type CardProps = {
   BorderProps &
   ShadowProps;
 
-export const Card = styled(styled(Box)`
-  display: flex;
+export const Card = styled(Flex)<CardProps>`
   background: ${(props: CardProps) =>
     props.customBg || props.theme.colors.bg.primary};
   border: 1px solid ${(props: CardProps) => props.theme.colors.ui.borderColor};
@@ -28,4 +22,4 @@ export const Card = styled(styled(Box)`
   box-shadow: ${(props: CardProps) =>
     props.theme.elevations[props.elevation || 'one']};
   border-radius: 12px;
-`)<CardProps>(compose(border, shadow));
+`;
