@@ -268,9 +268,73 @@ const TransactionList = types
         self.transactions.set(transaction.hash, tx);
       }
     },
-    applyChainTransactions(transactions: any) {
-
-    }
+    applyChainTransactions(conduit: any, protocol: ProtocolType, index: number, address: string, transactions: any) {
+      let formattedTransactions: any = {};
+      const previousTransactions = self.transactions.toJSON();
+      for (const transaction of transactions) {
+        const previousTransaction = previousTransactions[transaction.hash];
+        formattedTransactions[transaction.hash] = {
+          hash: transaction.hash,
+          walletIndex: index,
+          amount: transaction.value.toString(),
+          network: 'ethereum',
+          ethType: transaction.contractAddress || 'ETH',
+          type: address === transaction.from ? 'sent' : 'received',
+          initiatedAt: previousTransaction?.initiatedAt || '',
+          completedAt: transaction.metadata.blockTimestamp,
+          ourAddress: transaction.from,
+          theirPatp: previousTransaction?.theirPatp,
+          theirAddress: transaction.to,
+          status: 'succeeded',
+          failureReason: previousTransaction?.failureReason,
+          notes: previousTransaction?.notes || '',
+        };
+      }
+      formattedTransactions = {
+        ...previousTransactions,
+        ...formattedTransactions,
+      };
+      const map = types.map(Transaction);
+      const newTransactions = map.create(formattedTransactions);
+      applySnapshot(
+        self.transactions,
+        getSnapshot(newTransactions)
+      );
+      for (let transaction of transactions) {
+        if (previousTransactions[transaction.hash]) {
+          if (
+            formattedTransactions[transaction.hash].status !==
+            previousTransactions[transaction.hash].status
+          ) {
+            const tx = this.getStoredTransaction(transaction.hash);
+            WalletApi.setTransaction(
+              conduit,
+              'ethereum',
+              protocol,
+              index,
+              transaction.hash,
+              tx
+            );
+          }
+        }
+      }
+    },
+    getStoredTransaction(hash: string) {
+      const tx: any = self.transactions.get(hash);
+      return {
+        hash: tx.hash,
+        network: tx.network,
+        type: tx.type,
+        'initiated-at': tx.initiatedAt || '',
+        'completed-at': tx.completedAt || '',
+        'our-address': tx.ourAddress,
+        'their-patp': tx.theirPatp || null,
+        'their-address': tx.theirAddress,
+        status: tx.status,
+        'failure-reason': tx.failureReason || '',
+        notes: tx.notes || '',
+      };
+    },
   }));
 
 export type TransactionListType = Instance<typeof TransactionList>;
@@ -481,22 +545,7 @@ const EthWallet = types
         notes: tx.notes || '',
       };
     },
-    getAgentTransaction(protocol: ProtocolType, hash: string) {
-      const tx: any = self.data.get(protocol)!.transactionList.transactions.get(hash);
-      return {
-        hash: tx.hash,
-        network: tx.network,
-        type: tx.type,
-        'initiated-at': tx.initiatedAt || '',
-        'completed-at': tx.completedAt || '',
-        'our-address': tx.ourAddress,
-        'their-patp': tx.theirPatp || null,
-        'their-address': tx.theirAddress,
-        status: tx.status,
-        'failure-reason': tx.failureReason || '',
-        notes: tx.notes || '',
-      };
-    },
+
     enqueueTransaction(
       protocol: ProtocolType,
       hash: any,
@@ -528,8 +577,8 @@ const EthWallet = types
       netMap.applyAgentTransaction(self.index, transaction);
     },
     applyTransactions(conduit: any, protocol: ProtocolType, transactions: any) {
-      let formattedTransactions: any = {};
-      let previousTransactions = self.data.get(protocol)!.transactionList.transactions.toJSON();
+      self.data.get(protocol)!.transactionList.applyChainTransactions(conduit, protocol, self.index, self.address, transactions);
+      /*let previousTransactions = self.data.get(protocol)!.transactionList.transactions.toJSON();
       for (const transaction of transactions) {
         // console.log('applyTransaction', transaction);
         const previousTransaction = previousTransactions[transaction.hash];
@@ -577,7 +626,7 @@ const EthWallet = types
             );
           }
         }
-      }
+      }*/
     },
   }));
 
