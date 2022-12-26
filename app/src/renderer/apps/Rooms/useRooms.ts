@@ -1,6 +1,5 @@
 import { RealmProtocol, ProtocolEvent, RoomsManager } from '@holium/realm-room';
 import { Patp } from 'os/types';
-import { toJS } from 'mobx';
 import { createContext, useContext } from 'react';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
