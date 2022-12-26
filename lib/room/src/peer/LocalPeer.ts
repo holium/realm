@@ -68,7 +68,12 @@ export class LocalPeer extends Peer {
       }
       if (!peer.peer?.destroyed) {
         // if (!peer.peer?.destroyed && !peer.isAudioAttached) {
-        peer.peer?.addTrack(track, currentStream);
+        try {
+          peer.peer?.addTrack(track, currentStream);
+        } catch (e) {
+          // catches "Track has already been added to that stream."
+          console.error(e);
+        }
       }
     });
   }
