@@ -54,7 +54,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     const walletTransactions = getTransactions(
       (walletApp.navState.network === NetworkType.ETHEREUM
         ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .transactions
+            .transactionList.transactions
         : (wallet as BitcoinWalletType).transactions) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];

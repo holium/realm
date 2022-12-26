@@ -307,7 +307,6 @@ export class WalletService extends BaseService {
           btcNetwork: NetworkStoreType.BTC_MAIN,
         },
         ethereum: {
-          block: 0,
           gorliBlock: 0,
           protocol: ProtocolType.ETH_GORLI,
           settings: {
@@ -557,8 +556,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
-    const stateTx = currentWallet.getAgentTransaction(
-      this.state!.navState.protocol,
+    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
       hash
     );
 
@@ -616,8 +614,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.getAgentTransaction(
-      this.state!.navState.protocol,
+    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
       hash
     );
     console.log(stateTx);

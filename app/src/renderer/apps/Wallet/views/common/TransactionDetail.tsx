@@ -28,6 +28,7 @@ import {
   NetworkType,
   EthWalletType,
   BitcoinWalletType,
+  TransactionType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import styled from 'styled-components';
@@ -74,9 +75,9 @@ export const TransactionDetail: FC = observer(() => {
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (walletApp.currentWallet! as EthWalletType).data.get(
           walletApp.navState.protocol
-        )!.transactions
+        )!.transactionList.transactions
       : (walletApp.currentWallet! as BitcoinWalletType).transactions
-  ).get(walletApp.navState.detail!.key)!;
+  ).get(walletApp.navState.detail!.key)! as TransactionType;
 
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);

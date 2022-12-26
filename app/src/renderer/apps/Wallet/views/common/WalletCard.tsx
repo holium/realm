@@ -67,7 +67,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-          .transactions
+          .transactionList.transactions
       : (wallet as BitcoinWalletType).transactions;
   const transactions = getTransactions(walletTransactions || new Map());
 
