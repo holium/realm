@@ -493,6 +493,7 @@ export class RealmProtocol extends BaseProtocol {
       this.hangupAll(presentRoom.rid);
       this.presentRoom = undefined;
       this.peers.clear();
+      this.emit(ProtocolEvent.RoomLeft, presentRoom);
       await this.poke({
         app: 'rooms-v2',
         mark: 'rooms-v2-session-action',
