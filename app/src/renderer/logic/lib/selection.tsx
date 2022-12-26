@@ -7,24 +7,32 @@ import {
 } from 'react';
 
 type SelectionContextValue = {
-  selected: string | undefined;
+  selected:
+    | {
+        text: string;
+        element: HTMLElement;
+      }
+    | undefined;
 };
 
-const SelectionContext = createContext<SelectionContextValue>({
-  selected: undefined,
-});
+const SelectionContext = createContext<SelectionContextValue>({} as any);
 
 type SelectionProviderProps = {
   children: ReactNode;
 };
 
 export const SelectionProvider = ({ children }: SelectionProviderProps) => {
-  const [selected, setSelected] = useState<string>();
+  const [selected, setSelected] = useState<SelectionContextValue['selected']>();
 
   useEffect(() => {
     document.addEventListener('selectionchange', () => {
       const selection = document.getSelection()?.toString().trim();
-      if (selection && selection !== '') setSelected(selection.toString());
+      if (selection && selection !== '')
+        setSelected({
+          text: selection,
+          element: document.getSelection()?.anchorNode
+            ?.parentElement as HTMLElement,
+        });
     });
 
     return () => {

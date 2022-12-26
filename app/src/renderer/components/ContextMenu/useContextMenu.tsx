@@ -3,6 +3,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -25,6 +26,8 @@ type ContextMenuColorsMap = {
 };
 
 type ContextMenuContextValue = {
+  mouseRef: MouseEvent | null;
+  setMouseRef: (e: MouseEvent | null) => void;
   getOptions: (containerId: string) => ContextMenuOption[];
   setOptions: (containerId: string, Options: ContextMenuOption[]) => void;
   getColors: (containerId: string) => ColorConfig;
@@ -38,11 +41,14 @@ type ContextMenuProviderProps = {
 };
 
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
+  const root = document.getElementById('root');
   const selected = useSelection();
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
+  const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
   const [menuOptions, setMenuOptions] = useState<ContextMenuOptionsMap>();
   const [menuColors, setMenuColors] = useState<ContextMenuColorsMap>();
+  const [copied, setCopied] = useState('');
 
   const showDevTools = useMemo(
     () =>
@@ -50,16 +56,59 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
       process.env.DEBUG_PROD === 'true',
     []
   );
+
+  const isInputOrTextArea = useCallback(
+    (t: EventTarget | null | undefined) =>
+      t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement,
+    []
+  );
+
+  const isValidCopy = useMemo(
+    () =>
+      selected?.text &&
+      (selected.element === mouseRef?.target ||
+        selected.element.contains(mouseRef?.target as Node)),
+    [isInputOrTextArea, mouseRef?.target, selected?.text, selected?.element]
+  );
+
+  const isValidPaste = useMemo(
+    () => copied.length && isInputOrTextArea(mouseRef?.target),
+    [copied.length, isInputOrTextArea, mouseRef?.target]
+  );
+
   const defaultOptions = useMemo(
     () =>
       [
         {
           id: 'copy-text',
           label: 'Copy',
-          disabled: !selected,
+          disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            if (selected) navigator.clipboard.writeText(selected);
+            if (isValidCopy) {
+              setCopied(selected!.text);
+              navigator.clipboard.writeText(selected!.text);
+            }
+          },
+        },
+        {
+          id: 'paste-text',
+          label: 'Paste',
+          disabled: !isValidPaste,
+          onClick: (e: MouseEvent) => {
+            e.stopPropagation();
+            if (isValidPaste) {
+              // Insert copied text into focused input at cursor position
+              const input = mouseRef?.target as HTMLInputElement;
+              const startPos = input.selectionStart ?? 0;
+              const endPos = input.selectionEnd ?? 0;
+              input.value =
+                input.value.substring(0, startPos) +
+                copied +
+                input.value.substring(endPos, input.value.length);
+              input.selectionStart = startPos + copied.length;
+              input.selectionEnd = startPos + copied.length;
+            }
           },
         },
         showDevTools && {
@@ -70,7 +119,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [selected, showDevTools]
+    [isValidCopy, mouseRef?.target, selected, showDevTools]
   );
 
   const setOptions = useCallback(
@@ -101,9 +150,31 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     [menuColors, textColor, windowColor]
   );
 
+  const handleClick = useCallback(() => {
+    setMouseRef(null);
+  }, []);
+
+  const handleContextMenu = useCallback((e: MouseEvent) => {
+    setMouseRef(e);
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (!root) return;
+    root.addEventListener('click', handleClick);
+    root.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      root.removeEventListener('click', handleClick);
+      root.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [handleClick, handleContextMenu, root]);
+
   return (
     <ContextMenuContext.Provider
       value={{
+        mouseRef,
+        setMouseRef,
         getOptions,
         setOptions,
         getColors,
