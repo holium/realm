@@ -102,8 +102,9 @@ export const WalletApi = {
     network: string,
     net: string,
     wallet: number,
+    contract: string | null,
     hash: string,
-    transaction: any
+    transaction: any,
   ) => {
     const payload = {
       app: 'realm-wallet',
@@ -113,6 +114,7 @@ export const WalletApi = {
           network,
           net,
           wallet,
+          contract,
           hash,
           transaction,
         },
@@ -125,6 +127,7 @@ export const WalletApi = {
     network: string,
     net: string,
     wallet: number,
+    contract: string | null,
     hash: string,
     notes: string
   ) => {
@@ -136,6 +139,7 @@ export const WalletApi = {
           network,
           net,
           wallet,
+          contract,
           hash,
           notes,
         },
@@ -237,11 +241,11 @@ export const handleWalletReactions = (
       if (network === NetworkStoreType.ETHEREUM) {
         walletState!.ethereum.wallets
           .get(transaction.index)!
-          .applyTransactionUpdate(transaction.net, transaction.transaction);
+          .applyTransactionUpdate(transaction.net, transaction.contract, transaction.transaction);
       } else if (network === NetworkStoreType.BTC_MAIN) {
-        walletState!.ethereum.wallets
+        /*walletState!.bitcoin.wallets
           .get(transaction.index)!
-          .applyTransactionUpdate(transaction.net, transaction.transaction);
+          .applyTransactionUpdate(transaction.net, transaction.transaction);*/
       } else if (network === NetworkStoreType.BTC_TEST) {
         /*walletState!.btctest.wallets.get(
           transaction.index

@@ -244,6 +244,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
+    console.log('getting assets for ', addr);
     const coins = await this.alchemy.core.getTokenBalances(addr);
     const nfts = await this.alchemy.nft.getNftsForOwner(addr);
     let assets: Asset[] = [];

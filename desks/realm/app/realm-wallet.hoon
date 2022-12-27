@@ -250,7 +250,7 @@
       ~&  >  (crip (weld "generated wallet address " (z-co:co address)))
       =/  wallet
         ^-  wallet
-        [address path nickname.act ~]
+        [address path nickname.act ~ ~]
       =.  wallets.state
         =/  old-map  (~(got by wallets.state) network.act)
         =.  old-map  (~(put by old-map) [idx wallet])
@@ -300,13 +300,29 @@
     =.  wallets.state
       =/  network-map  (~(got by wallets.state) network.act)
       =/  prev-wallet  (~(got by network-map) wallet.act)
-      =.  transactions.prev-wallet
-        =/  net-map  (~(get by transactions.prev-wallet) net.act)
-        =/  net-map
-          ?~  net-map
-            (my [hash.transaction.act transaction.act]~)
-          (~(put by u.net-map) [hash.transaction.act transaction.act])
-        (~(put by transactions.prev-wallet) [net.act net-map])
+      =.  prev-wallet
+        ?~  contract.act
+          =.  transactions.prev-wallet
+            =/  net-map  (~(get by transactions.prev-wallet) net.act)
+            =/  net-map
+              ?~  net-map
+                (my [hash.transaction.act transaction.act]~)
+              (~(put by u.net-map) [hash.transaction.act transaction.act])
+            (~(put by transactions.prev-wallet) [net.act net-map])
+          prev-wallet
+        =.  token-txns.prev-wallet
+          =/  net-map  (~(get by token-txns.prev-wallet) net.act)
+          =/  net-map
+            ?~  net-map
+              (my [u.contract.act (my [hash.transaction.act transaction.act]~)]~)
+            =/  contract-map  (~(get by u.net-map) u.contract.act)
+            =/  contract-map
+              ^-  (map @t transaction)
+              ?~  contract-map  (my [hash.transaction.act transaction.act]~)
+              (~(put by u.contract-map) [hash.transaction.act transaction.act])
+            (~(put by u.net-map) [u.contract.act contract-map])
+          (~(put by token-txns.prev-wallet) [net.act net-map])
+        prev-wallet
       =.  network-map  (~(put by network-map) [wallet.act prev-wallet])
       (~(put by wallets.state) [network.act network-map])
     =/  cards  *(list card)
@@ -324,7 +340,7 @@
           =.  their-address.transaction.act  our-address.transaction.act
           =.  our-address.transaction.act  their-address
           transaction.act
-        =/  wall-act=action  [%set-transaction network.act net.act wallet.act hash.act transaction.act]
+        =/  wall-act=action  [%set-transaction network.act net.act wallet.act contract.act hash.act transaction.act]
         =/  task  [%poke %realm-wallet-action !>(wall-act)]
         =/  new-card
           ^-  (list card)
@@ -335,7 +351,7 @@
         !(team:title our.bowl src.bowl)
       =/  new-card
         ^-  (list card)
-        :~  `card`[%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act hash.act transaction.act])]
+        :~  `card`[%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act contract.act hash.act transaction.act])]
         ==
       (weld cards new-card)
     [cards state]
@@ -367,7 +383,7 @@
       =.  network-map  (~(put by network-map) [wallet.act wall-map])
       (~(put by wallets) [%ethereum network-map])
     :_  state
-    [%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act hash.act tx])]~
+    [%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act contract.act hash.act tx])]~
     ::
   ==
 ::

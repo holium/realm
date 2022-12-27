@@ -484,7 +484,7 @@ export class WalletService extends BaseService {
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.navState.network;
     const net = this.state!.navState.protocol;
-    // const hash = this.state!.currentItem!.key;
+    const contract = this.state!.navState.detail!.txtype === 'coin' ? this.state!.navState.detail!.coinKey! : null;
     const hash = this.state!.navState.detail!.key;
     const index = this.state!.currentWallet!.index;
     await WalletApi.saveTransactionNotes(
@@ -492,6 +492,7 @@ export class WalletService extends BaseService {
       network,
       net,
       index,
+      contract,
       hash,
       notes
     );

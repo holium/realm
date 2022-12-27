@@ -31,7 +31,13 @@
   ==
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
-+$  wallet  [=address path=@t nickname=@t transactions=(map net=@t (map @t transaction))]
++$  wallet  
+  $:  =address
+      path=@t
+      nickname=@t
+      transactions=(map net=@t (map @t transaction))
+      token-txns=(map net=@t (map @t (map @t transaction)))
+  ==
 +$  mode  ?(%on-demand %default)
 +$  pending-tx  [txh=(unit @ux) from=@ux to=@ux amount=@ud]
 +$  txn  [block=@ud txh=@ux log-index=@ud from=@ux to=@ux amount=@ud]
@@ -56,14 +62,14 @@
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%set-transaction =network net=@t wallet=@ud hash=@ =transaction]
-      [%save-transaction-notes =network net=@t wallet=@ud hash=@t notes=@t]
+      [%set-transaction =network net=@t wallet=@ud contract=(unit @t) hash=@ =transaction]
+      [%save-transaction-notes =network net=@t wallet=@ud contract=(unit @t) hash=@t notes=@t]
   ==
 ::  subscription updates
 ::
 +$  update
   $%  [%address =ship =network address=(unit address)]
-      [%transaction =network net=@t @ud @t transaction]
+      [%transaction =network net=@t wallet=@ud contract=(unit @t) hash=@t transaction]
 ::      [%history transactions]
       [%wallet =network @t =wallet]
       [%wallets wallets]

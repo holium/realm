@@ -106,8 +106,8 @@
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
-      [%set-transaction (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
-      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni hash+so notes+so])]
+      [%set-transaction (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni contract+so:dejs-soft hash+json-to-ux transaction+json-to-transaction])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni contract+so:dejs-soft hash+so notes+so])]
   ==
 ::
 ++  json-to-ux
@@ -148,8 +148,11 @@
       :~  ['network' [%s network.update]]
           ['net' [%s net.update]]
           ['index' (numb +>+<.update)]
-          ['key' [%s +>+>-.update]]
-          ['transaction' (transaction-to-json +>+>+.update)]
+          :-  'contract'
+          ?~  +>+>-.update  ~
+          [%s +>+>->.update]
+          ['key' [%s +>+>+<.update]]
+          ['transaction' (transaction-to-json +>+>+>.update)]
       ==
     ::
         %wallet

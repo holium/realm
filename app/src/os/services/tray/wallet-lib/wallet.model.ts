@@ -534,9 +534,15 @@ const EthWallet = types
       };
       self.data.get(protocol)!.transactionList.transactions.set(hash, tx);
     },
-    applyTransactionUpdate(protocol: ProtocolType, transaction: any) {
-      let netMap = self.data.get(protocol)!.transactionList;
-      netMap.applyAgentTransaction(self.index, transaction);
+    applyTransactionUpdate(protocol: ProtocolType, contract: any, transaction: any) {
+      if (contract) {
+        let txList = self.data.get(protocol)!.coins.get(contract)!.transactionList;
+        txList.applyAgentTransaction(self.index, transaction);
+      }
+      else {
+        let netMap = self.data.get(protocol)!.transactionList;
+        netMap.applyAgentTransaction(self.index, transaction);
+      }
     },
   }));
 
