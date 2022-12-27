@@ -104,7 +104,7 @@ export class WalletService extends BaseService {
       options?: {
         canReturn?: boolean;
         walletIndex?: string;
-        detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+        detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string, key: string };
         action?: { type: string; data: any };
       }
     ) => {
@@ -667,7 +667,7 @@ export class WalletService extends BaseService {
     options?: {
       canReturn?: boolean;
       walletIndex?: string;
-      detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+      detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string; key: string };
       action?: { type: string; data: any };
     }
   ) {

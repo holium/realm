@@ -114,9 +114,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
         this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
           for (let asset of assets) {
             if (asset.type === 'coin') {
-              /*this.getAsset(asset.addr, ethWallet.address, 'coin').then(
-                (coin: Asset) => ethWallet.updateCoin(this.protocol, coin)
-              );*/
+              if (!ethWallet.data.get(this.protocol)!.coins.has(asset.addr)) {
+                this.getAsset(asset.addr, ethWallet.address, 'coin').then(
+                  (coin: Asset) => ethWallet.setCoin(this.protocol, coin)
+                );
+              }
               this.getAssetTransfers(
                 asset.addr,
                 ethWallet.address,
@@ -127,16 +129,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
                   transfers.length > 0
                 ) {
-                  if (asset.addr === '0x07865c6e87b9f70255377e024ace6630c1eaa37f') {
-                    console.log("SUCCESS for USDC")
-                    console.log()
-                    const stuff = ethWallet.data
-                    .get(this.protocol)!
-                    .coins.get(asset.addr)!
-                    .transactionList.transactions.size;
-                    console.log(stuff)
-                    console.log(transfers);
-                  }
                   ethWallet.data
                     .get(this.protocol)!
                     .coins.get(asset.addr)!
@@ -147,7 +139,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
                 }
               });
             }
-            /*if (asset.type === 'nft') {
+            if (asset.type === 'nft') {
               this.getAsset(
                 asset.addr,
                 ethWallet.address,
@@ -156,8 +148,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
               ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
               /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
                 ethWallet.updateNftTransfers
-              );
-            }*/
+              );*/
+            }
           }
         });
       }
@@ -204,7 +196,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error);
             throw error;
           }
         }
@@ -242,7 +233,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error)
             throw error;
           }
         }
@@ -404,7 +394,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
               method: 'alchemy_getAssetTransfers',
               params: [
                 {
-                  fromBlock: ethers.utils.hexlify(0),//fromBlock),
+                  fromBlock: ethers.utils.hexlify(fromBlock),
                   toBlock: ethers.utils.hexlify(toBlock),
                   toAddress: addr,
                   contractAddresses: [contract],
@@ -423,7 +413,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error);
             throw error;
           }
         }

@@ -1,3 +1,4 @@
+import { Types } from 'aws-sdk/clients/s3';
 import {
   applySnapshot,
   types,
@@ -202,6 +203,8 @@ const TransactionList = types
         }
         self.transactions.set(transaction.hash, newTransaction);
       }
+      console.log('transactions set')
+      console.log(self.transactions.size);
     },
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
@@ -427,6 +430,32 @@ const EthWallet = types
       const newNft = map.create(formattedNft);
       applySnapshot(self.data.get(protocol)!.nfts, getSnapshot(newNft));
     },
+    setCoin(protocol: ProtocolType, coin: Asset) {
+      const coinData = coin.data as CoinAsset;
+      self.data.get(protocol)!.coins.set(coin.addr, {
+        name: coinData.symbol,
+        logo: coinData.logo || '',
+        address: coin.addr,
+        balance: coinData.balance.toString(),
+        decimals: coinData.decimals,
+        conversions: conversions.create(),
+        transactionList: {},
+        block: 0,
+      });
+    },
+    updateNft(protocol: ProtocolType, nft: Asset) {
+      const nftData = nft.data as NFTAsset;
+      self.data.get(protocol)!.nfts.set(nft.addr + nftData.tokenId, {
+        name: nftData.name,
+        collectionName: '',
+        address: nft.addr,
+        tokenId: nftData.tokenId,
+        imageUrl: nftData.image,
+        lastPrice: '',
+        block: 0,
+        transactionList: {},
+      });
+    },
     updateNftTransfers(protocol: ProtocolType, transfers: any) {},
     setBalance(protocol: ProtocolType, balance: string) {
       self.data.get(protocol)!.balance = balance;
@@ -646,6 +675,8 @@ export const WalletNavState = types
     detail: types.maybe(
       types.model({
         type: types.enumeration(['transaction', 'coin', 'nft']),
+        txtype: types.enumeration(['general', 'coin', 'nft']),
+        coinKey: types.maybe(types.string),
         key: types.string,
       })
     ),
@@ -707,6 +738,8 @@ export interface WalletNavOptions {
   walletIndex?: string;
   detail?: {
     type: 'transaction' | 'coin' | 'nft';
+    txtype?: 'general' | 'coin' | 'nft';
+    coinKey?: string;
     key: string;
   };
   action?: {

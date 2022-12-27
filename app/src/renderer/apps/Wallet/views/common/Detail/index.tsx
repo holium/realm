@@ -72,7 +72,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
             .coins.get(coin.address)!.transactionList.transactions
         : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
             .transactionList.transactions
-      : (wallet as BitcoinWalletType).transactions;
+      : (wallet as BitcoinWalletType).transactionList.transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()

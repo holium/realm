@@ -55,7 +55,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   const goToTransaction = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
       walletIndex: props.transaction.walletIndex.toString(),
-      detail: { type: 'transaction', key: props.transaction.hash },
+      detail: { type: 'transaction', txtype: walletApp.navState.detail?.txtype, coinKey: walletApp.navState.detail?.coinKey, key: props.transaction.hash },
     });
   };
 

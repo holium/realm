@@ -30,7 +30,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
         customBg={darken(0.0325, theme.currentTheme.windowColor)}
         onClick={async () =>
           await WalletActions.navigate(WalletView.WALLET_DETAIL, {
-            detail: { type: 'coin', key: props.details.address },
+            detail: { type: 'coin', txtype: 'coin', coinKey: props.details.address, key: props.details.address },
           })
         }
       >

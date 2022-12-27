@@ -27,6 +27,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
           await WalletActions.navigate(WalletView.NFT_DETAIL, {
             detail: {
               type: 'nft',
+              txtype: 'nft',
               key: `${props.details.address}${props.details.tokenId}`,
             },
           })
