@@ -5,17 +5,20 @@
 /-  cite
 |%
 ::
-+$  chats       (map path:c-path (pair preview chat))
++$  chats       (map path:c-path chat)
++$  previews    (map path:c-path preview)
 +$  chat-type   ?(%dm %group-dm)
 +$  m-path      (pair path:c-path time)
++$  profiles    (map ship profile)
++$  content     (pair (list blocks) (list inline))
 ::
 +$  preview
   $:  =path:c-path
       to=(set ship)
       type=chat-type
       last-sent=time
-      last-message=(list inline)
-      profiles=(map ship profile)
+      last-message=content
+      =profiles
       unread-count=@ud
   ==
 ::
@@ -25,13 +28,13 @@
       type=chat-type
       log=((mop time message) lte)
       unread-count=@ud
-      profiles=(map ship profile)
+      =profiles
       created-at=time
   ==
 ::
 +$  message
   $:  path=m-path
-      content=[(list blocks) (list inline)]
+      =content
       reactions=(map reacts (set ship))
       sent-at=time
   ==
@@ -71,7 +74,7 @@
 +$  action
   $%  [%create-chat type=chat-type to=(set ship)]
       [%leave-chat =path:c-path]
-      [%send-message =path:c-path =message]
+      :: [%send-message =path:c-path =message]
       :: [%read-chat =path:c-path]
       :: [%delete-chat =path:c-path]
       :: [%pin-chat =path:c-path]
@@ -89,6 +92,10 @@
       :: [%chat-pinned =path:c-path]
       :: [%chat-unpinned =path:c-path]
       [%reacted path=m-path =ship react=reacts]
+  ==
+::
++$  view
+  $%  [%inbox previews=(map path:c-path preview)]
   ==
 ::
 --

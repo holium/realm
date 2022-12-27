@@ -9,12 +9,14 @@
 /-  notif=notify
 :: /-  channel-sur=courier-channel
 /+  notif-lib=notify, dbug, default-agent, verb
+/+  corlib=courier-chat
 ::
 =>
   |%
   +$  card        card:agent:gall
   +$  chat-act    action:c-chat
   +$  chat-rct    reaction:c-chat
+  +$  chat-vi     view:c-chat 
   +$  inv-act     action:inv-sur
   +$  inv-rct     reaction:inv-sur
   ::
@@ -24,6 +26,7 @@
   +$  state-0
     $:  %0
         =chats:c-chat
+        =previews:c-chat
         :: =channels:channel-sur
         =app-id:notif         :: constant
         =uuid:notif           :: (sham @p)
@@ -40,9 +43,10 @@
 =<
   ^-  agent:gall
   |_  =bowl:gall
-  +*  this  .
-      def   ~(. (default-agent this %.n) bowl)
-      hol   ~(. +> [bowl ~])
+  +*  this      .
+      def       ~(. (default-agent this %.n) bowl)
+      hol       ~(. +> [bowl ~])
+      :: corlib    ~(corlib +> [bowl ~])
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -85,7 +89,7 @@
     |^
     =^  cards  state
     ?+  mark            (on-poke:def mark vase)
-      %chat-action        (action:chat:hol !<(chat-act vase))
+      %chat-action      (action:chat:hol !<(chat-act vase))
       %invite-action    (action:invite:hol !<(inv-act vase))
       %notify-action    (on-notify-action:hol !<(action:notif vase))
     ==
@@ -112,7 +116,11 @@
       [%x %devices ~]
         ?>  =(our.bowl src.bowl)
         ``notify-view+!>([%devices devices.state])
-    
+      ::
+      [%x %inbox ~]
+        ?>  =(our.bowl src.bowl)
+        ``courier-view+!>([%inbox previews.state])
+      ::
       :: [%x %dms ~]
       ::   ?>  =(our.bowl src.bowl)
       ::   =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
@@ -256,7 +264,7 @@
     ?-  -.act             
       %create-chat        (create-chat +.act)
       %leave-chat         (leave-chat +.act)
-      %send-message       (send-message +.act)
+      :: %send-message       (send-message +.act)
       :: %read-chat          (read-chat +.act)
       :: %delete-chat        (delete-chat +.act)
       :: %react              (react +.act)
