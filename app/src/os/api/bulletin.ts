@@ -23,11 +23,18 @@ export const BulletinApi = {
             break;
         }
       },
-      onError: (id, err) => {
-        console.log(err);
-        console.log('Subscription rejected');
+      onSubscribed: () => {
+        console.log('Subscribed to %bulletin');
+        store.setSubscriptionStatus('subscribed');
       },
-      onQuit: () => console.log('Kicked from courier subscription'),
+      onError: () => {
+        console.error('Subscription to %bulletin rejected');
+        store.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %bulletin subscription');
+        store.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };

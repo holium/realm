@@ -52,4 +52,10 @@ export const SoundActions = {
   playRoomLeave: async () => {
     playAudio('sounds/room-leave.wav');
   },
+  playRoomPeerEnter: async () => {
+    playAudio('sounds/room-peer-enter.wav');
+  },
+  playRoomPeerLeave: async () => {
+    playAudio('sounds/room-peer-leave.wav');
+  },
 };

@@ -79,7 +79,7 @@ export class RealmProtocol extends BaseProtocol {
         const signalData = JSON.parse(data['signal'].data);
         if (signalData.type === 'ready') {
           // another peer is indicating that they are ready for us to dial them
-          console.log('ready signal received', remotePeer, remotePeer?.status);
+          // console.log('ready signal received', remotePeer, remotePeer?.status);
           if (remotePeer) {
             // we already have a peer for this patp, so we can just create a peer connection
             remotePeer.createConnection();
@@ -149,7 +149,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
-        console.log('room entered update');
+        // console.log('room entered update');
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -159,7 +159,7 @@ export class RealmProtocol extends BaseProtocol {
               this.dial(payload.ship, payload.ship === room.creator).then(
                 (remotePeer: RemotePeer) => {
                   // queuedPeers are peers that are ready for us to dial them
-                  console.log('room-entered queuedPeers', this.queuedPeers);
+                  // console.log('room-entered queuedPeers', this.queuedPeers);
                   if (this.queuedPeers.includes(payload.ship)) {
                     remotePeer.createConnection();
                     this.queuedPeers.splice(
@@ -178,13 +178,14 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-left']) {
-        console.log('room left');
+        // console.log('room left');
         const payload = data['room-left'];
         const room = this.rooms.get(payload.rid);
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
-            console.log('hanging up peer', payload.ship);
             this.hangup(payload.ship);
+          } else {
+            console.log('we left the room');
           }
         }
         if (room) {
@@ -193,7 +194,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-created']) {
-        console.log('room created');
+        // console.log('room created');
         const { room } = data['room-created'];
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
@@ -406,20 +407,11 @@ export class RealmProtocol extends BaseProtocol {
       this.local?.streamTracks(remotePeer);
     });
 
-    // remotePeer.on(PeerEvent.Closed, () => {
-    //   if (this.presentRoom?.present.includes(peer)) {
-    //     if (!remotePeer.isInitiator) {
-    //       // TODO this is a hack to get around the fact that we can't dial
-    //       // the 3 retries is a default for now
-    //       retry(() => remotePeer.dial(), 3);
-    //     } else {
-    //       remotePeer.createConnection();
-    //     }
-    //   }
-    // });
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
       this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
     });
+
+    this.emit(ProtocolEvent.PeerAdded, remotePeer);
 
     return remotePeer;
   }
@@ -469,12 +461,12 @@ export class RealmProtocol extends BaseProtocol {
     return this.peers;
   }
 
-  hangup(peer: Patp) {
+  hangup(peer: Patp, { shouldEmit } = { shouldEmit: true }) {
     const remotePeer = this.peers.get(peer);
     if (remotePeer) {
       remotePeer.hangup();
+      shouldEmit && this.emit(ProtocolEvent.PeerRemoved, remotePeer);
       this.peers.delete(peer);
-      console.log('post hangup', this.peers.keys());
     }
   }
 
@@ -487,7 +479,7 @@ export class RealmProtocol extends BaseProtocol {
   hangupAll(rid: string) {
     //  hangup all peers
     this.peers.forEach((peer) => {
-      this.hangup(peer.patp);
+      this.hangup(peer.patp, { shouldEmit: false });
     });
     this.peers.clear();
   }
@@ -498,8 +490,10 @@ export class RealmProtocol extends BaseProtocol {
       throw new Error('No room to leave');
     }
     if (presentRoom.present.includes(this.our)) {
+      this.hangupAll(presentRoom.rid);
       this.presentRoom = undefined;
       this.peers.clear();
+      this.emit(ProtocolEvent.RoomLeft, presentRoom);
       await this.poke({
         app: 'rooms-v2',
         mark: 'rooms-v2-session-action',

@@ -1,10 +1,4 @@
-import {
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { MouseEventHandler } from 'react';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
@@ -13,11 +7,19 @@ import { MenuItem } from '../MenuItem';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;
-const MIN_HEIGHT = 84;
+const MENU_ITEM_HEIGHT = 33;
+const DIVIDER_HEIGHT = 12;
+const PADDING = 9;
 
-const getAnchorPoint = (e: MouseEvent, menu: HTMLDivElement | null) => {
+const getAnchorPoint = (e: MouseEvent, menuOptions: ContextMenuOption[]) => {
+  const numberOfMenuItems = menuOptions.length;
+  const numberOfDividers = new Set(menuOptions.map((o) => o.section)).size - 1;
+
   const menuWidth = WIDTH;
-  const menuHeight = Math.min(menu?.scrollHeight || MIN_HEIGHT, MAX_HEIGHT);
+  const menuHeight =
+    2 * PADDING +
+    numberOfDividers * DIVIDER_HEIGHT +
+    numberOfMenuItems * MENU_ITEM_HEIGHT;
 
   const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
   const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
@@ -42,47 +44,14 @@ export type ContextMenuOption = {
 };
 
 export const ContextMenu = () => {
-  const contextMenuRef = useRef<HTMLDivElement>(null);
-  const { getColors, getOptions } = useContextMenu();
-  const root = document.getElementById('root');
+  const { getColors, getOptions, mouseRef, setMouseRef } = useContextMenu();
 
-  const [show, setShow] = useState(false);
-  const clickedRef = useRef<HTMLElement | null>(null);
-  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+  if (!mouseRef) return <div />;
 
-  const handleClick = useCallback((e: MouseEvent) => {
-    setShow(false);
-    if (contextMenuRef.current?.contains(e.target as Node)) {
-      return;
-    }
-  }, []);
-
-  const handleContextMenu = useCallback(
-    (e: MouseEvent) => {
-      setAnchorPoint(getAnchorPoint(e, contextMenuRef.current));
-      clickedRef.current = e.target as HTMLElement;
-      e.preventDefault();
-      setShow(true);
-    },
-    [setAnchorPoint]
-  );
-
-  useEffect(() => {
-    if (!root) return;
-    root.addEventListener('click', handleClick);
-    root.addEventListener('contextmenu', handleContextMenu);
-
-    return () => {
-      root.removeEventListener('click', handleClick);
-      root.removeEventListener('contextmenu', handleContextMenu);
-    };
-  }, [handleClick, handleContextMenu, root]);
-
-  if (!clickedRef.current) return <div />;
-
-  const containerId = clickedRef.current.id;
+  const containerId = (mouseRef.target as HTMLElement).id;
   const contextualOptions = getOptions(containerId);
   const contextualColors = getColors(containerId);
+  const anchorPoint = getAnchorPoint(mouseRef, contextualOptions);
 
   return (
     <Portal>
@@ -105,11 +74,10 @@ export const ContextMenu = () => {
             duration: 0.1,
           },
         }}
-        ref={contextMenuRef}
         style={{
           y: anchorPoint.y,
           x: anchorPoint.x,
-          display: show ? 'block' : 'none',
+          display: mouseRef ? 'block' : 'none',
           width: WIDTH,
           maxHeight: MAX_HEIGHT,
           overflowY: 'auto',
@@ -134,8 +102,7 @@ export const ContextMenu = () => {
                 customBg={contextualColors.backgroundColor}
                 type="neutral"
                 onClick={(e) => {
-                  setShow(false);
-                  clickedRef.current = null;
+                  setMouseRef(null);
                   option.onClick(e);
                 }}
               />

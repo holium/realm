@@ -47,3 +47,20 @@ export const LoaderModel = types
   }));
 
 export type LoaderModelType = Instance<typeof LoaderModel>;
+
+export const SubscriptionModel = types
+  .model({
+    state: types.optional(
+      types.enumeration('LoaderState', [
+        'subscribed',
+        'subscribing',
+        'unsubscribed',
+      ]),
+      'subscribing'
+    ),
+  })
+  .actions((self) => ({
+    set(state: 'subscribed' | 'subscribing' | 'unsubscribed') {
+      self.state = state;
+    },
+  }));

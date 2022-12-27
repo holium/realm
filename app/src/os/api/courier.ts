@@ -70,14 +70,19 @@ export const CourierApi: CourierApiType = {
             console.log('action', action);
             break;
         }
-
-        // store.
       },
-      onError: (id, err) => {
-        console.log(err);
-        console.log('Subscription rejected');
+      onSubscribed: () => {
+        console.log('Subscribed to %courier');
+        store.setSubscriptionStatus('subscribed');
       },
-      onQuit: () => console.log('Kicked from courier subscription'),
+      onError: () => {
+        console.error('Subscription to %courier rejected');
+        store.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %courier subscription');
+        store.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
   sendDm: async (conduit, path, post) => {
