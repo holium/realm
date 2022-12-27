@@ -20,6 +20,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
+import { SubscriptionModel } from '../../common.model';
 
 const setAppStatus = (app: AppType, status: InstallStatus) => {
   if (app.type !== 'urbit') return app;
@@ -90,6 +91,7 @@ export const DevAppModel = types.model('DevApp', {
   id: types.identifier,
   title: types.string,
   type: types.literal(AppTypes.Dev),
+  info: types.optional(types.string, ''),
   color: types.string,
   icon: types.string,
   installStatus: types.optional(types.string, InstallStatus.installed),
@@ -110,21 +112,30 @@ export const WebApp = types.model('WebApp', {
   installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
-export const UrbitApp = types.model('UrbitApp', {
-  id: types.identifier,
-  title: types.string,
-  info: types.string,
-  color: types.string,
-  type: types.literal(AppTypes.Urbit),
-  image: types.maybeNull(types.string),
-  href: Glob,
-  version: types.string,
-  website: types.string,
-  license: types.string,
-  installStatus: types.string,
-  host: types.maybeNull(types.string),
-  config: types.maybeNull(RealmConfig),
-});
+export const UrbitApp = types
+  .model('UrbitApp', {
+    id: types.identifier,
+    title: types.string,
+    info: types.string,
+    color: types.string,
+    type: types.literal(AppTypes.Urbit),
+    image: types.maybeNull(types.string),
+    href: Glob,
+    version: types.string,
+    website: types.string,
+    license: types.string,
+    installStatus: types.string,
+    host: types.maybeNull(types.string),
+    config: types.maybeNull(RealmConfig),
+  })
+  .actions((self) => ({
+    setHost(host: string) {
+      self.host = host;
+    },
+    setConfig(config: any) {
+      self.config = config;
+    },
+  }));
 
 const NativeApp = types.model('NativeApp', {
   id: types.identifier,
@@ -177,6 +188,9 @@ export const NewBazaarStore = types
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .actions((self) => ({
     // Updates
@@ -230,10 +244,20 @@ export const NewBazaarStore = types
       Object.keys(data.catalog).forEach((key: string) => {
         const docket = data.catalog[key];
         if (docket.type === 'urbit') {
-          data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+          // Set new apps in catalog
+          const app = self.catalog.get(key);
+          if (!app) {
+            data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+            self.catalog.set(key, data.catalog[key]);
+          } else {
+            if (!(app as UrbitAppType).host && data.catalog[key].host) {
+              // add host to existing app
+              (app as UrbitAppType).setHost(data.catalog[key].host);
+              self.catalog.set(key, app);
+            }
+          }
         }
       });
-      self.catalog.merge(data.catalog);
       self.stalls.set(data.path, data.stall);
     },
     _updateStall(data: any) {
@@ -257,9 +281,9 @@ export const NewBazaarStore = types
           }
           self.catalog.set(app.id, app);
         }
-        self.gridIndex.clear();
-        self.gridIndex.merge(data.grid);
       }
+      self.gridIndex.clear();
+      applySnapshot(self.gridIndex, data.grid);
     },
     _rebuildStall(data: any) {
       if (data.catalog) {
@@ -492,6 +516,11 @@ export const NewBazaarStore = types
         self.devAppMap.set(app.id, DevAppModel.create(app));
       });
     },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
+    },
   }))
   .views((self) => ({
     get installed() {
@@ -615,6 +644,9 @@ export const NewBazaarStore = types
         }
       );
       return suite;
+    },
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }));
 

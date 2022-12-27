@@ -32,8 +32,8 @@ export class Conduit extends EventEmitter {
   ship!: string | null;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
+  idleWatches: Map<number, SubscribeParams & SubscribeCallbacks>;
   reactions: Map<ReactionPath, (data: any, mark: string) => void>;
-  retryTimeout: any = 0;
   reconnectTimeout: any = 0;
   status: ConduitState = ConduitState.Disconnected;
   private abort = new AbortController();
@@ -45,6 +45,7 @@ export class Conduit extends EventEmitter {
     super();
     this.pokes = new Map();
     this.watches = new Map();
+    this.idleWatches = new Map();
     this.reactions = new Map();
     this.handleError = this.handleError.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
@@ -201,12 +202,12 @@ export class Conduit extends EventEmitter {
 
     this.updateStatus(ConduitState.Initialized);
 
-    return await new Promise(async (resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       // console.log(channelUrl);
 
       // console.log(`EventSource => ['${channelUrl}', '${this.cookie}']`);
       this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie },
+        headers: { Cookie: this.cookie.split('; ')[0] },
       });
       // this.sse = new EventSource(channelUrl);
 
@@ -256,7 +257,7 @@ export class Conduit extends EventEmitter {
               } else {
                 console.error(new Error('watch sse error'));
               }
-              this.watches.delete(eventId);
+              this.setAsIdleWatch(eventId);
             } else {
               const watchHandler = this.watches.get(eventId);
               if (watchHandler) {
@@ -283,7 +284,8 @@ export class Conduit extends EventEmitter {
             console.log('on quit', eventId);
             if (this.watches.has(eventId)) {
               const reconnectSub = this.watches.get(eventId);
-              reconnectSub!.onQuit!(parsedData);
+              reconnectSub?.onQuit?.(parsedData);
+              this.setAsIdleWatch(eventId);
             }
             break;
           //
@@ -370,9 +372,11 @@ export class Conduit extends EventEmitter {
   /**
    * watch
    *
-   * @param params
+   * @param params the app and path to watch as well as handler functions.
+   *
+   * @returns whether the watch was successful
    */
-  async watch(params: SubscribeParams & SubscribeCallbacks) {
+  async watch(params: SubscribeParams & SubscribeCallbacks): Promise<boolean> {
     const handlers: SubscribeParams & SubscribeCallbacks = {
       onEvent: (_data) => {},
       onQuit: (_id) => {},
@@ -388,17 +392,22 @@ export class Conduit extends EventEmitter {
       path: params.path,
     };
     this.watches.set(message.id, handlers);
-    this.postToChannel(message).then(() => {
-      return message.id;
-    });
+    try {
+      const wasSuccessful = await this.postToChannel(message);
+      if (wasSuccessful) return true;
+    } catch {
+      return false;
+    }
+
+    return false;
   }
 
   /**
-   * watch
+   * Unsubscribe from a watch.
    *
-   * @param params
+   * @param subscription the id of the subscription to unsubscribe from
    */
-  async unsubscribe(subscription: number) {
+  unsubscribe(subscription: number) {
     const message: Message = {
       id: this.nextMsgId,
       action: Action.Unsubscribe,
@@ -408,6 +417,39 @@ export class Conduit extends EventEmitter {
       this.watches.delete(subscription);
       return message.id;
     });
+  }
+
+  /**
+   * Tries to re-subscribe to a watch that has gone idle.
+   *
+   * @param watchId the id of the watch to re-subscribe to
+   * @returns boolean indicating if the re-subscription was successful
+   */
+  async resubscribe(watchId: number, retryCount = 0) {
+    const idleWatch = this.idleWatches.get(watchId);
+    if (!idleWatch) {
+      console.log("Watch doesn't exist, can't re-subscribe.");
+      return false;
+    }
+    console.log('Attempting to re-subscribe to ', idleWatch?.app, '...');
+
+    try {
+      const res = await this.watch(idleWatch);
+      if (res) {
+        this.setAsActiveWatch(watchId);
+        console.log('Re-subscribed to', idleWatch?.app);
+        return true;
+      }
+    } catch {
+      if (retryCount < 5) {
+        setTimeout(() => {
+          this.resubscribe(watchId, retryCount + 1);
+        }, 2000);
+      }
+      console.log('Failed to re-subscribe to', idleWatch?.app);
+    }
+
+    return false;
   }
 
   /**
@@ -478,7 +520,7 @@ export class Conduit extends EventEmitter {
   private get headers() {
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie,
+      Cookie: this.cookie.split('; ')[0],
     };
   }
 
@@ -496,21 +538,30 @@ export class Conduit extends EventEmitter {
   /** ****************** Internal functions **********************/
   /**************************************************************/
 
-  // TODO perhaps store a map for resubscribing
-  private async resubscribe(
-    eventId: number,
-    params: SubscribeParams & SubscribeCallbacks
-  ) {
-    this.watches.delete(eventId);
-    console.log(`attempting re-subscribed to ${params?.app}${params?.path}`);
-    if (this.retryTimeout !== 0) clearTimeout(this.retryTimeout);
-    this.watch(params)
-      .then(() => console.log(`re-subscribed to ${params?.app}${params?.path}`))
-      .catch((e) => {
-        this.retryTimeout = setTimeout(() => {
-          this.resubscribe(eventId, params);
-        }, 2000);
-      });
+  /**
+   * Sets a watch as idle.
+   *
+   * @param watchId the id of the active watch to set as idle
+   */
+  private setAsIdleWatch(watchId: number) {
+    const watch = this.watches.get(watchId);
+    if (watch) {
+      this.watches.delete(watchId);
+      this.idleWatches.set(watchId, watch);
+    }
+  }
+
+  /**
+   * Sets a watch as active.
+   *
+   * @param watchId the id of the idle watch to set as active
+   */
+  private setAsActiveWatch(watchId: number) {
+    const watch = this.idleWatches.get(watchId);
+    if (watch) {
+      this.idleWatches.delete(watchId);
+      this.watches.set(watchId, watch);
+    }
   }
 
   /**
@@ -538,30 +589,33 @@ export class Conduit extends EventEmitter {
    * postToChannel
    *
    * @param body
-   * @returns
+   * @returns boolean indicating if the post was successful
    */
-  private async postToChannel(body: Message): Promise<void> {
+  private async postToChannel(body: Message): Promise<boolean> {
     try {
       const response = await axios.put(this.channelUrl(this.uid), [body], {
         headers: this.headers,
         signal: this.abort.signal,
       });
-      if (response.status > 300 && response.status < 200) {
-        // console.log('postToChannel poke failed');
-        throw new Error('Poke failed');
-      }
-      if (this.status !== ConduitState.Initialized) {
-        // console.log('postToChannel starting');
-        await this.startSSE(this.channelUrl(this.uid));
+      if (response) {
+        if (response.status > 300 && response.status < 200) {
+          return false;
+        }
+        if (this.status !== ConduitState.Initialized) {
+          await this.startSSE(this.channelUrl(this.uid));
+        }
+
+        return true;
       }
     } catch (e: any) {
-      // console.log('poke failed', e);
       const err = e as AxiosError;
       if (err.code === 'ECONNREFUSED') {
         // if we cannot connect to the ship, cleanup
         this.failGracefully();
       }
     }
+
+    return false;
   }
 
   cleanup() {
@@ -589,9 +643,9 @@ export class Conduit extends EventEmitter {
   /**
    * closeChannel
    *
-   * @returns
+   * @returns boolean indicating if the close was successful
    */
-  async closeChannel(): Promise<void> {
+  async closeChannel(): Promise<boolean> {
     const res = await this.postToChannel({
       id: this.nextMsgId,
       action: Action.Delete,

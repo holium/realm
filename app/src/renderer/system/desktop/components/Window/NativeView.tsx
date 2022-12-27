@@ -1,7 +1,6 @@
-import { FC, useRef } from 'react';
-import styled from 'styled-components';
+import { useRef } from 'react';
 import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { nativeRenderers } from 'renderer/apps/native';
+import { nativeRenderers, WindowId } from 'renderer/apps/native';
 
 export interface NativeViewProps {
   window: WindowModelProps | any;
@@ -9,17 +8,14 @@ export interface NativeViewProps {
   hasTitlebar: boolean | undefined;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean }>``;
-
-export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
+export const NativeView = (props: NativeViewProps) => {
   const { window, isResizing } = props;
 
   const elementRef = useRef(null);
-  const ViewComponent: FC<any> | undefined =
-    nativeRenderers[window.id].component;
+  const ViewComponent = nativeRenderers[window.id as WindowId].component;
 
   return (
-    <View
+    <div
       style={{
         overflowY: 'auto',
         overflowX: 'hidden',
@@ -28,7 +24,7 @@ export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
       }}
       ref={elementRef}
     >
-      {ViewComponent && <ViewComponent isResizing={isResizing} />}
-    </View>
+      {ViewComponent && <ViewComponent isResizing={Boolean(isResizing)} />}
+    </div>
   );
 };

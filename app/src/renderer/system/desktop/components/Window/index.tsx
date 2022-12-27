@@ -14,8 +14,8 @@ import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
-import { nativeRenderers } from 'renderer/apps/native';
-import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
+import { nativeRenderers, WindowId } from 'renderer/apps/native';
+import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
@@ -221,7 +221,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     if (window.type === 'native') {
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
-      CustomTitlebar = nativeRenderers[window.id].titlebar!;
+      CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
       showDevToolsToggle = false;
       preventClickEvents = false;
       if (CustomTitlebar) {

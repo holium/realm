@@ -11,9 +11,10 @@ import {
   ColorProps,
   LayoutProps,
 } from 'styled-system';
-import { motion } from 'framer-motion';
+
 import { rgba, lighten } from 'polished';
 import { ThemeType } from '../../../../../theme';
+import { Box } from '@holium/design-system';
 
 type IProps = {
   ref?: unknown;
@@ -24,7 +25,7 @@ type IProps = {
   LayoutProps &
   SpaceProps;
 
-export const TrayButton = styled(styled(motion.div)`
+export const TrayButton = styled(Box)<IProps>`
   padding: 4px 4px;
   padding-right: 16px;
   margin-left: 3px;
@@ -50,4 +51,5 @@ export const TrayButton = styled(styled(motion.div)`
           : 'inherit'};
       }
     `}
-`)<IProps>(compose(space, size, color, layout, typography));
+  ${compose(space, size, color, layout, typography)}
+`;

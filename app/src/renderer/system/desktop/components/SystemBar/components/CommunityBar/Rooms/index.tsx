@@ -1,7 +1,7 @@
 import { createRef, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Badge, Flex, IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
@@ -78,6 +78,30 @@ export const RoomTray = observer(() => {
     [theme.currentTheme.dockColor]
   );
 
+  const IconBadge = useMemo(
+    () => (
+      <Badge
+        style={{ pointerEvents: 'none' }}
+        right={-6}
+        bottom={-4}
+        wrapperWidth={iconSize + 6}
+        wrapperHeight={iconSize + 3}
+        textColor={'#FFFFFF'}
+        background={rgba(theme.currentTheme.accentColor, 1)}
+        count={presentRoom ? 0 : roomsManager.rooms.length}
+      >
+        <Icons
+          mr="4px"
+          size={iconSize}
+          color={textColor}
+          name="Connect"
+          pointerEvents="none"
+        />
+      </Badge>
+    ),
+    [roomsManager.rooms.length, theme.currentTheme.accentColor, presentRoom]
+  );
+
   return (
     <motion.div
       id="rooms-tray-icon"
@@ -95,26 +119,30 @@ export const RoomTray = observer(() => {
             creator={presentRoom.creator}
             provider={presentRoom.provider}
             rightChildren={
-              <Icons
-                size={iconSize - 4}
+              <IconButton
+                size={iconSize}
+                ref={roomsButtonRef}
+                customBg={iconHoverColor}
+                style={{ pointerEvents: 'none' }}
                 color={textColor}
-                name="Connect"
-                pointerEvents="none"
-              />
+              >
+                {IconBadge}
+              </IconButton>
             }
           />
         </Flex>
       ) : (
-        <IconButton
-          id="rooms-tray-icon"
-          ref={roomsButtonRef}
-          size={iconSize}
-          customBg={iconHoverColor}
-          color={textColor}
-          mt="2px"
-        >
-          <Icons name="Connect" pointerEvents="none" />
-        </IconButton>
+        <Flex padding="2px">
+          <IconButton
+            id="rooms-tray-icon"
+            ref={roomsButtonRef}
+            size={iconSize}
+            customBg={iconHoverColor}
+            color={textColor}
+          >
+            {IconBadge}
+          </IconButton>
+        </Flex>
       )}
     </motion.div>
   );

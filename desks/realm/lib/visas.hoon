@@ -72,6 +72,12 @@
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship s+(scot %p ship.act)]
       ==
+        %group-kick-member
+      :-  %group-kick-member
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+          [%ship s+(scot %p ship.act)]
+      ==
         %revoke-invite
       :-  %revoke-invite
       %-  pairs

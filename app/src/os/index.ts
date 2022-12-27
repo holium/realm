@@ -58,6 +58,7 @@ export class Realm extends EventEmitter {
   readonly handlers = {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
+    'realm.resubscribe': this.resubscribe,
     'realm.disconnect': this.disconnect,
     'realm.refresh': this.refresh,
     'realm.show-open-dialog': this.showOpenDialog,
@@ -72,6 +73,9 @@ export class Realm extends EventEmitter {
     },
     reconnect: async () => {
       return await ipcRenderer.invoke('realm.reconnect');
+    },
+    resubscribe: async (appName: string): Promise<boolean> => {
+      return await ipcRenderer.invoke('realm.resubscribe', appName);
     },
     disconnect: async () => {
       return await ipcRenderer.invoke('realm.disconnect');
@@ -275,6 +279,15 @@ export class Realm extends EventEmitter {
     }
   }
 
+  resubscribe(_: any, appName: string) {
+    const app = appName.replace('%', '');
+    const idleWatches = this.conduit?.idleWatches.entries();
+    if (!idleWatches) return false;
+    const watch = Array.from(idleWatches).find(([_, w]) => w.app === app);
+    if (!watch || !this.conduit) return false;
+    return this.conduit.resubscribe(watch[0]);
+  }
+
   async connect(
     session: ISession,
     params: ConnectParams = { reconnecting: false }
@@ -392,7 +405,6 @@ export class Realm extends EventEmitter {
   }
 
   async onWebViewAttached(e: Event, webContents: WebContents) {
-    // console.log('onWebViewAttached');
     webContents.on('will-redirect', (e: Event, url: string) =>
       this.onWillRedirect(e, url, webContents)
     );

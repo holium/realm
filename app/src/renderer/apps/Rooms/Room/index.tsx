@@ -165,7 +165,11 @@ export const Room = observer(() => {
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                roomsManager.leaveRoom(rid);
+                if (presentRoom.creator === ship!.patp) {
+                  roomsManager.deleteRoom(rid);
+                } else {
+                  roomsManager.leaveRoom(rid);
+                }
               }}
             >
               <Icons name="RoomLeave" />

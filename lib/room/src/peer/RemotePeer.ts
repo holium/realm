@@ -195,7 +195,7 @@ export class RemotePeer extends Peer {
     } else if (element instanceof HTMLVideoElement) {
       this.isVideoAttached = true;
     }
-    console.log('attached', element);
+    // console.log('attached', element);
     return element;
   }
 

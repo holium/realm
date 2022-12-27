@@ -285,8 +285,18 @@ export const BazaarSubscriptions = {
           handleReactions(data, model);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %bazaar');
+        model.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %bazaar rejected');
+        model.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %bazaar subscription');
+        model.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };
@@ -298,6 +308,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
+      // eslint-disable-next-line no-case-declarations
       const installUpdate = data['app-install-update'];
       model._setAppStatus(
         installUpdate.appId,
@@ -341,6 +352,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._allyDeleted(data['ally-deleted'].ship);
       break;
     case 'rebuild-catalog':
+      // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
       model._rebuildCatalog(data['rebuild-catalog']);
       // model._allyDeleted(data['ally-deleted'].ship);
       break;
