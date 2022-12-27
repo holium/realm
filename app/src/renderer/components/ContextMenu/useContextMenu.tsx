@@ -65,7 +65,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
   const isValidCopy = useMemo(
     () =>
-      selected?.text &&
+      selected &&
+      selected.text &&
       (selected.element === mouseRef?.target ||
         selected.element.contains(mouseRef?.target as Node)),
     [isInputOrTextArea, mouseRef?.target, selected?.text, selected?.element]

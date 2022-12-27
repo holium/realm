@@ -25,18 +25,18 @@ export const SelectionProvider = ({ children }: SelectionProviderProps) => {
   const [selected, setSelected] = useState<SelectionContextValue['selected']>();
 
   useEffect(() => {
-    document.addEventListener('selectionchange', () => {
-      const selection = document.getSelection()?.toString().trim();
-      if (selection && selection !== '')
-        setSelected({
-          text: selection,
-          element: document.getSelection()?.anchorNode
-            ?.parentElement as HTMLElement,
-        });
-    });
+    const handleSelection = () => {
+      const selection = document.getSelection();
+      if (!selection) return;
+      const text = selection.toString().trim();
+      const element = selection.anchorNode?.parentElement;
+      if (element) setSelected({ text, element });
+    };
+
+    document.addEventListener('selectionchange', handleSelection);
 
     return () => {
-      document.removeEventListener('selectionchange', () => {});
+      document.removeEventListener('selectionchange', handleSelection);
     };
   });
 
