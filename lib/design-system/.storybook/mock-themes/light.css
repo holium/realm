@@ -21,6 +21,10 @@
   --rlm-border-radius-12: 16px;
 }
 
+html {
+  background: var(--rlm-window-color)
+}
+
 * {
   font-family: var(--rlm-font);
 }

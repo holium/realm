@@ -1,5 +1,5 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon } from '../../';
+import { Flex, Icon, TextButton } from '../../';
 import { BaseInput } from './BaseInput';
 
 export default {
@@ -69,7 +69,7 @@ export const RightButton: ComponentStory<typeof BaseInput> = () => (
     <BaseInput
       width={300}
       rightInteractive
-      rightAdornment={<button>Button</button>}
+      rightAdornment={<TextButton>Button</TextButton>}
       inputId="input-2"
     >
       <input id="input-2" tabIndex={1} placeholder="Placeholder here" />
