@@ -50,7 +50,7 @@ export const BaseText = styled(Box)<TextProps>`
   }
 `;
 
-export const Default = styled(BaseText)`
+export const Default = styled(BaseText)<TextProps>`
   font-family: var(--rlm-font);
   font-weight: 400;
   font-size: 0.889rem;
@@ -60,61 +60,61 @@ export const Default = styled(BaseText)`
   white-space: nowrap;
 `;
 
-export const H1 = styled(Default)`
+export const H1 = styled(Default)<TextProps>`
   font-weight: 700;
   line-height: 1.5rem;
   font-size: 1.8rem;
 `;
 
-export const H2 = styled(Default)`
+export const H2 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.5rem;
   font-size: 1.6rem;
 `;
 
-export const H3 = styled(Default)`
+export const H3 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.25rem;
   font-size: 1.42rem;
 `;
 
-export const H4 = styled(Default)`
+export const H4 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.26rem;
 `;
 
-export const H5 = styled(Default)`
+export const H5 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.125rem;
 `;
 
-export const H6 = styled(Default)`
+export const H6 = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: 1rem;
   font-size: 1rem;
 `;
 
-const Body = styled(Default)`
+const Body = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.9rem;
 `;
 
-const Caption = styled(Default)`
+const Caption = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.9rem;
 `;
 
-const Hint = styled(Default)`
+const Hint = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.8rem;
 `;
 
-const Label = styled(Default)`
+const Label = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.1rem;
   font-size: 0.8rem;
@@ -125,7 +125,7 @@ const Custom = styled(BaseText)<TextProps>`
   margin-bottom: 0px;
 `;
 
-const Patp = styled(motion.p)`
+const Patp = styled(motion.p)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.9rem;

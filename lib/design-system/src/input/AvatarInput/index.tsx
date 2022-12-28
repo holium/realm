@@ -1,47 +1,69 @@
 import { FC, useState } from 'react';
 import { isImgUrl } from '../../utils';
-import { BaseInput, Icon, Input, TextButton } from '../..';
+import { BaseInput, BoxProps, Icon, Input, TextButton } from '../..';
 
 type AvatarInputProps = {
   id: string;
+  tabIndex?: number;
+  initialValue?: string;
   onSave: (url: string) => void;
-};
+} & BoxProps;
 
 export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
-  const { id, onSave } = props;
+  const { id, tabIndex, initialValue, onSave } = props;
   const [invalidImg, setInvalidImg] = useState(false);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(initialValue || '');
+  const [success, setSuccess] = useState(false);
+
+  let textButtonContent: string | JSX.Element = 'Save';
+  if (invalidImg) textButtonContent = 'Clear';
+  if (success) textButtonContent = <Icon name="CheckCircle" />;
+
   return (
     <BaseInput
-      width={300}
+      {...props}
+      tabIndex={tabIndex}
       rightInteractive
       leftAdornment={<Icon name="ProfileImage" opacity={0.3} size={24} />}
       rightAdornment={
         <TextButton
+          color={invalidImg ? 'intent-alert' : 'accent'}
           onClick={async (evt: React.MouseEvent<HTMLButtonElement>) => {
+            if (invalidImg) {
+              setInvalidImg(false);
+              setValue('');
+              setSuccess(false);
+              return;
+            }
             evt.preventDefault();
             const isImage: boolean = await isImgUrl(value);
             if (isImage) {
               setInvalidImg(false);
+              setSuccess(true);
               onSave(value);
             } else {
               setInvalidImg(true);
+              setSuccess(false);
             }
           }}
         >
-          Save
+          {textButtonContent}
         </TextButton>
       }
+      error={invalidImg ? 'Invalid image url' : undefined}
       inputId={id}
     >
       <Input
         id={id}
         tabIndex={1}
+        spellCheck={false}
+        className="realm-cursor-text-cursor"
         placeholder="Paste image link here"
         value={value}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
           if (evt.target.value === '') {
             setInvalidImg(false);
+            setSuccess(false);
           }
           setValue(evt.target.value);
         }}

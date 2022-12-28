@@ -176,17 +176,29 @@ export const Transparent = styled(Base)<ButtonProps>`
 
 type TextButtonProps = ButtonProps & { showOnHover?: boolean };
 
-export const TextButton = styled(Transparent)<TextButtonProps>`
-  color: var(--rlm-accent-color);
+export const TextButton = styled(Base)<TextButtonProps>`
+  color: ${(props) =>
+    props.color
+      ? `var(--rlm-${props.color}-color)`
+      : 'var(--rlm-accent-color)'};
+
   background-color: ${(props) =>
     props.showOnHover
       ? 'transparent'
+      : props.color
+      ? rgba(getVar(`--rlm-${props.color}-color`), 0.1)
       : rgba(getVar('--rlm-accent-color'), 0.1)};
   &:hover:not([disabled]) {
-    background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.15)};
+    background-color: ${(props) =>
+      props.color
+        ? rgba(getVar(`--rlm-${props.color}-color`), 0.15)
+        : rgba(getVar('--rlm-accent-color'), 0.15)};
   }
   &:active:not([disabled]) {
-    background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.2)};
+    background-color: ${(props) =>
+      props.color
+        ? rgba(getVar(`--rlm-${props.color}-color`), 0.2)
+        : rgba(getVar('--rlm-accent-color'), 0.2)};
   }
   svg {
     fill: var(--rlm-accent-color);

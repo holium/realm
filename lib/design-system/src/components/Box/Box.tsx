@@ -34,7 +34,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 
 export type BoxProps = {
   gap?: string | number | undefined;
-  pointerEvents?: boolean;
+  pointerEvents?: string;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &

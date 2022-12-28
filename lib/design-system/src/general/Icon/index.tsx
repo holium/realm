@@ -45,7 +45,6 @@ const SvgComponent = forwardRef<
       ref={svgRef}
       aria-labelledby={titleId}
       pointerEvents="none"
-      // onClick={(evt: any) => evt.stopPropagation()}
       {...props}
     >
       {title ? <title id={titleId}>{title}</title> : null}

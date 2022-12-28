@@ -9,16 +9,16 @@ export type InputBoxProps = {
   leftInteractive?: boolean;
   rightAdornment?: JSX.Element | string;
   rightInteractive?: boolean;
-  preventPointerEvents?: boolean;
   shouldHighlightOnFocus?: boolean;
-  isDisabled?: boolean;
+  disabled?: boolean;
   small?: boolean;
   bgOpacity?: number;
   wrapperMotionProps?: AnimationProps;
-  error?: string | boolean | undefined;
+  error?: string | undefined;
 } & BoxProps;
 
 export const InputBoxStyle = styled(Box)<InputBoxProps>`
+  position: relative;
   border-radius: var(--rlm-border-radius-6);
   border: 1px solid var(--rlm-border-color);
   background-color: var(--rlm-input-color);
@@ -37,11 +37,6 @@ export const InputBoxStyle = styled(Box)<InputBoxProps>`
         }
       }
     `}
-  ${(props) =>
-    props.preventPointerEvents &&
-    css`
-      pointer-events: none;
-    `};
 
   input {
     border-radius: var(--rlm-border-radius-4);
@@ -59,7 +54,7 @@ export const InputBoxStyle = styled(Box)<InputBoxProps>`
   }
 
   ${(props) =>
-    props.isDisabled &&
+    props.disabled &&
     css`
       pointer-events: none;
       input {
@@ -78,13 +73,13 @@ export const InputBoxStyle = styled(Box)<InputBoxProps>`
   ${(props) =>
     props.error &&
     css`
-      border-color: var(--rlm-alert-color);
+      border-color: var(--rlm-intent-alert-color);
       &:focus,
       &:focus-within,
       &:active {
         transition: ${(props) => props.theme.transition};
         outline: none;
-        border-color: var(--rlm-alert-color);
+        border-color: var(--rlm-intent-alert-color);
         &::placeholder {
           color: transparent;
         }
@@ -101,13 +96,10 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   svg {
     display: block;
     ${(props) =>
-      props.disabled
-        ? css`
-            fill: rgba(var(--rlm-icon-color), 0.5);
-          `
-        : css`
-            fill: var(--rlm-icon-color);
-          `};
+      props.disabled &&
+      css`
+        opacity: 0.5;
+      `};
     font-size: 14px;
   }
 `;
@@ -116,7 +108,6 @@ InputBoxStyle.defaultProps = {
   px: 1,
   py: 1,
   mb: 0,
-  preventPointerEvents: false,
   shouldHighlightOnFocus: true,
 };
 
@@ -134,7 +125,7 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
     leftInteractive,
     rightAdornment,
     rightInteractive,
-    isDisabled,
+    disabled,
     error,
     children,
   } = props;
@@ -146,10 +137,8 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
       height={props.height}
       error={error}
       flexDirection={inlineLabelDirection}
-      isDisabled={isDisabled}
+      disabled={disabled}
       onMouseDown={(evt: React.MouseEvent<HTMLDivElement>) => {
-        evt.preventDefault();
-        evt.stopPropagation();
         document.getElementById(inputId)?.focus();
       }}
     >
@@ -162,7 +151,7 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
           mr={1}
           alignItems="center"
           mb={inlineLabelDirection === 'column' ? 1 : 0}
-          pointerEvents={false}
+          pointerEvents="none"
         >
           {label}
         </Text.Label>
@@ -170,9 +159,9 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
       <Box display="flex" flexDirection="row" flex={1}>
         {leftAdornment && (
           <Adornment
-            pointerEvents={leftInteractive}
+            pointerEvents={leftInteractive ? 'auto' : 'none'}
             mr={1}
-            disabled={isDisabled}
+            disabled={disabled}
           >
             {leftAdornment}
           </Adornment>
@@ -180,14 +169,19 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
         {children}
         {rightAdornment && (
           <Adornment
-            pointerEvents={rightInteractive}
+            pointerEvents={rightInteractive ? 'auto' : 'none'}
             ml={1}
-            disabled={isDisabled}
+            disabled={disabled}
           >
             {rightAdornment}
           </Adornment>
         )}
       </Box>
+      {error && (
+        <Box position="absolute" bottom={-20}>
+          <Text.Hint color="intent-alert">{error}</Text.Hint>
+        </Box>
+      )}
     </InputBoxStyle>
   );
 };
