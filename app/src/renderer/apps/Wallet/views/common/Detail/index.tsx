@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Box, Text, TextButton } from 'renderer/components';
@@ -63,7 +63,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
     );
   }
-
+  
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? coin
@@ -73,10 +73,16 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
             .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
-  const transactions = getTransactions(walletTransactions || new Map()).sort(
+  let transactions = getTransactions(walletTransactions || new Map())
+  const pendingTransactions = transactions.filter(trans => trans.status === 'pending').sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
   );
+  const transactionHistory = transactions.filter(trans => trans.status !== 'pending').sort(
+    (a, b) =>
+      new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+  );
+  transactions = [...pendingTransactions, ...transactionHistory];
 
   /* useEffect(() => {
     if (coins.length) {

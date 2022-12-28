@@ -47,7 +47,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
   const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  let transactions: any = useMemo(() => [], []);
+  let transactions: any = [];
   for (const key of walletApp.currentStore.wallets.keys()) {
     const wallet = walletApp.currentStore.wallets.get(key);
     if (!wallet) continue;
@@ -55,15 +55,23 @@ export const WalletApp: FC<any> = observer((props: any) => {
       (walletApp.navState.network === NetworkType.ETHEREUM
         ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
             .transactionList.transactions
-        : (wallet as BitcoinWalletType).transactions) || new Map()
+        : (wallet as BitcoinWalletType).transactionList.transactions) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
     // console.log(transactions, transactionCount);
   }
+  const pending = transactions.filter(
+    (tx: any) => tx.status === 'pending'
+  ).length;
   useEffect(() => {
+    console.log('length', transactions.length)
+    console.log('count', transactionCount)
     if (transactions.length !== transactionCount) {
       setTransactionCount(transactions.length);
       setHidePending(false);
+    }
+    if (pending === 0) {
+      setHidePending(true);
     }
   }, [transactionCount, transactions]);
 

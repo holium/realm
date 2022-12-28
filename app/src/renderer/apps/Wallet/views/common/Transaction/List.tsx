@@ -124,7 +124,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
   // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(
-    (trans) => trans.status === 'pending'
+    (tx) => tx.status === 'pending'
   ).length;
 
   let transactions = props.transactions;

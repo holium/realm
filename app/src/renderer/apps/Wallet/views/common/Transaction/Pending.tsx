@@ -29,8 +29,8 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   let transactions = props.transactions;
   if (walletApp.navState.network === NetworkType.ETHEREUM) {
     for (const key of walletApp.currentStore.wallets.keys()) {
-      for (const coin of (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.transactionList.transactions.keys()) {
-        const coinTransactions = (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.transactionList.transactions;
+      for (const coin of (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.coins.keys()) {
+        const coinTransactions = (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.coins.get(coin)!.transactionList.transactions.values();
         transactions = [...coinTransactions, ...transactions];
       }
     }
