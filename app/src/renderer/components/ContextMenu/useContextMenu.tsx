@@ -42,7 +42,7 @@ type ContextMenuProviderProps = {
 
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   const root = document.getElementById('root');
-  const selected = useSelection();
+  const { selectedText, selectedElement } = useSelection();
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
   const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
@@ -65,11 +65,10 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
   const isValidCopy = useMemo(
     () =>
-      selected &&
-      selected.text &&
-      (selected.element === mouseRef?.target ||
-        selected.element.contains(mouseRef?.target as Node)),
-    [isInputOrTextArea, mouseRef?.target, selected?.text, selected?.element]
+      selectedText &&
+      (selectedElement === mouseRef?.target ||
+        selectedElement?.contains(mouseRef?.target as Node)),
+    [mouseRef?.target, selectedElement, selectedText]
   );
 
   const isValidPaste = useMemo(
@@ -86,10 +85,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            if (isValidCopy) {
-              setCopied(selected!.text);
-              navigator.clipboard.writeText(selected!.text);
-            }
+            setCopied(selectedText);
+            navigator.clipboard.writeText(selectedText);
           },
         },
         {
@@ -98,29 +95,32 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           disabled: !isValidPaste,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            if (isValidPaste) {
-              // Insert copied text into focused input at cursor position
-              const input = mouseRef?.target as HTMLInputElement;
-              const startPos = input.selectionStart ?? 0;
-              const endPos = input.selectionEnd ?? 0;
-              input.value =
-                input.value.substring(0, startPos) +
-                copied +
-                input.value.substring(endPos, input.value.length);
-              input.selectionStart = startPos + copied.length;
-              input.selectionEnd = startPos + copied.length;
-            }
+            // Insert copied text into focused input at cursor position
+            const input = mouseRef?.target as HTMLInputElement;
+            const startPos = input.selectionStart ?? 0;
+            const endPos = input.selectionEnd ?? 0;
+            input.value =
+              input.value.substring(0, startPos) +
+              copied +
+              input.value.substring(endPos, input.value.length);
+            input.selectionStart = startPos + copied.length;
+            input.selectionEnd = startPos + copied.length;
           },
         },
         showDevTools && {
           id: 'toggle-devtools',
           label: 'Toggle devtools',
-          onClick: () => {
-            DesktopActions.toggleDevTools();
-          },
+          onClick: DesktopActions.toggleDevTools,
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [isValidCopy, mouseRef?.target, selected, showDevTools]
+    [
+      isValidCopy,
+      isValidPaste,
+      mouseRef?.target,
+      selectedText,
+      showDevTools,
+      copied,
+    ]
   );
 
   const setOptions = useCallback(
@@ -151,7 +151,9 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     [menuColors, textColor, windowColor]
   );
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: MouseEvent) => {
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu && contextMenu.contains(e.target as Node)) return;
     setMouseRef(null);
   }, []);
 
@@ -162,11 +164,11 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
   useEffect(() => {
     if (!root) return;
-    root.addEventListener('click', handleClick);
+    root.addEventListener('mousedown', handleClick);
     root.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
-      root.removeEventListener('click', handleClick);
+      root.removeEventListener('mousedown', handleClick);
       root.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [handleClick, handleContextMenu, root]);

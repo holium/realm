@@ -7,12 +7,8 @@ import {
 } from 'react';
 
 type SelectionContextValue = {
-  selected:
-    | {
-        text: string;
-        element: HTMLElement;
-      }
-    | undefined;
+  selectedText: string;
+  selectedElement: HTMLElement | null;
 };
 
 const SelectionContext = createContext<SelectionContextValue>({} as any);
@@ -22,15 +18,21 @@ type SelectionProviderProps = {
 };
 
 export const SelectionProvider = ({ children }: SelectionProviderProps) => {
-  const [selected, setSelected] = useState<SelectionContextValue['selected']>();
+  const [selectedText, setSelected] = useState('');
+  const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(
+    null
+  );
 
   useEffect(() => {
     const handleSelection = () => {
+      const contextMenu = document.getElementById('context-menu');
+      if (contextMenu) return; // If the context menu is open, don't process selection.
       const selection = document.getSelection();
       if (!selection) return;
       const text = selection.toString().trim();
+      if (text !== selectedText) setSelected(text);
       const element = selection.anchorNode?.parentElement;
-      if (element) setSelected({ text, element });
+      if (element && element !== selectedElement) setSelectedElement(element);
     };
 
     document.addEventListener('selectionchange', handleSelection);
@@ -41,13 +43,10 @@ export const SelectionProvider = ({ children }: SelectionProviderProps) => {
   });
 
   return (
-    <SelectionContext.Provider value={{ selected }}>
+    <SelectionContext.Provider value={{ selectedText, selectedElement }}>
       {children}
     </SelectionContext.Provider>
   );
 };
 
-export const useSelection = () => {
-  const { selected } = useContext(SelectionContext);
-  return selected;
-};
+export const useSelection = () => useContext(SelectionContext);
