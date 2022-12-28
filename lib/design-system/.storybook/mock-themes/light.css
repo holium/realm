@@ -1,4 +1,6 @@
 :root {
+  --transition: all 0.25s ease;
+  --transition-2x: all 0.5s ease;
   --rlm-font: 'Rubik', sans-serif;
   --rlm-base-color: #c4c3bf;
   --rlm-accent-color: #4E9EFD;
@@ -9,4 +11,17 @@
   --rlm-theme-mode: light;
   --rlm-text-color: #2a2927;
   --rlm-icon-color: #333333;
+  --rlm-alert-color: #FF6240;
+  --rlm-caution-color: #FFBC32;
+  --rlm-success-color: #0FC383;
+  --rlm-border-radius-4: 4px;
+  --rlm-border-radius-6: 6px; 
+  --rlm-border-radius-9: 9px;
+  --rlm-border-radius-12: 12px;
+  --rlm-border-radius-12: 16px;
 }
+
+* {
+  font-family: var(--rlm-font);
+}
+    

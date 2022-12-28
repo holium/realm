@@ -34,6 +34,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 
 export type BoxProps = {
   gap?: string | number | undefined;
+  pointerEvents?: boolean;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
@@ -59,6 +60,15 @@ const textDecoration = style({
   cssProperty: 'textDecoration',
 });
 
+const pointerEvents = style({
+  prop: 'pointerEvents',
+  cssProperty: 'pointerEvents',
+  transformValue: (value: boolean | undefined) => {
+    if (value === undefined) return 'auto';
+    return !value ? 'none' : 'auto';
+  },
+});
+
 const textTransform = style({
   prop: 'textTransform',
   cssProperty: 'textTransform',
@@ -74,6 +84,7 @@ const boxStyles = compose(
   space,
   textStyle,
   textDecoration,
+  pointerEvents,
   textTransform,
   typography,
   border,
