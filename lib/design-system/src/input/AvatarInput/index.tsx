@@ -71,5 +71,3 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
     </BaseInput>
   );
 };
-
-AvatarInput.defaultProps = {};

@@ -116,7 +116,12 @@ export type BaseInputProps = InputBoxProps & {
   inlineLabelDirection?: 'row' | 'column';
 };
 
-export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
+export const BaseInput: FC<BaseInputProps> = (
+  props: BaseInputProps = {
+    inputId: 'base-input-1',
+    inlineLabelDirection: 'row',
+  }
+) => {
   const {
     inputId,
     inlineLabelDirection,
@@ -184,10 +189,6 @@ export const BaseInput: FC<BaseInputProps> = (props: BaseInputProps) => {
       )}
     </InputBoxStyle>
   );
-};
-
-BaseInput.defaultProps = {
-  inlineLabelDirection: 'row',
 };
 
 export default BaseInput;

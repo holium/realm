@@ -54,7 +54,7 @@ export type ButtonProps = {
     textTransform?:
       | TextTransformOption
       | Array<TextTransformOption | null | string>;
-  } & HTMLAttributes<any>;
+  } & HTMLAttributes<HTMLButtonElement>;
 
 const textDecoration = style({
   prop: 'textDecoration',
@@ -102,7 +102,7 @@ export const Base = styled(motion.button)<ButtonProps>`
   border: 1px solid transparent;
   border-radius: var(--rlm-border-radius-4);
   transition: var(--transition);
-  ${compose(buttonStyles)}
+  ${buttonStyles}
   ${colorStyle}
   &:hover:not([disabled]) {
     cursor: pointer;
