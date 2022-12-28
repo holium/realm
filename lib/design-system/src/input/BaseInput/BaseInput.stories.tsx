@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon, TextButton } from '../../';
-import { BaseInput } from './BaseInput';
+import { Flex, Icon, TextButton, Input } from '../../';
+import { BaseInput } from '.';
 
 export default {
   component: BaseInput,
@@ -19,7 +19,7 @@ Default.args = {
 export const InlineLabel: ComponentStory<typeof BaseInput> = () => (
   <Flex flexDirection="column" gap={12}>
     <BaseInput inputId="inline-label-input-1" label="Horizontal label">
-      <input
+      <Input
         id="inline-label-input-1"
         type="text"
         placeholder="Placeholder here"

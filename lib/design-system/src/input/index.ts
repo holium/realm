@@ -1,1 +1,3 @@
-export * from './BaseInput/BaseInput';
+export * from './BaseInput';
+export * from './Input';
+export * from './AvatarInput';

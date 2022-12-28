@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps } from '../../';
+import { Text, Box, BoxProps } from '../..';
 import { AnimationProps } from 'framer-motion';
 
 export type InputBoxProps = {

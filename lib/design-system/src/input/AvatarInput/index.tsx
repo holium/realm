@@ -1,13 +1,16 @@
-import { FC } from 'react';
-import { BaseInput, Icon, TextButton } from '../..';
+import { FC, useState } from 'react';
+import { isImgUrl } from '../../utils';
+import { BaseInput, Icon, Input, TextButton } from '../..';
 
 type AvatarInputProps = {
   id: string;
-  onSubmit: (url: string) => void;
+  onSave: (url: string) => void;
 };
 
 export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
-  const { id, onSubmit } = props;
+  const { id, onSave } = props;
+  const [invalidImg, setInvalidImg] = useState(false);
+  const [value, setValue] = useState('');
   return (
     <BaseInput
       width={300}
@@ -15,9 +18,15 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
       leftAdornment={<Icon name="ProfileImage" opacity={0.3} size={24} />}
       rightAdornment={
         <TextButton
-          onClick={() => {
-            console.log('clicking');
-            // onSubmit();
+          onClick={async (evt: React.MouseEvent<HTMLButtonElement>) => {
+            evt.preventDefault();
+            const isImage: boolean = await isImgUrl(value);
+            if (isImage) {
+              setInvalidImg(false);
+              onSave(value);
+            } else {
+              setInvalidImg(true);
+            }
           }}
         >
           Save
@@ -25,7 +34,18 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
       }
       inputId={id}
     >
-      <input id={id} tabIndex={1} placeholder="Paste image link here" />
+      <Input
+        id={id}
+        tabIndex={1}
+        placeholder="Paste image link here"
+        value={value}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+          if (evt.target.value === '') {
+            setInvalidImg(false);
+          }
+          setValue(evt.target.value);
+        }}
+      />
     </BaseInput>
   );
 };

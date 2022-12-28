@@ -9,6 +9,9 @@ export default {
 export const Default: ComponentStory<typeof Button.Base> = () => (
   <Flex flexDirection="column" gap={16}>
     <Flex gap={12}>
+      <Button.Primary height={32} px={2} fontSize="16px">
+        Primary
+      </Button.Primary>
       <Button.Primary> Primary </Button.Primary>
       <Button.Primary disabled> Primary </Button.Primary>
       <Button.Primary disabled>
