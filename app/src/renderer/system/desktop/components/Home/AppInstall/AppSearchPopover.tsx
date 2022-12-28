@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react';
 import { useMemo } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { darken } from 'polished';
@@ -5,7 +6,7 @@ import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInst
 import { RealmPopover } from '../Popover';
 import { SearchModes } from './SearchModes';
 
-export const AppSearchPopover = () => {
+export const AppSearchPopover = observer(() => {
   const appInstaller = useAppInstaller();
   const { theme } = useServices();
   const backgroundColor = useMemo(
@@ -37,4 +38,4 @@ export const AppSearchPopover = () => {
       <SearchModes />
     </RealmPopover>
   );
-};
+});
