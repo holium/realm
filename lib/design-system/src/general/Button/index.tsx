@@ -174,7 +174,7 @@ export const Transparent = styled(Base)<ButtonProps>`
   }
 `;
 
-type TextButtonProps = ButtonProps & { showOnHover: boolean };
+type TextButtonProps = ButtonProps & { showOnHover?: boolean };
 
 export const TextButton = styled(Transparent)<TextButtonProps>`
   color: var(--rlm-accent-color);

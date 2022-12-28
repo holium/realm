@@ -1,12 +1,12 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../../components/Flex/Flex';
-import { Text } from './Text';
+import { Text } from '.';
 
 export default {
-  component: Text.BaseText,
-} as ComponentMeta<typeof Text.BaseText>;
+  component: Text.Default,
+} as ComponentMeta<typeof Text.Default>;
 
-export const All: ComponentStory<typeof Text.BaseText> = () => (
+export const All: ComponentStory<typeof Text.Default> = () => (
   <Flex flexDirection="column" gap={12}>
     <Text.H1>H1 style</Text.H1>
     <Text.H2>H2 style</Text.H2>

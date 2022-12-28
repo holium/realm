@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { BaseInput, Icon } from '../..';
+import { BaseInput, Icon, TextButton } from '../..';
 
 type AvatarInputProps = {
   id: string;
@@ -7,13 +7,22 @@ type AvatarInputProps = {
 };
 
 export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
-  const { id } = props;
+  const { id, onSubmit } = props;
   return (
     <BaseInput
       width={300}
       rightInteractive
       leftAdornment={<Icon name="ProfileImage" opacity={0.3} size={24} />}
-      rightAdornment={<button>Save</button>}
+      rightAdornment={
+        <TextButton
+          onClick={() => {
+            console.log('clicking');
+            // onSubmit();
+          }}
+        >
+          Save
+        </TextButton>
+      }
       inputId={id}
     >
       <input id={id} tabIndex={1} placeholder="Paste image link here" />
