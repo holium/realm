@@ -29,6 +29,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private baseURL: string;
   private nodeURL: string;
   private blockURL: string;
+  private updating: boolean = false;
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
@@ -80,7 +81,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       .then((res: any) => {
         res.data.on('data', (data: any) => {
           const currentBlock = Number(data.toString());
-          // console.log('got block', currentBlock);
           this.updateWalletState(conduit, walletStore, currentBlock);
         });
       });
@@ -91,6 +91,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
     walletStore: WalletStoreType,
     currentBlock?: number
   ) {
+    if (this.updating) {
+      return;
+    }
+    this.updating = true;
     if (!currentBlock) {
       currentBlock = await this.getBlockNumber();
     }
@@ -154,6 +158,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
         });
       }
     }
+    this.updating = false;
   }
   async getAccountBalance(addr: string): Promise<string> {
     return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
@@ -168,6 +173,16 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
+          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
+            fromBlock: ethers.utils.hexlify(fromBlock),
+            toBlock: ethers.utils.hexlify(toBlock),
+            fromAddress: addr,
+            category: [
+              AssetTransfersCategory.INTERNAL,
+              AssetTransfersCategory.EXTERNAL,
+            ],
+            withMetadata: true,
+          });*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -196,6 +211,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error);
             throw error;
           }
         }
@@ -205,6 +221,16 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
+          /*toTransfers = await this.alchemy.core.getAssetTransfers({
+            fromBlock: ethers.utils.hexlify(fromBlock),
+            toBlock: ethers.utils.hexlify(toBlock),
+            toAddress: addr,
+            category: [
+              AssetTransfersCategory.INTERNAL,
+              AssetTransfersCategory.EXTERNAL,
+            ],
+            withMetadata: true,
+          });*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -233,6 +259,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error);
             throw error;
           }
         }
@@ -244,34 +271,38 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
-    console.log('getting assets for ', addr);
-    const coins = await this.alchemy.core.getTokenBalances(addr);
-    const nfts = await this.alchemy.nft.getNftsForOwner(addr);
-    let assets: Asset[] = [];
-    let data: NFTAsset = {
-      name: '',
-      tokenId: '',
-      description: '',
-      image: '',
-      transferable: true,
-      properties: {},
-    };
-    for (let coin of coins.tokenBalances) {
-      assets.push({
-        addr: coin.contractAddress,
-        type: 'coin',
-        data,
-      });
+    try {
+      const coins = await this.alchemy.core.getTokenBalances(addr);
+      const nfts = await this.alchemy.nft.getNftsForOwner(addr);
+      let assets: Asset[] = [];
+      let data: NFTAsset = {
+        name: '',
+        tokenId: '',
+        description: '',
+        image: '',
+        transferable: true,
+        properties: {},
+      };
+      for (let coin of coins.tokenBalances) {
+        assets.push({
+          addr: coin.contractAddress,
+          type: 'coin',
+          data,
+        });
+      }
+      for (let nft of nfts.ownedNfts) {
+        data.tokenId = nft.tokenId;
+        assets.push({
+          addr: nft.contract.address,
+          type: 'nft',
+          data,
+        });
+      }
+      return assets;
+    } catch (error: any) {
+      console.log(error);
+      return [];
     }
-    for (let nft of nfts.ownedNfts) {
-      data.tokenId = nft.tokenId;
-      assets.push({
-        addr: nft.contract.address,
-        type: 'nft',
-        data,
-      });
-    }
-    return assets;
   }
   async sendTransaction(signedTx: string): Promise<any> {
     return (await this.ethProvider!.sendTransaction(signedTx)).hash;
@@ -344,6 +375,18 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
+          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
+            fromBlock: ethers.utils.hexlify(fromBlock),
+            toBlock: ethers.utils.hexlify(toBlock),
+            fromAddress: addr,
+            contractAddresses: [contract],
+            category: [
+              AssetTransfersCategory.ERC20,
+              AssetTransfersCategory.ERC721,
+              AssetTransfersCategory.ERC1155,
+            ],
+            withMetadata: true,
+          })*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -374,7 +417,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            // console.log(error)
+            console.log(error)
             throw error;
           }
         }
@@ -384,6 +427,19 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
+          /*toTransfers = await this.alchemy.core.getAssetTransfers({
+            fromBlock: ethers.utils.hexlify(fromBlock),
+            toBlock: ethers.utils.hexlify(toBlock),
+            toAddress: addr,
+            contractAddresses: [contract],
+            category: [
+              AssetTransfersCategory.ERC20,
+              AssetTransfersCategory.ERC721,
+              AssetTransfersCategory.ERC1155,
+            ],
+            withMetadata: true,
+          })
+          console.log(toTransfers);*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -414,6 +470,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
+            console.log(error);
             throw error;
           }
         }
@@ -443,12 +500,16 @@ export class EthereumProtocol implements BaseBlockProtocol {
     return await this.ethProvider!.getGasPrice();
   }
 
-  async getFeeEstimate(from: string, to: string, value: string): Promise<any> {
+  /*async getFeeEstimate(from: string, to: string, value: string): Promise<any> {
     return await this.alchemy.core.estimateGas({
       to,
       from,
       value: ethers.utils.parseEther(value),
     });
+  }*/
+
+  async getFeeEstimate(tx: any): Promise<any> {
+    return await this.alchemy.core.estimateGas(tx);
   }
 
   async getNonce(address: string) {

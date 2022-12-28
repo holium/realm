@@ -229,6 +229,7 @@ export const handleWalletReactions = (
       onWallet();
       break;
     case 'transaction':
+      console.log(data);
       const transaction = data.transaction;
       const network: NetworkStoreType =
         transaction.net === ProtocolType.ETH_MAIN ||

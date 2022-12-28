@@ -13,4 +13,7 @@ export class UqbarProtocol implements BaseProtocol {
   watchUpdates(conduit: Conduit, walletState: WalletStoreType) {
 
   }
+  async sendTransaction(signedTx: string): Promise<any> {
+
+  }
 }

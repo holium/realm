@@ -186,7 +186,6 @@ export class WalletService extends BaseService {
       to: string,
       amount: string,
       toPatp?: string,
-      contractType?: string
     ) => {
       return await ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
@@ -194,7 +193,6 @@ export class WalletService extends BaseService {
         to,
         amount,
         toPatp,
-        contractType
       );
     },
     sendERC20Transaction: async (
@@ -525,7 +523,6 @@ export class WalletService extends BaseService {
     to: string,
     amount: string,
     toPatp?: string,
-    contractType?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(
@@ -536,7 +533,11 @@ export class WalletService extends BaseService {
       from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate(from, to, amount),
+      gasLimit: await protocol.getFeeEstimate({
+        to,
+        from,
+        value: ethers.utils.parseEther(amount),
+      }),
       gasPrice: await protocol.getFeePrice(),
       nonce: await protocol.getNonce(from),
       chainId: await protocol.getChainId(),
@@ -555,7 +556,6 @@ export class WalletService extends BaseService {
       fromAddress,
       tx.value,
       new Date().toISOString(),
-      contractType
     );
     const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
       hash
@@ -566,6 +566,7 @@ export class WalletService extends BaseService {
       'ethereum',
       this.state!.navState.protocol,
       currentWallet.index,
+      null,
       hash,
       stateTx
     );
@@ -587,7 +588,7 @@ export class WalletService extends BaseService {
     console.log(path);
     // console.log(this.privateKey!.mnemonic!.phrase);
     const ethAmount = ethers.utils.parseEther(amount);
-    const tx = (
+    const tx = await (
       this.wallet!.protocols.get(
         this.state!.navState.protocol
       )! as EthereumProtocol
@@ -599,6 +600,15 @@ export class WalletService extends BaseService {
         .data.get(this.state!.navState.protocol)!
         .coins.get(contractAddress)!.decimals
     );
+    const protocol = this.wallet!.protocols.get(
+      this.state!.navState.protocol
+    ) as EthereumProtocol;
+    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    tx.from = from;
+    tx.gasLimit = await protocol.getFeeEstimate(tx);
+    tx.gasPrice = await protocol.getFeePrice();
+    tx.nonce = await protocol.getNonce(from);
+    tx.chainId = await protocol.getChainId();
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
@@ -615,7 +625,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
+    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.coins.get(contractAddress)!.transactionList.getStoredTransaction(
       hash
     );
     console.log(stateTx);
@@ -624,6 +634,7 @@ export class WalletService extends BaseService {
       'ethereum',
       this.state!.navState.protocol,
       currentWallet.index,
+      contractAddress,
       hash,
       stateTx
     );

@@ -7,6 +7,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
+import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
@@ -196,6 +197,7 @@ const TransactionList = types
               'ethereum',
               protocol,
               index,
+              transaction.contractAddress || null,
               transaction.hash,
               tx
             );
@@ -532,7 +534,12 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      self.data.get(protocol)!.transactionList.transactions.set(hash, tx);
+      if (contractType) {
+        self.data.get(protocol)!.coins.get(contractType)!.transactionList.transactions.set(hash, tx);
+      }
+      else {
+        self.data.get(protocol)!.transactionList.transactions.set(hash, tx);
+      }
     },
     applyTransactionUpdate(protocol: ProtocolType, contract: any, transaction: any) {
       if (contract) {
@@ -643,7 +650,7 @@ export const EthStore = types
             const transaction = protocolTransactions[transactionKey];
             self.wallets
               .get(wallet.key)!
-              .applyTransactionUpdate(protocol as ProtocolType, transaction);
+              .applyTransactionUpdate(protocol as ProtocolType, null, transaction);
           }
         }
       }
@@ -681,7 +688,7 @@ export const WalletNavState = types
     detail: types.maybe(
       types.model({
         type: types.enumeration(['transaction', 'coin', 'nft']),
-        txtype: types.enumeration(['general', 'coin', 'nft']),
+        txtype: types.maybe(types.enumeration(['general', 'coin', 'nft'])),
         coinKey: types.maybe(types.string),
         key: types.string,
       })

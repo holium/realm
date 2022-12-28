@@ -13,6 +13,8 @@ import {
   WalletView,
   TransactionType,
   ProtocolType,
+  NetworkType,
+  EthWalletType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
@@ -23,7 +25,17 @@ interface PendingTransactionDisplayProps {
 export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   props: PendingTransactionDisplayProps
 ) => {
-  const pendingTransactions = props.transactions
+  const { walletApp } = useTrayApps();
+  let transactions = props.transactions;
+  if (walletApp.navState.network === NetworkType.ETHEREUM) {
+    for (const key of walletApp.currentStore.wallets.keys()) {
+      for (const coin of (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.transactionList.transactions.keys()) {
+        const coinTransactions = (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.transactionList.transactions;
+        transactions = [...coinTransactions, ...transactions];
+      }
+    }
+  }
+  const pendingTransactions = transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>

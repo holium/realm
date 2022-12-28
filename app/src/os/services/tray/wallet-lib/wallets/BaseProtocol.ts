@@ -5,4 +5,5 @@ import { Conduit } from "@holium/conduit";
  */
 export abstract class BaseProtocol {
   abstract watchUpdates(conduit: Conduit, walletState: any): void;
+  abstract sendTransaction(signedTx: string): Promise<any>;
 }
