@@ -56,7 +56,7 @@ export const ContextMenu = () => {
   return (
     <Portal>
       <MenuWrapper
-        className="menu"
+        id="context-menu"
         customBg={contextualColors.backgroundColor}
         initial={{
           opacity: 0,
@@ -77,7 +77,6 @@ export const ContextMenu = () => {
         style={{
           y: anchorPoint.y,
           x: anchorPoint.x,
-          display: mouseRef ? 'block' : 'none',
           width: WIDTH,
           maxHeight: MAX_HEIGHT,
           overflowY: 'auto',
@@ -102,8 +101,9 @@ export const ContextMenu = () => {
                 customBg={contextualColors.backgroundColor}
                 type="neutral"
                 onClick={(e) => {
-                  setMouseRef(null);
+                  if (option.disabled) return;
                   option.onClick(e);
+                  setMouseRef(null);
                 }}
               />
             </div>

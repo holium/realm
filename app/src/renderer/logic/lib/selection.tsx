@@ -26,6 +26,8 @@ export const SelectionProvider = ({ children }: SelectionProviderProps) => {
 
   useEffect(() => {
     const handleSelection = () => {
+      const contextMenu = document.getElementById('context-menu');
+      if (contextMenu) return;
       const selection = document.getSelection();
       if (!selection) return;
       const text = selection.toString().trim();
