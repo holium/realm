@@ -42,7 +42,7 @@ type ContextMenuProviderProps = {
 
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   const root = document.getElementById('root');
-  const selected = useSelection();
+  const { selectedText, selectedElement } = useSelection();
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
   const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
@@ -65,11 +65,10 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
   const isValidCopy = useMemo(
     () =>
-      selected &&
-      selected.text &&
-      (selected.element === mouseRef?.target ||
-        selected.element.contains(mouseRef?.target as Node)),
-    [mouseRef?.target, selected?.element, selected?.text]
+      selectedText &&
+      (selectedElement === mouseRef?.target ||
+        selectedElement?.contains(mouseRef?.target as Node)),
+    [mouseRef?.target, selectedElement, selectedText]
   );
 
   const isValidPaste = useMemo(
@@ -86,8 +85,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
-            setCopied(selected!.text);
-            navigator.clipboard.writeText(selected!.text);
+            setCopied(selectedText);
+            navigator.clipboard.writeText(selectedText);
           },
         },
         {
@@ -118,7 +117,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
       isValidCopy,
       isValidPaste,
       mouseRef?.target,
-      selected,
+      selectedText,
       showDevTools,
       copied,
     ]
@@ -165,11 +164,11 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
   useEffect(() => {
     if (!root) return;
-    root.addEventListener('click', handleClick);
+    root.addEventListener('mousedown', handleClick);
     root.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
-      root.removeEventListener('click', handleClick);
+      root.removeEventListener('mousedown', handleClick);
       root.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [handleClick, handleContextMenu, root]);
