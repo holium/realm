@@ -128,7 +128,7 @@ export const Transaction = types.model('Transaction', {
   walletIndex: types.number,
   amount: types.string,
   network: types.enumeration(['ethereum', 'bitcoin']),
-  ethType: types.maybe(types.string),
+  ethType: types.string,
   type: types.enumeration(['sent', 'received']),
 
   initiatedAt: types.maybeNull(types.string),

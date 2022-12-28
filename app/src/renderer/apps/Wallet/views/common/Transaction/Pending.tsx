@@ -27,14 +27,6 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
 ) => {
   const { walletApp } = useTrayApps();
   let transactions = props.transactions;
-  if (walletApp.navState.network === NetworkType.ETHEREUM) {
-    for (const key of walletApp.currentStore.wallets.keys()) {
-      for (const coin of (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.coins.keys()) {
-        const coinTransactions = (walletApp.currentStore.wallets.get(key)! as EthWalletType).data.get(walletApp.navState.protocol)!.coins.get(coin)!.transactionList.transactions.values();
-        transactions = [...coinTransactions, ...transactions];
-      }
-    }
-  }
   const pendingTransactions = transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
@@ -78,6 +70,8 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     props.transaction.theirPatp || shortened(props.transaction.theirAddress);
   let unitsDisplay = 'BTC';
   if (isEth) {
+    console.log(props.transaction);
+    console.log(props.transaction.ethType);
     unitsDisplay =
       props.transaction.ethType === 'ETH'
         ? walletApp.navState.protocol === ProtocolType.UQBAR
