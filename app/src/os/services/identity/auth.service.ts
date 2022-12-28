@@ -1,6 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
@@ -340,8 +339,6 @@ export class AuthService extends BaseService {
   }
 
   storeNewShip(ship: AuthShipType) {
-    console.log('storeNewShip', toJS(ship));
-
     const newShip = AuthShip.create(ship);
 
     this.state.setShip(newShip);

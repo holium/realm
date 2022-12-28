@@ -10,6 +10,8 @@ import {
   Spinner,
   AccessCode,
   Anchor,
+  FormControl,
+  isImgUrl,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -20,12 +22,12 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, identity } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const { setActiveApp } = useTrayApps();
+  const [invalidImg, setInvalidImg] = useState(false);
+  const [avatarImg, setAvatarImg] = useState('');
 
   const { windowColor, textColor, accentColor, inputColor } =
     theme.currentTheme;
@@ -58,7 +60,7 @@ export const AccountPanel: FC<any> = observer(() => {
       const profileData = {
         color: values.avatarColor,
         nickname: values.nickname,
-        avatar: values.avatarImage,
+        avatar: avatarImg,
       };
 
       if (avatarOption === 'color') {
@@ -218,16 +220,39 @@ export const AccountPanel: FC<any> = observer(() => {
                       borderRadius: 9,
                       backgroundColor: inputColor,
                     }}
-                    // defaultValue={customWallpaper.state.value}
-                    // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-                    onChange={
-                      (e: any) =>
-                        avatarImageField.actions.onChange(e.target.value)
-                      // customWallpaper.actions.onChange(e.target.value)
+                    onChange={(e: any) => {
+                      if (e.target.value === '') {
+                        setInvalidImg(false);
+                        setAvatarImg('');
+                      }
+                      avatarImageField.actions.onChange(e.target.value);
+                    }}
+                    rightInteractive
+                    rightIcon={
+                      <TextButton
+                        onClick={async () => {
+                          const isImage: boolean = await isImgUrl(
+                            avatarImageField.state.value
+                          );
+                          if (isImage) {
+                            setInvalidImg(false);
+                            setAvatarImg(avatarImageField.state.value);
+                          } else {
+                            setInvalidImg(true);
+                          }
+                        }}
+                      >
+                        Apply
+                      </TextButton>
                     }
                   />
                 )}
               </Flex>
+              {invalidImg ? (
+                <FormControl.Error>Invalid image</FormControl.Error>
+              ) : (
+                <></>
+              )}
             </Flex>
           </Flex>
 
@@ -264,7 +289,7 @@ export const AccountPanel: FC<any> = observer(() => {
             Email
           </Text>
           <Flex justifyContent="space-between" flex={3}>
-            <Text color={baseTheme.colors.text.secondary}> {email} </Text>
+            <Text color={textColor}> {email} </Text>
             <TextButton
               style={{ fontWeight: 400 }}
               showBackground
@@ -293,7 +318,7 @@ export const AccountPanel: FC<any> = observer(() => {
                 Payment
               </Text>
               <Flex justifyContent="space-between" flex={3}>
-                <Text color={baseTheme.colors.text.secondary}>Credit Card</Text>
+                <Text color={textColor}>Credit Card</Text>
                 <Anchor
                   href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg"
                   p={0}
@@ -317,7 +342,7 @@ export const AccountPanel: FC<any> = observer(() => {
           <Text fontWeight={500} flex={1} margin={'auto'}>
             URL
           </Text>
-          <Text color={baseTheme.colors.text.secondary} flex={3}>
+          <Text color={textColor} flex={3}>
             {url}
           </Text>
         </Flex>

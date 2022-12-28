@@ -18,6 +18,7 @@ import {
   Flex,
   TextButton,
   Spinner,
+  isImgUrl,
 } from 'renderer/components';
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -27,7 +28,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 interface ColorTileProps {
   tileColor: string;
 }
-const ColorTile = styled.div<ColorTileProps>`
+const ColorTile = styled(Flex)<ColorTileProps>`
   background: ${(props: ColorTileProps) => props.tileColor};
   height: 30px;
   width: 30px;
@@ -74,12 +75,13 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     const shipName = onboarding.ship!.patp;
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
+    const [invalidImg, setInvalidImg] = useState(false);
+    const [avatarImg, setAvatarImg] = useState('');
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
     const profileForm = useForm({
       async onSubmit({ values }) {
-        console.log(profileForm.computed.isDirty);
         if (profileForm.computed.isDirty) {
           setLoading(true);
           try {
@@ -89,7 +91,6 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
               avatar: values.avatar,
             };
             await OnboardingActions.setProfile(profileData);
-            console.log('profile set');
             props.setState &&
               props.setState({ ...props.workflowState, profile: profileData });
             props.onNext && props.onNext();
@@ -124,30 +125,20 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
       id: 'avatar',
       form: profileForm,
       initialValue: '',
-      validationSchema: yup
-        .string()
-        .optional()
-        .matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter correct url!'
-        ),
     });
 
     useEffect(() => {
       OnboardingActions.getProfile()
         .then((profile: any) => {
-          // console.log(profile);
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
           profileForm.fields.avatar.actions.onChange(profile.avatar || '');
           setProfileLoading(false);
         })
         .catch((err) => {
-          // TODO error message
           console.error(err);
           setProfileLoading(false);
         });
-      // console.log(profile);
     }, []);
 
     const handleClickOutside = (event: any) => {
@@ -208,11 +199,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                 <Sigil
                   simple={false}
                   size={52}
-                  avatar={
-                    avatar.state.value && !avatar.computed.error
-                      ? avatar.state.value
-                      : ''
-                  }
+                  avatar={avatarImg}
                   patp={shipName}
                   borderRadiusOverride="6px"
                   color={[sigilColor.state.value, 'white']}
@@ -262,8 +249,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                         id="signup-color-tile"
                         as="button"
                         tileColor={sigilColor.state.value}
-                        onClick={(evt: any) => {
-                          console.log('clicking tile', colorPickerOpen);
+                        onClick={() => {
                           setColorPickerOpen(!colorPickerOpen);
                         }}
                       />
@@ -298,18 +284,6 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   <FormControl.Field>
                     <Label>Avatar</Label>
                     <Flex>
-                      {/* <FileUpload
-                    required
-                    name="avatar"
-                    label="Avatar"
-                    width={40}
-                    onChange={(e: any) => setAvatar(e.target.value)}
-                    onBlur={(e: any) => setAvatar(e.target.value)}
-                    icon={
-                      <Icons name="ProfileImage" color="#C1C1C1" size={30} />
-                    }
-                    onNewFile={(avatar: any) => onAvatarUpload(avatar)}
-                  /> */}
                       <Input
                         tabIndex={3}
                         name="avatar"
@@ -327,13 +301,40 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                           avatar.computed.isDirty &&
                           avatar.computed.ifWasEverBlurredThenError
                         }
-                        onChange={(e: any) =>
-                          avatar.actions.onChange(e.target.value)
-                        }
+                        onChange={(e: any) => {
+                          if (e.target.value === '') {
+                            setInvalidImg(false);
+                            setAvatarImg('');
+                          }
+                          avatar.actions.onChange(e.target.value);
+                        }}
                         onFocus={() => avatar.actions.onFocus()}
                         onBlur={() => avatar.actions.onBlur()}
+                        rightInteractive
+                        rightIcon={
+                          <TextButton
+                            onClick={async () => {
+                              const isImage: boolean = await isImgUrl(
+                                avatar.state.value
+                              );
+                              if (isImage) {
+                                setInvalidImg(false);
+                                setAvatarImg(avatar.state.value);
+                              } else {
+                                setInvalidImg(true);
+                              }
+                            }}
+                          >
+                            Apply
+                          </TextButton>
+                        }
                       />
                     </Flex>
+                    {invalidImg ? (
+                      <FormControl.Error>Invalid image</FormControl.Error>
+                    ) : (
+                      <></>
+                    )}
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Nickname</Label>
