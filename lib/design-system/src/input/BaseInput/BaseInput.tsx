@@ -46,7 +46,7 @@ export const InputBoxStyle = styled(Box)<InputBoxProps>`
   input {
     border-radius: var(--rlm-border-radius-4);
     background-color: var(--rlm-input-color);
-    color: var(--rlm-text-color)
+    color: var(--rlm-text-color);
     pointer-events: all;
     flex: 1;
     height: inherit;
