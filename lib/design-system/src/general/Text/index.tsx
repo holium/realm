@@ -111,7 +111,7 @@ const Caption = styled(Default)<TextProps>`
 const Hint = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
-  font-size: 0.8rem;
+  font-size: 0.702rem;
 `;
 
 const Label = styled(Default)<TextProps>`

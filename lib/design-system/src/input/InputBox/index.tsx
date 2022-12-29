@@ -14,7 +14,7 @@ export type InputBoxStyleProps = {
   small?: boolean;
   bgOpacity?: number;
   wrapperMotionProps?: AnimationProps;
-  error?: string | undefined;
+  error?: string | boolean | undefined;
 } & BoxProps;
 
 const InputBoxStyle = styled(Box)<InputBoxStyleProps>`
@@ -188,7 +188,7 @@ export const InputBox: FC<InputBoxProps> = (props: InputBoxProps) => {
         )}
       </Box>
       {error && (
-        <Box position="absolute" bottom={-20}>
+        <Box position="absolute" left={0} bottom={-18}>
           <Text.Hint color="intent-alert">{error}</Text.Hint>
         </Box>
       )}
