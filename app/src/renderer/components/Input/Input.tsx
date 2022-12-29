@@ -1,6 +1,4 @@
-/* eslint-disable react/default-props-match-prop-types */
-/* eslint-disable react/prop-types */
-import { FC, forwardRef } from 'react';
+import { HTMLProps, RefObject } from 'react';
 import styled, { css, StyledComponentProps } from 'styled-components';
 import {
   compose,
@@ -235,9 +233,11 @@ const RightIcon: any = styled(Box)<
 `;
 
 export type FullProps = InputProps &
-  BoxProps & {
+  BoxProps &
+  HTMLProps<HTMLInputElement> & {
     tabIndex?: number;
-    wrapperRef?: any;
+    innerRef?: RefObject<HTMLInputElement>;
+    wrapperRef?: RefObject<HTMLDivElement>;
     wrapperStyle?: any;
     noCursor?: boolean;
     rows?: any;
@@ -251,112 +251,99 @@ export type FullProps = InputProps &
     type?: string;
   };
 
-export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
-  (props: FullProps, ref) => {
-    const {
-      id,
-      as,
-      leftIcon,
-      leftLabel,
-      leftInteractive,
-      rightIcon,
-      rightInteractive,
-      flex,
-      mb,
-      mt,
-      mx,
-      my,
-      ml,
-      mr,
-      noCursor,
-      disabled,
-      tabIndex,
-      variant,
-      borderColor,
-      wrapperMotionProps,
-      color,
-      bg,
-      width,
-      wrapperRef,
-      wrapperStyle,
-    } = props;
-
-    return (
-      <InputWrapper
-        id={id}
-        alignItems="center"
-        position="relative"
-        ref={wrapperRef}
-        borderColor={borderColor}
-        tabIndex={tabIndex}
-        color={color}
-        bg={bg}
-        mx={mx}
-        my={my}
-        mb={mb}
-        mt={mt}
-        ml={ml}
-        mr={mr}
-        width={width}
-        flex={flex}
-        style={wrapperStyle}
-        isDisabled={disabled}
-        error={props.error}
-        {...wrapperMotionProps}
-      >
-        {leftIcon && (
-          <LeftIcon
-            style={{ pointerEvents: leftInteractive ? 'auto' : 'none' }}
-            mr={inputTokens.x}
-            disabled={disabled}
-          >
-            {leftIcon}
-          </LeftIcon>
-        )}
-        {leftLabel && leftLabel !== 'none' && (
-          <Text color="#639DF6" fontWeight="500" marginRight={2}>
-            {leftLabel}
-          </Text>
-        )}
-        <ContentArea
-          as={as}
-          variant={variant}
-          ref={ref}
-          hasLeftIcon={leftIcon}
-          hasRightIcon={rightIcon}
-          disabled={disabled}
-          aria-invalid={props.error ? 'true' : 'false'}
-          {...props}
-          bg="transparent"
-          style={{
-            width: '100%',
-            caretColor: noCursor ? 'transparent' : undefined,
-            ...props.style,
-          }}
-        />
-        {rightIcon && (
-          <RightIcon
-            style={{ pointerEvents: rightInteractive ? 'auto' : 'none' }}
-            ml={inputTokens.x}
-            disabled={disabled}
-          >
-            {rightIcon}
-          </RightIcon>
-        )}
-      </InputWrapper>
-    );
-  }
-);
-Input.displayName = 'Input';
-Input.defaultProps = {
-  error: false,
-  leftInteractive: false,
-  rightInteractive: false,
-  variant: 'body',
-  as: 'input',
-  wrapperMotionProps: {
+export const Input = ({
+  as = 'input',
+  leftIcon,
+  leftLabel,
+  leftInteractive = false,
+  rightIcon,
+  rightInteractive = false,
+  flex,
+  error = false,
+  mb,
+  mt,
+  mx,
+  my,
+  ml,
+  mr,
+  noCursor,
+  disabled,
+  tabIndex,
+  variant = 'body',
+  borderColor,
+  wrapperMotionProps = {
     transition: {
       background: { duration: 1 },
     },
   },
-};
+  color,
+  bg,
+  width,
+  innerRef,
+  wrapperRef,
+  wrapperStyle,
+  style,
+  ...rest
+}: FullProps) => (
+  <InputWrapper
+    alignItems="center"
+    position="relative"
+    ref={wrapperRef}
+    borderColor={borderColor}
+    tabIndex={tabIndex}
+    color={color}
+    bg={bg}
+    mx={mx}
+    my={my}
+    mb={mb}
+    mt={mt}
+    ml={ml}
+    mr={mr}
+    width={width}
+    flex={flex}
+    style={wrapperStyle}
+    isDisabled={disabled}
+    error={error}
+    {...wrapperMotionProps}
+  >
+    {leftIcon && (
+      <LeftIcon
+        style={{ pointerEvents: leftInteractive ? 'auto' : 'none' }}
+        mr={inputTokens.x}
+        disabled={disabled}
+      >
+        {leftIcon}
+      </LeftIcon>
+    )}
+    {leftLabel && leftLabel !== 'none' && (
+      <Text color="#639DF6" fontWeight="500" marginRight={2}>
+        {leftLabel}
+      </Text>
+    )}
+    <ContentArea
+      as={as}
+      variant={variant}
+      ref={innerRef}
+      hasLeftIcon={leftIcon}
+      hasRightIcon={rightIcon}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : 'false'}
+      {...rest}
+      bg="transparent"
+      style={{
+        width: '100%',
+        caretColor: noCursor ? 'transparent' : undefined,
+        ...style,
+      }}
+    />
+    {rightIcon && (
+      <RightIcon
+        style={{ pointerEvents: rightInteractive ? 'auto' : 'none' }}
+        ml={inputTokens.x}
+        disabled={disabled}
+      >
+        {rightIcon}
+      </RightIcon>
+    )}
+  </InputWrapper>
+);

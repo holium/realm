@@ -422,7 +422,7 @@ export const ChatView = observer(
                 </Tooltip>
                 <Input
                   as="textarea"
-                  ref={chatInputRef}
+                  innerRef={chatInputRef}
                   tabIndex={1}
                   rows={1}
                   autoFocus
@@ -451,7 +451,11 @@ export const ChatView = observer(
                       </IconButton>
                     </Flex>
                   }
-                  onChange={(e) => dmMessage.actions.onChange(e.target.value)}
+                  onChange={(e) =>
+                    dmMessage.actions.onChange(
+                      (e.target as HTMLTextAreaElement).value
+                    )
+                  }
                   onPaste={onPaste}
                   onFocus={() => dmMessage.actions.onFocus()}
                   onBlur={() => dmMessage.actions.onBlur()}
