@@ -323,7 +323,6 @@ export const Input = ({
       </Text>
     )}
     <ContentArea
-      id={id}
       as={as}
       variant={variant}
       ref={innerRef}
