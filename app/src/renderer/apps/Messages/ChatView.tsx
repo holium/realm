@@ -204,6 +204,7 @@ export const ChatView = observer(
         SoundActions.playDMSend();
         if (chatInputRef.current) {
           chatInputRef.current.value = '';
+          chatInputRef.current.style.height = 'auto';
           chatInputRef.current.focus();
         }
 
