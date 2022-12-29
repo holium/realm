@@ -10,7 +10,6 @@ import {
   Grid,
   Sigil,
   Text,
-  Input,
   Label,
   FormControl,
   Box,
@@ -22,7 +21,7 @@ import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { AvatarInput } from '@holium/design-system';
+import { AvatarInput, TextInput } from '@holium/design-system';
 
 interface ColorTileProps {
   tileColor: string;
@@ -126,7 +125,8 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
         .then((profile: any) => {
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
-          profileForm.fields.avatar.actions.onChange(profile.avatar || '');
+          setAvatarImg(profile.avatar || '');
+
           setProfileLoading(false);
         })
         .catch((err) => {
@@ -287,15 +287,14 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Nickname</Label>
-                    <Input
-                      tabIndex={1}
+                    <TextInput
+                      id="onboarding-nickname"
                       name="nickname"
+                      className="realm-cursor-text-cursor"
+                      width="100%"
+                      type="text"
                       placeholder="optional"
                       value={nickname.state.value || ''}
-                      error={
-                        nickname.computed.isDirty &&
-                        nickname.computed.ifWasEverBlurredThenError
-                      }
                       onChange={(e: any) =>
                         nickname.actions.onChange(e.target.value)
                       }

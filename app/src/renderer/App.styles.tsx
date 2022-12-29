@@ -1,4 +1,4 @@
-import { darken, rgba } from 'polished';
+import { darken, rgba, lighten } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 import { ThemeType } from './logic/theme';
 import { ThemeType as OldTheme } from './theme';
@@ -37,8 +37,10 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --rlm-base-color: ${props.realmTheme.backgroundColor};
       --rlm-accent-color: ${props.realmTheme.accentColor};
       --rlm-input-color: ${props.realmTheme.inputColor};
-      --rlm-border-color: ${props.realmTheme.backgroundColor};
-      --rlm-window-color: ${darken(0.025, props.realmTheme.windowColor)};
+      --rlm-border-color: ${props.realmTheme.mode === 'dark'
+        ? lighten(0.07, props.realmTheme.windowColor)
+        : darken(0.1, props.realmTheme.windowColor)};
+      --rlm-window-color: ${props.realmTheme.windowColor};
       --rlm-card-color: ${props.realmTheme.windowColor};
       --rlm-theme-mode: ${props.realmTheme.mode};
       --rlm-text-color: ${props.realmTheme.textColor};

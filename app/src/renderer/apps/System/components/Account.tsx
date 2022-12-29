@@ -1,11 +1,10 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { AvatarInput } from '@holium/design-system';
+import { AvatarInput, TextInput } from '@holium/design-system';
 import {
   Flex,
   Text,
   Card,
-  Input,
   RadioGroup,
   TextButton,
   Spinner,
@@ -25,10 +24,9 @@ import { useTrayApps } from 'renderer/apps/store';
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
-  const [avatarImg, setAvatarImg] = useState('');
+  const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
 
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+  const { windowColor, textColor, accentColor } = theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
@@ -107,7 +105,6 @@ export const AccountPanel: FC<any> = observer(() => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
@@ -137,18 +134,14 @@ export const AccountPanel: FC<any> = observer(() => {
               Nickname
             </Text>
             <Flex flex={3}>
-              <Input
+              <TextInput
+                id="account-nickname"
+                name="account-nickname"
                 className="realm-cursor-text-cursor"
+                width="100%"
                 type="text"
                 placeholder="(none)"
                 value={nicknameField.state.value}
-                wrapperStyle={{
-                  cursor: 'none',
-                  borderRadius: 9,
-                  backgroundColor: inputColor,
-                }}
-                // defaultValue={ship!.nickname ? ship!.nickname : ''}
-                // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
                 onChange={(e: any) =>
                   nicknameField.actions.onChange(e.target.value)
                 }
