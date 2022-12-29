@@ -126,7 +126,6 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
           setAvatarImg(profile.avatar || '');
-
           setProfileLoading(false);
         })
         .catch((err) => {
