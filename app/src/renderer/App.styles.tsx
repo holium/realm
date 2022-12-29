@@ -1,4 +1,4 @@
-import { darken } from 'polished';
+import { darken, rgba, lighten } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 import { ThemeType } from './logic/theme';
 import { ThemeType as OldTheme } from './theme';
@@ -17,12 +17,46 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
 
   }
 
+  :root {
+    ${(props: StyleProps) => css`
+      --blur-enabled: ${props.blur ? 'blur(24px)' : 'none'}; */
+      --transition-fast: .4s ease;
+      --transition: all 0.25s ease;
+      --transition-2x: all 0.5s ease;
+      --rlm-border-radius-4: 4px;
+      --rlm-border-radius-6: 6px;
+      --rlm-border-radius-9: 9px;
+      --rlm-border-radius-12: 12px;
+      --rlm-border-radius-12: 16px;
+    `}
+  }
+
+  ${(props) => css`
+    :root {
+      --rlm-font: 'Rubik', sans-serif;
+      --rlm-base-color: ${props.realmTheme.backgroundColor};
+      --rlm-accent-color: ${props.realmTheme.accentColor};
+      --rlm-input-color: ${props.realmTheme.inputColor};
+      --rlm-border-color: ${props.realmTheme.mode === 'dark'
+        ? lighten(0.07, props.realmTheme.windowColor)
+        : darken(0.1, props.realmTheme.windowColor)};
+      --rlm-window-color: ${props.realmTheme.windowColor};
+      --rlm-card-color: ${props.realmTheme.windowColor};
+      --rlm-theme-mode: ${props.realmTheme.mode};
+      --rlm-text-color: ${props.realmTheme.textColor};
+      --rlm-icon-color: ${rgba(props.realmTheme.textColor, 0.7)};
+      --rlm-intent-alert-color: #ff6240;
+      --rlm-intent-caution-color: #ffbc32;
+      --rlm-intent-success-color: #0fc383;
+    }
+  `}
+
   #root{ 
     height: inherit;
     width: inherit;
   }
 
-  /* Scroll bar stylings */
+    /* Scroll bar stylings */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -50,21 +84,11 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     transition: .25s ease;
     background: ${(props) => darken(0.1, props.realmTheme.windowColor)}; 
   }
-  :root {
-    ${(props: StyleProps) => css`
-      --blur-enabled: ${props.blur ? 'blur(24px)' : 'none'};
-      --border-color: ${props.theme.colors.ui.borderColor};
-      --background-color: ${props.theme.colors.bg.primary};
-      --transition-fast: ${props.theme.transitionFast};
-      --transition: ${props.theme.transition};
-      --text-color: ${props.theme.colors.text.primary};
-    `}
-  }
 
   body {
-    background-color: ${(props) => props.theme.colors.bg.body};
+    background-color: var(--rlm-window-color);
     transition: background-color 1s ease;
-    color: ${(props) => props.theme.colors.text.primary};
+    color:var(--rlm-text-color);
     height: 100vh;
     width: 100vw;
     margin: 0;

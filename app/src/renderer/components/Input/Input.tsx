@@ -55,7 +55,7 @@ export type InputProps = StyledComponentProps<
   never
 >;
 
-export const InputWrapper = styled(Flex)`
+export const InputWrapper = styled(Flex)<BaseInputProps>`
   /* display: block; */
   width: ${(props) => (props.width ? props.width : '100%')};
   ${(props) =>
@@ -234,12 +234,22 @@ const RightIcon: any = styled(Box)<
   }
 `;
 
-export type FullProps = InputProps & {
-  wrapperRef?: any;
-  wrapperStyle?: any;
-  noCursor?: boolean;
-  rows?: any;
-};
+export type FullProps = InputProps &
+  BoxProps & {
+    tabIndex?: number;
+    wrapperRef?: any;
+    wrapperStyle?: any;
+    noCursor?: boolean;
+    rows?: any;
+    disabled?: boolean;
+    color?: string;
+    style?: any;
+    name?: string;
+    placeholder?: string;
+    value?: string;
+    required?: boolean;
+    type?: string;
+  };
 
 export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
   (props: FullProps, ref) => {
@@ -259,6 +269,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       mr,
       noCursor,
       disabled,
+      tabIndex,
       variant,
       borderColor,
       wrapperMotionProps,
@@ -275,6 +286,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         position="relative"
         ref={wrapperRef}
         borderColor={borderColor}
+        tabIndex={tabIndex}
         color={color}
         bg={bg}
         mx={mx}
@@ -338,7 +350,6 @@ Input.defaultProps = {
   error: false,
   leftInteractive: false,
   rightInteractive: false,
-  type: 'text',
   variant: 'body',
   as: 'input',
   wrapperMotionProps: {

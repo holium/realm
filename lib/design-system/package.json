@@ -15,6 +15,7 @@
   "dependencies": {
     "dom-helpers": "^5.2.1",
     "framer-motion": "^7.6.7",
+    "polished": "^4.2.2",
     "prop-types": "^15.8.1",
     "react-lifecycles-compat": "^3.0.4",
     "styled-components": "^5.3.6",

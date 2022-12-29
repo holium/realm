@@ -36,7 +36,7 @@ Field.defaultProps = {
 };
 
 export const FieldSet: any = styled(Grid).attrs({
-  gridGap: 4,
+  gridGap: 5,
   as: 'fieldset',
 })<GridProps>``;
 

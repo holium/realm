@@ -10,10 +10,8 @@ import {
   Grid,
   Sigil,
   Text,
-  Input,
   Label,
   FormControl,
-  Icons,
   Box,
   Flex,
   TextButton,
@@ -23,11 +21,12 @@ import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { AvatarInput, TextInput } from '@holium/design-system';
 
 interface ColorTileProps {
   tileColor: string;
 }
-const ColorTile = styled.div<ColorTileProps>`
+const ColorTile = styled(Flex)<ColorTileProps>`
   background: ${(props: ColorTileProps) => props.tileColor};
   height: 30px;
   width: 30px;
@@ -74,22 +73,23 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     const shipName = onboarding.ship!.patp;
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
+    const [avatarImg, setAvatarImg] = useState(
+      onboarding.ship ? onboarding.ship.avatar! : ''
+    );
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
     const profileForm = useForm({
       async onSubmit({ values }) {
-        console.log(profileForm.computed.isDirty);
         if (profileForm.computed.isDirty) {
           setLoading(true);
           try {
             const profileData = {
               color: values.color,
               nickname: values.nickname,
-              avatar: values.avatar,
+              avatar: avatarImg,
             };
             await OnboardingActions.setProfile(profileData);
-            console.log('profile set');
             props.setState &&
               props.setState({ ...props.workflowState, profile: profileData });
             props.onNext && props.onNext();
@@ -120,34 +120,18 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
         .required('Enter a hex value'),
     });
 
-    const avatar = useField({
-      id: 'avatar',
-      form: profileForm,
-      initialValue: '',
-      validationSchema: yup
-        .string()
-        .optional()
-        .matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter correct url!'
-        ),
-    });
-
     useEffect(() => {
       OnboardingActions.getProfile()
         .then((profile: any) => {
-          // console.log(profile);
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
-          profileForm.fields.avatar.actions.onChange(profile.avatar || '');
+          setAvatarImg(profile.avatar || '');
           setProfileLoading(false);
         })
         .catch((err) => {
-          // TODO error message
           console.error(err);
           setProfileLoading(false);
         });
-      // console.log(profile);
     }, []);
 
     const handleClickOutside = (event: any) => {
@@ -208,11 +192,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                 <Sigil
                   simple={false}
                   size={52}
-                  avatar={
-                    avatar.state.value && !avatar.computed.error
-                      ? avatar.state.value
-                      : ''
-                  }
+                  avatar={avatarImg}
                   patp={shipName}
                   borderRadiusOverride="6px"
                   color={[sigilColor.state.value, 'white']}
@@ -262,8 +242,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                         id="signup-color-tile"
                         as="button"
                         tileColor={sigilColor.state.value}
-                        onClick={(evt: any) => {
-                          console.log('clicking tile', colorPickerOpen);
+                        onClick={() => {
                           setColorPickerOpen(!colorPickerOpen);
                         }}
                       />
@@ -297,55 +276,24 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Avatar</Label>
-                    <Flex>
-                      {/* <FileUpload
-                    required
-                    name="avatar"
-                    label="Avatar"
-                    width={40}
-                    onChange={(e: any) => setAvatar(e.target.value)}
-                    onBlur={(e: any) => setAvatar(e.target.value)}
-                    icon={
-                      <Icons name="ProfileImage" color="#C1C1C1" size={30} />
-                    }
-                    onNewFile={(avatar: any) => onAvatarUpload(avatar)}
-                  /> */}
-                      <Input
-                        tabIndex={3}
-                        name="avatar"
-                        placeholder="Paste image link here"
-                        wrapperStyle={{ height: 35, paddingLeft: 4 }}
-                        leftIcon={
-                          <Icons
-                            name="ProfileImage"
-                            color="#C1C1C1"
-                            size={24}
-                          />
-                        }
-                        value={avatar.state.value || ''}
-                        error={
-                          avatar.computed.isDirty &&
-                          avatar.computed.ifWasEverBlurredThenError
-                        }
-                        onChange={(e: any) =>
-                          avatar.actions.onChange(e.target.value)
-                        }
-                        onFocus={() => avatar.actions.onFocus()}
-                        onBlur={() => avatar.actions.onBlur()}
-                      />
-                    </Flex>
+                    <AvatarInput
+                      id="profile-setup-avatar-input"
+                      tabIndex={3}
+                      initialValue={avatarImg}
+                      onSave={(url) => setAvatarImg(url)}
+                      height={35}
+                    />
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Nickname</Label>
-                    <Input
-                      tabIndex={1}
+                    <TextInput
+                      id="onboarding-nickname"
                       name="nickname"
+                      className="realm-cursor-text-cursor"
+                      width="100%"
+                      type="text"
                       placeholder="optional"
                       value={nickname.state.value || ''}
-                      error={
-                        nickname.computed.isDirty &&
-                        nickname.computed.ifWasEverBlurredThenError
-                      }
                       onChange={(e: any) =>
                         nickname.actions.onChange(e.target.value)
                       }
