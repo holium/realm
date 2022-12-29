@@ -174,6 +174,7 @@ export class RemotePeer extends Peer {
   }
 
   hangup() {
+    this.removeTracks();
     this.peer?.destroy();
   }
 
