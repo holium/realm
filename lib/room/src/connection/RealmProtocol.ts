@@ -491,7 +491,6 @@ export class RealmProtocol extends BaseProtocol {
     }
     if (presentRoom.present.includes(this.our)) {
       this.hangupAll(presentRoom.rid);
-      this.presentRoom = undefined;
       this.peers.clear();
       this.emit(ProtocolEvent.RoomLeft, presentRoom);
       await this.poke({
@@ -501,6 +500,7 @@ export class RealmProtocol extends BaseProtocol {
           'leave-room': presentRoom.rid,
         },
       });
+      this.presentRoom = undefined;
     }
   }
 }
