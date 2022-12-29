@@ -63,10 +63,10 @@ const textDecoration = style({
 const pointerEvents = style({
   prop: 'pointerEvents',
   cssProperty: 'pointerEvents',
-  transformValue: (value: boolean | undefined) => {
-    if (value === undefined) return 'auto';
-    return !value ? 'none' : 'auto';
-  },
+  // transformValue: (value: boolean | undefined) => {
+  //   if (value === undefined) return 'auto';
+  //   return !value ? 'none' : 'auto';
+  // },
 });
 
 const textTransform = style({

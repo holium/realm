@@ -1,32 +1,32 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon, TextButton, Input } from '../../';
-import { BaseInput } from '.';
+import { Flex, Icon, Button, Input } from '../..';
+import { InputBox } from '.';
 
 export default {
-  component: BaseInput,
-} as ComponentMeta<typeof BaseInput>;
+  component: InputBox,
+} as ComponentMeta<typeof InputBox>;
 
-export const Default: ComponentStory<typeof BaseInput> = (args) => (
-  <BaseInput {...args}>
+export const Default: ComponentStory<typeof InputBox> = (args) => (
+  <InputBox {...args}>
     <input id="inline-label-input" type="text" placeholder="Placeholder here" />
-  </BaseInput>
+  </InputBox>
 );
 
 Default.args = {
   inputId: 'inline-label-input',
 };
 
-export const InlineLabel: ComponentStory<typeof BaseInput> = () => (
+export const InlineLabel: ComponentStory<typeof InputBox> = () => (
   <Flex flexDirection="column" gap={12}>
-    <BaseInput inputId="inline-label-input-1" label="Horizontal label">
+    <InputBox inputId="inline-label-input-1" label="Horizontal label">
       <Input
         id="inline-label-input-1"
         type="text"
         placeholder="Placeholder here"
       />
-    </BaseInput>
+    </InputBox>
 
-    <BaseInput
+    <InputBox
       inputId="inline-label-input-2"
       inlineLabelDirection="column"
       label="Vertical label"
@@ -36,51 +36,59 @@ export const InlineLabel: ComponentStory<typeof BaseInput> = () => (
         type="text"
         placeholder="Placeholder here"
       />
-    </BaseInput>
+    </InputBox>
   </Flex>
 );
 
-export const LeftAdornment: ComponentStory<typeof BaseInput> = () => (
+export const LeftAdornment: ComponentStory<typeof InputBox> = () => (
   <>
-    <BaseInput
+    <InputBox
       width={200}
       leftAdornment={<Icon name="Search" />}
       inputId="input-2"
     >
       <input id="input-2" tabIndex={1} placeholder="Placeholder here" />
-    </BaseInput>
+    </InputBox>
   </>
 );
 
-export const RightAdornment: ComponentStory<typeof BaseInput> = () => (
+export const RightAdornment: ComponentStory<typeof InputBox> = () => (
   <>
-    <BaseInput
+    <InputBox
       width={200}
       rightAdornment={<Icon name="Search" />}
       inputId="input-2"
     >
       <input id="input-2" tabIndex={1} placeholder="Placeholder here" />
-    </BaseInput>
+    </InputBox>
   </>
 );
 
-export const RightButton: ComponentStory<typeof BaseInput> = () => (
+export const RightButton: ComponentStory<typeof InputBox> = () => (
   <>
-    <BaseInput
+    <InputBox
       width={300}
       rightInteractive
-      rightAdornment={<TextButton>Button</TextButton>}
+      rightAdornment={
+        <Button.TextButton
+          onClick={() => {
+            console.log('clicked');
+          }}
+        >
+          Button
+        </Button.TextButton>
+      }
       inputId="input-2"
     >
       <input id="input-2" tabIndex={1} placeholder="Placeholder here" />
-    </BaseInput>
+    </InputBox>
   </>
 );
 
-export const Error: ComponentStory<typeof BaseInput> = () => (
+export const Error: ComponentStory<typeof InputBox> = () => (
   <>
-    <BaseInput inputId="input-3" error="Not valid input">
+    <InputBox inputId="input-3" error="Not valid input">
       <input id="input-3" tabIndex={1} placeholder="Placeholder here" />
-    </BaseInput>
+    </InputBox>
   </>
 );

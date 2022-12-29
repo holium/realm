@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
+import { AvatarInput } from '@holium/design-system';
 import {
   Flex,
   Text,
@@ -10,8 +11,6 @@ import {
   Spinner,
   AccessCode,
   Anchor,
-  FormControl,
-  isImgUrl,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -26,7 +25,6 @@ import { useTrayApps } from 'renderer/apps/store';
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
-  const [invalidImg, setInvalidImg] = useState(false);
   const [avatarImg, setAvatarImg] = useState('');
 
   const { windowColor, textColor, accentColor, inputColor } =
@@ -81,12 +79,6 @@ export const AccountPanel: FC<any> = observer(() => {
     id: 'avatarColor',
     form: profileForm,
     initialValue: ship!.color!,
-  });
-
-  const avatarImageField = useField({
-    id: 'avatarImage',
-    form: profileForm,
-    initialValue: ship!.avatar ? ship!.avatar : '',
   });
 
   const nicknameField = useField({
@@ -203,56 +195,19 @@ export const AccountPanel: FC<any> = observer(() => {
                       '#8419D9',
                     ]}
                     onChange={(color: string) =>
-                      // console.log('color avatar input', color)
                       avatarColorField.actions.onChange(color)
                     }
                   />
                 )}
                 {avatarOption === 'image' && (
-                  <Input
-                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute ~bacwyls
-                    className="realm-cursor-text-cursor"
-                    type="text"
-                    placeholder="Paste url here"
-                    value={avatarImageField.state.value}
-                    wrapperStyle={{
-                      cursor: 'none',
-                      borderRadius: 9,
-                      backgroundColor: inputColor,
-                    }}
-                    onChange={(e: any) => {
-                      if (e.target.value === '') {
-                        setInvalidImg(false);
-                        setAvatarImg('');
-                      }
-                      avatarImageField.actions.onChange(e.target.value);
-                    }}
-                    rightInteractive
-                    rightIcon={
-                      <TextButton
-                        onClick={async () => {
-                          const isImage: boolean = await isImgUrl(
-                            avatarImageField.state.value
-                          );
-                          if (isImage) {
-                            setInvalidImg(false);
-                            setAvatarImg(avatarImageField.state.value);
-                          } else {
-                            setInvalidImg(true);
-                          }
-                        }}
-                      >
-                        Apply
-                      </TextButton>
-                    }
+                  <AvatarInput
+                    id="system-account-avatar-input"
+                    width="100%"
+                    initialValue={ship!.avatar! || ''}
+                    onSave={(url) => setAvatarImg(url)}
                   />
                 )}
               </Flex>
-              {invalidImg ? (
-                <FormControl.Error>Invalid image</FormControl.Error>
-              ) : (
-                <></>
-              )}
             </Flex>
           </Flex>
 

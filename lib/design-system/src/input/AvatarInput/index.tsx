@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { isImgUrl } from '../../utils';
-import { BaseInput, BoxProps, Icon, Input, TextButton } from '../..';
+import { InputBox, BoxProps, Icon, Input, Button } from '../..';
 
 type AvatarInputProps = {
   id: string;
@@ -20,13 +20,13 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
   if (success) textButtonContent = <Icon name="CheckCircle" />;
 
   return (
-    <BaseInput
+    <InputBox
       {...props}
       tabIndex={tabIndex}
       rightInteractive
       leftAdornment={<Icon name="ProfileImage" opacity={0.3} size={24} />}
       rightAdornment={
-        <TextButton
+        <Button.TextButton
           color={invalidImg ? 'intent-alert' : 'accent'}
           onClick={async (evt: React.MouseEvent<HTMLButtonElement>) => {
             if (invalidImg) {
@@ -48,7 +48,7 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
           }}
         >
           {textButtonContent}
-        </TextButton>
+        </Button.TextButton>
       }
       error={invalidImg ? 'Invalid image url' : undefined}
       inputId={id}
@@ -57,6 +57,9 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
         id={id}
         tabIndex={1}
         spellCheck={false}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
         className="realm-cursor-text-cursor"
         placeholder="Paste image link here"
         value={value}
@@ -68,6 +71,6 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
           setValue(evt.target.value);
         }}
       />
-    </BaseInput>
+    </InputBox>
   );
 };

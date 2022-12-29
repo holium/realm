@@ -33,7 +33,7 @@ export type TextProps = {
     | 'inherit';
 } & BoxProps;
 
-export const BaseText = styled(Box)<TextProps>`
+const BaseText = styled(Box)<TextProps>`
   ${(props) =>
     props.fontByName &&
     css`
@@ -50,7 +50,7 @@ export const BaseText = styled(Box)<TextProps>`
   }
 `;
 
-export const Default = styled(BaseText)<TextProps>`
+const Default = styled(BaseText)<TextProps>`
   font-family: var(--rlm-font);
   font-weight: 400;
   font-size: 0.889rem;
@@ -60,37 +60,37 @@ export const Default = styled(BaseText)<TextProps>`
   white-space: nowrap;
 `;
 
-export const H1 = styled(Default)<TextProps>`
+const H1 = styled(Default)<TextProps>`
   font-weight: 700;
   line-height: 1.5rem;
   font-size: 1.8rem;
 `;
 
-export const H2 = styled(Default)<TextProps>`
+const H2 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.5rem;
   font-size: 1.6rem;
 `;
 
-export const H3 = styled(Default)<TextProps>`
+const H3 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.25rem;
   font-size: 1.42rem;
 `;
 
-export const H4 = styled(Default)<TextProps>`
+const H4 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.26rem;
 `;
 
-export const H5 = styled(Default)<TextProps>`
+const H5 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.125rem;
 `;
 
-export const H6 = styled(Default)<TextProps>`
+const H6 = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: 1rem;
   font-size: 1rem;
@@ -135,7 +135,7 @@ const Patp = styled(motion.p)<TextProps>`
   margin-bottom: 0px;
 `;
 
-export const Anchor = styled(motion.a)<TextProps>`
+const Anchor = styled(motion.a)<TextProps>`
   ${(props) =>
     props.fontByName &&
     css`

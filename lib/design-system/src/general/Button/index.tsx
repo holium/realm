@@ -91,7 +91,7 @@ const buttonStyles = compose(
   border
 );
 
-export const Base = styled(motion.button)<ButtonProps>`
+const Base = styled(motion.button)<ButtonProps>`
   box-sizing: border-box;
   flex-basis: content;
   appearance: none;
@@ -121,7 +121,7 @@ export const Base = styled(motion.button)<ButtonProps>`
   }
 `;
 
-export const Primary = styled(Base)<ButtonProps>`
+const Primary = styled(Base)<ButtonProps>`
   background-color: var(--rlm-accent-color);
   color: #ffffff;
   &:hover:not([disabled]) {
@@ -135,7 +135,7 @@ export const Primary = styled(Base)<ButtonProps>`
   }
 `;
 
-export const Secondary = styled(Base)<ButtonProps>`
+const Secondary = styled(Base)<ButtonProps>`
   color: var(--rlm-text-color);
   background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
   &:hover:not([disabled]) {
@@ -146,7 +146,7 @@ export const Secondary = styled(Base)<ButtonProps>`
   }
 `;
 
-export const Minimal = styled(Base)<ButtonProps>`
+const Minimal = styled(Base)<ButtonProps>`
   color: var(--rlm-accent-color);
   background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.1)};
   &:hover:not([disabled]) {
@@ -160,7 +160,7 @@ export const Minimal = styled(Base)<ButtonProps>`
   }
 `;
 
-export const Transparent = styled(Base)<ButtonProps>`
+const Transparent = styled(Base)<ButtonProps>`
   color: var(--rlm-text-color);
   background-color: transparent;
   &:hover:not([disabled]) {
@@ -176,7 +176,7 @@ export const Transparent = styled(Base)<ButtonProps>`
 
 type TextButtonProps = ButtonProps & { showOnHover?: boolean };
 
-export const TextButton = styled(Base)<TextButtonProps>`
+const TextButton = styled(Base)<TextButtonProps>`
   color: ${(props) =>
     props.color
       ? `var(--rlm-${props.color}-color)`

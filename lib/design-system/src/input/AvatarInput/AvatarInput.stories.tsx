@@ -14,6 +14,7 @@ export const Default: ComponentStory<typeof AvatarInput> = (args) => (
 
 Default.args = {
   id: 'test-avatar',
+  width: 400,
   onSave: (url) => {
     console.log('should save url', url);
   },

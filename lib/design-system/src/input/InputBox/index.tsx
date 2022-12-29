@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { Text, Box, BoxProps } from '../..';
 import { AnimationProps } from 'framer-motion';
 
-export type InputBoxProps = {
+export type InputBoxStyleProps = {
   label?: string;
   leftAdornment?: JSX.Element | string;
   leftInteractive?: boolean;
@@ -17,7 +17,7 @@ export type InputBoxProps = {
   error?: string | undefined;
 } & BoxProps;
 
-export const InputBoxStyle = styled(Box)<InputBoxProps>`
+const InputBoxStyle = styled(Box)<InputBoxStyleProps>`
   position: relative;
   border-radius: var(--rlm-border-radius-6);
   border: 1px solid var(--rlm-border-color);
@@ -51,6 +51,13 @@ export const InputBoxStyle = styled(Box)<InputBoxProps>`
     &::placeholder {
       opacity: 0.5;
     }
+  }
+
+  input[type='password'] {
+    letter-spacing: 0.125em;
+  }
+  input[type='password']::placeholder {
+    letter-spacing: 0em;
   }
 
   ${(props) =>
@@ -111,20 +118,15 @@ InputBoxStyle.defaultProps = {
   shouldHighlightOnFocus: true,
 };
 
-export type BaseInputProps = InputBoxProps & {
+export type InputBoxProps = InputBoxStyleProps & {
   inputId: string;
   inlineLabelDirection?: 'row' | 'column';
 };
 
-export const BaseInput: FC<BaseInputProps> = (
-  props: BaseInputProps = {
-    inputId: 'base-input-1',
-    inlineLabelDirection: 'row',
-  }
-) => {
+export const InputBox: FC<InputBoxProps> = (props: InputBoxProps) => {
   const {
-    inputId,
-    inlineLabelDirection,
+    inputId = 'base-input-1',
+    inlineLabelDirection = 'row',
     leftAdornment,
     label,
     leftInteractive,
@@ -138,12 +140,15 @@ export const BaseInput: FC<BaseInputProps> = (
   return (
     <InputBoxStyle
       display="flex"
+      contentEditable="true"
+      suppressContentEditableWarning={true}
       width={props.width}
       height={props.height}
       error={error}
       flexDirection={inlineLabelDirection}
       disabled={disabled}
-      onMouseDown={(evt: React.MouseEvent<HTMLDivElement>) => {
+      // pointerEvents="none"
+      onFocus={(_evt: React.FocusEvent<HTMLDivElement>) => {
         document.getElementById(inputId)?.focus();
       }}
     >
@@ -191,4 +196,4 @@ export const BaseInput: FC<BaseInputProps> = (
   );
 };
 
-export default BaseInput;
+export default InputBox;

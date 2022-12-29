@@ -13,17 +13,16 @@ import {
   Input,
   Label,
   FormControl,
-  Icons,
   Box,
   Flex,
   TextButton,
   Spinner,
-  isImgUrl,
 } from 'renderer/components';
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { AvatarInput } from '@holium/design-system';
 
 interface ColorTileProps {
   tileColor: string;
@@ -75,8 +74,9 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     const shipName = onboarding.ship!.patp;
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
-    const [invalidImg, setInvalidImg] = useState(false);
-    const [avatarImg, setAvatarImg] = useState('');
+    const [avatarImg, setAvatarImg] = useState(
+      onboarding.ship ? onboarding.ship.avatar! : ''
+    );
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
@@ -88,7 +88,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
             const profileData = {
               color: values.color,
               nickname: values.nickname,
-              avatar: values.avatar,
+              avatar: avatarImg,
             };
             await OnboardingActions.setProfile(profileData);
             props.setState &&
@@ -119,12 +119,6 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
         .string()
         .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
         .required('Enter a hex value'),
-    });
-
-    const avatar = useField({
-      id: 'avatar',
-      form: profileForm,
-      initialValue: '',
     });
 
     useEffect(() => {
@@ -283,58 +277,13 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Avatar</Label>
-                    <Flex>
-                      <Input
-                        tabIndex={3}
-                        name="avatar"
-                        placeholder="Paste image link here"
-                        wrapperStyle={{ height: 35, paddingLeft: 4 }}
-                        leftIcon={
-                          <Icons
-                            name="ProfileImage"
-                            color="#C1C1C1"
-                            size={24}
-                          />
-                        }
-                        value={avatar.state.value || ''}
-                        error={
-                          avatar.computed.isDirty &&
-                          avatar.computed.ifWasEverBlurredThenError
-                        }
-                        onChange={(e: any) => {
-                          if (e.target.value === '') {
-                            setInvalidImg(false);
-                            setAvatarImg('');
-                          }
-                          avatar.actions.onChange(e.target.value);
-                        }}
-                        onFocus={() => avatar.actions.onFocus()}
-                        onBlur={() => avatar.actions.onBlur()}
-                        rightInteractive
-                        rightIcon={
-                          <TextButton
-                            onClick={async () => {
-                              const isImage: boolean = await isImgUrl(
-                                avatar.state.value
-                              );
-                              if (isImage) {
-                                setInvalidImg(false);
-                                setAvatarImg(avatar.state.value);
-                              } else {
-                                setInvalidImg(true);
-                              }
-                            }}
-                          >
-                            Apply
-                          </TextButton>
-                        }
-                      />
-                    </Flex>
-                    {invalidImg ? (
-                      <FormControl.Error>Invalid image</FormControl.Error>
-                    ) : (
-                      <></>
-                    )}
+                    <AvatarInput
+                      id="profile-setup-avatar-input"
+                      tabIndex={3}
+                      initialValue={avatarImg}
+                      onSave={(url) => setAvatarImg(url)}
+                      height={35}
+                    />
                   </FormControl.Field>
                   <FormControl.Field>
                     <Label>Nickname</Label>
