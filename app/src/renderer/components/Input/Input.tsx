@@ -302,7 +302,6 @@ export const Input = ({
     ml={ml}
     mr={mr}
     width={width}
-    flex={flex}
     style={wrapperStyle}
     isDisabled={disabled}
     error={error}
@@ -331,6 +330,7 @@ export const Input = ({
       disabled={disabled}
       aria-invalid={error ? 'true' : 'false'}
       {...rest}
+      flex={flex}
       bg="transparent"
       style={{
         width: '100%',
