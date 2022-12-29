@@ -254,6 +254,7 @@ export type FullProps = InputProps &
 export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
   (props: FullProps, ref) => {
     const {
+      id,
       as,
       leftIcon,
       leftLabel,
@@ -282,6 +283,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
 
     return (
       <InputWrapper
+        id={id}
         alignItems="center"
         position="relative"
         ref={wrapperRef}
