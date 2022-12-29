@@ -157,7 +157,7 @@ export const Members = observer((props: IMembers) => {
           autoCorrect="false"
           autoComplete="false"
           name="person"
-          ref={searchRef}
+          innerRef={searchRef}
           height={34}
           placeholder="Search..."
           // bg={

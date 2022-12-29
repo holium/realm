@@ -252,6 +252,7 @@ export type FullProps = InputProps &
   };
 
 export const Input = ({
+  id,
   as = 'input',
   leftIcon,
   leftLabel,
@@ -286,6 +287,7 @@ export const Input = ({
   ...rest
 }: FullProps) => (
   <InputWrapper
+    id={id}
     alignItems="center"
     position="relative"
     ref={wrapperRef}
@@ -321,6 +323,7 @@ export const Input = ({
       </Text>
     )}
     <ContentArea
+      id={id}
       as={as}
       variant={variant}
       ref={innerRef}
