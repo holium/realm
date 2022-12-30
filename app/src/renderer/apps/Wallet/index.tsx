@@ -72,8 +72,6 @@ export const WalletApp: FC<any> = observer((props: any) => {
     (tx: any) => tx.status === 'pending'
   ).length;
   useEffect(() => {
-    console.log('length', transactions.length)
-    console.log('count', transactionCount)
     if (transactions.length !== transactionCount) {
       setTransactionCount(transactions.length);
       setHidePending(false);

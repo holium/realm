@@ -110,6 +110,9 @@ export const TransactionDetail: FC = observer(() => {
   const amountDisplay = isEth
     ? `${ethAmount.eth}` /* ETH` */
     : `${btcAmount.btc} BTC`;
+  
+  console.log('tx', transaction.notes)
+  console.log('notes', notes)
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
