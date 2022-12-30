@@ -38,7 +38,25 @@ type PassportMenuProviderProps = {
   children: ReactNode;
 };
 
-const MENU_WIDTH = 340;
+const WIDTH = 340;
+const MIN_HEIGHT = 130;
+
+const calculateCoordinates = (config: PassportMenuConfig) => {
+  const charactersPerLine = 42;
+  const description = config.options.description ?? '';
+  const numberOfLines = Math.ceil(description.length / charactersPerLine);
+  const descriptionLineHeight = 17;
+  const totalHeight = MIN_HEIGHT + descriptionLineHeight * numberOfLines;
+  const willOverFlowBottom =
+    config.anchorPoint.y + totalHeight > window.innerHeight - 58;
+
+  return {
+    x: config.anchorPoint.x - WIDTH - 6,
+    y: willOverFlowBottom
+      ? config.anchorPoint.y - totalHeight + 38
+      : config.anchorPoint.y,
+  };
+};
 
 export const PassportMenuProvider = ({
   children,
@@ -70,11 +88,10 @@ export const PassportMenuProvider = ({
             <Menu
               customBg={theme.currentTheme.windowColor}
               style={{
-                x: menu.anchorPoint && menu.anchorPoint.x - MENU_WIDTH - 6,
-                y: menu.anchorPoint && menu.anchorPoint.y,
-                width: MENU_WIDTH,
+                ...calculateCoordinates(menu),
+                width: WIDTH,
                 borderRadius: 9,
-                minHeight: 120,
+                minHeight: MIN_HEIGHT,
                 padding: 12,
               }}
               isOpen
