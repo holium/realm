@@ -47,10 +47,10 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
     return (
       <Flex p={4} height="100%" width="100%" flexDirection="column">
         <Text mt={2} variant="h4">
-          Create Wallet
+          Create Address
         </Text>
         <Text mt={3} variant="body">
-          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallet
+          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
           will be created. Give it a memorable nickname.
         </Text>
         <FieldSet mt={8}>

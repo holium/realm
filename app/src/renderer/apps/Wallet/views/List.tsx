@@ -62,7 +62,7 @@ export const WalletList: FC<WalletListProps> = observer(
           alignItems="center"
         >
           <Text variant="h3" textAlign="center">
-            No wallets
+            No addresses
           </Text>
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
@@ -72,11 +72,11 @@ export const WalletList: FC<WalletListProps> = observer(
                 : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
                 ? 'Bitcoin'
                 : 'Bitcoin Testnet'}{' '}
-              wallets yet.
+              addresses yet.
             </Text>
           </Flex>
           <Flex mt={9} justifyContent="center">
-            <Button onClick={onClick}>Create wallet</Button>
+            <Button onClick={onClick}>Create address</Button>
           </Flex>
         </Flex>
       );
