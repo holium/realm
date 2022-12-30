@@ -4,7 +4,6 @@ import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 import {
   Grid,
-  Input,
   Label,
   FormControl,
   Box,
@@ -17,8 +16,7 @@ import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-
-// /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+import { TextInput } from '@holium/design-system';
 
 export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -113,18 +111,20 @@ export const AddShip: FC<BaseDialogProps> = observer(
               <FormControl.FieldSet>
                 <FormControl.Field>
                   <Label>Urbit ID</Label>
-                  <Input
+                  <TextInput
+                    mt={1}
+                    id="onboarding-patp"
                     tabIndex={1}
                     name="patp"
                     placeholder="~sampel-palnet"
-                    borderColor="input.borderColor"
                     defaultValue={urbitId.state.value}
                     autoCapitalize="false"
                     autoCorrect="false"
                     spellCheck="false"
                     error={
                       urbitId.computed.ifWasEverBlurredThenError &&
-                      urbitId.computed.isDirty
+                      urbitId.computed.isDirty &&
+                      urbitId.computed.error
                     }
                     onChange={(e: any) => {
                       setError('');
@@ -133,16 +133,12 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     onFocus={() => urbitId.actions.onFocus()}
                     onBlur={() => urbitId.actions.onBlur()}
                   />
-                  {urbitId.computed.ifWasEverBlurredThenError &&
-                    urbitId.computed.isDirty && (
-                      <FormControl.Error>
-                        {urbitId.computed.error}
-                      </FormControl.Error>
-                    )}
                 </FormControl.Field>
                 <FormControl.Field>
                   <Label>URL</Label>
-                  <Input
+                  <TextInput
+                    mt={1}
+                    id="onboarding-ship-url"
                     tabIndex={2}
                     name="url"
                     placeholder="https://my-ship.host.com"
@@ -152,7 +148,8 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     spellCheck="false"
                     error={
                       shipUrl.computed.ifWasEverBlurredThenError &&
-                      shipUrl.computed.isDirty
+                      shipUrl.computed.isDirty &&
+                      shipUrl.computed.error
                     }
                     onChange={(e: any) => {
                       setError('');
@@ -161,16 +158,12 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     onFocus={() => shipUrl.actions.onFocus()}
                     onBlur={() => shipUrl.actions.onBlur()}
                   />
-                  {shipUrl.computed.ifWasEverBlurredThenError &&
-                    shipUrl.computed.isDirty && (
-                      <FormControl.Error>
-                        {shipUrl.computed.error}
-                      </FormControl.Error>
-                    )}
                 </FormControl.Field>
                 <FormControl.Field>
                   <Label>Access key</Label>
-                  <Input
+                  <TextInput
+                    mt={1}
+                    id="onboarding-access-key"
                     tabIndex={3}
                     name="code"
                     placeholder="sample-micsev-bacmug-moldex"
@@ -181,7 +174,8 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     type="password"
                     error={
                       accessKey.computed.ifWasEverBlurredThenError &&
-                      accessKey.computed.isDirty
+                      accessKey.computed.isDirty &&
+                      accessKey.computed.error
                     }
                     onChange={(e: any) => {
                       setError('');
@@ -190,12 +184,6 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     onFocus={() => accessKey.actions.onFocus()}
                     onBlur={() => accessKey.actions.onBlur()}
                   />
-                  {accessKey.computed.ifWasEverBlurredThenError &&
-                    accessKey.computed.isDirty && (
-                      <FormControl.Error>
-                        {accessKey.computed.error}
-                      </FormControl.Error>
-                    )}
                 </FormControl.Field>
               </FormControl.FieldSet>
             </Flex>

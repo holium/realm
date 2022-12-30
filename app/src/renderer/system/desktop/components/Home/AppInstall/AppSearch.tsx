@@ -6,7 +6,6 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useAppInstaller } from './store';
 import * as yup from 'yup';
 import { createField, createForm } from 'mobx-easy-form';
-import { AppSearchPopover } from './AppSearchPopover';
 
 interface AppSearchProps {
   mode: 'home' | 'space';
@@ -184,7 +183,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           search.actions.onBlur();
         }}
       />
-      <AppSearchPopover />
     </Flex>
   );
 });

@@ -285,8 +285,18 @@ export const BazaarSubscriptions = {
           handleReactions(data, model);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %bazaar');
+        model.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %bazaar rejected');
+        model.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %bazaar subscription');
+        model.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };

@@ -1,7 +1,7 @@
 import { css } from 'styled-components';
 
 // The color variants maps to CSS variables injected by Realm.
-type ColorVariants =
+export type ColorVariants =
   | 'base'
   | 'accent'
   | 'input'
@@ -9,7 +9,11 @@ type ColorVariants =
   | 'window'
   | 'card'
   | 'text'
-  | 'icon';
+  | 'icon'
+  | 'intent-alert'
+  | 'intent-success'
+  | 'intent-warning'
+  | 'intent-info';
 
 export interface ColorProps {
   bg?: ColorVariants;

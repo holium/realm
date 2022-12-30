@@ -331,9 +331,18 @@ export const SpacesApi = {
           );
         }
       },
-
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %spaces');
+        spacesState.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %spaces rejected');
+        spacesState.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %spaces subscription');
+        spacesState.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };

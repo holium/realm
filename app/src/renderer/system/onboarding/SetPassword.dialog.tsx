@@ -1,12 +1,10 @@
 import { FC } from 'react';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
-
 import {
   Grid,
   Sigil,
   Text,
-  Input,
   Label,
   FormControl,
   Box,
@@ -17,6 +15,7 @@ import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { TextInput } from '@holium/design-system';
 
 export const SetPassword: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -125,15 +124,19 @@ export const SetPassword: FC<BaseDialogProps> = observer(
             <FormControl.FieldSet width="100%">
               <FormControl.Field>
                 <Label>Password</Label>
-                <Input
+                <TextInput
                   mt={1}
                   tabIndex={1}
+                  id="onboarding-password-1"
                   name="password"
                   type="password"
-                  placeholder="***************"
+                  placeholder="Must have at least 8 characters"
+                  className="realm-cursor-text-cursor"
+                  width="100%"
                   error={
+                    password.computed.ifWasEverBlurredThenError &&
                     password.computed.isDirty &&
-                    password.computed.ifWasEverBlurredThenError
+                    password.computed.error
                   }
                   onChange={(e: any) =>
                     password.actions.onChange(e.target.value)
@@ -141,24 +144,22 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   onFocus={() => password.actions.onFocus()}
                   onBlur={() => password.actions.onBlur()}
                 />
-
-                <FormControl.Error>
-                  {password.computed.ifWasEverBlurredThenError &&
-                    password.computed.isDirty &&
-                    password.computed.error}
-                </FormControl.Error>
               </FormControl.Field>
               <FormControl.Field mt={2}>
                 <Label>Confirm password</Label>
-                <Input
+                <TextInput
                   mt={1}
+                  id="onboarding-password-2"
                   tabIndex={2}
                   name="confirm-password"
                   type="password"
-                  placeholder="***************"
+                  placeholder="Must match"
+                  className="realm-cursor-text-cursor"
+                  width="100%"
                   error={
+                    confirmPassword.computed.ifWasEverBlurredThenError &&
                     confirmPassword.computed.isDirty &&
-                    confirmPassword.computed.ifWasEverBlurredThenError
+                    confirmPassword.computed.error
                   }
                   onChange={(e: any) =>
                     confirmPassword.actions.onChange(e.target.value)
@@ -166,11 +167,6 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   onFocus={() => confirmPassword.actions.onFocus()}
                   onBlur={() => confirmPassword.actions.onBlur()}
                 />
-                <FormControl.Error>
-                  {confirmPassword.computed.ifWasEverBlurredThenError &&
-                    confirmPassword.computed.isDirty &&
-                    confirmPassword.computed.error}
-                </FormControl.Error>
               </FormControl.Field>
             </FormControl.FieldSet>
           </Flex>

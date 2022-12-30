@@ -14,7 +14,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-export const EmptyGroup = styled.div`
+export const EmptyGroup = styled.div<{ color: string }>`
   height: 32px;
   width: 32px;
   background: ${(p) => p.color || '#000'};
