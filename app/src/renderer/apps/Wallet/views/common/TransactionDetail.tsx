@@ -71,7 +71,6 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  console.log(walletApp.navState.detail);
   const transactionList = (
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (walletApp.navState.detail?.txtype && walletApp.navState.detail!.txtype === 'coin')
@@ -103,7 +102,7 @@ export const TransactionDetail: FC = observer(() => {
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completed = new Date(
-    transaction.completedAt || transaction.initiatedAt
+    transaction.completedAt || transaction.initiatedAt || ''
   );
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
@@ -111,9 +110,6 @@ export const TransactionDetail: FC = observer(() => {
     ? `${ethAmount.eth}` /* ETH` */
     : `${btcAmount.btc} BTC`;
   
-  console.log('tx', transaction.notes)
-  console.log('notes', notes)
-
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
       <Text fontSize={2} color={themeData.colors.text.disabled}>
