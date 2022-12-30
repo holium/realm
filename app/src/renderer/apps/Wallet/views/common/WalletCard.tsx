@@ -68,7 +68,7 @@ export const WalletCard: FC<WalletCardProps> = ({
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
-      : (wallet as BitcoinWalletType).transactions;
+      : (wallet as BitcoinWalletType).transactionList.transactions;
   const transactions = getTransactions(walletTransactions || new Map());
 
   const ethTicker =
@@ -130,13 +130,17 @@ export const WalletCard: FC<WalletCardProps> = ({
       >
         <Flex>
           {coins &&
-            coins.map((coin, index) => (
+            coins.slice(0,6).map((coin, index) => (
               <img
                 src={coin.logo || getMockCoinIcon(coin.name)}
                 style={{ height: '14px', marginRight: '4px' }}
                 key={index}
               />
             ))}
+          {coins && coins.length > 6 &&
+          <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+            +{coins.length - 6}
+          </Text>}
         </Flex>
         <Text variant="body" color={theme.currentTheme.iconColor}>
           {transactions.length} Transactions
