@@ -7,7 +7,6 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
@@ -151,7 +150,7 @@ const TransactionList = types
     transactions: types.map(Transaction),
   })
   .actions((self) => ({
-    applyAgentTransaction(index: number, transaction: any) {
+    applyAgentTransaction(index: number, contract: string, transaction: any) {
       const tx = self.transactions.get(transaction.hash);
       if (tx) {
         tx.walletIndex = index;
@@ -163,6 +162,7 @@ const TransactionList = types
           walletIndex: index,
           amount: '0',
           notes: '',
+          ethType: contract || 'ETH',
         };
         self.transactions.set(transaction.hash, tx);
       }
@@ -186,10 +186,12 @@ const TransactionList = types
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
         };
+        const previousStatus = previousTransaction?.status;
+        self.transactions.set(transaction.hash, newTransaction);
         if (previousTransaction) {
           if (
             newTransaction.status !==
-            previousTransaction.status
+            previousStatus
           ) {
             const tx = this.getStoredTransaction(transaction.hash);
             WalletApi.setTransaction(
@@ -203,10 +205,7 @@ const TransactionList = types
             );
           }
         }
-        self.transactions.set(transaction.hash, newTransaction);
       }
-      console.log('transactions set')
-      console.log(self.transactions.size);
     },
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
@@ -434,16 +433,21 @@ const EthWallet = types
     },
     setCoin(protocol: ProtocolType, coin: Asset) {
       const coinData = coin.data as CoinAsset;
-      self.data.get(protocol)!.coins.set(coin.addr, {
-        name: coinData.symbol,
-        logo: coinData.logo || '',
-        address: coin.addr,
-        balance: coinData.balance.toString(),
-        decimals: coinData.decimals,
-        conversions: conversions.create(),
-        transactionList: {},
-        block: 0,
-      });
+      if (!self.data.get(protocol)!.coins.has(coin.addr)) {
+        self.data.get(protocol)!.coins.set(coin.addr, {
+          name: coinData.symbol,
+          logo: coinData.logo || '',
+          address: coin.addr,
+          balance: coinData.balance.toString(),
+          decimals: coinData.decimals,
+          conversions: conversions.create(),
+          transactionList: {},
+          block: 0,
+        });
+      }
+      else (
+        self.data.get(protocol)!.coins.get(coin.addr)!.balance = coinData.balance.toString()
+      )
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;
@@ -544,11 +548,11 @@ const EthWallet = types
     applyTransactionUpdate(protocol: ProtocolType, contract: any, transaction: any) {
       if (contract) {
         let txList = self.data.get(protocol)!.coins.get(contract)!.transactionList;
-        txList.applyAgentTransaction(self.index, transaction);
+        txList.applyAgentTransaction(self.index, contract, transaction);
       }
       else {
         let netMap = self.data.get(protocol)!.transactionList;
-        netMap.applyAgentTransaction(self.index, transaction);
+        netMap.applyAgentTransaction(self.index, contract, transaction);
       }
     },
   }));

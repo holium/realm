@@ -20,6 +20,7 @@ import {
   EthWalletType,
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
+import io from 'socket.io-client';
 
 export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
@@ -28,7 +29,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private interval: any;
   private baseURL: string;
   private nodeURL: string;
-  private blockURL: string;
   private updating: boolean = false;
 
   constructor(protocol: ProtocolType) {
@@ -41,21 +41,18 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
     if (this.protocol === ProtocolType.ETH_MAIN) {
       this.nodeURL = this.baseURL + '/eth';
-      this.blockURL = this.baseURL + '/block';
     } else {
       this.nodeURL = this.baseURL + '/gorli';
-      this.blockURL = this.baseURL + '/gorliblock';
     }
     let alchemySettings: AlchemySettings;
+    this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
     if (this.protocol === ProtocolType.ETH_MAIN) {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
       alchemySettings = {
         url: this.nodeURL,
         network: Network.ETH_MAINNET,
       };
       // etherscan
     } else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
       alchemySettings = {
         url: this.nodeURL,
         network: Network.ETH_GOERLI,
@@ -72,18 +69,25 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
 
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
-    console.log('watching updates')
     this.updateWalletState(conduit, walletStore);
-    axios
-      .get(this.blockURL, {
-        responseType: 'stream',
-      })
-      .then((res: any) => {
-        res.data.on('data', (data: any) => {
-          const currentBlock = Number(data.toString());
-          this.updateWalletState(conduit, walletStore, currentBlock);
-        });
+    try {
+      const socket = io(this.baseURL);
+      socket.on('connect', () => {
+        const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
+        socket.emit('join', room);
       });
+      socket.on('block', (data: any) => {
+        const currentBlock = Number(data.toString());
+        this.updateWalletState(conduit, walletStore, currentBlock);
+      });
+      socket.on('error', (error: any) => {
+        console.log(error);
+      });
+      socket.on('disconnect', () => {
+      })
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async updateWalletState(
@@ -95,68 +99,71 @@ export class EthereumProtocol implements BaseBlockProtocol {
       return;
     }
     this.updating = true;
-    if (!currentBlock) {
-      currentBlock = await this.getBlockNumber();
-    }
-    for (const walletKey of walletStore.currentStore?.wallets.keys()) {
-      const wallet = walletStore.ethereum.wallets.get(walletKey)!;
-      this.getAccountBalance(wallet.address).then((balance: string) =>
-        wallet.setBalance(this.protocol, balance)
-      );
-      this.getAccountTransactions(
-        wallet.address,
-        (wallet as EthWalletType).data.get(this.protocol)!.block || 0,
-        currentBlock
-      ).then((response: any[]) => {
-        if (response.length > 0) {
-          (wallet as EthWalletType).data.get(this.protocol)!.transactionList.applyChainTransactions(conduit, this.protocol, wallet.index, wallet.address, response);
-          (wallet as EthWalletType).data.get(this.protocol)!.setBlock(currentBlock!);
-        }
-      });
-      if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
-        const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
-        this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
-          for (let asset of assets) {
-            if (asset.type === 'coin') {
-              if (!ethWallet.data.get(this.protocol)!.coins.has(asset.addr)) {
+    try {
+      if (!currentBlock) {
+        currentBlock = await this.getBlockNumber();
+      }
+      for (const walletKey of walletStore.currentStore?.wallets.keys()) {
+        const wallet = walletStore.ethereum.wallets.get(walletKey)!;
+        this.getAccountBalance(wallet.address).then((balance: string) =>
+          wallet.setBalance(this.protocol, balance)
+        );
+        this.getAccountTransactions(
+          wallet.address,
+          (wallet as EthWalletType).data.get(this.protocol)!.block || 0,
+          currentBlock
+        ).then((response: any[]) => {
+          if (response.length > 0) {
+            (wallet as EthWalletType).data.get(this.protocol)!.transactionList.applyChainTransactions(conduit, this.protocol, wallet.index, wallet.address, response);
+            (wallet as EthWalletType).data.get(this.protocol)!.setBlock(currentBlock!);
+          }
+        });
+        if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
+          const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
+          this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
+            for (let asset of assets) {
+              if (asset.type === 'coin') {
                 this.getAsset(asset.addr, ethWallet.address, 'coin').then(
                   (coin: Asset) => ethWallet.setCoin(this.protocol, coin)
                 );
+                this.getAssetTransfers(
+                  asset.addr,
+                  ethWallet.address,
+                  ethWallet.data.get(this.protocol)!.coins.get(asset.addr)?.block || 0,
+                  currentBlock!
+                ).then((transfers: any) => {
+                  if (
+                    ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
+                    transfers.length > 0
+                  ) {
+                    ethWallet.data
+                      .get(this.protocol)!
+                      .coins.get(asset.addr)!
+                      .transactionList.applyChainTransactions(conduit, this.protocol, ethWallet.index, ethWallet.address, transfers);
+                    ethWallet.data
+                      .get(this.protocol)!
+                      .coins.get(asset.addr)!.setBlock(currentBlock!);
+                  }
+                });
               }
-              this.getAssetTransfers(
-                asset.addr,
-                ethWallet.address,
-                ethWallet.data.get(this.protocol)!.coins.get(asset.addr)?.block || 0,
-                currentBlock!
-              ).then((transfers: any) => {
-                if (
-                  ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
-                  transfers.length > 0
-                ) {
-                  ethWallet.data
-                    .get(this.protocol)!
-                    .coins.get(asset.addr)!
-                    .transactionList.applyChainTransactions(conduit, this.protocol, ethWallet.index, ethWallet.address, transfers);
-                  ethWallet.data
-                    .get(this.protocol)!
-                    .coins.get(asset.addr)!.setBlock(currentBlock!);
-                }
-              });
+              if (asset.type === 'nft') {
+                this.getAsset(
+                  asset.addr,
+                  ethWallet.address,
+                  'nft',
+                  (asset.data as NFTAsset).tokenId
+                ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
+                /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
+                  ethWallet.updateNftTransfers
+                );*/
+              }
             }
-            if (asset.type === 'nft') {
-              this.getAsset(
-                asset.addr,
-                ethWallet.address,
-                'nft',
-                (asset.data as NFTAsset).tokenId
-              ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
-              /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
-                ethWallet.updateNftTransfers
-              );*/
-            }
-          }
-        });
+          });
+        }
       }
+    } catch (error) {
+      console.log(error);
+      this.updating = false;
     }
     this.updating = false;
   }
