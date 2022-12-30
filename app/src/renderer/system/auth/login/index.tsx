@@ -182,7 +182,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   alignItems="center"
                 >
                   <Input
-                    ref={passwordRef}
+                    innerRef={passwordRef}
                     wrapperRef={wrapperRef}
                     bg="bg.blendedBg"
                     autoFocus

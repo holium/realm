@@ -118,7 +118,7 @@ export const AmountInput = observer(
                 /* @ts-expect-error */
                 <Input
                   autoFocus
-                  ref={amountRef}
+                  innerRef={amountRef}
                   mode={theme.currentTheme.mode}
                   type="number"
                   color={themeData.colors.text.primary}
@@ -134,7 +134,7 @@ export const AmountInput = observer(
                   {/* @ts-expect-error */}
                   <Input
                     autoFocus
-                    ref={amountRef}
+                    innerRef={amountRef}
                     mode={theme.currentTheme.mode}
                     type="number"
                     color={themeData.colors.text.primary}

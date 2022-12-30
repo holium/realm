@@ -126,7 +126,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
           type="text"
           placeholder="whats up dawg"
           autoFocus
-          ref={chatInputRef}
+          innerRef={chatInputRef}
           spellCheck={false}
           wrapperStyle={{
             cursor: 'none',
