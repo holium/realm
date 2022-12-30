@@ -348,7 +348,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
             autoComplete="false"
             spellCheck="false"
             name="person"
-            ref={searchRef}
+            innerRef={searchRef}
             height={34}
             leftIcon={<Icons opacity={0.6} color={iconColor} name="UserAdd" />}
             placeholder="Enter Urbit ID"
