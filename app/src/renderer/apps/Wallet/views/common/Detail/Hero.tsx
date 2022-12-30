@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, memo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
@@ -335,12 +335,12 @@ function CopyButton(props: CopyProps) {
   );
 }
 
-function SendReceiveButtons(props: {
+const SendReceiveButtons = memo((props: {
   hidden: boolean;
   windowColor: string;
   send: any;
   receive: any;
-}) {
+}) => {
   const panelBackground = darken(0.04, props.windowColor);
 
   return (
@@ -359,7 +359,7 @@ function SendReceiveButtons(props: {
       </Flex>
     </Box>
   );
-}
+})
 
 interface BalanceInterface {
   address: string;
