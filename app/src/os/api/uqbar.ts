@@ -1,18 +1,20 @@
 import { Conduit } from '@holium/conduit';
 import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
 
-export const WalletApi = {
+export const UqbarApi = {
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
+    const formattedAddress = '0x' + address.substring(2).match(/.{4}/g)!.join('.');
     const payload = {
       app: 'wallet',
-      mark: 'wallet-action',
+      mark: 'wallet-poke',
       json: {
         'add-tracked-address': {
-          address,
+          address: formattedAddress,
           nick,
         },
       },
     };
+    console.log(payload);
     await conduit.poke(payload);
   },
   editNickname: async (conduit: Conduit, address: string, nick: string) => {
@@ -137,8 +139,8 @@ export const WalletApi = {
   },
 };
 
-const handleBookReactions = (data: any, walletState: WalletStoreType) => {};
+const handleBookReactions = (data: any, walletState: WalletStoreType) => console.log(data);
 
-const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {};
+const handleMetadataReactions = (data: any, walletState: WalletStoreType) => console.log(data);
 
-const handleTxReactions = (data: any, walletState: WalletStoreType) => {};
+const handleTxReactions = (data: any, walletState: WalletStoreType) => console.log(data);

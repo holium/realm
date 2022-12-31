@@ -30,6 +30,7 @@ import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
+import { UqbarApi } from '../../api/uqbar';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -374,6 +375,7 @@ export class WalletService extends BaseService {
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
       this.wallet!.updateWalletState(this.core.conduit!, this.state!);
     });
+    UqbarApi.watchUpdates(this.core.conduit!, this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();

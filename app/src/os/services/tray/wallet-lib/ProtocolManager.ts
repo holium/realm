@@ -29,10 +29,10 @@ export class Wallet {
       lastProtocol?.removeListener();
     }
     this.currentProtocol = walletState.navState.protocol;
-    if (walletState.navState.network === NetworkType.ETHEREUM) {
-      this.protocols.get(
+    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
+      (this.protocols.get(
         this.currentProtocol
-      )!.watchUpdates(conduit, walletState);
+      )! as EthereumProtocol).watchUpdates(conduit, walletState);
     }
   }
 
