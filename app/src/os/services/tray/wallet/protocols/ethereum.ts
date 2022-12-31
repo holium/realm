@@ -225,7 +225,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error);
             throw error;
           }
         }
@@ -273,7 +272,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error);
             throw error;
           }
         }
@@ -314,7 +312,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       }
       return assets;
     } catch (error: any) {
-      console.log(error);
       return [];
     }
   }
@@ -431,7 +428,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error)
             throw error;
           }
         }
@@ -484,7 +480,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } else {
-            console.log(error);
             throw error;
           }
         }
