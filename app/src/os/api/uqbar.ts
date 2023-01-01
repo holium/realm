@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
+import { ProtocolType, WalletStoreType } from '../services/tray/wallet-lib/wallet.model';
 
 export const UqbarApi = {
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
@@ -139,8 +139,39 @@ export const UqbarApi = {
   },
 };
 
-const handleBookReactions = (data: any, walletState: WalletStoreType) => console.log(data);
+const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
 
-const handleMetadataReactions = (data: any, walletState: WalletStoreType) => console.log(data);
+const handleBookReactions = (data: any, walletState: WalletStoreType) => {
+  console.log('book')
+  console.log(data);
+  for (const address of Object.keys(data)) {
+    console.log(address)
+    for (const contract of Object.keys(data[address])) {
+      console.log('contract', contract)
+      if (data[address][contract].contract === ZIG_CONTRACT_ADDRESS) {
+        console.log('has contract')
+        const formattedAddress = address.replaceAll('.','');
+        console.log(formattedAddress)
+        console.log(walletState.ethereum.wallets.keys())
+        for (const key of walletState.ethereum.wallets.keys()) {
+          console.log(key)
+          if (walletState.ethereum.wallets.get(key)!.address === formattedAddress) {
+            console.log('has address')
+            const balance = data[address][contract].data.balance;
+            walletState.ethereum.wallets.get(key)!.setBalance(ProtocolType.UQBAR, balance);
+          }
+        }
+      }
+    }
+  }
+}
 
-const handleTxReactions = (data: any, walletState: WalletStoreType) => console.log(data);
+const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
+  console.log('metadata')
+  console.log(data);
+}
+
+const handleTxReactions = (data: any, walletState: WalletStoreType) => {
+  console.log('tx')
+  console.log(data);
+}
