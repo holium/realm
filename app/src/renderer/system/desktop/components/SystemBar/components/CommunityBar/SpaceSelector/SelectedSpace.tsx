@@ -4,10 +4,14 @@ import { Flex, Text, Sigil } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { useServices } from 'renderer/logic/store';
 
-const EmptyPicture = styled.div`
+type EmptyPictureProps = {
+  color?: string;
+};
+
+const EmptyPicture = styled.div<EmptyPictureProps>`
   height: 32px;
   width: 32px;
-  background: ${(p: any) => p.color || '#000'};
+  background: ${({ color }) => color || '#000'};
   border-radius: 4px;
 `;
 
@@ -96,7 +100,7 @@ export const SelectedSpace = observer((props: SelectedSpaceProps) => {
             src={selectedSpace.picture}
           />
         ) : (
-          <EmptyPicture color={selectedSpace.color || '#000000'} />
+          <EmptyPicture color={selectedSpace.color ?? '#000000'} />
         )}
         <Flex
           style={{ pointerEvents: 'none' }}
