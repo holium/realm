@@ -80,9 +80,9 @@ export const BrowserToolbar = observer(
     const toggleDevTools = () => {
       const webView = getWebView();
       if (webView)
-        webView.isDevToolsOpened()
-          ? webView.closeDevTools()
-          : webView.openDevTools();
+        webView?.isDevToolsOpened()
+          ? webView?.closeDevTools()
+          : webView?.openDevTools();
     };
 
     return (

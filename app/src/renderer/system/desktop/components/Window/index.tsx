@@ -163,17 +163,28 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    let webviewId = `${activeWindow.id}-urbit-webview`;
+    enum WebViewType {
+      'urbit' = 'urbit',
+      'web' = 'web',
+    }
+
+    const getWebViewId = (activeWindowId: string, webViewType: WebViewType) =>
+      `${activeWindowId}-${webViewType}-webview`;
+
+    let webviewId = getWebViewId(activeWindow.id, WebViewType.urbit);
     if (window.type === 'web') {
-      webviewId = `${activeWindow.id}-web-webview`;
+      webviewId = getWebViewId(activeWindow.id, WebViewType.web);
     }
 
     const onDevTools = useCallback(() => {
       console.log(webviewId);
-      const webview: any = document.getElementById(webviewId);
-      webview.isDevToolsOpened()
-        ? webview.closeDevTools()
-        : webview.openDevTools();
+      const webview: any =
+        document.getElementById(webviewId) ||
+        document.getElementById(getWebViewId(activeWindow.id, WebViewType.web));
+
+      webview?.isDevToolsOpened()
+        ? webview?.closeDevTools()
+        : webview?.openDevTools();
     }, [webviewId]);
 
     const onMouseDown = () => {
@@ -222,7 +233,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
       CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
-      showDevToolsToggle = false;
+      // TODO: Remove hardcoded showDevToolsToggle
+      showDevToolsToggle = true;
       preventClickEvents = false;
       if (CustomTitlebar) {
         titlebar = (
