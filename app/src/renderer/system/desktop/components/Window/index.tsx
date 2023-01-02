@@ -24,6 +24,7 @@ import {
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { getWebViewIdEffectful } from 'renderer/system/desktop/components/Window/util';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -163,24 +164,11 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    enum WebViewType {
-      'urbit' = 'urbit',
-      'web' = 'web',
-    }
-
-    const getWebViewId = (activeWindowId: string, webViewType: WebViewType) =>
-      `${activeWindowId}-${webViewType}-webview`;
-
-    let webviewId = getWebViewId(activeWindow.id, WebViewType.urbit);
-    if (window.type === 'web') {
-      webviewId = getWebViewId(activeWindow.id, WebViewType.web);
-    }
+    const webviewId = getWebViewIdEffectful(activeWindow.id, window.type);
 
     const onDevTools = useCallback(() => {
       console.log(webviewId);
-      const webview: any =
-        document.getElementById(webviewId) ||
-        document.getElementById(getWebViewId(activeWindow.id, WebViewType.web));
+      const webview = document.getElementById(webviewId) as Electron.WebviewTag;
 
       webview?.isDevToolsOpened()
         ? webview?.closeDevTools()

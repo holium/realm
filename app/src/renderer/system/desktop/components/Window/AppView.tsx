@@ -9,6 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { applyStyleOverrides } from './style-overrides';
 import { genCSSVariables } from 'renderer/logic/theme';
+import { getWebViewIdEffectful } from 'renderer/system/desktop/components/Window/util';
 
 interface AppViewProps {
   window: WindowModelProps;
@@ -51,8 +52,9 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   );
 
   useEffect(() => {
+    const webViewId = getWebViewIdEffectful(window.id, window.type);
     const webView: Electron.WebviewTag = document.getElementById(
-      `${window.id}-urbit-webview`
+      webViewId
     ) as Electron.WebviewTag;
 
     if (window && ship && webView) {
