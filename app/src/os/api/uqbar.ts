@@ -163,6 +163,9 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
           }
         }
       }
+      else {
+
+      }
     }
   }
 }
@@ -170,7 +173,6 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
 const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
   console.log('metadata')
   console.log(data);
-  
 }
 
 const handleTxReactions = (data: any, walletState: WalletStoreType) => {
