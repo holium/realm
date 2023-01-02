@@ -133,6 +133,29 @@
       ^-  [@t json]
       [key (transaction-to-json transaction)]
 ::
+++  token-transactions-to-json
+  =,  enjs:format
+  |=  token-txns=(map net=@t (map @t (map @t transaction)))
+  ^-  json
+    %-  pairs
+    =/  tx-list  ~(tap by token-txns)
+    %+  turn  tx-list
+    |=  [net=@t transactions=(map @t (map @t transaction))]
+    ^-  [@t json]
+    :-  net
+      %-  pairs
+      =/  tx-list  ~(tap by transactions)
+      %+  turn  tx-list
+      |=  [contract=@t contract-transactions=(map @t transaction)]
+      ^-  [@t json]
+      :-  contract
+        %-  pairs
+        =/  tx-list  ~(tap by contract-transactions)
+        %+  turn  tx-list
+        |=  [key=@t =transaction]
+        ^-  [@t json]
+        [key (transaction-to-json transaction)]
+::
 ++  enjs-update
   =,  enjs:format
   |=  =update
@@ -206,6 +229,7 @@
                   ['path' [%s path.wallet]]
                   ['nickname' [%s nickname.wallet]]
                   ['transactions' (transactions-to-json transactions.wallet)]
+                  ['token-txns' (token-transactions-to-json token-txns.wallet)]
               ==
         --
       --
