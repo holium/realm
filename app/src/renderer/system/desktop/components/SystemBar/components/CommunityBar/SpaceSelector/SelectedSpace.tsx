@@ -28,124 +28,125 @@ const FadeInMotion = {
   transition: { opacity: { duration: 1, ease: 'easeIn' } },
 };
 
-export const SelectedSpace = observer((props: SelectedSpaceProps) => {
-  const { selectorRef, onClick } = props;
-  const { spaces, ship, theme } = useServices();
-  const selectedSpace = spaces.selected;
-  const { dockColor, textColor } = theme.currentTheme;
+export const SelectedSpace = observer(
+  ({ selectorRef, onClick }: SelectedSpaceProps) => {
+    const { spaces, ship, theme } = useServices();
+    const selectedSpace = spaces.selected;
+    const { dockColor, textColor } = theme.currentTheme;
 
-  let innerContent: JSX.Element | null;
+    let innerContent: JSX.Element | null;
 
-  if (!selectedSpace) return null;
+    if (!selectedSpace) return null;
 
-  if (selectedSpace.type === 'our') {
-    innerContent = (
-      <Flex
-        style={{ pointerEvents: 'none' }}
-        gap={8}
-        flexDirection="row"
-        alignItems="center"
-      >
-        <Sigil
-          simple
-          size={28}
-          avatar={ship!.avatar}
-          patp={ship!.patp}
-          color={[ship!.color || '#000000', 'white']}
-        />
-
+    if (selectedSpace.type === 'our') {
+      innerContent = (
         <Flex
           style={{ pointerEvents: 'none' }}
-          mt="2px"
-          flexDirection="column"
-          justifyContent="center"
-          {...FadeInMotion}
+          gap={8}
+          flexDirection="row"
+          alignItems="center"
         >
-          <Text
-            style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
-            color={textColor}
-            lineHeight="14px"
-            initial={{ color: textColor }}
-            animate={{ color: textColor }}
-            fontSize={1}
-            opacity={0.5}
-          >
-            You
-          </Text>
-          <Text
-            style={{ pointerEvents: 'none' }}
-            color={textColor}
-            initial={{ color: textColor }}
-            animate={{ color: textColor }}
-            fontSize={2}
-            fontWeight={500}
-          >
-            {ship?.nickname || ship?.patp}
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  } else {
-    innerContent = (
-      <Flex
-        style={{ pointerEvents: 'none' }}
-        gap={8}
-        flexDirection="row"
-        alignItems="center"
-      >
-        {selectedSpace.picture ? (
-          <img
-            style={{ borderRadius: 6 }}
-            height="28px"
-            width="28px"
-            src={selectedSpace.picture}
+          <Sigil
+            simple
+            size={28}
+            avatar={ship!.avatar}
+            patp={ship!.patp}
+            color={[ship!.color || '#000000', 'white']}
           />
-        ) : (
-          <EmptyPicture color={selectedSpace.color ?? '#000000'} />
-        )}
+
+          <Flex
+            style={{ pointerEvents: 'none' }}
+            mt="2px"
+            flexDirection="column"
+            justifyContent="center"
+            {...FadeInMotion}
+          >
+            <Text
+              style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
+              color={textColor}
+              lineHeight="14px"
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              fontSize={1}
+              opacity={0.5}
+            >
+              You
+            </Text>
+            <Text
+              style={{ pointerEvents: 'none' }}
+              color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              fontSize={2}
+              fontWeight={500}
+            >
+              {ship?.nickname || ship?.patp}
+            </Text>
+          </Flex>
+        </Flex>
+      );
+    } else {
+      innerContent = (
         <Flex
           style={{ pointerEvents: 'none' }}
-          mt="2px"
-          flexDirection="column"
-          justifyContent="center"
-          {...FadeInMotion}
+          gap={8}
+          flexDirection="row"
+          alignItems="center"
         >
-          <Text
-            style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
-            initial={{ color: textColor }}
-            animate={{ color: textColor }}
-            transition={{ color: { duration: 0.5 } }}
-            lineHeight="14px"
-            fontSize={1}
-            opacity={0.5}
-          >
-            {selectedSpace.type}
-          </Text>
-          <Text
+          {selectedSpace.picture ? (
+            <img
+              style={{ borderRadius: 6 }}
+              height="28px"
+              width="28px"
+              src={selectedSpace.picture}
+            />
+          ) : (
+            <EmptyPicture color={selectedSpace.color ?? '#000000'} />
+          )}
+          <Flex
             style={{ pointerEvents: 'none' }}
-            initial={{ color: textColor }}
-            animate={{ color: textColor }}
-            transition={{ color: { duration: 0.5 } }}
-            fontSize={2}
-            fontWeight={500}
+            mt="2px"
+            flexDirection="column"
+            justifyContent="center"
+            {...FadeInMotion}
           >
-            {selectedSpace.name}
-          </Text>
+            <Text
+              style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
+              lineHeight="14px"
+              fontSize={1}
+              opacity={0.5}
+            >
+              {selectedSpace.type}
+            </Text>
+            <Text
+              style={{ pointerEvents: 'none' }}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
+              fontSize={2}
+              fontWeight={500}
+            >
+              {selectedSpace.name}
+            </Text>
+          </Flex>
         </Flex>
-      </Flex>
+      );
+    }
+
+    return (
+      <TrayButton
+        id="spaces-tray-icon"
+        ref={selectorRef}
+        whileTap={{ scale: 0.975 }}
+        transition={{ scale: 0.2 }}
+        customBg={dockColor}
+        onClick={onClick}
+      >
+        {innerContent}
+      </TrayButton>
     );
   }
-
-  return (
-    <TrayButton
-      id="spaces-tray-icon"
-      ref={selectorRef}
-      whileTap={{ scale: 0.975 }}
-      transition={{ scale: 0.2 }}
-      customBg={dockColor}
-      onClick={onClick}
-    >
-      {innerContent}
-    </TrayButton>
-  );
-});
+);
