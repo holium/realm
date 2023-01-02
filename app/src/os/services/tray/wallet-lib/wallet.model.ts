@@ -341,6 +341,7 @@ const ERC20 = types
     conversions,
     transactionList: TransactionList,
     block: types.number,
+    uqbarMetadataId: types.maybe(types.string),
   })
   .actions((self) => ({
     setBalance(balance: string) {

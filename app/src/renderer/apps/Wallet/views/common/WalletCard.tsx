@@ -7,6 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
   formatEthAmount,
+  formatZigAmount,
   getCoins,
   getMockCoinIcon,
   getTransactions,
@@ -75,12 +76,19 @@ export const WalletCard: FC<WalletCardProps> = ({
     walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
   const amountDisplay =
     walletApp.navState.network === NetworkType.ETHEREUM
+      ? walletApp.navState.protocol === ProtocolType.UQBAR
       ? `${
+        formatZigAmount(
+          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+            .balance
+        )
+      } zigs`
+      : `${
           formatEthAmount(
             (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
               .balance
           ).eth
-        }` + ethTicker
+        } ETH`
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
   return (

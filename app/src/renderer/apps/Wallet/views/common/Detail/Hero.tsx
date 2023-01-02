@@ -9,6 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import {
   shortened,
   formatEthAmount,
+  formatZigAmount,
   getBaseTheme,
   getMockCoinIcon,
   formatCoinAmount,
@@ -70,18 +71,24 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
 
-    const ethTicker =
-      walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
     const amountDisplay =
       walletApp.navState.network === NetworkType.ETHEREUM
         ? !props.coin
+          ? walletApp.navState.protocol === ProtocolType.UQBAR
           ? `${
+              formatZigAmount(
+                (props.wallet as EthWalletType).data.get(
+                  walletApp.navState.protocol
+                )!.balance
+              )
+            } zigs`
+          : `${
               formatEthAmount(
                 (props.wallet as EthWalletType).data.get(
                   walletApp.navState.protocol
                 )!.balance
               ).eth
-            }` + ethTicker
+            } ETH`
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`

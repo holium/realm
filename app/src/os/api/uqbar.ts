@@ -157,6 +157,7 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
           console.log(key)
           if (walletState.ethereum.wallets.get(key)!.address === formattedAddress) {
             console.log('has address')
+            console.log(data[address][contract].data)
             const balance = data[address][contract].data.balance;
             walletState.ethereum.wallets.get(key)!.setBalance(ProtocolType.UQBAR, balance);
           }
@@ -169,6 +170,7 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
 const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
   console.log('metadata')
   console.log(data);
+  
 }
 
 const handleTxReactions = (data: any, walletState: WalletStoreType) => {

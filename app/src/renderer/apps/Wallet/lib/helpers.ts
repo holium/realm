@@ -76,6 +76,17 @@ export interface BtcAmount {
   sats: string;
 }
 
+export function formatZigAmount(amount: string): string {
+  const count = amount.match(/\./g);
+  let zigAmount = amount;
+  if (count) {
+    if (count.length > 1) {
+      zigAmount = zigAmount.replaceAll('.', '');
+    }
+  }
+  return utils.formatUnits(zigAmount, 'ether').slice(0,6);
+}
+
 export function formatEthAmount(amount: string): EthAmount {
   const count = amount.match(/\./g);
   let ethAmount = amount;
