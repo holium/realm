@@ -24,7 +24,7 @@ import {
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { getWebViewIdEffectful } from 'renderer/system/desktop/components/Window/util';
+import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -164,15 +164,18 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    const webviewId = getWebViewIdEffectful(activeWindow.id, window.type);
+    const webviewId = getWebViewId(activeWindow.id, window.type);
 
     const onDevTools = useCallback(() => {
-      console.log(webviewId);
-      const webview = document.getElementById(webviewId) as Electron.WebviewTag;
+      const webview = document.getElementById(
+        webviewId
+      ) as Electron.WebviewTag | null;
 
-      webview?.isDevToolsOpened()
-        ? webview?.closeDevTools()
-        : webview?.openDevTools();
+      if (!webview) return;
+
+      webview.isDevToolsOpened()
+        ? webview.closeDevTools()
+        : webview.openDevTools();
     }, [webviewId]);
 
     const onMouseDown = () => {
