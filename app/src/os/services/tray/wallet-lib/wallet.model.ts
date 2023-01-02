@@ -379,9 +379,9 @@ const EthWalletData = types
     block: types.number,
   })
   .actions((self) => ({
-    setCoins(coins: any) {
+    /*setCoins(coins: any) {
       applySnapshot(self.coins, coins);
-    },
+    },*/
     setBlock(block: number) {
       self.block = block;
     }
@@ -397,7 +397,7 @@ const EthWallet = types
     data: types.map(EthWalletData),
   })
   .actions((self) => ({
-    setCoins(protocol: ProtocolType, coins: any) {
+    /*setCoins(protocol: ProtocolType, coins: any) {
       const formattedCoins: any = {};
       for (const Coin of coins) {
         const coin: any = Coin;
@@ -413,7 +413,7 @@ const EthWallet = types
       const map = types.map(ERC20);
       const newCoins = map.create(formattedCoins);
       applySnapshot(self.data.get(protocol)!.coins, getSnapshot(newCoins));
-    },
+    },*/
     setNFTs(protocol: ProtocolType, nfts: any) {
       const formattedNft: any = {};
       for (const NFT of nfts) {
@@ -445,9 +445,14 @@ const EthWallet = types
           block: 0,
         });
       }
-      else (
-        self.data.get(protocol)!.coins.get(coin.addr)!.balance = coinData.balance.toString()
-      )
+      else {
+        let coinToUpdate = self.data.get(protocol)!.coins.get(coin.addr)!;
+        coinToUpdate.name = coinData.symbol;
+        coinToUpdate.logo = coinData.logo || '';
+        coinToUpdate.address = coin.addr;
+        coinToUpdate.balance = coinData.balance.toString();
+        coinToUpdate.decimals = coinData.decimals;
+      }
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;
@@ -547,6 +552,18 @@ const EthWallet = types
     },
     applyTransactionUpdate(protocol: ProtocolType, contract: any, transaction: any) {
       if (contract) {
+        if (!self.data.get(protocol)!.coins.has(contract)) {
+          self.data.get(protocol)!.coins.set(contract, {
+            name: '',
+            logo: '',
+            address: contract,
+            balance: '0',
+            decimals: 18,
+            conversions: conversions.create(),
+            transactionList: {},
+            block: 0,
+          });
+        }
         let txList = self.data.get(protocol)!.coins.get(contract)!.transactionList;
         txList.applyAgentTransaction(self.index, contract, transaction);
       }
@@ -655,6 +672,20 @@ export const EthStore = types
             self.wallets
               .get(wallet.key)!
               .applyTransactionUpdate(protocol as ProtocolType, null, transaction);
+          }
+        }
+      }
+      if (wallet['token-txns']) {
+        for (const protocol of Object.keys(wallet['token-txns'])) {
+          const protocolTransactions = wallet['token-txns'][protocol];
+          for (const contract of Object.keys(protocolTransactions)) {
+            const contractTransactions = protocolTransactions[contract];
+            for (const transactionKey of Object.keys(contractTransactions)) {
+              const transaction = contractTransactions[transactionKey];
+              self.wallets
+                .get(wallet.key)!
+                .applyTransactionUpdate(protocol as ProtocolType, contract, transaction);
+            }
           }
         }
       }
