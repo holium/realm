@@ -23,6 +23,12 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
+  getEthXpub: async (conduit: Conduit) => {
+    return await conduit.scry({
+      app: 'realm-wallet',
+      path: '/eth-xpub',
+    });
+  },
   setSettings: async (
     conduit: Conduit,
     network: string,

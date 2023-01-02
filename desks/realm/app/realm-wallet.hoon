@@ -88,6 +88,10 @@
     ^-  (unit (unit cage))
     ?>  (team:title our.bowl src.bowl)
     ?+    path  (on-peek:def path)
+        [%x %eth-xpub ~]
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
+      [%eth-xpub xpub:(~(got by networks.settings) %ethereum)]
         [%x %wallets ~]
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
@@ -359,7 +363,11 @@
       %save-transaction-notes
     =/  network-map  (~(got by wallets) %ethereum)
     =/  wall-map  (~(got by network-map) wallet.act)
-    =/  net-map  (~(get by transactions.wall-map) net.act)
+    =/  net-map
+      ?~  contract.act  (~(get by transactions.wall-map) net.act)
+      =/  net-map  (~(get by token-txns.wall-map) net.act)
+      ?~  net-map  ~
+      (~(get by u.net-map) u.contract.act)
     =/  tx
       ?~  net-map
         =/  tx  *transaction
@@ -379,7 +387,17 @@
         (my [hash.act tx]~)
       (~(put by u.net-map) [hash.act tx])
     =.  wallets
-      =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
+      =.  wall-map
+        ?~  contract.act
+          =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
+          wall-map
+        =.  token-txns.wall-map
+          =/  map-net  (~(get by token-txns.wall-map) net.act)
+          ?~  map-net
+            (~(put by token-txns.wall-map) [net.act (my [u.contract.act net-map]~)])
+          =/  map-net  (~(put by u.map-net) [u.contract.act net-map])
+          (~(put by token-txns.wall-map) [net.act map-net])
+        wall-map
       =.  network-map  (~(put by network-map) [wallet.act wall-map])
       (~(put by wallets) [%ethereum network-map])
     :_  state

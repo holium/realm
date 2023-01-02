@@ -68,7 +68,8 @@
 ::  subscription updates
 ::
 +$  update
-  $%  [%address =ship =network address=(unit address)]
+  $%  [%eth-xpub xpub=(unit @t)]
+      [%address =ship =network address=(unit address)]
       [%transaction =network net=@t wallet=@ud contract=(unit @t) hash=@t transaction]
 ::      [%history transactions]
       [%wallet =network @t =wallet]

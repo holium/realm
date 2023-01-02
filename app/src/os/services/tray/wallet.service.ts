@@ -670,9 +670,10 @@ export class WalletService extends BaseService {
   }
 
   async checkMnemonic(_event: any, mnemonic: string) {
-    // TODO: implement
     (this.signer as RealmSigner).setMnemonic(mnemonic);
-    return true;
+    const ethXpub = this.signer.getXpub("m/44'/60'/0'");
+    const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))['eth-xpub'];
+    return ethXpub === agentEthXpub;
   }
 
   navigate(
