@@ -1,4 +1,4 @@
-import { EthWalletType } from 'os/services/tray/wallet-lib';
+import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
