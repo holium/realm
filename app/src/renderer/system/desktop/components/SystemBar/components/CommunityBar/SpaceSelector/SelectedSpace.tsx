@@ -11,7 +11,7 @@ type EmptyPictureProps = {
 const EmptyPicture = styled.div<EmptyPictureProps>`
   height: 32px;
   width: 32px;
-  background: ${({ color }) => color || '#000'};
+  background: ${({ color }) => color ?? '#000'};
   border-radius: 4px;
 `;
 
