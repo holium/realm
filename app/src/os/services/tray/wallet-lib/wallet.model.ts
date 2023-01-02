@@ -161,7 +161,7 @@ const TransactionList = types
           ...transaction,
           walletIndex: index,
           amount: '0',
-          notes: '',
+          notes: transaction.notes,
           ethType: contract || 'ETH',
         };
         self.transactions.set(transaction.hash, tx);
