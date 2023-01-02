@@ -33,7 +33,8 @@ export const SelectedSpace = observer((props: SelectedSpaceProps) => {
   const { spaces, ship, theme } = useServices();
   const selectedSpace = spaces.selected;
   const { dockColor, textColor } = theme.currentTheme;
-  let innerContent: any;
+
+  let innerContent: JSX.Element | null;
 
   if (!selectedSpace) return null;
 
@@ -134,6 +135,7 @@ export const SelectedSpace = observer((props: SelectedSpaceProps) => {
       </Flex>
     );
   }
+
   return (
     <TrayButton
       id="spaces-tray-icon"
