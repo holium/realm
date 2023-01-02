@@ -143,6 +143,9 @@
     :_  ~
     :-  `cord`-.update
     ?-   -.update
+        %eth-xpub
+      ?~  xpub.update  ~
+      [%s u.xpub.update]
         %transaction
       %-  pairs
       :~  ['network' [%s network.update]]

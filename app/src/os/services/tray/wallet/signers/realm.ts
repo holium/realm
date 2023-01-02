@@ -1,4 +1,4 @@
-import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
+import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
 import { ethers } from 'ethers';
 import { safeStorage } from 'electron';
 import Realm from '../../../..';

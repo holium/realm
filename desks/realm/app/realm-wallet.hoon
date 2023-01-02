@@ -88,6 +88,10 @@
     ^-  (unit (unit cage))
     ?>  (team:title our.bowl src.bowl)
     ?+    path  (on-peek:def path)
+        [%x %eth-xpub ~]
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
+      [%eth-xpub xpub:(~(got by networks.settings) %ethereum)]
         [%x %wallets ~]
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
