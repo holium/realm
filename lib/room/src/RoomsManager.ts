@@ -239,10 +239,11 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   deleteRoom(rid: string) {
     // provider/admin action
-    const room = this.live.room;
-    if (room) this.emit(RoomManagerEvent.DeletedRoom, room.rid);
     if (this.live.room?.rid === rid) {
+      this.emit(RoomManagerEvent.DeletedRoom, rid);
       this.local.disableMedia();
+      this.live.room = undefined;
+      this.live.chat = [];
     }
     this.protocol.deleteRoom(rid);
   }
