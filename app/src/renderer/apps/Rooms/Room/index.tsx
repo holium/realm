@@ -36,6 +36,27 @@ export const Room = observer(() => {
     return roomsManager.presentRoom.room;
   }, [roomsManager?.presentRoom?.room]);
 
+  const [readChat, setReadChat] = useState(
+    roomsManager.presentRoom?.chat.slice()
+  );
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const latestChat = roomsManager.presentRoom?.chat.slice();
+    if (roomView === 'chat') {
+      setReadChat(latestChat);
+      setUnreadCount(0);
+    } else {
+      setUnreadCount(
+        latestChat
+          ? latestChat.filter(
+              (msg) => !readChat?.includes(msg) && msg.author !== ship?.patp
+            ).length
+          : 0
+      );
+    }
+  }, [roomView, roomsManager.presentRoom?.chat.length]);
+
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
   }, [presentRoom, roomsApp]);
@@ -50,25 +71,6 @@ export const Room = observer(() => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
-
-  const [readChat, setReadChat] = useState(
-    roomsManager.presentRoom!.chat.slice()
-  );
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const latestChat = roomsManager.presentRoom!.chat.slice();
-    if (roomView === 'chat') {
-      setReadChat(latestChat);
-      setUnreadCount(0);
-    } else {
-      setUnreadCount(
-        latestChat.filter(
-          (msg) => !readChat.includes(msg) && msg.author !== ship?.patp
-        ).length
-      );
-    }
-  }, [roomView, roomsManager.presentRoom!.chat.length]);
 
   return (
     <Grid.Column

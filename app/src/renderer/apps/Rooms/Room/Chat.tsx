@@ -114,7 +114,8 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
       <Flex
         flexDirection="row"
         alignItems="center"
-        pt={4}
+        pt={2}
+        pb={2}
         px={3}
         style={{
           gap: 8,
