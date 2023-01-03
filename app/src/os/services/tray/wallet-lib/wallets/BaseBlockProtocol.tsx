@@ -35,7 +35,7 @@ export abstract class BaseBlockProtocol extends BaseProtocol {
     addr: string,
     type?: string,
     tokenId?: string
-  ): Promise<Asset>;
+  ): Promise<Asset | null>;
 
   /**
    * Gets to and from transfers for a given address

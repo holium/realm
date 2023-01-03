@@ -125,9 +125,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
           this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
             for (let asset of assets) {
               if (asset.type === 'coin') {
-                this.getAsset(asset.addr, ethWallet.address, 'coin').then(
-                  (coin: Asset) => ethWallet.setCoin(this.protocol, coin)
-                );
+                this.getAsset(asset.addr, ethWallet.address, 'coin').then((coin: Asset | null) => {
+                  if (coin) {
+                    ethWallet.setCoin(this.protocol, coin)
+                  }
+                });
                 this.getAssetTransfers(
                   asset.addr,
                   ethWallet.address,
@@ -154,7 +156,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   ethWallet.address,
                   'nft',
                   (asset.data as NFTAsset).tokenId
-                ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
+                ).then((nft: Asset | null) => {
+                  if (nft) {
+                    ethWallet.updateNft(this.protocol, nft) 
+                  }
+                });
                 /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
                   ethWallet.updateNftTransfers
                 );*/
@@ -337,42 +343,46 @@ export class EthereumProtocol implements BaseBlockProtocol {
     addr: string,
     type: string,
     tokenId?: string
-  ): Promise<Asset> {
-    if (type === 'coin') {
-      const metadata = await this.alchemy.core.getTokenMetadata(contract);
-      const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
-      const balance = (await ethContract.balanceOf(addr)).toString();
-      const data: CoinAsset = {
-        logo: metadata.logo,
-        symbol: metadata.symbol || '',
-        decimals: metadata.decimals || 0,
-        balance,
-        totalSupply: 1,
-        allowances: {},
-      };
-      return {
-        addr: contract,
-        type,
-        data,
-      };
-    } else {
-      const nft = await this.alchemy.nft.getNftMetadata(
-        contract,
-        ethers.BigNumber.from(tokenId!)
-      );
-      const data: NFTAsset = {
-        name: nft.title,
-        description: nft.description,
-        image: nft.rawMetadata?.image || '',
-        tokenId: tokenId!,
-        transferable: true,
-        properties: {},
-      };
-      return {
-        addr: contract,
-        type: 'nft',
-        data,
-      };
+  ): Promise<Asset | null> {
+    try {
+      if (type === 'coin') {
+        const metadata = await this.alchemy.core.getTokenMetadata(contract);
+        const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
+        const balance = (await ethContract.balanceOf(addr)).toString();
+        const data: CoinAsset = {
+          logo: metadata.logo,
+          symbol: metadata.symbol || '',
+          decimals: metadata.decimals || 0,
+          balance,
+          totalSupply: 1,
+          allowances: {},
+        };
+        return {
+          addr: contract,
+          type,
+          data,
+        };
+      } else {
+        const nft = await this.alchemy.nft.getNftMetadata(
+          contract,
+          ethers.BigNumber.from(tokenId!)
+        );
+        const data: NFTAsset = {
+          name: nft.title,
+          description: nft.description,
+          image: nft.rawMetadata?.image || '',
+          tokenId: tokenId!,
+          transferable: true,
+          properties: {},
+        };
+        return {
+          addr: contract,
+          type: 'nft',
+          data,
+        };
+      }
+    } catch (error) {
+      return null;
     }
   }
   async getAssetTransfers(
