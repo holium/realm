@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -21,7 +20,6 @@ export const Rooms = observer(() => {
   const { dimensions } = useTrayApps();
   const { spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
-  const [muted, setMuted] = useState(false);
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
 

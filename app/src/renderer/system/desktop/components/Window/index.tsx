@@ -24,6 +24,7 @@ import {
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -163,14 +164,15 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    let webviewId = `${activeWindow.id}-urbit-webview`;
-    if (window.type === 'web') {
-      webviewId = `${activeWindow.id}-web-webview`;
-    }
+    const webviewId = getWebViewId(activeWindow.id, window.type);
 
     const onDevTools = useCallback(() => {
-      console.log(webviewId);
-      const webview: any = document.getElementById(webviewId);
+      const webview = document.getElementById(
+        webviewId
+      ) as Electron.WebviewTag | null;
+
+      if (!webview) return;
+
       webview.isDevToolsOpened()
         ? webview.closeDevTools()
         : webview.openDevTools();
@@ -222,7 +224,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
       CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
-      showDevToolsToggle = false;
+      // TODO: Remove hardcoded showDevToolsToggle
+      showDevToolsToggle = true;
       preventClickEvents = false;
       if (CustomTitlebar) {
         titlebar = (
