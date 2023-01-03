@@ -223,12 +223,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   leaveRoom() {
+    const room = this.live.room;
+    if (room) this.emit(RoomManagerEvent.LeftRoom, room.rid);
     this.protocol.leave();
     this.local.disableMedia();
-    const room = this.live.room;
     this.live.room = undefined;
     this.live.chat = [];
-    if (room) this.emit(RoomManagerEvent.LeftRoom, room.rid);
   }
 
   createRoom(title: string, access: 'public' | 'private', path: string | null) {
@@ -240,11 +240,11 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   deleteRoom(rid: string) {
     // provider/admin action
     const room = this.live.room;
+    if (room) this.emit(RoomManagerEvent.DeletedRoom, room.rid);
     if (this.live.room?.rid === rid) {
       this.local.disableMedia();
     }
     this.protocol.deleteRoom(rid);
-    if (room) this.emit(RoomManagerEvent.DeletedRoom, room.rid);
   }
 
   sendData(data: any) {
