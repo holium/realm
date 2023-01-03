@@ -2,7 +2,6 @@ import './App.css';
 import * as process from 'process';
 import {
   RoomsManager,
-  RoomProtocol,
   RealmProtocol,
   RoomManagerEvent,
 } from '@holium/realm-room';
@@ -45,6 +44,10 @@ const ShipConfig: { [ship: string]: any } = {
 };
 const testShip = window.location.href.split('/')[3] || '~fes';
 const shipData = ShipConfig[testShip];
+// NOTE: to connect one ship to another, you must manually poke the ship to `set-provider` like:
+// :rooms-v2 &rooms-v2-session-action [%set-provider ~dev]
+//  (^ on the dojo of ~fes if he wanted to connect to a room hosted by ~dev)
+
 export let roomsManager: RoomsManager;
 
 const App: FC = observer(() => {
