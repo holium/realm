@@ -22,7 +22,6 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
-import { Wallet } from 'ethers';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
