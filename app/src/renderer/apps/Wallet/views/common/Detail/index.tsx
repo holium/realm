@@ -122,7 +122,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               flexDirection="column"
               mt={6}
             >
-              <Box pb={1}>
+              <Box /*pb={1}*/>
                 <Text
                   color={themeData.colors.text.disabled}
                   fontWeight={500}
