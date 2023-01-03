@@ -38,7 +38,7 @@ export const createManager = (our: Patp) => {
 
   // These sounds are for peer events
   protocol.on(ProtocolEvent.PeerAdded, () => {
-    if (manager.presentRoom?.state === 'connected') {
+    if (manager.state === 'connected') {
       // only play sound if we are already in the room
       SoundActions.playRoomPeerEnter();
     }

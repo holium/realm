@@ -53,7 +53,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.presentRoom!.chat.slice(0);
+  const chats = roomsManager.live.chat.slice(0);
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -62,7 +62,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
       if (chatInputRef.current === null) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsManager.presentRoom?.sendChat(innerText);
+      roomsManager.sendChat(innerText);
       text.actions.onChange('');
     },
     [roomsManager.presentRoom, text.actions]

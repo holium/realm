@@ -34,8 +34,8 @@ export const RoomTray = observer(() => {
   const presentRoom = useMemo(() => {
     if (!roomsManager) return;
     if (!roomsManager.presentRoom) return;
-    return roomsManager.presentRoom.room;
-  }, [roomsManager?.presentRoom?.room]);
+    return roomsManager.live.room;
+  }, [roomsManager.live.room]);
 
   const onButtonClick = useCallback(
     (evt: any) => {

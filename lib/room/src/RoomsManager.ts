@@ -226,6 +226,9 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   deleteRoom(rid: string) {
     // provider/admin action
+    if (this.live.room?.rid === rid) {
+      this.local.disableMedia();
+    }
     this.protocol.deleteRoom(rid);
   }
 

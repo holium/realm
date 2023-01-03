@@ -32,17 +32,15 @@ export const Room = observer(() => {
 
   const presentRoom = useMemo(() => {
     if (!roomsManager) return;
-    if (!roomsManager.presentRoom) return;
-    return roomsManager.presentRoom.room;
-  }, [roomsManager?.presentRoom?.room]);
+    if (!roomsManager.live) return;
+    return roomsManager.live.room;
+  }, [roomsManager?.live?.room]);
 
-  const [readChat, setReadChat] = useState(
-    roomsManager.presentRoom?.chat.slice()
-  );
+  const [readChat, setReadChat] = useState(roomsManager.live.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsManager.presentRoom?.chat.slice();
+    const latestChat = roomsManager.live.chat.slice();
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -55,14 +53,14 @@ export const Room = observer(() => {
           : 0
       );
     }
-  }, [roomView, roomsManager.presentRoom?.chat.length]);
+  }, [roomView, roomsManager.live.chat.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
   }, [presentRoom, roomsApp]);
 
   if (!presentRoom) return <div />;
-  const { rid, creator } = roomsManager!.presentRoom!.room;
+  const { rid, creator } = roomsManager.live.room!;
   const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
@@ -215,10 +213,10 @@ export const Room = observer(() => {
                 evt.stopPropagation();
                 if (muted) {
                   console.log('unmuting time');
-                  roomsManager!.presentRoom!.unmute();
+                  roomsManager.unmute();
                 } else {
                   console.log('muting time');
-                  roomsManager!.presentRoom!.mute();
+                  roomsManager.mute();
                 }
               }}
             />
