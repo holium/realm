@@ -2,7 +2,7 @@ import { PeerEvent } from '../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { action, makeObservable, observable, observe } from 'mobx';
+import { action, makeObservable, observable, observe, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket } from 'helpers/data';
@@ -150,7 +150,7 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['room-deleted'];
         const room = this.rooms.get(payload.rid);
         if (this.presentRoom?.rid === payload.rid) {
-          this.hangupAll(payload.rid);
+          this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
         }
         if (room) {
@@ -485,7 +485,7 @@ export class RealmProtocol extends BaseProtocol {
    *
    * @param rid
    */
-  hangupAll(rid: string) {
+  hangupAll() {
     //  hangup all peers
     this.peers.forEach((peer) => {
       this.hangup(peer.patp, { shouldEmit: false });
@@ -499,7 +499,7 @@ export class RealmProtocol extends BaseProtocol {
       throw new Error('No room to leave');
     }
     if (presentRoom.present.includes(this.our)) {
-      this.hangupAll(presentRoom.rid);
+      this.hangupAll();
       this.peers.clear();
       this.emit(ProtocolEvent.RoomLeft, presentRoom);
       await this.poke({
@@ -509,7 +509,7 @@ export class RealmProtocol extends BaseProtocol {
           'leave-room': presentRoom.rid,
         },
       });
-      action(() => {
+      runInAction(() => {
         this.presentRoom = undefined;
       });
     }
