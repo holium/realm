@@ -225,21 +225,26 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   leaveRoom() {
     this.protocol.leave();
     this.local.disableMedia();
+    const room = this.live.room;
     this.live.room = undefined;
     this.live.chat = [];
+    if (room) this.emit(RoomManagerEvent.LeftRoom, room.rid);
   }
 
   createRoom(title: string, access: 'public' | 'private', path: string | null) {
     // creates a room in the current provider
-    this.protocol.createRoom(title, access, path);
+    const room = this.protocol.createRoom(title, access, path);
+    this.emit(RoomManagerEvent.CreatedRoom, room);
   }
 
   deleteRoom(rid: string) {
     // provider/admin action
+    const room = this.live.room;
     if (this.live.room?.rid === rid) {
       this.local.disableMedia();
     }
     this.protocol.deleteRoom(rid);
+    if (room) this.emit(RoomManagerEvent.DeletedRoom, room.rid);
   }
 
   sendData(data: any) {
@@ -286,7 +291,7 @@ export type RoomsManagerEventCallbacks = {
   started: () => void;
   connected: () => void;
   createdRoom: (room: RoomType) => void;
-  deletedRoom: (rid: string, state: RoomState) => void;
+  deletedRoom: (rid: string) => void;
   joinedRoom: (rid: string) => void;
   leftRoom: (rid: string) => void;
   setNewProvider: (provider: Patp, rooms: RoomType[]) => void;

@@ -1,4 +1,9 @@
-import { RealmProtocol, ProtocolEvent, RoomsManager } from '@holium/realm-room';
+import {
+  RealmProtocol,
+  ProtocolEvent,
+  RoomsManager,
+  RoomManagerEvent,
+} from '@holium/realm-room';
 import { Patp } from 'os/types';
 import { createContext, useContext } from 'react';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
@@ -20,11 +25,11 @@ export const createManager = (our: Patp) => {
   const manager = new RoomsManager(protocol);
 
   // These sounds are for the creator of the room
-  protocol.on(ProtocolEvent.RoomCreated, () => {
+  manager.on(RoomManagerEvent.CreatedRoom, () => {
     SoundActions.playRoomEnter();
   });
 
-  protocol.on(ProtocolEvent.RoomDeleted, () => {
+  manager.on(RoomManagerEvent.DeletedRoom, () => {
     SoundActions.playRoomLeave();
   });
 
@@ -32,7 +37,7 @@ export const createManager = (our: Patp) => {
     SoundActions.playRoomEnter();
   });
 
-  protocol.on(ProtocolEvent.RoomLeft, () => {
+  manager.on(RoomManagerEvent.LeftRoom, () => {
     SoundActions.playRoomLeave();
   });
 
