@@ -8,10 +8,8 @@ export interface NativeViewProps {
   hasTitlebar: boolean | undefined;
 }
 
-export const NativeView = (props: NativeViewProps) => {
-  const { window, isResizing } = props;
-
-  const elementRef = useRef(null);
+export const NativeView = ({ window, isResizing }: NativeViewProps) => {
+  const elementRef = useRef<HTMLDivElement>(null);
   const ViewComponent = nativeRenderers[window.id as WindowId].component;
 
   return (
