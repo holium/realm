@@ -62,7 +62,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract connect(
     ...args: AgentConnectParams | LocalCommsParams
   ): Promise<Map<Patp, RemotePeer>>;
-  abstract dial(peer: Patp, isHost: boolean): Promise<RemotePeer>;
+  abstract dial(peer: Patp, isHost: boolean): RemotePeer;
   abstract kick(peer: Patp): void;
   abstract leave(): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;

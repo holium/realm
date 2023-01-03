@@ -3,11 +3,14 @@ import * as process from 'process';
 import {
   RoomsManager,
   RoomProtocol,
+  RealmProtocol,
   RoomManagerEvent,
 } from '@holium/realm-room';
+import Urbit from '@urbit/http-api';
 import { Speaker } from './Speaker';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 
 (window as any).global = window;
 (window as any).process = process;
@@ -29,34 +32,63 @@ const ShipConfig: { [ship: string]: any } = {
     url: 'http://localhost:8087',
     code: 'parsyr-dibwyt-livpen-hatsym',
   },
-};
-
-//
-// Set the ship with
-// http://localhost:3000/~dev
-//
-const testShip = window.location.href.split('/')[3] || '~fes';
-const protocol = new RoomProtocol(
-  testShip,
-  {
-    rtc: {
-      iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-    },
+  '~lomder-librun': {
+    ship: 'lomder-librun',
+    url: 'http://localhost:8091',
+    code: 'wistev-bacnul-fasleb-lattyn',
   },
-  ShipConfig[testShip]
-);
-
-protocol.init(ShipConfig[testShip]);
-
-export const roomsManager = new RoomsManager(protocol);
+  '~timluc-miptev': {
+    ship: 'timluc-miptev',
+    url: 'http://localhost:8092',
+    code: 'tanlun-datber-silwyn-lonnyd',
+  },
+};
+const testShip = window.location.href.split('/')[3] || '~fes';
+const shipData = ShipConfig[testShip];
+export let roomsManager: RoomsManager;
 
 const App: FC = observer(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
+    let api: any;
+    if (!roomsApi) {
+      Urbit.authenticate(shipData).then(async (newApi) => {
+        api = newApi;
+        console.log('connected');
+        await api.connect();
+        const handlers = {
+          poke: api.poke.bind(api),
+          scry: api.scry.bind(api),
+        };
+
+        const protocol = new RealmProtocol(
+          testShip,
+          {
+            rtc: {
+              iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+            },
+          },
+          handlers
+        );
+        roomsManager = new RoomsManager(protocol);
+        setRoomsManager(roomsManager);
+        api.subscribe({
+          app: 'rooms-v2',
+          path: '/lib',
+          event: (data: any, mark: any) => {
+            (roomsManager.protocol as RealmProtocol).onSignal(data, mark);
+          },
+        });
+      });
+    }
+
     return () => {
-      // roomsManager.presentRoom?.leave();
-      protocol.api?.delete();
+      api?.delete();
     };
-  }, []);
+  }, [roomsApi]);
+
+  if (!roomsApi) return null;
 
   return (
     <div className="room-page">
@@ -66,7 +98,7 @@ const App: FC = observer(() => {
         </div>
         <div className="room-list">
           {roomsManager.rooms.map((room: any) => {
-            const isPresent = roomsManager.presentRoom?.rid === room.rid;
+            const isPresent = roomsManager.live.room?.rid === room.rid;
             return (
               <div
                 className={
@@ -84,7 +116,7 @@ const App: FC = observer(() => {
               >
                 {room.rid}
                 <div>
-                  {roomsManager.presentRoom?.rid === room.rid ? 'Present' : ''}
+                  {roomsManager.live.room?.rid === room.rid ? 'Present' : ''}
                 </div>
               </div>
             );
@@ -118,7 +150,7 @@ const App: FC = observer(() => {
           </button>
         </div>
         <div className="speaker-grid">
-          {roomsManager.presentRoom && (
+          {roomsManager.live.room && (
             <Speaker
               our
               patp={roomsManager.our}
@@ -133,22 +165,21 @@ const App: FC = observer(() => {
 });
 
 const PeerGrid: FC = observer(() => {
-  if (!roomsManager.presentRoom) {
+  console.log(toJS(roomsManager.live));
+  if (!roomsManager.live.room) {
     return null;
   }
-  const peers = Array.from(roomsManager.protocol.peers.keys());
+  console.log(toJS(roomsManager.live.room));
   return (
     <>
-      {peers.map((patp: string) => {
+      {roomsManager.peers.map(({ patp }: any) => {
         return (
           <Speaker
             our={false}
             key={patp}
             patp={patp}
             type={
-              patp === roomsManager.presentRoom?.room.creator
-                ? 'host'
-                : 'speaker'
+              patp === roomsManager?.presentRoom?.creator ? 'host' : 'speaker'
             }
           />
         );

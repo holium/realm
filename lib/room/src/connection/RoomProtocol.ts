@@ -164,6 +164,7 @@ export class RoomProtocol extends BaseProtocol {
           if (this.presentRoom?.rid === payload.rid) {
             // if we are in the room, dial the new peer
             if (payload.ship !== this.our) {
+              console.log('room-entered dialing', payload.ship);
               this.dial(payload.ship, payload.ship === room.creator).then(
                 (remotePeer: RemotePeer) => {
                   // queuedPeers are peers that are ready for us to dial them
@@ -369,6 +370,7 @@ export class RoomProtocol extends BaseProtocol {
       this.sendSignal
     );
 
+    console.log('dialing', peer);
     this.peers.set(remotePeer.patp, remotePeer);
     remotePeer.dial();
     // When we connect, lets stream our local tracks to the remote peer

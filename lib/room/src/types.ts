@@ -37,3 +37,11 @@ export enum RoomState {
   Added = 'added',
   Kicked = 'kicked',
 }
+
+export type ChatModelType = {
+  author: string;
+  index: number;
+  content: string;
+  timeReceived: number;
+  isRightAligned: boolean;
+};
