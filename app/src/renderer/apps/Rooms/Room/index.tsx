@@ -194,7 +194,7 @@ export const Room = observer(() => {
                 if (presentRoom.creator === ship!.patp) {
                   roomsManager.deleteRoom(rid);
                 } else {
-                  roomsManager.leaveRoom(rid);
+                  roomsManager.leaveRoom();
                 }
               }}
             >

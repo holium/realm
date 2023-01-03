@@ -68,33 +68,3 @@ export function useRooms() {
 
   return roomsManager;
 }
-
-// export function useRooms(our: Patp) {
-//   const [roomManager, setRoomManager] = useState<RoomsManager | null>(null);
-
-//   useEffect(() => {
-//     if (!our) return;
-//     console.log('useEffect');
-//     const protocol = new RealmProtocol(our, config, handlers);
-//     const manager = new RoomsManager(protocol);
-//     protocol.getSession();
-//     setRoomManager(manager);
-//     RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
-//       protocol.onSignal(data, mark);
-//     });
-
-//     return () => {
-//       // TODO disconnect on logout
-//       // manager.protocol.;
-//     };
-//   }, [our]);
-
-//   return roomManager;
-// }
-
-// if (diff.exit) {
-//   SoundActions.playRoomLeave();
-// }
-// if (diff.enter) {
-//   SoundActions.playRoomEnter();
-// }
