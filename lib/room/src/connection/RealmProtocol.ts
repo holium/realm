@@ -8,20 +8,20 @@ import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket } from 'helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
 
-export interface IPCHandlers {
+export interface APIHandlers {
   poke: (params: any) => Promise<any>;
   scry: (params: any) => Promise<any>;
 }
 
 /**
- * An implementation of the BaseProtocol that uses IPC to communicate with
+ * An implementation of the BaseProtocol that uses passed in handlers to communicate with
  * Realm's OS process
  */
 export class RealmProtocol extends BaseProtocol {
   poke: (...args: any) => Promise<void>;
   scry: (...args: any) => Promise<any>;
   queuedPeers: Patp[] = [];
-  constructor(our: Patp, config: ProtocolConfig, handlers: IPCHandlers) {
+  constructor(our: Patp, config: ProtocolConfig, handlers: APIHandlers) {
     super(our, config);
 
     this.onSignal = this.onSignal.bind(this);
@@ -59,7 +59,6 @@ export class RealmProtocol extends BaseProtocol {
 
   async onSignal(data: any, mark: string) {
     // console.log(mark, data);
-
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -290,7 +289,7 @@ export class RealmProtocol extends BaseProtocol {
   createRoom(
     title: string,
     access: 'public' | 'private',
-    spacePath: string | null = null
+    path: string | null = null
   ) {
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, this.our, title),
@@ -301,7 +300,7 @@ export class RealmProtocol extends BaseProtocol {
       present: [this.our],
       whitelist: [],
       capacity: 6,
-      path: spacePath,
+      path,
     };
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
@@ -312,7 +311,7 @@ export class RealmProtocol extends BaseProtocol {
           rid: newRoom.rid,
           title,
           access,
-          path: spacePath,
+          path,
         },
       },
     });
@@ -445,7 +444,6 @@ export class RealmProtocol extends BaseProtocol {
 
   /**
    *  redial - reconstruct and listen for connected state
-   *  TODO revisit this
    *
    * @param remotePeer
    * @returns Promise<RemotePeer>
@@ -516,23 +514,23 @@ export class RealmProtocol extends BaseProtocol {
   }
 }
 
-const retry = (callback: any, times = 3) => {
-  let numberOfTries = 0;
-  return new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      numberOfTries++;
-      if (numberOfTries === times) {
-        console.log(`Trying for the last time... (${times})`);
-        clearInterval(interval);
-      }
-      try {
-        await callback();
-        clearInterval(interval);
-        console.log(`Operation successful, retried ${numberOfTries} times.`);
-        resolve(null);
-      } catch (err) {
-        console.log(`Unsuccessful, retried ${numberOfTries} times... ${err}`);
-      }
-    }, 2500);
-  });
-};
+// const retry = (callback: any, times = 3) => {
+//   let numberOfTries = 0;
+//   return new Promise((resolve) => {
+//     const interval = setInterval(async () => {
+//       numberOfTries++;
+//       if (numberOfTries === times) {
+//         console.log(`Trying for the last time... (${times})`);
+//         clearInterval(interval);
+//       }
+//       try {
+//         await callback();
+//         clearInterval(interval);
+//         console.log(`Operation successful, retried ${numberOfTries} times.`);
+//         resolve(null);
+//       } catch (err) {
+//         console.log(`Unsuccessful, retried ${numberOfTries} times... ${err}`);
+//       }
+//     }, 2500);
+//   });
+// };

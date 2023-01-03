@@ -108,7 +108,7 @@ const App: FC = observer(() => {
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   if (isPresent) {
-                    roomsManager.leaveRoom(room.rid);
+                    roomsManager.leaveRoom();
                   } else {
                     roomsManager.enterRoom(room.rid);
                   }

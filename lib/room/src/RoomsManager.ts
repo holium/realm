@@ -96,6 +96,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     );
 
     makeObservable(this, {
+      state: observable,
       protocol: observable,
       live: observable,
       createRoom: action.bound,
@@ -228,13 +229,9 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.live.chat = [];
   }
 
-  createRoom(
-    title: string,
-    access: 'public' | 'private',
-    spacePath: string | null
-  ) {
+  createRoom(title: string, access: 'public' | 'private', path: string | null) {
     // creates a room in the current provider
-    this.protocol.createRoom(title, access, spacePath);
+    this.protocol.createRoom(title, access, path);
   }
 
   deleteRoom(rid: string) {

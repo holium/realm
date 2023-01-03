@@ -53,7 +53,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract createRoom(
     title: string,
     access: 'public' | 'private',
-    spacePath: string | null
+    path: string | null
   ): RoomType;
   abstract deleteRoom(rid: string): void;
   abstract getRoom(rid: string): Promise<RoomType>;
