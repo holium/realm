@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
+import {
+  Badge,
+  Flex,
+  Grid,
+  IconButton,
+  Icons,
+  Text,
+} from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -43,6 +50,25 @@ export const Room = observer(() => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
+
+  const [readChat, setReadChat] = useState(
+    roomsManager.presentRoom!.chat.slice()
+  );
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const latestChat = roomsManager.presentRoom!.chat.slice();
+    if (roomView === 'chat') {
+      setReadChat(latestChat);
+      setUnreadCount(0);
+    } else {
+      setUnreadCount(
+        latestChat.filter(
+          (msg) => !readChat.includes(msg) && msg.author !== ship?.patp
+        ).length
+      );
+    }
+  }, [roomView, roomsManager.presentRoom!.chat.length]);
 
   return (
     <Grid.Column
@@ -210,20 +236,29 @@ export const Room = observer(() => {
             /> */}
           </Flex>
           <Flex alignItems="center">
-            <IconButton
-              className="realm-cursor-hover"
-              size={26}
-              customBg={dockColor}
-              color={roomView === 'chat' ? accentColor : undefined}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                roomView === 'chat'
-                  ? setRoomView('voice')
-                  : setRoomView('chat');
-              }}
+            <Badge
+              wrapperHeight={26}
+              wrapperWidth={26}
+              top={1}
+              right={1}
+              minimal
+              count={unreadCount}
             >
-              <Icons name="Chat3" />
-            </IconButton>
+              <IconButton
+                className="realm-cursor-hover"
+                size={26}
+                customBg={dockColor}
+                color={roomView === 'chat' ? accentColor : undefined}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  roomView === 'chat'
+                    ? setRoomView('voice')
+                    : setRoomView('chat');
+                }}
+              >
+                <Icons name="Chat3" />
+              </IconButton>
+            </Badge>
           </Flex>
         </Flex>
       </Flex>
