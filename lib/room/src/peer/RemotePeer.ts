@@ -8,7 +8,9 @@ import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
 import { isFireFox, isSafari } from '../utils';
 
-type SignalData = SimplePeer.SignalData | { type: 'ready'; from: Patp };
+type SignalData =
+  | SimplePeer.SignalData
+  | { type: 'ready' | 'ack-ready'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
   peer?: SimplePeer.Instance;
@@ -81,8 +83,15 @@ export class RemotePeer extends Peer {
   dial() {
     if (!this.isInitiator) {
       // notify the peer that we want to connect
+      console.log('dialing', this.patp);
       this.sendSignal(this.patp, { type: 'ready', from: this.our });
     }
+    console.log('waiting for dial', this.patp);
+  }
+
+  handleReadySignal() {
+    this.sendSignal(this.patp, { type: 'ack-ready', from: this.our });
+    this.createConnection();
   }
 
   peerSignal(data: SimplePeer.SignalData) {

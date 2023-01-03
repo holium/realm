@@ -52,7 +52,7 @@ export const Speaker = observer((props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        ship!.patp === roomsManager.currentRoom!.room!.creator && {
+        ship!.patp === roomsManager.live.room!.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -63,13 +63,7 @@ export const Speaker = observer((props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [
-      peer?.status,
-      person,
-      roomsManager.currentRoom,
-      roomsManager.protocol,
-      ship,
-    ]
+    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
