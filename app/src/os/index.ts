@@ -120,10 +120,6 @@ export class Realm extends EventEmitter {
     //     : new EncryptedStore(options);
     // Load session data
     this.db = new Store(options);
-    if (this.db.size > 0 && this.db.store.cookie !== null) {
-      this.isResuming = true;
-      this.setSession(this.db.store);
-    }
     // Create an instance of all services
     this.services = {
       onboarding: new OnboardingService(this),
@@ -135,6 +131,14 @@ export class Realm extends EventEmitter {
       desktop: new DesktopService(this),
       shell: new ShellService(this),
     };
+    if (
+      this.db.size > 0 &&
+      this.db.store.cookie !== null &&
+      !this.services.identity.auth.isFirstTime
+    ) {
+      this.isResuming = true;
+      this.setSession(this.db.store);
+    }
 
     this.holiumClient = new HoliumAPI();
     this.passwords = new PasswordStore();

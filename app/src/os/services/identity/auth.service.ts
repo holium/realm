@@ -43,6 +43,7 @@ export class AuthService extends BaseService {
       this.resendNewEmailVerificationCode,
     'realm.auth.verify-new-email': this.verifyNewEmail,
     'realm.auth.get-code': this.getCode,
+    'realm.auth.is-first-time': this.isFirstTime,
   };
 
   static preload = {
@@ -53,6 +54,8 @@ export class AuthService extends BaseService {
     refresh: async () => await ipcRenderer.invoke('realm.auth.refresh'),
     setFirstTime: async () =>
       await ipcRenderer.invoke('realm.auth.set-first-time'),
+    isFirstTime: async () =>
+      await ipcRenderer.invoke('realm.auth.is-first-time'),
     cancelLogin: async () =>
       await ipcRenderer.invoke('realm.auth.cancel-login'),
     setSelected: async (ship: string) =>
@@ -215,6 +218,10 @@ export class AuthService extends BaseService {
 
   setFirstTime() {
     this.state.setFirstTime();
+  }
+
+  isFirstTime() {
+    this.state.isFirstTime;
   }
 
   getShip(ship: string): AuthShipType {
