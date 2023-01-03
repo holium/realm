@@ -12,8 +12,26 @@ export const RTCConfig: RTCConfiguration = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
   iceTransportPolicy: 'relay',
 };
-
+/**
+ * TODO update this to use the new protocol interface
+ */
 export class TestProtocol extends BaseProtocol {
+  createRoom(
+    title: string,
+    access: 'public' | 'private',
+    path: string | null
+  ): RoomType {
+    throw new Error('Method not implemented.');
+  }
+  deleteRoom(rid: string): void {
+    throw new Error('Method not implemented.');
+  }
+  kick(peer: string): void {
+    throw new Error('Method not implemented.');
+  }
+  sendChat(content: string): void {
+    throw new Error('Method not implemented.');
+  }
   signaling: WebSocket;
   api: string;
   constructor(our: Patp, config: ProtocolConfig, api: string) {
@@ -62,7 +80,7 @@ export class TestProtocol extends BaseProtocol {
         }
       } else {
         // we aren't in the room, so just set the value to the new room
-        this.rooms = this.rooms.map((room) => {
+        this.rooms = this.rooms.values().map((room) => {
           if (room.rid === roomUpdate.rid) {
             return roomUpdate.room;
           }

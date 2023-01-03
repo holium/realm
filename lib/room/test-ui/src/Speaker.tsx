@@ -35,19 +35,15 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         <button
           onClick={() => {
             if (our) {
-              if (roomsManager.presentRoom?.muteStatus) {
-                roomsManager.presentRoom?.unmute();
+              if (roomsManager.muteStatus) {
+                roomsManager.unmute();
               } else {
-                roomsManager.presentRoom?.mute();
+                roomsManager.mute();
               }
             }
           }}
         >
-          {our
-            ? roomsManager.presentRoom?.muteStatus
-              ? 'Unmute'
-              : 'Mute'
-            : 'Mute'}
+          {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
         </button>
       </div>
 
