@@ -40,9 +40,9 @@ export const UqbarApi = {
         },
       },
     };
-    conduit.poke(payload);
+    await conduit.poke(payload);
   },
-  sendTokens: async (
+  enqueueTransaction: async (
     conduit: Conduit,
     from: string,
     contract: string,
@@ -66,6 +66,43 @@ export const UqbarApi = {
               item,
             },
           },
+        },
+      },
+    };
+    await conduit.poke(payload);
+  },
+  submitSigned: async (
+    conduit: Conduit,
+    from: string,
+    hash: string,
+    rate: number,
+    bud: number,
+    ethHash?: string,
+    sig?: { v: number; r: string; s: string; }
+  ) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-poke',
+      json: {
+        'submit-signed': {
+          from,
+          hash,
+          gas: { rate, bud },
+          'eth-hash': ethHash,
+          sig
+        }
+      }
+    };
+    await conduit.poke(payload);
+  },
+  deletePending: async (conduit: Conduit, from: string, hash: string) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-poke',
+      json: {
+        'delete-pending': {
+          from,
+          hash,
         },
       },
     };
