@@ -509,7 +509,9 @@ export class RealmProtocol extends BaseProtocol {
           'leave-room': presentRoom.rid,
         },
       });
-      this.presentRoom = undefined;
+      action(() => {
+        this.presentRoom = undefined;
+      });
     }
   }
 }

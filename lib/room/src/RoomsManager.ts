@@ -15,11 +15,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   local: LocalPeer;
   protocol: BaseProtocol;
   live: {
-    room: RoomType | undefined;
+    room?: RoomType;
     chat: ChatModelType[];
-  } = {
-    room: undefined,
-    chat: [],
+  };
+  context: {
+    path?: string;
+    provider: Patp;
+    list: RoomType[];
   };
   state: RoomState = RoomState.Disconnected;
 
@@ -31,6 +33,17 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       isHost: false,
       rtc: this.protocol.rtc,
     });
+
+    this.live = {
+      room: undefined,
+      chat: [],
+    };
+
+    this.context = {
+      path: undefined,
+      provider: this.protocol.provider,
+      list: Array.from(this.protocol.rooms.values()),
+    };
     this.protocol.registerLocal(this.local);
 
     // Setting up listeners
