@@ -337,19 +337,31 @@ export class OnboardingService extends BaseService {
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
       return { success: true, errorMessage: '' };
     } else {
-      const account = await this.core.holiumClient.createAccount(
-        email,
-        this.state.inviteCode
-      );
-      if (!account.id) {
+      let id = null,
+        errorCode = null;
+      const account = await this.core.holiumClient.findAccount(email);
+      if (account) {
+        id = account.id;
+        this.state.setNewAccount(false);
+      } else {
+        const newAccount = await this.core.holiumClient.createAccount(
+          email,
+          this.state.inviteCode
+        );
+        id = newAccount.id;
+        if (id) {
+          this.state.setNewAccount(true);
+        }
+        errorCode = newAccount.errorCode;
+      }
+      if (!id) {
         const errorMessage =
-          account.errorCode === 441
+          errorCode === 441
             ? 'An account with that email already exists.'
             : 'Something went wrong, please us at support@holium.com';
         return { success: false, errorMessage };
       }
-
-      auth.setAccountId(account.id);
+      auth.setAccountId(id);
       return { success: true, errorMessage: '' };
     }
   }

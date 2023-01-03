@@ -7,9 +7,6 @@ import { useEffect } from 'react';
 
 export const VoiceView = observer(() => {
   const roomsManager = useRooms();
-  if (!roomsManager.presentRoom) {
-    return null;
-  }
 
   const { setTrayAppHeight } = useTrayApps();
 
@@ -26,6 +23,9 @@ export const VoiceView = observer(() => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
+  if (!roomsManager.presentRoom) {
+    return null;
+  }
   return (
     <Flex
       flex={2}

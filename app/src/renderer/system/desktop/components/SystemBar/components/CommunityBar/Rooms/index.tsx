@@ -13,7 +13,7 @@ import { useRooms } from 'renderer/apps/Rooms/useRooms';
 const iconSize = 28;
 const position = 'top-left';
 const anchorOffset = { x: 8, y: 26 };
-const dimensions = { height: 500, width: 380 };
+const dimensions = { height: 520, width: 380 };
 
 export const RoomTray = observer(() => {
   const { theme } = useServices();
