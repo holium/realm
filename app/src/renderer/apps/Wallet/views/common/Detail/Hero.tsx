@@ -180,8 +180,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         layout="size"
         layoutId={`wallet-card-${props.wallet.address}`}
         transition={transitionConfig}
-        padding="16px 12px"
-        minHeight="240px"
+        px="12px"
+        minHeight="220px"
         height="auto"
         width="100%"
         flexDirection="column"
@@ -196,6 +196,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       >
         <Flex
           p={2}
+          mt="16px"
+          // padding="px 12px"
           width="100%"
           minHeight="38px"
           transition={transitionConfig}
@@ -292,6 +294,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={transitionConfig}
+          // padding="15px 12px"
         >
           <SendReceiveButtons
             hidden={props.sendTrans}
