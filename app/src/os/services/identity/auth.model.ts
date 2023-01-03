@@ -55,6 +55,7 @@ export const AuthStore = types
       return self.loader.isLoaded;
     },
     get isFirstTime() {
+      console.log('isFirstTime => %o', self.firstTime);
       return self.firstTime;
     },
     get currentShip() {

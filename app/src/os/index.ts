@@ -131,13 +131,20 @@ export class Realm extends EventEmitter {
       desktop: new DesktopService(this),
       shell: new ShellService(this),
     };
-    if (
-      this.db.size > 0 &&
-      this.db.store.cookie !== null &&
-      !this.services.identity.auth.isFirstTime
-    ) {
+    if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
-      this.setSession(this.db.store);
+      let connectConduit: boolean = false;
+      // @patrick - per Trent: when in dev mode, if onboarding has been completed
+      //  auto login user. therefore, only time we should fully auto login is if this is
+      //  a NON-production build and we are not currently onboarding
+      if (
+        !this.services.identity.auth.isFirstTime() &&
+        (process.env.NODE_ENV === 'development' ||
+          process.env.DEBUG_PROD === 'true')
+      ) {
+        connectConduit = true;
+      }
+      this.setSession(this.db.store, connectConduit);
     }
 
     this.holiumClient = new HoliumAPI();
@@ -328,9 +335,11 @@ export class Realm extends EventEmitter {
     });
   }
 
-  setSession(session: ISession): void {
+  setSession(session: ISession, connect: boolean = true): void {
     this.saveSession(session);
-    this.connect(session);
+    if (connect) {
+      this.connect(session);
+    }
   }
 
   saveSession(session: ISession): void {
