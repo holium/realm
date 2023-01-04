@@ -35,26 +35,6 @@ const ShipConfig: { [ship: string]: any } = {
     url: 'http://localhost:8087',
     code: 'parsyr-dibwyt-livpen-hatsym',
   },
-  '~lomder-librun': {
-    ship: 'lomder-librun',
-    url: 'http://localhost:8091',
-    code: 'wistev-bacnul-fasleb-lattyn',
-  },
-  '~timluc-miptev': {
-    ship: 'timluc-miptev',
-    url: 'http://localhost:8092',
-    code: 'tanlun-datber-silwyn-lonnyd',
-  },
-  '~novdus-fidlys-dozzod-hostyv': {
-    ship: 'novdus-fidlys-dozzod-hostyv',
-    url: 'http://localhost:8089',
-    code: 'danmyl-natsyl-sigryc-naczod',
-  },
-  '~timmyr-locrul-dozzod-hostyv': {
-    ship: 'timmyr-locrul-dozzod-hostyv',
-    url: 'http://localhost:8090',
-    code: 'timtux-sovryx-ramnys-labpet',
-  },
 };
 
 const testShip = window.location.href.split('/')[3] || '~fes';
