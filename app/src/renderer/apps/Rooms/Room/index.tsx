@@ -31,10 +31,9 @@ export const Room = observer(() => {
   const muted = roomsManager.protocol.local?.isMuted;
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager) return;
-    if (!roomsManager.presentRoom) return;
-    return roomsManager.presentRoom;
-  }, [roomsManager.presentRoom]);
+    if (!roomsManager.live.room) return;
+    return roomsManager.live.room;
+  }, [roomsManager.live.room]);
 
   const [readChat, setReadChat] = useState(roomsManager.live.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);
@@ -60,7 +59,7 @@ export const Room = observer(() => {
   }, [presentRoom, roomsApp]);
 
   if (!presentRoom) return <div />;
-  const { rid, creator } = roomsManager.presentRoom!;
+  const { rid, creator } = presentRoom;
   const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;

@@ -18,10 +18,10 @@ export const RoomApp = observer(() => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
   useEffect(() => {
-    if (roomsManager.presentRoom) {
+    if (roomsManager.live.room) {
       roomsApp.setView('room');
     }
-  }, [roomsApp, roomsManager.presentRoom]);
+  }, [roomsApp, roomsManager.live.room]);
   const View = RoomViews[roomsApp.currentView];
   return <View />;
 });

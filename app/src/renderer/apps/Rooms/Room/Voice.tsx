@@ -24,7 +24,7 @@ export const VoiceView = observer(() => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsManager.presentRoom) {
+  if (!roomsManager.live.room) {
     return null;
   }
   return (
