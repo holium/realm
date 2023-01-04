@@ -1,7 +1,15 @@
 import { Conduit } from '@holium/conduit';
 import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
 
-export const WalletApi = {
+export const UqbarApi = {
+  uqbarDeskExists: async (conduit: Conduit) => {
+    const response = await conduit.scry({
+      app: 'wallet',
+      path: `/`,
+    });
+    console.log('response', response);
+    return response !== undefined;
+  },
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
     const payload = {
       app: 'wallet',

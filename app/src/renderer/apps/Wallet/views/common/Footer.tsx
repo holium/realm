@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -23,12 +23,19 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
 
     const [click, setClick] = useState(false);
+    const [uqbarDeskExists, setUqbarDeskExists] = useState(false);
     const toggleUqbar = () => {
       if (click) {
         WalletActions.toggleUqbar();
       }
       setClick(!click);
     };
+
+    useEffect(() => {
+      WalletActions.uqbarDeskExists().then((exists) => {
+        setUqbarDeskExists(exists);
+      });
+    }, [])
 
     return (
       <Box width="100%" hidden={props.hidden}>
@@ -40,7 +47,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           pt="6px"
           width="100%"
           justifyContent="space-between"
-          style={{backgroundColor: '#ffffff'}}
+          style={{backgroundColor: theme.currentTheme.backgroundColor}}
         >
           <Box mr={1}>
             <WalletNetwork network={walletApp.navState.protocol} />
@@ -48,7 +55,13 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           <Flex>
             <Flex mr="10px" onClick={toggleUqbar}>
               {walletApp.navState.network === NetworkType.ETHEREUM && (
+                uqbarDeskExists ?
                 <ImageToggle
+                  src={UqbarLogo}
+                  color={darken(0.03, theme.currentTheme.windowColor)}
+                  checked={walletApp.navState.protocol === ProtocolType.UQBAR}
+                />
+                : <ImageToggle
                   src={UqbarLogo}
                   color={darken(0.03, theme.currentTheme.windowColor)}
                   checked={walletApp.navState.protocol === ProtocolType.UQBAR}

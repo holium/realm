@@ -19,6 +19,7 @@ import { BaseSigner } from './wallet-lib/wallets/BaseSigner';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
+import { UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';
 import {
   onPatch,
@@ -70,6 +71,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.navigateBack': this.navigateBack,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
+    'realm.tray.wallet.uqbar-desk-exists': this.uqbarDeskExists,
     'realm.tray.wallet.watch-updates': this.watchUpdates,
   };
 
@@ -264,6 +266,9 @@ export class WalletService extends BaseService {
     },
     toggleUqbar: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.toggle-uqbar');
+    },
+    uqbarDeskExists: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.uqbar-desk-exists');
     },
     watchUpdates: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
@@ -701,6 +706,10 @@ export class WalletService extends BaseService {
         this.wallet!.watchUpdates(this.core.conduit!, this.state!);
       }
     }
+  }
+
+  async uqbarDeskExists(_evt: any) {
+    return await UqbarApi.uqbarDeskExists(this.core.conduit!);
   }
 
   toggleUqbar(_evt: any) {
