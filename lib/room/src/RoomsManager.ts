@@ -51,8 +51,30 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       this.connectRoom(room.rid);
     });
 
+    this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
+      // When we create a room, we should enter it instantly
+      if (room.creator === this.our) {
+        this.connectRoom(room.rid);
+      }
+    });
+
     this.protocol.on(ProtocolEvent.RoomUpdated, (room: RoomType) => {
       this.updateRoom(room);
+    });
+
+    this.protocol.on(ProtocolEvent.RoomLeft, (room: RoomType) => {
+      // if we're in a deleted room, we should leave it
+      this.clearLiveRoom();
+    });
+
+    this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
+      // if we're in a deleted room, we should leave it
+      this.clearLiveRoom();
+    });
+
+    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
+      // if we're in a kicked room, we should leave it
+      this.leaveRoom();
     });
 
     this.protocol.on(
@@ -61,25 +83,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
         this.onChat(peer, content);
       }
     );
-
-    this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
-      // When we create a room, we should enter it instantly
-      if (room.creator === this.our) {
-        this.enterRoom(room.rid);
-      }
-    });
-
-    this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
-      // if we're in a deleted room, we should leave it
-      if (this.live.room?.rid === rid) {
-        this.live.room = undefined;
-      }
-    });
-
-    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
-      // if we're in a kicked room, we should leave it
-      this.leaveRoom();
-    });
 
     this.protocol.on(
       ProtocolEvent.PeerDataReceived,
@@ -227,8 +230,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (room) this.emit(RoomManagerEvent.LeftRoom, room.rid);
     this.protocol.leave();
     this.local.disableMedia();
-    this.live.room = undefined;
-    this.live.chat = [];
+    this.clearLiveRoom();
   }
 
   createRoom(title: string, access: 'public' | 'private', path: string | null) {
@@ -242,14 +244,18 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (this.live.room?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
       this.local.disableMedia();
-      this.live.room = undefined;
-      this.live.chat = [];
+      this.clearLiveRoom();
     }
     this.protocol.deleteRoom(rid);
   }
 
   sendData(data: any) {
     this.protocol.sendData({ from: this.our, ...data });
+  }
+
+  clearLiveRoom() {
+    this.live.room = undefined;
+    this.live.chat = [];
   }
 
   // Setup audio

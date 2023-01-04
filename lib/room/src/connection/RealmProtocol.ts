@@ -58,7 +58,6 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   async onSignal(data: any, mark: string) {
-    // console.log(mark, data);
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -99,6 +98,11 @@ export class RealmProtocol extends BaseProtocol {
                 1
               );
             }
+          } else {
+            console.log(
+              'got ack-ready from someone who we dont have a remotePeer connection for',
+              payload.from
+            );
           }
         }
         if (signalData.type === 'retry') {
@@ -123,15 +127,20 @@ export class RealmProtocol extends BaseProtocol {
             }
           } else {
             // we dont have a remotePeer for this patp and we are getting WebRTC signaling data, for now just log it
-            const remotePeer = this.dial(payload.from, false);
-            remotePeer.createConnection();
-            remotePeer.peerSignal(payload.data);
+            if (this.presentRoom?.present.includes(payload.from)) {
+              const remotePeer = this.dial(payload.from, false);
+              remotePeer.createConnection();
+              remotePeer.peerSignal(payload.data);
+            } else {
+              console.log('got signal from peer not in room', payload.from);
+            }
           }
         }
       }
     }
 
     if (mark === 'rooms-v2-reaction') {
+      console.log(mark, data);
       if (data['chat-received']) {
         const payload = data['chat-received'];
         this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
@@ -150,6 +159,7 @@ export class RealmProtocol extends BaseProtocol {
         if (this.presentRoom?.rid === payload.rid) {
           this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
+          this.presentRoom = undefined;
         }
         const room = this.rooms.get(payload.rid);
         if (room) {

@@ -1,11 +1,6 @@
 import './App.css';
 import * as process from 'process';
-import {
-  RoomsManager,
-  RoomProtocol,
-  RealmProtocol,
-  RoomManagerEvent,
-} from '@holium/realm-room';
+import { RoomsManager, RealmProtocol } from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
 import { Speaker } from './Speaker';
 import { FC, useEffect, useState } from 'react';
@@ -17,6 +12,11 @@ import { toJS } from 'mobx';
 (window as any).Buffer = [];
 
 const ShipConfig: { [ship: string]: any } = {
+  '~zod': {
+    ship: 'zod',
+    url: 'http://localhost',
+    code: 'lidlut-tabwed-pillex-ridrup',
+  },
   '~dev': {
     ship: 'dev',
     url: 'http://localhost:8081',
@@ -41,6 +41,16 @@ const ShipConfig: { [ship: string]: any } = {
     ship: 'timluc-miptev',
     url: 'http://localhost:8092',
     code: 'tanlun-datber-silwyn-lonnyd',
+  },
+  '~novdus-fidlys-dozzod-hostyv': {
+    ship: 'novdus-fidlys-dozzod-hostyv',
+    url: 'http://localhost:8089',
+    code: 'danmyl-natsyl-sigryc-naczod',
+  },
+  '~timmyr-locrul-dozzod-hostyv': {
+    ship: 'timmyr-locrul-dozzod-hostyv',
+    url: 'http://localhost:8090',
+    code: 'timtux-sovryx-ramnys-labpet',
   },
 };
 const testShip = window.location.href.split('/')[3] || '~fes';
@@ -166,20 +176,20 @@ const App: FC = observer(() => {
 
 const PeerGrid: FC = observer(() => {
   console.log(toJS(roomsManager.live));
-  if (!roomsManager.live.room) {
-    return null;
-  }
-  console.log(toJS(roomsManager.live.room));
+  // if (!roomsManager.presentRoom) {
+  //   return null;
+  // }
+  // console.log(toJS(roomsManager.presentRoom));
   return (
     <>
-      {roomsManager.peers.map(({ patp }: any) => {
+      {roomsManager.live.room?.present.map((patp: any) => {
         return (
           <Speaker
             our={false}
             key={patp}
             patp={patp}
             type={
-              patp === roomsManager?.presentRoom?.creator ? 'host' : 'speaker'
+              patp === roomsManager?.live.room?.creator ? 'host' : 'speaker'
             }
           />
         );
