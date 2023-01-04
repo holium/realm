@@ -66,7 +66,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       this.updateRoom(room);
     });
 
-    this.protocol.on(ProtocolEvent.RoomLeft, (room: RoomType) => {
+    this.protocol.on(ProtocolEvent.RoomLeft, () => {
       this.clearLiveRoom();
     });
 
@@ -77,7 +77,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     });
 
-    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
+    this.protocol.on(ProtocolEvent.RoomKicked, () => {
       this.clearLiveRoom();
     });
 
