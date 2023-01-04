@@ -72,6 +72,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
       if (this.live.room?.rid === rid) {
+        this.leaveRoom();
         this.live.room = undefined;
       }
     });
