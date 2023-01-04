@@ -28,6 +28,7 @@ import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
 import { motion } from 'framer-motion';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 // import { CoinList } from './CoinList';
 
 const CardWithShadow = styled(Card)`
@@ -151,6 +152,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             fontSize={2}
             color={rgba(theme.currentTheme.textColor, 0.4)}
             style={{ textTransform: 'uppercase' }}
+            onClick={WalletActions.navigateBack}
           >
             {`${props.wallet.nickname} / `}
           </Text>
