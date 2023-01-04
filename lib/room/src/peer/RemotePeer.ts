@@ -83,10 +83,10 @@ export class RemotePeer extends Peer {
   dial() {
     if (!this.isInitiator) {
       // notify the peer that we want to connect
-      console.log('dialing', this.patp);
+      console.log('sending ready to:', this.patp);
       this.sendSignal(this.patp, { type: 'ready', from: this.our });
     }
-    console.log('waiting for dial', this.patp);
+    console.log('waiting for ready from:', this.patp);
   }
 
   handleReadySignal() {

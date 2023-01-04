@@ -54,8 +54,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
       // When we create a room, we should enter it instantly
       if (room.creator === this.our) {
-        this.connectRoom(room.rid);
+        this.enterRoom(room.rid);
       }
+    });
+
+    this.protocol.on(ProtocolEvent.RoomEntered, (room: RoomType) => {
+      this.updateRoom(room);
     });
 
     this.protocol.on(ProtocolEvent.RoomUpdated, (room: RoomType) => {
@@ -63,17 +67,18 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     });
 
     this.protocol.on(ProtocolEvent.RoomLeft, (room: RoomType) => {
-      // if we're in a deleted room, we should leave it
       this.clearLiveRoom();
     });
 
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
-      this.clearLiveRoom();
+      if (this.live.room?.rid === rid) {
+        this.clearLiveRoom();
+      }
     });
 
     this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
-      // if we're in a kicked room, we should leave it
+      // if we're kicked from a room, we should leave it
       this.leaveRoom();
     });
 
@@ -180,16 +185,16 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   setProvider(provider: string) {
-    if (this.state === RoomState.Connected) {
-      throw new Error('Must leave current room before switching providers');
-    }
+    // if (this.state === RoomState.Connected) {
+    //   throw new Error('Must leave current room before switching providers');
+    // }
     this.protocol.setProvider(provider);
   }
 
   enterRoom(rid: string) {
-    if (this.live.room) {
-      if (this.live.room.creator === this.our) {
-        this.deleteRoom(this.live.room.rid);
+    if (this.presentRoom) {
+      if (this.presentRoom.creator === this.our) {
+        this.deleteRoom(this.presentRoom.rid);
       } else {
         this.leaveRoom();
       }
@@ -197,7 +202,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
       throw new Error('Room not found');
     }
-    if (rid === this.live.room?.rid) {
+    if (rid === this.presentRoom?.rid) {
       return;
     }
 
@@ -226,9 +231,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   leaveRoom() {
-    const room = this.live.room;
-    if (room) this.emit(RoomManagerEvent.LeftRoom, room.rid);
-    this.protocol.leave();
+    if (this.presentRoom) {
+      this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
+      this.protocol.leave(this.presentRoom.rid);
+    }
     this.local.disableMedia();
     this.clearLiveRoom();
   }
@@ -241,7 +247,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   deleteRoom(rid: string) {
     // provider/admin action
-    if (this.live.room?.rid === rid) {
+    if (this.presentRoom?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
       this.local.disableMedia();
       this.clearLiveRoom();

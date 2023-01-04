@@ -1,6 +1,10 @@
 import './App.css';
 import * as process from 'process';
-import { RoomsManager, RealmProtocol } from '@holium/realm-room';
+import {
+  RoomsManager,
+  RealmProtocol,
+  RoomManagerEvent,
+} from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
 import { Speaker } from './Speaker';
 import { FC, useEffect, useState } from 'react';
@@ -90,6 +94,12 @@ const App: FC = observer(() => {
             (roomsManager.protocol as RealmProtocol).onSignal(data, mark);
           },
         });
+        roomsManager.on(
+          RoomManagerEvent.OnDataChannel,
+          (rid: string, peer: string, data: any) => {
+            console.log('peer data', data);
+          }
+        );
       });
     }
 

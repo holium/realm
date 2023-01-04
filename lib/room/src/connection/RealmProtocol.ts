@@ -2,7 +2,7 @@ import { PeerEvent } from '../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { action, makeObservable, observable, observe, runInAction } from 'mobx';
+import { action, makeObservable, observable, observe } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket } from 'helpers/data';
@@ -21,6 +21,7 @@ export class RealmProtocol extends BaseProtocol {
   poke: (...args: any) => Promise<void>;
   scry: (...args: any) => Promise<any>;
   queuedPeers: Patp[] = [];
+  disposePresentRoom: any;
   constructor(our: Patp, config: ProtocolConfig, handlers: APIHandlers) {
     super(our, config);
 
@@ -80,27 +81,45 @@ export class RealmProtocol extends BaseProtocol {
         if (signalData.type === 'ready') {
           // another peer is indicating that they are ready for us to dial them
           if (remotePeer) {
+            console.log('got ready signal from remotePeer:', payload.from);
             // we already have a peer for this patp, so we can just create a peer connection
-            remotePeer.createConnection();
+            remotePeer.handleReadySignal();
           } else {
             // we don't have a remotePeer for this patp, so we need to queue one, they
             // will be entering the room soon
+            console.log(
+              'got ready signal from someone we dont have a remotePeer setup for:',
+              payload.from
+            );
             const remotePeer = this.dial(payload.from, false);
             remotePeer.handleReadySignal();
           }
         }
         if (signalData.type === 'ack-ready') {
           if (remotePeer) {
+            console.log(
+              'got ack-ready signal from a remotePeer:',
+              payload.from
+            );
             if (this.queuedPeers.includes(payload.from)) {
+              console.log(
+                'got ack-ready from peer we queued, creating connection for:',
+                payload.from
+              );
               remotePeer.createConnection();
               this.queuedPeers.splice(
                 this.queuedPeers.indexOf(payload.from),
                 1
               );
+            } else {
+              console.log(
+                'got ack-ready from peer we already have a connection for:',
+                payload.from
+              );
             }
           } else {
             console.log(
-              'got ack-ready from someone who we dont have a remotePeer connection for',
+              'got ack-ready from peer we dont have a remotePeer connection for:',
               payload.from
             );
           }
@@ -128,6 +147,10 @@ export class RealmProtocol extends BaseProtocol {
           } else {
             // we dont have a remotePeer for this patp and we are getting WebRTC signaling data, for now just log it
             if (this.presentRoom?.present.includes(payload.from)) {
+              console.log(
+                'got signal from peer in room, but with no peer connection, creating:',
+                payload.from
+              );
               const remotePeer = this.dial(payload.from, false);
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
@@ -149,8 +172,9 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
         if (this.presentRoom?.rid) {
-          this.peers.clear();
-          this.emit(ProtocolEvent.RoomDeleted, this.presentRoom?.rid);
+          const rid = this.presentRoom?.rid;
+          this.hangupAll();
+          this.emit(ProtocolEvent.RoomDeleted, rid);
         }
         this.rooms = new Map(Object.entries(payload.rooms));
       }
@@ -159,7 +183,6 @@ export class RealmProtocol extends BaseProtocol {
         if (this.presentRoom?.rid === payload.rid) {
           this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
-          this.presentRoom = undefined;
         }
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -190,7 +213,7 @@ export class RealmProtocol extends BaseProtocol {
               }
             } else {
               console.log('we entered the room');
-              this.emit(ProtocolEvent.RoomEntered, payload.rid);
+              this.emit(ProtocolEvent.RoomEntered, room);
             }
           } else {
             // if we are not in the room, we need to connect
@@ -383,7 +406,7 @@ export class RealmProtocol extends BaseProtocol {
       });
     }
     this.presentRoom = room;
-    observe(this.presentRoom, (change) => {
+    this.disposePresentRoom = observe(this.presentRoom, (change) => {
       this.emit(ProtocolEvent.RoomUpdated, change.object);
     });
 
@@ -494,6 +517,8 @@ export class RealmProtocol extends BaseProtocol {
    * @param rid
    */
   hangupAll() {
+    this.presentRoom = undefined;
+    this.disposePresentRoom();
     //  hangup all peers
     this.peers.forEach((peer) => {
       this.hangup(peer.patp, { shouldEmit: false });
@@ -501,26 +526,18 @@ export class RealmProtocol extends BaseProtocol {
     this.peers.clear();
   }
 
-  async leave() {
-    const presentRoom = this.presentRoom;
-    if (!presentRoom) {
-      throw new Error('No room to leave');
-    }
-    if (presentRoom.present.includes(this.our)) {
-      this.hangupAll();
-      this.peers.clear();
-      this.emit(ProtocolEvent.RoomLeft, presentRoom);
-      await this.poke({
-        app: 'rooms-v2',
-        mark: 'rooms-v2-session-action',
-        json: {
-          'leave-room': presentRoom.rid,
-        },
-      });
-      runInAction(() => {
-        this.presentRoom = undefined;
-      });
-    }
+  leave(rid: string) {
+    this.hangupAll();
+    this.peers.clear();
+    const room = this.rooms.get(rid);
+    this.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'leave-room': rid,
+      },
+    });
+    this.emit(ProtocolEvent.RoomLeft, room!);
   }
 }
 
