@@ -54,6 +54,9 @@ export const AuthStore = types
     get isLoaded() {
       return self.loader.isLoaded;
     },
+    get isFirstTime() {
+      return self.firstTime;
+    },
     get currentShip() {
       let selectedShip = self.selected;
       if (!selectedShip) {
