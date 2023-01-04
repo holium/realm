@@ -89,7 +89,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   return (
     <Flex width={width}>
       <Input
-        ref={inputRef}
+        innerRef={inputRef}
         flex={8}
         id={`${popoverId}-trigger`}
         className="realm-cursor-text-cursor"

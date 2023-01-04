@@ -7,6 +7,7 @@ import {
   useCallback,
   ClipboardEvent,
   KeyboardEventHandler,
+  ChangeEvent,
 } from 'react';
 import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
@@ -203,6 +204,7 @@ export const ChatView = observer(
         SoundActions.playDMSend();
         if (chatInputRef.current) {
           chatInputRef.current.value = '';
+          chatInputRef.current.style.height = 'auto';
           chatInputRef.current.focus();
         }
 
@@ -229,12 +231,35 @@ export const ChatView = observer(
         if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
           submitDm();
-        } else if (event.keyCode === 13 && event.shiftKey) {
-          // @ts-expect-error
-          chatInputRef.current.rows = chatInputRef.current.rows + 1;
         }
       },
       [submitDm]
+    );
+
+    const updateInputHeight = useCallback((inputRef: HTMLInputElement) => {
+      const padding = 16;
+      const lineHeight = 17;
+      const minHeight = 33;
+      const maxHeight = minHeight + lineHeight * 3;
+      const numberOfLines = inputRef.value.split(/\r*\n/).length;
+      const newHeight = numberOfLines * lineHeight + padding;
+
+      if (newHeight > maxHeight) {
+        inputRef.style.height = maxHeight + 'px';
+      } else if (newHeight < minHeight) {
+        inputRef.style.height = minHeight + 'px';
+      } else {
+        inputRef.style.height = newHeight + 'px';
+      }
+    }, []);
+
+    const onChange = useCallback(
+      (event: ChangeEvent<HTMLInputElement>) => {
+        dmMessage.actions.onChange(event.target.value);
+
+        updateInputHeight(event.target);
+      },
+      [dmMessage.actions, updateInputHeight]
     );
 
     const to = useMemo(
@@ -422,7 +447,7 @@ export const ChatView = observer(
                 </Tooltip>
                 <Input
                   as="textarea"
-                  ref={chatInputRef}
+                  innerRef={chatInputRef}
                   tabIndex={1}
                   rows={1}
                   autoFocus
@@ -451,12 +476,13 @@ export const ChatView = observer(
                       </IconButton>
                     </Flex>
                   }
-                  onChange={(e) => dmMessage.actions.onChange(e.target.value)}
+                  onChange={onChange}
                   onPaste={onPaste}
                   onFocus={() => dmMessage.actions.onFocus()}
                   onBlur={() => dmMessage.actions.onBlur()}
                   wrapperStyle={{
                     height: 'max-content',
+                    margin: '12px 0',
                     borderRadius: 9,
                     // borderWidth: 0,
                     borderColor: 'transparent',

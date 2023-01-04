@@ -1,14 +1,17 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { Flex, Text, Sigil } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { useServices } from 'renderer/logic/store';
 
-const EmptyPicture = styled.div`
+type EmptyPictureProps = {
+  color?: string;
+};
+
+const EmptyPicture = styled.div<EmptyPictureProps>`
   height: 32px;
   width: 32px;
-  background: ${(p: any) => p.color || '#000'};
+  background: ${({ color }) => color ?? '#000'};
   border-radius: 4px;
 `;
 
@@ -25,13 +28,15 @@ const FadeInMotion = {
   transition: { opacity: { duration: 1, ease: 'easeIn' } },
 };
 
-export const SelectedSpace: FC<SelectedSpaceProps> = observer(
-  (props: SelectedSpaceProps) => {
-    const { selectorRef, onClick } = props;
+export const SelectedSpace = observer(
+  ({ selectorRef, onClick }: SelectedSpaceProps) => {
     const { spaces, ship, theme } = useServices();
-    const selectedSpace = spaces.selected!;
+    const selectedSpace = spaces.selected;
     const { dockColor, textColor } = theme.currentTheme;
-    let innerContent: any;
+
+    let innerContent: JSX.Element | null;
+
+    if (!selectedSpace) return null;
 
     if (selectedSpace.type === 'our') {
       innerContent = (
@@ -96,7 +101,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
               src={selectedSpace.picture}
             />
           ) : (
-            <EmptyPicture color={selectedSpace.color || '#000000'} />
+            <EmptyPicture color={selectedSpace.color ?? '#000000'} />
           )}
           <Flex
             style={{ pointerEvents: 'none' }}
@@ -130,6 +135,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
         </Flex>
       );
     }
+
     return (
       <TrayButton
         id="spaces-tray-icon"

@@ -4,12 +4,10 @@ import { Flex } from 'renderer/components';
 import { Speaker } from '../components/Speaker';
 import { useRooms } from '../useRooms';
 import { useEffect } from 'react';
+import { roomTrayConfig } from '../config';
 
 export const VoiceView = observer(() => {
   const roomsManager = useRooms();
-  if (!roomsManager.presentRoom) {
-    return null;
-  }
 
   const { setTrayAppHeight } = useTrayApps();
 
@@ -17,15 +15,18 @@ export const VoiceView = observer(() => {
   const speakers = [...Array.from(roomsManager.protocol.peers.keys())]; //.filter((patp) => patp !== our);
 
   useEffect(() => {
-    const regularHeight = 500;
+    const regularHeight = roomTrayConfig.dimensions.height;
     if (speakers.length + 1 > 4) {
-      const tallHeight = 500 + 181 + 12;
+      const tallHeight = roomTrayConfig.dimensions.height + 181 + 12;
       setTrayAppHeight(tallHeight);
     } else {
       setTrayAppHeight(regularHeight);
     }
   }, [speakers.length, setTrayAppHeight]);
 
+  if (!roomsManager.presentRoom) {
+    return null;
+  }
   return (
     <Flex
       flex={2}
