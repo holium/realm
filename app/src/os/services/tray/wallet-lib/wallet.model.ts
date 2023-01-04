@@ -1,4 +1,3 @@
-import { Types } from 'aws-sdk/clients/s3';
 import {
   applySnapshot,
   types,
@@ -378,6 +377,7 @@ const EthWalletData = types
     nfts: types.map(ERC721),
     transactionList: TransactionList, //types.map(Transaction),
     block: types.number,
+    uqbarTokenId: types.maybe(types.string),
   })
   .actions((self) => ({
     /*setCoins(coins: any) {
@@ -471,6 +471,9 @@ const EthWallet = types
     updateNftTransfers(protocol: ProtocolType, transfers: any) {},
     setBalance(protocol: ProtocolType, balance: string) {
       self.data.get(protocol)!.balance = balance;
+    },
+    setUqbarTokenId(protocol: ProtocolType, tokenId: string) {
+      self.data.get(protocol)!.uqbarTokenId = tokenId;
     },
     /*clearWallet() {
       self.coins.clear();

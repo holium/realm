@@ -527,7 +527,6 @@ export class WalletService extends BaseService {
     amount: string,
     toPatp?: string,
   ) {
-    const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(
       this.state!.navState.protocol
     ) as EthereumProtocol;
@@ -546,11 +545,10 @@ export class WalletService extends BaseService {
       chainId: await protocol.getChainId(),
     };
     const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
+    const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
     const hash = await (this.wallet!.protocols.get(
       ProtocolType.UQBAR
     )! as UqbarProtocol).enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
-    let flatSig = await this.signer!.signMessage(message);
-    let sig = ethers.utils.splitSignature(flatSig);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -565,7 +563,6 @@ export class WalletService extends BaseService {
     const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
       hash
     );
-
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
@@ -575,73 +572,6 @@ export class WalletService extends BaseService {
       hash,
       stateTx
     );
-  }
-  
-  async sendUqbarTransaction(
-    _event: any,
-    walletIndex: string,
-    to: string,
-    amount: string,
-    toPatp?: string,
-  ) {
-    const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    ) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
-    const tx = {
-      from,
-      to,
-      value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate({
-        to,
-        from,
-        value: ethers.utils.parseEther(amount),
-      }),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
-    };
-    const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
-    const hash = await (this.wallet!.protocols.get(
-      ProtocolType.UQBAR
-    )! as UqbarProtocol).enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
-    let flatSig = await this.signer!.signMessage(message);
-    let sig = ethers.utils.splitSignature(flatSig);
-    const currentWallet = this.state!.currentWallet! as EthWalletType;
-    const fromAddress = currentWallet.address;
-    currentWallet.enqueueTransaction(
-      this.state!.navState.protocol,
-      hash,
-      tx.to,
-      toPatp,
-      fromAddress,
-      tx.value,
-      new Date().toISOString(),
-    );
-    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
-      hash
-    );
-
-    await WalletApi.setTransaction(
-      this.core.conduit!,
-      'ethereum',
-      this.state!.navState.protocol,
-      currentWallet.index,
-      null,
-      hash,
-      stateTx
-    );
-  }
-
-  async deleteUqbarTransaction(
-    _event: any,
-    walletIndex: string,
-    to: string,
-    amount: string,
-    toPatp?: string,
-  ) {
-    UqbarApi.deletePending(this.core.conduit!, walletIndex, to, amount, toPatp);
   }
 
   async sendEthereumTransaction(

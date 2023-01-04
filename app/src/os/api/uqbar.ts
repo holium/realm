@@ -197,6 +197,7 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
             console.log(data[address][contract].data)
             const balance = data[address][contract].data.balance;
             walletState.ethereum.wallets.get(key)!.setBalance(ProtocolType.UQBAR, balance);
+            walletState.ethereum.wallets.get(key)!.setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
           }
         }
       }
@@ -212,7 +213,12 @@ const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
   console.log(data);
 }
 
-const handleTxReactions = (data: any, walletState: WalletStoreType) => {
+const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType, signTransaction: any) => {
   console.log('tx')
   console.log(data);
+  const pending = true;
+  if (pending) {
+    const sig = signTransaction()
+    UqbarApi.submitSigned(conduit, walletState.ethereum.wallets.get(0)!.address, data.hash, 1, 1)
+  }
 }
