@@ -147,13 +147,13 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['room-deleted']) {
         const payload = data['room-deleted'];
-        const room = this.rooms.get(payload.rid);
-        if (room) {
-          this.rooms.delete(payload.rid);
-        }
         if (this.presentRoom?.rid === payload.rid) {
           this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
+        }
+        const room = this.rooms.get(payload.rid);
+        if (room) {
+          this.rooms.delete(payload.rid);
         }
       }
       if (data['room-entered']) {
@@ -194,17 +194,17 @@ export class RealmProtocol extends BaseProtocol {
       if (data['room-left']) {
         // console.log('room left');
         const payload = data['room-left'];
-        const room = this.rooms.get(payload.rid);
-        if (room) {
-          room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
-        }
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
             this.hangup(payload.ship);
           } else {
             console.log('we left the room');
           }
+        }
+        const room = this.rooms.get(payload.rid);
+        if (room) {
+          room.present.splice(room.present.indexOf(payload.ship), 1);
+          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
