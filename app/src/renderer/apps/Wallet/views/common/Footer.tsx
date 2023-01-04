@@ -47,7 +47,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           pt="6px"
           width="100%"
           justifyContent="space-between"
-          style={{backgroundColor: theme.currentTheme.backgroundColor}}
+          style={{backgroundColor: theme.currentTheme.windowColor}}
         >
           <Box mr={1}>
             <WalletNetwork network={walletApp.navState.protocol} />
