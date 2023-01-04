@@ -105,7 +105,7 @@ export const Rooms = observer(() => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsManager.presentRoom?.rid !== room.rid) {
+                if (roomsManager.live.room?.rid !== room.rid) {
                   roomsManager.enterRoom(room.rid);
                 }
                 roomsApp.setView('room');

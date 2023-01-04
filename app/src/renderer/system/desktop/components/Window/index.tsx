@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
@@ -31,7 +31,7 @@ interface AppWindowStyleProps {
   customBg?: string;
 }
 
-export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
+const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
   overflow: hidden;
@@ -49,9 +49,8 @@ interface AppWindowProps {
   desktopRef: any;
 }
 
-export const AppWindow: FC<AppWindowProps> = observer(
-  (props: AppWindowProps) => {
-    const { window, desktopRef } = props;
+const AppWindow = observer(
+  ({ window, desktopRef, hideTitlebar = false }: AppWindowProps) => {
     const { shell, bazaar, desktop, theme } = useServices();
     const { textColor, windowColor } = theme.currentTheme;
 
@@ -410,10 +409,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
   }
 );
 
-AppWindow.defaultProps = {
-  hideTitlebar: false,
-};
-
 export default AppWindow;
 
 interface WindowTypeProps {
@@ -423,8 +418,12 @@ interface WindowTypeProps {
   window: WindowModelProps;
 }
 
-export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
-  const { hasTitlebar, isResizing, isDragging, window } = props;
+const WindowType = ({
+  hasTitlebar,
+  isResizing,
+  isDragging,
+  window,
+}: WindowTypeProps) => {
   switch (window.type) {
     case 'native':
       return (
