@@ -81,6 +81,7 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
+    this.setStatus(PeerConnectionState.Connecting);
     if (!this.isInitiator) {
       // notify the peer that we want to connect
       console.log('sending ready to:', this.patp);

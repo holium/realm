@@ -78,8 +78,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     });
 
     this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
-      // if we're kicked from a room, we should leave it
-      this.leaveRoom();
+      this.clearLiveRoom();
     });
 
     this.protocol.on(
@@ -235,7 +234,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
       this.protocol.leave(this.presentRoom.rid);
     }
-    this.local.disableMedia();
     this.clearLiveRoom();
   }
 
@@ -249,7 +247,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     // provider/admin action
     if (this.presentRoom?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
-      this.local.disableMedia();
       this.clearLiveRoom();
     }
     this.protocol.deleteRoom(rid);
@@ -262,6 +259,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   clearLiveRoom() {
     this.live.room = undefined;
     this.live.chat = [];
+    this.local.disableMedia();
   }
 
   // Setup audio

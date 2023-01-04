@@ -4,12 +4,11 @@ import {
   RoomsManager,
   RealmProtocol,
   RoomManagerEvent,
+  RemotePeer,
 } from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
-import { Speaker } from './Speaker';
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 
 (window as any).global = window;
 (window as any).process = process;
@@ -57,6 +56,7 @@ const ShipConfig: { [ship: string]: any } = {
     code: 'timtux-sovryx-ramnys-labpet',
   },
 };
+
 const testShip = window.location.href.split('/')[3] || '~fes';
 const shipData = ShipConfig[testShip];
 export let roomsManager: RoomsManager;
@@ -171,40 +171,89 @@ const App: FC = observer(() => {
         </div>
         <div className="speaker-grid">
           {roomsManager.live.room && (
-            <Speaker
+            <OurMic
               our
               patp={roomsManager.our}
               type={roomsManager.local.host ? 'host' : 'speaker'}
             />
           )}
-          <PeerGrid />
+          {[...Array.from(roomsManager.protocol.peers.keys())].map(
+            (patp: any) => {
+              let peer: any;
+
+              peer = roomsManager.protocol.peers.get(patp);
+              if (!peer) {
+                return null;
+              }
+
+              return (
+                <div key={patp} className="speaker-container">
+                  <p style={{ margin: 0 }}>{patp}</p>
+                  <p
+                    style={{
+                      marginTop: 6,
+                      marginBottom: 12,
+                      opacity: 0.5,
+                      fontSize: 12,
+                    }}
+                  >
+                    {peer?.patpId}
+                  </p>
+                  <div
+                    style={{ display: 'flex', gap: 8, flexDirection: 'row' }}
+                  ></div>
+
+                  <div>
+                    <p>Status: {peer.status}</p>
+                    <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
+                  </div>
+                </div>
+              );
+            }
+          )}
         </div>
       </div>
     </div>
   );
 });
 
-const PeerGrid: FC = observer(() => {
-  console.log(toJS(roomsManager.live));
-  // if (!roomsManager.presentRoom) {
-  //   return null;
-  // }
-  // console.log(toJS(roomsManager.presentRoom));
+type ISpeaker = {
+  our: boolean;
+  patp: string;
+  peer?: RemotePeer;
+  cursors?: boolean;
+  type: 'host' | 'speaker' | 'listener';
+};
+
+const OurMic: FC<ISpeaker> = observer((props: ISpeaker) => {
+  const { our, patp } = props;
+
   return (
-    <>
-      {roomsManager.live.room?.present.map((patp: any) => {
-        return (
-          <Speaker
-            our={false}
-            key={patp}
-            patp={patp}
-            type={
-              patp === roomsManager?.live.room?.creator ? 'host' : 'speaker'
+    <div className="speaker-container">
+      <p style={{ margin: 0 }}>{patp}</p>
+      <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
+        {our}
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
+        <button
+          onClick={() => {
+            if (our) {
+              if (roomsManager.muteStatus) {
+                roomsManager.unmute();
+              } else {
+                roomsManager.mute();
+              }
             }
-          />
-        );
-      })}
-    </>
+          }}
+        >
+          {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
+        </button>
+      </div>
+
+      <div>
+        <p>Microphone: {'activated'}</p>
+      </div>
+    </div>
   );
 });
 
