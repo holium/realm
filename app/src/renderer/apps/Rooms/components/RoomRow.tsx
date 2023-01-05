@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useRef, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
@@ -7,6 +7,10 @@ import { AvatarRow } from './AvatarRow';
 import { darken } from 'polished';
 import { RoomType } from '@holium/realm-room';
 import { useRooms } from '../useRooms';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;
@@ -25,8 +29,11 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     onClick,
     rightChildren,
   } = props;
+  const roomRowRef = useRef<any>(null);
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
+  const { getOptions, setOptions } = useContextMenu();
+  console.log(getOptions('room-row-'+rid), props.provider, ship?.patp);
 
   const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -48,8 +55,40 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   }
   const isLive = roomsManager.presentRoom?.rid === rid;
 
+  const contextMenuOptions = useMemo(
+    () => {
+      let opts: ContextMenuOption[] = [];
+      if (ship!.patp === props.provider) {
+        opts = [
+          ({
+            id: `room-delete-${rid}`,
+            label: 'Delete Room',
+            onClick: (evt: any) => {
+              console.log('yooooooo');
+              //(roomsManager.protocol as RealmProtocol).retry(person);
+              //evt.stopPropagation();
+            },
+          } as ContextMenuOption),
+          ...opts
+        ]
+      }
+      return opts;
+    },
+    [rid, ship, props.provider]
+  );
+
+  useEffect(() => {
+    console.log('useEffect', contextMenuOptions, getOptions(`room-row-${rid}`));
+    if (contextMenuOptions !== getOptions(`room-row-${rid}`) ) {
+      console.log('setting', contextMenuOptions);
+      setOptions(`room-row-${rid}`, contextMenuOptions);
+    }
+  }, [contextMenuOptions, rid, setOptions]);
+
   return (
     <Row
+      id={`room-row-${rid}`}
+      ref={roomRowRef}
       style={{ position: 'relative' }}
       small={tray}
       className="realm-cursor-hover"
