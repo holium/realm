@@ -90,6 +90,10 @@ export const Speaker = observer((props: ISpeaker) => {
   if (peerState === PeerConnectionState.Disconnected)
     sublabel = <Sublabel {...textProps}>Disconnected</Sublabel>;
 
+  if (peerState === PeerConnectionState.Closed) {
+    sublabel = <Sublabel {...textProps}>Away</Sublabel>;
+  }
+
   useEffect(() => {
     if (
       person !== ship?.patp &&

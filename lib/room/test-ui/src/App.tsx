@@ -2,21 +2,24 @@ import './App.css';
 import * as process from 'process';
 import {
   RoomsManager,
-  RoomProtocol,
   RealmProtocol,
   RoomManagerEvent,
+  RemotePeer,
 } from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
-import { Speaker } from './Speaker';
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 
 (window as any).global = window;
 (window as any).process = process;
 (window as any).Buffer = [];
 
 const ShipConfig: { [ship: string]: any } = {
+  '~zod': {
+    ship: 'zod',
+    url: 'http://localhost',
+    code: 'lidlut-tabwed-pillex-ridrup',
+  },
   '~dev': {
     ship: 'dev',
     url: 'http://localhost:8081',
@@ -32,19 +35,14 @@ const ShipConfig: { [ship: string]: any } = {
     url: 'http://localhost:8087',
     code: 'parsyr-dibwyt-livpen-hatsym',
   },
-  '~lomder-librun': {
-    ship: 'lomder-librun',
-    url: 'http://localhost:8091',
-    code: 'wistev-bacnul-fasleb-lattyn',
-  },
-  '~timluc-miptev': {
-    ship: 'timluc-miptev',
-    url: 'http://localhost:8092',
-    code: 'tanlun-datber-silwyn-lonnyd',
-  },
 };
+
 const testShip = window.location.href.split('/')[3] || '~fes';
 const shipData = ShipConfig[testShip];
+// NOTE: to connect one ship to another, you must manually poke the ship to `set-provider` like:
+// :rooms-v2 &rooms-v2-session-action [%set-provider ~dev]
+//  (^ on the dojo of ~fes if he wanted to connect to a room hosted by ~dev)
+
 export let roomsManager: RoomsManager;
 
 const App: FC = observer(() => {
@@ -80,6 +78,12 @@ const App: FC = observer(() => {
             (roomsManager.protocol as RealmProtocol).onSignal(data, mark);
           },
         });
+        roomsManager.on(
+          RoomManagerEvent.OnDataChannel,
+          (rid: string, peer: string, data: any) => {
+            console.log('peer data', data);
+          }
+        );
       });
     }
 
@@ -151,40 +155,89 @@ const App: FC = observer(() => {
         </div>
         <div className="speaker-grid">
           {roomsManager.live.room && (
-            <Speaker
+            <OurMic
               our
               patp={roomsManager.our}
               type={roomsManager.local.host ? 'host' : 'speaker'}
             />
           )}
-          <PeerGrid />
+          {[...Array.from(roomsManager.protocol.peers.keys())].map(
+            (patp: any) => {
+              let peer: any;
+
+              peer = roomsManager.protocol.peers.get(patp);
+              if (!peer) {
+                return null;
+              }
+
+              return (
+                <div key={patp} className="speaker-container">
+                  <p style={{ margin: 0 }}>{patp}</p>
+                  <p
+                    style={{
+                      marginTop: 6,
+                      marginBottom: 12,
+                      opacity: 0.5,
+                      fontSize: 12,
+                    }}
+                  >
+                    {peer?.patpId}
+                  </p>
+                  <div
+                    style={{ display: 'flex', gap: 8, flexDirection: 'row' }}
+                  ></div>
+
+                  <div>
+                    <p>Status: {peer.status}</p>
+                    <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
+                  </div>
+                </div>
+              );
+            }
+          )}
         </div>
       </div>
     </div>
   );
 });
 
-const PeerGrid: FC = observer(() => {
-  console.log(toJS(roomsManager.live));
-  if (!roomsManager.live.room) {
-    return null;
-  }
-  console.log(toJS(roomsManager.live.room));
+type ISpeaker = {
+  our: boolean;
+  patp: string;
+  peer?: RemotePeer;
+  cursors?: boolean;
+  type: 'host' | 'speaker' | 'listener';
+};
+
+const OurMic: FC<ISpeaker> = observer((props: ISpeaker) => {
+  const { our, patp } = props;
+
   return (
-    <>
-      {roomsManager.peers.map(({ patp }: any) => {
-        return (
-          <Speaker
-            our={false}
-            key={patp}
-            patp={patp}
-            type={
-              patp === roomsManager?.presentRoom?.creator ? 'host' : 'speaker'
+    <div className="speaker-container">
+      <p style={{ margin: 0 }}>{patp}</p>
+      <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
+        {our}
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
+        <button
+          onClick={() => {
+            if (our) {
+              if (roomsManager.muteStatus) {
+                roomsManager.unmute();
+              } else {
+                roomsManager.mute();
+              }
             }
-          />
-        );
-      })}
-    </>
+          }}
+        >
+          {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
+        </button>
+      </div>
+
+      <div>
+        <p>Microphone: {'activated'}</p>
+      </div>
+    </div>
   );
 });
 

@@ -64,7 +64,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   ): Promise<Map<Patp, RemotePeer>>;
   abstract dial(peer: Patp, isHost: boolean): RemotePeer;
   abstract kick(peer: Patp): void;
-  abstract leave(): Promise<void>;
+  abstract leave(rid: string): void;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
   abstract sendChat(content: string): void;
