@@ -35,6 +35,26 @@ const ShipConfig: { [ship: string]: any } = {
     url: 'http://localhost:8087',
     code: 'parsyr-dibwyt-livpen-hatsym',
   },
+  '~lomder-librun': {
+    ship: 'lomder-librun',
+    url: 'http://localhost:8091',
+    code: 'wistev-bacnul-fasleb-lattyn',
+  },
+  '~timluc-miptev': {
+    ship: 'timluc-miptev',
+    url: 'http://localhost:8092',
+    code: 'tanlun-datber-silwyn-lonnyd',
+  },
+  '~novdus-fidlys-dozzod-hostyv': {
+    ship: 'novdus-fidlys-dozzod-hostyv',
+    url: 'http://localhost:8089',
+    code: 'danmyl-natsyl-sigryc-naczod',
+  },
+  '~timmyr-locrul-dozzod-hostyv': {
+    ship: 'timmyr-locrul-dozzod-hostyv',
+    url: 'http://localhost:8090',
+    code: 'timtux-sovryx-ramnys-labpet',
+  },
 };
 
 const testShip = window.location.href.split('/')[3] || '~fes';
@@ -49,11 +69,10 @@ const App: FC = observer(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
-    let api: any;
+    let api: any = null;
     if (!roomsApi) {
       Urbit.authenticate(shipData).then(async (newApi) => {
         api = newApi;
-        console.log('connected');
         await api.connect();
         const handlers = {
           poke: api.poke.bind(api),
@@ -90,7 +109,7 @@ const App: FC = observer(() => {
     return () => {
       api?.delete();
     };
-  }, [roomsApi]);
+  }, [roomsApi === null]);
 
   if (!roomsApi) return null;
 

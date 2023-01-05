@@ -7,6 +7,7 @@ import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
 import { DataPacket } from './helpers/data';
 import { RoomManagerEvent } from './events';
+import { isWeb } from './utils';
 
 /**
  * RoomsManager: top level class for managing the rooms primitive
@@ -114,7 +115,15 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       updateRoom: action.bound,
       onChat: action.bound,
       connectRoom: action.bound,
+      cleanup: action.bound,
     });
+    if (isWeb()) {
+      window.removeEventListener('beforeunload', this.cleanup.bind(this));
+      window.addEventListener('beforeunload', this.cleanup.bind(this));
+    }
+  }
+  cleanup() {
+    this.clearLiveRoom();
   }
 
   /**
@@ -204,7 +213,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (rid === this.presentRoom?.rid) {
       return;
     }
-
     this.connectRoom(rid);
   }
 
