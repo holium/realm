@@ -86,6 +86,8 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
+    this.setStatus(PeerConnectionState.Connecting);
+
     if (!this.isInitiator) {
       this.ready();
     } else {

@@ -7,7 +7,6 @@ import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
 import { DataPacket } from './helpers/data';
 import { RoomManagerEvent } from './events';
-import { isWeb } from './utils';
 
 /**
  * RoomsManager: top level class for managing the rooms primitive
@@ -103,6 +102,8 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     );
 
+    this.cleanup = this.cleanup.bind(this);
+
     makeObservable(this, {
       state: observable,
       protocol: observable,
@@ -115,15 +116,17 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       updateRoom: action.bound,
       onChat: action.bound,
       connectRoom: action.bound,
-      cleanup: action.bound,
     });
-    if (isWeb()) {
-      window.removeEventListener('beforeunload', this.cleanup.bind(this));
-      window.addEventListener('beforeunload', this.cleanup.bind(this));
-    }
   }
+
   cleanup() {
-    this.clearLiveRoom();
+    if (this.live.room) {
+      if (this.live.room.creator === this.our) {
+        this.deleteRoom(this.live.room.rid);
+      } else {
+        this.leaveRoom();
+      }
+    }
   }
 
   /**

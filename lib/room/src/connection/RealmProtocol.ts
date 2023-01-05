@@ -43,8 +43,8 @@ export class RealmProtocol extends BaseProtocol {
     this.scry = handlers.scry;
     this.emit(ProtocolEvent.Ready);
     if (isWeb()) {
-      window.removeEventListener('beforeunload', this.cleanup.bind(this));
-      window.addEventListener('beforeunload', this.cleanup.bind(this));
+      window.removeEventListener('beforeunload', this.cleanup);
+      window.addEventListener('beforeunload', this.cleanup);
     }
   }
 
