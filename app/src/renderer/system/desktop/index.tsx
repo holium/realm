@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
@@ -6,14 +5,12 @@ import { HomePane } from './components/Home';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { TrayManager } from './TrayManager';
-import { createManager, RoomsProvider } from 'renderer/apps/Rooms/useRooms';
-import { RoomsManager } from '@holium/realm-room';
+import { RoomsProvider, useRooms } from 'renderer/apps/Rooms/useRooms';
 
 export const Desktop = observer(() => {
   const { ship, desktop } = useServices();
   const our = ship!.patp;
-
-  const manager = useMemo<RoomsManager>(() => createManager(our), [our]);
+  const manager = useRooms(our);
 
   return (
     <RoomsProvider value={manager}>

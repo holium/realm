@@ -102,6 +102,8 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     );
 
+    this.cleanup = this.cleanup.bind(this);
+
     makeObservable(this, {
       state: observable,
       protocol: observable,
@@ -114,7 +116,18 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       updateRoom: action.bound,
       onChat: action.bound,
       connectRoom: action.bound,
+      clearLiveRoom: action.bound,
     });
+  }
+
+  async cleanup() {
+    if (this.live.room) {
+      if (this.live.room.creator === this.our) {
+        await this.deleteRoom(this.live.room.rid);
+      } else {
+        await this.leaveRoom();
+      }
+    }
   }
 
   /**
@@ -204,7 +217,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (rid === this.presentRoom?.rid) {
       return;
     }
-
     this.connectRoom(rid);
   }
 
@@ -229,10 +241,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.live.room = room;
   }
 
-  leaveRoom() {
+  async leaveRoom() {
     if (this.presentRoom) {
       this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
-      this.protocol.leave(this.presentRoom.rid);
+      await this.protocol.leave(this.presentRoom.rid);
     }
     this.clearLiveRoom();
   }
@@ -243,13 +255,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.emit(RoomManagerEvent.CreatedRoom, room);
   }
 
-  deleteRoom(rid: string) {
+  async deleteRoom(rid: string) {
     // provider/admin action
     if (this.presentRoom?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
       this.clearLiveRoom();
     }
-    this.protocol.deleteRoom(rid);
+    await this.protocol.deleteRoom(rid);
   }
 
   sendData(data: any) {

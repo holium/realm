@@ -55,7 +55,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
     access: 'public' | 'private',
     path: string | null
   ): RoomType;
-  abstract deleteRoom(rid: string): void;
+  abstract deleteRoom(rid: string): Promise<void>;
   abstract getRoom(rid: string): Promise<RoomType>;
   abstract getRooms(): Promise<RoomType[]>;
   //
@@ -64,7 +64,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   ): Promise<Map<Patp, RemotePeer>>;
   abstract dial(peer: Patp, isHost: boolean): RemotePeer;
   abstract kick(peer: Patp): void;
-  abstract leave(rid: string): void;
+  abstract leave(rid: string): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
   abstract sendChat(content: string): void;
