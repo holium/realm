@@ -1,13 +1,20 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-import styled, { css, StyledComponentProps } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Label = styled.label`
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  ${(props: { disabled: boolean }) =>
+    props.disabled &&
+    css`
+      opacity: 0.5;
+      cursor: default;
+    `}
 `;
+
 const Switch = styled.div`
   ${(props: { src: string; color: string }) =>
     props.src &&
@@ -46,10 +53,16 @@ const Input = styled.input`
   }
 `;
 
-export const ImageToggle = (props: any) => {
+export const ImageToggle = (props: {
+  src: string;
+  checked: boolean;
+  color: string;
+  disabled: boolean;
+  onClick: () => void;
+}) => {
   return (
-    <Label>
-      <Input checked={props.checked} type="checkbox" onChange={() => {}} />
+    <Label disabled={props.disabled} onClick={props.onClick}>
+      <Input checked={props.checked} type="checkbox" readOnly />
       <Switch src={props.src} color={props.color} />
     </Label>
   );

@@ -71,18 +71,22 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  const transactionList = (
+  const transactionList =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? (walletApp.navState.detail?.txtype && walletApp.navState.detail!.txtype === 'coin')
-        ? (walletApp.currentWallet! as EthWalletType).data.get(
-            walletApp.navState.protocol
-            )!.coins.get(walletApp.navState.detail!.coinKey!)!.transactionList.transactions
+      ? walletApp.navState.detail?.txtype &&
+        walletApp.navState.detail!.txtype === 'coin'
+        ? (walletApp.currentWallet! as EthWalletType).data
+            .get(walletApp.navState.protocol)!
+            .coins.get(walletApp.navState.detail!.coinKey!)!.transactionList
+            .transactions
         : (walletApp.currentWallet! as EthWalletType).data.get(
             walletApp.navState.protocol
-            )!.transactionList.transactions
-      : (walletApp.currentWallet! as BitcoinWalletType).transactionList.transactions
-  );
-  const transaction = transactionList.get(walletApp.navState.detail!.key)! as TransactionType;
+          )!.transactionList.transactions
+      : (walletApp.currentWallet! as BitcoinWalletType).transactionList
+          .transactions;
+  const transaction = transactionList.get(
+    walletApp.navState.detail!.key
+  )! as TransactionType;
 
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);
@@ -109,7 +113,7 @@ export const TransactionDetail: FC = observer(() => {
   const amountDisplay = isEth
     ? `${ethAmount.eth}` /* ETH` */
     : `${btcAmount.btc} BTC`;
-  
+
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
       <Text fontSize={2} color={themeData.colors.text.disabled}>

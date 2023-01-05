@@ -181,7 +181,9 @@ const buttonVariants = variant({
   },
 });
 
-type PropsWithRefChildren<T> = T & { children?: React.ReactNode } & { ref?: Ref<T> }
+type PropsWithRefChildren<T> = T & { children?: React.ReactNode } & {
+  ref?: Ref<T>;
+};
 const StyledButton = styled.button<PropsWithRefChildren<ButtonProps>>`
   ${(props) =>
     props.disabled

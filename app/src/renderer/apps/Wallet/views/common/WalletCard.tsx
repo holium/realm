@@ -130,17 +130,20 @@ export const WalletCard: FC<WalletCardProps> = ({
       >
         <Flex>
           {coins &&
-            coins.slice(0,6).map((coin, index) => (
-              <img
-                src={coin.logo || getMockCoinIcon(coin.name)}
-                style={{ height: '14px', marginRight: '4px' }}
-                key={index}
-              />
-            ))}
-          {coins && coins.length > 6 &&
-          <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
-            +{coins.length - 6}
-          </Text>}
+            coins
+              .slice(0, 6)
+              .map((coin, index) => (
+                <img
+                  src={coin.logo || getMockCoinIcon(coin.name)}
+                  style={{ height: '14px', marginRight: '4px' }}
+                  key={index}
+                />
+              ))}
+          {coins && coins.length > 6 && (
+            <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+              +{coins.length - 6}
+            </Text>
+          )}
         </Flex>
         <Text variant="body" color={theme.currentTheme.iconColor}>
           {transactions.length} Transactions

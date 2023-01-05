@@ -340,31 +340,42 @@ function CopyButton(props: CopyProps) {
   );
 }
 
-const SendReceiveButtons = memo((props: {
-  hidden: boolean;
-  windowColor: string;
-  send: any;
-  receive: any;
-}) => {
-  const panelBackground = darken(0.04, props.windowColor);
+const SendReceiveButtons = memo(
+  (props: {
+    hidden: boolean;
+    windowColor: string;
+    send: any;
+    receive: any;
+  }) => {
+    const panelBackground = darken(0.04, props.windowColor);
 
-  return (
-    <Box width="100%" hidden={props.hidden}>
-      <Flex mt="12px" width="100%" justifyContent="center" alignItems="center">
-        <Box mr="16px" onClick={props.receive}>
-          <CircleButton
-            icon="Receive"
-            title="Receive"
-            iconColor={panelBackground}
-          />
-        </Box>
-        <Box onClick={props.send}>
-          <CircleButton icon="Send" title="Send" iconColor={panelBackground} />
-        </Box>
-      </Flex>
-    </Box>
-  );
-})
+    return (
+      <Box width="100%" hidden={props.hidden}>
+        <Flex
+          mt="12px"
+          width="100%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Box mr="16px" onClick={props.receive}>
+            <CircleButton
+              icon="Receive"
+              title="Receive"
+              iconColor={panelBackground}
+            />
+          </Box>
+          <Box onClick={props.send}>
+            <CircleButton
+              icon="Send"
+              title="Send"
+              iconColor={panelBackground}
+            />
+          </Box>
+        </Flex>
+      </Box>
+    );
+  }
+);
 
 interface BalanceInterface {
   address: string;

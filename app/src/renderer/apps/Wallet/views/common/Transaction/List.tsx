@@ -44,7 +44,12 @@ export const Transaction = observer((props: TransactionProps) => {
 
   const onClick = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-      detail: { type: 'transaction', txtype: walletApp.navState.detail?.txtype || 'general', coinKey: walletApp.navState.detail?.coinKey, key: transaction.hash },
+      detail: {
+        type: 'transaction',
+        txtype: walletApp.navState.detail?.txtype || 'general',
+        coinKey: walletApp.navState.detail?.coinKey,
+        key: transaction.hash,
+      },
     });
   };
 

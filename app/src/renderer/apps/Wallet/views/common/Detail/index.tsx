@@ -63,7 +63,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
     );
   }
-  
+
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? coin
@@ -73,15 +73,19 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
             .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
-  let transactions = getTransactions(walletTransactions || new Map())
-  const pendingTransactions = transactions.filter(trans => trans.status === 'pending').sort(
-    (a, b) =>
-      new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
-  );
-  const transactionHistory = transactions.filter(trans => trans.status !== 'pending').sort(
-    (a, b) =>
-      new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
-  );
+  let transactions = getTransactions(walletTransactions || new Map());
+  const pendingTransactions = transactions
+    .filter((trans) => trans.status === 'pending')
+    .sort(
+      (a, b) =>
+        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+    );
+  const transactionHistory = transactions
+    .filter((trans) => trans.status !== 'pending')
+    .sort(
+      (a, b) =>
+        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+    );
   transactions = [...pendingTransactions, ...transactionHistory];
 
   /* useEffect(() => {
