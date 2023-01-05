@@ -326,14 +326,17 @@ export class RealmProtocol extends BaseProtocol {
    *
    * @param rid
    */
-  deleteRoom(rid: string) {
-    this.poke({
+  async deleteRoom(rid: string) {
+    await this.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
       json: {
         'delete-room': rid,
       },
     });
+    if (this.presentRoom?.rid === rid) {
+      this.hangupAll();
+    }
   }
 
   async getSession(): Promise<void> {
@@ -499,11 +502,11 @@ export class RealmProtocol extends BaseProtocol {
     this.peers.clear();
   }
 
-  leave(rid: string) {
+  async leave(rid: string) {
     this.hangupAll();
     this.peers.clear();
     const room = this.rooms.get(rid);
-    this.poke({
+    await this.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
       json: {

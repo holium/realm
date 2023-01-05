@@ -116,15 +116,16 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       updateRoom: action.bound,
       onChat: action.bound,
       connectRoom: action.bound,
+      clearLiveRoom: action.bound,
     });
   }
 
-  cleanup() {
+  async cleanup() {
     if (this.live.room) {
       if (this.live.room.creator === this.our) {
-        this.deleteRoom(this.live.room.rid);
+        await this.deleteRoom(this.live.room.rid);
       } else {
-        this.leaveRoom();
+        await this.leaveRoom();
       }
     }
   }
@@ -240,10 +241,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.live.room = room;
   }
 
-  leaveRoom() {
+  async leaveRoom() {
     if (this.presentRoom) {
       this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
-      this.protocol.leave(this.presentRoom.rid);
+      await this.protocol.leave(this.presentRoom.rid);
     }
     this.clearLiveRoom();
   }
@@ -254,13 +255,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.emit(RoomManagerEvent.CreatedRoom, room);
   }
 
-  deleteRoom(rid: string) {
+  async deleteRoom(rid: string) {
     // provider/admin action
     if (this.presentRoom?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
       this.clearLiveRoom();
     }
-    this.protocol.deleteRoom(rid);
+    await this.protocol.deleteRoom(rid);
   }
 
   sendData(data: any) {
