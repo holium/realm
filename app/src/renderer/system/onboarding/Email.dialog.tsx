@@ -36,6 +36,7 @@ export const EmailDialog: FC<BaseDialogProps> = observer(
             verificationCode={onboarding.verificationCode!}
             done={done}
             theme={baseTheme as ThemeType}
+            newAccount={onboarding.newAccount}
           />
         )}
       </Flex>
@@ -107,11 +108,22 @@ function VerifyScreen(props: {
   theme: ThemeType;
   verificationCode: string;
   done: any;
+  newAccount: boolean;
 }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
   const validChars =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+  const resendCode = async () => {
+    if (!props.newAccount) {
+      await OnboardingActions.resendEmailConfirmation();
+    }
+  };
+
+  useEffect(() => {
+    resendCode();
+  }, [props.newAccount]);
 
   const submit = async (code: string) => {
     const wasCorrect = await OnboardingActions.verifyEmail(code);

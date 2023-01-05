@@ -1,9 +1,8 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
-import { Patp, RoomState, RoomType } from './types';
+import { ChatModelType, Patp, RoomState, RoomType } from './types';
 import { BaseProtocol } from './connection/BaseProtocol';
-import { RoomInstance } from './RoomInstance';
 import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
 import { DataPacket } from './helpers/data';
@@ -15,7 +14,16 @@ import { RoomManagerEvent } from './events';
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
   protocol: BaseProtocol;
-  presentRoom?: RoomInstance;
+  live: {
+    room?: RoomType;
+    chat: ChatModelType[];
+  };
+  context: {
+    path?: string;
+    provider: Patp;
+    list: RoomType[];
+  };
+  state: RoomState = RoomState.Disconnected;
 
   constructor(protocol: BaseProtocol) {
     // eslint-disable-next-line constructor-super
@@ -25,23 +33,23 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       isHost: false,
       rtc: this.protocol.rtc,
     });
+
+    this.live = {
+      room: undefined,
+      chat: [],
+    };
+
+    this.context = {
+      path: undefined,
+      provider: this.protocol.provider,
+      list: Array.from(this.protocol.rooms.values()),
+    };
     this.protocol.registerLocal(this.local);
 
     // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
-      this.enterRoom(room.rid);
+      this.connectRoom(room.rid);
     });
-
-    this.protocol.on(ProtocolEvent.RoomUpdated, (room: RoomType) => {
-      this.presentRoom?.setRoom(room);
-    });
-
-    this.protocol.on(
-      ProtocolEvent.ChatReceived,
-      (peer: Patp, content: string) => {
-        this.presentRoom?.onChat(peer, content);
-      }
-    );
 
     this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
       // When we create a room, we should enter it instantly
@@ -50,25 +58,43 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     });
 
+    this.protocol.on(ProtocolEvent.RoomEntered, (room: RoomType) => {
+      this.updateRoom(room);
+    });
+
+    this.protocol.on(ProtocolEvent.RoomUpdated, (room: RoomType) => {
+      this.updateRoom(room);
+    });
+
+    this.protocol.on(ProtocolEvent.RoomLeft, () => {
+      this.clearLiveRoom();
+    });
+
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
-      if (this.presentRoom?.rid === rid) {
-        this.presentRoom = undefined;
+      if (this.live.room?.rid === rid) {
+        this.clearLiveRoom();
       }
     });
 
-    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
-      // if we're in a kicked room, we should leave it
-      this.leaveRoom(rid);
+    this.protocol.on(ProtocolEvent.RoomKicked, () => {
+      this.clearLiveRoom();
     });
+
+    this.protocol.on(
+      ProtocolEvent.ChatReceived,
+      (peer: Patp, content: string) => {
+        this.onChat(peer, content);
+      }
+    );
 
     this.protocol.on(
       ProtocolEvent.PeerDataReceived,
       (peer: Patp, data: DataPacket) => {
-        if (this.presentRoom) {
+        if (this.live.room) {
           this.emit(
             RoomManagerEvent.OnDataChannel,
-            this.presentRoom.rid,
+            this.live.room.rid,
             peer,
             data
           );
@@ -77,29 +103,163 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     );
 
     makeObservable(this, {
+      state: observable,
       protocol: observable,
-      presentRoom: observable,
+      live: observable,
       createRoom: action.bound,
       deleteRoom: action.bound,
       enterRoom: action.bound,
       leaveRoom: action.bound,
+      sendChat: action.bound,
+      updateRoom: action.bound,
+      onChat: action.bound,
+      connectRoom: action.bound,
     });
+  }
+
+  /**
+   * mute - Mutes local peer
+   */
+  mute() {
+    this.protocol.local?.mute();
+  }
+
+  /**
+   * unmute - Unmutes local peer
+   */
+  unmute() {
+    this.protocol.local?.unmute();
+  }
+
+  /**
+   * muteStatus - Returns mute status of local peer
+   */
+  get muteStatus() {
+    return this.protocol.local?.isMuted;
   }
 
   get our(): Patp {
     return this.local.patp;
   }
 
-  get currentRoom(): RoomInstance | undefined {
-    return this.presentRoom;
+  get presentRoom(): RoomType | undefined {
+    return this.protocol.presentRoom;
+  }
+
+  /**
+   * peers - Returns all peers
+   * @returns RemotePeer[]
+   */
+  get peers() {
+    return Array.from(this.protocol.peers.values());
+  }
+
+  get rooms(): RoomType[] {
+    return Array.from(this.protocol.rooms.values());
   }
 
   get currentProtocol(): BaseProtocol {
     return this.protocol;
   }
 
-  get rooms(): RoomType[] {
-    return Array.from(this.protocol.rooms.values());
+  sendChat(content: string) {
+    this.live.chat.push({
+      author: this.protocol.our,
+      index: this.live.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: true,
+    });
+    this.protocol.sendChat(content);
+  }
+
+  onChat(peer: Patp, content: string) {
+    this.live.chat.push({
+      author: peer,
+      index: this.live.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: false,
+    });
+  }
+
+  setProvider(provider: string) {
+    // if (this.state === RoomState.Connected) {
+    //   throw new Error('Must leave current room before switching providers');
+    // }
+    this.protocol.setProvider(provider);
+  }
+
+  enterRoom(rid: string) {
+    if (this.presentRoom) {
+      if (this.presentRoom.creator === this.our) {
+        this.deleteRoom(this.presentRoom.rid);
+      } else {
+        this.leaveRoom();
+      }
+    }
+    if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
+      throw new Error('Room not found');
+    }
+    if (rid === this.presentRoom?.rid) {
+      return;
+    }
+
+    this.connectRoom(rid);
+  }
+
+  connectRoom(rid: string) {
+    this.local.enableMedia();
+    // returns the list of rooms from the current provider
+    this.getRoom(rid).then(
+      action(() => {
+        this.state = RoomState.Started;
+        this.emit(RoomState.Started);
+      })
+    );
+  }
+
+  async getRoom(rid: string) {
+    const room = await this.protocol.getRoom(rid);
+    this.updateRoom(room);
+    this.protocol.connect(room);
+  }
+
+  updateRoom(room: RoomType) {
+    this.live.room = room;
+  }
+
+  leaveRoom() {
+    if (this.presentRoom) {
+      this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
+      this.protocol.leave(this.presentRoom.rid);
+    }
+    this.clearLiveRoom();
+  }
+
+  createRoom(title: string, access: 'public' | 'private', path: string | null) {
+    // creates a room in the current provider
+    const room = this.protocol.createRoom(title, access, path);
+    this.emit(RoomManagerEvent.CreatedRoom, room);
+  }
+
+  deleteRoom(rid: string) {
+    // provider/admin action
+    if (this.presentRoom?.rid === rid) {
+      this.emit(RoomManagerEvent.DeletedRoom, rid);
+      this.clearLiveRoom();
+    }
+    this.protocol.deleteRoom(rid);
+  }
+
+  sendData(data: any) {
+    this.protocol.sendData({ from: this.our, ...data });
+  }
+
+  clearLiveRoom() {
+    this.live.room = undefined;
+    this.live.chat = [];
+    this.local.disableMedia();
   }
 
   // Setup audio
@@ -136,68 +296,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   setAudioInput(deviceId: string) {
     this.local.setAudioInputDevice(deviceId);
   }
-
-  setProvider(provider: string) {
-    if (this.presentRoom?.state === RoomState.Connected) {
-      throw new Error('Must leave current room before switching providers');
-    }
-    this.protocol.setProvider(provider);
-  }
-
-  enterRoom(rid: string): RoomInstance {
-    if (this.presentRoom) {
-      if (this.presentRoom.room.creator === this.our) {
-        this.deleteRoom(this.presentRoom.rid);
-      } else {
-        this.leaveRoom(this.presentRoom.rid);
-      }
-    }
-    if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
-      throw new Error('Room not found');
-    }
-    if (rid === this.presentRoom?.rid) {
-      return this.presentRoom;
-    }
-    this.local.enableMedia();
-    // returns the list of rooms from the current provider
-    this.presentRoom = new RoomInstance(rid, this.protocol);
-    this.presentRoom.on(RoomState.Started, () => {
-      this.presentRoom?.connect();
-    });
-    return this.presentRoom;
-  }
-
-  leaveRoom(rid: string) {
-    if (this.presentRoom?.rid !== rid) {
-      throw new Error('must be in the room to leave');
-    }
-    this.local.disableMedia();
-    this.presentRoom.leave();
-    this.presentRoom = undefined;
-  }
-
-  createRoom(
-    title: string,
-    access: 'public' | 'private',
-    spacePath: string | null
-  ) {
-    // creates a room in the current provider
-    this.protocol.createRoom(title, access, spacePath);
-  }
-
-  deleteRoom(rid: string) {
-    // provider/admin action
-    this.protocol.deleteRoom(rid);
-  }
-
-  sendData(data: any) {
-    this.presentRoom?.sendData({ from: this.our, ...data });
-  }
 }
 
 export type RoomsManagerEventCallbacks = {
+  started: () => void;
+  connected: () => void;
   createdRoom: (room: RoomType) => void;
-  deletedRoom: (rid: string, state: RoomState) => void;
+  deletedRoom: (rid: string) => void;
   joinedRoom: (rid: string) => void;
   leftRoom: (rid: string) => void;
   setNewProvider: (provider: Patp, rooms: RoomType[]) => void;

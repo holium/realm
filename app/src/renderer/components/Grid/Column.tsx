@@ -20,6 +20,7 @@ type ColumnType = SpaceProps &
     noGutter?: boolean;
     children?: React.ReactNode;
     debug?: boolean;
+    style?: any;
   };
 
 const Column = styled(styled.div<ColumnType>`

@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
+import {
+  Badge,
+  Flex,
+  Grid,
+  IconButton,
+  Icons,
+  Text,
+} from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -24,17 +31,35 @@ export const Room = observer(() => {
   const muted = roomsManager.protocol.local?.isMuted;
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager) return;
-    if (!roomsManager.presentRoom) return;
-    return roomsManager.presentRoom.room;
-  }, [roomsManager?.presentRoom?.room]);
+    if (!roomsManager.live.room) return;
+    return roomsManager.live.room;
+  }, [roomsManager.live.room]);
+
+  const [readChat, setReadChat] = useState(roomsManager.live.chat.slice());
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const latestChat = roomsManager.live.chat.slice();
+    if (roomView === 'chat') {
+      setReadChat(latestChat);
+      setUnreadCount(0);
+    } else {
+      setUnreadCount(
+        latestChat
+          ? latestChat.filter(
+              (msg) => !readChat?.includes(msg) && msg.author !== ship?.patp
+            ).length
+          : 0
+      );
+    }
+  }, [roomView, roomsManager.live.chat.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
   }, [presentRoom, roomsApp]);
 
   if (!presentRoom) return <div />;
-  const { rid, creator } = roomsManager!.presentRoom!.room;
+  const { rid, creator } = presentRoom;
   const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
@@ -168,7 +193,7 @@ export const Room = observer(() => {
                 if (presentRoom.creator === ship!.patp) {
                   roomsManager.deleteRoom(rid);
                 } else {
-                  roomsManager.leaveRoom(rid);
+                  roomsManager.leaveRoom();
                 }
               }}
             >
@@ -187,10 +212,10 @@ export const Room = observer(() => {
                 evt.stopPropagation();
                 if (muted) {
                   console.log('unmuting time');
-                  roomsManager!.presentRoom!.unmute();
+                  roomsManager.unmute();
                 } else {
                   console.log('muting time');
-                  roomsManager!.presentRoom!.mute();
+                  roomsManager.mute();
                 }
               }}
             />
@@ -210,20 +235,29 @@ export const Room = observer(() => {
             /> */}
           </Flex>
           <Flex alignItems="center">
-            <IconButton
-              className="realm-cursor-hover"
-              size={26}
-              customBg={dockColor}
-              color={roomView === 'chat' ? accentColor : undefined}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                roomView === 'chat'
-                  ? setRoomView('voice')
-                  : setRoomView('chat');
-              }}
+            <Badge
+              wrapperHeight={26}
+              wrapperWidth={26}
+              top={1}
+              right={1}
+              minimal
+              count={unreadCount}
             >
-              <Icons name="Chat3" />
-            </IconButton>
+              <IconButton
+                className="realm-cursor-hover"
+                size={26}
+                customBg={dockColor}
+                color={roomView === 'chat' ? accentColor : undefined}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  roomView === 'chat'
+                    ? setRoomView('voice')
+                    : setRoomView('chat');
+                }}
+              >
+                <Icons name="Chat3" />
+              </IconButton>
+            </Badge>
           </Flex>
         </Flex>
       </Flex>

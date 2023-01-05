@@ -84,6 +84,7 @@ export const OnboardingStore = types
     code: types.maybe(types.string),
     planetWasTaken: false,
     versionVerified: false,
+    newAccount: true,
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -189,6 +190,10 @@ export const OnboardingStore = types
       }
       return self.versionVerified;
     }),
+
+    setNewAccount(val: boolean) {
+      self.newAccount = val;
+    },
 
     reset() {
       self.ship = undefined;

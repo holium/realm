@@ -2,6 +2,13 @@ import { Conduit } from '@holium/conduit';
 import { ProtocolType, WalletStoreType } from '../services/tray/wallet-lib/wallet.model';
 
 export const UqbarApi = {
+  uqbarDeskExists: async (conduit: Conduit) => {
+    const response = await conduit.scry({
+      app: 'docket',
+      path: `/charges`,
+    });
+    return Object.keys(response.initial).includes('zig');
+  },
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
     const formattedAddress = '0x' + address.substring(2).match(/.{4}/g)!.join('.');
     const payload = {

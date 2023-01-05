@@ -9,14 +9,11 @@ import { RoomRow } from 'renderer/apps/Rooms/components/RoomRow';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
-
-const iconSize = 28;
-const position = 'top-left';
-const anchorOffset = { x: 8, y: 26 };
-const dimensions = { height: 500, width: 380 };
+import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 
 export const RoomTray = observer(() => {
   const { theme } = useServices();
+  const { iconSize, position, anchorOffset, dimensions } = roomTrayConfig;
   // TODO ship.cookie
   // ship
   //
@@ -33,9 +30,8 @@ export const RoomTray = observer(() => {
 
   const presentRoom = useMemo(() => {
     if (!roomsManager) return;
-    if (!roomsManager.presentRoom) return;
-    return roomsManager.presentRoom.room;
-  }, [roomsManager?.presentRoom?.room]);
+    return roomsManager.live.room;
+  }, [roomsManager.live.room]);
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -58,11 +54,7 @@ export const RoomTray = observer(() => {
         bottom: roomsApp.liveRoom ? bottom - 2 : bottom,
       });
       setTrayAppDimensions(dimensions);
-      // RoomsActions.requestAllRooms();
       setActiveApp('rooms-tray');
-      if (roomsApp.liveRoom) {
-        // RoomsActions.setView('room');
-      }
     },
     [
       activeApp,

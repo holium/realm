@@ -217,6 +217,10 @@ export class AuthService extends BaseService {
     this.state.setFirstTime();
   }
 
+  isFirstTime() {
+    return this.state.isFirstTime;
+  }
+
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
   }

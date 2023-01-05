@@ -25,7 +25,7 @@ const Value = styled(Text)`
 export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
-  const room = roomsManager.presentRoom!.room;
+  const room = roomsManager.presentRoom!;
 
   const rowGap = 16;
 

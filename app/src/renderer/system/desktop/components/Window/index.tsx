@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
@@ -24,13 +24,14 @@ import {
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
   customBg?: string;
 }
 
-export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
+const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
   overflow: hidden;
@@ -48,9 +49,8 @@ interface AppWindowProps {
   desktopRef: any;
 }
 
-export const AppWindow: FC<AppWindowProps> = observer(
-  (props: AppWindowProps) => {
-    const { window, desktopRef } = props;
+const AppWindow = observer(
+  ({ window, desktopRef, hideTitlebar = false }: AppWindowProps) => {
     const { shell, bazaar, desktop, theme } = useServices();
     const { textColor, windowColor } = theme.currentTheme;
 
@@ -163,14 +163,15 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    let webviewId = `${activeWindow.id}-urbit-webview`;
-    if (window.type === 'web') {
-      webviewId = `${activeWindow.id}-web-webview`;
-    }
+    const webviewId = getWebViewId(activeWindow.id, window.type);
 
     const onDevTools = useCallback(() => {
-      console.log(webviewId);
-      const webview: any = document.getElementById(webviewId);
+      const webview = document.getElementById(
+        webviewId
+      ) as Electron.WebviewTag | null;
+
+      if (!webview) return;
+
       webview.isDevToolsOpened()
         ? webview.closeDevTools()
         : webview.openDevTools();
@@ -222,7 +223,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
       CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
-      showDevToolsToggle = false;
+      // TODO: Remove hardcoded showDevToolsToggle
+      showDevToolsToggle = true;
       preventClickEvents = false;
       if (CustomTitlebar) {
         titlebar = (
@@ -407,10 +409,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
   }
 );
 
-AppWindow.defaultProps = {
-  hideTitlebar: false,
-};
-
 export default AppWindow;
 
 interface WindowTypeProps {
@@ -420,8 +418,12 @@ interface WindowTypeProps {
   window: WindowModelProps;
 }
 
-export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
-  const { hasTitlebar, isResizing, isDragging, window } = props;
+const WindowType = ({
+  hasTitlebar,
+  isResizing,
+  isDragging,
+  window,
+}: WindowTypeProps) => {
   switch (window.type) {
     case 'native':
       return (

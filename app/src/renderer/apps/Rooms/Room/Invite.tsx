@@ -129,7 +129,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
             type="text"
             placeholder="~sampel-palnet"
             autoFocus
-            ref={inviteInputRef}
+            innerRef={inviteInputRef}
             spellCheck={false}
             wrapperStyle={{
               cursor: 'none',
