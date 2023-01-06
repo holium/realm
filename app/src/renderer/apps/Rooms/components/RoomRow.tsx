@@ -32,6 +32,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
   const { getOptions, setOptions } = useContextMenu();
+  const defaultOptions = getOptions().filter(o => o.id === 'toggle-devtools');
 
   const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -61,11 +62,13 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               id: `room-delete-${rid}`,
               label: 'Delete Room',
               onClick: (evt) => {
-                //(roomsManager.protocol as RealmProtocol).retry(person);
+                evt.stopPropagation();
+                (roomsManager.protocol as RealmProtocol).deleteRoom(rid);
               },
             } as ContextMenuOption,
+            ... defaultOptions
           ]
-        : [],
+        : defaultOptions,
     [rid, ship, props.provider]
   );
 
