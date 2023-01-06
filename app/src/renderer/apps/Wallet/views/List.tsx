@@ -21,6 +21,7 @@ export const WalletList: FC<WalletListProps> = observer(
       return (
         <Flex
           p={4}
+          height="100%"
           width="100%"
           flexDirection="column"
           layoutScroll
