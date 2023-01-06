@@ -63,7 +63,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               label: 'Delete Room',
               onClick: (evt) => {
                 evt.stopPropagation();
-                (roomsManager.protocol as RealmProtocol).deleteRoom(rid);
+                roomsManager.protocol.deleteRoom(rid);
               },
             } as ContextMenuOption,
             ... defaultOptions
