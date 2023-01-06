@@ -1,4 +1,4 @@
-import { FC, useRef, useMemo, useEffect } from 'react';
+import { FC, useMemo, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
@@ -29,11 +29,9 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     onClick,
     rightChildren,
   } = props;
-  const roomRowRef = useRef<any>(null);
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
   const { getOptions, setOptions } = useContextMenu();
-  console.log(getOptions('room-row-'+rid), props.provider, ship?.patp);
 
   const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -56,47 +54,42 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const isLive = roomsManager.presentRoom?.rid === rid;
 
   const contextMenuOptions = useMemo(
-    () => {
-      let opts: ContextMenuOption[] = [];
-      if (ship!.patp === props.provider) {
-        opts = [
-          ({
-            id: `room-delete-${rid}`,
-            label: 'Delete Room',
-            onClick: (evt: any) => {
-              console.log('yooooooo');
-              //(roomsManager.protocol as RealmProtocol).retry(person);
-              //evt.stopPropagation();
-            },
-          } as ContextMenuOption),
-          ...opts
-        ]
-      }
-      return opts;
-    },
+    () =>
+      ship!.patp === props.provider
+        ? [
+            {
+              id: `room-delete-${rid}`,
+              label: 'Delete Room',
+              onClick: (evt) => {
+                //(roomsManager.protocol as RealmProtocol).retry(person);
+              },
+            } as ContextMenuOption,
+          ]
+        : [],
     [rid, ship, props.provider]
   );
 
   useEffect(() => {
-    console.log('useEffect', contextMenuOptions, getOptions(`room-row-${rid}`));
-    if (contextMenuOptions !== getOptions(`room-row-${rid}`) ) {
-      console.log('setting', contextMenuOptions);
+    if (
+      contextMenuOptions.length &&
+      contextMenuOptions !== getOptions(`room-row-${rid}`)
+    ) {
       setOptions(`room-row-${rid}`, contextMenuOptions);
     }
   }, [contextMenuOptions, rid, setOptions]);
 
   return (
     <Row
-      id={`room-row-${rid}`}
-      ref={roomRowRef}
-      style={{ position: 'relative' }}
       small={tray}
       className="realm-cursor-hover"
       baseBg={!tray && isLive ? isLiveColor : undefined}
       customBg={isLive ? bgColor : windowColor}
-      {...(onClick
-        ? { onClick: (evt: any) => onClick(evt) }
-        : { style: { pointerEvents: 'none', position: 'relative' } })}
+      onClick={(evt: MouseEvent<HTMLDivElement>) => onClick?.(evt)}
+      style={
+        !onClick
+          ? { pointerEvents: 'none', position: 'relative' }
+          : { position: 'relative' }
+      }
     >
       <Flex
         flex={1}
@@ -106,6 +99,18 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
         flexDirection="row"
       >
         <Flex width="-webkit-fill-available" gap={2} flexDirection="column">
+          {/* An absolute element that captures all the context clicks */}
+          <div
+            id={`room-row-${rid}`}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
+            }}
+          />
           {/* {(!tray && isLive) && <Icons name='CheckCircle'></Icons> */}
           <Text fontWeight={500} fontSize={tray ? '14px' : '15px'}>
             {titleText}
