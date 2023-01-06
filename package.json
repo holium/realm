@@ -12,7 +12,7 @@
     "build": "yarn link:all && yarn workspace @holium/realm dev:cursor && yarn build:app",
     "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
     "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
-    "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
+    "link:room": "yarn build --cwd lib/room && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
     "link:design-system": "yarn build --cwd lib/design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
     "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
     "build:app": "yarn workspace @holium/realm build",
