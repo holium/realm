@@ -141,6 +141,11 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['chat-received'];
         this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
       }
+      if (data['mute-status']) {
+        const payload = data['mute-status'];
+        console.log('mute-status', payload);
+        this.emit(ProtocolEvent.PeerMuteStatusChanged, payload.from, payload.status);
+      }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
@@ -256,6 +261,25 @@ export class RealmProtocol extends BaseProtocol {
         this.local?.streamTracks(peer);
       });
     });
+    this.local.on(PeerEvent.Muted, () => {
+      console.log('muting poke');
+      this.poke({
+        app: 'rooms-v2',
+        mark: 'rooms-v2-session-action',
+        json: {
+          'toggle-mute': true,
+        },
+      });
+    })
+    this.local.on(PeerEvent.Unmuted, () => {
+      this.poke({
+        app: 'rooms-v2',
+        mark: 'rooms-v2-session-action',
+        json: {
+          'toggle-mute': false,
+        },
+      });
+    })
   }
 
   /**

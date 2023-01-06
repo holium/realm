@@ -213,6 +213,7 @@
         %invite             `state
         %kick               (handle-kick +.act)
         %send-chat          (handle-send-chat +.act)
+        %toggle-mute        (handle-toggle-mute +.act)
       ==
       ::
       ++  set-provider
@@ -423,6 +424,25 @@
         ::  Receiving a signal from another ship
         :_  state
         [%give %fact [/lib ~] rooms-v2-reaction+!>([%chat-received src.bol content])]~
+      ::
+      ++  handle-toggle-mute
+        |=  [status=?]
+        ^-  (quip card _state)
+        ?~  current.session.state
+            ~&  >>>  'must be in a room to send or receive chat'
+            `state
+        ?:  =(src.bol our.bol)
+          ::  send all present users the chat message
+          =/  room    (~(got by rooms.session.state) u.current.session.state)
+          =/  peers   (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
+          :_  state
+          %+  turn  (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
+            |=  =ship
+            ^-  card
+            [%pass / %agent [ship dap.bol] %poke rooms-v2-session-action+!>([%toggle-mute status])]
+        ::  Receiving a signal from another ship
+        :_  state
+        [%give %fact [/lib ~] rooms-v2-reaction+!>([%mute-status src.bol status])]~
       ::
       ++  handle-kick
         |=  [rid=cord =ship]

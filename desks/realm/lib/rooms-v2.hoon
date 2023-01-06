@@ -89,6 +89,13 @@
         ['from' %s (scot %p from.rct)]
         ['content' %s content.rct]
       ==
+      ::
+        %mute-status
+      %-  pairs
+      :~
+        ['from' %s (scot %p from.rct)]
+        ['status' %b status.rct]
+      ==
     ==
   ++  view
     |=  vi=view:sur
@@ -207,6 +214,7 @@
           [%invite invite]
           [%kick kick]
           [%send-chat so]
+          [%toggle-mute bo]
       ==
     ++  patp
       (su ;~(pfix sig fed:ag))
