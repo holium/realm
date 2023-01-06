@@ -28,6 +28,7 @@ import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
 import BrowserHelper from './helpers/browser';
+import PowerHelper from './helpers/power';
 
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
@@ -229,6 +230,7 @@ const createWindow = async () => {
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
+  PowerHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
