@@ -49,11 +49,10 @@ const App: FC = observer(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
-    let api: any;
+    let api: any = null;
     if (!roomsApi) {
       Urbit.authenticate(shipData).then(async (newApi) => {
         api = newApi;
-        console.log('connected');
         await api.connect();
         const handlers = {
           poke: api.poke.bind(api),
@@ -90,7 +89,7 @@ const App: FC = observer(() => {
     return () => {
       api?.delete();
     };
-  }, [roomsApi]);
+  }, [roomsApi === null]);
 
   if (!roomsApi) return null;
 
@@ -128,7 +127,13 @@ const App: FC = observer(() => {
         </div>
         <div className="room-sidebar-footer">
           <button
-            onClick={() => roomsManager.createRoom('new room', 'public', null)}
+            onClick={() =>
+              roomsManager.createRoom(
+                'TESTING NEW BUILD DONT JOIN',
+                'public',
+                '/~lomder-librun/realm-forerunners'
+              )
+            }
           >
             Create Room
           </button>

@@ -19,6 +19,7 @@ import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { useRooms } from '../Rooms/useRooms';
 
 export const AccountTrayApp = observer(() => {
   const { ship, theme, beacon } = useServices();
@@ -26,6 +27,7 @@ export const AccountTrayApp = observer(() => {
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
   const currentShip = ship!;
+  const roomsManager = useRooms();
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {
@@ -156,6 +158,7 @@ export const AccountTrayApp = observer(() => {
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={async () => {
+              await roomsManager.cleanup();
               AuthActions.logout(currentShip.patp);
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');

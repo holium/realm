@@ -22,6 +22,7 @@ import {
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
+import { rgba } from 'polished';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
@@ -94,7 +95,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     }
   }); */
 
-  const themeData = getBaseTheme(theme.currentTheme);
+  const { textColor } = theme.currentTheme;
+  const fadedTextColor = useMemo(() => rgba(textColor, 0.7), [textColor]);
 
   return (
     <Flex
@@ -102,7 +104,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       height="100%"
       justifyContent="flex-start"
       flexDirection="column"
-      p={4}
+      py={1}
+      px={4}
       pb={0}
     >
       <DetailHero
@@ -127,9 +130,10 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               flexDirection="column"
               mt={6}
             >
-              <Box /*pb={1}*/>
+              <Box>
                 <Text
-                  color={themeData.colors.text.disabled}
+                  mb={1}
+                  color={fadedTextColor}
                   fontWeight={500}
                   variant="body"
                 >
@@ -137,6 +141,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
                 </Text>
               </Box>
               <TransactionList
+                height={200}
                 transactions={transactions}
                 hidePending={props.hidePending}
                 ethType={coin?.address}
@@ -161,6 +166,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               />
               {listView === 'transactions' && (
                 <TransactionList
+                  height={230}
                   transactions={transactions}
                   hidePending={props.hidePending}
                 />
