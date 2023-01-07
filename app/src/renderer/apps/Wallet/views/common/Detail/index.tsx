@@ -103,6 +103,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       justifyContent="flex-start"
       flexDirection="column"
       p={4}
+      pb={0}
     >
       <DetailHero
         wallet={wallet}

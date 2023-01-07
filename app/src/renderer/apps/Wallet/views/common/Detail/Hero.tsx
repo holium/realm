@@ -136,6 +136,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         style={{ textTransform: 'uppercase' }}
       >
         {props.wallet.nickname}
+        asdf
       </Flex>
     ) : (
       <Flex

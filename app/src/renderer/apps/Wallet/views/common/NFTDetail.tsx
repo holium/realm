@@ -16,7 +16,7 @@ export const NFTDetail: FC = () => {
     .nfts.get(walletApp.navState.detail!.key)!;
 
   return (
-    <Flex width="100%" flexDirection="column" px={3}>
+    <Flex height="100%" width="100%" flexDirection="column" px={3}>
       <Flex mt={4} width="100%" height="256px" justifyContent="center">
         <img height="100%" src={nft.imageUrl} style={{ borderRadius: '6px' }} />
       </Flex>
