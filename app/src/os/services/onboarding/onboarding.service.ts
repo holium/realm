@@ -340,7 +340,7 @@ export class OnboardingService extends BaseService {
       let id = null,
         errorCode = null;
       const account = await this.core.holiumClient.findAccount(email);
-      if (account) {
+      if (account?.id) {
         id = account.id;
         this.state.setNewAccount(false);
       } else {
@@ -358,7 +358,7 @@ export class OnboardingService extends BaseService {
         const errorMessage =
           errorCode === 441
             ? 'An account with that email already exists.'
-            : 'Something went wrong, please us at support@holium.com';
+            : 'Something went wrong, please email us at support@holium.com';
         return { success: false, errorMessage };
       }
       auth.setAccountId(id);

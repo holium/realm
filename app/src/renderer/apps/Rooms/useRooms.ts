@@ -60,15 +60,18 @@ export const createManager = (our: Patp) => {
   return manager;
 };
 
-const RoomsContext = createContext<null | RoomsManager>(null);
+export let RoomsContext = createContext<null | RoomsManager>(null);
 
 export const RoomsProvider = RoomsContext.Provider;
-export function useRooms() {
-  const roomsManager = useContext(RoomsContext);
-  if (roomsManager === null) {
-    throw new Error(
-      'roomManager cannot be null, please add a context provider'
-    );
+
+export function useRooms(our?: Patp) {
+  let roomsManager = useContext(RoomsContext);
+  if (roomsManager === null && our) {
+    const manager = createManager(our);
+    RoomsContext = createContext<null | RoomsManager>(manager);
+    roomsManager = manager;
+  } else if (roomsManager === null) {
+    throw new Error('roomsManager not initialized');
   }
 
   return roomsManager;
