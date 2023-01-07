@@ -44,6 +44,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     return (
       <Box width="100%" hidden={props.hidden}>
         <Flex
+          z-index={3}
           bottom={0}
           px="12px"
           pb="12px"
