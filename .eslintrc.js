@@ -32,7 +32,7 @@ module.exports = {
     'prefer-const': 'warn',
     'no-self-assign': 'warn',
     'multiline-ternary': 'off',
-    'no-case-declarations': 'warn',
+    'no-case-declarations': 'off',
     'array-callback-return': 'warn',
     'no-prototype-builtins': 'warn',
     'constructor-super': 'off',

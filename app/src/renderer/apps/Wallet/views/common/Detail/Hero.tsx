@@ -1,4 +1,4 @@
-import { FC, useState, memo } from 'react';
+import { FC, useState, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
@@ -36,6 +36,15 @@ const CardWithShadow = styled(Card)`
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.1);
 `;
 
+const BreadCrumb = styled(Text)`
+  transition: var(--transition);
+
+  &:hover {
+    transition: var(--transition);
+    text-decoration: underline;
+  }
+`;
+
 interface DetailHeroProps {
   coinView?: any | null;
   wallet: EthWalletType | BitcoinWalletType;
@@ -71,6 +80,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
+    const fadedTextColor = useMemo(
+      () => rgba(theme.currentTheme.textColor, 0.4),
+      [theme.currentTheme.textColor]
+    );
 
     const amountDisplay =
       walletApp.navState.network === NetworkType.ETHEREUM
@@ -132,11 +145,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         transition={transitionConfig}
         mt={2}
         fontWeight={600}
-        color={rgba(theme.currentTheme.textColor, 0.4)}
+        color={fadedTextColor}
         style={{ textTransform: 'uppercase' }}
       >
         {props.wallet.nickname}
-        asdf
       </Flex>
     ) : (
       <Flex
@@ -147,23 +159,22 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         gap={8}
         transition={transitionConfig}
       >
-        {/* <IconButton onClick={async () => await WalletActions.navigateBack()}>
-          <Icons
-            name="ArrowLeftLine"
-            size={1}
-            color={theme.currentTheme.iconColor}
-          />
-        </IconButton> */}
         <Flex flexDirection="row" alignItems="center">
-          <Text
+          <BreadCrumb
             fontWeight={500}
             fontSize={2}
-            color={rgba(theme.currentTheme.textColor, 0.4)}
+            color={fadedTextColor}
             style={{ textTransform: 'uppercase' }}
             onClick={WalletActions.navigateBack}
           >
-            {`${props.wallet.nickname} / `}
-          </Text>
+            {`${props.wallet.nickname}`}
+          </BreadCrumb>
+          <Text
+            pl="2px"
+            fontWeight={500}
+            fontSize={2}
+            color={fadedTextColor}
+          >{` / `}</Text>
 
           <Text
             fontSize={2}
@@ -200,7 +211,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         <Flex
           p={2}
           mt="16px"
-          // padding="px 12px"
           width="100%"
           minHeight="38px"
           transition={transitionConfig}
@@ -290,14 +300,15 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         </Box>
         <Flex
           flexDirection="row"
-          layout="position"
-          layoutId={`wallet-buttons-${props.wallet.address}`}
+          // layout="position"
+          // layoutId={`wallet-buttons-${props.wallet.address}`}
           // mt={props.coin ? 0 : 3}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={transitionConfig}
+          exit={{ opacity: 1 }}
+          // transition={transitionConfig}
           // padding="15px 12px"
+          pb="15px"
         >
           <SendReceiveButtons
             hidden={props.sendTrans}

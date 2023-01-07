@@ -17,6 +17,7 @@ import {
   TextButton,
   NoScrollBar,
 } from 'renderer/components';
+import { TextInput } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
@@ -27,16 +28,7 @@ import {
   UISettingsType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
-type CreateMode = 'default' | 'on-demand';
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
-
-interface WalletSettingsState {
-  provider: string;
-  creationMode: CreateMode;
-  visibility: WalletVisibility;
-  sharedWallet?: string;
-  blockList: string[];
-}
 
 export const WalletSettings: FC = observer(() => {
   const { walletApp } = useTrayApps();
@@ -170,7 +162,9 @@ export const WalletSettings: FC = observer(() => {
         >
           The API endpoint for connecting to Ethereum nodes.
         </Text>
-        <Input
+        <TextInput
+          id="wallet-provider"
+          name="wallet-provider"
           placeholder="http://localhost:8545"
           value={providerInput}
           onChange={async (e) => await setProvider(e.target.value)}
@@ -188,7 +182,7 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text variant="label">Wallet Creation Mode</Text>
+        <Text variant="label">Address Creation Mode</Text>
         <Text
           mt={1}
           mb={2}
@@ -197,11 +191,12 @@ export const WalletSettings: FC = observer(() => {
           opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
-          If set to on-demand, anytime you're sent funds a new wallet will be
+          If set to on-demand, anytime you're sent funds a new address will be
           created to receive them.
         </Text>
         <Flex width="140px">
           <Select
+            id="wallet-creation-mode"
             customBg={selectBg}
             textColor={baseTheme.colors.text.primary}
             iconColor={theme.currentTheme.iconColor}
@@ -288,6 +283,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
     <>
       <Flex width="140px">
         <Select
+          id="wallet-visibility"
           customBg={selectBg}
           textColor={props.baseTheme.colors.text.primary}
           iconColor={props.theme.currentTheme.iconColor}
@@ -300,6 +296,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
         {['anyone', 'friends'].includes(props.sharingMode) &&
           props.walletCreationMode !== WalletCreationMode.ON_DEMAND && (
             <Select
+              id="wallet-default"
               customBg={selectBg}
               textColor={props.baseTheme.colors.text.primary}
               iconColor={props.theme.currentTheme.iconColor}
@@ -334,15 +331,17 @@ function BlockedInput(props: BlockedInputProps) {
 
   return (
     <Flex flexDirection="column">
-      <Flex mb={1} position="relative">
-        <Input
+      <Flex display="inline-block" mb={1} position="relative">
+        <TextInput
+          id="blocked-input"
+          name="blocked-input"
           pr="36px"
           spellCheck={false}
           placeholder="~tasdul-tasdul"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rightInteractive
-          rightIcon={
+          rightAdornment={
             <TextButton
               // position="absolute"
               // top="9px"

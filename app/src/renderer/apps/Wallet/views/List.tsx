@@ -20,7 +20,8 @@ export const WalletList: FC<WalletListProps> = observer(
     const List: FC = () => {
       return (
         <Flex
-          p={4}
+          py={1}
+          px={4}
           height="100%"
           width="100%"
           flexDirection="column"

@@ -280,6 +280,8 @@ export const Button: FC<PropsWithChildren<ButtonProps>> = forwardRef<
   );
 });
 
+Button.displayName = 'Button';
+
 Button.defaultProps = {
   variant: 'primary',
 };

@@ -78,7 +78,7 @@ export const AmountInput = observer(
     };
 
     const inputContainerClicked = () => {
-      (amountRef.current as HTMLElement).focus();
+      amountRef.current && (amountRef.current as HTMLElement).focus();
     };
 
     return (
