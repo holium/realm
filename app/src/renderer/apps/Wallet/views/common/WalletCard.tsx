@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { darken, lighten, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 import { Text, Flex, Card } from 'renderer/components';
@@ -57,7 +57,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   const { walletApp } = useTrayApps();
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
-  let coins = null;
+  let coins: any = null;
   if (walletApp.navState.network === NetworkType.ETHEREUM) {
     coins = getCoins(
       (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
@@ -69,6 +69,7 @@ export const WalletCard: FC<WalletCardProps> = ({
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
+
   const transactions = getTransactions(walletTransactions || new Map());
 
   const ethTicker =
@@ -83,73 +84,76 @@ export const WalletCard: FC<WalletCardProps> = ({
         }` + ethTicker
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
-  return (
-    <CardStyle
-      layout="size"
-      elevation="none"
-      layoutId={`wallet-card-${wallet.address}`}
-      transition={{ duration: 0.1 }}
-      customBg={lighten(0.04, theme.currentTheme.windowColor)}
-      borderColor={
-        theme.currentTheme.mode === 'dark'
-          ? darken(0.1, theme.currentTheme.backgroundColor)
-          : darken(0.1, theme.currentTheme.windowColor)
-      }
-      mode={mode}
-      isSelected={!!isSelected}
-      onClick={onSelect}
-    >
-      <Text
-        layoutId={`wallet-name-${wallet.address}`}
-        layout="position"
+  return useMemo(
+    () => (
+      <CardStyle
+        layout="size"
+        elevation="none"
+        layoutId={`wallet-card-${wallet.address}`}
         transition={{ duration: 0.1 }}
-        fontWeight={600}
-        color={rgba(theme.currentTheme.textColor, 0.4)}
-        style={{ textTransform: 'uppercase' }}
+        customBg={lighten(0.04, theme.currentTheme.windowColor)}
+        borderColor={
+          theme.currentTheme.mode === 'dark'
+            ? darken(0.1, theme.currentTheme.backgroundColor)
+            : darken(0.1, theme.currentTheme.windowColor)
+        }
+        mode={mode}
+        isSelected={!!isSelected}
+        onClick={onSelect}
       >
-        {wallet.nickname}
-      </Text>
-      <Text
-        mt={1}
-        layoutId={`wallet-balance-${wallet.address}`}
-        transition={{ duration: 0.1 }}
-        fontWeight={600}
-        fontSize={7}
-      >
-        {amountDisplay}
-      </Text>
-      <Flex
-        layout="position"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1 }}
-        pt={2}
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Flex>
-          {coins &&
-            coins
-              .slice(0, 6)
-              .map((coin, index) => (
-                <img
-                  src={coin.logo || getMockCoinIcon(coin.name)}
-                  style={{ height: '14px', marginRight: '4px' }}
-                  key={index}
-                />
-              ))}
-          {coins && coins.length > 6 && (
-            <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
-              +{coins.length - 6}
-            </Text>
-          )}
-        </Flex>
-        <Text variant="body" color={theme.currentTheme.iconColor}>
-          {transactions.length} Transactions
+        <Text
+          layoutId={`wallet-name-${wallet.address}`}
+          layout="position"
+          transition={{ duration: 0.1 }}
+          fontWeight={600}
+          color={rgba(theme.currentTheme.textColor, 0.4)}
+          style={{ textTransform: 'uppercase' }}
+        >
+          {wallet.nickname}
         </Text>
-      </Flex>
-    </CardStyle>
+        <Text
+          mt={1}
+          layoutId={`wallet-balance-${wallet.address}`}
+          transition={{ duration: 0.1 }}
+          fontWeight={600}
+          fontSize={7}
+        >
+          {amountDisplay}
+        </Text>
+        <Flex
+          layout="position"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+          pt={2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Flex>
+            {coins &&
+              coins
+                .slice(0, 6)
+                .map((coin, index) => (
+                  <img
+                    src={coin.logo || getMockCoinIcon(coin.name)}
+                    style={{ height: '14px', marginRight: '4px' }}
+                    key={index}
+                  />
+                ))}
+            {coins && coins.length > 6 && (
+              <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+                +{coins.length - 6}
+              </Text>
+            )}
+          </Flex>
+          <Text variant="body" color={theme.currentTheme.iconColor}>
+            {transactions.length} Transactions
+          </Text>
+        </Flex>
+      </CardStyle>
+    ),
+    [wallet, isSelected, theme, mode, coins, transactions.length]
   );
 };
 

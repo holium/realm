@@ -12,6 +12,19 @@ export const Default: ComponentStory<typeof TextInput> = () => (
   </Flex>
 );
 
+export const TextArea: ComponentStory<typeof TextInput> = () => (
+  <Flex flexDirection="column">
+    <TextInput
+      id="input-2"
+      name="test-area-input"
+      type="textarea"
+      placeholder="Placeholder here"
+      rows={4}
+      cols={40}
+    />
+  </Flex>
+);
+
 export const FullProps: ComponentStory<typeof TextInput> = () => (
   <Flex flexDirection="column" width={300}>
     <TextInput

@@ -1,6 +1,14 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Button,
+  Label,
+  Input,
+  FormControl,
+} from 'renderer/components';
+import { TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
 import { NetworkType } from 'os/services/tray/wallet-lib';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
@@ -53,13 +61,19 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
           A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
           will be created. Give it a memorable nickname.
         </Text>
-        <FieldSet mt={8}>
-          <Label required={true}>Nickname</Label>
-          <Input
-            value={nickname.state.value}
-            onChange={(e) => nickname.actions.onChange(e.target.value)}
-            placeholder="Fort Knox"
-          />
+        <FormControl.FieldSet mt={8}>
+          <FormControl.Field>
+            <Label mb={1} required={true}>
+              Nickname
+            </Label>
+            <TextInput
+              id="wallet-nickname"
+              name="wallet-nickname"
+              value={nickname.state.value}
+              onChange={(e) => nickname.actions.onChange(e.target.value)}
+              placeholder="Fort Knox"
+            />
+          </FormControl.Field>
           <Flex mt={5} width="100%">
             <Button
               id="submit"
@@ -71,7 +85,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
               Create
             </Button>
           </Flex>
-        </FieldSet>
+        </FormControl.FieldSet>
       </Flex>
     );
   }

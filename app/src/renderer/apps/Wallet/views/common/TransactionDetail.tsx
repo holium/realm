@@ -1,8 +1,5 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeType } from 'renderer/theme';
-import { darken, lighten, transparentize } from 'polished';
-
 import {
   Flex,
   Text,
@@ -12,9 +9,9 @@ import {
   Anchor,
   Spinner,
 } from 'renderer/components';
+import { TextInput } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import {
   shortened,
   fullMonthNames,
@@ -31,43 +28,6 @@ import {
   TransactionType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import styled from 'styled-components';
-
-interface TextAreaInput {
-  theme: ThemeType;
-  desktopTheme: Partial<ThemeModelType>;
-}
-const TextArea = styled.textarea<TextAreaInput>`
-  resize: none;
-  height: 120px;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  overflow: auto;
-  outline: none;
-  border-radius: 6px;
-  color: ${(props) => props.theme.colors.text.primary};
-  border: 1px solid transparent;
-
-  background-color: ${(props) =>
-    darken(
-      props.desktopTheme.mode === 'light' ? 0.05 : 0.02,
-      props.desktopTheme.windowColor!
-    )};
-  &:focus {
-    border: 1px solid ${(props) => props.theme.colors.brand.primary};
-  }
-  ::placeholder {
-    color: ${(props) =>
-      transparentize(
-        props.desktopTheme.mode === 'light' ? 0.4 : 0.7,
-        lighten(0.02, props.theme.colors.text.secondary)
-      )};
-  }
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-`;
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
@@ -115,7 +75,7 @@ export const TransactionDetail: FC = observer(() => {
     : `${btcAmount.btc} BTC`;
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" p={3}>
+    <Flex width="100%" height="100%" flexDirection="column" py={1} px={4}>
       <Text fontSize={2} color={themeData.colors.text.disabled}>
         Transaction
       </Text>
@@ -257,14 +217,24 @@ export const TransactionDetail: FC = observer(() => {
         Notes
       </Text>
       <Flex width="100%" flexDirection="column" justifyContent="center">
-        <TextArea
+        <TextInput
+          id="transaction-notes"
+          name="transaction-notes"
+          type="textarea"
+          rows={4}
+          cols={50}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Transaction notes..."
+        />
+        {/* <TextArea
           className="realm-cursor-text-cursor"
           theme={themeData}
           desktopTheme={theme.currentTheme}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Transaction notes..."
-        />
+        /> */}
         <Flex mt={4} width="100%" justifyContent="flex-end">
           <Button
             width="100%"

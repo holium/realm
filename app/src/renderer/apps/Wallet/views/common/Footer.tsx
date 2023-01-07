@@ -13,7 +13,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...
 import UqbarLogo from '../../../../../../assets/uqbar.png';
-import { getBaseTheme } from '../../lib/helpers';
 import { darken } from 'polished';
 
 interface WalletFooterProps {
@@ -24,7 +23,6 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
   (props: WalletFooterProps) => {
     const { walletApp } = useTrayApps();
     const { theme } = useServices();
-    const themeData = getBaseTheme(theme.currentTheme);
 
     const [click, setClick] = useState(false);
     const [uqbarDeskExists, setUqbarDeskExists] = useState(false);
@@ -48,7 +46,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           bottom={0}
           px="12px"
           pb="12px"
-          pt="6px"
+          pt="12px"
           width="100%"
           justifyContent="space-between"
           style={{ backgroundColor: theme.currentTheme.windowColor }}

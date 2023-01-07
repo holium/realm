@@ -3,10 +3,7 @@ import {
   ProtocolType,
   UISettingsType,
   WalletStoreType,
-  WalletCreationMode,
   NetworkStoreType,
-  EthStoreType,
-  BitcoinStoreType,
 } from '../services/tray/wallet-lib/wallet.model';
 
 export const WalletApi = {
@@ -110,7 +107,7 @@ export const WalletApi = {
     wallet: number,
     contract: string | null,
     hash: string,
-    transaction: any,
+    transaction: any
   ) => {
     const payload = {
       app: 'realm-wallet',
@@ -247,7 +244,11 @@ export const handleWalletReactions = (
       if (network === NetworkStoreType.ETHEREUM) {
         walletState!.ethereum.wallets
           .get(transaction.index)!
-          .applyTransactionUpdate(transaction.net, transaction.contract, transaction.transaction);
+          .applyTransactionUpdate(
+            transaction.net,
+            transaction.contract,
+            transaction.transaction
+          );
       } else if (network === NetworkStoreType.BTC_MAIN) {
         /*walletState!.bitcoin.wallets
           .get(transaction.index)!
