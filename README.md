@@ -33,7 +33,7 @@ In the debug build you can bypass the invite code and email with `~admins-admins
 
 `~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
 
-### Build for release
+### Build prerelease version
 
 ```
 npx cross-env DEBUG_PROD=true yarn package:prerelease:mac
