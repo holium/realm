@@ -22,7 +22,7 @@ import {
   SpaceProps,
   ColorProps,
 } from 'styled-system';
-import { Spinner, Flex, IconButton } from '..';
+import { Spinner, Flex, IconButton, BoxProps } from '..';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &
@@ -31,6 +31,7 @@ export type StyledButtonProps = SpaceProps &
   BackgroundProps &
   ColorProps &
   PositionProps &
+  BoxProps &
   FontWeightProps & {
     leftIcon?: JSX.Element;
     rightIcon?: JSX.Element;

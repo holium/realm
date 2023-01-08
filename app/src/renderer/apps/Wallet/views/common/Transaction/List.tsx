@@ -143,7 +143,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
     <>
       <NoScrollBar
         width="100%"
-        height={pending && !props.hidePending ? height - 45 : height}
+        height={pending && !props.hidePending ? height - 54 : height}
         flexDirection="column"
         margin="auto"
         overflow="auto"

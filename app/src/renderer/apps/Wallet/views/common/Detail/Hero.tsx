@@ -1,10 +1,10 @@
-import { FC, useState, memo, useMemo } from 'react';
+import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Card } from 'renderer/components';
+import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -29,11 +29,10 @@ import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
 import { motion } from 'framer-motion';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-// import { CoinList } from './CoinList';
-
-const CardWithShadow = styled(Card)`
-  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.1);
-`;
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../../components/WalletCardWrapper';
 
 const BreadCrumb = styled(Text)`
   transition: var(--transition);
@@ -65,11 +64,6 @@ interface DetailHeroProps {
     close: any;
   };
 }
-
-const transitionConfig = {
-  layout: { duration: 0.1 },
-  // opacity: { ease: 'smooth' },
-};
 
 export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
@@ -132,25 +126,25 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         : '';
 
     const accountDisplay = !props.coin ? (
-      <Flex
+      <Text
         layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         mt={2}
         fontWeight={600}
         color={fadedTextColor}
         style={{ textTransform: 'uppercase' }}
       >
         {props.wallet.nickname}
-      </Flex>
+      </Text>
     ) : (
       <Flex
         mt={2}
-        layoutId={`wallet-name-${props.wallet.address}`}
+        // layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
         alignItems="center"
         gap={8}
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
       >
         <Flex flexDirection="row" alignItems="center">
           <BreadCrumb
@@ -183,30 +177,30 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     );
 
     return (
-      <CardWithShadow
+      <WalletCardStyle
         layout="size"
+        elevation="none"
         layoutId={`wallet-card-${props.wallet.address}`}
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
+        pb="8px"
         px="12px"
         minHeight="220px"
         height="auto"
         width="100%"
-        flexDirection="column"
-        justifyContent="flex-start"
+        isSelected
+        mode={theme.currentTheme.mode}
         customBg={lighten(0.04, theme.currentTheme.windowColor)}
         borderColor={
           theme.currentTheme.mode === 'dark'
             ? darken(0.1, theme.currentTheme.backgroundColor)
             : darken(0.1, theme.currentTheme.windowColor)
         }
-        borderRadius="16px"
       >
         <Flex
           p={2}
-          mt="16px"
+          layout="position"
           width="100%"
           minHeight="38px"
-          transition={transitionConfig}
           style={{ height: props.QROpen ? 242 : 38 }}
           background={
             theme.currentTheme.mode === 'dark'
@@ -277,7 +271,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         </Flex>
         <Box
           layout="position"
-          transition={transitionConfig}
+          transition={walletCardStyleTransition}
           py={2}
           width="100%"
           hidden={props.hideWalletHero}
@@ -293,13 +287,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         </Box>
         <Flex
           flexDirection="row"
-          // layout="position"
-          // layoutId={`wallet-buttons-${props.wallet.address}`}
-          // mt={props.coin ? 0 : 3}
+          layout="position"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 1 }}
-          // transition={transitionConfig}
+          transition={walletCardStyleTransition}
           // padding="15px 12px"
           pb="15px"
         >
@@ -318,7 +310,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           />
         </Flex>
         {coinView}
-      </CardWithShadow>
+      </WalletCardStyle>
     );
   }
 );
@@ -352,16 +344,16 @@ function CopyButton(props: CopyProps) {
   );
 }
 
-const SendReceiveButtons = memo(
-  (props: {
-    hidden: boolean;
-    windowColor: string;
-    send: any;
-    receive: any;
-  }) => {
-    const panelBackground = darken(0.04, props.windowColor);
+const SendReceiveButtons = (props: {
+  hidden: boolean;
+  windowColor: string;
+  send: any;
+  receive: any;
+}) => {
+  const panelBackground = darken(0.04, props.windowColor);
 
-    return (
+  return useMemo(
+    () => (
       <Box width="100%" hidden={props.hidden}>
         <Flex
           mt="12px"
@@ -385,9 +377,10 @@ const SendReceiveButtons = memo(
           </Box>
         </Flex>
       </Box>
-    );
-  }
-);
+    ),
+    [props]
+  );
+};
 
 interface BalanceInterface {
   address: string;
@@ -405,7 +398,7 @@ function Balance(props: BalanceInterface) {
       <Text
         mt={1}
         layout="position"
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         layoutId={`wallet-balance-${props.address}`}
         fontWeight={600}
         fontSize={7}
@@ -416,7 +409,7 @@ function Balance(props: BalanceInterface) {
         mt={1}
         layout="position"
         layoutId={`wallet-usd-${props.address}`}
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         variant="body"
         color={props.colors.text.secondary}
       >
@@ -427,12 +420,14 @@ function Balance(props: BalanceInterface) {
     <Flex
       mt={1}
       layout="position"
-      transition={transitionConfig}
+      transition={walletCardStyleTransition}
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
     >
-      <motion.img layout="position" height="26px" src={coinIcon} />
+      <Flex width={26} height={26}>
+        <motion.img height="26px" src={coinIcon} />
+      </Flex>
       <Text
         mt={1}
         layout="position"

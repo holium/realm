@@ -21,7 +21,7 @@ export const WalletList: FC<WalletListProps> = observer(
       return (
         <Flex
           py={1}
-          px={4}
+          px={3}
           height="100%"
           width="100%"
           flexDirection="column"

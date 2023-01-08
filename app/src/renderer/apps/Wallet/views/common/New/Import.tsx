@@ -1,4 +1,11 @@
-import { FC, useMemo, Dispatch, SetStateAction, useState } from 'react';
+import {
+  FC,
+  useMemo,
+  Dispatch,
+  SetStateAction,
+  useState,
+  ChangeEvent,
+} from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import {
@@ -57,7 +64,9 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
             type="textarea"
             value={phrase}
             cols={50}
-            onChange={(e) => setPhrase(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPhrase(e.target.value)
+            }
             autoFocus={true}
           />
         </FormControl.Field>

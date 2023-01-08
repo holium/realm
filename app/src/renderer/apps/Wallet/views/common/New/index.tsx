@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ethers } from 'ethers';
 
 import { Box, Flex, Icons, IconButton } from 'renderer/components';
 import { Create } from './Create';
@@ -38,9 +37,7 @@ export const EthNew: FC<any> = observer(() => {
   const [passcode, setPasscode] = useState<number[]>([]);
 
   // TODO move this to background thread
-  const [seedPhrase, setSeedPhrase] = useState(
-    ethers.Wallet.createRandom().mnemonic.phrase
-  );
+  const [seedPhrase, setSeedPhrase] = useState('');
   const phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
   const setPasscodeWrapper = (passcode: number[]) => {
@@ -54,7 +51,11 @@ export const EthNew: FC<any> = observer(() => {
       <Import setSeedPhrase={phraseSetter} setScreen={setScreen} />
     ),
     [NewWalletScreen.BACKUP]: (
-      <Backup setScreen={setScreen} seedPhrase={seedPhrase} />
+      <Backup
+        setScreen={setScreen}
+        setSeedPhrase={phraseSetter}
+        seedPhrase={seedPhrase}
+      />
     ),
     [NewWalletScreen.CONFIRM]: (
       <Confirm setScreen={setScreen} seedPhrase={seedPhrase} />
@@ -80,7 +81,9 @@ export const EthNew: FC<any> = observer(() => {
   return (
     <Box width="100%" height="100%" px={16} py={12}>
       {currentComponent}
-      {NewWalletScreen.CREATE !== screen && (
+      {![NewWalletScreen.CREATE, NewWalletScreen.DETECTED_EXISTING].includes(
+        screen
+      ) && (
         <Flex
           position="absolute"
           top="582px"

@@ -1,19 +1,21 @@
-import { FC, useMemo, Dispatch, SetStateAction, useState } from 'react';
+import {
+  FC,
+  useMemo,
+  Dispatch,
+  SetStateAction,
+  useState,
+  ChangeEvent,
+} from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Icons,
-  Label,
-  Input,
-  Box,
-} from 'renderer/components';
+import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { TextInput } from '@holium/design-system';
+import { useTrayApps } from 'renderer/apps/store';
+import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
@@ -23,6 +25,7 @@ interface RecoverExistingProps {
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
   (props: RecoverExistingProps) => {
     const { theme } = useServices();
+    const { walletApp } = useTrayApps();
     const themeData = useMemo(
       () => getBaseTheme(theme.currentTheme),
       [theme.currentTheme]
@@ -43,7 +46,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
 
       if (correct) {
         props.setSeedPhrase(phrase);
-        props.setScreen(NewWalletScreen.CONFIRM);
+        WalletActions.navigate(WalletView.LOCKED);
         setError('');
       } else {
         setError(
@@ -64,14 +67,20 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
           <Label mb={3} required={true}>
             Seed phrase
           </Label>
-          <Input
+          <TextInput
+            id="seed-phrase"
+            name="seed-phrase"
             height="72px"
             required={true}
-            as="textarea"
+            type="textarea"
             value={phrase}
-            onChange={(e) => updatePhrase(e.target.value)}
+            cols={50}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPhrase(e.target.value)
+            }
             autoFocus={true}
           />
+
           <Box mt={3} hidden={error === ''}>
             <Text
               variant="body"

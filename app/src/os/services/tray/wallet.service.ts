@@ -106,7 +106,12 @@ export class WalletService extends BaseService {
       options?: {
         canReturn?: boolean;
         walletIndex?: string;
-        detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string, key: string };
+        detail?: {
+          type: 'transaction' | 'coin' | 'nft';
+          txtype?: 'general' | 'coin' | 'nft';
+          coinKey?: string;
+          key: string;
+        };
         action?: { type: string; data: any };
       }
     ) => {
@@ -118,26 +123,6 @@ export class WalletService extends BaseService {
     },
     navigateBack: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.navigateBack');
-    },
-    setView: async (
-      view: WalletView,
-      index?: string,
-      currentItem?: { type: 'transaction' | 'nft' | 'coin'; key: string },
-      unsetCurrentItem?: boolean
-    ) => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.set-view',
-        view,
-        index,
-        currentItem,
-        unsetCurrentItem
-      );
-    },
-    setReturnView: async (view: WalletView) => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.set-return-view',
-        view
-      );
     },
     setNetwork: async (network: NetworkType) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
@@ -187,14 +172,14 @@ export class WalletService extends BaseService {
       walletIndex: string,
       to: string,
       amount: string,
-      toPatp?: string,
+      toPatp?: string
     ) => {
       return await ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
         walletIndex,
         to,
         amount,
-        toPatp,
+        toPatp
       );
     },
     sendERC20Transaction: async (
@@ -487,7 +472,10 @@ export class WalletService extends BaseService {
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.navState.network;
     const net = this.state!.navState.protocol;
-    const contract = this.state!.navState.detail!.txtype === 'coin' ? this.state!.navState.detail!.coinKey! : null;
+    const contract =
+      this.state!.navState.detail!.txtype === 'coin'
+        ? this.state!.navState.detail!.coinKey!
+        : null;
     const hash = this.state!.navState.detail!.key;
     const index = this.state!.currentWallet!.index;
     await WalletApi.saveTransactionNotes(
@@ -527,7 +515,7 @@ export class WalletService extends BaseService {
     walletIndex: string,
     to: string,
     amount: string,
-    toPatp?: string,
+    toPatp?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(
@@ -560,11 +548,11 @@ export class WalletService extends BaseService {
       toPatp,
       fromAddress,
       tx.value,
-      new Date().toISOString(),
+      new Date().toISOString()
     );
-    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
-      hash
-    );
+    const stateTx = currentWallet.data
+      .get(this.state!.navState.protocol)!
+      .transactionList.getStoredTransaction(hash);
 
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -585,13 +573,9 @@ export class WalletService extends BaseService {
     contractAddress: string,
     toPatp?: string
   ) {
-    console.log(walletIndex);
-    console.log(to);
-    console.log(amount);
-    console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    console.log(path);
-    // console.log(this.privateKey!.mnemonic!.phrase);
+    console.log(walletIndex, to, amount, toPatp, path);
+
     const ethAmount = ethers.utils.parseEther(amount);
     const tx = await (
       this.wallet!.protocols.get(
@@ -630,9 +614,10 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.coins.get(contractAddress)!.transactionList.getStoredTransaction(
-      hash
-    );
+    const stateTx = currentWallet.data
+      .get(this.state!.navState.protocol)!
+      .coins.get(contractAddress)!
+      .transactionList.getStoredTransaction(hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -675,7 +660,9 @@ export class WalletService extends BaseService {
   async checkMnemonic(_event: any, mnemonic: string) {
     (this.signer as RealmSigner).setMnemonic(mnemonic);
     const ethXpub = this.signer.getXpub("m/44'/60'/0'");
-    const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))['eth-xpub'];
+    const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))[
+      'eth-xpub'
+    ];
     return ethXpub === agentEthXpub;
   }
 
@@ -685,7 +672,12 @@ export class WalletService extends BaseService {
     options?: {
       canReturn?: boolean;
       walletIndex?: string;
-      detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string; key: string };
+      detail?: {
+        type: 'transaction' | 'coin' | 'nft';
+        txtype?: 'general' | 'coin' | 'nft';
+        coinKey?: string;
+        key: string;
+      };
       action?: { type: string; data: any };
     }
   ) {

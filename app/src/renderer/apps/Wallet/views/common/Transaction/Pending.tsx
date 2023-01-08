@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { darken, lighten } from 'polished';
 import { Flex, Icons, Text, Spinner, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -13,8 +13,6 @@ import {
   WalletView,
   TransactionType,
   ProtocolType,
-  NetworkType,
-  EthWalletType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
@@ -25,9 +23,7 @@ interface PendingTransactionDisplayProps {
 export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   props: PendingTransactionDisplayProps
 ) => {
-  const { walletApp } = useTrayApps();
-  let transactions = props.transactions;
-  const pendingTransactions = transactions
+  const pendingTransactions = props.transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
@@ -35,7 +31,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     );
 
   return pendingTransactions.length ? (
-    <Flex mt={4} width="100%">
+    <Flex px={1} mb={1} width="100%">
       <PendingTransaction
         transaction={pendingTransactions[0]}
         hide={props.hide}
@@ -88,17 +84,22 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
             .coins.get(props.transaction.ethType!)!.name;
   }
 
+  const bgColor = useMemo(
+    () =>
+      theme.currentTheme.mode === 'light'
+        ? darken(0.04, theme.currentTheme.windowColor)
+        : lighten(0.02, theme.currentTheme.windowColor),
+    [theme.currentTheme.windowColor]
+  );
+
   return (
     <Flex
       mx={2}
-      p={3}
+      py={2}
+      px={2}
       width="100%"
       justifyContent="space-between"
-      background={
-        theme.currentTheme.mode == 'light'
-          ? darken(0.04, theme.currentTheme.windowColor)
-          : lighten(0.02, theme.currentTheme.windowColor)
-      }
+      background={bgColor}
       borderRadius="9px"
     >
       <Flex
@@ -107,8 +108,8 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
         alignItems="center"
         onClick={goToTransaction}
       >
-        <Flex pr={3} height="100%" alignItems="center">
-          <Spinner size={1} color={colors.brand.primary} />
+        <Flex mr={4} height="100%" alignItems="center">
+          <Spinner size={0} color={colors.brand.primary} />
         </Flex>
         <Flex flexDirection="column">
           <Text variant="body" color={colors.brand.primary}>
@@ -122,17 +123,14 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
         </Flex>
       </Flex>
       <Flex justifyContent="center" alignItems="center">
-        <IconButton onClick={props.hide}>
-          <Icons name="Close" size="15px" color={colors.text.disabled} />
+        <IconButton onClick={props.hide} mr={1}>
+          <Icons
+            opacity={0.7}
+            name="Close"
+            size="15px"
+            color={colors.text.disabled}
+          />
         </IconButton>
-        {/* <Text
-          variant="body"
-          color={colors.brand.primary}
-          fontSize={3}
-          onClick={props.hide}
-        >
-          x
-        </Text> */}
       </Flex>
     </Flex>
   );
