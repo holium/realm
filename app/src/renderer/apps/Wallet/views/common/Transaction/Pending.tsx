@@ -15,6 +15,7 @@ import {
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
+import { TxType } from './List';
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -57,7 +58,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: walletApp.navState.detail?.txtype,
+        txtype: walletApp.navState.detail?.txtype as TxType,
         coinKey: walletApp.navState.detail?.coinKey,
         key: props.transaction.hash,
       },
