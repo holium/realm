@@ -199,8 +199,9 @@
 ++  on-graph-action
   |=  [act=action =bowl:gall state=state-2]
   |^
+  =/  wires   (skim ~(tap in ~(key by wex.bowl)) |=(a=[=wire =ship =term] =(term.a %chat)))
   ?-  -.act
-    %send-dm               [(send-dm +.act) state]
+    %send-dm               [(send-dm wires +.act) state]
     %read-dm               [(read-dm +.act bowl) state]
     %create-group-dm       [(create-group-dm +.act bowl) state]
     %send-group-dm         [(send-group-dm +.act bowl) state]
@@ -211,8 +212,16 @@
       :: we do have to actually mutate the state here
       [%2 cache.state +.act app-id.state uuid.state devices.state push-enabled.state]
   ==
+  ++  does-wire-match-ship
+    |=  [=wire =ship]
+    =/  should-be-chat-type  +<:wire
+    =/  should-be-ship-part  +>-:wire
+    ?&
+      =(should-be-chat-type %dm)
+      =(`@p`(need `(unit @p)`(slaw %p should-be-ship-part)) ship)
+    ==
   ++  send-dm
-    |=  [=ship p=post]
+    |=  [wires=(list [=wire s=ship =term]) to-ship=ship p=post]
     =/  inlines
       ^-  (list inline:c)
       (turn contents.p into-chat-inline-type)
@@ -220,9 +229,17 @@
       ^-  (list block:c)
       (murn contents.p into-chat-block-type)
     =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [blocks (snoc inlines [%break ~])]])]
-    =/  chat-diff    [[ship time-sent.p] delta-for-chat]
+    =/  chat-diff    [[to-ship time-sent.p] delta-for-chat]
     :: ~&  >>  ['send-dm here:' chat-diff]
-    [%pass / %agent [author.p %chat] %poke dm-action+!>([ship chat-diff])]~
+    :: checking if we are already subscribed to the dm
+    ?:  (lien wires |=(a=[=wire s=ship =term] (does-wire-match-ship wire.a to-ship)))
+      [%pass / %agent [author.p %chat] %poke dm-action+!>([to-ship chat-diff])]~
+    :: we aren't already subscribed to this dm in %chat, so we will
+    :: attempt to subscribe right now
+    :~
+      [%pass / %agent [author.p %chat] %poke dm-action+!>([to-ship chat-diff])]
+      [%pass /g2/dm/(scot %p to-ship)/ui %agent [author.p %chat] %watch /dm/(scot %p to-ship)/ui]
+    ==
   ++  read-dm
     |=  [=ship =bowl:gall]
     ~&  >  "signaling read-dm for {(scow %p ship)}"
