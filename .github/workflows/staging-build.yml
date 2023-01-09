@@ -49,6 +49,8 @@ jobs:
   #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   build-mac-staging:
+    if: github.event.pull_request.merged == true
+    needs: [start-release]
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -69,20 +71,16 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
           # import certificate and provisioning profile from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
           # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
-
           # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
-
           # apply provisioning profile
           # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
@@ -90,10 +88,8 @@ jobs:
         run: npm install -g yarn
       - name: Install app dependencies
         run: yarn install
-      # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
-      #   and other utilities/functionality are available in the final product
       - name: Build and publish
-        run: npx cross-env DUMP_ENV=true APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:mac
+        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
