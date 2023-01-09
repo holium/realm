@@ -197,10 +197,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       # create annotated tag for this branch. this will become basis for the release
-      - run: git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
-      # push the tag
-      - run: git push origin ${{ github.event.pull_request.title }}
-      # set release version based on name of PR
-      - run: gh release create ${{ github.event.pull_request.title }} ./app/release/build/* --draft --target master
+      - run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
+          git push origin ${{ github.event.pull_request.title }}
+          gh release create ${{ github.event.pull_request.title }} ./app/release/build/* --draft --target master
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
