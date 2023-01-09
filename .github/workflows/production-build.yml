@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - main
+      - production
 jobs:
   build-mac-production:
     if: github.event.pull_request.merged == true

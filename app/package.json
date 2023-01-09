@@ -240,13 +240,7 @@
       "./assets/**",
       "./src/main/cursor.preload.js",
       "./release/app/dist/main/cursor.js"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "holium",
-      "repo": "realm",
-      "private": true
-    }
+    ]
   },
   "repository": {
     "type": "git",
