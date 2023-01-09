@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   #
-  build-linux-production:
+  build-linux-staging:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -184,6 +184,7 @@ jobs:
   #       continue-on-error: true
   #
   deploy-release:
+    needs: [build-linux-staging]
     runs-on: ubuntu-latest
     steps:
       # create annotated tag for this branch. this will become basis for the release
