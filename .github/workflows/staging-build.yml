@@ -10,21 +10,6 @@ on:
     branches:
       - master
 jobs:
-  generate-build-artifacts:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      #
-      - name: Simulate build and install
-        run: |
-          ls ./app
-          mkdir -p ./app/release/build
-          touch ./app/release/build/artifact.txt
-          ls ./app/release/build
-          echo "build artifact simulation" >> ./app/release/build/artifact.txt
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   # build-windows-staging:
   #   runs-on: ubuntu-latest
@@ -191,13 +176,15 @@ jobs:
   #       continue-on-error: true
   #
   deploy-release:
-    needs: [generate-build-artifacts]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       # create annotated tag for this branch. this will become basis for the release
       - run: |
+          mkdir -p ./app/release/build
+          touch ./app/release/build/artifact.txt
+          echo "build artifact simulation" >> ./app/release/build/artifact.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
