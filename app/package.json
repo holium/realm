@@ -11,7 +11,7 @@
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
     "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
-    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
+    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never --config.publish.releaseType=prerelease",
     "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish never",
     "package:release:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish always --config.publish.releaseType=release",
     "package:release:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish always --config.publish.releaseType=release",

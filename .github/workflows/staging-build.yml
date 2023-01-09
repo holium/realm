@@ -3,7 +3,7 @@ run-name: Staging Build - ${{ github.actor }}
 on:
   push:
     branches:
-      - staging
+      - master
 jobs:
   build-mac-staging:
     runs-on: macos-latest
@@ -50,10 +50,114 @@ jobs:
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:mac
+        run: npx cross-env DUMP_ENV=true APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+  #
+  deploy-desks:
+    needs: [build-mac-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Bump desks version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/bump.js')
+            console.log(script({github}, './app/release/app/package.json', ['./desks/realm']))
+      #
+      - name: Push desk version update
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git stash
+          git pull origin main
+          git stash pop
+          git add ./desks/realm/desk.docket-0
+          git commit -m "patch realm desk version"
+          git push
+      #
+      # publish latest agent udpates for realm, courier, and usher
+      - name: Publish ship updates
+        run: |
+          mkdir ~/.ssh
+          echo "$DEPLOY_RSA_STAGING" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          scp -v -i ~/.ssh/usher_rsa -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
+          scp -v -i ~/.ssh/usher_rsa -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
+          scp -v -i ~/.ssh/usher_rsa -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+      #
+      # poke remote endpoint in usher agent which will run clay commit
+      #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+      #  for more information
+      - name: Deploy ship updates
+        uses: actions/github-script@v6
+        env:
+          DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP_STAGING }}
+          DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE_STAGING }}
+          DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL_STAGING }}
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/deploy.js')
+            console.log(script({github}, {
+              ship: process.env.DEPLOY_SHIP_STAGING,
+              code: process.env.DEPLOY_SHIP_CODE_STAGING,
+              rootUrl: process.env.DEPLOY_ROOT_URL_STAGING,
+              mounts: ['usher', 'realm', 'courier']
+            }))
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://codesti.com/issue/actions/setup-node/317
+      - run: mkdir -p /home/runner/.npm
+        continue-on-error: true
+  #
+  # bump-app-version:
+  #   needs: [deploy-desks]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         token: ${{ secrets.GH_TOKEN }}
+  #     - name: Setup node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '14'
+  #         cache: 'npm'
+  #     - name: Increment version
+  #       run: |
+  #         cd ./app/release/app
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git pull
+  #         npm version patch
+  #         git add package.json
+  #         git commit -m "patch version"
+  #         git push
+  #     # Workaround to avoid "Post Run actions/setup-node" failures.
+  #     # See: https://codesti.com/issue/actions/setup-node/317
+  #     - run: mkdir -p /home/runner/.npm
+  #       continue-on-error: true
+  #
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      # set release version based on name of PR
+      - run: gh release create ${{ github.event.pull_request.title }} --prerelease --target master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
