@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   #
-  build-linux-production:
+  build-linux-staging:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -184,10 +184,13 @@ jobs:
   #       continue-on-error: true
   #
   deploy-release:
+    needs: [build-linux-staging]
     runs-on: ubuntu-latest
     steps:
       # create annotated tag for this branch. this will become basis for the release
       - run: git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
+      # push the tag
+      - run: git push origin ${{ github.event.pull_request.title }}
       # set release version based on name of PR
       - run: gh release create ${{ github.event.pull_request.title }} ./app/release/build/* --draft --target master
         env:
