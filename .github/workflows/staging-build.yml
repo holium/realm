@@ -5,22 +5,33 @@ on:
     branches:
       - master
 jobs:
-  #
-  build-windows-staging:
+  generate-build-artifacts:
     runs-on: ubuntu-latest
-    container:
-      image: electronuserland/builder:wine
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       #
-      - name: Build and install
+      - name: Simulate build and install
         run: |
-          apt-get update && apt-get -y install sudo
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:win
+          echo build artifacts >> ./app/release/build/artifact.txt
         env:
-          USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #
+  # build-windows-staging:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: electronuserland/builder:wine
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     #
+  #     - name: Build and install
+  #       run: |
+  #         apt-get update && apt-get -y install sudo
+  #         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:win
+  #       env:
+  #         USERNAME: ${{ github.actor }}
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # build-mac-staging:
   #   runs-on: macos-latest
   #   steps:
