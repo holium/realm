@@ -182,7 +182,7 @@ jobs:
   #       continue-on-error: true
   #
   deploy-release:
-    needs: [build-windows-staging]
+    needs: [generate-build-artifacts]
     runs-on: ubuntu-latest
     steps:
       # create annotated tag for this branch. this will become basis for the release
