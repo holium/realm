@@ -6,33 +6,20 @@ on:
       - master
 jobs:
   #
-  build-linux-staging:
+  build-windows-staging:
     runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-          cache: 'npm'
-      - name: Install yarn
-        run: npm install -g yarn
-      - name: Install app dependencies
-        run: yarn install
-      - name: Build and publish
+      #
+      - name: Build and install
         run: |
-          sudo dpkg --add-architecture i386
-          sudo mkdir -pm755 /etc/apt/keyrings
-          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-          sudo apt update
-          sudo apt install aptitude
-          sudo aptitude install -y -q winehq-staging
-          sudo aptitude install -y -q wine-staging
-          sudo apt update
-          GH_TOKEN=$GH_TOKEN npx yarn package:prerelease:linux
+          apt-get update && apt-get -y install sudo
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:win
         env:
+          USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   # build-mac-staging:
   #   runs-on: macos-latest
@@ -184,7 +171,7 @@ jobs:
   #       continue-on-error: true
   #
   deploy-release:
-    needs: [build-linux-staging]
+    needs: [build-windows-staging]
     runs-on: ubuntu-latest
     steps:
       # create annotated tag for this branch. this will become basis for the release
