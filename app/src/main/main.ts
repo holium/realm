@@ -28,7 +28,6 @@ import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
 import BrowserHelper from './helpers/browser';
-import PowerHelper from './helpers/power';
 
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
@@ -42,6 +41,13 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 
 const isDevelopment =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
+if (process.env.DUMP_ENV === 'true') {
+  for (const key in process.env) {
+    const val = process.env[key];
+    console.log(`${key}: ${val}`);
+  }
+}
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
@@ -109,6 +115,13 @@ export class AppUpdater implements IAppUpdater {
         .then(() => {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
+    });
+    autoUpdater.on('download-progress', (stats) => {
+      let log_message = 'Download speed: ' + stats.bytesPerSecond;
+      log_message = log_message + ' - Downloaded ' + stats.percent + '%';
+      log_message =
+        log_message + ' (' + stats.transferred + '/' + stats.total + ')';
+      mainWindow?.webContents.send('update-progress', stats);
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
@@ -230,7 +243,6 @@ const createWindow = async () => {
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
-  PowerHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
