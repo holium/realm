@@ -26,6 +26,8 @@ If updates are available, you will be prompted to download and install the updat
 
 Versioning is handled automatically during production builds. There is no need to manually update the version string in ./app/release/app/package.json.
 
+See https://semver.org/ for versioning guidelines.
+
 ### Prerelease
 
 Prerelease builds run when changes are pushed to the `@holium/realm` repo's `staging` branch. These builds are added to GitHub Releases as `prerelease` which ensures they will **not** be picked up by the auto-update process. This also gives admins a chance to review a given prerelease before promoting to a new production grade update that will be picked up by the auto-updater.
