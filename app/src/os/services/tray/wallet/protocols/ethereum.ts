@@ -8,8 +8,7 @@ import {
 import axios from 'axios';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
-// @ts-expect-error
-import nftabi from 'non-fungible-token-abi';
+// import nftabi from 'non-fungible-token-abi';
 import {
   ProtocolType,
   WalletStoreType,
@@ -83,8 +82,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       socket.on('error', (error: any) => {
         console.log(error);
       });
-      socket.on('disconnect', () => {
-      })
+      socket.on('disconnect', () => {});
     } catch (error) {
       console.log(error);
     }
@@ -107,7 +105,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
         const wallet = walletStore.ethereum.wallets.get(walletKey)!;
         this.getAccountBalance(wallet.address).then((balance: string) => {
           if (balance !== '-1') {
-            wallet.setBalance(this.protocol, balance)
+            wallet.setBalance(this.protocol, balance);
           }
         });
         this.getAccountTransactions(
@@ -116,8 +114,18 @@ export class EthereumProtocol implements BaseBlockProtocol {
           currentBlock
         ).then((response: any[]) => {
           if (response.length > 0) {
-            (wallet as EthWalletType).data.get(this.protocol)!.transactionList.applyChainTransactions(conduit, this.protocol, wallet.index, wallet.address, response);
-            (wallet as EthWalletType).data.get(this.protocol)!.setBlock(currentBlock!);
+            (wallet as EthWalletType).data
+              .get(this.protocol)!
+              .transactionList.applyChainTransactions(
+                conduit,
+                this.protocol,
+                wallet.index,
+                wallet.address,
+                response
+              );
+            (wallet as EthWalletType).data
+              .get(this.protocol)!
+              .setBlock(currentBlock!);
           }
         });
         if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
@@ -125,15 +133,18 @@ export class EthereumProtocol implements BaseBlockProtocol {
           this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
             for (let asset of assets) {
               if (asset.type === 'coin') {
-                this.getAsset(asset.addr, ethWallet.address, 'coin').then((coin: Asset | null) => {
-                  if (coin) {
-                    ethWallet.setCoin(this.protocol, coin)
+                this.getAsset(asset.addr, ethWallet.address, 'coin').then(
+                  (coin: Asset | null) => {
+                    if (coin) {
+                      ethWallet.setCoin(this.protocol, coin);
+                    }
                   }
-                });
+                );
                 this.getAssetTransfers(
                   asset.addr,
                   ethWallet.address,
-                  ethWallet.data.get(this.protocol)!.coins.get(asset.addr)?.block || 0,
+                  ethWallet.data.get(this.protocol)!.coins.get(asset.addr)
+                    ?.block || 0,
                   currentBlock!
                 ).then((transfers: any) => {
                   if (
@@ -143,10 +154,17 @@ export class EthereumProtocol implements BaseBlockProtocol {
                     ethWallet.data
                       .get(this.protocol)!
                       .coins.get(asset.addr)!
-                      .transactionList.applyChainTransactions(conduit, this.protocol, ethWallet.index, ethWallet.address, transfers);
+                      .transactionList.applyChainTransactions(
+                        conduit,
+                        this.protocol,
+                        ethWallet.index,
+                        ethWallet.address,
+                        transfers
+                      );
                     ethWallet.data
                       .get(this.protocol)!
-                      .coins.get(asset.addr)!.setBlock(currentBlock!);
+                      .coins.get(asset.addr)!
+                      .setBlock(currentBlock!);
                   }
                 });
               }
@@ -158,7 +176,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   (asset.data as NFTAsset).tokenId
                 ).then((nft: Asset | null) => {
                   if (nft) {
-                    ethWallet.updateNft(this.protocol, nft) 
+                    ethWallet.updateNft(this.protocol, nft);
                   }
                 });
                 /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
@@ -178,8 +196,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   async getAccountBalance(addr: string): Promise<string> {
     try {
       return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
-    }
-    catch (error) {
+    } catch (error) {
       return '-1';
     }
   }
@@ -292,8 +309,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
     try {
       const coins = await this.alchemy.core.getTokenBalances(addr);
       const nfts = await this.alchemy.nft.getNftsForOwner(addr);
-      let assets: Asset[] = [];
-      let data: NFTAsset = {
+      const assets: Asset[] = [];
+      const data: NFTAsset = {
         name: '',
         tokenId: '',
         description: '',
@@ -301,14 +318,14 @@ export class EthereumProtocol implements BaseBlockProtocol {
         transferable: true,
         properties: {},
       };
-      for (let coin of coins.tokenBalances) {
+      for (const coin of coins.tokenBalances) {
         assets.push({
           addr: coin.contractAddress,
           type: 'coin',
           data,
         });
       }
-      for (let nft of nfts.ownedNfts) {
+      for (const nft of nfts.ownedNfts) {
         data.tokenId = nft.tokenId;
         assets.push({
           addr: nft.contract.address,
@@ -347,7 +364,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
     try {
       if (type === 'coin') {
         const metadata = await this.alchemy.core.getTokenMetadata(contract);
-        const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
+        const ethContract = new ethers.Contract(
+          contract,
+          abi,
+          this.ethProvider!
+        );
         const balance = (await ethContract.balanceOf(addr)).toString();
         const data: CoinAsset = {
           logo: metadata.logo,

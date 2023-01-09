@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import { darken, lighten, rgba } from 'polished';
-import styled, { css } from 'styled-components';
-import { Text, Flex, Card } from 'renderer/components';
+import { Text, Flex } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -16,30 +15,12 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
+  ERC20Type,
 } from 'os/services/tray/wallet-lib/wallet.model';
-
-interface CardStyleProps {
-  isSelected: boolean;
-  mode: string;
-}
-
-const CardStyle = styled(Card)<CardStyleProps>`
-  ${(props: CardStyleProps) =>
-    props.isSelected
-      ? css``
-      : css`
-          border-radius: 16px;
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          padding: 16px 12px;
-          transition: box-shadow 0.25s ease;
-          &:hover {
-            transition: box-shadow 0.25s ease;
-            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.06);
-          }
-        `}
-`;
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../components/WalletCardWrapper';
 
 interface WalletCardProps {
   wallet: EthWalletType | BitcoinWalletType;
@@ -86,11 +67,12 @@ export const WalletCard: FC<WalletCardProps> = ({
 
   return useMemo(
     () => (
-      <CardStyle
+      <WalletCardStyle
         layout="size"
         elevation="none"
         layoutId={`wallet-card-${wallet.address}`}
-        transition={{ duration: 0.1 }}
+        justifyContent="flex-start"
+        transition={walletCardStyleTransition}
         customBg={lighten(0.04, theme.currentTheme.windowColor)}
         borderColor={
           theme.currentTheme.mode === 'dark'
@@ -121,7 +103,7 @@ export const WalletCard: FC<WalletCardProps> = ({
           {amountDisplay}
         </Text>
         <Flex
-          layout="position"
+          // layout="position"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -134,7 +116,7 @@ export const WalletCard: FC<WalletCardProps> = ({
             {coins &&
               coins
                 .slice(0, 6)
-                .map((coin, index) => (
+                .map((coin: ERC20Type, index: number) => (
                   <img
                     src={coin.logo || getMockCoinIcon(coin.name)}
                     style={{ height: '14px', marginRight: '4px' }}
@@ -151,7 +133,7 @@ export const WalletCard: FC<WalletCardProps> = ({
             {transactions.length} Transactions
           </Text>
         </Flex>
-      </CardStyle>
+      </WalletCardStyle>
     ),
     [wallet, isSelected, theme, mode, coins, transactions.length]
   );

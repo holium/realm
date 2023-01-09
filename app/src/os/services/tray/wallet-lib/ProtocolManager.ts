@@ -16,13 +16,21 @@ export class Wallet {
   }
 
   pauseUpdates() {
-    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
-      (this.protocols.get(this.currentProtocol)! as EthereumProtocol).removeListener();
+    if (
+      this.currentProtocol === ProtocolType.ETH_MAIN ||
+      this.currentProtocol === ProtocolType.ETH_GORLI
+    ) {
+      (
+        this.protocols.get(this.currentProtocol)! as EthereumProtocol
+      ).removeListener();
     }
   }
 
   watchUpdates(conduit: any, walletState: WalletStoreType) {
-    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
+    if (
+      this.currentProtocol === ProtocolType.ETH_MAIN ||
+      this.currentProtocol === ProtocolType.ETH_GORLI
+    ) {
       const lastProtocol = this.protocols.get(
         this.currentProtocol
       )! as EthereumProtocol;
@@ -30,17 +38,17 @@ export class Wallet {
     }
     this.currentProtocol = walletState.navState.protocol;
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      this.protocols.get(
-        this.currentProtocol
-      )!.watchUpdates(conduit, walletState);
+      this.protocols
+        .get(this.currentProtocol)!
+        .watchUpdates(conduit, walletState);
     }
   }
 
   updateWalletState(conduit: any, walletState: WalletStoreType) {
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      (this.protocols
-        .get(walletState.navState.protocol)! as EthereumProtocol)
-        .updateWalletState(conduit, walletState);
+      (
+        this.protocols.get(walletState.navState.protocol)! as EthereumProtocol
+      ).updateWalletState(conduit, walletState);
     }
   }
 }

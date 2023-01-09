@@ -55,33 +55,26 @@ import { ThemeType } from '../theme';
 
 type ActionButtonProps = {
   // variant: 'minimal';
+  tabIndex?: number;
   theme: ThemeType;
+  style?: any;
   children: React.ReactNode;
+  disabled?: boolean;
+  ref?: any;
+  onClick?: () => void;
   rightContent?: React.ReactNode;
 } & HeightProps &
   SpaceProps;
 
 export type ButtonProps = StyledComponentProps<
   'button',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
   ActionButtonProps,
   never
 >;
 
-// const StyledButton = styled.button(
-//   styled.button`
-//     ${(props) => css`
-//       appearance: none;
-//       border-radius: 4px;
-//       background: ${props.theme.colors.brand.muted};
-//     `}
-//   `,
-//   compose(space, layout, color, background, flexbox, border, position)
-// );
-
 const StyledButton = styled.button`
-  ${(props: ActionButtonProps) => css`
+  ${(props: ButtonProps) => css`
     appearance: none;
     decoration: none;
     display: flex;
@@ -123,7 +116,7 @@ export const ActionButton: FC<ButtonProps> = forwardRef<
     </StyledButton>
   );
 });
-
+ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,
 };

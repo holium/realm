@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
 // import _ from 'lodash';
@@ -7,7 +7,6 @@ import { isValidPatp } from 'urbit-ob';
 
 import {
   Flex,
-  Input,
   Text,
   Select,
   Icons,
@@ -138,11 +137,6 @@ export const WalletSettings: FC = observer(() => {
           py={1}
           variant="minimal"
           fontWeight={400}
-          // disabled={
-          //   providerError !== '' ||
-          //   (_.isEqual(state, settings) &&
-          //     _.isEqual(state.blocked, [...settings.blocked]))
-          // }
           isLoading={saving}
           onClick={saveSettings}
         >
@@ -167,7 +161,9 @@ export const WalletSettings: FC = observer(() => {
           name="wallet-provider"
           placeholder="http://localhost:8545"
           value={providerInput}
-          onChange={async (e) => await setProvider(e.target.value)}
+          onChange={async (e: ChangeEvent<HTMLInputElement>) =>
+            await setProvider(e.target.value)
+          }
         />
         <Box hidden={!providerError}>
           <Text
@@ -339,7 +335,9 @@ function BlockedInput(props: BlockedInputProps) {
           spellCheck={false}
           placeholder="~tasdul-tasdul"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setInput(e.target.value)
+          }
           rightInteractive
           rightAdornment={
             <TextButton

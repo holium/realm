@@ -1,4 +1,3 @@
-import { Types } from 'aws-sdk/clients/s3';
 import {
   applySnapshot,
   types,
@@ -167,7 +166,13 @@ const TransactionList = types
         self.transactions.set(transaction.hash, tx);
       }
     },
-    applyChainTransactions(conduit: any, protocol: ProtocolType, index: number, address: string, transactions: any) {
+    applyChainTransactions(
+      conduit: any,
+      protocol: ProtocolType,
+      index: number,
+      address: string,
+      transactions: any
+    ) {
       for (const transaction of transactions) {
         const previousTransaction = self.transactions.get(transaction.hash);
         const newTransaction = {
@@ -189,10 +194,7 @@ const TransactionList = types
         const previousStatus = previousTransaction?.status;
         self.transactions.set(transaction.hash, newTransaction);
         if (previousTransaction) {
-          if (
-            newTransaction.status !==
-            previousStatus
-          ) {
+          if (newTransaction.status !== previousStatus) {
             const tx = this.getStoredTransaction(transaction.hash);
             WalletApi.setTransaction(
               conduit,
@@ -234,7 +236,7 @@ const BitcoinWallet = types
     address: types.string,
     nickname: types.string,
     balance: types.string,
-    transactionList: TransactionList
+    transactionList: TransactionList,
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -328,8 +330,6 @@ const conversions = types
       self.usd = usd;
     },
   }));
-  
-
 
 const ERC20 = types
   .model('ERC20', {
@@ -351,7 +351,7 @@ const ERC20 = types
     },
     setBlock(block: number) {
       self.block = block;
-    }
+    },
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
@@ -384,7 +384,7 @@ const EthWalletData = types
     },*/
     setBlock(block: number) {
       self.block = block;
-    }
+    },
   }));
 
 const EthWallet = types
@@ -444,8 +444,7 @@ const EthWallet = types
           transactionList: {},
           block: 0,
         });
-      }
-      else {
+      } else {
         let coinToUpdate = self.data.get(protocol)!.coins.get(coin.addr)!;
         coinToUpdate.name = coinData.symbol;
         coinToUpdate.logo = coinData.logo || '';
@@ -502,7 +501,9 @@ const EthWallet = types
       applySnapshot(self.transactions, getSnapshot(newHistory));
     }, */
     getTransaction(protocol: ProtocolType, hash: string) {
-      const tx: any = self.data.get(protocol)!.transactionList.transactions.get(hash);
+      const tx: any = self.data
+        .get(protocol)!
+        .transactionList.transactions.get(hash);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -544,13 +545,19 @@ const EthWallet = types
         notes: '',
       };
       if (contractType) {
-        self.data.get(protocol)!.coins.get(contractType)!.transactionList.transactions.set(hash, tx);
-      }
-      else {
+        self.data
+          .get(protocol)!
+          .coins.get(contractType)!
+          .transactionList.transactions.set(hash, tx);
+      } else {
         self.data.get(protocol)!.transactionList.transactions.set(hash, tx);
       }
     },
-    applyTransactionUpdate(protocol: ProtocolType, contract: any, transaction: any) {
+    applyTransactionUpdate(
+      protocol: ProtocolType,
+      contract: any,
+      transaction: any
+    ) {
       if (contract) {
         if (!self.data.get(protocol)!.coins.has(contract)) {
           self.data.get(protocol)!.coins.set(contract, {
@@ -564,10 +571,11 @@ const EthWallet = types
             block: 0,
           });
         }
-        let txList = self.data.get(protocol)!.coins.get(contract)!.transactionList;
+        let txList = self.data
+          .get(protocol)!
+          .coins.get(contract)!.transactionList;
         txList.applyAgentTransaction(self.index, contract, transaction);
-      }
-      else {
+      } else {
         let netMap = self.data.get(protocol)!.transactionList;
         netMap.applyAgentTransaction(self.index, contract, transaction);
       }
@@ -643,21 +651,21 @@ export const EthStore = types
               coins: {},
               nfts: {},
               transactionList: {},
-              block: 0
+              block: 0,
             },
             [ProtocolType.ETH_GORLI]: {
               balance: '0',
               coins: {},
               nfts: {},
               transactionList: {},
-              block: 0
+              block: 0,
             },
             [ProtocolType.UQBAR]: {
               balance: '0',
               coins: {},
               nfts: {},
               transactionList: {},
-              block: 0
+              block: 0,
             },
           },
         };
@@ -671,7 +679,11 @@ export const EthStore = types
             const transaction = protocolTransactions[transactionKey];
             self.wallets
               .get(wallet.key)!
-              .applyTransactionUpdate(protocol as ProtocolType, null, transaction);
+              .applyTransactionUpdate(
+                protocol as ProtocolType,
+                null,
+                transaction
+              );
           }
         }
       }
@@ -684,7 +696,11 @@ export const EthStore = types
               const transaction = contractTransactions[transactionKey];
               self.wallets
                 .get(wallet.key)!
-                .applyTransactionUpdate(protocol as ProtocolType, contract, transaction);
+                .applyTransactionUpdate(
+                  protocol as ProtocolType,
+                  contract,
+                  transaction
+                );
             }
           }
         }
@@ -922,9 +938,6 @@ export const WalletStore = types
         btcNetwork: self.navState.btcNetwork,
       });
       self.navHistory = cast([]);
-    },
-    setReturnView(view: WalletView) {
-      self.returnView = view;
     },
     setNetworkProvider(provider: string) {
       self.currentStore.setProvider(provider);

@@ -1,19 +1,11 @@
-import { FC, useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Flex,
-  Text,
-  Button,
-  Label,
-  Input,
-  FormControl,
-} from 'renderer/components';
+import { Flex, Text, Button, Label, FormControl } from 'renderer/components';
 import { TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType } from 'os/services/tray/wallet-lib';
-import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
+import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface CreateWalletProps {
   network: NetworkType;
@@ -70,7 +62,9 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
               id="wallet-nickname"
               name="wallet-nickname"
               value={nickname.state.value}
-              onChange={(e) => nickname.actions.onChange(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                nickname.actions.onChange(e.target.value)
+              }
               placeholder="Fort Knox"
             />
           </FormControl.Field>

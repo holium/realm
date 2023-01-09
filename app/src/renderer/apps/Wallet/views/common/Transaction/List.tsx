@@ -18,9 +18,7 @@ import {
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
-interface InputProps {
-  hoverBg: string;
-}
+type TxType = 'coin' | 'nft' | 'general' | undefined;
 
 interface TransactionProps {
   transaction: TransactionType;
@@ -46,7 +44,7 @@ export const Transaction = observer((props: TransactionProps) => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: {
         type: 'transaction',
-        txtype: walletApp.navState.detail?.txtype || 'general',
+        txtype: (walletApp.navState.detail?.txtype as TxType) || 'general',
         coinKey: walletApp.navState.detail?.coinKey,
         key: transaction.hash,
       },
@@ -143,7 +141,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
     <>
       <NoScrollBar
         width="100%"
-        height={pending && !props.hidePending ? height - 45 : height}
+        height={pending && !props.hidePending ? height - 54 : height}
         flexDirection="column"
         margin="auto"
         overflow="auto"
