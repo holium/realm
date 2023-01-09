@@ -5,7 +5,7 @@ import { ProtocolEvent } from './events';
 import { action, makeObservable, observable, observe, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
-import { DataPacket } from 'helpers/data';
+import { DataPacket, DataPacket_Kind } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
 import { isInitiator, isWeb, isWebRTCSignal } from '../utils';
 
@@ -141,11 +141,6 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['chat-received'];
         this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
       }
-      if (data['mute-status']) {
-        const payload = data['mute-status'];
-        console.log('mute-status', payload);
-        this.emit(ProtocolEvent.PeerMuteStatusChanged, payload.from, payload.status);
-      }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
@@ -262,23 +257,20 @@ export class RealmProtocol extends BaseProtocol {
       });
     });
     this.local.on(PeerEvent.Muted, () => {
-      console.log('muting poke');
-      this.poke({
-        app: 'rooms-v2',
-        mark: 'rooms-v2-session-action',
-        json: {
-          'toggle-mute': true,
-        },
-      });
+      console.log('sending muting signal');
+      this.sendData({
+        from: this.local.patp,
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: {data: true }
+      })
     })
     this.local.on(PeerEvent.Unmuted, () => {
-      this.poke({
-        app: 'rooms-v2',
-        mark: 'rooms-v2-session-action',
-        json: {
-          'toggle-mute': false,
-        },
-      });
+      console.log('sending unmuting signal');
+      this.sendData({
+        from: this.local.patp,
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: {data: false }
+      })
     })
   }
 
@@ -460,7 +452,15 @@ export class RealmProtocol extends BaseProtocol {
     });
 
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
-      this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
+      if (data.kind === DataPacket_Kind.MUTE_STATUS) {
+        if (data.value.data) {
+          remotePeer.mute();
+        } else {
+          remotePeer.unmute();
+        }
+      } else {
+        this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
+      }
     });
 
     this.emit(ProtocolEvent.PeerAdded, remotePeer);

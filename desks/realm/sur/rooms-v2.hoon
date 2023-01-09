@@ -54,7 +54,6 @@
       [%invite =rid =ship]
       [%kick =rid =ship]
       [%send-chat content=cord]
-      [%toggle-mute status=?]
   ==
 ::
 +$  reaction
@@ -67,7 +66,6 @@
       [%invited provider=ship =rid =title =ship]
       [%kicked =rid =ship] 
       [%chat-received from=ship content=cord] 
-      [%mute-status from=ship status=?]
   ==
 ::
 +$  provider-action

@@ -89,21 +89,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     );
 
     this.protocol.on(
-      ProtocolEvent.PeerMuteStatusChanged,
-      (peerP: Patp, status: boolean) => {
-        this.peers.forEach((peer: RemotePeer) => {
-          if (peerP === peer.patp) {
-            if (status) {
-              peer.mute();
-            } else {
-              peer.unmute();
-            }
-          }
-        });
-      }
-    );
-
-    this.protocol.on(
       ProtocolEvent.PeerDataReceived,
       (peer: Patp, data: DataPacket) => {
         if (this.live.room) {
