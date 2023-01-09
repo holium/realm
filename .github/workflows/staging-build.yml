@@ -189,6 +189,8 @@ jobs:
     needs: [generate-build-artifacts]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       # create annotated tag for this branch. this will become basis for the release
       - run: git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
       # push the tag
