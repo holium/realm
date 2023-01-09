@@ -13,6 +13,7 @@ jobs:
       #
       - name: Simulate build and install
         run: |
+          touch ./app/release/build/artifact.txt
           echo "build artifact simulation" >> ./app/release/build/artifact.txt
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
