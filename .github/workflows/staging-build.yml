@@ -26,7 +26,9 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/init.js')
-            script({github, context}, './app/release/app/package.json')
+            const result = script({github, context}, './app/release/app/package.json')
+            console.log(result)
+            return result
       # commit the change for the new version
       - name: Push package version update
         run: |
