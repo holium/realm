@@ -1,4 +1,4 @@
-name: stating-build
+name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
   # push:
