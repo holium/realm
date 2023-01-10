@@ -55,7 +55,7 @@ jobs:
           gh release create $BUILD_VERSION ./app/release/build/*.* --draft --target $TARGET_BRANCH --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ steps.ci.outputs.result.buildVersion }}
+          BUILD_VERSION: ${{steps.ci.outputs.result.buildVersion}}
           TARGET_BRANCH: ${{ github.ref_name }}
   #
   # build-windows-staging:
