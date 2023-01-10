@@ -33,7 +33,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git stash
-          git pull origin main
+          git pull origin master
           git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
