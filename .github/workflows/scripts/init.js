@@ -6,6 +6,7 @@
 */
 var fs = require('fs');
 module.exports = ({ github, context }, pkgfile) => {
+  console.log(context);
   let ci = {
     // version "as-is" from package.json
     packageVersion: undefined,
