@@ -44,7 +44,6 @@ jobs:
       - name: Start release draft
         # create annotated tag for this branch. this will become basis for the release
         run: |
-          echo "${{steps.ci.outputs.result}}"
           mkdir -p ./app/release/build
           touch ./app/release/build/log.txt
           echo "start-release workflow for ${{steps.ci.outputs.result.buildVersion}}..." >> ./app/release/build/log.txt
