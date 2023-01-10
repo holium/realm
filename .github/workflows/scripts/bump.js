@@ -35,14 +35,14 @@ module.exports = ({ github }, pkgfile, desks) => {
             ' '
           )}`
         );
-        // if (mmb[2] === '99' && mmb[1] === '99') {
-        //   mmb[2] = '0';
-        //   mmb[1] = '0';
-        //   mmb[0] = (Number.parseInt(mmb[0]) + 1).toString();
-        // } else if (mmb[2] === '99') {
-        //   mmb[2] = '0';
-        //   mmb[1] = (Number.parseInt(mmb[1]) + 1).toString();
-        // }
+        if (mmb[2] === '99' && mmb[1] === '99') {
+          mmb[2] = '0';
+          mmb[1] = '0';
+          mmb[0] = (Number.parseInt(mmb[0]) + 1).toString();
+        } else if (mmb[2] === '99') {
+          mmb[2] = '0';
+          mmb[1] = (Number.parseInt(mmb[1]) + 1).toString();
+        }
         lines[j] = `${parts[0]}+[${mmb[0]} ${mmb[1]} ${mmb[2]}]`;
         fs.writeFileSync(`${desk}/desk.docket-0`, lines.join('\n'));
         break;

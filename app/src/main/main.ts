@@ -75,6 +75,7 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.setFeedURL({
       provider: 'generic',
       url: process.env.AUTOUPDATE_FEED_URL,
+      channel: process.env.RELEASE_CHANNEL || 'latest',
     });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
