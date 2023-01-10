@@ -17,6 +17,10 @@ jobs:
   start-release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -126,7 +130,7 @@ jobs:
           gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          BUILD_VERSION: ${{ needs.start-release.outputs.build_version }}
   # #
   # deploy-desks:
   #   needs: [build-mac-staging]
@@ -227,7 +231,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   deploy-release:
-    needs: [build-mac-staging]
+    needs: [start-release, build-mac-staging]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -236,4 +240,4 @@ jobs:
           gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          BUILD_VERSION: ${{ needs.start-release.outputs.build_version }}
