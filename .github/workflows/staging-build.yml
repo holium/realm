@@ -46,14 +46,15 @@ jobs:
         run: |
           mkdir -p ./app/release/build
           touch ./app/release/build/log.txt
-          echo "start-release workflow for ${{steps.ci.outputs.result.buildVersion}}..." >> ./app/release/build/log.txt
+          echo "start-release workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git tag -a ${{steps.ci.outputs.result.buildVersion}} -m "build tag: ${{steps.ci.outputs.result.buildVersion}}"
-          git push origin ${{steps.ci.outputs.result.buildVersion}}
-          gh release create ${{steps.ci.outputs.result.buildVersion}} ./app/release/build/*.* --draft --target ${{ github.ref_name }} --latest=false
+          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --draft --target ${{ github.ref_name }} --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
   #
   # build-windows-staging:
   #   runs-on: ubuntu-latest
@@ -122,9 +123,10 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          gh release upload ${{steps.ci.outputs.result.buildVersion}} ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
   # #
   # deploy-desks:
   #   needs: [build-mac-staging]
@@ -231,6 +233,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - run: |
-          gh release edit ${{steps.ci.outputs.result.buildVersion}} --prerelease=true --draft=false --latest=false
+          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
