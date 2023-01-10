@@ -3,6 +3,21 @@
   @purpose: script to setup context and environment variables to be used
     by other jobs/steps in the workflow.
 
+  @returns
+
+    JSON object (ci):
+
+      packageVersion - package.json file version attribute value. if this value
+        comes from the PR title, it will be "as-is". otherwise the build # will be
+        incremented (where build # is v<major>.<minor>.<build>)
+
+      buildVersion - the name of the release. also used to tag the build. this can
+        differ from the package version
+
+      channel - [alpha|latest] - translates to [staging|release]. the reason for using
+        alpha/latest is due to electron-builder library. it expects alpha/beta/latest in support
+        of channeling releases (see: https://www.electron.build/tutorials/release-using-channels.html)
+
 */
 var fs = require('fs');
 module.exports = ({ github, context }, pkgfile) => {
@@ -64,7 +79,11 @@ module.exports = ({ github, context }, pkgfile) => {
     ci.packageVersion = `${prepend ? 'v' : ''}${parts[0]}.${parts[1]}.${
       parseInt(parts[2]) + 1
     }`;
-    ci.buildVersion = ci.packageVersion;
+    if (ci.channel === 'alpha') {
+      ci.buildVersion = `${ci.packageVersion}-alpha`;
+    } else {
+      ci.buildVersion = ci.packageVersion;
+    }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
   if (ci.channel === 'alpha') {
