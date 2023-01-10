@@ -67,6 +67,6 @@ module.exports = ({ github, context }, pkgfile) => {
     }`;
   }
   pkg.version = ci.packageVersion;
-  fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, '2'));
+  fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
   return ci;
 };
