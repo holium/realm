@@ -1,18 +1,18 @@
 {
-2"name": "@holium/realm",
-2"version": "0.0.81",
-2"description": "A desktop environment for Urbit",
-2"main": "./dist/main/main.js",
-2"author": {
-22"name": "Holium Corporation",
-22"email": "support@holium.com",
-22"url": "https://github.com/holium/realm"
-2},
-2"scripts": {
-22"electron-rebuild": "node -r ts-node/register ../../.holium/scripts/electron-rebuild.js",
-22"link-modules": "node -r ts-node/register ../../.holium/scripts/link-modules.ts",
-22"postinstall": "npm run electron-rebuild && npm run link-modules"
-2},
-2"dependencies": {},
-2"license": "MIT"
+  "name": "@holium/realm",
+  "version": "0.0.81",
+  "description": "A desktop environment for Urbit",
+  "main": "./dist/main/main.js",
+  "author": {
+    "name": "Holium Corporation",
+    "email": "support@holium.com",
+    "url": "https://github.com/holium/realm"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ts-node/register ../../.holium/scripts/electron-rebuild.js",
+    "link-modules": "node -r ts-node/register ../../.holium/scripts/link-modules.ts",
+    "postinstall": "npm run electron-rebuild && npm run link-modules"
+  },
+  "dependencies": {},
+  "license": "MIT"
 }
