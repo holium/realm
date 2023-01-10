@@ -66,7 +66,12 @@ module.exports = ({ github, context }, pkgfile) => {
     }`;
     ci.buildVersion = ci.packageVersion;
   }
-  pkg.version = ci.packageVersion;
+  // see: https://www.electron.build/tutorials/release-using-channels.html
+  if (ci.channel === 'alpha') {
+    pkg.version = `${ci.packageVersion}-alpha`;
+  } else {
+    pkg.version = ci.packageVersion;
+  }
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
   return ci;
 };
