@@ -22,20 +22,20 @@ module.exports = ({ github, context }, pkgfile) => {
   ci.packageVersion = pkg.version;
   // test the title of the PR to see if it is a valid version string format.
   //  if so, use it as this build's version string (no modifications)
-  if (context.payload.event.pull_request.title) {
+  if (context.pull_request.title) {
     console.log(
-      `init.js: PR title = '${context.payload.event.pull_request.title}'. testing if matches version format...`
+      `init.js: PR title = '${context.pull_request.title}'. testing if matches version format...`
     );
-    const matches = context.payload.event.pull_request.title.match(
+    const matches = context.pull_request.title.match(
       /(release|staging)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
     );
     if (matches) {
       console.log(
-        `init.js: '${context.payload.event.pull_request.title}' matches version format. using as version string.`
+        `init.js: '${context.pull_request.title}' matches version format. using as version string.`
       );
       // set version from PR title "as-is". do not auto increment
       incrementVersion = false;
-      ci.buildVersion = context.payload.event.pull_request.title;
+      ci.buildVersion = context.pull_request.title;
       ci.packageVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${
         matches[4]
       }.${matches[5]}`;
