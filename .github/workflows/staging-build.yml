@@ -15,22 +15,46 @@ jobs:
   # 3) see deploy-release job which ensures that once all other workflows, jobs, actions have
   #    completed successfully that we turn this into published release
   start-release:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      # create annotated tag for this branch. this will become basis for the release
-      - run: |
-          mkdir -p ./app/release/build
-          touch ./app/release/build/log.txt
-          echo "start-release workflow for ${{ github.event.pull_request.title }}..." >> ./app/release/build/log.txt
+      - name: Initialize build environment
+        uses: actions/github-script@v6
+        id: ci
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/init.js')
+            script({github}, './app/release/app/package.json')
+      # commit the change for the new version
+      - name: Push package version update
+        run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git tag -a ${{ github.event.pull_request.title }} -m "build tag: ${{ github.event.pull_request.title }}"
-          git push origin ${{ github.event.pull_request.title }}
-          gh release create ${{ github.event.pull_request.title }} ./app/release/build/*.* --draft --target master --latest=false
+          git stash
+          git pull origin main
+          git stash pop
+          git add ./app/release/app/package.json
+          git commit -m "patch realm app version"
+          git push
+      #
+      - name: Start release draft
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          echo "${{steps.ci.outputs.result}}"
+          mkdir -p ./app/release/build
+          touch ./app/release/build/log.txt
+          echo "start-release workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --draft --target $TARGET_BRANCH --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ steps.ci.outputs.result.buildVersion }}
+          TARGET_BRANCH: ${{ github.ref_name }}
   #
   # build-windows-staging:
   #   runs-on: ubuntu-latest
@@ -99,9 +123,10 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          gh release upload ${{ github.event.pull_request.title }} ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ steps.ci.outputs.result.buildVersion }}
   # #
   # deploy-desks:
   #   needs: [build-mac-staging]
@@ -199,20 +224,16 @@ jobs:
   #     - run: mkdir -p /home/runner/.npm
   #       continue-on-error: true
   #
-  # deploy-release:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     # create annotated tag for this branch. this will become basis for the release
-  #     - run: |
-  #         mkdir -p ./app/release/build
-  #         touch ./app/release/build/artifact.txt
-  #         echo "build artifact simulation" >> ./app/release/build/artifact.txt
-  #         git config --global user.email realm-builder-no-reply@holium.com
-  #         git config --global user.name ${{ github.actor }}
-  #         git tag -a ${{ github.event.pull_request.title }} -m "auto-generate tag"
-  #         git push origin ${{ github.event.pull_request.title }} -f
-  #         gh release edit ${{ github.event.pull_request.title }} ./app/release/build/*.*
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #  once everything is done, flip the switch on the draft release to make
+  #    the release available to auto-update
+  deploy-release:
+    needs: [build-mac-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - run: |
+          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ steps.ci.outputs.result.buildVersion }}

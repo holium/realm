@@ -60,6 +60,7 @@ const configuration: webpack.Configuration = {
       START_MINIMIZED: false,
       AUTOUPDATE_FEED_URL: 'https://ghproxy.holium.xyz',
       INSTALL_MOON: '~hostyv:realm,courier',
+      RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
     }),
   ],
   /**
