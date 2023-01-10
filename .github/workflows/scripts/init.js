@@ -65,6 +65,7 @@ module.exports = ({ github, context }, pkgfile) => {
     ci.packageVersion = `${prepend ? 'v' : ''}${parts[0]}.${parts[1]}.${
       parseInt(parts[2]) + 1
     }`;
+    ci.buildVersion = ci.packageVersion;
   }
   pkg.version = ci.packageVersion;
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
