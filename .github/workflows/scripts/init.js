@@ -78,7 +78,8 @@ module.exports = ({ github, context }, pkgfile) => {
     }
     if (ci.packageVersion.endsWith('-alpha')) {
       ci.packageVersion = ci.packageVersion.substring(
-        ci.packageVersion.length - 7
+        0,
+        ci.packageVersion.length - 6
       );
     }
     const parts = ci.packageVersion.split('.');
