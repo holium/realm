@@ -37,16 +37,17 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
   // const [sendTrans, setSendTrans] = useState(false);
-  const sendTrans = walletApp.navState.view === WalletView.TRANSACTION_SEND;
-  const [hideWalletHero, setHideWalletHero] = useState(false);
+  const sendTrans = walletApp.navState.view === WalletView.TRANSACTION_SEND || walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
+  // const [hideWalletHero, setHideWalletHero] = useState(false);
+  const hideWalletHero = walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
-  const onScreenChange = (newScreen: string) =>
-    setHideWalletHero(newScreen === 'confirm');
+  const onScreenChange = (newScreen: string) => {}
+//    setHideWalletHero(newScreen === 'confirm');
   const close = () => {
     // setSendTrans(false);
     WalletActions.navigateBack();
-    setHideWalletHero(false);
+//    setHideWalletHero(false);
   };
 
   const wallet = walletApp.currentWallet!;

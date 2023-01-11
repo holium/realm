@@ -13,6 +13,7 @@ export enum WalletView {
   NEW = 'new',
   WALLET_DETAIL = 'detail',
   TRANSACTION_SEND = 'send',
+  TRANSACTION_CONFIRM = 'confirm',
   TRANSACTION_DETAIL = 'transaction',
   NFT_DETAIL = 'ethereum:nft',
   LOCKED = 'locked',

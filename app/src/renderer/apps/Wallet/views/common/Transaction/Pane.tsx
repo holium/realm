@@ -12,7 +12,9 @@ import {
   ProtocolType,
   ERC20Type,
   NetworkType,
+  WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { WalletApp } from 'renderer/apps/Wallet';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -31,7 +33,8 @@ interface TransactionPaneProps {
 export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
     const { walletApp } = useTrayApps();
-    const [screen, setScreen] = useState('initial');
+    // const [screen, setScreen] = useState('initial');
+    const screen = (walletApp.navState.view === WalletView.TRANSACTION_SEND) ? 'initial' : 'confirm';
     const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
@@ -49,12 +52,14 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
 
     const next = () => {
-      setScreen('confirm');
+      // setScreen('confirm');
+      WalletActions.navigate(WalletView.TRANSACTION_CONFIRM);
       props.onScreenChange('confirm');
     };
 
     const prev = () => {
-      setScreen('initial');
+      // setScreen('initial');
+      WalletActions.navigate(WalletView.TRANSACTION_SEND);
       props.onScreenChange('initial');
     };
 

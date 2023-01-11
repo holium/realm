@@ -252,12 +252,12 @@ const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStore
     },
   });*/
   // TODO: placeholder, we need to implement the actual send coins functionality
-  walletState.navigate(WalletView.TRANSACTION_DETAIL, {
+  walletState.navigate(WalletView.TRANSACTION_SEND, {
     walletIndex: '0',
-    detail: {
+    /*detail: {
       type: 'transaction',
       txtype: 'general',
       key: '0'
-    }
+    }*/
   });
 }

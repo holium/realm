@@ -29,6 +29,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   [WalletView.LIST]: (props: any) => <WalletList {...props} />,
   [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_SEND]: (props: any) => <Detail {...props} />,
+  [WalletView.TRANSACTION_CONFIRM]: (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_DETAIL]: (props: any) => (
     <TransactionDetail {...props} />
   ),
