@@ -202,7 +202,7 @@
   =/  wires   (skim ~(tap in ~(key by wex.bowl)) |=(a=[=wire =ship =term] =(term.a %chat)))
   ?-  -.act
     %send-dm               [(send-dm wires +.act) state]
-    %read-dm               [(read-dm +.act bowl) state]
+    %read-dm               [(read-dm wires +.act bowl) state]
     %create-group-dm       [(create-group-dm +.act bowl) state]
     %send-group-dm         [(send-group-dm +.act bowl) state]
     %read-group-dm         [(read-group-dm +.act bowl) state]
@@ -241,19 +241,24 @@
       [%pass /g2/dm/(scot %p to-ship)/ui %agent [author.p %chat] %watch /dm/(scot %p to-ship)/ui]
     ==
   ++  read-dm
-    |=  [=ship =bowl:gall]
-    ~&  >  "signaling read-dm for {(scow %p ship)}"
+    |=  [wires=(list [=wire s=ship =term]) to-ship=ship =bowl:gall]
+    ~&  >  "signaling read-dm for {(scow %p to-ship)}"
     =/  rop
       [
         gop=~ 
         can=~ 
         des=%talk 
-        ted=[/dm/(scot %p ship)]
+        ted=[/dm/(scot %p to-ship)]
       ]
-    :~
-      [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]
-      [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
-    ==
+    =/  cards-to-return
+        :~
+          [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship to-ship))]
+          [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
+        ==
+    :: checking if we are already subscribed to the dm
+    ?:  (lien wires |=(a=[=wire s=ship =term] (does-wire-match-ship wire.a to-ship)))
+      cards-to-return
+    [[%pass /g2/dm/(scot %p to-ship)/ui %agent [our.bowl %chat] %watch /dm/(scot %p to-ship)/ui] cards-to-return]
   ++  create-group-dm
     |=  [ships=(set ship) =bowl:gall]
     ::~&  >  "creating group dm with "::{ships}
