@@ -42,13 +42,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 const isDevelopment =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (process.env.DUMP_ENV === 'true') {
-  for (const key in process.env) {
-    const val = process.env[key];
-    console.log(`${key}: ${val}`);
-  }
-}
-
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
 // "A return value of false is a pretty strong indicator that the user won't
