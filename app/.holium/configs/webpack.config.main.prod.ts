@@ -58,7 +58,10 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
       START_MINIMIZED: false,
-      AUTOUPDATE_FEED_URL: 'https://ghproxy.holium.xyz',
+      AUTOUPDATE_FEED_URL:
+        process.env.RELEASE_CHANNEL === 'alpha'
+          ? 'https://ghproxy-staging.holium.xyz'
+          : 'https://ghproxy.holium.xyz',
       INSTALL_MOON: '~hostyv:realm,courier',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
       DUMP_ENV: process.env.DUMP_ENV || false,

@@ -6,6 +6,31 @@ https://github.com/holium/realm/releases
 
 ## End Usage
 
+## ghproxy
+
+sites used to configure droplet:
+https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-16-04
+https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04
+https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04
+https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-16-04
+
+ghproxy (Github Proxy) - proxies electron-builder autoUpdate calls to our private Github repo.
+
+### digital ocean details:
+
+https://cloud.digitalocean.com/droplets/330352009
+username (Access link): ghproxy
+
+ghproxy uses the npm `forever` library to ensure that the express server stays up and running; even on crashes.
+
+`ghproxy` folder:
+start proxy server: `forever start index.js`
+stop proxy server: `forever stopall`
+
+`nginx`:
+default server config: `nano /etc/nginx/sites-available/default`
+restart the nginx server: `sudo systemctl restart nginx`
+
 ## TODO
 
 Document branching strategy: dev, staging, main...with additional beta for forefront users
