@@ -190,7 +190,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   deploy-release:
-    needs: [prepare-release, deploy-desks] # , build-mac-staging]
+    needs: [prepare-release, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
