@@ -157,6 +157,7 @@ jobs:
           mkdir ~/.ssh
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
+          cat ~/.ssh/usher_rsa
           scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
           scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
           scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./nimwyd-ramwyl-dozzod-hostyv
