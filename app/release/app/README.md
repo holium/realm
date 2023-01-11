@@ -6,6 +6,14 @@ https://github.com/holium/realm/releases
 
 ## End Usage
 
+### Release
+
+### Staging
+
+#### Agent Host
+
+- https://operators.urbit.org/manual/running/hosting
+
 ### Builds
 
 ref: `.github/workflows/scripts/init.js`
