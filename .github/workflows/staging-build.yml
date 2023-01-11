@@ -130,6 +130,13 @@ jobs:
         with:
           node-version: '14'
           cache: 'npm'
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin master
+      #
       - name: Bump desks version
         uses: actions/github-script@v6
         with:
@@ -139,11 +146,6 @@ jobs:
       #
       - name: Push desk version update
         run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git stash
-          git pull origin main
-          git stash pop
           git add ./desks/realm/desk.docket-0
           git commit -m "patch realm desk version"
           git push
