@@ -154,7 +154,11 @@ jobs:
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
+          sudo apt update
+          sudo apt upgrade
           sudo apt install openssh-client
+          sudo apt update
+          sudo apt upgrade
           mkdir ~/.ssh
           echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmRUxzKJEZ8rnvtLHOmuDWRHzVpDhxqNJl1HevMjksBRH6T6YXuaf2rgtUSwfuwJhmkYwGan9/rvdyEa7dL+DuPP8+Q1uU25J0EU2X3hhtzsJgVFnXldHr08kdCqg6V7uWzdogxpscH+2hpTZMsMdNAOamDQuDykSutCihJVJ1FGyjCTXTd3fSwfg/sL7QOKfo/2AqFybTHwAc5YtCDXEMaLrrsdCFWqu3xry52rK8NNcGm22rqcrodYWx/d8JBfcSkebrGs4ZJHkPwvJYMcBpYirjyVWUk+p/5/zHxbnOwr6bh/Xr6+JccmojlR07W3+JgE8hRJS4ZClXE2n0MU6Uz2EN+JPu4foIg+h2qkvAX8rUSnnOSznqdi+QEwEU/WXqnh7PCo9nzgN+BShr4K25ieqO5HpKImse40JwfYo2Sv2cr2EQW5kxJhzcOfUad1Nad/Ino/lFinl5WKkJhXR6et33R7jBeYBIa5BQwn/irhnTCMIOuPH7wBurR114KuU= home@lodlev-migdev" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
