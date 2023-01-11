@@ -207,34 +207,6 @@ jobs:
   #     - run: mkdir -p /home/runner/.npm
   #       continue-on-error: true
   #
-  # bump-app-version:
-  #   needs: [deploy-desks]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.GH_TOKEN }}
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '14'
-  #         cache: 'npm'
-  #     - name: Increment version
-  #       run: |
-  #         cd ./app/release/app
-  #         git config --global user.email realm-builder-no-reply@holium.com
-  #         git config --global user.name ${{ github.actor }}
-  #         git pull
-  #         npm version patch
-  #         git add package.json
-  #         git commit -m "patch version"
-  #         git push
-  #     # Workaround to avoid "Post Run actions/setup-node" failures.
-  #     # See: https://codesti.com/issue/actions/setup-node/317
-  #     - run: mkdir -p /home/runner/.npm
-  #       continue-on-error: true
-  #
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   deploy-release:
