@@ -155,11 +155,11 @@ jobs:
       - name: Publish ship updates
         run: |
           mkdir ~/.ssh
-          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-          chmod 600 ~/.ssh/usher_rsa
-          scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          scp -vvv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa.pub
+          chmod 600 ~/.ssh/usher_rsa.pub
+          scp -vvv -i ~/.ssh/usher_rsa.pub -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          scp -vvv -i ~/.ssh/usher_rsa.pub -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          scp -vvv -i ~/.ssh/usher_rsa.pub -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
