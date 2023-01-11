@@ -214,6 +214,7 @@
   ==
   ++  does-wire-match-ship
     |=  [=wire =ship]
+    ?.  (gte (lent wire) 3)  %.n
     =/  should-be-chat-type  +<:wire
     =/  should-be-ship-part  +>-:wire
     ?&
