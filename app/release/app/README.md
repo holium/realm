@@ -6,6 +6,40 @@ https://github.com/holium/realm/releases
 
 ## End Usage
 
+### Builds
+
+ref: `.github/workflows/scripts/init.js`
+
+naming conventions:
+
+To force (manual) a staging (alpha) or release (latest) build, merge a PR with a title that follows
+the following format:
+
+`[staging|release]-[v|]<major>.<minor>.<build>`
+
+regex: `/(release|staging)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/`
+
+examples:
+
+`staging-v2.24.4084`
+`staging-1.10.18`
+`release-v0.4.98`
+`release-9.8.7`
+
+When PR title starts with `staging`:
+
+- ghproxy URL is set to `ghproxy-staging.holium.xyz`
+- autoUpdater channel (setFeedURL) is set to `alpha`
+- prelease build with `<version>-alpha` is created. this is required naming for electron-builder channeling to work properly.
+- prerelease is not set to latest and therefore will not get picked up by release builds
+
+When PR title starts with `release`:
+
+- ghproxy URL is set to `ghproxy.holium.xyz`
+- autoUpdater channel (setFeedURL) is set to `latest`
+- release titled `release-<version>`
+- last step in build flips the `draft` release to `latest` making available for download
+
 ## ghproxy
 
 sites used to configure droplet:

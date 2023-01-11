@@ -184,7 +184,6 @@
     "appId": "org.holium.Realm",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
-    "generateUpdatesFilesForAllChannels": true,
     "files": [
       "dist",
       "node_modules",

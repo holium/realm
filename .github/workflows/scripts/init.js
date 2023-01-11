@@ -32,8 +32,8 @@ module.exports = ({ github, context }, pkgfile) => {
   console.log(`init.js: package version = ${pkg.version}`);
   // default to staging/alpha build
   ci.channel = 'alpha';
-  ci.buildVersion = pkg.version;
   ci.packageVersion = pkg.version;
+  ci.buildVersion = ci.packageVersion;
   // test the title of the PR to see if it is a valid version string format.
   //  if so, use it as this build's version string (no modifications)
   if (context.payload.pull_request.title) {
@@ -60,6 +60,7 @@ module.exports = ({ github, context }, pkgfile) => {
       `init.js: version string starts with 'staging'. setting ci channel to 'alpha'.`
     );
     ci.channel = 'alpha';
+    ci.packageVersion = `${ci.packageVersion}-alpha`;
   } else if (ci.buildVersion.startsWith('release')) {
     console.log(
       `init.js: version string starts with 'release'. setting ci channel to 'release'.`
@@ -75,22 +76,24 @@ module.exports = ({ github, context }, pkgfile) => {
       prepend = true;
       ci.packageVersion = ci.packageVersion.substring(1);
     }
+    if (ci.packageVersion.endsWith('-alpha')) {
+      ci.packageVersion = ci.packageVersion.substring(
+        ci.packageVersion.length - 7
+      );
+    }
     const parts = ci.packageVersion.split('.');
     ci.packageVersion = `${prepend ? 'v' : ''}${parts[0]}.${parts[1]}.${
       parseInt(parts[2]) + 1
     }`;
     if (ci.channel === 'alpha') {
-      ci.buildVersion = `${ci.packageVersion}-alpha`;
+      ci.packageVersion = `${ci.packageVersion}-alpha`;
+      ci.buildVersion = ci.packageVersion;
     } else {
       ci.buildVersion = ci.packageVersion;
     }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
-  if (ci.channel === 'alpha') {
-    pkg.version = `${ci.packageVersion}-alpha`;
-  } else {
-    pkg.version = ci.packageVersion;
-  }
+  pkg.version = ci.packageVersion;
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
   return ci;
 };
