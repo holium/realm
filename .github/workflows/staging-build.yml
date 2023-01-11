@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p ./app/release/build
           touch ./app/release/build/log.txt
-          echo "start-release workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          echo "prepare-release workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
@@ -115,7 +115,7 @@ jobs:
           gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.start-release.outputs.build_version }}
+          BUILD_VERSION: ${{ needs.prepare-release.outputs.build_version }}
   #
   # deploy-desks:
   #   needs: [build-mac-staging]
@@ -188,7 +188,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   deploy-release:
-    needs: [start-release, build-mac-staging]
+    needs: [prepare-release, build-mac-staging]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -197,4 +197,4 @@ jobs:
           gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.start-release.outputs.build_version }}
+          BUILD_VERSION: ${{ needs.prepare-release.outputs.build_version }}
