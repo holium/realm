@@ -12,6 +12,7 @@ export enum WalletView {
   LIST = 'list',
   NEW = 'new',
   WALLET_DETAIL = 'detail',
+  TRANSACTION_SEND = 'send',
   TRANSACTION_DETAIL = 'transaction',
   NFT_DETAIL = 'ethereum:nft',
   LOCKED = 'locked',
@@ -874,6 +875,7 @@ export const WalletStore = types
       self.ethereum.setProtocol(protocol);
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
+      console.log('options', options)
       const canReturn = options?.canReturn || true;
       const walletIndex = options?.walletIndex || self.navState.walletIndex;
       const detail = options?.detail;

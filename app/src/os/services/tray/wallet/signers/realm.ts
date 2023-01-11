@@ -2,6 +2,7 @@ import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
 import { ethers } from 'ethers';
 import { safeStorage } from 'electron';
 import Realm from '../../../..';
+import { removeDots } from '../../../../api/uqbar';
 
 export class RealmSigner implements BaseSigner {
   private core: Realm;
@@ -21,6 +22,21 @@ export class RealmSigner implements BaseSigner {
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     return wallet.signTransaction(transaction);
+  }
+  signUqbarTransaction(path: string, hash: string, txn: any): any {
+    console.log('signing hash', hash);
+    console.log('txn', txn);
+    const ethHash = ethers.utils.serializeTransaction({
+      to: removeDots(txn.to).substring(0, 42),
+      gasPrice: '0x' + txn.rate.toString(16),
+      gasLimit: ethers.utils.hexlify(txn.budget),
+      nonce: txn.nonce,
+      chainId: parseInt(txn.town, 16),
+      data: removeDots(hash),
+      // value: ethers.utils.parseUnits(1, "ether")._hex
+    })
+    const sig = this.signTransaction(path, ethHash);
+    return { ethHash, sig };
   }
   private getPrivateKey() {
     const encryptedMnemonic =

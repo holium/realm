@@ -14,12 +14,13 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
+  WalletNavOptions,
 } from './wallet-lib/wallet.model';
 import { BaseSigner } from './wallet-lib/wallets/BaseSigner';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
-import { UqbarApi } from '../../api/uqbar';
+import { addDots, removeDots, UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';
 import {
   onPatch,
@@ -31,7 +32,6 @@ import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
-import { UqbarApi } from '../../api/uqbar';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
 
 // 10 minutes
@@ -74,6 +74,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
     'realm.tray.wallet.uqbar-desk-exists': this.uqbarDeskExists,
+    'realm.tray.wallet.send-uqbar-transaction': this.sendUqbarTransaction,
     'realm.tray.wallet.watch-updates': this.watchUpdates,
   };
 
@@ -105,12 +106,7 @@ export class WalletService extends BaseService {
     },
     navigate: async (
       view: WalletView,
-      options?: {
-        canReturn?: boolean;
-        walletIndex?: string;
-        detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string, key: string };
-        action?: { type: string; data: any };
-      }
+      options?: WalletNavOptions
     ) => {
       return await ipcRenderer.invoke(
         'realm.tray.wallet.navigate',
@@ -272,6 +268,9 @@ export class WalletService extends BaseService {
     uqbarDeskExists: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.uqbar-desk-exists');
     },
+    sendUqbarTransaction: async (walletIndex: string, to: string, amount: string, toPatp?: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.send-uqbar-transaction', walletIndex, to, amount, toPatp);
+    },
     watchUpdates: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
     },
@@ -310,6 +309,7 @@ export class WalletService extends BaseService {
           protocol: ProtocolType.ETH_GORLI,
           lastEthProtocol: ProtocolType.ETH_GORLI,
           btcNetwork: NetworkStoreType.BTC_MAIN,
+          transSend: false
         },
         ethereum: {
           gorliBlock: 0,
@@ -379,7 +379,7 @@ export class WalletService extends BaseService {
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
-      this.wallet!.updateWalletState(this.core.conduit!, this.state!);
+      this.wallet!.updateWalletState(this.core.conduit!, this.state!, ProtocolType.UQBAR);
     });
     UqbarApi.watchUpdates(this.core.conduit!, this.state!);
 
@@ -525,35 +525,42 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 
-  async enqueueUqbarTransaction(
+  async sendUqbarTransaction(
     _event: any,
     walletIndex: string,
     to: string,
     amount: string,
     toPatp?: string,
   ) {
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    ) as EthereumProtocol;
     const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     const tx = {
       from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate({
+      /*gasLimit: await protocol.getFeeEstimate({
         to,
         from,
         value: ethers.utils.parseEther(amount),
-      }),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
+      }),*/
+      // gasPrice: await protocol.getFeePrice(),
+      // nonce: await protocol.getNonce(from),
+      // chainId: await protocol.getChainId(),
     };
     const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
     const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
-    const hash = await (this.wallet!.protocols.get(
-      ProtocolType.UQBAR
-    )! as UqbarProtocol).enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
+    await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
+    const pendingTxns = await UqbarApi.scryPending(this.core.conduit!, from);
+    let hash = Object.keys(pendingTxns)
+      .filter(hash => pendingTxns[hash].from === addDots(from))
+      .sort((a, b) => pendingTxns[a].nonce - pendingTxns[b].nonce)[0]
+    console.log(hash)
+    const txn = pendingTxns[hash];
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(path, hash, txn);
+    const rate = 1;
+    const bud = 1000000;
+    await UqbarApi.submitSigned(this.core.conduit!, from, hash, rate, bud, signed.ethHash, signed.sig);
+    hash = removeDots(hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -739,12 +746,7 @@ export class WalletService extends BaseService {
   navigate(
     _event: any,
     view: WalletView,
-    options?: {
-      canReturn?: boolean;
-      walletIndex?: string;
-      detail?: { type: 'transaction' | 'coin' | 'nft'; txtype?: 'general' | 'coin' | 'nft'; coinKey?: string; key: string };
-      action?: { type: string; data: any };
-    }
+    options?: WalletNavOptions
   ) {
     this.state!.navigate(view, options);
   }
@@ -773,6 +775,7 @@ export class WalletService extends BaseService {
     this.state!.navState.protocol !== ProtocolType.UQBAR
       ? this.state!.setProtocol(ProtocolType.UQBAR)
       : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
+    console.log('watching udpates')
     this.wallet!.watchUpdates(this.core.conduit!, this.state!);
   }
 

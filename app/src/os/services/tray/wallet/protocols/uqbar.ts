@@ -19,10 +19,6 @@ export class UqbarProtocol implements BaseProtocol {
     }
   }
 
-  async enqueueTransaction(conduit: Conduit, from: string, contract: string, town: string, to: string, item: string, amount: number): Promise<any> {
-    UqbarApi.enqueueTransaction(conduit, from, contract, town, to, item, amount);
-  }
-
   async submitSigned(conduit: Conduit, signedTx: string): Promise<any> {
     UqbarApi.submitSigned(conduit, from, hash, rate, bud, ethHash, sig)
   }

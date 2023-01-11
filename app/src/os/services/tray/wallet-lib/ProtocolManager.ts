@@ -34,12 +34,17 @@ export class Wallet {
         this.currentProtocol
       )! as EthereumProtocol).watchUpdates(conduit, walletState);
     }
+    else if (this.currentProtocol === ProtocolType.UQBAR) {
+      (this.protocols.get(
+        this.currentProtocol
+      ))!.updateWalletState(conduit, walletState);
+    }
   }
 
-  updateWalletState(conduit: any, walletState: WalletStoreType) {
+  updateWalletState(conduit: any, walletState: WalletStoreType, protocol?: ProtocolType) {
     if (walletState.navState.network === NetworkType.ETHEREUM) {
       (this.protocols
-        .get(walletState.navState.protocol)! as EthereumProtocol)
+        .get(protocol || walletState.navState.protocol)! as EthereumProtocol)
         .updateWalletState(conduit, walletState);
     }
   }

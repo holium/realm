@@ -1,5 +1,13 @@
 import { Conduit } from '@holium/conduit';
-import { ProtocolType, WalletStoreType } from '../services/tray/wallet-lib/wallet.model';
+import { ProtocolType, WalletStoreType, WalletView } from '../services/tray/wallet-lib/wallet.model';
+
+export const addDots = (address: string) => {
+  return '0x' + address.substring(2).match(/.{4}/g)!.join('.');
+};
+export const removeDots = (address: string) => {
+  console.log('address', address)
+  return (address || '').replace(/\./g, '');
+};
 
 export const UqbarApi = {
   uqbarDeskExists: async (conduit: Conduit) => {
@@ -10,7 +18,7 @@ export const UqbarApi = {
     return Object.keys(response.initial).includes('zig');
   },
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
-    const formattedAddress = '0x' + address.substring(2).match(/.{4}/g)!.join('.');
+    const formattedAddress = addDots(address); 
     const payload = {
       app: 'wallet',
       mark: 'wallet-poke',
@@ -63,12 +71,12 @@ export const UqbarApi = {
       mark: 'wallet-poke',
       json: {
         transaction: {
-          from,
+          from: addDots(from),
           contract,
           town,
           action: {
             give: {
-              to,
+              to: addDots(to),
               amount,
               item,
             },
@@ -77,6 +85,16 @@ export const UqbarApi = {
       },
     };
     await conduit.poke(payload);
+  },
+  scryPending: async (
+    conduit: Conduit,
+    from: string,
+  ) => {
+    console.log('adddots', addDots(from))
+    return await conduit.scry({
+      app: 'wallet',
+      path: `/pending/${addDots(from)}`,
+    });
   },
   submitSigned: async (
     conduit: Conduit,
@@ -175,7 +193,7 @@ export const UqbarApi = {
       app: 'wallet',
       path: '/tx-updates',
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        handleTxReactions(data, walletState);
+        handleTxReactions(conduit, data, walletState);
       },
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription %spaces'),
@@ -220,12 +238,26 @@ const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
   console.log(data);
 }
 
-const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType, signTransaction: any) => {
-  console.log('tx')
+const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType) => {// }, signTransaction: any) => {
+  console.log('tx');
+  console.log('from uqbar')
   console.log(data);
-  const pending = true;
-  if (pending) {
-    const sig = signTransaction()
-    UqbarApi.submitSigned(conduit, walletState.ethereum.wallets.get(0)!.address, data.hash, 1, 1)
-  }
+  /*setActiveApp('wallet-tray', {
+    willOpen: true,
+    position: 'top-left',
+    anchorOffset: { x: 4, y: 26 },
+    dimensions: {
+      height: 580,
+      width: 330,
+    },
+  });*/
+  // TODO: placeholder, we need to implement the actual send coins functionality
+  walletState.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletIndex: '0',
+    detail: {
+      type: 'transaction',
+      txtype: 'general',
+      key: '0'
+    }
+  });
 }

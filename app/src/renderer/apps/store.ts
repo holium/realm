@@ -109,6 +109,7 @@ const walletAppDefault = {
     protocol: ProtocolType.ETH_GORLI,
     lastEthProtocol: ProtocolType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,
+    transSend: false,
   },
   ethereum: {
     block: 0,

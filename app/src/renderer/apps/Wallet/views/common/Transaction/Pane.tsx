@@ -62,22 +62,33 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
       try {
         setTransactionSending(true);
         if (walletApp.navState.network === NetworkType.ETHEREUM) {
-          props.coin
-            ? await WalletActions.sendERC20Transaction(
-                walletApp.currentWallet!.index.toString(),
-                transactionRecipient.address ||
-                  transactionRecipient.patpAddress!,
-                transactionAmount.toString(),
-                props.coin.address,
-                transactionRecipient.patp
-              )
-            : await WalletActions.sendEthereumTransaction(
-                walletApp.currentWallet!.index.toString(),
-                transactionRecipient.address ||
-                  transactionRecipient.patpAddress!,
-                transactionAmount.toString(),
-                transactionRecipient.patp
-              );
+          if (walletApp.navState.protocol === ProtocolType.UQBAR) {
+            await WalletActions.sendUqbarTransaction(
+              walletApp.currentWallet!.index.toString(),
+              transactionRecipient.address ||
+                transactionRecipient.patpAddress!,
+              transactionAmount.toString(),
+              transactionRecipient.patp
+            )
+          }
+          else {
+            props.coin
+              ? await WalletActions.sendERC20Transaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  props.coin.address,
+                  transactionRecipient.patp
+                )
+              : await WalletActions.sendEthereumTransaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  transactionRecipient.patp
+                );
+          }
         } else {
           await WalletActions.sendBitcoinTransaction(
             walletApp.currentWallet!.index,

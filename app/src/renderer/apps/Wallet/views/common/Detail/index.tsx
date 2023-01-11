@@ -18,11 +18,13 @@ import {
   BitcoinWalletType,
   EthWalletType,
   NetworkType,
+  WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
 import { rgba } from 'polished';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
@@ -34,14 +36,16 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
-  const [sendTrans, setSendTrans] = useState(false);
+  // const [sendTrans, setSendTrans] = useState(false);
+  const sendTrans = walletApp.navState.view === WalletView.TRANSACTION_SEND;
   const [hideWalletHero, setHideWalletHero] = useState(false);
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
   const onScreenChange = (newScreen: string) =>
     setHideWalletHero(newScreen === 'confirm');
   const close = () => {
-    setSendTrans(false);
+    // setSendTrans(false);
+    WalletActions.navigateBack();
     setHideWalletHero(false);
   };
 
@@ -116,7 +120,18 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         sendTrans={sendTrans}
         hideWalletHero={hideWalletHero}
         onScreenChange={(newScreen: string) => onScreenChange(newScreen)} // changed
-        setSendTrans={(send: boolean) => setSendTrans(send)} // changed
+        setSendTrans={(send: boolean) => {
+          console.log('setting it')
+          if (send) {
+            WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+              walletIndex: '0',
+            });
+          }
+          else {
+            WalletActions.navigateBack();
+          }
+          // setSendTrans(send)} // changed
+        }}
         close={close}
         coinView={
           coin &&
