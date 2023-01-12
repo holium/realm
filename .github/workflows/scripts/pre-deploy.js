@@ -85,7 +85,11 @@ module.exports = ({ github, context }, pkgfile) => {
     ci.channel = 'alpha';
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
-  pkg.version = ci.buildVersion;
+  // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
+  //  this is useful when checking the version in Realm -> About
+  pkg.version = `${ci.version.major}.${ci.version.minor}.${ci.version.build}${
+    ci.channel === 'alpha' ? '-alpha' : ''
+  }`;
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
   return ci;
 };

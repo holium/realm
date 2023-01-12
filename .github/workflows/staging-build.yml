@@ -61,7 +61,7 @@ jobs:
           BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
-  build-mac-staging:
+  build-mac:
     if: github.event.pull_request.merged == true
     needs: [pre-deploy]
     runs-on: macos-latest
