@@ -217,6 +217,7 @@
     ?.  (gte (lent wire) 3)  %.n
     =/  should-be-chat-type  +<:wire
     =/  should-be-ship-part  +>-:wire
+    ?~  (slaw %p should-be-ship-part)  %.n
     ?&
       =(should-be-chat-type %dm)
       =(`@p`(need `(unit @p)`(slaw %p should-be-ship-part)) ship)
