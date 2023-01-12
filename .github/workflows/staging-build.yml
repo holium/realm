@@ -178,9 +178,9 @@ jobs:
           script: |
             const script = require('./.github/workflows/scripts/deploy.js')
             console.log(script({github}, {
-              ship: process.env.DEPLOY_SHIP_STAGING,
-              code: process.env.DEPLOY_SHIP_CODE_STAGING,
-              rootUrl: process.env.DEPLOY_ROOT_URL_STAGING,
+              ship: process.env.DEPLOY_SHIP,
+              code: process.env.DEPLOY_SHIP_CODE,
+              rootUrl: process.env.DEPLOY_ROOT_URL,
               mounts: ['usher', 'realm', 'courier']
             }))
       # Workaround to avoid "Post Run actions/setup-node" failures.
