@@ -71,7 +71,7 @@ const determineReleaseChannel = () => {
     var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
     releaseChannel = settings.releaseChannel || releaseChannel;
   } else {
-    if (process.env.RELEASE_CHANNEL === 'alpha') {
+    if (releaseChannel === 'alpha') {
       fs.writeFileSync(settingsFilename, JSON.stringify({ releaseChannel }));
     }
   }
