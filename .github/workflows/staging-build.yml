@@ -125,7 +125,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy]
+    needs: [pre-deploy, build-mac]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -167,11 +167,11 @@ jobs:
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv/realm "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv/courier "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/courier/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv/usher "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
@@ -204,7 +204,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, deploy-desks]
+    needs: [pre-deploy, build-mac, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
