@@ -25,7 +25,7 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `disabling workflow ${workflowId} to prevent multiple simultaneous builds`
   );
-  await octokit.request(
+  await github.rest.request(
     'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
     {
       owner: 'OWNER',
