@@ -109,7 +109,7 @@ module.exports = async ({ github, context }, workflowId) => {
       /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
     );
     if (!matches) throw Error("error: 'buildVersion' format unexpected");
-    const buildNumber = parseInt(matches[4]);
+    let buildNumber = parseInt(matches[4]);
     // only increment build # if last release was not a draft or no release found
     //  therefore version value of first build ever should be '0.0.0' which would
     //  build as version '0.0.1'
