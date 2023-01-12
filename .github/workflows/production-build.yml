@@ -38,7 +38,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git stash
-          git pull origin master
+          git pull origin production
           git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
@@ -105,9 +105,9 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin master
+          git pull origin production
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+        run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -140,7 +140,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin master
+          git pull origin production
       #
       - name: Bump desks version
         uses: actions/github-script@v6
@@ -165,9 +165,9 @@ jobs:
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
