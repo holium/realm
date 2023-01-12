@@ -71,14 +71,16 @@ module.exports = ({ github, context }, pkgfile) => {
     );
     if (!matches)
       throw Error("package.json - 'version' attribute format unexpected");
+    // bump build # by 1
+    const buildNumber = parseInt(matches[4]) + 1;
     // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${matches[3]}.${
-      parseInt(matches[4]) + 1
-    }`;
+    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
+      matches[3]
+    }.${buildNumber}`;
     ci.releaseName = `staging-${ci.buildVersion}`;
-    ci.version.major = matches[2];
-    ci.version.minor = matches[3];
-    ci.version.build = matches[4];
+    ci.version.major = parseInt(matches[2]);
+    ci.version.minor = parseInt(matches[3]);
+    ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
     ci.channel = 'alpha';
   }
