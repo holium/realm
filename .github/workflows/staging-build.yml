@@ -240,6 +240,7 @@ jobs:
   finalize:
     if: always()
     needs: [post-deploy]
+    runs-on: ubuntu-latest
     steps:
       #
       - name: Run post-deploy script
