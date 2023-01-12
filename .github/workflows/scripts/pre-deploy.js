@@ -20,7 +20,6 @@
 
 */
 var fs = require('fs');
-const { release } = require('os');
 module.exports = async ({ github, context }, workflowId) => {
   // disable this workflow to prevent multiple builds running simultaneously
   console.log(
