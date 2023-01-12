@@ -235,3 +235,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # this will run even if the build is canceled or fails
+  #  we need this to re-enable the workflow
+  finalize:
+    if: always()
+    needs: [post-deploy]
+    steps:
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: done
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/finalize.js')
+            const result = script({github, context}, 'staging-build', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
