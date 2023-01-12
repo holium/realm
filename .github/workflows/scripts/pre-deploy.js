@@ -60,9 +60,9 @@ module.exports = ({ github, context }, pkgfile) => {
     }`;
     // buildVersion and packageVersion will match if manually deploying
     ci.packageVersion = ci.buildVersion;
-    ci.version.major = matches[3];
-    ci.version.minor = matches[4];
-    ci.version.build = matches[5];
+    ci.version.major = parseInt(matches[3]);
+    ci.version.minor = parseInt(matches[4]);
+    ci.version.build = parseInt(matches[5]);
     ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
   } else {
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
