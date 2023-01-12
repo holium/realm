@@ -25,7 +25,7 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `disabling workflow ${workflowId} to prevent multiple simultaneous builds`
   );
-  await github.rest.request(
+  await github.request(
     'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
     {
       owner: 'OWNER',
@@ -83,7 +83,7 @@ module.exports = async ({ github, context }, workflowId) => {
     let buildVersion = undefined;
     // grab the latest annotated tag of any kind (draft, prerelease, release), and interrogate it to determine
     //  how to move forward
-    const releases = await github.rest.request(
+    const releases = await github.request(
       'GET /repos/{owner}/{repo}/releases',
       {
         owner: 'holium',
