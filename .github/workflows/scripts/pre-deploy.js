@@ -28,9 +28,9 @@ module.exports = async ({ github, context }, workflowId) => {
   await github.request(
     'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
     {
-      owner: 'OWNER',
-      repo: 'REPO',
-      workflow_id: '37195237',
+      owner: 'holium',
+      repo: 'realm',
+      workflow_id: workflowId,
     }
   );
   const packageFilename = './app/release/app/package.json';

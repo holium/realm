@@ -13,8 +13,8 @@ module.exports = async ({ github, context }, workflowId, ci) => {
   await github.request(
     'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable',
     {
-      owner: 'OWNER',
-      repo: 'REPO',
+      owner: 'holium',
+      repo: 'realm',
       workflow_id: workflowId,
     }
   );
