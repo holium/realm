@@ -54,9 +54,10 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
           BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
