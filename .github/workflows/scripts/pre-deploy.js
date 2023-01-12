@@ -23,7 +23,7 @@ var fs = require('fs');
 module.exports = async ({ github, context }, workflowId) => {
   // disable this workflow to prevent multiple builds running simultaneously
   console.log(
-    `disabling workflow ${workflowId} to prevent multiple simultaneous builds`
+    `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
   );
   await github.request(
     'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
