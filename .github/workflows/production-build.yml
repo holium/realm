@@ -165,11 +165,11 @@ jobs:
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/realm/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/courier/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher "rm -rf *"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/usher/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
