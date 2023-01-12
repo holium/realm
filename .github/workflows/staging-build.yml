@@ -1,4 +1,9 @@
 #
+# todo:
+#  look into: https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#disable-a-workflow
+#  for notes on how to disable a workflow run temporarily as a means
+#  of preventing multiple simultaneous builds
+#
 name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
@@ -30,7 +35,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, './app/release/app/package.json')
+            const result = script({github, context}, 'staging-build')
             console.log(result)
             return result
       # commit the change for the new version
