@@ -38,6 +38,8 @@ jobs:
             const result = script({github, context}, 'staging-build')
             console.log(result)
             return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version
       - name: Push package version update
         run: |
