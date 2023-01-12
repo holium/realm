@@ -30,7 +30,7 @@ module.exports = async ({ github, context }, workflowId) => {
     {
       owner: 'OWNER',
       repo: 'REPO',
-      workflow_id: workflowId,
+      workflow_id: '37195237',
     }
   );
   const packageFilename = './app/release/app/package.json';
