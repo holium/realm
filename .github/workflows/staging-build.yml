@@ -16,7 +16,9 @@ jobs:
       release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
       build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
       package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
-      version: ${{ fromJSON(steps.ci.outputs.result).version }}
+      build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
+      build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
+      build_version_build: ${{ fromJSON(steps.ci.outputs.result).version.build }}
       channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
     steps:
       - name: Checkout repository
