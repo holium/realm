@@ -7,22 +7,26 @@ on:
     branches:
       - master
 jobs:
-  prepare-release:
+  pre-deploy:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
+      # the full CI object returned by the post-deploy script
+      ci: ${{ steps.ci.outputs.result }}
+      release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
       build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
       package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      version: ${{ fromJSON(steps.ci.outputs.result).version }}
       channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Initialize build environment
+      - name: Run pre-deploy script
         uses: actions/github-script@v6
         id: ci
         with:
           script: |
-            const script = require('./.github/workflows/scripts/init.js')
+            const script = require('./.github/workflows/scripts/pre-deploy.js')
             const result = script({github, context}, './app/release/app/package.json')
             console.log(result)
             return result
@@ -43,7 +47,7 @@ jobs:
         run: |
           mkdir -p ./app/release/build
           touch ./app/release/build/log.txt
-          echo "prepare-release workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
@@ -56,7 +60,7 @@ jobs:
   #
   # build-mac-staging:
   #   if: github.event.pull_request.merged == true
-  #   needs: [prepare-release]
+  #   needs: [pre-deploy]
   #   runs-on: macos-latest
   #   steps:
   #     - name: Checkout repository
@@ -115,10 +119,10 @@ jobs:
   #         gh release upload $BUILD_VERSION ./app/release/build/*.*
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         BUILD_VERSION: ${{ needs.prepare-release.outputs.build_version }}
+  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [prepare-release]
+    needs: [pre-deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -141,8 +145,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const script = require('./.github/workflows/scripts/bump.js')
-            console.log(script({github}, './app/release/app/package.json', ['./desks/realm']))
+            const script = require('./.github/workflows/scripts/bump-desk-version.js')
+            console.log(process.env.CI_ENV)
+            console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
+        env:
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Push desk version update
         run: |
@@ -190,14 +197,29 @@ jobs:
   #
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
-  deploy-release:
-    needs: [prepare-release, deploy-desks]
+  post-deploy:
+    needs: [pre-deploy, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: post-deploy
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/post-deploy.js')
+            console.log(process.env.CI_ENV);
+            const result = script({github, context}, JSON.parse(process.env.CI_ENV), './app/release/app/package.json')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - run: |
           gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.prepare-release.outputs.build_version }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
