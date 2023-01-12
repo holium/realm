@@ -62,9 +62,11 @@ const configuration: webpack.Configuration = {
         process.env.RELEASE_CHANNEL === 'alpha'
           ? 'https://ghproxy-staging.holium.xyz'
           : 'https://ghproxy.holium.xyz',
-      INSTALL_MOON: '~hostyv:realm,courier',
+      INSTALL_MOON:
+        process.env.RELEASE_CHANNEL === 'alpha'
+          ? '~nimwyd-ramwyl-dozzod-hostyv:realm,courier'
+          : '~hostyv:realm,courier',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
-      DUMP_ENV: process.env.DUMP_ENV || false,
     }),
   ],
   /**
