@@ -449,6 +449,11 @@ export class RealmProtocol extends BaseProtocol {
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
+      this.sendData({
+        from: this.local.patp,
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: {data: this.local.isMuted }
+      })
     });
 
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
