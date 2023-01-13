@@ -38,7 +38,6 @@ export const EthNew: FC<any> = observer(() => {
 
   // TODO move this to background thread
   const [seedPhrase, setSeedPhrase] = useState('');
-  const phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
   const setPasscodeWrapper = (passcode: number[]) => {
     setPasscode(passcode);
@@ -48,12 +47,12 @@ export const EthNew: FC<any> = observer(() => {
   const components: any = {
     [NewWalletScreen.CREATE]: <Create setScreen={setScreen} />,
     [NewWalletScreen.IMPORT]: (
-      <Import setSeedPhrase={phraseSetter} setScreen={setScreen} />
+      <Import setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
     ),
     [NewWalletScreen.BACKUP]: (
       <Backup
         setScreen={setScreen}
-        setSeedPhrase={phraseSetter}
+        setSeedPhrase={setSeedPhrase}
         seedPhrase={seedPhrase}
       />
     ),
@@ -73,7 +72,7 @@ export const EthNew: FC<any> = observer(() => {
       <DetectedExisting setScreen={setScreen} />
     ),
     [NewWalletScreen.RECOVER_EXISTING]: (
-      <RecoverExisting setSeedPhrase={phraseSetter} setScreen={setScreen} />
+      <RecoverExisting setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
     ),
   };
   const currentComponent = components[screen];

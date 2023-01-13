@@ -394,11 +394,25 @@ export class AuthService extends BaseService {
     this.state.deleteShip(ship);
   }
 
-  setMnemonic(_event: any, mnemonic: string) {
-    this.state.setMnemonic(mnemonic);
+  setMnemonic(_event: any, patp: string, passcode: string, mnemonic: string) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    db.store = mnemonic;
   }
 
-  getMnemonic(_event: any) {
-    return this.state.mnemonic;
+  getMnemonic(_event: any, patp: string, passcode: string) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    return db.store;
   }
 }

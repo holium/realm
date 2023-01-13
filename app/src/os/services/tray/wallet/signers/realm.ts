@@ -8,29 +8,31 @@ export class RealmSigner implements BaseSigner {
   constructor(core: Realm) {
     this.core = core;
   }
-  setMnemonic(mnemonic: string) {
-    const encryptedMnemonic = safeStorage
+  setMnemonic(mnemonic: string, patp: string, passcode: string) {
+    /*const encryptedMnemonic = safeStorage
       .encryptString(mnemonic)
-      .toString('base64');
+      .toString('base64');*/
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
-      encryptedMnemonic
+      patp,
+      passcode,
+      mnemonic,
     );
   }
-  signTransaction(path: string, transaction: any): any {
-    const privateKey = this.getPrivateKey();
+  signTransaction(path: string, transaction: any, patp: string, passcode: string): any {
+    const privateKey = this.getPrivateKey(patp, passcode);
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     return wallet.signTransaction(transaction);
   }
-  private getPrivateKey() {
-    const encryptedMnemonic =
-      this.core.services.identity.auth.getMnemonic(null);
-    const mnemonic = safeStorage.decryptString(
+  private getPrivateKey(patp: string, passcode: string) {
+    const mnemonic =
+      this.core.services.identity.auth.getMnemonic(null, patp, passcode);
+    /*const mnemonic = safeStorage.decryptString(
       Buffer.from(encryptedMnemonic, 'base64')
-    );
+    );*/
     return ethers.utils.HDNode.fromMnemonic(mnemonic);
   }
-  getXpub(path: string): string {
-    return this.getPrivateKey().derivePath(path).neuter().extendedKey;
+  getXpub(path: string, patp: string, passcode: string): string {
+    return this.getPrivateKey(patp, passcode).derivePath(path).neuter().extendedKey;
   }
 }

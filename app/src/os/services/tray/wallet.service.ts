@@ -49,7 +49,7 @@ export interface RecipientPayload {
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
-  private signer: BaseSigner;
+  private signer: RealmSigner;
   private wallet?: Wallet;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
@@ -68,7 +68,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
-    'realm.tray.wallet.navigateBack': this.navigateBack,
+    'realm.tray.wallet.navigate-back': this.navigateBack,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
     'realm.tray.wallet.uqbar-desk-exists': this.uqbarDeskExists,
@@ -122,7 +122,7 @@ export class WalletService extends BaseService {
       );
     },
     navigateBack: async () => {
-      return await ipcRenderer.invoke('realm.tray.wallet.navigateBack');
+      return await ipcRenderer.invoke('realm.tray.wallet.navigate-back');
     },
     setNetwork: async (network: NetworkType) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
@@ -274,6 +274,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
+    console.log('logging in')
     const secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
@@ -402,7 +403,7 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    (this.signer as RealmSigner).setMnemonic(mnemonic);
+    (this.signer as RealmSigner).setMnemonic(mnemonic, this.state!.ourPatp!, passcode.toString());
     const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
     const ethPath = "m/44'/60'/0'";
@@ -410,13 +411,13 @@ export class WalletService extends BaseService {
     const btcTestnetPath = "m/44'/1'/0'";
     let xpub: string;
     // eth
-    xpub = this.signer.getXpub(ethPath);
+    xpub = this.signer.getXpub(ethPath, this.state!.ourPatp!, passcodeHash);
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = this.signer.getXpub(btcPath);
+    xpub = this.signer.getXpub(btcPath, this.state!.ourPatp!, passcodeHash);
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
     // btc testnet
-    xpub = this.signer.getXpub(btcTestnetPath);
+    xpub = this.signer.getXpub(btcTestnetPath, this.state!.ourPatp!, passcodeHash);
     await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
 
     this.state!.navigate(WalletView.LIST);
@@ -535,7 +536,7 @@ export class WalletService extends BaseService {
       nonce: await protocol.getNonce(from),
       chainId: await protocol.getChainId(),
     };
-    const signedTx = await this.signer!.signTransaction(path, tx);
+    const signedTx = await this.signer!.signTransaction(path, tx, this.state!.ourPatp!, this.state!.passcodeHash!);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
     )!.sendTransaction(signedTx);
@@ -598,7 +599,7 @@ export class WalletService extends BaseService {
     tx.gasPrice = await protocol.getFeePrice();
     tx.nonce = await protocol.getNonce(from);
     tx.chainId = await protocol.getChainId();
-    const signedTx = await this.signer!.signTransaction(path, tx);
+    const signedTx = await this.signer!.signTransaction(path, tx, this.state!.ourPatp!, this.state?.passcodeHash!);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
     )!.sendTransaction(signedTx);
@@ -658,8 +659,7 @@ export class WalletService extends BaseService {
   }
 
   async checkMnemonic(_event: any, mnemonic: string) {
-    (this.signer as RealmSigner).setMnemonic(mnemonic);
-    const ethXpub = this.signer.getXpub("m/44'/60'/0'");
+    const ethXpub = ethers.utils.HDNode.fromMnemonic(mnemonic).derivePath("m/44'/60'/0'").neuter().extendedKey;
     const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))[
       'eth-xpub'
     ];
