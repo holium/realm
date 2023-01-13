@@ -29,7 +29,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, './app/release/app/package.json')
+            const result = script({github, context}, 'production-build.yml')
             console.log(result)
             return result
       # commit the change for the new version
@@ -227,6 +227,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # this will run even if the build is canceled or fails
+  #  we need this to re-enable the workflow
+  finalize:
+    if: always()
+    needs: [pre-deploy, post-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      #
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: done
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/finalize.js')
+            const result = script({github, context}, 'production-build', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
 #
 ########### DO NOT REMOVE THESE! ############
 #
