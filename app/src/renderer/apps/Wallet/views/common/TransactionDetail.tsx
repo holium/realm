@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -81,14 +81,14 @@ export const TransactionDetail: FC = observer(() => {
       </Text>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
-          <Flex>
+          <Flex alignItems="center">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
               Pending
             </Text>
             <Spinner
               ml={3}
               mt={1}
-              size={1}
+              size={0}
               color={themeData.colors.text.primary}
             />
           </Flex>
@@ -224,7 +224,9 @@ export const TransactionDetail: FC = observer(() => {
           rows={4}
           cols={50}
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setNotes(e.target.value)
+          }
           placeholder="Transaction notes..."
         />
         {/* <TextArea

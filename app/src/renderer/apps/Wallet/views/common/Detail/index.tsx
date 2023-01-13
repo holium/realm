@@ -50,6 +50,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 //    setHideWalletHero(false);
   };
 
+  console.log('rendering WalletDetail');
+
   const wallet = walletApp.currentWallet!;
   let coins = null;
   let nfts = null;
@@ -62,24 +64,39 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         .get(walletApp.navState.protocol)!
         .coins.get(walletApp.navState.detail!.key)!;
     }
-    coins = getCoins(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
+    coins = useMemo(
+      () =>
+        getCoins(
+          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
+        ),
+      []
     );
-    nfts = getNfts(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
+    nfts = useMemo(
+      () =>
+        getNfts(
+          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
+        ),
+      []
     );
   }
 
-  const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? coin
-        ? (wallet as EthWalletType).data
-            .get(walletApp.navState.protocol)!
-            .coins.get(coin.address)!.transactionList.transactions
-        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .transactionList.transactions
-      : (wallet as BitcoinWalletType).transactionList.transactions;
-  let transactions = getTransactions(walletTransactions || new Map());
+  const walletTransactions = useMemo(
+    () =>
+      walletApp.navState.network === NetworkType.ETHEREUM
+        ? coin
+          ? (wallet as EthWalletType).data
+              .get(walletApp.navState.protocol)!
+              .coins.get(coin.address)!.transactionList.transactions
+          : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+              .transactionList.transactions
+        : (wallet as BitcoinWalletType).transactionList.transactions,
+    []
+  );
+
+  let transactions = useMemo(
+    () => getTransactions(walletTransactions || new Map()),
+    [walletTransactions]
+  );
   const pendingTransactions = transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
@@ -94,12 +111,6 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     );
   transactions = [...pendingTransactions, ...transactionHistory];
 
-  /* useEffect(() => {
-    if (coins.length) {
-      setListView('coins');
-    }
-  }); */
-
   const { textColor } = theme.currentTheme;
   const fadedTextColor = useMemo(() => rgba(textColor, 0.7), [textColor]);
 
@@ -110,7 +121,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       justifyContent="flex-start"
       flexDirection="column"
       py={1}
-      px={4}
+      px={3}
       pb={0}
     >
       <DetailHero

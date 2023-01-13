@@ -3,7 +3,8 @@ import {
   ERC20Type,
   ERC721Type,
   TransactionType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib/wallet.model';
+
 import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
@@ -34,19 +35,11 @@ export function getTransactions(
   address?: string,
   coin?: ERC20Type | null
 ): TransactionType[] {
-  const coinFilter = (transaction: TransactionType) => {
-    // return coin ? transaction.coinName === coin!.name : true;
-    // TODO: once we have hook to coin in transaction add this
-    return !coin;
-  };
-
   const addressFilter = (transaction: TransactionType) => {
     return address ? transaction.ourAddress === address : true;
   };
 
-  return Array.from(transactionMap.values())
-    .filter(addressFilter)
-    .filter(coinFilter);
+  return Array.from(transactionMap.values()).filter(addressFilter);
 }
 
 export function getCoins(coinMap: Map<string, ERC20Type>): ERC20Type[] {

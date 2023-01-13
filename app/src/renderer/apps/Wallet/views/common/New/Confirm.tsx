@@ -1,8 +1,7 @@
-import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { FC, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text } from 'renderer/components';
 import { darken, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { WordPicker } from './WordPicker';
 import { NewWalletScreen } from './index';

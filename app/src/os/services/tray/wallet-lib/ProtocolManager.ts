@@ -16,13 +16,21 @@ export class Wallet {
   }
 
   pauseUpdates() {
-    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
-      (this.protocols.get(this.currentProtocol)! as EthereumProtocol).removeListener();
+    if (
+      this.currentProtocol === ProtocolType.ETH_MAIN ||
+      this.currentProtocol === ProtocolType.ETH_GORLI
+    ) {
+      (
+        this.protocols.get(this.currentProtocol)! as EthereumProtocol
+      ).removeListener();
     }
   }
 
   watchUpdates(conduit: any, walletState: WalletStoreType) {
-    if (this.currentProtocol === ProtocolType.ETH_MAIN || this.currentProtocol === ProtocolType.ETH_GORLI) {
+    if (
+      this.currentProtocol === ProtocolType.ETH_MAIN ||
+      this.currentProtocol === ProtocolType.ETH_GORLI
+    ) {
       const lastProtocol = this.protocols.get(
         this.currentProtocol
       )! as EthereumProtocol;

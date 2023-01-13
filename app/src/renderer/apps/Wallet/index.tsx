@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState, useMemo } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
@@ -45,7 +45,6 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
-  const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
   let transactions: any = [];
@@ -77,20 +76,19 @@ export const WalletApp: FC<any> = observer((props: any) => {
       }
     }
     transactions = [...walletTransactions, ...transactions];
-    // console.log(transactions, transactionCount);
   }
   const pending = transactions.filter(
     (tx: any) => tx.status === 'pending'
   ).length;
+
   useEffect(() => {
-    if (transactions.length !== transactionCount) {
-      setTransactionCount(transactions.length);
+    if (pending > 0) {
       setHidePending(false);
     }
-    if (pending === 0) {
+    if (pending === 0 && !hidePending) {
       setHidePending(true);
     }
-  }, [transactionCount, transactions]);
+  }, [pending]);
 
   const hide = () => {
     setHidePending(true);
@@ -105,6 +103,13 @@ export const WalletApp: FC<any> = observer((props: any) => {
   const hideHeader = [WalletView.LOCKED, WalletView.SETTINGS].includes(
     walletApp.navState.view
   );
+
+  const pendingIsVisible = [
+    WalletView.LIST,
+    WalletView.WALLET_DETAIL,
+    WalletView.TRANSACTION_DETAIL,
+    WalletView.NFT_DETAIL,
+  ].includes(walletApp.navState.view);
 
   const View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
 
@@ -131,7 +136,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
         }
         hide={hideHeader}
       />
-      {!hidePending &&
+      {pendingIsVisible &&
+        !hidePending &&
         walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}

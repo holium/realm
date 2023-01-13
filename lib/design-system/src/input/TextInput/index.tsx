@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { ChangeEvent, FC } from 'react';
 import { InputBox, BoxProps, Input, InputBoxProps, TextArea } from '../..';
 
 type TextInputProps = {
@@ -61,7 +61,9 @@ export const TextInput: FC<TextInputProps> = (props: TextInputProps) => {
           value={value}
           required={required}
           disabled={props.disabled}
-          onChange={props.onChange}
+          onChange={(evt: ChangeEvent<HTMLInputElement>) =>
+            props.onChange && props.onChange(evt)
+          }
           onFocus={props.onFocus}
           onBlur={props.onBlur}
           autoFocus={props.autoFocus}

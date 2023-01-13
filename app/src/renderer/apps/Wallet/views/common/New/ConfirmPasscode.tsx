@@ -8,6 +8,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
   correctPasscode: number[];
+  seedPhrase: string;
 }
 
 export const ConfirmPasscode: FC<PasscodeProps> = observer(
@@ -25,6 +26,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
             checkAgainst={props.correctPasscode}
             onSuccess={() => {
               props.setScreen(NewWalletScreen.FINALIZING);
+              WalletActions.setMnemonic(props.seedPhrase, props.correctPasscode);
               WalletActions.watchUpdates();
             }}
           />
