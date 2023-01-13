@@ -35,7 +35,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'staging-build')
+            const result = script({github, context}, 'staging-build.yml')
             console.log(result)
             return result
         env:
