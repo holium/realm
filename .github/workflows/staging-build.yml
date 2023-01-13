@@ -241,7 +241,7 @@ jobs:
   #  we need this to re-enable the workflow
   finalize:
     if: always()
-    needs: [post-deploy]
+    needs: [pre-deploy, post-deploy]
     runs-on: ubuntu-latest
     steps:
       #
