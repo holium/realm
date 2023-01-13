@@ -6,7 +6,7 @@ on:
     types:
       - closed
     branches:
-      - latest
+      - production
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
@@ -39,7 +39,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git stash
-          git pull origin latest
+          git pull origin production
           git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
@@ -106,7 +106,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin latest
+          git pull origin production
       - name: Build and publish
         run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
@@ -141,7 +141,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin latest
+          git pull origin production
       #
       - name: Bump desks version
         uses: actions/github-script@v6
