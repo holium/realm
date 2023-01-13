@@ -1,5 +1,5 @@
 name: production-build
-run-name: Production Build - ${{ github.actor }}
+run-name: Release Build - ${{ github.actor }}
 on:
   pull_request:
     types:
