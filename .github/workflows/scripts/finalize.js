@@ -15,7 +15,7 @@ module.exports = async ({ github, context }, workflowId, ci) => {
     {
       owner: 'holium',
       repo: 'realm',
-      workflow_id: workflowId,
+      workflow_id: 'staging-build.yml',
     }
   );
 };
