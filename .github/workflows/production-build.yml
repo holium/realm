@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - production
+      - latest
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
