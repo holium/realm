@@ -60,7 +60,7 @@ jobs:
           echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION" -f
           git push origin $BUILD_VERSION
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
         env:
