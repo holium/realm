@@ -245,6 +245,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       #
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
       - name: Run post-deploy script
         uses: actions/github-script@v6
         id: done

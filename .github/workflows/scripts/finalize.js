@@ -15,7 +15,7 @@ module.exports = async ({ github, context }, workflowId, ci) => {
     {
       owner: 'holium',
       repo: 'realm',
-      workflow_id: '37195237',
+      workflow_id: workflowId,
     }
   );
 };
