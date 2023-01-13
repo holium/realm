@@ -35,6 +35,11 @@ const ShipConfig: { [ship: string]: any } = {
     url: 'http://localhost:8087',
     code: 'parsyr-dibwyt-livpen-hatsym',
   },
+  '~bus': {
+    ship: 'bus',
+    url: 'http://localhost:8080',
+    code: 'riddec-bicrym-ridlev-pocsef',
+  },
 };
 
 const testShip = window.location.href.split('/')[3] || '~fes';

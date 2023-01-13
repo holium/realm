@@ -211,10 +211,8 @@ export const Room = observer(() => {
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (muted) {
-                  console.log('unmuting time');
                   roomsManager.unmute();
                 } else {
-                  console.log('muting time');
                   roomsManager.mute();
                 }
               }}
