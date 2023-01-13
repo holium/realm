@@ -131,13 +131,6 @@ export class AppUpdater implements IAppUpdater {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
     });
-    autoUpdater.on('download-progress', (stats) => {
-      let log_message = 'Download speed: ' + stats.bytesPerSecond;
-      log_message = log_message + ' - Downloaded ' + stats.percent + '%';
-      log_message =
-        log_message + ' (' + stats.transferred + '/' + stats.total + ')';
-      mainWindow?.webContents.send('update-progress', stats);
-    });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
     // setInterval(() => {
