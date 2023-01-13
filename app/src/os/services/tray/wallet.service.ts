@@ -76,6 +76,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.uqbar-desk-exists': this.uqbarDeskExists,
     'realm.tray.wallet.send-uqbar-transaction': this.sendUqbarTransaction,
     'realm.tray.wallet.watch-updates': this.watchUpdates,
+    'realm.tray.wallet.set-force-active': this.setForceActive,
   };
 
   static preload = {
@@ -268,12 +269,15 @@ export class WalletService extends BaseService {
     uqbarDeskExists: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.uqbar-desk-exists');
     },
-    sendUqbarTransaction: async (walletIndex: string, to: string, amount: string, toPatp?: string) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.send-uqbar-transaction', walletIndex, to, amount, toPatp);
+    sendUqbarTransaction: async (walletIndex: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.send-uqbar-transaction', walletIndex);
     },
     watchUpdates: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
     },
+    setForceActive: async (forceActive: boolean) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.set-force-active', forceActive);
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -309,7 +313,6 @@ export class WalletService extends BaseService {
           protocol: ProtocolType.ETH_GORLI,
           lastEthProtocol: ProtocolType.ETH_GORLI,
           btcNetwork: NetworkStoreType.BTC_MAIN,
-          transSend: false
         },
         ethereum: {
           gorliBlock: 0,
@@ -349,6 +352,7 @@ export class WalletService extends BaseService {
           passcodeHash: '',
         },
         ourPatp: ship,
+        forceActive: false
       });
     }
 
@@ -528,11 +532,9 @@ export class WalletService extends BaseService {
   async sendUqbarTransaction(
     _event: any,
     walletIndex: string,
-    to: string,
-    amount: string,
-    toPatp?: string,
+    // toPatp?: string,
   ) {
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     const tx = {
       from,
       to,
@@ -545,33 +547,39 @@ export class WalletService extends BaseService {
       // gasPrice: await protocol.getFeePrice(),
       // nonce: await protocol.getNonce(from),
       // chainId: await protocol.getChainId(),
-    };
-    const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
-    const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
+    // };
+    const tx = this.state!.uqTx!;
+    // const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
+    /*const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
     await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
     const pendingTxns = await UqbarApi.scryPending(this.core.conduit!, from);
     let hash = Object.keys(pendingTxns)
       .filter(hash => pendingTxns[hash].from === addDots(from))
       .sort((a, b) => pendingTxns[a].nonce - pendingTxns[b].nonce)[0]
     console.log(hash)
-    const txn = pendingTxns[hash];
+    const txn = pendingTxns[hash];*/
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(path, hash, txn);
-    const rate = 1;
-    const bud = 1000000;
-    await UqbarApi.submitSigned(this.core.conduit!, from, hash, rate, bud, signed.ethHash, signed.sig);
-    hash = removeDots(hash);
+    const contract = removeDots(tx.contract.slice(2))
+    const to = (tx as any)?.action?.give?.to ||
+          (tx as any)?.action?.['give-nft']?.to ||
+          `0x${contract}${contract}`
+    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(path, tx.hash, {...tx, to});
+    console.log('signed the tx')
+    await UqbarApi.submitSigned(this.core.conduit!, tx.from, tx.hash, Number(tx.rate), Number(tx.budget), signed.ethHash, signed.sig);//signed.ethHash, signed.sig);
+    console.log('submitted')
+    const hash = removeDots(tx.hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
       this.state!.navState.protocol,
       hash,
-      tx.to,
-      toPatp,
+      '',
+      '',//toPatp,
       fromAddress,
-      tx.value,
+      '',
       new Date().toISOString(),
     );
+    console.log('enqueued')
     const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
       hash
     );
@@ -781,5 +789,9 @@ export class WalletService extends BaseService {
 
   async watchUpdates(_evt: any) {
     await this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+  }
+
+  async setForceActive(_evt: any, forceActive: boolean) {
+    this.state!.setForceActive(forceActive);
   }
 }

@@ -783,6 +783,24 @@ export const WalletNavState = types
   }));
 export type WalletNavStateType = Instance<typeof WalletNavState>;
 
+export const UqTx = types.model('UqTx', {
+  status: types.string,
+  contract: types.string,
+  budget: types.string,
+  from: types.string,
+  rate: types.string,
+  action: types.model({
+    noun: types.model({
+      custom: types.string
+    })
+  }),
+  nonce: types.string,
+  town: types.string,
+  hash: types.string
+});
+export type UqTxType = Instance<typeof UqTx>;
+
+
 export interface WalletNavOptions {
   canReturn?: boolean;
   network?: NetworkType;
@@ -800,6 +818,7 @@ export interface WalletNavOptions {
     type: string;
     data: any;
   };
+  uqTx?: UqTxType;
 }
 
 export const WalletStore = types
@@ -819,6 +838,8 @@ export const WalletStore = types
     navState: WalletNavState,
     navHistory: types.array(WalletNavState),
     settings: WalletSettings,
+    forceActive: types.boolean,
+    uqTx: types.maybe(UqTx),
   })
   .views((self) => ({
     get currentStore() {
@@ -884,6 +905,8 @@ export const WalletStore = types
       const protocol = options?.protocol || self.navState.protocol;
       const lastEthProtocol =
         options?.lastEthProtocol || self.navState.lastEthProtocol;
+      console.log('the uqtx', options?.uqTx);
+      self.uqTx = options?.uqTx ? UqTx.create(options.uqTx) : undefined;
 
       if (
         canReturn &&
@@ -958,6 +981,9 @@ export const WalletStore = types
         store.settings.setSharingMode(netSettings.sharingMode);
       }
     },
+    setForceActive(forceActive: boolean) {
+      self.forceActive = forceActive;
+    }
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;

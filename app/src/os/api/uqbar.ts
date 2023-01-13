@@ -102,9 +102,10 @@ export const UqbarApi = {
     hash: string,
     rate: number,
     bud: number,
-    ethHash?: string,
-    sig?: { v: number; r: string; s: string; }
+    ethHash: string,
+    sig: { v: number; r: string; s: string; }
   ) => {
+    console.log('sig', sig)
     const payload = {
       app: 'wallet',
       mark: 'wallet-poke',
@@ -113,8 +114,12 @@ export const UqbarApi = {
           from,
           hash,
           gas: { rate, bud },
-          'eth-hash': ethHash,
-          sig
+          'eth-hash': addDots(ethHash!),
+          sig: {
+            v: sig.v,
+            r: addDots(sig.r),
+            s: addDots(sig.s),
+          }
         }
       }
     };
@@ -242,22 +247,18 @@ const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStore
   console.log('tx');
   console.log('from uqbar')
   console.log(data);
-  /*setActiveApp('wallet-tray', {
-    willOpen: true,
-    position: 'top-left',
-    anchorOffset: { x: 4, y: 26 },
-    dimensions: {
-      height: 580,
-      width: 330,
-    },
-  });*/
-  // TODO: placeholder, we need to implement the actual send coins functionality
-  walletState.navigate(WalletView.TRANSACTION_SEND, {
-    walletIndex: '0',
-    /*detail: {
-      type: 'transaction',
-      txtype: 'general',
-      key: '0'
-    }*/
-  });
+  console.log(data[Object.keys(data)[0]].action?.noun)
+  if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
+    walletState.setProtocol(ProtocolType.UQBAR);
+    walletState.navigate(WalletView.TRANSACTION_CONFIRM, {
+      walletIndex: '0',
+      uqTx: data[Object.keys(data)[0]],
+      /*detail: {
+        type: 'transaction',
+        txtype: 'general',
+        key: '0'
+      }*/
+    });
+    walletState.setForceActive(true);
+  }
 }

@@ -149,6 +149,7 @@ const walletAppDefault = {
   settings: {
     passcodeHash: '',
   },
+  forceActive: false,
 };
 
 export const trayStore = TrayAppStore.create({

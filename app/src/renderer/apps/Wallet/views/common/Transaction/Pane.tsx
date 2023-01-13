@@ -32,7 +32,7 @@ interface TransactionPaneProps {
 
 export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
-    const { walletApp } = useTrayApps();
+    const { walletApp, setActiveApp } = useTrayApps();
     // const [screen, setScreen] = useState('initial');
     const screen = (walletApp.navState.view === WalletView.TRANSACTION_SEND) ? 'initial' : 'confirm';
     const [transactionSending, setTransactionSending] = useState(false);
@@ -70,10 +70,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           if (walletApp.navState.protocol === ProtocolType.UQBAR) {
             await WalletActions.sendUqbarTransaction(
               walletApp.currentWallet!.index.toString(),
-              transactionRecipient.address ||
-                transactionRecipient.patpAddress!,
-              transactionAmount.toString(),
-              transactionRecipient.patp
             )
           }
           else {

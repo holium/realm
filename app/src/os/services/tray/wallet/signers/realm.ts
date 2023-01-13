@@ -18,24 +18,29 @@ export class RealmSigner implements BaseSigner {
       encryptedMnemonic
     );
   }
-  signTransaction(path: string, transaction: any): any {
+  signTransaction(path: string, message: any): any {
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
-    return wallet.signTransaction(transaction);
+    return wallet.signTransaction(message);
   }
-  signUqbarTransaction(path: string, hash: string, txn: any): any {
+  async signUqbarTransaction(path: string, hash: string, txn: any): Promise<any> {
     console.log('signing hash', hash);
     console.log('txn', txn);
+    // ethers.utils;
     const ethHash = ethers.utils.serializeTransaction({
       to: removeDots(txn.to).substring(0, 42),
       gasPrice: '0x' + txn.rate.toString(16),
-      gasLimit: ethers.utils.hexlify(txn.budget),
-      nonce: txn.nonce,
+      gasLimit: txn.budget === '0' ? '0x0': ethers.utils.hexlify(txn.budget),
+      nonce: Number(removeDots(txn.nonce)),
       chainId: parseInt(txn.town, 16),
       data: removeDots(hash),
       // value: ethers.utils.parseUnits(1, "ether")._hex
     })
-    const sig = this.signTransaction(path, ethHash);
+    console.log('got through signing')
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    const flatSig = await wallet.signMessage(hash);
+    const sig = ethers.utils.splitSignature(flatSig);
     return { ethHash, sig };
   }
   private getPrivateKey() {
