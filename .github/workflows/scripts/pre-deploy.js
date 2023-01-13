@@ -25,7 +25,7 @@ module.exports = async ({ github, context }, workflowId) => {
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
     // version "as-is" from package.json
-    packageVersion: pkg.version,
+    packageVersion: undefined,
     // version either set by PR title or calculated (build # incremented) if based on package.json version
     buildVersion: undefined,
     // version object - with major, minor, build #
@@ -56,6 +56,7 @@ module.exports = async ({ github, context }, workflowId) => {
     // this script is always called at the root of the repo; therefore
     //  read release package.json for build info
     const pkg = JSON.parse(fs.readFileSync(packageFilename));
+    ci.packageVersion = pkg.version;
     // PR title is a required property of the PR event
     console.log(
       `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
