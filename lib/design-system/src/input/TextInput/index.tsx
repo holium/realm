@@ -36,6 +36,7 @@ export const TextInput: FC<TextInputProps> = (props: TextInputProps) => {
         onChange={props.onChange}
         onFocus={props.onFocus}
         onBlur={props.onBlur}
+        onKeyDown={props.onKeyDown}
       />
     </InputBox>
   );
