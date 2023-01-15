@@ -125,7 +125,16 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   useEffect(() => {
     // Make planets tabable
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === 'Tab' && e.shiftKey) {
+        e.preventDefault();
+        const previousIndex = selectedIndex - 1;
+        const previousPlanet = planets[previousIndex];
+        if (previousPlanet) {
+          setSelectedIndex(previousIndex);
+        } else {
+          setSelectedIndex(planets.length - 1);
+        }
+      } else if (e.key === 'Tab') {
         e.preventDefault();
         const nextIndex = selectedIndex + 1;
         const nextPlanet = planets[nextIndex];
