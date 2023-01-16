@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
@@ -54,14 +54,11 @@ export const RoomTray = observer(() => {
     ]
   );
 
-  const participants = useMemo(
-    () =>
-      roomsManager.live.room?.present.map((patp: string) => {
-        const metadata = contacts.getContactAvatarMetadata(patp);
-        return metadata;
-      }) || [],
-    [roomsManager.live.room?.present]
-  );
+  const participants =
+    roomsManager.presentRoom?.present.map((patp: string) => {
+      const metadata = contacts.getContactAvatarMetadata(patp);
+      return metadata;
+    }) || [];
 
   return (
     <RoomsDock

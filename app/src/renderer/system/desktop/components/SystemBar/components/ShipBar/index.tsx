@@ -3,7 +3,7 @@ import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { BarStyle } from '@holium/design-system';
-import { RoomTray } from '../CommunityBar/Rooms';
+import { RoomTray } from './Rooms';
 
 export const ShipBar = () => {
   return (

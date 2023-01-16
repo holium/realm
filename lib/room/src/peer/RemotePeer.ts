@@ -105,11 +105,11 @@ export class RemotePeer extends Peer {
   }
 
   onWaiting() {
-    console.log(`${this.patp} is waiting`);
     // only send ready again if we are closed or waiting
     if (
       this.status === PeerConnectionState.Closed ||
       this.status === PeerConnectionState.Disconnected ||
+      // this.status === PeerConnectionState.Connecting ||
       this.readyStatus === WAITING
     ) {
       console.log(`sending ready to ${this.patp}`);
@@ -134,8 +134,11 @@ export class RemotePeer extends Peer {
 
   peerSignal(data: SimplePeer.SignalData) {
     if (this.peer?.destroyed) {
+      // NOTE: this is a hack to get around latency issues in Urbit.
+      // Sometimes a peer is destroyed and then a signal is received
       this.dial();
-      return;
+      // return;
+      this.createConnection();
     }
 
     this.peer?.signal(data);

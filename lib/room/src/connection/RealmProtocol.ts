@@ -8,6 +8,7 @@ import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
 import { isInitiator, isWeb, isWebRTCSignal } from '../utils';
+import { PeerConnectionState } from '../peer/types';
 
 export interface APIHandlers {
   poke: (params: any) => Promise<any>;
@@ -410,7 +411,9 @@ export class RealmProtocol extends BaseProtocol {
    */
   sendData(data: DataPacket) {
     this.peers.forEach((peer) => {
-      peer.sendData(data);
+      if (peer.status === PeerConnectionState.Connected) {
+        peer.sendData(data);
+      }
     });
   }
 
