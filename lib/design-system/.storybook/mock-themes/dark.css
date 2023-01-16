@@ -1,13 +1,16 @@
 
 :root {
+  --theme-mode: 'dark';
+  --blur-enabled: blur(24px);
   --transition: all 0.25s ease;
-  --transition-2x: all 0.5s ease;
+  --transition-slow: all 0.5s ease;
   --rlm-font: 'Rubik', sans-serif;
   --rlm-base-color: #25343F;
   --rlm-accent-color: #4E9EFD;
   --rlm-input-color: #1a252e;
   --rlm-border-color: rgba(0, 0, 0, 0.2);
   --rlm-window-color: #212D36;
+  --rlm-dock-color: #2A384375;
   --rlm-card-color: #2A3843;
   --rlm-theme-mode: dark;
   --rlm-text-color: #FFFFFF;
@@ -20,6 +23,8 @@
   --rlm-border-radius-9: 9px;
   --rlm-border-radius-12: 12px;
   --rlm-border-radius-12: 16px;
+  --rlm-overlay-hover: rgba(255, 255, 255, 0.05);
+  --rlm-overlay-active: rgba(255, 255, 255, 0.09);
 }
 
 html {
@@ -29,4 +34,14 @@ html {
 
 * {
   font-family: var(--rlm-font);
+  color: var(--rlm-text-color);
+}
+
+.wallpaper {
+  object-fit: cover;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  transition: var(--transition-slow);
+  background-image: url('https://images.unsplash.com/photo-1672821337870-2180f5223865?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4032&q=80');
 }
