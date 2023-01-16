@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
@@ -15,6 +15,8 @@ import {
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletApp } from 'renderer/apps/Wallet';
+import { Locked } from '../Locked';
+import { PasscodeDisplay } from 'renderer/apps/Wallet/components/PasscodeDisplay';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -28,6 +30,11 @@ interface TransactionPaneProps {
   onScreenChange: any;
   close: any;
   coin?: ERC20Type | null;
+  onConfirm: any;
+  transactionAmount: any;
+  setTransactionAmount: any;
+  transactionRecipient: any;
+  setTransactionRecipient: any;
 }
 
 export const TransactionPane: FC<TransactionPaneProps> = observer(
@@ -38,15 +45,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
-    const [transactionAmount, setTransactionAmount] = useState(0);
 
     const [recipientValid, setRecipientValid] = useState(false);
-    const [transactionRecipient, setTransactionRecipient] = useState<{
-      address?: string;
-      patp?: string;
-      patpAddress?: string;
-      color?: string;
-    }>({});
 
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
@@ -63,13 +63,14 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
       props.onScreenChange('initial');
     };
 
-    const sendTransaction = async () => {
+    /*const sendTransaction = async (passcode: number[]) => {
       try {
         setTransactionSending(true);
         if (walletApp.navState.network === NetworkType.ETHEREUM) {
           if (walletApp.navState.protocol === ProtocolType.UQBAR) {
             await WalletActions.sendUqbarTransaction(
               walletApp.currentWallet!.index.toString(),
+              passcode
             )
           }
           else {
@@ -80,6 +81,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     transactionRecipient.patpAddress!,
                   transactionAmount.toString(),
                   props.coin.address,
+                  passcode,
                   transactionRecipient.patp
                 )
               : await WalletActions.sendEthereumTransaction(
@@ -87,6 +89,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   transactionRecipient.address ||
                     transactionRecipient.patpAddress!,
                   transactionAmount.toString(),
+                  passcode,
                   transactionRecipient.patp
                 );
           }
@@ -98,18 +101,19 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           );
         }
         setTransactionSending(false);
-        setScreen('initial');
+        // setScreen('initial');
+        WalletActions.navigate(WalletView.TRANSACTION_SEND)
         props.close();
       } catch (e) {
         console.error(e);
         setTransactionSending(false);
       }
-    };
+    };*/
 
     const amountValidator = (valid: boolean, amount?: number) => {
       setAmountValid(valid);
       if (valid) {
-        setTransactionAmount(amount!);
+        props.setTransactionAmount(amount!);
       }
     };
 
@@ -119,7 +123,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     ) => {
       setRecipientValid(valid);
       if (valid) {
-        setTransactionRecipient(recipient);
+        props.setTransactionRecipient(recipient);
       }
     };
 
@@ -151,7 +155,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
         ) : (
           <Flex mt={7} flexDirection="column">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-              {transactionAmount}{' '}
+              {props.transactionAmount}{' '}
               {props.coin
                 ? props.coin.name
                 : walletApp.navState.protocol === ProtocolType.UQBAR
@@ -159,7 +163,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 : abbrMap[walletApp.navState.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
-              ${ethToUsd(transactionAmount)} USD
+              ${ethToUsd(props.transactionAmount)} USD
             </Text>
             <Flex
               mt={7}
@@ -174,8 +178,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 </Text>
                 <Flex justifyContent="center">
                   <Flex mr={2}>
-                    {!transactionRecipient.patp &&
-                      transactionRecipient.address && (
+                    {!props.transactionRecipient.patp &&
+                      props.transactionRecipient.address && (
                         <Flex flexDirection="column" justifyContent="center">
                           <Icons
                             name="Spy"
@@ -183,31 +187,31 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                             color={themeData.colors.text.secondary}
                           />
                           <Text variant="body">
-                            {shortened(transactionRecipient.address)}
+                            {shortened(props.transactionRecipient.address)}
                           </Text>
                         </Flex>
                       )}
-                    {transactionRecipient.patp &&
-                      transactionRecipient.address && (
+                    {props.transactionRecipient.patp &&
+                      props.transactionRecipient.address && (
                         <Flex gap={8} alignItems="center">
                           <Sigil
                             color={[
-                              transactionRecipient.color || 'black',
+                              props.transactionRecipient.color || 'black',
                               'white',
                             ]}
                             simple={true}
                             size={24}
-                            patp={transactionRecipient.patp!}
+                            patp={props.transactionRecipient.patp!}
                           />{' '}
                           <Flex flexDirection="column" justifyContent="center">
                             <Text variant="body">
-                              {transactionRecipient.patp}
+                              {props.transactionRecipient.patp}
                             </Text>
                             <Text
                               variant="body"
                               color={themeData.colors.text.tertiary}
                             >
-                              {shortened(transactionRecipient.address)}
+                              {shortened(props.transactionRecipient.address)}
                             </Text>
                           </Flex>
                         </Flex>
@@ -253,11 +257,11 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 </Text>
                 <Flex flexDirection="column">
                   <Text variant="body">
-                    {transactionAmount + 0.0005}{' '}
+                    {props.transactionAmount + 0.0005}{' '}
                     {props.coin ? props.coin.name : 'ETH'}
                   </Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
-                    ≈ {ethToUsd(transactionAmount + 0.0005)} USD
+                    ≈ {ethToUsd(props.transactionAmount + 0.0005)} USD
                   </Text>
                 </Flex>
               </Flex>
@@ -268,7 +272,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               </Button>
               <Button
                 px={2}
-                onClick={sendTransaction}
+                onClick={props.onConfirm} // sendTransaction}
                 isLoading={transactionSending}
               >
                 Confirm

@@ -72,7 +72,10 @@ export const EthNew: FC<any> = observer(() => {
       <DetectedExisting setScreen={setScreen} />
     ),
     [NewWalletScreen.RECOVER_EXISTING]: (
-      <RecoverExisting setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
+      <RecoverExisting setSeedPhrase={(phrase: string, passcode: number[]) => {
+        setSeedPhrase(phrase);
+        setPasscode(passcode);
+      }} setScreen={setScreen} />
     ),
   };
   const currentComponent = components[screen];

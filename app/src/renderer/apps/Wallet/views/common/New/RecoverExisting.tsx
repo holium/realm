@@ -5,6 +5,7 @@ import {
   SetStateAction,
   useState,
   ChangeEvent,
+  useEffect,
 } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
@@ -12,14 +13,16 @@ import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { TextInput } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
+import VerifyPasscode from './VerifyPasscode';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
+import { setScreen } from '@urbit/api';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
-  setSeedPhrase: (phrase: string) => void;
+  setSeedPhrase: (phrase: string, passcode: number[]) => void;
 }
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
@@ -34,19 +37,23 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const [showPasscode, setShowPasscode] = useState(false);
+
     const updatePhrase = (newPhrase: string) => {
       setError('');
       setPhrase(newPhrase);
     };
 
-    const recoverSeedPhrase = async () => {
+    const recoverSeedPhrase = async (passcode: number[]) => {
       setLoading(true);
       const correct = await WalletActions.checkMnemonic(phrase);
       setLoading(false);
 
       if (correct) {
-        props.setSeedPhrase(phrase);
-        WalletActions.navigate(WalletView.LOCKED);
+        props.setSeedPhrase(phrase, passcode);
+        WalletActions.watchUpdates();
+        props.setScreen(NewWalletScreen.FINALIZING);
+        // WalletActions.navigate(WalletView.LIST);
         setError('');
       } else {
         setError(
@@ -56,7 +63,12 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
     };
 
     return (
-      <Flex width="100%" height="100%" flexDirection="column">
+      showPasscode ? <VerifyPasscode onSuccess={(code: number[]) => {
+        console.log('ON SUCCESS')
+        recoverSeedPhrase(code);
+      }
+      } />
+      : <Flex width="100%" height="100%" flexDirection="column">
         <Text mt={6} variant="h4">
           Recover Wallet
         </Text>
@@ -76,7 +88,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             value={phrase}
             cols={50}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPhrase(e.target.value)
+              updatePhrase(e.target.value)
             }
             autoFocus={true}
           />
@@ -94,7 +106,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             <Button
               width="100%"
               disabled={!ethers.utils.isValidMnemonic(phrase)}
-              onClick={recoverSeedPhrase}
+              onClick={() => setShowPasscode(true)}
               isLoading={loading}
             >
               Recover

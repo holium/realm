@@ -5,13 +5,13 @@ import { Flex, Box, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
-import { TransactionPane } from './Pane';
 import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { TransactionPane } from './Pane';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -24,6 +24,11 @@ interface SendTransactionProps {
   close: () => void;
   wallet: EthWalletType | BitcoinWalletType;
   coin?: ERC20Type | null;
+  onConfirm: () => void;
+  transactionAmount: any;
+  setTransactionAmount: any;
+  transactionRecipient: any;
+  setTransactionRecipient: any;
 }
 
 export const SendTransaction: FC<SendTransactionProps> = observer(
@@ -68,16 +73,21 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
       <Box width="100%" hidden={props.hidden}>
         <Seperator />
         <TransactionPane
+          onConfirm={props.onConfirm}
           max={
             props.coin
               ? Number(props.coin.balance)
               : Number(
-                  props.wallet.data.get(walletApp.navState.protocol)!.balance
+                  (props.wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance
                 )
           }
           onScreenChange={props.onScreenChange}
           close={props.close}
           coin={props.coin}
+          setTransactionAmount={props.setTransactionAmount}
+          transactionAmount={props.transactionAmount}
+          setTransactionRecipient={props.setTransactionRecipient}
+          transactionRecipient={props.transactionRecipient}
         />
       </Box>
     );

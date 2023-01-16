@@ -914,7 +914,7 @@ export const WalletStore = types
       self.ethereum.setProtocol(protocol);
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
-      console.log('options', options)
+      console.log('NAVIGATING', view)
       const canReturn = options?.canReturn || true;
       const walletIndex = options?.walletIndex || self.navState.walletIndex;
       const detail = options?.detail;
@@ -927,7 +927,7 @@ export const WalletStore = types
 
       if (
         canReturn &&
-        ![WalletView.LOCKED, WalletView.NEW].includes(self.navState.view)
+        ![WalletView.LOCKED, WalletView.NEW, WalletView.TRANSACTION_SEND, WalletView.TRANSACTION_CONFIRM].includes(self.navState.view)
       ) {
         const returnSnapshot = getSnapshot(self.navState);
         self.navHistory.push(WalletNavState.create(returnSnapshot));

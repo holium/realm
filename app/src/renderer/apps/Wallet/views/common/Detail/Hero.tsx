@@ -24,6 +24,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
+  WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
@@ -34,6 +35,7 @@ import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../../components/WalletCardWrapper';
+import TransactionPasscode from '../Transaction/TransactionPasscode';
 
 const BreadCrumb = styled(Text)`
   transition: var(--transition);
@@ -78,6 +80,9 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       () => rgba(theme.currentTheme.textColor, 0.4),
       [theme.currentTheme.textColor]
     );
+
+    const [showPasscode, setShowPasscode] = useState(false);
+    const [passcode, setPasscode] = useState<number[]>([]);
 
     const amountDisplay =
       walletApp.navState.network === NetworkType.ETHEREUM
@@ -183,7 +188,63 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       </Flex>
     );
 
+    const [transactionAmount, setTransactionAmount] = useState(0);
+    const [transactionRecipient, setTransactionRecipient] = useState<{
+      address?: string;
+      patp?: string;
+      patpAddress?: string;
+      color?: string;
+    }>({});
+
+    const sendTransaction = async (passcode: number[]) => {
+      console.log('amount', transactionAmount)
+      console.log('recipient', transactionRecipient)
+      try {
+        if (walletApp.navState.network === NetworkType.ETHEREUM) {
+          if (walletApp.navState.protocol === ProtocolType.UQBAR) {
+            await WalletActions.sendUqbarTransaction(
+              walletApp.currentWallet!.index.toString(),
+              passcode
+            )
+          }
+          else {
+            props.coin
+              ? await WalletActions.sendERC20Transaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  props.coin.address,
+                  passcode,
+                  transactionRecipient.patp
+                )
+              : await WalletActions.sendEthereumTransaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  passcode,
+                  transactionRecipient.patp
+                );
+          }
+        } else {
+          await WalletActions.sendBitcoinTransaction(
+            walletApp.currentWallet!.index,
+            transactionRecipient.address || transactionRecipient.patpAddress!,
+            transactionAmount.toString()
+          );
+        }
+        props.close();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     return (
+      showPasscode ? <TransactionPasscode onSuccess={(code: number[]) => {
+        sendTransaction(code)
+      }
+      } /> :
       <WalletCardStyle
         layout="size"
         elevation="none"
@@ -314,6 +375,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             onScreenChange={props.onScreenChange}
             close={props.close}
             coin={props.coin}
+            onConfirm={() => setShowPasscode(true)}
+            setTransactionAmount={setTransactionAmount}
+            transactionAmount={transactionAmount}
+            setTransactionRecipient={setTransactionRecipient}
+            transactionRecipient={transactionRecipient}
           />
         </Flex>
         {coinView}

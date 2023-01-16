@@ -37,6 +37,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
   // const [sendTrans, setSendTrans] = useState(false);
+  console.log('THE CURRENT VIEW', walletApp.navState.view)
   const sendTrans = walletApp.navState.view === WalletView.TRANSACTION_SEND || walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   // const [hideWalletHero, setHideWalletHero] = useState(false);
   const hideWalletHero = walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
@@ -44,10 +45,13 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 
   const onScreenChange = (newScreen: string) => {}
 //    setHideWalletHero(newScreen === 'confirm');
-  const close = () => {
+  const close = async () => {
     // setSendTrans(false);
-    WalletActions.navigateBack();
+    console.log('going back 1', walletApp.navState.view)
+    // await WalletActions.resetNavigation();
+    await WalletActions.navigateBack();
 //    setHideWalletHero(false);
+    console.log('going back 2', walletApp.navState.view)
   };
 
   console.log('rendering WalletDetail');

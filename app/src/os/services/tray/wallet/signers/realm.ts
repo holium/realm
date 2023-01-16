@@ -1,8 +1,9 @@
 import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
 import { ethers } from 'ethers';
-import { safeStorage } from 'electron';
+// import { safeStorage } from 'electron';
 import Realm from '../../../..';
 import { removeDots } from '../../../../api/uqbar';
+import EncryptedStore from '../../../../lib/encryptedStore';
 
 export class RealmSigner implements BaseSigner {
   private core: Realm;
@@ -13,15 +14,28 @@ export class RealmSigner implements BaseSigner {
     /*const encryptedMnemonic = safeStorage
       .encryptString(mnemonic)
       .toString('base64');*/
-    this.core.services.identity.auth.setMnemonic(
+    /*this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
       patp,
       passcode,
       mnemonic,
-    );
+    );*/
+    console.log('SETTING MNEMONIC', mnemonic);
+    console.log('setting passcode', passcode);
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    console.log('trying to encrypt')
+    const db = new EncryptedStore<string>(storeParams);
+    console.log('made db')
+    db.store = mnemonic;
+    console.log('made db finished')
   }
-  signTransaction(path: string, message: any): any {
-    const privateKey = this.getPrivateKey();
+  signTransaction(path: string, message: any, patp: string, passcode: string): any {
+    const privateKey = this.getPrivateKey(patp, passcode);
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     return wallet.signTransaction(message);
   }
@@ -46,8 +60,21 @@ export class RealmSigner implements BaseSigner {
     return { ethHash, sig };
   }
   private getPrivateKey(patp: string, passcode: string) {
-    const mnemonic =
-      this.core.services.identity.auth.getMnemonic(null, patp, passcode);
+    /*const mnemonic = 
+      this.core.services.identity.auth.getMnemonic(null, patp, passcode);*/
+    console.log('trying to get mnemonic')
+    console.log(passcode);
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    console.log('creating db')
+    const db = new EncryptedStore<string>(storeParams);
+    console.log('db created')
+    const mnemonic = db.store;
+    console.log('mnem', mnemonic)
     /*const mnemonic = safeStorage.decryptString(
       Buffer.from(encryptedMnemonic, 'base64')
     );*/

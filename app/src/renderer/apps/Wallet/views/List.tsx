@@ -39,6 +39,7 @@ export const WalletList: FC<WalletListProps> = observer(
                 key={walletEntry.address}
                 wallet={fullWallet!}
                 onSelect={() => {
+                  console.log('list detail nav');
                   WalletActions.navigate(WalletView.WALLET_DETAIL, {
                     walletIndex: walletEntry.key,
                   });

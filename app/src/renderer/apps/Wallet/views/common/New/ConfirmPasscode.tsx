@@ -26,7 +26,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
             checkAgainst={props.correctPasscode}
             onSuccess={() => {
               props.setScreen(NewWalletScreen.FINALIZING);
-              WalletActions.setMnemonic(props.seedPhrase, props.correctPasscode);
+              // WalletActions.setMnemonic(props.seedPhrase, props.correctPasscode);
               WalletActions.watchUpdates();
             }}
           />

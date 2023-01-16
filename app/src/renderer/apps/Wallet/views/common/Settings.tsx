@@ -144,7 +144,7 @@ export const WalletSettings: FC = observer(() => {
         </Button>
       </Flex>
 
-      <Flex mt={3} flexDirection="column" width="100%">
+      {/*<Flex mt={3} flexDirection="column" width="100%">
         <Text variant="label">Provider</Text>
         <Text
           mt={1}
@@ -175,7 +175,7 @@ export const WalletSettings: FC = observer(() => {
             {providerError}
           </Text>
         </Box>
-      </Flex>
+        </Flex>*/}
 
       <Flex mt={3} flexDirection="column">
         <Text variant="label">Address Creation Mode</Text>
@@ -241,6 +241,45 @@ export const WalletSettings: FC = observer(() => {
           onChange={setBlockList}
         />
       </Flex>
+      <TextButton
+        highlightColor="#EC415A"
+        showBackground
+        textColor="#EC415A"
+        style={{ fontWeight: 400 }}
+        onClick={() => WalletActions.deleteLocalWallet()}
+      >
+        Delete Local HD Wallet
+      </TextButton>
+      <Text
+          mt={1}
+          mb={2}
+          variant="body"
+          fontSize={1}
+          opacity={0.8}
+          color={baseTheme.colors.text.secondary}
+        >
+          Delete your encrypted mnemonic from local storage.
+        </Text>
+      <br/>
+      <TextButton
+        highlightColor="#EC415A"
+        showBackground
+        textColor="#EC415A"
+        style={{ fontWeight: 400 }}
+        onClick={() => WalletActions.deleteShipWallet()}
+      >
+        Delete Ship HD Wallet
+      </TextButton>
+      <Text
+          mt={1}
+          mb={2}
+          variant="body"
+          fontSize={1}
+          opacity={0.8}
+          color={baseTheme.colors.text.secondary}
+        >
+          Completely delete your HD wallet locally and on your ship.
+        </Text>
     </Flex>
   );
 });
