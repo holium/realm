@@ -2,12 +2,13 @@ import { FC, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
 
-import { Flex, Pulser, Sigil, Box } from 'renderer/components';
+import { Flex, Pulser, Box } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { motion } from 'framer-motion';
+import { Avatar } from '@holium/design-system';
 
 const position = 'top-left';
 const anchorOffset = { x: 8, y: 26 };
@@ -68,12 +69,14 @@ export const AccountTray: FC<AccountTrayProps> = observer(
       >
         {ship ? (
           <Flex style={{ pointerEvents: 'none' }}>
-            <Sigil
+            <Avatar
               simple
-              size={28}
+              clickable={false}
               avatar={ship.avatar}
               patp={ship.patp}
-              color={[ship.color || '#000000', 'white']}
+              size={26}
+              borderRadiusOverride="4px"
+              sigilColor={[ship.color || '#000000', '#FFF']}
             />
           </Flex>
         ) : (

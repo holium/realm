@@ -19,8 +19,8 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
 
   :root {
     ${(props: StyleProps) => css`
-      --blur-enabled: ${props.blur ? 'blur(24px)' : 'none'}; */
-      --transition-fast: .4s ease;
+      --blur-enabled: ${props.blur ? 'blur(24px)' : 'none'};
+      --transition-fast: 0.4s ease;
       --transition: all 0.25s ease;
       --transition-2x: all 0.5s ease;
       --rlm-border-radius-4: 4px;
@@ -41,6 +41,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
         ? lighten(0.07, props.realmTheme.windowColor)
         : darken(0.1, props.realmTheme.windowColor)};
       --rlm-window-color: ${props.realmTheme.windowColor};
+      --rlm-dock-color: ${rgba(props.realmTheme.windowColor, 0.65)};
       --rlm-card-color: ${props.realmTheme.windowColor};
       --rlm-theme-mode: ${props.realmTheme.mode};
       --rlm-text-color: ${props.realmTheme.textColor};
@@ -48,6 +49,12 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --rlm-intent-alert-color: #ff6240;
       --rlm-intent-caution-color: #ffbc32;
       --rlm-intent-success-color: #0fc383;
+      --rlm-overlay-hover: ${props.realmTheme.mode === 'light'
+        ? 'rgba(0, 0, 0, 0.05)'
+        : 'rgba(255, 255, 255, 0.05)'};
+      --rlm-overlay-active: ${props.realmTheme.mode === 'light'
+        ? 'rgba(0, 0, 0, 0.09)'
+        : 'rgba(255, 255, 255, 0.09)'};
     }
   `}
 

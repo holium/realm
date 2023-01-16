@@ -2,10 +2,11 @@ import { FC, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
-import { IconButton, Icons, Tooltip } from 'renderer/components';
+import { Tooltip } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { BarButton, Icon } from '@holium/design-system';
 
 const position = 'top-left';
 const anchorOffset = { x: 4, y: 26 };
@@ -56,7 +57,17 @@ export const WalletTray: FC<WalletTrayProps> = observer(
         placement="top"
         show
       >
-        <IconButton
+        <BarButton
+          id="wallet-tray-icon"
+          height={28}
+          width={28}
+          whileTap={{ scale: 0.95 }}
+          transition={{ scale: 0.1 }}
+          opacity={0.5}
+        >
+          <Icon name="WalletTray" size={24} pointerEvents="none" />
+        </BarButton>
+        {/* <IconButton
           id="wallet-tray-icon"
           size={28}
           customBg={iconHoverColor}
@@ -67,7 +78,7 @@ export const WalletTray: FC<WalletTrayProps> = observer(
           // onClick={onButtonClick}
         >
           <Icons name="Wallet" pointerEvents="none" />
-        </IconButton>
+        </IconButton> */}
       </Tooltip>
     );
   }

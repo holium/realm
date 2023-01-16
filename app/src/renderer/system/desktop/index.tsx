@@ -20,7 +20,7 @@ export const Desktop = observer(() => {
         </Layer>
         <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
         <Layer zIndex={12}>
-          <Bottom size={58}>
+          <Bottom size={56}>
             <SystemBar />
           </Bottom>
         </Layer>

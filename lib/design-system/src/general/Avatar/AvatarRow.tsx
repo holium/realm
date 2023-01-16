@@ -1,15 +1,15 @@
 import { FC } from 'react';
 import { Flex, Box, Avatar } from '../../';
 
-type PersonData = {
+export type ContactData = {
   patp: string;
-  nickname: string;
+  nickname?: string;
   color: string;
-  avatar: string;
+  avatar?: string;
 };
 
 interface AvatarRowProps {
-  people: PersonData[];
+  people: ContactData[];
   size: number;
   borderRadiusOverride?: string;
   offset?: number;
@@ -23,7 +23,7 @@ export const AvatarRow: FC<AvatarRowProps> = ({
 }: AvatarRowProps) => {
   return (
     <Flex ml={`${offset}px`} flexDirection="row" alignItems="center">
-      {people.map((person: PersonData, index: number) => {
+      {people.map((person: ContactData, index: number) => {
         return (
           <Box
             style={{
@@ -32,7 +32,7 @@ export const AvatarRow: FC<AvatarRowProps> = ({
                   ? 'none'
                   : `inset(0px 0px 0px ${offset + 1.2}px round 0px)`,
             }}
-            key={person.patp}
+            key={`${person.patp} - ${index}`}
             ml={`-${offset}px`}
             zIndex={people.length - index}
           >

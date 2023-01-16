@@ -1,11 +1,10 @@
 import { FC, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
-
 import { observer } from 'mobx-react';
-
-import { IconButton, Icons, Badge, Flex } from 'renderer/components';
+import { Badge, Flex } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { Icon, BarButton } from '@holium/design-system';
 interface MessagesTrayProps {
   theme: any;
 }
@@ -67,15 +66,24 @@ export const MessagesTray: FC<MessagesTrayProps> = observer(
           minimal
           count={0}
         >
-          <IconButton
+          <BarButton
+            id="wallet-tray-icon"
+            height={28}
+            whileTap={{ scale: 0.95 }}
+            transition={{ scale: 0.1 }}
+            width={28}
+          >
+            <Icon name="Messages" size={24} pointerEvents="none" />
+          </BarButton>
+          {/* <IconButton
             size={iconSize}
             customBg={iconHoverColor}
             color={textColor}
             whileTap={{ scale: 0.9 }}
             transition={{ scale: 0.1 }}
           >
-            <Icons name="Messages" pointerEvents="none" />
-          </IconButton>
+            <Icon name="Messages" size={24} pointerEvents="none" />
+          </IconButton> */}
         </Badge>
       </Flex>
     );

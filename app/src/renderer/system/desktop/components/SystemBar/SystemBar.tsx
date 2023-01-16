@@ -1,24 +1,18 @@
+import { CommunityBar } from './components/CommunityBar';
+import { HomeButton } from './components/HomeButton';
+
 import { FC } from 'react';
 import { Flex } from 'renderer/components';
-import { HomeButton } from './components/HomeButton';
-import { ShipTray } from './components/ShipBar';
-import { CommunityBar } from './components/CommunityBar';
+import { ShipBar } from './components/ShipBar';
 
 interface SystemBarProps {}
 
 export const SystemBar: FC<SystemBarProps> = () => {
   return (
-    <Flex
-      onContextMenu={(evt: any) => {
-        evt.stopPropagation();
-      }}
-      gap={8}
-      margin="8px"
-      flexDirection="row"
-    >
+    <Flex margin={2} flexDirection="row" width="auto" gap={8}>
       <HomeButton />
       <CommunityBar />
-      <ShipTray />
+      <ShipBar />
     </Flex>
   );
 };
