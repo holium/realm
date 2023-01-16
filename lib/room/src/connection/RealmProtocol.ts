@@ -258,20 +258,20 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.local.on(PeerEvent.Muted, () => {
       console.log('sending muting signal');
-      this.sendData({
-        from: this.local.patp,
-        kind: DataPacket_Kind.MUTE_STATUS,
-        value: {data: true }
-      })
-    })
+      // this.sendData({
+      //   from: this.local.patp,
+      //   kind: DataPacket_Kind.MUTE_STATUS,
+      //   value: {data: true }
+      // })
+    });
     this.local.on(PeerEvent.Unmuted, () => {
       console.log('sending unmuting signal');
-      this.sendData({
-        from: this.local.patp,
-        kind: DataPacket_Kind.MUTE_STATUS,
-        value: {data: false }
-      })
-    })
+      // this.sendData({
+      //   from: this.local.patp,
+      //   kind: DataPacket_Kind.MUTE_STATUS,
+      //   value: {data: false }
+      // })
+    });
   }
 
   /**
@@ -449,20 +449,20 @@ export class RealmProtocol extends BaseProtocol {
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
-      this.sendData({
-        from: this.local.patp,
-        kind: DataPacket_Kind.MUTE_STATUS,
-        value: {data: this.local.isMuted }
-      })
+      // this.sendData({
+      //   from: this.local.patp,
+      //   kind: DataPacket_Kind.MUTE_STATUS,
+      //   value: { data: this.local.isMuted },
+      // });
     });
 
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
       if (data.kind === DataPacket_Kind.MUTE_STATUS) {
-        if (data.value.data) {
-          remotePeer.mute();
-        } else {
-          remotePeer.unmute();
-        }
+        // if (data.value.data) {
+        //   remotePeer.mute();
+        // } else {
+        //   remotePeer.unmute();
+        // }
       } else {
         this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
       }

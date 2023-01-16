@@ -13,7 +13,7 @@ import {
 import { ContactRow } from './components/ContactRow';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten } from 'polished';
+import { darken, rgba, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import {
   PreviewDMType,
@@ -150,8 +150,6 @@ export const DMs = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
-          // windowColor: rgba(windowColor, 0.8),
           windowColor,
         }}
       >
@@ -177,7 +175,7 @@ export const DMs = observer((props: IProps) => {
               backgroundColor:
                 theme.mode === 'dark'
                   ? lighten(0.1, windowColor)
-                  : darken(0.055, windowColor),
+                  : rgba(darken(0.075, windowColor), 0.5),
             }}
             onChange={(evt: any) => {
               evt.stopPropagation();
@@ -204,7 +202,6 @@ export const DMs = observer((props: IProps) => {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: windowColor,
         }}
         overflowY="hidden"
       >

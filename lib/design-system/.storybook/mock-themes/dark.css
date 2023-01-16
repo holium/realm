@@ -1,7 +1,7 @@
 
 :root {
   --theme-mode: 'dark';
-  --blur-enabled: blur(24px);
+  --blur: blur(24px);
   --transition: all 0.25s ease;
   --transition-slow: all 0.5s ease;
   --rlm-font: 'Rubik', sans-serif;

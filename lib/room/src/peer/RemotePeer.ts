@@ -203,7 +203,8 @@ export class RemotePeer extends Peer {
 
   sendData(data: DataPacket): void {
     if (this.status !== PeerConnectionState.Connected) {
-      throw new Error("can't send data unless connected");
+      console.warn("can't send data unless connected");
+      return;
     }
     this.peer?.send(JSON.stringify(data));
   }

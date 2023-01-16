@@ -27,17 +27,17 @@ export type BarStyleProps = SpaceProps &
 
 export const BarStyle = styled(styled(motion.div)<BarStyleProps>`
   position: relative;
-  z-index: 3;
+  z-index: 14;
   height: 40px;
   width: auto;
   display: flex;
   flex-direction: row;
   align-items: center;
   border-radius: 6px;
-  backdrop-filter: var(--blur-enabled);
+  backdrop-filter: var(--blur);
+  /* transform: translate3d(0, 0, 0); */
   backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  perspective: 1000;
+  -webkit-backface-visibility: hidden;
   transition: var(--transition-slow);
   background: var(--rlm-dock-color);
 `)<BarStyleProps>(

@@ -19,13 +19,13 @@ export const Desktop = observer(() => {
           <WindowManager />
         </Layer>
         <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
-        <Layer zIndex={12}>
+        <Layer zIndex={13}>
+          <TrayManager />
+        </Layer>
+        <Layer zIndex={14}>
           <Bottom size={56}>
             <SystemBar />
           </Bottom>
-        </Layer>
-        <Layer zIndex={13}>
-          <TrayManager />
         </Layer>
       </Fill>
     </RoomsProvider>

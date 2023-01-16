@@ -9,7 +9,14 @@ interface SystemBarProps {}
 
 export const SystemBar: FC<SystemBarProps> = () => {
   return (
-    <Flex margin={2} flexDirection="row" width="auto" gap={8}>
+    <Flex
+      position="relative"
+      zIndex={14}
+      margin={2}
+      flexDirection="row"
+      width="auto"
+      gap={8}
+    >
       <HomeButton />
       <CommunityBar />
       <ShipBar />
