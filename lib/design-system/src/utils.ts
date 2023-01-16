@@ -2,7 +2,6 @@ export const getVar = (varName: string) => {
   const value = getComputedStyle(document.documentElement).getPropertyValue(
     varName
   );
-  console.log('getVar', varName, value);
   return value.replace(/\s/g, '');
 };
 
@@ -13,4 +12,8 @@ export const isImgUrl = (url: string): Promise<boolean> => {
     img.onerror = () => resolve(false);
     img.onload = () => resolve(true);
   });
+};
+
+export const pluralize = (word: string, amount: number) => {
+  return `${word}${amount === 1 ? '' : 's'}`;
 };

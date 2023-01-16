@@ -13,6 +13,7 @@
     "storybook": "start-storybook -p 6006"
   },
   "dependencies": {
+    "@tlon/sigil-js": "^1.4.5",
     "dom-helpers": "^5.2.1",
     "framer-motion": "^7.6.7",
     "polished": "^4.2.2",

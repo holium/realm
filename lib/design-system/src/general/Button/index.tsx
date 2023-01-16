@@ -205,6 +205,26 @@ const TextButton = styled(Base)<TextButtonProps>`
   }
 `;
 
+export type IconButtonProps = ButtonProps & { showOnHover?: boolean };
+
+const IconButton = styled(Base)<IconButtonProps>`
+  padding: 0px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  &:hover:not([disabled]) {
+    background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
+  }
+  &:active:not([disabled]) {
+    background-color: ${() => darken(0.05, getVar('--rlm-window-color'))};
+  }
+  svg {
+    fill: var(--rlm-icon-color);
+  }
+`;
+
 export const Button = {
   Base,
   Primary,
@@ -212,4 +232,5 @@ export const Button = {
   Minimal,
   Transparent,
   TextButton,
+  IconButton,
 };
