@@ -232,7 +232,7 @@ export class RealmProtocol extends BaseProtocol {
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
           console.log('room present', room.present);
-          this.rooms.set(payload.rid, room);
+          // this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
@@ -346,6 +346,9 @@ export class RealmProtocol extends BaseProtocol {
       path,
     };
     this.transitions.creating = newRoom;
+    if (this.presentRoom) {
+      this.hangupAll();
+    }
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
       app: 'rooms-v2',
