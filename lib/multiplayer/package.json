@@ -12,7 +12,7 @@
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
-    "build": "yarn add --dev @preconstruct/cli && yarn preconstruct init && yarn preconstruct dev && preconstruct build",
+    "build": "yarn add --dev @preconstruct/cli && yarn preconstruct init && preconstruct build",
     "build:prod": "preconstruct build",
     "postinstall": "preconstruct dev"
   },
