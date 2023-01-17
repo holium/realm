@@ -15,6 +15,13 @@ export interface APIHandlers {
   scry: (params: any) => Promise<any>;
 }
 
+interface RoomTransitionStates {
+  creating: RoomType | null;
+  leaving: RoomType | null;
+  entering: RoomType | null;
+  deleting: RoomType | null;
+}
+
 /**
  * An implementation of the BaseProtocol that uses passed in handlers to communicate with
  * Realm's OS process
@@ -24,15 +31,23 @@ export class RealmProtocol extends BaseProtocol {
   scry: (...args: any) => Promise<any>;
   queuedPeers: Patp[] = []; // peers that we have queued to dial
   disposePresentRoom: any; // this is a mobx observable disposer
+  transitions: RoomTransitionStates; // keeps track of transitions for latency handling
   constructor(our: Patp, config: ProtocolConfig, handlers: APIHandlers) {
     super(our, config);
 
     this.onSignal = this.onSignal.bind(this);
     this.sendSignal = this.sendSignal.bind(this);
     this.cleanup = this.cleanup.bind(this);
+    this.transitions = {
+      creating: null,
+      leaving: null,
+      entering: null,
+      deleting: null,
+    };
 
     makeObservable(this, {
       queuedPeers: observable,
+      transitions: observable,
       dialAll: action.bound,
       hangupAll: action.bound,
       setSessionData: action.bound,
@@ -187,6 +202,7 @@ export class RealmProtocol extends BaseProtocol {
               }
             } else {
               this.emit(ProtocolEvent.RoomEntered, room);
+              this.transitions.entering = null;
             }
           } else {
             // if we are not in the room, we need to connect
@@ -202,13 +218,16 @@ export class RealmProtocol extends BaseProtocol {
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
             this.hangup(payload.ship);
+          } else {
+            this.hangupAll();
+            this.emit(ProtocolEvent.RoomLeft, payload.rid);
+            this.transitions.leaving = null;
           }
-          // else we left the room (already)
         }
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
+          // this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
@@ -217,6 +236,7 @@ export class RealmProtocol extends BaseProtocol {
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
           this.emit(ProtocolEvent.RoomCreated, room);
+          this.transitions.creating = null;
         }
       }
       if (data['kicked']) {
@@ -234,7 +254,7 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
+          // this.rooms.set(payload.rid, room);
         }
       }
     }
@@ -320,6 +340,7 @@ export class RealmProtocol extends BaseProtocol {
       capacity: 6,
       path,
     };
+    this.transitions.creating = newRoom;
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
       app: 'rooms-v2',
@@ -385,6 +406,7 @@ export class RealmProtocol extends BaseProtocol {
   async connect(room: RoomType): Promise<Map<Patp, RemotePeer>> {
     if (!room.present.includes(this.our)) {
       this.rooms.set(room.rid, room);
+      this.transitions.entering = room;
       await this.poke({
         app: 'rooms-v2',
         mark: 'rooms-v2-session-action',
@@ -537,6 +559,10 @@ export class RealmProtocol extends BaseProtocol {
     this.hangupAll();
     this.peers.clear();
     const room = this.rooms.get(rid);
+    if (room) {
+      this.transitions.leaving = room;
+      this.emit(ProtocolEvent.RoomLeft, room);
+    }
     await this.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
@@ -544,7 +570,6 @@ export class RealmProtocol extends BaseProtocol {
         'leave-room': rid,
       },
     });
-    this.emit(ProtocolEvent.RoomLeft, room!);
   }
 }
 
