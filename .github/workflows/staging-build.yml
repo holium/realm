@@ -65,68 +65,68 @@ jobs:
           BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
-  build-mac:
-    if: github.event.pull_request.merged == true
-    needs: [pre-deploy]
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-          cache: 'npm'
-      - name: Install the Apple certificate
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          # create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          # import certificate and provisioning profile from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-          # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
-          # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-          # apply provisioning profile
-          # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-      - name: Install yarn
-        run: npm install -g yarn
-      - name: Install app dependencies
-        run: yarn install
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin master
-      - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
-        run: |
-          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          mv ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # build-mac:
+  #   if: github.event.pull_request.merged == true
+  #   needs: [pre-deploy]
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     - name: Setup node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '14'
+  #         cache: 'npm'
+  #     - name: Install the Apple certificate
+  #       env:
+  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+  #         # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+  #         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+  #       run: |
+  #         # create variables
+  #         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+  #         # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+  #         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+  #         # import certificate and provisioning profile from secrets
+  #         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+  #         # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+  #         # create temporary keychain
+  #         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+  #         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         # import certificate to keychain
+  #         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+  #         security list-keychain -d user -s $KEYCHAIN_PATH
+  #         # apply provisioning profile
+  #         # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+  #         # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+  #     - name: Install yarn
+  #       run: npm install -g yarn
+  #     - name: Install app dependencies
+  #       run: yarn install
+  #     - name: Pull latest
+  #       run: |
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git pull origin master
+  #     - name: Build and publish
+  #       run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+  #       env:
+  #         APPLE_ID: ${{ secrets.APPLE_ID }}
+  #         APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+  #     #
+  #     - name: Deploy binaries and other artifacts to draft release
+  #       run: |
+  #         # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+  #         mv ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
+  #         gh release upload $BUILD_VERSION ./app/release/build/*.*
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   build-windows:
     if: github.event.pull_request.merged == true
@@ -147,7 +147,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-windows]
+    needs: [pre-deploy, build-windows]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -226,7 +226,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, build-windows, deploy-desks]
+    needs: [pre-deploy, build-windows, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
