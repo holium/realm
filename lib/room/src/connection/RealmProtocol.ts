@@ -7,7 +7,7 @@ import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
-import { isInitiator, isWeb, isWebRTCSignal } from '../utils';
+import { isDialer, isInitiator, isWeb, isWebRTCSignal } from '../utils';
 import { PeerConnectionState } from '../peer/types';
 
 export interface APIHandlers {
@@ -114,7 +114,11 @@ export class RealmProtocol extends BaseProtocol {
           remotePeer?.onWaiting();
           console.log('got waiting signal from', payload.from);
           if (!remotePeer) {
-            console.log('got waiting signal from unknown peer', payload.from);
+            console.log(
+              'QUEUED PEERS: got waiting signal from unknown peer',
+              payload.from
+            );
+            this.queuedPeers.push(payload.from);
           }
         }
 
@@ -140,6 +144,7 @@ export class RealmProtocol extends BaseProtocol {
             // we already have a peer for this patp, so we can just pass the signal to it
             if (!remotePeer.peer) {
               // if we don't have a peer connection yet, we need to create one
+              console.log('WEBRTC SIGNAL: no peer connection, creating one');
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
             } else {
@@ -463,7 +468,7 @@ export class RealmProtocol extends BaseProtocol {
     }
     const peerConfig = {
       isHost,
-      isInitiator: isInitiator(this.local.patpId, peer),
+      isInitiator: isDialer(this.local.patp, peer),
       rtc: this.rtc,
     };
     const remotePeer = new RemotePeer(

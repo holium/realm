@@ -87,13 +87,17 @@ export class RemotePeer extends Peer {
 
   dial() {
     this.setStatus(PeerConnectionState.Connecting);
-
-    if (!this.isInitiator) {
-      console.log('dialing: initiator to send ready signal');
-      this.ready();
-    } else {
-      console.log('dialing: waiting to send ready signal');
+    // if (!this.isInitiator) {
+    //   console.log('dialing: initiator to send ready signal');
+    //   // this.ready();
+    // } else {
+    //   console.log('dialing: waiting to send ready signal');
+    //   this.waiting();
+    // }
+    if (this.isInitiator) {
+      // console.log('dialing: initiator to send waiting signal');
       this.waiting();
+      // this.ready();
     }
   }
 
@@ -102,6 +106,7 @@ export class RemotePeer extends Peer {
     // after the remote peer has sent a ready signal. In this case,
     // we need to send a waiting signal to the remote peer so that
     // it knows to send a ready signal again.
+    console.log(`waiting: ${this.patp}`);
     this.readyStatus = WAITING;
     this.sendSignal(this.patp, { type: 'waiting', from: this.our });
   }
@@ -114,7 +119,7 @@ export class RemotePeer extends Peer {
       // this.status === PeerConnectionState.Connecting ||
       this.readyStatus === WAITING
     ) {
-      console.log('onWaiting', this.patp, this.status, this.readyStatus);
+      console.log('onWaiting:', this.patp, this.status, this.readyStatus);
       // console.log(`sending ready to ${this.patp}`);
       this.ready();
     }
@@ -125,18 +130,22 @@ export class RemotePeer extends Peer {
     // if we receive a waiting signal
     this.readyStatus = READY;
     this.sendSignal(this.patp, { type: READY, from: this.our });
-    console.log(`sending ready to ${this.patp}`);
+    console.log(`ready: ${this.patp}`);
     this.createConnection();
   }
 
   onReady() {
-    console.log(`${this.patp} is ready`);
+    console.log(`onReady: ${this.patp}`);
     this.readyStatus = READY;
     this.createConnection();
   }
 
   peerSignal(data: SimplePeer.SignalData) {
     if (this.peer?.destroyed) {
+      console.log(
+        'peerSignal: peer destroyed, creating new connection',
+        this.patp
+      );
       // NOTE: this is a hack to get around latency issues in Urbit.
       // Sometimes a peer is destroyed and then a signal is received
       this.dial();
