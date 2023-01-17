@@ -25,6 +25,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin master
+      #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
         id: ci
@@ -41,9 +48,6 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git stash
-          git pull origin master
-          git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
           git push
