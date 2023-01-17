@@ -73,4 +73,8 @@ export default class EncryptedStore<T> {
     );
     return JSON.parse(bytes.toString(CryptoJS.enc.Utf8)).data;
   }
+
+  delete() {
+    this.db.clear();
+  }
 }

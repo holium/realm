@@ -288,10 +288,10 @@ export class WalletService extends BaseService {
     resetNavigation: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.reset-navigation');
     },
-    deleteLocalWallet: async () => {
+    deleteLocalWallet: async (passcode: number[]) => {
       return await ipcRenderer.invoke('realm.tray.wallet.delete-local-wallet')
     },
-    deleteShipWallet: async () => {
+    deleteShipWallet: async (passcode: number[]) => {
       return await ipcRenderer.invoke('realm.tray.wallet.delete-ship-wallet')
     }
   };
@@ -822,11 +822,13 @@ export class WalletService extends BaseService {
     this.state!.resetNavigation();
   }
 
-  async deleteLocalWallet() {
-
+  async deleteLocalWallet(passcode: number[]) {
+    const passcodeString = passcode.map(String).join('');
+    (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
   }
 
-  async deleteShipWallet() {
-
+  async deleteShipWallet(passcode: number[]) {
+    const passcodeString = passcode.map(String).join('');
+    (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
   }
 }

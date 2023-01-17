@@ -20,19 +20,14 @@ export class RealmSigner implements BaseSigner {
       passcode,
       mnemonic,
     );*/
-    console.log('SETTING MNEMONIC', mnemonic);
-    console.log('setting passcode', passcode);
     const storeParams = {
       name: 'mnemonic',
       cwd: `realm.${patp}`,
       secretKey: passcode,
       accessPropertiesByDotNotation: true,
     };
-    console.log('trying to encrypt')
     const db = new EncryptedStore<string>(storeParams);
-    console.log('made db')
     db.store = mnemonic;
-    console.log('made db finished')
   }
   signTransaction(path: string, message: any, patp: string, passcode: string): any {
     const privateKey = this.getPrivateKey(patp, passcode);
@@ -82,5 +77,15 @@ export class RealmSigner implements BaseSigner {
   }
   getXpub(path: string, patp: string, passcode: string): string {
     return this.getPrivateKey(patp, passcode).derivePath(path).neuter().extendedKey;
+  }
+  deleteMnemonic(patp: string, passcode: string) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    db.delete();
   }
 }
