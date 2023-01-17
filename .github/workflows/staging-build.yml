@@ -54,6 +54,7 @@ jobs:
           git push
       #
       - name: Start release draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         # create annotated tag for this branch. this will become basis for the release
         run: |
           mkdir -p ./app/release/build
