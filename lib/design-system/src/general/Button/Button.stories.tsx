@@ -37,5 +37,10 @@ export const Default: ComponentStory<typeof Button.Base> = () => (
         TextButton
       </Button.TextButton>
     </Flex>
+    <Flex gap={12}>
+      <Button.IconButton size={32}>
+        <Icon name="Attachment" />
+      </Button.IconButton>
+    </Flex>
   </Flex>
 );

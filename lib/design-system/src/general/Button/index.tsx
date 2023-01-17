@@ -93,11 +93,12 @@ const buttonStyles = compose(
 
 const Base = styled(motion.button)<ButtonProps>`
   box-sizing: border-box;
-  flex-basis: content;
   appearance: none;
   width: fit-content;
   display: inline-flex;
   align-items: center;
+  flex-basis: initial;
+  font-size: 0.889rem;
   gap: 4px;
   border: 1px solid transparent;
   border-radius: var(--rlm-border-radius-4);
@@ -209,16 +210,23 @@ export type IconButtonProps = ButtonProps & { showOnHover?: boolean };
 
 const IconButton = styled(Base)<IconButtonProps>`
   padding: 0px;
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   background-color: transparent;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-hover);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('--rlm-window-color'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-active);
+  }
+  &:focus:not([disabled]) {
+    outline: none;
+    background-color: var(--rlm-overlay-active);
+    /* border: 2px solid var(--rlm-accent-color); */
   }
   svg {
     fill: var(--rlm-icon-color);
