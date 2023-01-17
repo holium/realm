@@ -29,8 +29,8 @@
   "exclude": [
     "dist",
     "node_modules",
-    ".template/<name>.stories.tsx",
-    ".template/<name>.tests.tsx",
-    ".template/index.tsx"
+    ".template/name.stories.tsx",
+    ".template/name.tests.tsx",
+    ".template/name.tsx"
   ]
 }

@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../../';
-import { Template } from './';
+import { Template } from './name';
 
 export default {
   component: Template,
