@@ -70,6 +70,7 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
           }
           setValue(evt.target.value);
         }}
+        onKeyDown={props.onKeyDown}
       />
     </InputBox>
   );

@@ -1,4 +1,4 @@
-import { FC, useState, useCallback } from 'react';
+import { FC, useState, useCallback, KeyboardEvent } from 'react';
 import {
   Grid,
   Text,
@@ -18,7 +18,8 @@ import { useServices } from 'renderer/logic/store';
 const stubAccessCode = {
   title: 'Combine DAO',
   description: 'Investing in Urbit companies together since 2022.',
-  image: 'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
+  image:
+    'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
   id: 'combine-dao',
   type: 'DAO',
 };
@@ -111,13 +112,23 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   }
 
   async function redeemCode() {
-    await OnboardingActions.setAccessCode(accessCode!);
-    props.onNext && props.onNext();
+    try {
+      await OnboardingActions.setAccessCode(accessCode!);
+      props.onNext && props.onNext();
+    } catch {
+      setErrorMessage('Error redeeming access code.');
+    }
   }
 
   function proceedWithout() {
     props.onNext && props.onNext();
   }
+
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (inputText) redeemCode();
+    }
+  };
 
   return (
     <Grid.Column noGutter lg={12} xl={12} px={32}>
@@ -185,6 +196,7 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
                   value={inputText}
                   placeholder="alchemy-dao"
                   onChange={inputChangeHandler}
+                  onKeyDown={onKeyDown}
                 />
                 <Box mt={12} height={18}>
                   <Text variant="body" color="text.error">

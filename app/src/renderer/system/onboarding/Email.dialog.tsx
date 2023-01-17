@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, KeyboardEventHandler, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
@@ -62,6 +62,10 @@ function InitialScreen(props: { done: any }) {
     response.success ? props.done() : setError(response.errorMessage);
   };
 
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') onClick();
+  };
+
   return (
     <>
       <Flex flexDirection="column">
@@ -78,7 +82,13 @@ function InitialScreen(props: { done: any }) {
         <Label mb={3} required={true}>
           Email
         </Label>
-        <Input value={email} onChange={onChange} type="email" required={true} />
+        <Input
+          value={email}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          type="email"
+          required={true}
+        />
         <Box mt={7} width="100%">
           <Button
             width="100%"
