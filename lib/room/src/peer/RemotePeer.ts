@@ -112,7 +112,8 @@ export class RemotePeer extends Peer {
       // this.status === PeerConnectionState.Connecting ||
       this.readyStatus === WAITING
     ) {
-      console.log(`sending ready to ${this.patp}`);
+      console.log('onWaiting', this.patp);
+      // console.log(`sending ready to ${this.patp}`);
       this.ready();
     }
   }
