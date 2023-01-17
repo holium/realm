@@ -115,6 +115,7 @@ export class RealmProtocol extends BaseProtocol {
           remotePeer?.onWaiting();
           if (!remotePeer) {
             console.log('got waiting signal from unknown peer', payload.from);
+            this.queuedPeers.push(payload.from);
           }
         }
 
