@@ -94,7 +94,6 @@ export class RealmProtocol extends BaseProtocol {
         this.provider = session.provider;
         this.rooms = new Map(Object.entries(session.rooms));
         if (currentRoom) {
-          // this.leave(currentRoom.rid);
           // if we are in a room, send the event up to RoomManager
           this.emit(ProtocolEvent.RoomInitial, currentRoom);
         }
@@ -115,7 +114,6 @@ export class RealmProtocol extends BaseProtocol {
           remotePeer?.onWaiting();
           if (!remotePeer) {
             console.log('got waiting signal from unknown peer', payload.from);
-            // this.queuedPeers.push(payload.from);
           }
         }
 
@@ -123,7 +121,6 @@ export class RealmProtocol extends BaseProtocol {
           remotePeer?.onReady();
           if (!remotePeer) {
             console.log('got ready signal from unknown peer', payload.from);
-            // this.queuedPeers.push(payload.from);
           }
         }
 
@@ -232,7 +229,6 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
@@ -258,7 +254,7 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
+          // this.rooms.set(payload.rid, room);
         }
       }
     }
@@ -414,12 +410,6 @@ export class RealmProtocol extends BaseProtocol {
     if (!room.present.includes(this.our)) {
       this.rooms.set(room.rid, room);
       this.transitions.entering = room;
-      runInAction(() => {
-        this.presentRoom = room;
-        this.disposePresentRoom = observe(this.presentRoom, (change) => {
-          this.emit(ProtocolEvent.RoomUpdated, change.object);
-        });
-      });
       await this.poke({
         app: 'rooms-v2',
         mark: 'rooms-v2-session-action',
@@ -428,6 +418,12 @@ export class RealmProtocol extends BaseProtocol {
         },
       });
     }
+    runInAction(() => {
+      this.presentRoom = room;
+      this.disposePresentRoom = observe(this.presentRoom, (change) => {
+        this.emit(ProtocolEvent.RoomUpdated, change.object);
+      });
+    });
 
     return this.dialAll(room);
   }
