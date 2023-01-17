@@ -1,9 +1,4 @@
 #
-# todo:
-#  look into: https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#disable-a-workflow
-#  for notes on how to disable a workflow run temporarily as a means
-#  of preventing multiple simultaneous builds
-#
 name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
