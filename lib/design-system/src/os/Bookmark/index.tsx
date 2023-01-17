@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Flex, BoxProps } from '../../';
+import { Flex, BoxProps } from '../..';
 
 type BookmarkProps = {
   myProp?: string;

@@ -1,7 +1,7 @@
 import { Layout } from '../../components/Layout';
 import React, { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Text, Favicon, Row, BoxProps, Icon, Button } from '../../';
+import { Text, Favicon, Row, BoxProps, Icon, Button } from '../..';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 const widths = {
