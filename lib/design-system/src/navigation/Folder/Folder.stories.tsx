@@ -1,24 +1,37 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Row } from '../..';
+import styled from 'styled-components';
+import { Text, Flex, Row } from '../..';
 import { Folder } from '.';
+
+const SidebarList = styled(Flex)`
+  gap: 2px;
+  flex-direction: column;
+  width: 300px;
+`;
 
 export default {
   component: Folder,
 } as ComponentMeta<typeof Folder>;
 
 export const Default: ComponentStory<typeof Folder> = () => (
-  <Flex flexDirection="column" width={300}>
+  <SidebarList>
     <Folder label="Dev research">
       <Flex gap={2} flexDirection="column">
         <Row>Child 1</Row>
         <Row>Child 2</Row>
       </Flex>
     </Folder>
-  </Flex>
+    <Folder
+      label="Dev research"
+      rightContent={<Text.Custom opacity={0.4}>Private</Text.Custom>}
+    >
+      <Row>Private Child 1</Row>
+    </Folder>
+  </SidebarList>
 );
 
 export const NestedFolders: ComponentStory<typeof Folder> = () => (
-  <Flex flexDirection="column" width={300}>
+  <SidebarList>
     <Folder label="Dev research">
       <Row>Child 1</Row>
       <Row>Child 2</Row>
@@ -31,11 +44,17 @@ export const NestedFolders: ComponentStory<typeof Folder> = () => (
         <Row>Child 6</Row>
       </Folder>
     </Folder>
-  </Flex>
+    <Folder
+      label="Dev research"
+      rightContent={<Text.Custom opacity={0.4}>Private</Text.Custom>}
+    >
+      <Row>Private Child 1</Row>
+    </Folder>
+  </SidebarList>
 );
 
 export const DeepNestedFolders: ComponentStory<typeof Folder> = () => (
-  <Flex flexDirection="column" width={300}>
+  <SidebarList>
     <Folder label="Dev research">
       <Row>Child 1</Row>
       <Folder label="Hoon">
@@ -51,5 +70,11 @@ export const DeepNestedFolders: ComponentStory<typeof Folder> = () => (
         </Folder>
       </Folder>
     </Folder>
-  </Flex>
+    <Folder
+      label="Dev research"
+      rightContent={<Text.Custom opacity={0.4}>Private</Text.Custom>}
+    >
+      <Row>Private Child 1</Row>
+    </Folder>
+  </SidebarList>
 );

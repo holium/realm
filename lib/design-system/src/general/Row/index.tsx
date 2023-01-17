@@ -10,7 +10,7 @@ interface RowProps {
 }
 
 export const Row = styled(Button.Base)<RowProps>`
-  border-radius: 8px;
+  border-radius: 6px;
   width: 100%;
   padding: 8px;
   display: flex;

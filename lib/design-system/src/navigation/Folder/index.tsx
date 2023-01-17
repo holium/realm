@@ -3,6 +3,7 @@ import { Flex, BoxProps, Icon, Row } from '../..';
 
 type FolderProps = {
   label: string;
+  rightContent?: React.ReactNode;
   onToggleChildren?: (
     evt: React.MouseEvent<HTMLButtonElement>,
     showChilden: boolean
@@ -10,7 +11,7 @@ type FolderProps = {
 } & BoxProps;
 
 export const Folder: FC<FolderProps> = (props: FolderProps) => {
-  const { label, onToggleChildren = () => {}, children } = props;
+  const { label, rightContent, onToggleChildren = () => {}, children } = props;
 
   const [showChildren, setShowChildren] = useState(false);
 
@@ -33,11 +34,19 @@ export const Folder: FC<FolderProps> = (props: FolderProps) => {
             <Icon name="Folder" size={14} opacity={0.4} />
             {label}
           </Flex>
-          <Icon
-            name={showChildren ? 'ChevronUp' : 'ChevronDown'}
-            size={18}
-            opacity={0.4}
-          />
+          <Flex
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+            gap={6}
+          >
+            {rightContent}
+            <Icon
+              name={showChildren ? 'ChevronUp' : 'ChevronDown'}
+              size={18}
+              opacity={0.4}
+            />
+          </Flex>
         </Flex>
       </Row>
       <Flex ml={2} gap={2} flexDirection="column">
