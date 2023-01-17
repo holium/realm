@@ -296,17 +296,27 @@
                 capacity.room  max-occupancy:lib
                 path.room      path
             ==
-          =/  old-rooms               (get-created-rooms:helpers:rooms:hol src.bol)
-          ::  TODO also get any rooms the new creator is currently in
-          =.  rooms.provider.state    (~(dif by rooms.provider.state) old-rooms)  :: remove old rooms
+          =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
+          =.  rooms.provider.state    :: remove old room if it exists
+            ?~  old-room  rooms.provider.state 
+            ?:  =(src.bol creator.u.old-room)
+              :: creator is leaving the room, so delete it
+              (~(del by rooms.provider.state) rid.u.old-room)
+            :: if participant is leaving, remove participant
+            =.  present.u.old-room    (~(del in present.u.old-room) src.bol)
+            (~(put by rooms.provider.state) [rid.u.old-room u.old-room])
+          ::
+          =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
+          =/  delete-cards            ::  prep cards to update delete old rooms by the creator
+            ?~  old-room  ~
+            ?:  =(src.bol creator.u.old-room) 
+              ::  creator is leaving the room, so delete it
+              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.u.old-room])]~
+            [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid.u.old-room src.bol])]~
+          ~&  >>  "{<dap.bol>}: [create-room] {<src.bol>} has an old-room {<old-room>}"
           =.  present.room            (~(put in present.room) src.bol)        :: enter new room
           =.  whitelist.room          (~(put in whitelist.room) src.bol)      :: creator is always on the whitelist
           =.  rooms.provider.state    (~(put by rooms.provider.state) [rid room])
-          =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
-          =/  delete-cards         ::  delete old rooms by the creator
-            %+  turn  ~(val by old-rooms)
-              |=  old-room=room:store
-              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.old-room])]
           :_  state
           %+  weld  delete-cards
             ^-  (list card)
@@ -553,15 +563,17 @@
         [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
       [~]
     ::
-    ++  get-created-rooms
+    ++  get-present-room
       |=  =ship
-      ^-  rooms:store
-      =/  rooms=(list [rid=rid:store room=room:store])
-        %+  skim  ~(tap by rooms.provider.state)
-          |=  [=rid:store =room:store]
+      ^-  (unit room:store)
+      =/  rooms=(list room=room:store)
+        %+  skim  ~(val by rooms.provider.state)
+          |=  =room:store
           (skim-created-rooms ship room)
-      ::
-      ^-(=rooms:store (malt rooms))
+      ?:  =((lent rooms) 0)
+        ~&  >>  "get-present-room: no rooms found"
+        ~
+      (some (rear rooms))
     ::
     ++  remove-present
       |=  [=ship entering-rid=rid:store]
@@ -578,15 +590,15 @@
           [cards.result rooms.result]
         result
     ::
-    ++  get-present-rooms
-      |=  =ship
-      ^-  rooms:store
-      =/  rooms=(list [rid=rid:store room=room:store])
-        %+  skim  ~(tap by rooms.provider.state)
-          |=  [=rid:store =room:store]
-          (skim-present-rooms ship room)
-      ::
-      ^-(=rooms:store (malt rooms))
+    :: ++  get-present-rooms
+    ::   |=  =ship
+    ::   ^-  rooms:store
+    ::   =/  rooms=(list [rid=rid:store room=room:store])
+    ::     %+  skim  ~(tap by rooms.provider.state)
+    ::       |=  [=rid:store =room:store]
+    ::       (skim-present-rooms ship room)
+    ::   ::
+    ::   ^-(=rooms:store (malt rooms))
     ::
     ++  skim-created-rooms
       |=  [=ship =room:store]
