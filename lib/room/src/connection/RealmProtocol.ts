@@ -232,6 +232,7 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
+          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
@@ -257,6 +258,7 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
+          this.rooms.set(payload.rid, room);
         }
       }
     }
