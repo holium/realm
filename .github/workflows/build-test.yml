@@ -30,7 +30,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin master
+          git pull origin test-build
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -170,7 +170,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin master
+          git pull origin test-build
       #
       - name: Bump desks version
         uses: actions/github-script@v6
