@@ -112,6 +112,7 @@ export class RealmProtocol extends BaseProtocol {
         if (signalData.type === 'waiting') {
           // repeat this on an interval until we get a ready signal
           remotePeer?.onWaiting();
+          console.log('got waiting signal from', payload.from);
           if (!remotePeer) {
             console.log('got waiting signal from unknown peer', payload.from);
           }
@@ -119,6 +120,7 @@ export class RealmProtocol extends BaseProtocol {
 
         if (signalData.type === 'ready') {
           remotePeer?.onReady();
+          console.log('got ready signal from', payload.from);
           if (!remotePeer) {
             console.log('got ready signal from unknown peer', payload.from);
           }
