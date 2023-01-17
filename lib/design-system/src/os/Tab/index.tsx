@@ -1,7 +1,6 @@
-import { Layout } from '../../components/Layout';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Text, Favicon, Row, BoxProps, Icon, Button } from '../..';
+import { Flex, Text, Favicon, Row, BoxProps, Icon, Button } from '../..';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 const widths = {
@@ -76,7 +75,14 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
   let multiplayerRow = null;
   if (multiplayer) {
     multiplayerRow = (
-      <Layout.Row mb="2px" gap={2} flex={1} justifyContent="space-between">
+      <Flex
+        mb="2px"
+        gap={2}
+        flex={1}
+        width="100%"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <AvatarRow
           size={18}
           offset={3}
@@ -86,20 +92,20 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
         <Text.Custom opacity={0.5} fontSize={1} fontWeight={300}>
           {multiplayer.host}
         </Text.Custom>
-      </Layout.Row>
+      </Flex>
     );
   }
   return (
     <TabRow id={id} width={collapsed ? widths.collapsed : widths.expanded}>
-      <Layout.Row flex={1} justifyContent="space-between">
-        <Layout.Row gap={6}>
+      <Flex flex={1} justifyContent="space-between">
+        <Flex gap={6} alignItems="center">
           <Favicon src={favicon} />
           {!collapsed && (
             <Text.Custom truncate width={widths.expanded - 28}>
               {title}
             </Text.Custom>
           )}
-        </Layout.Row>
+        </Flex>
         <Button.IconButton
           size={20}
           onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -109,7 +115,7 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
         >
           <Icon name="Close" size={16} opacity={0.6} />
         </Button.IconButton>
-      </Layout.Row>
+      </Flex>
       {multiplayerRow}
     </TabRow>
   );

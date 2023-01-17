@@ -32,7 +32,7 @@ const tab2: TabProps = {
 };
 
 const tab3: TabProps = {
-  url: 'https://urblt.org',
+  url: 'https://urbit.org',
   favicon: 'https://urbit.org/images/favicon.ico',
   title: 'Urbit',
   multiplayer: {

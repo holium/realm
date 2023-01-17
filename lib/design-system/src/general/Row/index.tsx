@@ -15,6 +15,7 @@ export const Row = styled(Button.Base)<RowProps>`
   padding: 8px;
   display: flex;
   flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
   background-color: transparent;
   gap: 6px;
