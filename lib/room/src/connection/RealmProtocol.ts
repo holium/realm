@@ -5,7 +5,7 @@ import { ProtocolEvent } from './events';
 import { action, makeObservable, observable, observe, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
-import { DataPacket, DataPacket_Kind } from '../helpers/data';
+import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
 import { isInitiator, isWeb, isWebRTCSignal } from '../utils';
 import { PeerConnectionState } from '../peer/types';
@@ -259,19 +259,17 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.local.on(PeerEvent.Muted, () => {
       console.log('sending muting signal');
-      // this.sendData({
-      //   from: this.local.patp,
-      //   kind: DataPacket_Kind.MUTE_STATUS,
-      //   value: {data: true }
-      // })
+      this.sendData({
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: { data: true },
+      });
     });
     this.local.on(PeerEvent.Unmuted, () => {
       console.log('sending unmuting signal');
-      // this.sendData({
-      //   from: this.local.patp,
-      //   kind: DataPacket_Kind.MUTE_STATUS,
-      //   value: {data: false }
-      // })
+      this.sendData({
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: { data: false },
+      });
     });
   }
 
@@ -409,10 +407,11 @@ export class RealmProtocol extends BaseProtocol {
    * sendData - Send data to all peers
    * @param data: DataPacket
    */
-  sendData(data: DataPacket) {
+  sendData(data: Partial<DataPacket>) {
+    const payload = { from: this.local?.patp, ...data } as DataPacket;
     this.peers.forEach((peer) => {
       if (peer.status === PeerConnectionState.Connected) {
-        peer.sendData(data);
+        peer.sendData(payload);
       }
     });
   }
@@ -452,20 +451,20 @@ export class RealmProtocol extends BaseProtocol {
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
-      // this.sendData({
-      //   from: this.local.patp,
-      //   kind: DataPacket_Kind.MUTE_STATUS,
-      //   value: { data: this.local.isMuted },
-      // });
+      this.sendData({
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: { data: this.local?.isMuted },
+      });
     });
 
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
       if (data.kind === DataPacket_Kind.MUTE_STATUS) {
-        // if (data.value.data) {
-        //   remotePeer.mute();
-        // } else {
-        //   remotePeer.unmute();
-        // }
+        const payload = data.value as DataPayload;
+        if (payload.data) {
+          remotePeer.mute();
+        } else {
+          remotePeer.unmute();
+        }
       } else {
         this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
       }
