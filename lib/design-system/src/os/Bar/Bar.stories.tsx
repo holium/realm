@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Text } from '../../';
-import { Bar } from '.';
+import { Flex, Text } from '../../general';
+import { Bar } from './Bar';
 
 export default {
   component: Bar,

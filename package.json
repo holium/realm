@@ -9,7 +9,7 @@
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn link:all && yarn workspace @holium/realm dev:cursor && yarn build:app",
+    "build": "yarn workspace @holium/realm dev:cursor && yarn build:app",
     "link:multiplayer": "yarn build --production=false --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
     "link:conduit": "yarn build --production=false --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
     "link:room": "yarn build --production=false --cwd lib/room && yarn link --cwd lib/room && yarn link '@holium/realm-room'",

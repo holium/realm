@@ -1,9 +1,9 @@
 import { FC } from 'react';
 import { sigil, reactRenderer } from '@tlon/sigil-js';
 import styled, { css } from 'styled-components';
-import { Box, BoxProps } from '../..';
 import { motion } from 'framer-motion';
 import { BorderRadiusProps } from 'styled-system';
+import { Box, BoxProps } from '../Box/Box';
 
 export type AvatarStyleProps = BoxProps &
   BorderRadiusProps & {
