@@ -168,6 +168,7 @@ export class RealmProtocol extends BaseProtocol {
         this.rooms = new Map(Object.entries(payload.rooms));
       }
       if (data['room-deleted']) {
+        console.log('%room-deleted');
         const payload = data['room-deleted'];
         if (this.presentRoom?.rid === payload.rid) {
           this.hangupAll();
@@ -179,6 +180,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
+        console.log('%room-entered');
         // console.log('room entered update');
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
@@ -194,6 +196,7 @@ export class RealmProtocol extends BaseProtocol {
               );
               // queuedPeers are peers that are ready for us to dial them
               if (this.queuedPeers.includes(payload.ship)) {
+                console.log('dialing queued peer', payload.ship);
                 remotePeer.createConnection();
                 this.queuedPeers.splice(
                   this.queuedPeers.indexOf(payload.ship),
@@ -206,6 +209,7 @@ export class RealmProtocol extends BaseProtocol {
             }
           } else {
             // if we are not in the room, we need to connect
+            console.log('we arent in the room yet', payload.rid);
             if (payload.ship === this.our) {
               this.connect(room);
             }
@@ -213,7 +217,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-left']) {
-        // console.log('room left');
+        console.log('%room-left');
         const payload = data['room-left'];
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
@@ -227,11 +231,12 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          // this.rooms.set(payload.rid, room);
+          console.log('room present', room.present);
+          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
-        // console.log('room created');
+        console.log('%room-created');
         const { room } = data['room-created'];
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {

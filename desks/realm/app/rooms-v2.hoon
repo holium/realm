@@ -275,11 +275,8 @@
         ++  session-create-room
           |=  [=rid:store =access:store =title:store path=(unit cord)]
           =/  provider      provider.session.state
-          :: =/  leave-cards   (gen-leave-cards:helpers:rooms:hol rid provider)
           :_  state
-          :: %+  weld  leave-cards
-          ::   ^-  (list card)
-            [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path])]~
+          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path])]~
         ::
         ++  provider-create-room
           |=  [=rid:store =access:store =title:store path=(unit cord)]
@@ -365,17 +362,12 @@
       ++  enter-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ::?.  (is-host:hol provider)
         ?.  (is-provider:hol provider src.bol)
-          :: =/  leave-cards   (gen-leave-cards:helpers:rooms:hol rid provider)
           :_  state
-          :: %+  weld  leave-cards
-          ::   ^-  (list card)
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
         ?>  (~(has by rooms.provider.state) rid)  ::  room exists
         ?>  (can-enter:hol rid src.bol)       ::  src.bol can enter
-        ::  TODO remove from other rooms if present
         =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
         =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
           =.  rooms.provider.state              :: remove old room if it exists
@@ -584,31 +576,6 @@
           (skim-present-rooms ship room)
       ?:  =((lent rooms) 0)  ~
       (some (rear rooms))
-    ::
-    ++  remove-present
-      |=  [=ship entering-rid=rid:store]
-      ^-  [cards=(list card) =rooms:store]
-      %-  ~(rep by rooms.provider.state)
-        |=  [[=rid:store =room:store] result=[cards=(list card) =rooms:store]]
-        ?:  =(rid entering-rid)  :: do not remove from entering room
-          result
-        ?:  (~(has in present.room) ship)
-          =/  fact-path     [/provider-updates/(scot %p our.bol) ~]
-          =.  cards.result  (snoc cards.result [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid ship])])
-          =.  present.room  (~(del in present.room) ship)
-          =.  rooms.result  (~(put by rooms.result) [rid room])
-          [cards.result rooms.result]
-        result
-    ::
-    :: ++  get-present-rooms
-    ::   |=  =ship
-    ::   ^-  rooms:store
-    ::   =/  rooms=(list [rid=rid:store room=room:store])
-    ::     %+  skim  ~(tap by rooms.provider.state)
-    ::       |=  [=rid:store =room:store]
-    ::       (skim-present-rooms ship room)
-    ::   ::
-    ::   ^-(=rooms:store (malt rooms))
     ::
     ++  skim-created-rooms
       |=  [=ship =room:store]
