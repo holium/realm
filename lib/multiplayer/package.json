@@ -9,10 +9,10 @@
   "typings": "dist/holium-realm-multiplayer.cjs.d.ts",
   "scripts": {
     "tsc": "tsc",
-    "prepare": "yarn install --production=false",
+    "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
-    "build": "preconstruct build",
+    "build": "yarn install --production=false && preconstruct build",
     "build:prod": "preconstruct build"
   },
   "preconstruct": {
