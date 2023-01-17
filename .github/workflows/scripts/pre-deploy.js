@@ -22,6 +22,8 @@
 var fs = require('fs');
 module.exports = async ({ github, context }, workflowId) => {
   let ci = {
+    // if package.json version will change, consider this a new build
+    isNewBuild: false,
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
     // version "as-is" from package.json
@@ -74,6 +76,9 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
         matches[5]
       }`;
+      if (ci.buildVersion !== ci.packageVersion) {
+        ci.isNewBuild = true;
+      }
       // buildVersion and packageVersion will match if manually deploying
       ci.packageVersion = ci.buildVersion;
       ci.version.major = parseInt(matches[3]);
@@ -81,7 +86,6 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.version.build = parseInt(matches[5]);
       ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
     } else {
-      let isNewBuild = false;
       let buildVersion = undefined;
       // grab the latest annotated tag of any kind (draft, prerelease, release), and interrogate it to determine
       //  how to move forward
@@ -97,14 +101,14 @@ module.exports = async ({ github, context }, workflowId) => {
       );
       if (releases.data.length > 0) {
         const release = releases.data[0];
-        isNewBuild = !release.draft;
+        ci.isNewBuild = !release.draft;
         // if the latest release is a draft, it means the prior build failed; therefore
         //  rerun the build using the same tag (version) information
         buildVersion = release.tag_name;
       } else {
         // otherwise if no releases found, use the version string from package.json
         buildVersion = pkg.version;
-        isNewBuild = true;
+        ci.isNewBuild = true;
       }
       // sanity check to ensure version coming in from package.json matches expected semantic version convention
       matches = buildVersion.match(
