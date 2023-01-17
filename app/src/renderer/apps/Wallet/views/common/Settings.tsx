@@ -26,6 +26,7 @@ import {
   SharingMode,
   UISettingsType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import DeletePasscode from './DeletePasscode';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
@@ -120,8 +121,12 @@ export const WalletSettings: FC = observer(() => {
     WalletActions.navigateBack();
   }
 
+  const [showPasscode, setShowPasscode] = useState(false);
+  const deleteWallet = () => {}
+
   return (
-    <Flex px={3} width="100%" height="100%" flexDirection="column">
+    showPasscode ? <DeletePasscode onSuccess={deleteWallet}/>
+    : <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Flex alignItems="center" gap={8}>
           <IconButton onClick={async () => await WalletActions.navigateBack()}>
@@ -246,7 +251,10 @@ export const WalletSettings: FC = observer(() => {
         showBackground
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
-        onClick={() => WalletActions.deleteLocalWallet()}
+        onClick={() => {
+          setShowPasscode(true)
+          // WalletActions.deleteLocalWallet()
+        }}
       >
         Delete Local HD Wallet
       </TextButton>
@@ -266,7 +274,10 @@ export const WalletSettings: FC = observer(() => {
         showBackground
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
-        onClick={() => WalletActions.deleteShipWallet()}
+        onClick={() => {
+          setShowPasscode(true);
+          // WalletActions.deleteShipWallet()
+        }}
       >
         Delete Ship HD Wallet
       </TextButton>
