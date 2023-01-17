@@ -140,6 +140,7 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.channel === 'alpha' ? '-alpha' : ''
     }`;
     console.log(`building version ${pkg.version}...`);
+    console.log(ci);
     // must write build version string out to package.json since electron-builder
     //   will use this to name assets
     fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
