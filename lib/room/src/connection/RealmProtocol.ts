@@ -94,8 +94,9 @@ export class RealmProtocol extends BaseProtocol {
         this.provider = session.provider;
         this.rooms = new Map(Object.entries(session.rooms));
         if (currentRoom) {
+          this.leave(currentRoom.rid);
           // if we are in a room, send the event up to RoomManager
-          this.emit(ProtocolEvent.RoomInitial, currentRoom);
+          // this.emit(ProtocolEvent.RoomInitial, currentRoom);
         }
       }
     }
@@ -121,6 +122,7 @@ export class RealmProtocol extends BaseProtocol {
           remotePeer?.onReady();
           if (!remotePeer) {
             console.log('got ready signal from unknown peer', payload.from);
+            this.queuedPeers.push(payload.from);
           }
         }
 
@@ -180,7 +182,6 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
-        console.log('%room-entered');
         // console.log('room entered update');
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
@@ -217,7 +218,6 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-left']) {
-        console.log('%room-left');
         const payload = data['room-left'];
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
@@ -231,12 +231,9 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          console.log('room present', room.present);
-          // this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
-        console.log('%room-created');
         const { room } = data['room-created'];
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
@@ -259,7 +256,6 @@ export class RealmProtocol extends BaseProtocol {
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
-          // this.rooms.set(payload.rid, room);
         }
       }
     }
@@ -415,6 +411,12 @@ export class RealmProtocol extends BaseProtocol {
     if (!room.present.includes(this.our)) {
       this.rooms.set(room.rid, room);
       this.transitions.entering = room;
+      runInAction(() => {
+        this.presentRoom = room;
+        this.disposePresentRoom = observe(this.presentRoom, (change) => {
+          this.emit(ProtocolEvent.RoomUpdated, change.object);
+        });
+      });
       await this.poke({
         app: 'rooms-v2',
         mark: 'rooms-v2-session-action',
@@ -423,12 +425,6 @@ export class RealmProtocol extends BaseProtocol {
         },
       });
     }
-    runInAction(() => {
-      this.presentRoom = room;
-      this.disposePresentRoom = observe(this.presentRoom, (change) => {
-        this.emit(ProtocolEvent.RoomUpdated, change.object);
-      });
-    });
 
     return this.dialAll(room);
   }
