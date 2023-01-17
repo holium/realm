@@ -89,8 +89,10 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
 
     if (!this.isInitiator) {
+      console.log('dialing: initiator to send ready signal');
       this.ready();
     } else {
+      console.log('dialing: waiting to send ready signal');
       this.waiting();
     }
   }
