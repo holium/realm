@@ -79,5 +79,7 @@ export const Default: ComponentStory<typeof Tab> = () => (
 export const Collapsed: ComponentStory<typeof Tab> = () => (
   <Flex gap={4} flexDirection="column" width={300}>
     <Tab collapsed {...tab1} />
+    <Tab collapsed {...tab2} />
+    <Tab collapsed {...tab3} />
   </Flex>
 );

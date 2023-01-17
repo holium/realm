@@ -22,10 +22,9 @@ const TabRow = styled(Row)<{ collapsed?: boolean }>`
   ${(props) =>
     props.collapsed &&
     css`
-      height: 30px;
+      min-height: 30px;
       width: 30px;
-      padding: 0px;
-      flex-basis: 30px;
+      padding: 6px 0px;
       align-items: center;
       justify-content: center;
       text-align: left;
@@ -61,15 +60,30 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
     return (
       <TabRow id={id} collapsed onClick={() => onNavigate(url)}>
         <Favicon src={favicon} />
+        {multiplayer && (
+          <AvatarRow
+            borderRadiusOverride="2px"
+            offset={3}
+            size={18}
+            direction="vertical"
+            people={multiplayer.peers}
+          />
+        )}
       </TabRow>
     );
   }
+
   let multiplayerRow = null;
   if (multiplayer) {
     multiplayerRow = (
       <Layout.Row mb="2px" gap={2} flex={1} justifyContent="space-between">
-        <AvatarRow size={18} people={multiplayer.peers} />
-        <Text.Custom opacity={0.7} fontWeight={300}>
+        <AvatarRow
+          size={18}
+          offset={3}
+          borderRadiusOverride="2px"
+          people={multiplayer.peers}
+        />
+        <Text.Custom opacity={0.5} fontSize={1} fontWeight={300}>
           {multiplayer.host}
         </Text.Custom>
       </Layout.Row>
