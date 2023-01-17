@@ -119,7 +119,7 @@ module.exports = async ({ github, context }, workflowId) => {
       // only increment build # if last release was not a draft or no release found
       //  therefore version value of first build ever should be '0.0.0' which would
       //  build as version '0.0.1'
-      if (isNewBuild) {
+      if (ci.isNewBuild) {
         buildNumber++;
       }
       // if building from package.json version, bump the build # by 1
