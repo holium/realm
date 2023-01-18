@@ -18,6 +18,7 @@ export type TextProps = {
   fontByName?: keyof typeof fontByName;
   fontByType?: keyof typeof fontByType;
   fontSize?: string | number;
+  truncate?: boolean;
   variant?:
     | 'body'
     | 'caption'
@@ -45,6 +46,14 @@ const BaseText = styled(Box)<TextProps>`
       font-family: ${fontByType[props.fontByType]};
     `}
 
+  ${(props) =>
+    props.truncate &&
+    css`
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
+    `}
   &:disabled {
     color: var(--rlm-text-disabled);
   }

@@ -1,4 +1,9 @@
 {
+  "ignore": [
+    ".template/<name>.stories.tsx",
+    ".template/index.tsx",
+    ".template/<name>.tests.tsx"
+  ],
   "presets": [
     "@babel/preset-env",
     [

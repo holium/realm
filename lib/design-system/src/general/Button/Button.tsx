@@ -92,11 +92,12 @@ const buttonStyles = compose(
 
 const Base = styled(motion.button)<ButtonProps>`
   box-sizing: border-box;
-  flex-basis: content;
   appearance: none;
   width: fit-content;
   display: inline-flex;
   align-items: center;
+  flex-basis: initial;
+  font-size: 0.889rem;
   gap: 4px;
   border: 1px solid transparent;
   border-radius: var(--rlm-border-radius-4);
@@ -208,7 +209,7 @@ export type IconButtonProps = ButtonProps & { showOnHover?: boolean };
 
 const IconButton = styled(Base)<IconButtonProps>`
   padding: 0px;
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
