@@ -129,7 +129,7 @@ jobs:
         run: |
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
