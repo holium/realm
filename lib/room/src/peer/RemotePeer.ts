@@ -64,6 +64,7 @@ export class RemotePeer extends Peer {
   }
 
   createConnection() {
+    this.waitingStatus = READY;
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
@@ -108,6 +109,12 @@ export class RemotePeer extends Peer {
       console.log(`sending %ack-waiting to ${this.patp}`);
       this.createConnection();
       this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
+    } else {
+      console.log(
+        'got waiting but am already connecting',
+        this.status,
+        this.waitingStatus
+      );
     }
   }
 
