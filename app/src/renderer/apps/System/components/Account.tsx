@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { AvatarInput, TextInput } from '@holium/design-system';
+import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
   Flex,
   Text,
@@ -8,8 +8,8 @@ import {
   RadioGroup,
   TextButton,
   Spinner,
-  AccessCode,
   Anchor,
+  CopyButton,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -20,11 +20,13 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
   const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
+  const showAccessKey = useToggle(false);
 
   const { windowColor, textColor, accentColor } = theme.currentTheme;
 
@@ -304,8 +306,25 @@ export const AccountPanel: FC<any> = observer(() => {
               <Spinner size={1} />
             </Flex>
           ) : (
-            <Flex flex={3}>
-              <AccessCode code={code} />
+            <Flex flex={3} gap={6} alignItems="center">
+              <TextInput
+                id="system-account-access-code"
+                name="access-code"
+                py={2}
+                width={285}
+                value={code}
+                readOnly={true}
+                type={showAccessKey.isOn ? 'text' : 'password'}
+                rightAdornment={
+                  <Button.IconButton onClick={showAccessKey.toggle}>
+                    <Icon
+                      name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
+                      opacity={0.5}
+                    />
+                  </Button.IconButton>
+                }
+              />
+              <CopyButton content={code} />
             </Flex>
           )}
         </Flex>

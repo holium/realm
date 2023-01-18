@@ -7,6 +7,8 @@ type TextInputProps = {
   type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url';
   required?: boolean;
   value?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   defaultValue?: string;
 } & Partial<InputBoxProps>;
@@ -21,13 +23,14 @@ export const TextInput = ({
   defaultValue,
   tabIndex,
   disabled,
+  readOnly,
   onChange,
   onFocus,
   onBlur,
   onKeyDown,
   ...inutBoxProps
 }: TextInputProps) => (
-  <InputBox inputId={id} {...inutBoxProps}>
+  <InputBox inputId={id} disabled={disabled} {...inutBoxProps}>
     <Input
       id={id}
       name={name}
@@ -38,6 +41,7 @@ export const TextInput = ({
       required={required}
       tabIndex={tabIndex}
       disabled={disabled}
+      readOnly={readOnly}
       onChange={onChange}
       onFocus={onFocus}
       onBlur={onBlur}
