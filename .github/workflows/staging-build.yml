@@ -25,6 +25,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin master
+      #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
         id: ci
@@ -36,19 +43,18 @@ jobs:
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      # commit the change for the new version
+      # commit the change for the new version if this is a new build
       - name: Push package version update
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git stash
-          git pull origin master
-          git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
           git push
       #
       - name: Start release draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         # create annotated tag for this branch. this will become basis for the release
         run: |
           mkdir -p ./app/release/build
@@ -122,11 +128,29 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          mv ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
+  # build-windows:
+  #   if: github.event.pull_request.merged == true
+  #   needs: [pre-deploy]
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: electronuserland/builder:wine
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     #
+  #     - name: Build and install
+  #       run: |
+  #         apt-get update && apt-get -y install sudo
+  #         npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+  #       env:
+  #         USERNAME: ${{ github.actor }}
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   deploy-desks:
     needs: [pre-deploy, build-mac]

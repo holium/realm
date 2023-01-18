@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import styled from 'styled-components';
-import { getVar } from '../../utils';
+import { getVar } from '../../util/utils';
 
 const CrossPath = styled(motion.path)`
   transition: var(--transition);

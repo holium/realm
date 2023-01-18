@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon } from '../..';
-import { Button } from '.';
+import { Button } from './Button';
+import { Flex } from '../Flex/Flex';
+import { Icon } from '../Icon/Icon';
 
 export default {
   component: Button.Base,
