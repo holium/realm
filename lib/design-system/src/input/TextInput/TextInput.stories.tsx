@@ -44,9 +44,9 @@ export const Password: ComponentStory<typeof TextInput> = () => {
       type={showPassword ? 'text' : 'password'}
       placeholder="Password"
       rightAdornment={
-        <Button.Transparent onClick={() => setShowPassword((prev) => !prev)}>
+        <Button.IconButton onClick={() => setShowPassword((prev) => !prev)}>
           <Icon name={showPassword ? 'EyeOff' : 'EyeOn'} opacity={0.5} />
-        </Button.Transparent>
+        </Button.IconButton>
       }
     />
   );

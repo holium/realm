@@ -16,7 +16,8 @@ import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import { TextInput } from '@holium/design-system';
+import { useToggle } from 'renderer/logic/lib/useToggle';
+import { Button, Icon, TextInput } from '@holium/design-system';
 
 export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -24,6 +25,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { identity } = useServices();
+    const showAccessKey = useToggle(false);
 
     useEffect(() => {
       // Reset onboarding conduit when this page loads
@@ -179,7 +181,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     autoCapitalize="false"
                     autoCorrect="false"
                     spellCheck="false"
-                    type="password"
+                    type={showAccessKey.isOn ? 'text' : 'password'}
                     error={
                       accessKey.computed.ifWasEverBlurredThenError &&
                       accessKey.computed.isDirty &&
@@ -192,6 +194,14 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     onFocus={() => accessKey.actions.onFocus()}
                     onBlur={() => accessKey.actions.onBlur()}
                     onKeyDown={onKeyDown}
+                    rightAdornment={
+                      <Button.IconButton onClick={showAccessKey.toggle}>
+                        <Icon
+                          name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
+                          opacity={0.5}
+                        />
+                      </Button.IconButton>
+                    }
                   />
                 </FormControl.Field>
               </FormControl.FieldSet>
