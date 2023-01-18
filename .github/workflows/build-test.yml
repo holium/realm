@@ -1,7 +1,7 @@
 #
 #
 name: test-build
-run-name: test Build - ${{ github.actor }}
+run-name: Test Build - ${{ github.actor }}
 on:
   pull_request:
     types:
@@ -152,6 +152,15 @@ jobs:
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest.yml (windows) file to alpha-mac.yml for staging builds
+          mv ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
     needs: [pre-deploy, build-windows]
