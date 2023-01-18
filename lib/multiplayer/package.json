@@ -17,11 +17,6 @@
     "build:prod": "preconstruct build",
     "release": "yarn prepare && yarn build"
   },
-  "preconstruct": {
-    "globals": {
-      "react": "React"
-    }
-  },
   "peerDependencies": {
     "react": "^18.0.0"
   },
