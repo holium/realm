@@ -13,8 +13,7 @@
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
     "build": "preconstruct build",
-    "build:prod": "preconstruct build",
-    "release": "yarn prepare && yarn build"
+    "build:prod": "preconstruct build"
   },
   "preconstruct": {
     "globals": {
