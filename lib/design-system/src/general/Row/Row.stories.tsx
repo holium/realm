@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
-import { Row } from '.';
+import { Row } from './Row';
 
 export default {
   component: Row,

@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
-import { SectionDivider } from '.';
+import { SectionDivider } from './SectionDivider';
 
 export default {
   component: SectionDivider,

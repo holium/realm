@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
-import { Bookmark, BookmarkProps } from '.';
+import { Bookmark, BookmarkProps } from './Bookmark';
 
 export default {
   component: Bookmark,

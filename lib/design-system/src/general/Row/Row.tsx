@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Button } from '../';
+import { Button } from '..';
 
 interface RowProps {
   small?: boolean;

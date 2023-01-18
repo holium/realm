@@ -39,6 +39,7 @@ export type TabProps = {
     host: string;
     peers: ContactData[];
   };
+  width?: number;
   onNavigate: (url: string) => void;
   onClose: (url: string) => void;
 } & BoxProps;
@@ -53,6 +54,7 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
     onNavigate,
     onClose,
     multiplayer,
+    width=270
   } = props;
 
   if (collapsed) {

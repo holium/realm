@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../../';
-import { SystemBar } from '.';
+import { Flex } from '../../general/Flex/Flex';
+import { SystemBar } from './SystemBar';
 
 export default {
   component: SystemBar,
