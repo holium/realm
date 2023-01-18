@@ -112,8 +112,8 @@ export const AppSuite = observer((props: AppSuiteProps) => {
   );
 
   const popoverId = `app-suite-${suiteIndex}`;
-  const popover = useMemo(() => {
-    return (
+  const popover = useMemo(
+    () => (
       <RealmPopover
         id={popoverId}
         isOpen={isOpen}
@@ -169,17 +169,18 @@ export const AppSuite = observer((props: AppSuiteProps) => {
           )}
         </Flex>
       </RealmPopover>
-    );
-  }, [
-    apps,
-    backgroundColor,
-    coords,
-    isOpen,
-    popoverId,
-    space.path,
-    suiteIndex,
-    textColor,
-  ]);
+    ),
+    [
+      apps,
+      backgroundColor,
+      coords,
+      isOpen,
+      popoverId,
+      space.path,
+      suiteIndex,
+      textColor,
+    ]
+  );
 
   const AppTile = ({ app, index }: { app: any | null; index: number }) => {
     if (app) {
