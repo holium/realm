@@ -165,6 +165,7 @@ jobs:
       #
       - name: Install gh cli
         run: |
+          apt-get update && apt-get -y install sudo
           type -p curl >/dev/null || sudo apt install curl -y
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
           && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -174,7 +175,6 @@ jobs:
       #
       - name: Build and install
         run: |
-          apt-get update && apt-get -y install sudo
           npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
