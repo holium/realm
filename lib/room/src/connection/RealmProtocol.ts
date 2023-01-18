@@ -174,15 +174,12 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['room-deleted']) {
         const payload = data['room-deleted'];
-        // console.log(`%room-deleted`, payload);
         if (this.presentRoom?.rid === payload.rid) {
+          console.log(`%room-deleted creator=${this.presentRoom?.creator}`);
           this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
         }
-        const room = this.rooms.get(payload.rid);
-        if (room) {
-          this.rooms.delete(payload.rid);
-        }
+        this.rooms.delete(payload.rid);
       }
       if (data['room-entered']) {
         const payload = data['room-entered'];
@@ -380,9 +377,9 @@ export class RealmProtocol extends BaseProtocol {
         'delete-room': rid,
       },
     });
-    if (this.presentRoom?.rid === rid) {
-      this.hangupAll();
-    }
+    this.hangupAll();
+    // if (this.presentRoom?.rid === rid) {
+    // }
   }
 
   async getSession(): Promise<void> {
