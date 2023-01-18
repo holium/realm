@@ -7,13 +7,13 @@ import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
 import { isFireFox, isSafari } from '../utils';
 
-const ACK_READY = 'ack-ready';
 const READY = 'ready';
 const WAITING = 'waiting';
+const ACK_WAITING = 'ack-waiting';
 
 type SignalData =
   | SimplePeer.SignalData
-  | { type: 'ready' | 'ack-ready' | 'waiting'; from: Patp };
+  | { type: 'ack-waiting' | 'waiting'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
   peer?: SimplePeer.Instance;
@@ -21,7 +21,7 @@ export class RemotePeer extends Peer {
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
   rtcConfig: RTCConfiguration;
-  readyStatus: 'ready' | 'waiting' | 'ack-ready';
+  waitingStatus: 'waiting' | 'ack-waiting' | 'ready';
   sendSignal: (peer: Patp, data: SignalData) => void;
   constructor(
     our: Patp,
@@ -32,7 +32,7 @@ export class RemotePeer extends Peer {
     super(peer, config);
     this.our = our;
     this.isInitiator = config.isInitiator;
-    this.readyStatus = WAITING;
+    this.waitingStatus = WAITING;
     this.sendSignal = sendSignal;
     this.rtcConfig = config.rtc;
 
@@ -40,7 +40,7 @@ export class RemotePeer extends Peer {
       peer: observable,
       isAudioAttached: observable,
       isVideoAttached: observable,
-      readyStatus: observable,
+      waitingStatus: observable,
       attach: action.bound,
       detach: action.bound,
       setStatus: action.bound,
@@ -54,10 +54,13 @@ export class RemotePeer extends Peer {
       _onStream: action.bound,
       _onTrack: action.bound,
       _onData: action.bound,
-      ready: action.bound,
-      waiting: action.bound,
       onWaiting: action.bound,
+      onAckWaiting: action.bound,
     });
+    // window.addEventListener('beforeunload', function (e) {
+    //   e.preventDefault();
+    //   // this.waitingStatus = 'retry'
+    // });
   }
 
   createConnection() {
@@ -86,70 +89,42 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
-    this.setStatus(PeerConnectionState.Connecting);
-    // if (!this.isInitiator) {
-    //   console.log('dialing: initiator to send ready signal');
-    //   // this.ready();
-    // } else {
-    //   console.log('dialing: waiting to send ready signal');
-    //   this.waiting();
-    // }
-    if (this.isInitiator) {
-      // console.log('dialing: initiator to send waiting signal');
-      this.waiting();
-      // this.ready();
+    this.setStatus(PeerConnectionState.New);
+    this.waitingStatus = WAITING;
+    console.log(`sending %waiting ${this.patp}`);
+    if (!this.isInitiator) {
+      // if we are not the initiator
+      this.createConnection();
+      console.log(`not initiator, creating connection`);
     }
-  }
-
-  waiting() {
-    // in some cases, the intiator has disconnected and reconnected
-    // after the remote peer has sent a ready signal. In this case,
-    // we need to send a waiting signal to the remote peer so that
-    // it knows to send a ready signal again.
-    console.log(`waiting: ${this.patp}`);
-    this.readyStatus = WAITING;
     this.sendSignal(this.patp, { type: 'waiting', from: this.our });
   }
 
   onWaiting() {
-    // only send ready again if we are closed or waiting
     if (
       this.status === PeerConnectionState.Closed ||
       this.status === PeerConnectionState.Disconnected ||
-      // this.status === PeerConnectionState.Connecting ||
-      this.readyStatus === WAITING
+      this.waitingStatus === WAITING
     ) {
-      console.log('onWaiting:', this.patp, this.status, this.readyStatus);
-      // console.log(`sending ready to ${this.patp}`);
-      this.ready();
+      console.log(`sending %ack-waiting ${this.patp}`);
+      this.createConnection();
+      this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
     }
   }
 
-  ready() {
-    // set ready status to ready so that we don't dial again
-    // if we receive a waiting signal
-    this.readyStatus = READY;
-    console.log(`ready: ${this.patp}`);
-    this.createConnection();
-    this.sendSignal(this.patp, { type: READY, from: this.our });
-  }
-
-  onReady() {
-    console.log(`onReady: ${this.patp}`);
-    this.readyStatus = READY;
-    this.createConnection();
+  onAckWaiting() {
+    console.log('onAckWaiting, now ready');
+    this.waitingStatus = READY;
   }
 
   peerSignal(data: SimplePeer.SignalData) {
+    // TODO go through the flow where a peer is destroyed and attempts to reconnect
     if (this.peer?.destroyed) {
       console.log(
         'peerSignal: peer destroyed, creating new connection',
         this.patp
       );
-      // NOTE: this is a hack to get around latency issues in Urbit.
-      // Sometimes a peer is destroyed and then a signal is received
       this.dial();
-      // return;
       this.createConnection();
     }
 
@@ -160,15 +135,15 @@ export class RemotePeer extends Peer {
     // console.log('RemotePeer onConnect', this.patp);
     this.setStatus(PeerConnectionState.Connected);
     this.emit(PeerEvent.Connected);
-    this.readyStatus = READY;
+    this.waitingStatus = READY;
   }
 
   _onClose() {
     // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
-    this.removeTracks();
+    this.hangup();
     this.emit(PeerEvent.Closed);
-    this.readyStatus = WAITING;
+    this.waitingStatus = WAITING;
   }
 
   _onError(err: Error) {
@@ -176,7 +151,7 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Failed);
     this.removeTracks();
     this.emit(PeerEvent.Failed, err);
-    this.readyStatus = WAITING;
+    this.waitingStatus = WAITING;
   }
 
   _onSignal(data: SimplePeer.SignalData) {
@@ -191,20 +166,20 @@ export class RemotePeer extends Peer {
   }
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
+    // TODO make sure we're not adding the same track twice
     this.tracks.set(track.id, track);
     if (track.kind === 'video') {
-      stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
-        this.videoTracks.set(video.id, video);
-        this.attach(video);
-        this.emit(PeerEvent.VideoTrackAdded, stream, video);
-      });
+      this.videoTracks.set(track.id, track);
+      this.attach(track);
+      this.emit(PeerEvent.VideoTrackAdded, stream, track);
     }
     if (track.kind === 'audio') {
-      stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
-        this.audioTracks.set(audio.id, audio);
-        this.attach(audio);
-        this.emit(PeerEvent.AudioTrackAdded, stream, audio);
-      });
+      if (this.audioTracks.size > 0) {
+        this.removeAudioTracks();
+      }
+      this.audioTracks.set(track.id, track);
+      this.attach(track);
+      this.emit(PeerEvent.AudioTrackAdded, stream, track);
     }
   }
 
@@ -238,6 +213,24 @@ export class RemotePeer extends Peer {
     this.tracks.clear();
     this.audioTracks.clear();
     this.videoTracks.clear();
+  }
+
+  removeVideoTracks() {
+    this.videoTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.tracks.delete(track.id);
+      this.detach(track);
+      this.emit(PeerEvent.VideoTrackRemoved, track);
+    });
+  }
+
+  removeAudioTracks() {
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.tracks.delete(track.id);
+      this.detach(track);
+      this.emit(PeerEvent.AudioTrackRemoved, track);
+    });
   }
 
   hangup() {

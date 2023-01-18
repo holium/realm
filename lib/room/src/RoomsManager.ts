@@ -120,10 +120,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       clearLiveRoom: action.bound,
     });
     // TODO: Fix this
-    if (isWeb()) {
-      window.removeEventListener('beforeunload', this.cleanup);
-      window.addEventListener('beforeunload', this.cleanup);
-    }
+    // if (isWeb()) {
+    //   window.removeEventListener('beforeunload', this.cleanup);
+    //   window.addEventListener('beforeunload', this.cleanup);
+    //   window.removeEventListener('sleep', this.cleanup);
+    //   document.addEventListener('sleep', this.cleanup);
+    // }
   }
 
   async cleanup() {

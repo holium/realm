@@ -27,7 +27,3 @@ export function isInitiator(localPatpId: number, remotePatp: Patp) {
 export function isDialer(localPatp: string, remotePatp: Patp) {
   return localPatp < remotePatp;
 }
-
-export function isWebRTCSignal(type: any): boolean {
-  return !['ready', 'retry', 'ack-ready', 'waiting'].includes(type);
-}

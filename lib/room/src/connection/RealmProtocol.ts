@@ -7,8 +7,12 @@ import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
-import { isDialer, isInitiator, isWeb, isWebRTCSignal } from '../utils';
+import { isDialer, isWeb } from '../utils';
 import { PeerConnectionState } from '../peer/types';
+
+export function isWebRTCSignal(type: any): boolean {
+  return !['retry', 'ack-waiting', 'waiting'].includes(type);
+}
 
 export interface APIHandlers {
   poke: (params: any) => Promise<any>;
@@ -58,10 +62,12 @@ export class RealmProtocol extends BaseProtocol {
     this.poke = handlers.poke;
     this.scry = handlers.scry;
     this.emit(ProtocolEvent.Ready);
-    if (isWeb()) {
-      window.removeEventListener('beforeunload', this.cleanup);
-      window.addEventListener('beforeunload', this.cleanup);
-    }
+    // if (isWeb()) {
+    //   window.removeEventListener('beforeunload', this.cleanup);
+    //   window.addEventListener('beforeunload', this.cleanup);
+    //   window.removeEventListener('sleep', this.cleanup);
+    //   document.addEventListener('sleep', this.cleanup);
+    // }
   }
 
   cleanup() {
@@ -110,33 +116,28 @@ export class RealmProtocol extends BaseProtocol {
         }
 
         if (signalData.type === 'waiting') {
-          // repeat this on an interval until we get a ready signal
-          remotePeer?.onWaiting();
-          console.log('got waiting signal from', payload.from);
           if (!remotePeer) {
-            console.log(
-              'QUEUED PEERS: got waiting signal from unknown peer',
-              payload.from
-            );
+            console.log(`unknown recieved %waiting ${payload.from}`);
+            console.log('queuing unknown peer');
             this.queuedPeers.push(payload.from);
+          } else {
+            console.log(`recieved %waiting ${payload.from}`);
+            remotePeer.onWaiting();
           }
         }
 
-        if (signalData.type === 'ready') {
-          remotePeer?.onReady();
-          console.log('got ready signal from', payload.from);
-          if (!remotePeer) {
-            console.log('got ready signal from unknown peer', payload.from);
+        if (signalData.type === 'ack-waiting') {
+          if (remotePeer) {
+            remotePeer?.onAckWaiting();
+            console.log(`recieved %ack-waiting ${payload.from}`);
+          } else {
+            console.log(`unknown recieved %ack-waiting ${payload.from}`);
           }
         }
 
         if (signalData.type === 'retry') {
           const retryingPeer = this.peers.get(payload.from);
-          if (retryingPeer?.isInitiator) {
-            retryingPeer.createConnection();
-          } else {
-            retryingPeer?.dial();
-          }
+          retryingPeer?.dial();
         }
         if (isWebRTCSignal(signalData.type)) {
           // we are receiving a WebRTC signaling data
@@ -159,13 +160,16 @@ export class RealmProtocol extends BaseProtocol {
     }
 
     if (mark === 'rooms-v2-reaction') {
-      console.log('%rooms', data);
+      // console.log('%rooms', data);
       if (data['chat-received']) {
         const payload = data['chat-received'];
         this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
       }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
+        console.log(
+          `%rooms %provider-changed old=${this.provider}, new=${payload.provider}`
+        );
         this.provider = payload.provider;
         if (this.presentRoom?.rid) {
           const rid = this.presentRoom?.rid;
@@ -175,8 +179,8 @@ export class RealmProtocol extends BaseProtocol {
         this.rooms = new Map(Object.entries(payload.rooms));
       }
       if (data['room-deleted']) {
-        console.log('%room-deleted');
         const payload = data['room-deleted'];
+        // console.log(`%room-deleted`, payload);
         if (this.presentRoom?.rid === payload.rid) {
           this.hangupAll();
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
@@ -187,8 +191,9 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
-        // console.log('room entered update');
         const payload = data['room-entered'];
+        console.log(`%room-entered ${payload.ship}`);
+        console.log(payload);
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.push(payload.ship);
@@ -202,8 +207,8 @@ export class RealmProtocol extends BaseProtocol {
               );
               // queuedPeers are peers that are ready for us to dial them
               if (this.queuedPeers.includes(payload.ship)) {
-                console.log('dialing queued peer', payload.ship);
-                remotePeer.createConnection();
+                console.log('%room-entered in queuedPeer', payload.ship);
+                remotePeer.onWaiting();
                 this.queuedPeers.splice(
                   this.queuedPeers.indexOf(payload.ship),
                   1
@@ -224,6 +229,9 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['room-left']) {
         const payload = data['room-left'];
+        console.log(`%room-left peer:${payload.ship}`);
+        console.log(payload);
+
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
             this.hangup(payload.ship);
@@ -240,6 +248,7 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['room-created']) {
         const { room } = data['room-created'];
+        console.log(`%room-created ${room.creator}`);
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
           this.emit(ProtocolEvent.RoomCreated, room);
@@ -248,7 +257,7 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['kicked']) {
         const payload = data['kicked'];
-        console.log('kicked update', payload);
+        console.log(`%room-kicked ${payload.ship}`);
         if (this.presentRoom?.rid === payload.rid) {
           // if we are in the room, hangup the peer
           if (payload.ship !== this.our) {
