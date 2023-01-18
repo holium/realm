@@ -282,14 +282,12 @@ export class RealmProtocol extends BaseProtocol {
       });
     });
     this.local.on(PeerEvent.Muted, () => {
-      console.log('sending muting signal');
       this.sendData({
         kind: DataPacket_Kind.MUTE_STATUS,
         value: { data: true },
       });
     });
     this.local.on(PeerEvent.Unmuted, () => {
-      console.log('sending unmuting signal');
       this.sendData({
         kind: DataPacket_Kind.MUTE_STATUS,
         value: { data: false },

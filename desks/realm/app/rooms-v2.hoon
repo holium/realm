@@ -342,8 +342,6 @@
         ::
         ?>  (~(has by rooms.provider.state) rid) ::  room exists
         =/  room   (~(got by rooms.provider.state) rid)
-        ~&  >  ['is creator' (is-creator:hol src.bol rid)]
-        ~&  >  ['is provider' (is-host:hol src.bol)]
         =/  can-delete
           ?|  (is-creator:hol src.bol rid)
               (is-host:hol src.bol)
