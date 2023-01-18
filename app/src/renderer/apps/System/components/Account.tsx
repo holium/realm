@@ -320,6 +320,7 @@ export const AccountPanel: FC<any> = observer(() => {
                     <Icon
                       name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
                       opacity={0.5}
+                      size={18}
                     />
                   </Button.IconButton>
                 }
