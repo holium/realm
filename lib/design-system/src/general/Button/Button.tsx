@@ -214,10 +214,16 @@ const IconButton = styled(Base)<IconButtonProps>`
   justify-content: center;
   background-color: transparent;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.025, getVar('window'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-hover);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('window'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-active);
+  }
+  &:focus:not([disabled]) {
+    outline: none;
+    background-color: var(--rlm-overlay-active);
   }
   svg {
     fill: var(--rlm-icon-color);
