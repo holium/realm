@@ -93,7 +93,6 @@ export class RemotePeer extends Peer {
     this.waitingStatus = WAITING;
     console.log(`sending %waiting ${this.patp}`);
     if (!this.isInitiator) {
-      // if we are not the initiator
       this.createConnection();
       console.log(`not initiator, creating connection`);
     }
@@ -106,14 +105,13 @@ export class RemotePeer extends Peer {
       this.status === PeerConnectionState.Disconnected ||
       this.waitingStatus === WAITING
     ) {
-      console.log(`sending %ack-waiting ${this.patp}`);
+      console.log(`sending %ack-waiting to ${this.patp}`);
       this.createConnection();
       this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
     }
   }
 
   onAckWaiting() {
-    console.log('onAckWaiting, now ready');
     this.waitingStatus = READY;
   }
 
