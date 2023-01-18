@@ -1,4 +1,4 @@
-import { BoxProps } from '../../components/Box/Box';
+import { BoxProps } from '../Box/Box';
 import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
@@ -32,6 +32,7 @@ const SvgComponent = forwardRef<
   SVGMotionProps<SVGSVGElement> & {
     name: IconPathsType;
     title?: string;
+    iconColor?: string;
   }
 >(({ title, name, ...props }, svgRef) => {
   const [titleId] = useState(() => (title ? uuid() : undefined));
@@ -41,7 +42,7 @@ const SvgComponent = forwardRef<
       viewBox="0 0 24 24"
       width={props.width || '1em'}
       height={props.height || '1em'}
-      fill={props.color ? props.color : 'currentcolor'}
+      fill={props.iconColor ? props.iconColor : 'currentcolor'}
       ref={svgRef}
       aria-labelledby={titleId}
       pointerEvents="none"

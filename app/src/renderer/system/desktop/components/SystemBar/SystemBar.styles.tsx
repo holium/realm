@@ -33,18 +33,14 @@ type SystemBarStyleProps = {
 
 export const SystemBarStyle = styled(styled(motion.div)<SystemBarStyleProps>`
   position: relative;
-  z-index: 3;
+  z-index: 16;
   height: 42px;
-  backdrop-filter: var(--blur-enabled);
+  backdrop-filter: var(--blur);
   display: flex;
   flex-direction: row;
   align-items: center;
   border-radius: 6px;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
   backface-visibility: hidden;
-  perspective: 1000;
   transform: translate3d(0, 0, 0);
   transition: ${(props: any) => props.theme.transition};
 `)<SystemBarStyleProps>(

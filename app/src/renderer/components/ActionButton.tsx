@@ -107,6 +107,9 @@ const StyledButton = styled.button`
     &:active {
       background: ${darken(0.15, props.theme.colors.brand.muted)};
     }
+    svg {
+      fill: ${props.theme.colors.brand.primary};
+    }
   `}
   ${compose(height, space)}
 `;
@@ -123,7 +126,7 @@ export const ActionButton: FC<ButtonProps> = forwardRef<
     </StyledButton>
   );
 });
-
+ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,
 };

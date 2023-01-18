@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Box, BoxProps } from '../../components/Box/Box';
+import { Box, BoxProps } from '../Box/Box';
 import { motion } from 'framer-motion';
 
 export const fontByType = {

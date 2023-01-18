@@ -3,11 +3,11 @@ import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
 import { Flex, Pulser, Divider } from 'renderer/components';
-import { TrayButton } from '../../TrayButton';
 import { SelectedSpace } from './SelectedSpace';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { BarButton } from '@holium/design-system';
 
 const position = 'top-right';
 const anchorOffset = { x: 4, y: 16 };
@@ -66,14 +66,9 @@ export const SpaceSelector = observer(() => {
       onClick={isLoaded && onButtonClick}
     >
       {isLoaded ? (
-        <SelectedSpace selectorRef={selectorRef} />
+        <SelectedSpace />
       ) : (
-        <TrayButton
-          ref={selectorRef}
-          whileTap={{ scale: 0.975 }}
-          transition={{ scale: 0.2 }}
-          customBg={dockColor}
-        >
+        <BarButton whileTap={{ scale: 0.975 }} transition={{ scale: 0.2 }}>
           <Flex>
             <Pulser
               background={rgba(theme.currentTheme.backgroundColor, 0.5)}
@@ -101,7 +96,7 @@ export const SpaceSelector = observer(() => {
               width={90}
             />
           </Flex>
-        </TrayButton>
+        </BarButton>
       )}
       {ship && (
         <Divider

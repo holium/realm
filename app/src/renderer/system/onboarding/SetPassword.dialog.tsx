@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, KeyboardEventHandler } from 'react';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 import {
@@ -53,6 +53,14 @@ export const SetPassword: FC<BaseDialogProps> = observer(
           : { error: 'Passwords must match.' };
       },
     });
+
+    const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+      if (e.key === 'Enter') {
+        if (!passwordForm.computed.isError) {
+          passwordForm.actions.submit();
+        }
+      }
+    };
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12}>
@@ -143,6 +151,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   }
                   onFocus={() => password.actions.onFocus()}
                   onBlur={() => password.actions.onBlur()}
+                  onKeyDown={onKeyDown}
                 />
               </FormControl.Field>
               <FormControl.Field mt={2}>
@@ -166,6 +175,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   }
                   onFocus={() => confirmPassword.actions.onFocus()}
                   onBlur={() => confirmPassword.actions.onBlur()}
+                  onKeyDown={onKeyDown}
                 />
               </FormControl.Field>
             </FormControl.FieldSet>

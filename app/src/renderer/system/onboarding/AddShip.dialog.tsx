@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, KeyboardEventHandler, useEffect, useState } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -97,6 +97,12 @@ export const AddShip: FC<BaseDialogProps> = observer(
         .required('Please enter access key'),
     });
 
+    const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+      if (e.key === 'Enter') {
+        if (shipForm.computed.isValid && !loading) shipForm.actions.submit();
+      }
+    };
+
     return (
       <Grid.Column xl={12} noGutter>
         <Grid.Column lg={7} xl={7} px={50}>
@@ -132,6 +138,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     }}
                     onFocus={() => urbitId.actions.onFocus()}
                     onBlur={() => urbitId.actions.onBlur()}
+                    onKeyDown={onKeyDown}
                   />
                 </FormControl.Field>
                 <FormControl.Field>
@@ -157,6 +164,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     }}
                     onFocus={() => shipUrl.actions.onFocus()}
                     onBlur={() => shipUrl.actions.onBlur()}
+                    onKeyDown={onKeyDown}
                   />
                 </FormControl.Field>
                 <FormControl.Field>
@@ -183,6 +191,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     }}
                     onFocus={() => accessKey.actions.onFocus()}
                     onBlur={() => accessKey.actions.onBlur()}
+                    onKeyDown={onKeyDown}
                   />
                 </FormControl.Field>
               </FormControl.FieldSet>
