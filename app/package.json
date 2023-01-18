@@ -221,8 +221,7 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "appx"
+        "nsis"
       ]
     },
     "linux": {
