@@ -13,8 +13,9 @@
     "prepare": "yarn install --production=false --force",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
-    "build": "yarn prepare && preconstruct build",
-    "build:prod": "preconstruct build"
+    "build": "preconstruct build",
+    "build:prod": "preconstruct build",
+    "release": "yarn prepare && yarn build"
   },
   "preconstruct": {
     "globals": {
