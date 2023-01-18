@@ -1,14 +1,11 @@
-import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { Text, Box, BoxProps } from '../..';
 import { AnimationProps } from 'framer-motion';
 
-export type InputBoxStyleProps = {
+type StyledBoxProps = {
   label?: string;
   leftAdornment?: JSX.Element | string;
-  leftInteractive?: boolean;
   rightAdornment?: JSX.Element | string;
-  rightInteractive?: boolean;
   shouldHighlightOnFocus?: boolean;
   disabled?: boolean;
   small?: boolean;
@@ -17,7 +14,7 @@ export type InputBoxStyleProps = {
   error?: string | boolean | undefined;
 } & BoxProps;
 
-const InputBoxStyle = styled(Box)<InputBoxStyleProps>`
+const StyledBox = styled(Box)<StyledBoxProps>`
   position: relative;
   border-radius: var(--rlm-border-radius-6);
   border: 1px solid var(--rlm-border-color);
@@ -111,89 +108,74 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   }
 `;
 
-InputBoxStyle.defaultProps = {
+StyledBox.defaultProps = {
   px: 1,
   py: 1,
   mb: 0,
   shouldHighlightOnFocus: true,
 };
 
-export type InputBoxProps = InputBoxStyleProps & {
+export type InputBoxProps = StyledBoxProps & {
   inputId: string;
   inlineLabelDirection?: 'row' | 'column';
 };
 
-export const InputBox: FC<InputBoxProps> = (props: InputBoxProps) => {
-  const {
-    inputId = 'base-input-1',
-    inlineLabelDirection = 'row',
-    leftAdornment,
-    label,
-    leftInteractive,
-    rightAdornment,
-    rightInteractive,
-    disabled,
-    error,
-    children,
-  } = props;
-
-  return (
-    <InputBoxStyle
-      display="flex"
-      contentEditable="true"
-      suppressContentEditableWarning={true}
-      width={props.width}
-      height={props.height}
-      error={error}
-      flexDirection={inlineLabelDirection}
-      disabled={disabled}
-      // pointerEvents="none"
-      onFocus={(_evt: React.FocusEvent<HTMLDivElement>) => {
-        document.getElementById(inputId)?.focus();
-      }}
-    >
-      {label && label !== 'none' && (
-        <Text.Label
-          ml="2px"
-          color="accent"
-          display="flex"
-          fontWeight="500"
-          mr={1}
-          alignItems="center"
-          mb={inlineLabelDirection === 'column' ? 1 : 0}
-          pointerEvents="none"
-        >
-          {label}
-        </Text.Label>
+export const InputBox = ({
+  width,
+  height,
+  inputId = 'base-input-1',
+  inlineLabelDirection = 'row',
+  leftAdornment,
+  label,
+  rightAdornment,
+  disabled,
+  error,
+  children,
+}: InputBoxProps) => (
+  <StyledBox
+    display="flex"
+    contentEditable="true"
+    suppressContentEditableWarning={true}
+    width={width}
+    height={height}
+    error={error}
+    flexDirection={inlineLabelDirection}
+    disabled={disabled}
+    onFocus={() => document.getElementById(inputId)?.focus()}
+  >
+    {label && label !== 'none' && (
+      <Text.Label
+        ml="2px"
+        color="accent"
+        display="flex"
+        fontWeight="500"
+        mr={1}
+        alignItems="center"
+        mb={inlineLabelDirection === 'column' ? 1 : 0}
+        pointerEvents="none"
+      >
+        {label}
+      </Text.Label>
+    )}
+    <Box display="flex" flexDirection="row" flex={1}>
+      {leftAdornment && (
+        <Adornment mr={1} disabled={disabled}>
+          {leftAdornment}
+        </Adornment>
       )}
-      <Box display="flex" flexDirection="row" flex={1}>
-        {leftAdornment && (
-          <Adornment
-            pointerEvents={leftInteractive ? 'auto' : 'none'}
-            mr={1}
-            disabled={disabled}
-          >
-            {leftAdornment}
-          </Adornment>
-        )}
-        {children}
-        {rightAdornment && (
-          <Adornment
-            pointerEvents={rightInteractive ? 'auto' : 'none'}
-            ml={1}
-            disabled={disabled}
-          >
-            {rightAdornment}
-          </Adornment>
-        )}
+      {children}
+      {rightAdornment && (
+        <Adornment ml={1} disabled={disabled}>
+          {rightAdornment}
+        </Adornment>
+      )}
+    </Box>
+    {error && (
+      <Box position="absolute" left={0} bottom={-18}>
+        <Text.Hint color="intent-alert">{error}</Text.Hint>
       </Box>
-      {error && (
-        <Box position="absolute" left={0} bottom={-18}>
-          <Text.Hint color="intent-alert">{error}</Text.Hint>
-        </Box>
-      )}
-    </InputBoxStyle>
-  );
-};
+    )}
+  </StyledBox>
+);
 
 export default InputBox;

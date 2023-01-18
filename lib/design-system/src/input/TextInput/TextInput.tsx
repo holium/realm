@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { InputBox, BoxProps, Input, InputBoxProps } from '../..';
+import { Input } from '../Input/Input';
+import InputBox, { InputBoxProps } from '../InputBox/InputBox';
 
 type TextInputProps = {
   id: string;
@@ -7,37 +7,45 @@ type TextInputProps = {
   type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url';
   required?: boolean;
   value?: string;
-} & BoxProps &
-  Partial<InputBoxProps>;
+  disabled?: boolean;
+  readOnly?: boolean;
+  placeholder?: string;
+  defaultValue?: string;
+} & Partial<InputBoxProps>;
 
-export const TextInput: FC<TextInputProps> = (props: TextInputProps) => {
-  const {
-    id,
-    name,
-    type = 'text',
-    required = false,
-    value,
-    placeholder,
-    defaultValue,
-  } = props;
-
-  return (
-    <InputBox {...{ px: 2, ...props, inputId: id }}>
-      <Input
-        id={id}
-        name={name}
-        tabIndex={props.tabIndex}
-        type={type}
-        placeholder={placeholder}
-        defaultValue={defaultValue}
-        value={value}
-        required={required}
-        disabled={props.disabled}
-        onChange={props.onChange}
-        onFocus={props.onFocus}
-        onBlur={props.onBlur}
-        onKeyDown={props.onKeyDown}
-      />
-    </InputBox>
-  );
-};
+export const TextInput = ({
+  id,
+  name,
+  type = 'text',
+  required = false,
+  value,
+  placeholder,
+  defaultValue,
+  tabIndex,
+  disabled,
+  readOnly,
+  onChange,
+  onFocus,
+  onBlur,
+  onKeyDown,
+  ...inutBoxProps
+}: TextInputProps) => (
+  <InputBox inputId={id} disabled={disabled} {...inutBoxProps}>
+    <Input
+      id={id}
+      name={name}
+      type={type}
+      placeholder={placeholder}
+      defaultValue={defaultValue}
+      value={value}
+      required={required}
+      tabIndex={tabIndex}
+      disabled={disabled}
+      readOnly={readOnly}
+      onChange={onChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
+    />
+  </InputBox>
+);
