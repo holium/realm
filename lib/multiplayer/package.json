@@ -13,7 +13,7 @@
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
-    "build": "yarn --production=false && preconstruct build",
+    "build": "preconstruct build",
     "build:prod": "preconstruct build"
   },
   "preconstruct": {
