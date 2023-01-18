@@ -73,7 +73,7 @@
 ::
 +$  peers-table  (map path-id (list peer-row))
 ::
-+$  table-name=?(%paths %messages %peers)
++$  table-name   ?(%paths %messages %peers)
 +$  table
   $%  [%paths =paths-table]
       [%messages =messages-table]

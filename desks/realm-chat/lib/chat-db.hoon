@@ -50,7 +50,7 @@
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)
-    (turn ~(val by tbl) |=(a=path-row:sur path.path-row))
+    (turn ~(val by tbl) |=(a=path-row:sur path.a))
   ::++  messages-table
   ::  |=  =tables:sur
   ::  ^-  messages-table:sur
@@ -63,101 +63,101 @@
 ++  enjs
   =,  enjs:format
   |%
-  ++  db-dump :: encodes for on-watch
-    |=  db=db-dump:sur
-    ^-  json
-    %-  pairs
-    :_  ~
-    ^-  [cord json]
-    :-  -.db
-    ?-  -.db
-      :: ::
-        %tables
-      (all-tables:encode tables.db)
-    ==
-  ::
-  ++  messages-table :: encodes for on-watch
-    |=  tbl=messages-table:sur
-    ^-  json
-    (messages-table:encode tbl)
-  ::
-  ++  path-row :: encodes for on-watch
-    |=  =path-row:sur
-    ^-  json
-    (path-row:encode path-row)
-  ::
+    ++  db-dump :: encodes for on-watch
+      |=  db=db-dump:sur
+      ^-  json
+      %-  pairs
+      :_  ~
+      ^-  [cord json]
+      :-  -.db
+      ?-  -.db
+        :: ::
+          %tables
+        (all-tables:encode tables.db)
+      ==
+    ::
+    ++  messages-table :: encodes for on-watch
+      |=  tbl=messages-table:sur
+      ^-  json
+      (messages-table:encode tbl)
+    ::
+    ++  path-row :: encodes for on-watch
+      |=  =path-row:sur
+      ^-  json
+      (path-row:encode path-row)
   --
 ::
-++  dejs
-  =,  dejs:format
-  |%
-  ++  action
-    |=  jon=json
-    ^-  action:sur
-    =<  (decode jon)
-    |%
-    ++  decode
-      %-  of
-      :~  [%read-dm read-dm]
-      ==
-    ::
-    ++  read-dm
-      %-  ot
-      :~  
-          [%ship (su ;~(pfix sig fed:ag))]
-      ==
-    ::
-    ++  tang 
-      |=  jon=^json
-      ^-  ^tang
-      ?>  ?=(%a -.jon)
-      %-  zing
-      %+  turn
-        p.jon
-      |=  jo=^json
-      ^-  (list tank)
-      ?>  ?=(%a -.jo)
-      %+  turn
-        p.jo
-      |=  j=^json
-      ?>  ?=(%s -.j)
-      ^-  tank
-      leaf+(trip p.j)
-    ::
-    ++  eval
-      %-  ot
-      :~  expression+so
-          output+tang
-      ==
-    ::
-    ::
-    --
-  --
+:: ++  dejs
+::   =,  dejs:format
+::   |%
+::   ++  action
+::     |=  jon=json
+::     ^-  action:sur
+::     =<  (decode jon)
+::     |%
+::     ++  decode
+::       %-  of
+::       :~  [%read-dm read-dm]
+::       ==
+::     ::
+::     ++  read-dm
+::       %-  ot
+::       :~  
+::           [%ship (su ;~(pfix sig fed:ag))]
+::       ==
+::     ::
+::     ++  tang 
+::       |=  jon=^json
+::       ^-  ^tang
+::       ?>  ?=(%a -.jon)
+::       %-  zing
+::       %+  turn
+::         p.jon
+::       |=  jo=^json
+::       ^-  (list tank)
+::       ?>  ?=(%a -.jo)
+::       %+  turn
+::         p.jo
+::       |=  j=^json
+::       ?>  ?=(%s -.j)
+::       ^-  tank
+::       leaf+(trip p.j)
+::     ::
+::     ++  eval
+::       %-  ot
+::       :~  expression+so
+::           output+tang
+::       ==
+::     ::
+::     ::
+::     --
+::   --
 ::
 ++  encode
   =,  enjs:format
   |%
-  ++  all-tables
-    |=  =tables:sur
-    ^-  json
-    %-  pairs
-    %+  turn  tables
-      |=  =table:sur
-      ::[-.table (jsonify-table +.table)]
-      [-.table s+'test']
-  ::
-  ++  messages-table
-    |=  tbl=messages-table:sur
-    ^-  json
-    :: TODO actually convert messages table to json
-    [%o *(map @t json)]
-  ++  path-row
-    |=  =path-row:sur
-    ^-  json
-    %-  pairs
-    :~  id+s+id.path-row
-        path+s+(spat path.path-row)
-        metadata+s+'TODO not implemented'
-        type+s+type.path-row
-    ==
+    ++  all-tables
+      |=  =tables:sur
+      ^-  json
+      %-  pairs
+      %+  turn  tables
+        |=  =table:sur
+        ::[-.table (jsonify-table +.table)]
+        [-.table s+'test']
+    ::
+    ++  messages-table
+      |=  tbl=messages-table:sur
+      ^-  json
+      :: TODO actually convert messages table to json
+      [%o *(map @t json)]
+    ++  path-row
+      |=  =path-row:sur
+      ^-  json
+      %-  pairs
+      :~  id+s+(scot %uv id.path-row)
+          path+s+(spat path.path-row)
+          metadata+s+'TODO not implemented'
+          type+s+type.path-row
+      ==
+  --
 --
