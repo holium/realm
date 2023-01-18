@@ -215,13 +215,11 @@ export const AppSuite = observer((props: AppSuiteProps) => {
               calculatePopoverAnchorById(`app-suite-${index}-trigger`, {
                 dimensions,
                 anchorOffset: {
-                  x: 0,
                   y: 12,
                 },
                 centered: true,
               })
             );
-
             setSearchMode('app-search');
             setSuiteIndex(index);
           }
