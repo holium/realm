@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { isImgUrl } from '../../utils';
+import { isImgUrl } from '../../util/utils';
 import { InputBox, BoxProps, Icon, Input, Button } from '../..';
 
 type AvatarInputProps = {

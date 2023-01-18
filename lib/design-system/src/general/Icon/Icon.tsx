@@ -1,4 +1,4 @@
-import { BoxProps } from '../../components/Box/Box';
+import { BoxProps } from '../Box/Box';
 import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
 import styled from 'styled-components';

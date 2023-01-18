@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../../';
-import { TextInput } from './';
+import { Flex } from '../../general/Flex/Flex';
+import { TextInput } from './TextInput';
 
 export default {
   component: TextInput,
