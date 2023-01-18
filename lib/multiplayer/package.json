@@ -10,12 +10,18 @@
   "scripts": {
     "tsc": "tsc",
     "preinstall": "yarn build",
-    "prepare": "yarn add @preconstruct/cli && yarn install && yarn preconstruct init",
+    "postinstall": "preconstruct dev",
+    "prepare": "yarn add --dev @preconstruct/cli && yarn install --production=false && yarn preconstruct dev && yarn preconstruct init",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
     "build": "preconstruct build",
     "build:prod": "preconstruct build",
     "release": "yarn prepare && yarn build"
+  },
+  "preconstruct": {
+    "globals": {
+      "react": "React"
+    }
   },
   "peerDependencies": {
     "react": "^18.0.0"
