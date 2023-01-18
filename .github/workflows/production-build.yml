@@ -24,6 +24,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin production
+      #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
         id: ci
@@ -33,19 +40,20 @@ jobs:
             const result = script({github, context}, 'production-build.yml')
             console.log(result)
             return result
-      # commit the change for the new version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      # commit the change for the new version if this is a new build
       - name: Push package version update
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git stash
-          git pull origin production
-          git stash pop
           git add ./app/release/app/package.json
           git commit -m "patch realm app version"
           git push
       #
       - name: Start release draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         # create annotated tag for this branch. this will become basis for the release
         run: |
           mkdir -p ./app/release/build
@@ -118,7 +126,7 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
