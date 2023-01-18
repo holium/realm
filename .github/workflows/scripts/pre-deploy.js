@@ -105,6 +105,11 @@ module.exports = async ({ github, context }, workflowId) => {
         // if the latest release is a draft, it means the prior build failed; therefore
         //  rerun the build using the same tag (version) information
         buildVersion = release.tag_name;
+        // are the versions different (exclude '-alpha') since that is only used
+        //  to name assets; therefore just compare 'raw' version
+        if (buildVersion !== ci.packageVersion.replace('-alpha', '')) {
+          ci.isNewBuild = true;
+        }
       } else {
         // otherwise if no releases found, use the version string from package.json
         buildVersion = pkg.version;
@@ -133,17 +138,19 @@ module.exports = async ({ github, context }, workflowId) => {
       // all non-manual builds are considered staging (alpha)
       ci.channel = 'alpha';
     }
-    // see: https://www.electron.build/tutorials/release-using-channels.html
-    // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
-    //  this is useful when checking the version in Realm -> About
-    pkg.version = `${ci.version.major}.${ci.version.minor}.${ci.version.build}${
-      ci.channel === 'alpha' ? '-alpha' : ''
-    }`;
-    console.log(`building version ${pkg.version}...`);
+    if (ci.isNewBuild) {
+      // see: https://www.electron.build/tutorials/release-using-channels.html
+      // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
+      //  this is useful when checking the version in Realm -> About
+      pkg.version = `${ci.version.major}.${ci.version.minor}.${
+        ci.version.build
+      }${ci.channel === 'alpha' ? '-alpha' : ''}`;
+      // must write build version string out to package.json since electron-builder
+      //   will use this to name assets
+      fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
+    }
+    console.log(`building version ${ci.buildVersion}...`);
     console.log(ci);
-    // must write build version string out to package.json since electron-builder
-    //   will use this to name assets
-    fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   } catch (e) {
     console.log(e);
   }
