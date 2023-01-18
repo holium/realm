@@ -18,7 +18,7 @@
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
-    "build:multiplayer": "yarn workspace install --production=false && yarn workspace @holium/realm-multiplayer build",
+    "build:multiplayer": "yarn workspace @holium/realm-multiplayer install --production=false && yarn workspace @holium/realm-multiplayer build",
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
