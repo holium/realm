@@ -880,7 +880,9 @@ export const WalletStore = types
         : null;
     },
   }))
-  .actions((self) => ({
+  .actions((self) => {
+    let initialState = {};
+    return {
     setInitialized(initialized: boolean) {
       self.initialized = initialized;
     },
@@ -914,7 +916,6 @@ export const WalletStore = types
       self.ethereum.setProtocol(protocol);
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
-      console.log('NAVIGATING', view)
       const canReturn = options?.canReturn || true;
       const walletIndex = options?.walletIndex || self.navState.walletIndex;
       const detail = options?.detail;
@@ -997,7 +998,10 @@ export const WalletStore = types
     },
     setForceActive(forceActive: boolean) {
       self.forceActive = forceActive;
+    },
+    reset: (initialState: any) => {
+      applySnapshot(self, initialState);
     }
-  }));
+  }});
 
 export type WalletStoreType = Instance<typeof WalletStore>;

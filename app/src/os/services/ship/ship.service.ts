@@ -309,7 +309,7 @@ export class ShipService extends BaseService {
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
-      this.wallet?.onLogin(ship);
+      this.wallet?.onLogin(ship, false);
 
       // return ship state
     } catch (err) {

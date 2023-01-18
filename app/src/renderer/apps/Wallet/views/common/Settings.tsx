@@ -30,6 +30,12 @@ import DeletePasscode from './DeletePasscode';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
+enum SettingScreen {
+  SETTINGS = 'settings',
+  LOCAL = 'local',
+  AGENT = 'agent',
+}
+
 export const WalletSettings: FC = observer(() => {
   const { walletApp } = useTrayApps();
   const [providerInput, setProviderInput] = useState('');
@@ -121,11 +127,32 @@ export const WalletSettings: FC = observer(() => {
     WalletActions.navigateBack();
   }
 
-  const [showPasscode, setShowPasscode] = useState(false);
-  const deleteWallet = () => {}
+  const [settingScreen, setSettingScreen] = useState<SettingScreen>(SettingScreen.SETTINGS)
+  const deleteWallet = (passcode: number[]) => {
+    if (settingScreen === SettingScreen.LOCAL) {
+      WalletActions.deleteLocalWallet(passcode);
+    }
+    else if (settingScreen === SettingScreen.AGENT) {
+      WalletActions.deleteShipWallet(passcode);
+    }
+  }
 
   return (
-    showPasscode ? <DeletePasscode onSuccess={deleteWallet}/>
+    settingScreen !== SettingScreen.SETTINGS ? 
+<Flex px={3} width="100%" height="100%" flexDirection="column">
+      <Flex justifyContent="space-between" alignItems="center" pt={3}>
+        <Flex alignItems="center" gap={8}>
+          <IconButton onClick={() => setSettingScreen(SettingScreen.SETTINGS)}>
+            <Icons
+              name="ArrowLeftLine"
+              size={1}
+              color={theme.currentTheme.iconColor}
+            />
+          </IconButton>
+        </Flex>
+      </Flex>
+    <DeletePasscode onSuccess={deleteWallet}/>
+    </Flex>
     : <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Flex alignItems="center" gap={8}>
@@ -252,7 +279,7 @@ export const WalletSettings: FC = observer(() => {
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
         onClick={() => {
-          setShowPasscode(true)
+          setSettingScreen(SettingScreen.LOCAL)
           // WalletActions.deleteLocalWallet()
         }}
       >
@@ -275,7 +302,7 @@ export const WalletSettings: FC = observer(() => {
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
         onClick={() => {
-          setShowPasscode(true);
+          setSettingScreen(SettingScreen.AGENT)
           // WalletActions.deleteShipWallet()
         }}
       >

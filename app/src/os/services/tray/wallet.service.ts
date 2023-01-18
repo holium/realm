@@ -33,6 +33,7 @@ import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
+import { init } from 'lodash/fp';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -48,9 +49,58 @@ export interface RecipientPayload {
   gasEstimate?: number;
 }
 
+const initialWalletState = (ship: string) => ({
+  navState: {
+    view: WalletView.NEW,
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+  },
+  ethereum: {
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  lastInteraction: Date.now(),
+  initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  ourPatp: ship,
+  forceActive: false
+});
+
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
+  private initialState?: any;
   private signer: RealmSigner;
   private wallet?: Wallet;
   handlers = {
@@ -289,10 +339,10 @@ export class WalletService extends BaseService {
       return await ipcRenderer.invoke('realm.tray.wallet.reset-navigation');
     },
     deleteLocalWallet: async (passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.delete-local-wallet')
+      return await ipcRenderer.invoke('realm.tray.wallet.delete-local-wallet', passcode)
     },
     deleteShipWallet: async (passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.delete-ship-wallet')
+      return await ipcRenderer.invoke('realm.tray.wallet.delete-ship-wallet', passcode)
     }
   };
 
@@ -309,7 +359,7 @@ export class WalletService extends BaseService {
     this.signer = new RealmSigner(this.core);
   }
 
-  async onLogin(ship: string) {
+  async onLogin(ship: string, forceReset: boolean) {
     console.log('logging in')
     const secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
@@ -321,56 +371,10 @@ export class WalletService extends BaseService {
     this.db = new Store<WalletStoreType>(storeParams);
     const persistedState: WalletStoreType = this.db.store;
 
-    if (Object.keys(persistedState).length !== 0) {
+    if (Object.keys(persistedState).length !== 0 && !forceReset) {
       this.state = WalletStore.create(castToSnapshot(persistedState));
     } else {
-      this.state = WalletStore.create({
-        navState: {
-          view: WalletView.NEW,
-          protocol: ProtocolType.ETH_GORLI,
-          lastEthProtocol: ProtocolType.ETH_GORLI,
-          btcNetwork: NetworkStoreType.BTC_MAIN,
-        },
-        ethereum: {
-          gorliBlock: 0,
-          protocol: ProtocolType.ETH_GORLI,
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            defaultIndex: 0,
-          },
-          initialized: false,
-          conversions: {},
-        },
-        bitcoin: {
-          block: 0,
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            defaultIndex: 0,
-          },
-          conversions: {},
-        },
-        btctest: {
-          block: 0,
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            defaultIndex: 0,
-          },
-          conversions: {},
-        },
-        navHistory: [],
-        creationMode: 'default',
-        sharingMode: 'anybody',
-        lastInteraction: Date.now(),
-        initialized: false,
-        settings: {
-          passcodeHash: '',
-        },
-        ourPatp: ship,
-        forceActive: false
-      });
+      this.state = WalletStore.create(initialWalletState(ship));
     }
 
     onSnapshot(this.state!, (snapshot: any) => {
@@ -811,7 +815,7 @@ export class WalletService extends BaseService {
   }
 
   async watchUpdates(_evt: any) {
-    await this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    this.wallet!.watchUpdates(this.core.conduit!, this.state!);
   }
 
   async setForceActive(_evt: any, forceActive: boolean) {
@@ -822,13 +826,16 @@ export class WalletService extends BaseService {
     this.state!.resetNavigation();
   }
 
-  async deleteLocalWallet(passcode: number[]) {
+  async deleteLocalWallet(_evt: any, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
     (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
+    this.onLogin(this.state!.ourPatp!, true);
   }
 
-  async deleteShipWallet(passcode: number[]) {
+  async deleteShipWallet(_evt: any, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
     (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
+    WalletApi.initialize(this.core.conduit!);
+    this.onLogin(this.state!.ourPatp!, true);
   }
 }

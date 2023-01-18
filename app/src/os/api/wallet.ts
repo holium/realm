@@ -198,6 +198,16 @@ export const WalletApi = {
       onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
+  initialize: async (conduit: Conduit) => {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'initialize': null
+      },
+    };
+    await conduit.poke(payload);
+  },
 };
 
 export const handleWalletReactions = (
