@@ -5,5 +5,6 @@ export * from './components/WindowedList/WindowedList';
 export * from './components/Layout';
 export * from './general';
 export * from './input';
+export * from './navigation'
 export * from './os';
 export { getVar as getCSSVar } from './utils';
