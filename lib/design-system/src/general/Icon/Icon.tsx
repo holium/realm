@@ -1,4 +1,3 @@
-import { BoxProps } from '../Box/Box';
 import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
@@ -18,6 +17,7 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { IconPathsType, paths } from './icons';
+import { BoxProps } from '../Box/Box';
 
 export type IconProps = BoxProps &
   SpaceProps &

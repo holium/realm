@@ -5,9 +5,7 @@ import { AnimationProps } from 'framer-motion';
 type StyledBoxProps = {
   label?: string;
   leftAdornment?: JSX.Element | string;
-  leftInteractive?: boolean;
   rightAdornment?: JSX.Element | string;
-  rightInteractive?: boolean;
   shouldHighlightOnFocus?: boolean;
   disabled?: boolean;
   small?: boolean;
@@ -129,9 +127,7 @@ export const InputBox = ({
   inlineLabelDirection = 'row',
   leftAdornment,
   label,
-  leftInteractive,
   rightAdornment,
-  rightInteractive,
   disabled,
   error,
   children,
@@ -163,21 +159,13 @@ export const InputBox = ({
     )}
     <Box display="flex" flexDirection="row" flex={1}>
       {leftAdornment && (
-        <Adornment
-          pointerEvents={leftInteractive ? 'auto' : 'none'}
-          mr={1}
-          disabled={disabled}
-        >
+        <Adornment mr={1} disabled={disabled}>
           {leftAdornment}
         </Adornment>
       )}
       {children}
       {rightAdornment && (
-        <Adornment
-          pointerEvents={rightInteractive ? 'auto' : 'none'}
-          ml={1}
-          disabled={disabled}
-        >
+        <Adornment ml={1} disabled={disabled}>
           {rightAdornment}
         </Adornment>
       )}

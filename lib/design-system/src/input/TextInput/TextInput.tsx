@@ -1,4 +1,5 @@
-import { InputBox, Input, InputBoxProps } from '../../';
+import { Input } from '../Input/Input';
+import InputBox, { InputBoxProps } from '../InputBox/InputBox';
 
 type TextInputProps = {
   id: string;
@@ -26,7 +27,7 @@ export const TextInput = ({
   onKeyDown,
   ...inutBoxProps
 }: TextInputProps) => (
-  <InputBox {...{ px: 2, inputId: id, inutBoxProps }}>
+  <InputBox inputId={id} {...inutBoxProps}>
     <Input
       id={id}
       name={name}

@@ -69,7 +69,6 @@ export const RightButton: ComponentStory<typeof InputBox> = () => (
   <>
     <InputBox
       width={300}
-      rightInteractive
       rightAdornment={
         <Button.TextButton
           onClick={() => {
