@@ -10,10 +10,10 @@
   "scripts": {
     "tsc": "tsc",
     "preinstall": "yarn build",
-    "prepare": "yarn build",
+    "prepare": "yarn install --production=false --force",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
-    "build": "yarn install --production=false --force && preconstruct build",
+    "build": "yarn prepare && preconstruct build",
     "build:prod": "preconstruct build"
   },
   "preconstruct": {
