@@ -1,6 +1,6 @@
 {
   "name": "@holium/realm",
-  "version": "0.0.87-alpha",
+  "version": "0.0.88-alpha",
   "description": "A desktop environment for Urbit",
   "main": "./dist/main/main.js",
   "author": {
