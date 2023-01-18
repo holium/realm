@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../../components/Flex/Flex';
-import { Text } from '.';
+import { Flex } from '../Flex/Flex';
+import { Text } from './Text';
 
 export default {
   component: Text.Default,

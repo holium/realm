@@ -1,9 +1,9 @@
 import { FC } from 'react';
-import { BarStyle } from '../Bar';
-import { Avatar, Flex, Icon } from '../../';
+import { BarStyle } from '../Bar/Bar';
+import { Avatar, Flex, Icon } from '../..';
 import { HoliumButton } from './HoliumButton';
 import { BarButton } from './BarButton';
-import { RoomsDock } from '../RoomsDock';
+import { RoomsDock } from '../RoomsDock/RoomsDock';
 
 type SystemBarProps = {};
 
@@ -100,5 +100,3 @@ export const SystemBar: FC<SystemBarProps> = (props: SystemBarProps) => {
     </Flex>
   );
 };
-
-export { BarButton, HoliumButton };
