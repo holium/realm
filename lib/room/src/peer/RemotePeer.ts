@@ -129,9 +129,9 @@ export class RemotePeer extends Peer {
     // set ready status to ready so that we don't dial again
     // if we receive a waiting signal
     this.readyStatus = READY;
-    this.sendSignal(this.patp, { type: READY, from: this.our });
     console.log(`ready: ${this.patp}`);
     this.createConnection();
+    this.sendSignal(this.patp, { type: READY, from: this.our });
   }
 
   onReady() {
