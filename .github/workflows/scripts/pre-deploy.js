@@ -105,9 +105,9 @@ module.exports = async ({ github, context }, workflowId) => {
         // if the latest release is a draft, it means the prior build failed; therefore
         //  rerun the build using the same tag (version) information
         buildVersion = release.tag_name;
-        // if the build version does not match package.json version, consider
-        //   a new build which will check in an update package.json version #
-        if (buildVersion !== pkg.version) {
+        // are the versions different (exclude '-alpha') since that is only used
+        //  to name assets; therefore just compare 'raw' version
+        if (buildVersion !== ci.packageVersion.replace('-alpha', '')) {
           ci.isNewBuild = true;
         }
       } else {
