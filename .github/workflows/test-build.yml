@@ -38,7 +38,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'staging-build.yml')
+            const result = script({github, context}, 'test-build.yml')
             console.log(result)
             return result
         env:
@@ -284,7 +284,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
-            const result = script({github, context}, 'staging-build.yml', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'test-build.yml', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
