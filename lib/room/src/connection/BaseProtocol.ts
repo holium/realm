@@ -23,7 +23,6 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   peers: Map<Patp, RemotePeer> = new Map();
   rtc: RTCConfiguration = {
     iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-    iceTransportPolicy: 'relay',
   };
 
   constructor(our: Patp, config: ProtocolConfig, rooms: RoomMap = new Map()) {

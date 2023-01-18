@@ -10,7 +10,8 @@
     "build": "preconstruct build",
     "build-storybook": "build-storybook",
     "postinstall": "preconstruct dev",
-    "storybook": "start-storybook -p 6006"
+    "storybook": "start-storybook -p 6006",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@tlon/sigil-js": "^1.4.5",
