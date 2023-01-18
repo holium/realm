@@ -23,7 +23,7 @@
 +$  path-id  @uvH   :: produced by (sham [path])
 +$  path-row
   $:  id=@uvH
-      path=path
+      =path
       metadata=(map cord cord)
       type=@tas     :: not officially specified, up to user to interpret for maybe %dm vs %group or %chat vs %board or whatever
   ==
@@ -73,13 +73,13 @@
 ::
 +$  peers-table  (map path-id (list peer-row))
 ::
-::+$  table-name=?(%paths %messages %peers)
-::+$  table
-::  $%  [%paths =paths-table]
-::      [%messages =messages-table]
-::      [%peers =peers-table]
-::  ==
-::+$  tables  (list table)
++$  table-name=?(%paths %messages %peers)
++$  table
+  $%  [%paths =paths-table]
+      [%messages =messages-table]
+      [%peers =peers-table]
+  ==
++$  tables  (list table)
 
 ::
 ::  agent details

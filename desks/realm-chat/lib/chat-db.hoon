@@ -47,6 +47,10 @@
     :: TODO actually filter the messages-table mop type into a list of
     :: msg-part that have id gth msg-id passed in
     ~
+  ++  paths-list
+    |=  [tbl=paths-table:sur]
+    ^-  (list path)
+    (turn ~(val by tbl) |=(a=path-row:sur path.path-row))
   ::++  messages-table
   ::  |=  =tables:sur
   ::  ^-  messages-table:sur
@@ -77,43 +81,11 @@
     ^-  json
     (messages-table:encode tbl)
   ::
-  ++  view :: encodes for on-peek
-    |=  vi=view:sur
+  ++  path-row :: encodes for on-watch
+    |=  =path-row:sur
     ^-  json
-    %-  pairs
-    :_  ~
-    ^-  [cord json]
-    :-  -.vi
-    ?-  -.vi
-      :: ::
-        %inbox
-      (chat-previews:encode chat-previews.vi)
-      ::
-        %dm-log
-      (dm-log:encode chat.vi)
-    ==
+    (path-row:encode path-row)
   ::
-  ++  rolodex
-    |=  =rolodex:cs
-    ^-  json
-    |^
-    %-  pairs
-    %+  turn  ~(tap by rolodex)
-    |=  [ship=@p =contact:cs]
-    ^-  [cord json]
-    [(scot %p ship) (encode-contact contact)]
-    ++  encode-contact
-      |=  =contact:cs
-      ^-  json
-      %-  pairs:enjs:format
-      :~  ['nickname' s+nickname.contact]
-          ['bio' s+bio.contact]
-          ['color' s+(scot %ux color.contact)]
-          ['avatar' ?~(avatar.contact ~ s+u.avatar.contact)]
-          ['cover' ?~(cover.contact ~ s+u.cover.contact)]
-          ['groups' a+(turn ~(tap in groups.contact) (cork enjs-path:res (lead %s)))]
-      ==
-    --
   --
 ::
 ++  dejs
@@ -126,106 +98,14 @@
     |%
     ++  decode
       %-  of
-      :~  [%send-dm dm]
-          [%read-dm read-dm]
-          [%create-group-dm cr-gp-dm]
-          [%send-group-dm gp-dm]
-          [%read-group-dm read-group-dm]
-          [%set-groups-target parse-groups-target]
+      :~  [%read-dm read-dm]
       ==
-    ::
-    ++  parse-groups-target
-      %-  ot
-      :~
-          [%target ngt]
-      ==
-    ++  ngt  :: Number-to-Groups-Target
-      |=  jon=json
-      ?>  ?=([%n *] jon)
-      ?:  =((rash p.jon dem) 1)
-      %1
-      %2
     ::
     ++  read-dm
       %-  ot
       :~  
           [%ship (su ;~(pfix sig fed:ag))]
       ==
-    ::
-    ++  read-group-dm
-      %-  ot
-      :~  
-          [%resource dejs:res]
-      ==
-    ::
-    ::
-    ++  cr-gp-dm
-      %-  ot
-      :~  [%ships (as (su ;~(pfix sig fed:ag)))]
-      ==
-    ::
-    ++  dm
-      %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
-          [%post pst]
-      ==
-    ::
-    ++  gp-dm
-      %-  ot
-      :~  
-          [%resource dejs:res]
-          [%post pst]
-      ==
-    ::
-    ++  pst
-      %-  ot
-      :~  [%author (su ;~(pfix sig fed:ag))]
-          [%index index]
-          [%time-sent di]
-          [%contents (ar content)]
-          [%hash (mu nu)]
-          [%signatures (as signature)]
-      ==
-    ::
-    ++  signature
-      %-  ot
-      :~  [%hash nu]
-          [%ship (su ;~(pfix sig fed:ag))]
-          [%life ni]
-      ==
-    ::
-    ++  index  (su ;~(pfix fas (more fas dem)))
-    ++  content
-      %-  of
-      :~  [%mention (su ;~(pfix sig fed:ag))]
-          [%text so]
-          [%url so]
-          [%reference reference]
-          [%code eval]
-      ==
-    ::
-    ++  reference
-      |^
-      %-  of
-      :~  graph+graph
-          group+dejs-path:res
-          app+app
-      ==
-      ::
-      ++  graph
-        %-  ot
-        :~  group+dejs-path:res
-            graph+dejs-path:res
-            index+index
-        ==
-      ::
-      ++  app
-        %-  ot
-        :~  ship+(su ;~(pfix sig fed:ag))
-            desk+so
-            path+pa
-        ==
-      --
     ::
     ++  tang 
       |=  jon=^json
@@ -271,4 +151,13 @@
     ^-  json
     :: TODO actually convert messages table to json
     [%o *(map @t json)]
+  ++  path-row
+    |=  =path-row:sur
+    ^-  json
+    %-  pairs
+    :~  id+s+id.path-row
+        path+s+(spat path.path-row)
+        metadata+s+'TODO not implemented'
+        type+s+type.path-row
+    ==
 --
