@@ -115,7 +115,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin master
+  #         git pull origin test-build
   #     - name: Build and publish
   #       run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
   #       env:
@@ -154,6 +154,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
+          git config --global --add safe.directory '*'
           git pull origin test-build
       #
       - name: Install yarn
