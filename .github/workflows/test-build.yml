@@ -1,7 +1,7 @@
 #
 #
 name: test-build
-run-name: test Build - ${{ github.actor }}
+run-name: Test Build - ${{ github.actor }}
 on:
   pull_request:
     types:
@@ -38,7 +38,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'staging-build.yml')
+            const result = script({github, context}, 'test-build.yml')
             console.log(result)
             return result
         env:
@@ -115,7 +115,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin master
+  #         git pull origin test-build
   #     - name: Build and publish
   #       run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
   #       env:
@@ -144,13 +144,50 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       #
-      - name: Build and install
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git config --global --add safe.directory '*'
+          git pull origin test-build
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
         run: |
           apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Build and install
+        run: |
           npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          mv ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
     needs: [pre-deploy, build-windows]
@@ -253,7 +290,8 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - run: |
-          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+          # test builds should stay in draft form
+          gh release edit $BUILD_VERSION --prerelease=false --draft=true --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
@@ -274,7 +312,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
-            const result = script({github, context}, 'staging-build.yml', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'test-build.yml', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
