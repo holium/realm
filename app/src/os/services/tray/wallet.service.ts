@@ -810,7 +810,6 @@ export class WalletService extends BaseService {
     this.state!.navState.protocol !== ProtocolType.UQBAR
       ? this.state!.setProtocol(ProtocolType.UQBAR)
       : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
-    console.log('watching udpates')
     this.wallet!.watchUpdates(this.core.conduit!, this.state!);
   }
 
