@@ -105,7 +105,7 @@ export const RoomsDock: FC<RoomsDockProps> = (props: RoomsDockProps) => {
               }}
             >
               <Icon
-                iconColor={isMuted ? 'red' : 'currentcolor'}
+                color={isMuted ? 'intent-warning' : 'text'}
                 name={isMuted ? 'Unmute' : 'Mute'}
                 size={26}
               />
