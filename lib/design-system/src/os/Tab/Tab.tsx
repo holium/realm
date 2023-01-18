@@ -12,7 +12,7 @@ const TabRow = styled(Row)<{ collapsed?: boolean }>`
   flex-direction: column;
   flex: 1;
   padding: 4px 4px 4px 6px;
-  align-items: flex-start;
+  align-items: space-between;
   text-align: left;
   background-color: var(--rlm-overlay-hover);
   &:hover {
@@ -54,7 +54,7 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
     onNavigate,
     onClose,
     multiplayer,
-    width=270
+    width = 270,
   } = props;
 
   if (collapsed) {
@@ -99,7 +99,7 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
   }
   return (
     <TabRow id={id} width={collapsed ? widths.collapsed : widths.expanded}>
-      <Flex flex={1} justifyContent="space-between">
+      <Flex width="100%" flex={1} justifyContent="space-between">
         <Flex gap={6} alignItems="center">
           <Favicon src={favicon} />
           {!collapsed && (

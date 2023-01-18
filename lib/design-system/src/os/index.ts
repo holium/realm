@@ -4,4 +4,4 @@ export * from './SystemBar/BarButton';
 export * from './SystemBar/HoliumButton';
 export * from './SystemBar/SystemBar';
 export { Bookmark } from './Bookmark/Bookmark';
-export * from './Tab/Tab'
+export * from './Tab/Tab';
