@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { BoxProps, Icon, Button } from '../../../';
 import { Input } from '../Input/Input';
 import InputBox from '../InputBox/InputBox';
-import { isImgUrl } from '../../util/utils';
+import { isImgUrl } from '../../util/strings';
 
 type AvatarInputProps = {
   id: string;

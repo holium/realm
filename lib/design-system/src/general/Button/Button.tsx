@@ -28,7 +28,7 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { ColorProps, colorStyle } from '../../util/colors';
-import { getVar } from '../../util/utils';
+import { getVar } from '../../util/strings';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
