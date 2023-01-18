@@ -153,7 +153,7 @@ jobs:
   #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-windows]
+    needs: [pre-deploy, build-mac]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -232,7 +232,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-windows, deploy-desks]
+    needs: [pre-deploy, build-mac, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
