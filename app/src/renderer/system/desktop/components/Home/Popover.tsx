@@ -134,6 +134,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   height: 'fit-content',
                   overflowY: 'auto',
                   maxHeight: '55vh',
+                  zIndex: 100,
                 }}
                 color={textColor}
                 customBg={windowColor}

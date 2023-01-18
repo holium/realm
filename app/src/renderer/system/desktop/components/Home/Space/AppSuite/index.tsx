@@ -112,8 +112,8 @@ export const AppSuite = observer((props: AppSuiteProps) => {
   );
 
   const popoverId = `app-suite-${suiteIndex}`;
-  const popover = useMemo(
-    () => (
+  const popover = useMemo(() => {
+    return (
       <RealmPopover
         id={popoverId}
         isOpen={isOpen}
@@ -169,18 +169,17 @@ export const AppSuite = observer((props: AppSuiteProps) => {
           )}
         </Flex>
       </RealmPopover>
-    ),
-    [
-      apps,
-      backgroundColor,
-      coords,
-      isOpen,
-      popoverId,
-      space.path,
-      suiteIndex,
-      textColor,
-    ]
-  );
+    );
+  }, [
+    apps,
+    backgroundColor,
+    coords,
+    isOpen,
+    popoverId,
+    space.path,
+    suiteIndex,
+    textColor,
+  ]);
 
   const AppTile = ({ app, index }: { app: any | null; index: number }) => {
     if (app) {
@@ -208,17 +207,20 @@ export const AppSuite = observer((props: AppSuiteProps) => {
         accentColor={accentColor}
         app={undefined}
         isAdmin={isAdmin}
-        onClick={() => {
+        onClick={(evt: React.MouseEvent<any>) => {
+          evt.stopPropagation();
           if (isAdmin) {
             setCoords(
               calculatePopoverAnchorById(`app-suite-${index}-trigger`, {
                 dimensions,
                 anchorOffset: {
+                  x: 0,
                   y: 12,
                 },
                 centered: true,
               })
             );
+
             setSearchMode('app-search');
             setSuiteIndex(index);
           }
