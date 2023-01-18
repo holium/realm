@@ -111,9 +111,6 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['signal'];
         const remotePeer = this.peers.get(payload.from);
         const signalData = JSON.parse(data['signal'].data);
-        if (!remotePeer) {
-          console.log('got signal from unknown peer', payload.from);
-        }
 
         if (signalData.type === 'waiting') {
           if (!remotePeer) {
@@ -121,7 +118,7 @@ export class RealmProtocol extends BaseProtocol {
             console.log('queuing unknown peer');
             this.queuedPeers.push(payload.from);
           } else {
-            console.log(`recieved %waiting ${payload.from}`);
+            console.log(`recieved %waiting from ${payload.from}`);
             remotePeer.onWaiting();
           }
         }
@@ -129,7 +126,7 @@ export class RealmProtocol extends BaseProtocol {
         if (signalData.type === 'ack-waiting') {
           if (remotePeer) {
             remotePeer?.onAckWaiting();
-            console.log(`recieved %ack-waiting ${payload.from}`);
+            console.log(`recieved %ack-waiting from ${payload.from}`);
           } else {
             console.log(`unknown recieved %ack-waiting ${payload.from}`);
           }
@@ -167,9 +164,6 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
-        console.log(
-          `%rooms %provider-changed old=${this.provider}, new=${payload.provider}`
-        );
         this.provider = payload.provider;
         if (this.presentRoom?.rid) {
           const rid = this.presentRoom?.rid;
@@ -193,7 +187,6 @@ export class RealmProtocol extends BaseProtocol {
       if (data['room-entered']) {
         const payload = data['room-entered'];
         console.log(`%room-entered ${payload.ship}`);
-        console.log(payload);
         const room = this.rooms.get(payload.rid);
         if (room) {
           room.present.push(payload.ship);
@@ -229,9 +222,7 @@ export class RealmProtocol extends BaseProtocol {
       }
       if (data['room-left']) {
         const payload = data['room-left'];
-        console.log(`%room-left peer:${payload.ship}`);
-        console.log(payload);
-
+        console.log(`%room-left ${payload.ship}`);
         if (this.presentRoom?.rid === payload.rid) {
           if (payload.ship !== this.our) {
             this.hangup(payload.ship);
