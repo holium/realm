@@ -201,10 +201,8 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy]
+    needs: [pre-deploy, build-windows]
     runs-on: ubuntu-latest
-    outputs:
-      bump-desks: ${{ steps.bump-desks.outputs.result }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
