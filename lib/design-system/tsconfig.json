@@ -26,5 +26,11 @@
     "noImplicitThis": false
   },
   "include": ["src", ".storybook"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".template/name.stories.tsx",
+    ".template/name.tests.tsx",
+    ".template/name.tsx"
+  ]
 }

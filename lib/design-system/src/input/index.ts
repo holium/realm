@@ -1,4 +1,2 @@
-export * from './InputBox';
-export * from './Input';
-export * from './AvatarInput';
-export * from './TextInput';
+export * from './AvatarInput/AvatarInput';
+export * from './TextInput/TextInput';

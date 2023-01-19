@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, KeyboardEventHandler } from 'react';
 import { Flex, Box, Input } from 'renderer/components';
 
 interface BigInputProps {
@@ -10,6 +10,7 @@ interface BigInputProps {
   placeholder: string;
   value: string;
   onChange: any;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
 }
 
 export const BigInput: FC<BigInputProps> = (props: BigInputProps) => {
@@ -37,6 +38,7 @@ export const BigInput: FC<BigInputProps> = (props: BigInputProps) => {
           placeholder={props.placeholder}
           value={props.value}
           onChange={(e) => props.onChange(e.target.value)}
+          onKeyDown={props.onKeyDown}
         />
       </Box>
     </Flex>

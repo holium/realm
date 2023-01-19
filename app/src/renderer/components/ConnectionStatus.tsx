@@ -21,11 +21,8 @@ const ConnStatusStyle = styled(motion.div)<ConnStatusStyleProps>`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  backdrop-filter: var(--blur-enabled);
+  backdrop-filter: var(--blur);
   user-select: none;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
   ${(props: ConnStatusStyleProps) =>
     props.mode === 'light'
       ? css`
