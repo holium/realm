@@ -106,10 +106,7 @@ module.exports = async ({ github, context }, workflowId) => {
     } catch (e) {
       console.log(e);
     }
-    console.log(`info: tag => %o`, {
-      id: tag?.data?.id,
-      name: tag?.data?.name,
-    });
+    console.log('tag => %o', tag);
     if (tag) {
       throw Error(
         `error: tag '${tag} exists. please rename the PR and try again`
