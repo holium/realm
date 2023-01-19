@@ -11,7 +11,6 @@ interface LockedProps {
 }
 
 export const VerifyPasscode: FC<LockedProps> = observer((props: LockedProps) => {
-  console.log('verify passcode')
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
 
