@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
       - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
@@ -134,63 +134,65 @@ jobs:
   #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
-  build-windows:
-    if: github.event.pull_request.merged == true
-    needs: [pre-deploy]
-    runs-on: ubuntu-latest
-    container:
-      image: electronuserland/builder:wine
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      #
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-          cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global --add safe.directory '*'
-          git pull origin test-build
-      #
-      - name: Install yarn
-        run: npm install -g yarn
-      #
-      - name: Install app dependencies
-        run: yarn install
-      #
-      - name: Install gh cli
-        run: |
-          apt-get update && apt-get -y install sudo
-          type -p curl >/dev/null || sudo apt install curl -y
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-      #
-      - name: Build and install
-        run: |
-          npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
-        env:
-          USERNAME: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
-        run: |
-          # rename the latest.yml (windows) file to alpha.yml for staging builds
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # build-windows:
+  #   if: github.event.pull_request.merged == true
+  #   needs: [pre-deploy]
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: electronuserland/builder:wine
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     #
+  #     - name: Setup node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '14'
+  #         cache: 'npm'
+  #     #
+  #     - name: Pull latest
+  #       run: |
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git config --global --add safe.directory '*'
+  #         git pull origin test-build
+  #     #
+  #     - name: Install yarn
+  #       run: npm install -g yarn
+  #     #
+  #     - name: Install app dependencies
+  #       run: yarn install
+  #     #
+  #     - name: Install gh cli
+  #       run: |
+  #         apt-get update && apt-get -y install sudo
+  #         type -p curl >/dev/null || sudo apt install curl -y
+  #         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+  #         && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+  #         && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+  #         && sudo apt update \
+  #         && sudo apt install gh -y
+  #     #
+  #     - name: Build and install
+  #       run: |
+  #         npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+  #       env:
+  #         USERNAME: ${{ github.actor }}
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     #
+  #     - name: Deploy binaries and other artifacts to draft release
+  #       run: |
+  #         # rename the latest.yml (windows) file to alpha.yml for staging builds
+  #         gh release upload $BUILD_VERSION ./app/release/build/*.*
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-windows]
+    needs: [pre-deploy]
     runs-on: ubuntu-latest
+    outputs:
+      bump-desks: ${{ steps.bump-desks.outputs.result }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -210,6 +212,7 @@ jobs:
       #
       - name: Bump desks version
         uses: actions/github-script@v6
+        id: bump-desks
         with:
           script: |
             const script = require('./.github/workflows/scripts/bump-desk-version.js')
@@ -219,6 +222,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Push desk version update
+        if: ${{ steps.bump-desks.outputs.result }}
         run: |
           git add ./desks/realm/desk.docket-0
           git commit -m "patch realm desk version"
@@ -268,12 +272,22 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-windows, deploy-desks]
+    needs: [pre-deploy, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      # merge any changes made by the build script back into master
+      - name: Merge production changes back into master
+        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isPackageUpdate || needs.deploy-desks.outputs.bump-desks }}
+        run: |
+          console.log("Running 'Merge production changes back into master'")
       - name: Run post-deploy script
         uses: actions/github-script@v6
         id: post-deploy
@@ -294,6 +308,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # failure:
+  #   if: failure()
+  #   needs: [pre-deploy, post-deploy]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     #
+  #     - name: Pull latest
+  #       run: |
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git pull origin test-build
+  #     #
+  #     - name: Delete release draft
+  #       if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
+  #       # create annotated tag for this branch. this will become basis for the release
+  #       run: |
+  #         mkdir -p ./app/release/build
+  #         touch ./app/release/build/log.txt
+  #         echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+  #         git push origin $BUILD_VERSION
+  #         gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+  #         BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+  #         CHANGELOG: ${{ github.event.pull_request.body }}
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:

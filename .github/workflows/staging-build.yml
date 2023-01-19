@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
       - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
@@ -62,7 +62,7 @@ jobs:
           echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
         env:
@@ -183,7 +183,7 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
-          mv ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
