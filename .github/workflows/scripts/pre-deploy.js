@@ -20,6 +20,25 @@
 
 */
 var fs = require('fs');
+
+// did the "core" part of two version strings change
+//  core being major.minor.build portion of version string
+function versionDiff(a, b) {
+  const a_matches = a.match(
+    /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  );
+  const b_matches = b.match(
+    /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  );
+  if (a_matches && b_matches) {
+    return !(
+      parseInt(a_matches[3]) === parseInt(b_matches[3]) &&
+      parseInt(a_matches[4]) === parseInt(b_matches[4]) &&
+      parseInt(a_matches[5]) === parseInt(b_matches[5])
+    );
+  }
+}
+
 module.exports = async ({ github, context }, workflowId) => {
   let ci = {
     // if package.json version will change, consider this a new build
@@ -76,7 +95,7 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
         matches[5]
       }`;
-      if (ci.buildVersion !== ci.packageVersion) {
+      if (versionDiff(ci.buildVersion, ci.packageVersion)) {
         ci.isNewBuild = true;
       }
       // buildVersion and packageVersion will match if manually deploying
@@ -107,7 +126,7 @@ module.exports = async ({ github, context }, workflowId) => {
         buildVersion = release.tag_name;
         // are the versions different (exclude '-alpha') since that is only used
         //  to name assets; therefore just compare 'raw' version
-        if (buildVersion !== ci.packageVersion.replace('-alpha', '')) {
+        if (versionDiff(ci.buildVersion, ci.packageVersion)) {
           ci.isNewBuild = true;
         }
       } else {
