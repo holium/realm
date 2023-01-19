@@ -91,17 +91,10 @@ module.exports = async ({ github, context }, workflowId) => {
       `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
     );
     ci.releaseName = context.payload.pull_request.title;
-    ci.buildVersion = `${matches[1]}-${matches[2] ? 'v' : ''}${matches[3]}.${
-      matches[4]
-    }.${matches[5]}`;
-    const tag = await github.request(
-      'GET /repos/{owner}/{repo}/releases/tags/{tag}',
-      {
-        owner: 'holium',
-        repo: 'realm',
-        tag: ci.buildVersion,
-      }
-    );
+    ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
+    ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
+      matches[5]
+    }${ci.channel === 'alpha' ? '-alpha' : ''}`;
     if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
     }
@@ -111,7 +104,6 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
-    ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
   } else {
     let buildVersion = undefined;
     // grab the latest annotated tag of any kind (draft, prerelease, release), and interrogate it to determine
@@ -156,9 +148,9 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.isPackageUpdate = true;
     }
     // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
+    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
-    }.${buildNumber}`;
+    }.${buildNumber}-alpha`;
     ci.releaseName = `${ci.buildVersion}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
