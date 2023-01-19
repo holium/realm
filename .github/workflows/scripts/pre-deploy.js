@@ -166,24 +166,22 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}-alpha`;
-    ci.releaseName = `${ci.buildVersion}`;
+    ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
+      matches[3]
+    }.${buildNumber}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
     ci.channel = 'alpha';
   }
-  if (ci.isNewBuild) {
-    // see: https://www.electron.build/tutorials/release-using-channels.html
-    // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
-    //  this is useful when checking the version in Realm -> About
-    pkg.version = `${ci.version.major}.${ci.version.minor}.${ci.version.build}${
-      ci.channel === 'alpha' ? '-alpha' : ''
-    }`;
-    // must write build version string out to package.json since electron-builder
-    //   will use this to name assets
-    fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
-  }
+  // see: https://www.electron.build/tutorials/release-using-channels.html
+  // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
+  //  this is useful when checking the version in Realm -> About
+  pkg.version = ci.buildVersion;
+  // must write build version string out to package.json since electron-builder
+  //   will use this to name assets
+  fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   console.log(`building version ${ci.buildVersion}...`);
   console.log(ci);
   return ci;
