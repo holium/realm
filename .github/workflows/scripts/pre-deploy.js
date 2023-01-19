@@ -7,9 +7,7 @@
 
     JSON object (ci):
 
-      packageVersion - package.json file version attribute value. if this value
-        comes from the PR title, it will be "as-is". otherwise the build # will be
-        incremented (where build # is v<major>.<minor>.<build>)
+      packageVersion - package.json version attribute value
 
       buildVersion - the name of the release. also used to tag the build. this can
         differ from the package version
@@ -97,8 +95,6 @@ module.exports = async ({ github, context }, workflowId) => {
     if (versionDiff(ci.buildVersion, ci.packageVersion)) {
       ci.isNewBuild = true;
     }
-    // buildVersion and packageVersion will match if manually deploying
-    ci.packageVersion = ci.buildVersion;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
