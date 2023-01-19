@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
       - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
@@ -191,6 +191,8 @@ jobs:
   deploy-desks:
     needs: [pre-deploy, build-windows]
     runs-on: ubuntu-latest
+    outputs:
+      bump-desks: ${{ steps.bump-desks.outputs.result }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -210,6 +212,7 @@ jobs:
       #
       - name: Bump desks version
         uses: actions/github-script@v6
+        id: bump-desks
         with:
           script: |
             const script = require('./.github/workflows/scripts/bump-desk-version.js')
@@ -219,6 +222,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Push desk version update
+        if: ${{ steps.bump-desks.outputs.result }}
         run: |
           git add ./desks/realm/desk.docket-0
           git commit -m "patch realm desk version"
@@ -274,6 +278,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      # merge any changes made by the build script back into master
+      - name: Merge production changes back into master
+        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).packageUpdated || needs.deploy-desks.outputs.bump-desks }}
+        run: |
+          console.log("Running 'Merge production changes back into master'")
       - name: Run post-deploy script
         uses: actions/github-script@v6
         id: post-deploy

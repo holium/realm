@@ -30,17 +30,19 @@ function versionDiff(a, b) {
   );
   if (a_matches && b_matches) {
     return !(
+      parseInt(a_matches[2]) === parseInt(b_matches[2]) &&
       parseInt(a_matches[3]) === parseInt(b_matches[3]) &&
-      parseInt(a_matches[4]) === parseInt(b_matches[4]) &&
-      parseInt(a_matches[5]) === parseInt(b_matches[5])
+      parseInt(a_matches[4]) === parseInt(b_matches[4])
     );
   }
 }
 
 module.exports = async ({ github, context }, workflowId) => {
   let ci = {
-    // if package.json version will change, consider this a new build
+    // if running from release title or default build with package.json version update
     isNewBuild: false,
+    // if new raw package.json version update
+    isPackageUpdate: false,
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
     // version "as-is" from package.json
@@ -89,11 +91,14 @@ module.exports = async ({ github, context }, workflowId) => {
       `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
     );
     ci.releaseName = context.payload.pull_request.title;
-    ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
-      matches[5]
-    }`;
-    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
+    ci.buildVersion = `${matches[1]}-${matches[2] ? 'v' : ''}${matches[3]}.${
+      matches[4]
+    }.${matches[5]}`;
+    if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
+    }
+    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
+      ci.isPackageUpdate = true;
     }
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
@@ -140,12 +145,13 @@ module.exports = async ({ github, context }, workflowId) => {
     //  build as version '0.0.1'
     if (ci.isNewBuild) {
       buildNumber++;
+      ci.isPackageUpdate = true;
     }
     // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
+    ci.buildVersion = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}`;
-    ci.releaseName = `staging-${ci.buildVersion}`;
+    ci.releaseName = `${ci.buildVersion}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
