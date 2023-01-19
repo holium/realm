@@ -97,7 +97,7 @@ module.exports = async ({ github, context }, workflowId) => {
     );
     const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
-    }${(matches[1] === 'staging') === 'alpha' ? '-alpha' : ''}`;
+    }${matches[1] === 'staging' ? '-alpha' : ''}`;
     let tag = undefined;
     try {
       tag = await github.request(
