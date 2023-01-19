@@ -89,9 +89,9 @@ module.exports = async ({ github, context }, workflowId) => {
       `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
     );
     ci.releaseName = context.payload.pull_request.title;
-    ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
-      matches[5]
-    }`;
+    ci.buildVersion = `${matches[1]}-${matches[2] ? 'v' : ''}${matches[3]}.${
+      matches[4]
+    }.${matches[5]}`;
     if (versionDiff(ci.buildVersion, ci.packageVersion)) {
       ci.isNewBuild = true;
     }
@@ -142,10 +142,10 @@ module.exports = async ({ github, context }, workflowId) => {
       buildNumber++;
     }
     // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
+    ci.buildVersion = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}`;
-    ci.releaseName = `staging-${ci.buildVersion}`;
+    ci.releaseName = `${ci.buildVersion}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
