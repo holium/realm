@@ -94,6 +94,14 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.buildVersion = `${matches[1]}-${matches[2] ? 'v' : ''}${matches[3]}.${
       matches[4]
     }.${matches[5]}`;
+    const tag = await github.request(
+      'GET /repos/{owner}/{repo}/releases/tags/{tag}',
+      {
+        owner: 'holium',
+        repo: 'realm',
+        tag: ci.buildVersion,
+      }
+    );
     if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
     }
