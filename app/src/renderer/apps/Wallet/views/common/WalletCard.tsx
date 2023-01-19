@@ -24,20 +24,23 @@ import {
 } from '../../components/WalletCardWrapper';
 
 interface WalletCardProps {
-  wallet: EthWalletType | BitcoinWalletType;
+  // wallet: EthWalletType | BitcoinWalletType;
+  walletKey: any;
   isSelected?: boolean;
   onSelect?: () => void;
   theme?: ThemeType;
 }
 
 export const WalletCard: FC<WalletCardProps> = ({
-  wallet,
+  walletKey,
   isSelected,
   onSelect,
 }: WalletCardProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
+
+  const wallet = walletApp.currentStore.wallets.get(walletKey)!;
 
   let coins: any = null;
   if (walletApp.navState.network === NetworkType.ETHEREUM) {
@@ -51,8 +54,18 @@ export const WalletCard: FC<WalletCardProps> = ({
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
+  console.log(walletTransactions);
+  console.log('thesize', walletTransactions.size);
+  const numSize = 
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+          .transactionList.size
+      : (wallet as BitcoinWalletType).transactionList.size;
+  console.log('viewsize', numSize)
 
   const transactions = getTransactions(walletTransactions || new Map());
+  console.log(transactions.length)
+  console.log('walletsize', walletTransactions.size)
 
   const ethTicker =
     walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
@@ -73,7 +86,7 @@ export const WalletCard: FC<WalletCardProps> = ({
         } ETH`
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
-  return useMemo(
+  return <Text>{walletTransactions.size}</Text>/*useMemo(
     () => (
       <WalletCardStyle
         layout="size"
@@ -144,7 +157,7 @@ export const WalletCard: FC<WalletCardProps> = ({
       </WalletCardStyle>
     ),
     [wallet, isSelected, theme, mode, coins, transactions.length]
-  );
+  );*/
 };
 
 WalletCard.defaultProps = {

@@ -22,6 +22,7 @@ export const Finalizing: FC<FinalizingProps> = observer(
       console.log('setting mnem', props.seedPhrase, props.passcode);
       if (props.seedPhrase && props.passcode) {
         await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
+        await WalletActions.watchUpdates();
       }
     };
     useEffect(() => {

@@ -31,13 +31,10 @@ export const WalletList: FC<WalletListProps> = observer(
           overflowY="auto"
         >
           {list.map((walletEntry) => {
-            const fullWallet = walletApp.currentStore.wallets.get(
-              walletEntry.key
-            );
             return (
               <WalletCard
                 key={walletEntry.address}
-                wallet={fullWallet!}
+                walletKey={walletEntry.key}
                 onSelect={() => {
                   console.log('list detail nav');
                   WalletActions.navigate(WalletView.WALLET_DETAIL, {

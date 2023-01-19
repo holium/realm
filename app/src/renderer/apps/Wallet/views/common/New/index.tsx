@@ -63,7 +63,7 @@ export const EthNew: FC<any> = observer(() => {
       <CreatePasscode setPasscode={setPasscodeWrapper} />
     ),
     [NewWalletScreen.CONFIRM_PASSCODE]: (
-      <ConfirmPasscode setScreen={setScreen} seedPhrase={seedPhrase} correctPasscode={passcode} />
+      <ConfirmPasscode setScreen={setScreen} correctPasscode={passcode} onSuccess={setPasscode} />
     ),
     [NewWalletScreen.FINALIZING]: (
       <Finalizing seedPhrase={seedPhrase} passcode={passcode} />

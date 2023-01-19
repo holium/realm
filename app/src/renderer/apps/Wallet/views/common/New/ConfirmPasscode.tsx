@@ -8,7 +8,8 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
   correctPasscode: number[];
-  seedPhrase: string;
+  onSuccess: any;
+  // seedPhrase: string;
 }
 
 export const ConfirmPasscode: FC<PasscodeProps> = observer(
@@ -24,10 +25,11 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
         <Flex flex={4} justifyContent="center" alignItems="center">
           <PasscodeInput
             checkAgainst={props.correctPasscode}
-            onSuccess={() => {
+            onSuccess={(passcode: number[]) => {
+              props.onSuccess(passcode);
               props.setScreen(NewWalletScreen.FINALIZING);
               // WalletActions.setMnemonic(props.seedPhrase, props.correctPasscode);
-              WalletActions.watchUpdates();
+              // WalletActions.watchUpdates();
             }}
           />
         </Flex>
