@@ -73,15 +73,16 @@ module.exports = async ({ github, context }, workflowId) => {
   // //  read release package.json for build info
   // const pkg = JSON.parse(fs.readFileSync(packageFilename));
   // ci.packageVersion = pkg.version;
-  const tags = await github.request('GET /repos/{owner}/{repo}/releases/tags', {
-    owner: 'holium',
-    repo: 'realm',
-    per_page: 1, // only give the last result
-    sort: 'created',
-    direction: 'desc',
-  });
-  console.log('logs => %o', tags.data);
   // PR title is a required property of the PR event
+  // const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
+  //   owner: 'holium',
+  //   repo: 'realm',
+  //   per_page: 1, // only give the last result
+  //   sort: 'created',
+  //   direction: 'desc',
+  // });
+  // console.log('logs => %o', tags.data);
+  // const currentBuildTag = tags.data[0].name;
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
@@ -158,7 +159,6 @@ module.exports = async ({ github, context }, workflowId) => {
     //  build as version '0.0.1'
     if (ci.isNewBuild) {
       buildNumber++;
-      ci.isPackageUpdate = true;
     }
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
@@ -182,6 +182,5 @@ module.exports = async ({ github, context }, workflowId) => {
   // fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   console.log(`building version ${ci.buildVersion}...`);
   console.log(ci);
-  throw new Error('stop');
   return ci;
 };
