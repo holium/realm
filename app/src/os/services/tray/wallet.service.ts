@@ -405,6 +405,9 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
       this.wallet!.updateWalletState(this.core.conduit!, this.state!, ProtocolType.UQBAR);
+      if (this.state!.navState.network === NetworkType.ETHEREUM && !(this.state!.navState.protocol === ProtocolType.UQBAR)) {
+        this.wallet?.updateWalletState(this.core.conduit!, this.state!);
+      }
     });
     UqbarApi.watchUpdates(this.core.conduit!, this.state!);
 
