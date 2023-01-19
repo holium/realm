@@ -39,8 +39,10 @@ function versionDiff(a, b) {
 
 module.exports = async ({ github, context }, workflowId) => {
   let ci = {
-    // if package.json version will change, consider this a new build
+    // if running from release title or default build with package.json version update
     isNewBuild: false,
+    // if new raw package.json version update
+    isPackageUpdate: false,
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
     // version "as-is" from package.json
@@ -95,6 +97,9 @@ module.exports = async ({ github, context }, workflowId) => {
     if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
     }
+    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
+      ci.isPackageUpdate = true;
+    }
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
@@ -140,6 +145,7 @@ module.exports = async ({ github, context }, workflowId) => {
     //  build as version '0.0.1'
     if (ci.isNewBuild) {
       buildNumber++;
+      ci.isPackageUpdate = true;
     }
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
