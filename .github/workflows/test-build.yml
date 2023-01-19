@@ -365,7 +365,8 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
-            const result = script({github, context}, 'test-build.yml', JSON.parse(process.env.CI_ENV))
+            const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV) || {};
+            const result = script({github, context}, 'test-build.yml', ci)
             console.log(result)
             return result
         env:
