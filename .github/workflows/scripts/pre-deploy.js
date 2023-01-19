@@ -92,7 +92,7 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.buildVersion = `${matches[1]}-${matches[2] ? 'v' : ''}${matches[3]}.${
       matches[4]
     }.${matches[5]}`;
-    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
+    if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
     }
     ci.version.major = parseInt(matches[3]);
