@@ -44,7 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
       - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
