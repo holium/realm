@@ -97,7 +97,7 @@ module.exports = async ({ github, context }, workflowId) => {
     );
     const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
-    }${ci.channel === 'alpha' ? '-alpha' : ''}`;
+    }${(matches[1] === 'staging') === 'alpha' ? '-alpha' : ''}`;
     let tag = undefined;
     try {
       tag = await github.request(
@@ -117,9 +117,10 @@ module.exports = async ({ github, context }, workflowId) => {
         `error: tag '${tag} exists. please rename the PR and try again`
       );
     }
+    ci.isNewBuild = true;
     ci.releaseName = context.payload.pull_request.title;
     ci.buildVersion = tagName;
-    ci.isNewBuild = true;
+    ci.channel = `${matches[1] === 'staging' ? 'alpha' : ''}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
