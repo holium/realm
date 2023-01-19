@@ -2,20 +2,6 @@
   @author:  lodlev-migdev
   @purpose: script to setup context and environment variables to be used
     by other jobs/steps in the workflow.
-
-  @returns
-
-    JSON object (ci):
-
-      packageVersion - package.json version attribute value
-
-      buildVersion - the name of the release. also used to tag the build. this can
-        differ from the package version
-
-      channel - [alpha|latest] - translates to [staging|release]. the reason for using
-        alpha/latest is due to electron-builder library. it expects alpha/beta/latest in support
-        of channeling releases (see: https://www.electron.build/tutorials/release-using-channels.html)
-
 */
 var fs = require('fs');
 
