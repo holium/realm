@@ -97,8 +97,6 @@ module.exports = async ({ github, context }, workflowId) => {
     }${ci.channel === 'alpha' ? '-alpha' : ''}`;
     if (ci.buildVersion !== ci.packageVersion) {
       ci.isNewBuild = true;
-    }
-    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
       ci.isPackageUpdate = true;
     }
     ci.version.major = parseInt(matches[3]);
