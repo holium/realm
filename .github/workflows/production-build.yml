@@ -61,7 +61,7 @@ jobs:
           echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git tag -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
         env:
@@ -131,8 +131,61 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
+  build-windows:
+    if: github.event.pull_request.merged == true
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git config --global --add safe.directory '*'
+          git pull origin master
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
+        run: |
+          apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Build and install
+        run: |
+          npx cross-env GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
+        env:
+          USERNAME: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          gh release upload $BUILD_VERSION ./app/release/build/*.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
   deploy-desks:
-    needs: [pre-deploy, build-mac]
+    needs: [pre-deploy, build-mac, build-windows]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -211,7 +264,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, deploy-desks]
+    needs: [pre-deploy, build-mac, build-windows, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
