@@ -68,12 +68,17 @@ export function useRooms(our?: Patp) {
     const manager = createManager(our);
     RoomsContext = createContext<null | RoomsManager>(manager);
     roomsManager = manager;
+
+    const refreshManager = () => {
+      RoomsContext = createContext<null | RoomsManager>(null);
+      roomsManager = null;
+    };
+
+    OSActions.onLogout(refreshManager);
+    window.addEventListener('beforeunload', refreshManager);
   } else if (roomsManager === null) {
     throw new Error('roomsManager not initialized');
   }
-  OSActions.onLogout((_event: any) => {
-    roomsManager = null;
-  });
 
   return roomsManager;
 }
