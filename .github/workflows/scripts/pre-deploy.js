@@ -81,7 +81,6 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
-  let tag = undefined;
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = context.payload.pull_request.title.match(
     /(release|staging)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
