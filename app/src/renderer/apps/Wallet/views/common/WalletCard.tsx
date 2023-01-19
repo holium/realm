@@ -86,7 +86,7 @@ export const WalletCard: FC<WalletCardProps> = ({
         } ETH`
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
-  return <Text>{walletTransactions.size}</Text>/*useMemo(
+  return useMemo(
     () => (
       <WalletCardStyle
         layout="size"
@@ -157,7 +157,7 @@ export const WalletCard: FC<WalletCardProps> = ({
       </WalletCardStyle>
     ),
     [wallet, isSelected, theme, mode, coins, transactions.length]
-  );*/
+  );
 };
 
 WalletCard.defaultProps = {

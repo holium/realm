@@ -1,3 +1,4 @@
+import { execFile } from 'child_process';
 import {
   applySnapshot,
   types,
@@ -6,6 +7,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
+import { setFlagsFromString } from 'v8';
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
