@@ -8,7 +8,6 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 
 export const TrayManager = observer(() => {
   const trayAppRef = useRef<HTMLDivElement>();
-  const { windowColor, textColor } = theme.currentTheme;
   const { activeApp, coords, walletApp, setActiveApp } = useTrayApps();
   const [walletForceActive, setWalletForceActive] = useState(false);
   if (walletForceActive && activeApp !== 'wallet-tray') {
