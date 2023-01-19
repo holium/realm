@@ -93,14 +93,19 @@ module.exports = async ({ github, context }, workflowId) => {
     const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
     }${ci.channel === 'alpha' ? '-alpha' : ''}`;
-    const tag = await github.request(
-      'GET /repos/{owner}/{repo}/releases/tags/{tag}',
-      {
-        owner: 'holium',
-        repo: 'realm',
-        tag: tagName,
-      }
-    );
+    let tag = undefined;
+    try {
+      tag = await github.request(
+        'GET /repos/{owner}/{repo}/releases/tags/{tag}',
+        {
+          owner: 'holium',
+          repo: 'realm',
+          tag: tagName,
+        }
+      );
+    } catch (e) {
+      console.log(e);
+    }
     console.log(`info: tag => %o`, {
       id: tag?.data?.id,
       name: tag?.data?.name,
