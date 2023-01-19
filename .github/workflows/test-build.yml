@@ -308,38 +308,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-  failure:
-    if: failure()
-    needs: [pre-deploy, post-deploy]
-    runs-on: ubuntu-latest
-    steps:
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin test-build
-      #
-      - name: Delete release draft
-        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
-        # create annotated tag for this branch. this will become basis for the release
-        run: |
-          mkdir -p ./app/release/build
-          touch ./app/release/build/log.txt
-          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
-          git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
-          CHANGELOG: ${{ github.event.pull_request.body }}
+  # failure:
+  #   if: failure()
+  #   needs: [pre-deploy, post-deploy]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     #
+  #     - name: Pull latest
+  #       run: |
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git pull origin test-build
+  #     #
+  #     - name: Delete release draft
+  #       if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
+  #       # create annotated tag for this branch. this will become basis for the release
+  #       run: |
+  #         mkdir -p ./app/release/build
+  #         touch ./app/release/build/log.txt
+  #         echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+  #         git config --global user.email realm-builder-no-reply@holium.com
+  #         git config --global user.name ${{ github.actor }}
+  #         git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+  #         git push origin $BUILD_VERSION
+  #         gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+  #         BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+  #         CHANGELOG: ${{ github.event.pull_request.body }}
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:

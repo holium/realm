@@ -81,6 +81,7 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
+  let tag = undefined;
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = context.payload.pull_request.title.match(
     /(release|staging)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
@@ -90,13 +91,30 @@ module.exports = async ({ github, context }, workflowId) => {
     console.log(
       `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
     );
-    ci.releaseName = context.payload.pull_request.title;
-    ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
-    ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
+    const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
     }${ci.channel === 'alpha' ? '-alpha' : ''}`;
+    const tag = await github.request(
+      'GET /repos/{owner}/{repo}/releases/tags/{tag}',
+      {
+        owner: 'holium',
+        repo: 'realm',
+        tag: tagName,
+      }
+    );
+    console.log(`info: tag => %o`, {
+      id: tag?.data?.id,
+      name: tag?.data?.name,
+    });
+    if (tag) {
+      throw Error(
+        `error: tag '${tag} exists. please rename the PR and try again`
+      );
+    }
+    ci.releaseName = context.payload.pull_request.title;
+    ci.buildVersion = tagName;
+    ci.isNewBuild = true;
     if (ci.buildVersion !== ci.packageVersion) {
-      ci.isNewBuild = true;
       ci.isPackageUpdate = true;
     }
     ci.version.major = parseInt(matches[3]);
@@ -124,7 +142,7 @@ module.exports = async ({ github, context }, workflowId) => {
       buildVersion = release.tag_name;
       // are the versions different (exclude '-alpha') since that is only used
       //  to name assets; therefore just compare 'raw' version
-      if (versionDiff(buildVersion, ci.packageVersion)) {
+      if (buildVersion !== ci.packageVersion) {
         ci.isNewBuild = true;
       }
     } else {
