@@ -179,7 +179,7 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
