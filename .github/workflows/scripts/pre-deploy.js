@@ -30,9 +30,9 @@ function versionDiff(a, b) {
   );
   if (a_matches && b_matches) {
     return !(
+      parseInt(a_matches[2]) === parseInt(b_matches[2]) &&
       parseInt(a_matches[3]) === parseInt(b_matches[3]) &&
-      parseInt(a_matches[4]) === parseInt(b_matches[4]) &&
-      parseInt(a_matches[5]) === parseInt(b_matches[5])
+      parseInt(a_matches[4]) === parseInt(b_matches[4])
     );
   }
 }
