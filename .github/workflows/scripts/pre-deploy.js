@@ -126,7 +126,7 @@ module.exports = async ({ github, context }, workflowId) => {
         buildVersion = release.tag_name;
         // are the versions different (exclude '-alpha') since that is only used
         //  to name assets; therefore just compare 'raw' version
-        if (versionDiff(ci.buildVersion, ci.packageVersion)) {
+        if (versionDiff(buildVersion, ci.packageVersion)) {
           ci.isNewBuild = true;
         }
       } else {
