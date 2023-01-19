@@ -7,7 +7,7 @@
 
     JSON object (ci):
 
-      packageVersion - package.json file version attribute value
+      packageVersion - package.json version attribute value
 
       buildVersion - the name of the release. also used to tag the build. this can
         differ from the package version

@@ -285,7 +285,7 @@ jobs:
           cache: 'npm'
       # merge any changes made by the build script back into master
       - name: Merge production changes back into master
-        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).packageUpdated || needs.deploy-desks.outputs.bump-desks }}
+        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isPackageUpdate || needs.deploy-desks.outputs.bump-desks }}
         run: |
           console.log("Running 'Merge production changes back into master'")
       - name: Run post-deploy script
