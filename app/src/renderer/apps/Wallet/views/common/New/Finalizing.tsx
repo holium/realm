@@ -19,7 +19,6 @@ export const Finalizing: FC<FinalizingProps> = observer(
     );
 
     const initWallet = async () => {
-      console.log('setting mnem', props.seedPhrase, props.passcode);
       if (props.seedPhrase && props.passcode) {
         await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
         await WalletActions.watchUpdates();

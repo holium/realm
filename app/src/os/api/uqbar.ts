@@ -5,7 +5,6 @@ export const addDots = (address: string) => {
   return '0x' + address.substring(2).match(/.{4}/g)!.join('.');
 };
 export const removeDots = (address: string) => {
-  console.log('address', address)
   return (address || '').replace(/\./g, '');
 };
 
@@ -29,7 +28,6 @@ export const UqbarApi = {
         },
       },
     };
-    console.log(payload);
     await conduit.poke(payload);
   },
   editNickname: async (conduit: Conduit, address: string, nick: string) => {
@@ -90,7 +88,6 @@ export const UqbarApi = {
     conduit: Conduit,
     from: string,
   ) => {
-    console.log('adddots', addDots(from))
     return await conduit.scry({
       app: 'wallet',
       path: `/pending/${addDots(from)}`,
@@ -105,7 +102,6 @@ export const UqbarApi = {
     ethHash: string,
     sig: { v: number; r: string; s: string; }
   ) => {
-    console.log('sig', sig)
     const payload = {
       app: 'wallet',
       mark: 'wallet-poke',
@@ -209,22 +205,12 @@ export const UqbarApi = {
 const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
 
 const handleBookReactions = (data: any, walletState: WalletStoreType) => {
-  console.log('book')
-  console.log(data);
   for (const address of Object.keys(data)) {
-    console.log(address)
     for (const contract of Object.keys(data[address])) {
-      console.log('contract', contract)
       if (data[address][contract].contract === ZIG_CONTRACT_ADDRESS) {
-        console.log('has contract')
         const formattedAddress = address.replaceAll('.','');
-        console.log(formattedAddress)
-        console.log(walletState.ethereum.wallets.keys())
         for (const key of walletState.ethereum.wallets.keys()) {
-          console.log(key)
           if (walletState.ethereum.wallets.get(key)!.address === formattedAddress) {
-            console.log('has address')
-            console.log(data[address][contract].data)
             const balance = data[address][contract].data.balance;
             walletState.ethereum.wallets.get(key)!.setBalance(ProtocolType.UQBAR, balance);
             walletState.ethereum.wallets.get(key)!.setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
@@ -239,15 +225,9 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
 }
 
 const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
-  console.log('metadata')
-  console.log(data);
 }
 
 const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType) => {// }, signTransaction: any) => {
-  console.log('tx');
-  console.log('from uqbar')
-  console.log(data);
-  console.log(data[Object.keys(data)[0]].action?.noun)
   if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
     walletState.setProtocol(ProtocolType.UQBAR);
     walletState.navigate(WalletView.TRANSACTION_CONFIRM, {

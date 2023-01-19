@@ -12,7 +12,6 @@ import { UqbarApi } from '../../../../api/uqbar';
 
 export class UqbarProtocol implements BaseProtocol {
   updateWalletState(conduit: Conduit, walletState: WalletStoreType) {
-    console.log('tracking addresses')
     for (const walletKey of walletState.ethereum.wallets.keys()) {
       const wallet = walletState.ethereum.wallets.get(walletKey)!;
       UqbarApi.trackAddress(conduit, wallet.address, wallet.nickname);

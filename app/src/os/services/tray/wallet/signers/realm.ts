@@ -35,8 +35,6 @@ export class RealmSigner implements BaseSigner {
     return wallet.signTransaction(message);
   }
   async signUqbarTransaction(path: string, hash: string, txn: any, patp: string, passcode: string): Promise<any> {
-    console.log('signing hash', hash);
-    console.log('txn', txn);
     // ethers.utils;
     const ethHash = ethers.utils.serializeTransaction({
       to: removeDots(txn.to).substring(0, 42),
@@ -47,7 +45,6 @@ export class RealmSigner implements BaseSigner {
       data: removeDots(hash),
       // value: ethers.utils.parseUnits(1, "ether")._hex
     })
-    console.log('got through signing')
     const privateKey = this.getPrivateKey(patp, passcode);
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     const flatSig = await wallet.signMessage(hash);
@@ -57,19 +54,14 @@ export class RealmSigner implements BaseSigner {
   private getPrivateKey(patp: string, passcode: string) {
     /*const mnemonic = 
       this.core.services.identity.auth.getMnemonic(null, patp, passcode);*/
-    console.log('trying to get mnemonic')
-    console.log(passcode);
     const storeParams = {
       name: 'mnemonic',
       cwd: `realm.${patp}`,
       secretKey: passcode,
       accessPropertiesByDotNotation: true,
     };
-    console.log('creating db')
     const db = new EncryptedStore<string>(storeParams);
-    console.log('db created')
     const mnemonic = db.store;
-    console.log('mnem', mnemonic)
     /*const mnemonic = safeStorage.decryptString(
       Buffer.from(encryptedMnemonic, 'base64')
     );*/

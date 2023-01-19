@@ -197,8 +197,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     }>({});
 
     const sendTransaction = async (passcode: number[]) => {
-      console.log('amount', transactionAmount)
-      console.log('recipient', transactionRecipient)
       try {
         if (walletApp.navState.network === NetworkType.ETHEREUM) {
           if (walletApp.navState.protocol === ProtocolType.UQBAR) {

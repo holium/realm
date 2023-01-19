@@ -123,7 +123,6 @@ export const WalletApi = {
         },
       },
     };
-    console.log(payload)
     await conduit.poke(payload);
   },
   saveTransactionNotes: async (

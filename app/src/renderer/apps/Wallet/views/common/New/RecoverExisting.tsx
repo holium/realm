@@ -64,7 +64,6 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
 
     return (
       showPasscode ? <VerifyPasscode onSuccess={(code: number[]) => {
-        console.log('ON SUCCESS')
         recoverSeedPhrase(code);
       }
       } />

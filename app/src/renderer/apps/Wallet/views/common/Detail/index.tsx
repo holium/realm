@@ -37,7 +37,6 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
   // const [sendTrans, setSendTrans] = useState(false);
-  console.log('THE CURRENT VIEW', walletApp.navState.view)
   const sendTrans = walletApp.navState.view === WalletView.TRANSACTION_SEND || walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   // const [hideWalletHero, setHideWalletHero] = useState(false);
   const hideWalletHero = walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
@@ -47,14 +46,11 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 //    setHideWalletHero(newScreen === 'confirm');
   const close = async () => {
     // setSendTrans(false);
-    console.log('going back 1', walletApp.navState.view)
     // await WalletActions.resetNavigation();
     await WalletActions.navigateBack();
 //    setHideWalletHero(false);
-    console.log('going back 2', walletApp.navState.view)
   };
 
-  console.log('rendering WalletDetail');
 
   const wallet = walletApp.currentWallet!;
   let coins = null;
@@ -137,7 +133,6 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         hideWalletHero={hideWalletHero}
         onScreenChange={(newScreen: string) => onScreenChange(newScreen)} // changed
         setSendTrans={(send: boolean) => {
-          console.log('setting it')
           if (send) {
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {
               walletIndex: '0',
