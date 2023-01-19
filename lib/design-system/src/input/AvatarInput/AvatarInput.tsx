@@ -1,6 +1,8 @@
 import { FC, useState } from 'react';
-import { isImgUrl } from '../../util/utils';
-import { InputBox, BoxProps, Icon, Input, Button } from '../..';
+import { BoxProps, Icon, Button } from '../../';
+import { Input } from '../Input/Input';
+import InputBox from '../InputBox/InputBox';
+import { isImgUrl } from '../../util/strings';
 
 type AvatarInputProps = {
   id: string;
@@ -23,7 +25,6 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
     <InputBox
       {...props}
       tabIndex={tabIndex}
-      rightInteractive
       leftAdornment={<Icon name="ProfileImage" opacity={0.3} size={24} />}
       rightAdornment={
         <Button.TextButton

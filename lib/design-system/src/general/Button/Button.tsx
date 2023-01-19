@@ -27,8 +27,7 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
-import { ColorProps, colorStyle } from '../../util/colors';
-import { getVar } from '../../util/utils';
+import { ColorProps, colorStyle, getVar } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -93,11 +92,12 @@ const buttonStyles = compose(
 
 const Base = styled(motion.button)<ButtonProps>`
   box-sizing: border-box;
-  flex-basis: content;
   appearance: none;
   width: fit-content;
   display: inline-flex;
   align-items: center;
+  flex-basis: initial;
+  font-size: 0.889rem;
   gap: 4px;
   border: 1px solid transparent;
   border-radius: var(--rlm-border-radius-4);
@@ -125,10 +125,10 @@ const Primary = styled(Base)<ButtonProps>`
   background-color: var(--rlm-accent-color);
   color: #ffffff;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('--rlm-accent-color'))};
+    background-color: ${() => darken(0.05, getVar('accent'))};
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.075, getVar('--rlm-accent-color'))};
+    background-color: ${() => darken(0.075, getVar('accent'))};
   }
   svg {
     fill: #ffffff;
@@ -137,23 +137,23 @@ const Primary = styled(Base)<ButtonProps>`
 
 const Secondary = styled(Base)<ButtonProps>`
   color: var(--rlm-text-color);
-  background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
+  background-color: ${() => darken(0.025, getVar('window'))};
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('--rlm-window-color'))};
+    background-color: ${() => darken(0.05, getVar('window'))};
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.075, getVar('--rlm-window-color'))};
+    background-color: ${() => darken(0.075, getVar('window'))};
   }
 `;
 
 const Minimal = styled(Base)<ButtonProps>`
   color: var(--rlm-accent-color);
-  background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.1)};
+  background-color: ${() => rgba(getVar('accent'), 0.1)};
   &:hover:not([disabled]) {
-    background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.15)};
+    background-color: ${() => rgba(getVar('accent'), 0.15)};
   }
   &:active:not([disabled]) {
-    background-color: ${() => rgba(getVar('--rlm-accent-color'), 0.18)};
+    background-color: ${() => rgba(getVar('accent'), 0.18)};
   }
   svg {
     fill: var(--rlm-accent-color);
@@ -164,10 +164,10 @@ const Transparent = styled(Base)<ButtonProps>`
   color: var(--rlm-text-color);
   background-color: transparent;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
+    background-color: ${() => darken(0.025, getVar('window'))};
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('--rlm-window-color'))};
+    background-color: ${() => darken(0.05, getVar('window'))};
   }
   svg {
     fill: var(--rlm-text-color);
@@ -186,19 +186,19 @@ const TextButton = styled(Base)<TextButtonProps>`
     props.showOnHover
       ? 'transparent'
       : props.color
-      ? rgba(getVar(`--rlm-${props.color}-color`), 0.1)
-      : rgba(getVar('--rlm-accent-color'), 0.1)};
+      ? rgba(getVar(props.color), 0.1)
+      : rgba(getVar('accent'), 0.1)};
   &:hover:not([disabled]) {
     background-color: ${(props) =>
       props.color
-        ? rgba(getVar(`--rlm-${props.color}-color`), 0.15)
-        : rgba(getVar('--rlm-accent-color'), 0.15)};
+        ? rgba(getVar(props.color), 0.15)
+        : rgba(getVar('accent'), 0.15)};
   }
   &:active:not([disabled]) {
     background-color: ${(props) =>
       props.color
-        ? rgba(getVar(`--rlm-${props.color}-color`), 0.2)
-        : rgba(getVar('--rlm-accent-color'), 0.2)};
+        ? rgba(getVar(props.color), 0.2)
+        : rgba(getVar('accent'), 0.2)};
   }
   svg {
     fill: var(--rlm-accent-color);
@@ -209,16 +209,22 @@ export type IconButtonProps = ButtonProps & { showOnHover?: boolean };
 
 const IconButton = styled(Base)<IconButtonProps>`
   padding: 0px;
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   background-color: transparent;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.025, getVar('--rlm-window-color'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-hover);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('--rlm-window-color'))};
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-active);
+  }
+  &:focus:not([disabled]) {
+    outline: none;
+    background-color: var(--rlm-overlay-active);
   }
   svg {
     fill: var(--rlm-icon-color);

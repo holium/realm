@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import styled from 'styled-components';
-import { getVar } from '../../util/utils';
+import { getVar } from '../../util/colors';
 
 const CrossPath = styled(motion.path)`
   transition: var(--transition);
@@ -13,7 +13,7 @@ const CrossPath = styled(motion.path)`
 
 const CirclePath = styled(motion.circle)`
   transition: var(--transition);
-  fill: ${() => darken(0.6, getVar('--rlm-dock-color'))};
+  fill: ${() => darken(0.6, getVar('dock'))};
 `;
 
 const HoliSvg = styled(motion.svg)`
@@ -21,14 +21,14 @@ const HoliSvg = styled(motion.svg)`
     ${CirclePath} {
       transition: var(--transition);
       cursor: pointer;
-      fill: ${() => darken(1, getVar('--rlm-dock-color'))};
+      fill: ${() => darken(1, getVar('dock'))};
     }
   }
   &:active {
     ${CirclePath} {
       transition: var(--transition);
       cursor: pointer;
-      fill: ${() => darken(1.5, getVar('--rlm-dock-color'))};
+      fill: ${() => darken(1.5, getVar('dock'))};
     }
   }
 `;

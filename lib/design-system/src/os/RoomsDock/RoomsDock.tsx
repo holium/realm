@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Flex, Icon, Text } from '../..';
 import { BarButton } from '../SystemBar/BarButton';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
-import { pluralize } from '../../util/utils';
+import { pluralize } from '../../util/strings';
 
 export const RoomsDockStyle = styled(Flex)<any>`
   transition: var(--transition);
@@ -105,7 +105,7 @@ export const RoomsDock: FC<RoomsDockProps> = (props: RoomsDockProps) => {
               }}
             >
               <Icon
-                iconColor={isMuted ? 'red' : 'currentcolor'}
+                color={isMuted ? 'intent-warning' : 'text'}
                 name={isMuted ? 'Unmute' : 'Mute'}
                 size={26}
               />

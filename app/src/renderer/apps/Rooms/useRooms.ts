@@ -6,6 +6,7 @@ import {
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
 import { createContext, useContext } from 'react';
+import { OSActions } from 'renderer/logic/actions/os';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
@@ -43,10 +44,7 @@ export const createManager = (our: Patp) => {
 
   // These sounds are for peer events
   protocol.on(ProtocolEvent.PeerAdded, () => {
-    if (manager.state === 'connected') {
-      // only play sound if we are already in the room
-      SoundActions.playRoomPeerEnter();
-    }
+    SoundActions.playRoomPeerEnter();
   });
 
   protocol.on(ProtocolEvent.PeerRemoved, () => {
@@ -73,6 +71,9 @@ export function useRooms(our?: Patp) {
   } else if (roomsManager === null) {
     throw new Error('roomsManager not initialized');
   }
+  OSActions.onLogout((_event: any) => {
+    roomsManager = null;
+  });
 
   return roomsManager;
 }

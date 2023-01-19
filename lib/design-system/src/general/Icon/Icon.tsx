@@ -1,4 +1,3 @@
-import { BoxProps } from '../Box/Box';
 import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
@@ -18,10 +17,12 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { IconPathsType, paths } from './icons';
+import { BoxProps } from '../Box/Box';
+import { ColorVariants, getVar } from '../../util/colors';
 
 export type IconProps = BoxProps &
   SpaceProps &
-  ColorProps &
+  Omit<ColorProps, 'color'> &
   LayoutProps &
   TypographyProps &
   WidthProps &
@@ -32,21 +33,22 @@ const SvgComponent = forwardRef<
   SVGMotionProps<SVGSVGElement> & {
     name: IconPathsType;
     title?: string;
-    iconColor?: string;
+    color?: ColorVariants;
   }
->(({ title, name, ...props }, svgRef) => {
+>(({ title, name, width, height, color, ...rest }, svgRef) => {
   const [titleId] = useState(() => (title ? uuid() : undefined));
+
   return (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      width={props.width || '1em'}
-      height={props.height || '1em'}
-      fill={props.iconColor ? props.iconColor : 'currentcolor'}
+      width={width || '1em'}
+      height={height || '1em'}
+      fill={color ? getVar(color) : 'currentcolor'}
       ref={svgRef}
       aria-labelledby={titleId}
       pointerEvents="none"
-      {...props}
+      {...rest}
     >
       {title ? <title id={titleId}>{title}</title> : null}
       {/* @ts-expect-error */}

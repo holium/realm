@@ -224,7 +224,7 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1920,
-    height: 1440,
+    height: 1080,
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
