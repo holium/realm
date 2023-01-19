@@ -183,7 +183,6 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
-          mv ./app/release/build/latest.yml ./app/release/build/alpha.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
