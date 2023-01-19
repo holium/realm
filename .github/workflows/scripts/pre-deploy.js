@@ -41,12 +41,8 @@ module.exports = async ({ github, context }, workflowId) => {
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
-    // if new raw package.json version update
-    isPackageUpdate: false,
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
-    // version "as-is" from package.json
-    packageVersion: undefined,
     // version either set by PR title or calculated (build # incremented) if based on package.json version
     buildVersion: undefined,
     // version object - with major, minor, build #
@@ -72,11 +68,19 @@ module.exports = async ({ github, context }, workflowId) => {
       workflow_id: workflowId,
     }
   );
-  const packageFilename = './app/release/app/package.json';
-  // this script is always called at the root of the repo; therefore
-  //  read release package.json for build info
-  const pkg = JSON.parse(fs.readFileSync(packageFilename));
-  ci.packageVersion = pkg.version;
+  // const packageFilename = './app/release/app/package.json';
+  // // this script is always called at the root of the repo; therefore
+  // //  read release package.json for build info
+  // const pkg = JSON.parse(fs.readFileSync(packageFilename));
+  // ci.packageVersion = pkg.version;
+  const tags = await github.request('GET /repos/{owner}/{repo}/releases/tags', {
+    owner: 'holium',
+    repo: 'realm',
+    per_page: 1, // only give the last result
+    sort: 'created',
+    direction: 'desc',
+  });
+  console.log('logs => %o', tags.data);
   // PR title is a required property of the PR event
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
@@ -115,9 +119,6 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.releaseName = context.payload.pull_request.title;
     ci.buildVersion = tagName;
     ci.isNewBuild = true;
-    if (ci.buildVersion !== ci.packageVersion) {
-      ci.isPackageUpdate = true;
-    }
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
@@ -141,11 +142,6 @@ module.exports = async ({ github, context }, workflowId) => {
       // if the latest release is a draft, it means the prior build failed; therefore
       //  rerun the build using the same tag (version) information
       buildVersion = release.tag_name;
-      // are the versions different (exclude '-alpha') since that is only used
-      //  to name assets; therefore just compare 'raw' version
-      if (buildVersion !== ci.packageVersion) {
-        ci.isNewBuild = true;
-      }
     } else {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
@@ -186,5 +182,6 @@ module.exports = async ({ github, context }, workflowId) => {
   // fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   console.log(`building version ${ci.buildVersion}...`);
   console.log(ci);
+  throw new Error('stop');
   return ci;
 };
