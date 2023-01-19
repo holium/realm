@@ -180,10 +180,10 @@ module.exports = async ({ github, context }, workflowId) => {
   // see: https://www.electron.build/tutorials/release-using-channels.html
   // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
   //  this is useful when checking the version in Realm -> About
-  pkg.version = ci.buildVersion;
+  // pkg.version = ci.buildVersion;
   // must write build version string out to package.json since electron-builder
   //   will use this to name assets
-  fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
+  // fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   console.log(`building version ${ci.buildVersion}...`);
   console.log(ci);
   return ci;

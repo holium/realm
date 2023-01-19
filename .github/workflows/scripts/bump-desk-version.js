@@ -10,7 +10,6 @@
 */
 var fs = require('fs');
 module.exports = ({ github }, ci, desks) => {
-  let updated = false;
   console.log(`bump.js: build version = ${ci.buildVersion}`);
   for (let i = 0; i < desks.length; i++) {
     const desk = desks[i];
@@ -24,30 +23,21 @@ module.exports = ({ github }, ci, desks) => {
         let ver = parts[1].trim();
         ver = ver.substring(1, ver.length - 1);
         let mmb = ver.split(' ');
-        if (
-          !(
-            parseInt(mmb[0]) === ci.version.major &&
-            parseInt(mmb[1]) === ci.version.minor &&
-            parseInt(mmb[2]) === ci.version.build
-          )
-        ) {
-          updated = true;
-          // set to match the package version which will have already been updated
-          // by an earlier build step and indicates the latest release version
-          mmb[0] = ci.version.major;
-          mmb[1] = ci.version.minor;
-          mmb[2] = ci.version.build;
-          console.log(
-            `./desks/${desk}/desk.docket-0: version string found. replacing ${ver} with ${mmb.join(
-              ' '
-            )}`
-          );
-          lines[j] = `${parts[0]}+[${mmb[0]} ${mmb[1]} ${mmb[2]}]`;
-          fs.writeFileSync(`${desk}/desk.docket-0`, lines.join('\n'));
-        }
+        // set to match the package version which will have already been updated
+        // by an earlier build step and indicates the latest release version
+        mmb[0] = ci.version.major;
+        mmb[1] = ci.version.minor;
+        mmb[2] = ci.version.build;
+        console.log(
+          `./desks/${desk}/desk.docket-0: version string found. replacing ${ver} with ${mmb.join(
+            ' '
+          )}`
+        );
+        lines[j] = `${parts[0]}+[${mmb[0]} ${mmb[1]} ${mmb[2]}]`;
+        fs.writeFileSync(`${desk}/desk.docket-0`, lines.join('\n'));
         break;
       }
     }
   }
-  return updated;
+  return ci;
 };
