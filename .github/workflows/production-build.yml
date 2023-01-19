@@ -131,7 +131,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
-  #
   build-windows:
     if: github.event.pull_request.merged == true
     needs: [pre-deploy]
@@ -173,7 +172,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
