@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon } from '../..';
-import { Button } from '.';
+import { Button } from './Button';
+import { Flex } from '../Flex/Flex';
+import { Icon } from '../Icon/Icon';
 
 export default {
   component: Button.Base,
@@ -36,6 +37,11 @@ export const Default: ComponentStory<typeof Button.Base> = () => (
       <Button.TextButton showOnHover disabled>
         TextButton
       </Button.TextButton>
+    </Flex>
+    <Flex gap={12}>
+      <Button.IconButton size={32}>
+        <Icon name="Attachment" />
+      </Button.IconButton>
     </Flex>
   </Flex>
 );

@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Icon, Button, Input } from '../..';
-import { InputBox } from '.';
+import { Flex, Icon, Button } from '../../general';
+import { Input } from '../Input/Input';
+import { InputBox } from './InputBox';
 
 export default {
   component: InputBox,
@@ -68,7 +69,6 @@ export const RightButton: ComponentStory<typeof InputBox> = () => (
   <>
     <InputBox
       width={300}
-      rightInteractive
       rightAdornment={
         <Button.TextButton
           onClick={() => {
