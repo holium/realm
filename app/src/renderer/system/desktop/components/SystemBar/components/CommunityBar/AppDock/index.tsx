@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import {
   AppType,
@@ -32,10 +32,8 @@ export const AppDock = observer(() => {
   const spacePath = spaces.selected?.path!;
   const dock = bazaar.getDock(spacePath);
 
-  // DO NOT REMOVE dock variable from useMemo dependencies
-  const orderedList = useMemo(
-    () => (spacePath ? bazaar.getDockApps(spacePath) : []),
-    [dock?.length, spacePath]
+  const [orderedList, setOrderedList] = useState(
+    spacePath ? (bazaar.getDockApps(spacePath) as AppType[]) : []
   );
 
   const pinnedApps = useMemo(() => {
@@ -49,8 +47,11 @@ export const AppDock = observer(() => {
           gap: 8,
         }}
         values={orderedList || []}
-        onReorder={(newOrder: any) => {
-          const newPinList = newOrder.map((app: any) => app.id);
+        onReorder={(newOrder: AppType[]) => {
+          // First we update the dock locally so the user doesn't have to
+          // wait for the subscription to come back.
+          setOrderedList(newOrder);
+          const newPinList = newOrder.map((app) => app.id);
           SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
         }}
       >
@@ -115,15 +116,6 @@ export const AppDock = observer(() => {
                   opacity: { duration: 1, delay: 0 },
                 },
               }}
-              onClick={() => {
-                const selectedApp = app;
-                if (desktop.isOpenWindow(selectedApp.id)) {
-                  DesktopActions.setActive(spacePath, selectedApp.id);
-                } else {
-                  console.log(selectedApp);
-                  DesktopActions.openAppWindow(spacePath, selectedApp);
-                }
-              }}
               whileDrag={{ zIndex: 20 }}
             >
               <AppTile
@@ -150,8 +142,7 @@ export const AppDock = observer(() => {
                   ...suspendRow,
                   {
                     label: 'Unpin',
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
+                    onClick: () => {
                       SpacesActions.unpinApp(spacePath, app.id);
                     },
                   },
@@ -159,9 +150,8 @@ export const AppDock = observer(() => {
                     label: 'Close',
                     section: 2,
                     disabled: !open,
-                    onClick: (evt: any) => {
+                    onClick: () => {
                       DesktopActions.closeAppWindow(spacePath, app);
-                      evt.stopPropagation();
                     },
                   },
                 ]}

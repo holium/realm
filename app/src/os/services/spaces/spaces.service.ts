@@ -679,9 +679,11 @@ export class SpacesService extends BaseService {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
-  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    // return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
-    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: string[]) {
+    this.models.bazaar.reorderPinnedApps(this.core.conduit!, {
+      path: formPathObj(path),
+      dock: order,
+    });
   }
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
