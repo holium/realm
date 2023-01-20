@@ -5,7 +5,6 @@ import {
   RoomManagerEvent,
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
-import { createContext, useContext } from 'react';
 import { OSActions } from 'renderer/logic/actions/os';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -21,8 +20,9 @@ const config = {
   },
 };
 
+let protocol: RealmProtocol | null;
 export const createManager = (our: Patp) => {
-  const protocol = new RealmProtocol(our, config, handlers);
+  protocol = new RealmProtocol(our, config, handlers);
   const manager = new RoomsManager(protocol);
 
   // These sounds are for the creator of the room
@@ -52,28 +52,64 @@ export const createManager = (our: Patp) => {
   });
 
   protocol.getSession();
-  RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
-    protocol.onSignal(data, mark);
-  });
+
   return manager;
 };
 
-export let RoomsContext = createContext<null | RoomsManager>(null);
+let roomsManager: null | RoomsManager;
+let curPatp: string | null;
 
-export const RoomsProvider = RoomsContext.Provider;
+RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
+  if (protocol) {
+    protocol.onSignal(data, mark);
+  }
+});
 
 export function useRooms(our?: Patp) {
-  let roomsManager = useContext(RoomsContext);
-  if (roomsManager === null && our) {
-    const manager = createManager(our);
-    RoomsContext = createContext<null | RoomsManager>(manager);
-    roomsManager = manager;
-  } else if (roomsManager === null) {
-    throw new Error('roomsManager not initialized');
+  if (roomsManager) {
+    return roomsManager;
   }
-  OSActions.onLogout((_event: any) => {
-    roomsManager = null;
-  });
+
+  if (!roomsManager && our) {
+    curPatp = our;
+    roomsManager = createManager(our);
+    OSActions.onLogout(() => {
+      protocol = null;
+      roomsManager = null;
+      curPatp = null;
+    });
+    window.addEventListener('beforeunload', () => {
+      roomsManager = null;
+      curPatp = null;
+      protocol = null;
+    });
+  }
 
   return roomsManager;
 }
+
+// export function useRooms(our?: Patp) {
+//   let roomsManager = useContext(RoomsContext);
+//   console.log('useRooms roomsManager', roomsManager?.local.patp);
+//   if (roomsManager === null && our) {
+//     const manager = createManager(our);
+//     RoomsContext = createContext<null | RoomsManager>(manager);
+//     roomsManager = manager;
+
+// OSActions.onLogout(() => {
+//   console.log('on logout');
+//   RoomsContext = createContext<null | RoomsManager>(null);
+//   RoomsProvider = RoomsContext.Provider;
+//   roomsManager = null;
+// });
+// window.addEventListener('beforeunload', () => {
+//   RoomsContext = createContext<null | RoomsManager>(null);
+//   RoomsProvider = RoomsContext.Provider;
+//   roomsManager = null;
+// });
+//   } else if (roomsManager === null) {
+//     throw new Error('roomsManager not initialized');
+//   }
+
+//   return roomsManager;
+// }

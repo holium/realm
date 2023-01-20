@@ -6,9 +6,10 @@ import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { RoomsDock } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
+import { RealmProtocol } from '@holium/realm-room';
 
 export const RoomTray = observer(() => {
-  const { contacts } = useServices();
+  const { contacts, spaces } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   const {
@@ -60,10 +61,16 @@ export const RoomTray = observer(() => {
       return metadata;
     }) || [];
 
+  const rooms = spaces.selected
+    ? (roomsManager.protocol as RealmProtocol).getSpaceRooms(
+        spaces.selected?.path
+      )
+    : [];
+
   return (
     <RoomsDock
       live={roomsManager.live.room}
-      rooms={roomsManager.rooms}
+      rooms={rooms}
       participants={participants}
       onCreate={() => {
         console.log('create room');
