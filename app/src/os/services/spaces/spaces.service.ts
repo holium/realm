@@ -112,20 +112,11 @@ export class SpacesService extends BaseService {
     selectSpace: async (spaceId: string) => {
       return await ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
-    pinApp: async (path: string, appId: string, rank: number | null = null) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.pin-app',
-        path,
-        appId,
-        rank
-      );
+    pinApp: (path: string, appId: string, rank: number | null = null) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.pin-app', path, appId, rank);
     },
-    unpinApp: async (path: string, appId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.unpin-app',
-        path,
-        appId
-      );
+    unpinApp: (path: string, appId: string) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
     },
     recommendApp: async (appId: string) => {
       return await ipcRenderer.invoke(
@@ -139,8 +130,8 @@ export class SpacesService extends BaseService {
         appId
       );
     },
-    setPinnedOrder: async (path: string, newOrder: any[]) => {
-      return await ipcRenderer.invoke(
+    setPinnedOrder: (path: string, newOrder: any[]) => {
+      ipcRenderer.invoke(
         'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
