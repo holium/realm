@@ -116,6 +116,20 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git pull origin master
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'test-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and publish
         run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
         env:
@@ -178,8 +192,8 @@ jobs:
         id: pre-windows
         with:
           script: |
-            const script = require('./.github/workflows/scripts/pre-windows.js')
-            const result = script({github, context}, 'test-build.yml', JSON.parse(process.env.CI_ENV))
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'test-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -224,6 +238,7 @@ jobs:
       #
       - name: Bump desks version
         uses: actions/github-script@v6
+        id: bump-desks
         with:
           script: |
             const script = require('./.github/workflows/scripts/bump-desk-version.js')

@@ -4,7 +4,7 @@
 
 */
 var fs = require('fs');
-module.exports = ({ github, context }, workflowId, ci) => {
+module.exports = ({ github, context }, workflowId, platform, ci) => {
   const pkgfile = './app/release/app/package.json';
   const pkg = JSON.parse(fs.readFileSync(pkgfile));
   pkg.version = ci.buildVersion;
