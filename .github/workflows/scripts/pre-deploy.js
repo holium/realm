@@ -3,19 +3,6 @@
   @purpose: script to setup context and environment variables to be used
     by other jobs/steps in the workflow.
 
-  @returns
-
-    JSON object (ci):
-
-      packageVersion - package.json file version attribute value
-
-      buildVersion - the name of the release. also used to tag the build. this can
-        differ from the package version
-
-      channel - [alpha|latest] - translates to [staging|release]. the reason for using
-        alpha/latest is due to electron-builder library. it expects alpha/beta/latest in support
-        of channeling releases (see: https://www.electron.build/tutorials/release-using-channels.html)
-
 */
 var fs = require('fs');
 
@@ -39,12 +26,10 @@ function versionDiff(a, b) {
 
 module.exports = async ({ github, context }, workflowId) => {
   let ci = {
-    // if package.json version will change, consider this a new build
+    // if running from release title or default build with package.json version update
     isNewBuild: false,
     // releaseName - generated based on PR title (if exists); otherwise build based on package.json version
     releaseName: undefined,
-    // version "as-is" from package.json
-    packageVersion: undefined,
     // version either set by PR title or calculated (build # incremented) if based on package.json version
     buildVersion: undefined,
     // version object - with major, minor, build #
@@ -70,12 +55,21 @@ module.exports = async ({ github, context }, workflowId) => {
       workflow_id: workflowId,
     }
   );
-  const packageFilename = './app/release/app/package.json';
-  // this script is always called at the root of the repo; therefore
-  //  read release package.json for build info
-  const pkg = JSON.parse(fs.readFileSync(packageFilename));
-  ci.packageVersion = pkg.version;
+  // const packageFilename = './app/release/app/package.json';
+  // // this script is always called at the root of the repo; therefore
+  // //  read release package.json for build info
+  // const pkg = JSON.parse(fs.readFileSync(packageFilename));
+  // ci.packageVersion = pkg.version;
   // PR title is a required property of the PR event
+  // const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
+  //   owner: 'holium',
+  //   repo: 'realm',
+  //   per_page: 1, // only give the last result
+  //   sort: 'created',
+  //   direction: 'desc',
+  // });
+  // console.log('logs => %o', tags.data);
+  // const currentBuildTag = tags.data[0].name;
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
@@ -88,17 +82,35 @@ module.exports = async ({ github, context }, workflowId) => {
     console.log(
       `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
     );
-    ci.releaseName = context.payload.pull_request.title;
-    ci.buildVersion = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
+    const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
-    }`;
-    if (versionDiff(ci.buildVersion, ci.packageVersion)) {
-      ci.isNewBuild = true;
+    }${matches[1] === 'staging' ? '-alpha' : ''}`;
+    let tag = undefined;
+    try {
+      tag = await github.request(
+        'GET /repos/{owner}/{repo}/releases/tags/{tag}',
+        {
+          owner: 'holium',
+          repo: 'realm',
+          tag: tagName,
+        }
+      );
+    } catch (e) {
+      console.log(e);
     }
+    console.log('tag => %o', tag);
+    if (tag) {
+      throw Error(
+        `error: tag '${tag} exists. please rename the PR and try again`
+      );
+    }
+    ci.isNewBuild = true;
+    ci.releaseName = context.payload.pull_request.title;
+    ci.buildVersion = tagName;
+    ci.channel = `${matches[1] === 'staging' ? 'alpha' : ''}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
-    ci.channel = matches[1] === 'staging' ? 'alpha' : 'latest';
   } else {
     let buildVersion = undefined;
     // grab the latest annotated tag of any kind (draft, prerelease, release), and interrogate it to determine
@@ -119,11 +131,6 @@ module.exports = async ({ github, context }, workflowId) => {
       // if the latest release is a draft, it means the prior build failed; therefore
       //  rerun the build using the same tag (version) information
       buildVersion = release.tag_name;
-      // are the versions different (exclude '-alpha') since that is only used
-      //  to name assets; therefore just compare 'raw' version
-      if (versionDiff(buildVersion, ci.packageVersion)) {
-        ci.isNewBuild = true;
-      }
     } else {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
@@ -144,25 +151,23 @@ module.exports = async ({ github, context }, workflowId) => {
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
+    }.${buildNumber}-alpha`;
+    ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
+      matches[3]
     }.${buildNumber}`;
-    ci.releaseName = `staging-${ci.buildVersion}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
     ci.channel = 'alpha';
   }
-  if (ci.isNewBuild) {
-    // see: https://www.electron.build/tutorials/release-using-channels.html
-    // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
-    //  this is useful when checking the version in Realm -> About
-    pkg.version = `${ci.version.major}.${ci.version.minor}.${ci.version.build}${
-      ci.channel === 'alpha' ? '-alpha' : ''
-    }`;
-    // must write build version string out to package.json since electron-builder
-    //   will use this to name assets
-    fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
-  }
+  // see: https://www.electron.build/tutorials/release-using-channels.html
+  // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
+  //  this is useful when checking the version in Realm -> About
+  // pkg.version = ci.buildVersion;
+  // must write build version string out to package.json since electron-builder
+  //   will use this to name assets
+  // fs.writeFileSync(packageFilename, JSON.stringify(pkg, null, 2));
   console.log(`building version ${ci.buildVersion}...`);
   console.log(ci);
   return ci;
