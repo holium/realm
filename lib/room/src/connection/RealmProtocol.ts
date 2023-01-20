@@ -98,6 +98,9 @@ export class RealmProtocol extends BaseProtocol {
         const session = data['session'];
         const currentRoom = session.rooms[session.current];
         this.provider = session.provider;
+        if (this.presentRoom) {
+          await this.leave(this.presentRoom.rid);
+        }
         this.rooms = new Map(Object.entries(session.rooms));
         if (currentRoom) {
           // if we are in a room, send the event up to RoomManager

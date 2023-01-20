@@ -157,6 +157,8 @@ export class RemotePeer extends Peer {
     this.removeTracks();
     this.emit(PeerEvent.Failed, err);
     this.waitingStatus = WAITING;
+    // TODO test this
+    // this.peer?.destroy();
   }
 
   _onSignal(data: SimplePeer.SignalData) {
