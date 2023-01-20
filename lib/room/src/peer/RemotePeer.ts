@@ -93,10 +93,6 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.New);
     this.waitingStatus = WAITING;
     console.log(`sending %waiting ${this.patp}`);
-    if (!this.isInitiator) {
-      this.createConnection();
-      console.log(`not initiator, creating connection`);
-    }
     this.sendSignal(this.patp, { type: 'waiting', from: this.our });
   }
 
@@ -106,20 +102,24 @@ export class RemotePeer extends Peer {
       this.status === PeerConnectionState.Disconnected ||
       this.waitingStatus === WAITING
     ) {
-      console.log(`sending %ack-waiting to ${this.patp}`);
-      this.createConnection();
-      this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
+      if (!this.isInitiator) {
+        this.createConnection();
+        console.log(`not initiator, createConnection on waiting`);
+        this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
+      }
     } else {
       console.log(
         'got waiting but am already connecting',
-        this.status,
-        this.waitingStatus
+        `PeerConnectionState = ${this.status}, waitingStatus = ${this.waitingStatus}`
       );
     }
   }
 
   onAckWaiting() {
-    this.waitingStatus = READY;
+    if (this.isInitiator) {
+      this.createConnection();
+      console.log(`initiator createConnection on ack-waiting`);
+    }
   }
 
   peerSignal(data: SimplePeer.SignalData) {
