@@ -2,6 +2,7 @@
   @author:  lodlev-migdev
   @purpose: script to setup context and environment variables to be used
     by other jobs/steps in the workflow.
+
 */
 var fs = require('fs');
 
