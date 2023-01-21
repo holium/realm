@@ -73,7 +73,7 @@ export class LocalPeer extends Peer {
         track.enabled = false;
       }
       if (!peer.peer?.destroyed) {
-        console.log(`streaming tracks to ${peer.patp}`);
+        // console.log(`%streaming tracks to ${peer.patp}`);
         try {
           peer.peer?.addTrack(track, currentStream);
         } catch (e) {
@@ -112,7 +112,6 @@ export class LocalPeer extends Peer {
     }
   ) {
     if (this.stream) {
-      console.log('already have stream');
       return;
     }
     const storedDeviceId = localStorage.getItem('rooms-audio-input');

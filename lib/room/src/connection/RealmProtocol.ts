@@ -135,32 +135,26 @@ export class RealmProtocol extends BaseProtocol {
 
         if (signalData.type === 'waiting') {
           if (!remotePeer) {
-            console.log(`unknown recieved waiting ${payload.from}`);
-            console.log('queuing unknown peer');
+            console.log(`%waiting from unknown ${payload.from}`);
             this.queuedPeers.push(payload.from);
           } else {
-            console.log(`recieved waiting from ${payload.from}`);
+            console.log(`%waiting from ${payload.from}`);
             remotePeer.onWaiting();
           }
         }
-
         if (signalData.type === 'retry') {
           const retryingPeer = this.peers.get(payload.from);
           retryingPeer?.dial();
         }
         if (isWebRTCSignal(signalData.type)) {
-          // we are receiving a WebRTC signaling data
           if (remotePeer) {
-            // we already have a peer for this patp, so we can just pass the signal to it
             console.log(
-              `${JSON.parse(payload.data)?.type} from ${payload.from}`
+              `%${JSON.parse(payload.data)?.type} from ${payload.from}`
             );
             remotePeer.peerSignal(payload.data);
           } else {
             console.log(
-              `got webrtc signal from unknown peer ${
-                JSON.parse(payload.data)?.type
-              } from ${payload.from}`
+              `%${JSON.parse(payload.data)?.type} from unknown ${payload.from}`
             );
           }
         }
