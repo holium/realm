@@ -74,7 +74,7 @@ const textTransform = style({
   cssProperty: 'textTransform',
 });
 
-const boxStyles = compose(
+export const boxStyles = compose(
   background,
   flexbox,
   grid,

@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components';
-import { Box, BoxProps } from '../Box/Box';
+import { Box, BoxProps, boxStyles } from '../Box/Box';
 import { motion } from 'framer-motion';
+import { colorStyle } from '../../util/colors';
 
 export const fontByType = {
   body: '"Rubik", sans-serif',
@@ -19,6 +20,7 @@ export type TextProps = {
   fontByType?: keyof typeof fontByType;
   fontSize?: string | number;
   truncate?: boolean;
+  noSelection?: boolean;
   variant?:
     | 'body'
     | 'caption'
@@ -54,6 +56,7 @@ const BaseText = styled(Box)<TextProps>`
       overflow: hidden !important;
       text-overflow: ellipsis;
     `}
+  ${(props) => props.noSelection && 'user-select: none;'}
   &:disabled {
     color: var(--rlm-text-disabled);
   }
@@ -145,16 +148,12 @@ const Patp = styled(motion.p)<TextProps>`
 `;
 
 const Anchor = styled(motion.a)<TextProps>`
-  ${(props) =>
-    props.fontByName &&
-    css`
-      font-family: ${props.theme.font.byName[props.fontByName]};
-    `};
-  ${(props) =>
-    props.fontByType &&
-    css`
-      font-family: ${props.theme.fonts.byType[props.fontByType]};
-    `}
+  ${boxStyles}
+  ${colorStyle}
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 export const Text = {
