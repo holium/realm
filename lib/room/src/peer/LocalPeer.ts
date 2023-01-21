@@ -56,6 +56,12 @@ export class LocalPeer extends Peer {
     localStorage.setItem('rooms-audio-output', deviceId);
   }
 
+  /**
+   * streamTracks: streams the tracks of the current stream to the peer
+   *
+   * @param peer
+   * @returns
+   */
   streamTracks(peer: RemotePeer) {
     if (!this.stream) {
       console.log('no stream to stream');
@@ -67,17 +73,15 @@ export class LocalPeer extends Peer {
         track.enabled = false;
       }
       if (!peer.peer?.destroyed) {
-        console.log(
-          'streaming tracks, isAudioAttached?=',
-          peer.isAudioAttached
-        );
-        // if (!peer.peer?.destroyed && !peer.isAudioAttached) {
+        console.log(`streaming tracks to ${peer.patp}`);
         try {
           peer.peer?.addTrack(track, currentStream);
         } catch (e) {
           // catches "Track has already been added to that stream."
           console.error(e);
         }
+      } else {
+        console.log('streamTracks: peer is destroyed');
       }
     });
   }
