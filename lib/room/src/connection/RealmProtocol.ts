@@ -156,23 +156,11 @@ export class RealmProtocol extends BaseProtocol {
               `${JSON.parse(payload.data)?.type} from ${payload.from}`
             );
             remotePeer.peerSignal(payload.data);
-            // if (!remotePeer.peer) {
-            //   // if we don't have a peer connection yet, we need to create one
-            //   console.log('WEBRTC SIGNAL: no peer connection, creating one');
-            //   remotePeer.createConnection();
-            //   remotePeer.peerSignal(payload.data);
-            // } else {
-            //   // we have a peer connection and it's open, so we can just pass the signal to it
-            //   console.log(
-            //     `signal: ${JSON.parse(payload.data)?.type} from ${payload.from}`
-            //   );
-            //   remotePeer.peerSignal(payload.data);
-            // }
           } else {
             console.log(
-              'got webrtc signal from unknown peer',
-              payload.from,
-              payload.data
+              `got webrtc signal from unknown peer ${
+                JSON.parse(payload.data)?.type
+              } from ${payload.from}`
             );
           }
         }
