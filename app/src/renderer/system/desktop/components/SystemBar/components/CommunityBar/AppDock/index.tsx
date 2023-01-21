@@ -130,9 +130,11 @@ export const AppDock = observer(() => {
                   .getElementById(tileId)
                   ?.getBoundingClientRect();
               }}
-              onPointerUp={() => {
+              onPointerUp={(e) => {
                 // If the tile's bounds haven't changed, we can assume it's
                 // been clicked and not dragged.
+                if (e.button !== 0) return;
+
                 const endBounds = document
                   .getElementById(tileId)
                   ?.getBoundingClientRect();
@@ -160,12 +162,14 @@ export const AppDock = observer(() => {
                   ...installRow,
                   ...suspendRow,
                   {
+                    id: `${app.id}-unpin}`,
                     label: 'Unpin',
                     onClick: () => {
                       SpacesActions.unpinApp(spacePath, app.id);
                     },
                   },
                   {
+                    id: `${app.id}-close}`,
                     label: 'Close',
                     section: 2,
                     disabled: !open,

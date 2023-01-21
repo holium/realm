@@ -225,9 +225,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                   width: menuWidth,
                                 }}
                                 isOpen={show}
-                                onClose={(evt) => {
-                                  setShow(false);
-                                }}
+                                onClose={() => setShow(false)}
                               >
                                 <MenuItem
                                   data-prevent-context-close={false}
@@ -240,8 +238,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                 <MenuItem
                                   label="Remove ship"
                                   customBg={theme.currentTheme.windowColor}
-                                  mt={1}
-                                  onClick={(_evt: any) => {
+                                  onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}
                                 />
