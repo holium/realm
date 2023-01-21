@@ -51,6 +51,7 @@ export const MenuItem = ({
   return (
     <MenuItemStyle
       id={id}
+      key={id}
       tabIndex={tabIndex}
       style={style}
       className="realm-cursor-hover"
