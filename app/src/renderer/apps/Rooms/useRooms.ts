@@ -59,7 +59,8 @@ export const createManager = (our: Patp) => {
 let roomsManager: null | RoomsManager;
 let curPatp: string | null;
 
-RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
+let onRoomsUpdate = RoomsActions.onUpdate;
+onRoomsUpdate((_event: any, data: any, mark: string) => {
   if (protocol) {
     protocol.onSignal(data, mark);
   }
@@ -77,11 +78,13 @@ export function useRooms(our?: Patp) {
       protocol = null;
       roomsManager = null;
       curPatp = null;
+      onRoomsUpdate = RoomsActions.onUpdate;
     });
     window.addEventListener('beforeunload', () => {
       roomsManager = null;
       curPatp = null;
       protocol = null;
+      onRoomsUpdate = RoomsActions.onUpdate;
     });
   }
 
