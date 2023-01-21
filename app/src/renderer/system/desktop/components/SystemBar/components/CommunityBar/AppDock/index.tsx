@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import {
   AppType,
@@ -32,6 +32,7 @@ export const AppDock = observer(() => {
   const spacePath = spaces.selected?.path!;
   const dock = bazaar.getDock(spacePath);
 
+  const startBounds = useRef<DOMRect>();
   const [orderedList, setOrderedList] = useState(
     spacePath ? (bazaar.getDockApps(spacePath) as AppType[]) : []
   );
@@ -95,6 +96,13 @@ export const AppDock = observer(() => {
                 ]
               : [];
           const tileId = `pinned-${app.id}-${spaces.selected?.path}`;
+          const onClick = () => {
+            if (desktop.isOpenWindow(app.id)) {
+              DesktopActions.setActive(spacePath, app.id);
+            } else {
+              DesktopActions.openAppWindow(spacePath, app);
+            }
+          };
 
           return (
             <Reorder.Item
@@ -117,6 +125,25 @@ export const AppDock = observer(() => {
                 },
               }}
               whileDrag={{ zIndex: 20 }}
+              onPointerDown={() => {
+                startBounds.current = document
+                  .getElementById(tileId)
+                  ?.getBoundingClientRect();
+              }}
+              onPointerUp={() => {
+                // If the tile's bounds haven't changed, we can assume it's
+                // been clicked and not dragged.
+                const endBounds = document
+                  .getElementById(tileId)
+                  ?.getBoundingClientRect();
+
+                if (!endBounds || !startBounds.current) return;
+
+                const diffX = Math.abs(startBounds.current.x - endBounds.x);
+                const diffY = Math.abs(startBounds.current.y - endBounds.y);
+
+                if (diffX < 5 && diffY < 5) onClick();
+              }}
             >
               <AppTile
                 tileId={tileId}
@@ -129,14 +156,6 @@ export const AppDock = observer(() => {
                 app={app}
                 selected={selected}
                 open={open}
-                onAppClick={() => {
-                  const selectedApp = app;
-                  if (desktop.isOpenWindow(selectedApp.id)) {
-                    DesktopActions.setActive(spacePath, selectedApp.id);
-                  } else {
-                    DesktopActions.openAppWindow(spacePath, selectedApp);
-                  }
-                }}
                 contextMenuOptions={[
                   ...installRow,
                   ...suspendRow,
