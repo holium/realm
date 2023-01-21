@@ -81,7 +81,11 @@
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
       ==
-
+        %current
+      :-  %current
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     
       ::   %members
       :: :-  %members
@@ -124,6 +128,7 @@
           [%remove path-key]
           [%join path-key]
           [%leave path-key]
+          [%current path-key]
           :: [%kicked kicked]
       ==
     ::

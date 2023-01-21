@@ -159,6 +159,31 @@ export const SpacesApi = {
       });
     });
   },
+  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          current: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.current',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
   /**
    * inviteMember: invite a member to a space
    *

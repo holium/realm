@@ -19,6 +19,7 @@
         =spaces:store
         =invitations:vstore
         =membership:membership-store
+        current=space-path:store
     ==
   --
 =|  state-0
@@ -39,7 +40,7 @@
     =/  our-members             (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
     =/  initial-membs           `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
     =/  initial-spaces          `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =.  state                   [%0 spaces=initial-spaces invitations=~ membership=initial-membs]
+    =.  state                   [%0 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
     `this
   ::
   ++  on-save
@@ -142,6 +143,10 @@
             ==
         =/  members             (~(got by membership.state) [host space-pth])
         [%give %fact ~ spaces-reaction+!>([%remote-space [host space-pth] space members])]~
+        ::
+          [%current ~]  :: get the currently opened space
+        ?>  =(our.bowl src.bowl)  :: only we should know what space we're in
+        [%give %fact ~ spaces-reaction+!>([%current current])]~
         ::
       ==
     [cards this]
@@ -259,6 +264,7 @@
       %remove         (handle-remove +.act)
       %join           (handle-join +.act)
       %leave          (handle-leave +.act)
+      %current        (handle-current +.act)
       :: %kicked         (handle-kicked +.act)
     ==
     ::
@@ -282,13 +288,15 @@
         ^-  (list card)
         :~
           [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]
+          [%give %fact [/current ~] spaces-reaction+!>([%current path.new-space])]
           [%give %fact [/spaces ~] spaces-reaction+!>([%add new-space members])]
         ==
       =?  cards  =(%group type.payload)
         %+  weld  cards
         =/  watch-path  /groups/(scot %p our.bowl)/[+.path.new-space]/updates/init
         `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
-      [cards state]
+      :-  cards
+      state(current path.new-space)
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -424,6 +432,16 @@
             `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
         [cards state]
     ::
+    ++  handle-current
+      |=  [path=space-path:store]
+      ^-  (quip card _state)
+      ?:  =(current.state path)
+        `state
+      =/  cards  `(list card)`[%give %fact [/current ~] spaces-reaction+!>([%current path])]~
+      ?>  (~(has by spaces.state) path)
+      :-  cards
+      state(current path)
+    ::
     --
   ++  reaction
     |=  [rct=reaction:store]
@@ -435,6 +453,7 @@
       %replace        (on-replace +.rct)
       %remove         (on-remove +.rct)
       %remote-space   (on-remote-space +.rct)
+      %current        (on-current +.rct)
     ==
     ::
     ++  on-initial
@@ -501,6 +520,13 @@
         [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
         [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
       ==
+    ::
+    ++  on-current
+      |=  [path=space-path:store]
+      ^-  (quip card _state)
+      :: TODO I don't know when/why this function is called yet. Revisit
+      :_  state(current path)
+      [%give %fact [/current ~] spaces-reaction+!>([%current path])]~
     ::
     --
   ++  helpers

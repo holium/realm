@@ -455,6 +455,8 @@ export class SpacesService extends BaseService {
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    // don't block for responsiveness, what about error handling?
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
