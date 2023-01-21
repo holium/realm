@@ -7,7 +7,7 @@ import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
-import { isDialer, isWeb } from '../utils';
+import { isDialer } from '../utils';
 import { PeerConnectionState } from '../peer/types';
 
 export function isWebRTCSignal(type: any): boolean {
@@ -62,12 +62,6 @@ export class RealmProtocol extends BaseProtocol {
     this.poke = handlers.poke;
     this.scry = handlers.scry;
     this.emit(ProtocolEvent.Ready);
-    // if (isWeb()) {
-    //   window.removeEventListener('beforeunload', this.cleanup);
-    //   window.addEventListener('beforeunload', this.cleanup);
-    //   window.removeEventListener('sleep', this.cleanup);
-    //   document.addEventListener('sleep', this.cleanup);
-    // }
   }
 
   cleanup() {
