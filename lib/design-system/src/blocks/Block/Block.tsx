@@ -5,16 +5,20 @@ import { BoxProps } from '../..';
 
 type BlockMode = 'embed' | 'display';
 
-type StyleProps = { mode?: BlockMode } & BoxProps;
+type StyleProps = {
+  mode?: BlockMode;
+  variant?: 'default' | 'overlay';
+} & BoxProps;
 
-const BlockStyle = styled(motion.div)<StyleProps>`
+const BlockStyle = styled(motion.span)<StyleProps>`
   display: inline-flex;
   flex-direction: column;
   box-sizing: content-box;
   align-items: flex-start;
   padding: 6px;
   gap: 6px;
-  background: rgba(241, 241, 245, 0.8);
+  background: var(--rlm-window-color);
+  color: var(--rlm-text-color);
   backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
   border: 1px solid transparent;
@@ -24,16 +28,39 @@ const BlockStyle = styled(motion.div)<StyleProps>`
     css`
       box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
     `}
+
   .block-author {
     transition: var(--transition);
     opacity: 0;
   }
+
   &:hover {
     .block-author {
       transition: var(--transition);
       opacity: 0.5;
     }
   }
+  ${(props) =>
+    props.variant === 'overlay' &&
+    css`
+      padding: 0px;
+      border: 0px solid transparent;
+      background: transparent;
+      position: relative;
+      .block-author {
+        position: absolute;
+        background: var(--rlm-window-color);
+        border-radius: 2px;
+        padding: 4px 4px;
+        bottom: 0px;
+        right: 0px;
+      }
+      &:hover {
+        .block-author {
+          opacity: 1;
+        }
+      }
+    `}
 `;
 
 export type BlockProps = {
@@ -42,24 +69,27 @@ export type BlockProps = {
 } & StyleProps;
 
 export const Block: FC<BlockProps> = (props: BlockProps) => {
-  const { id, mode = 'embed', draggable = false, children, ...rest } = props;
+  const {
+    id,
+    mode = 'embed',
+    variant = 'default',
+    draggable = false,
+    children,
+    ...rest
+  } = props;
 
   return (
     <BlockStyle
       id={id}
       mode={mode}
       width={rest.width || 'inherit'}
+      variant={variant}
       {...(draggable && {
         drag: true,
         dragTransition: { bounceStiffness: 600, bounceDamping: 20 },
         dragMomentum: false,
         whileTap: { cursor: 'grabbing' },
       })}
-
-      // dragConstraints={{ left: 0, right: 300 }}
-      // transition={{ scale: 0.2 }}
-      // whileDrag={{ scale: 1.2 }}
-      // whileTap={{ scale: 0.98, transition: { scale: 0.2 }, userSelect: 'none' }}
     >
       {children}
     </BlockStyle>

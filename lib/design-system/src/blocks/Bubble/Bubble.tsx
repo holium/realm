@@ -1,32 +1,7 @@
 import { FC } from 'react';
-import styled from 'styled-components';
-import { Flex, Text, BoxProps, Box } from '../..';
-
-const BubbleStyle = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  width: auto;
-  gap: 2px;
-  padding: 6px 12px 6px 8px;
-  font-size: 14px;
-  background: var(--rlm-input-color);
-  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
-  border-radius: 9px 9px 9px 0px;
-`;
-
-const BubbleAuthor = styled(Text.Custom)<{ authorColor: string }>`
-  font-size: 12px;
-  font-weight: 500;
-  color: ${(props) => props.authorColor};
-`;
-
-const BubbleFooter = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  font-size: 12px;
-`;
+import { Flex, Text, BoxProps } from '../..';
+import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
+import { FragmentBlock, renderFragment } from './fragment-lib';
 
 type TemplateProps = {
   author: string;
@@ -36,15 +11,38 @@ type TemplateProps = {
 } & BoxProps;
 
 export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
-  const { id, author, authorColor = '#000', message } = props;
+  const { id, author, our, authorColor = '#000', message } = props;
 
   return (
-    <Flex display="inline-flex">
-      <BubbleStyle id={id}>
-        <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
-        {message?.map((item, index) => {
-          return <Text.Custom key={index}>{item.text}</Text.Custom>;
-        })}
+    <Flex
+      display="inline-flex"
+      justifyContent={our ? 'flex-end' : 'flex-start'}
+    >
+      <BubbleStyle id={id} our={our}>
+        {!our && (
+          <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
+        )}
+        <FragmentBlock>
+          {message?.map((fragment, index) => {
+            let lineBreak = false;
+            if (index > 0) {
+              const fragmentType = Object.keys(fragment)[0];
+              lineBreak =
+                fragmentType === 'image' ||
+                fragmentType === 'video' ||
+                fragmentType === 'audio' ||
+                fragmentType === 'link'
+                  ? true
+                  : false;
+            }
+            return (
+              <>
+                {lineBreak && <br />}
+                {renderFragment(fragment, index, author)}
+              </>
+            );
+          })}
+        </FragmentBlock>
         <BubbleFooter>
           <Flex>{/* Reaction logic goes here */}</Flex>
           <Text.Custom alignSelf="flex-end" opacity={0.5}>

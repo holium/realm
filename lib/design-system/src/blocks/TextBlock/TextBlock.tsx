@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { Flex, Text } from '../../';
-import { BlockProps, Block } from '../Block';
+import { Flex, Text } from '../..';
+import { BlockProps, Block } from '../Block/Block';
 import { motion } from 'framer-motion';
 
 type TextBlockProps = {
