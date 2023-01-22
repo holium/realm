@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/require-default-props */
 // https://www.cssscript.com/demo/beautiful-creative-loaders/
 
