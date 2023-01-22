@@ -117,6 +117,9 @@
       =/  is-member             (~(has by (need members)) patp)
       ``membership-view+!>([%is-member is-member])
       ::
+        [%x %current ~] :: ~/scry/current.json
+      ``spaces-reaction+!>([%current current.state])
+      ::
     ==
   ::
   ++  on-watch
