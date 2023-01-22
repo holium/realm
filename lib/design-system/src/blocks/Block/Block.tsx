@@ -47,15 +47,25 @@ const BlockStyle = styled(motion.span)<StyleProps>`
       border: 0px solid transparent;
       background: transparent;
       position: relative;
-      .block-author {
+      .block-footer {
+        transition: var(--transition);
         position: absolute;
-        background: var(--rlm-window-color);
-        border-radius: 2px;
+        display: flex;
+        justify-content: space-between;
+        background: transparent;
+        border-radius: 0px 0px 2px 2px;
         padding: 4px 4px;
         bottom: 0px;
+        left: 0px;
         right: 0px;
       }
+
       &:hover {
+        .block-footer {
+          transition: var(--transition);
+          opacity: 1;
+          background: var(--rlm-window-color);
+        }
         .block-author {
           opacity: 1;
         }

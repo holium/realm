@@ -16,6 +16,7 @@
   "dependencies": {
     "@tlon/sigil-js": "^1.4.5",
     "dom-helpers": "^5.2.1",
+    "emoji-picker-react": "^4.4.7",
     "framer-motion": "^7.6.7",
     "polished": "^4.2.2",
     "prop-types": "^15.8.1",

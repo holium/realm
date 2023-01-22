@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Text } from '../..';
+import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
@@ -14,9 +14,12 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
   return (
     <Block variant="overlay" width={rest.width || 'inherit'} {...rest}>
       <FragmentImage src={image} draggable={false} />
-      <Text.Hint className="block-author" noSelection fontSize={0}>
-        {by}
-      </Text.Hint>
+      <Flex className="block-footer">
+        <Flex></Flex>
+        <Text.Hint className="block-author" noSelection fontSize={0}>
+          {by}
+        </Text.Hint>
+      </Flex>
     </Block>
   );
 };

@@ -2,19 +2,22 @@ import { FC } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
+import { Reactions } from './Reaction';
 
 type TemplateProps = {
   author: string;
   authorColor?: string;
   our?: boolean;
   message?: any[];
+  onReaction: (reaction: string) => void;
 } & BoxProps;
 
 export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
-  const { id, author, our, authorColor = '#000', message } = props;
+  const { id, author, our, authorColor = '#000', message, onReaction } = props;
 
   return (
     <Flex
+      key={id}
       display="inline-flex"
       justifyContent={our ? 'flex-end' : 'flex-start'}
     >
@@ -44,7 +47,12 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
           })}
         </FragmentBlock>
         <BubbleFooter>
-          <Flex>{/* Reaction logic goes here */}</Flex>
+          <Reactions
+            reactions={[]}
+            onReaction={(emoji: string) => {
+              onReaction(emoji);
+            }}
+          />
           <Text.Custom alignSelf="flex-end" opacity={0.5}>
             6:07 AM
           </Text.Custom>

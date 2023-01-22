@@ -188,6 +188,7 @@ export const renderFragment = (
           <ImageBlock
             draggable={false}
             mode="embed"
+            variant="overlay"
             key={index}
             id={author + index}
             image={(fragment as MessageImage).image}

@@ -23,7 +23,19 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
           background: var(--rlm-input-color);
           border-radius: 9px 9px 9px 0px;
         `};
-  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
+
+  .bubble-reactions {
+    transition: var(--transition);
+    opacity: 0;
+  }
+  &:hover {
+    .bubble-reactions {
+      transition: var(--transition);
+      opacity: 1;
+    }
+  }
+
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
 `;
 
 export const BubbleAuthor = styled(Text.Custom)<{ authorColor: string }>`
@@ -34,9 +46,10 @@ export const BubbleAuthor = styled(Text.Custom)<{ authorColor: string }>`
 `;
 
 export const BubbleFooter = styled(Box)`
+  position: relative;
   display: inline-flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 100%;
   font-size: 12px;
 `;

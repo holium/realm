@@ -21,7 +21,12 @@ export const TextBlock: FC<TextBlockProps> = (props: TextBlockProps) => {
       <Text.Custom fontSize={1} width={rest.width || 'inherit'}>
         {text}
       </Text.Custom>
-      <Flex flex={1} justifyContent="space-between" width="inherit">
+      <Flex
+        className="block-footer"
+        flex={1}
+        justifyContent="space-between"
+        width="inherit"
+      >
         <Flex flexDirection="row" gap={4} alignItems="center">
           {reference.image && (
             <motion.img

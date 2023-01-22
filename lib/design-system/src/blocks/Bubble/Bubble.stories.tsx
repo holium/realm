@@ -7,7 +7,7 @@ export default {
 } as ComponentMeta<typeof Bubble>;
 
 export const Default: ComponentStory<typeof Bubble> = () => (
-  <Flex gap={6} flexDirection="column" width={500}>
+  <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
       author="~fasnut-famden"
       authorColor="#FF0000"
@@ -18,6 +18,7 @@ export const Default: ComponentStory<typeof Bubble> = () => (
         },
         { ship: '~lomder-librun' },
       ]}
+      onReaction={() => {}}
     />
     <Bubble
       our
@@ -28,6 +29,7 @@ export const Default: ComponentStory<typeof Bubble> = () => (
         { plain: 'and' },
         { italics: 'italics' },
       ]}
+      onReaction={() => {}}
     />
     <Bubble
       our
@@ -40,6 +42,7 @@ export const Default: ComponentStory<typeof Bubble> = () => (
         },
         { plain: 'and then let me know whats up' },
       ]}
+      onReaction={() => {}}
     />
     <Bubble
       author="~fasnut-famden"
@@ -58,12 +61,25 @@ webpack building...
           `,
         },
       ]}
+      onReaction={() => {}}
+    />
+    <Bubble
+      our
+      author="~lomder-librun"
+      message={[
+        { plain: 'Meme drop' },
+        {
+          image:
+            'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+        },
+      ]}
+      onReaction={() => {}}
     />
   </Flex>
 );
 
 export const Embeds: ComponentStory<typeof Bubble> = () => (
-  <Flex gap={6} flexDirection="column" width={500}>
+  <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
       author="~fasnut-famden"
       authorColor="#FF0000"
@@ -73,6 +89,7 @@ export const Embeds: ComponentStory<typeof Bubble> = () => (
             'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
         },
       ]}
+      onReaction={() => {}}
     />
     <Bubble
       our
@@ -84,6 +101,7 @@ export const Embeds: ComponentStory<typeof Bubble> = () => (
             'https://pbs.twimg.com/media/FnFbARxXEAAoiuf?format=jpg&name=medium',
         },
       ]}
+      onReaction={() => {}}
     />
   </Flex>
 );
