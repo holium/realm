@@ -83,6 +83,105 @@ webpack building...
   );
 };
 
+export const BlockQuote: ComponentStory<typeof Bubble> = () => {
+  return (
+    <Flex gap={12} flexDirection="column" width={500}>
+      <Bubble
+        author="~fasnut-famden"
+        authorColor="#FF0000"
+        message={[
+          { plain: 'Hello' },
+          {
+            blockquote: 'its a blockquote aint it fun',
+          },
+          { plain: 'woooohooo' },
+        ]}
+        onReaction={() => {}}
+      />
+      <Bubble
+        our
+        author="~lomder-librun"
+        message={[
+          { plain: 'Hello' },
+          {
+            blockquote:
+              'its a blockquote that is longer than one line so i need to type this out a lot to make it long enough',
+          },
+          { plain: 'woooohooo' },
+        ]}
+        onReaction={() => {}}
+      />
+    </Flex>
+  );
+};
+
+export const InlineCode: ComponentStory<typeof Bubble> = () => {
+  return (
+    <Flex gap={12} flexDirection="column" width={500}>
+      <Bubble
+        author="~fasnut-famden"
+        authorColor="#FF0000"
+        message={[
+          { plain: 'Run the following command' },
+          {
+            'inline-code':
+              'npx cross-env DEBUG_PROD=true yarn package:prerelease:mac',
+          },
+          { plain: 'and then let me know whats up. You may need to make sure' },
+          {
+            'inline-code': 'NODE_ENV=production',
+          },
+          { plain: 'before running' },
+        ]}
+        onReaction={() => {}}
+      />
+      <Bubble
+        our
+        author="~lomder-librun"
+        message={[
+          { plain: 'Run the following command' },
+          {
+            'inline-code':
+              'npx cross-env DEBUG_PROD=true yarn package:prerelease:mac',
+          },
+          { plain: 'and then let me know whats up' },
+        ]}
+        onReaction={() => {}}
+      />
+    </Flex>
+  );
+};
+
+export const Mentions: ComponentStory<typeof Bubble> = () => {
+  return (
+    <Flex gap={12} flexDirection="column" width={500}>
+      <Bubble
+        author="~fasnut-famden"
+        authorColor="#FF0000"
+        message={[
+          {
+            plain:
+              'Yesterday, I wrote up a company handbook. Check it out and let me know',
+          },
+          { ship: '~lomder-librun' },
+        ]}
+        onReaction={() => {}}
+      />
+      <Bubble
+        our
+        author="~lomder-librun"
+        message={[
+          {
+            plain: 'Whatever',
+          },
+          { ship: '~fasnut-famden' },
+        ]}
+        onReaction={() => {}}
+      />
+    </Flex>
+  );
+};
+
 export const CodeBlock: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
@@ -179,10 +278,10 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
   window.ship = ourPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { by: ourPatp, emoji: payload.emoji }]);
+      setReacts([...reacts, { author: ourPatp, emoji: payload.emoji }]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.by === ourPatp
+        (r) => r.emoji === payload.emoji && r.author === ourPatp
       );
       if (removeIdx === -1) {
         return;
@@ -203,6 +302,24 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         ]}
         reactions={reacts}
         onReaction={onReaction}
+      />
+      <Bubble
+        author="~fasnut-famden"
+        authorColor="#FF0000"
+        message={[
+          {
+            image:
+              'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+          },
+        ]}
+        reactions={[
+          { author: '~lodlev-migdev', emoji: '1f44d' },
+          { author: '~fasnut-famden', emoji: '1f44d' },
+          { author: '~zod', emoji: '1f525' },
+          { author: '~dev', emoji: '1f525' },
+          { author: '~fes', emoji: '1f525' },
+        ]}
+        onReaction={() => {}}
       />
     </Flex>
   );

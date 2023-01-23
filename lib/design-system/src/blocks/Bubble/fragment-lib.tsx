@@ -33,6 +33,9 @@ export const FragmentBase = styled(Text.Custom)`
 
 export const FragmentBlock = styled(motion.span)`
   line-height: 1.4;
+  blockquote {
+    margin: 4px 4px;
+  }
 `;
 
 export const FragmentPlain = styled(FragmentBase)`
@@ -65,10 +68,11 @@ export const FragmentBoldItalicsStrike = styled(FragmentBase)`
   text-decoration: line-through;
 `;
 
-export const FragmentBlockquote = styled(FragmentBase)`
+export const FragmentBlockquote = styled(motion.blockquote)`
   font-style: italic;
   border-left: 2px solid var(--rlm-accent-color);
   padding-left: 8px;
+  ${FragmentBase}
 `;
 
 export const FragmentInlineCode = styled(FragmentBase)`

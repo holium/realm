@@ -34,18 +34,18 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
       Object.values(
         reactions.reduce((acc, reaction) => {
           if (acc[reaction.emoji]) {
-            acc[reaction.emoji].by.push(reaction.by);
+            acc[reaction.emoji].by.push(reaction.author);
             acc[reaction.emoji].count++;
           } else {
             acc[reaction.emoji] = {
-              by: [reaction.by],
+              by: [reaction.author],
               emoji: reaction.emoji,
               count: 1,
             };
           }
           return acc;
         }, {} as Record<string, ReactionAggregateType>)
-      ),
+      ).sort((a, b) => b.count - a.count),
     [reactions]
   );
 
@@ -68,7 +68,8 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
                 fragmentType === 'image' ||
                 fragmentType === 'video' ||
                 fragmentType === 'audio' ||
-                fragmentType === 'link'
+                fragmentType === 'link' ||
+                fragmentType === 'blockquote'
                   ? true
                   : false;
             }
@@ -76,6 +77,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
               <>
                 {lineBreak && <br />}
                 {renderFragment(fragment, index, author)}
+                {/* {lineBreak && message.length > index + 1 && <br />} */}
               </>
             );
           })}

@@ -65,6 +65,6 @@ export type FragmentType =
 export type FragmentKey = keyof FragmentType;
 
 export type FragmentReactionType = {
-  by: string;
+  author: string;
   emoji: string; // emoji.unified -> see emoji-picker-react
 };

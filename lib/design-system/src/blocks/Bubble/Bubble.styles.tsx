@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { Text, Box } from '../..';
+import { FragmentBlockquote } from './fragment-lib';
 
 export const BubbleStyle = styled(Box)<{ our?: boolean }>`
   display: inline-flex;
@@ -16,6 +17,10 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
           border-radius: 9px 9px 0px 9px;
           ${Text.Custom} {
             color: #ffffff;
+          }
+          ${FragmentBlockquote} {
+            color: #ffffff;
+            border-left: 2px solid #ffffff70;
           }
         `
       : css`
