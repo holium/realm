@@ -83,7 +83,69 @@ webpack building...
   );
 };
 
-export const Embeds: ComponentStory<typeof Bubble> = () => (
+export const CodeBlock: ComponentStory<typeof Bubble> = () => {
+  return (
+    <Flex gap={12} flexDirection="column" width={500}>
+      <Bubble
+        author="~fasnut-famden"
+        authorColor="#FF0000"
+        message={[
+          {
+            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
+    | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
+          },
+        ]}
+        onReaction={() => {}}
+      />
+      <Bubble
+        our
+        author="~lomder-librun"
+        message={[
+          {
+            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
+    | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
+          },
+        ]}
+        onReaction={() => {}}
+      />
+    </Flex>
+  );
+};
+
+export const Link: ComponentStory<typeof Bubble> = () => (
+  <Flex gap={12} flexDirection="column" width={500}>
+    <Bubble
+      author="~fasnut-famden"
+      authorColor="#FF0000"
+      message={[
+        { plain: 'Open Graph' },
+        {
+          link: [
+            'Spotify is laying off six percent of its global workforce, CEO announces',
+            'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
+          ],
+        },
+      ]}
+      onReaction={() => {}}
+    />
+    <Bubble
+      our
+      author="~lomder-librun"
+      message={[
+        { plain: 'Open Graph' },
+        {
+          link: [
+            'Spotify is laying off six percent of its global workforce, CEO announces',
+            'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
+          ],
+        },
+      ]}
+      onReaction={() => {}}
+    />
+  </Flex>
+);
+
+export const Image: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
       author="~fasnut-famden"
@@ -141,19 +203,6 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         ]}
         reactions={reacts}
         onReaction={onReaction}
-      />
-      <Bubble
-        our
-        author="~lomder-librun"
-        message={[
-          { plain: 'Check this out' },
-          {
-            image:
-              'https://pbs.twimg.com/media/FnFbARxXEAAoiuf?format=jpg&name=medium',
-          },
-        ]}
-        reactions={[]}
-        onReaction={() => {}}
       />
     </Flex>
   );

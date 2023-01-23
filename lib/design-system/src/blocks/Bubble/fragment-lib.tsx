@@ -23,6 +23,7 @@ import { getVar } from '../../util/colors';
 import { Text } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { LinkBlock } from '../LinkBlock/LinkBlock';
 
 export const FragmentBase = styled(Text.Custom)`
   display: inline;
@@ -179,9 +180,17 @@ export const renderFragment = (
         </FragmentCodeBlock>
       );
     case 'link':
-      return `[${(fragment as FragmentLinkType).link[0]}](${
-        (fragment as FragmentLinkType).link[1]
-      })`;
+      return (
+        <LinkBlock
+          draggable={false}
+          key={index}
+          mode="embed"
+          link={(fragment as FragmentLinkType).link}
+          id={author + index}
+          by={author}
+        />
+      );
+
     case 'image':
       return (
         <>
