@@ -27,6 +27,8 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
         urls: [
           'stun:coturn.holium.live:3478?transport=udp',
           'stun:coturn.holium.live:3478',
+          'stun:coturn.holium.live:5349?transport=udp',
+          'stun:coturn.holium.live:5349',
         ],
       },
     ],
