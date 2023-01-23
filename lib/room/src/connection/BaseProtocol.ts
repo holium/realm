@@ -22,7 +22,14 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   rooms: RoomMap;
   peers: Map<Patp, RemotePeer> = new Map();
   rtc: RTCConfiguration = {
-    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+    iceServers: [
+      {
+        urls: [
+          'stun:coturn.holium.live:3478?transport=udp',
+          'stun:coturn.holium.live:3478',
+        ],
+      },
+    ],
   };
 
   constructor(our: Patp, config: ProtocolConfig, rooms: RoomMap = new Map()) {
