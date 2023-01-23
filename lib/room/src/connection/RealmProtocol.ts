@@ -231,7 +231,9 @@ export class RealmProtocol extends BaseProtocol {
         }
         const room = this.rooms.get(payload.rid);
         if (room) {
-          room.present.splice(room.present.indexOf(payload.ship), 1);
+          if (room.present.indexOf(payload.ship) !== -1) {
+            room.present.splice(room.present.indexOf(payload.ship), 1);
+          }
         }
       }
       if (data['room-created']) {
