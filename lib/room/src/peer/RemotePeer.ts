@@ -59,7 +59,7 @@ export class RemotePeer extends Peer {
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
-      trickle: false,
+      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
