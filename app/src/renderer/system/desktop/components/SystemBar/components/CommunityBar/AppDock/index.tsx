@@ -46,7 +46,7 @@ export const AppDock = observer(() => {
   useEffect(() => {
     // If the dock length changes, e.g. from the AppGrid, we update the local dock.
     debouncedSetLocalDockApps(dockApps);
-  }, [dockApps.length]);
+  }, [dockApps?.length]);
 
   const pinnedApps = (
     <Reorder.Group
