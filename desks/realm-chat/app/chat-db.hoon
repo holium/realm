@@ -32,7 +32,7 @@
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       %create-path 
-        (create-path:db-lib act state bowl)
+        (create-path:db-lib +.act state bowl)
       %leave-path 
         (leave-path:db-lib act state bowl)
       %insert

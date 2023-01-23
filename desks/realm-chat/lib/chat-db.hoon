@@ -9,8 +9,16 @@
 ::  poke actions
 ::
 ++  create-path
-  |=  [act=action:sur state=state-0 =bowl:gall]
+  ::  :chat-db &action [%create-path [/a/path/to/a/chat ~ %chat]]
+  |=  [act=create-path-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  path-id  (sham [path.act])
+  =/  row=path-row:sur   :^
+    path-id
+    path.act
+    metadata.act
+    type.act
+  =.  paths-table.state  (~(put by paths-table.state) path-id row)
   [~ state]
 ++  leave-path
   |=  [act=action:sur state=state-0 =bowl:gall]
@@ -46,7 +54,9 @@
     ^-  (list msg-part:sur)
     :: TODO actually filter the messages-table mop type into a list of
     :: msg-part that have id gth msg-id passed in
-    ~
+    =/  msg-val  (~(got by tbl) [msg-id 0])
+    =/  filtered=messages-table:sur  +:(~(bif by tbl) [msg-id 0] msg-val)
+    ~(val by filtered)
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)

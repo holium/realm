@@ -86,7 +86,7 @@
 ::
 +$  action
   $%  
-      [%create-path =path]
+      [%create-path =create-path-action]
       [%leave-path =path]
       [%insert =message]
       [%edit =message]
@@ -94,6 +94,7 @@
       [%add-peer =path-id patp=ship]
       [%kick-peer =path-id patp=ship]
   ==
++$  create-path-action  [=path metadata=(map cord cord) type=@tas]
 ::
 +$  db-dump
   $%  
