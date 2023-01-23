@@ -43,14 +43,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
-      - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git add ./app/release/app/package.json
-          git commit -m "patch realm app version"
-          git push
+      # - name: Push package version update
+      #   if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
+      #   run: |
+      #     git config --global user.email realm-builder-no-reply@holium.com
+      #     git config --global user.name ${{ github.actor }}
+      #     git add ./app/release/app/package.json
+      #     git commit -m "patch realm app version"
+      #     git push
       #
       - name: Start release draft
         if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
@@ -115,6 +115,20 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git pull origin production
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and publish
         run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
@@ -170,6 +184,19 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y
       #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and install
         run: |
           npx cross-env GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
@@ -187,8 +214,6 @@ jobs:
   deploy-desks:
     needs: [pre-deploy, build-mac, build-windows]
     runs-on: ubuntu-latest
-    outputs:
-      bump-desks: ${{ steps.bump-desks.outputs.result }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -217,12 +242,12 @@ jobs:
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
-      - name: Push desk version update
-        if: ${{ fromJSON(steps.bump-desks.outputs.result).updated }}
-        run: |
-          git add ./desks/realm/desk.docket-0
-          git commit -m "patch realm desk version"
-          git push
+      # - name: Push desk version update
+      #   if: ${{ fromJSON(steps.bump-desks.outputs.result).updated }}
+      #   run: |
+      #     git add ./desks/realm/desk.docket-0
+      #     git commit -m "patch realm desk version"
+      #     git push
       #
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
@@ -279,19 +304,6 @@ jobs:
         with:
           node-version: '14'
           cache: 'npm'
-      # merge any changes made by the build script back into master
-      - name: Merge production changes back into master
-        if: ${{ fromJSON(needs.pre-deploy.outputs.ci).packageUpdated || needs.deploy-desks.outputs.bump-desks }}
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin production
-          git checkout master
-          git pull origin master
-          git merge production
-          git add .
-          git commit -m "merge changes made by production build back into master"
-          git push origin master
       #
       - name: Run post-deploy script
         uses: actions/github-script@v6
@@ -329,7 +341,8 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
-            const result = script({github, context}, 'production-build.yml', JSON.parse(process.env.CI_ENV))
+            const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
+            const result = script({github, context}, 'production-build.yml', ci)
             console.log(result)
             return result
         env:
