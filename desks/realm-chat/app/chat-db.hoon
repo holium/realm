@@ -34,9 +34,9 @@
       %create-path 
         (create-path:db-lib +.act state bowl)
       %leave-path 
-        (leave-path:db-lib act state bowl)
+        (leave-path:db-lib +.act state bowl)
       %insert
-        (insert:db-lib act state bowl)
+        (insert:db-lib +.act state bowl)
       %edit
         (edit:db-lib act state bowl)
       %delete

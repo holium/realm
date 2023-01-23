@@ -21,11 +21,14 @@
   =.  paths-table.state  (~(put by paths-table.state) path-id row)
   [~ state]
 ++  leave-path
-  |=  [act=action:sur state=state-0 =bowl:gall]
+  ::  :chat-db &action [%leave-path /a/path/to/a/chat]
+  |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  path-id  (sham [path])
+  =.  paths-table.state  (~(del by paths-table.state) path-id)
   [~ state]
 ++  insert
-  |=  [act=action:sur state=state-0 =bowl:gall]
+  |=  [msg=message:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   [~ state]
 ++  edit
