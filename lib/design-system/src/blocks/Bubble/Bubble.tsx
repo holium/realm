@@ -1,19 +1,53 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
+import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { FragmentBlock, renderFragment } from './fragment-lib';
-import { Reactions } from './Reaction';
+import {
+  Reactions,
+  ReactionAggregateType,
+  OnReactionPayload,
+} from './Reaction';
 
 type TemplateProps = {
   author: string;
   authorColor?: string;
   our?: boolean;
-  message?: any[];
-  onReaction: (reaction: string) => void;
+  message?: FragmentType[];
+  reactions?: FragmentReactionType[];
+  onReaction: (payload: OnReactionPayload) => void;
 } & BoxProps;
 
 export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
-  const { id, author, our, authorColor = '#000', message, onReaction } = props;
+  const {
+    id,
+    author,
+    our,
+    authorColor = '#000',
+    message,
+    reactions = [],
+    onReaction,
+  } = props;
+
+  const reactionsAggregated = useMemo(
+    () =>
+      Object.values(
+        reactions.reduce((acc, reaction) => {
+          if (acc[reaction.emoji]) {
+            acc[reaction.emoji].by.push(reaction.by);
+            acc[reaction.emoji].count++;
+          } else {
+            acc[reaction.emoji] = {
+              by: [reaction.by],
+              emoji: reaction.emoji,
+              count: 1,
+            };
+          }
+          return acc;
+        }, {} as Record<string, ReactionAggregateType>)
+      ),
+    [reactions]
+  );
 
   return (
     <Flex
@@ -47,13 +81,8 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
           })}
         </FragmentBlock>
         <BubbleFooter>
-          <Reactions
-            reactions={[]}
-            onReaction={(emoji: string) => {
-              onReaction(emoji);
-            }}
-          />
-          <Text.Custom alignSelf="flex-end" opacity={0.5}>
+          <Reactions reactions={reactionsAggregated} onReaction={onReaction} />
+          <Text.Custom pointerEvents="none" alignSelf="flex-end" opacity={0.5}>
             6:07 AM
           </Text.Custom>
         </BubbleFooter>

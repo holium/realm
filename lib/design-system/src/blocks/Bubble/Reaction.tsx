@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import styled from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
+import styled, { css } from 'styled-components';
 import { darken } from 'polished';
-import { Flex, Box, Icon } from '../..';
+import { Flex, Box, Icon, Text } from '../..';
 import { getVar } from '../../util/colors';
 import EmojiPicker, {
   EmojiClickData,
@@ -19,7 +20,7 @@ const ReactionRow = styled(Box)`
   bottom: -14px;
 `;
 
-const ReactionButton = styled(Box)`
+const ReactionButton = styled(Box)<{ hasCount?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -30,6 +31,21 @@ const ReactionButton = styled(Box)`
   transition: var(--transition);
   min-width: 24px;
   height: 24px;
+  width: auto;
+  img {
+    user-select: none;
+    pointer-events: none;
+  }
+  div {
+    user-select: none;
+    pointer-events: none;
+  }
+  ${({ hasCount }) =>
+    hasCount &&
+    css`
+      padding: 0 4px;
+      gap: 4px;
+    `}
   &:hover {
     transition: var(--transition);
     cursor: pointer;
@@ -37,48 +53,71 @@ const ReactionButton = styled(Box)`
   }
 `;
 
+export type ReactionAggregateType = {
+  emoji: string;
+  count: number;
+  by: string[];
+};
+
+export type OnReactionPayload = {
+  emoji: string;
+  action: 'remove' | 'add';
+  by: string;
+};
+
 type ReactionProps = {
-  reactions: any[];
-  onReaction: (emoji: string) => void;
+  reactions: ReactionAggregateType[];
+  onReaction: (payload: OnReactionPayload) => void;
 };
 
 export const Reactions = (props: ReactionProps) => {
-  const { reactions = [] } = props;
+  const { reactions = [], onReaction } = props;
   const [reacting, setReacting] = useState<boolean>(false);
-  const [selectedEmoji, setSelectedEmoji] = useState<EmojiClickData | null>(
-    null
-  );
 
-  function onClick(emojiData: EmojiClickData, event: MouseEvent) {
-    console.log(emojiData);
-    setSelectedEmoji(emojiData);
+  const checkDupe = (emoji: string) => {
+    const index = reactions.findIndex((r) => r.emoji === emoji);
+    if (index > -1) {
+      const reaction = reactions[index];
+      if (reaction.by.includes(window.ship)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const onClick = (emoji: string) => {
     setReacting(false);
-  }
-  let reactionRow = reactions;
-  if (selectedEmoji) {
-    reactionRow = [selectedEmoji];
-  }
+    if (checkDupe(emoji)) {
+      onReaction({ emoji, action: 'remove', by: window.ship });
+    } else {
+      onReaction({ emoji, action: 'add', by: window.ship });
+    }
+  };
+
   return (
     <ReactionRow
       onHoverEnd={() => {
         setReacting(false);
       }}
     >
-      {reactionRow.map((reaction, index) => {
-        console.log(reaction);
+      {reactions.map((reaction: ReactionAggregateType, index) => {
         return (
           <ReactionButton
             key={`${reaction.emoji}-${index}`}
-            onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
+            hasCount={reaction.count > 1}
+            onClick={(evt) => {
               evt.stopPropagation();
-              props.onReaction(reaction.emoji);
+              onClick(reaction.emoji);
             }}
           >
             <Emoji
-              unified={reaction.unified}
+              unified={reaction.emoji}
               emojiStyle={EmojiStyle.APPLE}
               size={16}
             />
+            {reaction.count > 1 && (
+              <Text.Hint fontSize={12}>{reaction.count}</Text.Hint>
+            )}
           </ReactionButton>
         );
       })}
@@ -91,18 +130,21 @@ export const Reactions = (props: ReactionProps) => {
         >
           <Icon size={18} opacity={0.5} name="Plus" pointerEvents="none" />
         </ReactionButton>
-        {reacting && (
-          // <EmojiPicker onEmojiClick={onClick} autoFocusSearch={false} />
-          <Flex position="absolute" zIndex={4}>
-            <EmojiPicker
-              skinTonesDisabled
-              emojiVersion="0.6"
-              defaultSkinTone={SkinTones.LIGHT}
-              onEmojiClick={onClick}
-              autoFocusSearch={false}
-            />
-          </Flex>
-        )}
+        <AnimatePresence>
+          {reacting && (
+            <Flex position="absolute" zIndex={4}>
+              <EmojiPicker
+                emojiVersion="0.6"
+                defaultSkinTone={SkinTones.NEUTRAL}
+                onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
+                  evt.stopPropagation();
+                  onClick(emojiData.unified);
+                }}
+                autoFocusSearch={false}
+              />
+            </Flex>
+          )}
+        </AnimatePresence>
       </Flex>
     </ReactionRow>
   );

@@ -1,20 +1,20 @@
 import {
-  Message,
-  MessageBlockquote,
-  MessageBold,
-  MessageBoldItalics,
-  MessageBoldItalicsStrike,
-  MessageBoldStrike,
-  MessageCode,
-  MessageImage,
-  MessageInlineCode,
-  MessageItalics,
-  MessageLink,
-  MessagePlain,
-  MessageShip,
-  MessageStrike,
-  MessageType,
-  MessageUrLink,
+  FragmentType,
+  FragmentBlockquoteType,
+  FragmentBoldType,
+  FragmentBoldItalicsType,
+  FragmentBoldItalicsStrikeType,
+  FragmentBoldStrikeType,
+  FragmentCodeType,
+  FragmentImageType,
+  FragmentInlineCodeType,
+  FragmentItalicsType,
+  FragmentLinkType,
+  FragmentPlainType,
+  FragmentShipType,
+  FragmentStrikeType,
+  FragmentKey,
+  FragmentUrLinkType,
 } from './Bubble.types';
 
 import styled from 'styled-components';
@@ -103,84 +103,84 @@ export const FragmentImage = styled(motion.img)`
 `;
 
 export const renderFragment = (
-  fragment: Message,
+  fragment: FragmentType,
   index: number,
   author: string
 ) => {
-  const key = Object.keys(fragment)[0] as MessageType;
+  const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
     case 'plain':
       return (
         <FragmentPlain key={index}>
-          {(fragment as MessagePlain).plain}
+          {(fragment as FragmentPlainType).plain}
         </FragmentPlain>
       );
     case 'bold':
       return (
         <FragmentBold key={index}>
-          {(fragment as MessageBold).bold}
+          {(fragment as FragmentBoldType).bold}
         </FragmentBold>
       );
     case 'italics':
       return (
         <FragmentItalic key={index}>
-          {(fragment as MessageItalics).italics}
+          {(fragment as FragmentItalicsType).italics}
         </FragmentItalic>
       );
     case 'strike':
       return (
         <FragmentStrike key={index}>
-          {(fragment as MessageStrike).strike}
+          {(fragment as FragmentStrikeType).strike}
         </FragmentStrike>
       );
     case 'bold-italics':
       return (
         <FragmentBoldItalic key={index}>
-          {(fragment as MessageBoldItalics)['bold-italics']}
+          {(fragment as FragmentBoldItalicsType)['bold-italics']}
         </FragmentBoldItalic>
       );
 
     case 'bold-strike':
       return (
         <FragmentBoldStrike key={index}>
-          {(fragment as MessageBoldStrike)['bold-strike']}
+          {(fragment as FragmentBoldStrikeType)['bold-strike']}
         </FragmentBoldStrike>
       );
     case 'bold-italics-strike':
       return (
         <FragmentBoldItalicsStrike key={index}>
-          {(fragment as MessageBoldItalicsStrike)['bold-italics-strike']}
+          {(fragment as FragmentBoldItalicsStrikeType)['bold-italics-strike']}
         </FragmentBoldItalicsStrike>
       );
 
     case 'blockquote':
       return (
         <FragmentBlockquote key={index}>
-          {(fragment as MessageBlockquote).blockquote}
+          {(fragment as FragmentBlockquoteType).blockquote}
         </FragmentBlockquote>
       );
     case 'inline-code':
       return (
         <FragmentInlineCode key={index}>
-          {(fragment as MessageInlineCode)['inline-code']}
+          {(fragment as FragmentInlineCodeType)['inline-code']}
         </FragmentInlineCode>
       );
     case 'ship':
       return (
         <FragmentShip key={index}>
-          {(fragment as MessageShip).ship}
+          {(fragment as FragmentShipType).ship}
         </FragmentShip>
       );
 
     case 'code':
       return (
         <FragmentCodeBlock key={index}>
-          {(fragment as MessageCode).code}
+          {(fragment as FragmentCodeType).code}
         </FragmentCodeBlock>
       );
     case 'link':
-      return `[${(fragment as MessageLink).link[0]}](${
-        (fragment as MessageLink).link[1]
+      return `[${(fragment as FragmentLinkType).link[0]}](${
+        (fragment as FragmentLinkType).link[1]
       })`;
     case 'image':
       return (
@@ -191,14 +191,14 @@ export const renderFragment = (
             variant="overlay"
             key={index}
             id={author + index}
-            image={(fragment as MessageImage).image}
+            image={(fragment as FragmentImageType).image}
             by={author}
           />
         </>
       );
 
     case 'ur-link':
-      return `<${(fragment as MessageUrLink)['ur-link']}>`;
+      return `<${(fragment as FragmentUrLinkType)['ur-link']}>`;
     case 'break':
       return '\n';
     default:
@@ -211,7 +211,7 @@ export const renderFragment = (
 //   const key = Object.keys(fragment)[0] as MessageType;
 //   switch (key) {
 //     case 'plain':
-//       return <FragmentPlain>{(fragment as MessagePlain).plain}</FragmentPlain>;
+//       return <FragmentPlain>{(fragment as FragmentPlainType).plain}</FragmentPlain>;
 //     case 'bold':
 //       return `**${(fragment as MessageBold).bold}**`;
 //     case 'italics':

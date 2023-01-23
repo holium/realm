@@ -1,65 +1,70 @@
-export type MessagePlain = {
+export type FragmentPlainType = {
   plain: string;
 };
-export type MessageBold = {
+export type FragmentBoldType = {
   bold: string;
 };
-export type MessageItalics = {
+export type FragmentItalicsType = {
   italics: string;
 };
-export type MessageStrike = {
+export type FragmentStrikeType = {
   strike: string;
 };
-export type MessageBoldItalics = {
+export type FragmentBoldItalicsType = {
   'bold-italics': string;
 };
-export type MessageBoldStrike = {
+export type FragmentBoldStrikeType = {
   'bold-strike': string;
 };
-export type MessageBoldItalicsStrike = {
+export type FragmentBoldItalicsStrikeType = {
   'bold-italics-strike': string;
 };
-export type MessageBlockquote = {
+export type FragmentBlockquoteType = {
   blockquote: string;
 };
-export type MessageInlineCode = {
+export type FragmentInlineCodeType = {
   'inline-code': string;
 };
-export type MessageShip = {
+export type FragmentShipType = {
   ship: string;
 };
-export type MessageCode = {
+export type FragmentCodeType = {
   code: string;
 };
-export type MessageLink = {
+export type FragmentLinkType = {
   // [display-name, url]
   link: [string, string];
 };
-export type MessageImage = {
+export type FragmentImageType = {
   image: string;
 };
-export type MessageUrLink = {
+export type FragmentUrLinkType = {
   'ur-link': string;
 };
-export type MessageBreak = {
+export type FragmentBreakType = {
   break: null;
 };
 
-export type Message =
-  | MessagePlain
-  | MessageBold
-  | MessageItalics
-  | MessageStrike
-  | MessageBoldItalics
-  | MessageBoldStrike
-  | MessageBoldItalicsStrike
-  | MessageBlockquote
-  | MessageInlineCode
-  | MessageShip
-  | MessageCode
-  | MessageLink
-  | MessageImage
-  | MessageUrLink
-  | MessageBreak;
+export type FragmentType =
+  | FragmentPlainType
+  | FragmentBoldType
+  | FragmentItalicsType
+  | FragmentStrikeType
+  | FragmentBoldItalicsType
+  | FragmentBoldStrikeType
+  | FragmentBoldItalicsStrikeType
+  | FragmentBlockquoteType
+  | FragmentInlineCodeType
+  | FragmentShipType
+  | FragmentCodeType
+  | FragmentLinkType
+  | FragmentImageType
+  | FragmentUrLinkType
+  | FragmentBreakType;
 
-export type MessageType = keyof Message;
+export type FragmentKey = keyof FragmentType;
+
+export type FragmentReactionType = {
+  by: string;
+  emoji: string; // emoji.unified -> see emoji-picker-react
+};
