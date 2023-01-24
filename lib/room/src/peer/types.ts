@@ -20,6 +20,7 @@ export enum PeerConnectionState {
   New = 'new',
   Closed = 'closed',
   Destroyed = 'destroyed',
+  Redialing = 'redialing',
   Broadcasting = 'broadcasting',
 }
 

@@ -55,11 +55,11 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
-    console.log('createConnection', this.rtcConfig);
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
+      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
@@ -117,14 +117,16 @@ export class RemotePeer extends Peer {
   _onClose() {
     // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
-    this.hangup();
+    // this.hangup();
     this.emit(PeerEvent.Closed);
   }
 
   _onError(err: Error) {
-    console.log('RemotePeer onError', err);
+    // @ts-ignore
+    console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
-    this.removeTracks();
+    // this.pee
+    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
   }
 
