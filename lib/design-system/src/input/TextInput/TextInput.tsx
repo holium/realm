@@ -48,7 +48,7 @@ export const TextInput = ({
       onKeyDown={onKeyDown}
     />
     :
-    <TextInput
+    <Input
       id={id}
       name={name}
       type={type}
