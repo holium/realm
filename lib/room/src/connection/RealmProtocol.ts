@@ -446,7 +446,6 @@ export class RealmProtocol extends BaseProtocol {
       throw new Error('No local peer created');
     }
 
-    console.log(this.rtc);
     const peerConfig = {
       isHost,
       isInitiator: isDialer(this.local.patp, peer),
