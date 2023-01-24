@@ -36,6 +36,8 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
     const { theme } = useServices();
     const { walletApp } = useTrayApps();
     const themeData = getBaseTheme(theme.currentTheme);
+    const pendingTx = walletApp.navState.protocol === ProtocolType.UQBAR ? walletApp.uqTx : null;
+    const uqbarContract: boolean = pendingTx ? 'noun' in pendingTx.action : false;
     const Seperator = () => (
       <Flex mt={6} position="relative" width="100%" justifyContent="center">
         <Box
@@ -45,6 +47,24 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           left="-10px"
           background={themeData.colors.bg.primary}
         />
+        {uqbarContract ?
+        <Flex
+          position="absolute"
+          bottom="-12px"
+          height="25px"
+          width="170px"
+          justifyContent="center"
+          alignItems="center"
+          borderRadius="50px"
+          background={
+            theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
+          }
+        >
+          <Text variant="body" color={themeData.colors.brand.primary}>
+            Contract Interaction
+          </Text>
+        </Flex>
+          :
         <Flex
           position="absolute"
           bottom="-12px"
@@ -66,6 +86,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>
+        } 
       </Flex>
     );
 
@@ -82,6 +103,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
                 )
           }
           onScreenChange={props.onScreenChange}
+          uqbarContract={uqbarContract}
           close={props.close}
           coin={props.coin}
           setTransactionAmount={props.setTransactionAmount}

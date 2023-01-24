@@ -1,12 +1,22 @@
 import { Conduit } from '@holium/conduit';
 import { ProtocolType, WalletStoreType, WalletView } from '../services/tray/wallet-lib/wallet.model';
 
-export const addDots = (address: string) => {
-  return '0x' + address.substring(2).match(/.{4}/g)!.join('.');
-};
-export const removeDots = (address: string) => {
-  return (address || '').replace(/\./g, '');
-};
+export const removeDots = (str: string) => {
+  return (str || '').replace(/\./g, '');
+}
+export const addDots = (hex: string) => {
+  const clearLead = removeDots(hex.replace('0x', '').toLowerCase())
+  let result = ''
+  for (let i = clearLead.length - 1; i > -1; i--) {
+    if (i < clearLead.length - 1 && (clearLead.length - 1 - i) % 4 === 0) {
+      result = '.' + result
+    }
+    result = clearLead[i] + result
+  }
+  return `0x${result}`
+}
+
+
 
 export const UqbarApi = {
   uqbarDeskExists: async (conduit: Conduit) => {
@@ -119,6 +129,9 @@ export const UqbarApi = {
         }
       }
     };
+    console.log(payload);
+    console.log(payload.json)
+    console.log(payload.json['submit-signed'].sig);
     await conduit.poke(payload);
   },
   deletePending: async (conduit: Conduit, from: string, hash: string) => {
@@ -228,7 +241,7 @@ const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
 }
 
 const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType) => {// }, signTransaction: any) => {
-  if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
+  /*if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
     walletState.setProtocol(ProtocolType.UQBAR);
     walletState.navigate(WalletView.TRANSACTION_CONFIRM, {
       walletIndex: '0',
@@ -238,7 +251,7 @@ const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStore
         txtype: 'general',
         key: '0'
       }*/
-    });
+  /*  });
     walletState.setForceActive(true);
-  }
+  }*/
 }

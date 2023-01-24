@@ -56,7 +56,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           </Box>
           <Flex>
             <Flex mr="10px">
-              {walletApp.navState.network === NetworkType.ETHEREUM &&
+              {/*walletApp.navState.network === NetworkType.ETHEREUM &&
                 (uqbarDeskExists ? (
                   <ImageToggle
                     src={UqbarLogo}
@@ -80,7 +80,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
                       onClick={() => {}}
                     />
                   </Tooltip>
-                ))}
+                ))*/}
             </Flex>
             <IconButton
               onClick={async () =>

@@ -200,7 +200,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       try {
         if (walletApp.navState.network === NetworkType.ETHEREUM) {
           if (walletApp.navState.protocol === ProtocolType.UQBAR) {
-            await WalletActions.sendUqbarTransaction(
+            await WalletActions.submitUqbarTransaction(
               walletApp.currentWallet!.index.toString(),
               passcode
             )

@@ -54,18 +54,13 @@ export const WalletCard: FC<WalletCardProps> = ({
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
-  console.log(walletTransactions);
-  console.log('thesize', walletTransactions.size);
   const numSize = 
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.size
       : (wallet as BitcoinWalletType).transactionList.size;
-  console.log('viewsize', numSize)
 
   const transactions = getTransactions(walletTransactions || new Map());
-  console.log(transactions.length)
-  console.log('walletsize', walletTransactions.size)
 
   const ethTicker =
     walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';

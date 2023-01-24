@@ -19,6 +19,7 @@ import VerifyPasscode from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { setScreen } from '@urbit/api';
+import { TextArea } from '@holium/design-system/src/input/Input/Input';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
@@ -89,7 +90,8 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               updatePhrase(e.target.value)
             }
-            autoFocus={true}
+
+            // autoFocus={true}
           />
 
           <Box mt={3} hidden={error === ''}>

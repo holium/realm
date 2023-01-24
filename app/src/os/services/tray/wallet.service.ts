@@ -34,6 +34,7 @@ import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
 import { init } from 'lodash/fp';
+import { textInputs } from 'polished';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -124,12 +125,14 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
     'realm.tray.wallet.uqbar-desk-exists': this.uqbarDeskExists,
-    'realm.tray.wallet.send-uqbar-transaction': this.sendUqbarTransaction,
+    'realm.tray.wallet.enqueue-uqbar-transaction': this.enqueueUqbarTransaction,
+    'realm.tray.wallet.submit-uqbar-transaction': this.submitUqbarTransaction,
     'realm.tray.wallet.watch-updates': this.watchUpdates,
     'realm.tray.wallet.set-force-active': this.setForceActive,
     'realm.tray.wallet.reset-navigation': this.resetNavigation,
     'realm.tray.wallet.delete-local-wallet': this.deleteLocalWallet,
     'realm.tray.wallet.delete-ship-wallet': this.deleteShipWallet,
+
   };
 
   static preload = {
@@ -326,8 +329,11 @@ export class WalletService extends BaseService {
     uqbarDeskExists: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.uqbar-desk-exists');
     },
-    sendUqbarTransaction: async (walletIndex: string, passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.send-uqbar-transaction', walletIndex, passcode);
+    enqueueUqbarTransaction: async (walletIndex: string, amount: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.enqueue-uqbar-transaction', walletIndex, amount);
+    },
+    submitUqbarTransaction: async (walletIndex: string, passcode: number[]) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.submit-uqbar-transaction', walletIndex, passcode);
     },
     watchUpdates: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
@@ -558,7 +564,36 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 
-  async sendUqbarTransaction(
+  async enqueueUqbarTransaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+  ) {
+    /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    // const protocol = this.wallet!.currentProtocol;
+    const tx = {
+      from,
+      to,
+      value: ethers.utils.parseEther(amount),
+      gasLimit: await protocol.getFeeEstimate({
+        to,
+        from,
+        value: ethers.utils.parseEther(amount),
+      }),
+      gasPrice: await protocol.getFeePrice(),
+      nonce: await protocol.getNonce(from),
+      chainId: await protocol.getChainId(),
+    };
+    const tx = this.state!.uqTx!;
+    const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
+    const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
+    await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
+    const pendingTxns = await UqbarApi.scryPending(this.core.conduit!, from);
+*/
+  }
+
+  async submitUqbarTransaction(
     _event: any,
     walletIndex: string,
     passcode: number[],
@@ -578,7 +613,12 @@ export class WalletService extends BaseService {
       // nonce: await protocol.getNonce(from),
       // chainId: await protocol.getChainId(),
     // };
-    const tx = this.state!.uqTx!;
+    const uqTx = this.state!.uqTx!;
+    const tx = {
+      ...uqTx,
+      rate: 2,
+      budget: 2000000,
+    }
     // const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
     /*const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
     await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
@@ -595,7 +635,8 @@ export class WalletService extends BaseService {
           `0x${contract}${contract}`
     const signed = await (this.signer! as RealmSigner).signUqbarTransaction(path, tx.hash, {...tx, to}, this.state!.ourPatp!, passcode.map(String).join(''));
     console.log('signed the tx')
-    await UqbarApi.submitSigned(this.core.conduit!, tx.from, tx.hash, Number(tx.rate), Number(tx.budget), signed.ethHash, signed.sig);//signed.ethHash, signed.sig);
+    console.log(signed.sig)
+    await UqbarApi.submitSigned(this.core.conduit!, tx.from, tx.hash, tx.rate, tx.budget, signed.ethHash, signed.sig);//signed.ethHash, signed.sig);
     console.log('submitted')
     const hash = removeDots(tx.hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
