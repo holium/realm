@@ -89,7 +89,7 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.setFeedURL({
       provider: 'generic',
       url: 'http://localhost:3001',
-      channel: determineReleaseChannel(),
+      channel: 'alpha',
     });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
