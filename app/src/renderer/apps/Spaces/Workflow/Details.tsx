@@ -22,46 +22,51 @@ import { TwitterPicker } from 'react-color';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import ReactDOM from 'react-dom';
+import { findDOMNode } from 'react-dom';
 
-export const createSpaceForm = (
-  defaults: any = {
-    name: '',
-    description: '',
-    color: '#000000',
-    picture: '',
-  }
-) => {
+type CreateSpaceFormProps = {
+  name: string;
+  description: string;
+  color: string;
+  picture: string;
+};
+
+export const createSpaceForm = ({
+  name,
+  description,
+  color,
+  picture,
+}: CreateSpaceFormProps) => {
   const spaceForm = createForm({
     onSubmit({ values }) {
       return values;
     },
   });
 
-  const name = createField({
+  const nameField = createField({
     id: 'name',
     form: spaceForm,
-    initialValue: defaults.name || '',
+    initialValue: name,
     validationSchema: yup.string().required('Name is required'),
   });
-  const description = createField({
+  const descriptionField = createField({
     id: 'description',
     form: spaceForm,
-    initialValue: defaults.description || '',
+    initialValue: description,
   });
-  const color = createField({
+  const colorField = createField({
     id: 'color',
     form: spaceForm,
-    initialValue: defaults.color || '',
+    initialValue: color,
     validationSchema: yup
       .string()
       .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
       .required('Enter a hex value'),
   });
-  const picture = createField({
+  const pictureField = createField({
     id: 'picture',
     form: spaceForm,
-    initialValue: defaults.picture || '',
+    initialValue: picture,
     validationSchema: yup.string().optional(),
     // .matches(
     //   /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
@@ -70,10 +75,10 @@ export const createSpaceForm = (
   });
   return {
     spaceForm,
-    name,
-    description,
-    color,
-    picture,
+    nameField,
+    descriptionField,
+    colorField,
+    pictureField,
   };
 };
 
@@ -96,7 +101,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
   );
 
   const handleClickOutside = (event: any) => {
-    const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
+    const domNode = findDOMNode(colorPickerRef.current);
     const pickerNode = document.getElementById('space-color-tile-popover');
     const isVisible = pickerNode
       ? pickerNode.getAttribute('data-is-open') === 'true'
@@ -162,24 +167,27 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
     };
   }, []);
 
-  const { name, description, picture, color } = useMemo(() => {
-    if (props.edit) {
-      const space = spaces.spaces.get(props.edit.space)!;
-      return createSpaceForm(space);
-    } else if (workflowState.type === 'group') {
-      return createSpaceForm({
-        name: workflowState.title,
-        description: workflowState.description,
-        color: workflowState.color,
-        picture: workflowState.image,
-      });
-    } else {
-      return createSpaceForm({
-        color: workflowState.color,
-        picture: '',
-      });
-    }
-  }, []);
+  const { nameField, descriptionField, pictureField, colorField } =
+    useMemo(() => {
+      if (props.edit) {
+        const space = spaces.spaces.get(props.edit.space)!;
+        return createSpaceForm(space);
+      } else if (workflowState.type === 'group') {
+        return createSpaceForm({
+          name: workflowState.title,
+          description: workflowState.description,
+          color: workflowState.color,
+          picture: workflowState.image,
+        });
+      } else {
+        return createSpaceForm({
+          name: '',
+          description: '',
+          color: workflowState.color,
+          picture: '',
+        });
+      }
+    }, []);
 
   return (
     <Grid.Column noGutter lg={12} xl={12}>
@@ -263,7 +271,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                         className="cursor-style"
                         color={workflowState.color}
                         onChange={(newColor: { hex: string }) => {
-                          color.actions.onChange(newColor.hex);
+                          colorField.actions.onChange(newColor.hex);
                           setWorkspaceState({
                             color: newColor.hex,
                             crestOption: 'color',
@@ -291,8 +299,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                   borderRadius: 6,
                   paddingRight: 0,
                 }}
-                value={color.state.value.replace('#', '')}
-                error={color.computed.ifWasEverBlurredThenError}
+                value={colorField.state.value.replace('#', '')}
+                error={colorField.computed.ifWasEverBlurredThenError}
                 onChange={(e: any) => {
                   if (isValidHexColor(`#${e.target.value}`)) {
                     setWorkspaceState({
@@ -300,10 +308,10 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                       crestOption: 'color',
                     });
                   }
-                  color.actions.onChange(e.target.value);
+                  colorField.actions.onChange(e.target.value);
                 }}
-                onFocus={() => color.actions.onFocus()}
-                onBlur={() => color.actions.onBlur()}
+                onFocus={colorField.actions.onFocus}
+                onBlur={colorField.actions.onBlur}
               />
             </Flex>
 
@@ -330,7 +338,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                   paddingRight: 4,
                   backgroundColor: inputColor,
                 }}
-                value={picture.state.value}
+                value={pictureField.state.value}
                 // error={!avatar.computed.isDirty || avatar.computed.error}
                 onChange={async (e: any) => {
                   if (e.target.value === '') {
@@ -339,21 +347,21 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                       crestOption: 'image',
                     });
                   }
-                  picture.actions.onChange(e.target.value);
+                  pictureField.actions.onChange(e.target.value);
                 }}
-                onFocus={() => picture.actions.onFocus()}
-                onBlur={() => picture.actions.onBlur()}
+                onFocus={pictureField.actions.onFocus}
+                onBlur={pictureField.actions.onBlur}
                 rightInteractive
                 rightIcon={
                   <TextButton
                     onClick={async () => {
                       const isImage: boolean = await isImgUrl(
-                        picture.state.value
+                        pictureField.state.value
                       );
                       if (isImage) {
                         setInvalidImg(false);
                         setWorkspaceState({
-                          image: picture.state.value,
+                          image: pictureField.state.value,
                           crestOption: 'image',
                         });
                       } else {
@@ -383,16 +391,14 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                 borderRadius: 6,
                 backgroundColor: inputColor,
               }}
-              defaultValue={name.state.value}
-              error={name.computed.ifWasEverBlurredThenError}
+              defaultValue={nameField.state.value}
+              error={nameField.computed.ifWasEverBlurredThenError}
               onChange={(e: any) => {
-                name.actions.onChange(e.target.value);
+                nameField.actions.onChange(e.target.value);
                 setWorkspaceState({ name: e.target.value });
               }}
-              onFocus={() => name.actions.onFocus()}
-              onBlur={(e: any) => {
-                name.actions.onBlur();
-              }}
+              onFocus={() => nameField.actions.onFocus()}
+              onBlur={nameField.actions.onBlur}
             />
           </FormControl.Field>
           <FormControl.Field>
@@ -410,17 +416,17 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
                 borderRadius: 6,
                 backgroundColor: inputColor,
               }}
-              defaultValue={description.state.value}
-              error={description.computed.ifWasEverBlurredThenError}
+              defaultValue={descriptionField.state.value}
+              error={descriptionField.computed.ifWasEverBlurredThenError}
               onChange={(e: any) =>
-                description.actions.onChange(e.target.value)
+                descriptionField.actions.onChange(e.target.value)
               }
-              onFocus={() => description.actions.onFocus()}
+              onFocus={() => descriptionField.actions.onFocus()}
               onBlur={(e: any) => {
                 setWorkspaceState({
                   description: e.target.value,
                 });
-                description.actions.onBlur();
+                descriptionField.actions.onBlur();
               }}
             />
           </FormControl.Field>

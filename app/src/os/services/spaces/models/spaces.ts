@@ -23,10 +23,10 @@ export const SpaceModel = types
     path: types.identifier,
     name: types.string,
     description: types.optional(types.string, ''),
-    color: types.maybeNull(types.string),
+    color: types.optional(types.string, '#000000'),
     type: types.enumeration(['group', 'our', 'space']),
     archetype: types.optional(types.enumeration(['home', 'community']), 'home'), // TODO remove the optional
-    picture: types.maybeNull(types.string),
+    picture: types.optional(types.string, ''),
     access: types.optional(types.string, 'public'),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
