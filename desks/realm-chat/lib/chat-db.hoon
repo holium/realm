@@ -5,6 +5,10 @@
 ::
 /-  *versioned-state, sur=chat-db
 |%
+++  fill-out-minimal-fragment
+  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud]
+  ^-  msg-part:sur
+  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id]
 ::
 ::  poke actions
 ::
@@ -12,24 +16,27 @@
   ::  :chat-db &action [%create-path [/a/path/to/a/chat ~ %chat]]
   |=  [act=create-path-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  path-id  (sham [path.act])
-  =/  row=path-row:sur   :^
-    path-id
+  =/  row=path-row:sur   :+
     path.act
     metadata.act
     type.act
-  =.  paths-table.state  (~(put by paths-table.state) path-id row)
+  =.  paths-table.state  (~(put by paths-table.state) path.act row)
   [~ state]
 ++  leave-path
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  path-id  (sham [path])
-  =.  paths-table.state  (~(del by paths-table.state) path-id)
+  =.  paths-table.state  (~(del by paths-table.state) path)
   [~ state]
 ++  insert
-  |=  [msg=message:sur state=state-0 =bowl:gall]
+::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
+  |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  msg-id=msg-id:sur   [now.bowl our.bowl]
+  =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
+  =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
+  =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
+  =.  messages-table.state  (~(gas by messages-table.state) key-vals)
   [~ state]
 ++  edit
   |=  [act=action:sur state=state-0 =bowl:gall]
@@ -167,8 +174,7 @@
       |=  =path-row:sur
       ^-  json
       %-  pairs
-      :~  id+s+(scot %uv id.path-row)
-          path+s+(spat path.path-row)
+      :~  path+s+(spat path.path-row)
           metadata+s+'TODO not implemented'
           type+s+type.path-row
       ==

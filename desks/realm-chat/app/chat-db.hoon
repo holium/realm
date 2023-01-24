@@ -27,6 +27,8 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
+    ~&  mark
+    ~&  vase
     ?>  ?=(%action mark)
     =/  act  !<(action:sur vase)
     =^  cards  state
@@ -65,9 +67,9 @@
           =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
           :~  [%give %fact ~ messages-table+!>((start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state))]
           ==
-      :: /db/path/0v1.b20g0
-        [%db %path @ ~]  :: the "path" path, subscribe by path-id explicitly
-          =/  thepathrow   (~(get by paths-table.state) `path-id:sur`(slav %uv i.t.t.path))
+      :: /db/path/the/actual/path/here
+        [%db %path *]  :: the "path" path, subscribe by path explicitly
+          =/  thepathrow   (~(get by paths-table.state) t.t.path)
           :~  [%give %fact ~ path-row+!>(thepathrow)]
           ==
     ==

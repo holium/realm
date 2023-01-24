@@ -20,25 +20,24 @@
 ::
 ::  database types
 ::
-+$  path-id  @uvH   :: produced by (sham [path])
 +$  path-row
-  $:  id=@uvH
-      =path
+  $:  =path
       metadata=(map cord cord)
       type=@tas     :: not officially specified, up to user to interpret for maybe %dm vs %group or %chat vs %board or whatever
   ==
 ::
-+$  paths-table  (map path-id path-row)
++$  paths-table  (map path path-row)
 ::
 +$  msg-id    [timestamp=@da sender=ship] :: paired with ship for uniqueness in global scope (like when two ships happen to send messages at exactly the same time)
 +$  msg-part-id  @ud            :: continuously incrementing numeric id, but only within a message
-+$  message   (list msg-part)   :: all the msg-part that have the same msg-id and path-id
++$  message   (list msg-part)   :: all the msg-part that have the same msg-id and path
++$  reply-to  (unit (pair path msg-id))
 +$  msg-part
-  $:  =path-id
+  $:  =path
       =msg-id
       =msg-part-id
       =content
-      reply-to=(pair path-id msg-id)
+      =reply-to
       metadata=(map cord cord)
       timestamp=@da
   ==
@@ -66,12 +65,12 @@
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
 ::
 +$  peer-row
-  $:  =path-id
+  $:  =path
       patp=ship
       role=?(%member %host)
   ==
 ::
-+$  peers-table  (map path-id (list peer-row))
++$  peers-table  (map path (list peer-row))
 ::
 +$  table-name   ?(%paths %messages %peers)
 +$  table
@@ -80,7 +79,6 @@
       [%peers =peers-table]
   ==
 +$  tables  (list table)
-
 ::
 ::  agent details
 ::
@@ -88,13 +86,15 @@
   $%  
       [%create-path =create-path-action]
       [%leave-path =path]
-      [%insert =message]
+      [%insert =insert-message-action]
       [%edit =message]
-      [%delete =path-id =msg-id]
-      [%add-peer =path-id patp=ship]
-      [%kick-peer =path-id patp=ship]
+      [%delete =path =msg-id]
+      [%add-peer =path patp=ship]
+      [%kick-peer =path patp=ship]
   ==
-+$  create-path-action  [=path metadata=(map cord cord) type=@tas]
++$  create-path-action      [=path metadata=(map cord cord) type=@tas]
++$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
++$  insert-message-action   [=path fragments=(list minimal-fragment)]
 ::
 +$  db-dump
   $%  
