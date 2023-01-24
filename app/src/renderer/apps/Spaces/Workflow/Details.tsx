@@ -22,7 +22,6 @@ import { TwitterPicker } from 'react-color';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { findDOMNode } from 'react-dom';
 
 type CreateSpaceFormProps = {
   name: string;
@@ -89,7 +88,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
   const { theme, spaces } = useServices();
   const { inputColor, windowColor, textColor } = theme.currentTheme;
   const { workflowState, setState } = props;
-  const colorPickerRef = useRef(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [crestOption, setCrestOption] = useState<CrestOptionType>(
@@ -100,18 +99,18 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
     workflowState.access || 'public'
   );
 
-  const handleClickOutside = (event: any) => {
-    const domNode = findDOMNode(colorPickerRef.current);
+  const handleClickOutside = (event: MouseEvent) => {
     const pickerNode = document.getElementById('space-color-tile-popover');
     const isVisible = pickerNode
       ? pickerNode.getAttribute('data-is-open') === 'true'
       : false; // get if the picker is visible currently
-    if (!domNode || !domNode.contains(event.target)) {
-      if (event.target.id === 'space-color-tile') {
-        return;
-      }
-      // You are clicking outside
-      if (isVisible) {
+
+    // Close the color picker if the user clicks outside of it.
+    if (isVisible && colorPickerRef.current) {
+      if (
+        event.target &&
+        !colorPickerRef.current.contains(event.target as Node)
+      ) {
         setColorPickerOpen(false);
       }
     }
