@@ -124,7 +124,7 @@ export class RemotePeer extends Peer {
   _onError(err: Error) {
     console.log('RemotePeer onError', err);
     this.setStatus(PeerConnectionState.Failed);
-    this.removeTracks();
+    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
   }
 
