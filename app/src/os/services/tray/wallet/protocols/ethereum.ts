@@ -19,7 +19,6 @@ import {
   EthWalletType,
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
-import io from 'socket.io-client';
 
 export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
