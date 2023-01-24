@@ -102,7 +102,6 @@ export class RemotePeer extends Peer {
     // TODO go through the flow where a peer is destroyed and attempts to reconnect
     if (!this.peer?.destroyed) {
       this.peer?.signal(data);
-      console.log(data);
     } else {
       console.log('peerSignal: peer destroyed, not signaling', this.patp);
       this.setStatus(PeerConnectionState.Destroyed);
