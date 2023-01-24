@@ -133,9 +133,11 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     ? 'zigs'
                     : abbrMap[walletApp.navState.network]}
                 </Text>
-                <Text mt={1} color={themeData.colors.text.disabled}>
-                  ${ethToUsd(props.transactionAmount)} USD
-                </Text>
+                {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+                  <Text mt={1} color={themeData.colors.text.disabled}>
+                    ${ethToUsd(props.transactionAmount)} USD
+                  </Text>
+                )}
                 <Flex
                   mt={7}
                   width="100%"
@@ -231,12 +233,15 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                       <Text variant="body">
                         0.0005 {props.coin ? props.coin.name : 'ETH'}
                       </Text>
-                      <Text
-                        fontSize={1}
-                        color={themeData.colors.text.secondary}
-                      >
-                        ≈ {ethToUsd(0.0005)} USD
-                      </Text>
+                      {walletApp.navState.protocol ===
+                        ProtocolType.ETH_MAIN && (
+                        <Text
+                          fontSize={1}
+                          color={themeData.colors.text.secondary}
+                        >
+                          ≈ {ethToUsd(0.0005)} USD
+                        </Text>
+                      )}
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
@@ -251,12 +256,15 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         {props.transactionAmount + 0.0005}{' '}
                         {props.coin ? props.coin.name : 'ETH'}
                       </Text>
-                      <Text
-                        fontSize={1}
-                        color={themeData.colors.text.secondary}
-                      >
-                        ≈ {ethToUsd(props.transactionAmount + 0.0005)} USD
-                      </Text>
+                      {walletApp.navState.protocol ===
+                        ProtocolType.ETH_MAIN && (
+                        <Text
+                          fontSize={1}
+                          color={themeData.colors.text.secondary}
+                        >
+                          ≈ {ethToUsd(props.transactionAmount + 0.0005)} USD
+                        </Text>
+                      )}
                     </Flex>
                   </Flex>
                 </Flex>

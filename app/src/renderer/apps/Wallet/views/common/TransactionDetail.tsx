@@ -26,6 +26,7 @@ import {
   EthWalletType,
   BitcoinWalletType,
   TransactionType,
+  ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
@@ -113,22 +114,24 @@ export const TransactionDetail: FC = observer(() => {
           >
             {wasSent && '-'} {amountDisplay}
           </Text>
-          <Text
-            variant="body"
-            fontSize={2}
-            color={themeData.colors.text.secondary}
-          >
-            $
-            {isEth
-              ? convertEthAmountToUsd(
-                  ethAmount,
-                  walletApp.ethereum.conversions.usd
-                )
-              : convertBtcAmountToUsd(
-                  btcAmount,
-                  walletApp.bitcoin.conversions.usd
-                )}
-          </Text>
+          {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+            <Text
+              variant="body"
+              fontSize={2}
+              color={themeData.colors.text.secondary}
+            >
+              $
+              {isEth
+                ? convertEthAmountToUsd(
+                    ethAmount,
+                    walletApp.ethereum.conversions.usd
+                  )
+                : convertBtcAmountToUsd(
+                    btcAmount,
+                    walletApp.bitcoin.conversions.usd
+                  )}
+            </Text>
+          )}
         </Flex>
       </Flex>
       <Flex mt={8} width="100%" justifyContent="space-between">

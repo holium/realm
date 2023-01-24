@@ -32,7 +32,11 @@ export const AmountInput = observer(
     const { theme } = useServices();
     const { walletApp } = useTrayApps();
 
-    const [inCrypto, setInCrypto] = useState(true);
+    const [inCryptoToggle, setInCryptoToggle] = useState(true);
+    const inCrypto =
+      walletApp.navState.protocol === ProtocolType.ETH_MAIN
+        ? inCryptoToggle
+        : true;
     const [amount, setAmount] = useState<string | number>(0);
     const [amountError, setAmountError] = useState(false);
 
@@ -67,13 +71,15 @@ export const AmountInput = observer(
     };
 
     const toggleInCrypto = () => {
-      const toggled = !inCrypto;
+      if (walletApp.navState.protocol === ProtocolType.ETH_MAIN) {
+        const toggled = !inCrypto;
 
-      setInCrypto(toggled);
-      check(toggled, amount);
+        setInCryptoToggle(toggled);
+        check(toggled, amount);
 
-      if (!toggled) {
-        setAmount(Number(amount).toFixed(2));
+        if (!toggled) {
+          setAmount(Number(amount).toFixed(2));
+        }
       }
     };
 
@@ -147,23 +153,25 @@ export const AmountInput = observer(
                   />
                 </Flex>
               )}
-              <Box hidden={!amount}>
-                <Text fontSize="11px" color={themeData.colors.text.disabled}>
-                  {inCrypto
-                    ? `$${ethToUsd(Number(amount))} USD`
-                    : `${usdToEth(Number(amount))} ${
-                        props.coin
-                          ? props.coin.name
-                          : walletApp.navState.protocol === ProtocolType.UQBAR
-                          ? 'zigs'
-                          : abbrMap[
-                              walletApp.navState.network as
-                                | 'bitcoin'
-                                | 'ethereum'
-                            ]
-                      }`}
-                </Text>
-              </Box>
+              {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+                <Box hidden={!amount}>
+                  <Text fontSize="11px" color={themeData.colors.text.disabled}>
+                    {inCrypto
+                      ? `$${ethToUsd(Number(amount))} USD`
+                      : `${usdToEth(Number(amount))} ${
+                          props.coin
+                            ? props.coin.name
+                            : walletApp.navState.protocol === ProtocolType.UQBAR
+                            ? 'zigs'
+                            : abbrMap[
+                                walletApp.navState.network as
+                                  | 'bitcoin'
+                                  | 'ethereum'
+                              ]
+                        }`}
+                  </Text>
+                </Box>
+              )}
             </Flex>
             <Flex
               p="4px"
@@ -185,7 +193,9 @@ export const AmountInput = observer(
                       ]
                   : 'USD'}
               </Text>
-              <Icons name="UpDown" size="12px" />
+              {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+                <Icons name="UpDown" size="12px" />
+              )}
             </Flex>
           </ContainerFlex>
         </FlexHider>
