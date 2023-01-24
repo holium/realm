@@ -16,7 +16,7 @@ import {
   MessageBoxReturnValue,
   net,
 } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import { autoUpdater, UpdateCheckResult } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
@@ -81,14 +81,14 @@ const determineReleaseChannel = () => {
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
-    if (process.env.NODE_ENV === 'development') return;
+    // if (process.env.NODE_ENV === 'development') return;
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     autoUpdater.autoDownload = false;
     // proxy private github repo requests
     autoUpdater.setFeedURL({
       provider: 'generic',
-      url: process.env.AUTOUPDATE_FEED_URL,
+      url: 'http://localhost:3001',
       channel: determineReleaseChannel(),
     });
     autoUpdater.on('error', (error) => {
@@ -149,10 +149,17 @@ export class AppUpdater implements IAppUpdater {
 
   // for manual update checks, report errors on internet connectivity. for
   //   auto update checks, gracefully ignore.
-  checkForUpdates = () => {
-    if (process.env.NODE_ENV === 'development') return;
+  checkForUpdates = async () => {
+    // if (process.env.NODE_ENV === 'development') return;
     if (net.isOnline()) {
-      this.manualCheck = true;
+      // this.manualCheck = true;
+      // try {
+      //   await autoUpdater.checkForUpdates();
+      // } catch (e) {
+      //   console.log(e);
+      // } finally {
+      //   this.manualCheck = false;
+      // }
       autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
     } else {
       dialog.showMessageBox({
