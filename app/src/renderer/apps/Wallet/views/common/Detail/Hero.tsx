@@ -88,20 +88,18 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       walletApp.navState.network === NetworkType.ETHEREUM
         ? !props.coin
           ? walletApp.navState.protocol === ProtocolType.UQBAR
-          ? `${
-              formatZigAmount(
+            ? `${formatZigAmount(
                 (props.wallet as EthWalletType).data.get(
                   walletApp.navState.protocol
                 )!.balance
-              )
-            } zigs`
-          : `${
-              formatEthAmount(
-                (props.wallet as EthWalletType).data.get(
-                  walletApp.navState.protocol
-                )!.balance
-              ).eth
-            } ETH`
+              )} zigs`
+            : `${
+                formatEthAmount(
+                  (props.wallet as EthWalletType).data.get(
+                    walletApp.navState.protocol
+                  )!.balance
+                ).eth
+              } ETH`
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
@@ -203,9 +201,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             await WalletActions.submitUqbarTransaction(
               walletApp.currentWallet!.index.toString(),
               passcode
-            )
-          }
-          else {
+            );
+          } else {
             props.coin
               ? await WalletActions.sendERC20Transaction(
                   walletApp.currentWallet!.index.toString(),
@@ -236,13 +233,15 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       } catch (e) {
         console.error(e);
       }
-    }
+    };
 
-    return (
-      showPasscode ? <TransactionPasscode onSuccess={(code: number[]) => {
-        sendTransaction(code)
-      }
-      } /> :
+    return showPasscode ? (
+      <TransactionPasscode
+        onSuccess={(code: number[]) => {
+          sendTransaction(code);
+        }}
+      />
+    ) : (
       <WalletCardStyle
         layout="size"
         elevation="none"

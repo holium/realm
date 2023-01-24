@@ -95,7 +95,7 @@ const initialWalletState = (ship: string) => ({
     passcodeHash: '',
   },
   ourPatp: ship,
-  forceActive: false
+  forceActive: false,
 });
 
 export class WalletService extends BaseService {
@@ -132,7 +132,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.reset-navigation': this.resetNavigation,
     'realm.tray.wallet.delete-local-wallet': this.deleteLocalWallet,
     'realm.tray.wallet.delete-ship-wallet': this.deleteShipWallet,
-
   };
 
   static preload = {
@@ -161,10 +160,7 @@ export class WalletService extends BaseService {
         providerURL
       );
     },
-    navigate: async (
-      view: WalletView,
-      options?: WalletNavOptions
-    ) => {
+    navigate: async (view: WalletView, options?: WalletNavOptions) => {
       return await ipcRenderer.invoke(
         'realm.tray.wallet.navigate',
         view,
@@ -330,26 +326,43 @@ export class WalletService extends BaseService {
       return await ipcRenderer.invoke('realm.tray.wallet.uqbar-desk-exists');
     },
     enqueueUqbarTransaction: async (walletIndex: string, amount: string) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.enqueue-uqbar-transaction', walletIndex, amount);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.enqueue-uqbar-transaction',
+        walletIndex,
+        amount
+      );
     },
     submitUqbarTransaction: async (walletIndex: string, passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.submit-uqbar-transaction', walletIndex, passcode);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.submit-uqbar-transaction',
+        walletIndex,
+        passcode
+      );
     },
     watchUpdates: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.watch-updates');
     },
     setForceActive: async (forceActive: boolean) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.set-force-active', forceActive);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.set-force-active',
+        forceActive
+      );
     },
     resetNavigation: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.reset-navigation');
     },
     deleteLocalWallet: async (passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.delete-local-wallet', passcode)
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.delete-local-wallet',
+        passcode
+      );
     },
     deleteShipWallet: async (passcode: number[]) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.delete-ship-wallet', passcode)
-    }
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.delete-ship-wallet',
+        passcode
+      );
+    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -366,7 +379,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string, forceReset: boolean) {
-    console.log('logging in')
+    console.log('logging in');
     const secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
@@ -410,8 +423,15 @@ export class WalletService extends BaseService {
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
-      this.wallet!.updateWalletState(this.core.conduit!, this.state!, ProtocolType.UQBAR);
-      if (this.state!.navState.network === NetworkType.ETHEREUM && !(this.state!.navState.protocol === ProtocolType.UQBAR)) {
+      this.wallet!.updateWalletState(
+        this.core.conduit!,
+        this.state!,
+        ProtocolType.UQBAR
+      );
+      if (
+        this.state!.navState.network === NetworkType.ETHEREUM &&
+        !(this.state!.navState.protocol === ProtocolType.UQBAR)
+      ) {
         this.wallet?.updateWalletState(this.core.conduit!, this.state!);
       }
     });
@@ -456,7 +476,11 @@ export class WalletService extends BaseService {
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
     console.log(passcodeString);
-    (this.signer as RealmSigner).setMnemonic(mnemonic, this.state!.ourPatp!, passcodeString);
+    (this.signer as RealmSigner).setMnemonic(
+      mnemonic,
+      this.state!.ourPatp!,
+      passcodeString
+    );
     const passcodeHash = await bcrypt.hash(passcodeString, 12);
     await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
     const ethPath = "m/44'/60'/0'";
@@ -470,7 +494,11 @@ export class WalletService extends BaseService {
     xpub = this.signer.getXpub(btcPath, this.state!.ourPatp!, passcodeString);
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
     // btc testnet
-    xpub = this.signer.getXpub(btcTestnetPath, this.state!.ourPatp!, passcodeString);
+    xpub = this.signer.getXpub(
+      btcTestnetPath,
+      this.state!.ourPatp!,
+      passcodeString
+    );
     await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
 
     this.state!.navigate(WalletView.LIST);
@@ -568,7 +596,7 @@ export class WalletService extends BaseService {
     _event: any,
     walletIndex: string,
     to: string,
-    amount: string,
+    amount: string
   ) {
     /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     // const protocol = this.wallet!.currentProtocol;
@@ -596,7 +624,7 @@ export class WalletService extends BaseService {
   async submitUqbarTransaction(
     _event: any,
     walletIndex: string,
-    passcode: number[],
+    passcode: number[]
     // toPatp?: string,
   ) {
     /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
@@ -609,16 +637,16 @@ export class WalletService extends BaseService {
         from,
         value: ethers.utils.parseEther(amount),
       }),*/
-      // gasPrice: await protocol.getFeePrice(),
-      // nonce: await protocol.getNonce(from),
-      // chainId: await protocol.getChainId(),
+    // gasPrice: await protocol.getFeePrice(),
+    // nonce: await protocol.getNonce(from),
+    // chainId: await protocol.getChainId(),
     // };
     const uqTx = this.state!.uqTx!;
     const tx = {
       ...uqTx,
       rate: 2,
       budget: 2000000,
-    }
+    };
     // const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
     /*const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
     await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
@@ -629,15 +657,30 @@ export class WalletService extends BaseService {
     console.log(hash)
     const txn = pendingTxns[hash];*/
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const contract = removeDots(tx.contract.slice(2))
-    const to = (tx as any)?.action?.give?.to ||
-          (tx as any)?.action?.['give-nft']?.to ||
-          `0x${contract}${contract}`
-    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(path, tx.hash, {...tx, to}, this.state!.ourPatp!, passcode.map(String).join(''));
-    console.log('signed the tx')
-    console.log(signed.sig)
-    await UqbarApi.submitSigned(this.core.conduit!, tx.from, tx.hash, tx.rate, tx.budget, signed.ethHash, signed.sig);//signed.ethHash, signed.sig);
-    console.log('submitted')
+    const contract = removeDots(tx.contract.slice(2));
+    const to =
+      (tx as any)?.action?.give?.to ||
+      (tx as any)?.action?.['give-nft']?.to ||
+      `0x${contract}${contract}`;
+    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(
+      path,
+      tx.hash,
+      { ...tx, to },
+      this.state!.ourPatp!,
+      passcode.map(String).join('')
+    );
+    console.log('signed the tx');
+    console.log(signed.sig);
+    await UqbarApi.submitSigned(
+      this.core.conduit!,
+      tx.from,
+      tx.hash,
+      tx.rate,
+      tx.budget,
+      signed.ethHash,
+      signed.sig
+    ); //signed.ethHash, signed.sig);
+    console.log('submitted');
     const hash = removeDots(tx.hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
@@ -645,15 +688,15 @@ export class WalletService extends BaseService {
       this.state!.navState.protocol,
       hash,
       '',
-      '',//toPatp,
+      '', //toPatp,
       fromAddress,
       '',
-      new Date().toISOString(),
+      new Date().toISOString()
     );
-    console.log('enqueued')
-    const stateTx = currentWallet.data.get(this.state!.navState.protocol)!.transactionList.getStoredTransaction(
-      hash
-    );
+    console.log('enqueued');
+    const stateTx = currentWallet.data
+      .get(this.state!.navState.protocol)!
+      .transactionList.getStoredTransaction(hash);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
@@ -671,7 +714,7 @@ export class WalletService extends BaseService {
     to: string,
     amount: string,
     passcode: number[],
-    toPatp?: string,
+    toPatp?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(
@@ -691,10 +734,17 @@ export class WalletService extends BaseService {
       nonce: await protocol.getNonce(from),
       chainId: await protocol.getChainId(),
     };
-    const signedTx = await this.signer!.signTransaction(path, tx, this.state!.ourPatp!, passcode.map(String).join(''));
-    const hash = await (this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    )! as BaseBlockProtocol).sendTransaction(signedTx);
+    const signedTx = await this.signer!.signTransaction(
+      path,
+      tx,
+      this.state!.ourPatp!,
+      passcode.map(String).join('')
+    );
+    const hash = await (
+      this.wallet!.protocols.get(
+        this.state!.navState.protocol
+      )! as BaseBlockProtocol
+    ).sendTransaction(signedTx);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -755,10 +805,17 @@ export class WalletService extends BaseService {
     tx.gasPrice = await protocol.getFeePrice();
     tx.nonce = await protocol.getNonce(from);
     tx.chainId = await protocol.getChainId();
-    const signedTx = await this.signer!.signTransaction(path, tx, this.state!.ourPatp!, passcode.map(String).join(''));
-    const hash = await (this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    )! as BaseBlockProtocol).sendTransaction(signedTx);
+    const signedTx = await this.signer!.signTransaction(
+      path,
+      tx,
+      this.state!.ourPatp!,
+      passcode.map(String).join('')
+    );
+    const hash = await (
+      this.wallet!.protocols.get(
+        this.state!.navState.protocol
+      )! as BaseBlockProtocol
+    ).sendTransaction(signedTx);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -815,18 +872,16 @@ export class WalletService extends BaseService {
   }
 
   async checkMnemonic(_event: any, mnemonic: string) {
-    const ethXpub = ethers.utils.HDNode.fromMnemonic(mnemonic).derivePath("m/44'/60'/0'").neuter().extendedKey;
+    const ethXpub = ethers.utils.HDNode.fromMnemonic(mnemonic)
+      .derivePath("m/44'/60'/0'")
+      .neuter().extendedKey;
     const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))[
       'eth-xpub'
     ];
     return ethXpub === agentEthXpub;
   }
 
-  navigate(
-    _event: any,
-    view: WalletView,
-    options?: WalletNavOptions
-  ) {
+  navigate(_event: any, view: WalletView, options?: WalletNavOptions) {
     this.state!.navigate(view, options);
   }
 
@@ -871,13 +926,19 @@ export class WalletService extends BaseService {
 
   async deleteLocalWallet(_evt: any, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
-    (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
+    (this.signer! as RealmSigner).deleteMnemonic(
+      this.state!.ourPatp!,
+      passcodeString
+    );
     this.onLogin(this.state!.ourPatp!, true);
   }
 
   async deleteShipWallet(_evt: any, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
-    (this.signer! as RealmSigner).deleteMnemonic(this.state!.ourPatp!, passcodeString);
+    (this.signer! as RealmSigner).deleteMnemonic(
+      this.state!.ourPatp!,
+      passcodeString
+    );
     WalletApi.initialize(this.core.conduit!);
     this.onLogin(this.state!.ourPatp!, true);
   }

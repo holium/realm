@@ -63,7 +63,11 @@ export const EthNew: FC<any> = observer(() => {
       <CreatePasscode setPasscode={setPasscodeWrapper} />
     ),
     [NewWalletScreen.CONFIRM_PASSCODE]: (
-      <ConfirmPasscode setScreen={setScreen} correctPasscode={passcode} onSuccess={setPasscode} />
+      <ConfirmPasscode
+        setScreen={setScreen}
+        correctPasscode={passcode}
+        onSuccess={setPasscode}
+      />
     ),
     [NewWalletScreen.FINALIZING]: (
       <Finalizing seedPhrase={seedPhrase} passcode={passcode} />
@@ -72,10 +76,13 @@ export const EthNew: FC<any> = observer(() => {
       <DetectedExisting setScreen={setScreen} />
     ),
     [NewWalletScreen.RECOVER_EXISTING]: (
-      <RecoverExisting setSeedPhrase={(phrase: string, passcode: number[]) => {
-        setSeedPhrase(phrase);
-        setPasscode(passcode);
-      }} setScreen={setScreen} />
+      <RecoverExisting
+        setSeedPhrase={(phrase: string, passcode: number[]) => {
+          setSeedPhrase(phrase);
+          setPasscode(passcode);
+        }}
+        setScreen={setScreen}
+      />
     ),
   };
   const currentComponent = components[screen];

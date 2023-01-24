@@ -7,7 +7,11 @@ import { Asset } from '../wallet.model';
 export abstract class BaseBlockProtocol extends BaseProtocol {
   abstract watchUpdates(conduit: any, walletState: any): void;
 
-  abstract updateWalletState(conduit: any, walletState: any, currentBlock?: number): void;
+  abstract updateWalletState(
+    conduit: any,
+    walletState: any,
+    currentBlock?: number
+  ): void;
 
   abstract removeListener(): void;
 

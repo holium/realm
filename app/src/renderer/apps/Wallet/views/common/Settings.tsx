@@ -127,19 +127,19 @@ export const WalletSettings: FC = observer(() => {
     WalletActions.navigateBack();
   }
 
-  const [settingScreen, setSettingScreen] = useState<SettingScreen>(SettingScreen.SETTINGS)
+  const [settingScreen, setSettingScreen] = useState<SettingScreen>(
+    SettingScreen.SETTINGS
+  );
   const deleteWallet = (passcode: number[]) => {
     if (settingScreen === SettingScreen.LOCAL) {
       WalletActions.deleteLocalWallet(passcode);
-    }
-    else if (settingScreen === SettingScreen.AGENT) {
+    } else if (settingScreen === SettingScreen.AGENT) {
       WalletActions.deleteShipWallet(passcode);
     }
-  }
+  };
 
-  return (
-    settingScreen !== SettingScreen.SETTINGS ? 
-<Flex px={3} width="100%" height="100%" flexDirection="column">
+  return settingScreen !== SettingScreen.SETTINGS ? (
+    <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Flex alignItems="center" gap={8}>
           <IconButton onClick={() => setSettingScreen(SettingScreen.SETTINGS)}>
@@ -151,9 +151,10 @@ export const WalletSettings: FC = observer(() => {
           </IconButton>
         </Flex>
       </Flex>
-    <DeletePasscode onSuccess={deleteWallet}/>
+      <DeletePasscode onSuccess={deleteWallet} />
     </Flex>
-    : <Flex px={3} width="100%" height="100%" flexDirection="column">
+  ) : (
+    <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Flex alignItems="center" gap={8}>
           <IconButton onClick={async () => await WalletActions.navigateBack()}>
@@ -279,45 +280,45 @@ export const WalletSettings: FC = observer(() => {
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
         onClick={() => {
-          setSettingScreen(SettingScreen.LOCAL)
+          setSettingScreen(SettingScreen.LOCAL);
           // WalletActions.deleteLocalWallet()
         }}
       >
         Delete Local HD Wallet
       </TextButton>
       <Text
-          mt={1}
-          mb={2}
-          variant="body"
-          fontSize={1}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
-          Delete your encrypted mnemonic from local storage.
-        </Text>
-      <br/>
+        mt={1}
+        mb={2}
+        variant="body"
+        fontSize={1}
+        opacity={0.8}
+        color={baseTheme.colors.text.secondary}
+      >
+        Delete your encrypted mnemonic from local storage.
+      </Text>
+      <br />
       <TextButton
         highlightColor="#EC415A"
         showBackground
         textColor="#EC415A"
         style={{ fontWeight: 400 }}
         onClick={() => {
-          setSettingScreen(SettingScreen.AGENT)
+          setSettingScreen(SettingScreen.AGENT);
           // WalletActions.deleteShipWallet()
         }}
       >
         Delete Ship HD Wallet
       </TextButton>
       <Text
-          mt={1}
-          mb={2}
-          variant="body"
-          fontSize={1}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
-          Completely delete your HD wallet locally and on your ship.
-        </Text>
+        mt={1}
+        mb={2}
+        variant="body"
+        fontSize={1}
+        opacity={0.8}
+        color={baseTheme.colors.text.secondary}
+      >
+        Completely delete your HD wallet locally and on your ship.
+      </Text>
     </Flex>
   );
 });

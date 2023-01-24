@@ -1,22 +1,24 @@
 import { Conduit } from '@holium/conduit';
-import { ProtocolType, WalletStoreType, WalletView } from '../services/tray/wallet-lib/wallet.model';
+import {
+  ProtocolType,
+  WalletStoreType,
+  WalletView,
+} from '../services/tray/wallet-lib/wallet.model';
 
 export const removeDots = (str: string) => {
   return (str || '').replace(/\./g, '');
-}
+};
 export const addDots = (hex: string) => {
-  const clearLead = removeDots(hex.replace('0x', '').toLowerCase())
-  let result = ''
+  const clearLead = removeDots(hex.replace('0x', '').toLowerCase());
+  let result = '';
   for (let i = clearLead.length - 1; i > -1; i--) {
     if (i < clearLead.length - 1 && (clearLead.length - 1 - i) % 4 === 0) {
-      result = '.' + result
+      result = '.' + result;
     }
-    result = clearLead[i] + result
+    result = clearLead[i] + result;
   }
-  return `0x${result}`
-}
-
-
+  return `0x${result}`;
+};
 
 export const UqbarApi = {
   uqbarDeskExists: async (conduit: Conduit) => {
@@ -27,7 +29,7 @@ export const UqbarApi = {
     return Object.keys(response.initial).includes('zig');
   },
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {
-    const formattedAddress = addDots(address); 
+    const formattedAddress = addDots(address);
     const payload = {
       app: 'wallet',
       mark: 'wallet-poke',
@@ -94,10 +96,7 @@ export const UqbarApi = {
     };
     await conduit.poke(payload);
   },
-  scryPending: async (
-    conduit: Conduit,
-    from: string,
-  ) => {
+  scryPending: async (conduit: Conduit, from: string) => {
     return await conduit.scry({
       app: 'wallet',
       path: `/pending/${addDots(from)}`,
@@ -110,7 +109,7 @@ export const UqbarApi = {
     rate: number,
     bud: number,
     ethHash: string,
-    sig: { v: number; r: string; s: string; }
+    sig: { v: number; r: string; s: string }
   ) => {
     const payload = {
       app: 'wallet',
@@ -125,12 +124,12 @@ export const UqbarApi = {
             v: sig.v,
             r: addDots(sig.r),
             s: addDots(sig.s),
-          }
-        }
-      }
+          },
+        },
+      },
     };
     console.log(payload);
-    console.log(payload.json)
+    console.log(payload.json);
     console.log(payload.json['submit-signed'].sig);
     await conduit.poke(payload);
   },
@@ -221,26 +220,34 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
   for (const address of Object.keys(data)) {
     for (const contract of Object.keys(data[address])) {
       if (data[address][contract].contract === ZIG_CONTRACT_ADDRESS) {
-        const formattedAddress = address.replaceAll('.','');
+        const formattedAddress = address.replaceAll('.', '');
         for (const key of walletState.ethereum.wallets.keys()) {
-          if (walletState.ethereum.wallets.get(key)!.address === formattedAddress) {
+          if (
+            walletState.ethereum.wallets.get(key)!.address === formattedAddress
+          ) {
             const balance = data[address][contract].data.balance;
-            walletState.ethereum.wallets.get(key)!.setBalance(ProtocolType.UQBAR, balance);
-            walletState.ethereum.wallets.get(key)!.setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
+            walletState.ethereum.wallets
+              .get(key)!
+              .setBalance(ProtocolType.UQBAR, balance);
+            walletState.ethereum.wallets
+              .get(key)!
+              .setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
           }
         }
-      }
-      else {
-
+      } else {
       }
     }
   }
-}
+};
 
-const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {
-}
+const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {};
 
-const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStoreType) => {// }, signTransaction: any) => {
+const handleTxReactions = (
+  conduit: Conduit,
+  data: any,
+  walletState: WalletStoreType
+) => {
+  // }, signTransaction: any) => {
   /*if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
     walletState.setProtocol(ProtocolType.UQBAR);
     walletState.navigate(WalletView.TRANSACTION_CONFIRM, {
@@ -254,4 +261,4 @@ const handleTxReactions = (conduit: Conduit, data: any, walletState: WalletStore
   /*  });
     walletState.setForceActive(true);
   }*/
-}
+};

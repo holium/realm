@@ -25,23 +25,21 @@ import { getTransactions } from './lib/helpers';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
-) => (
-  {
-    [WalletView.LIST]: (props: any) => <WalletList {...props} />,
-    [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
-    [WalletView.TRANSACTION_SEND]: (props: any) => <Detail {...props} />,
-    [WalletView.TRANSACTION_DETAIL]: (props: any) => (
-      <TransactionDetail {...props} />
-    ),
-    [WalletView.NEW]: (props: any) => <EthNew {...props} />,
-    [WalletView.CREATE_WALLET]: (props: any) => (
-      <CreateWallet network={network} />
-    ),
-    [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
-    [WalletView.SETTINGS]: (props: any) => <WalletSettings {...props} />,
-    [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
-  }
-);
+) => ({
+  [WalletView.LIST]: (props: any) => <WalletList {...props} />,
+  [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
+  [WalletView.TRANSACTION_SEND]: (props: any) => <Detail {...props} />,
+  [WalletView.TRANSACTION_DETAIL]: (props: any) => (
+    <TransactionDetail {...props} />
+  ),
+  [WalletView.NEW]: (props: any) => <EthNew {...props} />,
+  [WalletView.CREATE_WALLET]: (props: any) => (
+    <CreateWallet network={network} />
+  ),
+  [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
+  [WalletView.SETTINGS]: (props: any) => <WalletSettings {...props} />,
+  [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
+});
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
@@ -112,7 +110,10 @@ export const WalletApp: FC<any> = observer((props: any) => {
     WalletView.NFT_DETAIL,
   ].includes(walletApp.navState.view);
 
-  const viewComponent: WalletView = walletApp.navState.view === WalletView.TRANSACTION_CONFIRM ? WalletView.TRANSACTION_SEND : walletApp.navState.view;
+  const viewComponent: WalletView =
+    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM
+      ? WalletView.TRANSACTION_SEND
+      : walletApp.navState.view;
   const View = useMemo(() => {
     return WalletViews(walletApp.navState.network)[viewComponent];
   }, [viewComponent]);

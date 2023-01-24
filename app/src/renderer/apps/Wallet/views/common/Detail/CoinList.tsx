@@ -36,7 +36,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
               coinKey: props.details.address,
               key: props.details.address,
             },
-          })
+          });
         }}
       >
         <Flex width="100%" alignItems="center" justifyContent="space-between">

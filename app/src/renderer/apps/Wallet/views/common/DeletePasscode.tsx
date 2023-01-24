@@ -10,31 +10,42 @@ interface PasscodeProps {
   onSuccess: (passcode: number[]) => void;
 }
 
-export const DeletePasscode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
-  const { walletApp } = useTrayApps();
-  const { theme } = useServices();
+export const DeletePasscode: FC<PasscodeProps> = observer(
+  (props: PasscodeProps) => {
+    const { walletApp } = useTrayApps();
+    const { theme } = useServices();
 
-  return (
-    <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
+    return (
       <Flex
-        flex={1}
+        width="100%"
+        height="100%"
         flexDirection="column"
-        justifyContent="center"
         alignItems="center"
       >
-        <Icons name="Locked" size={36} />
-        <Text mt={2} variant="h3" color="red">
-          Confirm Delete
-        </Text>
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Icons name="Locked" size={36} />
+          <Text mt={2} variant="h3" color="red">
+            Confirm Delete
+          </Text>
+        </Flex>
+        <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
+          <Text mb={8} variant="body">
+            Enter your passcode to continue.
+          </Text>
+          <PasscodeInput
+            checkStored={true}
+            onSuccess={props.onSuccess}
+            keepLoading={true}
+          />
+        </Flex>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text>
-        <PasscodeInput checkStored={true} onSuccess={props.onSuccess} keepLoading={true}/>
-      </Flex>
-    </Flex>
-  );
-});
+    );
+  }
+);
 
 export default DeletePasscode;

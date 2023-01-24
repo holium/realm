@@ -1,4 +1,4 @@
-import { Conduit } from "@holium/conduit";
+import { Conduit } from '@holium/conduit';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.

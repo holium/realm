@@ -42,7 +42,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
     const { walletApp, setActiveApp } = useTrayApps();
     // const [screen, setScreen] = useState('initial');
-    const screen = (walletApp.navState.view === WalletView.TRANSACTION_SEND) ? 'initial' : 'confirm';
+    const screen =
+      walletApp.navState.view === WalletView.TRANSACTION_SEND
+        ? 'initial'
+        : 'confirm';
     const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
@@ -55,7 +58,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const next = () => {
       // setScreen('confirm');
       if (walletApp.navState.protocol === ProtocolType.UQBAR) {
-        WalletActions.enqueueUqbarTransaction(walletApp.navState.walletIndex!, props.transactionAmount);
+        WalletActions.enqueueUqbarTransaction(
+          walletApp.navState.walletIndex!,
+          props.transactionAmount
+        );
       } else {
         WalletActions.navigate(WalletView.TRANSACTION_CONFIRM);
         props.onScreenChange('confirm');
@@ -112,17 +118,25 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           </Flex>
         ) : (
           <Flex mt={7} flexDirection="column">
-            {!props.uqbarContract && 
-            (<><Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-                {props.transactionAmount}{' '}
-                {props.coin
-                  ? props.coin.name
-                  : walletApp.navState.protocol === ProtocolType.UQBAR
+            {!props.uqbarContract && (
+              <>
+                <Text
+                  opacity={0.9}
+                  fontWeight={600}
+                  fontSize={7}
+                  animate={false}
+                >
+                  {props.transactionAmount}{' '}
+                  {props.coin
+                    ? props.coin.name
+                    : walletApp.navState.protocol === ProtocolType.UQBAR
                     ? 'zigs'
                     : abbrMap[walletApp.navState.network]}
-              </Text><Text mt={1} color={themeData.colors.text.disabled}>
+                </Text>
+                <Text mt={1} color={themeData.colors.text.disabled}>
                   ${ethToUsd(props.transactionAmount)} USD
-                </Text><Flex
+                </Text>
+                <Flex
                   mt={7}
                   width="100%"
                   flexDirection="column"
@@ -130,18 +144,25 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   alignItems="center"
                 >
                   <Flex width="100%" justifyContent="space-between">
-                    <Text variant="body" color={themeData.colors.text.secondary}>
+                    <Text
+                      variant="body"
+                      color={themeData.colors.text.secondary}
+                    >
                       TO
                     </Text>
                     <Flex justifyContent="center">
                       <Flex mr={2}>
                         {!props.transactionRecipient.patp &&
                           props.transactionRecipient.address && (
-                            <Flex flexDirection="column" justifyContent="center">
+                            <Flex
+                              flexDirection="column"
+                              justifyContent="center"
+                            >
                               <Icons
                                 name="Spy"
                                 size="24px"
-                                color={themeData.colors.text.secondary} />
+                                color={themeData.colors.text.secondary}
+                              />
                               <Text variant="body">
                                 {shortened(props.transactionRecipient.address)}
                               </Text>
@@ -157,8 +178,12 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                                 ]}
                                 simple={true}
                                 size={24}
-                                patp={props.transactionRecipient.patp!} />{' '}
-                              <Flex flexDirection="column" justifyContent="center">
+                                patp={props.transactionRecipient.patp!}
+                              />{' '}
+                              <Flex
+                                flexDirection="column"
+                                justifyContent="center"
+                              >
                                 <Text variant="body">
                                   {props.transactionRecipient.patp}
                                 </Text>
@@ -166,7 +191,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                                   variant="body"
                                   color={themeData.colors.text.tertiary}
                                 >
-                                  {shortened(props.transactionRecipient.address)}
+                                  {shortened(
+                                    props.transactionRecipient.address
+                                  )}
                                 </Text>
                               </Flex>
                             </Flex>
@@ -194,20 +221,29 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text variant="body" color={themeData.colors.text.secondary}>
+                    <Text
+                      variant="body"
+                      color={themeData.colors.text.secondary}
+                    >
                       NETWORK FEE
                     </Text>
                     <Flex flexDirection="column">
                       <Text variant="body">
                         0.0005 {props.coin ? props.coin.name : 'ETH'}
                       </Text>
-                      <Text fontSize={1} color={themeData.colors.text.secondary}>
+                      <Text
+                        fontSize={1}
+                        color={themeData.colors.text.secondary}
+                      >
                         ≈ {ethToUsd(0.0005)} USD
                       </Text>
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text variant="body" color={themeData.colors.text.secondary}>
+                    <Text
+                      variant="body"
+                      color={themeData.colors.text.secondary}
+                    >
                       TOTAL
                     </Text>
                     <Flex flexDirection="column">
@@ -215,12 +251,17 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         {props.transactionAmount + 0.0005}{' '}
                         {props.coin ? props.coin.name : 'ETH'}
                       </Text>
-                      <Text fontSize={1} color={themeData.colors.text.secondary}>
+                      <Text
+                        fontSize={1}
+                        color={themeData.colors.text.secondary}
+                      >
                         ≈ {ethToUsd(props.transactionAmount + 0.0005)} USD
                       </Text>
                     </Flex>
                   </Flex>
-                </Flex></>)}
+                </Flex>
+              </>
+            )}
             <Flex mt={7} justifyContent="space-between">
               <Button variant="transparent" onClick={() => prev()}>
                 Reject

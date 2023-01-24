@@ -63,12 +63,14 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
       }
     };
 
-    return (
-      showPasscode ? <VerifyPasscode onSuccess={(code: number[]) => {
-        recoverSeedPhrase(code);
-      }
-      } />
-      : <Flex width="100%" height="100%" flexDirection="column">
+    return showPasscode ? (
+      <VerifyPasscode
+        onSuccess={(code: number[]) => {
+          recoverSeedPhrase(code);
+        }}
+      />
+    ) : (
+      <Flex width="100%" height="100%" flexDirection="column">
         <Text mt={6} variant="h4">
           Recover Wallet
         </Text>

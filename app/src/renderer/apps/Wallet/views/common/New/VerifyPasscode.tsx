@@ -10,36 +10,43 @@ interface LockedProps {
   onSuccess: any;
 }
 
-export const VerifyPasscode: FC<LockedProps> = observer((props: LockedProps) => {
-  const { walletApp } = useTrayApps();
-  const { theme } = useServices();
+export const VerifyPasscode: FC<LockedProps> = observer(
+  (props: LockedProps) => {
+    const { walletApp } = useTrayApps();
+    const { theme } = useServices();
 
-  const unlock = () => {
-    // WalletActions.navigateBack();
-    // WalletActions.watchUpdates();
-  };
+    const unlock = () => {
+      // WalletActions.navigateBack();
+      // WalletActions.watchUpdates();
+    };
 
-  return (
-    <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
+    return (
       <Flex
-        flex={1}
+        width="100%"
+        height="100%"
         flexDirection="column"
-        justifyContent="center"
         alignItems="center"
       >
-        <Icons name="Locked" size={36} />
-        <Text mt={2} variant="h3">
-          Wallet Locked
-        </Text>
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Icons name="Locked" size={36} />
+          <Text mt={2} variant="h3">
+            Wallet Locked
+          </Text>
+        </Flex>
+        <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
+          <Text mb={8} variant="body">
+            Enter your passcode to continue.
+          </Text>
+          <PasscodeInput checkStored={true} onSuccess={props.onSuccess} />
+        </Flex>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text>
-        <PasscodeInput checkStored={true} onSuccess={props.onSuccess} />
-      </Flex>
-    </Flex>
-  );
-});
+    );
+  }
+);
 
 export default VerifyPasscode;

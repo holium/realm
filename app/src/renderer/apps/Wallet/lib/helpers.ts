@@ -77,7 +77,7 @@ export function formatZigAmount(amount: string): string {
       zigAmount = zigAmount.replaceAll('.', '');
     }
   }
-  return utils.formatUnits(zigAmount, 'ether').slice(0,6);
+  return utils.formatUnits(zigAmount, 'ether').slice(0, 6);
 }
 
 export function formatEthAmount(amount: string): EthAmount {

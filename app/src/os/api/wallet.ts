@@ -202,7 +202,7 @@ export const WalletApi = {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'initialize': null
+        initialize: null,
       },
     };
     await conduit.poke(payload);

@@ -54,7 +54,7 @@ export const WalletCard: FC<WalletCardProps> = ({
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
-  const numSize = 
+  const numSize =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.size
@@ -67,18 +67,16 @@ export const WalletCard: FC<WalletCardProps> = ({
   const amountDisplay =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? walletApp.navState.protocol === ProtocolType.UQBAR
-      ? `${
-        formatZigAmount(
-          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .balance
-        )
-      } zigs`
-      : `${
-          formatEthAmount(
+        ? `${formatZigAmount(
             (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
               .balance
-          ).eth
-        } ETH`
+          )} zigs`
+        : `${
+            formatEthAmount(
+              (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+                .balance
+            ).eth
+          } ETH`
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
   return useMemo(

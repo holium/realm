@@ -19,7 +19,6 @@ export class UqbarProtocol implements BaseProtocol {
   }
 
   async submitSigned(conduit: Conduit, signedTx: string): Promise<any> {
-    UqbarApi.submitSigned(conduit, from, hash, rate, bud, ethHash, sig)
+    UqbarApi.submitSigned(conduit, from, hash, rate, bud, ethHash, sig);
   }
-
 }

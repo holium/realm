@@ -809,15 +809,14 @@ export const UqTx = types.model('UqTx', {
   rate: types.string,
   action: types.model({
     noun: types.model({
-      custom: types.string
-    })
+      custom: types.string,
+    }),
   }),
   nonce: types.string,
   town: types.string,
-  hash: types.string
+  hash: types.string,
 });
 export type UqTxType = Instance<typeof UqTx>;
-
 
 export interface WalletNavOptions {
   canReturn?: boolean;
@@ -884,125 +883,131 @@ export const WalletStore = types
   .actions((self) => {
     let initialState = {};
     return {
-    setInitialized(initialized: boolean) {
-      self.initialized = initialized;
-    },
-    setNetwork(network: NetworkType) {
-      /* @ts-expect-error */
-      self.resetNavigation();
-      if (network !== self.navState.network) {
-        switch (network) {
-          case NetworkType.ETHEREUM:
-            self.navState.protocol = self.ethereum.protocol;
-            break;
-          case NetworkType.BITCOIN:
-            self.navState.protocol =
-              self.navState.btcNetwork === NetworkStoreType.BTC_MAIN
-                ? ProtocolType.BTC_MAIN
-                : ProtocolType.BTC_TEST;
-            break;
+      setInitialized(initialized: boolean) {
+        self.initialized = initialized;
+      },
+      setNetwork(network: NetworkType) {
+        /* @ts-expect-error */
+        self.resetNavigation();
+        if (network !== self.navState.network) {
+          switch (network) {
+            case NetworkType.ETHEREUM:
+              self.navState.protocol = self.ethereum.protocol;
+              break;
+            case NetworkType.BITCOIN:
+              self.navState.protocol =
+                self.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+                  ? ProtocolType.BTC_MAIN
+                  : ProtocolType.BTC_TEST;
+              break;
+          }
         }
-      }
-    },
-    setProtocol(protocol: ProtocolType) {
-      /* @ts-expect-error */
-      self.resetNavigation();
-      if (protocol === ProtocolType.UQBAR) {
-        self.navState.lastEthProtocol =
-          self.navState.protocol === ProtocolType.UQBAR
-            ? ProtocolType.ETH_MAIN
-            : self.navState.protocol;
-      }
-      self.navState.protocol = protocol;
-      self.ethereum.setProtocol(protocol);
-    },
-    navigate(view: WalletView, options?: WalletNavOptions) {
-      const canReturn = options?.canReturn || true;
-      const walletIndex = options?.walletIndex || self.navState.walletIndex;
-      const detail = options?.detail;
-      const action = options?.action;
-      const protocol = options?.protocol || self.navState.protocol;
-      const lastEthProtocol =
-        options?.lastEthProtocol || self.navState.lastEthProtocol;
-      console.log('the uqtx', options?.uqTx);
-      self.uqTx = options?.uqTx ? UqTx.create(options.uqTx) : undefined;
+      },
+      setProtocol(protocol: ProtocolType) {
+        /* @ts-expect-error */
+        self.resetNavigation();
+        if (protocol === ProtocolType.UQBAR) {
+          self.navState.lastEthProtocol =
+            self.navState.protocol === ProtocolType.UQBAR
+              ? ProtocolType.ETH_MAIN
+              : self.navState.protocol;
+        }
+        self.navState.protocol = protocol;
+        self.ethereum.setProtocol(protocol);
+      },
+      navigate(view: WalletView, options?: WalletNavOptions) {
+        const canReturn = options?.canReturn || true;
+        const walletIndex = options?.walletIndex || self.navState.walletIndex;
+        const detail = options?.detail;
+        const action = options?.action;
+        const protocol = options?.protocol || self.navState.protocol;
+        const lastEthProtocol =
+          options?.lastEthProtocol || self.navState.lastEthProtocol;
+        console.log('the uqtx', options?.uqTx);
+        self.uqTx = options?.uqTx ? UqTx.create(options.uqTx) : undefined;
 
-      if (
-        canReturn &&
-        ![WalletView.LOCKED, WalletView.NEW, WalletView.TRANSACTION_SEND, WalletView.TRANSACTION_CONFIRM].includes(self.navState.view)
-      ) {
-        const returnSnapshot = getSnapshot(self.navState);
-        self.navHistory.push(WalletNavState.create(returnSnapshot));
-      }
+        if (
+          canReturn &&
+          ![
+            WalletView.LOCKED,
+            WalletView.NEW,
+            WalletView.TRANSACTION_SEND,
+            WalletView.TRANSACTION_CONFIRM,
+          ].includes(self.navState.view)
+        ) {
+          const returnSnapshot = getSnapshot(self.navState);
+          self.navHistory.push(WalletNavState.create(returnSnapshot));
+        }
 
-      const newState = WalletNavState.create({
-        view,
-        walletIndex,
-        detail,
-        action,
-        protocol,
-        lastEthProtocol,
-        btcNetwork: self.navState.btcNetwork,
-      });
-      self.navState = newState;
-    },
-    navigateBack() {
-      const DEFAULT_RETURN_VIEW = WalletView.LIST;
-      let returnSnapshot = getSnapshot(
-        WalletNavState.create({
-          view: DEFAULT_RETURN_VIEW,
+        const newState = WalletNavState.create({
+          view,
+          walletIndex,
+          detail,
+          action,
+          protocol,
+          lastEthProtocol,
+          btcNetwork: self.navState.btcNetwork,
+        });
+        self.navState = newState;
+      },
+      navigateBack() {
+        const DEFAULT_RETURN_VIEW = WalletView.LIST;
+        let returnSnapshot = getSnapshot(
+          WalletNavState.create({
+            view: DEFAULT_RETURN_VIEW,
+            protocol: self.navState.protocol,
+            lastEthProtocol: self.navState.lastEthProtocol,
+            btcNetwork: self.navState.btcNetwork,
+          })
+        );
+
+        if (self.navHistory.length) {
+          returnSnapshot = getSnapshot(self.navHistory.pop()!);
+        }
+
+        self.navState = WalletNavState.create(returnSnapshot);
+      },
+      resetNavigation() {
+        self.navState = WalletNavState.create({
+          view: WalletView.LIST,
           protocol: self.navState.protocol,
           lastEthProtocol: self.navState.lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
-        })
-      );
-
-      if (self.navHistory.length) {
-        returnSnapshot = getSnapshot(self.navHistory.pop()!);
-      }
-
-      self.navState = WalletNavState.create(returnSnapshot);
-    },
-    resetNavigation() {
-      self.navState = WalletNavState.create({
-        view: WalletView.LIST,
-        protocol: self.navState.protocol,
-        lastEthProtocol: self.navState.lastEthProtocol,
-        btcNetwork: self.navState.btcNetwork,
-      });
-      self.navHistory = cast([]);
-    },
-    setNetworkProvider(provider: string) {
-      self.currentStore.setProvider(provider);
-    },
-    setPasscodeHash(hash: string) {
-      self.passcodeHash = hash;
-    },
-    setLastInteraction(date: Date) {
-      self.lastInteraction = date;
-    },
-    setSettings(settings: any) {
-      self.settings.passcodeHash = settings.passcodeHash;
-      self.blacklist = settings.blocked;
-      for (let network of Object.keys(settings.networks)) {
-        const store =
-          network === 'ethereum'
-            ? self.ethereum
-            : network === 'bitcoin'
-            ? self.bitcoin
-            : self.btctest;
-        const netSettings = settings.networks[network];
-        store.settings.setDefaultIndex(netSettings.defaultIndex);
-        store.settings.setWalletCreationMode(netSettings.walletCreationMode);
-        store.settings.setSharingMode(netSettings.sharingMode);
-      }
-    },
-    setForceActive(forceActive: boolean) {
-      self.forceActive = forceActive;
-    },
-    reset: (initialState: any) => {
-      applySnapshot(self, initialState);
-    }
-  }});
+        });
+        self.navHistory = cast([]);
+      },
+      setNetworkProvider(provider: string) {
+        self.currentStore.setProvider(provider);
+      },
+      setPasscodeHash(hash: string) {
+        self.passcodeHash = hash;
+      },
+      setLastInteraction(date: Date) {
+        self.lastInteraction = date;
+      },
+      setSettings(settings: any) {
+        self.settings.passcodeHash = settings.passcodeHash;
+        self.blacklist = settings.blocked;
+        for (let network of Object.keys(settings.networks)) {
+          const store =
+            network === 'ethereum'
+              ? self.ethereum
+              : network === 'bitcoin'
+              ? self.bitcoin
+              : self.btctest;
+          const netSettings = settings.networks[network];
+          store.settings.setDefaultIndex(netSettings.defaultIndex);
+          store.settings.setWalletCreationMode(netSettings.walletCreationMode);
+          store.settings.setSharingMode(netSettings.sharingMode);
+        }
+      },
+      setForceActive(forceActive: boolean) {
+        self.forceActive = forceActive;
+      },
+      reset: (initialState: any) => {
+        applySnapshot(self, initialState);
+      },
+    };
+  });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
