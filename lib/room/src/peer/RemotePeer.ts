@@ -130,7 +130,7 @@ export class RemotePeer extends Peer {
     console.log('RemotePeer onError', err.code);
     console.log(this.peer?.destroyed);
     // @ts-ignore
-    if (err.code === 'ERR_DATA_CHANNEL' && !this.peer?.destroyed) {
+    if (err.code === 'ERR_CONNECTION_FAILURE' && !this.peer?.destroyed) {
       this.setStatus(PeerConnectionState.Redialing);
       this.removeTracks();
       this.dial();
