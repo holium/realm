@@ -55,11 +55,11 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
+    console.log('createConnection', this.rtcConfig);
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
-      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));

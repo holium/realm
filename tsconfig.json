@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    ".eslintrc.js",
+    "app",
+    "lib/conduit",
+    "lib/design-system",
+    "lib/multiplayer",
+    "lib/room/test-ui",
+    "lib/room"
+  ]
+}

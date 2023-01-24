@@ -25,10 +25,10 @@ import { debounce } from 'lodash';
 export const AppDock = observer(() => {
   const { desktop, spaces, bazaar, theme } = useServices();
 
-  const spacePath = spaces.selected?.path!;
-  const dock = bazaar.getDock(spacePath) ?? [];
+  const spacePath = spaces.selected?.path;
+  const dock = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
   const dockApps = spacePath
-    ? (bazaar.getDockApps(spacePath) as AppType[])
+    ? ((bazaar.getDockApps(spacePath) ?? []) as AppType[])
     : [];
 
   const [localDockApps, setLocalDockApps] = useState<AppType[]>(dockApps);
@@ -46,7 +46,9 @@ export const AppDock = observer(() => {
   useEffect(() => {
     // If the dock length changes, e.g. from the AppGrid, we update the local dock.
     debouncedSetLocalDockApps(dockApps);
-  }, [dockApps?.length]);
+  }, [dockApps.length]);
+
+  if (!spacePath) return null;
 
   const pinnedApps = (
     <Reorder.Group
