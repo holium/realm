@@ -100,7 +100,14 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     () => {
       setReady(false);
     };
-  }, [ship, window, spaces.selected?.path, desktop.mouseColor, theme.currentTheme.backgroundColor, theme.currentTheme.mode]);
+  }, [
+    ship,
+    window,
+    spaces.selected?.path,
+    desktop.mouseColor,
+    theme.currentTheme.backgroundColor,
+    theme.currentTheme.mode,
+  ]);
 
   // Set mouse color
   useEffect(() => {

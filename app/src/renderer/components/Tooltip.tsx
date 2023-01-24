@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { AnimatePresence, motion } from 'framer-motion';
 import * as React from 'react';
 import styled, { css } from 'styled-components';
