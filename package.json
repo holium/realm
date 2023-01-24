@@ -4,6 +4,7 @@
   "workspaces": [
     "app",
     "lib/design-system",
+    "lib/mouse",
     "lib/multiplayer",
     "lib/conduit",
     "lib/room",
@@ -19,6 +20,7 @@
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
+    "build:mouse": "yarn workspace @holium/realm-mouse build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
