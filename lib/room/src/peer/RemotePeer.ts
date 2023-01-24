@@ -7,10 +7,6 @@ import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
 import { isFireFox, isSafari } from '../utils';
 
-const READY = 'ready';
-const WAITING = 'waiting';
-const ACK_WAITING = 'ack-waiting';
-
 type SignalData =
   | SimplePeer.SignalData
   | { type: 'ack-waiting' | 'waiting'; from: Patp };
@@ -21,7 +17,6 @@ export class RemotePeer extends Peer {
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
   rtcConfig: RTCConfiguration;
-  waitingStatus: 'waiting' | 'ack-waiting' | 'ready';
   sendSignal: (peer: Patp, data: SignalData) => void;
   constructor(
     our: Patp,
@@ -32,7 +27,6 @@ export class RemotePeer extends Peer {
     super(peer, config);
     this.our = our;
     this.isInitiator = config.isInitiator;
-    this.waitingStatus = WAITING;
     this.sendSignal = sendSignal;
     this.rtcConfig = config.rtc;
 
@@ -40,7 +34,6 @@ export class RemotePeer extends Peer {
       peer: observable,
       isAudioAttached: observable,
       isVideoAttached: observable,
-      waitingStatus: observable,
       attach: action.bound,
       detach: action.bound,
       setStatus: action.bound,
@@ -55,16 +48,10 @@ export class RemotePeer extends Peer {
       _onTrack: action.bound,
       _onData: action.bound,
       onWaiting: action.bound,
-      onAckWaiting: action.bound,
     });
-    // window.addEventListener('beforeunload', function (e) {
-    //   e.preventDefault();
-    //   // this.waitingStatus = 'retry'
-    // });
   }
 
   createConnection() {
-    this.waitingStatus = READY;
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
@@ -72,6 +59,7 @@ export class RemotePeer extends Peer {
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
+      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
@@ -90,73 +78,56 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
+    if (this.status !== PeerConnectionState.New) {
+      console.log('dialing, not new status');
+      this.removeTracks();
+      this.peer?.destroy();
+    }
     this.setStatus(PeerConnectionState.New);
-    this.waitingStatus = WAITING;
-    console.log(`sending %waiting ${this.patp}`);
+    // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection();
-      console.log(`not initiator, creating connection`);
+      console.log(`%waiting to ${this.patp}`);
+      this.sendSignal(this.patp, { type: 'waiting', from: this.our });
     }
-    this.sendSignal(this.patp, { type: 'waiting', from: this.our });
   }
 
   onWaiting() {
-    if (
-      this.status === PeerConnectionState.Closed ||
-      this.status === PeerConnectionState.Disconnected ||
-      this.waitingStatus === WAITING
-    ) {
-      console.log(`sending %ack-waiting to ${this.patp}`);
+    if (this.isInitiator) {
       this.createConnection();
-      this.sendSignal(this.patp, { type: ACK_WAITING, from: this.our });
-    } else {
-      console.log(
-        'got waiting but am already connecting',
-        this.status,
-        this.waitingStatus
-      );
     }
-  }
-
-  onAckWaiting() {
-    this.waitingStatus = READY;
   }
 
   peerSignal(data: SimplePeer.SignalData) {
     // TODO go through the flow where a peer is destroyed and attempts to reconnect
-    if (this.peer?.destroyed) {
-      console.log(
-        'peerSignal: peer destroyed, creating new connection',
-        this.patp
-      );
-      this.dial();
-      this.createConnection();
+    if (!this.peer?.destroyed) {
+      this.peer?.signal(data);
+    } else {
+      console.log('peerSignal: peer destroyed, not signaling', this.patp);
+      this.setStatus(PeerConnectionState.Destroyed);
     }
-
-    this.peer?.signal(data);
   }
 
   _onConnect() {
     // console.log('RemotePeer onConnect', this.patp);
     this.setStatus(PeerConnectionState.Connected);
     this.emit(PeerEvent.Connected);
-    this.waitingStatus = READY;
   }
 
   _onClose() {
     // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
-    this.hangup();
+    // this.hangup();
     this.emit(PeerEvent.Closed);
-    this.waitingStatus = WAITING;
   }
 
   _onError(err: Error) {
-    console.log('RemotePeer onError', err);
+    // @ts-ignore
+    console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
-    this.removeTracks();
+    // this.pee
+    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
-    this.waitingStatus = WAITING;
   }
 
   _onSignal(data: SimplePeer.SignalData) {
@@ -198,8 +169,7 @@ export class RemotePeer extends Peer {
 
   sendData(data: DataPacket): void {
     if (this.status !== PeerConnectionState.Connected) {
-      console.warn("can't send data unless connected");
-      return;
+      console.warn("can't send data unless connected, still trying");
     }
     this.peer?.send(JSON.stringify(data));
   }

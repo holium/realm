@@ -12,6 +12,12 @@ export interface UnpinPoke {
   path: { ship: Patp; space: string };
   'app-id': string;
 }
+
+export interface ReorderPinnedAppsPoke {
+  path: { ship: Patp; space: string };
+  dock: string[];
+}
+
 export interface AddToSuitePoke {
   path: { ship: Patp; space: string };
   'app-id': string;
@@ -91,6 +97,24 @@ export const BazaarApi = {
         reaction: 'bazaar-reaction.pinned',
         onReaction(data) {
           resolve(data.pinned);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  reorderPinnedApps: async (conduit: Conduit, body: ReorderPinnedAppsPoke) => {
+    return await new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'reorder-pins': body,
+        },
+        reaction: 'bazaar-reaction.pins-reodered',
+        onReaction(data) {
+          resolve(data['pins-reodered']);
         },
         onError: (e: any) => {
           reject(e);
@@ -321,6 +345,9 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'unpinned':
       model._removePinned(data.unpinned);
+      break;
+    case 'pins-reodered':
+      if (data['pins-reodered']) model._reorderPins(data['pins-reodered']);
       break;
     case 'suite-added':
       model._suiteAdded(data['suite-added']);

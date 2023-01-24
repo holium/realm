@@ -1,111 +1,73 @@
+import { HTMLAttributes, ReactNode } from 'react';
 import { darken, rgba } from 'polished';
 import styled, { css } from 'styled-components';
-import {
-  compose,
-  space,
-  layout,
-  flexbox,
-  border,
-  position,
-  color,
-  SpaceProps,
-  ColorProps,
-  LayoutProps,
-  FlexboxProps,
-  BorderProps,
-  PositionProps,
-  FontSizeProps,
-} from 'styled-system';
 import type { ThemeType } from '../../theme';
-import { IntentProps } from './MenuItem';
 
-export type StyleProps = SpaceProps &
-  ColorProps &
-  LayoutProps &
-  FontSizeProps &
-  FlexboxProps &
-  BorderProps &
-  PositionProps &
-  IntentProps & {
-    theme: ThemeType;
-    customBg?: string;
-    highlightType?: 'neutral' | 'brand' | null;
-    selected?: boolean;
-    disabled?: boolean;
-    interaction?: boolean;
-  };
+type MenuItemStyleProps = {
+  children: ReactNode;
+  theme: ThemeType;
+  color?: string;
+  customBg?: string;
+  selected?: boolean;
+  disabled?: boolean;
+} & HTMLAttributes<HTMLLIElement>;
 
-// TODO make variants
-export const MenuItemStyle: any = styled(styled.li`
+export const MenuItemStyle = styled.li<MenuItemStyleProps>`
   display: flex;
   align-items: flex-start;
+  justify-content: flex-start;
+  flex: 1;
+  flex-direction: row;
   background: inherit;
   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
   -moz-box-sizing: border-box; /* Firefox, other Gecko */
   box-sizing: border-box; /* Opera/IE 8+ */
   padding: 8px;
   font-size: 14px;
-  /* margin: 0px 4px; */
   border-radius: ${(props) => props.theme.containers.outerBorderRadius}px;
-  /* color: ${(props: StyleProps) =>
-    props.intent
-      ? (props.intent === 'primary' && props.theme.colors.brand.primary) ||
-        // @ts-expect-error stop
-        props.theme.colors.ui.intent[props.intent]
-      : props.theme.colors.text.secondary}; */
-  transition: ${(props: StyleProps) => props.theme.transition};
+  transition: ${(props) => props.theme.transition};
   svg {
     fill: currentcolor;
   }
   pointer-events: auto;
+  user-select: none;
 
-  /* Not disabled */
-  ${(props: StyleProps) =>
-    !props.disabled &&
+  ${({ disabled, theme }) =>
+    !disabled
+      ? /* Enabled */
+        css`
+          &:hover:not([disabled]) {
+            transition: ${theme.transition};
+          }
+        `
+      : /* Disabled */
+        css`
+          -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
+          color: ${rgba(theme.colors.text.disabled, 0.7)};
+          border-color: ${theme.colors.ui.disabled};
+          opacity: 0.5;
+          cursor: default;
+          &:focus {
+            outline: none;
+            border-color: transparent;
+          }
+          background: transparent;
+        `}
+
+  ${({ color, disabled }) =>
+    color &&
     css`
-      &:hover:not([disabled]) {
-        transition: ${props.theme.transition};
-        background: ${props.highlightType === 'brand' &&
-        props.theme.colors.brand.primary};
-        /* color: ${props.intent
-          ? (props.intent === 'primary' && props.theme.colors.brand.primary) ||
-            // @ts-expect-error stop
-            props.theme.colors.ui.intent[props.intent]
-          : props.theme.colors.text.secondary}; */
-      }
+      color: ${disabled ? rgba(color, 0.7) : color};
     `}
 
-  /* Disabled */
-  ${(props: StyleProps) =>
-    props.disabled &&
-    css`
-      -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
-      color: ${rgba(props.theme.colors.text.disabled, 0.7)};
-      border-color: ${props.theme.colors.ui.disabled};
-      opacity: 0.5;
-      cursor: default;
-      &:focus {
-        outline: none;
-        border-color: transparent;
-      }
-      background: transparent;
-    `};
-
-  ${(props: StyleProps) =>
-    props.customBg &&
+  ${({ customBg }) =>
+    customBg &&
     css`
       background-color: transparent;
       &:hover:not([disabled]) {
-        background-color: ${darken(0.035, props.customBg)};
+        background-color: ${darken(0.035, customBg)};
       }
-    `}
-`)<StyleProps>(compose(space, color, layout, flexbox, border, position));
-
-export const ChildrenBox = styled(styled.div`
-  width: 100%;
-  user-select: ${(props: StyleProps) => (props.interaction ? 'auto' : 'none')};
-  pointer-events: ${(props: StyleProps) =>
-    props.interaction ? 'auto' : 'none'};
-`)<StyleProps>(compose(space, color, layout, flexbox, border, position));
+    `} // Cast as react component
+`;
 
 export default MenuItemStyle;
