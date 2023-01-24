@@ -117,7 +117,7 @@ export class RemotePeer extends Peer {
   _onClose() {
     // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
-    this.hangup();
+    // this.hangup();
     this.emit(PeerEvent.Closed);
   }
 
