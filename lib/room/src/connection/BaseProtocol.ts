@@ -24,10 +24,12 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   rtc: RTCConfiguration = {
     iceServers: [
       {
-        urls: 'stun:coturn.holium.live:3478?transport=udp',
+        urls: 'stun:coturn.holium.live:3478',
       },
       {
-        urls: 'stun:coturn.holium.live:5349?transport=udp',
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:3478?transport=udp',
       },
     ],
   };
