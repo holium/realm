@@ -25,7 +25,7 @@ export type BarStyleProps = SpaceProps &
   PositionProps &
   BackgroundColorProps & { children: React.ReactNode };
 
-export const BarStyle = styled(styled(motion.div)<BarStyleProps>`
+export const BarStyle = styled(motion.div)<BarStyleProps>`
   position: relative;
   z-index: 14;
   height: 40px;
@@ -40,10 +40,8 @@ export const BarStyle = styled(styled(motion.div)<BarStyleProps>`
   -webkit-backface-visibility: hidden;
   transition: var(--transition-slow);
   background: var(--rlm-dock-color);
-`)<BarStyleProps>(
-  {},
-  compose(space, layout, flexbox, border, position, color, backgroundColor)
-);
+  ${compose(space, layout, flexbox, border, position, color, backgroundColor)}
+`;
 
 export const Bar: FC<BarStyleProps> = ({ children, ...rest }) => {
   return (
