@@ -79,10 +79,7 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
-    if (
-      this.status !== PeerConnectionState.New &&
-      this.status !== PeerConnectionState.Redialing
-    ) {
+    if (this.status !== PeerConnectionState.New) {
       console.log('dialing, not new status');
       this.removeTracks();
       this.peer?.destroy();
@@ -128,16 +125,13 @@ export class RemotePeer extends Peer {
   _onError(err: Error) {
     // @ts-ignore
     console.log('RemotePeer onError', err.code);
-    console.log(this.peer?.destroyed);
+    this.setStatus(PeerConnectionState.Failed);
+    this.emit(PeerEvent.Failed, err);
     // @ts-ignore
     if (err.code === 'ERR_CONNECTION_FAILURE') {
-      this.setStatus(PeerConnectionState.Redialing);
-      this.removeTracks();
       this.dial();
       return;
     }
-    this.setStatus(PeerConnectionState.Failed);
-    this.emit(PeerEvent.Failed, err);
   }
 
   _onSignal(data: SimplePeer.SignalData) {
