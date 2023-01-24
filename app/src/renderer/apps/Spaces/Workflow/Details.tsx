@@ -137,8 +137,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
       const space = spaces.spaces.get(props.edit.space)!;
       setWorkspaceState({
         ...space,
-        description: space.description || '',
-        access: space.access || 'public',
+        description: space.description,
+        access: space.access,
         color: space.color,
         image: space.picture,
         crestOption: space.picture ? 'image' : 'color',
@@ -169,7 +169,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
     } else if (workflowState.type === 'group') {
       return createSpaceForm({
         name: workflowState.title,
-        description: workflowState.description || '',
+        description: workflowState.description,
         color: workflowState.color,
         picture: workflowState.image,
       });
