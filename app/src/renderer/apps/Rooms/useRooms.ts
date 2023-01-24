@@ -16,6 +16,9 @@ const handlers = {
 
 const config = {
   rtc: {
+    reconnectTimer: 100,
+    iceTransportPolicy: 'relay',
+    trickle: false,
     iceServers: [
       {
         username: 'realm',
