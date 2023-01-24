@@ -128,6 +128,7 @@ export class RemotePeer extends Peer {
   _onError(err: Error) {
     // @ts-ignore
     console.log('RemotePeer onError', err.code);
+    console.log(this.peer?.destroyed);
     // @ts-ignore
     if (err.code === 'ERR_DATA_CHANNEL' && !this.peer?.destroyed) {
       this.setStatus(PeerConnectionState.Redialing);
