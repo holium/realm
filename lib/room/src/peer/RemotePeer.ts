@@ -55,11 +55,11 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
+    console.log('createConnection', this.rtcConfig);
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
-      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
@@ -102,6 +102,7 @@ export class RemotePeer extends Peer {
     // TODO go through the flow where a peer is destroyed and attempts to reconnect
     if (!this.peer?.destroyed) {
       this.peer?.signal(data);
+      console.log(data);
     } else {
       console.log('peerSignal: peer destroyed, not signaling', this.patp);
       this.setStatus(PeerConnectionState.Destroyed);
