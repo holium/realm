@@ -1,5 +1,3 @@
-#
-#
 name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
@@ -44,14 +42,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       # commit the change for the new version if this is a new build
-      - name: Push package version update
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git add ./app/release/app/package.json
-          git commit -m "patch realm app version"
-          git push
+      # - name: Push package version update
+      #   if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
+      #   run: |
+      #     git config --global user.email realm-builder-no-reply@holium.com
+      #     git config --global user.name ${{ github.actor }}
+      #     git add ./app/release/app/package.json
+      #     git commit -m "patch realm app version"
+      #     git push
       #
       - name: Start release draft
         if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
@@ -116,6 +114,20 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git pull origin master
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and publish
         run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
         env:
@@ -173,6 +185,19 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y
       #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and install
         run: |
           npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
@@ -184,7 +209,7 @@ jobs:
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
@@ -211,6 +236,7 @@ jobs:
       #
       - name: Bump desks version
         uses: actions/github-script@v6
+        id: bump-desks
         with:
           script: |
             const script = require('./.github/workflows/scripts/bump-desk-version.js')
@@ -219,11 +245,11 @@ jobs:
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
-      - name: Push desk version update
-        run: |
-          git add ./desks/realm/desk.docket-0
-          git commit -m "patch realm desk version"
-          git push
+      # - name: Push desk version update
+      #   run: |
+      #     git add ./desks/realm/desk.docket-0
+      #     git commit -m "patch realm desk version"
+      #     git push
       #
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
@@ -275,6 +301,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
       - name: Run post-deploy script
         uses: actions/github-script@v6
         id: post-deploy
@@ -311,7 +343,8 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
-            const result = script({github, context}, 'staging-build.yml', JSON.parse(process.env.CI_ENV))
+            const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
+            const result = script({github, context}, 'staging-build.yml', ci)
             console.log(result)
             return result
         env:

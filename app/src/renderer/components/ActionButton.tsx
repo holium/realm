@@ -1,4 +1,4 @@
-import React, { FC, forwardRef } from 'react';
+import { forwardRef } from 'react';
 import styled, { css, StyledComponentProps } from 'styled-components';
 import { compose, space, HeightProps, SpaceProps, height } from 'styled-system';
 import { darken } from 'polished';
@@ -54,14 +54,10 @@ import { ThemeType } from '../theme';
 // });
 
 type ActionButtonProps = {
-  // variant: 'minimal';
-  tabIndex?: number;
   theme: ThemeType;
   style?: any;
   children: React.ReactNode;
   disabled?: boolean;
-  ref?: any;
-  onClick?: () => void;
   rightContent?: React.ReactNode;
 } & HeightProps &
   SpaceProps;
@@ -107,18 +103,16 @@ const StyledButton = styled.button`
   ${compose(height, space)}
 `;
 
-export const ActionButton: FC<ButtonProps> = forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->((props: ButtonProps, ref) => {
-  // eslint-disable-next-line react/prop-types
-  const { disabled, children, rightContent } = props;
-  return (
-    <StyledButton ref={ref} disabled={disabled} {...props}>
-      {children} {rightContent}
-    </StyledButton>
-  );
-});
+export const ActionButton = forwardRef<HTMLButtonElement, ButtonProps>(
+  (props: ButtonProps, ref) => {
+    const { disabled, children, rightContent } = props;
+    return (
+      <StyledButton ref={ref} disabled={disabled} {...props}>
+        {children} {rightContent}
+      </StyledButton>
+    );
+  }
+);
 ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,

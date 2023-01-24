@@ -88,7 +88,6 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
 };
 
 Sigil.defaultProps = {
-  // eslint-disable-next-line react/default-props-match-prop-types
   size: 30,
   simple: true,
 };

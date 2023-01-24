@@ -32,7 +32,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
   const { getOptions, setOptions } = useContextMenu();
-  const defaultOptions = getOptions().filter(o => o.id === 'toggle-devtools');
+  const defaultOptions = getOptions().filter((o) => o.id === 'toggle-devtools');
 
   const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -66,7 +66,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
                 roomsManager.protocol.deleteRoom(rid);
               },
             } as ContextMenuOption,
-            ... defaultOptions
+            ...defaultOptions,
           ]
         : defaultOptions,
     [rid, ship, props.provider]

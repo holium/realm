@@ -8,18 +8,11 @@
   "module": "dist/holium-realm-room.esm.js",
   "typings": "dist/holium-realm-room.cjs.d.ts",
   "scripts": {
-    "tsc": "tsc",
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
     "dev": "preconstruct dev",
     "build": "preconstruct build",
     "build:prod": "preconstruct build"
-  },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
   },
   "preconstruct": {
     "globals": {
@@ -42,8 +35,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@preconstruct/cli": "^2.2.1",
     "@types/simple-peer": "^9.11.5",
-    "ts-node": "^10.9.1",
-    "tsc": "^2.0.4"
+    "ts-node": "^10.9.1"
   },
   "dependencies": {
     "@urbit/http-api": "^2.3.0",
@@ -52,7 +44,6 @@
     "protobufjs": "^7.0.0",
     "simple-peer": "^9.11.1",
     "ts-debounce": "^4.0.0",
-    "typescript": "^4.7.4",
     "urbit-ob": "^5.0.1"
   }
 }

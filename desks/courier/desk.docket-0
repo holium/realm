@@ -1,8 +1,8 @@
-:~  
+:~
     title+'Courier'
     info+'A Realm dependency'
     color+0xce.bef0
-    version+[0 1 1]
+    version+[0 1 2]
     website+'https://holium.com'
     license+'MIT'
     base+'courier'

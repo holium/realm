@@ -8,14 +8,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: [
-      './app/tsconfig.json',
-      './lib/room/tsconfig.json',
-      './lib/conduit/tsconfig.json',
-      './lib/multiplayer/tsconfig.json',
-      './lib/design-system/tsconfig.json',
-      './tsconfig.eslint.json',
-    ],
+    project: ['./tsconfig.json'],
     ecmaVersion: 'latest',
     sourceType: 'module',
   },

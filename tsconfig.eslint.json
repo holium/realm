@@ -1,4 +1,0 @@
-// This file makes sure the .eslintrc.js file itself is being linted
-{
-  "include": [".eslintrc.js"]
-}

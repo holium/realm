@@ -151,7 +151,7 @@ export const Speaker = observer((props: ISpeaker) => {
         alignItems="center"
         style={{ pointerEvents: 'none' }}
       >
-        <Flex style={{ pointerEvents: 'none' }}>
+        <Flex style={{ height: 15, pointerEvents: 'none' }}>
           {peer?.isMuted && (
             <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
           )}

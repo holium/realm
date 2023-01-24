@@ -4,6 +4,7 @@ import {
   InstallPoke,
   PinPoke,
   RemoveFromSuitePoke,
+  ReorderPinnedAppsPoke,
   UninstallPoke,
   UnpinPoke,
 } from '../../../api/bazaar';
@@ -215,6 +216,9 @@ export const NewBazaarStore = types
       dock?.splice(removeIndex, 1);
       self.docks.set(data.path, dock);
     },
+    _reorderPins(data: { path: string; dock: string[] }) {
+      self.docks.set(data.path, data.dock);
+    },
     _suiteAdded(data: { path: string; id: string; index: number }) {
       const stall = self.stalls.get(data.path);
       if (!stall) return;
@@ -417,6 +421,16 @@ export const NewBazaarStore = types
     unpinApp: flow(function* (conduit: Conduit, body: UnpinPoke) {
       try {
         return yield BazaarApi.unpinApp(conduit, body);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    reorderPinnedApps: flow(function* (
+      conduit: Conduit,
+      body: ReorderPinnedAppsPoke
+    ) {
+      try {
+        return yield BazaarApi.reorderPinnedApps(conduit, body);
       } catch (error) {
         console.error(error);
       }
