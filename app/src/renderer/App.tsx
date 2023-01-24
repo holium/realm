@@ -13,7 +13,6 @@ import {
   servicesStore,
   useServices,
 } from './logic/store';
-import { Mouse } from './system/desktop/components/Mouse';
 import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { SelectionProvider } from './logic/lib/selection';
@@ -24,7 +23,7 @@ import { ErrorBoundary } from './logic/ErrorBoundary';
 
 const AppPresenter = () => {
   const { booted } = useCore();
-  const { desktop, shell, theme } = useServices();
+  const { theme } = useServices();
 
   const themeMode = theme.currentTheme.mode;
 
@@ -45,16 +44,6 @@ const AppPresenter = () => {
     [booted, theme.currentTheme.backgroundColor]
   );
 
-  const mouseMemo = useMemo(() => {
-    return (
-      <Mouse
-        hide={shell.isMouseInWebview}
-        cursorColor={desktop.mouseColor}
-        animateOut={false}
-      />
-    );
-  }, [desktop.mouseColor, shell.isMouseInWebview]);
-
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
 
   useEffect(() => {
@@ -72,7 +61,6 @@ const AppPresenter = () => {
           <ServiceProvider value={servicesStore}>
             <SelectionProvider>
               <ContextMenuProvider>
-                {mouseMemo}
                 <ErrorBoundary>
                   {shellMemo}
                   {contextMenuMemo}

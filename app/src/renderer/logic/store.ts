@@ -449,7 +449,3 @@ OSActions.onEffect((_event: any, value: any) => {
     }
   }
 });
-
-window.electron.app.setAppviewPreload((_event: any, data: any) => {
-  servicesStore.desktop.setAppviewPreload(data);
-});

@@ -5,9 +5,6 @@ const appPreload = {
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
   },
-  setAppviewPreload(callback: any) {
-    ipcRenderer.on('set-appview-preload', callback);
-  },
   setMouseColor(callback: any) {
     ipcRenderer.on('mouse-color', callback);
   },

@@ -166,7 +166,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"
-          preload={`file://${desktop.appviewPreload}`}
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-expect-error
           allowpopups="true"

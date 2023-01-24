@@ -7,17 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import {
-  app,
-  BrowserWindow,
-  shell,
-  session,
-  dialog,
-  MessageBoxReturnValue,
-  net,
-} from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
+import { app, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -32,6 +22,9 @@ import BrowserHelper from './helpers/browser';
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
+import { hideCursor } from './helpers/hideCursor';
+import { AppUpdater } from './AppUpdater';
+import { isDevelopment, isProduction } from './helpers/env';
 
 const fs = require('fs');
 
@@ -39,132 +32,14 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-const isDevelopment =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+// const mouseLibUrl = "http://localhost:3001"; // For local development.
+const mouseLibFile = path.join(
+  __dirname,
+  '../../../lib/mouse/build/index.html'
+);
 
-// a note on isOnline...
-//  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
-// "A return value of false is a pretty strong indicator that the user won't
-//  be able to connect to remote sites. However, a return value of true is
-//  inconclusive; even if some link is up, it is uncertain whether a particular
-//  connection attempt to a particular remote site will be successful."
-//
-//  so it appears there is not 100% guarantee the checkForUpdates will successfully
-//    connect, even if isOnline is true. something to keep in mind.
-export interface IAppUpdater {
-  checkForUpdates: () => void;
-}
-
-log.transports.file.level = isDevelopment ? 'debug' : 'info';
-
-// determine the releaseChannel. if a user downloads an alpha version of the app, we
-//  need to record this for later use. the reason is that 'alpha' channel updates
-//  both when new alpha and release builds are deployed.
-//  since release builds will not have process.env.RELEASE_CHANNEL (which means)
-//   channel will be set to 'latest', we need to "remember" that this is still
-//   an 'alpha' channel user. the rule is:
-//  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
-const determineReleaseChannel = () => {
-  let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
-  const settingsFilename = `${app.getPath('userData')}/settings.json`;
-  if (fs.existsSync(settingsFilename)) {
-    var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
-    releaseChannel = settings.releaseChannel || releaseChannel;
-  } else {
-    if (releaseChannel === 'alpha') {
-      fs.writeFileSync(settingsFilename, JSON.stringify({ releaseChannel }));
-    }
-  }
-  return releaseChannel;
-};
-
-export class AppUpdater implements IAppUpdater {
-  private manualCheck: boolean = false;
-  constructor() {
-    if (process.env.NODE_ENV === 'development') return;
-    // autoUpdater.autoInstallOnAppQuit = true;
-    // must force this set or 'rename' operations post-download will fail
-    autoUpdater.autoDownload = false;
-    // proxy private github repo requests
-    autoUpdater.setFeedURL({
-      provider: 'generic',
-      url: process.env.AUTOUPDATE_FEED_URL,
-      channel: determineReleaseChannel(),
-    });
-    autoUpdater.on('error', (error) => {
-      dialog.showErrorBox(
-        'Error: ',
-        error == null ? 'unknown' : (error.stack || error).toString()
-      );
-    });
-    autoUpdater.on('update-available', () => {
-      dialog
-        .showMessageBox({
-          type: 'info',
-          title: 'Found Updates',
-          message: 'Found updates, do you want update now?',
-          buttons: ['Yes', 'No'],
-        })
-        .then((result: MessageBoxReturnValue) => {
-          // @ts-ignore
-          if (result.response === 0) {
-            autoUpdater.downloadUpdate();
-          }
-        });
-    });
-    autoUpdater.on('update-not-available', () => {
-      // only show this message if the user chose to run an update check manually
-      if (this.manualCheck) {
-        dialog.showMessageBox({
-          title: 'No Updates',
-          message: 'Current version is up-to-date.',
-        });
-      }
-    });
-    autoUpdater.on('update-downloaded', () => {
-      dialog
-        .showMessageBox({
-          title: 'Install Updates',
-          message: 'Updates downloaded, application will be quit for update...',
-        })
-        .then(() => {
-          setImmediate(() => autoUpdater.quitAndInstall());
-        });
-    });
-    autoUpdater.logger = log;
-    // run auto check once every 10 minutes after app starts
-    // setInterval(() => {
-    //   if (!this.manualCheck) {
-    //     // gracefully ignore if no internet when attempting to auto update
-    //     if (net.isOnline()) {
-    //       autoUpdater.checkForUpdates();
-    //     }
-    //   }
-    // }, 600000);
-    // gracefully ignore if no internet when attempting to auto update
-    if (net.isOnline()) {
-      autoUpdater.checkForUpdates();
-    }
-  }
-
-  // for manual update checks, report errors on internet connectivity. for
-  //   auto update checks, gracefully ignore.
-  checkForUpdates = () => {
-    if (process.env.NODE_ENV === 'development') return;
-    if (net.isOnline()) {
-      this.manualCheck = true;
-      autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
-    } else {
-      dialog.showMessageBox({
-        title: 'Offline',
-        message:
-          'It appears you do not have internet connectivity. Check your internet connection and try again.',
-      });
-    }
-  };
-}
-
-let mainWindow: BrowserWindow | null = null;
+let mainWindow: BrowserWindow;
+let mouseOverlay: BrowserWindow;
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -184,27 +59,17 @@ process.on('uncaughtException', (err) => {
   }
 });
 
-if (process.env.NODE_ENV === 'production') {
+if (isProduction) {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
 
-if (isDevelopment) {
-  require('electron-debug')();
-}
+if (isDevelopment) require('electron-debug')();
 
-const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload
-    )
-    .catch(console.log);
-};
+const getPreload = () =>
+  app.isPackaged
+    ? path.join(__dirname, 'preload.js')
+    : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
   // TODO fix the warnings and errors with this
@@ -235,9 +100,7 @@ const createWindow = async () => {
       webviewTag: true,
       sandbox: false,
       contextIsolation: true,
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.holium/dll/preload.js'),
+      preload: getPreload(),
     },
   });
 
@@ -254,15 +117,25 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.on('resize', () => {
-    const newDimension = mainWindow?.getBounds();
-    mainWindow?.webContents.send('set-dimensions', newDimension);
+  mainWindow.webContents.on('did-finish-load', () => {
+    hideCursor(mainWindow.webContents);
+  });
+
+  mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
+    webPreferences.preload = getPreload();
+  });
+
+  mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+    webContents.on('did-finish-load', () => {
+      hideCursor(webContents);
+      webContents.send('add-relative-mouse-listener');
+    });
   });
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
-    mainWindow?.webContents.setZoomFactor(1.0);
+    mainWindow.webContents.setZoomFactor(1.0);
 
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
@@ -278,22 +151,14 @@ const createWindow = async () => {
     );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
-
-    mainWindow.webContents.send(
-      'set-appview-preload',
-      app.isPackaged
-        ? path.join(__dirname, '../renderer/cursor.preload.js')
-        : path.join(app.getAppPath(), 'cursor.preload.js')
-    );
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;
+    mouseOverlay.close();
     app.quit();
   });
 
   // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
   const appUpdater = new AppUpdater();
   // if (process.env.NODE_ENV === 'production') {
   //   appUpdater = new AppUpdater();
@@ -309,14 +174,54 @@ const createWindow = async () => {
   });
 };
 
-// start();
+const createMouseOverlay = () => {
+  // Create a window covering the whole window.
+  const newMouseWindow = new BrowserWindow({
+    title: 'Mouse overlay',
+    parent: mainWindow,
+    ...mainWindow.getBounds(),
+    frame: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    closable: false,
+    resizable: false,
+    focusable: false,
+    hasShadow: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    transparent: true,
+    alwaysOnTop: true,
+    acceptFirstMouse: true,
+    webPreferences: {
+      // preload: getPreload(),
+      devTools: false,
+    },
+  });
+  newMouseWindow.setIgnoreMouseEvents(true);
+  newMouseWindow.loadFile(mouseLibFile);
 
-/**
- * Add event listeners...
- */
-// app.on('web-contents-created', () => {
-//   console.log('web-contents-created');
-// });
+  newMouseWindow.webContents.on('did-finish-load', () => {
+    hideCursor(newMouseWindow.webContents);
+  });
+
+  newMouseWindow.on('close', () => {
+    mainWindow.close();
+  });
+
+  mainWindow.on('close', () => {
+    newMouseWindow.close();
+  });
+
+  mainWindow.on('resize', () => {
+    const newDimension = mainWindow.getBounds();
+    newMouseWindow.setBounds(newDimension);
+    mainWindow.webContents.send('set-dimensions', newDimension);
+  });
+
+  mouseOverlay = newMouseWindow;
+};
+
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
@@ -329,10 +234,16 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+    createMouseOverlay();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) {
+        createWindow();
+      }
+      if (mouseOverlay === null) {
+        createMouseOverlay();
+      }
     });
   })
   .catch(console.log);

@@ -72,9 +72,6 @@ export const WebView = observer(({ isLocked }: Props) => {
             src={currentTab.url}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            // This enables cursor injection, but it also crashes the webview on navigation.
-            // webpreferences="sandbox=false"
-            // preload={`file://${desktop.appviewPreload}`}
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"

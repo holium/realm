@@ -1,5 +1,4 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 
@@ -8,8 +7,6 @@ export interface WebviewProps {
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
-
-const View = styled.div<{ hasTitleBar?: boolean }>``;
 
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
@@ -98,7 +95,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
 
   return useMemo(
     () => (
-      <View
+      <div
         style={{
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -111,7 +108,6 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
           ref={webViewRef}
           id={`${window.id}-web-webview`}
           partition={'persist:dev-webview'}
-          preload={`file://${desktop.appviewPreload}`}
           src={window.href.site}
           webpreferences="sandbox=false"
           onMouseEnter={() => shell.setIsMouseInWebview(true)}
@@ -124,7 +120,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
             pointerEvents: isResizing || loading ? 'none' : 'auto',
           }}
         />
-      </View>
+      </div>
     ),
     [window.href.site, isResizing, loading, theme.currentTheme.windowColor]
   );
