@@ -16,12 +16,12 @@ const handlers = {
 
 const config = {
   rtc: {
-    iceTransportPolicy: 'relay' as RTCIceTransportPolicy,
+    // iceTransportPolicy: 'relay' as RTCIceTransportPolicy,
     iceServers: [
       {
         username: 'realm',
         credential: 'zQzjNHC34Y8RqdLW',
-        urls: 'turn:coturn.holium.live:443?transport=tcp',
+        urls: 'turn:coturn.holium.live:5349?transport=tcp',
       },
       {
         username: 'realm',
