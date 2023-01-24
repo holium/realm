@@ -9,6 +9,15 @@
   |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud]
   ^-  msg-part:sur
   [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id]
+++  get-full-message
+  |=  [tbl=messages-table:sur =msg-id:sur]
+  ^-  message:sur
+  =/  index  0
+  =/  result=message:sur  *message:sur
+  |-
+  ?~  (~(get by tbl) [msg-id index])
+    result
+  $(index +(index), result (snoc result (~(got by tbl) [msg-id index])))
 ::
 ::  poke actions
 ::
@@ -36,15 +45,23 @@
   =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
   =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
-  =.  messages-table.state  (~(gas by messages-table.state) key-vals)
+  =.  messages-table.state  (gas:msgon:sur messages-table.state key-vals)
   [~ state]
 ++  edit
-  |=  [act=action:sur state=state-0 =bowl:gall]
+  |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   [~ state]
 ++  delete
-  |=  [act=action:sur state=state-0 =bowl:gall]
+::  :chat-db &action [%delete [timestamp=~2023.1.24..22.54.50..8f5d sender=~zod]]
+  |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  part-counter=@ud  0
+  =/  result
+    |-
+    ?.  (has:msgon:sur messages-table.state `uniq-id:sur`[msg-id part-counter])
+      messages-table.state
+    $(part-counter +(part-counter), messages-table.state +:(del:msgon:sur messages-table.state [msg-id part-counter]))
+  =.  messages-table.state  result
   [~ state]
 ++  add-peer
   |=  [act=action:sur state=state-0 =bowl:gall]

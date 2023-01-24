@@ -40,9 +40,9 @@
       %insert
         (insert:db-lib +.act state bowl)
       %edit
-        (edit:db-lib act state bowl)
+        (edit:db-lib +.act state bowl)
       %delete
-        (delete:db-lib act state bowl)
+        (delete:db-lib +.act state bowl)
       %add-peer
         (add-peer:db-lib act state bowl)
       %kick-peer

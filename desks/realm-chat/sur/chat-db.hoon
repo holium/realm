@@ -63,6 +63,7 @@
 ::
 +$  uniq-id  [=msg-id =msg-part-id]
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
+++  msgon  ((on uniq-id msg-part) idx-sort)
 ::
 +$  peer-row
   $:  =path
@@ -87,14 +88,15 @@
       [%create-path =create-path-action]
       [%leave-path =path]
       [%insert =insert-message-action]
-      [%edit =message]
-      [%delete =path =msg-id]
+      [%edit =edit-message-action]
+      [%delete =msg-id]
       [%add-peer =path patp=ship]
       [%kick-peer =path patp=ship]
   ==
 +$  create-path-action      [=path metadata=(map cord cord) type=@tas]
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
 +$  insert-message-action   [=path fragments=(list minimal-fragment)]
++$  edit-message-action     [=msg-id =insert-message-action]
 ::
 +$  db-dump
   $%  
