@@ -60,8 +60,7 @@ export class RemotePeer extends Peer {
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
-      trickle: false,
-      reconnectTimer: 1000,
+      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
@@ -124,6 +123,7 @@ export class RemotePeer extends Peer {
   }
 
   _onError(err: Error) {
+    // @ts-ignore
     console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
     // this.pee
