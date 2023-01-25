@@ -1,4 +1,4 @@
-import { FC, useState, useMemo, useEffect } from 'react';
+import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';

@@ -6,7 +6,6 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { string } from 'yup';
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
