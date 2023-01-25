@@ -83,7 +83,7 @@ export default class MenuBuilder {
           label: 'Check for Updates',
           accelerator: 'Command+U',
           click: () => {
-            this.appUpdater.checkForUpdates();
+            this.appUpdater.checkForUpdates(true);
           },
         },
         { type: 'separator' },

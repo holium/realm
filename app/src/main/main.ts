@@ -10,13 +10,14 @@ import path from 'path';
 import {
   app,
   BrowserWindow,
+  BrowserView,
   shell,
   session,
   dialog,
   MessageBoxReturnValue,
   net,
 } from 'electron';
-import { autoUpdater, UpdateCheckResult } from 'electron-updater';
+import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
@@ -32,6 +33,8 @@ import BrowserHelper from './helpers/browser';
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
+import { reject } from 'lodash';
+import ViewCode from 'renderer/system/onboarding/ViewCode.dialog';
 
 const fs = require('fs');
 
@@ -52,7 +55,7 @@ const isDevelopment =
 //  so it appears there is not 100% guarantee the checkForUpdates will successfully
 //    connect, even if isOnline is true. something to keep in mind.
 export interface IAppUpdater {
-  checkForUpdates: () => void;
+  checkForUpdates: (manualCheck: boolean) => void;
 }
 
 log.transports.file.level = isDevelopment ? 'debug' : 'info';
@@ -78,9 +81,22 @@ const determineReleaseChannel = () => {
   return releaseChannel;
 };
 
+// to properly test auto update in development, see:
+//  https://github.com/SimulatedGREG/electron-vue/issues/375#issuecomment-388873561
+if (process.env.NODE_ENV === 'development') {
+  // set the version to whatever value is needed so that this version (semver)
+  //  is "less than" the version found on the update server
+  app.getVersion = () => '0.1.11-alpha';
+}
+
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
+  private doneCallback: undefined | ((value: unknown) => void) = undefined;
+  private ui: BrowserWindow | BrowserView | null = null;
+  // private updatesAvailable: boolean = false;
+
   constructor() {
+    const self = this;
     // if (process.env.NODE_ENV === 'development') return;
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
@@ -108,7 +124,20 @@ export class AppUpdater implements IAppUpdater {
         .then((result: MessageBoxReturnValue) => {
           // @ts-ignore
           if (result.response === 0) {
-            autoUpdater.downloadUpdate();
+            self.ui = new BrowserWindow({
+              parent: mainWindow || undefined,
+              frame: false,
+              center: true,
+              webPreferences: {
+                preload: path.join(__dirname, 'preload-view.js'),
+              },
+            });
+            self.ui.webContents.loadFile(
+              path.join(__dirname, 'update-progress.html')
+            );
+            // autoUpdater.downloadUpdate();
+          } else {
+            self.doneCallback && self.doneCallback('continue');
           }
         });
     });
@@ -120,6 +149,7 @@ export class AppUpdater implements IAppUpdater {
           message: 'Current version is up-to-date.',
         });
       }
+      self.doneCallback && self.doneCallback('continue');
     });
     autoUpdater.on('update-downloaded', () => {
       dialog
@@ -132,11 +162,7 @@ export class AppUpdater implements IAppUpdater {
         });
     });
     autoUpdater.on('download-progress', (stats) => {
-      let log_message = 'Download speed: ' + stats.bytesPerSecond;
-      log_message = log_message + ' - Downloaded ' + stats.percent + '%';
-      log_message =
-        log_message + ' (' + stats.transferred + '/' + stats.total + ')';
-      mainWindow?.webContents.send('update-progress', stats);
+      self.ui && self.ui.webContents.send('update-status', stats);
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
@@ -149,34 +175,62 @@ export class AppUpdater implements IAppUpdater {
     //   }
     // }, 600000);
     // gracefully ignore if no internet when attempting to auto update
-    if (net.isOnline()) {
-      autoUpdater.checkForUpdates();
-    }
+    // if (net.isOnline()) {
+    //   autoUpdater.checkForUpdates();
+    // }
   }
 
   // for manual update checks, report errors on internet connectivity. for
   //   auto update checks, gracefully ignore.
-  checkForUpdates = async () => {
-    // if (process.env.NODE_ENV === 'development') return;
-    if (net.isOnline()) {
-      // this.manualCheck = true;
-      // try {
-      //   await autoUpdater.checkForUpdates();
-      // } catch (e) {
-      //   console.log(e);
-      // } finally {
-      //   this.manualCheck = false;
-      // }
-      autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
-    } else {
-      dialog.showMessageBox({
-        title: 'Offline',
-        message:
-          'It appears you do not have internet connectivity. Check your internet connection and try again.',
-      });
-    }
+  checkForUpdates = (manualCheck: boolean = false) => {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      self.doneCallback = resolve;
+      if (net.isOnline()) {
+        self.manualCheck = manualCheck;
+        autoUpdater
+          .checkForUpdates()
+          .catch((e) => {
+            console.log(e);
+            reject(e);
+          })
+          .finally(() => (self.manualCheck = false));
+      } else {
+        dialog.showMessageBox({
+          title: 'Offline',
+          message:
+            'It appears you do not have internet connectivity. Check your internet connection and try again.',
+        });
+      }
+    });
+    // return new Promise((resolve, reject) => {
+    //   // if (process.env.NODE_ENV === 'development') return;
+    //   if (net.isOnline()) {
+    //     this.manualCheck = true;
+    //     autoUpdater
+    //       .checkForUpdates()
+    //       .then((val) => {
+    //         resolve(val);
+    //       })
+    //       .catch((e) => {
+    //         console.log(e);
+    //         reject(e);
+    //       })
+    //       .finally(() => {
+    //         this.manualCheck = false;
+    //       });
+    //   } else {
+    //     dialog.showMessageBox({
+    //       title: 'Offline',
+    //       message:
+    //         'It appears you do not have internet connectivity. Check your internet connection and try again.',
+    //     });
+    //   }
+    // });
   };
 }
+
+const appUpdater = new AppUpdater();
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -306,13 +360,6 @@ const createWindow = async () => {
     app.quit();
   });
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  const appUpdater = new AppUpdater();
-  // if (process.env.NODE_ENV === 'production') {
-  //   appUpdater = new AppUpdater();
-  // }
-
   const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
 
@@ -341,12 +388,18 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
-    createWindow();
-    app.on('activate', () => {
+  .then(async () => {
+    console.log('checking for updates...');
+    appUpdater.checkForUpdates().then((result: unknown) => {
+      console.log('after checkForUpdates => %o', result);
+      createWindow();
+    });
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) {
+        createWindow();
+      }
     });
   })
   .catch(console.log);
