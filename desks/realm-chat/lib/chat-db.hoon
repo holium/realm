@@ -49,7 +49,10 @@
     our.bowl
     %host
   =.  peers-table.state  (~(put by peers-table.state) path.act [peer ~])
-  [~ state]
+  =/  gives  :~
+    [%give %fact [/db ~] db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers [peer ~]]]])]
+  ==
+  [gives state]
 ++  leave-path
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
@@ -135,6 +138,10 @@
           %tables
         (all-tables:encode tables.db)
       ==
+    ++  db-change :: encodes for on-watch
+      |=  db=db-change:sur
+      ^-  json
+      (changes:encode db)
     ::
     ++  messages-table :: encodes for on-watch
       |=  tbl=messages-table:sur
@@ -210,6 +217,23 @@
       ^-  json
       :: TODO actually convert messages table to json
       [%o *(map @t json)]
+    ::
+    ++  changes
+      |=  ch=db-change:sur
+      ^-  json
+      :: TODO actually convert messages table to json
+      [%a (turn ch |=(a=[=db-change-type:sur =db-row:sur] (pairs :~(['type' s+db-change-type.a] ['table' %s -.db-row.a] ['row' (any-row db-row.a)]))))]
+    ++  any-row
+      |=  =db-row:sur
+      ^-  json
+      ?-  -.db-row
+        %paths
+          (path-row path-row.db-row)
+        %messages
+          (messages-row msg-part.db-row)
+        %peers
+          (peer-row peer-row.db-row)
+      ==
     ++  path-row
       |=  =path-row:sur
       ^-  json
@@ -217,6 +241,26 @@
       :~  path+s+(spat path.path-row)
           metadata+s+'TODO not implemented'
           type+s+type.path-row
+      ==
+    ++  messages-row
+      |=  =msg-part:sur
+      ^-  json
+      %-  pairs
+      :~  path+s+(spat path.msg-part)
+          msg-id+a+~[s+(scot %da timestamp.msg-id.msg-part) s+(scot %p sender.msg-id.msg-part)]
+          msg-part-id+n+(scot %ud msg-part-id.msg-part)
+          content+s+'TODO'
+          reply-to+s+'TODO'
+          metadata+s+'TODO'
+          timestamp+s+(scot %da timestamp.msg-part)
+      ==
+    ++  peer-row
+      |=  =peer-row:sur
+      ^-  json
+      %-  pairs
+      :~  path+s+(spat path.peer-row)
+          ship+s+(scot %p patp.peer-row)
+          role+s+role.peer-row
       ==
   --
 --

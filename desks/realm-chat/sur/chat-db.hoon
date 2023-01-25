@@ -102,6 +102,13 @@
   $%  
       [%tables =tables]
   ==
++$  db-change-type   ?(%add-row %del-row)
++$  db-row
+  $%  [%paths =path-row]
+      [%messages =msg-part]
+      [%peers =peer-row]
+  ==
++$  db-change  (list [=db-change-type =db-row])
 ::
 +$  reaction
   $%  
