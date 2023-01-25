@@ -11,7 +11,6 @@ export const Mouse = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     window.electron.app.onMouseMove((newCoordinates, newState) => {
-      console.log('newCoordinates: ', newCoordinates, 'newState: ', newState);
       setCoords(newCoordinates);
       setState(newState);
     });

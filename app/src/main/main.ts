@@ -36,11 +36,11 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-const mouseLibUrl = 'http://localhost:3000'; // For local development.
-// const mouseLibFile = path.join(
-//   __dirname,
-//   '../../../lib/mouse/build/index.html'
-// );
+// const mouseLibUrl = 'http://localhost:3000'; // For local development.
+const mouseLibFile = path.join(
+  __dirname,
+  '../../../lib/mouse/build/index.html'
+);
 
 let mainWindow: BrowserWindow;
 let mouseOverlay: BrowserWindow;
@@ -202,16 +202,14 @@ const createMouseOverlay = () => {
     acceptFirstMouse: true,
     webPreferences: {
       sandbox: false,
-      devTools: true,
+      devTools: false,
       contextIsolation: true,
       nodeIntegration: false,
       preload: getPreload(),
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
-  // newMouseWindow.loadFile(mouseLibFile);
-  newMouseWindow.loadURL(mouseLibUrl);
-  newMouseWindow.webContents.openDevTools({ mode: 'detach' });
+  newMouseWindow.loadFile(mouseLibFile);
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
