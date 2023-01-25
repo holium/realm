@@ -64,7 +64,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
         <Flex flexDirection="row" gap={4}>
           {walletApp.initialized && (
             <PassportButton
-              style={{ backgroundColor: rgba(buttonColor, 0.3) }}
+              style={{ backgroundColor: buttonColor }}
               data-prevent-menu-close="true"
               onClick={(evt: any) => {
                 setActiveApp('wallet-tray', {
