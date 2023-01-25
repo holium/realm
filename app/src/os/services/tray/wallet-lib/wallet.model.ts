@@ -650,7 +650,7 @@ export const EthStore = types
           index: Number(wallet.key),
           network: 'ethereum',
           path: wallet.path,
-          address: wallet.address,
+          address: '0x' + wallet.address.substring(2).padStart(40, '0'),
           nickname: wallet.nickname,
           data: {
             [ProtocolType.ETH_MAIN]: {
