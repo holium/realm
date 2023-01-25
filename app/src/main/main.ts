@@ -16,6 +16,8 @@ import {
   dialog,
   MessageBoxReturnValue,
   net,
+  Menu,
+  ipcMain,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -35,6 +37,7 @@ import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 import { reject } from 'lodash';
 import ViewCode from 'renderer/system/onboarding/ViewCode.dialog';
+import { setFdLimit } from 'process';
 
 const fs = require('fs');
 
@@ -91,6 +94,7 @@ if (process.env.NODE_ENV === 'development') {
 
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
+  private updatesAvailable: boolean = false;
   private doneCallback: undefined | ((value: unknown) => void) = undefined;
   private ui: BrowserWindow | BrowserView | null = null;
   // private updatesAvailable: boolean = false;
@@ -113,33 +117,29 @@ export class AppUpdater implements IAppUpdater {
         error == null ? 'unknown' : (error.stack || error).toString()
       );
     });
+    autoUpdater.on('checking-for-update', async () => {});
     autoUpdater.on('update-available', () => {
-      dialog
-        .showMessageBox({
-          type: 'info',
-          title: 'Found Updates',
-          message: 'Found updates, do you want update now?',
-          buttons: ['Yes', 'No'],
-        })
-        .then((result: MessageBoxReturnValue) => {
-          // @ts-ignore
-          if (result.response === 0) {
-            self.ui = new BrowserWindow({
-              parent: mainWindow || undefined,
-              frame: false,
-              center: true,
-              webPreferences: {
-                preload: path.join(__dirname, 'preload-view.js'),
-              },
-            });
-            self.ui.webContents.loadFile(
-              path.join(__dirname, 'update-progress.html')
-            );
-            // autoUpdater.downloadUpdate();
-          } else {
-            self.doneCallback && self.doneCallback('continue');
-          }
+      if (self.ui) {
+        console.log('update-available received');
+        self.ui.webContents.send('auto-updater-message', {
+          name: 'update-available',
         });
+      }
+      // dialog
+      //   .showMessageBox({
+      //     type: 'info',
+      //     title: 'Found Updates',
+      //     message: 'Found updates, do you want update now?',
+      //     buttons: ['Yes', 'No'],
+      //   })
+      //   .then((result: MessageBoxReturnValue) => {
+      //     // @ts-ignore
+      //     if (result.response === 0) {
+      //       // autoUpdater.downloadUpdate();
+      //     } else {
+      //       self.doneCallback && self.doneCallback('continue');
+      //     }
+      //   });
     });
     autoUpdater.on('update-not-available', () => {
       // only show this message if the user chose to run an update check manually
@@ -162,7 +162,11 @@ export class AppUpdater implements IAppUpdater {
         });
     });
     autoUpdater.on('download-progress', (stats) => {
-      self.ui && self.ui.webContents.send('update-status', stats);
+      self.ui &&
+        self.ui.webContents.send('auto-updater-message', {
+          ...stats,
+          name: 'update-status',
+        });
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
@@ -184,17 +188,61 @@ export class AppUpdater implements IAppUpdater {
   //   auto update checks, gracefully ignore.
   checkForUpdates = (manualCheck: boolean = false) => {
     const self = this;
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       self.doneCallback = resolve;
       if (net.isOnline()) {
-        self.manualCheck = manualCheck;
-        autoUpdater
-          .checkForUpdates()
-          .catch((e) => {
-            console.log(e);
-            reject(e);
-          })
-          .finally(() => (self.manualCheck = false));
+        self.ui = new BrowserWindow({
+          // parent: mainWindow || undefined,
+          width: 800,
+          height: 600,
+          icon: getAssetPath('icon.png'),
+          title: 'Realm',
+          acceptFirstMouse: true,
+          frame: false,
+          center: true,
+          resizable: false,
+          movable: false,
+          webPreferences: {
+            // devTools: false,
+            nodeIntegration: false,
+            webviewTag: true,
+            sandbox: false,
+            contextIsolation: true,
+            preload: path.join(
+              __dirname,
+              '../../.holium/dll/progress.preload.js'
+            ),
+          },
+        });
+        self.ui.webContents.on('did-finish-load', () => {
+          self.manualCheck = manualCheck;
+          ipcMain.handle('install-updates', () => {
+            if (self.ui) {
+              self.ui.webContents.send('update-status', {
+                name: 'starting-download',
+              });
+            }
+            autoUpdater.downloadUpdate();
+          });
+          ipcMain.handle('cancel-updates', () => {
+            self.ui && self.ui.webContents.close();
+            self.doneCallback && self.doneCallback('continue');
+          });
+          autoUpdater
+            .checkForUpdates()
+            .catch((e) => {
+              console.log(e);
+              reject(e);
+            })
+            .finally(() => (self.manualCheck = false));
+        });
+        self.ui.on('closed', () => {
+          app.quit();
+        });
+        self.ui.loadURL(resolveHtmlPath('/progress.html'));
+        // await self.ui.webContents.loadFile(
+        //   `../renderer/system/progress/progress.html`
+        // );
       } else {
         dialog.showMessageBox({
           title: 'Offline',
@@ -274,19 +322,20 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
+
 const createWindow = async () => {
   // TODO fix the warnings and errors with this
   // if (isDevelopment) {
   //   await installExtensions();
   // }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
   // let factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
@@ -391,15 +440,16 @@ app
   .then(async () => {
     console.log('checking for updates...');
     appUpdater.checkForUpdates().then((result: unknown) => {
-      console.log('after checkForUpdates => %o', result);
+      //   console.log('after checkForUpdates => %o', result);
       createWindow();
     });
     app.on('activate', async () => {
+      console.log('activated');
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) {
-        createWindow();
-      }
+      // if (mainWindow === null) {
+      //   createWindow();
+      // }
     });
   })
   .catch(console.log);

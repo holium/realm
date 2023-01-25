@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="./" />
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'self' ws://localhost:3001 http://localhost:8545; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css?family=Rubik:200,300,400,400i,500,500i,700,700i&display=swap"
+      as="style"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Rubik:200,300,400,400i,500,500i,700,700i&display=swap"
+      rel="stylesheet"
+    />
+    <title>Realm Update Progress</title>
+  </head>
+  <body>
+    <div id="root" style="margin: 0; width: 100%; height: calc(100vh)"></div>
+  </body>
+  <!-- <body class="bod">
+    <div class="content">
+      <div id="checking-for-update">Checking for updates. Please wait...</div>
+      <div
+        id="update-available"
+        style="
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div style="padding: 12px">Found Updates</div>
+        <div style="padding: 12px">Would you like to install?</div>
+        <div style="padding: 12px; display: flex; flex-direction: row">
+          <button id="install-updates">Yes</button>
+          <button id="cancel-updates">No</button>
+        </div>
+      </div>
+      <div id="stats" style="display: none">
+        <div id="speed"></div>
+        <div id="percent"></div>
+        <div id="transferred"></div>
+        <div id="total"></div>
+      </div>
+    </div>
+    <script src="./view-renderer.js"></script>
+  </body> -->
+</html>

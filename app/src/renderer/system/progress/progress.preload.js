@@ -8,5 +8,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('autoUpdate', {
-  listen: (callback) => ipcRenderer.on('update-status', callback),
+  listen: (callback) => ipcRenderer.on('auto-updater-message', callback),
+  installUpdates: () => ipcRenderer.invoke('install-updates'),
+  cancelUpdates: () => ipcRenderer.invoke('cancel-updates'),
 });
