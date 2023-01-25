@@ -144,13 +144,17 @@ const AppWindow = observer(
 
     const onDragStop = () => {
       setIsDragging(false);
+      const x = Math.round(mX.get());
+      const y = Math.round(mY.get());
       activeWindow &&
         DesktopActions.setAppDimensions(activeWindow.id, {
-          x: Math.round(mX.get()),
-          y: Math.round(mY.get()),
+          x,
+          y,
           height: Math.round(mHeight.get()),
           width: Math.round(mWidth.get()),
         });
+
+      DesktopActions.updateWebviewPosition(activeWindow.id, x, y);
     };
 
     const onDragStart = () => {

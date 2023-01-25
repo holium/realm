@@ -1,4 +1,4 @@
-import { WebView } from './WebView';
+import { BrowserWebview } from './BrowserWebview';
 
 export type TabViewProps = {
   isResizing: boolean;
@@ -14,7 +14,7 @@ export const TabView = ({ isResizing }: TabViewProps) => {
         transform: 'translateZ(0)',
       }}
     >
-      <WebView isLocked={isResizing} />
+      <BrowserWebview isLocked={isResizing} />
     </div>
   );
 };

@@ -239,6 +239,14 @@ const createMouseOverlay = () => {
 };
 
 ipcMain.handle(
+  'updateWebviewPosition',
+  (_, windowId: string, position: { x: number; y: number }) => {
+    console.log('updateWebviewPosition', windowId, position);
+    webviews[windowId] = { position, hasMouseInside: false };
+  }
+);
+
+ipcMain.handle(
   'mouse-move',
   (_, position: Vec2, state: MouseState, isInWebview: boolean) => {
     if (isInWebview) {

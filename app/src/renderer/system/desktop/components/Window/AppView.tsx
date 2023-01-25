@@ -1,4 +1,4 @@
-import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import { FC, useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 // import { Spinner, Flex } from 'renderer/components';
@@ -23,7 +23,7 @@ const View = styled(motion.div)`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, shell, desktop, theme, spaces } = useServices();
+  const { ship, desktop, theme, spaces } = useServices();
   const [ready, setReady] = useState(false);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
@@ -134,14 +134,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
 
-  const onMouseEnter = useCallback(() => {
-    shell.setIsMouseInWebview(true);
-  }, [shell]);
-
-  const onMouseLeave = useCallback(() => {
-    shell.setIsMouseInWebview(false);
-  }, [shell]);
-
   return useMemo(() => {
     return (
       <View
@@ -170,8 +162,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           // @ts-expect-error
           allowpopups="true"
           src={appConfig.url}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
           style={{
             left: 0,
             top: 0,

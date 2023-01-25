@@ -26,13 +26,11 @@ export const Mouse = ({ children }: PropsWithChildren) => {
   }, []);
 
   const onMouseEnterViewport = useCallback(() => {
-    console.log('mouse enter viewport');
     setIsVisible(true);
     setIsActive(false);
   }, []);
 
   const onMouseLeaveViewport = useCallback(() => {
-    console.log('mouse leave viewport');
     setIsVisible(false);
   }, []);
 

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 
@@ -8,11 +8,11 @@ export interface WebviewProps {
   hasTitlebar: boolean | undefined;
 }
 
-export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
+export const WebView = (props: WebviewProps) => {
   const { window, isResizing } = props;
   const [ready, setReady] = useState(false);
 
-  const { shell, ship, desktop, theme } = useServices();
+  const { ship, desktop, theme } = useServices();
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 
@@ -85,10 +85,12 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     `;
 
     if (ready) {
-      const webview: any = document.getElementById(`${window.id}-web-webview`);
-      webview!.insertCSS(css);
+      const webview = document.getElementById(
+        `${window.id}-web-webview`
+      ) as Electron.WebviewTag | null;
+      webview?.insertCSS(css);
       webview?.addEventListener('did-frame-finish-load', () => {
-        webview!.insertCSS(css);
+        webview?.insertCSS(css);
       });
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
@@ -107,11 +109,9 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         <webview
           ref={webViewRef}
           id={`${window.id}-web-webview`}
-          partition={'persist:dev-webview'}
           src={window.href.site}
+          partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
-          onMouseEnter={() => shell.setIsMouseInWebview(true)}
-          onMouseLeave={() => shell.setIsMouseInWebview(false)}
           style={{
             background: lighten(0.04, theme.currentTheme.windowColor),
             width: 'inherit',

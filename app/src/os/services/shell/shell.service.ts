@@ -17,7 +17,6 @@ export class ShellService extends BaseService {
     'realm.shell.open-dialog-with-string-props': this.openDialogWithStringProps,
     'realm.shell.close-dialog': this.closeDialog,
     'realm.shell.next-dialog': this.nextDialog,
-    'realm.shell.setIsMouseInWebview': this.setIsMouseInWebview,
   };
 
   static preload = {
@@ -55,12 +54,6 @@ export class ShellService extends BaseService {
       return await ipcRenderer.invoke(
         'realm.shell.set-fullscreen',
         isFullscreen
-      );
-    },
-    async setIsMouseInWebview(mouseInWebview: boolean) {
-      return await ipcRenderer.invoke(
-        'realm.shell.setIsMouseInWebview',
-        mouseInWebview
       );
     },
   };
@@ -142,9 +135,5 @@ export class ShellService extends BaseService {
 
   setDesktopDimensions(_event: any, width: number, height: number) {
     this.state?.setDesktopDimensions(width, height);
-  }
-
-  setIsMouseInWebview(_event: any, mouseInWebview: boolean) {
-    this.state?.setIsMouseInWebview(mouseInWebview);
   }
 }

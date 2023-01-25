@@ -61,6 +61,9 @@ export const DesktopActions = {
   toggleDevTools: async () => {
     return await window.electron.app.toggleDevTools();
   },
+  updateWebviewPosition: (windowId: string, x: number, y: number) => {
+    window.electron.app.updateWebviewPosition(windowId, { x, y });
+  },
 };
 
 // TODO

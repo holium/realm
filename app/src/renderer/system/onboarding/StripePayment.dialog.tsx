@@ -20,7 +20,6 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 export interface StripePaymentProps extends BaseDialogProps {
@@ -257,15 +256,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
         <Flex flex={3} alignItems="center" justifyContent="center" mt={8}>
           <form onSubmit={handleSubmit}>
             <Flex flexDirection="column">
-              <Flex
-                flex={6}
-                onMouseEnter={async () =>
-                  await ShellActions.setIsMouseInWebview(true)
-                }
-                onMouseLeave={async () =>
-                  await ShellActions.setIsMouseInWebview(false)
-                }
-              >
+              <Flex flex={6}>
                 <PaymentElement />
               </Flex>
               <Flex
