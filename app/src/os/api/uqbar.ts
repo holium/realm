@@ -2,7 +2,6 @@ import { Conduit } from '@holium/conduit';
 import {
   ProtocolType,
   WalletStoreType,
-  WalletView,
 } from '../services/tray/wallet-lib/wallet.model';
 
 export const removeDots = (str: string) => {

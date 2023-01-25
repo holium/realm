@@ -5,7 +5,6 @@ import {
   SetStateAction,
   useState,
   ChangeEvent,
-  useEffect,
 } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
@@ -17,9 +16,6 @@ import { TextInput } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import VerifyPasscode from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
-import { setScreen } from '@urbit/api';
-import { TextArea } from '@holium/design-system/src/input/Input/Input';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;

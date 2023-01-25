@@ -1,8 +1,6 @@
-import { FC, useCallback, useMemo } from 'react';
-import { darken, rgba } from 'polished';
+import { FC, useCallback } from 'react';
 import { observer } from 'mobx-react';
 
-import { IconButton, Icons } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';

@@ -4,7 +4,6 @@ import { FC } from 'react';
 import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ProtocolType } from 'os/services/tray/wallet-lib';
 
 type Network = 'ethereum' | 'bitcoin';

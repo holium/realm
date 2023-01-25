@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import { Flex, Text } from 'renderer/components';
 import { NewWalletScreen } from './index';
 import { PasscodeInput } from '../../../components/PasscodeInput';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;

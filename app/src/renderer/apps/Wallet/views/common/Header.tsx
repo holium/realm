@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { rgba } from 'polished';
-import { Icons, Flex, RadioGroup, IconButton, Text } from 'renderer/components';
+import { Icons, Flex, IconButton, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';

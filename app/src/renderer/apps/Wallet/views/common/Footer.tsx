@@ -1,19 +1,12 @@
 import { observer } from 'mobx-react';
 import { FC, useEffect, useState } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { Box, Flex, IconButton, Icons, Tooltip } from 'renderer/components';
+import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
-import {
-  NetworkType,
-  ProtocolType,
-  WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
-import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...
-import UqbarLogo from '../../../../../../assets/uqbar.png';
-import { darken } from 'polished';
 
 interface WalletFooterProps {
   hidden: boolean;

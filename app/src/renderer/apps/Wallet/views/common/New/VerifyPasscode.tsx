@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Icons } from 'renderer/components';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
 import PasscodeInput from '../../../components/PasscodeInput';
 import { useTrayApps } from 'renderer/apps/store';

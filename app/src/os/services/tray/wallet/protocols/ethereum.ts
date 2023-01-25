@@ -131,7 +131,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
         if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
           const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
           this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
-            for (let asset of assets) {
+            for (const asset of assets) {
               if (asset.type === 'coin') {
                 this.getAsset(asset.addr, ethWallet.address, 'coin').then(
                   (coin: Asset | null) => {

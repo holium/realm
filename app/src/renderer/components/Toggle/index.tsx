@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
 import styled, { css } from 'styled-components';
 
 const Label = styled.label`

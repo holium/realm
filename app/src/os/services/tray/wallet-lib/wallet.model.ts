@@ -1,4 +1,3 @@
-import { execFile } from 'child_process';
 import {
   applySnapshot,
   types,
@@ -450,7 +449,7 @@ const EthWallet = types
           block: 0,
         });
       } else {
-        let coinToUpdate = self.data.get(protocol)!.coins.get(coin.addr)!;
+        const coinToUpdate = self.data.get(protocol)!.coins.get(coin.addr)!;
         coinToUpdate.name = coinData.symbol;
         coinToUpdate.logo = coinData.logo || '';
         coinToUpdate.address = coin.addr;
@@ -579,12 +578,12 @@ const EthWallet = types
             block: 0,
           });
         }
-        let txList = self.data
+        const txList = self.data
           .get(protocol)!
           .coins.get(contract)!.transactionList;
         txList.applyAgentTransaction(self.index, contract, transaction);
       } else {
-        let netMap = self.data.get(protocol)!.transactionList;
+        const netMap = self.data.get(protocol)!.transactionList;
         netMap.applyAgentTransaction(self.index, contract, transaction);
       }
     },
@@ -881,7 +880,7 @@ export const WalletStore = types
     },
   }))
   .actions((self) => {
-    let initialState = {};
+    const initialState = {};
     return {
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
@@ -987,7 +986,7 @@ export const WalletStore = types
       setSettings(settings: any) {
         self.settings.passcodeHash = settings.passcodeHash;
         self.blacklist = settings.blocked;
-        for (let network of Object.keys(settings.networks)) {
+        for (const network of Object.keys(settings.networks)) {
           const store =
             network === 'ethereum'
               ? self.ethereum

@@ -16,11 +16,10 @@ import {
   NetworkStoreType,
   WalletNavOptions,
 } from './wallet-lib/wallet.model';
-import { BaseSigner } from './wallet-lib/wallets/BaseSigner';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
-import { addDots, removeDots, UqbarApi } from '../../api/uqbar';
+import { removeDots, UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';
 import {
   onPatch,
@@ -33,8 +32,6 @@ import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
-import { init } from 'lodash/fp';
-import { textInputs } from 'polished';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;

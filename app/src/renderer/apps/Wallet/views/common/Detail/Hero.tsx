@@ -24,7 +24,6 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-  WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';

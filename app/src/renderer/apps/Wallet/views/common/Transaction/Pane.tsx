@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
@@ -11,12 +11,8 @@ import { AmountInput } from './AmountInput';
 import {
   ProtocolType,
   ERC20Type,
-  NetworkType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { WalletApp } from 'renderer/apps/Wallet';
-import { Locked } from '../Locked';
-import { PasscodeDisplay } from 'renderer/apps/Wallet/components/PasscodeDisplay';
 
 const abbrMap = {
   ethereum: 'ETH',

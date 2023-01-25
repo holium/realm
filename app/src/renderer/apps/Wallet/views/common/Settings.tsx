@@ -10,7 +10,6 @@ import {
   Text,
   Select,
   Icons,
-  Box,
   Button,
   IconButton,
   TextButton,
