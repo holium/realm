@@ -6,6 +6,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
+import { string } from 'yup';
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
@@ -743,6 +744,7 @@ export const WalletNavState = types
     lastEthProtocol: Protocols,
     btcNetwork: NetworkStores,
     walletIndex: types.maybe(types.string),
+    to: types.maybe(types.string),
     detail: types.maybe(
       types.model({
         type: types.enumeration(['transaction', 'coin', 'nft']),
@@ -835,6 +837,7 @@ export interface WalletNavOptions {
     data: any;
   };
   uqTx?: UqTxType;
+  to?: string;
 }
 
 export const WalletStore = types
@@ -922,6 +925,7 @@ export const WalletStore = types
         const protocol = options?.protocol || self.navState.protocol;
         const lastEthProtocol =
           options?.lastEthProtocol || self.navState.lastEthProtocol;
+        const to = options?.to;
         self.uqTx = options?.uqTx ? UqTx.create(options.uqTx) : undefined;
 
         if (
@@ -945,6 +949,7 @@ export const WalletStore = types
           protocol,
           lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
+          to,
         });
         self.navState = newState;
       },

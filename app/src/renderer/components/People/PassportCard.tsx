@@ -77,19 +77,15 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                   },
                 });
                 // TODO: placeholder, we need to implement the actual send coins functionality
-                WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+                WalletActions.navigate(WalletView.TRANSACTION_SEND, {
                   walletIndex: '0',
+                  to: patp,
                 });
                 onClose();
                 evt.stopPropagation();
               }}
             >
-              <Icons
-                name="SendCoins"
-                color={iconColor}
-                size="16px"
-                opacity={0.3}
-              />
+              <Icons name="SendCoins" color={iconColor} size="16px" />
             </PassportButton>
           )}
           <PassportButton
