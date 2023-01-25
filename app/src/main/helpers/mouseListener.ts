@@ -43,14 +43,8 @@ ipcRenderer.on('add-mouse-listeners', (_, { isInWebview = false }) => {
 
     ipcRenderer.invoke('mouse-move', position, mouseState, isInWebview);
   };
-
-  const handleMousedown = () => {
-    ipcRenderer.invoke('mouse-down');
-  };
-
-  const handleMouseup = () => {
-    ipcRenderer.invoke('mouse-up');
-  };
+  const handleMousedown = () => ipcRenderer.invoke('mouse-down');
+  const handleMouseup = () => ipcRenderer.invoke('mouse-up');
 
   window.addEventListener('mousemove', handleMousemove);
   window.addEventListener('mousedown', handleMousedown);

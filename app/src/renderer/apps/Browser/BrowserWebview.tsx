@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
 import { useBrowser } from './store';
+import { WebView } from 'renderer/system/desktop/components/Window/WebView';
 
 type Props = {
   isLocked: boolean;
@@ -10,17 +11,13 @@ type Props = {
 export const BrowserWebview = observer(({ isLocked }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
 
-  const { id, loader } = currentTab;
+  const id = 'os-browser-web-webview';
+  const { loader } = currentTab;
 
   useEffect(() => {
     const webView = document.getElementById(id) as Electron.WebviewTag | null;
 
     if (!webView) return;
-
-    window.electron.app.updateWebviewPosition(id, {
-      x: webView.offsetLeft,
-      y: webView.offsetTop,
-    });
 
     webView.addEventListener('did-start-loading', () => {
       setLoading();
@@ -59,8 +56,8 @@ export const BrowserWebview = observer(({ isLocked }: Props) => {
             Failed to load.
           </Text>
         ) : (
-          <webview
-            id={currentTab.id}
+          <WebView
+            id={id}
             src={currentTab.url}
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
@@ -68,11 +65,9 @@ export const BrowserWebview = observer(({ isLocked }: Props) => {
             partition="browser-webview"
             style={{
               background: 'white',
-              width: 'inherit',
+              width: '100%',
               height: 'calc(100% - 54px)',
-              position: 'relative',
               marginTop: 54,
-              pointerEvents: isLocked ? 'none' : 'auto',
             }}
           />
         )}

@@ -9,6 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { applyStyleOverrides } from './style-overrides';
 import { genCSSVariables } from 'renderer/logic/theme';
+import { WebView } from './WebView';
 
 interface AppViewProps {
   window: WindowModelProps;
@@ -154,7 +155,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             <Spinner size={1} />
           </Flex>
         )} */}
-        <webview
+        <WebView
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"

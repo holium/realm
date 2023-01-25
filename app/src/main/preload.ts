@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
-import './preloads/add-mouse-listener';
+import './helpers/mouseListener';
 import {
   MouseState,
   Vec2,
@@ -44,8 +44,17 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  updateWebviewPosition: (id: string, position: { x: number; y: number }) => {
-    ipcRenderer.invoke('updateWebviewPosition', id, position);
+  updateWebviewPosition: (
+    webviewId: string,
+    position: { x: number; y: number }
+  ) => {
+    ipcRenderer.invoke('updateWebviewPosition', webviewId, position);
+  },
+  mouseEnteredWebview: (id: string) => {
+    ipcRenderer.invoke('mouseEnteredWebview', id);
+  },
+  mouseLeftWebview: (id: string) => {
+    ipcRenderer.invoke('mouseLeftWebview', id);
   },
   onMouseMove(callback: (coordinates: Vec2, state: MouseState) => void) {
     ipcRenderer.on('mouse-move', (_, coordinates: Vec2, state: MouseState) => {

@@ -128,17 +128,20 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.on('dom-ready', () => {
     hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', { isInWebview: false });
   });
 
   mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
     webPreferences.preload = getPreload();
+    webPreferences.nodeIntegration = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = false;
   });
 
   mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
-    webContents.on('did-finish-load', () => {
+    webContents.on('dom-ready', () => {
       hideCursor(webContents);
       webContents.send('add-mouse-listeners', { isInWebview: true });
     });
@@ -238,11 +241,21 @@ const createMouseOverlay = () => {
 
 ipcMain.handle(
   'updateWebviewPosition',
-  (_, windowId: string, position: { x: number; y: number }) => {
-    console.log('updateWebviewPosition', windowId, position);
-    webviews[windowId] = { position, hasMouseInside: false };
+  (_, webviewId: string, position: { x: number; y: number }) => {
+    console.log('updateWebviewPosition', webviewId, position);
+    webviews[webviewId] = { position, hasMouseInside: false };
   }
 );
+
+ipcMain.handle('mouseEnteredWebview', (_, id: string) => {
+  console.log('mouseEnteredWebview', id);
+  webviews[id].hasMouseInside = true;
+});
+
+ipcMain.handle('mouseLeftWebview', (_, id: string) => {
+  console.log('mouseLeftWebview', id);
+  webviews[id].hasMouseInside = false;
+});
 
 ipcMain.handle(
   'mouse-move',
@@ -257,9 +270,9 @@ ipcMain.handle(
         y: activeWebviewPosition.y + position.y,
       };
       mouseOverlay.webContents.send('mouse-move', absolutePosition, state);
+    } else {
+      mouseOverlay.webContents.send('mouse-move', position, state);
     }
-
-    mouseOverlay.webContents.send('mouse-move', position, state);
   }
 );
 
