@@ -15,9 +15,23 @@
   =/  index  0
   =/  result=message:sur  *message:sur
   |-
-  ?~  (~(get by tbl) [msg-id index])
+  ?~  (has:msgon:sur tbl [msg-id index])
     result
-  $(index +(index), result (snoc result (~(got by tbl) [msg-id index])))
+  $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
+++  remove-message-from-table
+  |=  [tbl=messages-table:sur =msg-id:sur]
+  =/  part-counter=@ud  0
+  |-
+  ?.  (has:msgon:sur tbl `uniq-id:sur`[msg-id part-counter])
+    tbl
+  $(part-counter +(part-counter), tbl +:(del:msgon:sur tbl [msg-id part-counter]))
+++  add-message-to-table
+  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur now=@da sender=@p]
+  =/  msg-id=msg-id:sur   [now sender]
+  =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
+  =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
+  =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
+  (gas:msgon:sur tbl key-vals)
 ::
 ::  poke actions
 ::
@@ -41,27 +55,20 @@
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  msg-id=msg-id:sur   [now.bowl our.bowl]
-  =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
-  =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
-  =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
-  =.  messages-table.state  (gas:msgon:sur messages-table.state key-vals)
+  =.  messages-table.state  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
   [~ state]
 ++  edit
+::  :chat-db &action [%edit [[~2023.1.25..18.29.42..0a77 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =.  messages-table.state  (remove-message-from-table messages-table.state msg-id)
+  =.  messages-table.state  (add-message-to-table messages-table.state msg-act timestamp.msg-id sender.msg-id)
   [~ state]
 ++  delete
-::  :chat-db &action [%delete [timestamp=~2023.1.24..22.54.50..8f5d sender=~zod]]
+::  :chat-db &action [%delete [timestamp=~2023.1.25..18.29.42..0a77 sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  part-counter=@ud  0
-  =/  result
-    |-
-    ?.  (has:msgon:sur messages-table.state `uniq-id:sur`[msg-id part-counter])
-      messages-table.state
-    $(part-counter +(part-counter), messages-table.state +:(del:msgon:sur messages-table.state [msg-id part-counter]))
-  =.  messages-table.state  result
+  =.  messages-table.state  (remove-message-from-table messages-table.state msg-id)
   [~ state]
 ++  add-peer
   |=  [act=action:sur state=state-0 =bowl:gall]
