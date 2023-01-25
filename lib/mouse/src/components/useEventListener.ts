@@ -2,16 +2,11 @@ import { useRef, useEffect } from 'react';
 
 type Handler = (event?: any) => void;
 
-/**
- * useEventListener
- * Hook for handling EventListeners
- * @return {object} width, height
- */
 export function useEventListener(
   eventName: string,
   handler: Handler,
   element: any = window
-): any {
+) {
   // Create a ref that stores handler
   const savedHandler = useRef<Handler>();
 

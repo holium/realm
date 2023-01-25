@@ -1,8 +1,10 @@
-import { AppData } from "../../../app/src/preload";
+import { AppPreloadType } from "../../../../app/src/main/preload";
 
 declare global {
   interface Window {
-    appData: AppData;
+    electron: {
+      app: AppPreloadType;
+    }
   }
 }
 

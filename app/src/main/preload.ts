@@ -1,5 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
+import './preloads/add-mouse-listener';
+import {
+  MouseState,
+  Vec2,
+} from '../../../lib/mouse/src/components/AnimatedCursor';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -39,7 +44,19 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
+  onMouseMove(callback: (coordinates: Vec2, state: MouseState) => void) {
+    ipcRenderer.on('mouse-move', (_, coordinates: Vec2, state: MouseState) => {
+      callback(coordinates, state);
+    });
+  },
+  onMouseDown(callback: () => void) {
+    ipcRenderer.on('mouse-down', callback);
+  },
+  onMouseUp(callback: () => void) {
+    ipcRenderer.on('mouse-up', callback);
+  },
 };
+
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {

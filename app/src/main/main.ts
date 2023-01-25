@@ -7,7 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session } from 'electron';
+import { app, BrowserWindow, shell, session, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -25,6 +25,10 @@ import fetch from 'cross-fetch'; // required 'fetch'
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isProduction } from './helpers/env';
+import {
+  MouseState,
+  Vec2,
+} from '../../../lib/mouse/src/components/AnimatedCursor';
 
 const fs = require('fs');
 
@@ -32,14 +36,21 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-// const mouseLibUrl = "http://localhost:3001"; // For local development.
-const mouseLibFile = path.join(
-  __dirname,
-  '../../../lib/mouse/build/index.html'
-);
+const mouseLibUrl = 'http://localhost:3000'; // For local development.
+// const mouseLibFile = path.join(
+//   __dirname,
+//   '../../../lib/mouse/build/index.html'
+// );
 
 let mainWindow: BrowserWindow;
 let mouseOverlay: BrowserWindow;
+const webviews: Record<
+  string,
+  {
+    position: { x: number; y: number };
+    hasMouseInside: boolean;
+  }
+> = {};
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -119,6 +130,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('did-finish-load', () => {
     hideCursor(mainWindow.webContents);
+    mainWindow.webContents.send('add-mouse-listeners', { isInWebview: false });
   });
 
   mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
@@ -128,7 +140,7 @@ const createWindow = async () => {
   mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
     webContents.on('did-finish-load', () => {
       hideCursor(webContents);
-      webContents.send('add-relative-mouse-listener');
+      webContents.send('add-mouse-listeners', { isInWebview: true });
     });
   });
 
@@ -151,11 +163,6 @@ const createWindow = async () => {
     );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
-  });
-
-  mainWindow.on('closed', () => {
-    mouseOverlay.close();
-    app.quit();
   });
 
   // Remove this if your app does not use auto updates
@@ -194,23 +201,32 @@ const createMouseOverlay = () => {
     alwaysOnTop: true,
     acceptFirstMouse: true,
     webPreferences: {
-      // preload: getPreload(),
-      devTools: false,
+      sandbox: false,
+      devTools: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: getPreload(),
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
-  newMouseWindow.loadFile(mouseLibFile);
+  // newMouseWindow.loadFile(mouseLibFile);
+  newMouseWindow.loadURL(mouseLibUrl);
+  newMouseWindow.webContents.openDevTools({ mode: 'detach' });
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
   });
 
   newMouseWindow.on('close', () => {
-    mainWindow.close();
+    if (mainWindow.isClosable()) mainWindow.close();
   });
 
   mainWindow.on('close', () => {
-    newMouseWindow.close();
+    if (newMouseWindow.isClosable()) newMouseWindow.close();
+  });
+
+  mainWindow.on('closed', () => {
+    app.quit();
   });
 
   mainWindow.on('resize', () => {
@@ -221,6 +237,33 @@ const createMouseOverlay = () => {
 
   mouseOverlay = newMouseWindow;
 };
+
+ipcMain.handle(
+  'mouse-move',
+  (_, position: Vec2, state: MouseState, isInWebview: boolean) => {
+    if (isInWebview) {
+      const activeWebviewPosition = Object.values(webviews).find(
+        (webview) => webview.hasMouseInside
+      )?.position;
+      if (!activeWebviewPosition) return;
+      const absolutePosition = {
+        x: activeWebviewPosition.x + position.x,
+        y: activeWebviewPosition.y + position.y,
+      };
+      mouseOverlay.webContents.send('mouse-move', absolutePosition, state);
+    }
+
+    mouseOverlay.webContents.send('mouse-move', position, state);
+  }
+);
+
+ipcMain.handle('mouse-down', () => {
+  mouseOverlay.webContents.send('mouse-down');
+});
+
+ipcMain.handle('mouse-up', () => {
+  mouseOverlay.webContents.send('mouse-up');
+});
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even

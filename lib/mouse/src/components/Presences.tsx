@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import AnimatedCursor, { Vec2 } from './Mouse';
+import { Vec2 } from '@holium/realm-multiplayer';
 import { useEventListener } from './useEventListener';
 import { ShipModelType } from '../../../../app/src/os/services/ship/models/ship';
 import { rgbToString, hexToRgb } from '../../../../app/src/os/lib/color';
+import { AnimatedCursor } from './AnimatedCursor';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -185,6 +186,7 @@ export const Presences = () => {
               coords={position}
               isActive={isClicking}
               isActiveClickable={isClicking}
+              state="pointer"
             />
             <CursorName
               style={{

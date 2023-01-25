@@ -19,9 +19,9 @@ import {
   Ship,
 } from '@holium/realm-multiplayer';
 import { useEventListener } from '../useEventListener';
-import AnimatedCursor from '../Mouse';
 import { hexToRgb, rgbToString } from '../../../../../app/src/os/lib/color';
 // import { Ship } from '@holium/realm-multiplayer/hooks';
+import { AnimatedCursor } from '../AnimatedCursor';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -212,6 +212,7 @@ export function Presences() {
               coords={position}
               isActive={isClicking}
               isActiveClickable={isClicking}
+              state="pointer"
             />
             <CursorName
               style={{
