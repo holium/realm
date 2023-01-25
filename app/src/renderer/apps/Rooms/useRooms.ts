@@ -16,7 +16,29 @@ const handlers = {
 
 const config = {
   rtc: {
-    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+    // iceTransportPolicy: 'relay' as RTCIceTransportPolicy,
+    iceServers: [
+      // {
+      //   username: 'realm',
+      //   credential: 'zQzjNHC34Y8RqdLW',
+      //   urls: 'stun:coturn.holium.live:3478',
+      // },
+      // {
+      //   username: 'realm',
+      //   credential: 'zQzjNHC34Y8RqdLW',
+      //   urls: 'turn:coturn.holium.live:5349?transport=tcp',
+      // },
+      {
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:443?transport=tcp',
+      },
+      {
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:3478?transport=udp',
+      },
+    ],
   },
 };
 

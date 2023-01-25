@@ -1,4 +1,3 @@
-import { Conduit } from '@holium/conduit';
 import { NotificationApi } from '../../../api/notifications';
 import { cast, Instance, types, flow } from 'mobx-state-tree';
 import { daToUnix, decToUd, udToDec, unixToDa } from '@urbit/api';

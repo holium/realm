@@ -10,10 +10,10 @@
   ],
   "scripts": {
     "build": "yarn workspace @holium/realm dev:cursor && yarn build:app",
-    "link:multiplayer": "yarn --cwd lib/multiplayer build && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
-    "link:conduit": "yarn --cwd lib/conduit build && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
-    "link:room": "yarn --cwd lib/room build && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
-    "link:design-system": "yarn --cwd lib/design-system build && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
+    "link:multiplayer": "yarn build:multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
+    "link:conduit": "yarn build:conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
+    "link:room": "yarn build:room && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
+    "link:design-system": "yarn build:design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
     "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
@@ -55,6 +55,7 @@
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "typescript": "^4.9.4"
   }
 }

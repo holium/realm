@@ -445,6 +445,7 @@ export class RealmProtocol extends BaseProtocol {
     if (!this.local) {
       throw new Error('No local peer created');
     }
+
     const peerConfig = {
       isHost,
       isInitiator: isDialer(this.local.patp, peer),
@@ -523,6 +524,7 @@ export class RealmProtocol extends BaseProtocol {
   hangup(peer: Patp, { shouldEmit } = { shouldEmit: true }) {
     const remotePeer = this.peers.get(peer);
     if (remotePeer) {
+      remotePeer.removeAllListeners();
       remotePeer.hangup();
       shouldEmit && this.emit(ProtocolEvent.PeerRemoved, remotePeer);
       this.peers.delete(peer);
