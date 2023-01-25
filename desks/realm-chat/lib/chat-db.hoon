@@ -44,12 +44,18 @@
     metadata.act
     type.act
   =.  paths-table.state  (~(put by paths-table.state) path.act row)
+  =/  peer=peer-row:sur   :+
+    path.act
+    our.bowl
+    %host
+  =.  peers-table.state  (~(put by peers-table.state) path.act [peer ~])
   [~ state]
 ++  leave-path
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =.  paths-table.state  (~(del by paths-table.state) path)
+  =.  peers-table.state  (~(del by peers-table.state) path)
   [~ state]
 ++  insert
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
@@ -71,12 +77,22 @@
   =.  messages-table.state  (remove-message-from-table messages-table.state msg-id)
   [~ state]
 ++  add-peer
-  |=  [act=action:sur state=state-0 =bowl:gall]
+::  :chat-db &action [%add-peer [/a/path/to/a/chat ~bus]]
+  |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  row=peer-row:sur   :+
+    path.act
+    patp.act
+    %member
+  =/  peers  (snoc (~(got by peers-table.state) path.act) row)
+  =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   [~ state]
 ++  kick-peer
-  |=  [act=action:sur state=state-0 =bowl:gall]
+::  :chat-db &action [%kick-peer [/a/path/to/a/chat ~bus]]
+  |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  peers  (skip (~(got by peers-table.state) path.act) |=(a=peer-row:sur =(patp.a patp.act)))
+  =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   [~ state]
 ::
 ::  mini helper lib

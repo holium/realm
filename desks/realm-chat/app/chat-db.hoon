@@ -44,9 +44,9 @@
       %delete
         (delete:db-lib +.act state bowl)
       %add-peer
-        (add-peer:db-lib act state bowl)
+        (add-peer:db-lib +.act state bowl)
       %kick-peer
-        (kick-peer:db-lib act state bowl)
+        (kick-peer:db-lib +.act state bowl)
     ==
     [cards this]
   ::
