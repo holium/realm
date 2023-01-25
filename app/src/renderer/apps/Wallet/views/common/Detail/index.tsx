@@ -82,18 +82,15 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     );
   }
 
-  const walletTransactions = useMemo(
-    () =>
-      walletApp.navState.network === NetworkType.ETHEREUM
-        ? coin
-          ? (wallet as EthWalletType).data
-              .get(walletApp.navState.protocol)!
-              .coins.get(coin.address)!.transactionList.transactions
-          : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-              .transactionList.transactions
-        : (wallet as BitcoinWalletType).transactionList.transactions,
-    []
-  );
+  const walletTransactions =
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? coin
+        ? (wallet as EthWalletType).data
+            .get(walletApp.navState.protocol)!
+            .coins.get(coin.address)!.transactionList.transactions
+        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+            .transactionList.transactions
+      : (wallet as BitcoinWalletType).transactionList.transactions;
 
   let transactions = useMemo(
     () => getTransactions(walletTransactions || new Map()),

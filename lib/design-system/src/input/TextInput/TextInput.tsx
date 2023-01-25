@@ -16,7 +16,7 @@ type TextInputProps = {
 export const TextInput = ({
   id,
   name,
-  type,// = 'text',
+  type, // = 'text',
   required = false,
   value,
   placeholder,
@@ -31,38 +31,39 @@ export const TextInput = ({
   ...inutBoxProps
 }: TextInputProps) => (
   <InputBox inputId={id} disabled={disabled} {...inutBoxProps}>
-    {type === 'textarea' ?
-    <TextArea
-      id={id}
-      name={name}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-      value={value}
-      required={required}
-      tabIndex={tabIndex}
-      disabled={disabled}
-      readOnly={readOnly}
-      onChange={onChange}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onKeyDown={onKeyDown}
-    />
-    :
-    <Input
-      id={id}
-      name={name}
-      type={type}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-      value={value}
-      required={required}
-      tabIndex={tabIndex}
-      disabled={disabled}
-      readOnly={readOnly}
-      onChange={onChange}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onKeyDown={onKeyDown}
-    /> }
+    {type === 'textarea' ? (
+      <TextArea
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        value={value}
+        required={required}
+        tabIndex={tabIndex}
+        disabled={disabled}
+        readOnly={readOnly}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+      />
+    ) : (
+      <Input
+        id={id}
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        value={value}
+        required={required}
+        tabIndex={tabIndex}
+        disabled={disabled}
+        readOnly={readOnly}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+      />
+    )}
   </InputBox>
 );

@@ -923,7 +923,6 @@ export const WalletStore = types
         const protocol = options?.protocol || self.navState.protocol;
         const lastEthProtocol =
           options?.lastEthProtocol || self.navState.lastEthProtocol;
-        console.log('the uqtx', options?.uqTx);
         self.uqTx = options?.uqTx ? UqTx.create(options.uqTx) : undefined;
 
         if (

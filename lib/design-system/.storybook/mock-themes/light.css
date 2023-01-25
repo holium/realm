@@ -14,11 +14,11 @@
   --rlm-theme-mode: light;
   --rlm-text-color: #2a2927;
   --rlm-icon-color: #333333;
-  --rlm-intent-alert-color: #FF6240;
-  --rlm-intent-caution-color: #FFBC32;
-  --rlm-intent-success-color: #0FC383;
+  --rlm-intent-alert-color: #ff6240;
+  --rlm-intent-caution-color: #ffbc32;
+  --rlm-intent-success-color: #0fc383;
   --rlm-border-radius-4: 4px;
-  --rlm-border-radius-6: 6px; 
+  --rlm-border-radius-6: 6px;
   --rlm-border-radius-9: 9px;
   --rlm-border-radius-12: 12px;
   --rlm-border-radius-12: 16px;
