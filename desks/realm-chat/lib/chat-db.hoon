@@ -25,6 +25,16 @@
   ?.  (has:msgon:sur tbl `uniq-id:sur`[msg-id part-counter])
     tbl
   $(part-counter +(part-counter), tbl +:(del:msgon:sur tbl [msg-id part-counter]))
+::
+++  remove-messages-for-path
+  |=  [tbl=messages-table:sur =path]
+  =/  badkvs  (skim (tap:msgon:sur tbl) |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path)))
+  |-
+  ?:  =(0 (lent badkvs))
+    tbl
+  =/  current  (snag 0 badkvs)
+  $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
+::
 ++  add-message-to-table
   |=  [tbl=messages-table:sur msg-act=insert-message-action:sur now=@da sender=@p]
   =/  msg-id=msg-id:sur   [now sender]
@@ -49,8 +59,10 @@
     our.bowl
     %host
   =.  peers-table.state  (~(put by peers-table.state) path.act [peer ~])
+  =/  thechange  db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers [peer ~]]]])
   =/  gives  :~
-    [%give %fact [/db ~] db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers [peer ~]]]])]
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.act) ~] thechange]
   ==
   [gives state]
 ++  leave-path
@@ -59,7 +71,13 @@
   ^-  (quip card state-0)
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
-  [~ state]
+  =.  messages-table.state  (remove-messages-for-path messages-table.state path)
+  =/  thechange  db-change+!>(~[[%del-row %paths path] [%del-row %peers path]])
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path) ~] thechange]
+  ==
+  [gives state]
 ++  insert
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
@@ -221,8 +239,28 @@
     ++  changes
       |=  ch=db-change:sur
       ^-  json
-      :: TODO actually convert messages table to json
-      [%a (turn ch |=(a=[=db-change-type:sur =db-row:sur] (pairs :~(['type' s+db-change-type.a] ['table' %s -.db-row.a] ['row' (any-row db-row.a)]))))]
+      [%a (turn ch individual-change)]
+    ++  individual-change
+      |=  ch=db-change-type:sur
+      %-  pairs
+      ?-  -.ch
+        %add-row
+          :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
+        %del-row
+          ?-  -.+.ch
+            %paths
+              :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' s+(spat path.ch)])
+            %peers
+              :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' s+(spat path.ch)])
+            %messages
+              :~
+                ['type' %s -.ch]
+                ['table' %s -.+.ch]
+                ['msg-id' a+~[s+(scot %da timestamp.msg-id.uniq-id.ch) s+(scot %p sender.msg-id.uniq-id.ch)]]
+                ['msg-part-id' n+(scot %ud msg-part-id.uniq-id.ch)]
+              ==
+          ==
+      ==
     ++  any-row
       |=  =db-row:sur
       ^-  json
