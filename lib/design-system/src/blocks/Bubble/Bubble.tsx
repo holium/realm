@@ -43,7 +43,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
       display="inline-flex"
       justifyContent={our ? 'flex-end' : 'flex-start'}
     >
-      <BubbleStyle id={id} our={our} className={our ? 'bubble-our' : ''}>
+      <BubbleStyle id={id} className={our ? 'bubble-our' : ''}>
         {!our && (
           <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
         )}

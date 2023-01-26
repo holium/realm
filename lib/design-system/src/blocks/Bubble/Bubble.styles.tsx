@@ -3,7 +3,7 @@ import { Text, Box } from '../..';
 
 import { FragmentBlockquote, FragmentShip } from './fragment-lib';
 
-export const BubbleStyle = styled(Box)<{ our?: boolean }>`
+export const BubbleStyle = styled(Box)`
   display: inline-flex;
   flex-direction: column;
   width: auto;
@@ -31,30 +31,6 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
       }
     }
   }
-  /* ${(props) =>
-    props.our
-      ? css`
-          background: var(--rlm-accent-color);
-          border-radius: 9px 9px 0px 9px;
-          ${Text.Custom} {
-            color: #ffffff;
-          }
-          ${FragmentBlockquote} {
-            color: #ffffff;
-            border-left: 2px solid #ffffff70;
-          }
-          ${FragmentShip} {
-            background: #ffffff30;
-            &:hover {
-              background: #ffffff45;
-            }
-          }
-        `
-      : css`
-          color: var(--rlm-text-color);
-          background: var(--rlm-input-color);
-          border-radius: 9px 9px 9px 0px;
-        `}; */
 
   .bubble-reactions {
     transition: var(--transition);
