@@ -1,16 +1,53 @@
 import { motion } from 'framer-motion';
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { BoxProps } from '../..';
+import { Text, Box } from '../..';
+
+import {
+  background,
+  BackgroundProps,
+  border,
+  BorderProps,
+  ButtonStyleProps,
+  compose,
+  flexbox,
+  FlexboxProps,
+  grid,
+  GridProps,
+  layout,
+  LayoutProps,
+  opacity,
+  OpacityProps,
+  position,
+  PositionProps,
+  space,
+  SpaceProps,
+  textStyle,
+  TextStyleProps,
+  typography,
+  TypographyProps,
+} from 'styled-system';
+import { ColorProps, colorStyle } from '../../util/colors';
 
 type BlockMode = 'embed' | 'display';
 
 type StyleProps = {
   mode?: BlockMode;
-  variant?: 'default' | 'overlay';
-} & BoxProps;
+  variant?: 'default' | 'overlay' | 'content';
+} & BackgroundProps &
+  ButtonStyleProps &
+  ColorProps &
+  FlexboxProps &
+  GridProps &
+  BorderProps &
+  LayoutProps &
+  OpacityProps &
+  PositionProps &
+  SpaceProps &
+  TextStyleProps &
+  TypographyProps;
 
-const BlockStyle = styled(motion.span)<StyleProps>`
+export const BlockStyle = styled(motion.span)<StyleProps>`
   display: inline-flex;
   flex-direction: column;
   box-sizing: content-box;
@@ -18,7 +55,10 @@ const BlockStyle = styled(motion.span)<StyleProps>`
   padding: 6px;
   gap: 6px;
   background: var(--rlm-window-color);
-  color: var(--rlm-text-color);
+  color: var(--rlm-text-color) !important;
+  ${Text.Custom} {
+    color: var(--rlm-text-color) !important;
+  }
   backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
   border: 1px solid transparent;
@@ -41,7 +81,7 @@ const BlockStyle = styled(motion.span)<StyleProps>`
     }
   }
   ${(props) =>
-    props.variant === 'overlay' &&
+    (props.variant === 'overlay' || props.variant === 'content') &&
     css`
       padding: 0px;
       border: 0px solid transparent;
@@ -60,17 +100,33 @@ const BlockStyle = styled(motion.span)<StyleProps>`
         right: 0px;
       }
 
-      &:hover {
-        .block-footer {
-          transition: var(--transition);
-          opacity: 1;
-          background: var(--rlm-window-color);
+      ${props.variant !== 'content' &&
+      css`
+        &:hover {
+          .block-footer {
+            transition: var(--transition);
+            opacity: 1;
+            background: var(--rlm-window-color);
+          }
+          .block-author {
+            opacity: 1;
+          }
         }
-        .block-author {
-          opacity: 1;
-        }
-      }
+      `}
     `}
+  ${compose(
+    background,
+    flexbox,
+    grid,
+    layout,
+    opacity,
+    position,
+    space,
+    textStyle,
+    typography,
+    border
+  )}
+  ${colorStyle}
 `;
 
 export type BlockProps = {
@@ -78,7 +134,9 @@ export type BlockProps = {
   draggable?: boolean;
 } & StyleProps;
 
-export const Block: FC<BlockProps> = (props: BlockProps) => {
+type BlockElProps = BlockProps & { children?: React.ReactNode };
+
+export const Block: FC<BlockElProps> = (props: BlockElProps) => {
   const {
     id,
     mode = 'embed',
@@ -100,6 +158,7 @@ export const Block: FC<BlockProps> = (props: BlockProps) => {
         dragMomentum: false,
         whileTap: { cursor: 'grabbing' },
       })}
+      {...rest}
     >
       {children}
     </BlockStyle>

@@ -18,6 +18,18 @@ type TemplateProps = {
   onReaction: (payload: OnReactionPayload) => void;
 } & BoxProps;
 
+const BLOCK_TYPES = ['image', 'video', 'audio', 'link', 'blockquote'];
+const TEXT_TYPES = [
+  'plain',
+  'bold',
+  'italics',
+  'bold-italics',
+  'bold-strike',
+  'bold-italics-strike',
+  'inline-code',
+  'ship',
+];
+
 export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
   const {
     id,
@@ -62,22 +74,22 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
         <FragmentBlock>
           {message?.map((fragment, index) => {
             let lineBreak = false;
+            // Detect line break between text and block
             if (index > 0) {
-              const fragmentType = Object.keys(fragment)[0];
-              lineBreak =
-                fragmentType === 'image' ||
-                fragmentType === 'video' ||
-                fragmentType === 'audio' ||
-                fragmentType === 'link' ||
-                fragmentType === 'blockquote'
-                  ? true
-                  : false;
+              const lastFragmentType = Object.keys(message[index - 1])[0];
+              const currentFragmentType = Object.keys(fragment)[0];
+              if (
+                TEXT_TYPES.includes(lastFragmentType) &&
+                BLOCK_TYPES.includes(currentFragmentType)
+              ) {
+                lineBreak = true;
+              }
             }
+
             return (
               <>
                 {lineBreak && <br />}
                 {renderFragment(fragment, index, author)}
-                {/* {lineBreak && message.length > index + 1 && <br />} */}
               </>
             );
           })}

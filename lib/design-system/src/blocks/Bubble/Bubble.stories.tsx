@@ -219,10 +219,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       message={[
         { plain: 'Open Graph' },
         {
-          link: [
-            'Spotify is laying off six percent of its global workforce, CEO announces',
-            'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
-          ],
+          link: 'https://www.cnn.com/2023/01/25/tech/meta-facebook-trump-decision/index.html',
         },
       ]}
       onReaction={() => {}}
@@ -233,10 +230,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       message={[
         { plain: 'Open Graph' },
         {
-          link: [
-            'Spotify is laying off six percent of its global workforce, CEO announces',
-            'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
-          ],
+          link: 'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
         },
       ]}
       onReaction={() => {}}
@@ -324,3 +318,43 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
     </Flex>
   );
 };
+
+export const ReplyTo: ComponentStory<typeof Bubble> = () => (
+  <Flex gap={12} flexDirection="column" width={500}>
+    <Bubble
+      author="~fasnut-famden"
+      authorColor="#FF0000"
+      message={[
+        {
+          reply: {
+            msgId: '123',
+            author: '~lomder-librun',
+            message: [{ plain: 'Yo what the hell you talkin bout?' }],
+          },
+        },
+        {
+          plain: 'You heard me bitch',
+        },
+      ]}
+      onReaction={() => {}}
+    />
+    <Bubble
+      author="~lomder-librun"
+      our
+      message={[
+        {
+          reply: {
+            msgId: '123',
+            author: '~fasnut-famden',
+            message: [{ plain: 'You heard me bitch' }],
+          },
+        },
+        {
+          image:
+            'https://i.kym-cdn.com/entries/icons/original/000/010/587/Navy_Seal.jpg',
+        },
+      ]}
+      onReaction={() => {}}
+    />
+  </Flex>
+);

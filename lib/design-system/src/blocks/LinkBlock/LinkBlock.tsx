@@ -10,7 +10,8 @@ const LinkImage = styled(motion.img)`
   width: 100%;
   height: 170px;
   object-fit: cover;
-  border-radius: 2px;
+  border-radius: 4px;
+  background: var(--rlm-window-color);
 `;
 
 type OpenGraphType = {
@@ -35,12 +36,8 @@ type OpenGraphType = {
 };
 
 type LinkBlockProps = {
-  link: [string, string];
+  link: string;
   by: string;
-  // reference: {
-  //   image: string; // favicon
-  //   link: string;
-  // };
   metadata?: any;
 } & BlockProps;
 
@@ -50,10 +47,9 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
 
   useEffect(() => {
     if (!openGraph) {
-      fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link[1])}`)
+      fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
         .then(async (res) => {
           const data = await res.json();
-          console.log(data);
           setOpenGraph(data);
         })
         .catch((err) => {
@@ -62,8 +58,13 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
     }
   }, []);
 
+  let description = openGraph?.ogDescription || '';
+  if (description.length > 99) {
+    description = description.substring(0, 100) + '...';
+  }
+
   return (
-    <Block p={0} width={rest.width || 'inherit'} {...rest}>
+    <Block {...rest}>
       <LinkImage src={openGraph?.ogImage.url} />
       <Flex gap={2} flexDirection="column">
         <Text.Anchor
@@ -78,7 +79,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
           {openGraph?.ogTitle}
         </Text.Anchor>
         <Text.Custom fontSize={1} opacity={0.7} width={rest.width || 'inherit'}>
-          {openGraph?.ogDescription}
+          {description}
         </Text.Custom>
       </Flex>
       <Flex
@@ -87,16 +88,25 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
         justifyContent="space-between"
         width="inherit"
       >
-        <Flex flexDirection="row" gap={4} alignItems="center">
+        <Flex
+          flexDirection="row"
+          gap={4}
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Text.Anchor
             fontSize={0}
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              window.open(openGraph?.ogUrl, '_blank');
+              if (openGraph?.ogUrl) {
+                const origin = new URL(openGraph.ogUrl).origin;
+                window.open(origin, '_blank');
+              }
             }}
           >
-            {openGraph?.ogSiteName}
+            {openGraph?.ogSiteName ||
+              (openGraph && new URL(openGraph.ogUrl).hostname)}
           </Text.Anchor>
         </Flex>
 

@@ -32,8 +32,7 @@ export type FragmentCodeType = {
   code: string;
 };
 export type FragmentLinkType = {
-  // [display-name, url]
-  link: [string, string];
+  link: string;
 };
 export type FragmentImageType = {
   image: string;
@@ -60,9 +59,18 @@ export type FragmentType =
   | FragmentLinkType
   | FragmentImageType
   | FragmentUrLinkType
-  | FragmentBreakType;
+  | FragmentBreakType
+  | FragmentReplyType;
 
 export type FragmentKey = keyof FragmentType;
+
+export type FragmentReplyType = {
+  reply: {
+    msgId: string;
+    author: string;
+    message: FragmentType[];
+  };
+};
 
 export type FragmentReactionType = {
   author: string;

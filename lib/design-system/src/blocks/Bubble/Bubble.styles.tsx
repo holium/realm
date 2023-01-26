@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { Text, Box } from '../..';
+
 import { FragmentBlockquote } from './fragment-lib';
 
 export const BubbleStyle = styled(Box)<{ our?: boolean }>`
@@ -43,11 +44,11 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
 `;
 
-export const BubbleAuthor = styled(Text.Custom)<{ authorColor: string }>`
+export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;
-  color: ${(props) => props.authorColor};
+  color: ${(props) => props.authorColor ?? 'var(--rlm-text-color)'};
 `;
 
 export const BubbleFooter = styled(Box)`

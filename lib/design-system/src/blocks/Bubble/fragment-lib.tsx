@@ -15,15 +15,17 @@ import {
   FragmentStrikeType,
   FragmentKey,
   FragmentUrLinkType,
+  FragmentReplyType,
 } from './Bubble.types';
 
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { getVar } from '../../util/colors';
-import { Text } from '../..';
+import { Text, Flex } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
+import { BubbleAuthor } from './Bubble.styles';
 
 export const FragmentBase = styled(Text.Custom)`
   display: inline;
@@ -186,12 +188,14 @@ export const renderFragment = (
     case 'link':
       return (
         <LinkBlock
+          my={1}
           draggable={false}
           key={index}
           mode="embed"
           link={(fragment as FragmentLinkType).link}
           id={author + index}
           by={author}
+          width={350}
         />
       );
 
@@ -199,15 +203,28 @@ export const renderFragment = (
       return (
         <>
           <ImageBlock
+            my={1}
             draggable={false}
             mode="embed"
-            variant="overlay"
+            variant="content"
             key={index}
             id={author + index}
             image={(fragment as FragmentImageType).image}
             by={author}
           />
         </>
+      );
+
+    case 'reply':
+      const msg = (fragment as FragmentReplyType).reply.message[0];
+      const replyAuthor = (fragment as FragmentReplyType).reply.author;
+      return (
+        <FragmentBlockquote>
+          <Flex flexDirection="column">
+            <BubbleAuthor>{replyAuthor}</BubbleAuthor>
+            {renderFragment(msg, index, replyAuthor)}
+          </Flex>
+        </FragmentBlockquote>
       );
 
     case 'ur-link':

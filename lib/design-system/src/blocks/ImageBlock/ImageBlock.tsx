@@ -9,10 +9,10 @@ type ImageBlockProps = {
 } & BlockProps;
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
-  const { image, by, ...rest } = props;
+  const { image, by, variant, ...rest } = props;
 
   return (
-    <Block variant="overlay" width={rest.width || 'inherit'} {...rest}>
+    <Block variant={variant} width={rest.width || 'inherit'} {...rest}>
       <FragmentImage src={image} draggable={false} />
       <Flex className="block-footer">
         <Flex></Flex>
