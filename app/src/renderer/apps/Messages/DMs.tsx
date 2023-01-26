@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -13,14 +13,15 @@ import {
 import { ContactRow } from './components/ContactRow';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten } from 'polished';
+import { darken, rgba, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import {
   PreviewDMType,
   PreviewGroupDMType,
   DMPreviewType,
 } from 'os/services/ship/models/courier';
-import { WindowedList } from '@holium/design-system';
+import { Skeleton, WindowedList } from '@holium/design-system';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface IProps {
   theme: ThemeModelType;
@@ -36,12 +37,27 @@ export const DMs = observer((props: IProps) => {
 
   const { courier } = useServices();
   const [searchString, setSearchString] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const previews = useMemo(() => {
-    return Array.from(courier.previews.values()).sort(
-      (a, b) => b.lastTimeSent - a.lastTimeSent
-    );
-  }, [courier.previews]);
+  const previews = Array.from(courier.previews.values()).sort(
+    (a, b) => b.lastTimeSent - a.lastTimeSent
+  );
+  const lastTimeSent = previews[0]?.lastTimeSent;
+
+  const fetchPreviews = useCallback(async () => {
+    const newPreviews = await ShipActions.getDMs();
+    courier.setPreviews(newPreviews);
+  }, [courier]);
+
+  useEffect(() => {
+    const fetchPreviewsWithSkeleton = async () => {
+      setIsFetching(true);
+      await fetchPreviews();
+      setIsFetching(false);
+    };
+
+    if (previews.length === 0) fetchPreviewsWithSkeleton();
+  }, []);
 
   const searchFilter = useCallback(
     (preview: DMPreviewType) => {
@@ -59,7 +75,24 @@ export const DMs = observer((props: IProps) => {
     [searchString]
   );
 
-  const dMList = useCallback(() => {
+  const DMList = () => {
+    if (isFetching) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="start"
+          overflow="hidden"
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Box key={index} mb={2} mx={4}>
+              <Skeleton height={57} borderRadius={8} />
+            </Box>
+          ))}
+        </Flex>
+      );
+    }
+
     if (previews.length === 0) {
       return (
         <Flex
@@ -76,21 +109,23 @@ export const DMs = observer((props: IProps) => {
       );
     }
 
-    const lastMessageText = previews[0].lastMessage[0]?.text;
-
     return (
       <WindowedList
-        key={lastMessageText}
+        key={lastTimeSent}
         width={388}
         height={544}
         rowHeight={57}
         data={previews}
         filter={searchFilter}
         rowRenderer={(dm, index) => (
-          <Box display="block" key={`${lastMessageText}-${index}`}>
+          <Box
+            display="block"
+            key={`dm-${index}-${dm.lastTimeSent}-${dm.pending}`}
+          >
             <ContactRow
               theme={theme}
               dm={dm}
+              refreshDms={fetchPreviews}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onSelectDm(dm);
@@ -100,7 +135,7 @@ export const DMs = observer((props: IProps) => {
         )}
       />
     );
-  }, [onSelectDm, previews, searchFilter, textColor, theme]);
+  };
 
   return (
     <Grid.Column
@@ -115,8 +150,6 @@ export const DMs = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
-          // windowColor: rgba(windowColor, 0.8),
           windowColor,
         }}
       >
@@ -142,7 +175,7 @@ export const DMs = observer((props: IProps) => {
               backgroundColor:
                 theme.mode === 'dark'
                   ? lighten(0.1, windowColor)
-                  : darken(0.055, windowColor),
+                  : rgba(darken(0.075, windowColor), 0.5),
             }}
             onChange={(evt: any) => {
               evt.stopPropagation();
@@ -169,7 +202,6 @@ export const DMs = observer((props: IProps) => {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: windowColor,
         }}
         overflowY="hidden"
       >
@@ -181,7 +213,7 @@ export const DMs = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {dMList()}
+              <DMList />
             </>
           )}
         </Grid.Column>

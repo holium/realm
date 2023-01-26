@@ -1,40 +1,29 @@
-import { useState } from 'react';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { useServices } from 'renderer/logic/store';
-import { Box, Icons } from '../components';
+import { Box, Icon } from '@holium/design-system';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
-interface CopyProps {
+interface CopyButtonProps {
   content: string;
   size?: number;
 }
 
-export function CopyButton(props: CopyProps) {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-  const [copied, setCopied] = useState(false);
+export const CopyButton = ({ content, size = 2 }: CopyButtonProps) => {
+  const copied = useToggle(false);
+
   const copy = () => {
-    navigator.clipboard.writeText(props.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 750);
+    navigator.clipboard.writeText(content);
+    copied.toggleOn();
+    setTimeout(copied.toggleOff, 750);
   };
 
   return (
     <Box>
-      {!copied ? (
+      {!copied.isOn ? (
         <Box onClick={copy}>
-          <Icons
-            name="Copy"
-            size={props.size || 2}
-            color={baseTheme.colors.text.disabled}
-          />
+          <Icon name="Copy" size={size} color="text" opacity={0.5} />
         </Box>
       ) : (
-        <Icons
-          name="CheckCircle"
-          size={props.size || 2}
-          color={baseTheme.colors.ui.intent.success}
-        />
+        <Icon name="CheckCircle" size={size} color="intent-success" />
       )}
     </Box>
   );
-}
+};

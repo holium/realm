@@ -1,7 +1,6 @@
 /* Mainbar */
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
 import styled from 'styled-components';
 
@@ -12,25 +11,21 @@ interface MiniAppStyleProps {
   customBg?: string;
 }
 
-export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
+export const MiniAppWindow = styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
-  backdrop-filter: var(--blur-enabled);
+  overflow: hidden;
+  /* width: 270px; */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  /* backdrop-filter: blur(24px); */
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  perspective: 1000;
-  --webkit-transform: translateZ(0);
-  --webkit-backface-visibility: hidden;
-  --webkit-perspective: 1000;
-  transform: translateZ(0);
-  width: 270px;
-  box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
-  border: 1px solid
-    ${(props: MiniAppStyleProps) => darken(0.1, props.customBg!)};
-  /* border: 1px solid ${(props: MiniAppStyleProps) =>
-    rgba(props.customBg!, 0.7)}; */
-`)<MiniAppStyleProps>({
-  // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
-});
+  background: var(--rlm-window-color);
+  border: 1px solid var(--rlm-window-border-color);
+  z-index: 12;
+  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
+`;
 
 interface MiniAppProps {
   id: string;
@@ -41,25 +36,21 @@ interface MiniAppProps {
   children: any | React.ReactNode;
 }
 
-export const MiniApp = observer(
-  ({ id, backgroundColor, textColor, children, innerRef }: MiniAppProps) => {
-    const { dimensions } = useTrayApps();
+export const MiniApp = observer(({ id, children, innerRef }: MiniAppProps) => {
+  const { dimensions } = useTrayApps();
 
-    return (
-      <MiniAppWindow
-        id={id}
-        ref={innerRef}
-        style={{
-          overflowY: 'hidden',
-          width: dimensions.width,
-          height: dimensions.height,
-        }}
-        color={textColor}
-        customBg={backgroundColor}
-        onContextMenu={(evt: any) => evt.stopPropagation()}
-      >
-        {children}
-      </MiniAppWindow>
-    );
-  }
-);
+  return (
+    <MiniAppWindow
+      id={id}
+      ref={innerRef}
+      style={{
+        overflowY: 'hidden',
+        width: dimensions.width,
+        height: dimensions.height,
+      }}
+      onContextMenu={(evt: any) => evt.stopPropagation()}
+    >
+      {children}
+    </MiniAppWindow>
+  );
+});

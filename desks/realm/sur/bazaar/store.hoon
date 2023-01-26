@@ -68,6 +68,10 @@
       [%install-app =ship =desk]
       [%uninstall-app =desk]
       [%initialize args=(map cord cord)]
+      [%rebuild-catalog args=(map cord cord)]
+      [%rebuild-stall path=space-path:spaces args=(map cord cord)]
+      [%clear-stall path=space-path:spaces args=(map cord cord)]
+      [%set-host app-id=desk host=ship]
   ==
 ::
 +$  interaction
@@ -87,10 +91,13 @@
       [%suite-removed path=space-path:spaces index=@ud]
       [%app-install-update =app-id =urbit-app =grid-index]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
-      [%stall-update =path:spaces-path:spaces =stall]
+      [%stall-update =path:spaces-path:spaces =stall det=(unit [=app-id app=(unit app)])]
       [%treaties-loaded =ship]
       [%new-ally =ship =alliance:treaty]
       [%ally-deleted =ship]
+      [%rebuild-catalog =catalog =grid-index]
+      [%rebuild-stall path=space-path:spaces =catalog =stall]
+      [%clear-stall path=space-path:spaces]
   ==
 +$  view
   $%  [%catalog =catalog]

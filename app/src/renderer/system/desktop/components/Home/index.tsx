@@ -8,11 +8,15 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpaceHome } from './Space';
 import { OurHome } from './Ship';
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
+import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 
 interface HomeWindowProps {}
 
 const HomeWindow = styled(motion.div)<HomeWindowProps>`
   height: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const HomePane = observer(() => {
@@ -46,6 +50,7 @@ export const HomePane = observer(() => {
             {/* TODO make app grid not reanimate when switching around */}
             {isOur && <OurHome isOpen={isOpen} />}
             {!isOur && <SpaceHome isOpen={isOpen} />}
+            <AppSearchPopover />
           </PassportMenuProvider>
         </HomeWindow>
       </AnimatePresence>

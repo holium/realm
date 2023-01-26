@@ -1,15 +1,15 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
+import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
   Flex,
   Text,
   Card,
-  Input,
   RadioGroup,
   TextButton,
   Spinner,
-  AccessCode,
   Anchor,
+  CopyButton,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -20,15 +20,15 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, identity } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const { setActiveApp } = useTrayApps();
+  const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
+  const showAccessKey = useToggle(false);
 
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+  const { windowColor, textColor, accentColor } = theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
@@ -58,7 +58,7 @@ export const AccountPanel: FC<any> = observer(() => {
       const profileData = {
         color: values.avatarColor,
         nickname: values.nickname,
-        avatar: values.avatarImage,
+        avatar: avatarImg,
       };
 
       if (avatarOption === 'color') {
@@ -79,12 +79,6 @@ export const AccountPanel: FC<any> = observer(() => {
     id: 'avatarColor',
     form: profileForm,
     initialValue: ship!.color!,
-  });
-
-  const avatarImageField = useField({
-    id: 'avatarImage',
-    form: profileForm,
-    initialValue: ship!.avatar ? ship!.avatar : '',
   });
 
   const nicknameField = useField({
@@ -113,7 +107,6 @@ export const AccountPanel: FC<any> = observer(() => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
@@ -143,18 +136,14 @@ export const AccountPanel: FC<any> = observer(() => {
               Nickname
             </Text>
             <Flex flex={3}>
-              <Input
+              <TextInput
+                id="account-nickname"
+                name="account-nickname"
                 className="realm-cursor-text-cursor"
+                width="100%"
                 type="text"
                 placeholder="(none)"
                 value={nicknameField.state.value}
-                wrapperStyle={{
-                  cursor: 'none',
-                  borderRadius: 9,
-                  backgroundColor: inputColor,
-                }}
-                // defaultValue={ship!.nickname ? ship!.nickname : ''}
-                // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
                 onChange={(e: any) =>
                   nicknameField.actions.onChange(e.target.value)
                 }
@@ -201,30 +190,16 @@ export const AccountPanel: FC<any> = observer(() => {
                       '#8419D9',
                     ]}
                     onChange={(color: string) =>
-                      // console.log('color avatar input', color)
                       avatarColorField.actions.onChange(color)
                     }
                   />
                 )}
                 {avatarOption === 'image' && (
-                  <Input
-                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute ~bacwyls
-                    className="realm-cursor-text-cursor"
-                    type="text"
-                    placeholder="Paste url here"
-                    value={avatarImageField.state.value}
-                    wrapperStyle={{
-                      cursor: 'none',
-                      borderRadius: 9,
-                      backgroundColor: inputColor,
-                    }}
-                    // defaultValue={customWallpaper.state.value}
-                    // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-                    onChange={
-                      (e: any) =>
-                        avatarImageField.actions.onChange(e.target.value)
-                      // customWallpaper.actions.onChange(e.target.value)
-                    }
+                  <AvatarInput
+                    id="system-account-avatar-input"
+                    width="100%"
+                    initialValue={ship!.avatar! || ''}
+                    onSave={(url) => setAvatarImg(url)}
                   />
                 )}
               </Flex>
@@ -264,7 +239,7 @@ export const AccountPanel: FC<any> = observer(() => {
             Email
           </Text>
           <Flex justifyContent="space-between" flex={3}>
-            <Text color={baseTheme.colors.text.secondary}> {email} </Text>
+            <Text color={textColor}> {email} </Text>
             <TextButton
               style={{ fontWeight: 400 }}
               showBackground
@@ -293,7 +268,7 @@ export const AccountPanel: FC<any> = observer(() => {
                 Payment
               </Text>
               <Flex justifyContent="space-between" flex={3}>
-                <Text color={baseTheme.colors.text.secondary}>Credit Card</Text>
+                <Text color={textColor}>Credit Card</Text>
                 <Anchor
                   href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg"
                   p={0}
@@ -317,7 +292,7 @@ export const AccountPanel: FC<any> = observer(() => {
           <Text fontWeight={500} flex={1} margin={'auto'}>
             URL
           </Text>
-          <Text color={baseTheme.colors.text.secondary} flex={3}>
+          <Text color={textColor} flex={3}>
             {url}
           </Text>
         </Flex>
@@ -331,8 +306,26 @@ export const AccountPanel: FC<any> = observer(() => {
               <Spinner size={1} />
             </Flex>
           ) : (
-            <Flex flex={3}>
-              <AccessCode code={code} />
+            <Flex flex={3} gap={6} alignItems="center">
+              <TextInput
+                id="system-account-access-code"
+                name="access-code"
+                py={2}
+                width={285}
+                value={code}
+                readOnly={true}
+                type={showAccessKey.isOn ? 'text' : 'password'}
+                rightAdornment={
+                  <Button.IconButton onClick={showAccessKey.toggle}>
+                    <Icon
+                      name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
+                      opacity={0.5}
+                      size={18}
+                    />
+                  </Button.IconButton>
+                }
+              />
+              <CopyButton content={code} />
             </Flex>
           )}
         </Flex>

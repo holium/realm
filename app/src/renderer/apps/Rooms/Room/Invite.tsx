@@ -129,7 +129,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
             type="text"
             placeholder="~sampel-palnet"
             autoFocus
-            ref={inviteInputRef}
+            innerRef={inviteInputRef}
             spellCheck={false}
             wrapperStyle={{
               cursor: 'none',
@@ -179,7 +179,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
           gap={4}
           width="100%"
           maxHeight="300px"
-          overflowY={'scroll'}
+          overflowY={'auto'}
           overflowX={'hidden'}
         >
           {invited.map((patp: string, index: number) => {

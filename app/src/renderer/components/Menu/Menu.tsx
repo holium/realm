@@ -1,7 +1,3 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable no-return-assign */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable react/no-find-dom-node */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { MenuWrapper } from './Menu.styles';

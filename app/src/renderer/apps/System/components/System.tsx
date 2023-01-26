@@ -1,9 +1,11 @@
-import React, { FC, useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, TextButton } from 'renderer/components';
+import styled from 'styled-components';
+import { Flex, Text, Card, TextButton, Spinner } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { OSActions } from 'renderer/logic/actions/os';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -12,16 +14,25 @@ export type MediaAccessStatus =
   | 'restricted'
   | 'unknown';
 
-const colorMap: any = {
+const colorMap: Record<MediaAccessStatus, string> = {
   granted: '#39a839',
   denied: '#ae2828',
+  'not-determined': '#ae2828',
+  restricted: '#ae2828',
+  unknown: '#ae2828',
 };
 
-export const SystemPanel: FC<any> = observer(() => {
-  const { theme, ship, contacts } = useServices();
+const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ isSubscribed }) =>
+    isSubscribed ? '#38CD7C' : '#EA2424'};
+`;
 
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+export const SystemPanel = observer(() => {
+  const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
+  const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<{
     camera: MediaAccessStatus;
@@ -38,6 +49,47 @@ export const SystemPanel: FC<any> = observer(() => {
   }, []);
 
   const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
+
+  const apps = [
+    {
+      name: '%spaces',
+      path: '/updates',
+      subscriptionState: spaces.subscriptionState,
+      subscribing: () => spaces.setSubscriptionStatus('subscribing'),
+    },
+    {
+      name: '%bazaar',
+      path: '/updates',
+      subscriptionState: bazaar.subscriptionState,
+      subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
+    },
+    {
+      name: '%courier',
+      path: '/updates',
+      subscriptionState: courier.subscriptionState,
+      subscribing: () => courier.setSubscriptionStatus('subscribing'),
+    },
+    {
+      name: '%bulletin',
+      path: '/ui',
+      subscriptionState: bulletin.subscriptionState,
+      subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
+    },
+    {
+      name: '%friends',
+      path: '/all',
+      subscriptionState: friends.subscriptionState,
+      subscribing: () => friends.setSubscriptionStatus('subscribing'),
+    },
+  ];
+
+  const resubscribe = async (appName: string) => {
+    const app = apps.find((a) => a.name === appName);
+    if (app) app.subscribing();
+    await OSActions.resubscribe(appName);
+  };
+
+  const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
 
   return (
     <Flex gap={12} flexDirection="column" p="12px" width="100%">
@@ -146,6 +198,48 @@ export const SystemPanel: FC<any> = observer(() => {
             </Flex>
           </Flex>
         </Flex>
+      </Card>
+
+      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+        SUBSCRIPTIONS
+      </Text>
+      <Card
+        p="20px"
+        width="100%"
+        gap={16}
+        elevation="none"
+        customBg={cardColor}
+        flexDirection={'column'}
+      >
+        {apps.map((app) => (
+          <Flex
+            key={app.name}
+            flexDirection="row"
+            alignItems="center"
+            height={24}
+            gap={12}
+          >
+            <StatusIndicator
+              isSubscribed={app.subscriptionState === 'subscribed'}
+            />
+            <Text fontWeight={500} width={100}>
+              {app.name}
+            </Text>
+            <Text fontSize={2} opacity={0.7} flex={1}>
+              {app.path}
+            </Text>
+            {app.subscriptionState === 'unsubscribed' && (
+              <TextButton
+                style={{ fontWeight: 600 }}
+                disabled={isSubscribing}
+                onClick={() => resubscribe(app.name)}
+              >
+                Reconnect
+              </TextButton>
+            )}
+            {app.subscriptionState === 'subscribing' && <Spinner size={0} />}
+          </Flex>
+        ))}
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>

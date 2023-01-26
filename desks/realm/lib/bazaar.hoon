@@ -25,6 +25,10 @@
           [%install-app install-app]
           [%uninstall-app uninstall-app]
           [%initialize ul]
+          [%rebuild-catalog ul]
+          [%rebuild-stall rebuild-stall]
+          [%clear-stall clear-stall]
+          [%set-host set-host]
       ==
     ::
     ++  install-app
@@ -85,6 +89,24 @@
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
+    ::
+    ++  rebuild-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ::
+    ++  clear-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ::
+    ++  set-host
+      %-  ot
+      :~  [%app-id so]
+          [%host (su ;~(pfix sig fed:ag))]
+      ==
     --
   --
 ::
@@ -101,6 +123,7 @@
     ^-  [cord json]
     :-  -.rct
     ?-  -.rct
+      ::
         %initial
       %-  pairs
       :~  [%catalog (catalog-js:encode catalog.rct)]
@@ -110,7 +133,7 @@
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       
+        %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned
@@ -165,10 +188,18 @@
       ==
       ::
         %stall-update
+      =/  data=(list [@tas json])
+          ?~  det.rct         [%none ~]~
+          ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+      =/  data
+        %+  weld  data
+        ^-  (list [@tas json])
+        :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+            [%stall (stall-js:encode stall.rct)]
+        ==
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%stall (stall-js:encode stall.rct)]
-      ==
+      data
       ::
         %treaties-loaded
       %-  pairs
@@ -193,6 +224,23 @@
       ::     [%desk s+desk.rct]
       ::     [%docket (dkt:encode docket.rct)]
       :: ==
+        %rebuild-catalog
+      %-  pairs
+      :~  [%catalog (catalog-js:encode catalog.rct)]
+          [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
+        %rebuild-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%catalog (catalog-js:encode catalog.rct)]
+          [%stall (stall-js:encode stall.rct)]
+      ==
+      ::
+        %clear-stall
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     ==
   ::
   ++  view  :: encodes for on-peek

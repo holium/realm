@@ -1,14 +1,78 @@
+#
 name: production-build
-run-name: Production Build - ${{ github.actor }}
+run-name: Release Build - ${{ github.actor }}
 on:
   pull_request:
     types:
       - closed
     branches:
-      - main
+      - production
 jobs:
-  build-mac-production:
+  pre-deploy:
     if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      # the full CI object returned by the post-deploy script
+      ci: ${{ steps.ci.outputs.result }}
+      release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+      build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
+      build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
+      build_version_build: ${{ fromJSON(steps.ci.outputs.result).version.build }}
+      channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin production
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: ci
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-deploy.js')
+            const result = script({github, context}, 'production-build.yml')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      # commit the change for the new version if this is a new build
+      # - name: Push package version update
+      #   if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
+      #   run: |
+      #     git config --global user.email realm-builder-no-reply@holium.com
+      #     git config --global user.name ${{ github.actor }}
+      #     git add ./app/release/app/package.json
+      #     git commit -m "patch realm app version"
+      #     git push
+      #
+      - name: Start release draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          mkdir -p ./app/release/build
+          touch ./app/release/build/log.txt
+          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --target ${{ github.ref_name }} --latest=false --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
+  #
+  build-mac:
+    if: github.event.pull_request.merged == true
+    needs: [pre-deploy]
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -46,130 +110,158 @@ jobs:
         run: npm install -g yarn
       - name: Install app dependencies
         run: yarn install
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin production
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:mac
+        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
-  # build-linux-production:
-  #   if: github.event.pull_request.merged == true
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '14'
-  #         cache: 'npm'
-  #     - name: Install yarn
-  #       run: npm install -g yarn
-  #     - name: Install app dependencies
-  #       run: yarn install
-  #     - name: Build and publish
-  #       run: |
-  #         sudo dpkg --add-architecture i386
-  #         sudo mkdir -pm755 /etc/apt/keyrings
-  #         sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-  #         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-  #         sudo apt update
-  #         sudo apt install aptitude
-  #         sudo aptitude install -y -q winehq-staging
-  #         sudo aptitude install -y -q wine-staging
-  #         sudo apt update
-  #         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:release:linux
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  # #
-  # build-windows-production:
-  #   if: github.event.pull_request.merged == true
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: electronuserland/builder:wine
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     #
-  #     - name: Build and install
-  #       run: |
-  #         apt-get update && apt-get -y install sudo
-  #         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:win
-  #       env:
-  #         USERNAME: ${{ github.actor }}
-  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  #
-  bump-app-version:
-    needs: [build-mac-production]
+  build-windows:
+    if: github.event.pull_request.merged == true
+    needs: [pre-deploy]
     runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
+      #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      - name: Increment version
+      #
+      - name: Pull latest
         run: |
-          cd ./app/release/app
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull
-          npm version patch
-          git add package.json
-          git commit -m "patch version"
-          git push
-      # Workaround to avoid "Post Run actions/setup-node" failures.
-      # See: https://codesti.com/issue/actions/setup-node/317
-      - run: mkdir -p /home/runner/.npm
-        continue-on-error: true
-  #
-  deploy-desks:
-    needs: [bump-app-version]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-          cache: 'npm'
-      - name: Bump desks version
+          git config --global --add safe.directory '*'
+          git pull origin production
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
+        run: |
+          apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Run pre-deploy script
         uses: actions/github-script@v6
+        id: pre-windows
         with:
           script: |
-            const script = require('./.github/workflows/scripts/bump.js')
-            console.log(script({github}, './app/release/app/package.json', ['./desks/realm']))
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
-      - name: Push desk version update
+      - name: Build and install
+        run: |
+          npx cross-env GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
+        env:
+          USERNAME: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
+  deploy-desks:
+    needs: [pre-deploy, build-mac, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Pull latest
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          mv ./desks/realm/desk.docket-0 ./desks/realm/desk.docket-0.tmp
-          git checkout HEAD^ ./desks/realm/desk.docket-0
-          git pull origin main
-          mv ./desks/realm/desk.docket-0.tmp ./desks/realm/desk.docket-0
-          git add ./desks/realm/desk.docket-0
-          git commit -m "patch realm desk version"
-          git push
+          git pull origin production
       #
+      - name: Bump desks version
+        uses: actions/github-script@v6
+        id: bump-desks
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/bump-desk-version.js')
+            console.log(process.env.CI_ENV)
+            console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
+        env:
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      # - name: Push desk version update
+      #   if: ${{ fromJSON(steps.bump-desks.outputs.result).updated }}
+      #   run: |
+      #     git add ./desks/realm/desk.docket-0
+      #     git commit -m "patch realm desk version"
+      #     git push
+      #
+      # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
           mkdir ~/.ssh
+          # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm-staging
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier-staging
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/realm/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/courier/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/usher/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -191,9 +283,118 @@ jobs:
               ship: process.env.DEPLOY_SHIP,
               code: process.env.DEPLOY_SHIP_CODE,
               rootUrl: process.env.DEPLOY_ROOT_URL,
-              mounts: ['usher', 'realm-staging', 'courier-staging']
+              mounts: ['usher', 'realm', 'courier']
             }))
       # Workaround to avoid "Post Run actions/setup-node" failures.
       # See: https://codesti.com/issue/actions/setup-node/317
       - run: mkdir -p /home/runner/.npm
         continue-on-error: true
+  #
+  #  once everything is done, flip the switch on the draft release to make
+  #    the release available to auto-update
+  post-deploy:
+    needs: [pre-deploy, build-mac, build-windows, deploy-desks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: post-deploy
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/post-deploy.js')
+            console.log(process.env.CI_ENV);
+            const result = script({github, context}, JSON.parse(process.env.CI_ENV), './app/release/app/package.json')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - run: |
+          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # this will run even if the build is canceled or fails
+  #  we need this to re-enable the workflow
+  finalize:
+    if: always()
+    needs: [pre-deploy, post-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      #
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: done
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/finalize.js')
+            const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
+            const result = script({github, context}, 'production-build.yml', ci)
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+#
+########### DO NOT REMOVE THESE! ############
+#
+# build-linux-production:
+#   if: github.event.pull_request.merged == true
+#   runs-on: ubuntu-latest
+#   steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v3
+#     - name: Setup node
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '14'
+#         cache: 'npm'
+#     - name: Install yarn
+#       run: npm install -g yarn
+#     - name: Install app dependencies
+#       run: yarn install
+#     - name: Build and publish
+#       run: |
+#         sudo dpkg --add-architecture i386
+#         sudo mkdir -pm755 /etc/apt/keyrings
+#         sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+#         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+#         sudo apt update
+#         sudo apt install aptitude
+#         sudo aptitude install -y -q winehq-staging
+#         sudo aptitude install -y -q wine-staging
+#         sudo apt update
+#         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:release:linux
+#       env:
+#         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+# #
+# build-windows-production:
+#   if: github.event.pull_request.merged == true
+#   runs-on: ubuntu-latest
+#   container:
+#     image: electronuserland/builder:wine
+#   steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v3
+#     #
+#     - name: Build and install
+#       run: |
+#         apt-get update && apt-get -y install sudo
+#         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:win
+#       env:
+#         USERNAME: ${{ github.actor }}
+#         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+#

@@ -3,9 +3,9 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store, *post, *resource, *versioned-state, group, inv=invite-store, met=metadata-store,
-    hark=hark-store, dm-hook-sur=dm-hook, notify, cs=contact-store
+    hark=hark-store, dm-hook-sur=dm-hook, notify, agd-type=accept-group-dm, cs=contact-store
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
-=|  state-1
+=|  state-2
 =*  state  -
 :: ^-  agent:gall
 =<
@@ -17,7 +17,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =.  groups-target.state     %1
+    =.  groups-target.state     %2
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
     =.  uuid.state              (sham our.bowl)
     =.  push-enabled.state      %.y
@@ -71,11 +71,11 @@
       %accept-group-dm
         ?-  groups-target
           %1
-            =/  accept-action  !<([%accept id=@uvH] vase)
+            =/  accept-action  !<(action:agd-type vase)
             :-
-            [%pass / %agent [our.bowl %invite-store] %poke invite-action+!>([%accept term=%group uid=id.accept-action])]~
+            [%pass / %agent [our.bowl %invite-store] %poke invite-action+!>([-.accept-action term=%group uid=id.accept-action])]~
             state
-          %2  [(accept-group-dm:groups-two !<([%accept id=@uvH] vase) bowl) state]
+          %2  [(accept-group-dm:groups-two !<(action:agd-type vase) bowl) state]
         ==
       %graph-dm-action
         ?-  groups-target
@@ -99,7 +99,7 @@
     ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
       ?:  =(groups-target %2)
-        (on-watch:groups-two path bowl)
+        (on-watch:groups-two path bowl state)
       :: ~&  "on-watch called in %courier"
       :: ~&  path
       ?+    path      (on-watch:def path)
@@ -113,7 +113,7 @@
     |=  =path
     ^-  (unit (unit cage))
     ?:  =(groups-target %2)
-      (peek:groups-two path bowl devices.state)
+      (peek:groups-two path bowl devices.state state)
     ?+    path  (on-peek:def path)
     ::
       [%x %devices ~]
@@ -138,9 +138,8 @@
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
         ``graph-dm-view+!>([%dm-log dms])
       [%x %rolodex ~]
-    :-  ~  :-  ~  :-  %rolodex
-    !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
-
+        :-  ~  :-  ~  :-  %rolodex
+        !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
       :: [%x %dms @ %paged @ @ ~]
@@ -206,7 +205,10 @@
             `this
           %fact
             :: ~&  ['club fact' cage.sign]
-            [(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
+            =^  cards  state
+              (handle-club-ui-fact:groups-two wire cage.sign bowl state)
+            [cards this]
+            ::[(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
         ==
       [%g2 %briefs ~]
         ?+    -.sign  (on-agent:def wire sign)
@@ -222,7 +224,7 @@
             ==
           %fact
             ~&  'groups-two /briefs fact'
-            :: ~&  cage.sign
+            ~&  cage.sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
             :: [whom:c brief:briefs:c]
         ==
@@ -237,7 +239,10 @@
             ~&  >  "{<dap.bowl>}: groups-two /dm/ui kicked us, giving up..."
             `this
           %fact
-            [(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
+            =^  cards  state
+              (handle-dm-ui-fact:groups-two wire cage.sign bowl state)
+            [cards this]
+            ::[(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
         ==
       [%g2 %club %new ~]
         :: ~&  -.sign

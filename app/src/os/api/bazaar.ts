@@ -12,6 +12,12 @@ export interface UnpinPoke {
   path: { ship: Patp; space: string };
   'app-id': string;
 }
+
+export interface ReorderPinnedAppsPoke {
+  path: { ship: Patp; space: string };
+  dock: string[];
+}
+
 export interface AddToSuitePoke {
   path: { ship: Patp; space: string };
   'app-id': string;
@@ -91,6 +97,24 @@ export const BazaarApi = {
         reaction: 'bazaar-reaction.pinned',
         onReaction(data) {
           resolve(data.pinned);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  reorderPinnedApps: async (conduit: Conduit, body: ReorderPinnedAppsPoke) => {
+    return await new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'reorder-pins': body,
+        },
+        reaction: 'bazaar-reaction.pins-reodered',
+        onReaction(data) {
+          resolve(data['pins-reodered']);
         },
         onError: (e: any) => {
           reject(e);
@@ -285,8 +309,18 @@ export const BazaarSubscriptions = {
           handleReactions(data, model);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %bazaar');
+        model.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %bazaar rejected');
+        model.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %bazaar subscription');
+        model.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };
@@ -298,6 +332,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
+      // eslint-disable-next-line no-case-declarations
       const installUpdate = data['app-install-update'];
       model._setAppStatus(
         installUpdate.appId,
@@ -310,6 +345,9 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'unpinned':
       model._removePinned(data.unpinned);
+      break;
+    case 'pins-reodered':
+      if (data['pins-reodered']) model._reorderPins(data['pins-reodered']);
       break;
     case 'suite-added':
       model._suiteAdded(data['suite-added']);
@@ -327,21 +365,31 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._updateStall(data['stall-update']);
       break;
     case 'joined-bazaar':
-      // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
       break;
     case 'treaties-loaded':
-      console.log(data);
       model._treatiesLoaded();
       break;
     case 'new-ally':
-      // console.log(data);
       const ally = data['new-ally'];
       model._allyAdded(ally.ship, ally.desks);
       break;
     case 'ally-deleted':
       // console.log(data);
       model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-catalog':
+      // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
+      model._rebuildCatalog(data['rebuild-catalog']);
+      // model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-stall':
+      // model._allyDeleted(data['ally-deleted'].ship);
+      model._rebuildStall(data['rebuild-stall']);
+      break;
+    case 'clear-stall':
+      model._clearStall(data['clear-stall']);
+      // model._allyDeleted(data['ally-deleted'].ship);
       break;
     default:
       break;

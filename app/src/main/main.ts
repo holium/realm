@@ -57,6 +57,27 @@ export interface IAppUpdater {
 
 log.transports.file.level = isDevelopment ? 'debug' : 'info';
 
+// determine the releaseChannel. if a user downloads an alpha version of the app, we
+//  need to record this for later use. the reason is that 'alpha' channel updates
+//  both when new alpha and release builds are deployed.
+//  since release builds will not have process.env.RELEASE_CHANNEL (which means)
+//   channel will be set to 'latest', we need to "remember" that this is still
+//   an 'alpha' channel user. the rule is:
+//  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
+const determineReleaseChannel = () => {
+  let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
+  const settingsFilename = `${app.getPath('userData')}/settings.json`;
+  if (fs.existsSync(settingsFilename)) {
+    var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
+    releaseChannel = settings.releaseChannel || releaseChannel;
+  } else {
+    if (releaseChannel === 'alpha') {
+      fs.writeFileSync(settingsFilename, JSON.stringify({ releaseChannel }));
+    }
+  }
+  return releaseChannel;
+};
+
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
@@ -68,6 +89,7 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.setFeedURL({
       provider: 'generic',
       url: process.env.AUTOUPDATE_FEED_URL,
+      channel: determineReleaseChannel(),
     });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
@@ -111,14 +133,14 @@ export class AppUpdater implements IAppUpdater {
     });
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
-    setInterval(() => {
-      if (!this.manualCheck) {
-        // gracefully ignore if no internet when attempting to auto update
-        if (net.isOnline()) {
-          autoUpdater.checkForUpdates();
-        }
-      }
-    }, 600000);
+    // setInterval(() => {
+    //   if (!this.manualCheck) {
+    //     // gracefully ignore if no internet when attempting to auto update
+    //     if (net.isOnline()) {
+    //       autoUpdater.checkForUpdates();
+    //     }
+    //   }
+    // }, 600000);
     // gracefully ignore if no internet when attempting to auto update
     if (net.isOnline()) {
       autoUpdater.checkForUpdates();
@@ -201,8 +223,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    // width: 1920,
-    // height: 1440,
+    width: 1920,
+    height: 1080,
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',

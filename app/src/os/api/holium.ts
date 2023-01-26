@@ -200,6 +200,19 @@ export class HoliumAPI {
     return data;
   }
 
+  async findAccount(email: string): Promise<{
+    id: string | null;
+    success: boolean;
+  } | null> {
+    try {
+      const { data } = await client.get(`accounts/find?email=${email}`);
+      return data;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
   async getAccessCode(code: string): Promise<AccessCode | null> {
     try {
       const { data } = await client.get(`access-codes/${code}`);

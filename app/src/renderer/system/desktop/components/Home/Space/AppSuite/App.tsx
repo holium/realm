@@ -19,6 +19,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { bgIsLightOrDark } from 'os/lib/color';
 import {
   handleInstallation,
   handleResumeSuspend,
@@ -31,6 +32,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 type AppEmptyProps = {
   isSelected: boolean;
   accentColor: string;
+  isAdmin: boolean | undefined;
 } & BoxProps;
 
 const AppEmpty = styled(Box)<AppEmptyProps>`
@@ -41,15 +43,14 @@ const AppEmpty = styled(Box)<AppEmptyProps>`
   align-items: center;
   justify-content: center;
   transition: 0.2s ease;
-  background: ${rgba('#FBFBFB', 0.4)};
-  &:hover {
-    transition: 0.2s ease;
-    background: ${rgba('#FFFFFF', 0.5)};
-  }
   ${(props: AppEmptyProps) =>
-    props.isSelected &&
     css`
-      border: 2px solid ${props.accentColor};
+      ${props.isSelected && `border: 2px solid ${props.accentColor}`};
+      background: ${rgba('#FBFBFB', props.isAdmin ? 0.4 : 0.1)};
+      &:hover {
+        transition: 0.2s ease;
+        background: ${rgba('#FFFFFF', props.isAdmin ? 0.5 : 0.2)};
+      }
     `};
 `;
 
@@ -80,7 +81,8 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
     const installStatus =
       ((app as UrbitAppType).installStatus as InstallStatus) ||
       InstallStatus.installed;
-    const { isInstalled, isUninstalled } = getAppTileFlags(installStatus);
+    const { isInstalled, isUninstalled, isDesktop } =
+      getAppTileFlags(installStatus);
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
@@ -168,12 +170,24 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
         weRecommended,
       ]
     );
-
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+    const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+    const iconColor = useMemo(
+      () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
+      [isLight]
+    );
+    // const iconColor
     return (
       <Box position="relative">
-        {isUninstalled && (
+        {(isUninstalled || isDesktop) && (
           <Box zIndex={3} position="absolute" right="14px" top="14px">
-            <IconButton size={26} color={accentColor} onClick={onInstallation}>
+            <IconButton
+              size={26}
+              hoverFill={iconColor}
+              customBg={rgba(iconColor, 0.12)}
+              color={iconColor}
+              onClick={onInstallation}
+            >
               <Icons name="CloudDownload" />
             </IconButton>
           </Box>
@@ -201,9 +215,12 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
       width={160}
       isSelected={selected}
       accentColor={accentColor}
+      isAdmin={isAdmin}
       onClick={(e) => onClick && onClick(e, undefined)}
     >
-      <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
+      {isAdmin && (
+        <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
+      )}
     </AppEmpty>
   );
 });

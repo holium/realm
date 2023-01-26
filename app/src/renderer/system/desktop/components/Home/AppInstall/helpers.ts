@@ -6,6 +6,7 @@ export const installLabel = (status: InstallStatus) => {
     case InstallStatus.installed:
       return 'Uninstall app';
     case InstallStatus.uninstalled:
+    case InstallStatus.desktop:
       return 'Install app';
     case InstallStatus.started:
       return 'Cancel install';
@@ -22,7 +23,11 @@ export const handleInstallation = (
   status: InstallStatus
 ) => {
   if (
-    [InstallStatus.uninstalled, InstallStatus.failed].includes(status) &&
+    [
+      InstallStatus.uninstalled,
+      InstallStatus.desktop,
+      InstallStatus.failed,
+    ].includes(status) &&
     !host
   ) {
     console.error('No host found for app', desk);
@@ -30,15 +35,14 @@ export const handleInstallation = (
   }
   switch (status) {
     case InstallStatus.installed:
+    case InstallStatus.suspended:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.uninstalled:
+    case InstallStatus.desktop:
       SpacesActions.installApp(host!, desk);
       return;
     case InstallStatus.started:
-      SpacesActions.uninstallApp(desk);
-      return;
-    case InstallStatus.suspended:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.failed:

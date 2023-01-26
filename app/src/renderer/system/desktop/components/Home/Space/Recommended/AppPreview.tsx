@@ -32,14 +32,21 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const { app } = props;
     const { theme, spaces } = useServices();
     const space = spaces.selected;
-    let installStatus = InstallStatus.uninstalled;
+    let installStatus = InstallStatus.installed;
     let info = '';
     if (app.type === 'urbit') {
       info = app.info;
       installStatus = app.installStatus as InstallStatus;
     }
-    const { isInstalling, isInstalled, isSuspended, isUninstalled, isFailed } =
-      getAppTileFlags(installStatus);
+
+    const {
+      isInstalling,
+      isInstalled,
+      isSuspended,
+      isUninstalled,
+      isFailed,
+      isDesktop,
+    } = getAppTileFlags(installStatus);
 
     const length = 60;
 
@@ -85,9 +92,11 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           app={app}
           installStatus={InstallStatus.installed}
           onAppClick={(selectedApp: AppType) => {
-            ShellActions.openDialogWithStringProps('app-detail-dialog', {
-              appId: selectedApp.id,
-            });
+            if (!(isInstalling || isInstalled)) {
+              ShellActions.openDialogWithStringProps('app-detail-dialog', {
+                appId: selectedApp.id,
+              });
+            }
           }}
         />
         <Flex
@@ -109,7 +118,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
             </Text>
           </Flex>
           <Flex flexGrow={0} gap={12}>
-            {isUninstalled && (
+            {(isUninstalled || isDesktop) && (
               <IconButton
                 size={26}
                 color={theme.currentTheme.accentColor}

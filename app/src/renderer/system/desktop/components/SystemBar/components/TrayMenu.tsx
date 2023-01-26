@@ -1,7 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
-import { compose, space, color, typography } from 'styled-system';
 import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 
 export interface TrayMenuProps {
@@ -12,22 +11,16 @@ export interface TrayMenuProps {
 
 const Wrapper = styled(motion.div)`
   position: absolute;
-  box-sizing: border-box;
-  /* max-width: 20rem; */
+  z-index: 13;
+  backface-visibility: hidden;
 `;
 
-export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
+export const TrayMenuWrapper = styled(motion.div)`
   position: absolute;
-  bottom: 0;
-  z-index: 4;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
+  bottom: 0px;
   backface-visibility: hidden;
-  perspective: 1000;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-`)(compose(space, color, typography));
+  z-index: 13;
+`;
 
 export const TrayMenu = ({ id, body, coords }: TrayMenuProps) => {
   const { setActiveApp, activeApp } = useTrayApps();

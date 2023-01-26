@@ -1,15 +1,12 @@
 import { FC, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 
 interface TitlebarStyleProps {
-  customBg: string;
   hasBorder: boolean;
   zIndex: number;
   isAppWindow?: boolean;
@@ -20,30 +17,25 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  /* flex: 1 1 auto; */
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   position: ${(props: TitlebarStyleProps) =>
     props.isAppWindow ? 'relative' : 'absolute'};
-  backdrop-filter: ${(props: TitlebarStyleProps) =>
-    props.hasBlur ? 'blur(16px)' : 'none'};
+  /* backdrop-filter: ${(props: TitlebarStyleProps) =>
+    props.hasBlur ? 'blur(16px)' : 'none'}; */
   top: 0;
   left: 0;
   right: 0;
   height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 54)}px;
   padding: 0 4px 0
     ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-transform: translateZ(0);
-  --webkit-backface-visibility: hidden;
-  --webkit-perspective: 1000;
-  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   ${(props: TitlebarStyleProps) => css`
-    background: ${props.customBg};
     z-index: ${props.zIndex};
     border-bottom: ${props.hasBorder
-      ? `1px solid ${rgba(darken(0.5, props.customBg), 0.25)}`
+      ? ' 1px solid var(--rlm-border-color)'
       : 'none'};
   `}
 `;
@@ -156,7 +148,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       transition={{
         background: { duration: 0.25 },
       }}
-      customBg={rgba(windowColor!, 0.9)}
+      // customBg={windowColor!}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >

@@ -362,6 +362,8 @@ export function CurrentUserCursor({
         'input[type="password"]',
         'input[type="date"]',
         'input',
+        '.input-transparent',
+        '.ProseMirror',
         ':scope > .cursor-text',
         '.realm-cursor-text-cursor',
       ].join(',')

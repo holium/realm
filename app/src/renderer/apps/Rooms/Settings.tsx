@@ -20,7 +20,6 @@ import { useRooms } from './useRooms';
 export const Settings: FC = observer(() => {
   const { dimensions, roomsApp } = useTrayApps();
   const { theme } = useServices();
-  const [loading, setLoading] = useState(false);
   const roomsManager = useRooms();
 
   const { dockColor, windowColor, inputColor, mode } = theme.currentTheme;

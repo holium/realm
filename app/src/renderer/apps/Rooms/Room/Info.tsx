@@ -25,7 +25,7 @@ const Value = styled(Text)`
 export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
-  const room = roomsManager.presentRoom!.room;
+  const room = roomsManager.presentRoom!;
 
   const rowGap = 16;
 
@@ -65,7 +65,7 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
           minWidth={bwid}
           flexDirection={'column'}
           maxHeight={'120px'}
-          overflowY={'scroll'}
+          overflowY={'auto'}
         >
           {room.whitelist.map((patp: Patp, index: number) => {
             return (

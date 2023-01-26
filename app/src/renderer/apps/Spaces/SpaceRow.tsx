@@ -14,7 +14,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-export const EmptyGroup = styled.div`
+export const EmptyGroup = styled.div<{ color?: string }>`
   height: 32px;
   width: 32px;
   background: ${(p) => p.color || '#000'};
@@ -162,9 +162,6 @@ export const SpaceRow = observer((props: SpaceRowProps) => {
             variant="body"
           >
             {space.name}
-
-            {/* TODO add notification */}
-            {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
             <Flex gap={4} flexDirection="row" alignItems="center">

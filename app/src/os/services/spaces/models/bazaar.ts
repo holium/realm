@@ -4,6 +4,7 @@ import {
   InstallPoke,
   PinPoke,
   RemoveFromSuitePoke,
+  ReorderPinnedAppsPoke,
   UninstallPoke,
   UnpinPoke,
 } from '../../../api/bazaar';
@@ -20,6 +21,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
+import { SubscriptionModel } from '../../common.model';
 
 const setAppStatus = (app: AppType, status: InstallStatus) => {
   if (app.type !== 'urbit') return app;
@@ -37,6 +39,11 @@ export enum InstallStatus {
   treaty = 'treaty',
   suspended = 'suspended',
   resuming = 'resuming',
+  // this is set when joining a space and you do not have the app
+  //  installed, but want it to appear on the home screen. this
+  //  is different than uninstalled which has %suspend implications
+  //  on the back-end. %desktop requires a fresh install.
+  desktop = 'desktop',
 }
 
 export enum AppTypes {
@@ -85,6 +92,7 @@ export const DevAppModel = types.model('DevApp', {
   id: types.identifier,
   title: types.string,
   type: types.literal(AppTypes.Dev),
+  info: types.optional(types.string, ''),
   color: types.string,
   icon: types.string,
   installStatus: types.optional(types.string, InstallStatus.installed),
@@ -105,21 +113,30 @@ export const WebApp = types.model('WebApp', {
   installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
-export const UrbitApp = types.model('UrbitApp', {
-  id: types.identifier,
-  title: types.string,
-  info: types.string,
-  color: types.string,
-  type: types.literal(AppTypes.Urbit),
-  image: types.maybeNull(types.string),
-  href: Glob,
-  version: types.string,
-  website: types.string,
-  license: types.string,
-  installStatus: types.string,
-  host: types.maybeNull(types.string),
-  config: types.maybeNull(RealmConfig),
-});
+export const UrbitApp = types
+  .model('UrbitApp', {
+    id: types.identifier,
+    title: types.string,
+    info: types.string,
+    color: types.string,
+    type: types.literal(AppTypes.Urbit),
+    image: types.maybeNull(types.string),
+    href: Glob,
+    version: types.string,
+    website: types.string,
+    license: types.string,
+    installStatus: types.string,
+    host: types.maybeNull(types.string),
+    config: types.maybeNull(RealmConfig),
+  })
+  .actions((self) => ({
+    setHost(host: string) {
+      self.host = host;
+    },
+    setConfig(config: any) {
+      self.config = config;
+    },
+  }));
 
 const NativeApp = types.model('NativeApp', {
   id: types.identifier,
@@ -172,6 +189,9 @@ export const NewBazaarStore = types
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .actions((self) => ({
     // Updates
@@ -195,6 +215,9 @@ export const NewBazaarStore = types
       const removeIndex = dock?.findIndex((id: string) => id === data.id)!;
       dock?.splice(removeIndex, 1);
       self.docks.set(data.path, dock);
+    },
+    _reorderPins(data: { path: string; dock: string[] }) {
+      self.docks.set(data.path, data.dock);
     },
     _suiteAdded(data: { path: string; id: string; index: number }) {
       const stall = self.stalls.get(data.path);
@@ -222,20 +245,64 @@ export const NewBazaarStore = types
       applySnapshot(self.gridIndex, data.grid);
     },
     _addJoined(data: { path: string; stall: any; catalog: any }) {
-      self.stalls.set(data.path, data.stall);
       Object.keys(data.catalog).forEach((key: string) => {
         const docket = data.catalog[key];
         if (docket.type === 'urbit') {
-          data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+          // Set new apps in catalog
+          const app = self.catalog.get(key);
+          if (!app) {
+            data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+            self.catalog.set(key, data.catalog[key]);
+          } else {
+            if (!(app as UrbitAppType).host && data.catalog[key].host) {
+              // add host to existing app
+              (app as UrbitAppType).setHost(data.catalog[key].host);
+              self.catalog.set(key, app);
+            }
+          }
         }
       });
-      self.catalog.merge(data.catalog);
-    },
-    _updateStall(data: {
-      path: string;
-      stall: { recommended: any; suite: any };
-    }) {
       self.stalls.set(data.path, data.stall);
+    },
+    _updateStall(data: any) {
+      if ('add-app' in data) {
+        const app: AppType = data['add-app'];
+        if (app.type === 'urbit') {
+          app.color = cleanNounColor(app.color);
+        }
+        self.catalog.set(app.id, app);
+      } else if ('remove-app' in data) {
+        // const appId: string = data['remove-app'];
+      }
+      self.stalls.set(data.path, data.stall);
+    },
+    _rebuildCatalog(data: any) {
+      if (data.catalog) {
+        for (let i = 0; i < data.catalog.length; i++) {
+          const app: AppType = data.catalog[i];
+          if (app.type === 'urbit') {
+            app.color = cleanNounColor(app.color);
+          }
+          self.catalog.set(app.id, app);
+        }
+      }
+      self.gridIndex.clear();
+      applySnapshot(self.gridIndex, data.grid);
+    },
+    _rebuildStall(data: any) {
+      if (data.catalog) {
+        for (let i = 0; i < data.catalog.length; i++) {
+          const app: AppType = data.catalog[i];
+          if (app.type === 'urbit') {
+            app.color = cleanNounColor(app.color);
+          }
+          self.catalog.set(app.id, app);
+        }
+      }
+      self.stalls.set(data.path, data.stall);
+    },
+    _clearStall(data: any) {
+      self.stalls.set(data.path, StallModel.create());
     },
     _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
@@ -358,6 +425,16 @@ export const NewBazaarStore = types
         console.error(error);
       }
     }),
+    reorderPinnedApps: flow(function* (
+      conduit: Conduit,
+      body: ReorderPinnedAppsPoke
+    ) {
+      try {
+        return yield BazaarApi.reorderPinnedApps(conduit, body);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     addToSuite: flow(function* (conduit: Conduit, body: AddToSuitePoke) {
       try {
         return yield BazaarApi.addToSuite(conduit, body);
@@ -452,6 +529,11 @@ export const NewBazaarStore = types
       Object.values(devApps).forEach((app: any) => {
         self.devAppMap.set(app.id, DevAppModel.create(app));
       });
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
     },
   }))
   .views((self) => ({
@@ -576,6 +658,9 @@ export const NewBazaarStore = types
         }
       );
       return suite;
+    },
+    get subscriptionState() {
+      return self.subscription.state;
     },
   }));
 

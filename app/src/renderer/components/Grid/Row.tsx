@@ -7,6 +7,7 @@ interface RowType {
   align?: string | object;
   justify?: string | object;
   children?: React.ReactNode;
+  style?: any;
   noGutter?: boolean;
   debug?: boolean;
 }

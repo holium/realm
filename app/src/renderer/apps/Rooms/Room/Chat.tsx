@@ -11,7 +11,7 @@ import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Box, WindowedList } from '@holium/design-system';
+import { WindowedList } from '@holium/design-system';
 import { RoomChatMessage } from './RoomChatMessage';
 import { useRooms } from '../useRooms';
 
@@ -43,7 +43,9 @@ export const chatForm = (
 export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   const { text } = useMemo(() => chatForm(), []);
   const [loading, setLoading] = useState(false);
-  const { roomsApp } = useTrayApps();
+  const { getTrayAppHeight } = useTrayApps();
+  const listHeight = getTrayAppHeight() - 164;
+
   const roomsManager = useRooms();
   const { theme: themeStore } = useServices();
 
@@ -51,7 +53,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.presentRoom!.chat.slice(0);
+  const chats = roomsManager.live.chat.slice(0);
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -60,7 +62,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
       if (chatInputRef.current === null) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsManager.presentRoom?.sendChat(innerText);
+      roomsManager.sendChat(innerText);
       text.actions.onChange('');
     },
     [roomsManager.presentRoom, text.actions]
@@ -70,7 +72,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
     if (chats.length === 0) {
       return (
         <Flex
-          height={330}
+          height="100%"
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
@@ -83,27 +85,26 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
     }
 
     return (
-      <Box height={330}>
-        <WindowedList
-          width={354}
-          data={chats}
-          sort={(a, b) => a.timeReceived - b.timeReceived}
-          rowRenderer={(chat, index) => (
-            <RoomChatMessage
-              key={chat.index}
-              chat={chat}
-              doesPack={
-                chats[index - 1] &&
-                // pack if last guy is the same as the current guy
-                chats[index - 1].author === chat.author
-                // and the last guy isn't too old (2 minutes)
-                // chats[index - 1].timeReceived + 1000 < chat.timeReceived
-              }
-            />
-          )}
-          startAtBottom
-        />
-      </Box>
+      <WindowedList
+        width={354}
+        height={listHeight}
+        data={chats}
+        sort={(a, b) => a.timeReceived - b.timeReceived}
+        rowRenderer={(chat, index) => (
+          <RoomChatMessage
+            key={chat.index}
+            chat={chat}
+            doesPack={
+              chats[index - 1] &&
+              // pack if last guy is the same as the current guy
+              chats[index - 1].author === chat.author
+              // and the last guy isn't too old (2 minutes)
+              // chats[index - 1].timeReceived + 1000 < chat.timeReceived
+            }
+          />
+        )}
+        startAtBottom
+      />
     );
   }, [chats]);
 
@@ -113,7 +114,8 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
       <Flex
         flexDirection="row"
         alignItems="center"
-        pt={4}
+        pt={2}
+        pb={2}
         px={3}
         style={{
           gap: 8,
@@ -125,7 +127,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
           type="text"
           placeholder="whats up dawg"
           autoFocus
-          ref={chatInputRef}
+          innerRef={chatInputRef}
           spellCheck={false}
           wrapperStyle={{
             cursor: 'none',

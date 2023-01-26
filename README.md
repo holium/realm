@@ -32,3 +32,11 @@ If you download from releases, you will have to include a github token env when 
 In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com` (only if DEBUG_PROD=true).
 
 `~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
+
+### Build prerelease version
+
+```
+npx cross-env DEBUG_PROD=true yarn package:prerelease:mac
+npx cross-env DEBUG_PROD=true yarn package:prerelease:linux
+npx cross-env DEBUG_PROD=true yarn package:prerelease:win
+```

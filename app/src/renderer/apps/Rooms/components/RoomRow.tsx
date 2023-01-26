@@ -1,14 +1,16 @@
-import React, { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
 import { darken } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
-// import { id } from 'ethers/lib/utils';
 import { RoomType } from '@holium/realm-room';
 import { useRooms } from '../useRooms';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;
@@ -23,16 +25,16 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     title,
     present,
     creator,
-    provider,
     // cursors,
     onClick,
     rightChildren,
   } = props;
   const { theme, ship } = useServices();
   const roomsManager = useRooms();
-  const { roomsApp } = useTrayApps();
+  const { getOptions, setOptions } = useContextMenu();
+  const defaultOptions = getOptions().filter((o) => o.id === 'toggle-devtools');
 
-  const { mode, dockColor, windowColor, accentColor } = theme.currentTheme;
+  const { mode, dockColor, windowColor } = theme.currentTheme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
@@ -43,7 +45,6 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  // const creator = roomsApp.liveRoom?.creator;
   const peopleNoHost = present!.filter(
     (person: string) => person !== ship?.patp
   );
@@ -53,15 +54,45 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   }
   const isLive = roomsManager.presentRoom?.rid === rid;
 
+  const contextMenuOptions = useMemo(
+    () =>
+      ship!.patp === props.provider
+        ? [
+            {
+              id: `room-delete-${rid}`,
+              label: 'Delete Room',
+              onClick: (evt) => {
+                evt.stopPropagation();
+                roomsManager.protocol.deleteRoom(rid);
+              },
+            } as ContextMenuOption,
+            ...defaultOptions,
+          ]
+        : defaultOptions,
+    [rid, ship, props.provider]
+  );
+
+  useEffect(() => {
+    if (
+      contextMenuOptions.length &&
+      contextMenuOptions !== getOptions(`room-row-${rid}`)
+    ) {
+      setOptions(`room-row-${rid}`, contextMenuOptions);
+    }
+  }, [contextMenuOptions, rid, setOptions]);
+
   return (
     <Row
       small={tray}
       className="realm-cursor-hover"
       baseBg={!tray && isLive ? isLiveColor : undefined}
       customBg={isLive ? bgColor : windowColor}
-      {...(onClick
-        ? { onClick: (evt: any) => onClick(evt) }
-        : { style: { pointerEvents: 'none' } })}
+      onClick={(evt: MouseEvent<HTMLDivElement>) => onClick?.(evt)}
+      style={
+        !onClick
+          ? { pointerEvents: 'none', position: 'relative' }
+          : { position: 'relative' }
+      }
     >
       <Flex
         flex={1}
@@ -71,6 +102,18 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
         flexDirection="row"
       >
         <Flex width="-webkit-fill-available" gap={2} flexDirection="column">
+          {/* An absolute element that captures all the context clicks */}
+          <div
+            id={`room-row-${rid}`}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
+            }}
+          />
           {/* {(!tray && isLive) && <Icons name='CheckCircle'></Icons> */}
           <Text fontWeight={500} fontSize={tray ? '14px' : '15px'}>
             {titleText}

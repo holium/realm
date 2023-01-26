@@ -122,6 +122,39 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
     getPlanets();
   }, []);
 
+  useEffect(() => {
+    // Make planets tabable
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab' && e.shiftKey) {
+        e.preventDefault();
+        const previousIndex = selectedIndex - 1;
+        const previousPlanet = planets[previousIndex];
+        if (previousPlanet) {
+          setSelectedIndex(previousIndex);
+        } else {
+          setSelectedIndex(planets.length - 1);
+        }
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        const nextIndex = selectedIndex + 1;
+        const nextPlanet = planets[nextIndex];
+        if (nextPlanet) {
+          setSelectedIndex(nextIndex);
+        } else {
+          setSelectedIndex(0);
+        }
+      } else if (e.key === 'Enter') {
+        selectPlanet();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, [selectedIndex, planets]);
+
   function selectPlanet() {
     const selectedPlanet = planets[selectedIndex];
     OnboardingActions.selectPlanet(selectedPlanet);
@@ -165,6 +198,7 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
                 key={index}
                 patp={planet.patp}
                 selected={index === selectedIndex}
+                tabIndex={index}
                 theme={props.theme}
                 onClick={() => setSelectedIndex(index)}
               />

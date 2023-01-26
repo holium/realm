@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
 import { Box, Sigil, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
@@ -7,7 +7,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-interface SelectPlanProps extends BaseDialogProps {
+export interface SelectPlanProps extends BaseDialogProps {
   patp: string;
 }
 
@@ -35,6 +35,28 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
     setSubscribeLoading(false);
     props.onNext && props.onNext();
   }
+
+  useEffect(() => {
+    // Make billingperiod tabable
+    const handleKeydown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      if (e.key === 'Tab') {
+        if (billingPeriod === 'monthly') {
+          setBillingPeriod('annual');
+        } else {
+          setBillingPeriod('monthly');
+        }
+      } else if (e.key === 'Enter') {
+        subscribe();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, [billingPeriod]);
 
   const PlanetPreview = () => (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">
@@ -114,6 +136,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
             title="Monthly subscription"
             price={`$15/month`}
             selected={billingPeriod === 'monthly'}
+            tabable={true}
             onClick={() => setBillingPeriod('monthly')}
           >
             Pay monthly and own your planet after you first three payments.

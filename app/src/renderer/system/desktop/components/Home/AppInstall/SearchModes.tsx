@@ -2,7 +2,8 @@ import { FC, useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import { rgba } from 'polished';
-import { Flex, Text, Button, Spinner } from 'renderer/components';
+
+import { Flex, Text, Button, Spinner, NoScrollBar } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -93,13 +94,14 @@ export const SearchModes = observer(() => {
 const AppInstallStart = observer(() => {
   const { bazaar, theme, spaces } = useServices();
   const spacePath: string = spaces.selected?.path!;
+  const appInstaller = useAppInstaller();
 
   const textFaded = useMemo(
     () => rgba(theme.currentTheme.textColor, 0.7),
     [theme.currentTheme.textColor]
   );
   return (
-    <>
+    <NoScrollBar flexDirection="column">
       <Flex flexDirection="column" gap={12}>
         <Text color={textFaded} fontWeight={500}>
           Recent Apps
@@ -122,16 +124,15 @@ const AppInstallStart = observer(() => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaar.recentDevs, theme.currentTheme)}
+          {renderDevs(bazaar.recentDevs, theme.currentTheme, appInstaller)}
         </Flex>
       </Flex>
-    </>
+    </NoScrollBar>
   );
 });
 
 const renderApps = (space: string, apps: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
-  console.log(apps);
 
   if (!apps || apps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -139,7 +140,8 @@ const renderApps = (space: string, apps: any, theme: any) => {
 
   const installedApps = apps?.filter(
     (app: any) =>
-      app.type !== 'urbit' || app.installStatus === InstallStatus.installed
+      app &&
+      (app.type !== 'urbit' || app.installStatus === InstallStatus.installed)
   );
   if (!installedApps || installedApps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -167,8 +169,11 @@ const renderAppSummary = () => {
   return <ViewComponent />;
 };
 
-const renderDevs = (devs: any, theme: any) => {
-  const appInstaller = useAppInstaller();
+const renderDevs = (
+  devs: any,
+  theme: any,
+  appInstaller: ReturnType<typeof useAppInstaller>
+) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!devs || devs.length === 0) {

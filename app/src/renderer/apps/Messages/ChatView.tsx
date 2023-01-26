@@ -7,9 +7,11 @@ import {
   useCallback,
   ClipboardEvent,
   KeyboardEventHandler,
+  ChangeEvent,
 } from 'react';
 import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
+import { Content } from '@urbit/api';
 import {
   Flex,
   IconButton,
@@ -61,19 +63,21 @@ export const ChatView = observer(
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string>();
     const [loading, setLoading] = useState(false);
-    const { courier } = useServices();
-    const resetLoading = () => setLoading(false);
+    const { courier, ship } = useServices();
     const { dmApp } = useTrayApps();
 
     const isGroup = useMemo(
-      () => selectedChat.type === 'group',
+      () =>
+        selectedChat.type === 'group' || selectedChat.type === 'group-pending',
       [selectedChat.type]
     );
 
-    const messages = useMemo(
-      () => courier.dms.get(selectedChat.path)?.messages || [],
-      [courier.dms, selectedChat.path]
-    );
+    const messages =
+      courier.dms
+        .get(selectedChat.path)
+        ?.messages.slice()
+        .sort((a, b) => a.timeSent - b.timeSent) ?? [];
+    const lastMessage = messages[messages.length - 1];
 
     const getPath = useCallback(() => {
       const path = selectedChat.path.substring(1);
@@ -84,39 +88,40 @@ export const ChatView = observer(
       }
     }, [isGroup, selectedChat.path]);
 
-    const reloadDms = useCallback(() => {
+    const fetchDms = useCallback(async () => {
       setLoading(true);
-      ShipActions.getDMLog(getPath()).finally(resetLoading);
-    }, [getPath]);
+      const dmLog = await ShipActions.getDmLog(getPath());
+      courier.setDmLog(dmLog);
+      setLoading(false);
+    }, [courier, getPath]);
 
     useEffect(() => {
       if (!selectedChat.isNew) {
-        reloadDms();
+        fetchDms();
+      }
+
+      return () => {
+        setIsSending(false);
+        setLoading(false);
+      };
+    }, [selectedChat.isNew, fetchDms]);
+
+    useEffect(() => {
+      const isFromUs = lastMessage?.author === ship?.patp;
+      if (!isFromUs) {
+        // Set current chat as read on new messages.
         if (isGroup) {
           ShipActions.readGroupDm(selectedChat.path.substring(1));
         } else {
           ShipActions.readDm(selectedChat.to as string);
         }
       }
-      // when unmounted
-      return () => {
-        setIsSending(false);
-        setLoading(false);
-      };
-    }, [
-      isGroup,
-      reloadDms,
-      selectedChat.isNew,
-      selectedChat.path,
-      selectedChat.to,
-    ]);
+    }, [ship, isGroup, selectedChat.path, selectedChat.to, lastMessage?.index]);
 
     const { canUpload, promptUpload } = useFileUpload({ storage });
 
     const onBack = () => {
       dmApp.setSelectedChat(null);
-      setIsSending(false);
-      setLoading(false);
     };
 
     const uploadFile = useCallback(
@@ -190,20 +195,20 @@ export const ChatView = observer(
     };
 
     const submitDm = useCallback(() => {
-      if (dmForm.computed.isValid) {
-        console.log('submitting dm');
-        const formData = dmForm.actions.submit();
-        const dmMessageContent = formData['dm-message'];
+      if (dmForm.computed.isValid && !isSending && !loading) {
         setIsSending(true);
+        const formData = dmForm.actions.submit();
+        const dmMessageContent: Content[] = formData['dm-message'];
+        dmMessage.actions.onChange('');
 
         SoundActions.playDMSend();
         if (chatInputRef.current) {
           chatInputRef.current.value = '';
+          chatInputRef.current.style.height = 'auto';
           chatInputRef.current.focus();
         }
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then(reloadDms)
           .catch((err) => {
             console.error('dm send error', err);
           })
@@ -211,19 +216,50 @@ export const ChatView = observer(
             setIsSending(false);
           });
       }
-    }, [dmForm.actions, dmForm.computed.isValid, reloadDms, selectedChat.path]);
+    }, [
+      dmForm.actions,
+      dmForm.computed.isValid,
+      dmMessage.actions,
+      isSending,
+      loading,
+      getPath,
+      selectedChat.path,
+    ]);
 
     const onKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
       (event) => {
         if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
           submitDm();
-        } else if (event.keyCode === 13 && event.shiftKey) {
-          // @ts-expect-error
-          chatInputRef.current.rows = chatInputRef.current.rows + 1;
         }
       },
       [submitDm]
+    );
+
+    const updateInputHeight = useCallback((inputRef: HTMLInputElement) => {
+      const padding = 16;
+      const lineHeight = 17;
+      const minHeight = 33;
+      const maxHeight = minHeight + lineHeight * 3;
+      const numberOfLines = inputRef.value.split(/\r*\n/).length;
+      const newHeight = numberOfLines * lineHeight + padding;
+
+      if (newHeight > maxHeight) {
+        inputRef.style.height = maxHeight + 'px';
+      } else if (newHeight < minHeight) {
+        inputRef.style.height = minHeight + 'px';
+      } else {
+        inputRef.style.height = newHeight + 'px';
+      }
+    }, []);
+
+    const onChange = useCallback(
+      (event: ChangeEvent<HTMLInputElement>) => {
+        dmMessage.actions.onChange(event.target.value);
+
+        updateInputHeight(event.target);
+      },
+      [dmMessage.actions, updateInputHeight]
     );
 
     const to = useMemo(
@@ -255,11 +291,6 @@ export const ChatView = observer(
         );
       }
     }, [isGroup, selectedChat]);
-
-    const ChatLogMemo = useMemo(
-      () => <ChatLog loading={loading} messages={messages} isGroup={isGroup} />,
-      [isGroup, loading, messages]
-    );
 
     const AttachmentIcon = () => {
       if (isUploading) {
@@ -355,7 +386,12 @@ export const ChatView = observer(
             overflowY="auto"
             alignContent="center"
           >
-            {ChatLogMemo}
+            <ChatLog
+              key={`${selectedChat.path}-${selectedChat.lastTimeSent}}-${lastMessage?.index}`}
+              loading={loading}
+              messages={messages}
+              isGroup={isGroup}
+            />
             <Flex
               position="absolute"
               bottom={0}
@@ -411,7 +447,7 @@ export const ChatView = observer(
                 </Tooltip>
                 <Input
                   as="textarea"
-                  ref={chatInputRef}
+                  innerRef={chatInputRef}
                   tabIndex={1}
                   rows={1}
                   autoFocus
@@ -440,12 +476,13 @@ export const ChatView = observer(
                       </IconButton>
                     </Flex>
                   }
-                  onChange={(e) => dmMessage.actions.onChange(e.target.value)}
+                  onChange={onChange}
                   onPaste={onPaste}
                   onFocus={() => dmMessage.actions.onFocus()}
                   onBlur={() => dmMessage.actions.onBlur()}
                   wrapperStyle={{
                     height: 'max-content',
+                    margin: '12px 0',
                     borderRadius: 9,
                     // borderWidth: 0,
                     borderColor: 'transparent',

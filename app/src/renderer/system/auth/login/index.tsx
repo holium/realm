@@ -23,6 +23,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
+import { trackEvent } from 'renderer/logic/lib/track';
 
 interface LoginProps {
   addShip: () => void;
@@ -75,7 +76,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   }, [pendingShip]);
 
   const login = async () => {
-    let loggedIn = await AuthActions.login(
+    const loggedIn = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
@@ -85,6 +86,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       submitRef.current.blur();
       setIncorrectPassword(true);
     }
+    trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
 
   const submitPassword = (event: any) => {
@@ -180,7 +182,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   alignItems="center"
                 >
                   <Input
-                    ref={passwordRef}
+                    innerRef={passwordRef}
                     wrapperRef={wrapperRef}
                     bg="bg.blendedBg"
                     autoFocus
@@ -223,9 +225,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                   width: menuWidth,
                                 }}
                                 isOpen={show}
-                                onClose={(evt) => {
-                                  setShow(false);
-                                }}
+                                onClose={() => setShow(false)}
                               >
                                 <MenuItem
                                   data-prevent-context-close={false}
@@ -238,8 +238,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                 <MenuItem
                                   label="Remove ship"
                                   customBg={theme.currentTheme.windowColor}
-                                  mt={1}
-                                  onClick={(_evt: any) => {
+                                  onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}
                                 />

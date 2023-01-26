@@ -14,10 +14,10 @@ import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
-// import { ShipActions } from 'renderer/logic/actions/ship';
-import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { useRooms } from '../Rooms/useRooms';
 
 export const AccountTrayApp = observer(() => {
   const { ship, theme, beacon } = useServices();
@@ -25,6 +25,7 @@ export const AccountTrayApp = observer(() => {
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
   const currentShip = ship!;
+  const roomsManager = useRooms();
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {
@@ -74,8 +75,6 @@ export const AccountTrayApp = observer(() => {
         alignItems="center"
         justifyContent="space-between"
         style={{
-          background: rgba(windowColor, 0.6),
-          backdropFilter: 'blur(24px)',
           minHeight: 58,
           zIndex: 4,
         }}
@@ -116,8 +115,6 @@ export const AccountTrayApp = observer(() => {
         pb={4}
         px={4}
         style={{
-          background: rgba(windowColor, 0.6),
-          backdropFilter: 'blur(24px)',
           minHeight: 58,
           zIndex: 4,
         }}
@@ -155,8 +152,10 @@ export const AccountTrayApp = observer(() => {
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={async () => {
+              await roomsManager.cleanup();
               AuthActions.logout(currentShip.patp);
               setActiveApp(null);
+              trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
           >
             <Icons name="Lock" />

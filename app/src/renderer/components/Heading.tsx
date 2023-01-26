@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { HTMLAttributes } from 'react';
 import styled from 'styled-components';
 

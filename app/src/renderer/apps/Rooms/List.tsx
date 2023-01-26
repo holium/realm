@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -21,7 +20,6 @@ export const Rooms = observer(() => {
   const { dimensions } = useTrayApps();
   const { spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
-  const [muted, setMuted] = useState(false);
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
 
@@ -75,7 +73,7 @@ export const Rooms = observer(() => {
         gap={8}
         flex={1}
         flexDirection="column"
-        overflowY={'scroll'}
+        overflowY={'auto'}
       >
         {rooms.length === 0 && (
           <Flex
@@ -107,7 +105,7 @@ export const Rooms = observer(() => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsManager.presentRoom?.rid !== room.rid) {
+                if (roomsManager.live.room?.rid !== room.rid) {
                   roomsManager.enterRoom(room.rid);
                 }
                 roomsApp.setView('room');

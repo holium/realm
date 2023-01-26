@@ -54,7 +54,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   }, [ship, window.id]);
 
   useEffect(() => {
-    let css = `
+    const css = `
       :root {
         --rlm-font: 'Rubik', sans-serif;
         --rlm-base-color: ${theme.currentTheme.backgroundColor};
@@ -83,7 +83,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         position: absolute;
         z-index: 2147483646 !important;
       }
-      
+
       
     `;
 
@@ -100,7 +100,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     () => (
       <View
         style={{
-          overflowY: 'scroll',
+          overflowY: 'auto',
           overflowX: 'hidden',
           width: 'inherit',
           height: 'inherit',

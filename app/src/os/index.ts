@@ -58,6 +58,7 @@ export class Realm extends EventEmitter {
   readonly handlers = {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
+    'realm.resubscribe': this.resubscribe,
     'realm.disconnect': this.disconnect,
     'realm.refresh': this.refresh,
     'realm.show-open-dialog': this.showOpenDialog,
@@ -72,6 +73,9 @@ export class Realm extends EventEmitter {
     },
     reconnect: async () => {
       return await ipcRenderer.invoke('realm.reconnect');
+    },
+    resubscribe: async (appName: string): Promise<boolean> => {
+      return await ipcRenderer.invoke('realm.resubscribe', appName);
     },
     disconnect: async () => {
       return await ipcRenderer.invoke('realm.disconnect');
@@ -116,10 +120,6 @@ export class Realm extends EventEmitter {
     //     : new EncryptedStore(options);
     // Load session data
     this.db = new Store(options);
-    if (this.db.size > 0 && this.db.store.cookie !== null) {
-      this.isResuming = true;
-      this.setSession(this.db.store);
-    }
     // Create an instance of all services
     this.services = {
       onboarding: new OnboardingService(this),
@@ -131,6 +131,21 @@ export class Realm extends EventEmitter {
       desktop: new DesktopService(this),
       shell: new ShellService(this),
     };
+    if (this.db.size > 0 && this.db.store.cookie !== null) {
+      this.isResuming = true;
+      let connectConduit: boolean = false;
+      // @patrick - per Trent: when in dev mode, if onboarding has been completed
+      //  auto login user. therefore, only time we should fully auto login is if this is
+      //  a NON-production build and we are not currently onboarding
+      if (
+        !this.services.identity.auth.isFirstTime() &&
+        (process.env.NODE_ENV === 'development' ||
+          process.env.DEBUG_PROD === 'true')
+      ) {
+        connectConduit = true;
+      }
+      this.setSession(this.db.store, connectConduit);
+    }
 
     this.holiumClient = new HoliumAPI();
     this.passwords = new PasswordStore();
@@ -180,7 +195,7 @@ export class Realm extends EventEmitter {
     let membership = null;
     let bazaar = null;
     let beacon = null;
-    let rooms = null;
+    let bulletin = null;
     let wallet = null;
     let visas = null;
     let models = {};
@@ -189,10 +204,10 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      // rooms = this.services.ship.roomSnapshot;
       wallet = this.services.ship.walletSnapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       beacon = this.services.spaces.modelSnapshots.beacon;
+      bulletin = this.services.spaces.modelSnapshots.bulletin;
       membership = this.services.spaces.modelSnapshots.membership;
       visas = this.services.spaces.modelSnapshots.visas;
     }
@@ -212,9 +227,9 @@ export class Realm extends EventEmitter {
       beacon,
       membership,
       visas,
-      rooms,
       wallet,
       models,
+      bulletin,
       loggedIn: !!this.session,
     };
     // if (spaces?.selected) {
@@ -275,6 +290,15 @@ export class Realm extends EventEmitter {
     }
   }
 
+  resubscribe(_: any, appName: string) {
+    const app = appName.replace('%', '');
+    const idleWatches = this.conduit?.idleWatches.entries();
+    if (!idleWatches) return false;
+    const watch = Array.from(idleWatches).find(([_, w]) => w.app === app);
+    if (!watch || !this.conduit) return false;
+    return this.conduit.resubscribe(watch[0]);
+  }
+
   async connect(
     session: ISession,
     params: ConnectParams = { reconnecting: false }
@@ -311,9 +335,11 @@ export class Realm extends EventEmitter {
     });
   }
 
-  setSession(session: ISession): void {
+  setSession(session: ISession, connect: boolean = true): void {
     this.saveSession(session);
-    this.connect(session);
+    if (connect) {
+      this.connect(session);
+    }
   }
 
   saveSession(session: ISession): void {
@@ -326,6 +352,7 @@ export class Realm extends EventEmitter {
   }
 
   async clearSession(): Promise<void> {
+    // this.conduit?.cleanup();
     await this.conduit?.closeChannel();
     this.conduit = undefined;
     this.db.clear();
@@ -391,7 +418,6 @@ export class Realm extends EventEmitter {
   }
 
   async onWebViewAttached(e: Event, webContents: WebContents) {
-    // console.log('onWebViewAttached');
     webContents.on('will-redirect', (e: Event, url: string) =>
       this.onWillRedirect(e, url, webContents)
     );

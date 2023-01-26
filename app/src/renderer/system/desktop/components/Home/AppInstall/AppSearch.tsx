@@ -2,16 +2,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { observer } from 'mobx-react';
 import { Input, Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-
-import { darken } from 'polished';
 import { useAppInstaller } from './store';
-import { RealmPopover } from '../Popover';
 import * as yup from 'yup';
-
 import { createField, createForm } from 'mobx-easy-form';
-import { SearchModes } from './SearchModes';
 
 interface AppSearchProps {
   mode: 'home' | 'space';
@@ -41,9 +35,10 @@ export const searchForm = (
   };
 };
 
+const dimensions = { height: 450, width: 550 };
+
 const AppSearchApp = observer((props: AppSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { theme } = useServices();
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
   const searchMode = appInstaller.searchMode;
@@ -87,48 +82,14 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     selectedShip,
   ]);
 
-  const isOpen = useMemo(() => searchMode !== 'none', [searchMode]);
-  const backgroundColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? theme.currentTheme.windowColor
-        : darken(0.1, theme.currentTheme.windowColor),
-    [theme.currentTheme]
-  );
-  const dimensions = { height: 450, width: 550 };
-
   const popoverId = 'app-install';
-  const popover = useMemo(
-    () => (
-      <RealmPopover
-        id={popoverId}
-        isOpen={isOpen}
-        coords={appInstaller.coords}
-        dimensions={appInstaller.dimensions}
-        onClose={() => {
-          appInstaller.setSearchMode('none');
-        }}
-        style={{
-          outline: 'none',
-          boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
-          borderRadius: 12,
-          maxHeight: '50vh',
-          overflowY: 'auto',
-          background: backgroundColor,
-        }}
-      >
-        <SearchModes />
-      </RealmPopover>
-    ),
-    [appInstaller, backgroundColor, isOpen]
-  );
 
   const width = props.mode === 'home' ? 500 : 450;
 
   return (
     <Flex width={width}>
       <Input
-        ref={inputRef}
+        innerRef={inputRef}
         flex={8}
         id={`${popoverId}-trigger`}
         className="realm-cursor-text-cursor"
@@ -222,7 +183,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           search.actions.onBlur();
         }}
       />
-      {popover}
     </Flex>
   );
 });

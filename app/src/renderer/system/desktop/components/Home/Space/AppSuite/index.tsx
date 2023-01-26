@@ -207,7 +207,9 @@ export const AppSuite = observer((props: AppSuiteProps) => {
         selected={index === suiteIndex}
         accentColor={accentColor}
         app={undefined}
-        onClick={() => {
+        isAdmin={isAdmin}
+        onClick={(evt: React.MouseEvent<any>) => {
+          evt.stopPropagation();
           if (isAdmin) {
             setCoords(
               calculatePopoverAnchorById(`app-suite-${index}-trigger`, {

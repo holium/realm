@@ -45,13 +45,16 @@ export const NewChat = observer((props: IProps) => {
       // if (event.keyCode === 13) {
       event.preventDefault();
       const contactsList = Array.from(selectedPatp.values());
-      let metadata: any;
-      if (contacts.getContactAvatarMetadata(contactsList[0])) {
-        metadata = contacts.getContactAvatarMetadata(contactsList[0]);
+      const metadata: any = [];
+      for (let i = 0; i < contactsList.length; i++) {
+        metadata.push(contacts.getContactAvatarMetadata(contactsList[i]));
       }
+      // if (contacts.getContactAvatarMetadata(contactsList[0])) {
+      //   metadata = contacts.getContactAvatarMetadata(contactsList[0]);
+      // }
       //
       setLoading(true);
-      const newDm = await ShipActions.draftDm(contactsList, [metadata]);
+      const newDm = await ShipActions.draftDm(contactsList, metadata);
       setLoading(false);
       onCreateNewDm(newDm);
     },
@@ -82,7 +85,7 @@ export const NewChat = observer((props: IProps) => {
     const contactNicknames = Array.from(selectedNickname.values());
     contactArray = (
       <Flex
-        overflowX="scroll"
+        overflowX="auto"
         ml={2}
         gap={8}
         height={36}

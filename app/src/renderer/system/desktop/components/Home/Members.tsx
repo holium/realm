@@ -27,8 +27,6 @@ interface HomeSidebarProps {
 
 const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   position: relative;
-  /* --webkit-backdrop-filter: var(--blur-enabled);
-  --webkit-transform: transale3d(0, 0, 0); */
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -157,7 +155,7 @@ export const Members = observer((props: IMembers) => {
           autoCorrect="false"
           autoComplete="false"
           name="person"
-          ref={searchRef}
+          innerRef={searchRef}
           height={34}
           placeholder="Search..."
           // bg={

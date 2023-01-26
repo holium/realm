@@ -1,6 +1,5 @@
-import { ipcMain, ipcRenderer, safeStorage } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
@@ -218,6 +217,10 @@ export class AuthService extends BaseService {
     this.state.setFirstTime();
   }
 
+  isFirstTime() {
+    return this.state.isFirstTime;
+  }
+
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
   }
@@ -242,7 +245,6 @@ export class AuthService extends BaseService {
     secretKey: string,
     credentials: ShipCredentials
   ): ShipCredentials {
-    // console.log('storeCredentials => %o', { patp, secretKey, credentials });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -259,7 +261,6 @@ export class AuthService extends BaseService {
   }
 
   readCredentials(patp: string, secretKey: string): ShipCredentials {
-    // console.log('readCredentials => %o', { patp, secretKey });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -275,50 +276,54 @@ export class AuthService extends BaseService {
   }
 
   async login(_event: any, patp: string, password: string): Promise<boolean> {
-    let shipId = `auth${patp}`;
-    this.state.setLoader('loading');
+    try {
+      const shipId = `auth${patp}`;
+      this.state.setLoader('loading');
 
-    let ship = this.state.ships.get(`auth${patp}`)!;
-    if (!ship) return false;
+      const ship = this.state.ships.get(`auth${patp}`)!;
+      if (!ship) {
+        throw new Error('ship not found');
+      }
 
-    if (ship.passwordHash === null) {
-      throw new Error('login: passwordHash is null');
-    }
-    let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
-    this.core.sendLog(`passwordHash: ${ship.passwordHash}`);
-    this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
+      if (ship.passwordHash === null) {
+        throw new Error('login: passwordHash is null');
+      }
+      const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
 
-    if (!passwordCorrect) {
-      this.core.sendLog(`password incorrect`);
+      if (!passwordCorrect) {
+        throw new Error('login: password is incorrect');
+      }
+
+      this.core.passwords.setPassword(patp, password);
+
+      this.state.login(shipId);
+
+      // this.core.services.desktop.setMouseColor(
+      //   null,
+      //   this.state.selected?.color!
+      // );
+
+      this.core.services.shell.setBlur(null, false);
+
+      const { code } = this.readCredentials(patp, password);
+      const cookie = await getCookie({
+        patp,
+        url: ship.url,
+        code,
+      });
+
+      this.core.setSession({
+        ship: ship.patp,
+        url: ship.url,
+        code,
+        cookie,
+      });
+      return true;
+    } catch (e) {
+      this.core.sendLog(e);
       this.state.setLoader('error');
       return false;
     }
-    this.core.sendLog(`ship: ${patp}`);
-    this.core.passwords.setPassword(patp, password);
-    this.core.sendLog(
-      `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
-    );
-
-    this.state.login(shipId);
-
-    this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
-    this.core.services.shell.setBlur(null, false);
-
-    const { code } = this.readCredentials(patp, password);
-    const cookie = await getCookie({
-      patp,
-      url: ship.url,
-      code,
-    });
-
-    this.core.setSession({
-      ship: ship.patp,
-      url: ship.url,
-      code,
-      cookie,
-    });
-
-    return true;
   }
 
   cancelLogin(_event: any) {
@@ -338,8 +343,6 @@ export class AuthService extends BaseService {
   }
 
   storeNewShip(ship: AuthShipType) {
-    console.log('storeNewShip', toJS(ship));
-
     const newShip = AuthShip.create(ship);
 
     this.state.setShip(newShip);
