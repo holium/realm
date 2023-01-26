@@ -1,0 +1,17 @@
+version: 0.1.17-alpha
+files:
+  - url: Realm-0.1.17-alpha-arm64-mac.zip
+    sha512: X3peNVeW9IcYpczRN7goyGsXYL1avOtLO2xs/oiIaJ57sdpcDp5CbRtBs5PXK0wTZTt+HvDcJi/ZQcoXMiOnGQ==
+    size: 95899949
+  - url: Realm-0.1.17-alpha-mac.zip
+    sha512: QSXus6A8yfgNPogEY4lgo+JnAFGrxOSIi8bU9i7/Zwg6ivaXxzvpc16wLmpctBZoEyUj1gzYrPPLonk/1COhDg==
+    size: 101768747
+  - url: Realm-0.1.17-alpha-arm64.dmg
+    sha512: 5FAUz1s3qkxTRZEXq1bAQhpF9nNN8SU3I8L/ayVDIQKkUU6nL1lYXchZ4fv9WkDTkSRDT+7GF//Wwa60Lf9N/A==
+    size: 100172684
+  - url: Realm-0.1.17-alpha.dmg
+    sha512: zuOcC9Dks9Vp0v/9QmmlpiBihIncUrFlbTsiMCSYAIuMnjy3ipo+vKg9DdF7JBAZhDlLm59DQmb+YlILL+1w4g==
+    size: 106014233
+path: Realm-0.1.17-alpha-arm64-mac.zip
+sha512: X3peNVeW9IcYpczRN7goyGsXYL1avOtLO2xs/oiIaJ57sdpcDp5CbRtBs5PXK0wTZTt+HvDcJi/ZQcoXMiOnGQ==
+releaseDate: '2023-01-26T06:28:00.572Z'

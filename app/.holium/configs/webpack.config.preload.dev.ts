@@ -16,10 +16,16 @@ const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
   mode: 'development',
   target: 'electron-preload',
-  entry: path.join(webpackPaths.srcMainPath, 'preload.ts'),
+  entry: {
+    preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
+    updater: path.join(
+      webpackPaths.srcRendererPath,
+      'system/progress/progress.preload.ts'
+    ),
+  },
   output: {
     path: webpackPaths.dllPath,
-    filename: 'preload.js',
+    filename: '[name].js',
   },
   plugins: [
     new BundleAnalyzerPlugin({

@@ -96,7 +96,7 @@ export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   private updatesAvailable: boolean = false;
   private doneCallback: undefined | ((value: unknown) => void) = undefined;
-  private ui: BrowserWindow | BrowserView | null = null;
+  private ui: BrowserWindow | null = null;
   // private updatesAvailable: boolean = false;
 
   constructor() {
@@ -117,14 +117,16 @@ export class AppUpdater implements IAppUpdater {
         error == null ? 'unknown' : (error.stack || error).toString()
       );
     });
-    autoUpdater.on('checking-for-update', async () => {});
-    autoUpdater.on('update-available', () => {
-      if (self.ui) {
-        console.log('update-available received');
-        self.ui.webContents.send('auto-updater-message', {
-          name: 'update-available',
-        });
+    autoUpdater.on('checking-for-update', async () => {
+      if (self.manualCheck) {
+        // self.ui?.show();
       }
+    });
+    autoUpdater.on('update-available', () => {
+      console.log('update-available received');
+      self.ui?.webContents.send('auto-updater-message', {
+        name: 'update-available',
+      });
       // dialog
       //   .showMessageBox({
       //     type: 'info',
@@ -162,6 +164,7 @@ export class AppUpdater implements IAppUpdater {
         });
     });
     autoUpdater.on('download-progress', (stats) => {
+      console.log('download-progress => %o', stats);
       self.ui &&
         self.ui.webContents.send('auto-updater-message', {
           ...stats,
@@ -184,6 +187,56 @@ export class AppUpdater implements IAppUpdater {
     // }
   }
 
+  startUpdateUI = (manualCheck: boolean = false) => {
+    const self = this;
+    this.ui = new BrowserWindow({
+      //show: false,
+      // parent: mainWindow || undefined,
+      width: 400,
+      height: 300,
+      icon: getAssetPath('icon.png'),
+      title: 'Update Progress',
+      acceptFirstMouse: true,
+      frame: false,
+      center: true,
+      resizable: true,
+      movable: false,
+      webPreferences: {
+        devTools: false,
+        nodeIntegration: false,
+        webviewTag: true,
+        sandbox: false,
+        contextIsolation: true,
+        preload: app.isPackaged
+          ? path.join(__dirname, 'updater.js')
+          : path.join(__dirname, '../../.holium/dll/updater.js'),
+      },
+    });
+    this.ui.webContents.on('did-finish-load', () => {
+      self.manualCheck = manualCheck;
+      ipcMain.handle('install-updates', () => {
+        if (self.ui) {
+          self.ui.webContents.send('update-status', {
+            name: 'starting-download',
+          });
+        }
+        autoUpdater.downloadUpdate();
+      });
+      ipcMain.handle('cancel-updates', () => {
+        self.ui && self.ui.close();
+        self.doneCallback && self.doneCallback('continue');
+      });
+      autoUpdater
+        .checkForUpdates()
+        .catch((e) => {
+          console.log(e);
+          reject(e);
+        })
+        .finally(() => (self.manualCheck = false));
+    });
+    this.ui.loadURL(resolveHtmlPath('progress.html'));
+  };
+
   // for manual update checks, report errors on internet connectivity. for
   //   auto update checks, gracefully ignore.
   checkForUpdates = (manualCheck: boolean = false) => {
@@ -191,58 +244,7 @@ export class AppUpdater implements IAppUpdater {
     return new Promise(async (resolve, reject) => {
       self.doneCallback = resolve;
       if (net.isOnline()) {
-        self.ui = new BrowserWindow({
-          // parent: mainWindow || undefined,
-          width: 800,
-          height: 600,
-          icon: getAssetPath('icon.png'),
-          title: 'Realm',
-          acceptFirstMouse: true,
-          frame: false,
-          center: true,
-          resizable: false,
-          movable: false,
-          webPreferences: {
-            // devTools: false,
-            nodeIntegration: false,
-            webviewTag: true,
-            sandbox: false,
-            contextIsolation: true,
-            preload: path.join(
-              __dirname,
-              '../../.holium/dll/progress.preload.js'
-            ),
-          },
-        });
-        self.ui.webContents.on('did-finish-load', () => {
-          self.manualCheck = manualCheck;
-          ipcMain.handle('install-updates', () => {
-            if (self.ui) {
-              self.ui.webContents.send('update-status', {
-                name: 'starting-download',
-              });
-            }
-            autoUpdater.downloadUpdate();
-          });
-          ipcMain.handle('cancel-updates', () => {
-            self.ui && self.ui.webContents.close();
-            self.doneCallback && self.doneCallback('continue');
-          });
-          autoUpdater
-            .checkForUpdates()
-            .catch((e) => {
-              console.log(e);
-              reject(e);
-            })
-            .finally(() => (self.manualCheck = false));
-        });
-        self.ui.on('closed', () => {
-          app.quit();
-        });
-        self.ui.loadURL(resolveHtmlPath('/progress.html'));
-        // await self.ui.webContents.loadFile(
-        //   `../renderer/system/progress/progress.html`
-        // );
+        self.startUpdateUI(manualCheck);
       } else {
         dialog.showMessageBox({
           title: 'Offline',
@@ -447,9 +449,9 @@ app
       console.log('activated');
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      // if (mainWindow === null) {
-      //   createWindow();
-      // }
+      if (mainWindow === null) {
+        createWindow();
+      }
     });
   })
   .catch(console.log);
