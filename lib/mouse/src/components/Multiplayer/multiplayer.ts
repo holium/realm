@@ -30,6 +30,7 @@ export const init: RealmMultiplayerInterface['init'] = ({
   // ship is loaded into webview via ipc + contextBridge, separately from preload
   // so we need to wait for it to be loaded
   function tryInit() {
+    // @ts-ignore
     ship = initShip ? JSON.parse(JSON.stringify(initShip)) : globalThis.ship;
     if (!ship) {
       console.error('no ship info, trying again in 10ms');
@@ -187,5 +188,6 @@ export const api: RealmMultiplayerInterface = {
 
 function getSessionID() {
   if (!ship) throw new Error('ship not loaded');
+  // @ts-ignore
   return globalThis.id + ship.patp;
 }

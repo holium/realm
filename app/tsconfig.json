@@ -5,5 +5,5 @@
     "outDir": "release/app/dist"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "release", ".holium/dll"]
+  "exclude": ["node_modules", "release", ".holium/dll", "../lib/mouse"]
 }
