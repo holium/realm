@@ -15,6 +15,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2022-11-26T10:04:38.000Z"
         message={[
           {
             plain:
@@ -27,6 +28,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Yo we should do XYZ in' },
           { bold: 'bold' },
@@ -38,6 +40,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Run the following command' },
           {
@@ -51,6 +54,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             plain: 'I get this error',
@@ -70,6 +74,7 @@ webpack building...
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Meme drop' },
           {
@@ -89,6 +94,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Hello' },
           {
@@ -101,6 +107,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Hello' },
           {
@@ -121,6 +128,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Run the following command' },
           {
@@ -138,6 +146,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Run the following command' },
           {
@@ -158,6 +167,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             plain:
@@ -170,6 +180,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             plain: 'Whatever',
@@ -188,6 +199,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
@@ -199,6 +211,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
       <Bubble
         our
         author="~lomder-librun"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
@@ -216,6 +229,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
     <Bubble
       author="~fasnut-famden"
       authorColor="#FF0000"
+      sentAt="2023-01-25T11:04:38.000Z"
       message={[
         { plain: 'Open Graph' },
         {
@@ -227,6 +241,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
     <Bubble
       our
       author="~lomder-librun"
+      sentAt="2023-01-26T11:04:38.000Z"
       message={[
         { plain: 'Open Graph' },
         {
@@ -243,6 +258,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
     <Bubble
       author="~fasnut-famden"
       authorColor="#FF0000"
+      sentAt="2023-01-26T11:04:38.000Z"
       message={[
         {
           image:
@@ -254,6 +270,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
     <Bubble
       our
       author="~lomder-librun"
+      sentAt="2023-01-26T11:04:38.000Z"
       message={[
         { plain: 'Check this out' },
         {
@@ -288,6 +305,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             image:
@@ -300,6 +318,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
       <Bubble
         author="~fasnut-famden"
         authorColor="#FF0000"
+        sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             image:
@@ -324,6 +343,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
     <Bubble
       author="~fasnut-famden"
       authorColor="#FF0000"
+      sentAt="2023-01-26T11:00:30.000Z"
       message={[
         {
           reply: {
@@ -341,6 +361,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
     <Bubble
       author="~lomder-librun"
       our
+      sentAt="2023-01-26T11:04:38.000Z"
       message={[
         {
           reply: {

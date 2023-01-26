@@ -62,7 +62,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
   border: 1px solid transparent;
-  width: ${(props) => `${props.width}px`};
+  width: ${(props) => (props.width ? `${props.width}px` : 'initial')};
   ${(props) =>
     props.mode === 'display' &&
     css`
@@ -150,7 +150,7 @@ export const Block: FC<BlockElProps> = (props: BlockElProps) => {
     <BlockStyle
       id={id}
       mode={mode}
-      width={rest.width || 'inherit'}
+      width={rest.width}
       variant={variant}
       {...(draggable && {
         drag: true,

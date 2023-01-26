@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { darken } from 'polished';
@@ -10,27 +10,69 @@ import EmojiPicker, {
   Emoji,
   SkinTones,
 } from 'emoji-picker-react';
+import { FragmentReactionType } from './Bubble.types';
 
-const ReactionRow = styled(Box)`
-  position: absolute;
+const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
   flex-direction: row;
   gap: 4px;
-  left: -4px;
-  bottom: -14px;
+  ${({ variant }) =>
+    variant === 'overlay'
+      ? css`
+          position: absolute;
+          left: -4px;
+          bottom: -14px;
+        `
+      : css`
+          flex-direction: row;
+        `}
 `;
 
-const ReactionButton = styled(Box)<{ hasCount?: boolean }>`
+const ReactionSizes: { [key: string]: number } = {
+  small: 16,
+  medium: 24,
+  large: 28,
+};
+
+const EmojiSizes: { [key: string]: number } = {
+  small: 10,
+  medium: 16,
+  large: 18,
+};
+
+const FontSizes: { [key: string]: number } = {
+  small: 12,
+  medium: 12,
+  large: 14,
+};
+
+type ReactionButtonProps = {
+  hasCount?: boolean;
+  size?: keyof typeof ReactionSizes;
+};
+
+const ReactionButton = styled(Box)<ReactionButtonProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   background: var(--rlm-input-color);
   border: 1px solid var(--rlm-border-color);
-  border-radius: 12px;
+  border-radius: 16px;
   transition: var(--transition);
-  min-width: 24px;
-  height: 24px;
+  ${({ size }) =>
+    size
+      ? css`
+          min-width: ${ReactionSizes[size]}px;
+          height: ${ReactionSizes[size]}px;
+          ${Text.Hint} {
+            font-size: ${FontSizes[size]}px;
+          }
+        `
+      : css`
+          min-width: 24px;
+          height: 24px;
+        `}
   width: auto;
   img {
     user-select: none;
@@ -43,7 +85,7 @@ const ReactionButton = styled(Box)<{ hasCount?: boolean }>`
   ${({ hasCount }) =>
     hasCount &&
     css`
-      padding: 0 4px;
+      padding: 0 6px 0 4px;
       gap: 4px;
     `}
   &:hover {
@@ -66,18 +108,45 @@ export type OnReactionPayload = {
 };
 
 type ReactionProps = {
-  reactions: ReactionAggregateType[];
+  variant?: 'overlay' | 'inline';
+  reactions: FragmentReactionType[];
+  size?: keyof typeof ReactionSizes;
   onReaction: (payload: OnReactionPayload) => void;
 };
 
 export const Reactions = (props: ReactionProps) => {
-  const { reactions = [], onReaction } = props;
+  const {
+    variant = 'overlay',
+    size = 'medium',
+    reactions = [],
+    onReaction,
+  } = props;
   const [reacting, setReacting] = useState<boolean>(false);
 
+  const reactionsAggregated = useMemo(
+    () =>
+      Object.values<ReactionAggregateType>(
+        reactions.reduce((acc, reaction) => {
+          if (acc[reaction.emoji]) {
+            acc[reaction.emoji].by.push(reaction.author);
+            acc[reaction.emoji].count++;
+          } else {
+            acc[reaction.emoji] = {
+              by: [reaction.author],
+              emoji: reaction.emoji,
+              count: 1,
+            };
+          }
+          return acc;
+        }, {} as Record<string, ReactionAggregateType>)
+      ).sort((a, b) => b.count - a.count),
+    [reactions.length]
+  );
+
   const checkDupe = (emoji: string) => {
-    const index = reactions.findIndex((r) => r.emoji === emoji);
+    const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
-      const reaction = reactions[index];
+      const reaction = reactionsAggregated[index];
       if (reaction.by.includes(window.ship)) {
         return true;
       }
@@ -96,13 +165,15 @@ export const Reactions = (props: ReactionProps) => {
 
   return (
     <ReactionRow
+      variant={variant}
       onHoverEnd={() => {
         setReacting(false);
       }}
     >
-      {reactions.map((reaction: ReactionAggregateType, index) => {
+      {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
         return (
           <ReactionButton
+            size={size}
             key={`${reaction.emoji}-${index}`}
             hasCount={reaction.count > 1}
             onClick={(evt) => {
@@ -113,16 +184,15 @@ export const Reactions = (props: ReactionProps) => {
             <Emoji
               unified={reaction.emoji}
               emojiStyle={EmojiStyle.APPLE}
-              size={16}
+              size={EmojiSizes[size]}
             />
-            {reaction.count > 1 && (
-              <Text.Hint fontSize={12}>{reaction.count}</Text.Hint>
-            )}
+            {reaction.count > 1 && <Text.Hint>{reaction.count}</Text.Hint>}
           </ReactionButton>
         );
       })}
       <Flex className="bubble-reactions">
         <ReactionButton
+          size={size}
           onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
             evt.stopPropagation();
             setReacting(!reacting);

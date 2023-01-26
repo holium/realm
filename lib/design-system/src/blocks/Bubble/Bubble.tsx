@@ -3,6 +3,8 @@ import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { FragmentBlock, renderFragment } from './fragment-lib';
+import { chatDate } from '../../util/date';
+
 import {
   Reactions,
   ReactionAggregateType,
@@ -12,6 +14,7 @@ import {
 type TemplateProps = {
   author: string;
   authorColor?: string;
+  sentAt: string;
   our?: boolean;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
@@ -35,31 +38,14 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
     id,
     author,
     our,
+    sentAt,
     authorColor = '#000',
     message,
     reactions = [],
     onReaction,
   } = props;
 
-  const reactionsAggregated = useMemo(
-    () =>
-      Object.values(
-        reactions.reduce((acc, reaction) => {
-          if (acc[reaction.emoji]) {
-            acc[reaction.emoji].by.push(reaction.author);
-            acc[reaction.emoji].count++;
-          } else {
-            acc[reaction.emoji] = {
-              by: [reaction.author],
-              emoji: reaction.emoji,
-              count: 1,
-            };
-          }
-          return acc;
-        }, {} as Record<string, ReactionAggregateType>)
-      ).sort((a, b) => b.count - a.count),
-    [reactions]
-  );
+  const dateDisplay = chatDate(new Date(sentAt));
 
   return (
     <Flex
@@ -95,9 +81,9 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
           })}
         </FragmentBlock>
         <BubbleFooter>
-          <Reactions reactions={reactionsAggregated} onReaction={onReaction} />
+          <Reactions reactions={reactions} onReaction={onReaction} />
           <Text.Custom pointerEvents="none" alignSelf="flex-end" opacity={0.5}>
-            6:07 AM
+            {dateDisplay}
           </Text.Custom>
         </BubbleFooter>
       </BubbleStyle>

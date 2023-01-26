@@ -21,13 +21,13 @@ import {
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { getVar } from '../../util/colors';
-import { Text, Flex } from '../..';
+import { Text, TextProps, Flex } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 
-export const FragmentBase = styled(Text.Custom)`
+export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   margin-left: 2px;
   margin-right: 2px;
@@ -74,7 +74,11 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   font-style: italic;
   border-left: 2px solid var(--rlm-accent-color);
   padding-left: 8px;
-  ${FragmentBase}
+  .fragment-reply {
+    ${FragmentBase} {
+      font-size: 0.86em;
+    }
+  }
 `;
 
 export const FragmentInlineCode = styled(FragmentBase)`
@@ -220,7 +224,7 @@ export const renderFragment = (
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
       return (
         <FragmentBlockquote>
-          <Flex flexDirection="column">
+          <Flex flexDirection="column" className="fragment-reply">
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
             {renderFragment(msg, index, replyAuthor)}
           </Flex>
