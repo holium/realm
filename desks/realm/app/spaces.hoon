@@ -12,17 +12,26 @@
   |%
   +$  card  card:agent:gall
   +$  versioned-state
-      $%  state-0
+      $%  state-1
+          state-0
       ==
-  +$  state-0
-    $:  %0
+  ::
+  +$  state-1
+    $:  %1
         =spaces:store
         =invitations:vstore
         =membership:membership-store
         current=space-path:store
     ==
+  ::
+  +$  state-0
+    $:  %0
+        =spaces:store
+        =invitations:vstore
+        =membership:membership-store
+    ==
   --
-=|  state-0
+=|  state-1
 =*  state  -
 =<
   %+  verb  &
@@ -40,7 +49,7 @@
     =/  our-members             (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
     =/  initial-membs           `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
     =/  initial-spaces          `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =.  state                   [%0 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
+    =.  state                   [%1 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
     `this
   ::
   ++  on-save
@@ -53,6 +62,7 @@
     =/  old  !<(versioned-state old-state)
     ?-  -.old
       %0  `this(state old)
+      %1  `this(state [%1 spaces=spaces.old invitations=invitations.old membership=membership.old current=path:our-space])
     ==
   ::
   ++  on-poke
