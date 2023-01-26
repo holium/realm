@@ -223,9 +223,7 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**",
-      "./src/main/cursor.preload.js",
-      "./release/app/dist/main/cursor.js"
+      "./assets/**"
     ]
   },
   "repository": {

@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { MouseState } from '../../../../lib/mouse/src/components/AnimatedCursor';
+import { MouseState } from '../../renderer/system/mouse/AnimatedCursor';
 
 const getMouseState = (e: MouseEvent): MouseState => {
   const element = document.elementFromPoint(e.x, e.y);

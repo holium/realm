@@ -1,10 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
-import {
-  MouseState,
-  Vec2,
-} from '../../../lib/mouse/src/components/AnimatedCursor';
+import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
 
 const appPreload = {
   setFullscreen(callback: any) {

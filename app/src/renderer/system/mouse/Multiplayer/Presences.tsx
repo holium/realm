@@ -19,7 +19,7 @@ import {
   Ship,
 } from '@holium/realm-multiplayer';
 import { useEventListener } from '../useEventListener';
-import { hexToRgb, rgbToString } from '../../../../../app/src/os/lib/color';
+import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 // import { Ship } from '@holium/realm-multiplayer/hooks';
 import { AnimatedCursor } from '../AnimatedCursor';
 

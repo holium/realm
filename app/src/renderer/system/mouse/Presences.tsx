@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Vec2 } from '@holium/realm-multiplayer';
 import { useEventListener } from './useEventListener';
-import { ShipModelType } from '../../../../app/src/os/services/ship/models/ship';
-import { rgbToString, hexToRgb } from '../../../../app/src/os/lib/color';
+import { ShipModelType } from '../../../os/services/ship/models/ship';
+import { rgbToString, hexToRgb } from '../../../os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';

@@ -6,8 +6,6 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 You should build the project from root with `yarn` so that all the libs build properly.
 
-**Note**: Make sure to run `yarn build:nouse` in root once to build the mouse lib.
-
 Start the app in dev mode with `yarn start` or `npm run start`.
 
 ## Developing apps within Realm

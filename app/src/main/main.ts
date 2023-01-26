@@ -25,22 +25,13 @@ import fetch from 'cross-fetch'; // required 'fetch'
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isProduction } from './helpers/env';
-import {
-  MouseState,
-  Vec2,
-} from '../../../lib/mouse/src/components/AnimatedCursor';
+import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
 
 const fs = require('fs');
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
-
-// const mouseLibUrl = 'http://localhost:3000'; // For local development.
-const mouseLibFile = path.join(
-  __dirname,
-  '../../../lib/mouse/build/index.html'
-);
 
 let mainWindow: BrowserWindow;
 let mouseOverlay: BrowserWindow;
@@ -212,7 +203,7 @@ const createMouseOverlay = () => {
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
-  newMouseWindow.loadFile(mouseLibFile);
+  newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
