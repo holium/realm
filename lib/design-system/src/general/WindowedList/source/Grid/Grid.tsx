@@ -229,7 +229,7 @@ type State = {
   scrollLeft: number;
   scrollTop: number;
   scrollPositionChangeReason:
-    | typeof SCROLL_POSITION_CHANGE_REASONS[keyof typeof SCROLL_POSITION_CHANGE_REASONS]
+    | (typeof SCROLL_POSITION_CHANGE_REASONS)[keyof typeof SCROLL_POSITION_CHANGE_REASONS]
     | null;
   needToResetStyleCache: boolean;
 };
