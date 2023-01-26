@@ -61,7 +61,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
       [results.length, search.length]
     );
 
-    const RowRenderer = (contact: typeof results[number]) => {
+    const RowRenderer = (contact: (typeof results)[number]) => {
       const nickname = contact[1].nickname!;
       const sigilColor = contact[1].color!;
       const avatar = contact[1].avatar!;

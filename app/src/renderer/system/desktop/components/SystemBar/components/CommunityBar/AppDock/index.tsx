@@ -48,6 +48,15 @@ export const AppDock = observer(() => {
     debouncedSetLocalDockApps(dockApps);
   }, [dockApps.length]);
 
+  const activeAndUnpinned = useMemo(
+    () =>
+      desktop.openApps.filter(
+        (appWindow: any) =>
+          dock && dock.findIndex((pinned) => appWindow.id === pinned) === -1
+      ),
+    [desktop.openApps, dock]
+  );
+
   if (!spacePath) return null;
 
   const pinnedApps = (
@@ -199,15 +208,6 @@ export const AppDock = observer(() => {
         );
       })}
     </Reorder.Group>
-  );
-
-  const activeAndUnpinned = useMemo(
-    () =>
-      desktop.openApps.filter(
-        (appWindow: any) =>
-          dock && dock.findIndex((pinned) => appWindow.id === pinned) === -1
-      ),
-    [desktop.openApps, dock]
   );
 
   const activeAndUnpinnedApps = (

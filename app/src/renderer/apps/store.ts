@@ -10,12 +10,14 @@ import {
 } from 'mobx-state-tree';
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
-  NetworkType,
+  NetworkStoreType,
+  ProtocolType,
   SharingMode,
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet.model';
+} from 'os/services/tray/wallet-lib/wallet.model';
+
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
 
@@ -104,44 +106,50 @@ const persistedState = loadSnapshot();
 const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    network: NetworkType.ETHEREUM,
-    btcNetwork: 'mainnet',
-  },
-  navHistory: [],
-  bitcoin: {
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      blocked: [],
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  testnet: {
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      blocked: [],
-      defaultIndex: 0,
-    },
-    conversions: {},
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+    transSend: false,
   },
   ethereum: {
-    network: 'gorli',
+    block: 0,
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
-      blocked: [],
       defaultIndex: 0,
     },
     initialized: false,
     conversions: {},
   },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
   creationMode: 'default',
   sharingMode: 'anybody',
-  ourPatp: '~zod',
-  lastInteraction: new Date(),
+  lastInteraction: Date.now(),
   initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  forceActive: false,
 };
 
 export const trayStore = TrayAppStore.create({

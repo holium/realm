@@ -36,8 +36,8 @@ export const SpacesList = observer(
     const incoming = Array.from(visas.incoming.values());
 
     type ListData = {
-      visa?: typeof incoming[number];
-      space?: typeof spaces[number];
+      visa?: (typeof incoming)[number];
+      space?: (typeof spaces)[number];
     }[];
 
     const listData: ListData = useMemo(

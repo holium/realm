@@ -1,4 +1,5 @@
-import { FC, forwardRef } from 'react';
+/* eslint-disable react/prop-types */
+import { FC, forwardRef, PropsWithChildren, Ref } from 'react';
 import { darken } from 'polished';
 import styled, { StyledComponentProps } from 'styled-components';
 import {
@@ -21,7 +22,7 @@ import {
   SpaceProps,
   ColorProps,
 } from 'styled-system';
-import { Spinner, Flex, IconButton } from '..';
+import { Spinner, Flex, IconButton, BoxProps } from '..';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &
@@ -30,6 +31,7 @@ export type StyledButtonProps = SpaceProps &
   BackgroundProps &
   ColorProps &
   PositionProps &
+  BoxProps &
   FontWeightProps & {
     leftIcon?: JSX.Element;
     rightIcon?: JSX.Element;
@@ -180,7 +182,17 @@ const buttonVariants = variant({
   },
 });
 
-const StyledButton = styled.button<ButtonProps>`
+type PropsWithRefChildren<T> = T & { children?: React.ReactNode } & {
+  ref?: Ref<T>;
+};
+const StyledButton = styled.button<PropsWithRefChildren<ButtonProps>>`
+  ${(props) =>
+    props.disabled
+      ? `
+        opacity: 0.5;
+        pointer-events: none;
+      `
+      : buttonVariants}
   ${buttonVariants}
   ${compose(
     space,
@@ -201,10 +213,10 @@ export type ButtonProps = StyledComponentProps<
   never
 >;
 
-export const Button: FC<ButtonProps> = forwardRef<
+export const Button: FC<PropsWithChildren<ButtonProps>> = forwardRef<
   HTMLButtonElement,
   ButtonProps
->((props: ButtonProps, ref) => {
+>((props: PropsWithChildren<ButtonProps>, ref) => {
   const {
     leftIcon,
     rightIcon,

@@ -1,11 +1,11 @@
-import { FC, useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
+import { Flex, Text, Button, Label, FormControl } from 'renderer/components';
+import { TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType } from 'os/services/tray/wallet.model';
-import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
+import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface CreateWalletProps {
   network: NetworkType;
@@ -47,19 +47,27 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
     return (
       <Flex p={4} height="100%" width="100%" flexDirection="column">
         <Text mt={2} variant="h4">
-          Create Wallet
+          Create Address
         </Text>
         <Text mt={3} variant="body">
-          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallet
+          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
           will be created. Give it a memorable nickname.
         </Text>
-        <FieldSet mt={8}>
-          <Label required={true}>Nickname</Label>
-          <Input
-            value={nickname.state.value}
-            onChange={(e) => nickname.actions.onChange(e.target.value)}
-            placeholder="Fort Knox"
-          />
+        <FormControl.FieldSet mt={8}>
+          <FormControl.Field>
+            <Label mb={1} required={true}>
+              Nickname
+            </Label>
+            <TextInput
+              id="wallet-nickname"
+              name="wallet-nickname"
+              value={nickname.state.value}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                nickname.actions.onChange(e.target.value)
+              }
+              placeholder="Fort Knox"
+            />
+          </FormControl.Field>
           <Flex mt={5} width="100%">
             <Button
               id="submit"
@@ -71,19 +79,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
               Create
             </Button>
           </Flex>
-        </FieldSet>
-        <Flex
-          position="absolute"
-          top="582px"
-          zIndex={999}
-          onClick={async () => await WalletActions.navigateBack()}
-        >
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            color={theme.currentTheme.iconColor}
-          />
-        </Flex>
+        </FormControl.FieldSet>
       </Flex>
     );
   }
