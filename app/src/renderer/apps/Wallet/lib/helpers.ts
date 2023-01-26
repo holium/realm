@@ -33,7 +33,7 @@ export function convertWeiToUsd(wei: string, exchangeRate: number = 1647.37) {
 export function getTransactions(
   transactionMap: Map<string, TransactionType>,
   address?: string,
-  coin?: ERC20Type | null
+  _coin?: ERC20Type | null
 ): TransactionType[] {
   const addressFilter = (transaction: TransactionType) => {
     return address ? transaction.ourAddress === address : true;
@@ -208,10 +208,10 @@ export const fullMonthNames = [
 // https://coincodex.com/cryptocurrencies/sector/ethereum-erc20/
 export function getMockCoinIcon(ticker: string) {
   switch (ticker) {
-    case 'BUSD': 
-      return 'https://cryptologos.cc/logos/binance-usd-busd-logo.png'
-    case 'MATIC': 
-      return 'https://cryptologos.cc/logos/polygon-matic-logo.png'
+    case 'BUSD':
+      return 'https://cryptologos.cc/logos/binance-usd-busd-logo.png';
+    case 'MATIC':
+      return 'https://cryptologos.cc/logos/polygon-matic-logo.png';
     case 'SHIB':
       return 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png';
     case 'DAI':
@@ -256,9 +256,7 @@ export function getMockCoinIcon(ticker: string) {
       return 'https://cryptologos.cc/logos/tron-trx-logo.png';
     case 'BNB':
       return 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png';
-    
     default:
       return 'https://static.thenounproject.com/png/3262833-200.png';
   }
 }
-
