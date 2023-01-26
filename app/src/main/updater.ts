@@ -71,8 +71,9 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.autoDownload = false;
     // proxy private github repo requests
     autoUpdater.setFeedURL({
+      // @ts-ignore
       provider: 'generic',
-      url: 'http://localhost:3001',
+      url: process.env.AUTOUPDATE_FEED_URL,
       channel: determineReleaseChannel(),
     });
     autoUpdater.on('error', (error) => {
@@ -96,22 +97,20 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.on('update-not-available', () => {
       // only show this message if the user chose to run an update check manually
       if (this.manualCheck) {
-        dialog.showMessageBox({
-          title: 'No Updates',
-          message: 'Current version is up-to-date.',
-        });
+        self.ui &&
+          self.ui.webContents.send('auto-updater-message', {
+            name: 'update-not-available',
+          });
       }
       self.doneCallback && self.doneCallback('continue');
     });
     autoUpdater.on('update-downloaded', () => {
-      console.log('update-downloaded');
       self.ui &&
         self.ui.webContents.send('auto-updater-message', {
           name: 'update-downloaded',
         });
     });
     autoUpdater.on('download-progress', (stats) => {
-      console.log('download-progress => %o', stats);
       self.ui &&
         self.ui.webContents.send('auto-updater-message', {
           ...stats,
@@ -156,10 +155,10 @@ export class AppUpdater implements IAppUpdater {
       acceptFirstMouse: true,
       frame: false,
       center: true,
-      resizable: true,
+      resizable: false,
       movable: false,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         nodeIntegration: false,
         webviewTag: true,
         sandbox: false,

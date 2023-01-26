@@ -1,11 +1,18 @@
-import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-// import { Button } from '@holium/design-system';
+import { ProgressInfo } from 'electron-updater';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
 
-const View = (props) => {
+declare global {
+  var autoUpdate: any;
+}
+
+type UpdateStatsProps = {
+  stats: ProgressInfo;
+};
+
+const View = (props: any) => {
   return (
     <div
       style={{
@@ -54,7 +61,7 @@ const UpdateAvailable = () => {
   );
 };
 
-const UpdateStats = (props) => {
+const UpdateStats = (props: UpdateStatsProps) => {
   const { stats } = props;
   return (
     <>
@@ -68,7 +75,7 @@ const UpdateStats = (props) => {
   );
 };
 
-const UpdateDownloaded = (props) => {
+const UpdateDownloaded = () => {
   return (
     <>
       <div style={{ padding: '12px' }}>Updates downloaded</div>
@@ -90,7 +97,8 @@ const UpdateDownloaded = (props) => {
   );
 };
 
-window.autoUpdate.listen((event, message) => {
+// @ts-ignore
+window.autoUpdate.listen((event, message: any) => {
   console.log('message => %o', message);
   let view = undefined;
   switch (message.name) {
