@@ -90,21 +90,6 @@ export class AppUpdater implements IAppUpdater {
       self.ui?.webContents.send('auto-updater-message', {
         name: 'update-available',
       });
-      // dialog
-      //   .showMessageBox({
-      //     type: 'info',
-      //     title: 'Found Updates',
-      //     message: 'Found updates, do you want update now?',
-      //     buttons: ['Yes', 'No'],
-      //   })
-      //   .then((result: MessageBoxReturnValue) => {
-      //     // @ts-ignore
-      //     if (result.response === 0) {
-      //       // autoUpdater.downloadUpdate();
-      //     } else {
-      //       self.doneCallback && self.doneCallback('continue');
-      //     }
-      //   });
     });
     autoUpdater.on('update-not-available', () => {
       // only show this message if the user chose to run an update check manually
@@ -123,14 +108,6 @@ export class AppUpdater implements IAppUpdater {
           ...stats,
           name: 'update-downloaded',
         });
-      // dialog
-      //   .showMessageBox({
-      //     title: 'Install Updates',
-      //     message: 'Updates downloaded, application will be quit for update...',
-      //   })
-      //   .then(() => {
-      //     setImmediate(() => autoUpdater.quitAndInstall());
-      //   });
     });
     autoUpdater.on('download-progress', (stats) => {
       console.log('download-progress => %o', stats);
@@ -141,19 +118,6 @@ export class AppUpdater implements IAppUpdater {
         });
     });
     autoUpdater.logger = log;
-    // run auto check once every 10 minutes after app starts
-    // setInterval(() => {
-    //   if (!this.manualCheck) {
-    //     // gracefully ignore if no internet when attempting to auto update
-    //     if (net.isOnline()) {
-    //       autoUpdater.checkForUpdates();
-    //     }
-    //   }
-    // }, 600000);
-    // gracefully ignore if no internet when attempting to auto update
-    // if (net.isOnline()) {
-    //   autoUpdater.checkForUpdates();
-    // }
   }
 
   startUpdateUI = (manualCheck: boolean = false) => {
@@ -210,7 +174,7 @@ export class AppUpdater implements IAppUpdater {
         })
         .finally(() => (self.manualCheck = false));
     });
-    this.ui.loadURL(resolveHtmlPath('progress.html'));
+    this.ui.loadURL(resolveHtmlPath('updater.html'));
   };
 
   // for manual update checks, report errors on internet connectivity. for

@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 const playgroundPort = process.env.PLAYGROUND_PORT || 3010;
 const port = process.env.PORT || 1212;
-const manifest = path.resolve(webpackPaths.dllPath, 'progress.json');
+const manifest = path.resolve(webpackPaths.dllPath, 'updater.json');
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const requiredByDLLConfig = module.parent!.filename.includes(
   'webpack.config.updater.dev.dll'
@@ -47,9 +47,9 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: {
-    progress: path.join(
+    updater: path.join(
       webpackPaths.srcRendererPath,
-      'system/progress/progress.tsx'
+      'system/updater/index.tsx'
     ),
   },
   output: {
@@ -134,12 +134,12 @@ const configuration: webpack.Configuration = {
     new ReactRefreshWebpackPlugin(),
 
     new HtmlWebpackPlugin({
-      filename: path.join('progress.html'),
+      filename: path.join('updater.html'),
       template: path.join(
         webpackPaths.srcRendererPath,
-        'system/progress/progress.ejs'
+        'system/updater/updater.ejs'
       ),
-      chunks: ['progress'], // respective JS files
+      chunks: ['updater'], // respective JS files
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
@@ -156,41 +156,6 @@ const configuration: webpack.Configuration = {
     __dirname: true,
     __filename: false,
   },
-
-  // devServer: {
-  // port,
-  // compress: true,
-  // hot: true,
-  // headers: { 'Access-Control-Allow-Origin': '*' },
-  // // static: {
-  // // publicPath: '/',
-  // // },
-  // static: ['media'],
-  // historyApiFallback: {
-  //   verbose: true,
-  // },
-  //   setupMiddlewares(middlewares) {
-  //     console.log('Starting preload.js builder...');
-  //     const preloadProcess = spawn('npm', ['run', 'start:preload'], {
-  //       shell: true,
-  //       stdio: 'inherit',
-  //     })
-  //       .on('close', (code: number) => process.exit(code!))
-  //       .on('error', (spawnError) => console.error(spawnError));
-
-  //     console.log('Starting Main Process...');
-  //     spawn('npm', ['run', 'start:main'], {
-  //       shell: true,
-  //       stdio: 'inherit',
-  //     })
-  //       .on('close', (code: number) => {
-  //         preloadProcess.kill();
-  //         process.exit(code!);
-  //       })
-  //       .on('error', (spawnError) => console.error(spawnError));
-  //     return middlewares;
-  //   },
-  // },
 };
 
 export default merge(baseConfig, configuration);

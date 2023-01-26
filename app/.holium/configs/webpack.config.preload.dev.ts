@@ -20,7 +20,7 @@ const configuration: webpack.Configuration = {
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
     updater: path.join(
       webpackPaths.srcRendererPath,
-      'system/progress/progress.preload.ts'
+      'system/updater/preload.ts'
     ),
   },
   output: {

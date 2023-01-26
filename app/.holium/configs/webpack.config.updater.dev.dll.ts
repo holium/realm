@@ -25,8 +25,7 @@ const configuration: webpack.Configuration = {
    */
   module: require('./webpack.config.updater.dev').default.module,
   entry: {
-    progress: ['react', 'react-dom'],
-    // progress: Object.keys(dependencies || {}),
+    updater: ['react', 'react-dom'],
   },
   output: {
     path: dist,
