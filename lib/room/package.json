@@ -6,6 +6,20 @@
   "description": "A lib that manages media streams via RTCPeerConnections.",
   "main": "dist/holium-realm-room.cjs.js",
   "module": "dist/holium-realm-room.esm.js",
+  "browser": {
+    "./dist/holium-realm-room.esm.js": "./dist/holium-realm-room.browser.esm.js"
+  },
+  "exports": {
+    ".": {
+      "module": {
+        "worker": "./dist/holium-realm-room.worker.esm.js",
+        "browser": "./dist/holium-realm-room.browser.esm.js",
+        "default": "./dist/holium-realm-room.esm.js"
+      },
+      "default": "./dist/holium-realm-room.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "typings": "dist/holium-realm-room.cjs.d.ts",
   "scripts": {
     "prepare": "yarn build",
