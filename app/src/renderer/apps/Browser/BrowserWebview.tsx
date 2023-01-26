@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
 import { useBrowser } from './store';
 import { WebView } from 'renderer/system/desktop/components/Window/WebView';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 type Props = {
   isLocked: boolean;
@@ -10,6 +11,7 @@ type Props = {
 
 export const BrowserWebview = observer(({ isLocked }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
+  const hidden = useToggle(true);
 
   const id = 'os-browser-web-webview';
   const { loader } = currentTab;
@@ -18,6 +20,10 @@ export const BrowserWebview = observer(({ isLocked }: Props) => {
     const webView = document.getElementById(id) as Electron.WebviewTag | null;
 
     if (!webView) return;
+
+    // On first load, we want to hide the webview until it's loaded.
+    // This is to wait for the webview coordinates to be sent to the main process.
+    webView.addEventListener('dom-ready', hidden.toggleOff);
 
     webView.addEventListener('did-start-loading', () => {
       setLoading();
@@ -68,6 +74,8 @@ export const BrowserWebview = observer(({ isLocked }: Props) => {
               width: '100%',
               height: 'calc(100% - 54px)',
               marginTop: 54,
+              // Hide the webview until it's loaded.
+              visibility: hidden.isOn ? 'hidden' : 'visible',
             }}
           />
         )}
