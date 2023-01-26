@@ -378,3 +378,27 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
     />
   </Flex>
 );
+
+export const RelicTab: ComponentStory<typeof Bubble> = () => (
+  <Flex gap={12} flexDirection="column" width={500}>
+    <Bubble
+      author="~fasnut-famden"
+      authorColor="#FF0000"
+      sentAt="2023-01-26T11:00:30.000Z"
+      message={[
+        {
+          plain: 'Check this out!',
+        },
+        {
+          tab: {
+            url: 'https://boards.4chan.org/pol/',
+            favicon: 'https://s.4cdn.org/image/favicon.ico',
+            title:
+              "/pol/ - Politically Incorrect is 4chan's board for discussing and debating politics and current events.",
+          },
+        },
+      ]}
+      onReaction={() => {}}
+    />
+  </Flex>
+);

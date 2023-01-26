@@ -16,16 +16,18 @@ import {
   FragmentKey,
   FragmentUrLinkType,
   FragmentReplyType,
+  FragmentTabType,
 } from './Bubble.types';
 
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { getVar } from '../../util/colors';
-import { Text, TextProps, Flex } from '../..';
+import { Text, TextProps, Flex, FlexProps } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
+import { Bookmark } from '../../os/Bookmark/Bookmark';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
@@ -121,6 +123,15 @@ export const FragmentImage = styled(motion.img)`
   width: 100%;
   max-width: 20rem;
   border-radius: 4px;
+`;
+
+const TabWrapper = styled(Flex)<FlexProps>`
+  border-radius: 6px;
+
+  background: var(--rlm-card-color);
+  ${Text.Custom} {
+    color: var(--rlm-text-color);
+  }
 `;
 
 export const renderFragment = (
@@ -241,6 +252,21 @@ export const renderFragment = (
             {renderFragment(msg, index, replyAuthor)}
           </Flex>
         </FragmentBlockquote>
+      );
+    case 'tab':
+      const { url, favicon, title } = (fragment as FragmentTabType).tab;
+      return (
+        <TabWrapper width={340} id={url} p={0}>
+          <Bookmark
+            url={url}
+            favicon={favicon}
+            title={title}
+            width={320}
+            onNavigate={(url: string) => {
+              window.open(url, '_blank');
+            }}
+          />
+        </TabWrapper>
       );
 
     case 'ur-link':

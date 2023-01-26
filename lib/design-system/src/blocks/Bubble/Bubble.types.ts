@@ -44,6 +44,14 @@ export type FragmentBreakType = {
   break: null;
 };
 
+export type FragmentTabType = {
+  tab: {
+    url: string;
+    favicon: string;
+    title: string;
+  };
+};
+
 export type FragmentType =
   | FragmentPlainType
   | FragmentBoldType
@@ -60,7 +68,8 @@ export type FragmentType =
   | FragmentImageType
   | FragmentUrLinkType
   | FragmentBreakType
-  | FragmentReplyType;
+  | FragmentReplyType
+  | FragmentTabType;
 
 export type FragmentKey = keyof FragmentType;
 
