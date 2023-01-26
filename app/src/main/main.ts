@@ -197,13 +197,10 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(async () => {
-    console.log('checking for updates...');
-    appUpdater.checkForUpdates().then((result: unknown) => {
-      //   console.log('after checkForUpdates => %o', result);
+    appUpdater.checkForUpdates().then(() => {
       createWindow();
     });
     app.on('activate', async () => {
-      console.log('activated');
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (BrowserWindow.getAllWindows().length === 0) {

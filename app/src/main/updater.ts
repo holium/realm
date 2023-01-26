@@ -61,6 +61,7 @@ export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   private doneCallback: undefined | ((value: unknown) => void) = undefined;
   private ui: BrowserWindow | null = null;
+  private wait: BrowserWindow | null = null;
 
   constructor() {
     const self = this;
@@ -72,7 +73,7 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.setFeedURL({
       provider: 'generic',
       url: 'http://localhost:3001',
-      channel: 'alpha',
+      channel: determineReleaseChannel(),
     });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
@@ -82,11 +83,12 @@ export class AppUpdater implements IAppUpdater {
     });
     autoUpdater.on('checking-for-update', async () => {
       if (self.manualCheck) {
-        // self.ui?.show();
+        self.ui?.show();
       }
     });
     autoUpdater.on('update-available', () => {
       console.log('update-available received');
+      self.ui?.show();
       self.ui?.webContents.send('auto-updater-message', {
         name: 'update-available',
       });
@@ -105,7 +107,6 @@ export class AppUpdater implements IAppUpdater {
       console.log('update-downloaded');
       self.ui &&
         self.ui.webContents.send('auto-updater-message', {
-          ...stats,
           name: 'update-downloaded',
         });
     });
@@ -122,8 +123,31 @@ export class AppUpdater implements IAppUpdater {
 
   startUpdateUI = (manualCheck: boolean = false) => {
     const self = this;
+    // show a splash on startup (manual check or not)
+    self.wait = new BrowserWindow({
+      width: 400,
+      height: 300,
+      icon: getAssetPath('icon.png'),
+      title: 'Please wait',
+      frame: false,
+      center: true,
+      resizable: false,
+      movable: false,
+      webPreferences: {
+        devTools: false,
+      },
+    });
+    // must be raw content. any attempt to do stuff with auto generated react/html (see startUpdateUI)
+    //  takes a while to load; especially in development when its built on the fly
+    const content = `
+      <div style="font-family: Arial; width: 100%; height: calc(100vh); display: flex; align-items: center; justify-content: center;">
+        Initializing. Please wait...
+      </div>
+    `;
+    self.wait.loadURL(`data:text/html;charset=utf-8,${content}`);
+    // create this window hidden. only show if manual check or updates found
     this.ui = new BrowserWindow({
-      //show: false,
+      show: false,
       // parent: mainWindow || undefined,
       width: 400,
       height: 300,
@@ -146,8 +170,13 @@ export class AppUpdater implements IAppUpdater {
       },
     });
     this.ui.webContents.on('did-finish-load', () => {
+      if (manualCheck) {
+        self.ui?.show();
+        self.wait?.hide();
+      }
       self.manualCheck = manualCheck;
       ipcMain.handle('download-updates', () => {
+        console.log('download-updates');
         if (self.ui) {
           self.ui.webContents.send('update-status', {
             name: 'starting-download',
@@ -156,10 +185,12 @@ export class AppUpdater implements IAppUpdater {
         autoUpdater.downloadUpdate();
       });
       ipcMain.handle('cancel-updates', () => {
+        console.log('cancel-updates');
         self.ui && self.ui.close();
         self.doneCallback && self.doneCallback('continue');
       });
       ipcMain.handle('install-updates', () => {
+        console.log('install-updates');
         if (self.ui) {
           self.ui.webContents.send('update-status', {
             name: 'installing-updates',
