@@ -256,6 +256,8 @@ export function getMockCoinIcon(ticker: string) {
       return 'https://cryptologos.cc/logos/tron-trx-logo.png';
     case 'BNB':
       return 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png';
+    case 'WETH':
+      return 'https://s3.amazonaws.com/token-icons/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png';
     default:
       return 'https://static.thenounproject.com/png/3262833-200.png';
   }
