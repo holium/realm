@@ -17,11 +17,13 @@ import {
   FragmentUrLinkType,
   FragmentReplyType,
   FragmentTabType,
+  TEXT_TYPES,
 } from './Bubble.types';
 
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { getVar } from '../../util/colors';
+import { capitalizeFirstLetter} from '../../util/strings';
 import { Text, TextProps, Flex, FlexProps } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
@@ -72,14 +74,20 @@ export const FragmentBoldItalicsStrike = styled(FragmentBase)`
   text-decoration: line-through;
 `;
 
-export const FragmentBlockquote = styled(motion.blockquote)`
+export const FragmentReplyTo = styled(motion.blockquote)`
   font-style: italic;
-  border-left: 2px solid var(--rlm-accent-color);
-  padding-left: 8px;
-  .fragment-reply {
-    ${FragmentBase} {
-      font-size: 0.86em;
-    }
+  border-radius: 4px;
+  display: flex;
+  margin: 0px;
+  flex-direction: column;
+  padding: 4px;
+  background: var(--rlm-card-color);
+  ${FragmentBase} {
+    font-size: 0.86em;
+    color: var(--rlm-text-color);
+  }
+  ${Text.Custom} {
+    color: var(--rlm-text-color);
   }
 `;
 
@@ -108,7 +116,7 @@ const CodeWrapper = styled(Flex)`
   padding: 4px 8px;
   width: 100%;
   ${Text.Custom} {
-    color: var(--rlm-text-color);
+    color: var(--rlm-text-color) !important;
   }
 `;
 
@@ -117,6 +125,7 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   border-radius: 4px;
   width: 100%;
   white-space: pre-wrap;
+  
 `;
 
 export const FragmentImage = styled(motion.img)`
@@ -127,10 +136,39 @@ export const FragmentImage = styled(motion.img)`
 
 const TabWrapper = styled(Flex)<FlexProps>`
   border-radius: 6px;
-
   background: var(--rlm-card-color);
   ${Text.Custom} {
     color: var(--rlm-text-color);
+  }
+`;
+
+export const FragmentBlockquote = styled(motion.blockquote)`
+  font-style: italic;
+  border-left: 2px solid var(--rlm-accent-color);
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 0px 3px 3px 0px;
+  .fragment-reply {
+    border-radius: 4px;
+    ${FragmentBase} {
+      font-size: 0.86em;
+    }
+    .block-author {
+      display: none !important;
+    }
+    ${FragmentImage} {
+      width: fit-content;
+      height: 40px;
+    }
+  }
+  &:active:not([disabled]) {
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-active);
+  }
+  &:hover:not([disabled]) {
+    transition: var(--transition);
+    background-color: var(--rlm-overlay-hover);
+    cursor: pointer;
   }
 `;
 
@@ -245,11 +283,24 @@ export const renderFragment = (
     case 'reply':
       const msg = (fragment as FragmentReplyType).reply.message[0];
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
+      const fragmentType: string = Object.keys(msg)[0];
+      let replyContent = null;
+      if (
+        !TEXT_TYPES.includes(fragmentType) &&
+        fragmentType !== 'image' &&
+        fragmentType !== 'reply'
+      ) {
+        replyContent = (
+          <FragmentPlain>{capitalizeFirstLetter(fragmentType)}</FragmentPlain>
+        );
+      } else {
+        replyContent = renderFragment(msg, index, replyAuthor);
+      }
       return (
         <FragmentBlockquote>
           <Flex flexDirection="column" className="fragment-reply">
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
-            {renderFragment(msg, index, replyAuthor)}
+            {replyContent}
           </Flex>
         </FragmentBlockquote>
       );

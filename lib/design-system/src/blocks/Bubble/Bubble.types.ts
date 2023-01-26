@@ -85,3 +85,22 @@ export type FragmentReactionType = {
   author: string;
   emoji: string; // emoji.unified -> see emoji-picker-react
 };
+
+export const BLOCK_TYPES = [
+  'image',
+  'video',
+  'audio',
+  'link',
+  'blockquote',
+  'code',
+];
+export const TEXT_TYPES = [
+  'plain',
+  'bold',
+  'italics',
+  'bold-italics',
+  'bold-strike',
+  'bold-italics-strike',
+  'inline-code',
+  'ship',
+];

@@ -1,10 +1,14 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
-import { FragmentReactionType, FragmentType } from './Bubble.types';
+import {
+  FragmentReactionType,
+  FragmentType,
+  TEXT_TYPES,
+  BLOCK_TYPES,
+} from './Bubble.types';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { chatDate } from '../../util/date';
-
 import { Reactions, OnReactionPayload } from './Reaction';
 
 type TemplateProps = {
@@ -15,19 +19,8 @@ type TemplateProps = {
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
   onReaction: (payload: OnReactionPayload) => void;
+  onReplyClick?: (msgId: string) => void;
 } & BoxProps;
-
-const BLOCK_TYPES = ['image', 'video', 'audio', 'link', 'blockquote', 'code'];
-const TEXT_TYPES = [
-  'plain',
-  'bold',
-  'italics',
-  'bold-italics',
-  'bold-strike',
-  'bold-italics-strike',
-  'inline-code',
-  'ship',
-];
 
 export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
   const {
@@ -39,6 +32,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
     message,
     reactions = [],
     onReaction,
+    // onReplyClick = () => {},
   } = props;
 
   const dateDisplay = chatDate(new Date(sentAt));
@@ -49,7 +43,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
       display="inline-flex"
       justifyContent={our ? 'flex-end' : 'flex-start'}
     >
-      <BubbleStyle id={id} our={our}>
+      <BubbleStyle id={id} our={our} className={our ? 'bubble-our' : ''}>
         {!our && (
           <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
         )}
@@ -67,6 +61,8 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
                 lineBreak = true;
               }
             }
+
+            // TODO somehow pass in the onReplyClick function
 
             return (
               <>

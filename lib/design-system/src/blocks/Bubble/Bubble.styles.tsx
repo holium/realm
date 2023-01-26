@@ -11,7 +11,27 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
   padding: 6px 8px 6px 8px;
   font-size: 14px;
   align-self: flex-start;
-  ${(props) =>
+  color: var(--rlm-text-color);
+  background: var(--rlm-input-color);
+  border-radius: 9px 9px 9px 0px;
+  &.bubble-our {
+    background: var(--rlm-accent-color);
+    border-radius: 9px 9px 0px 9px;
+    ${Text.Custom} {
+      color: #ffffff;
+    }
+    ${FragmentBlockquote} {
+      color: #ffffff;
+      border-left: 2px solid #ffffff70;
+    }
+    ${FragmentShip} {
+      background: #ffffff30;
+      &:hover {
+        background: #ffffff45;
+      }
+    }
+  }
+  /* ${(props) =>
     props.our
       ? css`
           background: var(--rlm-accent-color);
@@ -34,7 +54,7 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
           color: var(--rlm-text-color);
           background: var(--rlm-input-color);
           border-radius: 9px 9px 9px 0px;
-        `};
+        `}; */
 
   .bubble-reactions {
     transition: var(--transition);

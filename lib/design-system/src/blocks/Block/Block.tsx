@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Text, Box } from '../..';
+import { Text } from '../..';
 
 import {
   background,

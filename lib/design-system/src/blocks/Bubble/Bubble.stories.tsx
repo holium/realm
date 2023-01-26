@@ -376,6 +376,51 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       ]}
       onReaction={() => {}}
     />
+    <Bubble
+      author="~lodlev-migdev"
+      authorColor="#428E65"
+      sentAt="2023-01-26T11:04:38.000Z"
+      message={[
+        {
+          reply: {
+            msgId: '123',
+            author: '~lomder-librun',
+            message: [
+              {
+                image:
+                  'https://i.kym-cdn.com/entries/icons/original/000/010/587/Navy_Seal.jpg',
+              },
+            ],
+          },
+        },
+        {
+          plain: 'Ape MAD, APE KILL',
+        },
+      ]}
+      onReaction={() => {}}
+    />
+    <Bubble
+      author="~zod"
+      authorColor="#e3a30e"
+      sentAt="2023-01-26T11:04:38.000Z"
+      message={[
+        {
+          reply: {
+            msgId: '123',
+            author: '~lomder-librun',
+            message: [
+              {
+                code: 'https://i.kym-cdn.com/entries/icons/original/000/010/587/Navy_Seal.jpg',
+              },
+            ],
+          },
+        },
+        {
+          plain: 'Um yeah this is what losers do',
+        },
+      ]}
+      onReaction={() => {}}
+    />
   </Flex>
 );
 
@@ -383,7 +428,7 @@ export const RelicTab: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
       author="~fasnut-famden"
-      authorColor="#FF0000"
+      authorColor="#428E65"
       sentAt="2023-01-26T11:00:30.000Z"
       message={[
         {
