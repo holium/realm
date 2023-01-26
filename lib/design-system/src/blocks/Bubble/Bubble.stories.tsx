@@ -60,13 +60,11 @@ export const Default: ComponentStory<typeof Bubble> = () => {
             plain: 'I get this error',
           },
           {
-            code: `
-99% done plugins webpack-hot-middlewarewebpack built preview 643abb6f494255842d56 in 1968ms
+            code: `99% done plugins webpack-hot-middlewarewebpack built preview 643abb6f494255842d56 in 1968ms
 webpack building...
 99% done plugins webpack-hot-middlewarewebpack built preview c882f45221129543c371 in 2494ms
 webpack building...
-99% done plugins webpack-hot-middlewarewebpack built preview 4b80b9a66efd70ac5226 in 2279ms
-          `,
+99% done plugins webpack-hot-middlewarewebpack built preview 4b80b9a66efd70ac5226 in 2279ms`,
           },
         ]}
         onReaction={() => {}}
@@ -201,6 +199,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
+          { plain: 'Run the following command to download' },
           {
             code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
     | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',

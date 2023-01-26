@@ -5,11 +5,7 @@ import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { chatDate } from '../../util/date';
 
-import {
-  Reactions,
-  ReactionAggregateType,
-  OnReactionPayload,
-} from './Reaction';
+import { Reactions, OnReactionPayload } from './Reaction';
 
 type TemplateProps = {
   author: string;
@@ -21,7 +17,7 @@ type TemplateProps = {
   onReaction: (payload: OnReactionPayload) => void;
 } & BoxProps;
 
-const BLOCK_TYPES = ['image', 'video', 'audio', 'link', 'blockquote'];
+const BLOCK_TYPES = ['image', 'video', 'audio', 'link', 'blockquote', 'code'];
 const TEXT_TYPES = [
   'plain',
   'bold',

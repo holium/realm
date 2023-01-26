@@ -84,7 +84,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
 export const FragmentInlineCode = styled(FragmentBase)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
-  padding: 2px 4px;
+  padding: 0px 3px;
 `;
 
 export const FragmentShip = styled(FragmentBase)`
@@ -100,10 +100,20 @@ export const FragmentShip = styled(FragmentBase)`
   }
 `;
 
-export const FragmentCodeBlock = styled(FragmentBase)`
+const CodeWrapper = styled(Flex)`
+  border-radius: 4px;
+  background: var(--rlm-card-color);
+  padding: 4px 8px;
+  width: 100%;
+  ${Text.Custom} {
+    color: var(--rlm-text-color);
+  }
+`;
+
+export const FragmentCodeBlock = styled(Text.Custom)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
-  padding: 2px 4px;
+  width: 100%;
   white-space: pre-wrap;
 `;
 
@@ -185,9 +195,11 @@ export const renderFragment = (
 
     case 'code':
       return (
-        <FragmentCodeBlock key={index}>
-          {(fragment as FragmentCodeType).code}
-        </FragmentCodeBlock>
+        <CodeWrapper my={1}>
+          <FragmentCodeBlock key={index}>
+            {(fragment as FragmentCodeType).code}
+          </FragmentCodeBlock>
+        </CodeWrapper>
       );
     case 'link':
       return (

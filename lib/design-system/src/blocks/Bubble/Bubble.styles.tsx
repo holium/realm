@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
 import { Text, Box } from '../..';
 
-import { FragmentBlockquote } from './fragment-lib';
+import { FragmentBlockquote, FragmentShip } from './fragment-lib';
 
 export const BubbleStyle = styled(Box)<{ our?: boolean }>`
   display: inline-flex;
@@ -22,6 +22,12 @@ export const BubbleStyle = styled(Box)<{ our?: boolean }>`
           ${FragmentBlockquote} {
             color: #ffffff;
             border-left: 2px solid #ffffff70;
+          }
+          ${FragmentShip} {
+            background: #ffffff30;
+            &:hover {
+              background: #ffffff45;
+            }
           }
         `
       : css`
