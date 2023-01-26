@@ -233,18 +233,15 @@ const createMouseOverlay = () => {
 ipcMain.handle(
   'updateWebviewPosition',
   (_, webviewId: string, position: { x: number; y: number }) => {
-    console.log('updateWebviewPosition', webviewId, position);
     webviews[webviewId] = { position, hasMouseInside: false };
   }
 );
 
 ipcMain.handle('mouseEnteredWebview', (_, id: string) => {
-  console.log('mouseEnteredWebview', id);
   webviews[id].hasMouseInside = true;
 });
 
 ipcMain.handle('mouseLeftWebview', (_, id: string) => {
-  console.log('mouseLeftWebview', id);
   webviews[id].hasMouseInside = false;
 });
 

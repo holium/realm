@@ -17,10 +17,18 @@ export const WebView = ({ id, ...rest }: WebViewProps) => {
 
     if (!webView) return;
 
-    window.electron.app.updateWebviewPosition(id, {
-      x: webView.getBoundingClientRect().x,
-      y: webView.getBoundingClientRect().y,
-    });
+    const { x, y } = webView.getBoundingClientRect();
+
+    window.electron.app.updateWebviewPosition(id, { x, y });
+
+    const handleResize = () =>
+      window.electron.app.updateWebviewPosition(id, { x, y });
+
+    webView.addEventListener('resize', handleResize);
+
+    return () => {
+      webView.removeEventListener('resize', handleResize);
+    };
   }, [id]);
 
   return (

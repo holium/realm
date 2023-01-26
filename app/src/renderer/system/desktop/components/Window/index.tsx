@@ -139,16 +139,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
         height: Math.round(mHeight.get()),
         width: Math.round(mWidth.get()),
       });
-
-    const webview = document.getElementById(
-      webviewId
-    ) as Electron.WebviewTag | null;
-    if (!webview) return;
-    const webviewX = webview?.getBoundingClientRect().x;
-    const webviewY = webview?.getBoundingClientRect().y;
-    console.log('mazimize,', webview?.getBoundingClientRect());
-
-    DesktopActions.updateWebviewPosition(webviewId, webviewX, webviewY);
   }, [shell.isFullscreen, activeWindow, unmaximize, webviewId, setUnmaximize]);
 
   const onDragStop = () => {
