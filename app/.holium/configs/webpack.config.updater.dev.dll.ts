@@ -5,6 +5,7 @@
 import webpack from 'webpack';
 import path from 'path';
 import { merge } from 'webpack-merge';
+//import { dependencies } from '../../package.json';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -18,13 +19,14 @@ const configuration: webpack.Configuration = {
   devtool: 'eval',
   mode: 'development',
   target: 'electron-renderer',
-  // externals: ['fsevents', 'crypto-browserify'],
+  //externals: ['fsevents', 'crypto-browserify'],
   /**
    * Use `module` from `webpack.config.renderer.dev.js`
    */
   module: require('./webpack.config.updater.dev').default.module,
   entry: {
     progress: ['react', 'react-dom'],
+    // progress: Object.keys(dependencies || {}),
   },
   output: {
     path: dist,

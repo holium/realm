@@ -10,6 +10,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 console.log('hello from progress.preload.js');
 contextBridge.exposeInMainWorld('autoUpdate', {
   listen: (callback) => ipcRenderer.on('auto-updater-message', callback),
-  installUpdates: () => ipcRenderer.invoke('install-updates'),
+  downloadUpdates: () => ipcRenderer.invoke('download-updates'),
   cancelUpdates: () => ipcRenderer.invoke('cancel-updates'),
+  installUpdates: () => ipcRenderer.invoke('install-updates'),
 });

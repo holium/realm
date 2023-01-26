@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+// import { Button } from '@holium/design-system';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
@@ -33,23 +34,41 @@ root.render(
 const UpdateAvailable = () => {
   return (
     <>
-      <div>Found updates</div>
-      <div>Would you like to install?</div>
-      <div>
-        <button onClick={() => window.autoUpdate.installUpdates()}>Yes</button>
-        <button onClick={() => window.autoUpdate.cancelUpdates()}>No</button>
+      <div style={{ padding: '12px' }}>Found updates</div>
+      <div style={{ padding: '12px' }}>Would you like to install?</div>
+      <div style={{ padding: '12px' }}>
+        <button onClick={() => window.autoUpdate.downloadUpdates()}>Yes</button>
+        <button
+          style={{ marginLeft: '8px' }}
+          onClick={() => window.autoUpdate.cancelUpdates()}
+        >
+          No
+        </button>
       </div>
     </>
   );
 };
 
 const UpdateStats = (props) => {
+  const { stats } = props;
   return (
     <>
-      <div>{props.speed}</div>
-      <div>{props.percent}</div>
-      <div>{props.transferred}</div>
-      <div>{props.total}</div>
+      <div>Bytes per second: {stats.bytesPerSecond}</div>
+      <div>Transferred: {stats.transferred}</div>
+      <div>Total: {stats.total}</div>
+      <div>Percent: {stats.percent}</div>
+    </>
+  );
+};
+
+const UpdateDownloaded = (props) => {
+  const { stats } = props;
+  return (
+    <>
+      <div>Updates downloaded</div>
+      <button onClick={() => window.autoUpdate.installUpdates()}>
+        Install
+      </button>
     </>
   );
 };
@@ -76,6 +95,12 @@ window.autoUpdate.listen((event, message) => {
       break;
     case 'update-status':
       view = <UpdateStats stats={message} />;
+      break;
+    case 'update-downloaded':
+      view = <UpdateDownloaded />;
+      break;
+    case 'starting-download':
+      view = () => <>Starting download. Please wait...</>;
       break;
   }
   root.render(<View>{view}</View>);
