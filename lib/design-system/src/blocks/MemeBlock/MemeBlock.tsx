@@ -1,15 +1,10 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { FragmentReactionType, FragmentType } from '../Bubble/Bubble.types';
-import { FragmentBlock, renderFragment } from '../Bubble/fragment-lib';
-import {
-  Reactions,
-  ReactionAggregateType,
-  OnReactionPayload,
-} from '../Bubble/Reaction';
+import { FragmentReactionType } from '../Bubble/Bubble.types';
+import { Reactions, OnReactionPayload } from '../Bubble/Reaction';
 
 import { timelineDate } from '../../util/date';
 

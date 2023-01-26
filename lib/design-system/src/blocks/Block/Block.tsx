@@ -54,7 +54,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   align-items: flex-start;
   padding: 6px;
   gap: 6px;
-  background: var(--rlm-window-color);
+  background: var(--rlm-card-color);
   color: var(--rlm-text-color) !important;
   ${Text.Custom} {
     color: var(--rlm-text-color) !important;

@@ -32,3 +32,7 @@ export const chatDate = (date: Date) => {
     return dayjs(date).format('h:mm A');
   }
 };
+
+// if (dayjs(date).isSame(dayjs(), 'minute')) {
+//   return '1m';
+// } else
