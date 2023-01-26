@@ -61,8 +61,8 @@
     ^-  (quip card _this)
     =/  old  !<(versioned-state old-state)
     ?-  -.old
-      %0  `this(state old)
-      %1  `this(state [%1 spaces=spaces.old invitations=invitations.old membership=membership.old current=path:our-space])
+      %0  `this(state [%1 spaces=spaces.old invitations=invitations.old membership=membership.old current=[our.bowl 'our']])
+      %1  `this(state old)
     ==
   ::
   ++  on-poke
