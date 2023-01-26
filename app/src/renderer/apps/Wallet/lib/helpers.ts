@@ -205,18 +205,60 @@ export const fullMonthNames = [
   'November',
   'December',
 ];
-
+// https://coincodex.com/cryptocurrencies/sector/ethereum-erc20/
 export function getMockCoinIcon(ticker: string) {
   switch (ticker) {
-    case 'USDC':
-      return 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png';
-    case 'BNB':
-      return 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png';
+    case 'BUSD': 
+      return 'https://cryptologos.cc/logos/binance-usd-busd-logo.png'
+    case 'MATIC': 
+      return 'https://cryptologos.cc/logos/polygon-matic-logo.png'
     case 'SHIB':
       return 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png';
+    case 'DAI':
+      return 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png';
+    case 'WBTC':
+      return 'https://cryptologos.cc/logos/wrapped-bitcoin-wbtc-logo.png';
     case 'UNI':
       return 'https://cryptologos.cc/logos/uniswap-uni-logo.png';
+    case 'LINK':
+      return 'https://cryptologos.cc/logos/chainlink-link-logo.png';
+    case 'LEO':
+      return 'https://cryptologos.cc/logos/unus-sed-leo-leo-logo.png';
+    case 'APE':
+      return 'https://cryptologos.cc/logos/apecoin-ape-ape-logo.png';
+    case 'CRO':
+      return 'https://cryptologos.cc/logos/cronos-cro-logo.png';
+    case 'QNT':
+      return 'https://cryptologos.cc/logos/quant-qnt-logo.png';
+    case 'MANA':
+      return 'https://cryptologos.cc/logos/decentraland-mana-logo.png';
+    case 'AAVE':
+      return 'https://cryptologos.cc/logos/aave-aave-logo.png';
+    case 'MKR':
+      return 'https://cryptologos.cc/logos/maker-mkr-logo.png';
+    case 'USDT':
+      return 'https://cryptologos.cc/logos/tether-usdt-logo.png';
+    case 'USDC':
+      return 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png';
+    case 'XRP':
+      return 'https://cryptologos.cc/logos/xrp-xrp-logo.png';
+    case 'ADA':
+      return 'https://cryptologos.cc/logos/cardano-ada-logo.png';
+    case 'DOGE':
+      return 'https://cryptologos.cc/logos/dogecoin-doge-logo.png';
+    case 'SOL':
+      return 'https://cryptologos.cc/logos/solana-sol-logo.png';
+    case 'DOT':
+      return 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png';
+    case 'AVAX':
+      return 'https://cryptologos.cc/logos/avalanche-avax-logo.png';
+    case 'TRON':
+      return 'https://cryptologos.cc/logos/tron-trx-logo.png';
+    case 'BNB':
+      return 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png';
+    
     default:
       return 'https://static.thenounproject.com/png/3262833-200.png';
   }
 }
+

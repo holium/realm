@@ -5,12 +5,12 @@ import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
-  shortened,
   monthNames,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
+  shortened,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
@@ -18,7 +18,7 @@ import {
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
-type TxType = 'coin' | 'nft' | 'general' | undefined;
+export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
 interface TransactionProps {
   transaction: TransactionType;
