@@ -11,7 +11,7 @@ type TextInputProps = {
   readOnly?: boolean;
   placeholder?: string;
   defaultValue?: string;
-} & Partial<InputBoxProps>;
+} & Partial<InputBoxProps> & { cols?: number; rows?: number };
 
 export const TextInput = ({
   id,
@@ -28,9 +28,9 @@ export const TextInput = ({
   onFocus,
   onBlur,
   onKeyDown,
-  ...inutBoxProps
+  ...inputBoxProps
 }: TextInputProps) => (
-  <InputBox inputId={id} disabled={disabled} {...inutBoxProps}>
+  <InputBox inputId={id} disabled={disabled} {...inputBoxProps}>
     {type === 'textarea' ? (
       <TextArea
         id={id}
@@ -46,6 +46,8 @@ export const TextInput = ({
         onFocus={onFocus}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
+        cols={inputBoxProps.cols}
+        rows={inputBoxProps.rows}
       />
     ) : (
       <Input

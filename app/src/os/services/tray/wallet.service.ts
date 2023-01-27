@@ -1,37 +1,30 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { BaseService } from '../base.service';
-import Store from 'electron-store';
-import EncryptedStore from '../../lib/encryptedStore';
 import Realm from '../..';
 import {
   WalletStore,
   WalletStoreType,
   WalletView,
   NetworkType,
-  WalletCreationMode,
-  SharingMode,
   UISettingsType,
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
   WalletNavOptions,
+  initialWalletState,
 } from './wallet-lib/wallet.model';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
 import { removeDots, UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { getSnapshot } from 'mobx-state-tree';
 import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
+import { DiskStore } from '../base.store';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -47,58 +40,9 @@ export interface RecipientPayload {
   gasEstimate?: number;
 }
 
-const initialWalletState = (ship: string) => ({
-  navState: {
-    view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
-  },
-  ethereum: {
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    initialized: false,
-    conversions: {},
-  },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
-  creationMode: 'default',
-  sharingMode: 'anybody',
-  lastInteraction: Date.now(),
-  initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
-  ourPatp: ship,
-  forceActive: false,
-});
-
 export class WalletService extends BaseService {
-  private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
+  private db?: DiskStore; // for persistence
   private state?: WalletStoreType; // for state management
-  private initialState?: any;
   private signer: RealmSigner;
   private wallet?: Wallet;
   handlers = {
@@ -375,43 +319,20 @@ export class WalletService extends BaseService {
     this.signer = new RealmSigner(this.core);
   }
 
-  async onLogin(ship: string, forceReset: boolean) {
-    console.log('logging in');
+  async onLogin(ship: string) {
     const secretKey: string = this.core.passwords.getPassword(ship)!;
-    const storeParams = {
-      name: 'wallet',
-      cwd: `realm.${ship}`,
-      secretKey,
-      accessPropertiesByDotNotation: true,
-    };
-    this.db = new Store<WalletStoreType>(storeParams);
-    const persistedState: WalletStoreType = this.db.store;
 
-    if (Object.keys(persistedState).length !== 0 && !forceReset) {
-      this.state = WalletStore.create(castToSnapshot(persistedState));
-    } else {
-      this.state = WalletStore.create(initialWalletState(ship));
-    }
+    this.db = new DiskStore(
+      'wallet',
+      ship,
+      secretKey!,
+      WalletStore,
+      initialWalletState(ship)
+    );
 
-    onSnapshot(this.state!, (snapshot: any) => {
-      this.db!.store = snapshot;
-    });
-
-    const patchEffect = {
-      model: getSnapshot(this.state),
-      resource: 'wallet',
-      response: 'initial',
-    };
-    this.core.onEffect(patchEffect);
-
-    onPatch(this.state, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'wallet',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
-    });
+    this.state = this.db.model;
+    this.db.initialUpdate(this.core.onEffect);
+    this.db.registerPatches(this.core.onEffect);
 
     const protocolMap = new Map<ProtocolType, BaseProtocol>([
       [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
@@ -434,10 +355,15 @@ export class WalletService extends BaseService {
     });
     UqbarApi.watchUpdates(this.core.conduit!, this.state!);
 
-    if (this.state.navState.view !== WalletView.NEW) {
-      this.state.resetNavigation();
+    if (this.state && this.state.navState.view !== WalletView.NEW) {
+      this.state!.resetNavigation();
     }
     this.lock(); // lock wallet on login
+  }
+
+  logout() {
+    this.db = undefined;
+    this.state = undefined;
   }
 
   get snapshot() {
@@ -472,7 +398,6 @@ export class WalletService extends BaseService {
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
-    console.log(passcodeString);
     (this.signer as RealmSigner).setMnemonic(
       mnemonic,
       this.state!.ourPatp!,
@@ -497,7 +422,6 @@ export class WalletService extends BaseService {
       passcodeString
     );
     await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
-
     this.state!.navigate(WalletView.LIST);
   }
 
@@ -927,7 +851,7 @@ export class WalletService extends BaseService {
       this.state!.ourPatp!,
       passcodeString
     );
-    this.onLogin(this.state!.ourPatp!, true);
+    this.db?.resetToDefaults();
   }
 
   async deleteShipWallet(_evt: any, passcode: number[]) {
@@ -936,7 +860,7 @@ export class WalletService extends BaseService {
       this.state!.ourPatp!,
       passcodeString
     );
+    this.db?.resetToDefaults();
     WalletApi.initialize(this.core.conduit!);
-    this.onLogin(this.state!.ourPatp!, true);
   }
 }
