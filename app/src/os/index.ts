@@ -149,6 +149,7 @@ export class Realm extends EventEmitter {
 
     this.holiumClient = new HoliumAPI();
     this.passwords = new PasswordStore();
+    this.sendLog = this.sendLog.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -467,7 +468,10 @@ export class Realm extends EventEmitter {
   }
 
   sendLog(data: any): void {
-    this.mainWindow.webContents.send('realm.on-log', data.toString());
+    this.mainWindow?.webContents.send(
+      'realm.on-log',
+      typeof data === 'string' ? data : data.toString()
+    );
   }
 
   /**

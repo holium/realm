@@ -6,6 +6,7 @@ import { EthereumProtocol } from '../wallet/protocols/ethereum';
 export class Wallet {
   protocols: Map<ProtocolType, BaseProtocol>;
   currentProtocol: ProtocolType;
+  sendLog: any;
 
   constructor(
     protocols: Map<ProtocolType, BaseProtocol>,

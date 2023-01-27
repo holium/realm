@@ -29,10 +29,14 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private baseURL: string;
   private nodeURL: string;
   private updating: boolean = false;
+  sendLog: (log: string) => any;
 
-  constructor(protocol: ProtocolType) {
+  constructor(protocol: ProtocolType, sendLog: (log: string) => any) {
     this.protocol = protocol;
-    this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
+    this.sendLog = sendLog;
+    this.baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
+
+    // this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
     if (process.env.NODE_ENV === 'production') {
       this.baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
     } else if (process.env.USE_LOCAL_API) {
@@ -101,9 +105,13 @@ export class EthereumProtocol implements BaseBlockProtocol {
       if (!currentBlock) {
         currentBlock = await this.getBlockNumber();
       }
+      this.sendLog(
+        `updateWalletState: ${walletStore.currentStore?.wallets.size} wallets`
+      );
       for (const walletKey of walletStore.currentStore?.wallets.keys()) {
         const wallet = walletStore.ethereum.wallets.get(walletKey)!;
         this.getAccountBalance(wallet.address).then((balance: string) => {
+          this.sendLog(`updateWalletState: getAccountBalance: ${balance}`);
           if (balance !== '-1') {
             wallet.setBalance(this.protocol, balance);
           }
@@ -193,12 +201,26 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
     this.updating = false;
   }
+  // async getAccountBalance(addr: string): Promise<string> {
+  //   try {
+  //     return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
+  //   } catch (error) {
+  //     console.log('getAccountBalance error');
+  //     console.error(error);
+  //     return '-1';
+  //   }
+  // }
   async getAccountBalance(addr: string): Promise<string> {
     try {
-      return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
+      const balance = ethers.utils.formatEther(
+        await this.alchemy.core.getBalance(addr)
+      );
+      console.log('getAccountBalance', addr, balance);
+      this.sendLog(`getAccountBalance ${addr}, ${balance}`);
+      return balance;
     } catch (error) {
-      console.log('getAccountBalance error');
-      console.error(error);
+      this.sendLog(`getAccountBalance error ${error}`);
+      console.error('getAccountBalance error', error);
       return '-1';
     }
   }

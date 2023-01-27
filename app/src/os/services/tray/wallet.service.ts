@@ -334,8 +334,14 @@ export class WalletService extends BaseService {
     this.db.registerPatches(this.core.onEffect);
 
     const protocolMap = new Map<ProtocolType, BaseProtocol>([
-      [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
-      [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
+      [
+        ProtocolType.ETH_MAIN,
+        new EthereumProtocol(ProtocolType.ETH_MAIN, this.core.sendLog),
+      ],
+      [
+        ProtocolType.ETH_GORLI,
+        new EthereumProtocol(ProtocolType.ETH_GORLI, this.core.sendLog),
+      ],
       [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
