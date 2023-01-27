@@ -3,7 +3,7 @@
  * electron renderer process from here and communicate with the other processes
  * through IPC.
  *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
+ * When running `yarn build` or `yarn build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
@@ -65,7 +65,7 @@ if (isProduction) {
 
 if (isDevelopment) require('electron-debug')();
 
-const getPreload = () =>
+export const getPreload = () =>
   app.isPackaged
     ? path.join(__dirname, 'preload.js')
     : path.join(__dirname, '../../.holium/dll/preload.js');
@@ -109,7 +109,7 @@ const createWindow = async () => {
   Realm.start(mainWindow);
 
   FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(webView);
+  WebviewHelper.registerListeners(mainWindow, webView);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -119,20 +119,6 @@ const createWindow = async () => {
   mainWindow.webContents.on('dom-ready', () => {
     hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', { isWebview: false });
-  });
-
-  mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
-    webPreferences.preload = getPreload();
-    webPreferences.nodeIntegration = false;
-    webPreferences.contextIsolation = true;
-    webPreferences.sandbox = false;
-  });
-
-  mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
-    webContents.on('dom-ready', () => {
-      hideCursor(webContents);
-      webContents.send('add-mouse-listeners', { isWebview: true });
-    });
   });
 
   // TODO why is this rendering multiple times?
