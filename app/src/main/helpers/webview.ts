@@ -1,6 +1,7 @@
-import { BrowserWindow, ipcMain, session } from 'electron';
+import { ipcMain, session } from 'electron';
+import { WebViewsData } from 'main/main';
 
-export const registerListeners = (mainWindow: BrowserWindow) => {
+export const registerListeners = (webviews: WebViewsData) => {
   ipcMain.handle(
     'open-app',
     (_event, location: { url: string; cookies: any }, partition: string) => {
@@ -15,9 +16,12 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     }
   );
 
-  ipcMain.handle('close-app', async (event, location: any) => {
-    const views = mainWindow.getBrowserViews();
-  });
+  ipcMain.handle(
+    'updateWebviewPosition',
+    (_, webviewId: string, position: { x: number; y: number }) => {
+      webviews[webviewId] = { position, hasMouseInside: false };
+    }
+  );
 };
 
 export default { registerListeners };

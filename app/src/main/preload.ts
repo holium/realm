@@ -41,17 +41,14 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  updateWebviewPosition: (
-    webviewId: string,
-    position: { x: number; y: number }
-  ) => {
+  updateWebviewPosition(webviewId: string, position: { x: number; y: number }) {
     ipcRenderer.invoke('updateWebviewPosition', webviewId, position);
   },
-  mouseEnteredWebview: (id: string) => {
-    ipcRenderer.invoke('mouseEnteredWebview', id);
+  mouseEnteredWebView(id: string) {
+    ipcRenderer.invoke('mouse-entered-webview', id);
   },
-  mouseLeftWebview: (id: string) => {
-    ipcRenderer.invoke('mouseLeftWebview', id);
+  mouseLeftWebView(id: string) {
+    ipcRenderer.invoke('mouse-left-webview', id);
   },
   onMouseMove(callback: (coordinates: Vec2, state: MouseState) => void) {
     ipcRenderer.on('mouse-move', (_, coordinates: Vec2, state: MouseState) => {

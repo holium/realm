@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, PropsWithChildren } from 'react';
+import { useState, useEffect, PropsWithChildren } from 'react';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 import { AnimatedCursor, MouseState } from './AnimatedCursor';
-import { useEventListener } from './useEventListener';
 
 export const Mouse = ({ children }: PropsWithChildren) => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
-  const [isActive, setIsActive] = useState(false);
-  // Only state that is not coming from the app layer:
-  const [isVisible, setIsVisible] = useState(false);
+  const active = useToggle(false);
+  const visible = useToggle(false);
 
   useEffect(() => {
     window.electron.app.onMouseMove((newCoordinates, newState) => {
@@ -15,33 +14,22 @@ export const Mouse = ({ children }: PropsWithChildren) => {
       setState(newState);
     });
 
-    window.electron.app.onMouseDown(() => {
-      setIsActive(true);
-    });
+    window.electron.app.onMouseDown(active.toggleOn);
+    window.electron.app.onMouseUp(active.toggleOff);
 
-    window.electron.app.onMouseUp(() => {
-      setIsActive(false);
-    });
+    const handleMouseOver = () => visible.toggleOn();
+    const handleMouseOut = () => visible.toggleOff();
+
+    window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mouseout', handleMouseOut);
   }, []);
-
-  const onMouseEnterViewport = useCallback(() => {
-    setIsVisible(true);
-    setIsActive(false);
-  }, []);
-
-  const onMouseLeaveViewport = useCallback(() => {
-    setIsVisible(false);
-  }, []);
-
-  useEventListener('mouseover', onMouseEnterViewport);
-  useEventListener('mouseout', onMouseLeaveViewport);
 
   return (
     <AnimatedCursor
       state={state}
       coords={coords}
-      isActive={isActive}
-      isVisible={isVisible}
+      isActive={active.isOn}
+      isVisible={visible.isOn}
     >
       {children}
     </AnimatedCursor>

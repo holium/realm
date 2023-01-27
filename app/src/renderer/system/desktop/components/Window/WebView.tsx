@@ -35,12 +35,8 @@ export const WebView = ({ id, ...rest }: WebViewProps) => {
     <webview
       id={id}
       {...rest}
-      onPointerEnter={() => {
-        window.electron.app.mouseEnteredWebview(id);
-      }}
-      onPointerLeave={() => {
-        window.electron.app.mouseLeftWebview(id);
-      }}
+      onPointerEnter={() => window.electron.app.mouseEnteredWebView(id)}
+      onPointerLeave={() => window.electron.app.mouseLeftWebView(id)}
     />
   );
 };
