@@ -5,7 +5,7 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     if (mainWindow.webContents.isDevToolsOpened()) {
       mainWindow.webContents.closeDevTools();
     } else {
-      mainWindow.webContents.openDevTools({ mode: 'detach' });
+      mainWindow.webContents.openDevTools();
     }
   });
 };

@@ -63,10 +63,7 @@ if (isProduction) {
   sourceMapSupport.install();
 }
 
-if (isDevelopment)
-  require('electron-debug')({
-    showDevTools: false,
-  });
+if (isDevelopment) require('electron-debug')();
 
 const getAssetPath = (...paths: string[]) =>
   app.isPackaged

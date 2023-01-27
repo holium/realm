@@ -28,7 +28,4 @@ const hideCursorCss = `
 
 export const hideCursor = (webContents: Electron.WebContents) => {
   webContents.insertCSS(hideCursorCss);
-  webContents.executeJavaScript(`
-    document.body.style.cursor = "none";
-  `);
 };
