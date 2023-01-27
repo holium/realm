@@ -12,6 +12,10 @@ export const applyStyleOverrides = (windowId: string, theme: ThemeType) => {
     case 'talk':
     case 'groups':
       return `
+        body {
+          overflow-x: hidden;
+          overflow-y: hidden;
+        }
         .card {
           background: ${baseBg} !important;
         }
