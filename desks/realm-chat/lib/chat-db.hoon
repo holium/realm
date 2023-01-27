@@ -21,10 +21,11 @@
 ++  remove-message-from-table
   |=  [tbl=messages-table:sur =msg-id:sur]
   =/  part-counter=@ud  0
+  =/  ids  *(list uniq-id:sur)
   |-
   ?.  (has:msgon:sur tbl `uniq-id:sur`[msg-id part-counter])
-    tbl
-  $(part-counter +(part-counter), tbl +:(del:msgon:sur tbl [msg-id part-counter]))
+    [tbl ids]
+  $(part-counter +(part-counter), tbl +:(del:msgon:sur tbl [msg-id part-counter]), ids (snoc ids [msg-id part-counter]))
 ::
 ++  remove-messages-for-path
   |=  [tbl=messages-table:sur =path]
@@ -41,7 +42,7 @@
   =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
   =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
-  (gas:msgon:sur tbl key-vals)
+  [(gas:msgon:sur tbl key-vals) msg]
 ::
 ::  poke actions
 ::
@@ -82,21 +83,44 @@
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  messages-table.state  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
-  [~ state]
+  =/  add-result  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
+  =.  messages-table.state  -.add-result
+  =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.msg-act) ~] thechange]
+  ==
+  [gives state]
 ++  edit
 ::  :chat-db &action [%edit [[~2023.1.25..18.29.42..0a77 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  messages-table.state  (remove-message-from-table messages-table.state msg-id)
-  =.  messages-table.state  (add-message-to-table messages-table.state msg-act timestamp.msg-id sender.msg-id)
-  [~ state]
+
+  =/  remove-result  (remove-message-from-table messages-table.state msg-id)
+  =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a]))
+  =.  messages-table.state  -.remove-result
+
+  =/  add-result            (add-message-to-table messages-table.state msg-act timestamp.msg-id sender.msg-id)
+  =.  messages-table.state  -.add-result
+  =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.msg-act) ~] thechange]
+  ==
+  [gives state]
 ++  delete
 ::  :chat-db &action [%delete [timestamp=~2023.1.25..18.29.42..0a77 sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  messages-table.state  (remove-message-from-table messages-table.state msg-id)
-  [~ state]
+  =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
+  =/  remove-result  (remove-message-from-table messages-table.state msg-id)
+  =.  messages-table.state  -.remove-result
+  =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a])))
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.msg-part) ~] thechange]
+  ==
+  [gives state]
 ++  add-peer
 ::  :chat-db &action [%add-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
@@ -107,14 +131,24 @@
     %member
   =/  peers  (snoc (~(got by peers-table.state) path.act) row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  [~ state]
+  =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.act) ~] thechange]
+  ==
+  [gives state]
 ++  kick-peer
 ::  :chat-db &action [%kick-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  peers  (skip (~(got by peers-table.state) path.act) |=(a=peer-row:sur =(patp.a patp.act)))
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  [~ state]
+  =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+    [%give %fact [(weld /db/path path.act) ~] thechange]
+  ==
+  [gives state]
 ::
 ::  mini helper lib
 ::
