@@ -19,10 +19,10 @@ export const WebView = ({ id, ...rest }: WebViewProps) => {
 
     const { x, y } = webView.getBoundingClientRect();
 
-    window.electron.app.updateWebviewPosition(id, { x, y });
+    window.electron.app.updateWebViewPosition(id, { x, y });
 
     const handleResize = () =>
-      window.electron.app.updateWebviewPosition(id, { x, y });
+      window.electron.app.updateWebViewPosition(id, { x, y });
 
     webView.addEventListener('resize', handleResize);
 

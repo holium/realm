@@ -158,7 +158,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     const webviewX = webview?.getBoundingClientRect().x;
     const webviewY = webview?.getBoundingClientRect().y;
 
-    DesktopActions.updateWebviewPosition(webviewId, webviewX, webviewY);
+    DesktopActions.updateWebViewPosition(webviewId, webviewX, webviewY);
   };
 
   const onDragStart = () => {
