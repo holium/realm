@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { Flex, Icons, NoScrollBar, Text } from 'renderer/components';
@@ -6,19 +5,20 @@ import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
-  shortened,
   monthNames,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
+  shortened,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
+import {
+  TransactionType,
+  WalletView,
+} from 'os/services/tray/wallet-lib/wallet.model';
 
-interface InputProps {
-  hoverBg: string;
-}
+export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
 interface TransactionProps {
   transaction: TransactionType;
@@ -34,7 +34,7 @@ export const Transaction = observer((props: TransactionProps) => {
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt
+    transaction.completedAt || transaction.initiatedAt || 0
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
@@ -42,7 +42,12 @@ export const Transaction = observer((props: TransactionProps) => {
 
   const onClick = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-      detail: { type: 'transaction', key: transaction.hash },
+      detail: {
+        type: 'transaction',
+        txtype: (walletApp.navState.detail?.txtype as TxType) || 'general',
+        coinKey: walletApp.navState.detail?.coinKey,
+        key: transaction.hash,
+      },
     });
   };
 
@@ -112,40 +117,31 @@ export const Transaction = observer((props: TransactionProps) => {
 });
 
 interface TransactionListProps {
+  height: number;
   transactions: TransactionType[];
   hidePending: boolean;
   ethType?: string;
 }
 export const TransactionList = observer((props: TransactionListProps) => {
+  const { height = 230 } = props;
   const { theme } = useServices();
-  // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(
-    (trans) => trans.status === 'pending'
+    (tx) => tx.status === 'pending'
   ).length;
 
-  // const [coinTransactions, setCoinTransactions] = useState(null);
-  useEffect(() => {
-    if (props.ethType !== 'ethereum' && props.ethType) {
-      const ourAddress = props.transactions[0].ourAddress;
-      // console.log('ourAddress', ourAddress, props.ethType);
-      WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-        (txns: any) => {
-          console.log(txns);
-        }
-      );
-    }
-  }, [props.ethType, props.transactions]);
-
-  const transactions = props.transactions.filter((trans) =>
-    props.ethType ? trans.ethType === props.ethType : true
-  );
+  let transactions = props.transactions;
+  if (props.ethType === 'ETH') {
+    transactions = props.transactions.filter((tx) =>
+      props.ethType ? tx.ethType === props.ethType : true
+    );
+  }
 
   return (
     <>
       <NoScrollBar
         width="100%"
-        height={pending && !props.hidePending ? '165px' : '210px'}
+        height={pending && !props.hidePending ? height - 54 : height}
         flexDirection="column"
         margin="auto"
         overflow="auto"
@@ -165,8 +161,8 @@ export const TransactionList = observer((props: TransactionListProps) => {
           </Text>
         )}
       </NoScrollBar>
-      {transactions.length > 3 && (
-        <Flex pt={1} width="100%" justifyContent="center">
+      {transactions.length > 4 && (
+        <Flex pt="2px" width="100%" justifyContent="center">
           <Icons
             name="ChevronDown"
             size={1}

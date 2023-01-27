@@ -38,6 +38,12 @@ export const RecipientInput = observer(
     const [valueCache, setValueCache] = useState('');
     const [recipient, setRecipient] = useState('');
     const [recipientError, setRecipientError] = useState('');
+    useEffect(() => {
+      if (walletApp.navState.to) {
+        setRecipient(walletApp.navState.to);
+        onChange({ target: { value: walletApp.navState.to } });
+      }
+    }, []);
 
     // const [detailsLoading, setDetailsLoading] = useState(false);
     const [recipientDetails, setRecipientDetails] = useState<{

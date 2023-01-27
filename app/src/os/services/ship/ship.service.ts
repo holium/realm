@@ -352,6 +352,7 @@ export class ShipService extends BaseService {
     this.models.contacts = undefined;
     this.models.courier = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
+    this.wallet.logout();
   }
 
   storeNewShip(ship: AuthShipType): ShipModelType {

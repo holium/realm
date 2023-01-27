@@ -15,9 +15,8 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { BaseDialogProps } from '../dialog/dialogs';
 
-export const InstallAgent = observer((props: BaseDialogProps) => {
+export const InstallAgent = observer(() => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);

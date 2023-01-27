@@ -4,16 +4,12 @@ import { FC } from 'react';
 import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { ProtocolType } from 'os/services/tray/wallet-lib';
 
 type Network = 'ethereum' | 'bitcoin';
 
 interface WalletNetworkProps {
-  network:
-    | 'Ethereum Mainnet'
-    | 'Görli Testnet'
-    | 'Bitcoin Mainnet'
-    | 'Bitcoin Testnet';
+  network: ProtocolType;
 }
 
 export const WalletNetwork: FC<WalletNetworkProps> = observer(
@@ -30,7 +26,7 @@ export const WalletNetwork: FC<WalletNetworkProps> = observer(
         justifyContent="center"
         borderRadius="33px"
         background={darken(0.03, theme.currentTheme.windowColor)}
-        onClick={WalletActions.toggleNetwork}
+        //onClick={WalletActions.toggleNetwork}
       >
         <Box
           height="8px"

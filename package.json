@@ -42,7 +42,8 @@
     "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
-    "qrcode.react": "^3.1.0"
+    "qrcode.react": "^3.1.0",
+    "socket.io-client": "^4.5.4"
   },
   "version": "0.1.11-alpha",
   "devDependencies": {
@@ -57,5 +58,13 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.7.1",
     "typescript": "^4.9.4"
+  },
+  "preconstruct": {
+    "packages": [
+      "lib/design-system",
+      "lib/multiplayer",
+      "lib/conduit",
+      "lib/room"
+    ]
   }
 }
