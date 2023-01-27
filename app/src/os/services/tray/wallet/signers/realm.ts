@@ -10,6 +10,7 @@ export class RealmSigner implements BaseSigner {
   constructor(core: Realm) {
     this.core = core;
   }
+  // TODO use ethers wallet encryption
   setMnemonic(mnemonic: string, patp: string, passcode: string) {
     /*const encryptedMnemonic = safeStorage
       .encryptString(mnemonic)

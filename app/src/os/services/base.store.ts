@@ -1,6 +1,7 @@
 import {
   applySnapshot,
   castToSnapshot,
+  getSnapshot,
   IAnyType,
   onPatch,
   onSnapshot,
@@ -59,6 +60,16 @@ export class DiskStore {
 
   get state() {
     return this.persisted.store;
+  }
+
+  initialUpdate(onEffect: (patch: any) => void) {
+    const patchEffect = {
+      model: getSnapshot(this.model),
+      resource: 'wallet',
+      response: 'initial',
+    };
+
+    onEffect(patchEffect);
   }
 
   resetToDefaults() {

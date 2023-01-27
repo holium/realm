@@ -331,6 +331,7 @@ export class WalletService extends BaseService {
     );
 
     this.state = this.db.model;
+    this.db.initialUpdate(this.core.onEffect);
     this.db.registerPatches(this.core.onEffect);
 
     const protocolMap = new Map<ProtocolType, BaseProtocol>([
@@ -358,6 +359,11 @@ export class WalletService extends BaseService {
       this.state!.resetNavigation();
     }
     this.lock(); // lock wallet on login
+  }
+
+  logout() {
+    this.db = undefined;
+    this.state = undefined;
   }
 
   get snapshot() {
@@ -846,7 +852,6 @@ export class WalletService extends BaseService {
       passcodeString
     );
     this.db?.resetToDefaults();
-    // this.onLogin(this.state!.ourPatp!, true);
   }
 
   async deleteShipWallet(_evt: any, passcode: number[]) {
@@ -857,6 +862,5 @@ export class WalletService extends BaseService {
     );
     this.db?.resetToDefaults();
     WalletApi.initialize(this.core.conduit!);
-    // this.onLogin(this.state!.ourPatp!, true);
   }
 }
