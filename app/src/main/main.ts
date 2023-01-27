@@ -68,13 +68,11 @@ if (isDevelopment)
     showDevTools: false,
   });
 
-const RESOURCES_PATH = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets')
-  : path.join(__dirname, '../../assets');
+const getAssetPath = (...paths: string[]) =>
+  app.isPackaged
+    ? path.join(process.resourcesPath, 'assets', ...paths)
+    : path.join(__dirname, '../../assets', ...paths);
 
-const getAssetPath = (...paths: string[]): string => {
-  return path.join(RESOURCES_PATH, ...paths);
-};
 export const getPreloadPath = () =>
   app.isPackaged
     ? path.join(__dirname, 'preload.js')
