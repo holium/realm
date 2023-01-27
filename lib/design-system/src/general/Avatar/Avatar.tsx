@@ -1,9 +1,10 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { sigil, reactRenderer } from '@tlon/sigil-js';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { BorderRadiusProps } from 'styled-system';
 import { Box, BoxProps } from '../Box/Box';
+import { isImgValid } from '../../util/image';
 
 export type AvatarStyleProps = BoxProps &
   BorderRadiusProps & {
@@ -92,9 +93,18 @@ export const Avatar: FC<AvatarProps> = (props: AvatarProps) => {
     opacity,
     ...rest
   } = props;
+  const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    if (avatar) {
+      isImgValid(avatar).then((valid) => {
+        setIsValid(valid);
+      });
+    }
+  }, []);
 
   let innerContent = null;
-  if (avatar) {
+  if (avatar && isValid) {
     innerContent = (
       <AvatarInner
         src={avatar}

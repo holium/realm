@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { Flex, Icons, NoScrollBar, Text } from 'renderer/components';
+import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
+import { Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -55,7 +56,7 @@ export const Transaction = observer((props: TransactionProps) => {
     <Row customBg={hoverBackground} onClick={onClick}>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Flex flexDirection="column" justifyContent="center">
-          <Text variant="h5" fontSize={3}>
+          <OldText variant="h5" fontSize={3}>
             {transaction.status !== 'pending'
               ? wasSent
                 ? 'Sent'
@@ -63,9 +64,9 @@ export const Transaction = observer((props: TransactionProps) => {
               : wasSent
               ? 'Sending'
               : 'Receiving'}
-          </Text>
+          </OldText>
           <Flex>
-            <Text
+            <OldText
               variant="body"
               fontSize={1}
               color={
@@ -79,13 +80,19 @@ export const Transaction = observer((props: TransactionProps) => {
               {`${
                 monthNames[completedDate.getMonth()]
               } ${completedDate.getDate()}`}
-            </Text>
-            <Text mx={1} variant="body" fontSize={1} color="text.disabled">
+            </OldText>
+            <OldText mx={1} variant="body" fontSize={1} color="text.disabled">
               ·
-            </Text>
-            <Text variant="body" fontSize={1} color="text.disabled">
+            </OldText>
+            <Text.Custom
+              truncate
+              width={130}
+              variant="body"
+              fontSize={1}
+              opacity={0.5}
+            >
               {wasSent ? 'To:' : 'From:'} {themDisplay}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
         <Flex
@@ -93,11 +100,11 @@ export const Transaction = observer((props: TransactionProps) => {
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text variant="body" fontSize={2}>
+          <OldText variant="body" fontSize={2}>
             {transaction.type === 'sent' ? '-' : ''}{' '}
             {isEth ? `${ethAmount.eth}` /* ETH` */ : `${btcAmount.btc} BTC`}
-          </Text>
-          <Text variant="body" fontSize={1} color="text.disabled">
+          </OldText>
+          <OldText variant="body" fontSize={1} color="text.disabled">
             {transaction.type === 'sent' ? '-' : ''}$
             {isEth
               ? convertEthAmountToUsd(
@@ -109,7 +116,7 @@ export const Transaction = observer((props: TransactionProps) => {
                   walletApp.bitcoin.conversions.usd
                 )}{' '}
             USD
-          </Text>
+          </OldText>
         </Flex>
       </Flex>
     </Row>
@@ -151,14 +158,14 @@ export const TransactionList = observer((props: TransactionListProps) => {
             <Transaction key={index} transaction={transaction} />
           ))
         ) : (
-          <Text
+          <OldText
             mt={6}
             variant="h5"
             textAlign="center"
             color={theme.currentTheme.iconColor}
           >
             No transactions
-          </Text>
+          </OldText>
         )}
       </NoScrollBar>
       {transactions.length > 4 && (

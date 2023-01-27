@@ -31,7 +31,7 @@ const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
 export interface RecipientPayload {
   recipientMetadata?: {
-    color?: string;
+    color: string;
     avatar?: string;
     nickname?: string;
   };
@@ -443,7 +443,7 @@ export class WalletService extends BaseService {
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
     const recipientMetadata: {
-      color?: string;
+      color: string;
       avatar?: string;
       nickname?: string;
     } = await this.core.services.ship.getContact(null, patp);
@@ -466,7 +466,9 @@ export class WalletService extends BaseService {
       return {
         patp,
         gasEstimate: 7,
-        recipientMetadata: {},
+        recipientMetadata: {
+          color: '#000000',
+        },
         address: null,
       };
     }
