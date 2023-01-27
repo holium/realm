@@ -5,7 +5,6 @@
     "app",
     "lib/conduit",
     "lib/design-system",
-    "lib/mouse",
     "lib/multiplayer",
     "lib/room/test-ui",
     "lib/room"
