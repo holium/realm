@@ -23,7 +23,6 @@ export const registerListeners = (
   ipcMain.handle(
     'webview-moved',
     (_, webviewId: string, position: { x: number; y: number }) => {
-      console.log('webview moved', webviewId, position);
       webviews[webviewId] = { position, hasMouseInside: false };
     }
   );

@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
+import { WindowModelProps } from 'os/services/shell/desktop.model';
 
 interface Props {
-  window: any;
+  window: WindowModelProps;
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
@@ -110,7 +111,7 @@ export const DevView = (props: Props) => {
         <WebView
           ref={webViewRef}
           id={`${window.id}-web-webview`}
-          src={window.href.site}
+          src={window.href?.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
           isLocked={isResizing || loading}
@@ -123,6 +124,6 @@ export const DevView = (props: Props) => {
         />
       </div>
     ),
-    [window.href.site, isResizing, loading, theme.currentTheme.windowColor]
+    [window.href?.site, isResizing, loading, theme.currentTheme.windowColor]
   );
 };

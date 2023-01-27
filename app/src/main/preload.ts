@@ -41,8 +41,8 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  updateWebViewPosition(webviewId: string, position: { x: number; y: number }) {
-    ipcRenderer.invoke('webview-moved', webviewId, position);
+  setWebViewPosition(webViewId: string, position: { x: number; y: number }) {
+    ipcRenderer.invoke('webview-moved', webViewId, position);
   },
   mouseEnteredWebView(id: string) {
     ipcRenderer.invoke('mouse-entered-webview', id);

@@ -1,11 +1,4 @@
-import {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  ReactNode,
-} from 'react';
+import { useState, useCallback, useEffect, useMemo, ReactNode } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
@@ -73,29 +66,25 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const activeWindow = window;
-  const titlebarRef = useRef<HTMLDivElement>(null);
 
-  const getTitlebarHeight = () =>
-    titlebarRef.current?.getBoundingClientRect().height ?? 0;
-
-  const mX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
-  const mY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
-  const mHeight = useMotionValue(
+  const motionX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
+  const motionY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
+  const motionHeight = useMotionValue(
     activeWindow ? activeWindow.dimensions.height : 600
   );
-  const mWidth = useMotionValue(
+  const motionWidth = useMotionValue(
     activeWindow ? activeWindow.dimensions.width : 600
   );
 
   useEffect(() => {
-    mX.set(activeWindow.dimensions.x);
-    mY.set(activeWindow.dimensions.y);
-    mWidth.set(activeWindow.dimensions.width);
-    mHeight.set(activeWindow.dimensions.height);
-  }, [activeWindow.dimensions.width, activeWindow.dimensions.height]);
+    motionX.set(activeWindow.dimensions.x);
+    motionY.set(activeWindow.dimensions.y);
+    motionWidth.set(activeWindow.dimensions.width);
+    motionHeight.set(activeWindow.dimensions.height);
+  }, [activeWindow.dimensions]);
 
   const windowId = `app-window-${activeWindow?.id}`;
-  const webviewId = getWebViewId(activeWindow.id, window.type);
+  const webViewId = getWebViewId(activeWindow.id, window.type);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -113,55 +102,72 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     resizeRightX.set(resizeRightX.get() - info.offset.x);
     resizeRightY.set(resizeRightY.get() - info.offset.y);
     // if we are greater than the minimum or are moving in the postive direction
-    if (mWidth.get() >= 400 || info.delta.x > 0) {
-      mWidth.set(mWidth.get() + info.delta.x);
+    if (motionWidth.get() >= 400 || info.delta.x > 0) {
+      motionWidth.set(motionWidth.get() + info.delta.x);
     }
-    if (mHeight.get() >= 400 || info.delta.y > 0) {
-      mHeight.set(mHeight.get() + info.delta.y);
+    if (motionHeight.get() >= 400 || info.delta.y > 0) {
+      motionHeight.set(motionHeight.get() + info.delta.y);
     }
   }, []);
 
   // Toggles maximize or not
-  const maximize = useCallback(() => {
+  const maximize = () => {
     if (!unmaximize) {
       setUnmaximize({
-        x: mX.get(),
-        y: mY.get(),
-        height: mHeight.get(),
-        width: mWidth.get(),
+        x: motionX.get(),
+        y: motionY.get(),
+        height: motionHeight.get(),
+        width: motionWidth.get(),
       });
       const offset = shell.isFullscreen ? 0 : 30;
       const desktopDims = desktopRef.current!.getBoundingClientRect();
-      mX.set(0);
-      mY.set(8);
-      mHeight.set(desktopDims.height - (16 + offset) - 50);
-      mWidth.set(desktopDims.width - 16);
+      motionX.set(0);
+      motionY.set(8);
+      motionHeight.set(desktopDims.height - (16 + offset) - 50);
+      motionWidth.set(desktopDims.width - 16);
     } else {
-      mX.set(unmaximize.x);
-      mY.set(unmaximize.y);
-      mHeight.set(unmaximize.height);
-      mWidth.set(unmaximize.width);
+      motionX.set(unmaximize.x);
+      motionY.set(unmaximize.y);
+      motionHeight.set(unmaximize.height);
+      motionWidth.set(unmaximize.width);
       setUnmaximize(undefined);
     }
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
-        x: Math.round(mX.get()),
-        y: Math.round(mY.get()),
-        height: Math.round(mHeight.get()),
-        width: Math.round(mWidth.get()),
-        titlebarHeight: getTitlebarHeight(),
+      DesktopActions.setAppDimensions(activeWindow.id, {
+        x: Math.round(motionX.get()),
+        y: Math.round(motionY.get()),
+        height: Math.round(motionHeight.get()),
+        width: Math.round(motionWidth.get()),
       });
-  }, [shell.isFullscreen, activeWindow, unmaximize, webviewId, setUnmaximize]);
 
+    setTimeout(() => {
+      const webViewRect = document
+        .getElementById(webViewId)
+        ?.getBoundingClientRect();
+      if (webViewRect?.x && webViewRect?.y)
+        DesktopActions.setWebViewPosition(webViewId, {
+          x: webViewRect.x,
+          y: webViewRect.y,
+        });
+    }, 50);
+  };
   const onDragStop = () => {
     setIsDragging(false);
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
-        x: Math.round(mX.get()),
-        y: Math.round(mY.get()),
-        height: Math.round(mHeight.get()),
-        width: Math.round(mWidth.get()),
-        titlebarHeight: getTitlebarHeight(),
+      DesktopActions.setAppDimensions(activeWindow.id, {
+        x: Math.round(motionX.get()),
+        y: Math.round(motionY.get()),
+        height: Math.round(motionHeight.get()),
+        width: Math.round(motionWidth.get()),
+      });
+
+    const webViewRect = document
+      .getElementById(webViewId)
+      ?.getBoundingClientRect();
+    if (webViewRect?.x && webViewRect?.y)
+      DesktopActions.setWebViewPosition(webViewId, {
+        x: webViewRect.x,
+        y: webViewRect.y,
       });
   };
 
@@ -176,16 +182,16 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   };
 
   const onDevTools = useCallback(() => {
-    const webview = document.getElementById(
-      webviewId
+    const webView = document.getElementById(
+      webViewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview) return;
+    if (!webView) return;
 
-    webview.isDevToolsOpened()
-      ? webview.closeDevTools()
-      : webview.openDevTools();
-  }, [webviewId]);
+    webView.isDevToolsOpened()
+      ? webView.closeDevTools()
+      : webView.openDevTools();
+  }, [webViewId]);
 
   const onMouseDown = () => {
     DesktopActions.setActive('', window.id);
@@ -208,7 +214,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   }
   let titlebar = (
     <Titlebar
-      innerRef={titlebarRef}
       isAppWindow
       maximizeButton={maximizeButton}
       minimizeButton
@@ -233,6 +238,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   if (window.type === 'native') {
     hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
     noTitlebar = nativeApps[window.id].native!.noTitlebar!;
+    // @ts-ignore
     CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
@@ -240,7 +246,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     if (CustomTitlebar) {
       titlebar = (
         <CustomTitlebar
-          innerRef={titlebarRef}
           zIndex={window.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
@@ -254,7 +259,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     } else {
       titlebar = (
         <Titlebar
-          innerRef={titlebarRef}
           isAppWindow
           maximizeButton={maximizeButton}
           minimizeButton
@@ -302,7 +306,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     } else {
       titlebar = (
         <CustomTitlebar
-          innerRef={titlebarRef}
           zIndex={window.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
@@ -347,10 +350,10 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           },
         }}
         style={{
-          x: mX,
-          y: mY,
-          width: mWidth,
-          height: mHeight,
+          x: motionX,
+          y: motionY,
+          width: motionWidth,
+          height: motionHeight,
           zIndex: window.zIndex,
           borderRadius,
           background: windowColor,
@@ -392,12 +395,11 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
-                    x: mX.get(),
-                    y: mY.get(),
-                    height: mHeight.get(),
-                    width: mWidth.get(),
-                    titlebarHeight: getTitlebarHeight(),
+                  DesktopActions.setAppDimensions(activeWindow.id, {
+                    x: motionX.get(),
+                    y: motionY.get(),
+                    height: motionHeight.get(),
+                    width: motionWidth.get(),
                   });
               }}
               onPanEnd={() => setIsResizing(false)}
@@ -415,10 +417,10 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
       unmaximize,
       isResizing,
       isDragging,
-      mHeight,
-      mWidth,
-      mX,
-      mY,
+      motionHeight,
+      motionWidth,
+      motionX,
+      motionY,
     ]
   );
 });

@@ -1,4 +1,5 @@
 import { DetailedHTMLProps, useEffect, WebViewHTMLAttributes } from 'react';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type WebViewProps = {
   id: string;
@@ -21,7 +22,7 @@ export const WebView = ({ id, isLocked, ...rest }: WebViewProps) => {
 
     const { x, y } = webView.getBoundingClientRect();
 
-    window.electron.app.updateWebViewPosition(id, { x, y });
+    DesktopActions.setWebViewPosition(id, { x, y });
   }, [id]);
 
   return (
