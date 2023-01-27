@@ -40,11 +40,6 @@ export const genCSSVariables = (theme: ThemeType) => {
         z-index: 2000 !important;
       }
 
-      body {
-        overflow-x: hidden;
-        overflow-y: hidden;
-      }
-
       #rlm-cursor {
         position: absolute;
         z-index: 2147483646 !important;
