@@ -10,8 +10,8 @@ export enum WindowId {
 export const nativeRenderers = {
   'os-browser': {
     titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
-    component: ({ isResizing = false }) => (
-      <BrowserWebview isLocked={isResizing} />
+    component: ({ isResizing = false, isDragging = false }) => (
+      <BrowserWebview isResizing={isResizing} isDragging={isDragging} />
     ),
   },
   'os-settings': {

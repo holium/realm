@@ -3,12 +3,17 @@ import { nativeRenderers, WindowId } from 'renderer/apps/native';
 
 export interface NativeViewProps {
   window: WindowModelProps | any;
-  isResizing?: boolean;
+  isResizing: boolean;
+  isDragging: boolean;
   hasTitlebar: boolean | undefined;
 }
 
-export const NativeView = ({ window, isResizing }: NativeViewProps) => {
+export const NativeView = ({
+  window,
+  isResizing,
+  isDragging,
+}: NativeViewProps) => {
   const ViewComponent = nativeRenderers[window.id as WindowId].component;
 
-  return <ViewComponent isResizing={Boolean(isResizing)} />;
+  return <ViewComponent isResizing={isResizing} isDragging={isDragging} />;
 };

@@ -36,12 +36,19 @@ const getMouseState = (e: MouseEvent): MouseState => {
 ipcRenderer.on('add-mouse-listeners', (_, { isWebview = false }) => {
   const handleMouseMove = (e: MouseEvent) => {
     const mouseState = getMouseState(e);
+    const isDragging = e.buttons === 1;
     const position = {
       x: e.x,
       y: e.y,
     };
 
-    ipcRenderer.invoke('mouse-move', position, mouseState, isWebview);
+    ipcRenderer.invoke(
+      'mouse-move',
+      position,
+      mouseState,
+      isDragging,
+      isWebview
+    );
   };
   const handleMouseDown = () => ipcRenderer.invoke('mouse-down');
   const handleMouseUp = () => ipcRenderer.invoke('mouse-up');

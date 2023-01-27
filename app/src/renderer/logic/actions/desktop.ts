@@ -28,14 +28,23 @@ export const DesktopActions = {
   setMouseColor: async (mouseColor: string) => {
     return await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setAppDimensions: async (
-    windowId: any,
-    dimensions: { width: number; height: number; x: number; y: number }
+  setAppDimensions: (
+    windowId: string,
+    webviewId: string,
+    dimensions: {
+      width: number;
+      height: number;
+      x: number;
+      y: number;
+      titlebarHeight: number;
+    }
   ) => {
-    return await window.electron.os.desktop.setAppDimensions(
-      windowId,
-      dimensions
-    );
+    const webViewPosition = {
+      x: dimensions.x + 1, // 1px border
+      y: dimensions.y + dimensions.titlebarHeight,
+    };
+    window.electron.app.updateWebViewPosition(webviewId, webViewPosition);
+    window.electron.os.desktop.setAppDimensions(windowId, dimensions);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);
@@ -60,9 +69,6 @@ export const DesktopActions = {
   },
   toggleDevTools: async () => {
     return await window.electron.app.toggleDevTools();
-  },
-  updateWebViewPosition: (webviewId: string, x: number, y: number) => {
-    window.electron.app.updateWebViewPosition(webviewId, { x, y });
   },
 };
 

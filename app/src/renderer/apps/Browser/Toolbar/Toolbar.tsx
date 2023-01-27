@@ -1,4 +1,4 @@
-import { PointerEvent, useRef } from 'react';
+import { PointerEvent, RefObject, useRef } from 'react';
 import styled from 'styled-components';
 import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { Icons } from 'renderer/components';
@@ -21,6 +21,7 @@ export interface BrowserToolbarProps {
   windowColor: string;
   showDevToolsToggle: boolean;
   dragControls: ReturnType<typeof useDragControls>;
+  innerRef?: RefObject<HTMLDivElement>;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
   onDragStop: (e: PointerEvent<HTMLDivElement>) => void;
   onClose: () => any;
@@ -33,6 +34,7 @@ export const BrowserToolbar = observer(
     windowColor,
     showDevToolsToggle = true,
     dragControls,
+    innerRef,
     onDragStop,
     onDragStart,
     onClose,
@@ -87,6 +89,7 @@ export const BrowserToolbar = observer(
 
     return (
       <ToolbarStyle
+        ref={innerRef}
         hasBlur={false}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}

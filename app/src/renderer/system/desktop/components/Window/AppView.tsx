@@ -163,6 +163,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           // @ts-expect-error
           allowpopups="true"
           src={appConfig.url}
+          isLocked={lockView}
           style={{
             left: 0,
             top: 0,
@@ -171,7 +172,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             position: 'absolute',
             background: theme.currentTheme.windowColor,
             overflow: 'hidden',
-            pointerEvents: lockView ? 'none' : 'auto',
           }}
         />
       </View>

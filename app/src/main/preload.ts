@@ -50,10 +50,19 @@ const appPreload = {
   mouseLeftWebView(id: string) {
     ipcRenderer.invoke('mouse-left-webview', id);
   },
-  onMouseMove(callback: (coordinates: Vec2, state: MouseState) => void) {
-    ipcRenderer.on('mouse-move', (_, coordinates: Vec2, state: MouseState) => {
-      callback(coordinates, state);
-    });
+  onMouseMove(
+    callback: (
+      coordinates: Vec2,
+      state: MouseState,
+      isDragging: boolean
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'mouse-move',
+      (_, coordinates: Vec2, state: MouseState, isDragging: boolean) => {
+        callback(coordinates, state, isDragging);
+      }
+    );
   },
   onMouseDown(callback: () => void) {
     ipcRenderer.on('mouse-down', callback);

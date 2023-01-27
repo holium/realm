@@ -1,4 +1,11 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  ReactNode,
+} from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
@@ -44,7 +51,7 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 
 interface AppWindowProps {
   window: WindowModelProps;
-  children?: React.ReactNode;
+  children?: ReactNode;
   desktopRef: any;
 }
 
@@ -66,6 +73,10 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const activeWindow = window;
+  const titlebarRef = useRef<HTMLDivElement>(null);
+
+  const getTitlebarHeight = () =>
+    titlebarRef.current?.getBoundingClientRect().height ?? 0;
 
   const mX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
   const mY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
@@ -133,32 +144,25 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
       setUnmaximize(undefined);
     }
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, {
+      DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
         x: Math.round(mX.get()),
         y: Math.round(mY.get()),
         height: Math.round(mHeight.get()),
         width: Math.round(mWidth.get()),
+        titlebarHeight: getTitlebarHeight(),
       });
   }, [shell.isFullscreen, activeWindow, unmaximize, webviewId, setUnmaximize]);
 
   const onDragStop = () => {
     setIsDragging(false);
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, {
+      DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
         x: Math.round(mX.get()),
         y: Math.round(mY.get()),
         height: Math.round(mHeight.get()),
         width: Math.round(mWidth.get()),
+        titlebarHeight: getTitlebarHeight(),
       });
-
-    const webview = document.getElementById(
-      webviewId
-    ) as Electron.WebviewTag | null;
-    if (!webview) return;
-    const webviewX = webview?.getBoundingClientRect().x;
-    const webviewY = webview?.getBoundingClientRect().y;
-
-    DesktopActions.updateWebViewPosition(webviewId, webviewX, webviewY);
   };
 
   const onDragStart = () => {
@@ -204,6 +208,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   }
   let titlebar = (
     <Titlebar
+      innerRef={titlebarRef}
       isAppWindow
       maximizeButton={maximizeButton}
       minimizeButton
@@ -235,6 +240,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     if (CustomTitlebar) {
       titlebar = (
         <CustomTitlebar
+          innerRef={titlebarRef}
           zIndex={window.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
@@ -248,6 +254,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     } else {
       titlebar = (
         <Titlebar
+          innerRef={titlebarRef}
           isAppWindow
           maximizeButton={maximizeButton}
           minimizeButton
@@ -295,6 +302,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     } else {
       titlebar = (
         <CustomTitlebar
+          innerRef={titlebarRef}
           zIndex={window.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
@@ -384,11 +392,12 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  DesktopActions.setAppDimensions(activeWindow.id, {
+                  DesktopActions.setAppDimensions(activeWindow.id, webviewId, {
                     x: mX.get(),
                     y: mY.get(),
                     height: mHeight.get(),
                     width: mWidth.get(),
+                    titlebarHeight: getTitlebarHeight(),
                   });
               }}
               onPanEnd={() => setIsResizing(false)}
@@ -433,6 +442,7 @@ const WindowType = ({
     case 'native':
       return (
         <NativeView
+          isDragging={isDragging}
           isResizing={isResizing}
           hasTitlebar={nativeApps[window.id].native?.hideTitlebarBorder}
           window={window}

@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, RefObject, useMemo } from 'react';
 import styled from 'styled-components';
 import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
@@ -19,6 +19,7 @@ export interface DialogTitlebarProps {
   zIndex: number;
   showDevToolsToggle: boolean;
   windowColor: string;
+  innerRef?: RefObject<HTMLDivElement>;
   onClose?: () => void;
   onMaximize: () => void;
 }
@@ -32,6 +33,7 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
     onDragStart,
     zIndex,
     windowColor,
+    innerRef,
     onClose,
   } = props;
   const { theme } = useServices();
@@ -41,6 +43,7 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
   return useMemo(() => {
     return (
       <ToolbarStyle
+        ref={innerRef}
         hasBlur={false}
         {...(dragControls
           ? {

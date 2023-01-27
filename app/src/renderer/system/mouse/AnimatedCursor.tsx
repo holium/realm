@@ -1,11 +1,4 @@
-import {
-  useRef,
-  useCallback,
-  useEffect,
-  PropsWithChildren,
-  Fragment,
-  ReactNode,
-} from 'react';
+import { useRef, useCallback, useEffect, Fragment } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
 import IsDevice from './isDevice';
 
@@ -27,11 +20,10 @@ interface AnimatedCursorProps {
   trailingSpeed?: number;
   coords: Vec2;
   state: MouseState;
-  isActive?: boolean;
+  isActive: boolean;
   isActiveClickable?: boolean;
-  isVisible?: boolean;
+  isVisible: boolean;
   initialRender?: boolean;
-  children?: ReactNode;
 }
 
 /**
@@ -57,7 +49,6 @@ const CursorCore = ({
   isActive,
   isActiveClickable,
   isVisible = true,
-  children,
 }: AnimatedCursorProps) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
   const cursorInnerRef = useRef<HTMLDivElement>(null);
@@ -229,9 +220,7 @@ const CursorCore = ({
         style={{
           ...styles.cursorInner,
         }}
-      >
-        {children}
-      </motion.div>
+      />
     </Fragment>
   );
 };
@@ -239,13 +228,10 @@ const CursorCore = ({
 /**
  * Calls and passes props to CursorCore if not a touch/mobile device.
  */
-export const AnimatedCursor = ({
-  children,
-  ...props
-}: PropsWithChildren<AnimatedCursorProps>) => {
+export const AnimatedCursor = ({ ...props }: AnimatedCursorProps) => {
   if (typeof navigator !== 'undefined' && IsDevice?.any()) {
     return <Fragment></Fragment>;
   }
 
-  return <CursorCore {...props}>{children}</CursorCore>;
+  return <CursorCore {...props} />;
 };

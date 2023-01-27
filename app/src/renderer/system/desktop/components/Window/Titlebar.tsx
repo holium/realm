@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { RefObject, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -49,6 +49,7 @@ const TitleCentered = styled(Flex)`
 `;
 
 interface TitlebarProps {
+  innerRef?: RefObject<HTMLDivElement>;
   theme: Partial<ThemeModelType>;
   zIndex: number;
   showDevToolsToggle?: boolean;
@@ -78,6 +79,7 @@ interface TitlebarProps {
 }
 
 export const Titlebar = ({
+  innerRef,
   children,
   app,
   showDevToolsToggle,
@@ -133,6 +135,7 @@ export const Titlebar = ({
 
   return (
     <TitlebarStyle
+      ref={innerRef}
       hasBlur={hasBlur}
       {...(dragControls
         ? {

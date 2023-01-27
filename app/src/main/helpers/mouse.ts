@@ -16,7 +16,13 @@ const registerListeners = (
 
   ipcMain.handle(
     'mouse-move',
-    (_, position: Vec2, state: MouseState, isWebview: boolean) => {
+    (
+      _,
+      position: Vec2,
+      state: MouseState,
+      isDragging: boolean,
+      isWebview: boolean
+    ) => {
       if (isWebview) {
         const activeWebviewPosition = Object.values(webViews).find(
           (webView) => webView.hasMouseInside
@@ -26,9 +32,14 @@ const registerListeners = (
           x: activeWebviewPosition.x + position.x,
           y: activeWebviewPosition.y + position.y,
         };
-        mouseWindow.webContents.send('mouse-move', absolutePosition, state);
+        mouseWindow.webContents.send(
+          'mouse-move',
+          absolutePosition,
+          state,
+          isDragging
+        );
       } else {
-        mouseWindow.webContents.send('mouse-move', position, state);
+        mouseWindow.webContents.send('mouse-move', position, state, isDragging);
       }
     }
   );

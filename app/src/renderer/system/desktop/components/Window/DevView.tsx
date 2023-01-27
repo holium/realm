@@ -113,12 +113,12 @@ export const DevView = (props: Props) => {
           src={window.href.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
+          isLocked={isResizing || loading}
           style={{
             background: lighten(0.04, theme.currentTheme.windowColor),
             width: 'inherit',
             height: '100%',
             position: 'relative',
-            pointerEvents: isResizing || loading ? 'none' : 'auto',
           }}
         />
       </div>
