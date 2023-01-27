@@ -34,9 +34,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   constructor(protocol: ProtocolType, sendLog: (log: string) => any) {
     this.protocol = protocol;
     this.sendLog = sendLog;
-    this.baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
-
-    // this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
+    this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
     if (process.env.NODE_ENV === 'production') {
       this.baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
     } else if (process.env.USE_LOCAL_API) {
@@ -105,17 +103,16 @@ export class EthereumProtocol implements BaseBlockProtocol {
       if (!currentBlock) {
         currentBlock = await this.getBlockNumber();
       }
-      this.sendLog(
-        `updateWalletState: ${walletStore.currentStore?.wallets.size} wallets`
-      );
       for (const walletKey of walletStore.currentStore?.wallets.keys()) {
         const wallet = walletStore.ethereum.wallets.get(walletKey)!;
-        this.getAccountBalance(wallet.address).then((balance: string) => {
-          this.sendLog(`updateWalletState: getAccountBalance: ${balance}`);
-          if (balance !== '-1') {
+        this.getAccountBalance(wallet.address)
+          .then((balance: string) => {
             wallet.setBalance(this.protocol, balance);
-          }
-        });
+          })
+          .catch((error: any) => {
+            this.sendLog(error);
+          });
+
         this.getAccountTransactions(
           wallet.address,
           (wallet as EthWalletType).data.get(this.protocol)!.block || 0,
@@ -136,6 +133,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
               .setBlock(currentBlock!);
           }
         });
+
         if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
           const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
           this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
@@ -201,27 +199,25 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
     this.updating = false;
   }
-  // async getAccountBalance(addr: string): Promise<string> {
-  //   try {
-  //     return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
-  //   } catch (error) {
-  //     console.log('getAccountBalance error');
-  //     console.error(error);
-  //     return '-1';
-  //   }
-  // }
   async getAccountBalance(addr: string): Promise<string> {
     try {
-      const balance = ethers.utils.formatEther(
-        await this.alchemy.core.getBalance(addr)
-      );
-      console.log('getAccountBalance', addr, balance);
-      this.sendLog(`getAccountBalance ${addr}, ${balance}`);
-      return balance;
+      const balance = await axios.request({
+        method: 'POST',
+        url: this.nodeURL,
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        data: {
+          jsonrpc: '2.0',
+          method: 'eth_getBalance',
+          params: [addr],
+        },
+      });
+
+      return ethers.utils.formatEther(balance.data.result);
     } catch (error) {
-      this.sendLog(`getAccountBalance error ${error}`);
-      console.error('getAccountBalance error', error);
-      return '-1';
+      throw error;
     }
   }
   async getAccountTransactions(
