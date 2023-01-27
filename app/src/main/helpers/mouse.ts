@@ -3,8 +3,8 @@ import { WebViewsData } from 'main/main';
 import { Vec2, MouseState } from 'renderer/system/mouse/AnimatedCursor';
 
 const registerListeners = (
-  webViews: WebViewsData,
-  mouseOverlay: BrowserWindow
+  mouseWindow: BrowserWindow,
+  webViews: WebViewsData
 ) => {
   ipcMain.handle('mouse-entered-webview', (_, id: string) => {
     webViews[id].hasMouseInside = true;
@@ -26,19 +26,19 @@ const registerListeners = (
           x: activeWebviewPosition.x + position.x,
           y: activeWebviewPosition.y + position.y,
         };
-        mouseOverlay.webContents.send('mouse-move', absolutePosition, state);
+        mouseWindow.webContents.send('mouse-move', absolutePosition, state);
       } else {
-        mouseOverlay.webContents.send('mouse-move', position, state);
+        mouseWindow.webContents.send('mouse-move', position, state);
       }
     }
   );
 
   ipcMain.handle('mouse-down', () => {
-    mouseOverlay.webContents.send('mouse-down');
+    mouseWindow.webContents.send('mouse-down');
   });
 
   ipcMain.handle('mouse-up', () => {
-    mouseOverlay.webContents.send('mouse-up');
+    mouseWindow.webContents.send('mouse-up');
   });
 };
 

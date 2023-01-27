@@ -30,7 +30,7 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 });
 
 let mainWindow: BrowserWindow;
-let mouseOverlay: BrowserWindow;
+let mouseWindow: BrowserWindow;
 export type WebViewsData = Record<
   string,
   {
@@ -38,7 +38,7 @@ export type WebViewsData = Record<
     hasMouseInside: boolean;
   }
 >;
-const webView: WebViewsData = {};
+const webViewsData: WebViewsData = {};
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -63,27 +63,26 @@ if (isProduction) {
   sourceMapSupport.install();
 }
 
-if (isDevelopment) require('electron-debug')();
+if (isDevelopment)
+  require('electron-debug')({
+    showDevTools: false,
+  });
 
-export const getPreload = () =>
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
+export const getPreloadPath = () =>
   app.isPackaged
     ? path.join(__dirname, 'preload.js')
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
   // TODO fix the warnings and errors with this
-  // if (isDevelopment) {
-  //   await installExtensions();
-  // }
-
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
-  // let factor = screen.getPrimaryDisplay().scaleFactor;
+  // if (isDevelopment) await installExtensions();
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -99,7 +98,7 @@ const createWindow = async () => {
       webviewTag: true,
       sandbox: false,
       contextIsolation: true,
-      preload: getPreload(),
+      preload: getPreloadPath(),
     },
   });
 
@@ -109,7 +108,7 @@ const createWindow = async () => {
   Realm.start(mainWindow);
 
   FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow, webView);
+  WebviewHelper.registerListeners(mainWindow, webViewsData);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -158,7 +157,7 @@ const createWindow = async () => {
   });
 };
 
-const createMouseOverlay = () => {
+const createMouseOverlayWindow = () => {
   // Create a window covering the whole window.
   const newMouseWindow = new BrowserWindow({
     title: 'Mouse overlay',
@@ -182,7 +181,7 @@ const createMouseOverlay = () => {
       devTools: false,
       contextIsolation: true,
       nodeIntegration: false,
-      preload: getPreload(),
+      preload: getPreloadPath(),
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
@@ -210,9 +209,9 @@ const createMouseOverlay = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(webView, newMouseWindow);
+  MouseHelper.registerListeners(newMouseWindow, webViewsData);
 
-  mouseOverlay = newMouseWindow;
+  mouseWindow = newMouseWindow;
 };
 
 app.on('window-all-closed', () => {
@@ -227,15 +226,15 @@ app
   .whenReady()
   .then(() => {
     createWindow();
-    createMouseOverlay();
+    createMouseOverlayWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) {
         createWindow();
       }
-      if (mouseOverlay === null) {
-        createMouseOverlay();
+      if (mouseWindow === null) {
+        createMouseOverlayWindow();
       }
     });
   })

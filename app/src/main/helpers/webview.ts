@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
-import { getPreload, WebViewsData } from '../main';
+import { getPreloadPath, WebViewsData } from '../main';
 import { hideCursor } from './hideCursor';
 
 export const registerListeners = (
@@ -28,7 +28,7 @@ export const registerListeners = (
   );
 
   mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
-    webPreferences.preload = getPreload();
+    webPreferences.preload = getPreloadPath();
     webPreferences.nodeIntegration = false;
     webPreferences.contextIsolation = true;
     webPreferences.sandbox = false;
