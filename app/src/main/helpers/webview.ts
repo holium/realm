@@ -17,7 +17,7 @@ export const registerListeners = (webviews: WebViewsData) => {
   );
 
   ipcMain.handle(
-    'updateWebviewPosition',
+    'webview-moved',
     (_, webviewId: string, position: { x: number; y: number }) => {
       webviews[webviewId] = { position, hasMouseInside: false };
     }
