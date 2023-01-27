@@ -415,7 +415,6 @@ function BlockedInput(props: BlockedInputProps) {
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setInput(e.target.value)
           }
-          rightInteractive
           rightAdornment={
             <TextButton
               // position="absolute"

@@ -1,4 +1,5 @@
 import {
+  applySnapshot,
   castToSnapshot,
   IAnyType,
   onPatch,
@@ -6,12 +7,14 @@ import {
   typecheck,
 } from 'mobx-state-tree';
 import Store from 'electron-store';
-import { Patp } from 'os/types';
+import { Patp } from '../types';
 
 export class DiskStore {
   name: string;
   persisted: any;
   model: any;
+  defaults: any;
+  store: IAnyType;
   constructor(
     name: string,
     patp: Patp,
@@ -20,11 +23,16 @@ export class DiskStore {
     defaults: any = {}
   ) {
     this.name = name;
+    this.defaults = defaults;
+    this.store = store;
     const baseParams = {
       name,
       cwd: `realm.${patp}`, // base folder
+      defaults,
+      accessPropertiesByDotNotation: true,
     };
 
+    this.persisted = new Store<typeof store>(baseParams);
     // this.persisted =
     //   process.env.NODE_ENV === 'development'
     //     ? new Store<any>(baseParams)
@@ -32,11 +40,10 @@ export class DiskStore {
     //         secretKey,
     //         ...baseParams,
     //       });
-    this.persisted = new Store<any>(baseParams);
 
     try {
       typecheck(store, this.persisted.store);
-      // console.log(`typecheck passed: ${store.name}`);
+      console.log(`typecheck passed: ${store.name}`);
       this.model = store.create(castToSnapshot(this.persisted.store));
     } catch (err) {
       console.error(`typecheck failed: ${store.name} rebuilding...`);
@@ -44,6 +51,7 @@ export class DiskStore {
     }
 
     // autosave snapshots
+
     onSnapshot(this.model, (snapshot) => {
       this.persisted.store = castToSnapshot(snapshot);
     });
@@ -51,6 +59,10 @@ export class DiskStore {
 
   get state() {
     return this.persisted.store;
+  }
+
+  resetToDefaults() {
+    applySnapshot(this.model, this.defaults);
   }
 
   registerPatches(onEffect: (patch: any) => void) {

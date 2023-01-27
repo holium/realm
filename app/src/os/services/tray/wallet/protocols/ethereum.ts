@@ -197,6 +197,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
     try {
       return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
     } catch (error) {
+      console.log('getAccountBalance error');
+      console.error(error);
       return '-1';
     }
   }
@@ -210,16 +212,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            fromAddress: addr,
-            category: [
-              AssetTransfersCategory.INTERNAL,
-              AssetTransfersCategory.EXTERNAL,
-            ],
-            withMetadata: true,
-          });*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -257,16 +249,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*toTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            toAddress: addr,
-            category: [
-              AssetTransfersCategory.INTERNAL,
-              AssetTransfersCategory.EXTERNAL,
-            ],
-            withMetadata: true,
-          });*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -417,18 +399,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            fromAddress: addr,
-            contractAddresses: [contract],
-            category: [
-              AssetTransfersCategory.ERC20,
-              AssetTransfersCategory.ERC721,
-              AssetTransfersCategory.ERC1155,
-            ],
-            withMetadata: true,
-          })*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -468,19 +438,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*toTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            toAddress: addr,
-            contractAddresses: [contract],
-            category: [
-              AssetTransfersCategory.ERC20,
-              AssetTransfersCategory.ERC721,
-              AssetTransfersCategory.ERC1155,
-            ],
-            withMetadata: true,
-          })
-          console.log(toTransfers);*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -527,26 +484,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
     amountOrTokenId: string | number
   ): Promise<void> {
     const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
-    /*const ethAmount = ethers.utils.parseEther(amount);
-    const erc20Amount = ethers.utils.parseUnits(
-      amount,
-      this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!
-        .decimals
-    );*/
     return (await ethContract.transfer(toAddr, amountOrTokenId)).hash;
   }
 
   async getFeePrice(): Promise<any> {
     return await this.ethProvider!.getGasPrice();
   }
-
-  /*async getFeeEstimate(from: string, to: string, value: string): Promise<any> {
-    return await this.alchemy.core.estimateGas({
-      to,
-      from,
-      value: ethers.utils.parseEther(value),
-    });
-  }*/
 
   async getFeeEstimate(tx: any): Promise<any> {
     return await this.alchemy.core.estimateGas(tx);

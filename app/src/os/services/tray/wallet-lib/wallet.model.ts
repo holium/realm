@@ -1013,3 +1013,51 @@ export const WalletStore = types
   });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
+
+export const initialWalletState = (ship: string) => ({
+  navState: {
+    view: WalletView.NEW,
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+  },
+  ethereum: {
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  lastInteraction: Date.now(),
+  initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  ourPatp: ship,
+  forceActive: false,
+});
