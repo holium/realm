@@ -172,6 +172,7 @@ const createMouseOverlayWindow = () => {
     fullscreen: true,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
+    roundedCorners: false,
     webPreferences: {
       sandbox: false,
       devTools: false,
