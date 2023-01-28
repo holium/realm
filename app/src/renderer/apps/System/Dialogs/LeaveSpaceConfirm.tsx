@@ -6,9 +6,9 @@ import { ConfirmDialog } from './Confirm';
 export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any
 ) => {
+  const [loading, setLoading] = useState(false);
   return {
     component: (props: any) => {
-      const [loading, setLoading] = useState(false);
       const onConfirm = async () => {
         if (dialogProps) {
           setLoading(true);

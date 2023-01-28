@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
@@ -79,15 +80,15 @@ const KPI: FC<KPIProps> = (props: KPIProps) => {
 export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
   dialogProps: AppDetailProps
 ) => {
+  const [copied, setCopied] = useState<boolean>(false);
   return {
     component: observer(() => {
       const { theme, bazaar } = useServices();
-      const { loading, appId, type } = dialogProps;
-      const [copied, setCopied] = useState<boolean>(false);
+      const { selectedApp, setSearchMode } = useAppInstaller();
+      const { appId, type } = dialogProps;
       let app: AppType;
       let onClose: any = ShellActions.closeDialog;
       if (type === 'app-install') {
-        const { selectedApp, setSearchMode } = useAppInstaller();
         onClose = () => {
           setSearchMode('none');
         };

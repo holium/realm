@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /**
  * Detect Element Resize.
  * https://github.com/sdecima/javascript-detect-element-resize
