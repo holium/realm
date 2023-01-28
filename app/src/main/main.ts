@@ -171,11 +171,6 @@ const createMouseOverlayWindow = () => {
     alwaysOnTop: true,
     fullscreen: true,
     titleBarStyle: 'hidden',
-    trafficLightPosition: {
-      // Hack to hide the traffic lights while in fullscreen.
-      x: -mainWindow.getBounds().width,
-      y: -mainWindow.getBounds().height,
-    },
     acceptFirstMouse: true,
     webPreferences: {
       sandbox: false,
@@ -186,6 +181,7 @@ const createMouseOverlayWindow = () => {
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
+  newMouseWindow.setWindowButtonVisibility(false);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   newMouseWindow.webContents.on('did-finish-load', () => {
