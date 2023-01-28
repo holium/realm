@@ -44,7 +44,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
       this.nodeURL = this.baseURL + '/gorli';
     }
     let alchemySettings: AlchemySettings;
-    this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
+    this.ethProvider = new ethers.providers.JsonRpcProvider({
+      skipFetchSetup: true,
+      url: this.nodeURL,
+    });
     if (this.protocol === ProtocolType.ETH_MAIN) {
       alchemySettings = {
         url: this.nodeURL,
