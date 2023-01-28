@@ -166,10 +166,16 @@ const createMouseOverlayWindow = () => {
     resizable: false,
     focusable: false,
     hasShadow: false,
-    fullscreenable: false,
     skipTaskbar: true,
     transparent: true,
     alwaysOnTop: true,
+    fullscreen: true,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: {
+      // Hack to hide the traffic lights while in fullscreen.
+      x: -mainWindow.getBounds().width,
+      y: -mainWindow.getBounds().height,
+    },
     acceptFirstMouse: true,
     webPreferences: {
       sandbox: false,
