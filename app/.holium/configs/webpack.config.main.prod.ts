@@ -45,10 +45,6 @@ const configuration: webpack.Configuration = {
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
-    // new webpack.ProvidePlugin({
-    //   WebSocket: 'ws',
-    //   fetch: ['node-fetch', 'default'],
-    // }),
     /**
      * Create global constants which can be configured at compile time.
      *
