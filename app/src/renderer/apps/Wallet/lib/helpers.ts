@@ -8,6 +8,18 @@ import {
 import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
+export function getDisplayDate(date: Date) {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
+  return `${date.toLocaleDateString(
+    'en-US',
+    options
+  )} ${date.toLocaleTimeString()}`;
+}
+
 export function getBaseTheme(currentTheme: ThemeType) {
   // @ts-expect-error
   return theme[currentTheme.mode];

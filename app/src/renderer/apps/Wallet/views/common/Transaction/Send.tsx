@@ -1,10 +1,10 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Box, Text } from 'renderer/components';
+import { Flex, Box } from 'renderer/components';
+import { Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../../lib/helpers';
 import {
   BitcoinWalletType,
   EthWalletType,
@@ -35,7 +35,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
   (props: SendTransactionProps) => {
     const { theme } = useServices();
     const { walletApp } = useTrayApps();
-    const themeData = getBaseTheme(theme.currentTheme);
     const pendingTx =
       walletApp.navState.protocol === ProtocolType.UQBAR
         ? walletApp.uqTx
@@ -45,13 +44,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
       : false;
     const Seperator = () => (
       <Flex mt={6} position="relative" width="100%" justifyContent="center">
-        <Box
-          position="absolute"
-          width="300px"
-          height="1px"
-          left="-10px"
-          background={themeData.colors.bg.primary}
-        />
+        <Box position="absolute" width="300px" height="1px" left="-10px" />
         {uqbarContract ? (
           <Flex
             position="absolute"
@@ -65,9 +58,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
             }
           >
-            <Text variant="body" color={themeData.colors.brand.primary}>
-              Contract Interaction
-            </Text>
+            <Text.Body color="accent">Contract Interaction</Text.Body>
           </Flex>
         ) : (
           <Flex
@@ -82,14 +73,18 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
             }
           >
-            <Text variant="body" color={themeData.colors.brand.primary}>
-              Send{' '}
-              {props.coin
-                ? props.coin.name
-                : walletApp.navState.protocol === ProtocolType.UQBAR
-                ? 'zigs'
-                : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']}
-            </Text>
+            <Text.Body color="accent">
+              {`Send ${
+                props.coin
+                  ? props.coin.name
+                  : walletApp.navState.protocol === ProtocolType.UQBAR
+                  ? 'zigs'
+                  : abbrMap[
+                      walletApp.navState.network as 'bitcoin' | 'ethereum'
+                    ]
+              }
+              `}
+            </Text.Body>
           </Flex>
         )}
       </Flex>

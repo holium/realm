@@ -72,6 +72,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
 
     const amountValidator = (valid: boolean, amount?: number) => {
       setAmountValid(valid);
+      console.log('amountValidator', valid, amount);
       if (valid) {
         props.setTransactionAmount(amount!);
       }

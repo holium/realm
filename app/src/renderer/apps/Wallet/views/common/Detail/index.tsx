@@ -1,6 +1,6 @@
 import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-
+import { toJS } from 'mobx';
 import { Flex, Box, Text, TextButton } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
@@ -36,22 +36,16 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
-  // const [sendTrans, setSendTrans] = useState(false);
   const sendTrans =
     walletApp.navState.view === WalletView.TRANSACTION_SEND ||
     walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
-  // const [hideWalletHero, setHideWalletHero] = useState(false);
   const hideWalletHero =
     walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
   const onScreenChange = (newScreen: string) => {};
-  //    setHideWalletHero(newScreen === 'confirm');
   const close = async () => {
-    // setSendTrans(false);
-    // await WalletActions.resetNavigation();
     await WalletActions.navigateBack();
-    //    setHideWalletHero(false);
   };
 
   const wallet = walletApp.currentWallet!;
@@ -133,13 +127,13 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         onScreenChange={(newScreen: string) => onScreenChange(newScreen)} // changed
         setSendTrans={(send: boolean) => {
           if (send) {
+            console.log(toJS(wallet));
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {
-              walletIndex: '0',
+              walletIndex: `${wallet.index!}`,
             });
           } else {
             WalletActions.navigateBack();
           }
-          // setSendTrans(send)} // changed
         }}
         close={close}
         coinView={

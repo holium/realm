@@ -6,13 +6,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface WalletInfoProps {
-  wallet: EthWalletType | BitcoinWalletType;
+  wallet: EthWalletType;
   QROpen: boolean;
   setQROpen: (open: boolean) => void;
   hideWalletHero: boolean;

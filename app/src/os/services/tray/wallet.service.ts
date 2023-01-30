@@ -25,6 +25,7 @@ import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
 import { DiskStore } from '../base.store';
+import axios from 'axios';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -54,6 +55,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-settings': this.setSettings,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
     'realm.tray.wallet.create-wallet': this.createWallet,
+    'realm.wallet.get-conversion': this.getConversion,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
     'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
@@ -82,6 +84,9 @@ export class WalletService extends BaseService {
         mnemonic,
         passcode
       );
+    },
+    getConversion: async (from: 'ETH', to: 'USD' | 'EUR' | string) => {
+      return await ipcRenderer.invoke('realm.wallet.get-conversion', from, to);
     },
     checkMnemonic: async (mnemonic: string) => {
       return await ipcRenderer.invoke(
@@ -359,6 +364,9 @@ export class WalletService extends BaseService {
       this.state!.resetNavigation();
     }
     this.lock(); // lock wallet on login
+    this.getConversion(null, 'ETH', 'USD').catch((err) => {
+      console.error('getConversion error', err);
+    });
   }
 
   logout() {
@@ -396,6 +404,18 @@ export class WalletService extends BaseService {
     }
   }
 
+  async getConversion(
+    _event: any,
+    from: 'ETH' = 'ETH',
+    to: 'USD' | 'EUR' | string = 'USD'
+  ): Promise<string> {
+    const result = await axios({
+      method: 'get',
+      url: `https://min-api.cryptocompare.com/data/price?fsym=${from}&tsyms=${to}`,
+    });
+    this.state?.ethereum.setExchangeRate(result.data[to]);
+    return result.data[to];
+  }
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
     const passcodeString = passcode.map(String).join('');
     (this.signer as RealmSigner).setMnemonic(

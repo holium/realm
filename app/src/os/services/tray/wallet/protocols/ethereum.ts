@@ -58,8 +58,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
     let alchemySettings: AlchemySettings;
     this.ethProvider = new ethers.providers.JsonRpcProvider({
-      // skipFetchSetup: true,
-      // errorPassThrough: true,
       url: this.nodeURL,
     });
     if (this.protocol === ProtocolType.ETH_MAIN) {
@@ -87,20 +85,15 @@ export class EthereumProtocol implements BaseBlockProtocol {
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     this.updateWalletState(conduit, walletStore);
     try {
-      console.log('connecting', `${this.baseURL}/socketio`);
-      // const socket = io(`${this.baseURL}/socketio`);
       const socket = io(this.baseURL);
-      // const socket = io('wss://api.holium.live/v1/alchemy/socketio');
-      // console.log(socket.connect());
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
-        // console.log(socket.id);
         console.log('connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
-        // console.log('on-block', currentBlock);
+        // console.log('block: ' + currentBlock);
         this.updateWalletState(conduit, walletStore, currentBlock);
       });
       socket.on('error', (error: any) => {
@@ -109,8 +102,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       // either by directly modifying the `auth` attribute
       socket.on('connect_error', () => {
         console.log('connect error');
-        // socket.auth.token = 'abcd';
-        // socket.connect();
       });
 
       socket.on('disconnect', () => {});
