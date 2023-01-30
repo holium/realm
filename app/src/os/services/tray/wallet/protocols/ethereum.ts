@@ -6,6 +6,11 @@ import {
   Network,
 } from 'alchemy-sdk';
 import axios from 'axios';
+// NOTE: this was needed for JsonRpcProvider to work
+import fetch from 'node-fetch';
+// tslint:disable-next-line:no-any
+declare var global: any;
+global.fetch = fetch;
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
@@ -38,13 +43,23 @@ export class EthereumProtocol implements BaseBlockProtocol {
     } else if (process.env.USE_LOCAL_API) {
       this.baseURL = 'http://localhost:8080';
     }
+    // this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // if (process.env.NODE_ENV === 'production') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // } else if (process.env.NODE_ENV === 'staging') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy'; // staging URL
+    // } else {
+    //   this.baseURL = 'http://localhost:3300/v1/alchemy';
+    // }
     if (this.protocol === ProtocolType.ETH_MAIN) {
       this.nodeURL = this.baseURL + '/eth';
     } else {
       this.nodeURL = this.baseURL + '/gorli';
     }
     let alchemySettings: AlchemySettings;
-    this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
+    this.ethProvider = new ethers.providers.JsonRpcProvider({
+      url: this.nodeURL,
+    });
     if (this.protocol === ProtocolType.ETH_MAIN) {
       alchemySettings = {
         url: this.nodeURL,
@@ -73,6 +88,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
+        console.log('connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
@@ -82,6 +98,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
       socket.on('error', (error: any) => {
         console.log(error);
       });
+      // either by directly modifying the `auth` attribute
+      socket.on('connect_error', () => {
+        console.log('connect error');
+      });
+
       socket.on('disconnect', () => {});
     } catch (error) {
       console.log(error);

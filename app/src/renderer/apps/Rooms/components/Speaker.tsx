@@ -29,7 +29,7 @@ export const Speaker = observer((props: ISpeaker) => {
   const { person, type } = props;
   const { ship, theme, contacts } = useServices();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = contacts.getContactAvatarMetadata(person);

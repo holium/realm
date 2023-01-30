@@ -1,6 +1,5 @@
 import { Patp } from 'os/types';
 import { FC } from 'react';
-import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text } from 'renderer/components';
 import styled from 'styled-components';
 import { useRooms } from '../useRooms';
@@ -23,11 +22,8 @@ const Value = styled(Text)`
 `;
 
 export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
-  const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const room = roomsManager.presentRoom!;
-
-  const rowGap = 16;
 
   return (
     <Flex

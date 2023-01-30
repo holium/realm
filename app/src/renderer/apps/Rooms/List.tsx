@@ -18,10 +18,10 @@ import { RealmProtocol, RoomType } from '@holium/realm-room';
 
 export const Rooms = observer(() => {
   const { dimensions } = useTrayApps();
-  const { spaces, theme } = useServices();
+  const { ship, spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
   const ourSpace = spaces.selected?.type === 'our';
 

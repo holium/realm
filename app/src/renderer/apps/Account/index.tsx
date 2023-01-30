@@ -25,7 +25,7 @@ export const AccountTrayApp = observer(() => {
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
   const currentShip = ship!;
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {

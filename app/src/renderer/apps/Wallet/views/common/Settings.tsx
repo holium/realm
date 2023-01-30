@@ -153,30 +153,39 @@ export const WalletSettings: FC = observer(() => {
       <DeletePasscode onSuccess={deleteWallet} />
     </Flex>
   ) : (
-    <Flex px={3} width="100%" height="100%" flexDirection="column">
-      <Flex justifyContent="space-between" alignItems="center" pt={3}>
-        <Flex alignItems="center" gap={8}>
-          <IconButton onClick={async () => await WalletActions.navigateBack()}>
-            <Icons
-              name="ArrowLeftLine"
-              size={1}
-              color={theme.currentTheme.iconColor}
-            />
-          </IconButton>
-          <Text variant="h5">Settings</Text>
+    <Flex
+      px={3}
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex flexDirection="column">
+        <Flex justifyContent="space-between" alignItems="center" pt={3}>
+          <Flex alignItems="center" gap={8}>
+            <IconButton
+              onClick={async () => await WalletActions.navigateBack()}
+            >
+              <Icons
+                name="ArrowLeftLine"
+                size={1}
+                color={theme.currentTheme.iconColor}
+              />
+            </IconButton>
+            <Text variant="h5">Settings</Text>
+          </Flex>
+          <Button
+            py={1}
+            variant="minimal"
+            fontWeight={400}
+            isLoading={saving}
+            onClick={saveSettings}
+          >
+            Save
+          </Button>
         </Flex>
-        <Button
-          py={1}
-          variant="minimal"
-          fontWeight={400}
-          isLoading={saving}
-          onClick={saveSettings}
-        >
-          Save
-        </Button>
-      </Flex>
 
-      {/*<Flex mt={3} flexDirection="column" width="100%">
+        {/*<Flex mt={3} flexDirection="column" width="100%">
         <Text variant="label">Provider</Text>
         <Text
           mt={1}
@@ -208,116 +217,121 @@ export const WalletSettings: FC = observer(() => {
           </Text>
         </Box>
         </Flex>*/}
+        <Flex mt={3} flexDirection="column">
+          <Text variant="label">Address Creation Mode</Text>
+          <Text
+            mt={1}
+            mb={2}
+            variant="body"
+            fontSize={1}
+            opacity={0.8}
+            color={baseTheme.colors.text.secondary}
+          >
+            If set to on-demand, anytime you're sent funds a new address will be
+            created to receive them.
+          </Text>
+          <Flex width="140px">
+            <Select
+              id="wallet-creation-mode"
+              customBg={selectBg}
+              textColor={baseTheme.colors.text.primary}
+              iconColor={theme.currentTheme.iconColor}
+              options={[
+                { label: 'Default', value: 'default' },
+                { label: 'On-demand', value: 'on-demand' },
+              ]}
+              selected={state.walletCreationMode}
+              onClick={setCreationMode}
+            />
+          </Flex>
+        </Flex>
 
-      <Flex mt={3} flexDirection="column">
-        <Text variant="label">Address Creation Mode</Text>
-        <Text
-          mt={1}
-          mb={2}
-          variant="body"
-          fontSize={1}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
-          If set to on-demand, anytime you're sent funds a new address will be
-          created to receive them.
-        </Text>
-        <Flex width="140px">
-          <Select
-            id="wallet-creation-mode"
-            customBg={selectBg}
-            textColor={baseTheme.colors.text.primary}
-            iconColor={theme.currentTheme.iconColor}
-            options={[
-              { label: 'Default', value: 'default' },
-              { label: 'On-demand', value: 'on-demand' },
-            ]}
-            selected={state.walletCreationMode}
-            onClick={setCreationMode}
+        <Flex mt={3} flexDirection="column">
+          <Text variant="label">Wallet Visibility</Text>
+          <Text
+            mt={1}
+            mb={2}
+            variant="body"
+            fontSize={1}
+            opacity={0.8}
+            color={baseTheme.colors.text.secondary}
+          >
+            Determine how you want to share addresses with other people on the
+            network.
+          </Text>
+          <VisibilitySelect
+            theme={theme}
+            baseTheme={baseTheme}
+            wallets={wallets}
+            sharingMode={state.sharingMode}
+            defaultIndex={state.defaultIndex}
+            walletCreationMode={state.walletCreationMode}
+            onChange={setWalletVisibility}
+          />
+        </Flex>
+
+        <Flex mt={3} flexDirection="column">
+          <Text mb={2} variant="label">
+            Blocked IDs
+          </Text>
+          <BlockedInput
+            theme={theme}
+            baseTheme={baseTheme}
+            blocked={state.blocked}
+            onChange={setBlockList}
           />
         </Flex>
       </Flex>
-
-      <Flex mt={3} flexDirection="column">
-        <Text variant="label">Wallet Visibility</Text>
+      <Flex flexDirection="column" mb={2}>
+        <TextButton
+          highlightColor="#EC415A"
+          showBackground
+          textColor="#EC415A"
+          style={{ fontWeight: 400 }}
+          onClick={() => {
+            setSettingScreen(SettingScreen.LOCAL);
+            // WalletActions.deleteLocalWallet()
+          }}
+        >
+          Delete Local HD Wallet
+        </TextButton>
         <Text
           mt={1}
           mb={2}
+          ml="2px"
           variant="body"
           fontSize={1}
           opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
-          Determine how you want to share addresses with other people on the
-          network.
+          Delete your HD wallet from local storage.
         </Text>
-        <VisibilitySelect
-          theme={theme}
-          baseTheme={baseTheme}
-          wallets={wallets}
-          sharingMode={state.sharingMode}
-          defaultIndex={state.defaultIndex}
-          walletCreationMode={state.walletCreationMode}
-          onChange={setWalletVisibility}
-        />
-      </Flex>
-
-      <Flex mt={3} flexDirection="column">
-        <Text mb={2} variant="label">
-          Blocked IDs
+        <br />
+        <TextButton
+          highlightColor="#EC415A"
+          showBackground
+          textColor="#EC415A"
+          style={{ fontWeight: 400 }}
+          onClick={() => {
+            setSettingScreen(SettingScreen.AGENT);
+            // WalletActions.deleteShipWallet()
+          }}
+        >
+          Delete Ship HD Wallet
+        </TextButton>
+        <Text
+          mt={1}
+          mb={2}
+          ml="2px"
+          variant="body"
+          fontSize={1}
+          opacity={0.8}
+          color={baseTheme.colors.text.secondary}
+        >
+          Completely delete your HD wallet locally and remove all metadata from
+          your Urbit.
         </Text>
-        <BlockedInput
-          theme={theme}
-          baseTheme={baseTheme}
-          blocked={state.blocked}
-          onChange={setBlockList}
-        />
       </Flex>
-      <TextButton
-        highlightColor="#EC415A"
-        showBackground
-        textColor="#EC415A"
-        style={{ fontWeight: 400 }}
-        onClick={() => {
-          setSettingScreen(SettingScreen.LOCAL);
-          // WalletActions.deleteLocalWallet()
-        }}
-      >
-        Delete Local HD Wallet
-      </TextButton>
-      <Text
-        mt={1}
-        mb={2}
-        variant="body"
-        fontSize={1}
-        opacity={0.8}
-        color={baseTheme.colors.text.secondary}
-      >
-        Delete your encrypted mnemonic from local storage.
-      </Text>
-      <br />
-      <TextButton
-        highlightColor="#EC415A"
-        showBackground
-        textColor="#EC415A"
-        style={{ fontWeight: 400 }}
-        onClick={() => {
-          setSettingScreen(SettingScreen.AGENT);
-          // WalletActions.deleteShipWallet()
-        }}
-      >
-        Delete Ship HD Wallet
-      </TextButton>
-      <Text
-        mt={1}
-        mb={2}
-        variant="body"
-        fontSize={1}
-        opacity={0.8}
-        color={baseTheme.colors.text.secondary}
-      >
-        Completely delete your HD wallet locally and on your ship.
-      </Text>
     </Flex>
   );
 });

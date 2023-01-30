@@ -24,7 +24,7 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 export const Room = observer(() => {
   const { ship, theme } = useServices();
   const { roomsApp, dimensions } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');

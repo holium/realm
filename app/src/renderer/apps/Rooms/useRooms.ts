@@ -87,7 +87,7 @@ RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
   }
 });
 
-export function useRooms(our?: Patp) {
+export function useRooms(our?: Patp): RoomsManager {
   if (roomsManager) {
     return roomsManager;
   }
@@ -105,6 +105,9 @@ export function useRooms(our?: Patp) {
       curPatp = null;
       protocol = null;
     });
+  }
+  if (!roomsManager) {
+    throw new Error('roomsManager not initialized');
   }
 
   return roomsManager;
