@@ -55,6 +55,7 @@ import { ThemeType } from '../theme';
 
 type ActionButtonProps = {
   theme: ThemeType;
+  style?: any;
   children: React.ReactNode;
   disabled?: boolean;
   rightContent?: React.ReactNode;
@@ -68,19 +69,8 @@ export type ButtonProps = StyledComponentProps<
   never
 >;
 
-// const StyledButton = styled.button(
-//   styled.button`
-//     ${(props) => css`
-//       appearance: none;
-//       border-radius: 4px;
-//       background: ${props.theme.colors.brand.muted};
-//     `}
-//   `,
-//   compose(space, layout, color, background, flexbox, border, position)
-// );
-
 const StyledButton = styled.button`
-  ${(props: ActionButtonProps) => css`
+  ${(props: ButtonProps) => css`
     appearance: none;
     decoration: none;
     display: flex;

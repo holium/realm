@@ -19,8 +19,8 @@ import { useRooms } from './useRooms';
 
 export const Settings: FC = observer(() => {
   const { dimensions, roomsApp } = useTrayApps();
-  const { theme } = useServices();
-  const roomsManager = useRooms();
+  const { ship, theme } = useServices();
+  const roomsManager = useRooms(ship!.patp);
 
   const { dockColor, windowColor, inputColor, mode } = theme.currentTheme;
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
@@ -87,6 +87,7 @@ export const Settings: FC = observer(() => {
           <FormControl.Field>
             <Label>Audio input</Label>
             <Select
+              id="rooms-settings-audio-input"
               height={32}
               textColor={theme.currentTheme.textColor}
               iconColor={theme.currentTheme.iconColor}

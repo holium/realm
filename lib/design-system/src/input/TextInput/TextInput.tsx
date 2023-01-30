@@ -1,22 +1,22 @@
-import { Input } from '../Input/Input';
+import { Input, TextArea } from '../Input/Input';
 import InputBox, { InputBoxProps } from '../InputBox/InputBox';
 
 type TextInputProps = {
   id: string;
   name: string;
-  type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url';
+  type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url' | 'textarea';
   required?: boolean;
   value?: string;
   disabled?: boolean;
   readOnly?: boolean;
   placeholder?: string;
   defaultValue?: string;
-} & Partial<InputBoxProps>;
+} & Partial<InputBoxProps> & { cols?: number; rows?: number };
 
 export const TextInput = ({
   id,
   name,
-  type = 'text',
+  type, // = 'text',
   required = false,
   value,
   placeholder,
@@ -28,24 +28,44 @@ export const TextInput = ({
   onFocus,
   onBlur,
   onKeyDown,
-  ...inutBoxProps
+  ...inputBoxProps
 }: TextInputProps) => (
-  <InputBox inputId={id} disabled={disabled} {...inutBoxProps}>
-    <Input
-      id={id}
-      name={name}
-      type={type}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-      value={value}
-      required={required}
-      tabIndex={tabIndex}
-      disabled={disabled}
-      readOnly={readOnly}
-      onChange={onChange}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onKeyDown={onKeyDown}
-    />
+  <InputBox inputId={id} disabled={disabled} {...inputBoxProps}>
+    {type === 'textarea' ? (
+      <TextArea
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        value={value}
+        required={required}
+        tabIndex={tabIndex}
+        disabled={disabled}
+        readOnly={readOnly}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+        cols={inputBoxProps.cols}
+        rows={inputBoxProps.rows}
+      />
+    ) : (
+      <Input
+        id={id}
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        value={value}
+        required={required}
+        tabIndex={tabIndex}
+        disabled={disabled}
+        readOnly={readOnly}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+      />
+    )}
   </InputBox>
 );

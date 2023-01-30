@@ -61,10 +61,10 @@ export const createRoomForm = (
 
 export const NewRoom = observer(() => {
   const { dimensions } = useTrayApps();
-  const { theme, spaces } = useServices();
+  const { ship, theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, windowColor, inputColor } = theme.currentTheme;
 
