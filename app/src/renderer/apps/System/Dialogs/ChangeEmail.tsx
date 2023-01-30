@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
@@ -43,7 +43,7 @@ export const ChangeEmailDialogConfig: DialogConfig = {
   noTitlebar: false,
 };
 
-export const ChangeEmailDialog: FC = observer(() => {
+const ChangeEmailDialogPresenter = () => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
@@ -75,7 +75,9 @@ export const ChangeEmailDialog: FC = observer(() => {
       {Screen}
     </Flex>
   );
-});
+};
+
+const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
 function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   const { onboarding, identity } = useServices();

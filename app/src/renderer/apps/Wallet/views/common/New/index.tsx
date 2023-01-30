@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Box, Flex, Icons, IconButton } from 'renderer/components';
@@ -26,7 +26,7 @@ export enum NewWalletScreen {
   RECOVER_EXISTING = 'recover_existing',
 }
 
-export const EthNew: FC<any> = observer(() => {
+const EthNewPresenter = () => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const initialScreen = walletApp.initialized
@@ -124,4 +124,6 @@ export const EthNew: FC<any> = observer(() => {
       )}
     </Box>
   );
-});
+};
+
+export const EthNew = observer(EthNewPresenter);

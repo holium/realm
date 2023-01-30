@@ -3,31 +3,49 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
 
+type LeaveSpaceDialogConfigComponentProps = {
+  path: string;
+  name: string;
+  [key: string]: any;
+};
+
+const LeaveSpaceDialogConfigComponent = ({
+  path,
+  name,
+  ...props
+}: LeaveSpaceDialogConfigComponentProps) => {
+  const [loading, setLoading] = useState(false);
+  const onConfirm = async () => {
+    if (path) {
+      setLoading(true);
+      SpacesActions.leaveSpace(path).then(() => {
+        setLoading(false);
+      });
+    }
+  };
+  return (
+    <ConfirmDialog
+      title="Leave Space"
+      description={`Are you sure you want to leave ${name}?`}
+      confirmText="Leave"
+      loading={loading}
+      onConfirm={onConfirm}
+      {...props}
+    />
+  );
+};
+
 export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any
-) => {
-  const [loading, setLoading] = useState(false);
-  return {
-    component: (props: any) => {
-      const onConfirm = async () => {
-        if (dialogProps) {
-          setLoading(true);
-          SpacesActions.leaveSpace(dialogProps.path).then(() => {
-            setLoading(false);
-          });
-        }
-      };
-      return (
-        <ConfirmDialog
-          title="Leave Space"
-          description={`Are you sure you want to leave ${dialogProps.name}?`}
-          confirmText="Leave"
-          loading={loading}
-          onConfirm={onConfirm}
-          {...props}
-        />
-      );
-    },
+) =>
+  ({
+    component: (props: any) => (
+      <LeaveSpaceDialogConfigComponent
+        path={dialogProps.path}
+        name={dialogProps.name}
+        {...props}
+      />
+    ),
     onClose: () => {},
     window: {
       id: 'leave-space-dialog',
@@ -43,5 +61,4 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
     },
     hasCloseButton: false,
     noTitlebar: true,
-  } as DialogConfig;
-};
+  } as DialogConfig);

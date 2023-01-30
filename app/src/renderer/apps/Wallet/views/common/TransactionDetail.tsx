@@ -1,4 +1,4 @@
-import { FC, useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -30,7 +30,7 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-export const TransactionDetail: FC = observer(() => {
+const TransactionDetailPresenter = () => {
   const { walletApp } = useTrayApps();
   const transactionList =
     walletApp.navState.network === NetworkType.ETHEREUM
@@ -244,4 +244,6 @@ export const TransactionDetail: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const TransactionDetail = observer(TransactionDetailPresenter);

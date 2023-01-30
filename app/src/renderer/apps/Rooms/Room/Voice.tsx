@@ -7,14 +7,16 @@ import { useEffect } from 'react';
 import { roomTrayConfig } from '../config';
 import { useServices } from 'renderer/logic/store';
 
-export const VoiceView = observer(() => {
+const VoiceViewPresenter = () => {
   const { ship } = useServices();
   const roomsManager = useRooms(ship!.patp);
 
   const { setTrayAppHeight } = useTrayApps();
 
-  const our = roomsManager.local.patp;
-  const speakers = [...Array.from(roomsManager.protocol.peers.keys())]; //.filter((patp) => patp !== our);
+  const our = roomsManager?.local.patp;
+  const speakers = roomsManager
+    ? [...Array.from(roomsManager.protocol.peers.keys())]
+    : []; //.filter((patp) => patp !== our);
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -26,7 +28,7 @@ export const VoiceView = observer(() => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsManager.live.room) {
+  if (!roomsManager?.live.room) {
     return null;
   }
   return (
@@ -39,10 +41,12 @@ export const VoiceView = observer(() => {
       gridAutoColumns="1fr"
       gridAutoRows={'.5fr'}
     >
-      <Speaker key={our} type="our" person={our} />
+      <Speaker key={our} type="our" person={our ?? ''} />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}
     </Flex>
   );
-});
+};
+
+export const VoiceView = observer(VoiceViewPresenter);

@@ -50,7 +50,7 @@ const shipData = ShipConfig[testShip];
 
 export let roomsManager: RoomsManager;
 
-const App: FC = observer(() => {
+const AppPresenter = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
@@ -209,7 +209,7 @@ const App: FC = observer(() => {
       </div>
     </div>
   );
-});
+};
 
 type ISpeaker = {
   our: boolean;
@@ -251,4 +251,4 @@ const OurMic: FC<ISpeaker> = observer((props: ISpeaker) => {
   );
 });
 
-export default App;
+export default observer(AppPresenter);

@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 
@@ -22,7 +22,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
   ShellActions.setDesktopDimensions(dims.width, dims.height);
 });
 
-export const Shell: FC = observer(() => {
+const ShellPresenter = () => {
   const { shell, theme, identity, ship } = useServices();
   const { resuming } = useCore();
 
@@ -65,9 +65,9 @@ export const Shell: FC = observer(() => {
       </Layer>
     </ViewPort>
   );
-});
+};
 
-export default Shell;
+export const Shell = observer(ShellPresenter);
 
 const BgImage = ({
   blurred,
