@@ -177,18 +177,19 @@ const TransactionList = types
     ) {
       for (const transaction of transactions) {
         const previousTransaction = self.transactions.get(transaction.hash);
+        const sent = address === transaction.from;
         const newTransaction = {
           hash: transaction.hash,
           walletIndex: index,
           amount: transaction.value?.toString() || '0',
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
-          type: address === transaction.from ? 'sent' : 'received',
+          type: sent ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt || '',
           completedAt: transaction.metadata.blockTimestamp,
-          ourAddress: transaction.from,
+          ourAddress: sent ? transaction.from : transaction.to,
           theirPatp: previousTransaction?.theirPatp,
-          theirAddress: address === transaction.from ? transaction.to : transaction.from,
+          theirAddress: sent ? transaction.to : transaction.from,
           status: 'succeeded',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
