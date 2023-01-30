@@ -5,7 +5,10 @@ import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
+import {
+  ERC20Type,
+  WalletView,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { Row } from 'renderer/components/NewRow';
 
 interface CoinListProps {
@@ -25,11 +28,16 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
       <Row
         baseBg={darken(0.03, theme.currentTheme.windowColor)}
         customBg={darken(0.0325, theme.currentTheme.windowColor)}
-        onClick={async () =>
+        onClick={async () => {
           await WalletActions.navigate(WalletView.WALLET_DETAIL, {
-            detail: { type: 'coin', key: props.details.address },
-          })
-        }
+            detail: {
+              type: 'coin',
+              txtype: 'coin',
+              coinKey: props.details.address,
+              key: props.details.address,
+            },
+          });
+        }}
       >
         <Flex width="100%" alignItems="center" justifyContent="space-between">
           <Flex alignItems="center">

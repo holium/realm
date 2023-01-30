@@ -34,13 +34,13 @@ const configuration: webpack.Configuration = {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
   },
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-      }),
-    ],
-  },
+  // optimization: {
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       parallel: true,
+  //     }),
+  //   ],
+  // },
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',

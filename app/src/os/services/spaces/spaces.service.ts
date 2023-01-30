@@ -10,7 +10,7 @@ import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { MemberRole, Patp, SpacePath } from 'os/types';
+import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';

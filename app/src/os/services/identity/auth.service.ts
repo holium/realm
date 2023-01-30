@@ -12,6 +12,7 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
+import EncryptedStore from '../../lib/encryptedStore';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
@@ -251,11 +252,7 @@ export class AuthService extends BaseService {
       secretKey: secretKey,
       accessPropertiesByDotNotation: true,
     };
-    // const db =
-    //   process.env.NODE_ENV === 'development'
-    //     ? new Store<ShipCredentials>(storeParams)
-    //     : new EncryptedStore<ShipCredentials>(storeParams);
-    const db = new Store<ShipCredentials>(storeParams);
+    const db = new EncryptedStore<ShipCredentials>(storeParams);
     db.store = credentials;
     return credentials;
   }
@@ -267,11 +264,7 @@ export class AuthService extends BaseService {
       secretKey: secretKey,
       accessPropertiesByDotNotation: true,
     };
-    // const db =
-    //   process.env.NODE_ENV === 'development'
-    //     ? new Store<ShipCredentials>(storeParams)
-    //     : new EncryptedStore<ShipCredentials>(storeParams);
-    const db = new Store<ShipCredentials>(storeParams);
+    const db = new EncryptedStore<ShipCredentials>(storeParams);
     return db.store;
   }
 
@@ -306,6 +299,7 @@ export class AuthService extends BaseService {
       this.core.services.shell.setBlur(null, false);
 
       const { code } = this.readCredentials(patp, password);
+
       const cookie = await getCookie({
         patp,
         url: ship.url,
@@ -400,11 +394,25 @@ export class AuthService extends BaseService {
     this.state.deleteShip(ship);
   }
 
-  setMnemonic(_event: any, mnemonic: string) {
-    this.state.setMnemonic(mnemonic);
+  setMnemonic(_event: any, patp: string, passcode: string, mnemonic: string) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    db.store = mnemonic;
   }
 
-  getMnemonic(_event: any) {
-    return this.state.mnemonic;
+  getMnemonic(_event: any, patp: string, passcode: string) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    return db.store;
   }
 }

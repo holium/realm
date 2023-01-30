@@ -14,7 +14,12 @@ import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
-import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import {
+  EthWalletType,
+  BitcoinWalletType,
+  NetworkType,
+  WalletView,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 
@@ -23,6 +28,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 ) => ({
   [WalletView.LIST]: (props: any) => <WalletList {...props} />,
   [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
+  [WalletView.TRANSACTION_SEND]: (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_DETAIL]: (props: any) => (
     <TransactionDetail {...props} />
   ),
@@ -38,25 +44,50 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
-  const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  let transactions: any = useMemo(() => [], []);
+  let transactions: any = [];
   for (const key of walletApp.currentStore.wallets.keys()) {
     const wallet = walletApp.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      wallet.transactions.get(walletApp.currentStore.network) || new Map()
+      (walletApp.navState.network === NetworkType.ETHEREUM
+        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+            .transactionList.transactions
+        : (wallet as BitcoinWalletType).transactionList.transactions) ||
+        new Map()
     );
+    if (walletApp.navState.network === NetworkType.ETHEREUM) {
+      for (const key of walletApp.currentStore.wallets.keys()) {
+        for (const coin of (
+          walletApp.currentStore.wallets.get(key)! as EthWalletType
+        ).data
+          .get(walletApp.navState.protocol)!
+          .coins.keys()) {
+          const coinTransactions = (
+            walletApp.currentStore.wallets.get(key)! as EthWalletType
+          ).data
+            .get(walletApp.navState.protocol)!
+            .coins.get(coin)!
+            .transactionList.transactions.values();
+          transactions = [...coinTransactions, ...transactions];
+        }
+      }
+    }
     transactions = [...walletTransactions, ...transactions];
-    // console.log(transactions, transactionCount);
   }
+  const pending = transactions.filter(
+    (tx: any) => tx.status === 'pending'
+  ).length;
+
   useEffect(() => {
-    if (transactions.length !== transactionCount) {
-      setTransactionCount(transactions.length);
+    if (pending > 0) {
       setHidePending(false);
     }
-  }, [transactionCount, transactions]);
+    if (pending === 0 && !hidePending) {
+      setHidePending(true);
+    }
+  }, [pending]);
 
   const hide = () => {
     setHidePending(true);
@@ -72,7 +103,20 @@ export const WalletApp: FC<any> = observer((props: any) => {
     walletApp.navState.view
   );
 
-  const View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
+  const pendingIsVisible = [
+    WalletView.LIST,
+    WalletView.WALLET_DETAIL,
+    WalletView.TRANSACTION_DETAIL,
+    WalletView.NFT_DETAIL,
+  ].includes(walletApp.navState.view);
+
+  const viewComponent: WalletView =
+    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM
+      ? WalletView.TRANSACTION_SEND
+      : walletApp.navState.view;
+  const View = useMemo(() => {
+    return WalletViews(walletApp.navState.network)[viewComponent];
+  }, [viewComponent]);
 
   return (
     <Flex
@@ -97,7 +141,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
         }
         hide={hideHeader}
       />
-      {!hidePending &&
+      {pendingIsVisible &&
+        !hidePending &&
         walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}

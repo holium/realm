@@ -3,7 +3,11 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
-import { WalletView } from 'os/services/tray/wallet.model';
+import {
+  NetworkStoreType,
+  NetworkType,
+  WalletView,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}
@@ -16,7 +20,9 @@ export const WalletList: FC<WalletListProps> = observer(
     const List: FC = () => {
       return (
         <Flex
-          p={4}
+          py={1}
+          px={3}
+          height="100%"
           width="100%"
           flexDirection="column"
           layoutScroll
@@ -25,13 +31,10 @@ export const WalletList: FC<WalletListProps> = observer(
           overflowY="auto"
         >
           {list.map((walletEntry) => {
-            const fullWallet = walletApp.currentStore.wallets.get(
-              walletEntry.key
-            );
             return (
               <WalletCard
                 key={walletEntry.address}
-                wallet={fullWallet!}
+                walletKey={walletEntry.key}
                 onSelect={() => {
                   WalletActions.navigate(WalletView.WALLET_DETAIL, {
                     walletIndex: walletEntry.key,
@@ -58,21 +61,21 @@ export const WalletList: FC<WalletListProps> = observer(
           alignItems="center"
         >
           <Text variant="h3" textAlign="center">
-            No wallets
+            No addresses
           </Text>
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
               {walletApp.navState.network === 'ethereum'
                 ? 'Ethereum'
-                : walletApp.navState.btcNetwork === 'mainnet'
+                : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
                 ? 'Bitcoin'
                 : 'Bitcoin Testnet'}{' '}
-              wallets yet.
+              addresses yet.
             </Text>
           </Flex>
           <Flex mt={9} justifyContent="center">
-            <Button onClick={onClick}>Create wallet</Button>
+            <Button onClick={onClick}>Create address</Button>
           </Flex>
         </Flex>
       );
@@ -88,7 +91,21 @@ export const WalletList: FC<WalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        <Empty network={walletApp.navState.network} />
+        {walletApp.navState.network === NetworkType.BITCOIN ? (
+          <Flex
+            width="100%"
+            height="100%"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text variant="h3" textAlign="center">
+              Coming soon...
+            </Text>{' '}
+          </Flex>
+        ) : (
+          <Empty network={walletApp.navState.network} />
+        )}
       </Flex>
     );
   }

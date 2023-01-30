@@ -9,7 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
 
 export const RoomTray = observer(() => {
-  const { contacts, spaces } = useServices();
+  const { ship, contacts, spaces } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   const {
@@ -20,7 +20,7 @@ export const RoomTray = observer(() => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship!.patp);
   const muted = roomsManager.protocol.local?.isMuted;
 
   const onButtonClick = useCallback(

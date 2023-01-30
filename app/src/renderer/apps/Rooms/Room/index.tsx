@@ -16,7 +16,6 @@ import { CommButton } from '../components/CommButton';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
-import { RoomInfo } from './Info';
 import { useRooms } from '../useRooms';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
@@ -24,7 +23,7 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 export const Room = observer(() => {
   const { ship, theme } = useServices();
   const { roomsApp, dimensions } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship!.patp);
 
   const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
@@ -169,7 +168,6 @@ export const Room = observer(() => {
         {roomView === 'voice' && <VoiceView />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
-        {roomView === 'info' && <RoomInfo />}
         <Flex
           pb={16}
           pl={1}

@@ -69,6 +69,7 @@ export const InputWrapper = styled(Flex)<BaseInputProps>`
         ? props.theme.colors.ui.intent.alert
         : props.theme.colors.ui.input.borderColor};
   border-radius: ${(props) => props.theme.input.borderRadius}px;
+
   textarea {
     resize: none;
   }
