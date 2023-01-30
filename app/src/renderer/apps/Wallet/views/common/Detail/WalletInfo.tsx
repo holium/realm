@@ -22,7 +22,9 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
+    // TODO clean up everything
     const amountDisplay = `${
+      // @ts-ignore
       formatEthAmount(props.wallet ? props.wallet.balance : '0.0').eth
     } ETH`;
 

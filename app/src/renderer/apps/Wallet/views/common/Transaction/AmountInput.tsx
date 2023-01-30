@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { getBaseTheme } from '../../../lib/helpers';
@@ -37,7 +37,7 @@ export const AmountInput = observer(
     const [inCryptoToggle, setInCryptoToggle] = useState(true);
     const showUsd =
       walletApp.navState.protocol === ProtocolType.ETH_MAIN ||
-      walletApp.navState.protocol === ProtocolType.ETH_GORLI;
+      (walletApp.navState.protocol === ProtocolType.ETH_GORLI && !props.coin);
 
     const inCrypto = showUsd ? inCryptoToggle : true;
 
@@ -86,7 +86,7 @@ export const AmountInput = observer(
         check(toggled, amount);
 
         if (!toggled) {
-          setAmount(Number(amount).toFixed(2));
+          setAmount(0);
         }
       }
     };
@@ -190,12 +190,12 @@ export const AmountInput = observer(
               p="4px"
               justifyContent="center"
               alignItems="center"
-              background={lighten(0.02, theme.currentTheme.windowColor)}
+              background={theme.currentTheme.windowColor}
               border={`solid 1px ${themeData.colors.ui.borderColor}`}
               borderRadius="5px"
               onClick={toggleInCrypto}
             >
-              <Text mr={1} variant="body" fontSize="12px">
+              <Text variant="body" fontSize="12px">
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
@@ -206,7 +206,7 @@ export const AmountInput = observer(
                       ]
                   : 'USD'}
               </Text>
-              {showUsd && <Icons name="UpDown" size="12px" />}
+              {showUsd && <Icons ml={1} name="UpDown" size="12px" />}
             </Flex>
           </ContainerFlex>
         </FlexHider>

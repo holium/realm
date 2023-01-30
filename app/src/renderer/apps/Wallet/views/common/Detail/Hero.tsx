@@ -81,7 +81,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     );
 
     const [showPasscode, setShowPasscode] = useState(false);
-    const [passcode, setPasscode] = useState<number[]>([]);
 
     const amountDisplay =
       walletApp.navState.network === NetworkType.ETHEREUM
@@ -105,6 +104,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         : `${
             formatBtcAmount((props.wallet as BitcoinWalletType).balance).btc
           } BTC`;
+
     const amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
@@ -149,7 +149,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     ) : (
       <Flex
         mt={2}
-        // layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
         alignItems="center"
         gap={8}
@@ -221,13 +220,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                   transactionRecipient.patp
                 );
           }
-        } else {
-          await WalletActions.sendBitcoinTransaction(
-            walletApp.currentWallet!.index,
-            transactionRecipient.address || transactionRecipient.patpAddress!,
-            transactionAmount.toString()
-          );
         }
+
         props.close();
       } catch (e) {
         console.error(e);

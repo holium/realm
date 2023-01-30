@@ -93,7 +93,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
-        // console.log('block: ' + currentBlock);
         this.updateWalletState(conduit, walletStore, currentBlock);
       });
       socket.on('error', (error: any) => {

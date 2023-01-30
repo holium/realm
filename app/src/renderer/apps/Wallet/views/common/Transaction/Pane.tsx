@@ -19,7 +19,8 @@ const abbrMap = {
   bitcoin: 'BTC',
 };
 
-const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
+const ethToUsd = (eth: number, currentPrice: number) =>
+  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
 
 interface TransactionPaneProps {
   max: number;
@@ -36,13 +37,13 @@ interface TransactionPaneProps {
 
 export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
-    const { walletApp, setActiveApp } = useTrayApps();
-    // const [screen, setScreen] = useState('initial');
+    const { coin } = props;
+    const { walletApp } = useTrayApps();
+
     const screen =
       walletApp.navState.view === WalletView.TRANSACTION_SEND
         ? 'initial'
         : 'confirm';
-    const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
 
@@ -52,27 +53,36 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
 
     const next = () => {
-      // setScreen('confirm');
       if (walletApp.navState.protocol === ProtocolType.UQBAR) {
         WalletActions.enqueueUqbarTransaction(
           walletApp.navState.walletIndex!,
           props.transactionAmount
         );
       } else {
-        WalletActions.navigate(WalletView.TRANSACTION_CONFIRM);
+        const wallet = walletApp.currentWallet!;
+        WalletActions.navigate(WalletView.TRANSACTION_CONFIRM, {
+          walletIndex: `${wallet.index!}`,
+          protocol: walletApp.navState.protocol,
+          ...(coin && {
+            detail: {
+              type: 'coin',
+              txtype: 'coin',
+              coinKey: coin.address,
+              key: coin.address,
+            },
+          }),
+        });
         props.onScreenChange('confirm');
       }
     };
 
     const prev = () => {
-      // setScreen('initial');
       WalletActions.navigate(WalletView.TRANSACTION_SEND);
       props.onScreenChange('initial');
     };
 
     const amountValidator = (valid: boolean, amount?: number) => {
       setAmountValid(valid);
-      console.log('amountValidator', valid, amount);
       if (valid) {
         props.setTransactionAmount(amount!);
       }
@@ -132,7 +142,12 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 </Text>
                 {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
                   <Text mt={1} color={themeData.colors.text.disabled}>
-                    ${ethToUsd(props.transactionAmount)} USD
+                    $
+                    {ethToUsd(
+                      props.transactionAmount,
+                      walletApp.ethereum.conversions.usd!
+                    )}{' '}
+                    USD
                   </Text>
                 )}
                 <Flex
@@ -227,16 +242,19 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                       NETWORK FEE
                     </Text>
                     <Flex flexDirection="column">
-                      <Text variant="body">
-                        0.0005 {props.coin ? props.coin.name : 'ETH'}
-                      </Text>
+                      <Text variant="body">0.001 ETH</Text>
                       {walletApp.navState.protocol ===
                         ProtocolType.ETH_MAIN && (
                         <Text
                           fontSize={1}
                           color={themeData.colors.text.secondary}
                         >
-                          ≈ {ethToUsd(0.0005)} USD
+                          ≈{' '}
+                          {ethToUsd(
+                            0.0005,
+                            walletApp.ethereum.conversions.usd!
+                          )}{' '}
+                          USD
                         </Text>
                       )}
                     </Flex>
@@ -259,7 +277,12 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                           fontSize={1}
                           color={themeData.colors.text.secondary}
                         >
-                          ≈ {ethToUsd(props.transactionAmount + 0.0005)} USD
+                          ≈{' '}
+                          {ethToUsd(
+                            props.transactionAmount + 0.0005,
+                            walletApp.ethereum.conversions.usd!
+                          )}{' '}
+                          USD
                         </Text>
                       )}
                     </Flex>
@@ -274,7 +297,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               <Button
                 px={2}
                 onClick={props.onConfirm} // sendTransaction}
-                isLoading={transactionSending}
               >
                 Confirm
               </Button>
