@@ -188,7 +188,7 @@ const TransactionList = types
           completedAt: transaction.metadata.blockTimestamp,
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
-          theirAddress: transaction.to,
+          theirAddress: address === transaction.from ? transaction.to : transaction.from,
           status: 'succeeded',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
