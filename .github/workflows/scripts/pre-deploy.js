@@ -107,7 +107,7 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.isNewBuild = true;
     ci.releaseName = context.payload.pull_request.title;
     ci.buildVersion = tagName;
-    ci.channel = `${matches[1] === 'staging' ? 'alpha' : ''}`;
+    ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);

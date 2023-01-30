@@ -1,4 +1,4 @@
-import React, { FC, forwardRef } from 'react';
+import { forwardRef } from 'react';
 import styled, { css, StyledComponentProps } from 'styled-components';
 import { compose, space, HeightProps, SpaceProps, height } from 'styled-system';
 import { darken } from 'polished';
@@ -54,34 +54,23 @@ import { ThemeType } from '../theme';
 // });
 
 type ActionButtonProps = {
-  // variant: 'minimal';
   theme: ThemeType;
+  style?: any;
   children: React.ReactNode;
+  disabled?: boolean;
   rightContent?: React.ReactNode;
 } & HeightProps &
   SpaceProps;
 
 export type ButtonProps = StyledComponentProps<
   'button',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
   ActionButtonProps,
   never
 >;
 
-// const StyledButton = styled.button(
-//   styled.button`
-//     ${(props) => css`
-//       appearance: none;
-//       border-radius: 4px;
-//       background: ${props.theme.colors.brand.muted};
-//     `}
-//   `,
-//   compose(space, layout, color, background, flexbox, border, position)
-// );
-
 const StyledButton = styled.button`
-  ${(props: ActionButtonProps) => css`
+  ${(props: ButtonProps) => css`
     appearance: none;
     decoration: none;
     display: flex;
@@ -114,18 +103,16 @@ const StyledButton = styled.button`
   ${compose(height, space)}
 `;
 
-export const ActionButton: FC<ButtonProps> = forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->((props: ButtonProps, ref) => {
-  // eslint-disable-next-line react/prop-types
-  const { disabled, children, rightContent } = props;
-  return (
-    <StyledButton ref={ref} disabled={disabled} {...props}>
-      {children} {rightContent}
-    </StyledButton>
-  );
-});
+export const ActionButton = forwardRef<HTMLButtonElement, ButtonProps>(
+  (props: ButtonProps, ref) => {
+    const { disabled, children, rightContent } = props;
+    return (
+      <StyledButton ref={ref} disabled={disabled} {...props}>
+        {children} {rightContent}
+      </StyledButton>
+    );
+  }
+);
 ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,

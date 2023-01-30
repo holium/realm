@@ -60,7 +60,6 @@ body {
   border: 1px solid #00000020;
 }
 
-
 .room-row:hover {
   background-color: #00000005;
   cursor: pointer;
@@ -97,7 +96,7 @@ body {
 }
 
 .speaker-container {
-  display: flex;    
+  display: flex;
   background: #fff;
   border: 1px solid #00000020;
   border-radius: 6px;

@@ -92,7 +92,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   const onClick = async () => {
     console.log(`setting email: ${email}`);
     setLoading(true);
-    let result = await AuthActions.changeEmail(email);
+    const result = await AuthActions.changeEmail(email);
     setLoading(false);
 
     if (result.verificationCode) {

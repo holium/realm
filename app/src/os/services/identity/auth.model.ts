@@ -143,7 +143,7 @@ export const AuthStore = types
       color: string,
       avatar: string
     ) {
-      let ship = self.ships.get(id);
+      const ship = self.ships.get(id);
       if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;

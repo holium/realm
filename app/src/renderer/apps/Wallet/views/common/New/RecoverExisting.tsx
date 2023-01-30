@@ -1,28 +1,31 @@
-import { FC, useMemo, Dispatch, SetStateAction, useState } from 'react';
+import {
+  FC,
+  useMemo,
+  Dispatch,
+  SetStateAction,
+  useState,
+  ChangeEvent,
+} from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Icons,
-  Label,
-  Input,
-  Box,
-} from 'renderer/components';
+import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
+import { TextInput } from '@holium/design-system';
+import { useTrayApps } from 'renderer/apps/store';
+import VerifyPasscode from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
-  setSeedPhrase: (phrase: string) => void;
+  setSeedPhrase: (phrase: string, passcode: number[]) => void;
 }
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
   (props: RecoverExistingProps) => {
     const { theme } = useServices();
+    const { walletApp } = useTrayApps();
     const themeData = useMemo(
       () => getBaseTheme(theme.currentTheme),
       [theme.currentTheme]
@@ -31,19 +34,23 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const [showPasscode, setShowPasscode] = useState(false);
+
     const updatePhrase = (newPhrase: string) => {
       setError('');
       setPhrase(newPhrase);
     };
 
-    const recoverSeedPhrase = async () => {
+    const recoverSeedPhrase = async (passcode: number[]) => {
       setLoading(true);
       const correct = await WalletActions.checkMnemonic(phrase);
       setLoading(false);
 
       if (correct) {
-        props.setSeedPhrase(phrase);
-        props.setScreen(NewWalletScreen.CONFIRM);
+        props.setSeedPhrase(phrase, passcode);
+        WalletActions.watchUpdates();
+        props.setScreen(NewWalletScreen.FINALIZING);
+        // WalletActions.navigate(WalletView.LIST);
         setError('');
       } else {
         setError(
@@ -52,7 +59,13 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
       }
     };
 
-    return (
+    return showPasscode ? (
+      <VerifyPasscode
+        onSuccess={(code: number[]) => {
+          recoverSeedPhrase(code);
+        }}
+      />
+    ) : (
       <Flex width="100%" height="100%" flexDirection="column">
         <Text mt={6} variant="h4">
           Recover Wallet
@@ -64,14 +77,21 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
           <Label mb={3} required={true}>
             Seed phrase
           </Label>
-          <Input
+          <TextInput
+            id="seed-phrase"
+            name="seed-phrase"
             height="72px"
             required={true}
-            as="textarea"
+            type="textarea"
             value={phrase}
-            onChange={(e) => updatePhrase(e.target.value)}
-            autoFocus={true}
+            cols={50}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              updatePhrase(e.target.value)
+            }
+
+            // autoFocus={true}
           />
+
           <Box mt={3} hidden={error === ''}>
             <Text
               variant="body"
@@ -85,7 +105,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             <Button
               width="100%"
               disabled={!ethers.utils.isValidMnemonic(phrase)}
-              onClick={recoverSeedPhrase}
+              onClick={() => setShowPasscode(true)}
               isLoading={loading}
             >
               Recover
