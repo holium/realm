@@ -18,7 +18,7 @@ export const RoomViews: { [key: string]: any } = {
 export const RoomApp = observer(() => {
   const { ship } = useServices();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(ship!.patp);
   useEffect(() => {
     if (roomsManager.live.room) {
       roomsApp.setView('room');

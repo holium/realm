@@ -20,7 +20,7 @@ export const RoomTray = observer(() => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(ship!.patp);
   const muted = roomsManager.protocol.local?.isMuted;
 
   const onButtonClick = useCallback(

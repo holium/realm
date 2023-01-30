@@ -21,7 +21,7 @@ export const Rooms = observer(() => {
   const { ship, spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(ship!.patp);
 
   const ourSpace = spaces.selected?.type === 'our';
 

@@ -39,9 +39,6 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
     props.setScreen(NewWalletScreen.PASSCODE);
   };
 
-  console.log(phrase);
-  console.log('is valid? ', ethers.utils.isValidMnemonic(phrase));
-
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Text mt={6} variant="h4">
@@ -67,7 +64,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setPhrase(e.target.value)
             }
-            autoFocus={true}
+            // autoFocus={true}
           />
         </FormControl.Field>
         <Flex mt={7} width="100%">

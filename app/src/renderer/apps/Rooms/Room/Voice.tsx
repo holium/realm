@@ -9,7 +9,7 @@ import { useServices } from 'renderer/logic/store';
 
 export const VoiceView = observer(() => {
   const { ship } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(ship!.patp);
 
   const { setTrayAppHeight } = useTrayApps();
 

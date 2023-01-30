@@ -3,6 +3,7 @@ import { darken } from 'polished';
 import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
 import { Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
+import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
@@ -41,6 +42,7 @@ export const Transaction = observer((props: TransactionProps) => {
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
   const onClick = () => {
+    console.log('clicked', toJS(transaction));
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: {
         type: 'transaction',
