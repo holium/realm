@@ -19,8 +19,8 @@ import { useRooms } from './useRooms';
 
 export const Settings: FC = observer(() => {
   const { dimensions, roomsApp } = useTrayApps();
-  const { theme } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+  const { ship, theme } = useServices();
+  const roomsManager = useRooms(ship!.patp);
 
   const { dockColor, windowColor, inputColor, mode } = theme.currentTheme;
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
