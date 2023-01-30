@@ -46,7 +46,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
 
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const { theme: themeStore } = useServices();
 
   const theme = themeStore.currentTheme;

@@ -34,17 +34,21 @@ const configuration: webpack.Configuration = {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
   },
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-      }),
-    ],
-  },
+  // optimization: {
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       parallel: true,
+  //     }),
+  //   ],
+  // },
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
+    // new webpack.ProvidePlugin({
+    //   WebSocket: 'ws',
+    //   fetch: ['node-fetch', 'default'],
+    // }),
     /**
      * Create global constants which can be configured at compile time.
      *

@@ -6,6 +6,11 @@ import {
   Network,
 } from 'alchemy-sdk';
 import axios from 'axios';
+// NOTE: this was needed for JsonRpcProvider to work
+import fetch from 'node-fetch';
+// tslint:disable-next-line:no-any
+declare var global: any;
+global.fetch = fetch;
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
@@ -38,6 +43,14 @@ export class EthereumProtocol implements BaseBlockProtocol {
     } else if (process.env.USE_LOCAL_API) {
       this.baseURL = 'http://localhost:8080';
     }
+    // this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // if (process.env.NODE_ENV === 'production') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // } else if (process.env.NODE_ENV === 'staging') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy'; // staging URL
+    // } else {
+    //   this.baseURL = 'http://localhost:3300/v1/alchemy';
+    // }
     if (this.protocol === ProtocolType.ETH_MAIN) {
       this.nodeURL = this.baseURL + '/eth';
     } else {
@@ -45,7 +58,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
     let alchemySettings: AlchemySettings;
     this.ethProvider = new ethers.providers.JsonRpcProvider({
-      skipFetchSetup: true,
+      // skipFetchSetup: true,
+      // errorPassThrough: true,
       url: this.nodeURL,
     });
     if (this.protocol === ProtocolType.ETH_MAIN) {
@@ -73,18 +87,32 @@ export class EthereumProtocol implements BaseBlockProtocol {
   watchUpdates(conduit: any, walletStore: WalletStoreType) {
     this.updateWalletState(conduit, walletStore);
     try {
+      console.log('connecting', `${this.baseURL}/socketio`);
+      // const socket = io(`${this.baseURL}/socketio`);
       const socket = io(this.baseURL);
+      // const socket = io('wss://api.holium.live/v1/alchemy/socketio');
+      // console.log(socket.connect());
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
+        // console.log(socket.id);
+        console.log('connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
+        // console.log('on-block', currentBlock);
         this.updateWalletState(conduit, walletStore, currentBlock);
       });
       socket.on('error', (error: any) => {
         console.log(error);
       });
+      // either by directly modifying the `auth` attribute
+      socket.on('connect_error', () => {
+        console.log('connect error');
+        // socket.auth.token = 'abcd';
+        // socket.connect();
+      });
+
       socket.on('disconnect', () => {});
     } catch (error) {
       console.log(error);

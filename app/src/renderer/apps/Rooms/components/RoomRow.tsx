@@ -30,7 +30,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     rightChildren,
   } = props;
   const { theme, ship } = useServices();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions().filter((o) => o.id === 'toggle-devtools');
 

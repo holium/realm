@@ -5,9 +5,11 @@ import { Speaker } from '../components/Speaker';
 import { useRooms } from '../useRooms';
 import { useEffect } from 'react';
 import { roomTrayConfig } from '../config';
+import { useServices } from 'renderer/logic/store';
 
 export const VoiceView = observer(() => {
-  const roomsManager = useRooms();
+  const { ship } = useServices();
+  const roomsManager = useRooms(ship?.patp);
 
   const { setTrayAppHeight } = useTrayApps();
 
