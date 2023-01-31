@@ -100,11 +100,6 @@ export function useRooms(our?: Patp): RoomsManager {
       roomsManager = null;
       curPatp = null;
     });
-    window.addEventListener('beforeunload', () => {
-      roomsManager = null;
-      curPatp = null;
-      protocol = null;
-    });
   }
   if (!roomsManager) {
     throw new Error('roomsManager not initialized');
