@@ -20,6 +20,7 @@ export const TextArea = styled(motion.textarea)`
   border-radius: var(--rlm-border-radius-4);
   background-color: var(--rlm-input-color);
   color: var(--rlm-text-color);
+  width: 100%;
   pointer-events: all;
   appearance: none;
   outline: none;

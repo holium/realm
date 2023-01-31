@@ -1,5 +1,3 @@
-#
-#
 name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
@@ -123,7 +121,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'staging-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -193,7 +191,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'staging-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -211,7 +209,7 @@ jobs:
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}

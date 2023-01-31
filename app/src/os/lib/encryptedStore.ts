@@ -15,6 +15,11 @@ export default class EncryptedStore<T> {
   private _store;
 
   constructor(params: EncryptedStoreParams) {
+    try {
+      safeStorage.isEncryptionAvailable();
+    } catch (e) {
+      console.error('safeStorage.isEncryptionAvailable() failed', e);
+    }
     this.secretKey = safeStorage.encryptString(params.secretKey);
     this.db = new Store<{ data: string }>({
       name: params.name,
@@ -34,9 +39,20 @@ export default class EncryptedStore<T> {
   }
 
   readEncryptedStore(): any {
-    return this.db.store && this.db.store.data
-      ? this.decryptData(this.db.store.data)
-      : null;
+    // if the store is encrypted, decrypt it else return the store
+    // this is to support the old version of the store and will
+    // upgrade the store to the new version on the next write
+    if (this.db.store && this.db.store.data) {
+      return this.decryptData(this.db.store.data);
+    } else {
+      if (this.db.store) {
+        console.log('store is not encrypted, should be upgraded');
+        this.writeEncryptedStore(this.db.store);
+        this._store = this.readEncryptedStore();
+        return this._store;
+      }
+      console.error(`${this.db.path} is empty`);
+    }
   }
 
   writeEncryptedStore(data: any): any {
@@ -56,5 +72,9 @@ export default class EncryptedStore<T> {
       safeStorage.decryptString(this.secretKey)
     );
     return JSON.parse(bytes.toString(CryptoJS.enc.Utf8)).data;
+  }
+
+  delete() {
+    this.db.clear();
   }
 }

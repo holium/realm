@@ -198,6 +198,7 @@ export const AddShip = observer((props: BaseDialogProps) => {
                       <Icon
                         name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
                         opacity={0.5}
+                        size={18}
                       />
                     </Button.IconButton>
                   }

@@ -1,6 +1,5 @@
 import { MouseEventHandler } from 'react';
 import { MenuWrapper } from '../Menu';
-import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { MenuItem } from '../MenuItem';
@@ -40,7 +39,7 @@ export type ContextMenuOption = {
   label: string;
   disabled?: boolean;
   section?: number;
-  onClick: (e: MouseEventHandler<HTMLElement>) => void;
+  onClick: MouseEventHandler<HTMLElement>;
 };
 
 export const ContextMenu = () => {
@@ -93,13 +92,9 @@ export const ContextMenu = () => {
               <MenuItem
                 id={option.id}
                 label={option.label}
-                color={
-                  option.disabled
-                    ? rgba(contextualColors.textColor, 0.7)
-                    : contextualColors.textColor
-                }
+                disabled={option.disabled}
+                color={contextualColors.textColor}
                 customBg={contextualColors.backgroundColor}
-                type="neutral"
                 onClick={(e) => {
                   if (option.disabled) return;
                   option.onClick(e);

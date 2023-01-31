@@ -408,7 +408,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: false,
     isValidated: () => true,
-    component: (props: BaseDialogProps) => <ViewCode {...props} />,
+    component: () => <ViewCode />,
     onNext: async (_evt: any, state: any, setState: any) => {
       setState({ ...state, isHosted: true });
       await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);

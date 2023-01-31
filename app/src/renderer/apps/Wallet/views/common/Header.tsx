@@ -1,5 +1,6 @@
-import { FC } from 'react';
-import { Icons, Flex, RadioGroup, IconButton } from 'renderer/components';
+import { FC, useMemo } from 'react';
+import { rgba } from 'polished';
+import { Icons, Flex, IconButton, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';
@@ -21,6 +22,7 @@ interface WalletHeader {
 export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
   const { showBack, isOnboarding, network, onSetNetwork, onAddWallet } = props;
   const { windowColor, textColor, iconColor } = props.theme;
+  const ethBg = useMemo(() => rgba('#627EEA', 0.1), []);
   return !props.hide ? (
     <Flex
       width="100%"
@@ -28,8 +30,9 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
       alignItems="center"
       pl={3}
       pr={3}
-      // height={48}
-      pt="8px"
+      pt={3}
+      // height={40}
+      pb={2}
     >
       {showBack && !isOnboarding ? (
         <IconButton
@@ -45,23 +48,36 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
           alignItems="center"
           width="24px"
         >
-          <Icons name="WalletNew" size="20px" opacity={0.7} />
+          <Icons name="WalletNew" size="20px" opacity={0.6} />
         </Flex>
       )}
 
       {!isOnboarding && (
         <>
-          <RadioGroup
+          <Flex
+            alignItems="center"
+            py={1}
+            pl={1}
+            pr={2}
+            background={ethBg}
+            borderRadius={6}
+          >
+            <Icons mr="6px" name="Ethereum" pointerEvents="none" />
+            <Text fontSize={1} fontWeight={500} color={'#627EEA'}>
+              Ethereum
+            </Text>
+          </Flex>
+          {/* <RadioGroup
             customBg={windowColor}
             textColor={textColor}
             selected={network}
             options={[
-              {
-                label: 'Bitcoin',
-                icon: 'Bitcoin',
-                value: 'bitcoin',
-                highlightColor: '#F7931A',
-              },
+              // {
+              //   label: 'Bitcoin',
+              //   icon: 'Bitcoin',
+              //   value: 'bitcoin',
+              //   highlightColor: '#F7931A',
+              // },
               {
                 label: 'Ethereum',
                 icon: 'Ethereum',
@@ -72,7 +88,7 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
             onClick={(value: Network) => {
               onSetNetwork(value);
             }}
-          />
+          /> */}
           <IconButton onClick={onAddWallet}>
             <Icons name="Plus" />
           </IconButton>

@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable react/require-default-props */
 // https://www.cssscript.com/demo/beautiful-creative-loaders/
 
-import React from 'react';
+import { memo } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import {
@@ -31,7 +29,7 @@ export type SimpleSpinnerProps = SpaceProps &
 
 const sizes = [16, 24, 32, 40, 48, 56, 64, 72, 80, 88];
 
-const SimpleSpinner = styled.div`
+const SimpleSpinner = styled.div<ColorProps>`
   width: 48px;
   height: 48px;
   border: ${(props: any) => (props.size < 2 ? 0.75 : 5)}px solid
@@ -74,17 +72,15 @@ const defaultProps = {
   color: 'ui.primary',
 };
 
-export const Spinner = React.memo(
+export const Spinner = memo(
   ({
     block,
-    title,
     size,
     color,
     ...props
   }: SimpleSpinnerProps & SpinnerProps = defaultProps) => (
     <Box display={block ? 'block' : 'inline-block'} {...props}>
       <SimpleSpinnerComposed
-        title={title}
         size={typeof size === 'number' ? sizes[size] : size}
         color={color}
       />
@@ -92,3 +88,5 @@ export const Spinner = React.memo(
     </Box>
   )
 );
+
+Spinner.displayName = 'Spinner';

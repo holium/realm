@@ -625,7 +625,7 @@ export class OnboardingService extends BaseService {
     this.state.setEncryptedPassword(encryptedPassword);
   }
 
-  async installRealm(_event: any, ship: string) {
+  async installRealm(_event: any) {
     // if either INSTALL_MOON is undefined or set to 'bypass', ignore installation
     if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
       console.error(
@@ -656,18 +656,7 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
-    // send one last poke to bazaar to inform it that it is now safe to initialize
-    //   its internal app catalog
-    // const result = await this.conduit!.poke({
-    //   app: 'bazaar',
-    //   mark: 'bazaar-action',
-    //   json: {
-    //     initialize: {
-    //       args: {},
-    //     },
-    //   },
-    // });
-    // console.log('refresh-app-catalog => %o', result);
+
     await this.closeConduit();
     this.state.endRealmInstall('success');
     this.state.setRealmInstalled();
@@ -676,13 +665,6 @@ export class OnboardingService extends BaseService {
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
-    // if (process.env.NODE_ENV !== 'development') {
-    //   try {
-    //     await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
-    //   } catch (e) {
-    //     console.error('Unable to redeem gated access code, continuing anyway.');
-    //   }
-    // }
 
     const decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')

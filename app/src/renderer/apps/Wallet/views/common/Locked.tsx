@@ -14,6 +14,7 @@ export const Locked: FC<LockedProps> = observer((props: LockedProps) => {
 
   const unlock = () => {
     WalletActions.navigateBack();
+    WalletActions.watchUpdates();
   };
 
   return (

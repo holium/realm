@@ -1,4 +1,3 @@
-import { Conduit } from '@holium/conduit';
 import { NotificationApi } from '../../../api/notifications';
 import { cast, Instance, types, flow } from 'mobx-state-tree';
 import { daToUnix, decToUd, udToDec, unixToDa } from '@urbit/api';
@@ -323,9 +322,10 @@ const RawTimeBox = {
 // 👇️ type Values = 1 | "James Doe" | 100
 export type RawTimeBoxType = typeof RawTimeBox;
 // 👇️ type Values = 1 | "James Doe" | 100
-export type RawNotificationType = typeof RawTimeBox.notifications[0];
+export type RawNotificationType = (typeof RawTimeBox.notifications)[0];
 
-export type RawNotificationBody = typeof RawTimeBox.notifications[0]['body'][0];
+export type RawNotificationBody =
+  (typeof RawTimeBox.notifications)[0]['body'][0];
 
 // Notes
 //
