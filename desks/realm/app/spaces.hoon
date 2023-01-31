@@ -450,7 +450,7 @@
       ^-  (quip card _state)
       ?:  =(current.state path)
         `state
-      =/  cards  `(list card)`[%give %fact [/current ~] spaces-reaction+!>([%current path])]~
+      =/  cards  `(list card)`[%give %fact [/current /updates ~] spaces-reaction+!>([%current path])]~
       ?>  (~(has by spaces.state) path)
       :-  cards
       state(current path)

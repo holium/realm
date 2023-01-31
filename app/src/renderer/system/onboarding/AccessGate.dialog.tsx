@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, KeyboardEventHandler, useState } from 'react';
 import { Text, Flex, Label, Button, Input, Box } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -33,6 +33,10 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
     props.onNext && props.onNext();
   };
 
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') checkCode();
+  };
+
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Text fontSize={3} fontWeight={500} mb={20}>
@@ -52,6 +56,7 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
           type="text"
           required={true}
           spellCheck={false}
+          onKeyDown={onKeyDown}
         />
         <Box hidden={!error} mt={2}>
           <Text variant="body" color={themeData.colors.text.error}>

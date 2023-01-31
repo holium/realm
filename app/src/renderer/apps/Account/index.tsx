@@ -14,8 +14,6 @@ import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
-// import { ShipActions } from 'renderer/logic/actions/ship';
-import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
@@ -27,7 +25,7 @@ export const AccountTrayApp = observer(() => {
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
   const currentShip = ship!;
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship!.patp);
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {
@@ -77,8 +75,6 @@ export const AccountTrayApp = observer(() => {
         alignItems="center"
         justifyContent="space-between"
         style={{
-          background: rgba(windowColor, 0.6),
-          backdropFilter: 'blur(24px)',
           minHeight: 58,
           zIndex: 4,
         }}
@@ -119,8 +115,6 @@ export const AccountTrayApp = observer(() => {
         pb={4}
         px={4}
         style={{
-          background: rgba(windowColor, 0.6),
-          backdropFilter: 'blur(24px)',
           minHeight: 58,
           zIndex: 4,
         }}

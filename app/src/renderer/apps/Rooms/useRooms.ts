@@ -5,7 +5,7 @@ import {
   RoomManagerEvent,
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
-import { createContext, useContext } from 'react';
+import { OSActions } from 'renderer/logic/actions/os';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
@@ -16,12 +16,35 @@ const handlers = {
 
 const config = {
   rtc: {
-    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+    // iceTransportPolicy: 'relay' as RTCIceTransportPolicy,
+    iceServers: [
+      // {
+      //   username: 'realm',
+      //   credential: 'zQzjNHC34Y8RqdLW',
+      //   urls: 'stun:coturn.holium.live:3478',
+      // },
+      // {
+      //   username: 'realm',
+      //   credential: 'zQzjNHC34Y8RqdLW',
+      //   urls: 'turn:coturn.holium.live:5349?transport=tcp',
+      // },
+      {
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:443?transport=tcp',
+      },
+      {
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:3478?transport=udp',
+      },
+    ],
   },
 };
 
+let protocol: RealmProtocol | null;
 export const createManager = (our: Patp) => {
-  const protocol = new RealmProtocol(our, config, handlers);
+  protocol = new RealmProtocol(our, config, handlers);
   const manager = new RoomsManager(protocol);
 
   // These sounds are for the creator of the room
@@ -43,10 +66,7 @@ export const createManager = (our: Patp) => {
 
   // These sounds are for peer events
   protocol.on(ProtocolEvent.PeerAdded, () => {
-    if (manager.state === 'connected') {
-      // only play sound if we are already in the room
-      SoundActions.playRoomPeerEnter();
-    }
+    SoundActions.playRoomPeerEnter();
   });
 
   protocol.on(ProtocolEvent.PeerRemoved, () => {
@@ -54,25 +74,67 @@ export const createManager = (our: Patp) => {
   });
 
   protocol.getSession();
-  RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
-    protocol.onSignal(data, mark);
-  });
+
   return manager;
 };
 
-export let RoomsContext = createContext<null | RoomsManager>(null);
+let roomsManager: null | RoomsManager;
+let curPatp: string | null;
 
-export const RoomsProvider = RoomsContext.Provider;
+RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
+  if (protocol) {
+    protocol.onSignal(data, mark);
+  }
+});
 
-export function useRooms(our?: Patp) {
-  let roomsManager = useContext(RoomsContext);
-  if (roomsManager === null && our) {
-    const manager = createManager(our);
-    RoomsContext = createContext<null | RoomsManager>(manager);
-    roomsManager = manager;
-  } else if (roomsManager === null) {
+export function useRooms(our?: Patp): RoomsManager {
+  if (roomsManager) {
+    return roomsManager;
+  }
+
+  if (!roomsManager && our) {
+    curPatp = our;
+    roomsManager = createManager(our);
+    OSActions.onLogout(() => {
+      protocol = null;
+      roomsManager = null;
+      curPatp = null;
+    });
+    window.addEventListener('beforeunload', () => {
+      roomsManager = null;
+      curPatp = null;
+      protocol = null;
+    });
+  }
+  if (!roomsManager) {
     throw new Error('roomsManager not initialized');
   }
 
   return roomsManager;
 }
+
+// export function useRooms(our?: Patp) {
+//   let roomsManager = useContext(RoomsContext);
+//   console.log('useRooms roomsManager', roomsManager?.local.patp);
+//   if (roomsManager === null && our) {
+//     const manager = createManager(our);
+//     RoomsContext = createContext<null | RoomsManager>(manager);
+//     roomsManager = manager;
+
+// OSActions.onLogout(() => {
+//   console.log('on logout');
+//   RoomsContext = createContext<null | RoomsManager>(null);
+//   RoomsProvider = RoomsContext.Provider;
+//   roomsManager = null;
+// });
+// window.addEventListener('beforeunload', () => {
+//   RoomsContext = createContext<null | RoomsManager>(null);
+//   RoomsProvider = RoomsContext.Provider;
+//   roomsManager = null;
+// });
+//   } else if (roomsManager === null) {
+//     throw new Error('roomsManager not initialized');
+//   }
+
+//   return roomsManager;
+// }

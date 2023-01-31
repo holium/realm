@@ -34,13 +34,13 @@ const configuration: webpack.Configuration = {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
   },
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-      }),
-    ],
-  },
+  // optimization: {
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       parallel: true,
+  //     }),
+  //   ],
+  // },
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
@@ -58,8 +58,15 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
       START_MINIMIZED: false,
-      AUTOUPDATE_FEED_URL: 'https://ghproxy.holium.xyz',
-      INSTALL_MOON: '~hostyv:realm,courier',
+      AUTOUPDATE_FEED_URL:
+        process.env.RELEASE_CHANNEL === 'alpha'
+          ? 'https://ghproxy-staging.holium.xyz'
+          : 'https://ghproxy.holium.xyz',
+      INSTALL_MOON:
+        process.env.RELEASE_CHANNEL === 'alpha'
+          ? '~nimwyd-ramwyl-dozzod-hostyv:realm,courier'
+          : '~hostyv:realm,courier',
+      RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
     }),
   ],
   /**

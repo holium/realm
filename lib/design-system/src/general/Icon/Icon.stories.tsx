@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../..';
-import { Icon } from '.';
+import { Icon } from './Icon';
+import { Flex } from '../Flex/Flex';
 
 export default {
   component: Icon,

@@ -30,9 +30,11 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     rightChildren,
   } = props;
   const { theme, ship } = useServices();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
-  const defaultOptions = getOptions().filter(o => o.id === 'toggle-devtools');
+  const defaultOptions = getOptions('').filter(
+    (o) => o.id === 'toggle-devtools'
+  );
 
   const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -63,10 +65,10 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               label: 'Delete Room',
               onClick: (evt) => {
                 evt.stopPropagation();
-                roomsManager.protocol.deleteRoom(rid);
+                rid && roomsManager.protocol.deleteRoom(rid);
               },
             } as ContextMenuOption,
-            ... defaultOptions
+            ...defaultOptions,
           ]
         : defaultOptions,
     [rid, ship, props.provider]
@@ -83,6 +85,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
 
   return (
     <Row
+      id={`room-row-${rid}`}
       small={tray}
       className="realm-cursor-hover"
       baseBg={!tray && isLive ? isLiveColor : undefined}

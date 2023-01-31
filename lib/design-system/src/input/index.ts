@@ -1,4 +1,4 @@
-export * from './InputBox';
-export * from './Input';
-export * from './AvatarInput';
-export * from './TextInput';
+export * from './AvatarInput/AvatarInput';
+export * from './TextInput/TextInput';
+export { Input, TextArea } from './Input/Input';
+export { InputBox } from './InputBox/InputBox';

@@ -10,7 +10,7 @@ import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { MemberRole, Patp, SpacePath } from 'os/types';
+import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
@@ -112,20 +112,11 @@ export class SpacesService extends BaseService {
     selectSpace: async (spaceId: string) => {
       return await ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
-    pinApp: async (path: string, appId: string, rank: number | null = null) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.pin-app',
-        path,
-        appId,
-        rank
-      );
+    pinApp: (path: string, appId: string, rank: number | null = null) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.pin-app', path, appId, rank);
     },
-    unpinApp: async (path: string, appId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.unpin-app',
-        path,
-        appId
-      );
+    unpinApp: (path: string, appId: string) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
     },
     recommendApp: async (appId: string) => {
       return await ipcRenderer.invoke(
@@ -139,8 +130,8 @@ export class SpacesService extends BaseService {
         appId
       );
     },
-    setPinnedOrder: async (path: string, newOrder: any[]) => {
-      return await ipcRenderer.invoke(
+    setPinnedOrder: (path: string, newOrder: any[]) => {
+      ipcRenderer.invoke(
         'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
@@ -324,7 +315,13 @@ export class SpacesService extends BaseService {
       this.models.visas.initialIncoming(visas);
     });
 
-    this.state.selected && this.setTheme(this.state.selected?.theme);
+    // setting provider to current space host
+    if (this.state.selected) {
+      this.setTheme(this.state.selected.theme);
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected.path)
+      );
+    }
 
     // initial sync effect
     const syncEffect = {
@@ -362,12 +359,6 @@ export class SpacesService extends BaseService {
 
     BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
 
-    // setting provider to current space host
-    if (this.state.selected) {
-      this.core.services.ship.rooms.setProvider(
-        getHost(this.state.selected!.path)
-      );
-    }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
     BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
@@ -396,8 +387,9 @@ export class SpacesService extends BaseService {
     );
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
-    const selected = this.state?.selectSpace(spacePath);
-    selected && this.setTheme({ ...selected.theme, id });
+    this.setSelected(_event, spacePath);
+    // const selected = this.state?.selectSpace(spacePath);
+    // selected && this.setTheme({ ...selected.theme, id });
     return spacePath;
   }
 
@@ -456,14 +448,15 @@ export class SpacesService extends BaseService {
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     // don't block for responsiveness, what about error handling?
-    SpacesApi.setCurrentSpace(this.core.conduit!, { path });
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+      console.error('Error setting current space', e);
+    });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
     // if (currentRoomProvider !== spaceHost)
-    console.log(spaceHost);
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
@@ -690,9 +683,11 @@ export class SpacesService extends BaseService {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
-  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    // return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
-    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: string[]) {
+    this.models.bazaar.reorderPinnedApps(this.core.conduit!, {
+      path: formPathObj(path),
+      dock: order,
+    });
   }
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {

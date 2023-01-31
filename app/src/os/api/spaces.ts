@@ -5,6 +5,7 @@ import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { VisaModelType } from 'os/services/spaces/models/visas';
 import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { getHost } from '../services/spaces/spaces.service';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -416,6 +417,16 @@ const handleSpacesReactions = (
           data['remote-space'].members
         );
         spacesState.addSpace(data['remote-space']);
+      }
+      break;
+    case 'current':
+      if (spacesState.selected?.path !== data.current.path) {
+        console.log(
+          `%current old=${spacesState.selected?.path} new=${data.current.path}`
+        );
+        spacesState.selectSpace(data.current.path);
+        setTheme(spacesState.getSpaceByPath(data.current.path)?.theme);
+        roomService.setProvider(getHost(data.current.path));
       }
       break;
     default:

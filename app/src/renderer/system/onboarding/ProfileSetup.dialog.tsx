@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, KeyboardEventHandler, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useField, useForm } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -159,6 +159,10 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
       };
     }, []);
 
+    const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+      if (e.key === 'Enter') profileForm.actions.submit();
+    };
+
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12}>
         <Text fontSize={4} mb={1} variant="body">
@@ -282,6 +286,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                       initialValue={avatarImg}
                       onSave={(url) => setAvatarImg(url)}
                       height={35}
+                      onKeyDown={onKeyDown}
                     />
                   </FormControl.Field>
                   <FormControl.Field>
@@ -299,6 +304,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                       }
                       onFocus={() => nickname.actions.onFocus()}
                       onBlur={() => nickname.actions.onBlur()}
+                      onKeyDown={onKeyDown}
                     />
                   </FormControl.Field>
                 </FormControl.FieldSet>

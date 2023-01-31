@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
 // import _ from 'lodash';
@@ -7,16 +7,15 @@ import { isValidPatp } from 'urbit-ob';
 
 import {
   Flex,
-  Input,
   Text,
   Select,
   Icons,
-  Box,
   Button,
   IconButton,
   TextButton,
   NoScrollBar,
 } from 'renderer/components';
+import { TextInput } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
@@ -25,17 +24,15 @@ import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet.model';
+} from 'os/services/tray/wallet-lib/wallet.model';
+import DeletePasscode from './DeletePasscode';
 
-type CreateMode = 'default' | 'on-demand';
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
-interface WalletSettingsState {
-  provider: string;
-  creationMode: CreateMode;
-  visibility: WalletVisibility;
-  sharedWallet?: string;
-  blockList: string[];
+enum SettingScreen {
+  SETTINGS = 'settings',
+  LOCAL = 'local',
+  AGENT = 'agent',
 }
 
 export const WalletSettings: FC = observer(() => {
@@ -55,7 +52,7 @@ export const WalletSettings: FC = observer(() => {
   const [state, setState] = useState<UISettingsType>({
     ...settings,
     provider: settings.provider!,
-    blocked: [...settings.blocked],
+    blocked: [...walletApp.blacklist],
   });
 
   const { theme } = useServices();
@@ -129,36 +126,66 @@ export const WalletSettings: FC = observer(() => {
     WalletActions.navigateBack();
   }
 
-  return (
+  const [settingScreen, setSettingScreen] = useState<SettingScreen>(
+    SettingScreen.SETTINGS
+  );
+  const deleteWallet = (passcode: number[]) => {
+    if (settingScreen === SettingScreen.LOCAL) {
+      WalletActions.deleteLocalWallet(passcode);
+    } else if (settingScreen === SettingScreen.AGENT) {
+      WalletActions.deleteShipWallet(passcode);
+    }
+  };
+
+  return settingScreen !== SettingScreen.SETTINGS ? (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Flex alignItems="center" gap={8}>
-          <IconButton onClick={async () => await WalletActions.navigateBack()}>
+          <IconButton onClick={() => setSettingScreen(SettingScreen.SETTINGS)}>
             <Icons
               name="ArrowLeftLine"
               size={1}
               color={theme.currentTheme.iconColor}
             />
           </IconButton>
-          <Text variant="h5">Settings</Text>
         </Flex>
-        <Button
-          py={1}
-          variant="minimal"
-          fontWeight={400}
-          // disabled={
-          //   providerError !== '' ||
-          //   (_.isEqual(state, settings) &&
-          //     _.isEqual(state.blocked, [...settings.blocked]))
-          // }
-          isLoading={saving}
-          onClick={saveSettings}
-        >
-          Save
-        </Button>
       </Flex>
+      <DeletePasscode onSuccess={deleteWallet} />
+    </Flex>
+  ) : (
+    <Flex
+      px={3}
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex flexDirection="column">
+        <Flex justifyContent="space-between" alignItems="center" pt={3}>
+          <Flex alignItems="center" gap={8}>
+            <IconButton
+              onClick={async () => await WalletActions.navigateBack()}
+            >
+              <Icons
+                name="ArrowLeftLine"
+                size={1}
+                color={theme.currentTheme.iconColor}
+              />
+            </IconButton>
+            <Text variant="h5">Settings</Text>
+          </Flex>
+          <Button
+            py={1}
+            variant="minimal"
+            fontWeight={400}
+            isLoading={saving}
+            onClick={saveSettings}
+          >
+            Save
+          </Button>
+        </Flex>
 
-      <Flex mt={3} flexDirection="column" width="100%">
+        {/*<Flex mt={3} flexDirection="column" width="100%">
         <Text variant="label">Provider</Text>
         <Text
           mt={1}
@@ -170,10 +197,14 @@ export const WalletSettings: FC = observer(() => {
         >
           The API endpoint for connecting to Ethereum nodes.
         </Text>
-        <Input
+        <TextInput
+          id="wallet-provider"
+          name="wallet-provider"
           placeholder="http://localhost:8545"
           value={providerInput}
-          onChange={async (e) => await setProvider(e.target.value)}
+          onChange={async (e: ChangeEvent<HTMLInputElement>) =>
+            await setProvider(e.target.value)
+          }
         />
         <Box hidden={!providerError}>
           <Text
@@ -185,70 +216,121 @@ export const WalletSettings: FC = observer(() => {
             {providerError}
           </Text>
         </Box>
-      </Flex>
+        </Flex>*/}
+        <Flex mt={3} flexDirection="column">
+          <Text variant="label">Address Creation Mode</Text>
+          <Text
+            mt={1}
+            mb={2}
+            variant="body"
+            fontSize={1}
+            opacity={0.8}
+            color={baseTheme.colors.text.secondary}
+          >
+            If set to on-demand, anytime you're sent funds a new address will be
+            created to receive them.
+          </Text>
+          <Flex width="140px">
+            <Select
+              id="wallet-creation-mode"
+              customBg={selectBg}
+              textColor={baseTheme.colors.text.primary}
+              iconColor={theme.currentTheme.iconColor}
+              options={[
+                { label: 'Default', value: 'default' },
+                { label: 'On-demand', value: 'on-demand' },
+              ]}
+              selected={state.walletCreationMode}
+              onClick={setCreationMode}
+            />
+          </Flex>
+        </Flex>
 
-      <Flex mt={3} flexDirection="column">
-        <Text variant="label">Wallet Creation Mode</Text>
-        <Text
-          mt={1}
-          mb={2}
-          variant="body"
-          fontSize={1}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
-          If set to on-demand, anytime you're sent funds a new wallet will be
-          created to receive them.
-        </Text>
-        <Flex width="140px">
-          <Select
-            customBg={selectBg}
-            textColor={baseTheme.colors.text.primary}
-            iconColor={theme.currentTheme.iconColor}
-            options={[
-              { label: 'Default', value: 'default' },
-              { label: 'On-demand', value: 'on-demand' },
-            ]}
-            selected={state.walletCreationMode}
-            onClick={setCreationMode}
+        <Flex mt={3} flexDirection="column">
+          <Text variant="label">Wallet Visibility</Text>
+          <Text
+            mt={1}
+            mb={2}
+            variant="body"
+            fontSize={1}
+            opacity={0.8}
+            color={baseTheme.colors.text.secondary}
+          >
+            Determine how you want to share addresses with other people on the
+            network.
+          </Text>
+          <VisibilitySelect
+            theme={theme}
+            baseTheme={baseTheme}
+            wallets={wallets}
+            sharingMode={state.sharingMode}
+            defaultIndex={state.defaultIndex}
+            walletCreationMode={state.walletCreationMode}
+            onChange={setWalletVisibility}
+          />
+        </Flex>
+
+        <Flex mt={3} flexDirection="column">
+          <Text mb={2} variant="label">
+            Blocked IDs
+          </Text>
+          <BlockedInput
+            theme={theme}
+            baseTheme={baseTheme}
+            blocked={state.blocked}
+            onChange={setBlockList}
           />
         </Flex>
       </Flex>
-
-      <Flex mt={3} flexDirection="column">
-        <Text variant="label">Wallet Visibility</Text>
+      <Flex flexDirection="column" mb={2}>
+        <TextButton
+          highlightColor="#EC415A"
+          showBackground
+          textColor="#EC415A"
+          style={{ fontWeight: 400 }}
+          onClick={() => {
+            setSettingScreen(SettingScreen.LOCAL);
+            // WalletActions.deleteLocalWallet()
+          }}
+        >
+          Delete Local HD Wallet
+        </TextButton>
         <Text
           mt={1}
           mb={2}
+          ml="2px"
           variant="body"
           fontSize={1}
           opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
-          Determine how you want to share addresses with other people on the
-          network.
+          Delete your HD wallet from local storage.
         </Text>
-        <VisibilitySelect
-          theme={theme}
-          baseTheme={baseTheme}
-          wallets={wallets}
-          sharingMode={state.sharingMode}
-          defaultIndex={state.defaultIndex}
-          walletCreationMode={state.walletCreationMode}
-          onChange={setWalletVisibility}
-        />
-      </Flex>
-
-      <Flex mt={3} flexDirection="column">
-        <Text mb={2} variant="label">
-          Blocked IDs
+        <br />
+        <TextButton
+          highlightColor="#EC415A"
+          showBackground
+          textColor="#EC415A"
+          style={{ fontWeight: 400 }}
+          onClick={() => {
+            setSettingScreen(SettingScreen.AGENT);
+            // WalletActions.deleteShipWallet()
+          }}
+        >
+          Delete Ship HD Wallet
+        </TextButton>
+        <Text
+          mt={1}
+          mb={2}
+          ml="2px"
+          variant="body"
+          fontSize={1}
+          opacity={0.8}
+          color={baseTheme.colors.text.secondary}
+        >
+          Completely delete your HD wallet locally and remove all metadata from
+          your Urbit.
         </Text>
-        <BlockedInput
-          theme={theme}
-          baseTheme={baseTheme}
-          blocked={state.blocked}
-          onChange={setBlockList}
-        />
       </Flex>
     </Flex>
   );
@@ -288,6 +370,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
     <>
       <Flex width="140px">
         <Select
+          id="wallet-visibility"
           customBg={selectBg}
           textColor={props.baseTheme.colors.text.primary}
           iconColor={props.theme.currentTheme.iconColor}
@@ -300,6 +383,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
         {['anyone', 'friends'].includes(props.sharingMode) &&
           props.walletCreationMode !== WalletCreationMode.ON_DEMAND && (
             <Select
+              id="wallet-default"
               customBg={selectBg}
               textColor={props.baseTheme.colors.text.primary}
               iconColor={props.theme.currentTheme.iconColor}
@@ -334,15 +418,18 @@ function BlockedInput(props: BlockedInputProps) {
 
   return (
     <Flex flexDirection="column">
-      <Flex mb={1} position="relative">
-        <Input
+      <Flex display="inline-block" mb={1} position="relative">
+        <TextInput
+          id="blocked-input"
+          name="blocked-input"
           pr="36px"
           spellCheck={false}
           placeholder="~tasdul-tasdul"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rightInteractive
-          rightIcon={
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setInput(e.target.value)
+          }
+          rightAdornment={
             <TextButton
               // position="absolute"
               // top="9px"

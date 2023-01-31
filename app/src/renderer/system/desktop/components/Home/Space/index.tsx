@@ -7,7 +7,7 @@ import { Flex, Text } from 'renderer/components';
 import { SpaceTitlebar } from './Titlebar';
 import { AppSuite } from './AppSuite';
 import { RecommendedApps } from './Recommended';
-import { RecentActivity } from './RecentActivity';
+// import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
 
@@ -192,7 +192,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
             >
               <AppSuite patp={ship!.patp} isAdmin={isAdmin as boolean} />
               <RecommendedApps />
-              <RecentActivity />
+              {/* <RecentActivity /> */}
             </Flex>
           )}
           {sidebarComponent}

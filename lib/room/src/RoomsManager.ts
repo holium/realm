@@ -204,13 +204,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   enterRoom(rid: string) {
-    if (this.presentRoom) {
-      if (this.presentRoom.creator === this.our) {
-        this.deleteRoom(this.presentRoom.rid);
-      } else {
-        this.leaveRoom();
-      }
-    }
     if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
       throw new Error('Room not found');
     }

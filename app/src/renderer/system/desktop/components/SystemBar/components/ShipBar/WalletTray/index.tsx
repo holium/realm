@@ -1,11 +1,10 @@
-import { FC, useCallback, useMemo } from 'react';
-import { darken, rgba } from 'polished';
+import { FC, useCallback } from 'react';
 import { observer } from 'mobx-react';
 
-import { IconButton, Icons, Tooltip } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { BarButton, Icon } from '@holium/design-system';
 
 const position = 'top-left';
 const anchorOffset = { x: 4, y: 26 };
@@ -17,14 +16,8 @@ interface WalletTrayProps {
 
 export const WalletTray: FC<WalletTrayProps> = observer(
   ({ theme }: WalletTrayProps) => {
-    const { dockColor, textColor } = theme;
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
-
-    const iconHoverColor = useMemo(
-      () => rgba(darken(0.05, dockColor), 0.5),
-      [dockColor]
-    );
 
     const onButtonClick = useCallback(
       (evt: any) => {
@@ -50,25 +43,16 @@ export const WalletTray: FC<WalletTrayProps> = observer(
     );
 
     return (
-      <Tooltip
-        id="wallet-tray-icon-tooltip"
-        content="Wallet coming soon..."
-        placement="top"
-        show
+      <BarButton
+        id="wallet-tray-icon"
+        height={28}
+        width={28}
+        whileTap={{ scale: 0.95 }}
+        transition={{ scale: 0.1 }}
+        onClick={onButtonClick}
       >
-        <IconButton
-          id="wallet-tray-icon"
-          size={28}
-          customBg={iconHoverColor}
-          color={textColor}
-          whileTap={{ scale: 0.95 }}
-          transition={{ scale: 0.1 }}
-          opacity={0.5}
-          // onClick={onButtonClick}
-        >
-          <Icons name="Wallet" pointerEvents="none" />
-        </IconButton>
-      </Tooltip>
+        <Icon name="WalletTray" size={24} pointerEvents="none" />
+      </BarButton>
     );
   }
 );
