@@ -7,6 +7,7 @@ on:
       - closed
     branches:
       - production
+      - 'hotfix/**'
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
@@ -130,13 +131,14 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
+        run: npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
@@ -199,10 +201,11 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
+          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
