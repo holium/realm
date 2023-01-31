@@ -19,7 +19,7 @@ const HomeWindow = styled(motion.div)<HomeWindowProps>`
   }
 `;
 
-export const HomePane = observer(() => {
+const HomePanePresenter = () => {
   const { theme, spaces, desktop } = useServices();
   const isOpen = desktop.showHomePane;
 
@@ -57,4 +57,6 @@ export const HomePane = observer(() => {
     ),
     [isOpen, theme.currentTheme, isOur]
   );
-});
+};
+
+export const HomePane = observer(HomePanePresenter);

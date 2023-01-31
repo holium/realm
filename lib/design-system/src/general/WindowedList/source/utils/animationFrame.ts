@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 type Callback = (timestamp: number) => void;
 type CancelAnimationFrame = (requestId: number) => void;
 type RequestAnimationFrame = (callback: Callback) => number;

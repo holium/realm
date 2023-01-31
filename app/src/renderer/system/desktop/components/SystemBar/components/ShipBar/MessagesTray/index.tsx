@@ -10,7 +10,7 @@ const position = 'top-left';
 const anchorOffset = { x: 4, y: 24 };
 const dimensions = { height: 600, width: 390 };
 
-export const MessagesTray = observer(() => {
+const MessagesTrayPresenter = () => {
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
 
@@ -75,4 +75,6 @@ export const MessagesTray = observer(() => {
       </Badge>
     </Flex>
   );
-});
+};
+
+export const MessagesTray = observer(MessagesTrayPresenter);

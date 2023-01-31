@@ -6,7 +6,8 @@
     "lib/design-system",
     "lib/multiplayer",
     "lib/conduit",
-    "lib/room"
+    "lib/room",
+    "lib/room/test-ui"
   ],
   "scripts": {
     "build": "yarn workspace @holium/realm dev:cursor && yarn build:app",
@@ -32,19 +33,27 @@
     "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
-  "dependencies": {},
+  "dependencies": {
+    "alchemy-sdk": "^2.2.1",
+    "bitcore-lib": "^8.25.40",
+    "eth-block-tracker": "^6.0.0",
+    "eth-json-rpc-infura": "^5.1.0",
+    "eth-query": "^2.1.2",
+    "ethers": "^5.7.0",
+    "memoize-one": "^6.0.0",
+    "non-fungible-token-abi": "^1.0.1",
+    "qrcode.react": "^3.1.0",
+    "socket.io-client": "^4.5.4"
+  },
   "version": "0.0.1",
   "devDependencies": {
-    "@typescript-eslint/parser": "^5.43.0",
-    "eslint": "^8.0.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.25.2",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-react": "^7.31.10",
-    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.7.1",
+    "prettier": "^2.8.3",
     "typescript": "^4.9.4"
   },
   "preconstruct": {

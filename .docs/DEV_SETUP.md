@@ -46,7 +46,7 @@ Once started, you should run the following commands on your ship.
 For `%realm`:
 
 ```hoon
-> |merge %realm our %garden
+> |new-desk %realm
 > |mount %realm
 ```
 
@@ -59,7 +59,7 @@ sudo rm -r ships/zod/realm/*
 For `%courier`:
 
 ```hoon
-> |merge %courier our %garden
+> |new-desk %courier
 > |mount %courier
 ```
 

@@ -8,7 +8,7 @@ import { RoomsDock } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
 
-export const RoomTray = observer(() => {
+const RoomTrayPresenter = () => {
   const { ship, contacts, spaces } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
@@ -20,7 +20,7 @@ export const RoomTray = observer(() => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
   const muted = roomsManager.protocol.local?.isMuted;
 
   const onButtonClick = useCallback(
@@ -56,20 +56,20 @@ export const RoomTray = observer(() => {
   );
 
   const participants =
-    roomsManager.presentRoom?.present.map((patp: string) => {
+    roomsManager?.presentRoom?.present.map((patp: string) => {
       const metadata = contacts.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];
 
   const rooms = spaces.selected
-    ? (roomsManager.protocol as RealmProtocol).getSpaceRooms(
+    ? (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
         spaces.selected?.path
       )
     : [];
 
   return (
     <RoomsDock
-      live={roomsManager.live.room}
+      live={roomsManager?.live.room}
       rooms={rooms}
       participants={participants}
       onCreate={() => {
@@ -79,9 +79,9 @@ export const RoomTray = observer(() => {
       onOpen={onButtonClick}
       onMute={() => {
         if (muted) {
-          roomsManager.unmute();
+          roomsManager?.unmute();
         } else {
-          roomsManager.mute();
+          roomsManager?.mute();
         }
       }}
       onCursor={(enabled: boolean) => {}}
@@ -133,4 +133,6 @@ export const RoomTray = observer(() => {
   //     )}
   //   </motion.div>
   // );
-});
+};
+
+export const RoomTray = observer(RoomTrayPresenter);

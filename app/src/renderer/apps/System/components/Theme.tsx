@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -26,7 +26,7 @@ const WallpaperPreview = styled(motion.img)`
   -webkit-user-drag: none;
 `;
 
-export const ThemePanel: FC<any> = observer(() => {
+const ThemePanelPresenter = () => {
   const { theme, ship, contacts, spaces, membership } = useServices();
   const { windowColor, textColor, accentColor, inputColor } =
     theme.currentTheme;
@@ -318,4 +318,6 @@ export const ThemePanel: FC<any> = observer(() => {
       </Card>
     </Flex>
   );
-});
+};
+
+export const ThemePanel = observer(ThemePanelPresenter);

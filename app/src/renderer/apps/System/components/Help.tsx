@@ -1,10 +1,10 @@
-import React, { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Card } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
-export const HelpPanel: FC<any> = observer(() => {
+const HelpPanelPresenter = () => {
   const { theme, ship, contacts } = useServices();
 
   const { windowColor, textColor, accentColor, inputColor } =
@@ -33,4 +33,6 @@ export const HelpPanel: FC<any> = observer(() => {
       </Card>
     </Flex>
   );
-});
+};
+
+export const HelpPanel = observer(HelpPanelPresenter);
