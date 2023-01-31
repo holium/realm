@@ -87,16 +87,16 @@
   =/  add-result  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
+  :: message-paths is all the sup.bowl paths that start with
+  :: /db/messages/start since every new message will need to go out to
+  :: those subscriptions
   =/  message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
-  ~&  %sending-new-message-on-sup-bowl-paths
-  ~&  message-paths
   =/  gives  :~
-    [%give %fact [/db (weld /db/path path.msg-act) ~] thechange]
-    [%give %fact message-paths thechange]
+    [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
   ==
   [gives state]
 ++  edit
-::  :chat-db &action [%edit [[~2023.1.25..18.29.42..0a77 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
+::  :chat-db &action [%edit [[~2023.1.31..18.16.30..86f1 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -107,9 +107,14 @@
   =/  add-result            (add-message-to-table messages-table.state msg-act timestamp.msg-id sender.msg-id)
   =.  messages-table.state  -.add-result
   =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
+  :: message-paths is all the sup.bowl paths that start with
+  :: /db/messages/start AND have a timestamp after the timestamp in the
+  :: subscription path since they explicitly DONT care about the ones
+  :: from earlier
+  =/  all-message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.msg-act) ~] thechange]
+    [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
   ==
   [gives state]
 ++  delete
@@ -120,9 +125,14 @@
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
   =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a])))
+  :: message-paths is all the sup.bowl paths that start with
+  :: /db/messages/start AND have a timestamp after the timestamp in the
+  :: subscription path since they explicitly DONT care about the ones
+  :: from earlier
+  =/  all-message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.msg-part) ~] thechange]
+    [%give %fact (weld (limo [/db (weld /db/path path.msg-part) ~]) message-paths) thechange]
   ==
   [gives state]
 ++  add-peer
