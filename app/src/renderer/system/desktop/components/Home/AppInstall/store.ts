@@ -134,9 +134,9 @@ export const appInstallStore = AppInstallStore.create({
   selectedShip: '',
   selectedDesk: '',
   loadingState: '',
-  coords: (persistedState && persistedState.coords) || {
-    left: 0,
-    top: 0,
+  coords: {
+    left: persistedState?.coords?.left ?? 0,
+    top: persistedState?.coords?.top ?? 0,
   },
   dimensions: { height: 450, width: 550 },
 });

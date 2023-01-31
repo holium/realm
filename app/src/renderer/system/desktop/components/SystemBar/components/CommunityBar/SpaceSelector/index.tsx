@@ -13,7 +13,7 @@ const position = 'top-right';
 const anchorOffset = { x: 4, y: 16 };
 const dimensions = { height: 500, width: 380 };
 
-export const SpaceSelector = observer(() => {
+const SpaceSelectorPresenter = () => {
   const { ship, spaces, theme } = useServices();
   const selectorRef = createRef<HTMLDivElement>();
 
@@ -110,6 +110,6 @@ export const SpaceSelector = observer(() => {
       )}
     </Flex>
   );
-});
+};
 
-export default { SpaceSelector };
+export const SpaceSelector = observer(SpaceSelectorPresenter);

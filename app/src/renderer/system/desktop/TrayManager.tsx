@@ -6,7 +6,7 @@ import { TrayMenu } from './components/SystemBar/components/TrayMenu';
 import { MiniApp } from './components/SystemBar/components/MiniAppWindow';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-export const TrayManager = observer(() => {
+const TrayManagerPresenter = () => {
   const trayAppRef = useRef<HTMLDivElement>();
   const { activeApp, coords, walletApp, setActiveApp } = useTrayApps();
   const [walletForceActive, setWalletForceActive] = useState(false);
@@ -34,6 +34,6 @@ export const TrayManager = observer(() => {
       }
     />
   );
-});
+};
 
-export default { TrayManager };
+export const TrayManager = observer(TrayManagerPresenter);

@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -71,7 +71,7 @@ const createWallpaperForm = (
   };
 };
 
-export const WallpaperDialog: FC = observer(() => {
+const WallpaperDialogPresenter = () => {
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
   const { inputColor, windowColor } = theme.currentTheme;
@@ -147,4 +147,6 @@ export const WallpaperDialog: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+const WallpaperDialog = observer(WallpaperDialogPresenter);

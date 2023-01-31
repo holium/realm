@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
 // import _ from 'lodash';
@@ -35,7 +35,7 @@ enum SettingScreen {
   AGENT = 'agent',
 }
 
-export const WalletSettings: FC = observer(() => {
+const WalletSettingsPresenter = () => {
   const { walletApp } = useTrayApps();
   const [providerInput, setProviderInput] = useState('');
   const [providerError, setProviderError] = useState('');
@@ -334,9 +334,9 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
 
-export default WalletSettings;
+export const WalletSettings = observer(WalletSettingsPresenter);
 
 interface VisibilitySelectProps {
   theme: any;

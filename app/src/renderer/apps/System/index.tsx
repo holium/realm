@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Sigil, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -9,7 +9,7 @@ import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
 
-export const SystemApp: FC<any> = observer(() => {
+const SystemAppPresenter = () => {
   const { theme, ship, contacts } = useServices();
   const { windowColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
@@ -142,4 +142,6 @@ export const SystemApp: FC<any> = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const SystemApp = observer(SystemAppPresenter);
