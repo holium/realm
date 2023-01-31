@@ -2,7 +2,9 @@
 name: test-build
 run-name: Test Build - ${{ github.actor }}
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - test-build
 jobs:
