@@ -388,8 +388,6 @@ export class SpacesService extends BaseService {
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     this.setSelected(_event, spacePath);
-    // const selected = this.state?.selectSpace(spacePath);
-    // selected && this.setTheme({ ...selected.theme, id });
     return spacePath;
   }
 
