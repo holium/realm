@@ -19,7 +19,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useRooms } from '../Rooms/useRooms';
 
-export const AccountTrayApp = observer(() => {
+const AccountTrayAppPresenter = () => {
   const { ship, theme, beacon } = useServices();
   const { dimensions, setActiveApp } = useTrayApps();
   const { backgroundColor, textColor, windowColor, iconColor } =
@@ -175,4 +175,6 @@ export const AccountTrayApp = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const AccountTrayApp = observer(AccountTrayAppPresenter);

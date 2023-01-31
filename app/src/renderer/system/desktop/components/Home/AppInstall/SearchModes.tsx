@@ -1,4 +1,4 @@
-import { FC, useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import { rgba } from 'polished';
@@ -18,7 +18,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { toJS } from 'mobx';
 
-export const SearchModes = observer(() => {
+const SearchModesPresenter = () => {
   const { bazaar, theme } = useServices();
   const [data, setData] = useState<any>([]);
   const {
@@ -89,9 +89,11 @@ export const SearchModes = observer(() => {
       {searchMode === 'app-summary' && renderAppSummary()}
     </>
   );
-});
+};
 
-const AppInstallStart = observer(() => {
+export const SearchModes = observer(SearchModesPresenter);
+
+const AppInstallStartPresenter = () => {
   const { bazaar, theme, spaces } = useServices();
   const spacePath: string = spaces.selected?.path!;
   const appInstaller = useAppInstaller();
@@ -129,7 +131,9 @@ const AppInstallStart = observer(() => {
       </Flex>
     </NoScrollBar>
   );
-});
+};
+
+const AppInstallStart = observer(AppInstallStartPresenter);
 
 const renderApps = (space: string, apps: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
@@ -214,7 +218,7 @@ const renderAppSearch = (apps: any, theme: any) => {
   );
 };
 
-const AppProviders: FC<any> = observer(() => {
+const AppProvidersPresenter = () => {
   const appInstaller = useAppInstaller();
   const { bazaar } = useServices();
   const onProviderClick = (ship: string) => {
@@ -249,8 +253,11 @@ const AppProviders: FC<any> = observer(() => {
       </>
     )
   );
-});
-const ShipSearch: FC<any> = observer(() => {
+};
+
+const AppProviders = observer(AppProvidersPresenter);
+
+const ShipSearchPresenter = () => {
   const { theme } = useServices();
 
   return (
@@ -263,9 +270,11 @@ const ShipSearch: FC<any> = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
 
-const DevApps = observer(() => {
+const ShipSearch = observer(ShipSearchPresenter);
+
+const DevAppsPresenter = () => {
   const { theme, bazaar } = useServices();
   const {
     searchString,
@@ -364,9 +373,11 @@ const DevApps = observer(() => {
       ))}
     </>
   );
-});
+};
 
-const DevAppSearch: FC = observer(() => {
+const DevApps = observer(DevAppsPresenter);
+
+const DevAppSearchPresenter = () => {
   const { theme } = useServices();
   const { selectedShip } = useAppInstaller();
 
@@ -386,4 +397,6 @@ const DevAppSearch: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+const DevAppSearch = observer(DevAppSearchPresenter);

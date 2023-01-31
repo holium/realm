@@ -16,7 +16,7 @@ import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
 
-export const InstallAgent = observer(() => {
+const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
@@ -150,6 +150,8 @@ export const InstallAgent = observer(() => {
       </Box>
     </Grid.Column>
   );
-});
+};
+
+const InstallAgent = observer(InstallAgentPresenter);
 
 export default InstallAgent;

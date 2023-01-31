@@ -8,9 +8,6 @@ import {
 import axios from 'axios';
 // NOTE: this was needed for JsonRpcProvider to work
 import fetch from 'node-fetch';
-// tslint:disable-next-line:no-any
-declare var global: any;
-global.fetch = fetch;
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
@@ -25,6 +22,9 @@ import {
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
 import io from 'socket.io-client';
+
+declare var global: any;
+global.fetch = fetch;
 
 export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;

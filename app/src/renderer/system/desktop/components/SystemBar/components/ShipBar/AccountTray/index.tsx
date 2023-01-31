@@ -16,7 +16,7 @@ const dimensions = {
   width: 400,
 };
 
-export const AccountTray = observer(() => {
+const AccountTrayPresenter = () => {
   const { ship, beacon, theme } = useServices();
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
@@ -107,4 +107,6 @@ export const AccountTray = observer(() => {
       )}
     </motion.div>
   );
-});
+};
+
+export const AccountTray = observer(AccountTrayPresenter);

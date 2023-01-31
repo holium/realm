@@ -20,25 +20,25 @@ import { useRooms } from '../useRooms';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
-export const Room = observer(() => {
+const RoomPresenter = () => {
   const { ship, theme } = useServices();
   const { roomsApp, dimensions } = useTrayApps();
   const roomsManager = useRooms(ship!.patp);
 
   const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const muted = roomsManager.protocol.local?.isMuted;
+  const muted = roomsManager?.protocol.local?.isMuted;
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager.live.room) return;
-    return roomsManager.live.room;
-  }, [roomsManager.live.room]);
+    if (!roomsManager?.live.room) return;
+    return roomsManager?.live.room;
+  }, [roomsManager?.live.room]);
 
-  const [readChat, setReadChat] = useState(roomsManager.live.chat.slice());
+  const [readChat, setReadChat] = useState(roomsManager?.live.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsManager.live.chat.slice();
+    const latestChat = roomsManager?.live.chat.slice();
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -51,7 +51,7 @@ export const Room = observer(() => {
           : 0
       );
     }
-  }, [roomView, roomsManager.live.chat.length]);
+  }, [roomView, roomsManager?.live.chat.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
@@ -59,7 +59,7 @@ export const Room = observer(() => {
 
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
-  const presentCount = roomsManager.protocol.peers.size + 1; // to include self
+  const presentCount = (roomsManager?.protocol.peers.size ?? 0) + 1; // to include self
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
@@ -189,9 +189,9 @@ export const Room = observer(() => {
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (presentRoom.creator === ship!.patp) {
-                  roomsManager.deleteRoom(rid);
+                  roomsManager?.deleteRoom(rid);
                 } else {
-                  roomsManager.leaveRoom();
+                  roomsManager?.leaveRoom();
                 }
               }}
             >
@@ -209,9 +209,9 @@ export const Room = observer(() => {
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (muted) {
-                  roomsManager.unmute();
+                  roomsManager?.unmute();
                 } else {
-                  roomsManager.mute();
+                  roomsManager?.mute();
                 }
               }}
             />
@@ -259,4 +259,6 @@ export const Room = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const Room = observer(RoomPresenter);
