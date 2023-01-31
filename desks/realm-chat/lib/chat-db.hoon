@@ -43,6 +43,9 @@
   =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
+++  messages-wires
+  |=  [=bowl:gall]
+  ~(key by sup.bowl)
 ::
 ::  poke actions
 ::
@@ -62,8 +65,7 @@
   =.  peers-table.state  (~(put by peers-table.state) path.act [peer ~])
   =/  thechange  db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers [peer ~]]]])
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.act) ~] thechange]
+    [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
 ++  leave-path
@@ -75,8 +77,7 @@
   =.  messages-table.state  (remove-messages-for-path messages-table.state path)
   =/  thechange  db-change+!>(~[[%del-row %paths path] [%del-row %peers path]])
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path) ~] thechange]
+    [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
   [gives state]
 ++  insert
@@ -86,9 +87,12 @@
   =/  add-result  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
+  =/  message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  ~&  %sending-new-message-on-sup-bowl-paths
+  ~&  message-paths
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.msg-act) ~] thechange]
+    [%give %fact [/db (weld /db/path path.msg-act) ~] thechange]
+    [%give %fact message-paths thechange]
   ==
   [gives state]
 ++  edit
@@ -159,9 +163,9 @@
     ^-  (list msg-part:sur)
     :: TODO actually filter the messages-table mop type into a list of
     :: msg-part that have id gth msg-id passed in
-    =/  msg-val  (~(got by tbl) [msg-id 0])
-    =/  filtered=messages-table:sur  +:(~(bif by tbl) [msg-id 0] msg-val)
-    ~(val by filtered)
+    =/  start=uniq-id:sur  [msg-id 0]
+    =/  kvs  (tap:msgon:sur (lot:msgon:sur tbl `start ~))
+    (turn kvs |=(a=[k=uniq-id:sur v=msg-part:sur] v.a))
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)

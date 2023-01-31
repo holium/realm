@@ -19,6 +19,7 @@
     |=  old-state=vase
     ^-  (quip card _this)
     ~&  %on-load
+    ~&  bowl
     =/  old  !<(versioned-state old-state)
     ?-  -.old
       %0  `this(state old)
@@ -53,6 +54,8 @@
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
+    ~&  >   'on-watching in chat-db'
+    ~&  >   path
     ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
     ::  each path should map to a list of cards
@@ -62,11 +65,11 @@
           :~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
           ==
       :: /db/messages/start/~zod/~2023.1.17..19.50.46..be0e
+      :: TODO: ensure that pokes signal on these wires
         [%db %messages %start @ @ ~]  :: the "recent messages" path
           =/  sender=@p       `@p`(slav %p i.t.t.t.path)
           =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
-          :~  [%give %fact ~ messages-table+!>((start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state))]
-          ==
+          [%give %fact ~ messages-table+!>((start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state))]~
       :: /db/path/the/actual/path/here
         [%db %path *]  :: the "path" path, subscribe by path explicitly
           =/  thepathrow   (~(get by paths-table.state) t.t.path)
