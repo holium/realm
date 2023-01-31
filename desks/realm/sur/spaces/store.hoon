@@ -82,7 +82,7 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces =membership:membership =invitations:visas]
+  $%  [%initial =spaces =membership:membership =invitations:visas current=space-path]
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]

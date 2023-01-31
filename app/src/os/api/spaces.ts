@@ -391,6 +391,13 @@ const handleSpacesReactions = (
       if (data.initial.invitations) {
         visaState.initialIncoming(data.initial.invitations);
       }
+      // handle current
+      if (spacesState.selected?.path !== data.initial.current.path) {
+        const currentPath = data.initial.current.path;
+        spacesState.selectSpace(currentPath);
+        setTheme(spacesState.getSpaceByPath(currentPath)?.theme);
+        roomService.setProvider(getHost(currentPath));
+      }
       // roomService!.setProvider(null, getHost(spacesState.selected!.path));
       break;
     case 'add':

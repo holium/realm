@@ -139,7 +139,7 @@
       ?+    path                      (on-watch:def path)
           [%updates ~]
         ?>  =(our.bowl src.bowl)      ::  only host should get all updates
-        [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state])]~
+        [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state current.state])]~
         ::
           [%spaces ~]  :: Sends %add reaction when user joins a new space
         ?>  =(our.bowl src.bowl)
@@ -448,6 +448,7 @@
     ++  handle-current
       |=  [path=space-path:store]
       ^-  (quip card _state)
+      ?>  =(our.bowl src.bowl) :: only we can set current
       ?:  =(current.state path)
         `state
       =/  cards  `(list card)`[%give %fact [/current /updates ~] spaces-reaction+!>([%current path])]~
@@ -470,7 +471,7 @@
     ==
     ::
     ++  on-initial
-      |=  [=spaces:store =membership:membership-store =invitations:vstore]
+      |=  [=spaces:store =membership:membership-store =invitations:vstore current=space-path:store]
       ^-  (quip card _state)
       `state
     ::

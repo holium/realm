@@ -453,10 +453,8 @@ export class SpacesService extends BaseService {
     });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
-    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
-    // if (currentRoomProvider !== spaceHost)
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 

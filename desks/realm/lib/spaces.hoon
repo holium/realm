@@ -52,6 +52,7 @@
       :~  [%spaces (spaces-map:encode spaces.rct)]
           [%membership (membership-map:encode membership.rct)]
           [%invitations (invitations:encode invitations.rct)]
+          [%current (curr:encode current.rct)]
       ==
     ::
         %add
@@ -317,6 +318,11 @@
         ['status' s+(scot %tas status.member)]
         :: ['pinned' b+pinned.member]
     ==
+  ++  curr
+    |=  current=space-path:store
+    ^-  json
+    %-  pairs
+    ['path' s+(spat /(scot %p ship.current)/(scot %tas space.current))]~
   ::
   ++  spc
     |=  =space
