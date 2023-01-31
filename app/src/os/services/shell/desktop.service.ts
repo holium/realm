@@ -167,7 +167,7 @@ export class DesktopService extends BaseService {
 
     if (selectedApp.type === 'urbit') {
       const appUrl = newWindow.href?.glob
-        ? `${credentials.url}/apps/${selectedApp.id!}`
+        ? `${credentials.url}/apps/${selectedApp.href.glob?.base}`
         : `${credentials.url}${newWindow.href?.site}`;
 
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({

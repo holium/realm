@@ -84,8 +84,11 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       let appUrl = `${ship.url}/apps/${appWindow.appId}/?spaceId=${spaces.selected?.path}`;
 
       if (appWindow.href?.site) {
-        appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spaces.selected?.path}`;
+        appUrl = `${ship.url}${appWindow.href.site}`;
+      } else {
+        appUrl = `${ship.url}/apps/${appWindow.href?.glob?.base}/?spaceId=${spaces.selected?.path}`;
       }
+      console.log('appUrl', appUrl);
 
       DesktopActions.openAppWindow(toJS(app));
       setAppUrl(appUrl);
