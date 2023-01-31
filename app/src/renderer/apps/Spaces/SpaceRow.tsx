@@ -69,6 +69,14 @@ export const SpaceRow = observer((props: SpaceRowProps) => {
   const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];
+    menu.push({
+      id: `space-row-${space.path}-btn-leave`,
+      label: 'Copy link',
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        navigator.clipboard.writeText(space.path.substring(1));
+      },
+    });
     if (roles?.includes('owner') || roles?.includes('admin')) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
