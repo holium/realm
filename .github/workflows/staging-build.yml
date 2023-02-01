@@ -41,15 +41,6 @@ jobs:
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      # commit the change for the new version if this is a new build
-      # - name: Push package version update
-      #   if: ${{ fromJSON(steps.ci.outputs.result).isPackageUpdate }}
-      #   run: |
-      #     git config --global user.email realm-builder-no-reply@holium.com
-      #     git config --global user.name ${{ github.actor }}
-      #     git add ./app/release/app/package.json
-      #     git commit -m "patch realm app version"
-      #     git push
       #
       - name: Start release draft
         if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
@@ -136,6 +127,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
@@ -204,6 +196,7 @@ jobs:
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
