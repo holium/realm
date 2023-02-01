@@ -321,6 +321,8 @@ export function useCore() {
 
 OSActions.onLogin((_event: any) => {
   SoundActions.playLogin();
+  const shipColor = servicesStore.desktop.mouseColor;
+  if (shipColor) DesktopActions.setMouseColor(shipColor);
 });
 
 OSActions.onConnected(
