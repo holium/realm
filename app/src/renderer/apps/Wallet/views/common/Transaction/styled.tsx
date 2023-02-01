@@ -1,24 +1,9 @@
 import styled from 'styled-components';
 import { Flex } from 'renderer/components';
 
-interface InputProps {
-  mode: 'light' | 'dark';
-}
-export const Input = styled.input<InputProps>`
-  -webkit-appearance: none;
-  width: ${(props) => (props.width ? props.width : '100px;')};
-  background-color: inherit;
-  border: 0;
-  color: ${(props) =>
-    props.mode === 'light' ? '#333333' : '#ffffff'} !important;
-  outline: none;
-  :focus {
-    outline: none !important;
-  }
-`;
-
 /* @ts-expect-error */
 export const ContainerFlex = styled(Flex)<ContainerFlexProps>`
+  background-color: var(--rlm-input-color);
   :focus-within {
     /* @ts-ignore */
     border: 1px solid ${(props) => props.focusBorder};

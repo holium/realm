@@ -18,7 +18,7 @@ export interface Space {
   token?: string;
 }
 
-export const FeaturedList = observer(() => {
+const FeaturedListPresenter = () => {
   const { theme, spaces, bulletin } = useServices();
   const { windowColor } = theme.currentTheme;
 
@@ -125,4 +125,6 @@ export const FeaturedList = observer(() => {
       />
     </Flex>
   );
-});
+};
+
+export const FeaturedList = observer(FeaturedListPresenter);

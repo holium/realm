@@ -59,12 +59,12 @@ export const createRoomForm = (
   };
 };
 
-export const NewRoom = observer(() => {
+const NewRoomPresenter = () => {
   const { dimensions } = useTrayApps();
-  const { theme, spaces } = useServices();
+  const { ship, theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, windowColor, inputColor } = theme.currentTheme;
 
@@ -76,7 +76,7 @@ export const NewRoom = observer(() => {
     evt.stopPropagation();
     const spacePath =
       spaces.selected?.type !== 'our' ? spaces.selected!.path : null;
-    roomsManager.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
 
@@ -193,4 +193,6 @@ export const NewRoom = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const NewRoom = observer(NewRoomPresenter);

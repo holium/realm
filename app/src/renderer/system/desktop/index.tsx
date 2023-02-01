@@ -7,7 +7,7 @@ import { observer } from 'mobx-react';
 import { TrayManager } from './TrayManager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 
-export const Desktop = observer(() => {
+const DesktopPresenter = () => {
   const { ship, desktop } = useServices();
   const our = ship!.patp;
   // creates first instance of roomsManager
@@ -29,6 +29,6 @@ export const Desktop = observer(() => {
       </Layer>
     </Fill>
   );
-});
+};
 
-export default Desktop;
+export const Desktop = observer(DesktopPresenter);

@@ -3,31 +3,50 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
 
+type DeleteSpaceDialogConfigComponentProps = {
+  path: string;
+  name: string;
+  [key: string]: any;
+};
+
+const DeleteSpaceDialogConfigComponent = ({
+  path,
+  name,
+  ...props
+}: DeleteSpaceDialogConfigComponentProps) => {
+  const [loading, setLoading] = useState(false);
+  const onConfirm = async () => {
+    if (path) {
+      setLoading(true);
+      SpacesActions.deleteSpace(path).then(() => {
+        setLoading(false);
+      });
+    }
+  };
+
+  return (
+    <ConfirmDialog
+      title="Delete Space"
+      description={`Are you sure you want to delete ${name}?`}
+      confirmText="Delete"
+      loading={loading}
+      onConfirm={onConfirm}
+      {...props}
+    />
+  );
+};
+
 export const DeleteSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any
-) => {
-  return {
-    component: (props: any) => {
-      const [loading, setLoading] = useState(false);
-      const onConfirm = async () => {
-        if (dialogProps) {
-          setLoading(true);
-          SpacesActions.deleteSpace(dialogProps.path).then(() => {
-            setLoading(false);
-          });
-        }
-      };
-      return (
-        <ConfirmDialog
-          title="Delete Space"
-          description={`Are you sure you want to delete ${dialogProps.name}?`}
-          confirmText="Delete"
-          loading={loading}
-          onConfirm={onConfirm}
-          {...props}
-        />
-      );
-    },
+) =>
+  ({
+    component: (props) => (
+      <DeleteSpaceDialogConfigComponent
+        path={dialogProps.path}
+        name={dialogProps.name}
+        {...props}
+      />
+    ),
     onClose: () => {},
     window: {
       id: 'delete-space-dialog',
@@ -43,5 +62,4 @@ export const DeleteSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
     },
     hasCloseButton: false,
     noTitlebar: true,
-  } as DialogConfig;
-};
+  } as DialogConfig);

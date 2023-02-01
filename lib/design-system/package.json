@@ -20,6 +20,8 @@
     "framer-motion": "^7.6.7",
     "polished": "^4.2.2",
     "react-lifecycles-compat": "^3.0.4",
+    "react-player": "^2.11.0",
+    "react-spotify-embed": "^1.0.4",
     "styled-components": "^5.3.6",
     "styled-system": "^5.1.5"
   },

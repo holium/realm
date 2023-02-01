@@ -5,6 +5,7 @@ import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { VisaModelType } from 'os/services/spaces/models/visas';
 import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { getHost } from '../services/spaces/spaces.service';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -99,7 +100,7 @@ export const SpacesApi = {
             path: pathObj,
           },
         },
-        reaction: 'spaces-reaction.delete',
+        reaction: 'spaces-reaction.remove',
         onReaction: (data: any) => {
           resolve(data);
         },
@@ -150,6 +151,31 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.delete',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          current: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.current',
         onReaction: (data: any) => {
           resolve(data);
         },
@@ -365,6 +391,16 @@ const handleSpacesReactions = (
       if (data.initial.invitations) {
         visaState.initialIncoming(data.initial.invitations);
       }
+      // handle current
+      if (
+        data.initial.current &&
+        spacesState.selected?.path !== data.initial.current.path
+      ) {
+        const currentPath = data.initial.current.path;
+        spacesState.selectSpace(currentPath);
+        setTheme(spacesState.getSpaceByPath(currentPath)?.theme);
+        roomService.setProvider(getHost(currentPath));
+      }
       // roomService!.setProvider(null, getHost(spacesState.selected!.path));
       break;
     case 'add':
@@ -391,6 +427,16 @@ const handleSpacesReactions = (
           data['remote-space'].members
         );
         spacesState.addSpace(data['remote-space']);
+      }
+      break;
+    case 'current':
+      if (spacesState.selected?.path !== data.current.path) {
+        console.log(
+          `%current old=${spacesState.selected?.path} new=${data.current.path}`
+        );
+        spacesState.selectSpace(data.current.path);
+        setTheme(spacesState.getSpaceByPath(data.current.path)?.theme);
+        roomService.setProvider(getHost(data.current.path));
       }
       break;
     default:

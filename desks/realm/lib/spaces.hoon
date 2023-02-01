@@ -52,6 +52,7 @@
       :~  [%spaces (spaces-map:encode spaces.rct)]
           [%membership (membership-map:encode membership.rct)]
           [%invitations (invitations:encode invitations.rct)]
+          [%current (curr:encode current.rct)]
       ==
     ::
         %add
@@ -81,7 +82,11 @@
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
       ==
-
+        %current
+      :-  %current
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     
       ::   %members
       :: :-  %members
@@ -124,6 +129,7 @@
           [%remove path-key]
           [%join path-key]
           [%leave path-key]
+          [%current path-key]
           :: [%kicked kicked]
       ==
     ::
@@ -312,6 +318,11 @@
         ['status' s+(scot %tas status.member)]
         :: ['pinned' b+pinned.member]
     ==
+  ++  curr
+    |=  current=space-path:store
+    ^-  json
+    %-  pairs
+    ['path' s+(spat /(scot %p ship.current)/(scot %tas space.current))]~
   ::
   ++  spc
     |=  =space

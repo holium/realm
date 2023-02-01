@@ -21,7 +21,7 @@ import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
 import { FeaturedList } from './FeaturedList';
 
-export const SpacesTrayApp = observer(() => {
+const SpacesTrayAppPresenter = () => {
   const { ship, theme, spaces } = useServices();
   const { dimensions } = useTrayApps();
 
@@ -266,4 +266,6 @@ export const SpacesTrayApp = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const SpacesTrayApp = observer(SpacesTrayAppPresenter);

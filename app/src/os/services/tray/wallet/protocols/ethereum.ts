@@ -6,6 +6,8 @@ import {
   Network,
 } from 'alchemy-sdk';
 import axios from 'axios';
+// NOTE: this was needed for JsonRpcProvider to work
+import fetch from 'node-fetch';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
@@ -20,6 +22,9 @@ import {
 } from '../../wallet-lib/wallet.model';
 import { ethers } from 'ethers';
 import io from 'socket.io-client';
+
+declare var global: any;
+global.fetch = fetch;
 
 export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
@@ -38,13 +43,23 @@ export class EthereumProtocol implements BaseBlockProtocol {
     } else if (process.env.USE_LOCAL_API) {
       this.baseURL = 'http://localhost:8080';
     }
+    // this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // if (process.env.NODE_ENV === 'production') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy';
+    // } else if (process.env.NODE_ENV === 'staging') {
+    //   this.baseURL = 'https://api.holium.live/v1/alchemy'; // staging URL
+    // } else {
+    //   this.baseURL = 'http://localhost:3300/v1/alchemy';
+    // }
     if (this.protocol === ProtocolType.ETH_MAIN) {
       this.nodeURL = this.baseURL + '/eth';
     } else {
       this.nodeURL = this.baseURL + '/gorli';
     }
     let alchemySettings: AlchemySettings;
-    this.ethProvider = new ethers.providers.JsonRpcProvider(this.nodeURL);
+    this.ethProvider = new ethers.providers.JsonRpcProvider({
+      url: this.nodeURL,
+    });
     if (this.protocol === ProtocolType.ETH_MAIN) {
       alchemySettings = {
         url: this.nodeURL,
@@ -73,6 +88,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
+        console.log('connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
@@ -82,6 +98,11 @@ export class EthereumProtocol implements BaseBlockProtocol {
       socket.on('error', (error: any) => {
         console.log(error);
       });
+      // either by directly modifying the `auth` attribute
+      socket.on('connect_error', () => {
+        console.log('connect error');
+      });
+
       socket.on('disconnect', () => {});
     } catch (error) {
       console.log(error);
@@ -197,6 +218,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
     try {
       return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
     } catch (error) {
+      console.log('getAccountBalance error');
+      console.error(error);
       return '-1';
     }
   }
@@ -210,16 +233,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            fromAddress: addr,
-            category: [
-              AssetTransfersCategory.INTERNAL,
-              AssetTransfersCategory.EXTERNAL,
-            ],
-            withMetadata: true,
-          });*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -257,16 +270,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*toTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            toAddress: addr,
-            category: [
-              AssetTransfersCategory.INTERNAL,
-              AssetTransfersCategory.EXTERNAL,
-            ],
-            withMetadata: true,
-          });*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -417,18 +420,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       let retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*fromTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            fromAddress: addr,
-            contractAddresses: [contract],
-            category: [
-              AssetTransfersCategory.ERC20,
-              AssetTransfersCategory.ERC721,
-              AssetTransfersCategory.ERC1155,
-            ],
-            withMetadata: true,
-          })*/
           fromTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -468,19 +459,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
       retries = 3;
       for (let i = 0; i < retries; i++) {
         try {
-          /*toTransfers = await this.alchemy.core.getAssetTransfers({
-            fromBlock: ethers.utils.hexlify(fromBlock),
-            toBlock: ethers.utils.hexlify(toBlock),
-            toAddress: addr,
-            contractAddresses: [contract],
-            category: [
-              AssetTransfersCategory.ERC20,
-              AssetTransfersCategory.ERC721,
-              AssetTransfersCategory.ERC1155,
-            ],
-            withMetadata: true,
-          })
-          console.log(toTransfers);*/
           toTransfers = await axios.request({
             method: 'POST',
             url: this.nodeURL,
@@ -527,26 +505,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
     amountOrTokenId: string | number
   ): Promise<void> {
     const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
-    /*const ethAmount = ethers.utils.parseEther(amount);
-    const erc20Amount = ethers.utils.parseUnits(
-      amount,
-      this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!
-        .decimals
-    );*/
     return (await ethContract.transfer(toAddr, amountOrTokenId)).hash;
   }
 
   async getFeePrice(): Promise<any> {
     return await this.ethProvider!.getGasPrice();
   }
-
-  /*async getFeeEstimate(from: string, to: string, value: string): Promise<any> {
-    return await this.alchemy.core.estimateGas({
-      to,
-      from,
-      value: ethers.utils.parseEther(value),
-    });
-  }*/
 
   async getFeeEstimate(tx: any): Promise<any> {
     return await this.alchemy.core.estimateGas(tx);

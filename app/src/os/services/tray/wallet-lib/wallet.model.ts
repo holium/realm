@@ -177,18 +177,19 @@ const TransactionList = types
     ) {
       for (const transaction of transactions) {
         const previousTransaction = self.transactions.get(transaction.hash);
+        const sent = address === transaction.from;
         const newTransaction = {
           hash: transaction.hash,
           walletIndex: index,
           amount: transaction.value?.toString() || '0',
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
-          type: address === transaction.from ? 'sent' : 'received',
+          type: sent ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt || '',
           completedAt: transaction.metadata.blockTimestamp,
-          ourAddress: transaction.from,
+          ourAddress: sent ? transaction.from : transaction.to,
           theirPatp: previousTransaction?.theirPatp,
-          theirAddress: transaction.to,
+          theirAddress: sent ? transaction.to : transaction.from,
           status: 'succeeded',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
@@ -1013,3 +1014,51 @@ export const WalletStore = types
   });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
+
+export const initialWalletState = (ship: string) => ({
+  navState: {
+    view: WalletView.NEW,
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+  },
+  ethereum: {
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  lastInteraction: Date.now(),
+  initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  ourPatp: ship,
+  forceActive: false,
+});

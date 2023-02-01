@@ -1,7 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-
-import { Flex, Box, Text, TextButton } from 'renderer/components';
+import { Flex, Box, TextButton } from 'renderer/components';
+import { Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -16,6 +16,7 @@ import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
 import {
   BitcoinWalletType,
+  ERC20Type,
   EthWalletType,
   NetworkType,
   WalletView,
@@ -23,7 +24,6 @@ import {
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
-import { rgba } from 'polished';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
@@ -34,24 +34,17 @@ interface DetailProps {
 }
 export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { walletApp } = useTrayApps();
-  const { theme } = useServices();
   const [QROpen, setQROpen] = useState(false);
-  // const [sendTrans, setSendTrans] = useState(false);
   const sendTrans =
     walletApp.navState.view === WalletView.TRANSACTION_SEND ||
     walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
-  // const [hideWalletHero, setHideWalletHero] = useState(false);
   const hideWalletHero =
     walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
   const onScreenChange = (newScreen: string) => {};
-  //    setHideWalletHero(newScreen === 'confirm');
   const close = async () => {
-    // setSendTrans(false);
-    // await WalletActions.resetNavigation();
     await WalletActions.navigateBack();
-    //    setHideWalletHero(false);
   };
 
   const wallet = walletApp.currentWallet!;
@@ -59,7 +52,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   let nfts = null;
   const hasCoin =
     walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
-  let coin: any = null;
+  let coin: ERC20Type | null = null;
   if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
       coin = (wallet as EthWalletType).data
@@ -110,9 +103,6 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     );
   transactions = [...pendingTransactions, ...transactionHistory];
 
-  const { textColor } = theme.currentTheme;
-  const fadedTextColor = useMemo(() => rgba(textColor, 0.7), [textColor]);
-
   return (
     <Flex
       width="100%"
@@ -134,12 +124,20 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         setSendTrans={(send: boolean) => {
           if (send) {
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {
-              walletIndex: '0',
+              walletIndex: `${wallet.index!}`,
+              protocol: walletApp.navState.protocol,
+              ...(coin && {
+                detail: {
+                  type: 'coin',
+                  txtype: 'coin',
+                  coinKey: coin.address,
+                  key: coin.address,
+                },
+              }),
             });
           } else {
             WalletActions.navigateBack();
           }
-          // setSendTrans(send)} // changed
         }}
         close={close}
         coinView={
@@ -154,16 +152,9 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               flexDirection="column"
               mt={6}
             >
-              <Box>
-                <Text
-                  mb={1}
-                  color={fadedTextColor}
-                  fontWeight={500}
-                  variant="body"
-                >
-                  Transactions
-                </Text>
-              </Box>
+              <Text.Custom mb={2} opacity={0.5} fontWeight={500} fontSize={2}>
+                Transactions
+              </Text.Custom>
               <TransactionList
                 height={200}
                 transactions={transactions}

@@ -6,8 +6,6 @@ import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
-// @ts-expect-error its there...
-
 interface WalletFooterProps {
   hidden: boolean;
 }
@@ -33,14 +31,17 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     }, []);
 
     return (
-      <Box width="100%" hidden={props.hidden}>
+      <Box
+        position="absolute"
+        z-index={3}
+        bottom={0}
+        px="12px"
+        pb="12px"
+        pt="12px"
+        width="100%"
+        hidden={props.hidden}
+      >
         <Flex
-          z-index={3}
-          bottom={0}
-          px="12px"
-          pb="12px"
-          pt="12px"
-          width="100%"
           justifyContent="space-between"
           style={{ backgroundColor: theme.currentTheme.windowColor }}
         >
