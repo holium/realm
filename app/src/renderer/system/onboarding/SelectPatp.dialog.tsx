@@ -110,13 +110,18 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const loading = planets.length === 0;
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [showContactSupport, setShowContactSupport] = useState<boolean>(false);
+  // const loading = planets.length === 0;
+  const loading = true;
 
   useEffect(() => {
     const getPlanets = async () => {
       const result = await OnboardingActions.getAvailablePlanets();
       setPlanets(result);
+      if (result.length === 0) {
+        setShowContactSupport(true);
+      }
     };
 
     getPlanets();
@@ -217,8 +222,23 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
           </Text>
         )}
       </Flex>
+      {showContactSupport && (
+        <Flex
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+        >
+          No available planets found. Please contact Realm support.
+        </Flex>
+      )}
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
-        <TextButton>Next</TextButton>
+        <TextButton
+          disabled={!loading && planets.length > 0 && selectedIndex >= 0}
+        >
+          Next
+        </TextButton>
       </Box>
     </Grid.Column>
   );
