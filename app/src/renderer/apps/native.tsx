@@ -1,6 +1,6 @@
 import { SystemApp } from './System';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar/Toolbar';
-import { TabView, TabViewProps } from './Browser/TabView';
+import { BrowserWebview } from './Browser/BrowserWebview';
 
 export enum WindowId {
   Browser = 'os-browser',
@@ -10,8 +10,8 @@ export enum WindowId {
 export const nativeRenderers = {
   'os-browser': {
     titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
-    component: ({ isResizing }: TabViewProps) => (
-      <TabView isResizing={isResizing} />
+    component: ({ isResizing = false, isDragging = false }) => (
+      <BrowserWebview isResizing={isResizing} isDragging={isDragging} />
     ),
   },
   'os-settings': {

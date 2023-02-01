@@ -2,10 +2,7 @@
 // and renders cursor based on presence
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
-import { hexToRgb, rgbToString } from 'os/lib/color';
 import styled from 'styled-components';
-import AnimatedCursor from '../Cursor';
-import { useEventListener } from '../Cursor/useEventListener';
 import { subscribe, close, send, SendPartial } from './multiplayer';
 import {
   CursorMovePayload,
@@ -21,7 +18,9 @@ import {
   PresenceStateSyncPayload,
   Ship,
 } from '@holium/realm-multiplayer';
+import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 // import { Ship } from '@holium/realm-multiplayer/hooks';
+import { AnimatedCursor } from '../AnimatedCursor';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -189,14 +188,14 @@ export function Presences() {
     send(payload);
   }, []);
 
-  useEventListener('mousemove', onMouseMove);
-  useEventListener('mouseleave', onMouseLeave, document);
-  useEventListener('blur', onMouseLeave);
-  useEventListener('click', onClick);
-  useEventListener('mouseover', onMouseOver);
-  useEventListener('mousedown', onMouseDown);
-  useEventListener('mouseup', onMouseUp);
-  useEventListener('mouseout', onMouseOut);
+  // useEventListener('mousemove', onMouseMove);
+  // useEventListener('mouseleave', onMouseLeave, document);
+  // useEventListener('blur', onMouseLeave);
+  // useEventListener('click', onClick);
+  // useEventListener('mouseover', onMouseOver);
+  // useEventListener('mousedown', onMouseDown);
+  // useEventListener('mouseup', onMouseUp);
+  // useEventListener('mouseout', onMouseOut);
 
   return (
     <>
@@ -207,11 +206,12 @@ export function Presences() {
         return (
           <div key={id}>
             <AnimatedCursor
-              id={patp}
-              color={(color && rgbToString(hexToRgb(color))) || undefined}
+              color={color && rgbToString(hexToRgb(color))}
               coords={position}
-              isActive={isClicking}
+              isVisible={true}
+              isActive={isClicking ?? false}
               isActiveClickable={isClicking}
+              state="pointer"
             />
             <CursorName
               style={{

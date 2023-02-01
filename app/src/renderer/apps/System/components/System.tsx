@@ -30,7 +30,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
     isSubscribed ? '#38CD7C' : '#EA2424'};
 `;
 
-export const SystemPanel = observer(() => {
+const SystemPanelPresenter = () => {
   const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
@@ -316,4 +316,6 @@ export const SystemPanel = observer(() => {
     </Card> */}
     </Flex>
   );
-});
+};
+
+export const SystemPanel = observer(SystemPanelPresenter);

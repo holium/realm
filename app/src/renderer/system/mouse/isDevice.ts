@@ -1,4 +1,3 @@
-// @ts-nocheck
 const IsDevice = (() => {
   if (typeof navigator === 'undefined') return;
 
@@ -35,16 +34,15 @@ const IsDevice = (() => {
      */
     any() {
       return (
-        IsDevice.Android() ||
-        IsDevice.BlackBerry() ||
-        IsDevice.iOS() ||
-        IsDevice.iPad() ||
-        IsDevice.OperaMini() ||
-        IsDevice.IEMobile()
+        IsDevice?.Android() ||
+        IsDevice?.BlackBerry() ||
+        IsDevice?.iOS() ||
+        IsDevice?.iPad() ||
+        IsDevice?.OperaMini() ||
+        IsDevice?.IEMobile()
       );
     },
   };
 })();
 
-// Export
 export default IsDevice;

@@ -3,21 +3,14 @@ import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
-import {
-  Flex,
-  Box,
-  Icons,
-  Text,
-  Sigil,
-  ImagePreview,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Box, Icons, Text, Sigil, Spinner } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
-import { Input, ContainerFlex } from './styled';
+import { ContainerFlex } from './styled';
+import { Avatar, Input } from '@holium/design-system';
 
 export const RecipientInput = observer(
   (props: {
@@ -62,17 +55,20 @@ export const RecipientInput = observer(
     stateRef.current = { recipient, currPromise };
 
     // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
+    let timer: NodeJS.Timeout | null = null;
     const getRecipient = async (patp: string) => {
       const promise: Promise<RecipientPayload> = new Promise(
-        async (resolve, reject) => {
-          const timer = setTimeout(
-            () => reject(new Error('Request timed out.')),
-            5000
-          );
+        (resolve, reject) => {
+          timer && clearTimeout(timer);
+          timer = setTimeout(() => {
+            reject(new Error('Request timed out.'));
+          }, 5000);
+
           try {
-            const details = await WalletActions.getRecipient(patp);
-            clearTimeout(timer);
-            resolve(details);
+            WalletActions.getRecipient(patp).then((details) => {
+              timer && clearTimeout(timer);
+              resolve(details);
+            });
           } catch (e) {
             clearTimeout(timer);
             reject(e);
@@ -166,20 +162,15 @@ export const RecipientInput = observer(
     const RecipientIcon = (props: { icon: string }) => {
       if (recipientDetails.details?.recipientMetadata) {
         const metadata = recipientDetails.details.recipientMetadata;
-        if (metadata.avatar) {
-          return (
-            <ImagePreview src={metadata.avatar} height="24px" width="24px" />
-          );
-        } else if (metadata.color) {
-          return (
-            <Sigil
-              color={[metadata.color, 'white']}
-              simple={true}
-              size={24}
-              patp={valueCache}
-            />
-          );
-        }
+        return (
+          <Avatar
+            sigilColor={[metadata.color, 'white']}
+            avatar={metadata.avatar}
+            simple={true}
+            size={24}
+            patp={valueCache}
+          />
+        );
       }
 
       if (props.icon === 'spy')
@@ -230,6 +221,7 @@ export const RecipientInput = observer(
             TO
           </Text>
           <ContainerFlex
+            className="realm-cursor-hover"
             focusBorder={themeData.colors.brand.primary}
             px={1}
             py={1}
@@ -249,7 +241,6 @@ export const RecipientInput = observer(
             </Flex>
             <Flex flexDirection="column">
               <Input
-                mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
                 width="100%"
                 placeholder="@p or recipient’s address"
                 spellCheck="false"

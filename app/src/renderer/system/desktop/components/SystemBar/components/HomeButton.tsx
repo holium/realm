@@ -1,16 +1,13 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useMotionValue } from 'framer-motion';
 import HoliumAnimated from 'renderer/components/Icons/holium';
-
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { rgba } from 'polished';
 import { BarStyle } from '@holium/design-system';
 
-interface HomeButton {}
-
-export const HomeButton: FC<HomeButton> = observer(() => {
+const HomeButtonPresenter = () => {
   const { desktop, theme } = useServices();
 
   const { textColor } = useMemo(
@@ -53,6 +50,6 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     ),
     [theme.currentTheme.textColor]
   );
-});
+};
 
-export default { HomeButton };
+export const HomeButton = observer(HomeButtonPresenter);

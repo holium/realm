@@ -34,20 +34,11 @@ export const genCSSVariables = (theme: ThemeType) => {
         --rlm-theme-mode: ${theme.mode};
         --rlm-text-color: ${theme.textColor};
         --rlm-icon-color: ${theme.iconColor};
+        --rlm-mouse-color: ${theme.mouseColor};
       }
    
       div[data-radix-portal] {
         z-index: 2000 !important;
-      }
-
-      body {
-        overflow-x: hidden;
-        overflow-y: hidden;
-      }
-
-      #rlm-cursor {
-        position: absolute;
-        z-index: 2147483646 !important;
       }
     `;
 };

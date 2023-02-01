@@ -1,4 +1,4 @@
-import { FC, useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -14,12 +14,12 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
-  fullMonthNames,
   getBaseTheme,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
+  getDisplayDate,
 } from '../../lib/helpers';
 import {
   NetworkType,
@@ -30,7 +30,7 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-export const TransactionDetail: FC = observer(() => {
+const TransactionDetailPresenter = () => {
   const { walletApp } = useTrayApps();
   const transactionList =
     walletApp.navState.network === NetworkType.ETHEREUM
@@ -69,6 +69,7 @@ export const TransactionDetail: FC = observer(() => {
   const completed = new Date(
     transaction.completedAt || transaction.initiatedAt || ''
   );
+
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
   const amountDisplay = isEth
@@ -180,9 +181,7 @@ export const TransactionDetail: FC = observer(() => {
           DATE
         </Text>
         <Text variant="body" fontSize={1}>
-          {fullMonthNames[completed.getMonth()]} {completed.getDate()}{' '}
-          {completed.getFullYear() !== new Date().getFullYear() &&
-            `, ${completed.getFullYear()}`}
+          {getDisplayDate(completed)}
         </Text>
       </Flex>
       <Flex
@@ -232,14 +231,6 @@ export const TransactionDetail: FC = observer(() => {
           }
           placeholder="Transaction notes..."
         />
-        {/* <TextArea
-          className="realm-cursor-text-cursor"
-          theme={themeData}
-          desktopTheme={theme.currentTheme}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Transaction notes..."
-        /> */}
         <Flex mt={4} width="100%" justifyContent="flex-end">
           <Button
             width="100%"
@@ -253,4 +244,6 @@ export const TransactionDetail: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const TransactionDetail = observer(TransactionDetailPresenter);

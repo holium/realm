@@ -12,8 +12,6 @@ declare global {
 }
 
 export {};
-
-import 'react';
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {

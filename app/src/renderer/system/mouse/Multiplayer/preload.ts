@@ -1,10 +1,9 @@
 import * as React from 'react';
-// @ts-expect-error
 import ReactDOM from 'react-dom/client';
+import { contextBridge } from 'electron';
 import { Presences } from './Presences';
 import { api } from './multiplayer';
-import { contextBridge } from 'electron';
-import Mouse from '../Mouse';
+import { Mouse } from '../Mouse';
 
 contextBridge.exposeInMainWorld('realmMultiplayer', api);
 

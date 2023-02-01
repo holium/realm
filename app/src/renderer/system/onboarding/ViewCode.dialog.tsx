@@ -1,23 +1,25 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Sigil,
   Grid,
   Text,
   Flex,
-  AccessCode,
   Spinner,
+  CopyButton,
 } from 'renderer/components';
 import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { Button, Icon, TextInput } from '@holium/design-system';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
-const ViewCode: FC<BaseDialogProps> = observer((_props: BaseDialogProps) => {
+const ViewCode = observer(function Component() {
   const { theme } = useServices();
   const [accessCode, setAccessCode] = useState('');
   const { onboarding } = useServices();
-  const planet = onboarding.planet!;
+  const planet = onboarding.planet;
+  const showAccessCode = useToggle(false);
 
   const sigilColors: [string, string] =
     theme.currentTheme.mode === 'light'
@@ -51,7 +53,7 @@ const ViewCode: FC<BaseDialogProps> = observer((_props: BaseDialogProps) => {
               color={sigilColors}
               simple={false}
               size={48}
-              patp={planet.patp}
+              patp={planet?.patp ?? ''}
             />
           </Box>
           <Text mt={2}> Your ship is ready! </Text>
@@ -70,7 +72,27 @@ const ViewCode: FC<BaseDialogProps> = observer((_props: BaseDialogProps) => {
               Outside of Realm, you'll need this access code to log into your
               Urbit. We recommend you write it down now.
             </Text>
-            <AccessCode code={accessCode} />
+            <Flex gap={6} alignItems="center">
+              <TextInput
+                id="system-account-access-code"
+                name="access-code"
+                width={285}
+                py={2}
+                value={accessCode}
+                readOnly={true}
+                type={showAccessCode.isOn ? 'text' : 'password'}
+                rightAdornment={
+                  <Button.IconButton onClick={showAccessCode.toggle}>
+                    <Icon
+                      name={showAccessCode.isOn ? 'EyeOff' : 'EyeOn'}
+                      opacity={0.5}
+                      size={18}
+                    />
+                  </Button.IconButton>
+                }
+              />
+              <CopyButton content={accessCode} />
+            </Flex>
           </Flex>
         )}
       </Flex>

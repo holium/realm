@@ -22,7 +22,7 @@ import {
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 import { debounce } from 'lodash';
 
-export const AppDock = observer(() => {
+const AppDockPresenter = () => {
   const { desktop, spaces, bazaar, theme } = useServices();
 
   const spacePath = spaces.selected?.path;
@@ -281,4 +281,6 @@ export const AppDock = observer(() => {
       {activeAndUnpinnedApps}
     </Flex>
   );
-});
+};
+
+export const AppDock = observer(AppDockPresenter);

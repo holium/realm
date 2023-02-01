@@ -16,18 +16,18 @@ import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
 
-export const Rooms = observer(() => {
+const RoomsPresenter = () => {
   const { dimensions } = useTrayApps();
-  const { spaces, theme } = useServices();
+  const { ship, spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship!.patp);
 
   const ourSpace = spaces.selected?.type === 'our';
 
   const rooms = ourSpace
-    ? roomsManager.rooms
-    : (roomsManager.protocol as RealmProtocol).getSpaceRooms(
+    ? roomsManager?.rooms
+    : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
         spaces.selected!.path
       );
 
@@ -75,7 +75,7 @@ export const Rooms = observer(() => {
         flexDirection="column"
         overflowY={'auto'}
       >
-        {rooms.length === 0 && (
+        {rooms?.length === 0 && (
           <Flex
             flex={1}
             flexDirection="column"
@@ -91,7 +91,7 @@ export const Rooms = observer(() => {
             </Text>
           </Flex>
         )}
-        {rooms.map((room: RoomType, index: number) => {
+        {rooms?.map((room: RoomType, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}
@@ -105,8 +105,8 @@ export const Rooms = observer(() => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsManager.live.room?.rid !== room.rid) {
-                  roomsManager.enterRoom(room.rid);
+                if (roomsManager?.live.room?.rid !== room.rid) {
+                  roomsManager?.enterRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}
@@ -184,4 +184,6 @@ export const Rooms = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const Rooms = observer(RoomsPresenter);
