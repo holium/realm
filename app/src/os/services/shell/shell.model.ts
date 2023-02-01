@@ -5,7 +5,6 @@ export const ShellStore = types
   .model('ShellStore', {
     isBlurred: types.optional(types.boolean, true),
     isFullscreen: types.optional(types.boolean, true),
-    isMouseInWebview: types.optional(types.boolean, false),
     desktopDimensions: types.optional(
       types.model({
         width: types.number,
@@ -41,9 +40,6 @@ export const ShellStore = types
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
-    },
-    setIsMouseInWebview(inWebview: boolean) {
-      self.isMouseInWebview = inWebview;
     },
   }));
 export type ShellStoreType = Instance<typeof ShellStore>;

@@ -1,21 +1,22 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { useBrowser } from './store';
+import { WebView } from 'renderer/system/desktop/components/Window/WebView';
 
 type Props = {
-  isLocked: boolean;
+  isDragging: boolean;
+  isResizing: boolean;
 };
 
-export const WebView = observer(({ isLocked }: Props) => {
+export const BrowserWebview = observer(({ isDragging, isResizing }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
-  const { shell } = useServices();
 
-  const { id, loader } = currentTab;
+  const id = 'os-browser-web-webview';
+  const { loader } = currentTab;
 
   useEffect(() => {
-    const webView = document.getElementById(id) as Electron.WebviewTag;
+    const webView = document.getElementById(id) as Electron.WebviewTag | null;
 
     if (!webView) return;
 
@@ -32,22 +33,11 @@ export const WebView = observer(({ isLocked }: Props) => {
     webView.addEventListener('did-navigate-in-page', (e) => {
       setUrl(e.url);
     });
-
     webView.addEventListener('did-fail-load', (e) => {
       // Error code 3 is a bug and not a terminal error.
-      if (e.errorCode !== -3) {
-        setError();
-      }
+      if (e.errorCode !== -3) setError();
     });
   }, [id]);
-
-  const onMouseEnter = useCallback(() => {
-    shell.setIsMouseInWebview(true);
-  }, [shell]);
-
-  const onMouseLeave = useCallback(() => {
-    shell.setIsMouseInWebview(false);
-  }, [shell]);
 
   return useMemo(
     () => (
@@ -67,37 +57,24 @@ export const WebView = observer(({ isLocked }: Props) => {
             Failed to load.
           </Text>
         ) : (
-          <webview
-            id={currentTab.id}
+          <WebView
+            id={id}
             src={currentTab.url}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            // This enables cursor injection, but it also crashes the webview on navigation.
-            // webpreferences="sandbox=false"
-            // preload={`file://${desktop.appviewPreload}`}
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
             partition="browser-webview"
+            isLocked={isDragging || isResizing || loader.state === 'loading'}
             style={{
               background: 'white',
-              width: 'inherit',
+              width: '100%',
               height: 'calc(100% - 54px)',
-              position: 'relative',
               marginTop: 54,
-              pointerEvents: isLocked ? 'none' : 'auto',
             }}
           />
         )}
       </>
     ),
-    [
-      currentTab.id,
-      currentTab.url,
-      isLocked,
-      loader.state,
-      onMouseEnter,
-      onMouseLeave,
-    ]
+    [currentTab.id, currentTab.url, isDragging, isResizing, loader.state]
   );
 });

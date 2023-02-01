@@ -22,6 +22,7 @@ import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { AvatarInput, TextInput } from '@holium/design-system';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface ColorTileProps {
   tileColor: string;
@@ -90,6 +91,8 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
               avatar: avatarImg,
             };
             await OnboardingActions.setProfile(profileData);
+            const shipColor = values.color;
+            if (shipColor) DesktopActions.setMouseColor(shipColor);
             props.setState &&
               props.setState({ ...props.workflowState, profile: profileData });
             props.onNext && props.onNext();

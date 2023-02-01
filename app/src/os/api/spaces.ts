@@ -392,7 +392,10 @@ const handleSpacesReactions = (
         visaState.initialIncoming(data.initial.invitations);
       }
       // handle current
-      if (spacesState.selected?.path !== data.initial.current.path) {
+      if (
+        data.initial.current &&
+        spacesState.selected?.path !== data.initial.current.path
+      ) {
         const currentPath = data.initial.current.path;
         spacesState.selectSpace(currentPath);
         setTheme(spacesState.getSpaceByPath(currentPath)?.theme);
