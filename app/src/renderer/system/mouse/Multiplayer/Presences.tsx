@@ -18,7 +18,6 @@ import {
   PresenceStateSyncPayload,
   Ship,
 } from '@holium/realm-multiplayer';
-import { useEventListener } from '../useEventListener';
 import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 // import { Ship } from '@holium/realm-multiplayer/hooks';
 import { AnimatedCursor } from '../AnimatedCursor';
@@ -189,14 +188,14 @@ export function Presences() {
     send(payload);
   }, []);
 
-  useEventListener('mousemove', onMouseMove);
-  useEventListener('mouseleave', onMouseLeave, document);
-  useEventListener('blur', onMouseLeave);
-  useEventListener('click', onClick);
-  useEventListener('mouseover', onMouseOver);
-  useEventListener('mousedown', onMouseDown);
-  useEventListener('mouseup', onMouseUp);
-  useEventListener('mouseout', onMouseOut);
+  // useEventListener('mousemove', onMouseMove);
+  // useEventListener('mouseleave', onMouseLeave, document);
+  // useEventListener('blur', onMouseLeave);
+  // useEventListener('click', onClick);
+  // useEventListener('mouseover', onMouseOver);
+  // useEventListener('mousedown', onMouseDown);
+  // useEventListener('mouseup', onMouseUp);
+  // useEventListener('mouseout', onMouseOut);
 
   return (
     <>
@@ -207,10 +206,10 @@ export function Presences() {
         return (
           <div key={id}>
             <AnimatedCursor
-              id={patp}
-              color={(color && rgbToString(hexToRgb(color))) || undefined}
+              color={color && rgbToString(hexToRgb(color))}
               coords={position}
-              isActive={isClicking}
+              isVisible={true}
+              isActive={isClicking ?? false}
               isActiveClickable={isClicking}
               state="pointer"
             />

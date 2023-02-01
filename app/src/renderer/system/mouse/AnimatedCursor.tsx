@@ -10,8 +10,7 @@ export type Vec2 = {
 };
 
 interface AnimatedCursorProps {
-  id?: string;
-  color?: string;
+  color: string | null;
   outerAlpha?: number;
   innerSize?: number;
   outerSize?: number;
@@ -36,8 +35,7 @@ interface AnimatedCursorProps {
  * @param {array}  clickables - array of clickable selectors
  */
 const CursorCore = ({
-  id = 'rlm-cursor',
-  color = '0, 0, 0',
+  color,
   outerAlpha = 0.2,
   innerSize = 10,
   outerSize = 12,
@@ -193,9 +191,7 @@ const CursorCore = ({
   return (
     <Fragment>
       <motion.div
-        id={`${id}-outer`}
         ref={cursorOuterRef}
-        layoutId={`${id}-outer`}
         animate={{
           opacity: state === 'text' ? 0 : 1,
         }}
@@ -206,8 +202,6 @@ const CursorCore = ({
         }}
       />
       <motion.div
-        id={`${id}`}
-        layoutId={`${id}`}
         ref={cursorInnerRef}
         variants={cursorVariants}
         animate={state}

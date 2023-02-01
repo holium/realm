@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
+import { hexToRgb, rgbToString } from 'os/lib/color';
 import { AnimatedCursor, MouseState } from './AnimatedCursor';
 
 export const Mouse = () => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
+  const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const active = useToggle(false);
   const visible = useToggle(false);
 
@@ -14,6 +16,11 @@ export const Mouse = () => {
       // mouse layer doesn't capture the mouse position when it's dragging.
       if (isDragging) setCoords(newCoordinates);
       setState(newState);
+    });
+
+    window.electron.app.onMouseColorChange((hex) => {
+      const rgbString = rgbToString(hexToRgb(hex));
+      if (rgbString) setMouseColor(rgbString);
     });
 
     window.electron.app.onMouseDown(active.toggleOn);
@@ -42,6 +49,7 @@ export const Mouse = () => {
       coords={coords}
       isActive={active.isOn}
       isVisible={visible.isOn}
+      color={mouseColor}
     />
   );
 };

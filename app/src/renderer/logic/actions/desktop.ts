@@ -27,7 +27,8 @@ export const DesktopActions = {
     return await window.electron.os.desktop.setHomePane(isHome);
   },
   setMouseColor: async (mouseColor: string) => {
-    return await window.electron.os.desktop.setMouseColor(mouseColor);
+    window.electron.app.mouseColorChanged(mouseColor);
+    await window.electron.os.desktop.setMouseColor(mouseColor);
   },
   setAppDimensions: (
     windowId: string,

@@ -48,13 +48,13 @@ The project is structured with the goal of having a seperate process sync data f
                                 |
                           ____________
                          |            |
-                         |    Core    |
+                         |     OS     |
                          |____________|
 ```
 
 - `/renderer` is the GUI layer.
 - `/main` is the main electron process
-- `/core` is the core background process libs for syncing state and managing data.
+- `/os` is the core background process libs for syncing state and managing data.
 - `/background` is the background process logic, starts a tray icon for Realm.
 
 ## Packaging for release

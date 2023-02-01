@@ -51,6 +51,10 @@ const registerListeners = (
   ipcMain.handle('mouse-up', () => {
     mouseWindow.webContents.send('mouse-up');
   });
+
+  ipcMain.handle('mouse-color', (_, color: string) => {
+    mouseWindow.webContents.send('mouse-color', color);
+  });
 };
 
 export default { registerListeners };

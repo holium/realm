@@ -14,6 +14,7 @@ import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
+import { DesktopActions } from './actions/desktop';
 import { MembershipStore } from 'os/services/spaces/models/members';
 import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
@@ -250,6 +251,8 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
+    const shipColor = response.ship.color;
+    if (shipColor) DesktopActions.setMouseColor(shipColor);
     coreStore.setLoggedIn(true);
     ShellActions.setBlur(false);
   }

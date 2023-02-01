@@ -50,6 +50,9 @@ const appPreload = {
   mouseLeftWebView(id: string) {
     ipcRenderer.invoke('mouse-left-webview', id);
   },
+  mouseColorChanged(hex: string) {
+    ipcRenderer.invoke('mouse-color', hex);
+  },
   onMouseMove(
     callback: (
       coordinates: Vec2,
@@ -69,6 +72,11 @@ const appPreload = {
   },
   onMouseUp(callback: () => void) {
     ipcRenderer.on('mouse-up', callback);
+  },
+  onMouseColorChange(callback: (hex: string) => void) {
+    ipcRenderer.on('mouse-color', (_, hex: string) => {
+      callback(hex);
+    });
   },
 };
 
