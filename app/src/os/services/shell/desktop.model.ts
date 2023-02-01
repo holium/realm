@@ -53,7 +53,6 @@ export interface WindowModelProps {
 export const DesktopStore = types
   .model('DesktopStore', {
     showHomePane: types.optional(types.boolean, false),
-    appviewPreload: types.maybe(types.string),
     dynamicMouse: types.optional(types.boolean, true),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     activeWindow: types.safeReference(Window),
@@ -104,9 +103,6 @@ export const DesktopStore = types
         }
       });
       self.activeWindow = self.windows.get(activeWindowId);
-    },
-    setAppviewPreload(preloadPath: string) {
-      self.appviewPreload = preloadPath;
     },
     setDimensions(windowId: string, dimensions: DimensionModelType) {
       const windowDimensions = self.windows.get(windowId)?.dimensions;

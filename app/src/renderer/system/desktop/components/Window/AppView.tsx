@@ -1,4 +1,4 @@
-import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import { FC, useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 // import { Spinner, Flex } from 'renderer/components';
@@ -9,6 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { applyStyleOverrides } from './style-overrides';
 import { genCSSVariables } from 'renderer/logic/theme';
+import { WebView } from './WebView';
 
 interface AppViewProps {
   window: WindowModelProps;
@@ -23,7 +24,7 @@ const View = styled(motion.div)`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, shell, desktop, theme, spaces } = useServices();
+  const { ship, desktop, theme, spaces } = useServices();
   const [ready, setReady] = useState(false);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
@@ -134,14 +135,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
 
-  const onMouseEnter = useCallback(() => {
-    shell.setIsMouseInWebview(true);
-  }, [shell]);
-
-  const onMouseLeave = useCallback(() => {
-    shell.setIsMouseInWebview(false);
-  }, [shell]);
-
   return useMemo(() => {
     return (
       <View
@@ -162,17 +155,15 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             <Spinner size={1} />
           </Flex>
         )} */}
-        <webview
+        <WebView
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"
-          preload={`file://${desktop.appviewPreload}`}
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-expect-error
           allowpopups="true"
           src={appConfig.url}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
+          isLocked={lockView}
           style={{
             left: 0,
             top: 0,
@@ -181,7 +172,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             position: 'absolute',
             background: theme.currentTheme.windowColor,
             overflow: 'hidden',
-            pointerEvents: lockView ? 'none' : 'auto',
           }}
         />
       </View>

@@ -1,4 +1,4 @@
-import { Realm } from './';
+import { Realm } from './index';
 import { AuthService } from './services/identity/auth.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { DesktopService } from './services/shell/desktop.service';

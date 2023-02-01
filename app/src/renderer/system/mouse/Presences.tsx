@@ -1,12 +1,13 @@
 // Loaded in the webview/appview preload script, connects to websocket directly
 // and renders cursor based on presence
-import { motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ShipModelType } from 'os/services/ship/models/ship';
-import { hexToRgb, rgbToString } from 'os/lib/color';
 import styled from 'styled-components';
-import AnimatedCursor, { Vec2 } from './Cursor';
-import { useEventListener } from './Cursor/useEventListener';
+import { motion } from 'framer-motion';
+import { Vec2 } from '@holium/realm-multiplayer';
+import { useEventListener } from './useEventListener';
+import { ShipModelType } from '../../../os/services/ship/models/ship';
+import { rgbToString, hexToRgb } from '../../../os/lib/color';
+import { AnimatedCursor } from './AnimatedCursor';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -185,6 +186,7 @@ export const Presences = () => {
               coords={position}
               isActive={isClicking}
               isActiveClickable={isClicking}
+              state="pointer"
             />
             <CursorName
               style={{
