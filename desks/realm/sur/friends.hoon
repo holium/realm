@@ -5,7 +5,8 @@
 ::
 ::  $friends: specifically used for the our space.
 ::
-+$  friends     (map ship friend)
++$  friends-0     (map ship friend-0)
++$  friends   (map ship friend)
 +$  is-public   ?
 ::
 ::  $friend: specifically used for the our space, keeps track of another
@@ -13,22 +14,25 @@
 ::
 +$  friend-state  ?(%added %mutual)
 +$  friend-tags   (set cord)
-+$  friend  
++$  friend-0
+  $:  pinned=?
+      tags=friend-tags
+      status=?(%fren %following %follower)
+  ==  
++$  friend
   $:  pinned=_|
       tags=friend-tags
       status=?(%fren %following %follower %contact)
-      :: metadata=(map cord cord)
-      is-contact=_|
-      ::
-      :: from %contact-store
-      nickname=@t
+      contact-info=(unit contact-info)
+  ==  
++$  contact-info
+  $:  nickname=@t
       bio=@t
       color=@ux
       avatar=(unit @t)
       cover=(unit @t)
       groups=(set resource)
-      :: last-updated=@da
-  ==  
+  ==
 ::
 ::
 +$  action

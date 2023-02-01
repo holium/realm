@@ -6,10 +6,11 @@
 /+  dbug, default-agent, lib=friends
 |%
 +$  card  card:agent:gall
-+$  versioned-state  $%(state-0)
-+$  state-0  [%0 is-public=? =friends:store]
++$  versioned-state  $%(state-0 state-1)
++$  state-0  [%0 is-public=? friends=friends-0:store]
++$  state-1  [%1 is-public=? =friends:store]
 --
-=|  state-0
+=|  state-1
 =*  state  -
 %-  agent:dbug
 ^-  agent:gall
@@ -37,27 +38,30 @@
     !>(state)
   ::
   ++  on-load
-    |=  =vase
+    |=  old-state=vase
     ^-  (quip card:agent:gall agent:gall)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
-    ?^  old
-      `this(state u.old)
-    :: temporarily doing this for making development easier
-    ~&  >>  'nuking old %friends'
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
-  :: |=  old-state=vase
-  :: ^-  (quip card _this)
-  :: =/  old  !<(versioned-state old-state)
-  :: ?-  -.old
-  ::   %0  `this(state old)
-  :: ==
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+        %0
+      :-  ~
+      %=  this
+          state  :*  %1
+                     is-public.old
+                     ^-  friends:store
+                     %-  malt
+                     %+  turn  ~(tap by friends.old)
+                     |=  [=ship fren=friend-0:store]
+                     :-  ship
+                     :*  pinned.fren
+                         tags.fren
+                         status.fren
+                         ~
+                     ==
+                 ==
+      ==
+        %1
+      `this(state old)
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -287,7 +291,7 @@
     [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
       %follower
     =.  friends
-      ?.  is-contact.fren  (~(del by friends) ship)
+      ?~  contact-info.fren  (~(del by friends) ship)
       (~(put by friends) ship fren(status %contact))
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%bye-friend ship])]

@@ -17,15 +17,15 @@
   |=  [ufriend=(unit friend:sur) =contact:sur]
   ^-  friend:sur
   =/  friend  ?~(ufriend *friend:sur u.ufriend)
-  %=  friend
-    is-contact    %.y
-    nickname      nickname.contact
-    bio           bio.contact
-    color         color.contact
-    avatar        avatar.contact
-    cover         cover.contact
-    groups        groups.contact
-  ==
+  =/  contact-info
+    :*  nickname.contact
+        bio.contact
+        color.contact
+        avatar.contact
+        cover.contact
+        groups.contact
+    ==
+  friend(contact-info `contact-info)
 ::
 ++  rolodex-to-friends
   |=  [=friends:sur =rolodex:sur]
@@ -50,14 +50,15 @@
 ++  field-edit
   |=  [=friend:sur field=edit-field:sur]
   ^-  friend:sur
+  ?~  contact-info.friend  !!
   ?+  -.field      friend
-    %nickname      friend(nickname nickname.field)
-    %bio           friend(bio bio.field)
-    %color         friend(color color.field)
-    %avatar        friend(avatar avatar.field)
-    %add-group     friend(groups (~(put in groups.friend) resource.field))
-    %remove-group  friend(groups (~(del in groups.friend) resource.field))
-    %cover         friend(cover cover.field)
+    %nickname      friend(nickname.u.contact-info nickname.field)
+    %bio           friend(bio.u.contact-info bio.field)
+    %color         friend(color.u.contact-info color.field)
+    %avatar        friend(avatar.u.contact-info avatar.field)
+    %add-group     friend(groups.u.contact-info (~(put in groups.u.contact-info.friend) resource.field))
+    %remove-group  friend(groups.u.contact-info (~(del in groups.u.contact-info.friend) resource.field))
+    %cover         friend(cover.u.contact-info cover.field)
   ==
 ::
 ++  nu                                              ::  parse number as hex
@@ -210,13 +211,17 @@
     :~  ['pinned' b+pinned.friend]
         ['tags' [%a (turn ~(tap in tags.friend) |=(tag=cord s+tag))]]
         ['status' s+status.friend]
-        ['is-contact' b+is-contact.friend]
-        ['nickname' s+nickname.friend]
-        ['bio' s+bio.friend]
-        ['color' s+(scot %ux color.friend)]
-        ['avatar' ?~(avatar.friend ~ s+u.avatar.friend)]
-        ['cover' ?~(cover.friend ~ s+u.cover.friend)]
-        ['groups' a+(turn ~(tap in groups.friend) (cork enjs-path:res (lead %s)))]
+        :-  'contact-info'
+          ?~  contact-info.friend  ~
+          %-  pairs
+          ^-  (list [@t json])
+          :~  ['nickname' s+nickname.u.contact-info.friend]
+              ['bio' s+bio.u.contact-info.friend]
+              ['color' s+(scot %ux color.u.contact-info.friend)]
+              ['avatar' ?~(avatar.u.contact-info.friend ~ s+u.avatar.u.contact-info.friend)]
+              ['cover' ?~(cover.u.contact-info.friend ~ s+u.cover.u.contact-info.friend)]
+              ['groups' a+(turn ~(tap in groups.u.contact-info.friend) (cork enjs-path:res (lead %s)))]
+          ==
     ==
   ::
   --
