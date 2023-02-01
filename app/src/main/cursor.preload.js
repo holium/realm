@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { app, ipcRenderer, contextBridge } = require('electron');
 const path = require('path');
 let CursorLib;

@@ -10,7 +10,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-export const WindowManager = observer(() => {
+const WindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
   const isOpen = !desktop.showHomePane;
@@ -79,4 +79,6 @@ export const WindowManager = observer(() => {
       ))}
     </motion.div>
   );
-});
+};
+
+export const WindowManager = observer(WindowManagerPresenter);

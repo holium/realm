@@ -6,7 +6,7 @@ import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInst
 import { RealmPopover } from '../Popover';
 import { SearchModes } from './SearchModes';
 
-export const AppSearchPopover = observer(() => {
+const AppSearchPopoverPresenter = () => {
   const appInstaller = useAppInstaller();
   const { theme } = useServices();
   const backgroundColor = useMemo(
@@ -38,4 +38,6 @@ export const AppSearchPopover = observer(() => {
       <SearchModes />
     </RealmPopover>
   );
-});
+};
+
+export const AppSearchPopover = observer(AppSearchPopoverPresenter);

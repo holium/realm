@@ -22,7 +22,7 @@ import { ErrorBoundary } from './logic/ErrorBoundary';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-export const App = observer(() => {
+const AppPresenter = () => {
   const { booted } = useCore();
   const { desktop, shell, theme } = useServices();
 
@@ -86,7 +86,7 @@ export const App = observer(() => {
       </ThemeProvider>
     </CoreProvider>
   );
-});
+};
 
 // function MultiplayerMouse() {
 //   const { ship, spaces } = useServices();
@@ -118,4 +118,4 @@ export const App = observer(() => {
 //   return <Presences />;
 // }
 
-export default App;
+export default observer(AppPresenter);

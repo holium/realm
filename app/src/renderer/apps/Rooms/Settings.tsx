@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Flex,
   Grid,
@@ -17,7 +17,7 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
-export const Settings: FC = observer(() => {
+const SettingsPresenter = () => {
   const { dimensions, roomsApp } = useTrayApps();
   const { ship, theme } = useServices();
   const roomsManager = useRooms(ship!.patp);
@@ -33,7 +33,7 @@ export const Settings: FC = observer(() => {
   }, [inputColor, mode]);
 
   useEffect(() => {
-    roomsManager.getAudioInputSources().then((sources: any[]) => {
+    roomsManager?.getAudioInputSources().then((sources: any[]) => {
       setAudioSources(sources as RadioOption[]);
       const deviceId =
         localStorage.getItem('rooms-audio-input') ||
@@ -97,7 +97,7 @@ export const Settings: FC = observer(() => {
               selected={selectedSource}
               onClick={(source: string) => {
                 setSelectedSource(source);
-                roomsManager.setAudioInput(source);
+                roomsManager?.setAudioInput(source);
               }}
             />
           </FormControl.Field>
@@ -105,4 +105,6 @@ export const Settings: FC = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const Settings = observer(SettingsPresenter);

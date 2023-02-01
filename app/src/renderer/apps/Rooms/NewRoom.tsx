@@ -59,7 +59,7 @@ export const createRoomForm = (
   };
 };
 
-export const NewRoom = observer(() => {
+const NewRoomPresenter = () => {
   const { dimensions } = useTrayApps();
   const { ship, theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,7 @@ export const NewRoom = observer(() => {
     evt.stopPropagation();
     const spacePath =
       spaces.selected?.type !== 'our' ? spaces.selected!.path : null;
-    roomsManager.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
 
@@ -193,4 +193,6 @@ export const NewRoom = observer(() => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const NewRoom = observer(NewRoomPresenter);
