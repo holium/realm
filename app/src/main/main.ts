@@ -22,7 +22,7 @@ import MediaHelper from './helpers/media';
 import MouseHelper from './helpers/mouse';
 import BrowserHelper from './helpers/browser';
 
-import { AppUpdater } from './updater';
+import { AppUpdater } from './AppUpdater';
 
 import { hideCursor } from './helpers/hideCursor';
 import { isDevelopment, isProduction } from './helpers/env';
@@ -78,14 +78,6 @@ export const getPreloadPath = () =>
   app.isPackaged
     ? path.join(__dirname, 'preload.js')
     : path.join(__dirname, '../../.holium/dll/preload.js');
-
-const RESOURCES_PATH = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets')
-  : path.join(__dirname, '../../assets');
-
-const getAssetPath = (...paths: string[]): string => {
-  return path.join(RESOURCES_PATH, ...paths);
-};
 
 const createWindow = async () => {
   // TODO fix the warnings and errors with this
