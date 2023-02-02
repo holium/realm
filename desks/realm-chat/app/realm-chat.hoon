@@ -48,6 +48,8 @@
         (create-chat:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
+      %remove-ship-from-chat
+        (remove-ship-from-chat:lib +.act state bowl)
     ==
     [cards this]
   ::
@@ -106,12 +108,12 @@
             ~&  >>>  p.cage.sign
             ?+    p.cage.sign  `this
                 %db-dump
-                  ~&  >>>  'we got a new db-dump thing'
-                  ~&  >>>  !<(db-dump:db-sur q.cage.sign)
+                  ::~&  >>>  'we got a new db-dump thing'
+                  ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
                   `this
                 %db-change
-                  ~&  >>>  'we got a new db-change thing'
-                  ~&  >>>  !<(db-change:db-sur q.cage.sign)
+                  ::~&  >>>  'we got a new db-change thing'
+                  ::~&  >>>  !<(db-change:db-sur q.cage.sign)
                   `this
             ==
         ==

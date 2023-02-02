@@ -39,6 +39,13 @@
 ++  into-insert-message-poke
   |=  [p=peer-row:db act=insert-message-action:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert act])]
+++  into-all-peers-kick-pokes
+  |=  [kickee=ship peers=(list peer-row:db)]
+  ^-  (list card)
+  %:  turn
+    peers
+    |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%kick-peer path.p kickee])])
+  ==
 ::
 ::  poke actions
 ::
@@ -69,6 +76,27 @@
         |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%add-peer path.act ship.act])])
       ==
   [cards state]
+::  allows self to remove self, or %host to kick others
+++  remove-ship-from-chat
+::  :realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
+  |=  [act=[=path =ship] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+  =/  cards
+    ?:  =(ship.act patp.host)
+      :: if src.bowl is %host, we have to send kick-peer for all the peers
+      :: to all the peers and then leave-path the host
+      :-  [%pass /dbpoke %agent [patp.host %chat-db] %poke %action !>([%leave-path path.act])]
+      %-  zing
+      %:  turn
+        pathpeers
+        |=(p=peer-row:db (into-all-peers-kick-pokes patp.p pathpeers))
+      ==
+    :: otherwise we just send kick-peer to all the peers (db will ensure permissions)
+    (into-all-peers-kick-pokes ship.act pathpeers)
+  [cards state]
+::
 ++  send-message
 ::  :realm-chat &action [%send-message [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [act=insert-message-action:db state=state-0 =bowl:gall]

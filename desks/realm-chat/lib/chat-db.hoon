@@ -190,23 +190,38 @@
   ==
   [gives state]
 ++  kick-peer
-::  :chat-db &action [%kick-peer [/a/path/to/a/chat ~bus]]
+::  :chat-db &action [%kick-peer /a/path/to/a/chat ~bus]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ?.  (~(has by paths-table.state) path.act)
+    `state  :: do nothing if we get a kick-peer on a path we have already left
 
-  :: TODO kick-peer signals are only valid from the ship which is the
-  :: %host of the path
+  =/  original-peers-list   (~(got by peers-table.state) path.act)
+  :: kick-peer signals are only valid from the ship which is the
+  :: %host of the path, OR from the ship being kicked (kicking yourself)
+  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
+  ?>  |(=(patp.host-peer-row src.bowl) =(src.bowl patp.act))
 
   =/  peers  (skip (~(got by peers-table.state) path.act) |=(a=peer-row:sur =(patp.a patp.act)))
-  =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
+  =/  our-kicked  =(our.bowl patp.act)
 
-  :: TODO if we are kicked from a path by the %host, we should update
-  :: paths-table and messages-table
+  :: remove from all tables if we were the one kicked
+  :: otherwise, only update the peers-table
+  =.  peers-table.state  ?:(our-kicked (~(del by peers-table.state) path.act) (~(put by peers-table.state) path.act peers))
+  =.  paths-table.state  ?:(our-kicked (~(del by paths-table.state) path.act) paths-table.state)
+  =.  messages-table.state  ?:(our-kicked (remove-messages-for-path messages-table.state path.act) messages-table.state)
+
+  =/  thechange
+    ?:  our-kicked
+      :: for now we are assuming that subscribed clients are intelligent
+      :: enough to realize that a %del-row %paths also means remove the
+      :: related messages
+      db-change+!>(~[[%del-row %peers path.act] [%del-row %paths path.act]])
+    :: else just update the peers table
+    db-change+!>(~[[%del-row %peers path.act] [%add-row %peers peers]])
 
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.act) ~] thechange]
+    [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
 ::

@@ -15,6 +15,7 @@
   $%
       [%create-chat =create-chat-data]
       [%add-ship-to-chat =path =ship]
+      [%remove-ship-from-chat =path =ship]
       [%send-message =insert-message-action:db]
   ==
 +$  create-chat-data  [metadata=(map cord cord) type=@tas]

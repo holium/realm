@@ -53,8 +53,6 @@
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
-    ~&  >   'on-watching in chat-db'
-    ~&  >   path
     ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
     ::  each path should map to a list of cards
