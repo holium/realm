@@ -97,6 +97,38 @@ const UpdateDownloaded = () => {
   );
 };
 
+const UpdateNotAvailable = () => {
+  return (
+    <>
+      <div style={{ padding: '12px' }}>No updates available</div>
+      <div style={{ padding: '12px' }}>
+        <button
+          style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
+          onClick={() => window.autoUpdate.cancelUpdates()}
+        >
+          Ok
+        </button>
+      </div>
+    </>
+  );
+};
+
+const AppUpdateError = (props) => {
+  return (
+    <>
+      <div style={{ padding: '12px' }}>{props.error}</div>
+      <div style={{ padding: '12px' }}>
+        <button
+          style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
+          onClick={() => window.autoUpdate.cancelUpdates()}
+        >
+          Ok
+        </button>
+      </div>
+    </>
+  );
+};
+
 // @ts-ignore
 window.autoUpdate.listen((event, message: any) => {
   console.log('message => %o', message);
@@ -113,6 +145,15 @@ window.autoUpdate.listen((event, message: any) => {
       break;
     case 'starting-download':
       view = () => <>Starting download. Please wait...</>;
+      break;
+    case 'checking-for-updates':
+      view = () => <>Checking for updates. Please wait...</>;
+      break;
+    case 'update-not-available':
+      view = <UpdateNotAvailable />;
+      break;
+    case 'error':
+      view = <AppUpdateError error={message.error} />;
       break;
   }
   root.render(<View>{view}</View>);
