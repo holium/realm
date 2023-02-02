@@ -7,8 +7,8 @@
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater, UpdateInfo } from 'electron-updater';
-import { resolveHtmlPath } from './util';
+import { autoUpdater } from 'electron-updater';
+import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 const fs = require('fs');
 
@@ -75,7 +75,6 @@ export class AppUpdater implements IAppUpdater {
   private progressWindow: BrowserWindow | null = null;
   private splashWindow: BrowserWindow | null = null;
   private handlers: IpcHandler[] = [];
-  private updateInfo: UpdateInfo | undefined = undefined;
 
   constructor() {
     if (!process.env.AUTOUPDATE_FEED_URL) return;
@@ -111,14 +110,13 @@ export class AppUpdater implements IAppUpdater {
         });
       }
     });
-    autoUpdater.on('update-available', (info: UpdateInfo) => {
+    autoUpdater.on('update-available', () => {
+      // TODO - call download function
       self.progressWindow?.show();
       self.splashWindow?.close();
       self.splashWindow = null;
-      self.updateInfo = info;
       self.progressWindow?.webContents.send('auto-updater-message', {
         name: 'update-available',
-        version: info.version,
       });
     });
     autoUpdater.on('update-not-available', () => {
@@ -132,14 +130,14 @@ export class AppUpdater implements IAppUpdater {
       }
     });
     autoUpdater.on('update-downloaded', () => {
+      // TODO - restart the app and install the update
       self.progressWindow?.webContents.send('auto-updater-message', {
         name: 'update-downloaded',
       });
     });
     autoUpdater.on('download-progress', (stats) => {
       self.progressWindow?.webContents.send('auto-updater-message', {
-        stats,
-        info: self.updateInfo,
+        ...stats,
         name: 'update-status',
       });
     });
@@ -163,9 +161,10 @@ export class AppUpdater implements IAppUpdater {
     // this is not needed if the app is already open (mainWindow !== null)
     if (!mainWindow) {
       // show a splash on startup (manual check or not)
-      self.splashWindow = new BrowserWindow({
-        width: 400,
-        height: 300,
+      console.log('creating waiting window...');
+      self.wait = new BrowserWindow({
+        width: 420,
+        height: 310,
         icon: getAssetPath('icon.png'),
         title: 'Please wait',
         frame: false,
@@ -178,12 +177,7 @@ export class AppUpdater implements IAppUpdater {
       });
       // must be raw content. any attempt to do stuff with auto generated react/html (see startUpdateUI)
       //  takes a while to load; especially in development when its built on the fly
-      const content = `
-      <html><body><div style="font-family: Arial; width: 100%; height: calc(100vh); display: flex; align-items: center; justify-content: center;">
-        Initializing. Please wait...
-      </div></body></html>
-    `;
-      self.splashWindow?.loadURL(`data:text/html;charset=utf-8,${content}`);
+      self.wait.loadURL(resolveUpdaterPath('initial.html'));
     } else {
       self.splashWindow = null;
     }
@@ -191,9 +185,9 @@ export class AppUpdater implements IAppUpdater {
     // if (!mainWindow) {
     this.progressWindow = new BrowserWindow({
       show: mainWindow ? true : false,
-      parent: mainWindow || undefined,
-      width: 400,
-      height: 300,
+      parent: mainWindow,
+      width: 420,
+      height: 310,
       icon: getAssetPath('icon.png'),
       title: 'Update Progress',
       acceptFirstMouse: true,
@@ -224,7 +218,6 @@ export class AppUpdater implements IAppUpdater {
           listener: () => {
             self.progressWindow?.webContents.send('update-status', {
               name: 'starting-download',
-              info: self.updateInfo,
             });
             autoUpdater.downloadUpdate();
           },

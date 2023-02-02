@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
+import { HoliumLogo } from './holium-logo';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
@@ -29,11 +30,17 @@ const View = (props: any) => {
   return (
     <div
       style={{
-        height: 'calc(100vh)',
+        height: '100vh',
         width: '100%',
-        fontFamily: 'Rubik, sans-serif',
+        fontFamily: 'Rubik, system-ui, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
+      <HoliumLogo />
+
       <div
         style={{
           display: 'flex',
@@ -42,7 +49,6 @@ const View = (props: any) => {
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
-          height: '100%',
         }}
       >
         {props.children}
