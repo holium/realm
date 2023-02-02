@@ -1,11 +1,9 @@
-const fs = require('fs');
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-
 import { autoUpdater } from 'electron-updater';
-
 import { resolveHtmlPath } from './util';
+const fs = require('fs');
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')
