@@ -64,15 +64,15 @@ export class AppUpdater implements IAppUpdater {
   private wait: BrowserWindow | null = null;
 
   constructor() {
+    if (!process.env.AUTOUPDATE_FEED_URL) return;
     const self = this;
-    // if (process.env.NODE_ENV === 'development') return;
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     autoUpdater.autoDownload = false;
     // proxy private github repo requests
     autoUpdater.setFeedURL({
-      provider: 'custom',
-      url: process.env.AUTOUPDATE_FEED_URL,
+      provider: 'generic',
+      url: process.env.AUTOUPDATE_FEED_URL, // || 'https://ghproxy-staging.holium.xyz',
       channel: determineReleaseChannel(),
     });
     autoUpdater.on('error', (error) => {
@@ -211,6 +211,10 @@ export class AppUpdater implements IAppUpdater {
   checkForUpdates = (manualCheck: boolean = false) => {
     const self = this;
     return new Promise(async (resolve) => {
+      if (!process.env.AUTOUPDATE_FEED_URL) {
+        resolve('continue');
+        return;
+      }
       self.doneCallback = resolve;
       if (net.isOnline()) {
         self.startUpdateUI(manualCheck);
