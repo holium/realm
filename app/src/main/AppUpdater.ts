@@ -192,10 +192,10 @@ export class AppUpdater implements IAppUpdater {
       fullscreen: false,
       frame: false,
       center: true,
-      resizable: false,
+      resizable: true,
       movable: false,
       webPreferences: {
-        // devTools: false,
+        // devTools: true,
         nodeIntegration: false,
         webviewTag: true,
         sandbox: false,
