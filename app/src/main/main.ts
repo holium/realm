@@ -21,13 +21,17 @@ import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
 import MouseHelper from './helpers/mouse';
 import BrowserHelper from './helpers/browser';
-import { hideCursor } from './helpers/hideCursor';
+
 import { AppUpdater } from './AppUpdater';
+
+import { hideCursor } from './helpers/hideCursor';
 import { isDevelopment, isProduction } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
+
+const appUpdater = new AppUpdater();
 
 let mainWindow: BrowserWindow;
 let mouseWindow: BrowserWindow;
@@ -136,12 +140,6 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
-  // Remove this if your app does not use auto updates
-  const appUpdater = new AppUpdater();
-  // if (process.env.NODE_ENV === 'production') {
-  //   appUpdater = new AppUpdater();
-  // }
-
   const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
 
@@ -222,13 +220,15 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
-    createWindow();
-    createMouseOverlayWindow();
-    app.on('activate', () => {
+  .then(async () => {
+    appUpdater.checkForUpdates().then(() => {
+      createWindow();
+      createMouseOverlayWindow();
+    });
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) {
+      if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
       }
       if (mouseWindow === null) {
