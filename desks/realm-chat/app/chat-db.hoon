@@ -38,6 +38,7 @@
       %leave-path 
         (leave-path:db-lib +.act state bowl)
       %insert
+        ~&  >>  %insert-in-db
         (insert:db-lib +.act state bowl)
       %edit
         (edit:db-lib +.act state bowl)

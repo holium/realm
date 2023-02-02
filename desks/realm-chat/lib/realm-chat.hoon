@@ -37,8 +37,8 @@
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
 ++  into-insert-message-poke
-  |=  [p=peer-row:db act=insert-message-action:db]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert act])]
+  |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db)] ts=@da]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert ts act])]
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
   ^-  (list card)
@@ -78,6 +78,7 @@
   [cards state]
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
+:: TODO fix %host removes self fails to update other peers properly
 ::  :realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
@@ -98,15 +99,16 @@
   [cards state]
 ::
 ++  send-message
-::  :realm-chat &action [%send-message [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
-  |=  [act=insert-message-action:db state=state-0 =bowl:gall]
+::  :realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain 'hello'] ~ ~] ~])]
+  |=  [act=[=path fragments=(list minimal-fragment:db)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
+  =/  official-time  now.bowl
   =/  cards  
     %:  turn
       pathpeers
-      |=(a=peer-row:db (into-insert-message-poke a act))
+      |=(a=peer-row:db (into-insert-message-poke a act official-time))
     ==
   :: then send pokes to all the peers about inserting a message
   [cards state]

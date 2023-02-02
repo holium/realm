@@ -37,12 +37,18 @@
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
 ++  add-message-to-table
-  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur now=@da sender=@p]
-  =/  msg-id=msg-id:sur   [now sender]
+  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p]
+  =/  msg-id=msg-id:sur   [timestamp.msg-act sender]
   =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
   =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
+++  messages-start-paths
+  |=  [=bowl:gall]
+  ^-  (list path)
+  =/  len-three  (skim ~(val by sup.bowl) |=(a=[p=ship q=path] (gte (lent q.a) 3)))
+  =/  matching  (skim len-three |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start)))
+  (turn matching |=(a=[p=ship q=path] q.a))
 ::
 ::  poke actions
 ::
@@ -101,27 +107,27 @@
   [gives state]
 ::
 ++  insert
-::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
+::  :chat-db &action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
 
-  =/  add-result  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
+  =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start since every new message will need to go out to
   :: those subscriptions
-  =/  message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  =/  message-paths  (messages-start-paths bowl)
   =/  gives  :~
-    [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
+    [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg-act) ~])) thechange]
   ==
   [gives state]
 ::
 ++  edit
-::  :chat-db &action [%edit [[~2023.1.31..18.16.30..86f1 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
+::  :chat-db &action [%edit [[~2023.2.2..23.11.10..234a ~zod] [~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -131,14 +137,14 @@
   =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a]))
   =.  messages-table.state  -.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state msg-act timestamp.msg-id sender.msg-id)
+  =/  add-result            (add-message-to-table messages-table.state msg-act sender.msg-id)
   =.  messages-table.state  -.add-result
   =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
   :: from earlier
-  =/  all-message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  =/  all-message-paths  (messages-start-paths bowl)
   =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
@@ -146,7 +152,7 @@
   [gives state]
 ::
 ++  delete
-::  :chat-db &action [%delete [timestamp=~2023.1.31..18.16.30..86f1 sender=~zod]]
+::  :chat-db &action [%delete [timestamp=~2023.2.2..23.11.10..234a sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -160,7 +166,7 @@
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
   :: from earlier
-  =/  all-message-paths  (turn (skim ~(val by sup.bowl) |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start))) |=(a=[p=ship q=path] q.a))
+  =/  all-message-paths  (messages-start-paths bowl)
   =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path.msg-part) ~]) message-paths) thechange]
