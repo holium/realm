@@ -1,6 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import {
   background,
   BackgroundProps,

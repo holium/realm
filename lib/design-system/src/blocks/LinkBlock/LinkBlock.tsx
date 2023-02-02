@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Flex, skeletonStyle, Text, Bookmark } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { isTwitterLink, parseMediaType } from '../../util/links';
+import { isTwitterLink } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
 
 const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';

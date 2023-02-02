@@ -21,6 +21,7 @@ const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
     css`
       ${skeletonStyle}
       border-radius: 12px;
+      min-width: 392px;
       width: calc(100% - 8px) !important;
       height: calc(100% - 8px) !important;
       padding: 4px;
@@ -42,7 +43,6 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
       tweetEmbed = (
         <TwitterTweetEmbed
           onLoad={() => {
-            console.log('TweetBlock: tweet loaded');
             setTweetLoaded(true);
           }}
           tweetId={tweetId}

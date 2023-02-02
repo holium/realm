@@ -244,7 +244,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       message={[
         { plain: 'Epic shit here' },
         {
-          link: 'https://twitter.com/AidenSolaran/status/1620110592961875980',
+          link: 'https://twitter.com/AidenSolaran/status/1603513958459121682?s=20&t=LKirXqLOIXG8Ff_TS-2HCw',
         },
       ]}
       onReaction={() => {}}
