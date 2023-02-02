@@ -9,3 +9,4 @@ export * from './WindowedList/WindowedList';
 export { Row } from './Row/Row';
 export { Favicon } from './Favicon/Favicon';
 export { SectionDivider } from './SectionDivider/SectionDivider';
+export { ProgressBar } from './ProgressBar/ProgressBar';

@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
+import { Flex, ProgressBar } from '@holium/design-system';
 import { HoliumLogo } from './holium-logo';
 
 const environment = process.env.NODE_ENV;
@@ -30,6 +31,7 @@ const View = (props: any) => {
   return (
     <div
       style={{
+        position: 'relative',
         height: '100vh',
         width: '100%',
         fontFamily: 'Rubik, system-ui, sans-serif',
@@ -39,8 +41,9 @@ const View = (props: any) => {
         justifyContent: 'center',
       }}
     >
-      <HoliumLogo />
-
+      <Flex position="absolute" top="80px">
+        <HoliumLogo />
+      </Flex>
       <div
         style={{
           display: 'flex',
@@ -63,6 +66,7 @@ root.render(<View />);
 
 const UpdateAvailable = (props: UpdateAvailableProps) => {
   const { info } = props;
+  console.log('UpdateAvailable', info);
   return (
     <>
       <div style={{ padding: '12px' }}>Found updates</div>
@@ -88,6 +92,7 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
 
 const UpdateStats = (props: UpdateStatsProps) => {
   const { stats, info } = props;
+  console.log(stats, info);
   return (
     <>
       <div style={{ padding: '12px' }}>Version: {info.version}</div>
