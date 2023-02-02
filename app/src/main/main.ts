@@ -182,8 +182,12 @@ const createMouseOverlayWindow = () => {
     },
   });
   newMouseWindow.setIgnoreMouseEvents(true);
-  newMouseWindow.setWindowButtonVisibility(false);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
+
+  // Hide the traffic lights on macOS.
+  if (process.platform === 'darwin') {
+    newMouseWindow.setWindowButtonVisibility(false);
+  }
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
