@@ -28,9 +28,8 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ~&  mark
-    ~&  vase
     ?>  ?=(%action mark)
+    ~&  vase
     =/  act  !<(action:sur vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
@@ -39,6 +38,8 @@
       %leave-path 
         (leave-path:db-lib +.act state bowl)
       %insert
+        ~&  >>>  'aaaaaaaaaaaa'
+        ~&  >>>  +.act
         (insert:db-lib +.act state bowl)
       %edit
         (edit:db-lib +.act state bowl)
@@ -91,6 +92,12 @@
     ::
       [%x %db %peers ~]
         ``db-dump+!>([%tables [[%peers peers-table.state] ~]])
+    ::
+    :: .^(* %gx /(scot %p our)/chat-db/(scot %da now)/db/peers-for-path/a/path/to/a/chat/noun)
+      [%x %db %peers-for-path *]
+        =/  thepath  t.t.t.path
+        =/  thepeers  (~(got by peers-table.state) thepath)
+        ``db-dump+!>([%tables [[%peers (malt (limo ~[[thepath thepeers]]))] ~]])
     ::
       [%x %db %messages ~]
         ``db-dump+!>([%tables [[%messages messages-table.state] ~]])

@@ -41,8 +41,8 @@
     =/  act  !<(action vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
-      %first-action
-        (first-action:lib +.act state bowl)
+      %send-message
+        (send-message:lib +.act state bowl)
     ==
     [cards this]
   ::
@@ -75,6 +75,14 @@
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
     ?+    wire  !!
+      [%dbpoke ~]
+        ?+    -.sign  !!
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  wire
+            ~&  >>>  p.sign
+            `this
+        ==
       [%messages ~]
         ?+    -.sign  !!
           %watch-ack

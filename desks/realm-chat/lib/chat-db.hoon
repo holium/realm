@@ -58,12 +58,30 @@
     metadata.act
     type.act
   =.  paths-table.state  (~(put by paths-table.state) path.act row)
-  =/  peer=peer-row:sur   :+
+
+  :: if this signal comes from ourselves, we are the host, but if it
+  :: comes from elsewhere, we are being invited, and they are the host
+  =/  thepeers
+  ?:  =(src.bowl our.bowl)
+    =/  peer=peer-row:sur   :+
+      path.act
+      our.bowl
+      %host
+    [peer ~]
+
+  :: else, signal came from not-us
+  =/  us=peer-row:sur   :+
     path.act
     our.bowl
+    %member
+  =/  them=peer-row:sur   :+
+    path.act
+    src.bowl
     %host
-  =.  peers-table.state  (~(put by peers-table.state) path.act [peer ~])
-  =/  thechange  db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers [peer ~]]]])
+  [them us ~]
+
+  =.  peers-table.state  (~(put by peers-table.state) path.act thepeers)
+  =/  thechange  db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers thepeers]]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
@@ -72,6 +90,7 @@
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ?>  =(our.bowl src.bowl)  :: leave signals are only valid from ourselves. if others want to kick us, that is a different matter
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
   =.  messages-table.state  (remove-messages-for-path messages-table.state path)
@@ -84,6 +103,10 @@
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
+  =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
+  ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
+
   =/  add-result  (add-message-to-table messages-table.state msg-act now.bowl our.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
@@ -99,6 +122,8 @@
 ::  :chat-db &action [%edit [[~2023.1.31..18.16.30..86f1 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
+  ?>  =(sender.msg-id src.bowl)  :: edit signals are only valid from the ship which is the original sender
 
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a]))
@@ -118,9 +143,12 @@
   ==
   [gives state]
 ++  delete
-::  :chat-db &action [%delete [timestamp=~2023.1.25..18.29.42..0a77 sender=~zod]]
+::  :chat-db &action [%delete [timestamp=~2023.1.31..18.16.30..86f1 sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
+  ?>  =(sender.msg-id src.bowl)  :: delete signals are only valid from the ship which is the original sender
+
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
@@ -139,6 +167,10 @@
 ::  :chat-db &action [%add-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
+  :: TODO add-peer signals are only valid from the ship which is the
+  :: %host of the path
+
   =/  row=peer-row:sur   :+
     path.act
     patp.act
@@ -155,9 +187,17 @@
 ::  :chat-db &action [%kick-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
+  :: TODO kick-peer signals are only valid from the ship which is the
+  :: %host of the path
+
   =/  peers  (skip (~(got by peers-table.state) path.act) |=(a=peer-row:sur =(patp.a patp.act)))
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
+
+  :: TODO if we are kicked from a path by the %host, we should update
+  :: paths-table and messages-table
+
   =/  gives  :~
     [%give %fact [/db ~] thechange]
     [%give %fact [(weld /db/path path.act) ~] thechange]

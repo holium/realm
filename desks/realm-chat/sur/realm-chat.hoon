@@ -1,3 +1,4 @@
+/-  db=chat-db
 ::  realm-chat [realm]
 ::
 |%
@@ -11,7 +12,7 @@
   ==
 ::
 +$  action
-  $%  
-      [%first-action =path]
+  $%
+      [%send-message =insert-message-action:db]
   ==
 --

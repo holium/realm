@@ -3,21 +3,45 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in realm-chat sur.
 ::
-/-  *realm-chat
+/-  *realm-chat, db=chat-db
 |%
 ::
-:: transformation helpers
+:: helpers
 ::
-
-
+++  scry-peers
+  |=  [=path =bowl:gall]
+  ^-  (list peer-row:db)
+  =/  paths  (weld /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/peers-for-path path)
+  =/  tbls
+    .^
+      db-dump:db
+      %gx
+      (weld paths /noun)
+    ==
+  =/  tbl  `table:db`(snag 0 tables.tbls)
+  ?+  -.tbl  !!
+    %peers  (snag 0 ~(val by peers-table.tbl))
+  ==
+++  into-insert-message-pokes
+  |=  [p=peer-row:db act=insert-message-action:db]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert act])]
 ::
 ::  poke actions
 ::
-++  first-action
-::  :realm-chat &action [%first-action /a/path/to/a/chat]
-  |=  [act=path state=state-0 =bowl:gall]
+++  send-message
+::  :realm-chat &action [%send-message [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
+  |=  [act=insert-message-action:db state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  `state
+  :: read the peers for the path
+  =/  pathpeers  (scry-peers path.act bowl)
+  ~&  >  pathpeers
+  =/  cards  
+    %:  turn
+      pathpeers
+      |=(a=peer-row:db (into-insert-message-pokes a act))
+    ==
+  :: then send pokes to all the peers about inserting a message
+  [cards state]
 ::
 ::  JSON
 ::
