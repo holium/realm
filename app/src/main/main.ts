@@ -31,8 +31,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-const appUpdater = new AppUpdater();
-
 let mainWindow: BrowserWindow;
 let mouseWindow: BrowserWindow;
 export type WebViewsData = Record<
@@ -140,7 +138,7 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
+  const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
@@ -221,7 +219,7 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(async () => {
-    appUpdater.checkForUpdates().then(() => {
+    new AppUpdater().checkForUpdates().then(() => {
       createWindow();
       createMouseOverlayWindow();
     });

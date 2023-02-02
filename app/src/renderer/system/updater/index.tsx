@@ -40,11 +40,7 @@ const View = (props: any) => {
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(
-  <View>
-    <>Checking for updates. Please wait...</>
-  </View>
-);
+root.render(<View />);
 
 const UpdateAvailable = () => {
   return (
@@ -152,10 +148,10 @@ window.autoUpdate.listen((event, message: any) => {
       view = <UpdateDownloaded />;
       break;
     case 'starting-download':
-      view = () => <>Starting download. Please wait...</>;
+      view = <>Starting download. Please wait...</>;
       break;
     case 'checking-for-updates':
-      view = () => <>Checking for updates. Please wait...</>;
+      view = <>Checking for updates. Please wait...</>;
       break;
     case 'update-not-available':
       view = <UpdateNotAvailable />;
