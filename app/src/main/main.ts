@@ -23,7 +23,7 @@ import MouseHelper from './helpers/mouse';
 import BrowserHelper from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isProduction } from './helpers/env';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -185,9 +185,7 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   // Hide the traffic lights on macOS.
-  if (process.platform === 'darwin') {
-    newMouseWindow.setWindowButtonVisibility(false);
-  }
+  if (isMac) newMouseWindow.setWindowButtonVisibility(false);
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
@@ -219,9 +217,7 @@ const createMouseOverlayWindow = () => {
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (!isMac) app.quit();
 });
 
 app
