@@ -5,6 +5,7 @@ When testing in development mode...
 ## Local Update Server
 
 1. Clone the realm update server
+https://github.com/holium/autoupdate-dev-server
 
 - Nav to the source root folder
 - Run `yarn install`
