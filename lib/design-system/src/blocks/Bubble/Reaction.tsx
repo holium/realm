@@ -205,6 +205,7 @@ export const Reactions = (props: ReactionProps) => {
             <Flex position="absolute" zIndex={4}>
               <EmojiPicker
                 emojiVersion="0.6"
+                zIndex={4}
                 defaultSkinTone={SkinTones.NEUTRAL}
                 onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
                   evt.stopPropagation();
