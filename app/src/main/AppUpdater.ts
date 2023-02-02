@@ -7,7 +7,7 @@
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater } from 'electron-updater';
+import { autoUpdater, UpdateInfo } from 'electron-updater';
 import { resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 const fs = require('fs');
@@ -75,6 +75,7 @@ export class AppUpdater implements IAppUpdater {
   private progressWindow: BrowserWindow | null = null;
   private splashWindow: BrowserWindow | null = null;
   private handlers: IpcHandler[] = [];
+  private updateInfo: UpdateInfo | undefined = undefined;
 
   constructor() {
     if (!process.env.AUTOUPDATE_FEED_URL) return;
@@ -110,12 +111,14 @@ export class AppUpdater implements IAppUpdater {
         });
       }
     });
-    autoUpdater.on('update-available', () => {
+    autoUpdater.on('update-available', (info: UpdateInfo) => {
       self.progressWindow?.show();
       self.splashWindow?.close();
       self.splashWindow = null;
+      self.updateInfo = info;
       self.progressWindow?.webContents.send('auto-updater-message', {
         name: 'update-available',
+        version: info.version,
       });
     });
     autoUpdater.on('update-not-available', () => {
@@ -135,7 +138,8 @@ export class AppUpdater implements IAppUpdater {
     });
     autoUpdater.on('download-progress', (stats) => {
       self.progressWindow?.webContents.send('auto-updater-message', {
-        ...stats,
+        stats,
+        info: self.updateInfo,
         name: 'update-status',
       });
     });
@@ -220,6 +224,7 @@ export class AppUpdater implements IAppUpdater {
           listener: () => {
             self.progressWindow?.webContents.send('update-status', {
               name: 'starting-download',
+              info: self.updateInfo,
             });
             autoUpdater.downloadUpdate();
           },
