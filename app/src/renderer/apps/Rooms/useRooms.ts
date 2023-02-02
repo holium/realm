@@ -105,10 +105,6 @@ export function useRooms(our?: Patp): RoomsManager {
     throw new Error('roomsManager not initialized');
   }
 
-  if (!roomsManager) {
-    throw new Error('roomsManager not initialized');
-  }
-
   return roomsManager;
 }
 
