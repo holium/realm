@@ -29,6 +29,14 @@ export const getVar = (colorVariant: ColorVariants) => {
   return value;
 };
 
+export const getRawVar = (variable: string) => {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(variable)
+    .replace(/\s/g, '');
+
+  return value;
+};
+
 export interface ColorProps {
   bg?: ColorVariants;
   color?: ColorVariants;

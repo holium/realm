@@ -28,7 +28,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
     author,
     our,
     sentAt,
-    authorColor = '#000',
+    authorColor,
     message,
     reactions = [],
     onReaction,
