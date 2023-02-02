@@ -1,6 +1,5 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Text, Box } from '../..';
-
 import { FragmentBlockquote, FragmentShip } from './fragment-lib';
 
 export const BubbleStyle = styled(Box)`

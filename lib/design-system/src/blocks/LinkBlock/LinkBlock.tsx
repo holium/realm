@@ -98,7 +98,14 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
     if (width < 400) {
       width = 400;
     }
-    return <TweetBlock link={link} {...rest} width={width} />;
+    return (
+      <TweetBlock
+        variant={rest.mode === 'embed' ? 'content' : 'default'}
+        link={link}
+        {...rest}
+        width={width}
+      />
+    );
   }
 
   return (

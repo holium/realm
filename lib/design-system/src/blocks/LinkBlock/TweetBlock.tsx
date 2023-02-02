@@ -1,20 +1,12 @@
-import { FC } from 'react';
-import {
-  TwitterTimelineEmbed,
-  TwitterShareButton,
-  TwitterFollowButton,
-  TwitterHashtagButton,
-  TwitterMentionButton,
-  TwitterTweetEmbed,
-  TwitterMomentShare,
-  TwitterDMButton,
-  TwitterVideoEmbed,
-  TwitterOnAirButton,
-} from 'react-twitter-embed';
-import styled from 'styled-components';
-import { Block, BlockProps } from '../Block/Block';
+import { FC, useMemo, useState } from 'react';
+import { TwitterTweetEmbed } from 'react-twitter-embed';
+import styled, { css } from 'styled-components';
+import { skeletonStyle } from '../..';
+import { BlockStyle, BlockProps } from '../Block/Block';
 
-const TweetWrap = styled(Block)`
+type TweetWrapperProps = { skeleton: boolean };
+
+const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
   min-height: 250px;
   > div {
     /* This is the wrapper of the embed */
@@ -24,6 +16,16 @@ const TweetWrap = styled(Block)`
     margin-top: 0px !important;
     margin-bottom: 0px !important;
   }
+  ${({ skeleton }: TweetWrapperProps) =>
+    skeleton &&
+    css`
+      ${skeletonStyle}
+      border-radius: 12px;
+      width: calc(100% - 8px) !important;
+      height: calc(100% - 8px) !important;
+      padding: 4px;
+      min-height: 250px;
+    `}
 `;
 
 type TweetBlockProps = {
@@ -33,25 +35,31 @@ type TweetBlockProps = {
 export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
   const { id, link, ...rest } = props;
   let tweetEmbed: any = null;
-  if (link.includes('status')) {
-    const tweetId = link.split('status/')[1].split('?')[0];
-    tweetEmbed = (
-      <TwitterTweetEmbed
-        tweetId={tweetId}
-        options={{
-          dnt: true,
-          width: rest.width,
-        }}
-      />
-    );
-  } else {
-    console.error('TweetBlock: link is not a tweet link');
-  }
+  const [tweetLoaded, setTweetLoaded] = useState(false);
+  return useMemo(() => {
+    if (link.includes('status')) {
+      const tweetId = link.split('status/')[1].split('?')[0];
+      tweetEmbed = (
+        <TwitterTweetEmbed
+          onLoad={() => {
+            console.log('TweetBlock: tweet loaded');
+            setTweetLoaded(true);
+          }}
+          tweetId={tweetId}
+          options={{
+            dnt: true,
+            width: rest.width,
+          }}
+        />
+      );
+    } else {
+      console.error('TweetBlock: link is not a tweet link');
+    }
 
-  return (
-    <TweetWrap id={id} variant="content" {...rest}>
-      {tweetEmbed}
-      {/* <TweetWrap>{tweetEmbed}</TweetWrap> */}
-    </TweetWrap>
-  );
+    return (
+      <TweetWrapper skeleton={!tweetLoaded} id={id} {...rest}>
+        {tweetEmbed}
+      </TweetWrapper>
+    );
+  }, [link, tweetLoaded]);
 };

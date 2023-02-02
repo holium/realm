@@ -1,15 +1,15 @@
 import { FC } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
+import { FragmentBlock, renderFragment } from './fragment-lib';
+import { Reactions, OnReactionPayload } from './Reaction';
 import {
   FragmentReactionType,
   FragmentType,
   TEXT_TYPES,
   BLOCK_TYPES,
 } from './Bubble.types';
-import { FragmentBlock, renderFragment } from './fragment-lib';
 import { chatDate } from '../../util/date';
-import { Reactions, OnReactionPayload } from './Reaction';
 
 type TemplateProps = {
   author: string;
