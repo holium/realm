@@ -16,16 +16,24 @@ const View = (props: any) => {
   return (
     <div
       style={{
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: 'calc(100vh)',
         width: '100%',
-        height: '100%',
+        fontFamily: 'Rubik, sans-serif',
       }}
     >
-      {props.children}
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        {props.children}
+      </div>
     </div>
   );
 };

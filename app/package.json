@@ -14,12 +14,12 @@
     "package:release:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
     "package:release:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
     "package:release:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --x64 --ia32 --publish never",
-    "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts --config ./.holium/configs/webpack.config.updater.dev.dll.ts",
+    "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env DEBUG_PROD=true INSTALL_MOON=bypass NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:onboard": "cross-env DEBUG_PROD=true INSTALL_MOON='~hostyv:realm,courier' NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
-    "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts --config ./.holium/configs/webpack.config.updater.dev.ts",
+    "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
   "dependencies": {
