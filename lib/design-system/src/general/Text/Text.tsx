@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import { Box, BoxProps, boxStyles } from '../Box/Box';
 import { motion } from 'framer-motion';
 import { colorStyle } from '../../util/colors';
+import { skeletonStyle } from '../../general/Skeleton/Skeleton';
 
 export const fontByType = {
   body: '"Rubik", sans-serif',
@@ -145,6 +146,7 @@ const Patp = styled(motion.p)<TextProps>`
   color: var(--rlm-text-color);
   margin-top: 0px;
   margin-bottom: 0px;
+  ${({ skeleton }) => skeleton && skeletonStyle}
 `;
 
 const Anchor = styled(motion.a)<TextProps>`
@@ -154,6 +156,12 @@ const Anchor = styled(motion.a)<TextProps>`
     cursor: pointer;
     text-decoration: underline;
   }
+  ${({ skeleton }: TextProps) =>
+    skeleton &&
+    css`
+      line-height: normal;
+      ${skeletonStyle}
+    `};
 `;
 
 export const Text = {

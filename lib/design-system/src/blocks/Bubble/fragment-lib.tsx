@@ -23,11 +23,14 @@ import {
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { getVar } from '../../util/colors';
-import { capitalizeFirstLetter} from '../../util/strings';
-import { Text, TextProps, Flex, FlexProps } from '../..';
+import { capitalizeFirstLetter } from '../../util/strings';
+import { isTwitterLink } from '../../util/links';
+import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
+import { TweetBlock } from '../LinkBlock/TweetBlock';
+
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 
@@ -125,13 +128,17 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   border-radius: 4px;
   width: 100%;
   white-space: pre-wrap;
-  
 `;
 
-export const FragmentImage = styled(motion.img)`
+type FragmentImageProps = {
+  skeleton?: boolean;
+};
+
+export const FragmentImage = styled(motion.img)<FragmentImageProps>`
   width: 100%;
   max-width: 20rem;
   border-radius: 4px;
+  ${({ skeleton }) => skeleton && skeletonStyle}
 `;
 
 const TabWrapper = styled(Flex)<FlexProps>`

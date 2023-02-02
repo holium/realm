@@ -1,17 +1,20 @@
 import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, Text } from '../..';
+import { Flex, skeletonStyle, Text, Bookmark } from '../..';
 import { BlockProps, Block } from '../Block/Block';
+import { isTwitterLink, parseMediaType } from '../../util/links';
+import { TweetBlock } from './TweetBlock';
 
-const OPENGRAPH_API = 'https://opengraph.holium.live/opengraph';
+const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
 
-const LinkImage = styled(motion.img)`
+const LinkImage = styled(motion.img)<{ skeleton?: boolean }>`
   width: 100%;
   height: 170px;
   object-fit: cover;
   border-radius: 4px;
   background: var(--rlm-window-color);
+  ${({ skeleton }) => skeleton && skeletonStyle}
 `;
 
 type OpenGraphType = {
@@ -41,19 +44,32 @@ type LinkBlockProps = {
   metadata?: any;
 } & BlockProps;
 
+type LinkType = 'opengraph' | 'url' | 'twitter';
+
 export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
   const { link, by, metadata, ...rest } = props;
   const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [linkType, setLinkType] = useState<LinkType>('opengraph');
 
   useEffect(() => {
-    if (!openGraph) {
+    if (isTwitterLink(link)) {
+      setLinkType('twitter');
+    }
+    if (!openGraph && linkType === 'opengraph') {
       fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
         .then(async (res) => {
-          const data = await res.json();
-          setOpenGraph(data);
+          if (res.status === 200) {
+            const data = await res.json();
+            if (!data || data.error) setLinkType('url');
+            setOpenGraph(data);
+          } else {
+            setLinkType('url');
+          }
         })
         .catch((err) => {
           console.error(err);
+          setLinkType('url');
         });
     }
   }, []);
@@ -63,11 +79,40 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
     description = description.substring(0, 100) + '...';
   }
 
+  if (linkType === 'url') {
+    return (
+      <Block {...rest}>
+        <Bookmark
+          url={link}
+          title={link}
+          width={320}
+          onNavigate={(url: string) => {
+            window.open(url, '_blank');
+          }}
+        />
+      </Block>
+    );
+  }
+  if (linkType === 'twitter') {
+    let width = rest.width || 400;
+    if (width < 400) {
+      width = 400;
+    }
+    return <TweetBlock link={link} {...rest} width={width} />;
+  }
+
   return (
     <Block {...rest}>
-      <LinkImage src={openGraph?.ogImage.url} />
-      <Flex gap={2} flexDirection="column">
+      <LinkImage
+        skeleton={!openGraph || !imgLoaded}
+        src={openGraph?.ogImage.url}
+        alt={openGraph?.ogTitle}
+        onError={(evt: React.SyntheticEvent<HTMLImageElement, Event>) => {}}
+        onLoad={() => setImgLoaded(true)}
+      />
+      <Flex width="100%" gap={2} flexDirection="column">
         <Text.Anchor
+          skeleton={!openGraph}
           fontSize={2}
           fontWeight={500}
           width={rest.width || 'inherit'}
@@ -78,7 +123,12 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
         >
           {openGraph?.ogTitle}
         </Text.Anchor>
-        <Text.Custom fontSize={1} opacity={0.7} width={rest.width || 'inherit'}>
+        <Text.Custom
+          skeleton={!openGraph}
+          fontSize={1}
+          opacity={0.7}
+          width={rest.width || 'inherit'}
+        >
           {description}
         </Text.Custom>
       </Flex>
@@ -93,8 +143,10 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
           gap={4}
           justifyContent="space-between"
           alignItems="center"
+          width="50%"
         >
           <Text.Anchor
+            skeleton={!openGraph}
             fontSize={0}
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {

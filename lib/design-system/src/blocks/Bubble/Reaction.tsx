@@ -82,7 +82,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
     user-select: none;
     pointer-events: none;
   }
-  ${({ hasCount }) =>
+  ${({ hasCount }: ReactionButtonProps) =>
     hasCount &&
     css`
       padding: 0 6px 0 4px;

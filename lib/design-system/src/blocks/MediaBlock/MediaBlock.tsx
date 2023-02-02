@@ -3,6 +3,13 @@ import Spotify from 'react-spotify-embed';
 import ReactPlayer from 'react-player';
 import { Flex, Icon, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
+import { parseMediaType } from '../../util/links';
+import styled from 'styled-components';
+
+const MediaWrapper = styled(Flex)`
+  position: relative;
+  width: 100%;
+`;
 
 type MediaBlockProps = {
   url: string;
@@ -11,6 +18,9 @@ type MediaBlockProps = {
 
 export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
   const { url, height = 300, ...rest } = props;
+
+  const { mediaType, linkType } = parseMediaType(url);
+  console.log('mediaType', mediaType, linkType);
 
   return <Block {...rest}>{renderMediaBlock(url, height)}</Block>;
 };
@@ -25,8 +35,19 @@ export const renderMediaBlock = (url: string, height: number) => {
   }
   // TODO if error, render as basic link
   const [isError, setIsError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   return (
-    <Flex width="100%" position="relative">
+    <MediaWrapper>
+      {!isReady && !isError && (
+        <Flex
+          skeleton
+          position="absolute"
+          top="0"
+          bottom="0"
+          left="0"
+          right="0"
+        />
+      )}
       {isError ? (
         <Flex
           gap={12}
@@ -45,9 +66,11 @@ export const renderMediaBlock = (url: string, height: number) => {
         <ReactPlayer
           url={url}
           controls
+          onReady={() => {
+            setIsReady(true);
+          }}
           width="100%"
           height={`${height}px`}
-          fallback={<div>Sorry, this media cannot be played</div>}
           onError={(err) => {
             setIsError(true);
           }}
@@ -62,6 +85,6 @@ export const renderMediaBlock = (url: string, height: number) => {
           }}
         />
       )}
-    </Flex>
+    </MediaWrapper>
   );
 };

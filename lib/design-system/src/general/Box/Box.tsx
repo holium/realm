@@ -1,6 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   background,
   BackgroundProps,
@@ -28,6 +28,7 @@ import {
   variant,
 } from 'styled-system';
 import { ColorProps, colorStyle } from '../../util/colors';
+import { skeletonStyle } from '../../general/Skeleton/Skeleton';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -35,6 +36,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 export type BoxProps = {
   gap?: string | number | undefined;
   pointerEvents?: string;
+  skeleton?: boolean;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
@@ -97,10 +99,9 @@ export const boxStyles = compose(
   })
 );
 
-export const Box = styled(motion.div)<BoxProps>(
-  {
-    boxSizing: 'border-box',
-  },
-  boxStyles,
-  colorStyle
-);
+export const Box = styled(motion.div)<BoxProps>`
+  box-sizing: border-box;
+  ${boxStyles}
+  ${colorStyle}
+  ${({ skeleton }) => skeleton && skeletonStyle}
+`;

@@ -11,7 +11,7 @@ const BookmarkRow = styled(Row)`
 `;
 
 export type BookmarkProps = {
-  favicon: string;
+  favicon?: string;
   url: string;
   title: string;
   member?: string;
@@ -45,7 +45,7 @@ export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
       }}
     >
       <Flex gap={8} justifyContent="flex-start" alignItems="center">
-        <Favicon src={favicon} />
+        {favicon && <Favicon src={favicon} />}
         <Text.Custom truncate width={textWidth}>
           {title}
         </Text.Custom>

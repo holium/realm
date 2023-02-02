@@ -22,6 +22,7 @@
     "react-lifecycles-compat": "^3.0.4",
     "react-player": "^2.11.0",
     "react-spotify-embed": "^1.0.4",
+    "react-twitter-embed": "^4.0.4",
     "styled-components": "^5.3.6",
     "styled-system": "^5.1.5"
   },

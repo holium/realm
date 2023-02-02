@@ -237,12 +237,23 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       ]}
       onReaction={() => {}}
     />
+
     <Bubble
       our
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
-        { plain: 'Open Graph' },
+        { plain: 'Epic shit here' },
+        {
+          link: 'https://twitter.com/AidenSolaran/status/1620110592961875980',
+        },
+      ]}
+      onReaction={() => {}}
+    />
+    <Bubble
+      author="~lodlev-migdev"
+      sentAt="2023-01-26T11:06:38.000Z"
+      message={[
         {
           link: 'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting',
         },
