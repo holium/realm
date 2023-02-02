@@ -8,6 +8,20 @@
 ::
 :: helpers
 ::
+++  scry-path-row
+  |=  [=path =bowl:gall]
+  ^-  path-row:db
+  =/  paths  (weld /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/path path)
+  =/  tbls
+    .^
+      db-dump:db
+      %gx
+      (weld paths /noun)
+    ==
+  =/  tbl  `table:db`(snag 0 tables.tbls)
+  ?+  -.tbl  !!
+    %paths  (snag 0 ~(val by paths-table.tbl))
+  ==
 ++  scry-peers
   |=  [=path =bowl:gall]
   ^-  (list peer-row:db)
@@ -22,23 +36,49 @@
   ?+  -.tbl  !!
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
-++  into-insert-message-pokes
+++  into-insert-message-poke
   |=  [p=peer-row:db act=insert-message-action:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert act])]
 ::
 ::  poke actions
 ::
+++  create-chat
+::  :realm-chat &action [%create-chat ~ %chat]
+  |=  [act=create-chat-data state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  ?>  =(type.act %chat)  :: for now only support %chat type paths
+  =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
+  =/  cards  
+    [%pass /dbpoke %agent [our.bowl %chat-db] %poke %action !>([%create-path chat-path act])]~
+  [cards state]
+++  add-ship-to-chat
+::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
+  |=  [act=[=path =ship] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  pathrow  (scry-path-row path.act bowl)
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  cards
+    :-  
+      ::  we poke the newly-added ship's db with a create-path,
+      ::  since that will automatically handle them joining as a member
+      [%pass /dbpoke %agent [ship.act %chat-db] %poke %action !>([%create-path pathrow])]
+
+      :: we poke all peers/members' db with add-peer (including ourselves)
+      %:  turn
+        pathpeers
+        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%add-peer path.act ship.act])])
+      ==
+  [cards state]
 ++  send-message
 ::  :realm-chat &action [%send-message [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [act=insert-message-action:db state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
-  ~&  >  pathpeers
   =/  cards  
     %:  turn
       pathpeers
-      |=(a=peer-row:db (into-insert-message-pokes a act))
+      |=(a=peer-row:db (into-insert-message-poke a act))
     ==
   :: then send pokes to all the peers about inserting a message
   [cards state]

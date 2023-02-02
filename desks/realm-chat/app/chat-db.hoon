@@ -29,17 +29,15 @@
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?>  ?=(%action mark)
-    ~&  vase
     =/  act  !<(action:sur vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       %create-path 
+        ~&  >>  %create-path-in-db
         (create-path:db-lib +.act state bowl)
       %leave-path 
         (leave-path:db-lib +.act state bowl)
       %insert
-        ~&  >>>  'aaaaaaaaaaaa'
-        ~&  >>>  +.act
         (insert:db-lib +.act state bowl)
       %edit
         (edit:db-lib +.act state bowl)
@@ -89,6 +87,11 @@
     ::
       [%x %db %paths ~]
         ``db-dump+!>([%tables [[%paths paths-table.state] ~]])
+    ::
+      [%x %db %path *]
+        =/  thepath  t.t.t.path
+        =/  thepathrow  (~(got by paths-table.state) thepath)
+        ``db-dump+!>([%tables [[%paths (malt (limo ~[[thepath thepathrow]]))] ~]])
     ::
       [%x %db %peers ~]
         ``db-dump+!>([%tables [[%peers peers-table.state] ~]])

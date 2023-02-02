@@ -113,7 +113,7 @@
 +$  db-row
   $%  [%paths =path-row]
       [%messages =msg-part]
-      [%peers =peer-row]
+      [%peers peers=(list peer-row)]
   ==
 +$  db-change  (list db-change-type)
 ::

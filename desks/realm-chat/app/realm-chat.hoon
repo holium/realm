@@ -15,8 +15,8 @@
       [%0 'TODO real initial state']
     :_  this(state default-state)
     :~
-::      [%pass /db %agent [our.bowl %chat-db] %watch /db]
-      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]
+      [%pass /db %agent [our.bowl %chat-db] %watch /db]
+::      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]
     ==
   ++  on-save   !>(state)
   ++  on-load
@@ -25,7 +25,8 @@
     ~&  %on-load-realm-chat
     ~&  bowl
     =/  cards  ?:  =(wex.bowl ~)  
-      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]~
+::      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]~
+      [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     ~
     =/  old  !<(versioned-state old-state)
     ?-  -.old
@@ -43,6 +44,10 @@
     ?-  -.act  :: each handler function here should return [(list card) state]
       %send-message
         (send-message:lib +.act state bowl)
+      %create-chat
+        (create-chat:lib +.act state bowl)
+      %add-ship-to-chat
+        (add-ship-to-chat:lib +.act state bowl)
     ==
     [cards this]
   ::
@@ -74,14 +79,41 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
+
     ?+    wire  !!
       [%dbpoke ~]
-        ?+    -.sign  !!
+        ~&  >>  -.sign
+        ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
             ~&  >>>  wire
-            ~&  >>>  p.sign
+            ~&  >>>  "dbpoke failed"
             `this
+        ==
+      [%db ~]
+        ?+    -.sign  !!
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: /db subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
+            :_  this
+            :~
+              [%pass /db %agent [our.bowl %graph-store] %watch /db]
+            ==
+          %fact
+            ~&  >>>  p.cage.sign
+            ?+    p.cage.sign  `this
+                %db-dump
+                  ~&  >>>  'we got a new db-dump thing'
+                  ~&  >>>  !<(db-dump:db-sur q.cage.sign)
+                  `this
+                %db-change
+                  ~&  >>>  'we got a new db-change thing'
+                  ~&  >>>  !<(db-change:db-sur q.cage.sign)
+                  `this
+            ==
         ==
       [%messages ~]
         ?+    -.sign  !!

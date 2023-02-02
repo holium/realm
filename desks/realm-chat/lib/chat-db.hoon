@@ -43,14 +43,11 @@
   =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
-++  messages-wires
-  |=  [=bowl:gall]
-  ~(key by sup.bowl)
 ::
 ::  poke actions
 ::
 ++  create-path
-  ::  :chat-db &action [%create-path [/a/path/to/a/chat ~ %chat]]
+  ::  :chat-db &action [%create-path /a/path/to/a/chat ~ %chat]
   |=  [act=create-path-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  row=path-row:sur   :+
@@ -58,34 +55,37 @@
     metadata.act
     type.act
   =.  paths-table.state  (~(put by paths-table.state) path.act row)
+  ~&  >  '%chat-db: new path created'
+  ~&  >  path.act
 
   :: if this signal comes from ourselves, we are the host, but if it
   :: comes from elsewhere, we are being invited, and they are the host
   =/  thepeers
-  ?:  =(src.bowl our.bowl)
-    =/  peer=peer-row:sur   :+
+    ?:  =(src.bowl our.bowl)
+      =/  peer=peer-row:sur   :+
+        path.act
+        our.bowl
+        %host
+      [peer ~]
+
+    :: else, signal came from not-us
+    =/  us=peer-row:sur   :+
       path.act
       our.bowl
+      %member
+    =/  them=peer-row:sur   :+
+      path.act
+      src.bowl
       %host
-    [peer ~]
-
-  :: else, signal came from not-us
-  =/  us=peer-row:sur   :+
-    path.act
-    our.bowl
-    %member
-  =/  them=peer-row:sur   :+
-    path.act
-    src.bowl
-    %host
-  [them us ~]
+    [them us ~]
 
   =.  peers-table.state  (~(put by peers-table.state) path.act thepeers)
-  =/  thechange  db-change+!>(~[[%add-row [%paths row]] [%add-row [%peers thepeers]]])
+  =/  thechange  db-change+!>((limo [[%add-row %paths row] [%add-row %peers thepeers] ~]))
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
+::
 ++  leave-path
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
@@ -99,6 +99,7 @@
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
   [gives state]
+::
 ++  insert
 ::  :chat-db &action [%insert [/a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
@@ -118,6 +119,7 @@
     [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
   ==
   [gives state]
+::
 ++  edit
 ::  :chat-db &action [%edit [[~2023.1.31..18.16.30..86f1 ~zod] [/a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
   |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
@@ -142,6 +144,7 @@
     [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
   ==
   [gives state]
+::
 ++  delete
 ::  :chat-db &action [%delete [timestamp=~2023.1.31..18.16.30..86f1 sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
@@ -163,13 +166,17 @@
     [%give %fact (weld (limo [/db (weld /db/path path.msg-part) ~]) message-paths) thechange]
   ==
   [gives state]
+::
 ++  add-peer
 ::  :chat-db &action [%add-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
-  :: TODO add-peer signals are only valid from the ship which is the
+  =/  original-peers-list   (~(got by peers-table.state) path.act)
+  :: add-peer signals are only valid from the ship which is the
   :: %host of the path
+  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
+  ?>  =(patp.host-peer-row src.bowl)
 
   =/  row=peer-row:sur   :+
     path.act
@@ -179,8 +186,7 @@
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
-    [%give %fact [(weld /db/path path.act) ~] thechange]
+    [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
 ++  kick-peer
@@ -358,7 +364,7 @@
         %messages
           (messages-row msg-part.db-row)
         %peers
-          (peer-row peer-row.db-row)
+          a+(turn peers.db-row peer-row)
       ==
     ++  path-row
       |=  =path-row:sur
