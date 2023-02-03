@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
-import { Flex, ProgressBar } from '@holium/design-system';
+import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
 import { HoliumLogo } from './holium-logo';
 
 const environment = process.env.NODE_ENV;
@@ -31,26 +31,29 @@ const View = (props: any) => {
   return (
     <div
       style={{
+        display: 'flex',
+        flexDirection: 'column',
         position: 'relative',
         height: '100vh',
         width: '100%',
         fontFamily: 'Rubik, system-ui, sans-serif',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
-      <Flex position="absolute" top="80px">
+      <Flex
+        position="absolute"
+        top="80px"
+        width="100%"
+        style={{
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <HoliumLogo />
       </Flex>
       <div
         style={{
-          display: 'flex',
-          flex: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          top: 164,
           width: '100%',
         }}
       >
@@ -69,16 +72,16 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
   console.log('UpdateAvailable', info);
   return (
     <>
-      <div style={{ padding: '12px' }}>Found updates</div>
+      <div style={{ padding: '12px' }}>Found updates fuckj</div>
       <div style={{ padding: '12px' }}>{info.version}</div>
       <div style={{ padding: '12px' }}>Would you like to install?</div>
       <div style={{ padding: '12px' }}>
-        <button
+        <Button.Base
           style={{ fontFamily: 'Rubik' }}
           onClick={() => window.autoUpdate.downloadUpdates()}
         >
           Yes
-        </button>
+        </Button.Base>
         <button
           style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
           onClick={() => window.autoUpdate.cancelUpdates()}
@@ -94,15 +97,36 @@ const UpdateStats = (props: UpdateStatsProps) => {
   const { stats, info } = props;
   console.log(stats, info);
   return (
-    <>
-      <div style={{ padding: '12px' }}>Version: {info.version}</div>
+    <Flex flexDirection="column" alignItems="center">
+      <div style={{ width: 280 }}>
+        <ProgressBar percentage={50} progressColor="#F08735" />
+      </div>
+      <div
+        style={{
+          width: 280,
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text.Custom fontWeight={300} opacity={0.5}>
+          Downloading update...
+        </Text.Custom>
+        <Flex flexDirection="column">
+          <Text.Custom>{info.version}</Text.Custom>
+          <Text.Custom fontSize={1} opacity={0.5}>
+            {info.version}
+          </Text.Custom>
+        </Flex>
+      </div>
       <div style={{ padding: '12px' }}>
         Bytes per second: {stats.bytesPerSecond}
       </div>
       <div style={{ padding: '12px' }}>Transferred: {stats.transferred}</div>
       <div style={{ padding: '12px' }}>Total: {stats.total}</div>
       <div style={{ padding: '12px' }}>Percent: {stats.percent}</div>
-    </>
+    </Flex>
   );
 };
 
@@ -156,9 +180,32 @@ const AppUpdateError = (props: AppUpdateErrorProps) => {
 const StartingDownload = (props: StartingDownloadProps) => {
   const { info } = props;
   return (
-    <>
-      <div style={{ padding: '12px' }}>Downloading {info.version}...</div>
-    </>
+    <Flex position="relative">
+      <Flex position="absolute" style={{ left: 0, top: 80, width: 280 }}>
+        <ProgressBar percentage={50} progressColor="#F08735" />
+      </Flex>
+      <Flex
+        position="absolute"
+        style={{
+          top: 200,
+          width: 280,
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text.Custom fontWeight={300} opacity={0.5}>
+          Downloading update...
+        </Text.Custom>
+        <Flex flexDirection="column">
+          <Text.Custom>{info.version}</Text.Custom>
+          <Text.Custom fontSize={1} opacity={0.5}>
+            {info.version}
+          </Text.Custom>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 

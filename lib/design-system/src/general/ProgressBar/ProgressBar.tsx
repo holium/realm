@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Box, Flex, BoxProps } from '../../';
+import { Box, BoxProps } from '../../';
 
 const Bar = styled(Box)`
   background-color: var(--rlm-input-color);
@@ -28,15 +28,13 @@ export const ProgressBar: FC<ProgressBarProps> = (props: ProgressBarProps) => {
   const { percentage, progressColor } = props;
 
   return (
-    <Flex>
-      <Bar>
-        <Progress
-          background={progressColor}
-          initial={{ width: '0%' }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.5, default: { ease: 'linear' } }}
-        />
-      </Bar>
-    </Flex>
+    <Bar>
+      <Progress
+        background={progressColor}
+        initial={{ width: '0%' }}
+        animate={{ width: `${percentage}%` }}
+        transition={{ duration: 0.5, default: { ease: 'linear' } }}
+      />
+    </Bar>
   );
 };
