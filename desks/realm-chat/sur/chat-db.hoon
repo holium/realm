@@ -97,7 +97,7 @@
 +$  create-path-action      [=path metadata=(map cord cord) type=@tas]
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
 +$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment)]
-+$  edit-message-action     [=msg-id =insert-message-action]
++$  edit-message-action     [=msg-id =path fragments=(list minimal-fragment)]
 ::
 +$  db-dump
   $%  

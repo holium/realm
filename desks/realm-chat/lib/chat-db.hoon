@@ -64,7 +64,7 @@
   ~&  >  '%chat-db: new path created'
   ~&  >  path.act
 
-  :: if this signal comes from ourselves, we are the host, but if it
+  :: if this poke comes from ourselves, we are the host, but if it
   :: comes from elsewhere, we are being invited, and they are the host
   =/  thepeers
     ?:  =(src.bowl our.bowl)
@@ -74,7 +74,7 @@
         %host
       [peer ~]
 
-    :: else, signal came from not-us
+    :: else, poke came from not-us
     =/  us=peer-row:sur   :+
       path.act
       our.bowl
@@ -96,7 +96,7 @@
   ::  :chat-db &action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  ?>  =(our.bowl src.bowl)  :: leave signals are only valid from ourselves. if others want to kick us, that is a different matter
+  ?>  =(our.bowl src.bowl)  :: leave pokes are only valid from ourselves. if others want to kick us, that is a different matter
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
   =.  messages-table.state  (remove-messages-for-path messages-table.state path)
@@ -127,17 +127,18 @@
   [gives state]
 ::
 ++  edit
-::  :chat-db &action [%edit [[~2023.2.2..23.11.10..234a ~zod] [~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]]
-  |=  [[=msg-id:sur msg-act=insert-message-action:sur] state=state-0 =bowl:gall]
+::  :chat-db &action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
+  |=  [[=msg-id:sur p=path fragments=(list minimal-fragment:sur)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
-  ?>  =(sender.msg-id src.bowl)  :: edit signals are only valid from the ship which is the original sender
+  ?>  =(sender.msg-id src.bowl)  :: edit pokes are only valid from the ship which is the original sender
+  ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a]))
   =.  messages-table.state  -.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state msg-act sender.msg-id)
+  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id)
   =.  messages-table.state  -.add-result
   =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
   :: message-paths is all the sup.bowl paths that start with
@@ -147,7 +148,7 @@
   =/  all-message-paths  (messages-start-paths bowl)
   =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
-    [%give %fact (weld (limo [/db (weld /db/path path.msg-act) ~]) message-paths) thechange]
+    [%give %fact (weld (limo [/db (weld /db/path p) ~]) message-paths) thechange]
   ==
   [gives state]
 ::
@@ -156,7 +157,8 @@
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
-  ?>  =(sender.msg-id src.bowl)  :: delete signals are only valid from the ship which is the original sender
+  ?>  =(sender.msg-id src.bowl)  :: delete pokes are only valid from the ship which is the original sender
+  ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: delete pokes are only valid if there is a fragment 0 in the table for the msg-id
 
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
@@ -179,7 +181,7 @@
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
-  :: add-peer signals are only valid from the ship which is the
+  :: add-peer pokes are only valid from the ship which is the
   :: %host of the path
   =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
   ?>  =(patp.host-peer-row src.bowl)
@@ -203,7 +205,7 @@
     `state  :: do nothing if we get a kick-peer on a path we have already left
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
-  :: kick-peer signals are only valid from the ship which is the
+  :: kick-peer pokes are only valid from the ship which is the
   :: %host of the path, OR from the ship being kicked (kicking yourself)
   =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
   ?>  |(=(patp.host-peer-row src.bowl) =(src.bowl patp.act))

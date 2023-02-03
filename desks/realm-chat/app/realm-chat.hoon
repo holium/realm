@@ -36,20 +36,22 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ~&  mark
-    ~&  vase
     ?>  ?=(%action mark)
     =/  act  !<(action vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
-      %send-message
-        (send-message:lib +.act state bowl)
       %create-chat
         (create-chat:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
       %remove-ship-from-chat
         (remove-ship-from-chat:lib +.act state bowl)
+      %send-message
+        (send-message:lib +.act state bowl)
+      %edit-message
+        (edit-message:lib +.act state bowl)
+      %delete-message
+        (delete-message:lib +.act state bowl)
     ==
     [cards this]
   ::
@@ -105,7 +107,7 @@
               [%pass /db %agent [our.bowl %graph-store] %watch /db]
             ==
           %fact
-            ~&  >>>  p.cage.sign
+            ~&  >>  p.cage.sign
             ?+    p.cage.sign  `this
                 %db-dump
                   ::~&  >>>  'we got a new db-dump thing'

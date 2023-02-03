@@ -39,6 +39,12 @@
 ++  into-insert-message-poke
   |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db)] ts=@da]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert ts act])]
+++  into-edit-message-poke
+  |=  [p=peer-row:db act=edit-message-action:db]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%edit act])]
+++  into-delete-message-poke
+  |=  [p=peer-row:db =msg-id:db]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%delete msg-id])]
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
   ^-  (list card)
@@ -54,7 +60,9 @@
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(type.act %chat)  :: for now only support %chat type paths
+  :: TODO UNCOMMENT THIS TO USE REAL PATHS WHEN NOT TESTING
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
+  ::=/  chat-path  /realm-chat/path-id
   =/  cards  
     [%pass /dbpoke %agent [our.bowl %chat-db] %poke %action !>([%create-path chat-path act])]~
   [cards state]
@@ -78,20 +86,20 @@
   [cards state]
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
-:: TODO fix %host removes self fails to update other peers properly
 ::  :realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathpeers  (scry-peers path.act bowl)
+  =/  members  (skim pathpeers |=(p=peer-row:db =(role.p %member)))
   =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
   =/  cards
     ?:  =(ship.act patp.host)
-      :: if src.bowl is %host, we have to send kick-peer for all the peers
-      :: to all the peers and then leave-path the host
+      :: if src.bowl is %host, we have to leave-path for the host
+      :: and then send kick-peer for all the member-peers
       :-  [%pass /dbpoke %agent [patp.host %chat-db] %poke %action !>([%leave-path path.act])]
       %-  zing
       %:  turn
-        pathpeers
+        members
         |=(p=peer-row:db (into-all-peers-kick-pokes patp.p pathpeers))
       ==
     :: otherwise we just send kick-peer to all the peers (db will ensure permissions)
@@ -111,6 +119,32 @@
       |=(a=peer-row:db (into-insert-message-poke a act official-time))
     ==
   :: then send pokes to all the peers about inserting a message
+  [cards state]
+++  edit-message
+::  :realm-chat &action [%edit-message [~2023.2.3..16.23.37..72f6 ~zod] /realm-chat/path-id (limo [[[%plain 'edited'] ~ ~] ~])]
+  |=  [act=edit-message-action:db state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  :: just pass along the edit-message-action to all the peers chat-db
+  :: %chat-db will disallow invalid signals
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  cards  
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db (into-edit-message-poke p act))
+    ==
+  [cards state]
+++  delete-message
+::  :realm-chat &action [%delete-message /realm-chat/path-id ~2023.2.3..16.23.37..72f6 ~zod]
+  |=  [act=[=path =msg-id:db] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  :: just pass along the delete msg-id to all the peers chat-db
+  :: %chat-db will disallow invalid signals
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  cards  
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db (into-delete-message-poke p msg-id.act))
+    ==
   [cards state]
 ::
 ::  JSON
