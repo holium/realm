@@ -76,83 +76,98 @@ export class AppUpdater implements IAppUpdater {
   private splashWindow: BrowserWindow | null = null;
   private handlers: IpcHandler[] = [];
   private updateInfo: UpdateInfo | undefined = undefined;
+  private autoUpdater: typeof autoUpdater;
 
   constructor() {
+    autoUpdater.removeAllListeners();
+    this.autoUpdater = autoUpdater;
+    this.done = this.done.bind(this);
+    this.startUpdateUI = this.startUpdateUI.bind(this);
     if (!process.env.AUTOUPDATE_FEED_URL) return;
     // good luck trying to test on localmachine
     if (isDevelopment) {
-      autoUpdater.updateConfigPath = path.join(
+      this.autoUpdater.updateConfigPath = path.join(
         __dirname,
         'dev-app-update.json'
       );
     }
+    console.log('contructor -> autoUpdater.autoDownload = false');
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
-    autoUpdater.autoDownload = false;
+    this.autoUpdater.autoDownload = false;
     // proxy private github repo requests
-    autoUpdater.setFeedURL({
+    this.autoUpdater.setFeedURL({
       provider: 'generic',
       // see the app/src/renderer/system/updater/readme.md for more information
       url: process.env.AUTOUPDATE_FEED_URL,
       channel: determineReleaseChannel(),
     });
-    autoUpdater.on('error', (error) => {
+    this.autoUpdater.on('error', (error) => {
       this.progressWindow?.webContents.send('auto-updater-message', {
         name: 'error',
         error: error == null ? 'unknown' : (error.stack || error).toString(),
       });
     });
-    autoUpdater.on('checking-for-update', async () => {
-      if (this.manualCheck) {
-        this.progressWindow?.show();
-        this.progressWindow?.webContents.send('auto-updater-message', {
-          name: 'checking-for-updates',
-        });
-      }
+    this.autoUpdater.on('checking-for-update', async () => {
+      this.progressWindow?.webContents.send('auto-updater-message', {
+        name: 'checking-for-updates',
+      });
     });
-    autoUpdater.on('update-available', (info: UpdateInfo) => {
-      this.progressWindow?.show();
+    this.autoUpdater.on('update-available', (info: UpdateInfo) => {
       this.splashWindow?.close();
       this.splashWindow = null;
       this.updateInfo = info;
       if (!this.manualCheck) {
+        console.log('update-available -> autoDownload');
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'starting-download',
-          info,
+          ...info,
         });
-        // console.log(autoUpdater.)
-        // autoUpdater.downloadUpdate();
+        this.autoUpdater.downloadUpdate();
       } else {
+        console.log('update-available -> manualCheck');
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'update-available',
           version: info.version,
         });
       }
     });
-    autoUpdater.on('update-not-available', () => {
+    this.autoUpdater.on('update-not-available', () => {
       // only show this message if the user chose to run an update check manually
       if (this.manualCheck) {
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'update-not-available',
         });
       } else {
+        console.log('update-not-available -> manualCheck');
         this.done();
       }
     });
-    autoUpdater.on('update-downloaded', () => {
-      this.progressWindow?.webContents.send('auto-updater-message', {
-        name: 'update-downloaded',
-      });
+    this.autoUpdater.on('update-downloaded', () => {
+      console.log('update-downloaded -> manualCheck=', this.manualCheck);
+      if (!this.manualCheck) {
+        if (process.env.NODE_ENV === 'development') {
+          this.done();
+        } else {
+          this.progressWindow?.webContents.send('update-status', {
+            name: 'installing-updates',
+          });
+          setImmediate(() => this.autoUpdater.quitAndInstall());
+        }
+      } else {
+        this.progressWindow?.webContents.send('auto-updater-message', {
+          name: 'update-downloaded',
+        });
+      }
     });
-    autoUpdater.on('download-progress', (stats) => {
-      console.log('come on', this.progressWindow);
+    this.autoUpdater.on('download-progress', (stats) => {
       this.progressWindow?.webContents.send('auto-updater-message', {
         stats,
         info: this.updateInfo,
         name: 'update-status',
       });
     });
-    autoUpdater.logger = log;
+    this.autoUpdater.logger = log;
   }
 
   done = () => {
@@ -168,6 +183,8 @@ export class AppUpdater implements IAppUpdater {
     mainWindow: BrowserWindow | null,
     manualCheck: boolean = false
   ) => {
+    console.log('startUpdateUI', manualCheck);
+    this.manualCheck = manualCheck;
     // this is not needed if the app is already open (mainWindow !== null)
     if (!mainWindow) {
       // show a splash on startup (manual check or not)
@@ -208,7 +225,6 @@ export class AppUpdater implements IAppUpdater {
       webPreferences: {
         devTools: false,
         nodeIntegration: false,
-        webviewTag: true,
         sandbox: false,
         contextIsolation: true,
         preload: app.isPackaged
@@ -217,19 +233,20 @@ export class AppUpdater implements IAppUpdater {
       },
     });
     this.progressWindow.webContents.on('did-finish-load', () => {
-      if (manualCheck) {
-        this.progressWindow?.show();
-      }
-      this.manualCheck = manualCheck;
+      console.log('did-finish-load ---> manualCheck = ', this.manualCheck);
+      // if (manualCheck) {
+      //   this.progressWindow?.show();
+      // }
       this.handlers = [
         {
           channel: 'download-updates',
           listener: () => {
-            this.progressWindow?.webContents.send('update-status', {
-              name: 'starting-download',
-              info: this.updateInfo,
-            });
-            autoUpdater.downloadUpdate();
+            console.log('download-updates');
+            // this.progressWindow?.webContents.send('update-status', {
+            //   name: 'starting-download',
+            //   ...this.updateInfo,
+            // });
+            // this.autoUpdater.downloadUpdate();
           },
         },
         {
@@ -242,22 +259,29 @@ export class AppUpdater implements IAppUpdater {
           channel: 'install-updates',
           listener: () => {
             console.log('install-updates');
-            this.progressWindow?.webContents.send('update-status', {
-              name: 'installing-updates',
-            });
-            setImmediate(() => autoUpdater.quitAndInstall());
+            // this.progressWindow?.webContents.send('update-status', {
+            //   name: 'installing-updates',
+            // });
+            // setImmediate(() => this.autoUpdater.quitAndInstall());
           },
         },
       ];
-      this.handlers.forEach((handler) =>
-        ipcMain.handle(handler.channel, handler.listener.bind(this))
-      );
-      autoUpdater
-        .checkForUpdates()
-        .catch((e) => {
-          console.log(e);
-        })
-        .finally(() => (this.manualCheck = false));
+      this.handlers.forEach((handler) => {
+        ipcMain.removeHandler(handler.channel);
+        console.log(handler.channel, `manualCheck=${this.manualCheck}`);
+        ipcMain.handle(handler.channel, handler.listener.bind(this));
+      });
+      this.autoUpdater.checkForUpdates().catch((e) => {
+        console.log(e);
+      });
+      // if (!this.manualCheck) {
+      // } else {
+      //   this.progressWindow?.webContents.send('auto-updater-message', {
+      //     name: 'checking-for-updates',
+      //     info: this.updateInfo,
+      //   });
+      // }
+      // .finally(() => (this.manualCheck = false));
     });
     this.progressWindow.webContents.loadURL(resolveHtmlPath('updater.html'));
   };
@@ -268,7 +292,6 @@ export class AppUpdater implements IAppUpdater {
     mainWindow: BrowserWindow | null = null,
     manualCheck: boolean = false
   ) => {
-    const self = this;
     return new Promise(async (resolve) => {
       if (!process.env.AUTOUPDATE_FEED_URL) {
         resolve('continue');
@@ -276,6 +299,7 @@ export class AppUpdater implements IAppUpdater {
       }
       this.doneCallback = resolve;
       if (net.isOnline()) {
+        console.log('checkForUpdates ->>>>>>>>>>>', manualCheck);
         this.startUpdateUI(mainWindow, manualCheck);
       } else {
         dialog.showMessageBox({

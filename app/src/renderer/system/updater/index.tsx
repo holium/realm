@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
 import { HoliumLogo } from './holium-logo';
+import { InstallerStyle } from './installer.styles';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
@@ -12,7 +13,7 @@ declare global {
 
 type UpdateStatsProps = {
   stats: ProgressInfo;
-  info: UpdateInfo;
+  info: UpdateInfo & { channel: string | null };
 };
 
 type UpdateAvailableProps = {
@@ -20,7 +21,7 @@ type UpdateAvailableProps = {
 };
 
 type StartingDownloadProps = {
-  info: UpdateInfo;
+  info: UpdateInfo & { channel: string | null };
 };
 
 type AppUpdateErrorProps = {
@@ -29,37 +30,42 @@ type AppUpdateErrorProps = {
 
 const View = (props: any) => {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        height: '100vh',
-        width: '100%',
-        fontFamily: 'Rubik, system-ui, sans-serif',
-      }}
-    >
+    <>
+      <InstallerStyle />
       <Flex
-        position="absolute"
-        top="80px"
+        flexDirection="column"
+        position="relative"
+        height="100vh"
         width="100%"
-        style={{
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
       >
-        <HoliumLogo />
+        <Flex
+          position="absolute"
+          top={58}
+          width="100%"
+          style={{
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <HoliumLogo />
+        </Flex>
+        <Flex
+          position="absolute"
+          gap={16}
+          top={190}
+          flexDirection="column"
+          alignItems="center"
+          width="100%"
+        >
+          {props.children || (
+            <Text.Custom pt={16} fontWeight={300} opacity={0.5}>
+              Checking for updates...
+            </Text.Custom>
+          )}
+        </Flex>
       </Flex>
-      <div
-        style={{
-          top: 164,
-          width: '100%',
-        }}
-      >
-        {props.children}
-      </div>
-    </div>
+    </>
   );
 };
 
@@ -69,70 +75,74 @@ root.render(<View />);
 
 const UpdateAvailable = (props: UpdateAvailableProps) => {
   const { info } = props;
-  console.log('UpdateAvailable', info);
   return (
-    <>
-      <div style={{ padding: '12px' }}>Found updates fuckj</div>
-      <div style={{ padding: '12px' }}>{info.version}</div>
-      <div style={{ padding: '12px' }}>Would you like to install?</div>
-      <div style={{ padding: '12px' }}>
-        <Button.Base
-          style={{ fontFamily: 'Rubik' }}
-          onClick={() => window.autoUpdate.downloadUpdates()}
-        >
-          Yes
-        </Button.Base>
-        <button
-          style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
-          onClick={() => window.autoUpdate.cancelUpdates()}
-        >
-          No
-        </button>
-      </div>
-    </>
+    <Flex width="100%" flexDirection="column" alignItems="center">
+      <Flex
+        gap={20}
+        flexDirection="column"
+        justifyContent="space-between"
+        width={308}
+        alignItems="center"
+      >
+        {/* <Text.Custom fontWeight={300} opacity={0.5}>
+          Install update v{info.version}
+        </Text.Custom> */}
+        <Flex gap={4}>
+          <Text.Custom fontWeight={300} opacity={0.5}>
+            Update available -
+          </Text.Custom>
+          <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
+            v{info.version}
+          </Text.Custom>
+        </Flex>
+        <Flex gap={16}>
+          <Button.Transparent
+            height={26}
+            px="8px"
+            onClick={() => window.autoUpdate.cancelUpdates()}
+          >
+            Cancel
+          </Button.Transparent>
+          <Button.TextButton
+            height={26}
+            px="8px"
+            onClick={() => window.autoUpdate.downloadUpdates()}
+          >
+            Download
+          </Button.TextButton>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 
 const UpdateStats = (props: UpdateStatsProps) => {
   const { stats, info } = props;
-  console.log(stats, info);
   return (
-    <Flex flexDirection="column" alignItems="center">
-      <div style={{ width: 280 }}>
-        <ProgressBar percentage={50} progressColor="#F08735" />
-      </div>
-      <div
-        style={{
-          width: 280,
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Text.Custom fontWeight={300} opacity={0.5}>
+    <Flex gap={16} width="100%" flexDirection="column" alignItems="center">
+      <Flex width={308}>
+        <ProgressBar percentage={stats.percent} progressColor="#F08735" />
+      </Flex>
+      <Flex justifyContent="space-between" width={308} alignItems="flex-start">
+        <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
           Downloading update...
         </Text.Custom>
-        <Flex flexDirection="column">
-          <Text.Custom>{info.version}</Text.Custom>
-          <Text.Custom fontSize={1} opacity={0.5}>
-            {info.version}
-          </Text.Custom>
+        <Flex flexDirection="column" alignItems="flex-end">
+          <Text.Custom fontSize={2}>v{info.version}</Text.Custom>
+          {info.channel && (
+            <Text.Custom fontSize={0} fontWeight={300} opacity={0.5}>
+              {info.channel}
+            </Text.Custom>
+          )}
         </Flex>
-      </div>
-      <div style={{ padding: '12px' }}>
-        Bytes per second: {stats.bytesPerSecond}
-      </div>
-      <div style={{ padding: '12px' }}>Transferred: {stats.transferred}</div>
-      <div style={{ padding: '12px' }}>Total: {stats.total}</div>
-      <div style={{ padding: '12px' }}>Percent: {stats.percent}</div>
+      </Flex>
     </Flex>
   );
 };
 
 const UpdateDownloaded = () => {
   return (
-    <>
+    <Flex>
       <div style={{ padding: '12px' }}>Updates downloaded</div>
       <div style={{ padding: '12px' }}>
         <button
@@ -148,13 +158,13 @@ const UpdateDownloaded = () => {
           Cancel
         </button>
       </div>
-    </>
+    </Flex>
   );
 };
 
 const UpdateNotAvailable = () => {
   return (
-    <>
+    <Flex>
       <div style={{ padding: '12px' }}>No updates available</div>
       <div style={{ padding: '12px' }}>
         <button
@@ -164,45 +174,33 @@ const UpdateNotAvailable = () => {
           Ok
         </button>
       </div>
-    </>
+    </Flex>
   );
 };
 
 const AppUpdateError = (props: AppUpdateErrorProps) => {
   const { error } = props;
-  return (
-    <>
-      <div style={{ padding: '12px' }}>{error}</div>
-    </>
-  );
+  return <div style={{ padding: '12px' }}>{error}</div>;
 };
 
 const StartingDownload = (props: StartingDownloadProps) => {
   const { info } = props;
   return (
-    <Flex position="relative">
-      <Flex position="absolute" style={{ left: 0, top: 80, width: 280 }}>
-        <ProgressBar percentage={50} progressColor="#F08735" />
+    <Flex gap={16} width="100%" flexDirection="column" alignItems="center">
+      <Flex width={308}>
+        <ProgressBar percentage={0} progressColor="#F08735" />
       </Flex>
-      <Flex
-        position="absolute"
-        style={{
-          top: 200,
-          width: 280,
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Text.Custom fontWeight={300} opacity={0.5}>
+      <Flex justifyContent="space-between" width={308} alignItems="flex-start">
+        <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
           Downloading update...
         </Text.Custom>
-        <Flex flexDirection="column">
-          <Text.Custom>{info.version}</Text.Custom>
-          <Text.Custom fontSize={1} opacity={0.5}>
-            {info.version}
-          </Text.Custom>
+        <Flex flexDirection="column" alignItems="flex-end">
+          <Text.Custom fontSize={2}>v{info.version}</Text.Custom>
+          {info.channel && (
+            <Text.Custom fontSize={0} fontWeight={300} opacity={0.5}>
+              {info.channel}
+            </Text.Custom>
+          )}
         </Flex>
       </Flex>
     </Flex>
@@ -226,9 +224,9 @@ window.autoUpdate.listen((event, message: any) => {
     case 'starting-download':
       view = <StartingDownload info={message} />;
       break;
-    case 'checking-for-updates':
-      view = <>Checking for updates. Please wait...</>;
-      break;
+    // case 'checking-for-updates':
+    //   view = <>Checking for updates. Please wait...</>;
+    //   break;
     case 'update-not-available':
       view = <UpdateNotAvailable />;
       break;

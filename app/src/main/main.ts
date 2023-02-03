@@ -234,8 +234,6 @@ app
         createWindow();
         createMouseOverlayWindow();
       }
-        createMouseOverlayWindow();
-      }
     });
   })
   .catch(console.log);
