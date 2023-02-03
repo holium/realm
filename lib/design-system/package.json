@@ -14,12 +14,15 @@
   },
   "dependencies": {
     "@tlon/sigil-js": "^1.4.5",
+    "dayjs": "^1.11.7",
     "dom-helpers": "^5.2.1",
+    "emoji-picker-react": "^4.4.7",
     "framer-motion": "^7.6.7",
     "polished": "^4.2.2",
     "react-lifecycles-compat": "^3.0.4",
-    "styled-components": "^5.3.6",
-    "styled-system": "^5.1.5"
+    "react-player": "^2.11.0",
+    "react-spotify-embed": "^1.0.4",
+    "react-twitter-embed": "^4.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",
@@ -40,10 +43,13 @@
     "@types/babel__core": "^7.1.20",
     "@types/react-lifecycles-compat": "^3.0.1",
     "babel-loader": "^8.3.0",
-    "babel-plugin-styled-components": "^2.0.7"
+    "babel-plugin-styled-components": "^2.0.7",
+    "storybook-addon-state": "^1.0.3"
   },
   "peerDependencies": {
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "styled-components": "^5.3.6",
+    "styled-system": "^5.1.5"
   }
 }
