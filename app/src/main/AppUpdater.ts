@@ -242,11 +242,11 @@ export class AppUpdater implements IAppUpdater {
           channel: 'download-updates',
           listener: () => {
             console.log('download-updates');
-            // this.progressWindow?.webContents.send('update-status', {
-            //   name: 'starting-download',
-            //   ...this.updateInfo,
-            // });
-            // this.autoUpdater.downloadUpdate();
+            this.progressWindow?.webContents.send('update-status', {
+              name: 'starting-download',
+              ...this.updateInfo,
+            });
+            this.autoUpdater.downloadUpdate();
           },
         },
         {
@@ -259,10 +259,10 @@ export class AppUpdater implements IAppUpdater {
           channel: 'install-updates',
           listener: () => {
             console.log('install-updates');
-            // this.progressWindow?.webContents.send('update-status', {
-            //   name: 'installing-updates',
-            // });
-            // setImmediate(() => this.autoUpdater.quitAndInstall());
+            this.progressWindow?.webContents.send('update-status', {
+              name: 'installing-updates',
+            });
+            setImmediate(() => this.autoUpdater.quitAndInstall());
           },
         },
       ];
@@ -274,14 +274,6 @@ export class AppUpdater implements IAppUpdater {
       this.autoUpdater.checkForUpdates().catch((e) => {
         console.log(e);
       });
-      // if (!this.manualCheck) {
-      // } else {
-      //   this.progressWindow?.webContents.send('auto-updater-message', {
-      //     name: 'checking-for-updates',
-      //     info: this.updateInfo,
-      //   });
-      // }
-      // .finally(() => (this.manualCheck = false));
     });
     this.progressWindow.webContents.loadURL(resolveHtmlPath('updater.html'));
   };
