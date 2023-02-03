@@ -1,6 +1,9 @@
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, css } from 'styled-components';
 
-export const InstallerStyle = createGlobalStyle`
+type InstallerStyleProps = {
+  hideCursor?: boolean;
+};
+export const InstallerStyle = createGlobalStyle<InstallerStyleProps>`
   :root {
     font-family: 'Rubik', system-ui, sans-serif;
     color: var(--rlm-text-color);
@@ -19,7 +22,7 @@ export const InstallerStyle = createGlobalStyle`
     --rlm-theme-mode: light;
     --rlm-text-color: #2a2927;
     --rlm-icon-color: #333333;
-    --rlm-intent-alert-color: #ff6240;
+    --rlm-intent-alert-color: #e82a00;
     --rlm-intent-caution-color: #ffbc32;
     --rlm-intent-success-color: #0fc383;
     --rlm-border-radius-4: 4px;
@@ -34,4 +37,11 @@ export const InstallerStyle = createGlobalStyle`
     background: var(--rlm-window-color);
     font-family: var(--rlm-font);
   }
+  ${(props) =>
+    props.hideCursor &&
+    css`
+      * {
+        cursor: none !important;
+      }
+    `}
 `;

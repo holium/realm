@@ -28,10 +28,10 @@ type AppUpdateErrorProps = {
   error: string;
 };
 
-const View = (props: any) => {
+const View = (props: { children: React.ReactNode; hideCursor?: boolean }) => {
   return (
     <>
-      <InstallerStyle />
+      <InstallerStyle hideCursor={props.hideCursor} />
       <Flex
         flexDirection="column"
         position="relative"
@@ -53,13 +53,13 @@ const View = (props: any) => {
         <Flex
           position="absolute"
           gap={16}
-          top={190}
+          top={172}
           flexDirection="column"
           alignItems="center"
           width="100%"
         >
           {props.children || (
-            <Text.Custom pt={16} fontWeight={300} opacity={0.5}>
+            <Text.Custom pt={34} fontWeight={300} opacity={0.5}>
               Checking for updates...
             </Text.Custom>
           )}
@@ -71,22 +71,13 @@ const View = (props: any) => {
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(<View />);
+root.render(<View hideCursor={false}> </View>);
 
 const UpdateAvailable = (props: UpdateAvailableProps) => {
   const { info } = props;
   return (
     <Flex width="100%" flexDirection="column" alignItems="center">
-      <Flex
-        gap={20}
-        flexDirection="column"
-        justifyContent="space-between"
-        width={308}
-        alignItems="center"
-      >
-        {/* <Text.Custom fontWeight={300} opacity={0.5}>
-          Install update v{info.version}
-        </Text.Custom> */}
+      <Flex gap={20} flexDirection="column" width={308} alignItems="center">
         <Flex gap={4}>
           <Text.Custom fontWeight={300} opacity={0.5}>
             Update available -
@@ -95,45 +86,25 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
             v{info.version}
           </Text.Custom>
         </Flex>
-        <Flex gap={16}>
-          <Button.Transparent
+        <Flex gap={8} flexDirection="column" alignItems="center" width={120}>
+          <Button.Primary
             height={26}
-            px="8px"
-            onClick={() => window.autoUpdate.cancelUpdates()}
-          >
-            Cancel
-          </Button.Transparent>
-          <Button.TextButton
-            height={26}
+            width="inherit"
+            justifyContent="center"
             px="8px"
             onClick={() => window.autoUpdate.downloadUpdates()}
           >
             Download
-          </Button.TextButton>
-        </Flex>
-      </Flex>
-    </Flex>
-  );
-};
-
-const UpdateStats = (props: UpdateStatsProps) => {
-  const { stats, info } = props;
-  return (
-    <Flex gap={16} width="100%" flexDirection="column" alignItems="center">
-      <Flex width={308}>
-        <ProgressBar percentage={stats.percent} progressColor="#F08735" />
-      </Flex>
-      <Flex justifyContent="space-between" width={308} alignItems="flex-start">
-        <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
-          Downloading update...
-        </Text.Custom>
-        <Flex flexDirection="column" alignItems="flex-end">
-          <Text.Custom fontSize={2}>v{info.version}</Text.Custom>
-          {info.channel && (
-            <Text.Custom fontSize={0} fontWeight={300} opacity={0.5}>
-              {info.channel}
-            </Text.Custom>
-          )}
+          </Button.Primary>
+          <Button.Secondary
+            height={26}
+            width="inherit"
+            justifyContent="center"
+            px="8px"
+            onClick={() => window.autoUpdate.cancelUpdates()}
+          >
+            Cancel
+          </Button.Secondary>
         </Flex>
       </Flex>
     </Flex>
@@ -142,51 +113,103 @@ const UpdateStats = (props: UpdateStatsProps) => {
 
 const UpdateDownloaded = () => {
   return (
-    <Flex>
-      <div style={{ padding: '12px' }}>Updates downloaded</div>
-      <div style={{ padding: '12px' }}>
-        <button
-          style={{ fontFamily: 'Rubik' }}
-          onClick={() => window.autoUpdate.installUpdates()}
-        >
-          Install
-        </button>
-        <button
-          style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
-          onClick={() => window.autoUpdate.cancelUpdates()}
-        >
-          Cancel
-        </button>
-      </div>
+    <Flex width="100%" flexDirection="column" alignItems="center">
+      <Flex gap={20} flexDirection="column" width={308} alignItems="center">
+        <Flex gap={4}>
+          <Text.Custom fontWeight={300} opacity={0.5}>
+            Updates downloaded
+          </Text.Custom>
+        </Flex>
+        <Flex gap={8} flexDirection="column" alignItems="center" width={120}>
+          <Button.Primary
+            height={26}
+            width="inherit"
+            justifyContent="center"
+            px="8px"
+            onClick={() => window.autoUpdate.installUpdates()}
+          >
+            Install and Restart
+          </Button.Primary>
+          <Button.Secondary
+            height={26}
+            width="inherit"
+            justifyContent="center"
+            px="8px"
+            onClick={() => window.autoUpdate.cancelUpdates()}
+          >
+            Cancel
+          </Button.Secondary>
+        </Flex>
+      </Flex>
     </Flex>
   );
 };
 
 const UpdateNotAvailable = () => {
   return (
-    <Flex>
-      <div style={{ padding: '12px' }}>No updates available</div>
-      <div style={{ padding: '12px' }}>
-        <button
-          style={{ marginLeft: '8px', fontFamily: 'Rubik' }}
-          onClick={() => window.autoUpdate.cancelUpdates()}
-        >
-          Ok
-        </button>
-      </div>
+    <Flex width="100%" flexDirection="column" alignItems="center">
+      <Flex gap={20} flexDirection="column" width={308} alignItems="center">
+        <Flex gap={4}>
+          <Text.Custom fontWeight={300} opacity={0.5}>
+            No updates available
+          </Text.Custom>
+        </Flex>
+        <Flex gap={8} flexDirection="column" alignItems="center" width={120}>
+          <Button.Secondary
+            height={26}
+            width="inherit"
+            justifyContent="center"
+            px="8px"
+            onClick={() => window.autoUpdate.cancelUpdates()}
+          >
+            Ok
+          </Button.Secondary>
+        </Flex>
+      </Flex>
     </Flex>
   );
 };
 
 const AppUpdateError = (props: AppUpdateErrorProps) => {
   const { error } = props;
-  return <div style={{ padding: '12px' }}>{error}</div>;
+  return (
+    <Flex width="100%" flexDirection="column" alignItems="center">
+      <Flex flexDirection="column" width={308} alignItems="center">
+        <Text.Custom
+          color="intent-alert"
+          fontSize={1}
+          fontWeight={400}
+          opacity={0.5}
+          width="inherit"
+          height={80}
+          style={{ wordBreak: 'break-word' }}
+        >
+          {error}
+        </Text.Custom>
+        <Text.Anchor
+          color="accent"
+          fontSize={1}
+          variant="hint"
+          href="mailto:support@holium.com?subject=BUG:Update error"
+        >
+          Email support@holium.com
+        </Text.Anchor>
+      </Flex>
+    </Flex>
+  );
 };
 
 const StartingDownload = (props: StartingDownloadProps) => {
   const { info } = props;
+  const releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
   return (
-    <Flex gap={16} width="100%" flexDirection="column" alignItems="center">
+    <Flex
+      gap={16}
+      pt={16}
+      width="100%"
+      flexDirection="column"
+      alignItems="center"
+    >
       <Flex width={308}>
         <ProgressBar percentage={0} progressColor="#F08735" />
       </Flex>
@@ -195,10 +218,46 @@ const StartingDownload = (props: StartingDownloadProps) => {
           Downloading update...
         </Text.Custom>
         <Flex flexDirection="column" alignItems="flex-end">
-          <Text.Custom fontSize={2}>v{info.version}</Text.Custom>
-          {info.channel && (
+          <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
+            v{info.version}
+          </Text.Custom>
+          {releaseChannel === 'alpha' && (
             <Text.Custom fontSize={0} fontWeight={300} opacity={0.5}>
-              {info.channel}
+              prerelease
+            </Text.Custom>
+          )}
+        </Flex>
+      </Flex>
+    </Flex>
+  );
+};
+
+const UpdateStats = (props: UpdateStatsProps) => {
+  const { stats, info } = props;
+  const releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
+
+  return (
+    <Flex
+      gap={16}
+      pt={16}
+      width="100%"
+      flexDirection="column"
+      alignItems="center"
+    >
+      <Flex width={308}>
+        <ProgressBar percentage={stats.percent} progressColor="#F08735" />
+      </Flex>
+      <Flex justifyContent="space-between" width={308} alignItems="flex-start">
+        <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
+          Downloading update...
+        </Text.Custom>
+        <Flex flexDirection="column" alignItems="flex-end">
+          <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
+            v{info.version}
+          </Text.Custom>
+          {releaseChannel === 'alpha' && (
+            <Text.Custom fontSize={0} fontWeight={300} opacity={0.5}>
+              prerelease
             </Text.Custom>
           )}
         </Flex>
@@ -234,5 +293,5 @@ window.autoUpdate.listen((event, message: any) => {
       view = <AppUpdateError error={message.error} />;
       break;
   }
-  root.render(<View>{view}</View>);
+  root.render(<View hideCursor={message.inAppWindow}>{view}</View>);
 });

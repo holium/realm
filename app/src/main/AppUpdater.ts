@@ -81,8 +81,7 @@ export class AppUpdater implements IAppUpdater {
   constructor() {
     autoUpdater.removeAllListeners();
     this.autoUpdater = autoUpdater;
-    this.done = this.done.bind(this);
-    this.startUpdateUI = this.startUpdateUI.bind(this);
+
     if (!process.env.AUTOUPDATE_FEED_URL) return;
     // good luck trying to test on localmachine
     if (isDevelopment) {
@@ -91,7 +90,6 @@ export class AppUpdater implements IAppUpdater {
         'dev-app-update.json'
       );
     }
-    console.log('contructor -> autoUpdater.autoDownload = false');
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     this.autoUpdater.autoDownload = false;
@@ -111,32 +109,39 @@ export class AppUpdater implements IAppUpdater {
     this.autoUpdater.on('checking-for-update', async () => {
       this.progressWindow?.webContents.send('auto-updater-message', {
         name: 'checking-for-updates',
+        inAppWindow: this.manualCheck,
       });
     });
     this.autoUpdater.on('update-available', (info: UpdateInfo) => {
+      console.log('update-available', info);
+      this.progressWindow?.show();
       this.splashWindow?.close();
       this.splashWindow = null;
       this.updateInfo = info;
       if (!this.manualCheck) {
-        console.log('update-available -> autoDownload');
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'starting-download',
           ...info,
+          inAppWindow: this.manualCheck,
         });
         this.autoUpdater.downloadUpdate();
       } else {
-        console.log('update-available -> manualCheck');
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'update-available',
           version: info.version,
+          inAppWindow: this.manualCheck,
         });
       }
     });
     this.autoUpdater.on('update-not-available', () => {
+      if (process.env.NODE_ENV === 'development') {
+        this.done();
+      }
       // only show this message if the user chose to run an update check manually
       if (this.manualCheck) {
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'update-not-available',
+          inAppWindow: this.manualCheck,
         });
       } else {
         console.log('update-not-available -> manualCheck');
@@ -144,19 +149,21 @@ export class AppUpdater implements IAppUpdater {
       }
     });
     this.autoUpdater.on('update-downloaded', () => {
-      console.log('update-downloaded -> manualCheck=', this.manualCheck);
       if (!this.manualCheck) {
-        if (process.env.NODE_ENV === 'development') {
-          this.done();
-        } else {
-          this.progressWindow?.webContents.send('update-status', {
-            name: 'installing-updates',
-          });
-          setImmediate(() => this.autoUpdater.quitAndInstall());
-        }
+        // if (process.env.NODE_ENV === 'development') {
+        //   // skips the install and restart for dev mode
+        //   this.done();
+        // }
+        this.progressWindow?.webContents.send('update-status', {
+          name: 'installing-updates',
+          inAppWindow: this.manualCheck,
+        });
+        setImmediate(() => this.autoUpdater.quitAndInstall());
       } else {
+        console.log('update-downloaded', this.updateInfo);
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'update-downloaded',
+          inAppWindow: this.manualCheck,
         });
       }
     });
@@ -165,6 +172,7 @@ export class AppUpdater implements IAppUpdater {
         stats,
         info: this.updateInfo,
         name: 'update-status',
+        inAppWindow: this.manualCheck,
       });
     });
     this.autoUpdater.logger = log;
@@ -183,7 +191,6 @@ export class AppUpdater implements IAppUpdater {
     mainWindow: BrowserWindow | null,
     manualCheck: boolean = false
   ) => {
-    console.log('startUpdateUI', manualCheck);
     this.manualCheck = manualCheck;
     // this is not needed if the app is already open (mainWindow !== null)
     if (!mainWindow) {
@@ -233,18 +240,14 @@ export class AppUpdater implements IAppUpdater {
       },
     });
     this.progressWindow.webContents.on('did-finish-load', () => {
-      console.log('did-finish-load ---> manualCheck = ', this.manualCheck);
-      // if (manualCheck) {
-      //   this.progressWindow?.show();
-      // }
       this.handlers = [
         {
           channel: 'download-updates',
           listener: () => {
-            console.log('download-updates');
             this.progressWindow?.webContents.send('update-status', {
               name: 'starting-download',
               ...this.updateInfo,
+              inAppWindow: this.manualCheck,
             });
             this.autoUpdater.downloadUpdate();
           },
@@ -268,7 +271,6 @@ export class AppUpdater implements IAppUpdater {
       ];
       this.handlers.forEach((handler) => {
         ipcMain.removeHandler(handler.channel);
-        console.log(handler.channel, `manualCheck=${this.manualCheck}`);
         ipcMain.handle(handler.channel, handler.listener.bind(this));
       });
       this.autoUpdater.checkForUpdates().catch((e) => {
@@ -291,7 +293,6 @@ export class AppUpdater implements IAppUpdater {
       }
       this.doneCallback = resolve;
       if (net.isOnline()) {
-        console.log('checkForUpdates ->>>>>>>>>>>', manualCheck);
         this.startUpdateUI(mainWindow, manualCheck);
       } else {
         dialog.showMessageBox({
