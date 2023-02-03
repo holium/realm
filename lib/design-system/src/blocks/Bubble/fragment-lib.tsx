@@ -128,14 +128,14 @@ export const FragmentCodeBlock = styled(Text.Custom)`
 `;
 
 type FragmentImageProps = {
-  skeleton?: boolean;
+  isSkeleton?: boolean;
 };
 
 export const FragmentImage = styled(motion.img)<FragmentImageProps>`
   width: 100%;
   max-width: 20rem;
   border-radius: 4px;
-  ${({ skeleton }) => skeleton && skeletonStyle}
+  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
 const TabWrapper = styled(Flex)<FlexProps>`
@@ -333,48 +333,3 @@ export const renderFragment = (
       return '';
   }
 };
-
-// export const renderFragment = (fragment: Message) => {
-//   const key = Object.keys(fragment)[0] as MessageType;
-//   switch (key) {
-//     case 'plain':
-//       return <FragmentPlain>{(fragment as FragmentPlainType).plain}</FragmentPlain>;
-//     case 'bold':
-//       return `**${(fragment as MessageBold).bold}**`;
-//     case 'italics':
-//       return `*${(fragment as MessageItalics).italics}*`;
-//     case 'strike':
-//       return `~~${(fragment as MessageStrike).strike}~~`;
-//     case 'bold-italics':
-//       return `***${(fragment as MessageBoldItalics)['bold-italics']}***`;
-//     case 'bold-strike':
-//       return `**~~${(fragment as MessageBoldStrike)['bold-strike']}~~**`;
-//     case 'bold-italics-strike':
-//       return `***~~${
-//         (fragment as MessageBoldItalicsStrike)['bold-italics-strike']
-//       }~~***`;
-//     case 'blockquote':
-//       return `> ${(fragment as MessageBlockquote).blockquote}`;
-//     case 'inline-code':
-//       return `\`${(fragment as MessageInlineCode)['inline-code']}\``;
-//     case 'ship':
-//       return `${(fragment as MessageShip).ship}`;
-//     case 'code':
-//       return `\`\`\`${(fragment as MessageCode).code}\`\`\``;
-//     case 'link':
-//       return `[${(fragment as MessageLink).link[0]}](${
-//         (fragment as MessageLink).link[1]
-//       })`;
-//     case 'image':
-//       return `![${(fragment as MessageImage).image}](${
-//         (fragment as MessageImage).image
-//       })`;
-//     case 'ur-link':
-//       return `<${(fragment as MessageUrLink)['ur-link']}>`;
-//     case 'break':
-//       return '\n';
-//     default:
-//       // return fragment[key].data;
-//       return '';
-//   }
-// };

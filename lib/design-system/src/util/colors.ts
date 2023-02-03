@@ -16,22 +16,27 @@ export type ColorVariants =
   | 'intent-warning'
   | 'intent-info';
 
-export const variantToCssVar = (colorVariant: ColorVariants) => {
+export type ThemeVar = 'theme-mode';
+export type StyleVars = ColorVariants | ThemeVar;
+
+export const variantToColorVar = (colorVariant: ColorVariants) => {
   return `--rlm-${colorVariant}-color`;
 };
 
-export const getVar = (colorVariant: ColorVariants) => {
-  const cssVar = variantToCssVar(colorVariant);
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(cssVar)
-    .replace(/\s/g, '');
-
-  return value;
+export const variantToCssVar = (variable: ThemeVar) => {
+  return `--rlm-${variable}`;
 };
 
-export const getRawVar = (variable: string) => {
+export const getVar = (variable: StyleVars) => {
+  let cssVar: string;
+  if (variable === 'theme-mode') {
+    cssVar = variantToCssVar(variable);
+  } else {
+    cssVar = variantToColorVar(variable);
+  }
+
   const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(variable)
+    .getPropertyValue(cssVar)
     .replace(/\s/g, '');
 
   return value;
@@ -47,16 +52,16 @@ export const colorStyle = css<ColorProps>`
   ${(props) =>
     props.bg &&
     css`
-      background-color: var(${variantToCssVar(props.bg)});
+      background-color: var(${variantToColorVar(props.bg)});
     `}
   ${(props) =>
     props.color &&
     css`
-      color: var(${variantToCssVar(props.color)});
+      color: var(${variantToColorVar(props.color)});
     `}
   ${(props) =>
     props.borderColor &&
     css`
-      border-color: var(${variantToCssVar(props.borderColor)});
+      border-color: var(${variantToColorVar(props.borderColor)});
     `}
 `;

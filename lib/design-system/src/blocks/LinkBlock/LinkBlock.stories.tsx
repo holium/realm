@@ -97,8 +97,6 @@ export const NoOpenGraph: ComponentStory<typeof LinkBlock> = () => (
 );
 
 export const Twitter: ComponentStory<typeof LinkBlock> = () => (
-  // https://twitter.com/Ollyoxalls/status/1620941313431445504
-  // hhttps://twitter.com/Ollyoxalls/status/1620941313431445504?s=20
   <Flex flexDirection="row" gap={16} p={1}>
     <Flex flexDirection="column" width={430} p={2} background={'#FFFF'}>
       <TweetBlock

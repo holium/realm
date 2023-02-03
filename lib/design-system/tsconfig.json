@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "src"
   },
-  "include": ["src", ".storybook", "window.d.ts", "window.d.ts"],
+  "include": ["src", ".storybook", "window.d.ts"],
   "exclude": [
     "dist",
     "node_modules",

@@ -146,7 +146,7 @@ const Patp = styled(motion.p)<TextProps>`
   color: var(--rlm-text-color);
   margin-top: 0px;
   margin-bottom: 0px;
-  ${({ skeleton }) => skeleton && skeletonStyle}
+  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
 const Anchor = styled(motion.a)<TextProps>`
@@ -156,8 +156,8 @@ const Anchor = styled(motion.a)<TextProps>`
     cursor: pointer;
     text-decoration: underline;
   }
-  ${({ skeleton }: TextProps) =>
-    skeleton &&
+  ${({ isSkeleton }: TextProps) =>
+    isSkeleton &&
     css`
       line-height: normal;
       ${skeletonStyle}

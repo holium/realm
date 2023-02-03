@@ -9,13 +9,13 @@ type ImageBlockProps = {
 } & BlockProps;
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
-  const { image, by, variant, ...rest } = props;
+  const { image, by, variant, width = 'inherit', ...rest } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <Block variant={variant} width={rest.width || 'inherit'} {...rest}>
+    <Block variant={variant} width={width} {...rest}>
       <FragmentImage
-        skeleton={!imgLoaded}
+        isSkeleton={!imgLoaded}
         src={image}
         draggable={false}
         onError={(evt: React.SyntheticEvent<HTMLImageElement, Event>) => {

@@ -36,7 +36,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 export type BoxProps = {
   gap?: string | number | undefined;
   pointerEvents?: string;
-  skeleton?: boolean;
+  isSkeleton?: boolean;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
@@ -103,5 +103,5 @@ export const Box = styled(motion.div)<BoxProps>`
   box-sizing: border-box;
   ${boxStyles}
   ${colorStyle}
-  ${({ skeleton }) => skeleton && skeletonStyle}
+  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;

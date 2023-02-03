@@ -2,10 +2,10 @@ import { FC, useMemo, useState } from 'react';
 import { TwitterTweetEmbed } from 'react-twitter-embed';
 import styled, { css } from 'styled-components';
 import { skeletonStyle } from '../..';
-import { getRawVar } from '../../util/colors';
+import { getVar } from '../../util/colors';
 import { BlockStyle, BlockProps } from '../Block/Block';
 
-type TweetWrapperProps = { skeleton: boolean };
+type TweetWrapperProps = { isSkeleton: boolean };
 
 const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
   min-height: 250px;
@@ -17,8 +17,8 @@ const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
     margin-top: 0px !important;
     margin-bottom: 0px !important;
   }
-  ${({ skeleton }: TweetWrapperProps) =>
-    skeleton &&
+  ${({ isSkeleton }: TweetWrapperProps) =>
+    isSkeleton &&
     css`
       ${skeletonStyle}
       border-radius: 12px;
@@ -38,7 +38,7 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
   const { id, link, ...rest } = props;
   let tweetEmbed: any = null;
   const [tweetLoaded, setTweetLoaded] = useState(false);
-  const themeMode = getRawVar('--rlm-theme-mode') || 'light';
+  const themeMode = getVar('theme-mode') || 'light';
   return useMemo(() => {
     if (link.includes('status')) {
       const tweetId = link.split('status/')[1].split('?')[0];
@@ -60,7 +60,7 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
     }
 
     return (
-      <TweetWrapper skeleton={!tweetLoaded} id={id} {...rest}>
+      <TweetWrapper isSkeleton={!tweetLoaded} id={id} {...rest}>
         {tweetEmbed}
       </TweetWrapper>
     );

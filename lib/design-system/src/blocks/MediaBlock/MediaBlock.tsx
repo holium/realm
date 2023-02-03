@@ -29,7 +29,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
       <MediaWrapper>
         {!isReady && !isError && (
           <Flex
-            skeleton
+            isSkeleton
             position="absolute"
             top="0"
             bottom="0"

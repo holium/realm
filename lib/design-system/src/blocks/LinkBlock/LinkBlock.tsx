@@ -8,13 +8,13 @@ import { TweetBlock } from './TweetBlock';
 
 const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
 
-const LinkImage = styled(motion.img)<{ skeleton?: boolean }>`
+const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   width: 100%;
   height: 170px;
   object-fit: cover;
   border-radius: 4px;
   background: var(--rlm-window-color);
-  ${({ skeleton }) => skeleton && skeletonStyle}
+  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
 type OpenGraphType = {
@@ -111,7 +111,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
   return (
     <Block {...rest}>
       <LinkImage
-        skeleton={!openGraph || !imgLoaded}
+        isSkeleton={!openGraph || !imgLoaded}
         src={openGraph?.ogImage.url}
         alt={openGraph?.ogTitle}
         onError={(evt: React.SyntheticEvent<HTMLImageElement, Event>) => {}}
@@ -119,7 +119,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
       />
       <Flex width="100%" gap={2} flexDirection="column">
         <Text.Anchor
-          skeleton={!openGraph}
+          isSkeleton={!openGraph}
           fontSize={2}
           fontWeight={500}
           width={rest.width || 'inherit'}
@@ -131,7 +131,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
           {openGraph?.ogTitle}
         </Text.Anchor>
         <Text.Custom
-          skeleton={!openGraph}
+          isSkeleton={!openGraph}
           fontSize={1}
           opacity={0.7}
           width={rest.width || 'inherit'}
@@ -153,7 +153,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
           width="50%"
         >
           <Text.Anchor
-            skeleton={!openGraph}
+            isSkeleton={!openGraph}
             fontSize={0}
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
