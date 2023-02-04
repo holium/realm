@@ -110,13 +110,32 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const loading = planets.length === 0;
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getPlanets = async () => {
-      const result = await OnboardingActions.getAvailablePlanets();
-      setPlanets(result);
+      setLoading(true);
+      OnboardingActions.getAvailablePlanets()
+        .then((result) => {
+          setPlanets(result);
+          if (result.length === 0) {
+            setError(true);
+            setErrorMessage(
+              `no ships available, contact hosting@holium.com for support`
+            );
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          setError(true);
+          setErrorMessage(
+            `an error occurred retrieving available planets. contact hosting@holium.com for support`
+          );
+        })
+        .finally(() => setLoading(false));
     };
 
     getPlanets();
@@ -216,9 +235,25 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
             another one.
           </Text>
         )}
+        {error && errorMessage?.length > 0 && (
+          <Text
+            color={baseTheme.colors.text.error}
+            fontSize={1}
+            textAlign="center"
+            mt={3}
+          >
+            No available planets found. Please contact Realm support.
+          </Text>
+        )}
       </Flex>
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
-        <TextButton>Next</TextButton>
+        <TextButton
+          disabled={
+            !(!loading && !error && planets.length > 0 && selectedIndex >= 0)
+          }
+        >
+          Next
+        </TextButton>
       </Box>
     </Grid.Column>
   );
