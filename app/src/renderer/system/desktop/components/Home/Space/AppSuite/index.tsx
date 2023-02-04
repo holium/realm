@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
-import { SuiteApp } from './App';
+import { SuiteApp } from './SuiteApp';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
