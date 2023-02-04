@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import { useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
-import { Detail } from './views/common/Detail';
+import { Detail } from './views/common/Detail/Detail';
 import { WalletList } from './views/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
