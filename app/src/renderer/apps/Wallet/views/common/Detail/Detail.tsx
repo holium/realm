@@ -57,6 +57,8 @@ const DetailPresenter = (props: DetailProps) => {
         .get(walletApp.navState.protocol)!
         .coins.get(walletApp.navState.detail!.key)!;
     }
+    // TODO: can we remove this memo?
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     coins = useMemo(
       () =>
         getCoins(
@@ -64,6 +66,8 @@ const DetailPresenter = (props: DetailProps) => {
         ),
       []
     );
+    // TODO: can we remove this memo?
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     nfts = useMemo(
       () =>
         getNfts(
