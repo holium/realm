@@ -327,7 +327,7 @@ export const renderFragment = (
     case 'ur-link':
       return `<${(fragment as FragmentUrLinkType)['ur-link']}>`;
     case 'break':
-      return '\n';
+      return <br />;
     default:
       // return fragment[key].data;
       return '';

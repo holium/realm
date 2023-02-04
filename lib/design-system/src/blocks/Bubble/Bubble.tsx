@@ -11,7 +11,7 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
-type TemplateProps = {
+export type BubbleProps = {
   author: string;
   authorColor?: string;
   sentAt: string;
@@ -22,7 +22,7 @@ type TemplateProps = {
   onReplyClick?: (msgId: string) => void;
 } & BoxProps;
 
-export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
+export const Bubble: FC<BubbleProps> = (props: BubbleProps) => {
   const {
     id,
     author,
