@@ -1,5 +1,4 @@
 import {
-  FC,
   useMemo,
   Dispatch,
   SetStateAction,
@@ -26,7 +25,7 @@ interface ImportProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-export const Import: FC<ImportProps> = observer((props: ImportProps) => {
+const ImportPresenter = (props: ImportProps) => {
   const { theme } = useServices();
   const themeData = useMemo(
     () => getBaseTheme(theme.currentTheme),
@@ -91,4 +90,6 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Import = observer(ImportPresenter);

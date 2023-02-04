@@ -12,7 +12,7 @@ interface LoginProps {
   firstTime: boolean;
 }
 
-export const Auth = observer(({ firstTime }: LoginProps) => {
+const AuthPresenter = ({ firstTime }: LoginProps) => {
   const { onboarding } = useServices();
   const [addShip, setAddShip] = useState(false);
 
@@ -40,6 +40,6 @@ export const Auth = observer(({ firstTime }: LoginProps) => {
       )}
     </Flex>
   );
-});
+};
 
-export default Auth;
+export const Auth = observer(AuthPresenter);

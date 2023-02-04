@@ -90,7 +90,7 @@ const dimensions = {
   width: 550,
 };
 
-export const AppSuite = observer((props: AppSuiteProps) => {
+const AppSuitePresenter = (props: AppSuiteProps) => {
   const { isAdmin } = props;
   const { theme, bazaar, spaces } = useServices();
   const space = spaces.selected!;
@@ -250,4 +250,6 @@ export const AppSuite = observer((props: AppSuiteProps) => {
       {popover}
     </Flex>
   );
-});
+};
+
+export const AppSuite = observer(AppSuitePresenter);

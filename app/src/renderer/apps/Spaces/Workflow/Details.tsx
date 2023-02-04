@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Grid,
   Text,
@@ -84,7 +84,7 @@ export const createSpaceForm = ({
 type CrestOptionType = 'color' | 'image';
 type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
-export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
+const SpacesCreateFormPresenter = (props: BaseDialogProps) => {
   const { theme, spaces } = useServices();
   const { inputColor, windowColor, textColor } = theme.currentTheme;
   const { workflowState, setState } = props;
@@ -470,4 +470,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const SpacesCreateForm = observer(SpacesCreateFormPresenter);

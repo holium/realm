@@ -3,7 +3,7 @@ import { Flex, Text, Icons } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import PasscodeInput from '../../components/PasscodeInput';
 
-export const Locked = observer(() => {
+const LockedPresenter = () => {
   const unlock = () => {
     WalletActions.navigateBack();
     WalletActions.watchUpdates();
@@ -30,6 +30,6 @@ export const Locked = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
 
-export default Locked;
+export const Locked = observer(LockedPresenter);

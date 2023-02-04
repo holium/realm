@@ -39,7 +39,7 @@ const FadeInMotion = {
   transition: { opacity: { duration: 1, ease: 'easeIn' } },
 };
 
-export const SelectedSpace = observer(({ onClick }: SelectedSpaceProps) => {
+const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
   const { spaces, ship, theme } = useServices();
   const selectedSpace = spaces.selected;
   const { textColor } = theme.currentTheme;
@@ -158,4 +158,6 @@ export const SelectedSpace = observer(({ onClick }: SelectedSpaceProps) => {
       {innerContent}
     </SpaceButton>
   );
-});
+};
+
+export const SelectedSpace = observer(SelectedSpacePresenter);

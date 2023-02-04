@@ -12,7 +12,7 @@ import {
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
-export const Splash = observer(() => {
+const SplashPresenter = () => {
   useEffect(() => {
     SoundActions.playStartup();
 
@@ -57,6 +57,6 @@ export const Splash = observer(() => {
       </Flex>
     </AnimatePresence>
   );
-});
+};
 
-export default Splash;
+export const Splash = observer(SplashPresenter);

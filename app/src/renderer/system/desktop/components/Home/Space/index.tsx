@@ -1,4 +1,4 @@
-import { FC, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
@@ -7,7 +7,6 @@ import { Flex, Text } from 'renderer/components';
 import { SpaceTitlebar } from './Titlebar';
 import { AppSuite } from './AppSuite';
 import { RecommendedApps } from './Recommended';
-// import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
 
@@ -17,7 +16,7 @@ interface HomePaneProps {
 
 type SidebarType = 'members' | null;
 
-export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
+const SpaceHomePresenter = (props: HomePaneProps) => {
   const { isOpen } = props;
   const { ship, spaces, membership } = useServices();
   const currentSpace = spaces.selected;
@@ -200,4 +199,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const SpaceHome = observer(SpaceHomePresenter);

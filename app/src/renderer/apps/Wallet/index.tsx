@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
@@ -9,7 +9,7 @@ import { EthNew } from './views/common/New';
 import { WalletFooter } from './views/common/Footer';
 import { CreateWallet } from './views/common/Create';
 import { NFTDetail } from './views/common/NFTDetail';
-import Locked from './views/common/Locked';
+import { Locked } from './views/common/Locked';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
@@ -39,7 +39,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
 });
 
-export const WalletApp: FC<any> = observer((props: any) => {
+const WalletAppPresenter = (props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
 
@@ -148,4 +148,6 @@ export const WalletApp: FC<any> = observer((props: any) => {
       <WalletFooter hidden={hideFooter} />
     </Flex>
   );
-});
+};
+
+export const WalletApp = observer(WalletAppPresenter);

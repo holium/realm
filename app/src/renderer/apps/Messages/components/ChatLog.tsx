@@ -13,7 +13,7 @@ interface ChatLogProps {
   messages: GraphDMType[];
 }
 
-export const ChatLog = observer((props: ChatLogProps) => {
+const ChatLogPresenter = (props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
@@ -109,4 +109,6 @@ export const ChatLog = observer((props: ChatLogProps) => {
       theme,
     ]
   );
-});
+};
+
+export const ChatLog = observer(ChatLogPresenter);

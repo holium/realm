@@ -66,7 +66,7 @@ interface SuiteAppProps {
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app?: any) => void;
 }
 
-export const SuiteApp = observer((props: SuiteAppProps) => {
+const SuiteAppPresenter = (props: SuiteAppProps) => {
   const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
     props;
   const { bazaar } = useServices();
@@ -223,4 +223,6 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
       )}
     </AppEmpty>
   );
-});
+};
+
+export const SuiteApp = observer(SuiteAppPresenter);
