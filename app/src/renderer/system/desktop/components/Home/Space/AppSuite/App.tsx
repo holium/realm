@@ -75,6 +75,13 @@ const SuiteAppPresenter = (props: SuiteAppProps) => {
     return (app as UrbitAppType).host;
   }, [app]);
 
+  const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+  const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+  const iconColor = useMemo(
+    () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
+    [isLight]
+  );
+
   if (app) {
     const isPinned = bazaar.isPinned(space.path, app.id);
     const weRecommended = bazaar.isRecommended(app.id);
@@ -170,13 +177,7 @@ const SuiteAppPresenter = (props: SuiteAppProps) => {
         weRecommended,
       ]
     );
-    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-    const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
-    const iconColor = useMemo(
-      () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
-      [isLight]
-    );
-    // const iconColor
+
     return (
       <Box position="relative">
         {(isUninstalled || isDesktop) && (
