@@ -5,7 +5,7 @@ import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 
 import { SpaceTitlebar } from './Titlebar';
-import { AppSuite } from './AppSuite';
+import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
