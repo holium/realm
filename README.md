@@ -40,3 +40,11 @@ npx cross-env DEBUG_PROD=true yarn package:prerelease:mac
 npx cross-env DEBUG_PROD=true yarn package:prerelease:linux
 npx cross-env DEBUG_PROD=true yarn package:prerelease:win
 ```
+
+## Contributing
+
+For frontend development, make sure to:
+
+1. Install the ESLint extension in your editor of choice ([VSCode link](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)). The Prettier extension is not needed since we're using it as an ESLint plugin.
+2. Configure your editor to format on save so you don't have to run `yarn lint` manually ([VSCode instruction](https://code.visualstudio.com/updates/v1_6#_format-on-save)).
+3. Follow the [Frontend Style Guide](./.docs/FRONTEND.md).
