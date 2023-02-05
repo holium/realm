@@ -10,12 +10,13 @@ export const BubbleStyle = styled(Box)`
   padding: 6px 8px 6px 8px;
   font-size: 14px;
   align-self: flex-start;
+  min-width: 150px;
   color: var(--rlm-text-color);
   background: var(--rlm-input-color);
   border-radius: 9px 9px 9px 0px;
   &.bubble-our {
     background: var(--rlm-accent-color);
-    border-radius: 9px 9px 0px 9px;
+    border-radius: 9px 9px 0px 9px !important;
     ${Text.Custom} {
       color: #ffffff;
     }

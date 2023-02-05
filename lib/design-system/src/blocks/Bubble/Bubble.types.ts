@@ -132,4 +132,5 @@ export type FragmentKeyTypes =
   | 'blockquote'
   | 'code'
   | 'tab'
-  | 'reply';
+  | 'reply'
+  | 'break';

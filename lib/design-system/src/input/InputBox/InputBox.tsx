@@ -16,9 +16,9 @@ type StyledBoxProps = {
 
 const StyledBox = styled(Box)<StyledBoxProps>`
   position: relative;
-  border-radius: var(--rlm-border-radius-6);
   border: 1px solid var(--rlm-border-color);
   background-color: var(--rlm-input-color);
+  overflow: hidden;
   min-height: 32px;
   ${(props) =>
     props.shouldHighlightOnFocus &&
@@ -131,14 +131,13 @@ export const InputBox = ({
   disabled,
   error,
   children,
+  borderRadius = '6px',
 }: InputBoxProps) => (
   <StyledBox
-    display="flex"
-    contentEditable="true"
-    suppressContentEditableWarning={true}
     width={width}
     height={height}
     error={error}
+    borderRadius={borderRadius}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}

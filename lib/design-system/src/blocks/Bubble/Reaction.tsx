@@ -198,14 +198,13 @@ export const Reactions = (props: ReactionProps) => {
             setReacting(!reacting);
           }}
         >
-          <Icon size={18} opacity={0.5} name="Plus" pointerEvents="none" />
+          <Icon size={18} opacity={0.5} name="Reaction" pointerEvents="none" />
         </ReactionButton>
         <AnimatePresence>
           {reacting && (
             <Flex position="absolute" zIndex={4}>
               <EmojiPicker
                 emojiVersion="0.6"
-                zIndex={4}
                 defaultSkinTone={SkinTones.NEUTRAL}
                 onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
                   evt.stopPropagation();

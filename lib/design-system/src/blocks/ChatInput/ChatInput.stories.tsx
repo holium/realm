@@ -14,32 +14,25 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
 
   return (
     <Flex position="relative" height={670} width={400}>
-      <Box height={600} width="inherit" borderRadius={12} overflow="hidden">
+      <Box height={600} width="inherit" overflow="hidden">
         <WindowedList
           startAtBottom
+          hideScrollbar
+          height={600}
           data={messages}
           rowRenderer={(row: ChatMessageType, index: number) => (
-            <Bubble {...row} onReaction={() => {}} />
-            // <Flex
-            //   height={itemHeight}
-            //   padding={12}
-            //   alignItems="center"
-            //   justifyContent="center"
-            //   color="input"
-            //   bg={index % 2 === 0 ? 'accent' : 'card'}
-            // >
-            //   {row}
-            // </Flex>
+            <Box pt={2} width="100%">
+              <Bubble {...row} onReaction={() => {}} />
+            </Box>
           )}
-          hideScrollbar={true}
         />
       </Box>
       <Box position="absolute" bottom={12} left={0} right={0}>
         <ChatInput
           id="chat-send"
           onSend={(message: FragmentType[]) => {
-            console.log(message);
             setMessages([
+              ...messages,
               {
                 our: true,
                 author: '~lomder-librun',
@@ -48,6 +41,7 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
               },
             ]);
           }}
+          onAttachment={() => {}}
         />
       </Box>
     </Flex>

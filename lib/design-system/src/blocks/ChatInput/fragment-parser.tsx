@@ -4,85 +4,201 @@ import {
   TEXT_TYPES,
 } from '../Bubble/Bubble.types';
 
-const detectPlainRegex = /^([^<]+)$/;
-const detectBoldRegex = /^\*\*([^*]+)\*\*$/;
-const detectItalicRegex = /^\*([^*]+)\*$/;
-const detectStrikeRegex = /^~~([^~]+)~~$/;
-const detectBoldItalicRegex = /^\*\*\*([^*]+)\*\*\*$/;
-const detectBoldStrikeRegex = /^\*\*~~([^*]+)~~\*\*$/;
-const detectBoldItalicStrikeRegex = /^\*\*\*~~([^*]+)~~\*\*\*$/;
-const detectBlockquoteRegex = /^>([^>]+)$/;
-const detectInlineCodeRegex = /^`([^`]+)`$/;
-const detectCodeBlockRegex = /^```([^`]+)```$/;
-const detectLinkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/;
-const detectImageRegex = /^!\[([^\]]+)\]\(([^)]+)\)$/;
-const detectLineBreakRegex = /\n/;
+const plainRegex = /^[a-zA-Z]+(([\'\,\.\- ][a-zA-Z ])?[a-zA-Z]*)*$/g;
+const boldRegex = /\*\*([^*]+)\*\*/g;
+const italicsRegex = /\*([^*]+)\*/g;
+const strikeRegex = /~~([^*]+)~~/g;
+const boldItalicsRegex = /^\*\*\*([^*]*)\*\*\*/g;
+const boldStrikeRegex = /^\*\*~~([^*]*)~~\*\*/g;
+const boldItalicsStrikeRegex = /^\*\*\*~~([^*]*)~~\*\*\*$/g;
+const blockquoteRegex = /^>([^>]+)$/g;
+const inlineCodeRegex = /`([^`]+)`/g;
+const codeBlockRegex = /```([^`]*)```/g;
+const linkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/g;
+const imageRegex = /^!\[([^\]]+)\]\(([^)]+)\)$/g;
+const lineBreakRegex = /\n/g;
 
-// TODO parse blocks and inline elements
+const START_TOKEN = '[%%';
+const END_TOKEN = '%%]';
 
-const parseFragment = (fragment: string): FragmentType => {
-  const bold = detectBoldRegex.exec(fragment);
-  if (bold) {
-    return { bold: bold[1] };
-  }
-  const italics = detectItalicRegex.exec(fragment);
-  if (italics) {
-    return { italics: italics[1] };
-  }
-  const strike = detectStrikeRegex.exec(fragment);
-  if (strike) {
-    return { strike: strike[1] };
-  }
-  const boldItalic = detectBoldItalicRegex.exec(fragment);
-  if (boldItalic) {
-    return { 'bold-italics': boldItalic[1] };
-  }
-  const boldStrike = detectBoldStrikeRegex.exec(fragment);
-  if (boldStrike) {
-    return { 'bold-strike': boldStrike[1] };
-  }
-  const boldItalicStrike = detectBoldItalicStrikeRegex.exec(fragment);
-  if (boldItalicStrike) {
-    return { 'bold-italics-strike': boldItalicStrike[1] };
-  }
-  const blockquote = detectBlockquoteRegex.exec(fragment);
-  if (blockquote) {
-    return { blockquote: blockquote[1] };
-  }
-  const code = detectInlineCodeRegex.exec(fragment);
-  if (code) {
-    return { 'inline-code': code[1] };
-  }
-  const codeBlock = detectCodeBlockRegex.exec(fragment);
-  if (codeBlock) {
-    return { code: codeBlock[1] };
-  }
-  const link = detectLinkRegex.exec(fragment);
-  if (link) {
-    return { link: link[1] };
-  }
-  const image = detectImageRegex.exec(fragment);
-  if (image) {
-    return { image: image[1] };
-  }
-  const lineBreak = detectLineBreakRegex.exec(fragment);
-  if (lineBreak) {
-    return { break: null };
-  }
-  return { plain: fragment };
-};
-
-export const parseChatInput = (fragment: string): FragmentType[] => {
-  const frags: FragmentType[] = [];
-  const consolidatedFragments: FragmentType[] = [];
-  // TODO This only works for inline elements, need to add block elements
-  const rawFragments = fragment.replaceAll('\n', ' \n ').split(' ');
-  rawFragments.forEach((rawFragment: string) => {
-    const parsedFragment = parseFragment(rawFragment);
-    frags.push(parsedFragment);
+const splitTextType = (text: string, type: string): FragmentType[] => {
+  const fragments = text.split(lineBreakRegex);
+  const parsedFragments: FragmentType[] = [];
+  fragments.forEach((fragment, index) => {
+    if (index > 0) parsedFragments.push({ break: null });
+    parsedFragments.push({ [type]: fragment } as FragmentType);
   });
 
-  console.log(rawFragments);
+  return parsedFragments.filter(
+    // @ts-ignore
+    (fragment) => fragment[type] !== ''
+  );
+};
+
+const parseFragment = (fragment: string): FragmentType[] => {
+  if (fragment?.includes(`%bold-italics-strike${START_TOKEN}`)) {
+    let sanitizedBoldItalicsStrike = fragment.replace(
+      '%bold-italics-strike***~~',
+      ''
+    );
+    sanitizedBoldItalicsStrike = sanitizedBoldItalicsStrike.replace(
+      '***~~',
+      ''
+    );
+    return splitTextType(sanitizedBoldItalicsStrike, 'bold-italics-strike');
+  }
+  if (fragment?.includes(`%bold-italics${START_TOKEN}`)) {
+    let sanitizedBoldItalic = fragment.replace(
+      `%bold-italics${START_TOKEN}`,
+      ''
+    );
+    sanitizedBoldItalic = sanitizedBoldItalic.replaceAll(END_TOKEN, '');
+    return splitTextType(sanitizedBoldItalic, 'bold-italics');
+  }
+  if (fragment?.includes(`%bold-strike${START_TOKEN}`)) {
+    let sanitizedBoldStrike = fragment.replace(
+      `%bold-strike${START_TOKEN}`,
+      ''
+    );
+    sanitizedBoldStrike = sanitizedBoldStrike.replace(END_TOKEN, '');
+    return splitTextType(sanitizedBoldStrike, 'bold-strike');
+  }
+  if (fragment?.includes(`%bold${START_TOKEN}`)) {
+    let sanitizedBold = fragment.replace(`%bold${START_TOKEN}`, '');
+    sanitizedBold = sanitizedBold.replace(END_TOKEN, '');
+    return splitTextType(sanitizedBold, 'bold');
+  }
+  if (fragment?.includes(`%italics${START_TOKEN}`)) {
+    let sanitizedItalics = fragment.replace(`%italics${START_TOKEN}`, '');
+    sanitizedItalics = sanitizedItalics.replace(END_TOKEN, '');
+    return splitTextType(sanitizedItalics, 'italics');
+  }
+  if (fragment?.includes(`%strike${START_TOKEN}`)) {
+    let sanitizedStrike = fragment.replace(`%strike${START_TOKEN}`, '');
+    sanitizedStrike = sanitizedStrike.replace(END_TOKEN, '');
+    return splitTextType(sanitizedStrike, 'strike');
+  }
+
+  if (fragment?.includes('%blockquote')) {
+    let sanitizedBlockquote = fragment.replace(`%blockquote${START_TOKEN}`, '');
+    sanitizedBlockquote = sanitizedBlockquote.replace(END_TOKEN, '');
+    return splitTextType(sanitizedBlockquote, 'blockquote');
+  }
+
+  if (fragment?.includes(`%inline-code${START_TOKEN}`)) {
+    let sanitizedInlineCode = fragment.replace(
+      `%inline-code${START_TOKEN}`,
+      ''
+    );
+    sanitizedInlineCode = sanitizedInlineCode.replace(END_TOKEN, '');
+
+    return [{ 'inline-code': sanitizedInlineCode }];
+  }
+
+  if (fragment?.includes(`%code${START_TOKEN}`)) {
+    let sanitizedCode = fragment.replaceAll('%% \n', '%%');
+    sanitizedCode = sanitizedCode.replaceAll('\n %%', '%%');
+    sanitizedCode = sanitizedCode.replaceAll('%%\n', '%%');
+    sanitizedCode = sanitizedCode.replaceAll('\n%%', '%%');
+    sanitizedCode = sanitizedCode.replace(`%code${START_TOKEN}`, '');
+    sanitizedCode = sanitizedCode.replace(END_TOKEN, '');
+    return [
+      {
+        code: sanitizedCode,
+      },
+    ];
+  }
+  const link = linkRegex.exec(fragment);
+  if (link) {
+    return [{ link: link[1].replace('%link', '') }];
+  }
+  const image = imageRegex.exec(fragment);
+  if (image) {
+    return [{ image: image[1].replace('%image', '') }];
+  }
+  // const lineBreak = lineBreakRegex.exec(fragment);
+  // if (lineBreak) {
+  //   return [{ break: null }];
+  // }
+  return splitTextType(fragment.replace('%plain', ''), 'plain');
+};
+
+const addSeperatorReplacer = (
+  match: any,
+  type: FragmentKeyTypes,
+  ...args: any
+) => {
+  return `|%${type}[%%${args[0][0]}%%]|`;
+};
+
+const seperateRawInput = (rawInput: string): string => {
+  let rawInputWithSeperators = rawInput;
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    codeBlockRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'code', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    inlineCodeRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'inline-code', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    blockquoteRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'blockquote', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    boldItalicsRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'bold-italics', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    boldItalicsStrikeRegex,
+    (match: any, ...args) =>
+      addSeperatorReplacer(match, 'bold-italics-strike', args)
+  );
+
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    boldStrikeRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'bold-strike', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    boldRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'bold', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    italicsRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'italics', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    strikeRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'strike', args)
+  );
+  rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+    imageRegex,
+    (match: any, ...args) => addSeperatorReplacer(match, 'image', args)
+  );
+  // rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+  //   plainRegex,
+  //   (match: any, ...args) => addSeperatorReplacer(match, 'plain', args)
+  // );
+  // rawInputWithSeperators = rawInputWithSeperators.replaceAll(
+  //   lineBreakRegex,
+  //   (match: any) => addSeperatorReplacer(match, 'break')
+  // );
+  return rawInputWithSeperators;
+};
+
+export const parseChatInput = (rawInput: string): FragmentType[] => {
+  let frags: FragmentType[] = [];
+  const consolidatedFragments: FragmentType[] = [];
+  const rawInputWithSeperators = seperateRawInput(rawInput);
+
+  const rawFragments = rawInputWithSeperators.split('|');
+
+  rawFragments
+    .filter((value: string) => value !== '')
+    .forEach((rawFragment: string) => {
+      const parsedFragment = parseFragment(rawFragment);
+      frags = frags.concat(parsedFragment);
+    });
 
   frags.forEach((fragment: FragmentType, index: number) => {
     let previousFragment: FragmentType | null = null;

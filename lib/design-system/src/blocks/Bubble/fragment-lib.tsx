@@ -33,8 +33,8 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
-  margin-left: 2px;
-  margin-right: 2px;
+  /* margin-left: 1px;
+  margin-right: 1px; */
 `;
 
 export const FragmentBlock = styled(motion.span)`

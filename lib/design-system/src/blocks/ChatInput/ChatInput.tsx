@@ -1,17 +1,22 @@
-import { FC, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import styled from 'styled-components';
-import { Icon, Button, InputBox, BoxProps, TextArea } from '../..';
+import { Icon, Button, InputBox, BoxProps, TextArea, Flex } from '../..';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
+  line-height: 24px;
+  font-size: 14px;
+  padding-left: 4px;
+  padding-right: 4px;
 `;
 
 type ChatInputProps = {
   id: string;
   disabled?: boolean;
   onSend: (fragments: FragmentType[]) => void;
+  onAttachment?: (file: any) => void;
 } & BoxProps;
 
 export const parseStringToFragment = (value: string): FragmentType[] => {
@@ -21,18 +26,14 @@ export const parseStringToFragment = (value: string): FragmentType[] => {
   return fragments;
 };
 
-export const ChatInput: FC<ChatInputProps> = (props: ChatInputProps) => {
-  const { id, tabIndex, disabled, onSend, ...chatInputProps } = props;
+export const ChatInput = (props: ChatInputProps) => {
+  const { id, tabIndex, disabled, onSend, onAttachment, ...chatInputProps } =
+    props;
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [fragments, setFragments] = useState<FragmentType[]>([]);
 
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = evt.target;
-    const newFragments = value.split(' ').map((fragment) => ({
-      plain: fragment,
-    }));
-    setFragments(newFragments);
     setValue(value);
   };
 
@@ -58,20 +59,35 @@ export const ChatInput: FC<ChatInputProps> = (props: ChatInputProps) => {
     <InputBox
       inputId={id}
       disabled={disabled}
-      height={48}
-      borderRadius={16}
-      rightAdornment={
+      height={36}
+      py="3px"
+      leftAdornment={
         <Button.IconButton
-          disabled={value.length === 0}
+          ml={1}
           onClick={() => {
-            const parsedFragments = parseChatInput(value);
-            onSend(parsedFragments);
+            // onAttachment();
           }}
         >
-          <Icon name="ArrowRightLine" size={20} opacity={0.5} />
+          <Icon name="Attachment" size={20} opacity={0.5} />
         </Button.IconButton>
       }
+      rightAdornment={
+        <Flex>
+          <Button.IconButton
+            mr={1}
+            disabled={value.length === 0}
+            onClick={() => {
+              const parsedFragments = parseChatInput(value);
+              setValue('');
+              onSend(parsedFragments);
+            }}
+          >
+            <Icon name="ArrowRightLine" size={20} opacity={0.5} />
+          </Button.IconButton>
+        </Flex>
+      }
       {...chatInputProps}
+      borderRadius={24}
     >
       <ChatBox
         id={id}
@@ -79,7 +95,7 @@ export const ChatInput: FC<ChatInputProps> = (props: ChatInputProps) => {
         required
         name="chat-input"
         placeholder="New message"
-        rows={2}
+        rows={1}
         value={value}
         tabIndex={tabIndex}
         disabled={disabled}

@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
@@ -22,7 +21,7 @@ export type BubbleProps = {
   onReplyClick?: (msgId: string) => void;
 } & BoxProps;
 
-export const Bubble: FC<BubbleProps> = (props: BubbleProps) => {
+export const Bubble = (props: BubbleProps) => {
   const {
     id,
     author,
