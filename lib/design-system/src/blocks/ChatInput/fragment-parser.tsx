@@ -8,14 +8,14 @@ const plainRegex = /^[a-zA-Z]+(([\'\,\.\- ][a-zA-Z ])?[a-zA-Z]*)*$/g;
 const boldRegex = /\*\*([^*]+)\*\*/g;
 const italicsRegex = /\*([^*]+)\*/g;
 const strikeRegex = /~~([^*]+)~~/g;
-const boldItalicsRegex = /^\*\*\*([^*]*)\*\*\*/g;
-const boldStrikeRegex = /^\*\*~~([^*]*)~~\*\*/g;
-const boldItalicsStrikeRegex = /^\*\*\*~~([^*]*)~~\*\*\*$/g;
-const blockquoteRegex = /^>([^>]+)$/g;
+const boldItalicsRegex = /\*\*\*([^*]+)\*\*\*/g;
+const boldStrikeRegex = /\*\*~~([^*]+)~~\*\*/g;
+const boldItalicsStrikeRegex = /\*\*\*~~([^*]+)~~\*\*\*/g;
+const blockquoteRegex = />([^>]+)$/g;
 const inlineCodeRegex = /`([^`]+)`/g;
 const codeBlockRegex = /```([^`]*)```/g;
-const linkRegex = /^\[([^\]]+)\]\(([^)]+)\)$/g;
-const imageRegex = /^!\[([^\]]+)\]\(([^)]+)\)$/g;
+const linkRegex = /^\[([^\]]+)\]\(([^)]+)\)/g;
+const imageRegex = /^!\[([^\]]+)\]\(([^)]+)\)/g;
 const lineBreakRegex = /\n/g;
 
 const START_TOKEN = '[%%';
@@ -38,16 +38,17 @@ const splitTextType = (text: string, type: string): FragmentType[] => {
 const parseFragment = (fragment: string): FragmentType[] => {
   if (fragment?.includes(`%bold-italics-strike${START_TOKEN}`)) {
     let sanitizedBoldItalicsStrike = fragment.replace(
-      '%bold-italics-strike***~~',
+      `%bold-italics-strike${START_TOKEN}`,
       ''
     );
     sanitizedBoldItalicsStrike = sanitizedBoldItalicsStrike.replace(
-      '***~~',
+      END_TOKEN,
       ''
     );
     return splitTextType(sanitizedBoldItalicsStrike, 'bold-italics-strike');
   }
   if (fragment?.includes(`%bold-italics${START_TOKEN}`)) {
+    console.log(fragment);
     let sanitizedBoldItalic = fragment.replace(
       `%bold-italics${START_TOKEN}`,
       ''
@@ -199,6 +200,8 @@ export const parseChatInput = (rawInput: string): FragmentType[] => {
       const parsedFragment = parseFragment(rawFragment);
       frags = frags.concat(parsedFragment);
     });
+
+  console.log(rawFragments);
 
   frags.forEach((fragment: FragmentType, index: number) => {
     let previousFragment: FragmentType | null = null;
