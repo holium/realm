@@ -154,7 +154,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     return this.local.patp;
   }
 
-  get presentRoom(): RoomType | undefined {
+  get presentRoom(): RoomType | null {
     return this.protocol.presentRoom;
   }
 

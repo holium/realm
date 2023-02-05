@@ -207,6 +207,6 @@ export class TestProtocol extends BaseProtocol {
       body: JSON.stringify({ patp: this.our }),
     });
     this.peers.clear();
-    this.presentRoom = undefined;
+    this.presentRoom = null;
   }
 }
