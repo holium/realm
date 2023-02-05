@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import {
   compose,
@@ -87,7 +87,7 @@ export const TextButtonStyle = styled(styled.div`
 );
 
 type TextButtonProps = {
-  children: ReactNode;
+  children?: ReactNode;
   tabIndex?: number;
   highlightColor?: string;
   showBackground?: boolean;
@@ -100,7 +100,7 @@ type TextButtonProps = {
   onKeyDown?: (evt: any) => void;
 } & PositionProps;
 
-export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
+export const TextButton = (props: TextButtonProps) => {
   return (
     <div
       className={

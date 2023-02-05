@@ -143,13 +143,12 @@ export const AppSuite = observer((props: AppSuiteProps) => {
               {apps.map((item, index) => (
                 <AppRow
                   key={index}
-                  caption={item ? item.id : ''}
                   app={item}
                   descriptionWidth={dimensions.width - 225}
                   actionRenderer={() => (
                     <Button
                       borderRadius={6}
-                      onClick={(e) => {
+                      onClick={() => {
                         setSearchMode('none');
                         setSuiteIndex(-1);
                         SpacesActions.addToSuite(

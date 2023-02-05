@@ -17,8 +17,7 @@ export const calculateAnchorPoint = (
   padding = 12,
   menuWidth: number,
   menuHeight?: number,
-  position?: 'above' | 'below',
-  adaptive?: boolean // should there be some variance in the anchor point location within a range
+  position?: 'above' | 'below'
 ) => {
   let x: number;
   let y: number;
@@ -28,10 +27,6 @@ export const calculateAnchorPoint = (
     const offsetX = event.offsetX;
     const offsetY = event.offsetY;
     const targetElementHeight = event.target.clientHeight;
-    const targetElementWidth = event.target.clientHeight;
-
-    const targetX = event.target.offsetLeft;
-    const targetY = event.target.offsetHeight;
 
     // console.log(clickX, offsetX, event);
     switch (orientation) {

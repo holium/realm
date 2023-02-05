@@ -22,8 +22,7 @@ import { useRooms } from '../Rooms/useRooms';
 const AccountTrayAppPresenter = () => {
   const { ship, theme, beacon } = useServices();
   const { dimensions, setActiveApp } = useTrayApps();
-  const { backgroundColor, textColor, windowColor, iconColor } =
-    theme.currentTheme;
+  const { backgroundColor, iconColor } = theme.currentTheme;
   const currentShip = ship!;
   const roomsManager = useRooms(ship!.patp);
 

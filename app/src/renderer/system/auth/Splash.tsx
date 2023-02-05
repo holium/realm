@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -12,7 +12,7 @@ import {
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
-export const Splash: FC<any> = observer((props: any) => {
+export const Splash = observer(() => {
   useEffect(() => {
     SoundActions.playStartup();
 

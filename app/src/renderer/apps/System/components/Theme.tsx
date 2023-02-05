@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -22,50 +22,44 @@ const WallpaperPreview = styled(motion.img)`
   margin: 0 auto;
   border-radius: 6px;
   transition: all 0.25s ease;
-  draggable: false;
   -webkit-user-drag: none;
 `;
 
+type wpOptionType =
+  | 'blueorb'
+  | 'darkneon'
+  | 'hallway'
+  | 'sunorb'
+  | 'jiggleorb'
+  | 'sliceball'
+  | undefined;
+
+const wpGallery: { [key: string]: string } = {
+  blueorb:
+    'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80',
+  nightcity:
+    'https://images.unsplash.com/photo-1655463223445-7c7cc696fdf8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  oranges:
+    'https://images.unsplash.com/photo-1656567229591-72a12a4cb0d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  water:
+    'https://images.unsplash.com/photo-1660469770527-cd73fbc59cc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  forestfog:
+    'https://images.unsplash.com/photo-1661749232278-3c8380532c07?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80',
+  darkneon:
+    'https://images.unsplash.com/photo-1650943574955-ac02c65cfc71?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2942&q=80',
+  ogdefault:
+    'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80',
+  // 'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
+  // 'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+  // 'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+  // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
+};
+
 const ThemePanelPresenter = () => {
-  const { theme, ship, contacts, spaces, membership } = useServices();
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+  const { theme, ship, spaces, membership } = useServices();
+  const { windowColor, accentColor, inputColor } = theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
-  type AppearanceType = 'dynamic' | 'light' | 'dark';
-
-  const [appearance, setAppearance] = useState<AppearanceType>('dynamic');
-
-  type wpOptionType =
-    | 'blueorb'
-    | 'darkneon'
-    | 'hallway'
-    | 'sunorb'
-    | 'jiggleorb'
-    | 'sliceball'
-    | undefined;
-
-  const wpGallery: { [key: string]: string } = {
-    blueorb:
-      'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80',
-    nightcity:
-      'https://images.unsplash.com/photo-1655463223445-7c7cc696fdf8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    oranges:
-      'https://images.unsplash.com/photo-1656567229591-72a12a4cb0d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    water:
-      'https://images.unsplash.com/photo-1660469770527-cd73fbc59cc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    forestfog:
-      'https://images.unsplash.com/photo-1661749232278-3c8380532c07?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80',
-    darkneon:
-      'https://images.unsplash.com/photo-1650943574955-ac02c65cfc71?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2942&q=80',
-    ogdefault:
-      'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80',
-    // 'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
-    // 'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    // 'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
-  };
 
   const wpGalleryKeys = Object.keys(wpGallery);
 
@@ -107,25 +101,6 @@ const ThemePanelPresenter = () => {
     },
   });
 
-  const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
-  const isValidHexColor = (hex: string) => {
-    return hexRegex.test(hex);
-  };
-  // // // //
-  const accentColorField = useField({
-    id: 'accentColor',
-    form: themeForm,
-    initialValue: accentColor,
-    validate: (acc: string) => {
-      if (isValidHexColor(acc)) {
-        setValidatedColor(acc);
-        return { error: undefined, parsed: acc };
-      }
-
-      return { error: 'Invalid Color', parsed: undefined };
-    },
-  });
-
   const customWallpaper = useField({
     id: 'customWallpaper',
     form: themeForm,
@@ -146,9 +121,6 @@ const ThemePanelPresenter = () => {
       return { error: 'Invalid URL', parsed: undefined };
     },
   });
-
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [validatedColor, setValidatedColor] = useState(accentColor);
 
   return (
     <Flex

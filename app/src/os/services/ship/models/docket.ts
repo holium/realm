@@ -43,8 +43,6 @@ export const WebApp = types.model('WebApp', {
   href: types.string,
 });
 
-const AppModel = types.union({ eager: false }, DocketApp, WebApp);
-
 export const DocketStore = types
   .model('DocketStore', {
     // loader: Loader

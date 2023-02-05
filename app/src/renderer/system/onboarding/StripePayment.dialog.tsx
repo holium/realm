@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Elements,
   PaymentElement,
@@ -213,6 +213,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
                   justifyContent="center"
                 >
                   <img
+                    alt="access code"
                     height={28}
                     style={{ borderRadius: 6 }}
                     src={onboarding?.accessCode?.image as string}
