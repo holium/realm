@@ -84,6 +84,7 @@ export class RealmProtocol extends BaseProtocol {
           if (remotePeer) {
             console.log('got ready signal from remotePeer:', payload.from);
             // we already have a peer for this patp, so we can just create a peer connection
+            // @ts-ignore
             remotePeer.ackReady();
           } else {
             // we don't have a remotePeer for this patp, so we need to queue one, they
@@ -93,6 +94,7 @@ export class RealmProtocol extends BaseProtocol {
               payload.from
             );
             const remotePeer = this.dial(payload.from, false);
+            // @ts-ignore
             remotePeer.ackReady();
           }
         }
@@ -356,6 +358,7 @@ export class RealmProtocol extends BaseProtocol {
    *
    * @param rid
    */
+  // @ts-ignore
   deleteRoom(rid: string) {
     this.poke({
       app: 'rooms-v2',
@@ -528,6 +531,7 @@ export class RealmProtocol extends BaseProtocol {
     this.peers.clear();
   }
 
+  // @ts-ignore
   leave(rid: string) {
     this.hangupAll();
     this.peers.clear();
