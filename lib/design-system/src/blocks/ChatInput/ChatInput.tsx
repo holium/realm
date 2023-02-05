@@ -26,9 +26,14 @@ export const parseStringToFragment = (value: string): FragmentType[] => {
   return fragments;
 };
 
-export const ChatInput = (props: ChatInputProps) => {
-  const { id, tabIndex, disabled, onSend, onAttachment, ...chatInputProps } =
-    props;
+export const ChatInput = ({
+  id,
+  tabIndex,
+  disabled,
+  onSend,
+  onAttachment,
+  ...chatInputProps
+}: ChatInputProps) => {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
