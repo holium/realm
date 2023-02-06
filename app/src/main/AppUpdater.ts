@@ -20,7 +20,22 @@ const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
-log.transports.file.level = isDevelopment ? 'debug' : 'info';
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
+
+/*****
+ *
+ * NOTE: nearly impossible to test in development mode. see here:
+ *   https://github.com/electron-userland/electron-builder/issues/1505
+ *
+ */
+
+log.transports.file.level = isDevelopment ? 'all' : 'info';
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
