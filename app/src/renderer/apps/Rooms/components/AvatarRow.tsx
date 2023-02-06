@@ -8,13 +8,13 @@ interface AvatarRowProps {
   backgroundColor: string;
 }
 
-const AvatarRowPresenter = ({ people, backgroundColor }: AvatarRowProps) => {
-  const { contacts } = useServices();
+const AvatarRowPresenter = ({ people }: AvatarRowProps) => {
+  const { friends } = useServices();
 
   return (
     <Flex flexDirection="row" alignItems="center">
       {people.map((person: string, index: number) => {
-        const metadata = contacts.getContactAvatarMetadata(person);
+        const metadata = friends.getContactAvatarMetadata(person);
         return (
           <Box
             style={{
@@ -26,7 +26,7 @@ const AvatarRowPresenter = ({ people, backgroundColor }: AvatarRowProps) => {
             zIndex={people.length - index}
           >
             <Avatar
-              borderColor={backgroundColor}
+              // borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
               size={22}

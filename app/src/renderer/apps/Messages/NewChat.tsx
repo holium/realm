@@ -30,8 +30,8 @@ interface IProps {
 
 export const NewChat = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { contacts } = useServices();
   const { textColor, iconColor, dockColor, windowColor } = theme;
+  const contacts = useServices().friends;
   const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 

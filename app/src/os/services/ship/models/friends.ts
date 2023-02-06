@@ -85,6 +85,16 @@ export const FriendsStore = types
         })
       );
     },
+    get contacts(): [string, ContactModelType][] {
+      const filtered = Array.from(self.all.entries()).filter(
+        (value: [patp: string, friend: FriendType]) =>
+          value[1].contactInfo !== null
+      );
+      return filtered.map((value: [patp: string, friend: any]) => [
+        value[0],
+        value[1].contactInfo,
+      ]);
+    },
     get subscriptionState() {
       return self.subscription.state;
     },

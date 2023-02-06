@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
 import { Flex, Text, Box, IconButton, Icons } from '../';
 import { Row } from '../NewRow';
-import { ContactModelType } from 'os/services/ship/models/contacts';
+import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
@@ -52,8 +52,13 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
     const { mode, dockColor, windowColor } = theme.currentTheme;
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
-      const contactsList = ship ? Array.from(friends.all.entries()) : [];
-      return searchPatpOrNickname(search, contactsList, selected, ship?.patp);
+      // const contactsList = ship ? friends.contacts : [];
+      return searchPatpOrNickname(
+        search,
+        friends.contacts,
+        selected,
+        ship?.patp
+      );
     }, [friends.all, search, selected, ship]);
 
     const isOpen = useMemo(

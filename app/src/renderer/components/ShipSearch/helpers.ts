@@ -1,4 +1,4 @@
-import { ContactModelType } from 'os/services/ship/models/contacts';
+import { ContactModelType } from 'os/services/ship/models/friends';
 import { isValidPatp } from 'urbit-ob';
 
 export const searchPatpOrNickname = (
@@ -19,8 +19,6 @@ export const searchPatpOrNickname = (
         status: '',
         bio: '',
         cover: '',
-        groups: null,
-        'last-updated': 0,
       },
     ]);
   }

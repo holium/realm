@@ -77,7 +77,7 @@ export const createPeopleForm = (
 };
 
 export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
-  const { theme, ship, contacts } = useServices();
+  const { theme, ship, friends } = useServices();
   const { inputColor, iconColor, textColor, windowColor, mode } =
     theme.currentTheme;
   const { workflowState, setState } = props;
@@ -196,7 +196,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
     const isOur = patp === ship!.patp;
-    const contact = contacts.getContactAvatarMetadata(patp);
+    const contact = friends.getContactAvatarMetadata(patp);
 
     return (
       <Row

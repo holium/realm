@@ -28,12 +28,12 @@ const speakerType = {
 
 export const Speaker = observer((props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, theme, contacts } = useServices();
+  const { ship, theme, friends } = useServices();
   const speakerRef = useRef<any>(null);
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
-  const metadata = contacts.getContactAvatarMetadata(person);
+  const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
   const peer = isOur
@@ -130,7 +130,7 @@ export const Speaker = observer((props: ISpeaker) => {
           size={36}
           avatar={metadata && metadata.avatar}
           patp={person}
-          sigilcolor={[(metadata && metadata.color) || '#000000', 'white']}
+          sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
         />
         <Text
           style={{ pointerEvents: 'none' }}
