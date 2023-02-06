@@ -84,10 +84,13 @@ export const createSpaceForm = ({
 type CrestOptionType = 'color' | 'image';
 type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
-const SpacesCreateFormPresenter = (props: BaseDialogProps) => {
+const SpacesCreateFormPresenter = ({
+  edit,
+  workflowState,
+  setState,
+}: BaseDialogProps) => {
   const { theme, spaces } = useServices();
   const { inputColor, windowColor, textColor } = theme.currentTheme;
-  const { workflowState, setState } = props;
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -137,8 +140,8 @@ const SpacesCreateFormPresenter = (props: BaseDialogProps) => {
         access: 'public',
       });
     }
-    if (props.edit) {
-      const space = spaces.spaces.get(props.edit.space)!;
+    if (edit) {
+      const space = spaces.spaces.get(edit.space)!;
       setWorkspaceState({
         ...space,
         description: space.description,
@@ -168,8 +171,8 @@ const SpacesCreateFormPresenter = (props: BaseDialogProps) => {
 
   const { nameField, descriptionField, pictureField, colorField } =
     useMemo(() => {
-      if (props.edit) {
-        const space = spaces.spaces.get(props.edit.space)!;
+      if (edit) {
+        const space = spaces.spaces.get(edit.space)!;
         return createSpaceForm(space);
       } else if (workflowState.type === 'group') {
         return createSpaceForm({
