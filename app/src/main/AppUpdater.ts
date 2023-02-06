@@ -20,14 +20,6 @@ const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
-const RESOURCES_PATH = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets')
-  : path.join(__dirname, '../../assets');
-
-const getAssetPath = (...paths: string[]): string => {
-  return path.join(RESOURCES_PATH, ...paths);
-};
-
 /*****
  *
  * NOTE: nearly impossible to test in development mode. see here:
@@ -35,7 +27,7 @@ const getAssetPath = (...paths: string[]): string => {
  *
  */
 
-log.transports.file.level = isDevelopment ? 'all' : 'info';
+log.transports.file.level = isDevelopment ? 'debug' : 'info';
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
