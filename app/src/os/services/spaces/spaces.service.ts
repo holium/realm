@@ -300,7 +300,7 @@ export class SpacesService extends BaseService {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core!.conduit);
+    this.models.beacon.load(this.core!.conduit!);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -627,11 +627,11 @@ export class SpacesService extends BaseService {
     });
   }
 
-  async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
   }
 
-  async newInstaller(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.newInstaller(
     //   this.core.conduit!,
     //   ship,
@@ -671,11 +671,11 @@ export class SpacesService extends BaseService {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }
 
-  async addApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
   }
 
-  async removeApp(_event: IpcMainInvokeEvent, appId: string) {
+  async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
@@ -688,8 +688,8 @@ export class SpacesService extends BaseService {
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
     return await this.models.beacon.notes
-      .get(noteId)
-      .markSeen(this.core.conduit!, noteId);
+      ?.get(noteId)
+      ?.markSeen(this.core.conduit!);
     // return await BeaconApi.sawNote(this.core.conduit!, noteId);
   }
   async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {

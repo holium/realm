@@ -5,8 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
-
-import { IAppUpdater } from './main';
+import { IAppUpdater } from './AppUpdater';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;

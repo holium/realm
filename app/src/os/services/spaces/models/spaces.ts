@@ -43,8 +43,8 @@ export const SpaceModel = types
       })
     ),
   })
-  .views((self) => ({}))
-  .actions((self) => ({}));
+  .views(() => ({}))
+  .actions(() => ({}));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
 
@@ -86,9 +86,9 @@ export const SpacesStore = types
     },
   }))
   .actions((self) => ({
-    initialScry: (data: any, persistedState: any, ship: Patp) => {
+    initialScry: (data: any, _persistedState: any, ship: Patp) => {
       Object.entries(data).forEach(
-        ([path, space]: [path: string, space: any]) => {
+        ([path, _space]: [path: string, space: any]) => {
           // console.log(path, space);
           // const persistedData =
           //   persistedState && persistedState.spaces

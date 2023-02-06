@@ -19,7 +19,7 @@ export class DiskStore {
   constructor(
     name: string,
     patp: Patp,
-    secretKey: string,
+    _secretKey: string,
     store: IAnyType,
     defaults: any = {}
   ) {

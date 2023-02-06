@@ -1,7 +1,5 @@
 import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
-import validUrl from 'valid-url';
-// import _ from 'lodash';
 import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 
@@ -37,8 +35,8 @@ enum SettingScreen {
 
 const WalletSettingsPresenter = () => {
   const { walletApp } = useTrayApps();
-  const [providerInput, setProviderInput] = useState('');
-  const [providerError, setProviderError] = useState('');
+  // const [providerInput, setProviderInput] = useState('');
+  // const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
   const network = walletApp.navState.network;
@@ -59,28 +57,28 @@ const WalletSettingsPresenter = () => {
   const baseTheme = getBaseTheme(theme.currentTheme);
   const selectBg = darken(0.025, theme.currentTheme.windowColor);
 
-  async function setProvider(newProviderURL: string) {
-    setProviderInput(newProviderURL);
-    if (newProviderURL === '') {
-      setProviderError('');
-      return;
-    } else if (!validUrl.isUri(newProviderURL)) {
-      setProviderError('Invalid URL.');
-      return;
-    }
+  // async function setProvider(newProviderURL: string) {
+  //   setProviderInput(newProviderURL);
+  //   if (newProviderURL === '') {
+  //     setProviderError('');
+  //     return;
+  //   } else if (!validUrl.isUri(newProviderURL)) {
+  //     setProviderError('Invalid URL.');
+  //     return;
+  //   }
 
-    const validProvider = await WalletActions.checkProviderURL(newProviderURL);
+  //   const validProvider = await WalletActions.checkProviderURL(newProviderURL);
 
-    if (validProvider) {
-      setState({
-        ...state,
-        provider: newProviderURL,
-      });
-      setProviderError('');
-    } else {
-      setProviderError('No valid provider found at that URL.');
-    }
-  }
+  //   if (validProvider) {
+  //     setState({
+  //       ...state,
+  //       provider: newProviderURL,
+  //     });
+  //     setProviderError('');
+  //   } else {
+  //     setProviderError('No valid provider found at that URL.');
+  //   }
+  // }
 
   function setCreationMode(newMode: WalletCreationMode) {
     setState({ ...state, walletCreationMode: newMode });

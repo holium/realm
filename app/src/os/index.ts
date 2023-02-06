@@ -173,11 +173,7 @@ export class Realm extends EventEmitter {
     );
     this.mainWindow.webContents.on(
       'will-attach-webview',
-      (
-        event: Electron.Event,
-        webPreferences: WebPreferences,
-        params: Record<string, string>
-      ) => {
+      (_event: Electron.Event, webPreferences: WebPreferences) => {
         webPreferences.partition = 'urbit-webview';
       }
     );
@@ -417,7 +413,7 @@ export class Realm extends EventEmitter {
     }
   }
 
-  async onWebViewAttached(e: Event, webContents: WebContents) {
+  async onWebViewAttached(_: Event, webContents: WebContents) {
     webContents.on('will-redirect', (e: Event, url: string) =>
       this.onWillRedirect(e, url, webContents)
     );
@@ -483,7 +479,7 @@ export class Realm extends EventEmitter {
         this.sendConnectionStatus(ConduitState.Initialized);
       }
     });
-    conduit.on(ConduitState.Refreshing, (session) => {
+    conduit.on(ConduitState.Refreshing, () => {
       this.sendConnectionStatus(ConduitState.Refreshing);
     });
     conduit.on(ConduitState.Refreshed, (session) => {

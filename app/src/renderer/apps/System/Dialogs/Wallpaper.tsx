@@ -74,13 +74,13 @@ const createWallpaperForm = (
 const WallpaperDialogPresenter = () => {
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
     () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
     []
   );
 
-  const onChange = (evt: any) => {
+  const onChange = () => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
     theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
@@ -140,7 +140,7 @@ const WallpaperDialogPresenter = () => {
           showBackground
           highlightColor={theme.currentTheme.accentColor}
           textColor={theme.currentTheme.accentColor}
-          onClick={(evt: any) => onChange(evt)}
+          onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}
         </TextButton>

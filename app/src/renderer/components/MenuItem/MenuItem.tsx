@@ -1,4 +1,4 @@
-import { MouseEventHandler } from 'React';
+import { MouseEventHandler } from 'react';
 import { Box, Spinner, Text } from '../';
 import { MenuItemStyle } from './MenuItem.styles';
 

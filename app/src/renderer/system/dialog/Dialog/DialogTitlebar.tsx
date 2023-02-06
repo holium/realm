@@ -54,7 +54,6 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
             }
           : {})}
         zIndex={zIndex}
-        customBg={windowColor}
         hasBorder
       >
         {onClose && (

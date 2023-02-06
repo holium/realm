@@ -7,8 +7,6 @@
   "exclude": [
     "dist",
     "node_modules",
-    ".template/name.stories.tsx",
-    ".template/name.tests.tsx",
-    ".template/name.tsx"
+    ".template"
   ]
 }

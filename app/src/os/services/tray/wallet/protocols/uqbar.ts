@@ -1,6 +1,4 @@
 import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
-// @ts-expect-error
-// @ts-expect-error
 import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
 import { Conduit } from '@holium/conduit';
 import { UqbarApi } from '../../../../api/uqbar';
@@ -13,7 +11,7 @@ export class UqbarProtocol implements BaseProtocol {
     }
   }
 
-  async submitSigned(conduit: Conduit, signedTx: string): Promise<any> {
-    UqbarApi.submitSigned(conduit, from, hash, rate, bud, ethHash, sig);
+  async submitSigned(_conduit: Conduit, _signedTx: string): Promise<any> {
+    // UqbarApi.submitSigned(conduit, from, hash, rate, bud, ethHash, sig);
   }
 }

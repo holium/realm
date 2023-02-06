@@ -33,9 +33,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
     <TransactionDetail {...props} />
   ),
   [WalletView.NEW]: (props: any) => <EthNew {...props} />,
-  [WalletView.CREATE_WALLET]: (props: any) => (
-    <CreateWallet network={network} />
-  ),
+  [WalletView.CREATE_WALLET]: () => <CreateWallet network={network} />,
   [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   [WalletView.SETTINGS]: (props: any) => <WalletSettings {...props} />,
   [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,

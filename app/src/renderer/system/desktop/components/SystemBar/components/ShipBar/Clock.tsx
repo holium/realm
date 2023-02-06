@@ -1,8 +1,8 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import moment from 'moment';
 import { Flex, Text } from 'renderer/components';
 
-export const TrayClock: FC<any> = (props: any) => {
+export const TrayClock = () => {
   const time = useMemo(() => moment().format('hh:mm A'), []);
   const date = useMemo(() => moment().format('MM/DD/YY'), []);
   return (

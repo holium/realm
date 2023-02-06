@@ -70,22 +70,20 @@ export const createPeopleForm = (
   };
 };
 
-export const Members = observer((props: IMembers) => {
-  const { our } = props;
-  const { theme, spaces, friends, membership } = useServices();
+export const Members = observer(({ our }: IMembers) => {
+  const { theme, spaces } = useServices();
   const searchRef = useRef(null);
 
-  const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
-    theme.currentTheme;
+  const { inputColor, windowColor, mode, dockColor } = theme.currentTheme;
 
-  const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
+  const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
 
-  const onShipSelected = (ship: [string, string?], metadata?: any) => {
+  const onShipSelected = (ship: [string, string?]) => {
     const patp = ship[0];
     const nickname = ship[1];
     if (our) {
@@ -184,7 +182,7 @@ export const Members = observer((props: IMembers) => {
           rightIcon={
             <TextButton
               disabled={!person.computed.parsed}
-              onClick={(evt: any) => {
+              onClick={() => {
                 onShipSelected([person.computed.parsed!, '']);
                 person.actions.onChange('');
               }}
@@ -217,8 +215,8 @@ export const Members = observer((props: IMembers) => {
           search={person.state.value}
           selected={selectedPatp}
           customBg={windowColor}
-          onSelected={(ship: [string, string?], metadata: any) => {
-            onShipSelected(ship, metadata);
+          onSelected={(ship: [string, string?]) => {
+            onShipSelected(ship);
             person.actions.onChange('');
           }}
         />

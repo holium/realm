@@ -345,7 +345,7 @@ export const CourierStore = types
     },
   }))
   .actions((self) => ({
-    rejectDmInvite: (path: string) => {},
+    rejectDmInvite: () => {},
     setNewPreview: (preview: DMPreviewType) => {
       let prev;
       if (preview.type === 'group' || preview.type === 'group-pending') {
