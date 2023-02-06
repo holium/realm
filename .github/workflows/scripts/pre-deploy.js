@@ -25,6 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
+  console.log('PR => %o', context.payload.pull_request);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -42,6 +43,8 @@ module.exports = async ({ github, context }, workflowId) => {
     //   note: use alpha|latest to keep in line with channel naming expectations
     //     of the electron-builder library
     channel: undefined,
+    foundTag: false, // true if the tag exists; otherwise false
+    releaseType: 'draft' | 'alpha' | 'release' | 'hotfix',
   };
   // disable this workflow to prevent multiple builds running simultaneously
   console.log(
@@ -115,9 +118,9 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.buildVersion = tagName;
     switch (matches[1]) {
       // test and staging builds produce alphas. the only difference is
-      // that 'test' stays in draft mode and sets the release channel used by auto-updater
-      // to 'test' or 'staging' respectively
-      case 'test':
+      // that 'draft' stays in draft mode and sets the release channel used by auto-updater
+      // to 'draft' or 'staging' respectively
+      case 'draft':
       case 'staging':
         ci.channel = 'alpha';
         break;
@@ -128,6 +131,7 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'latest';
         break;
     }
+    ci.releaseType = matches[1];
     // ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
@@ -148,7 +152,12 @@ module.exports = async ({ github, context }, workflowId) => {
     );
     if (releases.data.length > 0) {
       const release = releases.data[0];
-      ci.isNewBuild = !release.draft;
+      console.log(
+        `${release.tag_name} found. will delete release and tag prior to build...`
+      );
+      ci.foundTag = true;
+      // ci.isNewBuild = !release.draft;
+      ci.isNewBuild = true;
       // if the latest release is a draft, it means the prior build failed; therefore
       //  rerun the build using the same tag (version) information
       buildVersion = release.tag_name;

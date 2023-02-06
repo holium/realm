@@ -43,6 +43,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       #
+      - name: Remove existing release
+        if: ${{ fromJSON(steps.ci.outputs.result).foundTag && fromJSON(steps.ci.outputs.result).releaseType === 'draft'  }}
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          gh release delete $BUILD_VERSION --cleanup-tag --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
+      #
       - name: Start release draft
         if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         # create annotated tag for this branch. this will become basis for the release
