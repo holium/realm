@@ -1,3 +1,4 @@
+import { Avatar } from '@holium/design-system';
 import { FC } from 'react';
 import { Flex, Box, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -25,14 +26,14 @@ export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
             ml="-6px"
             zIndex={people.length - index}
           >
-            <Sigil
+            <Avatar
               borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
               size={22}
               avatar={metadata && metadata.avatar}
               patp={person}
-              color={[(metadata && metadata.color) || '#000000', 'white']}
+              sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
             />
           </Box>
         );

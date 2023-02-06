@@ -23,7 +23,7 @@
         color.contact
         avatar.contact
         cover.contact
-        groups.contact
+        :: groups.contact
     ==
   friend(contact-info `contact-info)
 ::
@@ -50,16 +50,20 @@
 ++  field-edit
   |=  [=friend:sur field=edit-field:sur]
   ^-  friend:sur
-  ?~  contact-info.friend  !!
-  ?+  -.field      friend
-    %nickname      friend(nickname.u.contact-info nickname.field)
-    %bio           friend(bio.u.contact-info bio.field)
-    %color         friend(color.u.contact-info color.field)
-    %avatar        friend(avatar.u.contact-info avatar.field)
-    %add-group     friend(groups.u.contact-info (~(put in groups.u.contact-info.friend) resource.field))
-    %remove-group  friend(groups.u.contact-info (~(del in groups.u.contact-info.friend) resource.field))
-    %cover         friend(cover.u.contact-info cover.field)
-  ==
+  =/  contact-info
+    ?~  contact-info.friend  *contact-info:sur
+    u.contact-info.friend
+  =/  new-contact-info
+    ?+  -.field      contact-info
+      %nickname      contact-info(nickname nickname.field)
+      %bio           contact-info(bio bio.field)
+      %color         contact-info(color color.field)
+      %avatar        contact-info(avatar avatar.field)
+      :: %add-group     contact-info(groups (~(put in groups.contact-info) resource.field))
+      :: %remove-group  contact-info(groups (~(del in groups.contact-info) resource.field))
+      %cover         contact-info(cover cover.field)
+    ==
+  friend(contact-info `new-contact-info)
 ::
 ++  nu                                              ::  parse number as hex
   |=  jon=json
@@ -140,17 +144,25 @@
         %bye-fren
       :-  %bye-fren
       ~
+        %set-contact
+      :-  %set-contact
+      ~
+        %share-contact
+      :-  %set-contact
+      ~
     ==
   ::
   ++  view :: encodes for on-peek
     |=  view=^view
     ^-  json
-    %-  pairs
-    :_  ~
-    ^-  [cord json]
     ?-  -.view
         %friends
+      %-  pairs
+      :_  ~
+      ^-  [cord json]
       [%friends (frens:encode friends.view)]
+        %contact-info
+      (enjs-contact-info:encode contact-info.view)
     ==
   --
 ::
@@ -170,7 +182,14 @@
           [%be-fren ul]
           [%yes-fren ul]
           [%bye-fren ul]
+          [%set-contact set-contact]
       ==
+    ::
+    ++  json-to-ux
+      =,  dejs:format
+      |=  =json
+      ^-  @ux
+      (scan (trip (so json)) ;~(pfix (jest '0x') hex))
     ::
     ++  add-friend
       %-  ot
@@ -187,6 +206,19 @@
     ++  remove-friend
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  set-contact
+      %-  ot
+      :~  [%ship (se %p)]
+          [%contact-info json-to-contact-info]
+      ==
+    ::
+    ++  json-to-contact-info
+      |=  =json
+      ^-  contact-info-edit
+      %.  json
+      :~  (ot ~[nickname+so:dejs-soft:format bio+so:dejs-soft:format color+(mu nu) avatar+so:dejs-soft:format cover+so:dejs-soft:format])
       ==
     ::
     --
@@ -220,8 +252,18 @@
               ['color' s+(scot %ux color.u.contact-info.friend)]
               ['avatar' ?~(avatar.u.contact-info.friend ~ s+u.avatar.u.contact-info.friend)]
               ['cover' ?~(cover.u.contact-info.friend ~ s+u.cover.u.contact-info.friend)]
-              ['groups' a+(turn ~(tap in groups.u.contact-info.friend) (cork enjs-path:res (lead %s)))]
           ==
+    ==
+  ::
+  ++  enjs-contact-info
+    |=  =contact-info
+    %-  pairs
+    ^-  (list [@t json])
+    :~  ['nickname' s+nickname.contact-info]
+        ['bio' s+bio.contact-info]
+        ['color' s+(scot %ux color.contact-info)]
+        ['avatar' ?~(avatar.contact-info ~ s+u.avatar.contact-info)]
+        ['cover' ?~(cover.contact-info ~ s+u.cover.contact-info)]
     ==
   ::
   --

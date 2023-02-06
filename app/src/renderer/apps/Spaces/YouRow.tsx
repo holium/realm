@@ -4,6 +4,7 @@ import { Flex, Sigil, Text } from 'renderer/components';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
 import { useServices } from 'renderer/logic/store';
+import { Avatar } from '@holium/design-system';
 
 interface SpaceRowProps {
   colorTheme: string;
@@ -30,13 +31,13 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
       }}
     >
       <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
-        <Sigil
+        <Avatar
           simple
           borderRadiusOverride="6px"
           size={32}
           avatar={currentShip.avatar}
           patp={currentShip.patp}
-          color={[currentShip.color || '#000000', 'white']}
+          sigilColor={[currentShip.color || '#000000', 'white']}
         />
         <Flex ml={2} flexDirection="column">
           <Text

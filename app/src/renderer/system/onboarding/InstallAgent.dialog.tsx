@@ -15,6 +15,7 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
@@ -54,13 +55,13 @@ const InstallAgentPresenter = () => {
         handle core OS functionality.
       </Text>
       <Flex flexDirection="column" alignItems="center" justifyContent="center">
-        <Sigil
+        <Avatar
           simple={false}
           size={52}
           avatar={avatar}
           patp={shipName}
           borderRadiusOverride="6px"
-          color={[shipColor, 'white']}
+          sigilColor={[shipColor, 'white']}
         />
         <Flex
           style={{ width: 210 }}

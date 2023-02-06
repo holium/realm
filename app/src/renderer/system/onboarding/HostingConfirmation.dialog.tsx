@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { Avatar } from '@holium/design-system';
 
 function useInterval(callback: any, delay: number) {
   const savedCallback = useRef();
@@ -70,8 +71,8 @@ const HostingConfirmation: FC<BaseDialogProps> = observer(
             alignItems="center"
           >
             <Box height={48} width={48} mb={12}>
-              <Sigil
-                color={['black', 'white']}
+              <Avatar
+                sigilColor={['black', 'white']}
                 simple={false}
                 size={48}
                 patp={planet.patp}

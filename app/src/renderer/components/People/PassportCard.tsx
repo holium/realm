@@ -8,6 +8,7 @@ import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
+import { Avatar } from '@holium/design-system';
 
 interface IPassport {
   patp: string;
@@ -34,12 +35,12 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">
         <Box>
-          <Sigil
+          <Avatar
             simple={false}
             size={52}
             avatar={avatar}
             patp={patp}
-            color={[sigilColor || '#000000', 'white']}
+            sigilColor={[sigilColor || '#000000', 'white']}
             borderRadiusOverride="6px"
           />
         </Box>

@@ -15,7 +15,7 @@ import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { TextInput } from '@holium/design-system';
+import { Avatar, TextInput } from '@holium/design-system';
 
 export const SetPassword: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -90,13 +90,13 @@ export const SetPassword: FC<BaseDialogProps> = observer(
             justifyContent="center"
             alignItems="center"
           >
-            <Sigil
+            <Avatar
               simple={false}
               size={52}
               avatar={avatar}
               patp={shipName}
               borderRadiusOverride="6px"
-              color={[shipColor || '#000000', 'white']}
+              sigilColor={[shipColor || '#000000', 'white']}
             />
             <Flex
               style={{ width: 210 }}

@@ -13,6 +13,7 @@ import {
   ERC20Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { Avatar } from '@holium/design-system';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -185,8 +186,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         {props.transactionRecipient.patp &&
                           props.transactionRecipient.address && (
                             <Flex gap={8} alignItems="center">
-                              <Sigil
-                                color={[
+                              <Avatar
+                                sigilColor={[
                                   props.transactionRecipient.color || 'black',
                                   'white',
                                 ]}

@@ -184,8 +184,8 @@ export const RecipientInput = observer(
 
       if (props.icon === 'sigil')
         return (
-          <Sigil
-            color={
+          <Avatar
+            sigilColor={
               theme.currentTheme.mode === 'light'
                 ? ['black', 'white']
                 : ['white', 'black']

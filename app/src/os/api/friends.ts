@@ -1,8 +1,43 @@
 import { Conduit } from '@holium/conduit';
+import { cleanNounColor, removeHash } from '../../os/lib/color';
 import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
 
 export const FriendsApi = {
+  getContact: async (
+    conduit: Conduit,
+    ship: string
+  ) => {
+    const contact = await conduit.scry({
+      app: 'friends',
+      path: `/contact/${ship}`,
+    })
+    return {
+      ...contact,
+      color: contact.color && cleanNounColor(contact.color),
+    };
+  },
+  saveContact: async (conduit: Conduit, ship: string, data: any) => {
+    console.log('data', data);
+    const preparedData: any = {
+      nickname: data.nickname,
+      color: removeHash(data.color),
+      avatar: data.avatar || '',
+      bio: data.bio,
+      cover: data.cover || null,
+    };
+    const payload =  {
+      app: 'friends',
+      mark: 'friends-action',
+      json: {
+        'set-contact': {
+          ship,
+          'contact-info': preparedData,
+        },
+      },
+    };
+    return await conduit.poke(payload);
+  },
   /**
    * getFriends: returns a map of friends
    *

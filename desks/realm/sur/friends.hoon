@@ -22,16 +22,22 @@
 +$  friend
   $:  pinned=_|
       tags=friend-tags
-      status=?(%fren %following %follower %contact)
+      status=?(%fren %following %follower %contact %our)
       contact-info=(unit contact-info)
-  ==  
+  ==
 +$  contact-info
   $:  nickname=@t
       bio=@t
       color=@ux
       avatar=(unit @t)
       cover=(unit @t)
-      groups=(set resource)
+  ==
++$  contact-info-edit
+  $:  nickname=(unit @t)
+      bio=(unit @t)
+      color=(unit @ux)
+      avatar=(unit @t)
+      cover=(unit @t)
   ==
 ::
 ::
@@ -44,14 +50,16 @@
       [%be-fren ~]
       [%yes-fren ~]
       [%bye-fren ~]
+      [%set-contact =ship contact-info=contact-info-edit]
+      [%share-contact =ship]
   ==
 ::
 +$  reaction
   $%  
       [%friends =friends]
-      [%friend =ship =friend]     :: reacts when old friend is updated
-      [%new-friend =ship =friend] :: reacts when a new friend is added
-      [%bye-friend =ship]         :: reacts when a friend is removed 
+      [%friend =ship =friend]       :: reacts when old friend is updated
+      [%new-friend =ship =friend]   :: reacts when a new friend is added
+      [%bye-friend =ship]           :: reacts when a friend is removed 
   ==
 ::
 ::  Scry views
@@ -59,5 +67,6 @@
 +$  view
   $%  
       [%friends =friends]
+      [%contact-info =contact-info]
   ==
 --

@@ -21,7 +21,7 @@ import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { AvatarInput, TextInput } from '@holium/design-system';
+import { Avatar, AvatarInput, TextInput } from '@holium/design-system';
 
 interface ColorTileProps {
   tileColor: string;
@@ -88,6 +88,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
               color: values.color,
               nickname: values.nickname,
               avatar: avatarImg,
+              bio: '',
             };
             await OnboardingActions.setProfile(profileData);
             props.setState &&
@@ -193,13 +194,13 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                 xl={6}
                 pr={6}
               >
-                <Sigil
+                <Avatar
                   simple={false}
                   size={52}
                   avatar={avatarImg}
                   patp={shipName}
                   borderRadiusOverride="6px"
-                  color={[sigilColor.state.value, 'white']}
+                  sigilColor={[sigilColor.state.value, 'white']}
                 />
                 <Observer>
                   {() => (

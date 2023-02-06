@@ -9,7 +9,7 @@ import {
   Anchor,
   Spinner,
 } from 'renderer/components';
-import { TextInput } from '@holium/design-system';
+import { Avatar, TextInput } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -151,8 +151,8 @@ const TransactionDetailPresenter = () => {
               color={themeData.colors.text.secondary}
             />
           ) : (
-            <Sigil
-              color={
+            <Avatar
+              sigilColor={
                 theme.currentTheme.mode === 'light'
                   ? ['black', 'white']
                   : ['white', 'black']

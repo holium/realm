@@ -8,6 +8,7 @@ import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
+import { Avatar } from '@holium/design-system';
 
 const SystemAppPresenter = () => {
   const { theme, ship, contacts } = useServices();
@@ -39,14 +40,14 @@ const SystemAppPresenter = () => {
             maxWidth={'220px'}
           >
             {/* sig and patp */}
-            <Sigil
+            <Avatar
               // borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
               size={55}
               avatar={ship!.avatar}
               patp={person}
-              color={[ship!.color || '#000000', 'white']}
+              sigilColor={[ship!.color || '#000000', 'white']}
             />
             <Flex
               flexDirection="column"

@@ -22,6 +22,7 @@ import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Avatar } from '@holium/design-system';
 
 export interface StripePaymentProps extends BaseDialogProps {
   patp: string;
@@ -182,8 +183,8 @@ const MainComponent: FC<StripePaymentProps> = observer(
               alignItems="center"
               justifyContent="center"
             >
-              <Sigil
-                color={['black', 'white']}
+              <Avatar
+                sigilColor={['black', 'white']}
                 simple={false}
                 size={48}
                 patp={onboarding.planet!.patp}

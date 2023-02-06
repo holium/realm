@@ -8,7 +8,7 @@
 +$  card  card:agent:gall
 +$  versioned-state  $%(state-0 state-1)
 +$  state-0  [%0 is-public=? friends=friends-0:store]
-+$  state-1  [%1 is-public=? =friends:store]
++$  state-1  [%1 sync-contact-store=? is-public=? =friends:store]
 --
 =|  state-1
 =*  state  -
@@ -29,7 +29,7 @@
       abet:(add-frens:core ~(tap in ~(key by pals-following:core)))
     ::
     ?.  has-contact-store:core  [cards this]
-    :_  this(friends (rolodex-to-friends:lib friends rolodex:core))
+    :_  this(sync-contact-store %.n, friends (rolodex-to-friends:lib friends rolodex:core))
     %+  welp  cards
     [%pass /contacts %agent [our.bowl %contact-store] %watch /all]~
   ::
@@ -46,6 +46,7 @@
       :-  ~
       %=  this
           state  :*  %1
+                     %.n
                      is-public.old
                      ^-  friends:store
                      %-  malt
@@ -97,6 +98,14 @@
         [%x %ships ~]
       ?>  =(our.bowl src.bowl)
       ``noun+!>(~(key by (non-contacts:core friends)))
+      ::
+        [%x %contact @ ~]
+      ?>  =(our.bowl src.bowl)
+      =/  =ship  `@p`(slav %p i.t.t.path)
+      =/  fren  (~(get by friends) ship)
+      ?~  fren  ``noun+!>((view:enjs:lib [%contact-info *contact-info:store]))
+      ?~  contact-info.u.fren  ``noun+!>((view:enjs:lib [%contact-info *contact-info:store]))
+      ``noun+!>((view:enjs:lib [%contact-info u.contact-info.u.fren]))
     ==
   ::
   ++  on-agent
@@ -159,6 +168,8 @@
     %be-fren        abet:(be-fren src.bowl)
     %yes-fren       abet:(yes-fren src.bowl)
     %bye-fren       abet:(bye-fren src.bowl)
+    %set-contact    abet:(set-contact +.action)
+    %share-contact  abet:(share-contact +.action)
   ==
 ::
 ++  add-fren
@@ -187,10 +198,17 @@
   =.  friends  (~(put by friends) ship fren)
   %-  emil
   %+  welp  contact-cards
-  :~  =/  dock  [ship dap.bowl]
-      =/  cage  friends-action+!>([%be-fren ~])
+  =/  dock  [ship dap.bowl]
+  :~  =/  cage  friends-action+!>([%be-fren ~])
       [%pass / %agent dock %poke cage]
       [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
+      =/  our-contact
+        =/  our-fren  (~(get by friends) our.bowl)
+        ?~  our-fren  *contact-info:store
+        ?~  contact-info.u.our-fren  *contact-info:store
+        u.contact-info.u.our-fren
+      =/  cage  friends-action+!>([%set-contact our-contact])
+      [%pass / %agent dock %poke cage]
   ==
   ++  contact-cards
     ^-  (list card)
@@ -296,6 +314,79 @@
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%bye-friend ship])]
   ==
+::
+:: share contact with another ship
+++  share-contact
+  |=  =ship
+  %-  emit
+  =/  dock  [ship dap.bowl]
+  =/  our-contact
+    =/  our-fren  (~(get by friends) our.bowl)
+    ?~  our-fren  *contact-info:store
+    ?~  contact-info.u.our-fren  *contact-info:store
+    u.contact-info.u.our-fren
+  =/  cage  friends-action+!>([%set-contact our-contact])
+  [%pass / %agent dock %poke cage]
+::
+:: save contact info for a ship
+++  set-contact
+  |=  [=ship edit=contact-info-edit:store]
+  ^-  _core
+  ?>  ?|  =(our.bowl src.bowl)
+          =(ship src.bowl)
+      ==
+  =/  ufren  (~(get by friends) ship)
+  |^
+  ?~  ufren
+    =/  new-contact
+      ^-  friend:store
+      :*  %.n
+          ~
+          %contact
+          [~ *contact-info:store]
+      ==
+    =.  contact-info.new-contact  [~ (edit-contact *contact-info:store edit)]
+    =.  friends  (~(put by friends) [ship new-contact])
+    core
+  =/  contact-info
+    ?~  contact-info.u.ufren  *contact-info:store
+    u.contact-info.u.ufren
+  =.  contact-info  (edit-contact contact-info edit)
+  =/  fren  u.ufren(contact-info `contact-info)
+  =.  friends  (~(put by friends) [ship fren])
+  =/  cards  `(list card)`[%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]~
+  =?  cards  =(ship our.bowl)
+    %+  weld  cards
+    ^-  (list card)
+    =/  our-contact
+      =/  our-fren  (~(get by friends) our.bowl)
+      ?~  our-fren  *contact-info:store
+      ?~  contact-info.u.our-fren  *contact-info:store
+      u.contact-info.u.our-fren
+    %+  turn  ~(tap in ~(key by friends))
+    |=  =^ship
+    =/  cage  friends-action+!>([%set-contact our-contact])
+    [%pass / %agent [ship dap.bowl] %poke cage]
+  %-  emil  cards
+  ++  edit-contact
+    |=  [=contact-info:store edit=contact-info-edit:store]
+    =.  nickname.contact-info
+      ?~  nickname.edit  nickname.contact-info
+      u.nickname.edit
+    =.  bio.contact-info
+      ?~  bio.edit  bio.contact-info
+      u.bio.edit
+    =.  color.contact-info
+      ?~  color.edit  color.contact-info
+      u.color.edit
+    =.  avatar.contact-info
+      ?~  avatar.edit  avatar.contact-info
+      avatar.edit
+    =.  cover.contact-info
+      ?~  cover.edit  cover.contact-info
+      cover.edit
+    contact-info
+  --
 ::
 ++  non-contacts
   |=  =friends:store

@@ -9,7 +9,7 @@ import { ContactModelType } from 'os/services/ship/models/contacts';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
-import { WindowedList } from '@holium/design-system';
+import { Avatar, WindowedList } from '@holium/design-system';
 
 const resultHeight = 50;
 
@@ -48,13 +48,13 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, customBg, onSelected }: ShipSearchProps) => {
-    const { theme, ship, contacts } = useServices();
+    const { theme, ship, friends } = useServices();
     const { mode, dockColor, windowColor } = theme.currentTheme;
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
-      const contactsList = ship ? Array.from(contacts.rolodex.entries()) : [];
+      const contactsList = ship ? Array.from(friends.all.entries()) : [];
       return searchPatpOrNickname(search, contactsList, selected, ship?.patp);
-    }, [contacts.rolodex, search, selected, ship]);
+    }, [friends.all, search, selected, ship]);
 
     const isOpen = useMemo(
       () => search.length && results.length,
@@ -77,12 +77,12 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         >
           <Flex gap={10} flexDirection="row" alignItems="center">
             <Box>
-              <Sigil
+              <Avatar
                 simple
                 size={22}
                 avatar={avatar}
                 patp={contact[0]}
-                color={[sigilColor || '#000000', 'white']}
+                sigilColor={[sigilColor || '#000000', 'white']}
               />
             </Box>
             <Text fontSize={2}>{contact[0]}</Text>

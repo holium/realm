@@ -25,6 +25,7 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { Avatar } from '@holium/design-system';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -207,12 +208,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
       >
         <Flex gap={10} flexDirection="row" alignItems="center">
           <Box>
-            <Sigil
+            <Avatar
               simple
               size={22}
               avatar={contact.avatar || null}
               patp={patp}
-              color={[contact.color || '#000000', 'white']}
+              sigilColor={[contact.color || '#000000', 'white']}
             />
           </Box>
           <Flex flexDirection="row" gap={8}>

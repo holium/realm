@@ -18,6 +18,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useRooms } from '../Rooms/useRooms';
+import { Avatar } from '@holium/design-system';
 
 const AccountTrayAppPresenter = () => {
   const { ship, theme, beacon } = useServices();
@@ -120,13 +121,13 @@ const AccountTrayAppPresenter = () => {
         }}
       >
         <Flex alignItems="center">
-          <Sigil
+          <Avatar
             simple
             borderRadiusOverride="4px"
             size={32}
             avatar={currentShip.avatar}
             patp={currentShip.patp}
-            color={[currentShip.color || '#000000', 'white']}
+            sigilColor={[currentShip.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text

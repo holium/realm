@@ -42,6 +42,7 @@ import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { Avatar } from '@holium/design-system';
 
 type Props = {
   theme: ThemeModelType;
@@ -281,12 +282,12 @@ export const ChatView = observer(
       } else {
         const dmModel = selectedChat as PreviewDMType;
         return (
-          <Sigil
+          <Avatar
             simple
             size={28}
             avatar={dmModel.metadata.avatar}
             patp={dmModel.to}
-            color={[dmModel.metadata.color || '#000000', 'white']}
+            sigilColor={[dmModel.metadata.color || '#000000', 'white']}
           />
         );
       }

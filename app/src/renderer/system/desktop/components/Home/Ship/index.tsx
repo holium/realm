@@ -8,6 +8,7 @@ import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
 import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { Avatar } from '@holium/design-system';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -79,12 +80,12 @@ export const OurHome = observer((props: OurHomeProps) => {
         >
           <Flex>
             {ship && (
-              <Sigil
+              <Avatar
                 simple
                 size={32}
                 avatar={ship.avatar}
                 patp={ship.patp}
-                color={[ship.color || '#000000', 'white']}
+                sigilColor={[ship.color || '#000000', 'white']}
               />
             )}
           </Flex>

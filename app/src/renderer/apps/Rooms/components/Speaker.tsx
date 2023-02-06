@@ -11,6 +11,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { Avatar } from '@holium/design-system';
 
 interface ISpeaker {
   person: string;
@@ -121,7 +122,7 @@ export const Speaker = observer((props: ISpeaker) => {
         alignItems="center"
         gap={10}
       >
-        <Sigil
+        <Avatar
           clickable={false}
           opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
           borderRadiusOverride="6px"
@@ -129,7 +130,7 @@ export const Speaker = observer((props: ISpeaker) => {
           size={36}
           avatar={metadata && metadata.avatar}
           patp={person}
-          color={[(metadata && metadata.color) || '#000000', 'white']}
+          sigilcolor={[(metadata && metadata.color) || '#000000', 'white']}
         />
         <Text
           style={{ pointerEvents: 'none' }}
