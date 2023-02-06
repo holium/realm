@@ -5,7 +5,7 @@ export type FlexProps = {
   gap?: string | number;
 } & BoxProps;
 
-export const Flex = styled(Box)`
+export const Flex = styled(Box)<FlexProps>`
   display: flex;
   ${({ gap }) => gap && `gap: ${typeof gap === 'string' ? gap : `${gap}px`};`}
 `;

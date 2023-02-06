@@ -11,27 +11,41 @@ const BookmarkRow = styled(Row)`
 `;
 
 export type BookmarkProps = {
-  favicon: string;
+  favicon?: string;
   url: string;
   title: string;
   member?: string;
+  width?: number;
   onNavigate: (url: string) => void;
   onRemove?: (url: string) => void;
 } & BoxProps;
 
-const width = 270;
-
 export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
-  const { id, favicon, title, url, member, onNavigate } = props;
+  const {
+    id,
+    favicon,
+    title,
+    url,
+    member = '',
+    width = 270,
+    onNavigate,
+  } = props;
 
   const textWidth = member ? width - 10 - 110 : width - 10;
 
   // TODO handle moon names? or tooltip on hover with full name?
 
   return (
-    <BookmarkRow id={id} width={width} onClick={() => onNavigate(url)}>
+    <BookmarkRow
+      id={id}
+      width={width}
+      onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        onNavigate(url);
+      }}
+    >
       <Flex gap={8} justifyContent="flex-start" alignItems="center">
-        <Favicon src={favicon} />
+        {favicon && <Favicon src={favicon} />}
         <Text.Custom truncate width={textWidth}>
           {title}
         </Text.Custom>
