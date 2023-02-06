@@ -53,7 +53,6 @@ export interface WindowModelProps {
 export const DesktopStore = types
   .model('DesktopStore', {
     showHomePane: types.optional(types.boolean, false),
-    appviewPreload: types.maybe(types.string),
     dynamicMouse: types.optional(types.boolean, true),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     activeWindow: types.safeReference(Window),
@@ -105,17 +104,13 @@ export const DesktopStore = types
       });
       self.activeWindow = self.windows.get(activeWindowId);
     },
-    setAppviewPreload(preloadPath: string) {
-      self.appviewPreload = preloadPath;
-    },
     setDimensions(windowId: string, dimensions: DimensionModelType) {
       const windowDimensions = self.windows.get(windowId)?.dimensions;
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(
       app: AppType,
-      desktopDimensions: { width: number; height: number },
-      isFullscreen: boolean
+      desktopDimensions: { width: number; height: number }
     ) {
       let glob;
       let href;
@@ -135,11 +130,7 @@ export const DesktopStore = types
         href,
         zIndex: self.windows.size + 1,
         type: app.type,
-        dimensions: getInitialWindowDimensions(
-          app,
-          desktopDimensions,
-          isFullscreen
-        ),
+        dimensions: getInitialWindowDimensions(app, desktopDimensions),
       });
       self.windows.set(newWindow.id, newWindow);
       this.setActive(newWindow.id);

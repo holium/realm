@@ -147,9 +147,14 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         defaultValue={search.state.value}
         onChange={(evt) => {
           evt.stopPropagation();
+          // @ts-ignore
+          // @ts-ignore
           search.actions.onChange(evt.target.value);
+          // @ts-ignore
           appInstaller.setSearchString(evt.target.value);
+          // @ts-ignore
           if (evt.target.value) {
+            // @ts-ignore
             if (evt.target.value[0] === '~') {
               appInstaller.setSearchMode('ship-search');
               // setData([]);

@@ -11,7 +11,6 @@ import {
   getCoins,
   getNfts,
 } from '../../../lib/helpers';
-
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
 import {
@@ -21,7 +20,6 @@ import {
   NetworkType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
-
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -42,7 +40,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
-  const onScreenChange = (newScreen: string) => {};
+  const onScreenChange = () => {};
   const close = async () => {
     await WalletActions.navigateBack();
   };
@@ -120,7 +118,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         setQROpen={setQROpen}
         sendTrans={sendTrans}
         hideWalletHero={hideWalletHero}
-        onScreenChange={(newScreen: string) => onScreenChange(newScreen)} // changed
+        onScreenChange={onScreenChange}
         setSendTrans={(send: boolean) => {
           if (send) {
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {

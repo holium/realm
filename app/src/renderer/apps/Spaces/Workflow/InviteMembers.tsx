@@ -233,6 +233,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
 
         <Flex gap={8} justifyContent="center" alignItems="center">
           <Select
+            id="select-role"
             placeholder="Select role"
             customBg={windowColor}
             textColor={textColor}

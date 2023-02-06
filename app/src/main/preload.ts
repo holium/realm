@@ -1,12 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
+import './helpers/mouseListener';
+import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
 
 const appPreload = {
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
-  },
-  setAppviewPreload(callback: any) {
-    ipcRenderer.on('set-appview-preload', callback);
   },
   setMouseColor(callback: any) {
     ipcRenderer.on('mouse-color', callback);
@@ -42,7 +41,45 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
+  setWebViewPosition(webViewId: string, position: { x: number; y: number }) {
+    ipcRenderer.invoke('webview-moved', webViewId, position);
+  },
+  mouseEnteredWebView(id: string) {
+    ipcRenderer.invoke('mouse-entered-webview', id);
+  },
+  mouseLeftWebView(id: string) {
+    ipcRenderer.invoke('mouse-left-webview', id);
+  },
+  mouseColorChanged(hex: string) {
+    ipcRenderer.invoke('mouse-color', hex);
+  },
+  onMouseMove(
+    callback: (
+      coordinates: Vec2,
+      state: MouseState,
+      isDragging: boolean
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'mouse-move',
+      (_, coordinates: Vec2, state: MouseState, isDragging: boolean) => {
+        callback(coordinates, state, isDragging);
+      }
+    );
+  },
+  onMouseDown(callback: () => void) {
+    ipcRenderer.on('mouse-down', callback);
+  },
+  onMouseUp(callback: () => void) {
+    ipcRenderer.on('mouse-up', callback);
+  },
+  onMouseColorChange(callback: (hex: string) => void) {
+    ipcRenderer.on('mouse-color', (_, hex: string) => {
+      callback(hex);
+    });
+  },
 };
+
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {

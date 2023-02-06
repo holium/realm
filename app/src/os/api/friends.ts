@@ -130,7 +130,7 @@ export const FriendsApi = {
     return await conduit.watch({
       app: 'friends',
       path: `/all`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
+      onEvent: async (data: any, _id?: number) => {
         if (data.friends) {
           friendsStore.initial(data.friends);
         }

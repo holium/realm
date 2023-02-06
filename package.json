@@ -10,12 +10,8 @@
     "lib/room/test-ui"
   ],
   "scripts": {
-    "build": "yarn workspace @holium/realm dev:cursor && yarn build:app",
-    "link:multiplayer": "yarn build:multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
-    "link:conduit": "yarn build:conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
-    "link:room": "yarn build:room && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
-    "link:design-system": "yarn build:design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
-    "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-multiplayer tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
+    "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",

@@ -272,7 +272,7 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.remote-space',
-        onReaction(data, mark?) {
+        onReaction(data) {
           membersState.addMemberMap(
             data['remote-space'].path,
             data['remote-space'].members
@@ -378,7 +378,7 @@ const handleSpacesReactions = (
   our: Patp,
   spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: NewBazaarStoreType,
+  _bazaarState: NewBazaarStoreType,
   visaState: VisaModelType,
   roomService: any,
   setTheme: (theme: any) => void
@@ -392,7 +392,10 @@ const handleSpacesReactions = (
         visaState.initialIncoming(data.initial.invitations);
       }
       // handle current
-      if (spacesState.selected?.path !== data.initial.current.path) {
+      if (
+        data.initial.current &&
+        spacesState.selected?.path !== data.initial.current.path
+      ) {
         const currentPath = data.initial.current.path;
         spacesState.selectSpace(currentPath);
         setTheme(spacesState.getSpaceByPath(currentPath)?.theme);

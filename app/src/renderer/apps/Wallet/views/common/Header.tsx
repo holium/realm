@@ -1,11 +1,11 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { rgba } from 'polished';
 import { Icons, Flex, IconButton, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';
 
-interface WalletHeader {
+type Props = {
   showBack: boolean;
   isOnboarding: boolean;
   theme: {
@@ -17,13 +17,21 @@ interface WalletHeader {
   onSetNetwork: (network: Network) => void;
   onAddWallet: () => void;
   hide: boolean;
-}
+};
 
-export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
-  const { showBack, isOnboarding, network, onSetNetwork, onAddWallet } = props;
-  const { windowColor, textColor, iconColor } = props.theme;
+export const WalletHeader = ({
+  theme,
+  hide,
+  showBack,
+  isOnboarding,
+  onAddWallet,
+}: Props) => {
+  const { iconColor } = theme;
   const ethBg = useMemo(() => rgba('#627EEA', 0.1), []);
-  return !props.hide ? (
+
+  if (hide) return null;
+
+  return (
     <Flex
       width="100%"
       justifyContent="space-between"
@@ -95,5 +103,5 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
         </>
       )}
     </Flex>
-  ) : null;
+  );
 };

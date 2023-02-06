@@ -75,7 +75,7 @@ module.exports = async ({ github, context }, workflowId) => {
   );
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = context.payload.pull_request.title.match(
-    /(release|staging)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+    /(release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   );
   // matches null if no match
   if (matches) {
@@ -84,7 +84,13 @@ module.exports = async ({ github, context }, workflowId) => {
     );
     const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
-    }${matches[1] === 'staging' ? '-alpha' : ''}`;
+    }${
+      matches[1] === 'staging'
+        ? '-alpha'
+        : matches[1] === 'hotfix'
+        ? '-hotfix'
+        : ''
+    }`;
     let tag = undefined;
     try {
       tag = await github.request(
@@ -107,7 +113,18 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.isNewBuild = true;
     ci.releaseName = context.payload.pull_request.title;
     ci.buildVersion = tagName;
-    ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
+    switch (matches[1]) {
+      case 'staging':
+        ci.channel = 'alpha';
+        break;
+      case 'hotfix':
+        ci.channel = 'hotfix';
+        break;
+      case 'release':
+        ci.channel = 'latest';
+        break;
+    }
+    // ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);

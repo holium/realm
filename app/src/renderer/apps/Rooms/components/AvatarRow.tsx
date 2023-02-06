@@ -1,5 +1,5 @@
 import { Avatar } from '@holium/design-system';
-import { FC } from 'react';
+import { observer } from 'mobx-react';
 import { Flex, Box, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
@@ -8,9 +8,8 @@ interface AvatarRowProps {
   backgroundColor: string;
 }
 
-export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
-  const { people, backgroundColor } = props;
-  const { ship, contacts } = useServices();
+const AvatarRowPresenter = ({ people, backgroundColor }: AvatarRowProps) => {
+  const { contacts } = useServices();
 
   return (
     <Flex flexDirection="row" alignItems="center">
@@ -41,3 +40,5 @@ export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
     </Flex>
   );
 };
+
+export const AvatarRow = observer(AvatarRowPresenter);

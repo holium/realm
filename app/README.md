@@ -6,9 +6,6 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 You should build the project from root with `yarn` so that all the libs build properly.
 
-**Note**: Run `yarn dev:cursor` one time to build the `mouse.js` preload. Need to refactor the default build
-process to include this step.
-
 Start the app in dev mode with `yarn start` or `npm run start`.
 
 ## Developing apps within Realm
@@ -51,13 +48,13 @@ The project is structured with the goal of having a seperate process sync data f
                                 |
                           ____________
                          |            |
-                         |    Core    |
+                         |     OS     |
                          |____________|
 ```
 
 - `/renderer` is the GUI layer.
 - `/main` is the main electron process
-- `/core` is the core background process libs for syncing state and managing data.
+- `/os` is the core background process libs for syncing state and managing data.
 - `/background` is the background process logic, starts a tray icon for Realm.
 
 ## Packaging for release
@@ -72,73 +69,4 @@ If you include `DEBUG_PROD=true` you can open dev tools and check for errors.
 
 ```zsh
 npx cross-env DEBUG_PROD=true yarn package
-```
-
-## Linking the libs
-
-#### Yarn
-
-```zsh
-# In the root directory
-yarn
-```
-
-#### Yarn link /libs
-
-Link all libs (It'll take a little while):
-
-```zsh
-yarn link:all
-```
-
-Or link them individually:
-
-`@holium/design-system`:
-
-```zsh
-cd lib/design-system
-yarn build
-yarn link
-
-cd ...
-## In the root directory
-yarn link "@holium/design-system"
-```
-
-`@holium/realm-multiplayer`:
-
-```zsh
-cd lib/multiplayer
-yarn build
-yarn link
-
-cd ...
-## In the root directory
-yarn link "@holium/realm-multiplayer"
-```
-
-`@holium/conduit`:
-
-```zsh
-cd lib/conduit
-
-yarn build
-yarn link
-
-cd ...
-## In the root directory
-yarn link "@holium/conduit"
-```
-
-`@holium/realm-room`:
-
-```zsh
-cd lib/room
-
-yarn build
-yarn link
-
-cd ...
-## In the root directory
-yarn link "@holium/realm-room"
 ```

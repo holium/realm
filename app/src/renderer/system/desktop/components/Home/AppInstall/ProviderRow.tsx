@@ -39,20 +39,13 @@ export const ProviderRowStyle = styled(motion.div)<RowProps>`
 `;
 
 interface ProviderRowProps {
-  caption?: string;
   id: string;
   ship: string;
   color: string;
   onClick: (ship: string) => void;
 }
 
-export const ProviderRow = ({
-  caption,
-  id,
-  ship,
-  color,
-  onClick,
-}: ProviderRowProps) => {
+export const ProviderRow = ({ id, ship, color, onClick }: ProviderRowProps) => {
   const { theme } = useServices();
   const rowRef = useRef<any>(null);
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);

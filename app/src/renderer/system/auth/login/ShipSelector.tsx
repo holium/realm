@@ -41,7 +41,7 @@ const ShipSelectorPresenter = () => {
         value={shipKey}
         style={{ zIndex: 1 }}
         whileDrag={{ zIndex: 20 }}
-        onDragStart={(evt: any) => setDragging(true)}
+        onDragStart={() => setDragging(true)}
         onClick={() => {
           !dragging && AuthActions.setSelected(ship.patp);
         }}

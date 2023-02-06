@@ -180,7 +180,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 borderRadius={6}
                 color={rgba(theme.currentTheme.textColor, 0.9)}
                 backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
-                onClick={(evt) => {
+                onClick={() => {
                   DesktopActions.openAppWindow(space!.path, toJS(app));
                   DesktopActions.setHomePane(false);
                 }}

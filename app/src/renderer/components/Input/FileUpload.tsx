@@ -96,14 +96,10 @@ interface IProps {
   maxFileSizeInBytes?: number;
 }
 
-const KILO_BYTES_PER_BYTE = 1000;
 const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 500000;
 
 const convertNestedObjectToArray = (nestedObj: any) =>
   Object.keys(nestedObj).map((key) => nestedObj[key]);
-
-const convertBytesToKB = (bytes: number) =>
-  Math.round(bytes / KILO_BYTES_PER_BYTE);
 
 export const FileUpload: FC<IProps> = ({
   theme,
@@ -122,10 +118,10 @@ export const FileUpload: FC<IProps> = ({
   const fileInputField = useRef(null);
   const [files, setFiles] = useState<any>({});
 
-  const handleUploadBtnClick = () => {
-    // @ts-expect-error
-    fileInputField.current!.click();
-  };
+  // const handleUploadBtnClick = () => {
+  //   // @ts-expect-error
+  //   fileInputField.current!.click();
+  // };
 
   const addNewFiles = (newFiles: any) => {
     for (const file of newFiles) {
@@ -133,7 +129,6 @@ export const FileUpload: FC<IProps> = ({
         if (!multiple) {
           return { file };
         }
-        // @ts-expect-error
         files[file.name] = file;
       }
     }
@@ -163,7 +158,6 @@ export const FileUpload: FC<IProps> = ({
     callUpdateFilesCb({ ...files });
   };
 
-  // @ts-expect-error
   const file = files.file;
 
   const isImageFile = file && file.type.split('/')[0] === 'image';
@@ -179,19 +173,23 @@ export const FileUpload: FC<IProps> = ({
         color={'color'}
       >
         {label && (
+          // @ts-ignore
           <Label mb={1} htmlFor="avatar">
             {label}
           </Label>
         )}
+        {/* @ts-ignore */}
         <FileUploadContainer size={width} theme={theme}>
           {!file && <div className="file-upload-icon">{icon && icon}</div>}
           {file && isImageFile && (
             <ImagePreview
+              // @ts-ignore
               src={URL.createObjectURL(file)}
               alt={`file preview`}
             />
           )}
           <FormField
+            // @ts-ignore
             name={name}
             required={required}
             type="file"
@@ -205,6 +203,7 @@ export const FileUpload: FC<IProps> = ({
         </FileUploadContainer>
         {file && (
           <Button
+            // @ts-ignore
             type="button"
             style={{ margin: '5px 0' }}
             theme={theme}

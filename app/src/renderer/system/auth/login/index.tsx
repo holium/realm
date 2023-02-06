@@ -1,4 +1,4 @@
-import { useRef, FC, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
@@ -30,12 +30,11 @@ interface LoginProps {
   addShip: () => void;
 }
 
-export const Login: FC<LoginProps> = observer((props: LoginProps) => {
+export const Login = observer((props: LoginProps) => {
   const { addShip } = props;
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
-  const [isStale, setIsStale] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -207,7 +206,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           ref={optionsRef}
                           luminosity={theme.currentTheme.mode}
                           opacity={1}
-                          onClick={(evt: any) => {
+                          onClick={() => {
                             setShow(true);
                           }}
                         >
@@ -276,7 +275,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
-                    {isStale && 'Stale connection. Refreshing token...'}
                     {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>

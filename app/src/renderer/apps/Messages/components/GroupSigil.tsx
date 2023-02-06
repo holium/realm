@@ -53,7 +53,6 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   }
   if (len > 4) {
     // todo add +n
-    const plusEl = <div>+ {len - 4}</div>;
   }
   return (
     <Flex

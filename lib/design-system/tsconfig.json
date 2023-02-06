@@ -3,12 +3,10 @@
   "compilerOptions": {
     "baseUrl": "src"
   },
-  "include": ["src", ".storybook"],
+  "include": ["src", ".storybook", "window.d.ts"],
   "exclude": [
     "dist",
     "node_modules",
-    ".template/name.stories.tsx",
-    ".template/name.tests.tsx",
-    ".template/name.tsx"
+    ".template"
   ]
 }

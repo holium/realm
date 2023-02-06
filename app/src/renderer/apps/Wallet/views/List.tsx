@@ -10,49 +10,85 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-interface WalletListProps {}
+export const WalletList = observer(() => {
+  const { walletApp } = useTrayApps();
+  const list = walletApp.currentStore.list;
 
-export const WalletList: FC<WalletListProps> = observer(
-  (props: WalletListProps) => {
-    const { walletApp } = useTrayApps();
-    const list = walletApp.currentStore.list;
+  const List: FC = () => {
+    return (
+      <Flex
+        py={1}
+        px={3}
+        height="100%"
+        width="100%"
+        flexDirection="column"
+        layoutScroll
+        gap={6}
+        overflowX="visible"
+        overflowY="auto"
+      >
+        {list.map((walletEntry) => {
+          return (
+            <WalletCard
+              key={walletEntry.address}
+              walletKey={walletEntry.key}
+              onSelect={() => {
+                WalletActions.navigate(WalletView.WALLET_DETAIL, {
+                  walletIndex: walletEntry.key,
+                });
+              }}
+            />
+          );
+        })}
+      </Flex>
+    );
+  };
 
-    const List: FC = () => {
-      return (
-        <Flex
-          py={1}
-          px={3}
-          height="100%"
-          width="100%"
-          flexDirection="column"
-          layoutScroll
-          gap={6}
-          overflowX="visible"
-          overflowY="auto"
-        >
-          {list.map((walletEntry) => {
-            return (
-              <WalletCard
-                key={walletEntry.address}
-                walletKey={walletEntry.key}
-                onSelect={() => {
-                  WalletActions.navigate(WalletView.WALLET_DETAIL, {
-                    walletIndex: walletEntry.key,
-                  });
-                }}
-              />
-            );
-          })}
-        </Flex>
-      );
+  const Empty = () => {
+    const onClick = () => {
+      WalletActions.navigate(WalletView.CREATE_WALLET);
     };
 
-    const Empty: FC<any> = (props: any) => {
-      const onClick = () => {
-        WalletActions.navigate(WalletView.CREATE_WALLET);
-      };
+    return (
+      <Flex
+        width="100%"
+        height="100%"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Text variant="h3" textAlign="center">
+          No addresses
+        </Text>
+        <Flex width="80%" justifyContent="center">
+          <Text mt={4} variant="body" textAlign="center">
+            You haven't created any{' '}
+            {walletApp.navState.network === 'ethereum'
+              ? 'Ethereum'
+              : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+              ? 'Bitcoin'
+              : 'Bitcoin Testnet'}{' '}
+            addresses yet.
+          </Text>
+        </Flex>
+        <Flex mt={9} justifyContent="center">
+          <Button onClick={onClick}>Create address</Button>
+        </Flex>
+      </Flex>
+    );
+  };
 
-      return (
+  return list.length ? (
+    <List />
+  ) : (
+    <Flex
+      p={4}
+      height="100%"
+      width="100%"
+      flexDirection="column"
+      alignItems="center"
+    >
+      {walletApp.navState.network === NetworkType.BITCOIN ? (
         <Flex
           width="100%"
           height="100%"
@@ -61,52 +97,13 @@ export const WalletList: FC<WalletListProps> = observer(
           alignItems="center"
         >
           <Text variant="h3" textAlign="center">
-            No addresses
-          </Text>
-          <Flex width="80%" justifyContent="center">
-            <Text mt={4} variant="body" textAlign="center">
-              You haven't created any{' '}
-              {walletApp.navState.network === 'ethereum'
-                ? 'Ethereum'
-                : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
-                ? 'Bitcoin'
-                : 'Bitcoin Testnet'}{' '}
-              addresses yet.
-            </Text>
-          </Flex>
-          <Flex mt={9} justifyContent="center">
-            <Button onClick={onClick}>Create address</Button>
-          </Flex>
+            Coming soon...
+          </Text>{' '}
         </Flex>
-      );
-    };
-
-    return list.length ? (
-      <List />
-    ) : (
-      <Flex
-        p={4}
-        height="100%"
-        width="100%"
-        flexDirection="column"
-        alignItems="center"
-      >
-        {walletApp.navState.network === NetworkType.BITCOIN ? (
-          <Flex
-            width="100%"
-            height="100%"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Text variant="h3" textAlign="center">
-              Coming soon...
-            </Text>{' '}
-          </Flex>
-        ) : (
-          <Empty network={walletApp.navState.network} />
-        )}
-      </Flex>
-    );
-  }
-);
+      ) : (
+        // @ts-ignore
+        <Empty network={walletApp.navState.network} />
+      )}
+    </Flex>
+  );
+});

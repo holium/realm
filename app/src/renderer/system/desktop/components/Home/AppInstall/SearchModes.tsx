@@ -154,7 +154,6 @@ const renderApps = (space: string, apps: any, theme: any) => {
   return installedApps.map((app: any, index: number) => (
     <AppRow
       key={index}
-      caption={app.title}
       app={app}
       descriptionWidth={450}
       onClick={() => {
@@ -348,7 +347,6 @@ const DevAppsPresenter = () => {
       {apps?.map((app: DocketAppType, index: number) => (
         <div key={index}>
           <AppRow
-            caption={app.title}
             app={app}
             actionRenderer={(app: DocketAppType) =>
               app.id && <InstallButton app={app} />

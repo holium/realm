@@ -84,7 +84,7 @@ const AppPresenter = () => {
         });
         roomsManager.on(
           RoomManagerEvent.OnDataChannel,
-          (rid: string, peer: string, data: any) => {
+          (_rid: string, _peer: string, data: any) => {
             console.log('peer data', data);
           }
         );

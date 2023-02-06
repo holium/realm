@@ -14,14 +14,15 @@ function useInterval(callback: any, delay: number) {
   }, [callback]);
 
   useEffect(() => {
+    let intervalRef: NodeJS.Timer;
     function tick() {
       // @ts-expect-error
       savedCallback.current();
     }
     if (delay !== null) {
-      const id = setInterval(tick, delay);
-      return () => clearInterval(id);
+      intervalRef = setInterval(tick, delay);
     }
+    return () => clearInterval(intervalRef);
   }, [delay]);
 }
 

@@ -1,6 +1,13 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { FC, useEffect, useRef, useState, useMemo } from 'react';
-
+import {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  ReactNode,
+  RefObject,
+} from 'react';
 import {
   Flex,
   TextButton,
@@ -16,7 +23,14 @@ export interface DialogViewProps {
   window: WindowModelProps;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
+type ViewProps = {
+  ref: RefObject<HTMLDivElement>;
+  background: string;
+  hasTitleBar?: boolean;
+  children?: ReactNode;
+};
+
+const View = styled.div<ViewProps>`
   position: relative;
   display: flex;
   flex-direction: column;
