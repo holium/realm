@@ -170,11 +170,8 @@ export class TestProtocol extends BaseProtocol {
     });
   }
 
-  // @ts-ignore
-  async dial(peer: Patp, isHost: boolean): Promise<RemotePeer> {
-    if (!this.local) {
-      throw new Error('No local peer created');
-    }
+  dial(peer: Patp, isHost: boolean): RemotePeer {
+    if (!this.local) throw new Error('No local peer created');
     const remotePeer = new RemotePeer(
       this.our,
       peer,
