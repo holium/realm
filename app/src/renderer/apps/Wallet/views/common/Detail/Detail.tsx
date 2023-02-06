@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Box, TextButton } from 'renderer/components';
 import { Text } from '@holium/design-system';
@@ -30,7 +30,7 @@ interface DetailProps {
   theme: ThemeModelType;
   hidePending: boolean;
 }
-export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
+const DetailPresenter = (props: DetailProps) => {
   const { walletApp } = useTrayApps();
   const [QROpen, setQROpen] = useState(false);
   const sendTrans =
@@ -57,19 +57,11 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         .get(walletApp.navState.protocol)!
         .coins.get(walletApp.navState.detail!.key)!;
     }
-    coins = useMemo(
-      () =>
-        getCoins(
-          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-        ),
-      []
+    coins = getCoins(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
     );
-    nfts = useMemo(
-      () =>
-        getNfts(
-          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
-        ),
-      []
+    nfts = getNfts(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
     );
   }
 
@@ -192,7 +184,9 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       </Box>
     </Flex>
   );
-});
+};
+
+export const Detail = observer(DetailPresenter);
 
 interface ListSelectorProps {
   selected: DisplayType;

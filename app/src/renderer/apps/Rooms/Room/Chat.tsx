@@ -31,7 +31,7 @@ export const chatForm = (
   };
 };
 
-export const RoomChat = observer(() => {
+const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
@@ -156,4 +156,6 @@ export const RoomChat = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const RoomChat = observer(RoomChatPresenter);
