@@ -57,23 +57,11 @@ const DetailPresenter = (props: DetailProps) => {
         .get(walletApp.navState.protocol)!
         .coins.get(walletApp.navState.detail!.key)!;
     }
-    // TODO: can we remove this memo?
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    coins = useMemo(
-      () =>
-        getCoins(
-          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-        ),
-      []
+    coins = getCoins(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
     );
-    // TODO: can we remove this memo?
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    nfts = useMemo(
-      () =>
-        getNfts(
-          (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
-        ),
-      []
+    nfts = getNfts(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
     );
   }
 
