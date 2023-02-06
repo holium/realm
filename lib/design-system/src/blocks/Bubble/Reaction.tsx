@@ -49,6 +49,7 @@ const FontSizes: { [key: string]: number } = {
 type ReactionButtonProps = {
   hasCount?: boolean;
   size?: keyof typeof ReactionSizes;
+  selected?: boolean;
 };
 
 const ReactionButton = styled(Box)<ReactionButtonProps>`
@@ -57,16 +58,23 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   align-items: center;
   justify-content: center;
   background: var(--rlm-input-color);
-  border: 1px solid var(--rlm-border-color);
+  ${({ selected }) =>
+    selected
+      ? css`
+          border: 1px solid #efbb92;
+          background: #fff6ef;
+        `
+      : 'border: 1px solid var(--rlm-border-color);'}
   border-radius: 16px;
   transition: var(--transition);
-  ${({ size }) =>
+  ${({ size, selected }) =>
     size
       ? css`
           min-width: ${ReactionSizes[size]}px;
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
+            ${selected && 'color: #e47a27;'}
           }
         `
       : css`
@@ -88,11 +96,22 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
       padding: 0 6px 0 4px;
       gap: 4px;
     `}
-  &:hover {
-    transition: var(--transition);
-    cursor: pointer;
-    background: ${() => darken(0.05, getVar('input'))};
-  }
+  ${({ selected }: ReactionButtonProps) =>
+    selected
+      ? css`
+          &:hover {
+            transition: var(--transition);
+            cursor: pointer;
+            background: ${() => darken(0.05, '#fff6ef')};
+          }
+        `
+      : css`
+          &:hover {
+            transition: var(--transition);
+            cursor: pointer;
+            background: ${() => darken(0.05, getVar('input'))};
+          }
+        `}
 `;
 
 export type ReactionAggregateType = {
@@ -180,6 +199,7 @@ export const Reactions = (props: ReactionProps) => {
               evt.stopPropagation();
               onClick(reaction.emoji);
             }}
+            selected={reaction.by.includes(window.ship)}
           >
             <Emoji
               unified={reaction.emoji}
