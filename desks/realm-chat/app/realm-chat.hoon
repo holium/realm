@@ -1,4 +1,5 @@
-/-  *realm-chat, db-sur=chat-db
+::  app/realm-chat.hoon
+/-  *realm-chat, db-sur=chat-db, notify
 /+  dbug, lib=realm-chat
 =|  state-0
 =*  state  -
@@ -12,7 +13,12 @@
   ++  on-init
     ^-  (quip card _this)
     =/  default-state=state-0
-      [%0 'TODO real initial state']
+      :*  %0
+          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
+          (sham our.bowl)                         :: uuid:notify
+          *devices:notify
+          %.y                                     :: push-enabled
+      ==
     :_  this(state default-state)
     :~
       [%pass /db %agent [our.bowl %chat-db] %watch /db]
@@ -22,8 +28,6 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    ~&  %on-load-realm-chat
-    ~&  bowl
     =/  cards  ?:  =(wex.bowl ~)  
 ::      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]~
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
@@ -40,18 +44,29 @@
     =/  act  !<(action vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
+      :: meta-chat management pokes
       %create-chat
         (create-chat:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
       %remove-ship-from-chat
         (remove-ship-from-chat:lib +.act state bowl)
+      :: message management pokes
       %send-message
         (send-message:lib +.act state bowl)
       %edit-message
         (edit-message:lib +.act state bowl)
       %delete-message
         (delete-message:lib +.act state bowl)
+      :: notification preferences pokes
+      %disable-push
+        (disable-push:lib state)
+      %enable-push
+        (enable-push:lib state)
+      %remove-device
+        (remove-device:lib +.act state)
+      %set-device
+        (set-device:lib +.act state)
     ==
     [cards this]
   ::
@@ -115,8 +130,31 @@
                   `this
                 %db-change
                   ::~&  >>>  'we got a new db-change thing'
-                  ::~&  >>>  !<(db-change:db-sur q.cage.sign)
-                  `this
+                  =/  thechange  !<(db-change:db-sur q.cage.sign)
+                  ?. :: ?. not ?: to reverse order
+                  :: the following conditions must ALL be true in order
+                  :: for us to send out a push-notification
+                  ?&  (lien thechange is-new-message)     :: the change includes a new message
+                      push-enabled.state                  :: push is enabled
+                      (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
+                  ==
+                    :: at least one of the conditions was not met,
+                    :: so just ignore the %fact
+                    `this
+                  :: ELSE, push notify about the new message
+                  =/  firstelem=db-change-type:db-sur  (snag 0 (skim thechange is-new-message))
+                  ?+  -.firstelem  `this
+                    %add-row
+                    ?+  -.db-row.firstelem  `this
+                      %messages
+                      :: if it's our message, don't do anything
+                      ?:  =(sender.msg-id.msg-part.db-row.firstelem our.bowl)
+                        `this
+                      =/  thepath  path.msg-part.db-row.firstelem
+                      =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.firstelem)}"))
+                      [[push-card ~] this]
+                    ==
+                  ==
             ==
         ==
       [%messages ~]
@@ -165,6 +203,9 @@
 ::
 ++  this  .
 ++  core  .
-++  all-tables
-  ~
+++  is-new-message
+  |=  [a=db-change-type:db-sur]
+  ?+  -.a  %.n
+    %add-row  =(-.db-row.a %messages)
+  ==
 --

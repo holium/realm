@@ -3,7 +3,8 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in realm-chat sur.
 ::
-/-  *realm-chat, db=chat-db
+/-  *realm-chat, db=chat-db, notify
+/+  notif-lib=notify
 |%
 ::
 :: helpers
@@ -52,6 +53,35 @@
     peers
     |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%kick-peer path.p kickee])])
   ==
+++  push-notification-card
+  |=  [=bowl:gall state=state-0 chat-path=path subtitle=@t content=@t]
+  ^-  card
+  =/  note=notification:notify
+  ^-  notification:notify
+    [
+      app-id=app-id.state
+      data=[path=(spat chat-path) member-meta=*mem-meta:notify]
+      subtitle=(malt ~[['en' subtitle]])
+      contents=(malt ~[['en' content]])
+    ]
+  ::  send http request
+  ::
+  =/  =header-list:http    ['Content-Type' 'application/json']~
+  =|  =request:http
+  :: TODO include the unread count in the push notif (perhaps global?)
+  =:  method.request       %'POST'
+      url.request          'https://onesignal.com/api/v1/notifications'
+      header-list.request  header-list
+      body.request
+        :-  ~
+        %-  as-octt:mimes:html
+        %-  en-json:html
+        %+  request:enjs:notif-lib
+          note
+        devices.state
+  ==
+
+  [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
 ::
 ::  poke actions
 ::
@@ -146,6 +176,26 @@
       |=(p=peer-row:db (into-delete-message-poke p msg-id.act))
     ==
   [cards state]
+++  disable-push
+  |=  [state=state-0]
+  ^-  (quip card state-0)
+  =.  push-enabled.state  %.n
+  `state
+++  enable-push
+  |=  [state=state-0]
+  ^-  (quip card state-0)
+  =.  push-enabled.state  %.y
+  `state
+++  remove-device
+  |=  [=device-id:notify state=state-0]
+  ^-  (quip card state-0)
+  =.  devices.state         (~(del by devices.state) device-id)
+  `state
+++  set-device
+  |=  [[=device-id:notify =player-id:notify] state=state-0]
+  ^-  (quip card state-0)
+  =.  devices.state         (~(put by devices.state) device-id player-id)
+  `state
 ::
 ::  JSON
 ::

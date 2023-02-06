@@ -1,3 +1,4 @@
+::  app/chat-db.hoon
 /-  *versioned-state, sur=chat-db
 /+  dbug, db-lib=chat-db
 =|  state-0
@@ -18,8 +19,6 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    ~&  %on-load
-    ~&  bowl
     =/  old  !<(versioned-state old-state)
     ?-  -.old
       %0  `this(state old)
@@ -32,18 +31,19 @@
     =/  act  !<(action:sur vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
+      :: paths-table pokes
       %create-path 
-        ~&  >>  %create-path-in-db
         (create-path:db-lib +.act state bowl)
       %leave-path 
         (leave-path:db-lib +.act state bowl)
+      :: messages-table pokes
       %insert
-        ~&  >>  %insert-in-db
         (insert:db-lib +.act state bowl)
       %edit
         (edit:db-lib +.act state bowl)
       %delete
         (delete:db-lib +.act state bowl)
+      :: peers-table pokes
       %add-peer
         (add-peer:db-lib +.act state bowl)
       %kick-peer
@@ -63,7 +63,6 @@
           :~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
           ==
       :: /db/messages/start/~zod/~2023.1.17..19.50.46..be0e
-      :: TODO: ensure that pokes signal on these wires
         [%db %messages %start @ @ ~]  :: the "recent messages" path
           =/  sender=@p       `@p`(slav %p i.t.t.t.path)
           =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
