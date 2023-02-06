@@ -100,16 +100,12 @@ type TextButtonProps = {
   onKeyDown?: (evt: any) => void;
 } & PositionProps;
 
-export const TextButton = (props: TextButtonProps) => {
-  return (
-    <div
-      className={
-        props.disabled ? 'dynamic-mouse-disabled' : 'realm-cursor-hover'
-      }
-    >
-      <TextButtonStyle {...props}>{props.children}</TextButtonStyle>
-    </div>
-  );
-};
-
-TextButton.displayName = 'TextButton';
+export const TextButton = ({
+  children,
+  disabled,
+  ...rest
+}: TextButtonProps) => (
+  <div className={disabled ? 'dynamic-mouse-disabled' : 'realm-cursor-hover'}>
+    <TextButtonStyle {...rest}>{children}</TextButtonStyle>
+  </div>
+);

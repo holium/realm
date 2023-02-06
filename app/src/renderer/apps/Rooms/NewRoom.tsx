@@ -167,7 +167,9 @@ const NewRoomPresenter = () => {
             onClick={(evt: any) => {
               createRoom(evt);
             }}
-          />
+          >
+            Start
+          </TextButton>
         </Flex>
         <Flex mt={3} justifyContent="flex-start">
           {/* <Checkbox
