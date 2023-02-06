@@ -114,6 +114,10 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.releaseName = context.payload.pull_request.title;
     ci.buildVersion = tagName;
     switch (matches[1]) {
+      // test and staging builds produce alphas. the only difference is
+      // that 'test' stays in draft mode and sets the release channel used by auto-updater
+      // to 'test' or 'staging' respectively
+      case 'test':
       case 'staging':
         ci.channel = 'alpha';
         break;
