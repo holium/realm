@@ -160,7 +160,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
         </Box>
       )}
       <AppTile
-        tileId={`${id}-app`}
+        tileId={`${app.id}-app`}
         tileSize="xl1"
         app={app}
         isAnimated={isInstalled}
