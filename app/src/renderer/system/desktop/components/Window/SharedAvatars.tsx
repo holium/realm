@@ -1,6 +1,6 @@
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, Sigil, Icons, IconButton } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import styled from 'styled-components';
 import { Avatar } from '@holium/design-system';
 

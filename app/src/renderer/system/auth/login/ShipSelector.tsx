@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { delay } from 'lodash';
 
-import { Flex, Sigil, Tooltip } from 'renderer/components';
+import { Flex, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { Avatar } from '@holium/design-system';

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
-import { Box, Sigil, Text, Flex, Icons, Button } from 'renderer/components';
+import { Box, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';

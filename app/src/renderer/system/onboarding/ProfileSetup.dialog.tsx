@@ -8,7 +8,6 @@ import { TwitterPicker } from 'react-color';
 
 import {
   Grid,
-  Sigil,
   Text,
   Label,
   FormControl,

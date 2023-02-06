@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { Flex, Icons, Text, Sigil, FlexProps } from 'renderer/components';
+import { Flex, Icons, Text, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';

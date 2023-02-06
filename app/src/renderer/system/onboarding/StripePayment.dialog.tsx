@@ -6,15 +6,7 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Box,
-  Sigil,
-  Text,
-  Flex,
-  Button,
-  Icons,
-  Spinner,
-} from 'renderer/components';
+import { Box, Text, Flex, Button, Icons, Spinner } from 'renderer/components';
 import { transparentize, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';

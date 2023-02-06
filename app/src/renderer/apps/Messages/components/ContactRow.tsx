@@ -3,14 +3,7 @@ import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
-import {
-  Sigil,
-  Flex,
-  Box,
-  Text,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Box, Text, TextButton, Spinner } from 'renderer/components';
 import {
   DMPreviewType,
   PreviewDMType,

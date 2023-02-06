@@ -10,7 +10,6 @@ import {
   Icons,
   Crest,
   Box,
-  Sigil,
   IconButton,
   Select,
   Skeleton,

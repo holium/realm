@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
-import { Flex, Text, Box, Sigil, IconButton, Icons } from '../';
+import { Flex, Text, Box, IconButton, Icons } from '../';
 import { Row } from '../NewRow';
 import { ContactModelType } from 'os/services/ship/models/contacts';
 import { darken, lighten } from 'polished';

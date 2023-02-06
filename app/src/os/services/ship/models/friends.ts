@@ -30,7 +30,6 @@ export const ContactModel = types.model('ContactModel', {
 
 export type ContactModelType = Instance<typeof ContactModel>;
 
-
 export const FriendModel = types.model({
   pinned: types.boolean,
   tags: types.optional(types.array(types.string), []),

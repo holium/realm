@@ -17,7 +17,6 @@ import {
   IconButton,
   Icons,
   Input,
-  Sigil,
   Text,
   Grid,
   Box,

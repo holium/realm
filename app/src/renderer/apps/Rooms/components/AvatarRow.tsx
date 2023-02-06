@@ -1,6 +1,6 @@
 import { Avatar } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box, Sigil } from 'renderer/components';
+import { Flex, Box } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
 interface AvatarRowProps {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Sigil, RadioList } from 'renderer/components';
+import { Flex, Text, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';

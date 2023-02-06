@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Sigil,
   Grid,
   Text,
   Flex,

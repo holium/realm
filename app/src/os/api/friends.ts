@@ -4,14 +4,11 @@ import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
 
 export const FriendsApi = {
-  getContact: async (
-    conduit: Conduit,
-    ship: string
-  ) => {
+  getContact: async (conduit: Conduit, ship: string) => {
     const contact = await conduit.scry({
       app: 'friends',
       path: `/contact/${ship}`,
-    })
+    });
     return {
       ...contact,
       color: contact.color && cleanNounColor(contact.color),
@@ -26,7 +23,7 @@ export const FriendsApi = {
       bio: data.bio,
       cover: data.cover || null,
     };
-    const payload =  {
+    const payload = {
       app: 'friends',
       mark: 'friends-action',
       json: {

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { rgba, darken } from 'polished';
-import { Sigil, Flex, Box, Text, Icons } from '../';
+import { Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';

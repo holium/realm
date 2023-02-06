@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Flex, Sigil } from 'renderer/components';
+import { Flex } from 'renderer/components';
 import { Patp } from 'os/types';
 import { Avatar } from '@holium/design-system';
 

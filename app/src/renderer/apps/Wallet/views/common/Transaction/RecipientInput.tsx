@@ -3,7 +3,7 @@ import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
-import { Flex, Box, Icons, Text, Sigil, Spinner } from 'renderer/components';
+import { Flex, Box, Icons, Text, Spinner } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Icons, IconButton, Sigil } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';

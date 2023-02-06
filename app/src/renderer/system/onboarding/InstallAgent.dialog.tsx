@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 
 import {
   Grid,
-  Sigil,
   Text,
   Flex,
   ActionButton,

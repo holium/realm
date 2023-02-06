@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 
-import { Flex, Sigil, Text } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
 import { useServices } from 'renderer/logic/store';

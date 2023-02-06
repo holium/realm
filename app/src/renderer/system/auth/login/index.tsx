@@ -5,7 +5,6 @@ import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,

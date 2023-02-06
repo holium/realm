@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Sigil } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { ThemeType } from '../../../../../theme';
 import { Avatar } from '@holium/design-system';
 

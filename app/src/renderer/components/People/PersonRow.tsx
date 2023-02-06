@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
-import { Flex, Box, Sigil, Text, MenuItemProps } from '../';
+import { Flex, Box, Text, MenuItemProps } from '../';
 import { Row } from 'renderer/components/NewRow';
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { ThemeType } from '../../logic/theme';

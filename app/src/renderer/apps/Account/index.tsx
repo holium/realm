@@ -1,12 +1,5 @@
 import { useEffect } from 'react';
-import {
-  Grid,
-  Flex,
-  Icons,
-  Sigil,
-  Text,
-  IconButton,
-} from 'renderer/components';
+import { Grid, Flex, Icons, Text, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
 import { nativeApps } from '..';

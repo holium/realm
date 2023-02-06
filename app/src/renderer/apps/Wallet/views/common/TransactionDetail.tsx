@@ -5,7 +5,6 @@ import {
   Text,
   Button,
   Icons,
-  Sigil,
   Anchor,
   Spinner,
 } from 'renderer/components';

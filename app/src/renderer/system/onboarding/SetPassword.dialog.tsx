@@ -3,7 +3,6 @@ import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 import {
   Grid,
-  Sigil,
   Text,
   Label,
   FormControl,
