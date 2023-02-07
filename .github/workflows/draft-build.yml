@@ -29,7 +29,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin draft-build
+          git pull origin draft
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -173,7 +173,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git config --global --add safe.directory '*'
-          git pull origin draft-build
+          git pull origin draft
       #
       - name: Install yarn
         run: npm install -g yarn
@@ -239,7 +239,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin draft-build
+  #         git pull origin draft
   #     #
   #     - name: Bump desks version
   #       uses: actions/github-script@v6
@@ -352,7 +352,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin draft-build
+  #         git pull origin draft
   #     #
   #     - name: Delete release draft
   #       if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
