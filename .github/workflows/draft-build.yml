@@ -6,7 +6,7 @@ on:
     types:
       - closed
     branches:
-      - test-build
+      - draft
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
