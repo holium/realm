@@ -280,8 +280,15 @@ export class AppUpdater implements IAppUpdater {
         ipcMain.removeHandler(handler.channel);
         ipcMain.handle(handler.channel, handler.listener.bind(this));
       });
-      this.autoUpdater.checkForUpdates().catch((e) => {
-        console.log(e);
+      this.autoUpdater.checkForUpdates().catch((error) => {
+        console.log(error);
+        // this is bad. just show the error without a fancy screen and move on...
+        dialog.showErrorBox(
+          'Auto Update Error',
+          // @ts-ignore
+          error == null ? 'unknown' : (error.stack || error).toString()
+        );
+        this.doneCallback && this.doneCallback('error');
       });
     });
     this.progressWindow.webContents.loadURL(resolveHtmlPath('updater.html'));
