@@ -61,12 +61,12 @@ const configuration: webpack.Configuration = {
       START_MINIMIZED: false,
       AUTOUPDATE_FEED_URL:
         process.env.RELEASE_CHANNEL === 'alpha' ||
-        process.env.RELEASE_CHANNEL === 'test'
+        process.env.RELEASE_CHANNEL === 'draft'
           ? 'https://ghproxy-staging.holium.xyz'
           : 'https://ghproxy.holium.xyz',
       INSTALL_MOON:
         process.env.RELEASE_CHANNEL === 'alpha' ||
-        process.env.RELEASE_CHANNEL === 'test'
+        process.env.RELEASE_CHANNEL === 'draft'
           ? '~nimwyd-ramwyl-dozzod-hostyv:realm,courier'
           : '~hostyv:realm,courier',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
