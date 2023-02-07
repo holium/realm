@@ -30,7 +30,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 });
 
 let mainWindow: BrowserWindow;
-let mouseWindow: BrowserWindow;
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -203,8 +202,6 @@ const createMouseOverlayWindow = () => {
   });
 
   MouseHelper.registerListeners(newMouseWindow);
-
-  mouseWindow = newMouseWindow;
 };
 
 app.on('window-all-closed', () => {
