@@ -53,7 +53,7 @@
 ::  poke actions
 ::
 ++  create-path
-  ::  :chat-db &action [%create-path /a/path/to/a/chat ~ %chat]
+::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat]
   |=  [act=create-path-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  row=path-row:sur   :+
@@ -107,7 +107,7 @@
   [gives state]
 ::
 ++  insert
-::  :chat-db &action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]
+::  :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -127,7 +127,7 @@
   [gives state]
 ::
 ++  edit
-::  :chat-db &action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
+::  :chat-db &db-action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
   |=  [[=msg-id:sur p=path fragments=(list minimal-fragment:sur)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -153,7 +153,7 @@
   [gives state]
 ::
 ++  delete
-::  :chat-db &action [%delete [timestamp=~2023.2.2..23.11.10..234a sender=~zod]]
+::  :chat-db &db-action [%delete [timestamp=~2023.2.2..23.11.10..234a sender=~zod]]
   |=  [=msg-id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -176,7 +176,7 @@
   [gives state]
 ::
 ++  add-peer
-::  :chat-db &action [%add-peer [/a/path/to/a/chat ~bus]]
+::  :chat-db &db-action [%add-peer [/a/path/to/a/chat ~bus]]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -198,7 +198,7 @@
   ==
   [gives state]
 ++  kick-peer
-::  :chat-db &action [%kick-peer /a/path/to/a/chat ~bus]
+::  :chat-db &db-action [%kick-peer /a/path/to/a/chat ~bus]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?.  (~(has by paths-table.state) path.act)
@@ -239,21 +239,13 @@
   |%
   ++  start
     |=  [=msg-id:sur tbl=messages-table:sur]
-    ^-  (list msg-part:sur)
-    :: TODO actually filter the messages-table mop type into a list of
-    :: msg-part that have id gth msg-id passed in
+    ^-  messages-table:sur
     =/  start=uniq-id:sur  [msg-id 0]
-    =/  kvs  (tap:msgon:sur (lot:msgon:sur tbl `start ~))
-    (turn kvs |=(a=[k=uniq-id:sur v=msg-part:sur] v.a))
+    (lot:msgon:sur tbl `start ~)
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)
     (turn ~(val by tbl) |=(a=path-row:sur path.a))
-  ::++  messages-table
-  ::  |=  =tables:sur
-  ::  ^-  messages-table:sur
-  ::  =/  mini  (skim tables |=(a=table:sur =(-.a %messages)))
-  ::  (snag 0 mini)
   --
 ::
 ::  JSON
@@ -269,9 +261,8 @@
       ^-  [cord json]
       :-  -.db
       ?-  -.db
-        :: ::
-          %tables
-        (all-tables:encode tables.db)
+        %tables
+          (all-tables:encode tables.db)
       ==
     ++  db-change :: encodes for on-watch
       |=  db=db-change:sur
@@ -288,53 +279,6 @@
       ^-  json
       (path-row:encode path-row)
   --
-::
-:: ++  dejs
-::   =,  dejs:format
-::   |%
-::   ++  action
-::     |=  jon=json
-::     ^-  action:sur
-::     =<  (decode jon)
-::     |%
-::     ++  decode
-::       %-  of
-::       :~  [%read-dm read-dm]
-::       ==
-::     ::
-::     ++  read-dm
-::       %-  ot
-::       :~  
-::           [%ship (su ;~(pfix sig fed:ag))]
-::       ==
-::     ::
-::     ++  tang 
-::       |=  jon=^json
-::       ^-  ^tang
-::       ?>  ?=(%a -.jon)
-::       %-  zing
-::       %+  turn
-::         p.jon
-::       |=  jo=^json
-::       ^-  (list tank)
-::       ?>  ?=(%a -.jo)
-::       %+  turn
-::         p.jo
-::       |=  j=^json
-::       ?>  ?=(%s -.j)
-::       ^-  tank
-::       leaf+(trip p.j)
-::     ::
-::     ++  eval
-::       %-  ot
-::       :~  expression+so
-::           output+tang
-::       ==
-::     ::
-::     ::
-::     --
-::   --
-::
 ++  encode
   =,  enjs:format
   |%
@@ -345,9 +289,9 @@
       %+  turn  tables
         |=  =table:sur
         ?-  -.table
-          %paths  paths+(paths-table +.table)
-          %messages  messages+(messages-table +.table)
-          %peers  peers+(peers-table +.table)
+          %paths      paths+(paths-table +.table)
+          %messages   messages+(messages-table +.table)
+          %peers      peers+(peers-table +.table)
         ==
     ::
     ++  paths-table

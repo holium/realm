@@ -121,11 +121,4 @@
   $%  
       [%example =ship]
   ==
-::
-::  Scry views
-::
-+$  view
-  $%  
-      [%example =ship]
-  ==
 --

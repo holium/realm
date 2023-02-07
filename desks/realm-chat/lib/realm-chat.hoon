@@ -90,9 +90,9 @@
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(type.act %chat)  :: for now only support %chat type paths
-  :: TODO UNCOMMENT THIS TO USE REAL PATHS WHEN NOT TESTING
-  ::=/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
-  =/  chat-path  /realm-chat/path-id
+  :: TODO COMMENT/UNCOMMENT THIS TO USE REAL paths or TESTING paths
+  =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
+  ::=/  chat-path  /realm-chat/path-id
   =/  cards  
     [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path chat-path act])]~
   [cards state]
@@ -198,23 +198,6 @@
   `state
 ::
 ::  JSON
-::
-::++  enjs
-::  =,  enjs:format
-::  |%
-::    ++  db-dump :: encodes for on-watch
-::      |=  db=db-dump:sur
-::      ^-  json
-::      %-  pairs
-::      :_  ~
-::      ^-  [cord json]
-::      :-  -.db
-::      ?-  -.db
-::        :: ::
-::          %tables
-::        (all-tables:encode tables.db)
-::      ==
-::  --
 ::
 ++  dejs
   =,  dejs:format

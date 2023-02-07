@@ -1,5 +1,5 @@
-/-  store=courier
-/+  *courier
+/-  store=notify
+/+  *notify
 ::
 |_  view=view:store
 ++  grad  %noun

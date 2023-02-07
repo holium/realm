@@ -66,7 +66,7 @@
         [%db %messages %start @ @ ~]  :: the "recent messages" path
           =/  sender=@p       `@p`(slav %p i.t.t.t.path)
           =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
-          [%give %fact ~ messages-table+!>((start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state))]~
+          [%give %fact ~ db-dump+!>([%tables [[%messages (start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state)] ~]])]~
       :: /db/path/the/actual/path/here
         [%db %path *]  :: the "path" path, subscribe by path explicitly
           =/  thepathrow   (~(get by paths-table.state) t.t.path)
@@ -81,10 +81,10 @@
     ?+    path  !!
     ::
       [%x %db ~]
-        ``db-dump+!>([%tables all-tables:core])
+        ``db-dump+!>(tables+all-tables:core)
     ::
       [%x %db %paths ~]
-        ``db-dump+!>([%tables [[%paths paths-table.state] ~]])
+        ``db-dump+!>(tables+[[%paths paths-table.state] ~])
     ::
       [%x %db %path *]
         =/  thepath  t.t.t.path
@@ -101,38 +101,19 @@
         ``db-dump+!>([%tables [[%peers (malt (limo ~[[thepath thepeers]]))] ~]])
     ::
       [%x %db %messages ~]
-        ``db-dump+!>([%tables [[%messages messages-table.state] ~]])
+        ``db-dump+!>(tables+[messages+messages-table.state ~])
     ::
       [%x %db %messages %start @ @ ~]
-        =/  sender=@p       `@p`(slav %p i.t.t.t.path)
-        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
-        ``messages-table+!>((start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state))
+        =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.t.path)
+        ``db-dump+!>(tables+[messages+(start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
     ==
-  ::
+  :: chat-db does not subscribe to anything.
+  :: chat-db does not care
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    ?+    wire  !!
-      [%fake ~]
-        ?+    -.sign  !!
-          %watch-ack
-            ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: fake subscription failed"
-            `this
-          %kick
-            ~&  >  "{<dap.bowl>}: fake kicked us, resubscribing..."
-            `this
-            :::_  this
-            :::~
-            ::  [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
-            ::==
-          %fact
-            ?+    p.cage.sign  !!
-                %case
-                  `this
-            ==
-        ==
-    ==
+    !!
   ::
   ++  on-leave
     |=  path
@@ -141,10 +122,7 @@
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
-    ?+  wire  !!
-        [%fake *]
-      `this
-    ==
+    !!
   ::
   ++  on-fail
     |=  [=term =tang]

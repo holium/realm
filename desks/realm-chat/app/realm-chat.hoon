@@ -22,14 +22,13 @@
     :_  this(state default-state)
     :~
       [%pass /db %agent [our.bowl %chat-db] %watch /db]
-::      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]
     ==
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
+    :: do a quick check to make sure we are subbed to /db in %chat-db
     =/  cards  ?:  =(wex.bowl ~)  
-::      [%pass /messages %agent [our.bowl %chat-db] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]~
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     ~
     =/  old  !<(versioned-state old-state)
@@ -70,44 +69,33 @@
         (set-device:lib +.act state)
     ==
     [cards this]
-  ::
+  ::  realm-chat supports no subscriptions
+  ::  realm-chat does not care
+  ::  (users/frontends shoulc sub to %chat-db agent)
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
-    ?>  =(our.bowl src.bowl)
-    =/  cards=(list card)
-    ::  each path should map to a list of cards
-    ?+  path      !!
-      ::
-        [%updates ~]
-          ~
-          :::~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
-          ::==
-    ==
-    [cards this]
-  ::
+    !!
+  :: we support devices peek for push notifications
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
     ?+    path  !!
     ::
-      [%x %dms ~]
+      [%x %devices ~]
         ?>  =(our.bowl src.bowl)
-        ``graph-dm-view+!>([%inbox ~])
+        ``notify-view+!>([%devices devices.state])
     ==
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-
     ?+    wire  !!
       [%dbpoke ~]
-        ~&  >>  -.sign
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  wire
-            ~&  >>>  "dbpoke failed"
+            ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
             `this
         ==
       [%db ~]
@@ -156,42 +144,16 @@
                   ==
             ==
         ==
-      [%messages ~]
-        ?+    -.sign  !!
-          %watch-ack
-            ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: /messages subscription failed"
-            `this
-          %kick
-            ~&  >  "{<dap.bowl>}: /messages kicked us, resubscribing..."
-            :_  this
-            :~
-              [%pass /messages %agent [our.bowl %graph-store] %watch /db/messages/start/(scot %p our.bowl)/(scot %da now.bowl)]
-            ==
-          %fact
-            ~&  >>>  p.cage.sign
-            ?+    p.cage.sign  !!
-                %messages-table
-                  `this
-                %db-change
-                  ~&  >>>  'we got a new db-change thing'
-                  ~&  >>>  !<(db-change:db-sur q.cage.sign)
-                  `this
-            ==
-        ==
     ==
   ::
   ++  on-leave
     |=  path
       `this
-  ::
+  :: we don't care about arvo
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
-    ?+  wire  !!
-        [%fake *]
-      `this
-    ==
+    !!
   ::
   ++  on-fail
     |=  [=term =tang]
