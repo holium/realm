@@ -25,7 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
-  console.log('PR => %o', context.payload.pull_request);
+  // console.log('PR => %o', context.payload.pull_request);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -76,6 +76,7 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
+  let bumpVersion = false;
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = context.payload.pull_request.title.match(
     /(release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
@@ -165,6 +166,7 @@ module.exports = async ({ github, context }, workflowId) => {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
       ci.isNewBuild = true;
+      bumpVersion = true;
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
@@ -175,13 +177,15 @@ module.exports = async ({ github, context }, workflowId) => {
     // only increment build # if last release was not a draft or no release found
     //  therefore version value of first build ever should be '0.0.0' which would
     //  build as version '0.0.1'
-    if (ci.isNewBuild) {
+    if (bumpVersion) {
       buildNumber++;
     }
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
-    }.${buildNumber}-alpha`;
+    }.${buildNumber}-${
+      context.payload.pull_request.base.ref === 'draft' ? 'draft' : 'alpha'
+    }`;
     ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}`;
@@ -189,7 +193,14 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
-    ci.channel = 'alpha';
+
+    if (context.payload.pull_request.base.ref === 'draft') {
+      ci.channel = 'draft';
+      ci.releaseType = 'draft';
+    } else if (context.payload.pull_request.base.ref === 'master') {
+      ci.channel = 'alpha';
+      ci.releaseType = 'alpha';
+    }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
   // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
