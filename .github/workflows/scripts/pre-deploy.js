@@ -123,7 +123,6 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'latest';
         break;
     }
-    // ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
