@@ -4,8 +4,6 @@ import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
 import { HoliumLogo } from './holium-logo';
 import { InstallerStyle } from './installer.styles';
 
-const environment = process.env.NODE_ENV;
-
 declare global {
   var autoUpdate: any;
 }
