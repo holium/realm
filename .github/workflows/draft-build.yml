@@ -1,7 +1,6 @@
-# PR into the test-build branch to run this script
-# bump
-name: test-build
-run-name: Test Build - ${{ github.actor }}
+# PR into the draft-build branch to run this script
+name: draft-build
+run-name: Draft Build - ${{ github.actor }}
 on:
   pull_request:
     types:
@@ -30,7 +29,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin test-build
+          git pull origin draft-build
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -38,7 +37,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'test-build.yml')
+            const result = script({github, context}, 'draft-build.yml')
             console.log(result)
             return result
         env:
@@ -240,7 +239,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin test-build
+  #         git pull origin draft-build
   #     #
   #     - name: Bump desks version
   #       uses: actions/github-script@v6
@@ -353,7 +352,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin test-build
+  #         git pull origin draft-build
   #     #
   #     - name: Delete release draft
   #       if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
