@@ -17,7 +17,7 @@ type Props = {
   innerRef: RefObject<HTMLDivElement>;
 };
 
-export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
+const ToolbarSearchInputPresenter = ({ innerRef }: Props) => {
   const { currentTab, setUrl } = useBrowser();
   const { theme } = useServices();
   const [input, setInput] = useState(currentTab.url || '');
@@ -77,4 +77,6 @@ export const ToolbarSearchInput = observer(({ innerRef }: Props) => {
       />
     </Flex>
   );
-});
+};
+
+export const ToolbarSearchInput = observer(ToolbarSearchInputPresenter);

@@ -70,7 +70,7 @@ export const createPeopleForm = (
   };
 };
 
-export const Members = observer(({ our }: IMembers) => {
+const MembersPresenter = ({ our }: IMembers) => {
   const { theme, spaces } = useServices();
   const searchRef = useRef(null);
 
@@ -225,4 +225,6 @@ export const Members = observer(({ our }: IMembers) => {
       {!our && <MembersList path={spaces.selected!.path} />}
     </HomeSidebar>
   );
-});
+};
+
+export const Members = observer(MembersPresenter);

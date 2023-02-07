@@ -36,7 +36,7 @@ interface MiniAppProps {
   children: any | React.ReactNode;
 }
 
-export const MiniApp = observer(({ id, children, innerRef }: MiniAppProps) => {
+const MiniAppPresenter = ({ id, children, innerRef }: MiniAppProps) => {
   const { dimensions } = useTrayApps();
 
   return (
@@ -53,4 +53,6 @@ export const MiniApp = observer(({ id, children, innerRef }: MiniAppProps) => {
       {children}
     </MiniAppWindow>
   );
-});
+};
+
+export const MiniApp = observer(MiniAppPresenter);

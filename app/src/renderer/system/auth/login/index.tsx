@@ -29,8 +29,7 @@ interface LoginProps {
   addShip: () => void;
 }
 
-export const Login = observer((props: LoginProps) => {
-  const { addShip } = props;
+const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
@@ -313,6 +312,6 @@ export const Login = observer((props: LoginProps) => {
       </Bottom>
     </Fill>
   );
-});
+};
 
-export default Login;
+export const Login = observer(LoginPresenter);

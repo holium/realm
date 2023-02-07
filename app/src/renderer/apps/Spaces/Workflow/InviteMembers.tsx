@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
 import {
@@ -76,7 +76,7 @@ export const createPeopleForm = (
   };
 };
 
-export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
+const InviteMembersPresenter = (props: BaseDialogProps) => {
   const { theme, ship, friends } = useServices();
   const { inputColor, iconColor, textColor, windowColor, mode } =
     theme.currentTheme;
@@ -407,4 +407,6 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const InviteMembers = observer(InviteMembersPresenter);

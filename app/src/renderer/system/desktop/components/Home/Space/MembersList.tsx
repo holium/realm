@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { Flex, Text, PersonRow } from 'renderer/components';
@@ -12,7 +12,7 @@ interface IMembersList {
   path: string;
 }
 
-export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
+const MembersListPresenter = (props: IMembersList) => {
   const { path } = props;
   const { theme, spaces, membership, ship, friends } = useServices();
 
@@ -132,4 +132,6 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
       />
     </Flex>
   );
-});
+};
+
+export const MembersList = observer(MembersListPresenter);

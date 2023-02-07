@@ -23,7 +23,7 @@ import MouseHelper from './helpers/mouse';
 import BrowserHelper from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isProduction } from './helpers/env';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -31,14 +31,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 
 let mainWindow: BrowserWindow;
 let mouseWindow: BrowserWindow;
-export type WebViewsData = Record<
-  string,
-  {
-    position: { x: number; y: number };
-    hasMouseInside: boolean;
-  }
->;
-const webViewsData: WebViewsData = {};
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -103,7 +95,7 @@ const createWindow = async () => {
   Realm.start(mainWindow);
 
   FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow, webViewsData);
+  WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -112,7 +104,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('dom-ready', () => {
     hideCursor(mainWindow.webContents);
-    mainWindow.webContents.send('add-mouse-listeners', { isWebview: false });
+    mainWindow.webContents.send('add-mouse-listeners');
   });
 
   // TODO why is this rendering multiple times?
@@ -185,12 +177,11 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   // Hide the traffic lights on macOS.
-  if (process.platform === 'darwin') {
-    newMouseWindow.setWindowButtonVisibility(false);
-  }
+  if (isMac) newMouseWindow.setWindowButtonVisibility(false);
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
+    if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
   });
 
   newMouseWindow.on('close', () => {
@@ -211,7 +202,7 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow, webViewsData);
+  MouseHelper.registerListeners(newMouseWindow);
 
   mouseWindow = newMouseWindow;
 };
@@ -219,9 +210,7 @@ const createMouseOverlayWindow = () => {
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (!isMac) app.quit();
 });
 
 app

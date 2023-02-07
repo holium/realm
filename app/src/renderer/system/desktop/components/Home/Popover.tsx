@@ -38,7 +38,7 @@ export const RealmPopoverWrapper = styled(styled.div<
   z-index: 4;
 `)(compose(space, color, typography));
 
-export const RealmPopover = observer((props: RealmPopoverProps) => {
+const RealmPopoverPresenter = (props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
@@ -149,4 +149,6 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
       </RealmPopoverWrapper>
     </Box>
   );
-});
+};
+
+export const RealmPopover = observer(RealmPopoverPresenter);

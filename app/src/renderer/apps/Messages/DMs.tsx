@@ -31,7 +31,7 @@ interface IProps {
   onNewChat: (evt: any) => void;
 }
 
-export const DMs = observer((props: IProps) => {
+const DMsPresenter = (props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { textColor, iconColor, dockColor, windowColor } = theme;
 
@@ -220,4 +220,6 @@ export const DMs = observer((props: IProps) => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const DMs = observer(DMsPresenter);

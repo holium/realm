@@ -15,7 +15,7 @@ interface SpaceTitlebarProps {
   onToggleApps: (evt: MouseEvent) => void;
 }
 
-export const SpaceTitlebar = observer((props: SpaceTitlebarProps) => {
+const SpaceTitlebarPresenter = (props: SpaceTitlebarProps) => {
   const {
     space,
     membersCount,
@@ -67,4 +67,6 @@ export const SpaceTitlebar = observer((props: SpaceTitlebarProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const SpaceTitlebar = observer(SpaceTitlebarPresenter);

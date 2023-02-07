@@ -26,7 +26,7 @@ const speakerType = {
   listener: 'Listener',
 };
 
-export const Speaker = observer((props: ISpeaker) => {
+const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
   const { ship, theme, friends } = useServices();
   const speakerRef = useRef<any>(null);
@@ -161,7 +161,9 @@ export const Speaker = observer((props: ISpeaker) => {
       </Flex>
     </SpeakerWrapper>
   );
-});
+};
+
+export const Speaker = observer(SpeakerPresenter);
 
 type SpeakerStyle = FlexProps & { hoverBg: string };
 

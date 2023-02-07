@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
-import { SuiteApp } from './App';
+import { SuiteApp } from './SuiteApp';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
@@ -90,7 +90,7 @@ const dimensions = {
   width: 550,
 };
 
-export const AppSuite = observer((props: AppSuiteProps) => {
+const AppSuitePresenter = (props: AppSuiteProps) => {
   const { isAdmin } = props;
   const { theme, bazaar, spaces } = useServices();
   const space = spaces.selected!;
@@ -250,4 +250,6 @@ export const AppSuite = observer((props: AppSuiteProps) => {
       {popover}
     </Flex>
   );
-});
+};
+
+export const AppSuite = observer(AppSuitePresenter);

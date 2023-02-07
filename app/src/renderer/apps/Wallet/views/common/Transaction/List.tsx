@@ -25,7 +25,7 @@ interface TransactionProps {
   isCoin?: boolean;
   transaction: TransactionType;
 }
-export const Transaction = observer((props: TransactionProps) => {
+const TransactionPresenter = (props: TransactionProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const hoverBackground = darken(0.0325, theme.currentTheme.windowColor);
@@ -119,7 +119,9 @@ export const Transaction = observer((props: TransactionProps) => {
       </Flex>
     </Row>
   );
-});
+};
+
+export const Transaction = observer(TransactionPresenter);
 
 interface TransactionListProps {
   height: number;
@@ -127,7 +129,7 @@ interface TransactionListProps {
   hidePending: boolean;
   ethType?: string;
 }
-export const TransactionList = observer((props: TransactionListProps) => {
+const TransactionListPresenter = (props: TransactionListProps) => {
   const { height = 230, ethType } = props;
   const { theme } = useServices();
 
@@ -181,4 +183,6 @@ export const TransactionList = observer((props: TransactionListProps) => {
       )}
     </>
   );
-});
+};
+
+export const TransactionList = observer(TransactionListPresenter);

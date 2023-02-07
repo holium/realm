@@ -28,7 +28,7 @@ interface IProps {
   onCreateNewDm: (newDmKey: DMPreviewType) => void;
 }
 
-export const NewChat = observer((props: IProps) => {
+const NewChatPresenter = (props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { textColor, iconColor, dockColor, windowColor } = theme;
   const contacts = useServices().friends;
@@ -247,4 +247,6 @@ export const NewChat = observer((props: IProps) => {
       </Grid.Column>
     </Grid.Column>
   );
-});
+};
+
+export const NewChat = observer(NewChatPresenter);
