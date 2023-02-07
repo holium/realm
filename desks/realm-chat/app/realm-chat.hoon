@@ -46,6 +46,7 @@
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: meta-chat management pokes
       %create-chat
+        ~&  >  '%realm-chat: %create-chat action'
         (create-chat:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
@@ -122,15 +123,13 @@
               [%pass /db %agent [our.bowl %graph-store] %watch /db]
             ==
           %fact
-            ~&  >>  p.cage.sign
             ?+    p.cage.sign  `this
                 %db-dump
                   ::~&  >>>  'we got a new db-dump thing'
                   ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
                   `this
                 %db-change
-                  ::~&  >>>  'we got a new db-change thing'
-                  =/  thechange  !<(db-change:db-sur q.cage.sign)
+                  =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
                   ?. :: ?. not ?: to reverse order
                   :: the following conditions must ALL be true in order
                   :: for us to send out a push-notification
@@ -204,8 +203,10 @@
 ++  this  .
 ++  core  .
 ++  is-new-message
-  |=  [a=db-change-type:db-sur]
-  ?+  -.a  %.n
-    %add-row  =(-.db-row.a %messages)
+  |=  ch=*
+  ^-  ?
+  ?+  -.ch  !!
+    %add-row  =(-.+.ch %messages)
+    %del-row  %.n
   ==
 --

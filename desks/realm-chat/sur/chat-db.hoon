@@ -42,7 +42,7 @@
       timestamp=@da
   ==
 +$  content
-  $%  [@t p=cord] :: general data type
+  $%  [%custom name=cord value=cord] :: general data type
       [%plain p=cord]
       [%bold p=cord]
       [%italics p=cord]

@@ -39,19 +39,19 @@
   ==
 ++  into-insert-message-poke
   |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db)] ts=@da]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%insert ts act])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts act])]
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%edit act])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit act])]
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%delete msg-id])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%delete msg-id])]
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
   ^-  (list card)
   %:  turn
     peers
-    |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%kick-peer path.p kickee])])
+    |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%kick-peer path.p kickee])])
   ==
 ++  push-notification-card
   |=  [=bowl:gall state=state-0 chat-path=path subtitle=@t content=@t]
@@ -91,10 +91,10 @@
   ^-  (quip card state-0)
   ?>  =(type.act %chat)  :: for now only support %chat type paths
   :: TODO UNCOMMENT THIS TO USE REAL PATHS WHEN NOT TESTING
-  =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
-  ::=/  chat-path  /realm-chat/path-id
+  ::=/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
+  =/  chat-path  /realm-chat/path-id
   =/  cards  
-    [%pass /dbpoke %agent [our.bowl %chat-db] %poke %action !>([%create-path chat-path act])]~
+    [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path chat-path act])]~
   [cards state]
 ++  add-ship-to-chat
 ::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
@@ -106,12 +106,12 @@
     :-  
       ::  we poke the newly-added ship's db with a create-path,
       ::  since that will automatically handle them joining as a member
-      [%pass /dbpoke %agent [ship.act %chat-db] %poke %action !>([%create-path pathrow])]
+      [%pass /dbpoke %agent [ship.act %chat-db] %poke %db-action !>([%create-path pathrow])]
 
       :: we poke all peers/members' db with add-peer (including ourselves)
       %:  turn
         pathpeers
-        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %action !>([%add-peer path.act ship.act])])
+        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%add-peer path.act ship.act])])
       ==
   [cards state]
 ::  allows self to remove self, or %host to kick others
@@ -126,7 +126,7 @@
     ?:  =(ship.act patp.host)
       :: if src.bowl is %host, we have to leave-path for the host
       :: and then send kick-peer for all the member-peers
-      :-  [%pass /dbpoke %agent [patp.host %chat-db] %poke %action !>([%leave-path path.act])]
+      :-  [%pass /dbpoke %agent [patp.host %chat-db] %poke %db-action !>([%leave-path path.act])]
       %-  zing
       %:  turn
         members
@@ -216,63 +216,101 @@
 ::      ==
 ::  --
 ::
-:: ++  dejs
-::   =,  dejs:format
-::   |%
-::   ++  action
-::     |=  jon=json
-::     ^-  action:sur
-::     =<  (decode jon)
-::     |%
-::     ++  decode
-::       %-  of
-::       :~  [%read-dm read-dm]
-::       ==
-::     ::
-::     ++  read-dm
-::       %-  ot
-::       :~  
-::           [%ship (su ;~(pfix sig fed:ag))]
-::       ==
-::     ::
-::     ++  tang 
-::       |=  jon=^json
-::       ^-  ^tang
-::       ?>  ?=(%a -.jon)
-::       %-  zing
-::       %+  turn
-::         p.jon
-::       |=  jo=^json
-::       ^-  (list tank)
-::       ?>  ?=(%a -.jo)
-::       %+  turn
-::         p.jo
-::       |=  j=^json
-::       ?>  ?=(%s -.j)
-::       ^-  tank
-::       leaf+(trip p.j)
-::     ::
-::     ++  eval
-::       %-  ot
-::       :~  expression+so
-::           output+tang
-::       ==
-::     ::
-::     ::
-::     --
-::   --
-::
-::++  encode
-::  =,  enjs:format
-::  |%
-::    ++  all-tables
-::      |=  =tables:sur
-::      ^-  json
-::      %-  pairs
-::      %+  turn  tables
-::        |=  =table:sur
-::        ::[-.table (jsonify-table +.table)]
-::        [-.table s+'test']
-::    ::
-::  --
+++  dejs
+  =,  dejs:format
+  |%
+  ++  action
+    |=  jon=json
+    ^-  ^action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%create-chat meta-and-type]
+          [%add-ship-to-chat path-and-ship]
+          [%remove-ship-from-chat path-and-ship]
+          [%send-message path-and-fragments]
+          [%edit-message de-edit-info]
+          [%delete-message path-and-msg-id]
+
+          [%enable-push ul]
+          [%disable-push ul]
+          [%set-device set-device]
+          [%remove-device remove-device]
+      ==
+    ::
+    ++  meta-and-type
+      %-  ot
+      :~  [%metadata (om so)]
+          [%type (se %tas)]
+      ==
+    ::
+    ++  set-device
+      %-  ot
+      :~  [%device-id so]
+          [%player-id so]
+      ==
+    ::
+    ++  remove-device
+      %-  ot
+      :~  [%device-id so]
+      ==
+    ::
+    ++  path-and-ship
+      %-  ot
+      :~  
+          [%path pa]
+          [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  de-edit-info
+      %-  ot
+      :~  
+          [%msg-id (at ~[(se %da) (su ;~(pfix sig fed:ag))])]
+          [%path pa]
+          de-frag
+      ==
+    ::
+    ++  de-frag
+      [%fragments (ar (ot ~[content+de-content reply-to+(mu path-and-msg-id) metadata+(om so)]))]
+    ::
+    ++  path-and-fragments
+      %-  ot
+      :~  
+          [%path pa]
+          de-frag
+      ==
+    ::
+    ++  de-content
+      %-  of
+      :~  
+          [%plain so]
+          [%bold so]
+          [%italics so]
+          [%strike so]
+          [%bold-italics so]
+          [%bold-strike so]
+          [%italics-strike so]
+          [%bold-italics-strike so]
+          [%blockquote so]
+          [%inline-code so]
+          [%code so]
+          [%image so]
+          [%ur-link so]
+          [%react so]
+          [%break ul]
+          [%ship (su ;~(pfix sig fed:ag))]
+          [%link (at ~[so so])]
+          [%custom (at ~[so so])]
+      ==
+    ::
+    ++  path-and-msg-id
+      %-  ot
+      :~  
+          [%path pa]
+          :: TODO decide if di for millisecond time is easier than (se %da)
+          [%msg-id (at ~[(se %da) (su ;~(pfix sig fed:ag))])]
+      ==
+    --
+  --
 --

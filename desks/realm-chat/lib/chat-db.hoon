@@ -93,7 +93,7 @@
   [gives state]
 ::
 ++  leave-path
-  ::  :chat-db &action [%leave-path /a/path/to/a/chat]
+::  :chat-db &db-action [%leave-path /a/path/to/a/chat]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(our.bowl src.bowl)  :: leave pokes are only valid from ourselves. if others want to kick us, that is a different matter
@@ -344,14 +344,26 @@
       %-  pairs
       %+  turn  tables
         |=  =table:sur
-        ::[-.table (jsonify-table +.table)]
-        [-.table s+'test']
+        ?-  -.table
+          %paths  paths+(paths-table +.table)
+          %messages  messages+(messages-table +.table)
+          %peers  peers+(peers-table +.table)
+        ==
+    ::
+    ++  paths-table
+      |=  tbl=paths-table:sur
+      ^-  json
+      [%a ~(val by (~(run by tbl) path-row))]
+    ::
+    ++  peers-table
+      |=  tbl=peers-table:sur
+      ^-  json
+      a+(turn ~(val by tbl) |=(a=(list peer-row:sur) a+(turn a peer-row)))
     ::
     ++  messages-table
       |=  tbl=messages-table:sur
       ^-  json
-      :: TODO actually convert messages table to json
-      [%o *(map @t json)]
+      [%a (turn (tap:msgon:sur tbl) messages-row)]
     ::
     ++  changes
       |=  ch=db-change:sur
@@ -385,7 +397,7 @@
         %paths
           (path-row path-row.db-row)
         %messages
-          (messages-row msg-part.db-row)
+          (messages-row [msg-id.msg-part.db-row msg-part-id.msg-part.db-row] msg-part.db-row)
         %peers
           a+(turn peers.db-row peer-row)
       ==
@@ -394,21 +406,59 @@
       ^-  json
       %-  pairs
       :~  path+s+(spat path.path-row)
-          metadata+s+'TODO not implemented'
+          metadata+(metadata-to-json metadata.path-row)
           type+s+type.path-row
       ==
     ++  messages-row
-      |=  =msg-part:sur
+      |=  [k=uniq-id:sur =msg-part:sur]
       ^-  json
       %-  pairs
       :~  path+s+(spat path.msg-part)
-          msg-id+a+~[s+(scot %da timestamp.msg-id.msg-part) s+(scot %p sender.msg-id.msg-part)]
+          msg-id+(msg-id-to-json msg-id.msg-part)
           msg-part-id+n+(scot %ud msg-part-id.msg-part)
-          content+s+'TODO'
-          reply-to+s+'TODO'
-          metadata+s+'TODO'
+          content+(content-to-json content.msg-part)
+          reply-to+(reply-to-to-json reply-to.msg-part)
+          metadata+(metadata-to-json metadata.msg-part)
           timestamp+s+(scot %da timestamp.msg-part)
       ==
+    ++  reply-to-to-json
+      |=  =reply-to:sur
+      ^-  json
+      ?~  reply-to
+        ~
+      %-  pairs
+      :~  path+[%s (spat -.+.reply-to)]
+          msg-id+(msg-id-to-json +.+.reply-to)
+      ==
+    ++  content-to-json
+      |=  =content:sur
+      ^-  json
+      %-  pairs
+      ?+  -.content
+        ::default here
+        :~  [-.content [%s +.content]]
+        ==
+        %ship
+          :~  ship+[%s (scot %p p.content)]
+          ==
+        %break
+          :~  break+~
+          ==
+        %link
+          :~  link+a+[[%s -.+.content] [%s +.+.content] ~]
+          ==
+        %custom
+          :~  custom+a+[[%s -.+.content] [%s +.+.content] ~]
+          ==
+      ==
+    ++  msg-id-to-json
+      |=  =msg-id:sur
+      ^-  json
+      a+~[s+(scot %da timestamp.msg-id) s+(scot %p sender.msg-id)]
+    ++  metadata-to-json
+      |=  m=(map cord cord)
+      ^-  json
+      o+(~(rut by m) |=([k=cord v=cord] s+v))
     ++  peer-row
       |=  =peer-row:sur
       ^-  json

@@ -1,16 +1,16 @@
-/-  chat-db
-/+  db-lib=chat-db
+/+  *realm-chat
 ::
-|_  act=action:chat-db
+|_  act=action
 ++  grad  %noun
 ++  grow
   |%
   ++  noun  act
+  :: ++  json  (action:enjs act)
   --
 ::
 ++  grab
   |%
-  ++  noun  action:chat-db
+  ++  noun  action
+  ++  json  action:dejs
   --
 --
-

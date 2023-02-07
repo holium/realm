@@ -27,7 +27,7 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ?>  ?=(%action mark)
+    ?>  ?=(%db-action mark)
     =/  act  !<(action:sur vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
