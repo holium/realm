@@ -139,17 +139,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
         height: Math.round(motionHeight.get()),
         width: Math.round(motionWidth.get()),
       });
-
-    setTimeout(() => {
-      const webViewRect = document
-        .getElementById(webViewId)
-        ?.getBoundingClientRect();
-      if (webViewRect?.x && webViewRect?.y)
-        DesktopActions.setWebViewPosition(webViewId, {
-          x: webViewRect.x,
-          y: webViewRect.y,
-        });
-    }, 50);
   };
   const onDragStop = () => {
     setIsDragging(false);
@@ -159,15 +148,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
         y: Math.round(motionY.get()),
         height: Math.round(motionHeight.get()),
         width: Math.round(motionWidth.get()),
-      });
-
-    const webViewRect = document
-      .getElementById(webViewId)
-      ?.getBoundingClientRect();
-    if (webViewRect?.x && webViewRect?.y)
-      DesktopActions.setWebViewPosition(webViewId, {
-        x: webViewRect.x,
-        y: webViewRect.y,
       });
   };
 

@@ -2,7 +2,6 @@
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
-import { Vec2 } from 'renderer/system/mouse/AnimatedCursor';
 import { SpacesActions } from './spaces';
 
 /**
@@ -35,9 +34,6 @@ export const DesktopActions = {
     dimensions: { width: number; height: number; x: number; y: number }
   ) => {
     window.electron.os.desktop.setAppDimensions(windowId, dimensions);
-  },
-  setWebViewPosition: (webViewId: string, position: Vec2) => {
-    window.electron.app.setWebViewPosition(webViewId, position);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);
