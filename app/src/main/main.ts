@@ -31,8 +31,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-const appUpdater = new AppUpdater();
-
 let mainWindow: BrowserWindow;
 let mouseWindow: BrowserWindow;
 export type WebViewsData = Record<

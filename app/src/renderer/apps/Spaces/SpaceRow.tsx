@@ -58,7 +58,7 @@ interface SpaceRowProps {
   onSelect: (spaceKey: string) => void;
 }
 
-export const SpaceRow = observer((props: SpaceRowProps) => {
+const SpaceRowPresenter = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { theme, membership, ship } = useServices();
   const rowRef = useRef<any>(null);
@@ -203,4 +203,6 @@ export const SpaceRow = observer((props: SpaceRowProps) => {
       </Flex>
     </SpaceRowStyle>
   );
-});
+};
+
+export const SpaceRow = observer(SpaceRowPresenter);

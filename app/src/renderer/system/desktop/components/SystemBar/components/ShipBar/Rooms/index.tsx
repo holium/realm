@@ -84,7 +84,7 @@ const RoomTrayPresenter = () => {
           roomsManager?.mute();
         }
       }}
-      onCursor={(enabled: boolean) => {}}
+      onCursor={() => {}}
       onLeave={() => {}}
     />
   );

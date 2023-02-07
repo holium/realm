@@ -1,13 +1,16 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { ThemeType } from 'renderer/theme';
 import { rgba } from 'polished';
-import styled from 'styled-components';
+import styled, { CSSProperties } from 'styled-components';
 import { Flex } from '..';
 
 interface IMentionStyle {
   theme: ThemeType;
   textColor?: string;
   height?: number;
+  children?: ReactNode;
+  style?: CSSProperties;
+  className?: string;
 }
 
 const MentionStyle = styled.span<IMentionStyle>`

@@ -12,7 +12,7 @@ interface GroupViewProps {
   peers?: number;
 }
 
-const EmptyGroup = styled.div`
+const EmptyGroup = styled.div<{ color?: string }>`
   height: 48px;
   width: 48px;
   background: ${(p) => p.color || '#000'};

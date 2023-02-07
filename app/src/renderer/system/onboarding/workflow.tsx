@@ -10,7 +10,7 @@ import {
 import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
 import EmailDialog from 'renderer/system/onboarding/Email.dialog';
 import HaveUrbitDialog from 'renderer/system/onboarding/HaveUrbit.dialog';
-import AddShip from 'renderer/system/onboarding/AddShip.dialog';
+import { AddShip } from 'renderer/system/onboarding/AddShip.dialog';
 import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
 import SetPassword from 'renderer/system/onboarding/SetPassword.dialog';
 import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
@@ -41,7 +41,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (data: any) => {
+    onNext: (_data: any) => {
       OnboardingActions.agreedToDisclaimer();
       OnboardingActions.setStep(OnboardingStep.ACCESS_GATE);
     },
@@ -66,7 +66,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (data: any) => {
+    onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
     },
     window: {
@@ -90,7 +90,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (data: any) => {
+    onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.EMAIL);
     },
     window: {
@@ -113,7 +113,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (data: any) => {
+    onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
     window: {
@@ -200,7 +200,7 @@ const completeProfileDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (data: any) => {
+    onNext: () => {
       OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);
     },
     window: {
@@ -274,7 +274,7 @@ const completeProfileDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    component: (props: BaseDialogProps) => <InstallAgent {...props} />,
+    component: () => <InstallAgent />,
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),

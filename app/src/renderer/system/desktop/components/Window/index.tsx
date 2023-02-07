@@ -204,7 +204,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     | React.FC<DialogTitlebarProps>
     | undefined; // todo fix typings
   let showDevToolsToggle = true;
-  let preventClickEvents = true;
   let maximizeButton = true;
   let borderRadius = 12;
   const appInfo = bazaar.getApp(window.id);
@@ -242,7 +241,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
-    preventClickEvents = false;
     if (CustomTitlebar) {
       titlebar = (
         <CustomTitlebar
@@ -292,7 +290,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     noTitlebar = dialogConfig.noTitlebar!;
     CustomTitlebar = DialogTitlebar;
     showDevToolsToggle = false;
-    preventClickEvents = false;
     maximizeButton = false;
     borderRadius = 16;
     const onCloseDialog = dialogConfig.onClose;

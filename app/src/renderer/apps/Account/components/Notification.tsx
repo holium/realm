@@ -1,4 +1,5 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
+import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
 import { Flex, Text, Skeleton, Mention } from 'renderer/components';
@@ -17,16 +18,15 @@ export interface NotificationProps {
   loading?: boolean;
   dismissed?: boolean;
   image?: string;
-  title: ContentType[];
-  content: ContentType[];
-  // content: string;
+  title?: ContentType[];
+  content: any;
   seen?: boolean;
   inbox?: string;
   desk?: string;
-  link: string;
-  time: string;
-  ship: string;
-  app: string;
+  link?: string;
+  time: number;
+  ship?: string;
+  app?: string;
 }
 
 interface NotifTitleProps {
@@ -36,8 +36,7 @@ interface NotifTitleProps {
   bold?: boolean;
 }
 
-const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
-  const { content, fontSize, fontOpacity } = props;
+const NotifTitle = ({ content, fontSize, fontOpacity }: NotifTitleProps) => {
   let token: any = [];
   switch (Object.keys(content)[0]) {
     case 'text':
@@ -84,10 +83,10 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
   return token;
 };
 
-export const Notification = (props: NotificationProps) => {
+const NotificationPresenter = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
   const seedColor = '#4E9EFD';
-  const { dmApp, setActiveApp, closeActiveApp } = useTrayApps();
+  const { dmApp, setActiveApp } = useTrayApps();
   const { courier } = useServices();
 
   const bgColor = useMemo(
@@ -194,6 +193,8 @@ export const Notification = (props: NotificationProps) => {
     </Flex>
   );
 };
+
+export const Notification = observer(NotificationPresenter);
 
 const NotifRow = styled(Row)`
   border-radius: 12px;

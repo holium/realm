@@ -5,7 +5,6 @@ import { HoliumLogo } from './holium-logo';
 import { InstallerStyle } from './installer.styles';
 
 const environment = process.env.NODE_ENV;
-const isProd = environment === 'production';
 
 declare global {
   var autoUpdate: any;

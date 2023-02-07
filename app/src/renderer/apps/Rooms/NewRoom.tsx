@@ -1,6 +1,6 @@
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Flex,
   Grid,
@@ -9,7 +9,6 @@ import {
   Text,
   Input,
   TextButton,
-  Spinner,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -62,13 +61,12 @@ export const createRoomForm = (
 const NewRoomPresenter = () => {
   const { dimensions } = useTrayApps();
   const { ship, theme, spaces } = useServices();
-  const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, windowColor, inputColor } = theme.currentTheme;
 
-  const { form, name, isPrivate } = useMemo(() => createRoomForm(), []);
+  const { form, name } = useMemo(() => createRoomForm(), []);
 
   const createRoom = (evt: any) => {
     // setLoading(true);
@@ -170,7 +168,7 @@ const NewRoomPresenter = () => {
               createRoom(evt);
             }}
           >
-            {loading ? <Spinner size={0} /> : 'Start'}
+            Start
           </TextButton>
         </Flex>
         <Flex mt={3} justifyContent="flex-start">

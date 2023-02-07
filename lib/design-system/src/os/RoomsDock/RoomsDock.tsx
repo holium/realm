@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import styled from 'styled-components';
 import { Flex, Icon, Text } from '../..';
 import { BarButton } from '../SystemBar/BarButton';
@@ -42,19 +41,14 @@ type RoomsDockProps = {
   children?: React.ReactNode;
 };
 
-export const RoomsDock: FC<RoomsDockProps> = (props: RoomsDockProps) => {
-  const {
-    live,
-    rooms = [],
-    isMuted,
-    onCreate,
-    onOpen,
-    onMute,
-    onCursor,
-    onLeave,
-    participants = [],
-  } = props;
-
+export const RoomsDock = ({
+  live,
+  rooms = [],
+  isMuted,
+  onOpen,
+  onMute,
+  participants = [],
+}: RoomsDockProps) => {
   let innerContent = null;
   if (live) {
     innerContent = (

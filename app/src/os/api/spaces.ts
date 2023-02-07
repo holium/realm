@@ -272,7 +272,7 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.remote-space',
-        onReaction(data, mark?) {
+        onReaction(data) {
           membersState.addMemberMap(
             data['remote-space'].path,
             data['remote-space'].members
@@ -378,7 +378,7 @@ const handleSpacesReactions = (
   our: Patp,
   spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: NewBazaarStoreType,
+  _bazaarState: NewBazaarStoreType,
   visaState: VisaModelType,
   roomService: any,
   setTheme: (theme: any) => void

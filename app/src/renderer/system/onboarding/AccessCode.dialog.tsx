@@ -1,4 +1,4 @@
-import { FC, useState, useCallback, KeyboardEvent } from 'react';
+import { useState, useCallback, KeyboardEvent } from 'react';
 import {
   Grid,
   Text,
@@ -63,10 +63,9 @@ const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   );
 };
 
-const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+const AccessCodeComponent = observer((props: BaseDialogProps) => {
   const { theme } = useServices();
   const [inputText, setInputText] = useState('');
-  const [codeLoading, setCodeLoading] = useState(false);
   const [accessCode, setAccessCode] = useState<AccessCode | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -86,14 +85,12 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
     //   : setErrorMessage('');
 
     // TODO: Remove when fixed
-    setCodeLoading(true);
     if (code === stubAccessCode.id) {
       setAccessCode(stubAccessCode);
       setErrorMessage('');
     } else {
       setErrorMessage('Invalid access code.');
     }
-    setCodeLoading(false);
   }
   const debouncedGetAccessCode = useCallback(
     _.debounce(getAccessCode, 500, { leading: true }),
@@ -222,4 +219,4 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   );
 });
 
-export default AccessCode;
+export default AccessCodeComponent;

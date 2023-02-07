@@ -24,10 +24,6 @@ const EmptyPicture = styled.div<PictureProps>`
   border-radius: 6px;
 `;
 
-const Picture = styled.img<PictureProps>`
-  border-radius: 6px;
-`;
-
 const FadeInMotion = {
   initial: { opacity: 0 },
   exit: { opacity: 0 },
@@ -52,7 +48,7 @@ export const SpacePicture: FC<SpacePictureProps> = (
           size="sm2"
         />
       ) : (
-        <EmptyPicture size={size} color={space.color || '#000000'} />
+        <EmptyPicture size={size} />
       )}
       <Flex
         flexDirection="column"

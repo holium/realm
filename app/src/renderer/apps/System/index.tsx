@@ -1,29 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Sigil, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { lighten } from 'polished';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
 
+type SystemPanelType =
+  | 'system'
+  | 'theme'
+  | 'account'
+  | 'about'
+  | 'help'
+  | undefined;
+
 const SystemAppPresenter = () => {
-  const { theme, ship, contacts } = useServices();
+  const { theme, ship } = useServices();
   const { windowColor } = theme.currentTheme;
-  const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   const person = ship!.patp;
-  const contact = contacts.getContactAvatarMetadata(person);
-
-  type SystemPanelType =
-    | 'system'
-    | 'theme'
-    | 'account'
-    | 'about'
-    | 'help'
-    | undefined;
 
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>('theme');
 

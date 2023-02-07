@@ -13,33 +13,28 @@ export interface TagProps {
   onRemove?: (evt: any) => any;
 }
 
-export const Tag: any = (props: TagProps) => {
-  const { children, icon, intent, minimal, onRemove, rounded, custom } = props;
-  return (
-    <TagStyle
-      intent={intent}
-      minimal={minimal}
-      custom={custom}
-      rounded={rounded}
-    >
-      {icon && (
-        <TagIcon intent={intent}>
-          <Icons size={18} name={icon} />
-        </TagIcon>
-      )}
-      <Flex alignItems="center" ml={1}>
-        {children}
-      </Flex>
-      {onRemove && (
-        <IconButton size={18} ml={2} onClick={onRemove}>
-          <Icons name="Close" />
-        </IconButton>
-      )}
-    </TagStyle>
-  );
-};
-
-Tag.defaultProps = {
-  intent: 'info',
-  minimal: false,
-};
+export const Tag = ({
+  children,
+  icon,
+  intent = 'info',
+  minimal = false,
+  onRemove,
+  rounded,
+  custom,
+}: TagProps) => (
+  <TagStyle intent={intent} minimal={minimal} custom={custom} rounded={rounded}>
+    {icon && (
+      <TagIcon intent={intent}>
+        <Icons size={18} name={icon} />
+      </TagIcon>
+    )}
+    <Flex alignItems="center" ml={1}>
+      {children}
+    </Flex>
+    {onRemove && (
+      <IconButton size={18} ml={2} onClick={onRemove}>
+        <Icons name="Close" />
+      </IconButton>
+    )}
+  </TagStyle>
+);
