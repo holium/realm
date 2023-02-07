@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       #
       - name: Remove existing release
-        if: ${{ fromJSON(steps.ci.outputs.result).foundTag && fromJSON(steps.ci.outputs.result).releaseType === 'draft'  }}
+        if: ${{ fromJSON(steps.ci.outputs.result).foundTag && fromJSON(steps.ci.outputs.result).releaseType == 'draft'  }}
         # create annotated tag for this branch. this will become basis for the release
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
