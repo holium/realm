@@ -14,6 +14,7 @@ const FriendStatus = types.enumeration('FriendStatus', [
   'follower',
   'following',
   'contact',
+  'our'
 ]);
 export type FriendStatus = Instance<typeof FriendStatus>;
 
@@ -22,10 +23,7 @@ export const ContactModel = types.model('ContactModel', {
   bio: types.maybeNull(types.string),
   color: types.maybeNull(types.string),
   cover: types.maybeNull(types.string),
-  // groups: types.maybeNull(types.array(types.string)),
-  // 'last-updated': types.maybeNull(types.number),
   nickname: types.maybeNull(types.string),
-  status: types.maybeNull(types.string),
 });
 
 export type ContactModelType = Instance<typeof ContactModel>;
