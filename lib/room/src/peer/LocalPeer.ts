@@ -19,7 +19,7 @@ export const DEFAULT_AUDIO_OPTIONS = {
 };
 
 export class LocalPeer extends Peer {
-  stream?: MediaStream;
+  stream: MediaStream | null = null;
   protocol: BaseProtocol;
   constraints: MediaStreamConstraints = {
     audio: DEFAULT_AUDIO_OPTIONS,
@@ -155,6 +155,6 @@ export class LocalPeer extends Peer {
       this.emit(PeerEvent.VideoTrackRemoved, track);
     });
     this.videoTracks.clear();
-    this.stream = undefined;
+    this.stream = null;
   }
 }

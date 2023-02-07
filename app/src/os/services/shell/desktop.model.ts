@@ -110,8 +110,7 @@ export const DesktopStore = types
     },
     openBrowserWindow(
       app: AppType,
-      desktopDimensions: { width: number; height: number },
-      isFullscreen: boolean
+      desktopDimensions: { width: number; height: number }
     ) {
       let glob;
       let href;
@@ -131,11 +130,7 @@ export const DesktopStore = types
         href,
         zIndex: self.windows.size + 1,
         type: app.type,
-        dimensions: getInitialWindowDimensions(
-          app,
-          desktopDimensions,
-          isFullscreen
-        ),
+        dimensions: getInitialWindowDimensions(app, desktopDimensions),
       });
       self.windows.set(newWindow.id, newWindow);
       this.setActive(newWindow.id);

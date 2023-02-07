@@ -23,13 +23,6 @@ import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
 import { SubscriptionModel } from '../../common.model';
 
-const setAppStatus = (app: AppType, status: InstallStatus) => {
-  if (app.type !== 'urbit') return app;
-  app as UrbitAppType;
-  app.installStatus = status;
-  return app as AppType;
-};
-
 export enum InstallStatus {
   uninstalled = 'uninstalled',
   initial = 'initial',

@@ -9,7 +9,7 @@ type Props = {
   isResizing: boolean;
 };
 
-export const BrowserWebview = observer(({ isDragging, isResizing }: Props) => {
+const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
 
   const id = 'os-browser-web-webview';
@@ -77,4 +77,6 @@ export const BrowserWebview = observer(({ isDragging, isResizing }: Props) => {
     ),
     [currentTab.id, currentTab.url, isDragging, isResizing, loader.state]
   );
-});
+};
+
+export const BrowserWebview = observer(BrowserWebviewPresenter);

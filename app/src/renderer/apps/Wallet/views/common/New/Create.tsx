@@ -1,4 +1,4 @@
-import { FC, useMemo, Dispatch, SetStateAction } from 'react';
+import { useMemo, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import {
   Button,
@@ -16,7 +16,7 @@ interface CreateProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
 }
 
-export const Create: FC<CreateProps> = observer((props: CreateProps) => {
+const CreatePresenter = (props: CreateProps) => {
   const { theme } = useServices();
   const themeData = useMemo(
     () => getBaseTheme(theme.currentTheme),
@@ -71,4 +71,6 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Create = observer(CreatePresenter);

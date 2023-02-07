@@ -178,7 +178,7 @@ const SpacesTrayAppPresenter = () => {
                 rightIcon={
                   <TextButton
                     disabled={!isValidSpace(searchString)}
-                    onClick={(evt: any) => {
+                    onClick={() => {
                       SpacesActions.setJoin('loading');
                       SpacesActions.joinSpace(searchString);
                     }}

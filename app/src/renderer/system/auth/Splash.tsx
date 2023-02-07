@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -12,7 +12,7 @@ import {
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
-export const Splash: FC<any> = observer((props: any) => {
+const SplashPresenter = () => {
   useEffect(() => {
     SoundActions.playStartup();
 
@@ -57,6 +57,6 @@ export const Splash: FC<any> = observer((props: any) => {
       </Flex>
     </AnimatePresence>
   );
-});
+};
 
-export default Splash;
+export const Splash = observer(SplashPresenter);

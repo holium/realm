@@ -19,7 +19,7 @@ import { useServices } from 'renderer/logic/store';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { Button, Icon, TextInput } from '@holium/design-system';
 
-export const AddShip = observer((props: BaseDialogProps) => {
+const AddShipPresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -222,6 +222,6 @@ export const AddShip = observer((props: BaseDialogProps) => {
       </Box>
     </Grid.Column>
   );
-});
+};
 
-export default AddShip;
+export const AddShip = observer(AddShipPresenter);

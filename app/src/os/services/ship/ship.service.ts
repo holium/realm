@@ -384,13 +384,13 @@ export class ShipService extends BaseService {
     return newShip;
   }
 
-  removeShip(patp: string) {
+  removeShip(_patp: string) {
     // TODO clean out the folder here.
-    const deletedShip = new Store<ShipModelType>({
-      name: 'ship',
-      cwd: `realm.${patp}`,
-      accessPropertiesByDotNotation: true,
-    });
+    // const deletedShip = new Store<ShipModelType>({
+    //   name: 'ship',
+    //   cwd: `realm.${patp}`,
+    //   accessPropertiesByDotNotation: true,
+    // });
     // deletedShip.clear();
     // this.db?.clear();
   }

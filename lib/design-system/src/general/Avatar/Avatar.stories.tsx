@@ -6,7 +6,7 @@ export default {
   component: Avatar,
 } as ComponentMeta<typeof Avatar>;
 
-export const Default: ComponentStory<typeof Avatar> = (args) => (
+export const Default: ComponentStory<typeof Avatar> = () => (
   <Flex gap={8}>
     <Avatar
       patp="~lomder-librun"

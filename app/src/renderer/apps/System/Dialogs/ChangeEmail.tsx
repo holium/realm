@@ -80,7 +80,7 @@ const ChangeEmailDialogPresenter = () => {
 const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
 function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
-  const { onboarding, identity } = useServices();
+  const { identity } = useServices();
   const [email, setEmail] = useState(identity.auth.email!);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -145,12 +145,12 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   );
 }
 
+const validChars =
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
 function VerifyScreen(props: { theme: ThemeType; done: any }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
-  const [verified, setVerified] = useState(false);
-  const validChars =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   const submit = async (code: string) => {
     const wasCorrect = await AuthActions.verifyNewEmail(code);

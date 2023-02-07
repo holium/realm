@@ -1,5 +1,4 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import Store from 'electron-store';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -7,7 +6,6 @@ import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
 
 export class ShellService extends BaseService {
-  private readonly db?: Store<ShellStoreType>; // for persistance
   private readonly state?: ShellStoreType; // for state management
   handlers = {
     'realm.shell.set-desktop-dimensions': this.setDesktopDimensions,

@@ -25,5 +25,13 @@
     "strictNullChecks": true,
     "target": "es2021"
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "references": [
+    { "path": "./app" },
+    { "path": "./lib/conduit" },
+    { "path": "./lib/design-system" },
+    { "path": "./lib/multiplayer" },
+    { "path": "./lib/room" },
+    { "path": "./lib/room/test-ui" }
+  ]
 }

@@ -41,14 +41,11 @@ const SystemPanelPresenter = () => {
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
-  type mouseOptionType = 'system' | 'realm';
   useEffect(() => {
     RealmActions.getMediaStatus().then((status) => {
       setMediaStatus(status);
     });
   }, []);
-
-  const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
 
   const apps = [
     {

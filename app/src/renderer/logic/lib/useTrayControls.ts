@@ -18,17 +18,17 @@ export const openDMsToChat = (
   });
 };
 
-export const openWalletToTx = (
-  walletApp: DmAppInstance,
-  dmPreview: DMPreviewType,
-  setActiveApp: any
-) => {
-  dmApp.setSelectedChat(dmPreview);
-  dmApp.setView('dm-chat');
-  setActiveApp('messages-tray', {
-    willOpen: true,
-    anchorOffset: { x: 4, y: 26 },
-    position: 'top-left',
-    dimensions: defaultTrayDimensions['messages-tray'],
-  });
-};
+// export const openWalletToTx = (
+//   walletApp: DmAppInstance,
+//   dmPreview: DMPreviewType,
+//   setActiveApp: any
+// ) => {
+//   dmApp.setSelectedChat(dmPreview);
+//   dmApp.setView('dm-chat');
+//   setActiveApp('messages-tray', {
+//     willOpen: true,
+//     anchorOffset: { x: 4, y: 26 },
+//     position: 'top-left',
+//     dimensions: defaultTrayDimensions['messages-tray'],
+//   });
+// };

@@ -6,7 +6,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
-import { DataPacket } from 'helpers/data';
+import { DataPacket } from '../helpers/data';
 
 export const RTCConfig: RTCConfiguration = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
@@ -17,19 +17,20 @@ export const RTCConfig: RTCConfiguration = {
  */
 export class TestProtocol extends BaseProtocol {
   createRoom(
-    title: string,
-    access: 'public' | 'private',
-    path: string | null
+    _title: string,
+    _access: 'public' | 'private',
+    _path: string | null
   ): RoomType {
     throw new Error('Method not implemented.');
   }
-  deleteRoom(rid: string): void {
+  // @ts-ignore
+  deleteRoom(_rid: string): void {
     throw new Error('Method not implemented.');
   }
-  kick(peer: string): void {
+  kick(_peer: string): void {
     throw new Error('Method not implemented.');
   }
-  sendChat(content: string): void {
+  sendChat(_content: string): void {
     throw new Error('Method not implemented.');
   }
   signaling: WebSocket;
@@ -80,7 +81,8 @@ export class TestProtocol extends BaseProtocol {
         }
       } else {
         // we aren't in the room, so just set the value to the new room
-        this.rooms = this.rooms.values().map((room) => {
+        // @ts-ignore
+        this.rooms = this.rooms.values().map((room: any) => {
           if (room.rid === roomUpdate.rid) {
             return roomUpdate.room;
           }
@@ -92,7 +94,7 @@ export class TestProtocol extends BaseProtocol {
     }
     if (payload.from !== this.local?.patp) {
       const sender = this.peers.get(payload.from);
-      sender?.peer.signal(payload.data);
+      sender?.peer?.signal(payload.data);
     }
   }
 
@@ -108,16 +110,19 @@ export class TestProtocol extends BaseProtocol {
    */
   async setProvider(provider: Patp): Promise<RoomType[]> {
     this.provider = provider;
+    // @ts-ignore
     return this.rooms;
   }
 
   async getRooms(): Promise<RoomType[]> {
     const res = await fetch(this.api + '/rooms');
     this.rooms = await res.json();
+    // @ts-ignore
     return this.rooms;
   }
 
   async getRoom(rid: string): Promise<RoomType> {
+    // @ts-ignore
     const room = this.rooms.find((room) => room.rid === rid);
     if (!room) {
       throw new Error('Room not found');
@@ -165,15 +170,14 @@ export class TestProtocol extends BaseProtocol {
     });
   }
 
-  async dial(peer: Patp, isHost: boolean): Promise<RemotePeer> {
-    if (!this.local) {
-      throw new Error('No local peer created');
-    }
+  dial(peer: Patp, isHost: boolean): RemotePeer {
+    if (!this.local) throw new Error('No local peer created');
     const remotePeer = new RemotePeer(
       this.our,
       peer,
       {
         isHost,
+        // @ts-ignore
         isInitiator: RemotePeer.isInitiator(this.local.patpId, peer),
         rtc: this.rtc,
       },
@@ -200,6 +204,6 @@ export class TestProtocol extends BaseProtocol {
       body: JSON.stringify({ patp: this.our }),
     });
     this.peers.clear();
-    this.presentRoom = undefined;
+    this.presentRoom = null;
   }
 }

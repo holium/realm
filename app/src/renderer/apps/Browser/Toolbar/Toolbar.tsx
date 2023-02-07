@@ -31,7 +31,6 @@ export interface BrowserToolbarProps {
 export const BrowserToolbar = observer(
   ({
     zIndex,
-    windowColor,
     showDevToolsToggle = true,
     dragControls,
     innerRef,
@@ -94,7 +93,6 @@ export const BrowserToolbar = observer(
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         zIndex={zIndex}
-        customBg={windowColor}
         hasBorder
       >
         <Icons name="AppIconCompass" size="28px" />

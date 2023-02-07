@@ -6,16 +6,12 @@ We use yarn workspace to manage the multiple modules.
 
 ## Getting started
 
-We use yarn workspace to build all libs and packages for Realm.
-
-Simply run `yarn` to build the libs and app.
+We use yarn workspaces to build all packages for Realm.
 
 ```zsh
-## Build libs
-yarn link:all
-## Build project
-yarn build
-# Once the install and build is complete
+# Install dependencies and build all packages
+yarn
+# Start the app
 yarn start
 ```
 

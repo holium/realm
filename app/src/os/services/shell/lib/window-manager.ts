@@ -122,8 +122,7 @@ export const getCenteredDimensions = (
  */
 export const getInitialWindowDimensions = (
   app: AppType,
-  desktopDimensions: DesktopDimensions,
-  isFullscreen?: boolean
+  desktopDimensions: DesktopDimensions
 ): AppDimensions => {
   let dimensions: { x: number; y: number; width: number; height: number };
   let realmConfig: RealmConfigType | null;

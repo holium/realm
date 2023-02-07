@@ -184,7 +184,7 @@ export const AuthStore = types
       const loggedInShip = self.ships.get(id);
       self.selected = loggedInShip;
     },
-    logout(ship: string) {
+    logout(_ship: string) {
       try {
         // const [response, error] = yield AuthIPC.logout(ship);
         // if (error) throw error;

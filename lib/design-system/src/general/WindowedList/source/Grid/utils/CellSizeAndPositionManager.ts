@@ -103,12 +103,14 @@ export default class CellSizeAndPositionManager {
         if (size === undefined || isNaN(size)) {
           throw Error(`Invalid size returned for cell ${i} of value ${size}`);
         } else if (size === null) {
+          // @ts-ignore
           this._cellSizeAndPositionData[i] = {
             offset,
             size: 0,
           };
           this._lastBatchedIndex = index;
         } else {
+          // @ts-ignore
           this._cellSizeAndPositionData[i] = {
             offset,
             size,
@@ -119,12 +121,14 @@ export default class CellSizeAndPositionManager {
       }
     }
 
+    // @ts-ignore
     return this._cellSizeAndPositionData[index];
   }
 
   getSizeAndPositionOfLastMeasuredCell(): SizeAndPositionData {
     return this._lastMeasuredIndex >= 0
-      ? this._cellSizeAndPositionData[this._lastMeasuredIndex]
+      ? // @ts-ignore
+        this._cellSizeAndPositionData[this._lastMeasuredIndex]
       : {
           offset: 0,
           size: 0,

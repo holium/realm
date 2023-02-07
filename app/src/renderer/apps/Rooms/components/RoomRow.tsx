@@ -1,4 +1,4 @@
-import { FC, useMemo, useEffect, MouseEvent } from 'react';
+import { useMemo, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
@@ -18,17 +18,17 @@ type RoomRowProps = Partial<RoomType> & {
   rightChildren?: any;
 };
 
-export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
-  const {
-    rid,
-    tray,
-    title,
-    present,
-    creator,
-    // cursors,
-    onClick,
-    rightChildren,
-  } = props;
+const RoomRowPresenter = ({
+  rid,
+  tray,
+  title,
+  provider,
+  present,
+  creator,
+  // cursors,
+  onClick,
+  rightChildren,
+}: RoomRowProps) => {
   const { theme, ship } = useServices();
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
@@ -36,7 +36,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     (o) => o.id === 'toggle-devtools'
   );
 
-  const { mode, dockColor, windowColor } = theme.currentTheme;
+  const { dockColor, windowColor } = theme.currentTheme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
@@ -58,7 +58,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
 
   const contextMenuOptions = useMemo(
     () =>
-      ship!.patp === props.provider
+      ship!.patp === provider
         ? [
             {
               id: `room-delete-${rid}`,
@@ -71,7 +71,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
             ...defaultOptions,
           ]
         : defaultOptions,
-    [rid, ship, props.provider]
+    [rid, ship, provider]
   );
 
   useEffect(() => {
@@ -167,4 +167,6 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
       {rightChildren || <div />}
     </Row>
   );
-});
+};
+
+export const RoomRow = observer(RoomRowPresenter);
