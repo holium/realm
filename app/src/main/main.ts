@@ -21,25 +21,16 @@ import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
 import MouseHelper from './helpers/mouse';
 import BrowserHelper from './helpers/browser';
-
-import { AppUpdater } from './AppUpdater';
-
 import { hideCursor } from './helpers/hideCursor';
-import { isDevelopment, isProduction } from './helpers/env';
+import { AppUpdater } from './AppUpdater';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
 let mainWindow: BrowserWindow;
-export type WebViewsData = Record<
-  string,
-  {
-    position: { x: number; y: number };
-    hasMouseInside: boolean;
-  }
->;
-const webViewsData: WebViewsData = {};
+let mouseWindow: BrowserWindow;
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -104,7 +95,7 @@ const createWindow = async () => {
   Realm.start(mainWindow);
 
   FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow, webViewsData);
+  WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -113,7 +104,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('dom-ready', () => {
     hideCursor(mainWindow.webContents);
-    mainWindow.webContents.send('add-mouse-listeners', { isWebview: false });
+    mainWindow.webContents.send('add-mouse-listeners');
   });
 
   // TODO why is this rendering multiple times?
@@ -137,7 +128,13 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
+  // Remove this if your app does not use auto updates
+  const appUpdater = new AppUpdater();
+  // if (process.env.NODE_ENV === 'production') {
+  //   appUpdater = new AppUpdater();
+  // }
+
+  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
@@ -180,12 +177,11 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   // Hide the traffic lights on macOS.
-  if (process.platform === 'darwin') {
-    newMouseWindow.setWindowButtonVisibility(false);
-  }
+  if (isMac) newMouseWindow.setWindowButtonVisibility(false);
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
+    if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
   });
 
   newMouseWindow.on('close', () => {
@@ -206,15 +202,15 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow, webViewsData);
+  MouseHelper.registerListeners(newMouseWindow);
+
+  mouseWindow = newMouseWindow;
 };
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (!isMac) app.quit();
 });
 
 app
