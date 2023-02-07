@@ -32,7 +32,6 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 });
 
 let mainWindow: BrowserWindow;
-let mouseWindow: BrowserWindow;
 export type WebViewsData = Record<
   string,
   {
@@ -208,8 +207,6 @@ const createMouseOverlayWindow = () => {
   });
 
   MouseHelper.registerListeners(newMouseWindow, webViewsData);
-
-  mouseWindow = newMouseWindow;
 };
 
 app.on('window-all-closed', () => {
