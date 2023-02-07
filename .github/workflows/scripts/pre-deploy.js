@@ -43,8 +43,8 @@ module.exports = async ({ github, context }, workflowId) => {
     //   note: use alpha|latest to keep in line with channel naming expectations
     //     of the electron-builder library
     channel: undefined,
-    foundTag: false, // true if the tag exists; otherwise false
-    releaseType: 'draft' | 'alpha' | 'release' | 'hotfix',
+    // if you want to have the build script remove a release, set the release version/tag here
+    // removeRelease: undefined,
   };
   // disable this workflow to prevent multiple builds running simultaneously
   console.log(
@@ -121,7 +121,6 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'latest';
         break;
     }
-    ci.releaseType = matches[1];
     // ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
@@ -142,16 +141,7 @@ module.exports = async ({ github, context }, workflowId) => {
     );
     if (releases.data.length > 0) {
       const release = releases.data[0];
-      if (release.draft) {
-        console.log(
-          `${release.tag_name} found. will delete release and tag prior to build...`
-        );
-        ci.foundTag = true;
-      }
-      // ci.isNewBuild = !release.draft;
-      ci.isNewBuild = true;
-      // if the latest release is a draft, it means the prior build failed; therefore
-      //  rerun the build using the same tag (version) information
+      // if there is at least one release, use it's tag name to determine next version
       buildVersion = release.tag_name;
     } else {
       // otherwise if no releases found, use the version string from package.json
@@ -164,13 +154,8 @@ module.exports = async ({ github, context }, workflowId) => {
       /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
     );
     if (!matches) throw Error("error: 'buildVersion' format unexpected");
-    let buildNumber = parseInt(matches[4]);
-    // only increment build # if last release was not a draft or no release found
-    //  therefore version value of first build ever should be '0.0.0' which would
-    //  build as version '0.0.1'
-    if (bumpVersion) {
-      buildNumber++;
-    }
+    // always bump version
+    let buildNumber = parseInt(matches[4]) + 1;
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
@@ -180,6 +165,7 @@ module.exports = async ({ github, context }, workflowId) => {
         ? 'draft'
         : 'alpha') || 'draft'
     }`;
+    ci.isNewBuild = true;
     ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}`;
@@ -193,16 +179,13 @@ module.exports = async ({ github, context }, workflowId) => {
       context.payload.pull_request.base.ref === 'draft'
     ) {
       ci.channel = 'draft';
-      ci.releaseType = 'draft';
     } else if (
       github.event_name === 'pull_request' &&
       context.payload.pull_request.base.ref === 'master'
     ) {
       ci.channel = 'alpha';
-      ci.releaseType = 'alpha';
     } else {
       ci.channel = 'draft';
-      ci.releaseType = 'draft';
     }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
