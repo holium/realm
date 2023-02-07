@@ -25,7 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
-  console.log('PR => %o', context.payload.pull_request);
+  // console.log('PR => %o', context.payload.pull_request);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -181,7 +181,9 @@ module.exports = async ({ github, context }, workflowId) => {
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
-    }.${buildNumber}-alpha`;
+    }.${buildNumber}-${
+      context.payload.pull_request.base.ref === 'draft' ? 'draft' : 'alpha'
+    }`;
     ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
     }.${buildNumber}`;
@@ -189,7 +191,12 @@ module.exports = async ({ github, context }, workflowId) => {
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
-    ci.channel = 'alpha';
+
+    if (context.payload.pull_request.base.ref === 'draft') {
+      ci.channel = 'draft';
+    } else if (context.payload.pull_request.base.ref === 'master') {
+      ci.channel = 'alpha';
+    }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
   // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
