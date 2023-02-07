@@ -14,7 +14,7 @@ const FriendStatus = types.enumeration('FriendStatus', [
   'follower',
   'following',
   'contact',
-  'our'
+  'our',
 ]);
 export type FriendStatus = Instance<typeof FriendStatus>;
 
