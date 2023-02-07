@@ -119,7 +119,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin test-build
+          git pull origin draft
         #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -127,7 +127,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'draft-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -174,7 +174,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git config --global --add safe.directory '*'
-          git pull origin test-build
+          git pull origin draft-build
       #
       - name: Install yarn
         run: npm install -g yarn
@@ -198,7 +198,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'draft-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -390,7 +390,7 @@ jobs:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
             const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
-            const result = script({github, context}, 'test-build.yml', ci)
+            const result = script({github, context}, 'draft-build.yml', ci)
             console.log(result)
             return result
         env:
