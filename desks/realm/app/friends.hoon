@@ -390,10 +390,11 @@
         bio       `bio.our-contact
         color     `color.our-contact
       ==
-    %+  turn  ~(tap in ~(key by friends))
+    %+  murn  ~(tap in ~(key by friends))
     |=  =^ship
+    ?:  =(our.bowl ship)  ~
     =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
-    [%pass / %agent [ship dap.bowl] %poke cage]
+    `[%pass / %agent [ship dap.bowl] %poke cage]
   %-  emil  cards
   ++  edit-contact
     |=  [=contact-info:store edit=contact-info-edit:store]
