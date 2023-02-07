@@ -150,6 +150,9 @@
         %share-contact
       :-  %set-contact
       ~
+        %set-sync
+      :-  %set-sync
+      ~
     ==
   ::
   ++  view :: encodes for on-peek
@@ -183,6 +186,7 @@
           [%yes-fren ul]
           [%bye-fren ul]
           [%set-contact set-contact]
+          [%set-sync bo]
       ==
     ::
     ++  json-to-ux

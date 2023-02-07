@@ -113,6 +113,8 @@
   ^-  (quip card _this)
   ?+    wire  (on-agent:def wire sign)
       [%contacts ~]
+    ::  ignore if not syncing
+    ?.  sync-contact-store  `this
     ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
       ?~  p.sign  
@@ -170,6 +172,7 @@
     %bye-fren       abet:(bye-fren src.bowl)
     %set-contact    abet:(set-contact +.action)
     %share-contact  abet:(share-contact +.action)
+    %set-sync       abet:(set-sync +.action)
   ==
 ::
 ++  add-fren
@@ -203,15 +206,24 @@
       [%pass / %agent dock %poke cage]
       [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
       =/  our-contact
+        ^-  contact-info:store
         =/  our-fren  (~(get by friends) our.bowl)
         ?~  our-fren  *contact-info:store
         ?~  contact-info.u.our-fren  *contact-info:store
         u.contact-info.u.our-fren
-      =/  cage  friends-action+!>([%set-contact our-contact])
+      =/  our-contact
+        ^-  contact-info-edit:store
+        %=  our-contact
+          nickname  `nickname.our-contact
+          bio       `bio.our-contact
+          color     `color.our-contact
+        ==
+      =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
       [%pass / %agent dock %poke cage]
   ==
   ++  contact-cards
     ^-  (list card)
+    :: ?.  sync-contact-store  ~
     %+  welp
       :: allow ship to view our contact info
       ?:  contact-is-public:core  ~
@@ -325,7 +337,14 @@
     ?~  our-fren  *contact-info:store
     ?~  contact-info.u.our-fren  *contact-info:store
     u.contact-info.u.our-fren
-  =/  cage  friends-action+!>([%set-contact our-contact])
+  =/  our-contact
+    ^-  contact-info-edit:store
+    %=  our-contact
+      nickname  `nickname.our-contact
+      bio       `bio.our-contact
+      color     `color.our-contact
+    ==
+  =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
   [%pass / %agent dock %poke cage]
 ::
 :: save contact info for a ship
@@ -355,6 +374,7 @@
   =/  fren  u.ufren(contact-info `contact-info)
   =.  friends  (~(put by friends) [ship fren])
   =/  cards  `(list card)`[%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]~
+  ::  share updated contact on edited
   =?  cards  =(ship our.bowl)
     %+  weld  cards
     ^-  (list card)
@@ -363,9 +383,16 @@
       ?~  our-fren  *contact-info:store
       ?~  contact-info.u.our-fren  *contact-info:store
       u.contact-info.u.our-fren
+    =/  our-contact
+      ^-  contact-info-edit:store
+      %=  our-contact
+        nickname  `nickname.our-contact
+        bio       `bio.our-contact
+        color     `color.our-contact
+      ==
     %+  turn  ~(tap in ~(key by friends))
     |=  =^ship
-    =/  cage  friends-action+!>([%set-contact our-contact])
+    =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
     [%pass / %agent [ship dap.bowl] %poke cage]
   %-  emil  cards
   ++  edit-contact
@@ -387,6 +414,11 @@
       cover.edit
     contact-info
   --
+::
+::
+++  set-sync
+  |=  sync=?
+  core(sync-contact-store sync)
 ::
 ++  non-contacts
   |=  =friends:store

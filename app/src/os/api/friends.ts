@@ -20,7 +20,7 @@ export const FriendsApi = {
       nickname: data.nickname,
       color: removeHash(data.color),
       avatar: data.avatar || '',
-      bio: data.bio,
+      bio: data.bio || null,
       cover: data.cover || null,
     };
     const payload = {

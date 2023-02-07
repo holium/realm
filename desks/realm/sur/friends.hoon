@@ -52,6 +52,7 @@
       [%bye-fren ~]
       [%set-contact =ship contact-info=contact-info-edit]
       [%share-contact =ship]
+      [%set-sync sync=?]
   ==
 ::
 +$  reaction
