@@ -65,10 +65,10 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `init.js: PR title = '${buildTitle}'. testing if matches version format...`
   );
-  let bumpVersion = false;
+
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = buildTitle.match(
-    /(release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+    /(draft|release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   );
   // matches null if no match
   if (matches) {
@@ -111,6 +111,8 @@ module.exports = async ({ github, context }, workflowId) => {
       // that 'draft' stays in draft mode and sets the release channel used by auto-updater
       // to 'draft' or 'staging' respectively
       case 'draft':
+        ci.channel = 'draft';
+        break;
       case 'staging':
         ci.channel = 'alpha';
         break;
@@ -140,40 +142,12 @@ module.exports = async ({ github, context }, workflowId) => {
       }
     );
     if (releases.data.length > 0) {
-      const release = releases.data[0];
       // if there is at least one release, use it's tag name to determine next version
-      buildVersion = release.tag_name;
+      buildVersion = releases.data[0].tag_name;
     } else {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
-      ci.isNewBuild = true;
-      bumpVersion = true;
     }
-    // sanity check to ensure version coming in from package.json matches expected semantic version convention
-    matches = buildVersion.match(
-      /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-    );
-    if (!matches) throw Error("error: 'buildVersion' format unexpected");
-    // always bump version
-    let buildNumber = parseInt(matches[4]) + 1;
-    // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
-      matches[3]
-    }.${buildNumber}-${
-      (github.event_name === 'pull_request' &&
-      context.payload.pull_request.base.ref === 'draft'
-        ? 'draft'
-        : 'alpha') || 'draft'
-    }`;
-    ci.isNewBuild = true;
-    ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
-      matches[3]
-    }.${buildNumber}`;
-    ci.version.major = parseInt(matches[2]);
-    ci.version.minor = parseInt(matches[3]);
-    ci.version.build = buildNumber;
-    // all non-manual builds are considered staging (alpha)
-
     if (
       github.event_name === 'pull_request' &&
       context.payload.pull_request.base.ref === 'draft'
@@ -187,6 +161,25 @@ module.exports = async ({ github, context }, workflowId) => {
     } else {
       ci.channel = 'draft';
     }
+    // sanity check to ensure version coming in from package.json matches expected semantic version convention
+    matches = buildVersion.match(
+      /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+    );
+    if (!matches) throw Error("error: 'buildVersion' format unexpected");
+    // always bump version
+    let buildNumber = parseInt(matches[4]) + 1;
+    // if building from package.json version, bump the build # by 1
+    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
+      matches[3]
+    }.${buildNumber}-${ci.channel}`;
+    ci.isNewBuild = true;
+    ci.releaseName = `${ci.channel === 'alpha' ? 'staging' : ci.channel}-${
+      matches[1] ? 'v' : ''
+    }${matches[2]}.${matches[3]}.${buildNumber}`;
+    ci.version.major = parseInt(matches[2]);
+    ci.version.minor = parseInt(matches[3]);
+    ci.version.build = buildNumber;
+    // all non-manual builds are considered staging (alpha)
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
   // must append '-alpha' to the version in order to build assets with the '-alpha' appended.
