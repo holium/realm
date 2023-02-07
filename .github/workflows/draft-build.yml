@@ -330,7 +330,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - run: |
-          # test builds should stay in draft form
+          # draft builds to stay in draft form
           gh release edit $BUILD_VERSION --prerelease=false --draft=true --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

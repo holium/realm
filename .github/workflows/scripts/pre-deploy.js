@@ -196,8 +196,10 @@ module.exports = async ({ github, context }, workflowId) => {
 
     if (context.payload.pull_request.base.ref === 'draft') {
       ci.channel = 'draft';
+      ci.releaseType = 'draft';
     } else if (context.payload.pull_request.base.ref === 'master') {
       ci.channel = 'alpha';
+      ci.releaseType = 'alpha';
     }
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
