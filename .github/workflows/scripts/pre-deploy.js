@@ -76,6 +76,7 @@ module.exports = async ({ github, context }, workflowId) => {
   console.log(
     `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
   );
+  let bumpVersion = false;
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = context.payload.pull_request.title.match(
     /(release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
@@ -165,6 +166,7 @@ module.exports = async ({ github, context }, workflowId) => {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
       ci.isNewBuild = true;
+      bumpVersion = true;
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
@@ -175,7 +177,7 @@ module.exports = async ({ github, context }, workflowId) => {
     // only increment build # if last release was not a draft or no release found
     //  therefore version value of first build ever should be '0.0.0' which would
     //  build as version '0.0.1'
-    if (ci.isNewBuild) {
+    if (bumpVersion) {
       buildNumber++;
     }
     // if building from package.json version, bump the build # by 1

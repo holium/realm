@@ -134,7 +134,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=test APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+        run: npx cross-env RELEASE_CHANNEL=draft APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -146,7 +146,7 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          mv -f ./app/release/build/latest-mac.yml ./app/release/build/test-mac.yml
+          mv -f ./app/release/build/latest-mac.yml ./app/release/build/draft-mac.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -206,7 +206,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=test GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env RELEASE_CHANNEL=draft GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -215,7 +215,7 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
-          mv -f ./app/release/build/latest.yml ./app/release/build/test.yml
+          mv -f ./app/release/build/latest.yml ./app/release/build/draft.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
