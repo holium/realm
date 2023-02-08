@@ -22,7 +22,7 @@ const Wrapper = styled(Box)`
 `;
 
 interface WalletFooterProps {
-  hidden: boolean;
+  hidden?: boolean;
 }
 
 export const WalletFooterPresenter = ({
@@ -70,21 +70,11 @@ export const WalletFooterPresenter = ({
           </Flex>
           <Button.IconButton
             size={24}
-            onClick={async () =>
-              await WalletActions.navigate(WalletView.SETTINGS)
-            }
+            onClick={() => WalletActions.navigate(WalletView.SETTINGS)}
           >
             <Icon name="Settings" size={20} opacity={0.5} />
           </Button.IconButton>
         </Flex>
-        <Button.IconButton
-          size={26}
-          onClick={async () =>
-            await WalletActions.navigate(WalletView.SETTINGS)
-          }
-        >
-          <Icon name="Settings" size={24} opacity={0.7} />
-        </Button.IconButton>
       </Flex>
     </Wrapper>
   );

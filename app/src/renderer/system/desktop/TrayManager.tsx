@@ -29,7 +29,8 @@ const TrayManagerPresenter = () => {
       coords={{
         x: coords.left,
         y: height - dimensions.height - coords.bottom,
-        ...dimensions,
+        height: dimensions.height,
+        width: dimensions.width,
       }}
       closeTray={() => {
         setActiveApp(null);
