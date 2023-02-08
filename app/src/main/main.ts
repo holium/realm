@@ -127,13 +127,7 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
-  // Remove this if your app does not use auto updates
-  const appUpdater = new AppUpdater();
-  // if (process.env.NODE_ENV === 'production') {
-  //   appUpdater = new AppUpdater();
-  // }
-
-  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
+  const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser

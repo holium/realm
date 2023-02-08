@@ -37,6 +37,8 @@ npx cross-env DEBUG_PROD=true yarn package:prerelease:linux
 npx cross-env DEBUG_PROD=true yarn package:prerelease:win
 ```
 
+Building a prerelease will replace the `.d.ts` files in all the `/dist` folders, so make sure to run `rm -rf ./**/dist` followed by `yarn` in root when you want to run Realm in dev mode again.
+
 ## Contributing
 
 For frontend development, make sure to:

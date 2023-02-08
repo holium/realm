@@ -288,7 +288,8 @@ export class AppUpdater implements IAppUpdater {
           // @ts-ignore
           error == null ? 'unknown' : (error.stack || error).toString()
         );
-        this.doneCallback && this.doneCallback('error');
+        // close all the updater windows and continue
+        this.done();
       });
     });
     this.progressWindow.webContents.loadURL(resolveHtmlPath('updater.html'));
