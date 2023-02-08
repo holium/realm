@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Box, BoxProps } from '../../';
+import { Box, BoxProps } from '../Box/Box';
 
 const Bar = styled(Box)`
   background-color: var(--rlm-input-color);

@@ -81,6 +81,7 @@ export const TrayApp = ({
     <AnimatePresence>
       {isOpen && (
         <Wrapper
+          key={appId}
           id={appId}
           initial={{
             x: coords.x,
