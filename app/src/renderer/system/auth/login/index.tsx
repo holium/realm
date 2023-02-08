@@ -88,8 +88,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       passwordRef!.current!.value
     );
     if (status && status.startsWith('error:')) {
-      // @ts-expect-error
-      submitRef.current.blur();
+      if (submitRef.current) {
+        // @ts-ignore
+        submitRef.current.blur();
+      }
       const parts = status.split(':');
       // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
       //  assume 400 means they may have changed ship code. ask them to enter the new one.
@@ -134,7 +136,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         setSaveShipCodeResult(result);
         if (result === 'success') {
           // @ts-ignore
-          passwordRef.current!.value = '';
+          if (passwordRef.current) {
+            // @ts-ignore
+            passwordRef.current.value = '';
+          }
           accessKey.state.value = '';
           setLoginError('');
           setSuccessMessage(
@@ -339,20 +344,19 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     }
                   />
 
-                  {['password', 'missing', 'code'].indexOf(loginError) !== -1 ||
-                    (hasFailed && (
-                      <FormControl.Error
-                        style={{ height: 15, fontSize: 14 }}
-                        textShadow="0.5px 0.5px #080000"
-                      >
-                        {hasFailed &&
-                          'Connection to your ship has been refused.'}
-                        {loginError === 'password' && 'Incorrect password.'}
-                        {loginError === 'missing' &&
-                          'Unable to connect to ship.'}
-                        {loginError === 'code' && 'Error saving new ship code'}
-                      </FormControl.Error>
-                    ))}
+                  {(['password', 'missing', 'code'].indexOf(loginError) !==
+                    -1 ||
+                    hasFailed) && (
+                    <FormControl.Error
+                      style={{ height: 15, fontSize: 14 }}
+                      textShadow="0.5px 0.5px #080000"
+                    >
+                      {hasFailed && 'Connection to your ship has been refused.'}
+                      {loginError === 'password' && 'Incorrect password.'}
+                      {loginError === 'missing' && 'Unable to connect to ship.'}
+                      {loginError === 'code' && 'Error saving new ship code'}
+                    </FormControl.Error>
+                  )}
 
                   {showShipCode && (
                     <>
