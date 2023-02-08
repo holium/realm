@@ -3,8 +3,6 @@ import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
-// import { TrayMenu } from './components/SystemBar/components/TrayMenu';
-// import { MiniApp } from './components/SystemBar/components/MiniAppWindow';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 const TrayManagerPresenter = () => {
@@ -39,15 +37,6 @@ const TrayManagerPresenter = () => {
     >
       {TrayAppView && <TrayAppView />}
     </TrayApp>
-    // <TrayMenu
-    //   id={activeApp as TrayAppKeys}
-    //   coords={coords}
-    //   body={
-    //     <MiniApp id={`${activeApp}-app`} innerRef={trayAppRef}>
-    //       {TrayAppView && <TrayAppView />}
-    //     </MiniApp>
-    //   }
-    // />
   );
 };
 

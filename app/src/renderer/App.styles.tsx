@@ -27,6 +27,9 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   ${(props) => css`
     :root {
       --rlm-font: 'Rubik', sans-serif;
+      --rlm-home-button-color: ${props.realmTheme.mode === 'light'
+        ? rgba(darken(0.2, props.realmTheme.dockColor), 0.5)
+        : rgba(darken(0.15, props.realmTheme.dockColor), 0.6)};
       --rlm-base-color: ${props.realmTheme.backgroundColor};
       --rlm-accent-color: ${props.realmTheme.accentColor};
       --rlm-input-color: ${props.realmTheme.inputColor};

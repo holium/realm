@@ -103,7 +103,7 @@ const SpacesTrayAppPresenter = () => {
           position="absolute"
           flexDirection="column"
           width="100%"
-          style={{ bottom: bottomHeight, top: 40, left: 0, right: 0 }}
+          style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
           overflowY="hidden"
         >
           <Flex position="relative" flexDirection="column">
@@ -197,7 +197,7 @@ const SpacesTrayAppPresenter = () => {
         <Flex
           position="absolute"
           width="100%"
-          style={{ bottom: bottomHeight, top: 40, left: 0, right: 0 }}
+          style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
           overflowY="hidden"
         >
           <SpacesList

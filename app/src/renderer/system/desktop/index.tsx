@@ -13,13 +13,13 @@ const DesktopPresenter = () => {
 
   return (
     <Fill>
+      <Layer zIndex={15}>
+        <TrayManager />
+      </Layer>
       <Layer zIndex={0}>
         <WindowManager />
       </Layer>
       <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
-      <Layer zIndex={15}>
-        <TrayManager />
-      </Layer>
       <Layer zIndex={14}>
         <Bottom size={56}>
           <SystemBar />

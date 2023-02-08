@@ -24,4 +24,4 @@ export const SystemBar: FC<SystemBarProps> = () => {
   );
 };
 
-export default { SystemBar };
+export default SystemBar;
