@@ -26,11 +26,14 @@ const TrayManagerPresenter = () => {
     <TrayApp
       zIndex={100}
       id={activeApp as TrayAppKeys}
-      coords={{
-        x: coords.left,
-        y: height - dimensions.height - coords.bottom,
-        ...dimensions,
-      }}
+      coords={
+        {
+          x: coords.left,
+          y: height - dimensions.height - coords.bottom,
+          height: dimensions.height,
+          width: dimensions.width,
+        } as DOMRect
+      }
       closeTray={() => {
         setActiveApp(null);
       }}
