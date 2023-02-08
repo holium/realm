@@ -1,19 +1,18 @@
 import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
-import { rgba } from 'polished';
 import { BoxProps } from '../../';
-import { getVar } from '../../util/colors';
 
 const Wrapper = styled(motion.div)`
-  z-index: 13;
+  z-index: 16;
+  height: inherit;
   position: absolute;
   overflow: hidden;
   border-radius: 16px;
   transform: translate3d(0, 0, 0);
   backdrop-filter: blur(24px);
   backface-visibility: hidden;
-  background: ${() => rgba(getVar('window'), 0.9)};
+  background: var(--rlm-window-bg);
   border: 1px solid var(--rlm-border-color);
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
   ::-webkit-scrollbar {

@@ -63,8 +63,6 @@ export const ChatMessage = ({
         alignItems={primaryBubble ? 'flex-end' : 'flex-start'}
         flexDirection="column"
         pb={2}
-        pl={2}
-        pr={2}
       >
         {showDate && (
           <Box width="100%" mb={2}>

@@ -44,10 +44,10 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --rlm-intent-caution-color: #ffbc32;
       --rlm-intent-success-color: #0fc383;
       --rlm-overlay-hover: ${props.realmTheme.mode === 'light'
-        ? 'rgba(0, 0, 0, 0.05)'
+        ? 'rgba(0, 0, 0, 0.04)'
         : 'rgba(255, 255, 255, 0.06)'};
       --rlm-overlay-active: ${props.realmTheme.mode === 'light'
-        ? 'rgba(0, 0, 0, 0.09)'
+        ? 'rgba(0, 0, 0, 0.06)'
         : 'rgba(255, 255, 255, 0.09)'};
     }
   `}
@@ -55,6 +55,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   * {
     box-sizing: border-box;
     cursor: none !important;
+    color: var(--rlm-text-color);
     font-family: "Rubik", sans-serif;
   }
 

@@ -100,7 +100,7 @@ const DetailPresenter = (props: DetailProps) => {
       justifyContent="flex-start"
       flexDirection="column"
       py={1}
-      px={3}
+      // px={3}
       pb={0}
     >
       <DetailHero

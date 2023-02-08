@@ -6,6 +6,7 @@ import { getVar } from '../../util/colors';
 const CrossPath = styled(motion.path)`
   transition: var(--transition);
   fill: var(--rlm-text-color);
+  opacity: 0.8;
   &:hover {
     cursor: pointer;
   }
@@ -13,7 +14,11 @@ const CrossPath = styled(motion.path)`
 
 const CirclePath = styled(motion.circle)`
   transition: var(--transition);
-  fill: ${() => darken(0.6, getVar('dock'))};
+  fill-opacity: 0.2;
+  fill: ${() =>
+    getVar('theme-mode') === 'dark'
+      ? darken(1, getVar('dock'))
+      : darken(0.4, getVar('dock'))};
 `;
 
 const HoliSvg = styled(motion.svg)`
@@ -43,7 +48,7 @@ export const HoliumButton = () => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <g filter="url(#filter0_ii_360_6399)">
-        <CirclePath cx="14" cy="14" r="14" fillOpacity="0.2" />
+        <CirclePath cx="14" cy="14" r="14" />
       </g>
       <CrossPath
         fillRule="evenodd"

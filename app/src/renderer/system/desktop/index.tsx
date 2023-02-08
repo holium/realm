@@ -17,7 +17,7 @@ const DesktopPresenter = () => {
         <WindowManager />
       </Layer>
       <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
-      <Layer zIndex={13}>
+      <Layer zIndex={15}>
         <TrayManager />
       </Layer>
       <Layer zIndex={14}>
