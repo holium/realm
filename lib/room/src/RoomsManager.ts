@@ -26,7 +26,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   state: RoomState = RoomState.Disconnected;
 
   constructor(protocol: BaseProtocol) {
-    // eslint-disable-next-line constructor-super
     super();
     this.protocol = protocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
@@ -155,7 +154,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     return this.local.patp;
   }
 
-  get presentRoom(): RoomType | undefined {
+  get presentRoom(): RoomType | null {
     return this.protocol.presentRoom;
   }
 

@@ -13,7 +13,6 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
 import { TextInput } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import VerifyPasscode from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
@@ -25,7 +24,6 @@ interface RecoverExistingProps {
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
   (props: RecoverExistingProps) => {
     const { theme } = useServices();
-    const { walletApp } = useTrayApps();
     const themeData = useMemo(
       () => getBaseTheme(theme.currentTheme),
       [theme.currentTheme]

@@ -12,7 +12,7 @@ export const DmApi = {
     return response['graph-update']['add-graph'].graph;
   },
   updates: async (conduit: Conduit, store: CourierStoreType): Promise<any> => {
-    const ship = `~${conduit.ship}`;
+    // const ship = `~${conduit.ship}`;
     return await conduit.watch({
       app: 'dm-hook',
       path: '/updates',
@@ -23,7 +23,7 @@ export const DmApi = {
           )[0];
           switch (action) {
             case 'pendings':
-              const pendings: string[] = payload;
+              // const pendings: string[] = payload;
               // chatStore.setPendingDms(pendings);
               break;
             case 'screen':
@@ -49,7 +49,7 @@ export const DmApi = {
             case 'decline':
               const declinedContact = `~${payload}`;
               console.log('decline', payload, `/dm-inbox/${declinedContact}`);
-              store.rejectDmInvite(`/dm-inbox/${declinedContact}`);
+              store.rejectDmInvite();
               break;
             default:
               console.log('action', action);

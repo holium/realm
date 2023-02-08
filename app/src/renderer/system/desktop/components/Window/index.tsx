@@ -139,17 +139,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
         height: Math.round(motionHeight.get()),
         width: Math.round(motionWidth.get()),
       });
-
-    setTimeout(() => {
-      const webViewRect = document
-        .getElementById(webViewId)
-        ?.getBoundingClientRect();
-      if (webViewRect?.x && webViewRect?.y)
-        DesktopActions.setWebViewPosition(webViewId, {
-          x: webViewRect.x,
-          y: webViewRect.y,
-        });
-    }, 50);
   };
   const onDragStop = () => {
     setIsDragging(false);
@@ -159,15 +148,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
         y: Math.round(motionY.get()),
         height: Math.round(motionHeight.get()),
         width: Math.round(motionWidth.get()),
-      });
-
-    const webViewRect = document
-      .getElementById(webViewId)
-      ?.getBoundingClientRect();
-    if (webViewRect?.x && webViewRect?.y)
-      DesktopActions.setWebViewPosition(webViewId, {
-        x: webViewRect.x,
-        y: webViewRect.y,
       });
   };
 
@@ -204,7 +184,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     | React.FC<DialogTitlebarProps>
     | undefined; // todo fix typings
   let showDevToolsToggle = true;
-  let preventClickEvents = true;
   let maximizeButton = true;
   let borderRadius = 12;
   const appInfo = bazaar.getApp(window.id);
@@ -242,7 +221,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
-    preventClickEvents = false;
     if (CustomTitlebar) {
       titlebar = (
         <CustomTitlebar
@@ -292,7 +270,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     noTitlebar = dialogConfig.noTitlebar!;
     CustomTitlebar = DialogTitlebar;
     showDevToolsToggle = false;
-    preventClickEvents = false;
     maximizeButton = false;
     borderRadius = 16;
     const onCloseDialog = dialogConfig.onClose;

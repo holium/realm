@@ -1,4 +1,4 @@
-import { FC, useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 // import { Spinner, Flex } from 'renderer/components';
@@ -22,7 +22,7 @@ const View = styled(motion.div)`
   transform: translateZ(0);
 `;
 
-export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
+const AppViewPresenter = (props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
   const { ship, desktop, theme, spaces } = useServices();
   const [ready, setReady] = useState(false);
@@ -177,4 +177,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       </View>
     );
   }, [lockView, window.id, appConfig.url]);
-});
+};
+
+export const AppView = observer(AppViewPresenter);

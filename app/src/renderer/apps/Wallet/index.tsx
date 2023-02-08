@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
-import { Detail } from './views/common/Detail';
+import { Detail } from './views/common/Detail/Detail';
 import { WalletList } from './views/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletFooter } from './views/common/Footer';
 import { CreateWallet } from './views/common/Create';
 import { NFTDetail } from './views/common/NFTDetail';
-import Locked from './views/common/Locked';
+import { Locked } from './views/common/Locked';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
@@ -33,15 +33,13 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
     <TransactionDetail {...props} />
   ),
   [WalletView.NEW]: (props: any) => <EthNew {...props} />,
-  [WalletView.CREATE_WALLET]: (props: any) => (
-    <CreateWallet network={network} />
-  ),
+  [WalletView.CREATE_WALLET]: () => <CreateWallet network={network} />,
   [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   [WalletView.SETTINGS]: (props: any) => <WalletSettings {...props} />,
   [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
 });
 
-export const WalletApp: FC<any> = observer((props: any) => {
+const WalletAppPresenter = (props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
 
@@ -150,4 +148,6 @@ export const WalletApp: FC<any> = observer((props: any) => {
       <WalletFooter hidden={hideFooter} />
     </Flex>
   );
-});
+};
+
+export const WalletApp = observer(WalletAppPresenter);

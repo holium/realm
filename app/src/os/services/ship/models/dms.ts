@@ -212,7 +212,7 @@ export const Chat = types
       console.log('decline in client dm store');
       return null;
     }),
-    setScreen: flow(function* (screen: boolean) {
+    setScreen: flow(function* () {
       self.loader.set('loading');
       self.loader.set('loaded');
       console.log('set screen');

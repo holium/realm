@@ -10,6 +10,7 @@
   "scripts": {
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
+    "postinstall": "preconstruct dev",
     "dev": "preconstruct dev",
     "build": "preconstruct build",
     "build:prod": "preconstruct build"

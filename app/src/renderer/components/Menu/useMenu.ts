@@ -9,7 +9,7 @@ export const useMenu = (
   const [show, setShow] = useState(false);
 
   const handleMenu = useCallback(
-    (event) => {
+    (event: any) => {
       // If the id of the menu matches the parent of the click, show the menu
       if (event.target.id === ref.current.id && !show) {
         event.preventDefault();

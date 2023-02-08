@@ -41,14 +41,18 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  setWebViewPosition(webViewId: string, position: { x: number; y: number }) {
-    ipcRenderer.invoke('webview-moved', webViewId, position);
+  onMouseOver(callback: () => void) {
+    ipcRenderer.on('mouse-over', callback);
   },
-  mouseEnteredWebView(id: string) {
-    ipcRenderer.invoke('mouse-entered-webview', id);
+  onMouseOut(callback: () => void) {
+    ipcRenderer.on('mouse-out', callback);
   },
-  mouseLeftWebView(id: string) {
-    ipcRenderer.invoke('mouse-left-webview', id);
+  /**
+   * For macOS we enable mouse layer tracking for a smoother experience.
+   * It is not supported for Windows or Linux.
+   */
+  onEnableMouseLayerTracking(callback: () => void) {
+    ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
   mouseColorChanged(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);

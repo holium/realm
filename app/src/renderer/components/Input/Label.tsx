@@ -48,6 +48,7 @@ export const Label: FC<LabelProps> = forwardRef<HTMLLabelElement, LabelProps>(
   (props: LabelProps, ref) => {
     const { adornment, children, as } = props;
     return (
+      // @ts-ignore
       <StyledLabel as={as} variant="label" ref={ref} {...props}>
         {children}
         {adornment && (

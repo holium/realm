@@ -1,4 +1,4 @@
-import { TransactionType } from './wallet.model';
+import { TransactionType } from './wallet-lib/wallet.model';
 
 const transactionList = [
   {

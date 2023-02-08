@@ -8,3 +8,4 @@ export * from './LinkBlock/LinkBlock';
 export * from './MediaBlock/MediaBlock';
 export * from './MemeBlock/MemeBlock';
 export * from './TextBlock/TextBlock';
+export * from './ChatInput/ChatInput';

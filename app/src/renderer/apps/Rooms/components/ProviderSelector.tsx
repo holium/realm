@@ -1,11 +1,10 @@
-import { FC } from 'react';
 import styled from 'styled-components';
 import { rgba, darken } from 'polished';
 import { Flex, Icons, Text } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
-import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { useRooms } from '../useRooms';
+import { observer } from 'mobx-react';
 
 interface CommCircleProps {
   customBg: string;
@@ -34,23 +33,19 @@ interface ProviderSelectorProps {
   onClick: (evt: any) => void;
 }
 
-export const ProviderSelector: FC<ProviderSelectorProps> = observer(
-  ({ seedColor, onClick }: ProviderSelectorProps) => {
-    const { ship, theme } = useServices();
-    const { windowColor, textColor } = theme.currentTheme;
-    const roomsManager = useRooms(ship!.patp);
+const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
+  const { ship, theme } = useServices();
+  const { windowColor, textColor } = theme.currentTheme;
+  const roomsManager = useRooms(ship!.patp);
 
-    // const accentColor = '#F08735';
-    return (
-      <ProviderStyle
-        customBg={windowColor}
-        onClick={(evt: any) => onClick(evt)}
-      >
-        <Icons size={18} fill={rgba(textColor, 0.7)} name="BaseStation" />
-        <Text fontSize={1} color={rgba(textColor, 0.7)}>
-          {roomsManager?.protocol.provider}
-        </Text>
-      </ProviderStyle>
-    );
-  }
-);
+  return (
+    <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>
+      <Icons size={18} fill={rgba(textColor, 0.7)} name="BaseStation" />
+      <Text fontSize={1} color={rgba(textColor, 0.7)}>
+        {roomsManager?.protocol.provider}
+      </Text>
+    </ProviderStyle>
+  );
+};
+
+export const ProviderSelector = observer(ProviderSelectorPresenter);

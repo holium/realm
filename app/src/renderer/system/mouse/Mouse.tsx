@@ -9,12 +9,20 @@ export const Mouse = () => {
   const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const active = useToggle(false);
   const visible = useToggle(false);
+  const mouseLayerTracking = useToggle(false);
 
   useEffect(() => {
+    window.electron.app.onMouseOver(visible.toggleOn);
+    window.electron.app.onMouseOut(visible.toggleOff);
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
-      // We only use the IPC's coordinates if we're dragging since the
-      // mouse layer doesn't capture the mouse position when it's dragging.
-      if (isDragging) setCoords(newCoordinates);
+      // We only use the IPC'd coordinates if
+      // A) mouse layer tracking is disabled, or
+      // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
+      if (!mouseLayerTracking.isOn) {
+        setCoords(newCoordinates);
+      } else {
+        if (isDragging) setCoords(newCoordinates);
+      }
       setState(newState);
     });
 
@@ -26,19 +34,16 @@ export const Mouse = () => {
     window.electron.app.onMouseDown(active.toggleOn);
     window.electron.app.onMouseUp(active.toggleOff);
 
-    const handleMouseOver = visible.toggleOn;
-    const handleMouseOut = visible.toggleOff;
     const handleMouseMove = (e: MouseEvent) => {
       if (!active.isOn) setCoords({ x: e.clientX, y: e.clientY });
     };
 
-    window.addEventListener('mouseover', handleMouseOver);
-    window.addEventListener('mouseout', handleMouseOut);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.electron.app.onEnableMouseLayerTracking(() => {
+      mouseLayerTracking.toggleOn();
+      window.addEventListener('mousemove', handleMouseMove);
+    });
 
     return () => {
-      window.removeEventListener('mouseover', handleMouseOver);
-      window.removeEventListener('mouseout', handleMouseOut);
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);

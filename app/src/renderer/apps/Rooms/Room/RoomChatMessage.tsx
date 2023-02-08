@@ -1,6 +1,7 @@
+import { observer } from 'mobx-react';
 import { ChatModelType } from '@holium/realm-room';
 import { lighten, darken } from 'polished';
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bubble } from 'renderer/apps/Messages/components/Bubble';
 import { Flex, Text, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -10,11 +11,8 @@ interface RoomChatMessageProps {
   doesPack: boolean;
 }
 
-export const RoomChatMessage: FC<RoomChatMessageProps> = ({
-  chat,
-  doesPack,
-}: RoomChatMessageProps) => {
-  const { theme: themeStore, ship } = useServices();
+const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
+  const { theme: themeStore } = useServices();
   const theme = themeStore.currentTheme;
 
   const [timeString, setTimeString] = useState('');
@@ -71,3 +69,5 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
     </Flex>
   );
 };
+
+export const RoomChatMessage = observer(RoomChatMessagePresenter);

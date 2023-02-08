@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Conduit } from '@holium/conduit';
 import { NotificationStoreType } from '../services/spaces/models/beacon';
 
@@ -7,7 +6,7 @@ export type BeaconInboxType =
   | { group: string }
   | { all: null };
 
-export const BeaconApi = {
+export const BeaconApi: any = {
   // get new notifications (anything not yet read/seen)
   getAll: async (conduit: Conduit) => {
     const response = await conduit.scry({
@@ -64,7 +63,7 @@ export const BeaconApi = {
     conduit.watch({
       app: 'realm-beacon',
       path: '/updates',
-      onEvent: async (data: any, id?: number, mark?: string) => {
+      onEvent: async (data: any) => {
         if ('new-note' in data) {
           beacon.newNotification(data['new-note']);
         }

@@ -104,7 +104,6 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
     iconColor,
     disabled,
     onClick,
-    inputColor,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -196,9 +195,6 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
               <MenuItemStyle
                 customBg={customBg}
                 color={textColor}
-                fontSize={2}
-                pt={2}
-                pb={2}
                 disabled={selected === option.value}
                 key={option.value}
                 onClick={() => {

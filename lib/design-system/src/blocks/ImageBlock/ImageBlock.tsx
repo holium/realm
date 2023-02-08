@@ -18,7 +18,7 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         isSkeleton={!imgLoaded}
         src={image}
         draggable={false}
-        onError={(evt: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        onError={() => {
           // TODO: handle error using placeholder image
         }}
         onLoad={() => setImgLoaded(true)}

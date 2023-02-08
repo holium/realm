@@ -21,7 +21,7 @@ interface AppGridProps {
   tileSize: AppTileSize;
 }
 
-export const AppGrid = observer(({ tileSize = 'xxl' }: AppGridProps) => {
+const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected!;
   const apps = [...bazaar.installed, ...bazaar.devApps];
@@ -126,4 +126,6 @@ export const AppGrid = observer(({ tileSize = 'xxl' }: AppGridProps) => {
       })}
     </>
   );
-});
+};
+
+export const AppGrid = observer(AppGridPresenter);

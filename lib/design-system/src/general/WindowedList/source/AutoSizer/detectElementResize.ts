@@ -85,13 +85,18 @@ export default function createDetectElementResize(hostWindow: Window) {
         return;
       }
 
+      // @ts-ignore
       var element = this;
+      // @ts-ignore
       resetTriggers(this);
 
+      // @ts-ignore
       if (this.__resizeRAF__) {
+        // @ts-ignore
         cancelFrame(this.__resizeRAF__);
       }
 
+      // @ts-ignore
       this.__resizeRAF__ = requestFrame(function () {
         if (checkTriggers(element)) {
           element.__resizeLast__.width = element.offsetWidth;
