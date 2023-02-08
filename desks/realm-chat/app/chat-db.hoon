@@ -1,0 +1,138 @@
+::  app/chat-db.hoon
+/-  *versioned-state, sur=chat-db
+/+  dbug, db-lib=chat-db
+=|  state-0
+=*  state  -
+:: ^-  agent:gall
+=<
+  %-  agent:dbug
+  |_  =bowl:gall
+  +*  this  .
+      core   ~(. +> [bowl ~])
+  ::
+  ++  on-init
+    ^-  (quip card _this)
+    =/  default-state=state-0
+      [%0 *paths-table:sur *messages-table:sur *peers-table:sur]
+    `this(state default-state)
+  ++  on-save   !>(state)
+  ++  on-load
+    |=  old-state=vase
+    ^-  (quip card _this)
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  `this(state old)
+    ==
+  ::
+  ++  on-poke
+    |=  [=mark =vase]
+    ^-  (quip card _this)
+    ?>  ?=(%db-action mark)
+    =/  act  !<(action:sur vase)
+    =^  cards  state
+    ?-  -.act  :: each handler function here should return [(list card) state]
+      :: paths-table pokes
+      %create-path 
+        (create-path:db-lib +.act state bowl)
+      %leave-path 
+        (leave-path:db-lib +.act state bowl)
+      :: messages-table pokes
+      %insert
+        (insert:db-lib +.act state bowl)
+      %edit
+        (edit:db-lib +.act state bowl)
+      %delete
+        (delete:db-lib +.act state bowl)
+      :: peers-table pokes
+      %add-peer
+        (add-peer:db-lib +.act state bowl)
+      %kick-peer
+        (kick-peer:db-lib +.act state bowl)
+    ==
+    [cards this]
+  ::
+  ++  on-watch
+    |=  =path
+    ^-  (quip card _this)
+    ?>  =(our.bowl src.bowl)
+    =/  cards=(list card)
+    ::  each path should map to a list of cards
+    ?+  path      !!
+      ::
+        [%db ~]  :: the "everything" path
+          :~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
+          ==
+      :: /db/messages/start/~zod/~2023.1.17..19.50.46..be0e
+        [%db %messages %start @ @ ~]  :: the "recent messages" path
+          =/  sender=@p       `@p`(slav %p i.t.t.t.path)
+          =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
+          [%give %fact ~ db-dump+!>([%tables [[%messages (start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state)] ~]])]~
+      :: /db/path/the/actual/path/here
+        [%db %path *]  :: the "path" path, subscribe by path explicitly
+          =/  thepathrow   (~(get by paths-table.state) t.t.path)
+          :~  [%give %fact ~ path-row+!>(thepathrow)]
+          ==
+    ==
+    [cards this]
+  ::
+  ++  on-peek
+    |=  =path
+    ^-  (unit (unit cage))
+    ?+    path  !!
+    ::
+      [%x %db ~]
+        ``db-dump+!>(tables+all-tables:core)
+    ::
+      [%x %db %paths ~]
+        ``db-dump+!>(tables+[[%paths paths-table.state] ~])
+    ::
+      [%x %db %path *]
+        =/  thepath  t.t.t.path
+        =/  thepathrow  (~(got by paths-table.state) thepath)
+        ``db-dump+!>([%tables [[%paths (malt (limo ~[[thepath thepathrow]]))] ~]])
+    ::
+      [%x %db %peers ~]
+        ``db-dump+!>([%tables [[%peers peers-table.state] ~]])
+    ::
+    :: .^(* %gx /(scot %p our)/chat-db/(scot %da now)/db/peers-for-path/a/path/to/a/chat/noun)
+      [%x %db %peers-for-path *]
+        =/  thepath  t.t.t.path
+        =/  thepeers  (~(got by peers-table.state) thepath)
+        ``db-dump+!>([%tables [[%peers (malt (limo ~[[thepath thepeers]]))] ~]])
+    ::
+      [%x %db %messages ~]
+        ``db-dump+!>(tables+[messages+messages-table.state ~])
+    ::
+      [%x %db %messages %start @ @ ~]
+        =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.t.path)
+        ``db-dump+!>(tables+[messages+(start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
+    ==
+  :: chat-db does not subscribe to anything.
+  :: chat-db does not care
+  ++  on-agent
+    |=  [=wire =sign:agent:gall]
+    ^-  (quip card _this)
+    !!
+  ::
+  ++  on-leave
+    |=  path
+      `this
+  ::
+  ++  on-arvo
+    |=  [=wire =sign-arvo]
+    ^-  (quip card _this)
+    !!
+  ::
+  ++  on-fail
+    |=  [=term =tang]
+    %-  (slog leaf+"error in {<dap.bowl>}" >term< tang)
+    `this
+  --
+|_  [=bowl:gall cards=(list card)]
+::
+++  this  .
+++  core  .
+++  all-tables
+  [[%paths paths-table.state] [%messages messages-table.state] [%peers peers-table.state] ~]
+--
