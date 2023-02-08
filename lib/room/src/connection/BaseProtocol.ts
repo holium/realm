@@ -16,18 +16,22 @@ export interface ProtocolConfig {
 
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
-  local?: LocalPeer;
+  local: LocalPeer | null = null;
   provider: string; // default is our
-  presentRoom?: RoomType;
+  presentRoom: RoomType | null = null;
   rooms: RoomMap;
   peers: Map<Patp, RemotePeer> = new Map();
   rtc: RTCConfiguration = {
-    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-    iceTransportPolicy: 'relay',
+    iceServers: [
+      {
+        username: 'realm',
+        credential: 'zQzjNHC34Y8RqdLW',
+        urls: 'turn:coturn.holium.live:3478',
+      },
+    ],
   };
 
   constructor(our: Patp, config: ProtocolConfig, rooms: RoomMap = new Map()) {
-    // eslint-disable-next-line constructor-super
     super();
     this.our = our;
     this.provider = our;
@@ -53,18 +57,18 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract createRoom(
     title: string,
     access: 'public' | 'private',
-    spacePath: string | null
+    path: string | null
   ): RoomType;
-  abstract deleteRoom(rid: string): void;
+  abstract deleteRoom(rid: string): Promise<void>;
   abstract getRoom(rid: string): Promise<RoomType>;
   abstract getRooms(): Promise<RoomType[]>;
   //
   abstract connect(
     ...args: AgentConnectParams | LocalCommsParams
   ): Promise<Map<Patp, RemotePeer>>;
-  abstract dial(peer: Patp, isHost: boolean): Promise<RemotePeer>;
+  abstract dial(peer: Patp, isHost: boolean): RemotePeer;
   abstract kick(peer: Patp): void;
-  abstract leave(): Promise<void>;
+  abstract leave(rid: string): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
   abstract sendChat(content: string): void;

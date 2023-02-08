@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import styled, { css, StyledComponentProps } from 'styled-components';
 import { Text } from '../Text';
 import { Icons } from '../Icons';
@@ -75,15 +75,13 @@ const CheckboxIcon = (props: any) => (
 export type CheckboxProps = StyledComponentProps<
   'input',
   any,
-  { label: string; error?: Boolean } & BoxProps,
+  { label?: string; disabled?: boolean; error?: Boolean } & BoxProps,
   never
 >;
 
-export const Checkbox: any = forwardRef<HTMLInputElement, CheckboxProps>(
-  (
-    { children, label, disabled, error, mb, mt, mx, my, ml, mr, ...props },
-    ref
-  ) => (
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ label, disabled, error, mb, mt, mx, my, ml, mr, ...props }, ref) => (
+    // @ts-ignore
     <Text
       as="label"
       variant="body"
@@ -98,6 +96,7 @@ export const Checkbox: any = forwardRef<HTMLInputElement, CheckboxProps>(
       mr={mr}
     >
       <Box display="inline-block">
+        {/* @ts-ignore */}
         <Box
           ref={ref}
           as="input"

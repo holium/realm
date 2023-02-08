@@ -29,6 +29,7 @@ export type BaseDialogProps = {
   draggable?: boolean;
   unblurOnClose?: boolean;
   theme?: ThemeModelType;
+  edit?: any;
 } & BaseWorkflowProps;
 
 export type DialogConfig = {

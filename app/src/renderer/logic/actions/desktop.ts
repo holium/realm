@@ -26,16 +26,14 @@ export const DesktopActions = {
     return await window.electron.os.desktop.setHomePane(isHome);
   },
   setMouseColor: async (mouseColor: string) => {
-    return await window.electron.os.desktop.setMouseColor(mouseColor);
+    window.electron.app.mouseColorChanged(mouseColor);
+    await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setAppDimensions: async (
-    windowId: any,
+  setAppDimensions: (
+    windowId: string,
     dimensions: { width: number; height: number; x: number; y: number }
   ) => {
-    return await window.electron.os.desktop.setAppDimensions(
-      windowId,
-      dimensions
-    );
+    window.electron.os.desktop.setAppDimensions(windowId, dimensions);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);

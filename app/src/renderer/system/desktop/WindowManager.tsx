@@ -10,11 +10,12 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-export const WindowManager = observer(() => {
+const WindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
   const isOpen = !desktop.showHomePane;
   const desktopRef = useRef<any>(null);
+  const id = 'desktop-fill';
 
   const windows = Array.from(desktop.windows.values());
 
@@ -46,17 +47,14 @@ export const WindowManager = observer(() => {
   );
 
   useEffect(() => {
-    if (
-      contextMenuOptions &&
-      contextMenuOptions !== getOptions('desktop-fill')
-    ) {
-      setOptions('desktop-fill', contextMenuOptions);
+    if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
+      setOptions(id, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, setOptions]);
 
   return (
     <motion.div
-      id="desktop-fill"
+      id={id}
       ref={desktopRef}
       animate={{
         display: isOpen ? 'block' : 'none',
@@ -81,4 +79,6 @@ export const WindowManager = observer(() => {
       ))}
     </motion.div>
   );
-});
+};
+
+export const WindowManager = observer(WindowManagerPresenter);

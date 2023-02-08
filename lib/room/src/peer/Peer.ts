@@ -20,8 +20,8 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
   tracks: Map<string, any>;
   audioTracks: Map<string, any>;
   videoTracks: Map<string, any>;
-  lastSpokeAt?: Date | undefined;
-  status: PeerConnectionState = PeerConnectionState.Disconnected;
+  lastSpokeAt: Date | null = null;
+  status: PeerConnectionState = PeerConnectionState.New;
 
   constructor(patp: Patp, config: PeerConfig) {
     // eslint-disable-next-line constructor-super

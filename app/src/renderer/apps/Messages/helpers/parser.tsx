@@ -9,21 +9,23 @@ export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {
     return getReferenceData(content.reference);
   } else {
-    return content[type];
+    if (typeof content[type] === 'string') {
+      return content[type];
+    } else {
+      if (content[type] && content[type].expression) {
+        return content[type].expression;
+      }
+    }
   }
 };
 
-type ReferenceView = {
+type Props = {
   reference: any;
   embedColor?: string;
   textColor?: string;
 };
 
-export const ReferenceView = ({
-  reference,
-  embedColor,
-  textColor,
-}: ReferenceView) => {
+export const ReferenceView = ({ reference, embedColor, textColor }: Props) => {
   const referenceType: any = Object.keys(reference)[0];
   const [groupReference, setGroupReference] = useState<any | null>(null);
 

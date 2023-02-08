@@ -251,13 +251,29 @@
         =/  old-wire       [/provider-updates/(scot %p old-provider)]
         =/  wire           [/provider-updates/(scot %p new-provider)]
         ~&  >>  "{<dap.bol>}: [set-provider]. {<src.bol>} setting provider from {<old-provider>} to {<new-provider>}"
-        :_  state
-        %+  weld  leave-cards
+        =/  outgoing-sub-wire-leave-cards
           ^-  (list card)
-          :~
-            [%pass old-wire %agent [old-provider %rooms-v2] %leave ~]
-            [%pass wire %agent [new-provider %rooms-v2] %watch wire]
+          %+  murn
+            ^-  (list path)
+            %~  tap  in
+            ^-  (set path)
+            %-  %~  run  in
+                  ~(key by wex.bol)
+            |=  [sub=path =ship =term]
+            sub
+          |=  =path
+          ?+  path  ~
+              [%provider-updates @ ~]
+            `[%pass path %agent [(slav %p i.t.path) %rooms-v2] %leave ~]
           ==
+        :_  state
+        %+  weld  outgoing-sub-wire-leave-cards
+          %+  weld  leave-cards
+            ^-  (list card)
+            :~
+              [%pass old-wire %agent [old-provider %rooms-v2] %leave ~]
+              [%pass wire %agent [new-provider %rooms-v2] %watch wire]
+            ==
       ::
       ++  reset-provider
         =/  old-provider            provider.session.state
@@ -283,11 +299,8 @@
         ++  session-create-room
           |=  [=rid:store =access:store =title:store path=(unit cord)]
           =/  provider      provider.session.state
-          =/  leave-cards   (gen-leave-cards:helpers:rooms:hol rid provider)
           :_  state
-          %+  weld  leave-cards
-            ^-  (list card)
-            [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path])]~
+          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path])]~
         ::
         ++  provider-create-room
           |=  [=rid:store =access:store =title:store path=(unit cord)]
@@ -304,16 +317,24 @@
                 capacity.room  max-occupancy:lib
                 path.room      path
             ==
-          =/  old-rooms               (get-created-rooms:helpers:rooms:hol src.bol)
-          =.  rooms.provider.state    (~(dif by rooms.provider.state) old-rooms)  :: remove old rooms
+          =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
+          =.  rooms.provider.state              :: remove old room if it exists
+            ?~  old-room  rooms.provider.state
+            ?:  =(src.bol creator.u.old-room)   :: creator is leaving the room, so delete it
+              (~(del by rooms.provider.state) rid.u.old-room)
+            :: if participant is leaving, remove participant
+            =.  present.u.old-room    (~(del in present.u.old-room) src.bol)
+            (~(put by rooms.provider.state) [rid.u.old-room u.old-room])
+          ::
+          =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
+          =/  delete-cards            ::  prep cards to update delete old rooms by the creator
+            ?~  old-room  ~
+            ?:  =(src.bol creator.u.old-room)  ::  creator is leaving the room, so delete it
+              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.u.old-room])]~
+            [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid.u.old-room src.bol])]~
           =.  present.room            (~(put in present.room) src.bol)        :: enter new room
           =.  whitelist.room          (~(put in whitelist.room) src.bol)      :: creator is always on the whitelist
           =.  rooms.provider.state    (~(put by rooms.provider.state) [rid room])
-          =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
-          =/  delete-cards         ::  delete old rooms by the creator
-            %+  turn  ~(val by old-rooms)
-              |=  old-room=room:store
-              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.old-room])]
           :_  state
           %+  weld  delete-cards
             ^-  (list card)
@@ -345,8 +366,6 @@
         ::
         ?>  (~(has by rooms.provider.state) rid) ::  room exists
         =/  room   (~(got by rooms.provider.state) rid)
-        ~&  >  ['is creator' (is-creator:hol src.bol rid)]
-        ~&  >  ['is provider' (is-host:hol src.bol)]
         =/  can-delete
           ?|  (is-creator:hol src.bol rid)
               (is-host:hol src.bol)
@@ -365,23 +384,34 @@
       ++  enter-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ::?.  (is-host:hol provider)
         ?.  (is-provider:hol provider src.bol)
-          =/  leave-cards   (gen-leave-cards:helpers:rooms:hol rid provider)
           :_  state
-          %+  weld  leave-cards
-            ^-  (list card)
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
         ?>  (~(has by rooms.provider.state) rid)  ::  room exists
         ?>  (can-enter:hol rid src.bol)       ::  src.bol can enter
-        ::  TODO remove from other rooms if present
-        :: =/  remove-result         (remove-present:helpers:rooms:hol src.bol rid)
+        =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
+        =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
+          =.  rooms.provider.state              :: remove old room if it exists
+            ?~  old-room  rooms.provider.state
+            ?:  =(src.bol creator.u.old-room)   :: creator is leaving the room, so delete it
+              (~(del by rooms.provider.state) rid.u.old-room)
+            :: if participant is leaving, remove participant
+            =.  present.u.old-room    (~(del in present.u.old-room) src.bol)
+            (~(put by rooms.provider.state) [rid.u.old-room u.old-room])
+        =/  leave-cards            ::  prep card to leave old room
+          ?~  old-room  ~
+          ?:  =(src.bol creator.u.old-room)  ::  creator is leaving the room, so delete it
+            [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.u.old-room])]~
+          [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid.u.old-room src.bol])]~
+
         =/  room                      (~(got by rooms.provider.state) rid)
+        ?>  (lth ~(wyt in present.room) capacity.room)
         =.  present.room              (~(put in present.room) src.bol)
         =.  rooms.provider.state      (~(put by rooms.provider.state) [rid room])
-        =/  fact-path                 [/provider-updates/(scot %p our.bol) ~]
         :_  state
+        %+  weld  leave-cards
+            ^-  (list card)
         [%give %fact fact-path rooms-v2-reaction+!>([%room-entered rid src.bol])]~
         :: ?.  =(~(wyt by rooms.remove-result) 0)
         ::     =.  rooms.provider.state    rooms.remove-result ::  remove from present rooms
@@ -559,40 +589,15 @@
         [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
       [~]
     ::
-    ++  get-created-rooms
+    ++  get-present-room
       |=  =ship
-      ^-  rooms:store
-      =/  rooms=(list [rid=rid:store room=room:store])
-        %+  skim  ~(tap by rooms.provider.state)
-          |=  [=rid:store =room:store]
-          (skim-created-rooms ship room)
-      ::
-      ^-(=rooms:store (malt rooms))
-    ::
-    ++  remove-present
-      |=  [=ship entering-rid=rid:store]
-      ^-  [cards=(list card) =rooms:store]
-      %-  ~(rep by rooms.provider.state)
-        |=  [[=rid:store =room:store] result=[cards=(list card) =rooms:store]]
-        ?:  =(rid entering-rid)  :: do not remove from entering room
-          result
-        ?:  (~(has in present.room) ship)
-          =/  fact-path     [/provider-updates/(scot %p our.bol) ~]
-          =.  cards.result  (snoc cards.result [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid ship])])
-          =.  present.room  (~(del in present.room) ship)
-          =.  rooms.result  (~(put by rooms.result) [rid room])
-          [cards.result rooms.result]
-        result
-    ::
-    ++  get-present-rooms
-      |=  =ship
-      ^-  rooms:store
-      =/  rooms=(list [rid=rid:store room=room:store])
-        %+  skim  ~(tap by rooms.provider.state)
-          |=  [=rid:store =room:store]
+      ^-  (unit room:store)
+      =/  rooms=(list room=room:store)
+        %+  skim  ~(val by rooms.provider.state)
+          |=  =room:store
           (skim-present-rooms ship room)
-      ::
-      ^-(=rooms:store (malt rooms))
+      ?:  =((lent rooms) 0)  ~
+      (some (rear rooms))
     ::
     ++  skim-created-rooms
       |=  [=ship =room:store]

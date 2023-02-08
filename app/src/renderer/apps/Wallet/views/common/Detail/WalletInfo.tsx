@@ -6,13 +6,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-} from 'os/services/tray/wallet.model';
+import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface WalletInfoProps {
-  wallet: EthWalletType | BitcoinWalletType;
+  wallet: EthWalletType;
   QROpen: boolean;
   setQROpen: (open: boolean) => void;
   hideWalletHero: boolean;
@@ -25,7 +22,9 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
+    // TODO clean up everything
     const amountDisplay = `${
+      // @ts-ignore
       formatEthAmount(props.wallet ? props.wallet.balance : '0.0').eth
     } ETH`;
 
@@ -74,7 +73,12 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
       >
         <Flex width="100%" justifyContent="space-between">
           <Flex>
-            <Icons name="Ethereum" height="20px" mr={2} />
+            <Text>aowsiehtoishrtoiwheotiwhet</Text>
+            {/*(typeof props.wallet) === EthWalletType
+            ? <Icons name="Ethereum" height="20px" mr={2} />
+            : <Icons name="Bitcoin" height="20px" mr={2} />
+    */}
+            <Icons name="Bitcoin" height="20px" mr={2} />
             <Text pt="2px" textAlign="center" fontSize="14px">
               {props.wallet && shortened(props.wallet.address)}
             </Text>

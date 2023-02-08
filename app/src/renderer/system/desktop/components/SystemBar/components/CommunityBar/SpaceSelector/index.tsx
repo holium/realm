@@ -3,17 +3,17 @@ import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
 import { Flex, Pulser, Divider } from 'renderer/components';
-import { TrayButton } from '../../TrayButton';
 import { SelectedSpace } from './SelectedSpace';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { BarButton } from '@holium/design-system';
 
 const position = 'top-right';
 const anchorOffset = { x: 4, y: 16 };
 const dimensions = { height: 500, width: 380 };
 
-export const SpaceSelector = observer(() => {
+const SpaceSelectorPresenter = () => {
   const { ship, spaces, theme } = useServices();
   const selectorRef = createRef<HTMLDivElement>();
 
@@ -54,6 +54,8 @@ export const SpaceSelector = observer(() => {
     [activeApp, setTrayAppCoords, setTrayAppDimensions, setActiveApp]
   );
 
+  const isLoaded = spaces.isLoaded || spaces.selected;
+
   return (
     <Flex
       id="spaces-tray-icon"
@@ -61,17 +63,12 @@ export const SpaceSelector = observer(() => {
       className="realm-cursor-hover"
       position="relative"
       alignItems="center"
-      onClick={onButtonClick}
+      onClick={isLoaded && onButtonClick}
     >
-      {spaces.isLoaded || spaces.selected ? (
-        <SelectedSpace selectorRef={selectorRef} />
+      {isLoaded ? (
+        <SelectedSpace />
       ) : (
-        <TrayButton
-          ref={selectorRef}
-          whileTap={{ scale: 0.975 }}
-          transition={{ scale: 0.2 }}
-          customBg={dockColor}
-        >
+        <BarButton whileTap={{ scale: 0.975 }} transition={{ scale: 0.2 }}>
           <Flex>
             <Pulser
               background={rgba(theme.currentTheme.backgroundColor, 0.5)}
@@ -99,7 +96,7 @@ export const SpaceSelector = observer(() => {
               width={90}
             />
           </Flex>
-        </TrayButton>
+        </BarButton>
       )}
       {ship && (
         <Divider
@@ -113,6 +110,6 @@ export const SpaceSelector = observer(() => {
       )}
     </Flex>
   );
-});
+};
 
-export default { SpaceSelector };
+export const SpaceSelector = observer(SpaceSelectorPresenter);

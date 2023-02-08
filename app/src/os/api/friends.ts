@@ -95,7 +95,7 @@ export const FriendsApi = {
     return await conduit.watch({
       app: 'friends',
       path: `/all`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
+      onEvent: async (data: any, _id?: number) => {
         if (data.friends) {
           friendsStore.initial(data.friends);
         }
@@ -114,8 +114,18 @@ export const FriendsApi = {
           friendsStore.remove(patp);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
+      onSubscribed: () => {
+        console.log('Subscribed to %friends');
+        friendsStore.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %friends rejected');
+        friendsStore.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %friends subscription');
+        friendsStore.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };

@@ -1,7 +1,6 @@
 import { Patp } from 'os/types';
 import { useState } from 'react';
 import {
-  Icons,
   Text,
   TextButton,
   Flex,
@@ -30,30 +29,16 @@ interface IVisaRow {
   onButtonClick?: (data: any) => void;
 }
 
-export const VisaRow = (props: IVisaRow) => {
-  const {
-    disabled,
-    customBg,
-    icon,
-    image,
-    color,
-    title,
-    path,
-    invitedBy,
-    onClick,
-    onAccept,
-    onButtonClick,
-  } = props;
-  let leftIcon = <EmptyGroup />;
-  if (icon) {
-    leftIcon = <Icons size={32} name={icon} />;
-  }
-  if (image) {
-    leftIcon = (
-      <img height={32} width={32} style={{ borderRadius: 4 }} src={image} />
-    );
-  }
-
+export const VisaRow = ({
+  disabled,
+  customBg,
+  image,
+  color,
+  title,
+  path,
+  invitedBy,
+  onClick,
+}: IVisaRow) => {
   const [declining, setDeclining] = useState(false);
   const [joining, setJoining] = useState(false);
 
@@ -104,6 +89,7 @@ export const VisaRow = (props: IVisaRow) => {
       <Flex gap={16} flexDirection="row" alignItems="center">
         {image ? (
           <img
+            alt="group"
             style={{ borderRadius: 6 }}
             height="32px"
             width="32px"

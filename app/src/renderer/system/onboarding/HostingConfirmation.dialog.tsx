@@ -5,10 +5,6 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-interface SelectPlanProps extends BaseDialogProps {
-  patp: string;
-}
-
 function useInterval(callback: any, delay: number) {
   const savedCallback = useRef();
 
@@ -17,21 +13,22 @@ function useInterval(callback: any, delay: number) {
   }, [callback]);
 
   useEffect(() => {
+    let intervalRef: NodeJS.Timer;
     function tick() {
       // @ts-expect-error
       savedCallback.current();
     }
     if (delay !== null) {
-      const id = setInterval(tick, delay);
-      return () => clearInterval(id);
+      intervalRef = setInterval(tick, delay);
     }
+    return () => clearInterval(intervalRef);
   }, [delay]);
 }
 
 const ASSUME_ERROR_DURATION = 1000 * 60 * 30;
 
-const HostingConfirmation: FC<SelectPlanProps> = observer(
-  (props: SelectPlanProps) => {
+const HostingConfirmation: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
     const [loading, setLoading] = useState(true);
     const [startTime, _] = useState(Date.now());
     const [error, setError] = useState('');

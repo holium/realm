@@ -12,3 +12,10 @@ declare global {
 }
 
 export {};
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      webview: Electron.WebviewTag;
+    }
+  }
+}

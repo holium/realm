@@ -1,4 +1,4 @@
-import { useRef, FC, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
@@ -23,17 +23,16 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
+import { trackEvent } from 'renderer/logic/lib/track';
 
 interface LoginProps {
   addShip: () => void;
 }
 
-export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip } = props;
+const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
-  const [isStale, setIsStale] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -75,7 +74,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   }, [pendingShip]);
 
   const login = async () => {
-    let loggedIn = await AuthActions.login(
+    const loggedIn = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
@@ -85,6 +84,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       submitRef.current.blur();
       setIncorrectPassword(true);
     }
+    trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
 
   const submitPassword = (event: any) => {
@@ -180,7 +180,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   alignItems="center"
                 >
                   <Input
-                    ref={passwordRef}
+                    innerRef={passwordRef}
                     wrapperRef={wrapperRef}
                     bg="bg.blendedBg"
                     autoFocus
@@ -204,7 +204,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           ref={optionsRef}
                           luminosity={theme.currentTheme.mode}
                           opacity={1}
-                          onClick={(evt: any) => {
+                          onClick={() => {
                             setShow(true);
                           }}
                         >
@@ -223,9 +223,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                   width: menuWidth,
                                 }}
                                 isOpen={show}
-                                onClose={(evt) => {
-                                  setShow(false);
-                                }}
+                                onClose={() => setShow(false)}
                               >
                                 <MenuItem
                                   data-prevent-context-close={false}
@@ -238,8 +236,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                 <MenuItem
                                   label="Remove ship"
                                   customBg={theme.currentTheme.windowColor}
-                                  mt={1}
-                                  onClick={(_evt: any) => {
+                                  onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}
                                 />
@@ -276,7 +273,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
-                    {isStale && 'Stale connection. Refreshing token...'}
                     {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>
@@ -316,6 +312,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       </Bottom>
     </Fill>
   );
-});
+};
 
-export default Login;
+export const Login = observer(LoginPresenter);

@@ -1,8 +1,7 @@
-import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text } from 'renderer/components';
 import { darken, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { WordPicker } from './WordPicker';
 import { NewWalletScreen } from './index';
@@ -12,7 +11,7 @@ interface ConfirmProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
 }
 
-export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
+const ConfirmPresenter = (props: ConfirmProps) => {
   const [valid, setValid] = useState(false);
   const { theme } = useServices();
 
@@ -52,4 +51,6 @@ export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Confirm = observer(ConfirmPresenter);

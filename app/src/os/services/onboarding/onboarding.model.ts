@@ -1,8 +1,11 @@
 import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
 import { AccessCode, HostingPlanet } from 'os/api/holium';
+import { DocketApi } from '../../api/docket';
+import { Conduit } from '@holium/conduit';
 
 export enum OnboardingStep {
+  PRE_INSTALLATION_CHECK = 'onboarding:pre-installation-check',
   DISCLAIMER = 'onboarding:disclaimer',
   ACCESS_GATE = 'onboarding:gated-access',
   ACCESS_GATE_PASSED = 'onboarding:access-gate-passed',
@@ -63,6 +66,7 @@ export const OnboardingShipModel = types
 
 export const OnboardingStore = types
   .model({
+    firstTime: types.optional(types.boolean, true),
     currentStep: OnboardingStep.DISCLAIMER,
     agreedToDisclaimer: false,
     email: types.maybe(types.string),
@@ -72,12 +76,15 @@ export const OnboardingStore = types
     planet: types.maybe(PlanetModel),
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
+    versionLoader: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
     code: types.maybe(types.string),
     planetWasTaken: false,
+    versionVerified: false,
+    newAccount: true,
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -152,10 +159,41 @@ export const OnboardingStore = types
       }
     },
 
-    installRealm: flow(function* () {
-      self.installer.set('loading');
+    setRealmInstalled() {
       self.installer.set('loaded');
+    },
+
+    preInstallSysCheck: flow(function* (conduit: Conduit) {
+      self.versionLoader.set('loading');
+      try {
+        const apps = yield DocketApi.getApps(conduit);
+        if (!('groups' in apps)) throw new Error('groups 2 not installed');
+        const ver = apps['groups'].version;
+        console.log(ver);
+        const parts = ver.split('.');
+        // change version if needed . this is latest groups based on my latest ship OTA
+        console.log(parts);
+        if (
+          !(
+            Number.parseInt(parts[0]) >= 2 &&
+            Number.parseInt(parts[1]) >= 0 &&
+            Number.parseInt(parts[2]) >= 0
+          )
+        )
+          throw new Error('needs upgrade');
+        self.versionVerified = true;
+        self.versionLoader.set('loaded');
+      } catch (error) {
+        console.error(error);
+        self.versionVerified = false;
+        self.versionLoader.set('error');
+      }
+      return self.versionVerified;
     }),
+
+    setNewAccount(val: boolean) {
+      self.newAccount = val;
+    },
 
     reset() {
       self.ship = undefined;

@@ -1,35 +1,32 @@
-import React, { FC, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Sigil, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { lighten } from 'polished';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
 
-export const SystemApp: FC<any> = observer(() => {
-  const { theme, ship, contacts } = useServices();
+type SystemPanelType =
+  | 'system'
+  | 'theme'
+  | 'account'
+  | 'about'
+  | 'help'
+  | undefined;
+
+const SystemAppPresenter = () => {
+  const { theme, ship } = useServices();
   const { windowColor } = theme.currentTheme;
-  const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   const person = ship!.patp;
-  const contact = contacts.getContactAvatarMetadata(person);
-
-  type SystemPanelType =
-    | 'system'
-    | 'theme'
-    | 'account'
-    | 'about'
-    | 'help'
-    | undefined;
 
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>('theme');
 
   return (
     <Flex height={'100%'}>
-      <Flex gap={0} flexDirection="row" flex={5} overflowX={'scroll'}>
+      <Flex gap={0} flexDirection="row" flex={5} overflowX="hidden">
         {/* left hand side, list selector view */}
         <Flex gap={12} flexDirection="column" p="12px">
           <Flex
@@ -87,7 +84,7 @@ export const SystemApp: FC<any> = observer(() => {
             />
           </Flex> */}
 
-          <Flex overflowY="scroll" flexDirection="row" flex={4}>
+          <Flex overflowY="auto" flexDirection="row" flex={4}>
             {/* menu / list  */}
             <RadioList
               customBg={windowColor}
@@ -142,4 +139,6 @@ export const SystemApp: FC<any> = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const SystemApp = observer(SystemAppPresenter);

@@ -1,25 +1,27 @@
 /-  *realm-wallet
 /+  default-agent, dbug, *realm-wallet
-|%
-+$  versioned-state
-  $%  state-0
-  ==
-+$  state-0
-  $:  %0
-      =wallets
-      =settings
-  ==
-+$  card  card:agent:gall
---
-%-  agent:dbug
+^-  agent:gall
+::
+=>
+  |%
+  +$  card  card:agent:gall
+  +$  versioned-state
+    $%  state-0
+    ==
+  +$  state-0
+    $:  %0
+        =wallets
+        =settings
+    ==
+  --
 =|  state-0
 =*  state  -
-^-  agent:gall
 =<
+  %-  agent:dbug
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
-      core   ~(. +> bowl)
+      core   ~(. +> [bowl ~])
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -37,7 +39,7 @@
       (mole |.(!<(state-0 vase)))  
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easierr
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
@@ -53,7 +55,6 @@
     :: ==
   ::
   ++  on-poke
-    ~/  %on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?+  mark  (on-poke:def mark vase)
@@ -75,10 +76,11 @@
       =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
-        [%transactions ~]
-      `this
-        [%wallets ~]
-      `this
+        [%updates ~]
+      :_  this
+      :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
+          [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
+      ==
     ==
   ++  on-leave  on-leave:def
   ++  on-peek
@@ -86,6 +88,10 @@
     ^-  (unit (unit cage))
     ?>  (team:title our.bowl src.bowl)
     ?+    path  (on-peek:def path)
+        [%x %eth-xpub ~]
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
+      [%eth-xpub xpub:(~(got by networks.settings) %ethereum)]
         [%x %wallets ~]
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
@@ -99,28 +105,28 @@
   ++  on-arvo   on-arvo:def
   ++  on-fail   on-fail:def
   --
-|_  =bowl:gall
+|_  [=bowl:gall cards=(list card)]
 ::
+++  core  .
 ++  handle-wallet-action
   |=  act=action
   ^-  (quip card _state)
   ?-  -.act
       %initialize
     ?>  (team:title our.bowl src.bowl)
-    =.  who.sharing.settings.state  %anybody
-    =.  wallet-creation.sharing.settings.state  %default
     =.  wallets.state
       (~(put by wallets.state) [%ethereum ~])
     =.  wallets.state
       (~(put by wallets.state) [%bitcoin ~])
     =.  wallets.state
       (~(put by wallets.state) [%btctestnet ~])
+    =/  default-net-settings  [~ 0 %anybody %default]
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%ethereum [~ 0]])
+      (~(put by networks.settings.state) [%ethereum default-net-settings])
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%bitcoin [~ 0]])
+      (~(put by networks.settings.state) [%bitcoin default-net-settings])
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%btctestnet [~ 0]])
+      (~(put by networks.settings.state) [%btctestnet default-net-settings])
     `state
     ::
       %set-xpub
@@ -140,41 +146,53 @@
       (~(put by networks.settings.state) [network.act net])
     `state
     ::
-      %set-settings
+      %set-network-settings
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings
       =/  net-settings  (~(got by networks.settings) network.act)
       =.  default-index.net-settings  share-index.act
+      =.  wallet-creation.sharing.net-settings  mode.act
+      =.  who.sharing.net-settings  who.act
       (~(put by networks.settings) [network.act net-settings])
-    =.  wallet-creation.sharing.settings  mode.act
-    =.  who.sharing.settings  who.act
-    =.  blocked.sharing.settings  blocked.act
-    `state
+    =.  blocked.settings  blocked.act
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
+    ::
+      %set-passcode-hash
+    ?>  (team:title our.bowl src.bowl)
+    =.  passcode-hash.settings  hash.act
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-wallet-creation-mode
     ?>  (team:title our.bowl src.bowl)
-    `state(wallet-creation.sharing.settings mode.act)
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    =.  wallet-creation.sharing.net-settings  mode.act
+    =.  networks.settings.state  (~(put by networks.settings.state) [network.act net-settings])
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-mode
     ?>  (team:title our.bowl src.bowl)
-    `state(who.sharing.settings who.act)
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    =.  who.sharing.net-settings  who.act
+    =.  networks.settings.state  (~(put by networks.settings.state) [network.act net-settings])
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-permissions
     ?>  (team:title our.bowl src.bowl)
-    =.  sharing.settings
-      ?-  type.act
-        %block
-      =.  blocked.sharing.settings  (~(put in blocked.sharing.settings) who.act)
-      sharing.settings
-      ==
-    `state
+    =.  blocked.settings  (~(put in blocked.settings) who.act)
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-default-index
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings.state
       =/  prev-set  (~(got by networks.settings.state) network.act)
-      (~(put by networks.settings.state) [network.act [xpub.prev-set index.act]])
-    `state
+      (~(put by networks.settings.state) [network.act [xpub.prev-set index.act sharing.prev-set]])
+    :_  state
+    [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-wallet-nickname
     ?>  (team:title our.bowl src.bowl)
@@ -194,24 +212,26 @@
       =/  wall-act=action  [%receive-address network.act ~]
       =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
-    ?:  =(who.sharing.settings %nobody)
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    ?:  =(who.sharing.net-settings %nobody)
       [null-address-card state]
-    ?:  (~(has in blocked.sharing.settings) src.bowl)
+    ?:  (~(has in blocked.settings) src.bowl)
       [null-address-card state]
-    ?:  ?&  =(who.sharing.settings %friends)
+    ?:  ?&  =(who.sharing.net-settings %friends)
             =/  friends  .^((set @p) %gx /(scot %p our.bowl)/friends/(scot %da now.bowl)/ships/noun)
             !(~(has in friends) src.bowl)
         ==
       [null-address-card state]
     ::  send default wallet if requested
     ::
+    =/  net-settings  (~(got by networks.settings.state) network.act)
     ?:  ?&  !(team:title our.bowl src.bowl)
-            =(%default wallet-creation.sharing.settings.state)
+            =(%default wallet-creation.sharing.net-settings)
             =/  net-wallets  ~(tap by (~(got by wallets) network.act))
             =/  num-wallets  (lent net-wallets)
             (gth num-wallets 0)
         ==
-      =/  default-idx  default-index:(~(got by networks.settings.state) network.act)
+      =/  default-idx  default-index.net-settings
       =/  default-wallet  (~(get by (~(got by wallets) network.act)) default-idx)
       :_  state
       ?~  default-wallet
@@ -234,7 +254,7 @@
       ~&  >  (crip (weld "generated wallet address " (z-co:co address)))
       =/  wallet
         ^-  wallet
-        [address path nickname.act ~]
+        [address path nickname.act ~ ~]
       =.  wallets.state
         =/  old-map  (~(got by wallets.state) network.act)
         =.  old-map  (~(put by old-map) [idx wallet])
@@ -254,7 +274,7 @@
     =/  cards
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
-      :~  `card`[%give %fact [/wallets]~ %realm-wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
+      :~  `card`[%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
       ==
     ::  send wallet to requester if not our
     =?  cards  !(team:title our.bowl src.bowl)
@@ -284,13 +304,29 @@
     =.  wallets.state
       =/  network-map  (~(got by wallets.state) network.act)
       =/  prev-wallet  (~(got by network-map) wallet.act)
-      =.  transactions.prev-wallet
-        =/  net-map  (~(get by transactions.prev-wallet) net.act)
-        =/  net-map
-          ?~  net-map
-            (my [hash.transaction.act transaction.act]~)
-          (~(put by u.net-map) [hash.transaction.act transaction.act])
-        (~(put by transactions.prev-wallet) [net.act net-map])
+      =.  prev-wallet
+        ?~  contract.act
+          =.  transactions.prev-wallet
+            =/  net-map  (~(get by transactions.prev-wallet) net.act)
+            =/  net-map
+              ?~  net-map
+                (my [hash.transaction.act transaction.act]~)
+              (~(put by u.net-map) [hash.transaction.act transaction.act])
+            (~(put by transactions.prev-wallet) [net.act net-map])
+          prev-wallet
+        =.  token-txns.prev-wallet
+          =/  net-map  (~(get by token-txns.prev-wallet) net.act)
+          =/  net-map
+            ?~  net-map
+              (my [u.contract.act (my [hash.transaction.act transaction.act]~)]~)
+            =/  contract-map  (~(get by u.net-map) u.contract.act)
+            =/  contract-map
+              ^-  (map @t transaction)
+              ?~  contract-map  (my [hash.transaction.act transaction.act]~)
+              (~(put by u.contract-map) [hash.transaction.act transaction.act])
+            (~(put by u.net-map) [u.contract.act contract-map])
+          (~(put by token-txns.prev-wallet) [net.act net-map])
+        prev-wallet
       =.  network-map  (~(put by network-map) [wallet.act prev-wallet])
       (~(put by wallets.state) [network.act network-map])
     =/  cards  *(list card)
@@ -308,7 +344,7 @@
           =.  their-address.transaction.act  our-address.transaction.act
           =.  our-address.transaction.act  their-address
           transaction.act
-        =/  wall-act=action  [%set-transaction network.act net.act wallet.act hash.act transaction.act]
+        =/  wall-act=action  [%set-transaction network.act net.act wallet.act contract.act hash.act transaction.act]
         =/  task  [%poke %realm-wallet-action !>(wall-act)]
         =/  new-card
           ^-  (list card)
@@ -319,7 +355,7 @@
         !(team:title our.bowl src.bowl)
       =/  new-card
         ^-  (list card)
-        :~  `card`[%give %fact ~[/transactions] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act hash.act transaction.act])]
+        :~  `card`[%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act contract.act hash.act transaction.act])]
         ==
       (weld cards new-card)
     [cards state]
@@ -327,7 +363,11 @@
       %save-transaction-notes
     =/  network-map  (~(got by wallets) %ethereum)
     =/  wall-map  (~(got by network-map) wallet.act)
-    =/  net-map  (~(get by transactions.wall-map) net.act)
+    =/  net-map
+      ?~  contract.act  (~(get by transactions.wall-map) net.act)
+      =/  net-map  (~(get by token-txns.wall-map) net.act)
+      ?~  net-map  ~
+      (~(get by u.net-map) u.contract.act)
     =/  tx
       ?~  net-map
         =/  tx  *transaction
@@ -347,11 +387,21 @@
         (my [hash.act tx]~)
       (~(put by u.net-map) [hash.act tx])
     =.  wallets
-      =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
+      =.  wall-map
+        ?~  contract.act
+          =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
+          wall-map
+        =.  token-txns.wall-map
+          =/  map-net  (~(get by token-txns.wall-map) net.act)
+          ?~  map-net
+            (~(put by token-txns.wall-map) [net.act (my [u.contract.act net-map]~)])
+          =/  map-net  (~(put by u.map-net) [u.contract.act net-map])
+          (~(put by token-txns.wall-map) [net.act map-net])
+        wall-map
       =.  network-map  (~(put by network-map) [wallet.act wall-map])
       (~(put by wallets) [%ethereum network-map])
     :_  state
-    [%give %fact ~[/transactions] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act hash.act tx])]~
+    [%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act contract.act hash.act tx])]~
     ::
   ==
 ::

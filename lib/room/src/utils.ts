@@ -1,3 +1,6 @@
+import { patp2dec } from 'urbit-ob';
+import { Patp } from '@urbit/http-api';
+
 export function isFireFox(): boolean {
   if (!isWeb()) return false;
   return navigator.userAgent.includes('Firefox');
@@ -15,4 +18,12 @@ export function isMobile(): boolean {
 
 export function isWeb(): boolean {
   return typeof document !== 'undefined';
+}
+
+export function isInitiator(localPatpId: number, remotePatp: Patp) {
+  return localPatpId < patp2dec(remotePatp);
+}
+
+export function isDialer(localPatp: string, remotePatp: Patp) {
+  return localPatp < remotePatp;
 }

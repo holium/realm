@@ -65,18 +65,16 @@ export const Message = ({
     case 'url':
       if (isImage(message)) {
         messageContainer = (
-          <img
-            className="realm-cursor-hover"
-            style={{ borderRadius: 8 }}
-            height="auto"
-            width={250}
-            onClick={(evt: any) => {
-              evt.preventDefault();
-              // openFileViewer(message);
-            }}
-            src={message}
-            onLoad={onImageLoad}
-          />
+          <a href={message}>
+            <img
+              className="realm-cursor-hover"
+              style={{ borderRadius: 8 }}
+              height="auto"
+              width={250}
+              src={message}
+              onLoad={onImageLoad}
+            />
+          </a>
         );
       } else {
         messageContainer = (
@@ -111,6 +109,7 @@ export const Message = ({
       if (typeof message === 'string') {
         messageContainer = <Text fontSize={2}>{message}</Text>;
       } else {
+        // @ts-ignore
         messageContainer = <Text fontSize={2}>{message.expression}</Text>;
       }
       break;

@@ -1,6 +1,5 @@
 import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
-import Store from 'electron-store';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -25,7 +24,6 @@ import { AppType } from '../spaces/models/bazaar';
  *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
-  private readonly db?: Store<DesktopStoreType>; // for persistance
   private readonly state: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
@@ -107,7 +105,7 @@ export class DesktopService extends BaseService {
     });
   }
 
-  async load(patp: string, mouseColor: string) {
+  async load(_patp: string, mouseColor: string) {
     // const syncEffect = {
     //   model: getSnapshot(this.state!),
     //   resource: 'desktop',
@@ -142,7 +140,7 @@ export class DesktopService extends BaseService {
     // }
   }
 
-  setActive(_event: any, spaceId: string, appId: string) {
+  setActive(_event: any, _spaceId: string, appId: string) {
     this.state?.setActive(appId);
   }
 
@@ -163,13 +161,12 @@ export class DesktopService extends BaseService {
     this.state?.setDimensions(windowId, dimensions);
   }
 
-  openAppWindow(_event: any, spaceId: string, selectedApp: AppType) {
-    const { desktopDimensions, isFullscreen } = this.core.services.shell;
+  openAppWindow(_event: any, _spaceId: string, selectedApp: AppType) {
+    const { desktopDimensions } = this.core.services.shell;
 
     const newWindow = this.state.openBrowserWindow(
       selectedApp,
-      desktopDimensions as any,
-      isFullscreen as boolean
+      desktopDimensions as any
     );
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
@@ -195,10 +192,10 @@ export class DesktopService extends BaseService {
     }
   }
 
-  toggleMinimized(_event: any, spaceId: string, windowId: string) {
+  toggleMinimized(_event: any, _spaceId: string, windowId: string) {
     this.state?.toggleMinimize(windowId);
   }
-  closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
+  closeAppWindow(_event: any, _spaceId: string, selectedApp: any) {
     this.state?.closeBrowserWindow(selectedApp.id);
   }
 }

@@ -5,6 +5,7 @@ export enum DataPacket_Kind {
   DATA = 0,
   CURSOR = 1,
   TRACK_META = 2,
+  MUTE_STATUS = 3,
   UNRECOGNIZED = -1,
 }
 

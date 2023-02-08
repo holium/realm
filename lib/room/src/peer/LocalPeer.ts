@@ -19,7 +19,7 @@ export const DEFAULT_AUDIO_OPTIONS = {
 };
 
 export class LocalPeer extends Peer {
-  stream?: MediaStream;
+  stream: MediaStream | null = null;
   protocol: BaseProtocol;
   constraints: MediaStreamConstraints = {
     audio: DEFAULT_AUDIO_OPTIONS,
@@ -56,6 +56,12 @@ export class LocalPeer extends Peer {
     localStorage.setItem('rooms-audio-output', deviceId);
   }
 
+  /**
+   * streamTracks: streams the tracks of the current stream to the peer
+   *
+   * @param peer
+   * @returns
+   */
   streamTracks(peer: RemotePeer) {
     if (!this.stream) {
       console.log('no stream to stream');
@@ -67,8 +73,15 @@ export class LocalPeer extends Peer {
         track.enabled = false;
       }
       if (!peer.peer?.destroyed) {
-        // if (!peer.peer?.destroyed && !peer.isAudioAttached) {
-        peer.peer?.addTrack(track, currentStream);
+        // console.log(`%streaming tracks to ${peer.patp}`);
+        try {
+          peer.peer?.addTrack(track, currentStream);
+        } catch (e) {
+          // catches "Track has already been added to that stream."
+          console.error(e);
+        }
+      } else {
+        console.log('streamTracks: peer is destroyed');
       }
     });
   }
@@ -99,7 +112,6 @@ export class LocalPeer extends Peer {
     }
   ) {
     if (this.stream) {
-      console.log('already have stream');
       return;
     }
     const storedDeviceId = localStorage.getItem('rooms-audio-input');
@@ -143,6 +155,6 @@ export class LocalPeer extends Peer {
       this.emit(PeerEvent.VideoTrackRemoved, track);
     });
     this.videoTracks.clear();
-    this.stream = undefined;
+    this.stream = null;
   }
 }

@@ -1,26 +1,25 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import { Spinner } from 'renderer/components';
 import {
-  Grid,
+  Icon,
+  Text,
+  Button,
   Flex,
   Box,
-  Spinner,
-  Text,
-  Input,
-  Icons,
-  IconButton,
-} from 'renderer/components';
+  TextInput,
+  Skeleton,
+  WindowedList,
+} from '@holium/design-system';
 import { ContactRow } from './components/ContactRow';
 import { ThemeModelType } from 'os/services/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import {
   PreviewDMType,
   PreviewGroupDMType,
   DMPreviewType,
 } from 'os/services/ship/models/courier';
-import { WindowedList } from '@holium/design-system';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface IProps {
   theme: ThemeModelType;
@@ -30,18 +29,32 @@ interface IProps {
   onNewChat: (evt: any) => void;
 }
 
-export const DMs = observer((props: IProps) => {
-  const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
-  const { textColor, iconColor, dockColor, windowColor } = theme;
+const DMsPresenter = (props: IProps) => {
+  const { height, theme, onSelectDm, onNewChat } = props;
 
   const { courier } = useServices();
   const [searchString, setSearchString] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const previews = useMemo(() => {
-    return Array.from(courier.previews.values()).sort(
-      (a, b) => b.lastTimeSent - a.lastTimeSent
-    );
-  }, [courier.previews]);
+  const previews = Array.from(courier.previews.values()).sort(
+    (a, b) => b.lastTimeSent - a.lastTimeSent
+  );
+  const lastTimeSent = previews[0]?.lastTimeSent;
+
+  const fetchPreviews = useCallback(async () => {
+    const newPreviews = await ShipActions.getDMs();
+    courier.setPreviews(newPreviews);
+  }, [courier]);
+
+  useEffect(() => {
+    const fetchPreviewsWithSkeleton = async () => {
+      setIsFetching(true);
+      await fetchPreviews();
+      setIsFetching(false);
+    };
+
+    if (previews.length === 0) fetchPreviewsWithSkeleton();
+  }, []);
 
   const searchFilter = useCallback(
     (preview: DMPreviewType) => {
@@ -59,7 +72,24 @@ export const DMs = observer((props: IProps) => {
     [searchString]
   );
 
-  const dMList = useCallback(() => {
+  const DMList = () => {
+    if (isFetching) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="start"
+          overflow="hidden"
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Box key={index} mb={2} mx={4}>
+              <Skeleton height={57} borderRadius={8} />
+            </Box>
+          ))}
+        </Flex>
+      );
+    }
+
     if (previews.length === 0) {
       return (
         <Flex
@@ -69,28 +99,30 @@ export const DMs = observer((props: IProps) => {
           alignItems="center"
           gap={24}
         >
-          <Text color={textColor} width={200} textAlign="center" opacity={0.3}>
+          <Text.Custom width={200} textAlign="center" opacity={0.3}>
             No Direct Messages. Click the <b>+</b> to start.
-          </Text>
+          </Text.Custom>
         </Flex>
       );
     }
 
-    const lastMessageText = previews[0].lastMessage[0]?.text;
-
     return (
       <WindowedList
-        key={lastMessageText}
-        width={388}
+        key={lastTimeSent}
+        width={364}
         height={544}
         rowHeight={57}
         data={previews}
         filter={searchFilter}
         rowRenderer={(dm, index) => (
-          <Box display="block" key={`${lastMessageText}-${index}`}>
+          <Box
+            display="block"
+            key={`dm-${index}-${dm.lastTimeSent}-${dm.pending}`}
+          >
             <ContactRow
               theme={theme}
               dm={dm}
+              refreshDms={fetchPreviews}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onSelectDm(dm);
@@ -100,92 +132,63 @@ export const DMs = observer((props: IProps) => {
         )}
       />
     );
-  }, [onSelectDm, previews, searchFilter, textColor, theme]);
+  };
 
   return (
-    <Grid.Column
-      style={{ position: 'relative', color: textColor }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBlur
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...props.theme,
-          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
-          // windowColor: rgba(windowColor, 0.8),
-          windowColor,
-        }}
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
       >
-        <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
-          <Icons opacity={0.8} name="Messages" size={24} mr={2} />
-          <Text
-            opacity={0.8}
-            style={{ textTransform: 'uppercase' }}
-            fontWeight={600}
-          >
+        <Flex justifyContent="center" alignItems="center">
+          <Icon opacity={0.8} name="Messages" size={24} mr={3} />
+          <Text.Custom fontWeight="600" textTransform="uppercase" opacity={0.7}>
             DMs
-          </Text>
+          </Text.Custom>
         </Flex>
-        <Flex flex={1}>
-          <Input
+        <Flex flex={1} ml={3} mr={2}>
+          <TextInput
+            id="dm-search"
+            name="dm-search"
             className="realm-cursor-text-cursor"
             type="text"
+            height={30}
+            width="100%"
             placeholder="Search"
-            wrapperStyle={{
-              cursor: 'none',
-              borderRadius: 9,
-              borderColor: 'transparent',
-              backgroundColor:
-                theme.mode === 'dark'
-                  ? lighten(0.1, windowColor)
-                  : darken(0.055, windowColor),
-            }}
             onChange={(evt: any) => {
               evt.stopPropagation();
               setSearchString(evt.target.value);
             }}
           />
         </Flex>
-        <Flex ml={1} pl={2} pr={2}>
-          <IconButton
-            customBg={dockColor}
+        <Flex>
+          <Button.IconButton
             className="realm-cursor-hover"
-            size={28}
-            color={iconColor}
+            width={26}
+            height={26}
             onClick={onNewChat}
           >
-            <Icons name="Plus" />
-          </IconButton>
+            <Icon name="Plus" size={24} opacity={0.7} />
+          </Button.IconButton>
         </Flex>
-      </Titlebar>
-      <Flex
-        style={{
-          zIndex: 4,
-          position: 'relative',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: windowColor,
-        }}
-        overflowY="hidden"
-      >
-        <Grid.Column gap={2} noGutter expand height={height} overflowY="auto">
-          {courier.loader.isLoading ? (
-            <Flex flex={1} alignItems="center" justifyContent="center">
-              <Spinner size={2} />
-            </Flex>
-          ) : (
-            <>
-              <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {dMList()}
-            </>
-          )}
-        </Grid.Column>
       </Flex>
-    </Grid.Column>
+      <Flex gap={2} flexDirection="column" height={height} overflowY="auto">
+        {courier.loader.isLoading ? (
+          <Flex flex={1} alignItems="center" justifyContent="center">
+            <Spinner size={2} />
+          </Flex>
+        ) : (
+          <>
+            <Box display="block" />
+            <DMList />
+            <Box display="block" />
+          </>
+        )}
+      </Flex>
+    </>
   );
-});
+};
+
+export const DMs = observer(DMsPresenter);

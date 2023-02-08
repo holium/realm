@@ -1,6 +1,6 @@
+import { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
-
 import {
   compose,
   space,
@@ -18,6 +18,7 @@ import { ThemeType } from 'renderer/theme';
 
 export type TagStyleProps = ColorProps &
   SpaceProps & {
+    children: ReactNode;
     theme: ThemeType;
     intent: IntentTypes;
     minimal?: boolean;
@@ -60,7 +61,7 @@ export const TagStyle = styled(
 
 export const TagIcon = styled(
   styled.div`
-    display:flex;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     margin-right: 4px;
@@ -78,6 +79,7 @@ export const TagIcon = styled(
                 fill:: ${(props: TagStyleProps) =>
                   props.theme.colors.text.white};
               `}
+      }
     }
   `
 )<TagStyleProps>(compose(space, layout, flexbox, border, position, color));

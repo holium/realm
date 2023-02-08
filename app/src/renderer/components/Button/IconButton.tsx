@@ -43,7 +43,6 @@ export const IconButton = styled(motion.button)<IProps>`
   justify-content: center;
   position: relative;
   pointer-events: auto;
-  will-change: transform;
   height: ${(props: IProps) => `${props.size}px`};
   width: ${(props: IProps) => `${props.size}px`};
   svg {

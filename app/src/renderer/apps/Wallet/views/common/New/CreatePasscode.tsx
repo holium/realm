@@ -10,21 +10,17 @@ interface CreatePasscodeProps {
 export const CreatePasscode: FC<CreatePasscodeProps> = observer(
   (props: CreatePasscodeProps) => {
     return (
-      <Flex
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        justifyContent="space-evenly"
-        alignItems="center"
-      >
-        <Flex flexDirection="column">
-          <Text variant="h5">Set a passcode</Text>
-          <Text mt={3} variant="body">
-            Set a 6-digit passcode to unlock your wallet. This adds an extra
-            layer of security but is not needed to recover your wallet.
-          </Text>
+      <Flex width="100%" height="100%" flexDirection="column" flex={5}>
+        <Flex flex={1} flexDirection="column">
+          <Flex gap={12} flexDirection="column">
+            <Text variant="h5">Set a passcode</Text>
+            <Text variant="body">
+              Set a 6-digit passcode to unlock your wallet. This adds an extra
+              layer of security but is not needed to recover your wallet.
+            </Text>
+          </Flex>
         </Flex>
-        <Flex alignItems="center">
+        <Flex flex={4} justifyContent="center" alignItems="center">
           <PasscodeInput checkStored={false} onSuccess={props.setPasscode} />
         </Flex>
       </Flex>

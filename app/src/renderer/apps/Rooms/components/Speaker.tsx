@@ -15,20 +15,21 @@ import {
 interface ISpeaker {
   person: string;
   cursors?: boolean;
-  type: 'host' | 'speaker' | 'listener';
+  type: 'our' | 'speaker' | 'listener' | 'creator';
 }
 
 const speakerType = {
-  host: 'Host',
+  our: 'You',
+  creator: 'Creator',
   speaker: 'Speaker',
   listener: 'Listener',
 };
 
-export const Speaker = observer((props: ISpeaker) => {
+const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
   const { ship, theme, contacts } = useServices();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = contacts.getContactAvatarMetadata(person);
@@ -51,7 +52,7 @@ export const Speaker = observer((props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        ship!.patp === roomsManager.currentRoom!.room!.creator && {
+        ship!.patp === roomsManager.live.room!.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -62,13 +63,7 @@ export const Speaker = observer((props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [
-      peer?.status,
-      person,
-      roomsManager.currentRoom,
-      roomsManager.protocol,
-      ship,
-    ]
+    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
@@ -94,6 +89,10 @@ export const Speaker = observer((props: ISpeaker) => {
 
   if (peerState === PeerConnectionState.Disconnected)
     sublabel = <Sublabel {...textProps}>Disconnected</Sublabel>;
+
+  if (peerState === PeerConnectionState.Closed) {
+    sublabel = <Sublabel {...textProps}>Away</Sublabel>;
+  }
 
   useEffect(() => {
     if (
@@ -152,7 +151,7 @@ export const Speaker = observer((props: ISpeaker) => {
         alignItems="center"
         style={{ pointerEvents: 'none' }}
       >
-        <Flex style={{ pointerEvents: 'none' }}>
+        <Flex style={{ height: 15, pointerEvents: 'none' }}>
           {peer?.isMuted && (
             <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
           )}
@@ -161,7 +160,9 @@ export const Speaker = observer((props: ISpeaker) => {
       </Flex>
     </SpeakerWrapper>
   );
-});
+};
+
+export const Speaker = observer(SpeakerPresenter);
 
 type SpeakerStyle = FlexProps & { hoverBg: string };
 

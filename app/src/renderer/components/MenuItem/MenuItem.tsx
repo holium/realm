@@ -1,11 +1,6 @@
-import { FC } from 'react';
-import { SpaceProps } from 'styled-system';
+import { MouseEventHandler } from 'react';
 import { Box, Spinner, Text } from '../';
-import { ChildrenBox, MenuItemStyle } from './MenuItem.styles';
-
-export interface IntentProps {
-  intent?: 'primary' | 'alert' | 'caution' | 'success' | 'info';
-}
+import { MenuItemStyle } from './MenuItem.styles';
 
 export type MenuItemProps = {
   id?: string;
@@ -16,34 +11,25 @@ export type MenuItemProps = {
   label: string;
   disabled?: boolean;
   selected?: boolean;
-  children?: any;
   section?: number;
-  type?: 'neutral' | 'brand';
   color?: string;
   customBg?: string;
-  onClick: (evt: React.MouseEventHandler<HTMLElement>) => void;
-  subMenu?: any[];
-} & IntentProps &
-  SpaceProps;
+  onClick: MouseEventHandler<HTMLLIElement>;
+};
 
-export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
-  const {
-    id,
-    icon,
-    label,
-    style,
-    intent,
-    disabled,
-    onClick,
-    selected,
-    // subMenu
-    type,
-    customBg,
-    color,
-    children,
-    tabIndex,
-    loading,
-  } = props;
+export const MenuItem = ({
+  id,
+  icon,
+  label,
+  style,
+  disabled,
+  onClick,
+  selected,
+  customBg,
+  color,
+  tabIndex,
+  loading = false,
+}: MenuItemProps) => {
   let innerContent;
   if (loading) {
     innerContent = <Spinner size={1} />;
@@ -58,9 +44,6 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
         <Text style={{ pointerEvents: 'none' }} fontSize={2} fontWeight={400}>
           {label}
         </Text>
-        {children && (
-          <ChildrenBox interaction={disabled}>{children}</ChildrenBox>
-        )}
       </>
     );
   }
@@ -68,47 +51,25 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
   return (
     <MenuItemStyle
       id={id}
+      key={id}
       tabIndex={tabIndex}
       style={style}
-      flex={1}
-      interaction
-      highlightType={type}
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="flex-start"
       className="realm-cursor-hover"
-      intent={intent}
       color={color}
+      customBg={customBg}
       data-prevent-context-close={disabled}
       disabled={disabled}
       selected={selected}
-      customBg={customBg}
-      onKeyPress={(evt: any) => {
-        const key = evt.keyCode || evt.which;
-        if (key === 13) {
-          evt.preventDefault(); // Ensure it is only this code that runs
-          // @ts-expect-error i hate typescript
-          onClick(evt);
-        }
-      }}
-      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
+      onClick={(evt) => {
         if (!disabled) {
-          // @ts-expect-error i hate typescript
           onClick(evt);
         } else {
           evt.preventDefault();
           evt.stopPropagation();
         }
       }}
-      value={label}
-      // {...props}
     >
       {innerContent}
     </MenuItemStyle>
   );
-};
-
-MenuItem.defaultProps = {
-  type: 'neutral',
-  loading: false,
 };

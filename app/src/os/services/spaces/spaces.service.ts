@@ -10,7 +10,7 @@ import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { MemberRole, Patp, SpacePath } from 'os/types';
+import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
@@ -18,7 +18,9 @@ import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
 import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
+import { BulletinApi } from '../../api/bulletin';
 import { NotificationStore, NotificationStoreType } from './models/beacon';
+import { BulletinStore, BulletinStoreType } from './models/bulletin';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: any = null;
@@ -37,6 +39,7 @@ interface SpaceModels {
   membership: MembershipType;
   visas: VisaModelType;
   beacon: NotificationStoreType;
+  bulletin: BulletinStoreType;
 }
 /**
  * SpacesService
@@ -52,7 +55,7 @@ export class SpacesService extends BaseService {
     }),
     bazaar: NewBazaarStore.create(),
     beacon: NotificationStore.create(),
-    // bazaar: BazaarStore.create({ my: {} }),
+    bulletin: BulletinStore.create(),
   };
 
   handlers = {
@@ -109,20 +112,11 @@ export class SpacesService extends BaseService {
     selectSpace: async (spaceId: string) => {
       return await ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
-    pinApp: async (path: string, appId: string, rank: number | null = null) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.pin-app',
-        path,
-        appId,
-        rank
-      );
+    pinApp: (path: string, appId: string, rank: number | null = null) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.pin-app', path, appId, rank);
     },
-    unpinApp: async (path: string, appId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.bazaar.unpin-app',
-        path,
-        appId
-      );
+    unpinApp: (path: string, appId: string) => {
+      ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
     },
     recommendApp: async (appId: string) => {
       return await ipcRenderer.invoke(
@@ -136,8 +130,8 @@ export class SpacesService extends BaseService {
         appId
       );
     },
-    setPinnedOrder: async (path: string, newOrder: any[]) => {
-      return await ipcRenderer.invoke(
+    setPinnedOrder: (path: string, newOrder: any[]) => {
+      ipcRenderer.invoke(
         'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
@@ -147,11 +141,7 @@ export class SpacesService extends BaseService {
       return await ipcRenderer.invoke('realm.spaces.create-space', form);
     },
     updateSpace: async (path: any, update: any) => {
-      return await ipcRenderer.invoke(
-        'realm.spaces.update-space',
-        path,
-        update
-      );
+      return ipcRenderer.invoke('realm.spaces.update-space', path, update);
     },
     deleteSpace: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.delete-space', path);
@@ -266,6 +256,7 @@ export class SpacesService extends BaseService {
       bazaar: getSnapshot(this.models.bazaar),
       visas: getSnapshot(this.models.visas),
       beacon: getSnapshot(this.models.beacon),
+      bulletin: getSnapshot(this.models.bulletin),
     };
   }
 
@@ -295,13 +286,21 @@ export class SpacesService extends BaseService {
       NotificationStore,
       {}
     );
+    const bulletinStore = new DiskStore(
+      'bulletin',
+      patp,
+      secretKey!,
+      BulletinStore,
+      {}
+    );
     this.models.membership = membershipStore.model;
     this.models.bazaar = bazaarStore.model;
+    this.models.bulletin = bulletinStore.model;
     if (devApps) {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core!.conduit);
+    this.models.beacon.load(this.core!.conduit!);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -316,7 +315,13 @@ export class SpacesService extends BaseService {
       this.models.visas.initialIncoming(visas);
     });
 
-    this.state.selected && this.setTheme(this.state.selected?.theme);
+    // setting provider to current space host
+    if (this.state.selected) {
+      this.setTheme(this.state.selected.theme);
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected.path)
+      );
+    }
 
     // initial sync effect
     const syncEffect = {
@@ -325,6 +330,7 @@ export class SpacesService extends BaseService {
         membership: getSnapshot(this.models.membership),
         bazaar: getSnapshot(this.models.bazaar),
         beacon: getSnapshot(this.models.beacon),
+        bulletin: getSnapshot(this.models.bulletin),
       },
       resource: 'spaces',
       key: null,
@@ -338,6 +344,7 @@ export class SpacesService extends BaseService {
     membershipStore.registerPatches(this.core.onEffect);
     bazaarStore.registerPatches(this.core.onEffect);
     beaconStore.registerPatches(this.core.onEffect);
+    bulletinStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -350,12 +357,8 @@ export class SpacesService extends BaseService {
       this.setTheme
     );
 
-    // setting provider to current space host
-    if (this.state.selected) {
-      this.core.services.ship.rooms.setProvider(
-        getHost(this.state.selected!.path)
-      );
-    }
+    BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
+
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
     BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
@@ -384,8 +387,7 @@ export class SpacesService extends BaseService {
     );
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
-    const selected = this.state?.selectSpace(spacePath);
-    selected && this.setTheme({ ...selected.theme, id });
+    this.setSelected(_event, spacePath);
     return spacePath;
   }
 
@@ -435,7 +437,7 @@ export class SpacesService extends BaseService {
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.joinSpace(this.core.conduit!, { path });
+    return SpacesApi.joinSpace(this.core.conduit!, { path });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
@@ -443,13 +445,14 @@ export class SpacesService extends BaseService {
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    // don't block for responsiveness, what about error handling?
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+      console.error('Error setting current space', e);
+    });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
-    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
-    // if (currentRoomProvider !== spaceHost)
-    console.log(spaceHost);
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
@@ -624,11 +627,11 @@ export class SpacesService extends BaseService {
     });
   }
 
-  async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
   }
 
-  async newInstaller(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.newInstaller(
     //   this.core.conduit!,
     //   ship,
@@ -668,23 +671,25 @@ export class SpacesService extends BaseService {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }
 
-  async addApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
   }
 
-  async removeApp(_event: IpcMainInvokeEvent, appId: string) {
+  async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
-  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    // return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
-    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: string[]) {
+    this.models.bazaar.reorderPinnedApps(this.core.conduit!, {
+      path: formPathObj(path),
+      dock: order,
+    });
   }
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
     return await this.models.beacon.notes
-      .get(noteId)
-      .markSeen(this.core.conduit!, noteId);
+      ?.get(noteId)
+      ?.markSeen(this.core.conduit!);
     // return await BeaconApi.sawNote(this.core.conduit!, noteId);
   }
   async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {

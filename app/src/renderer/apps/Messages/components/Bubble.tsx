@@ -25,6 +25,9 @@ export const Bubble = styled(motion.div)<BubbleProps>`
   ${(props: BubbleProps) =>
     props.primary
       ? css`
+          * {
+            color: #fff;
+          }
           border-bottom-right-radius: 0px;
         `
       : css`

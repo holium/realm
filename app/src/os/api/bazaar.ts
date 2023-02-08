@@ -12,6 +12,12 @@ export interface UnpinPoke {
   path: { ship: Patp; space: string };
   'app-id': string;
 }
+
+export interface ReorderPinnedAppsPoke {
+  path: { ship: Patp; space: string };
+  dock: string[];
+}
+
 export interface AddToSuitePoke {
   path: { ship: Patp; space: string };
   'app-id': string;
@@ -31,9 +37,9 @@ export interface UninstallPoke {
 }
 
 export const BazaarApi = {
-  getApps: (conduit: Conduit, path: string, tag: string) => null,
-  getAllies: (conduit: Conduit, path: string) => null,
-  getTreaties: (conduit: Conduit, patp: string) => null,
+  getApps: (_conduit: Conduit, _path: string, _tag: string) => null,
+  getAllies: (_conduit: Conduit, _path: string) => null,
+  getTreaties: (_conduit: Conduit, _patp: string) => null,
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
       app: 'bazaar',
@@ -89,8 +95,26 @@ export const BazaarApi = {
           pin: body,
         },
         reaction: 'bazaar-reaction.pinned',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data.pinned);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  reorderPinnedApps: async (conduit: Conduit, body: ReorderPinnedAppsPoke) => {
+    return await new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'reorder-pins': body,
+        },
+        reaction: 'bazaar-reaction.pins-reodered',
+        onReaction(data: any) {
+          resolve(data['pins-reodered']);
         },
         onError: (e: any) => {
           reject(e);
@@ -107,7 +131,7 @@ export const BazaarApi = {
           unpin: body,
         },
         reaction: 'bazaar-reaction.unpinned',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data.unpinned);
         },
         onError: (e: any) => {
@@ -125,7 +149,7 @@ export const BazaarApi = {
           'suite-add': body,
         },
         reaction: 'bazaar-reaction.suite-added',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data['suite-added']);
         },
         onError: (e: any) => {
@@ -146,7 +170,7 @@ export const BazaarApi = {
           'suite-remove': body,
         },
         reaction: 'bazaar-reaction.suite-removed',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data['suite-removed']);
         },
         onError: (e: any) => {
@@ -193,7 +217,7 @@ export const BazaarApi = {
           // reject(e);
         },
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.log(e);
         // if (timeout) clearTimeout(timeout);
         // reject('add ally error');
@@ -285,8 +309,18 @@ export const BazaarSubscriptions = {
           handleReactions(data, model);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %bazaar');
+        model.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %bazaar rejected');
+        model.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %bazaar subscription');
+        model.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };
@@ -298,6 +332,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
+      // eslint-disable-next-line no-case-declarations
       const installUpdate = data['app-install-update'];
       model._setAppStatus(
         installUpdate.appId,
@@ -310,6 +345,9 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'unpinned':
       model._removePinned(data.unpinned);
+      break;
+    case 'pins-reodered':
+      if (data['pins-reodered']) model._reorderPins(data['pins-reodered']);
       break;
     case 'suite-added':
       model._suiteAdded(data['suite-added']);
@@ -327,21 +365,31 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._updateStall(data['stall-update']);
       break;
     case 'joined-bazaar':
-      // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
       break;
     case 'treaties-loaded':
-      console.log(data);
       model._treatiesLoaded();
       break;
     case 'new-ally':
-      // console.log(data);
       const ally = data['new-ally'];
       model._allyAdded(ally.ship, ally.desks);
       break;
     case 'ally-deleted':
       // console.log(data);
       model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-catalog':
+      // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
+      model._rebuildCatalog(data['rebuild-catalog']);
+      // model._allyDeleted(data['ally-deleted'].ship);
+      break;
+    case 'rebuild-stall':
+      // model._allyDeleted(data['ally-deleted'].ship);
+      model._rebuildStall(data['rebuild-stall']);
+      break;
+    case 'clear-stall':
+      model._clearStall(data['clear-stall']);
+      // model._allyDeleted(data['ally-deleted'].ship);
       break;
     default:
       break;

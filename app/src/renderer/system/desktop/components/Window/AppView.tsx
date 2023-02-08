@@ -1,12 +1,15 @@
-import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 // import { Spinner, Flex } from 'renderer/components';
 import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { darken, lighten } from 'polished';
+import { applyStyleOverrides } from './style-overrides';
+import { genCSSVariables } from 'renderer/logic/theme';
+import { WebView } from './WebView';
 
 interface AppViewProps {
   window: WindowModelProps;
@@ -15,13 +18,13 @@ interface AppViewProps {
   hasTitlebar: boolean;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean }>`
+const View = styled(motion.div)`
   transform: translateZ(0);
 `;
 
-export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
+const AppViewPresenter = (props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, shell, desktop, theme, spaces } = useServices();
+  const { ship, desktop, theme, spaces } = useServices();
   const [ready, setReady] = useState(false);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
@@ -33,15 +36,15 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 
   const isActive = desktop.isActiveWindow(window.id);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // const onStartLoading = () => {
-  //   setLoading(true);
-  // };
+  const onStartLoading = () => {
+    setLoading(true);
+  };
 
-  // const onStopLoading = () => {
-  //   setLoading(false);
-  // };
+  const onStopLoading = () => {
+    setLoading(false);
+  };
 
   const lockView = useMemo(
     () => isResizing || isDragging || loading || !isActive,
@@ -49,20 +52,40 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   );
 
   useEffect(() => {
-    const webview: any = document.getElementById(`${window.id}-urbit-webview`);
-    // webview?.addEventListener('did-start-loading', onStartLoading);
-    // webview?.addEventListener('did-stop-loading', onStopLoading);
+    const webView: Electron.WebviewTag = document.getElementById(
+      `${window.id}-urbit-webview`
+    ) as Electron.WebviewTag;
 
-    if (window && ship) {
-      webview?.addEventListener('dom-ready', () => {
-        webview.send('mouse-color', desktop.mouseColor);
-        const css = '* { cursor: none !important; }';
-        webview.insertCSS(css);
+    if (window && ship && webView) {
+      webView.addEventListener('did-start-loading', onStartLoading);
+      webView.addEventListener('did-stop-loading', onStopLoading);
+      if (process.env.NODE_ENV === 'development') {
+        webView.addEventListener(
+          'console-message',
+          (e: Electron.ConsoleMessageEvent) => {
+            if (e.level === 3) {
+              console.error(`${window.id} => `, e.message);
+            }
+          }
+        );
+      }
+      const css = `
+          ${genCSSVariables(theme.currentTheme)}
+          ${applyStyleOverrides(window.id, theme.currentTheme)}
+        `;
+
+      webView.addEventListener('did-attach', () => {
+        webView.insertCSS(css);
+        webView.send('mouse-color', desktop.mouseColor);
+      });
+      webView.addEventListener('dom-ready', () => {
+        webView.insertCSS(css);
+        webView.send('mouse-color', desktop.mouseColor);
         setReady(true);
       });
 
-      webview?.addEventListener('close', () => {
-        webview.closeDevTools();
+      webView.addEventListener('close', () => {
+        webView.closeDevTools();
       });
 
       let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
@@ -74,69 +97,43 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       DesktopActions.openAppWindow('', toJS(window));
       setAppConfig({ url: appUrl });
     }
+
     () => {
       setReady(false);
     };
-  }, [ship, window, spaces.selected?.path, desktop.mouseColor]);
+  }, [
+    ship,
+    window,
+    spaces.selected?.path,
+    desktop.mouseColor,
+    theme.currentTheme.backgroundColor,
+    theme.currentTheme.mode,
+  ]);
 
+  // Set mouse color
   useEffect(() => {
-    const css = `
-      :root {
-        --rlm-font: 'Rubik', sans-serif;
-        --rlm-base-color: ${theme.currentTheme.backgroundColor};
-        --rlm-accent-color: ${theme.currentTheme.accentColor};
-        --rlm-input-color: ${theme.currentTheme.inputColor};
-        --rlm-border-color: ${
-          theme.currentTheme.mode === 'light'
-            ? darken(0.1, theme.currentTheme.windowColor)
-            : darken(0.075, theme.currentTheme.windowColor)
-        };
-        --rlm-window-color: ${theme.currentTheme.windowColor};
-        --rlm-card-color: ${
-          theme.currentTheme.mode === 'light'
-            ? lighten(0.05, theme.currentTheme.windowColor)
-            : darken(0.025, theme.currentTheme.windowColor)
-        };
-        --rlm-theme-mode: ${theme.currentTheme.mode};
-        --rlm-text-color: ${theme.currentTheme.textColor};
-        --rlm-icon-color: ${theme.currentTheme.iconColor};
-      }
-      div[data-radix-portal] {
-        z-index: 2000 !important;
-      }
-
-      body {
-        overflow-x: hidden;
-        overflow-y: hidden;
-      }
-
-      #rlm-cursor {
-        position: absolute;
-        z-index: 2147483646 !important;
-      }
-
-
-    `;
-
     if (ready) {
-      const webview: any = document.getElementById(
+      const webView: Electron.WebviewTag = document.getElementById(
         `${window.id}-urbit-webview`
-      );
-      webview.insertCSS(css);
-      // TODO request permission for campfire
-      webview.webContents?.session?.setPermissionRequestHandler();
-      webview?.addEventListener('did-frame-finish-load', () => {
-        webview.insertCSS(css);
-      });
+      ) as Electron.WebviewTag;
+
+      webView?.send('mouse-color', desktop.mouseColor);
+    }
+  }, [desktop.mouseColor, ready]);
+
+  // Set theme on change
+  useEffect(() => {
+    if (ready) {
+      const css = `
+        ${genCSSVariables(theme.currentTheme)}
+        ${applyStyleOverrides(window.id, theme.currentTheme)}
+      `;
+      const webView: Electron.WebviewTag = document.getElementById(
+        `${window.id}-urbit-webview`
+      ) as Electron.WebviewTag;
+      webView.insertCSS(css);
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
-
-  const onMouseEnter = useCallback(() => {
-    shell.setIsMouseInWebview(true);
-  }, [shell]);
-  const onMouseLeave = useCallback(() => {
-    shell.setIsMouseInWebview(false);
-  }, [shell]);
 
   return useMemo(() => {
     return (
@@ -158,15 +155,15 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             <Spinner size={1} />
           </Flex>
         )} */}
-        <webview
+        <WebView
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"
-          preload={`file://${desktop.appviewPreload}`}
-          webpreferences="sandbox=false"
+          webpreferences="sandbox=false, nativeWindowOpen=yes"
+          // @ts-expect-error
+          allowpopups="true"
           src={appConfig.url}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
+          isLocked={lockView}
           style={{
             left: 0,
             top: 0,
@@ -175,10 +172,11 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             position: 'absolute',
             background: theme.currentTheme.windowColor,
             overflow: 'hidden',
-            pointerEvents: lockView ? 'none' : 'auto',
           }}
         />
       </View>
     );
   }, [lockView, window.id, appConfig.url]);
-});
+};
+
+export const AppView = observer(AppViewPresenter);

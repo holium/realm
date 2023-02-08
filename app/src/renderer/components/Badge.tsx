@@ -1,6 +1,8 @@
 import React, { FC } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
+import { Text } from './Text';
+import { Box } from '@holium/design-system';
 import { lighten } from 'polished';
 import { ThemeType } from '../theme';
 
@@ -13,50 +15,116 @@ const Wrapper = styled(motion.div)<{ height: number; width: number }>`
 interface BadgeStyleProps {
   theme: ThemeType;
   minimal?: boolean;
-  top: number;
-  right: number;
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+  background?: string;
+  textColor?: string;
 }
 
-const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
+const BadgeStyle = styled(Box)<BadgeStyleProps>`
   position: absolute;
   display: block;
-  border-radius: 50%;
 
   ${(props: BadgeStyleProps) => css`
-    background: ${lighten(0.02, props.theme.colors.brand.primary)};
-    top: ${props.top}px;
-    right: ${props.right}px;
-    height: ${props.minimal ? '6px' : '12px'};
-    width: ${props.minimal ? '6px' : '12px'};
+    font-size: 13px;
+    ${props.background
+      ? css`
+          background: ${lighten(0.02, props.background)};
+        `
+      : css`
+          background: ${lighten(0.02, props.theme.colors.brand.primary)};
+        `}
+
+    border-radius: ${props.minimal ? '50%' : '3px'};
+    padding: ${props.minimal ? '0' : '0.5px 3px 0.5px 3px'};
+    color: ${props.textColor
+      ? props.textColor
+      : props.theme.colors.text.primary};
+    ${props.top &&
+    css`
+      top: ${props.top}px;
+    `};
+    ${props.left &&
+    css`
+      left: ${props.left}px;
+    `}
+    ${props.bottom &&
+    css`
+      bottom: ${props.bottom}px;
+    `}
+     ${props.right &&
+    css`
+      right: ${props.right}px;
+    `}
+    height: ${props.minimal ? '6px' : 'fit-content'};
+    width: ${props.minimal ? '6px' : 'fit-content'};
   `}
 `;
 
 // const
 interface BadgeProps {
+  style?: any;
   wrapperHeight: number;
   wrapperWidth: number;
   children: React.ReactNode;
   minimal?: boolean;
   count: number;
-  top: number;
-  right: number;
+  top?: number;
+  left?: number;
+  bottom?: number;
+  right?: number;
+  background?: string;
+  textColor?: string;
 }
 
 export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
-  const { minimal, top, right, count, wrapperHeight, wrapperWidth, children } =
-    props;
+  const {
+    style,
+    minimal,
+    top,
+    bottom,
+    right,
+    left,
+    count,
+    wrapperHeight,
+    wrapperWidth,
+    children,
+    background,
+    textColor,
+  } = props;
 
   return (
-    <Wrapper height={wrapperHeight} width={wrapperWidth}>
+    <Wrapper style={style} height={wrapperHeight} width={wrapperWidth}>
       {children}
-      {count > 0 && (
-        <BadgeStyle top={top} right={right} minimal={minimal}></BadgeStyle>
-      )}
+      <AnimatePresence>
+        {count > 0 && (
+          <BadgeStyle
+            animate={{
+              opacity: count > 0 ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            style={style}
+            background={background}
+            bottom={bottom}
+            top={top}
+            left={left}
+            right={right}
+            minimal={minimal}
+            textColor={textColor}
+          >
+            {!minimal && <Text fontWeight={500}>{count}</Text>}
+          </BadgeStyle>
+        )}
+      </AnimatePresence>
     </Wrapper>
   );
 };
 Badge.defaultProps = {
-  top: 0,
-  right: 0,
+  // top: 0,
+  // right: 0,
   count: 0,
 };

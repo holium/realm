@@ -54,6 +54,9 @@ export const AuthStore = types
     get isLoaded() {
       return self.loader.isLoaded;
     },
+    get isFirstTime() {
+      return self.firstTime;
+    },
     get currentShip() {
       let selectedShip = self.selected;
       if (!selectedShip) {
@@ -140,7 +143,7 @@ export const AuthStore = types
       color: string,
       avatar: string
     ) {
-      let ship = self.ships.get(id);
+      const ship = self.ships.get(id);
       if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;
@@ -181,7 +184,7 @@ export const AuthStore = types
       const loggedInShip = self.ships.get(id);
       self.selected = loggedInShip;
     },
-    logout(ship: string) {
+    logout(_ship: string) {
       try {
         // const [response, error] = yield AuthIPC.logout(ship);
         // if (error) throw error;

@@ -23,10 +23,11 @@ interface SpacesListProps {
   selected?: SpaceModelType;
   spaces: SpaceModelType[];
   onSelect: (spaceKey: string) => void;
+  onFindMore: () => void;
 }
 
 export const SpacesList = observer(
-  ({ selected, spaces, onSelect }: SpacesListProps) => {
+  ({ selected, spaces, onSelect, onFindMore }: SpacesListProps) => {
     const { theme, visas } = useServices();
     const { textColor } = theme.currentTheme;
 
@@ -35,8 +36,8 @@ export const SpacesList = observer(
     const incoming = Array.from(visas.incoming.values());
 
     type ListData = {
-      visa?: typeof incoming[number];
-      space?: typeof spaces[number];
+      visa?: (typeof incoming)[number];
+      space?: (typeof spaces)[number];
     }[];
 
     const listData: ListData = useMemo(
@@ -88,7 +89,10 @@ export const SpacesList = observer(
               rightContent={
                 <Icons mr="2px" size="22px" name="ArrowRightLine" />
               }
-              data-close-tray="true"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onFindMore();
+              }}
             >
               Find spaces
             </ActionButton>
@@ -98,10 +102,11 @@ export const SpacesList = observer(
     }
 
     return (
-      <Flex flex={1} px={10} width="100%">
+      <Flex flex={1} width="100%">
         <WindowedList
+          rowHeight={56}
           key={`${spaces.length}-${incoming.length}`}
-          width={358}
+          width={354}
           data={listData}
           rowRenderer={({ space, visa }) => {
             if (space) {

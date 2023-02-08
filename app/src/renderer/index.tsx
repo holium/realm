@@ -6,17 +6,16 @@ import App from './App';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';
-const isDebug = process.env.DEBUG_PROD === 'true';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
   Sentry.init({
-    enabled: isProd,
-    debug: isDebug,
     environment,
     dsn: process.env.SENTRY_DSN,
     integrations: [new BrowserTracing()],
     tracesSampleRate: 1,
+    // Remove when we've done the window system refactor and are no longer using webviews.
+    ignoreErrors: ['GUEST_VIEW_MANAGER_CALL'],
   });
 } else {
   console.error('Environment variable for Sentry is undefined.');

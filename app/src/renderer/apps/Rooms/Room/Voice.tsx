@@ -1,34 +1,36 @@
 import { observer } from 'mobx-react';
-import { trayStore } from 'renderer/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { Flex } from 'renderer/components';
 import { Speaker } from '../components/Speaker';
 import { useRooms } from '../useRooms';
 import { useEffect } from 'react';
+import { roomTrayConfig } from '../config';
+import { useServices } from 'renderer/logic/store';
 
-export const VoiceView = observer(() => {
-  const roomsManager = useRooms();
-  if (!roomsManager.presentRoom) {
-    return null;
-  }
+const VoiceViewPresenter = () => {
+  const { ship } = useServices();
+  const roomsManager = useRooms(ship!.patp);
 
-  const { setTrayAppHeight } = trayStore;
+  const { setTrayAppHeight } = useTrayApps();
 
-  const host = roomsManager.protocol.provider;
-  const speakers = [
-    ...Array.from(roomsManager.protocol.peers.keys()),
-    roomsManager.protocol.our,
-  ].filter((person: string) => person !== host);
+  const our = roomsManager?.local.patp;
+  const speakers = roomsManager
+    ? [...Array.from(roomsManager.protocol.peers.keys())]
+    : []; //.filter((patp) => patp !== our);
 
   useEffect(() => {
-    const regularHeight = 500;
+    const regularHeight = roomTrayConfig.dimensions.height;
     if (speakers.length + 1 > 4) {
-      const tallHeight = 500 + 181 + 12;
+      const tallHeight = roomTrayConfig.dimensions.height + 181 + 12;
       setTrayAppHeight(tallHeight);
     } else {
       setTrayAppHeight(regularHeight);
     }
   }, [speakers.length, setTrayAppHeight]);
 
+  if (!roomsManager?.live.room) {
+    return null;
+  }
   return (
     <Flex
       flex={2}
@@ -39,10 +41,12 @@ export const VoiceView = observer(() => {
       gridAutoColumns="1fr"
       gridAutoRows={'.5fr'}
     >
-      <Speaker key={host} type="host" person={host} />
+      <Speaker key={our} type="our" person={our ?? ''} />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}
     </Flex>
   );
-});
+};
+
+export const VoiceView = observer(VoiceViewPresenter);

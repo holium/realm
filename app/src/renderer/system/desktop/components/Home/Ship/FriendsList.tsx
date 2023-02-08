@@ -7,7 +7,7 @@ import { ShipActions } from 'renderer/logic/actions/ship';
 import { FriendType } from 'os/services/ship/models/friends';
 import { WindowedList } from '@holium/design-system';
 
-export const FriendsList = observer(() => {
+const FriendsListPresenter = () => {
   const paneRef = useRef(null);
   const { theme, contacts, friends } = useServices();
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
@@ -145,4 +145,6 @@ export const FriendsList = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const FriendsList = observer(FriendsListPresenter);

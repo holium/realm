@@ -6,15 +6,12 @@
     "lib/design-system",
     "lib/multiplayer",
     "lib/conduit",
-    "lib/room"
+    "lib/room",
+    "lib/room/test-ui"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm dev:cursor && yarn build:app",
-    "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
-    "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
-    "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
-    "link:design-system": "yarn build --cwd lib/design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
-    "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-multiplayer tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
+    "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
@@ -22,6 +19,7 @@
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
+    "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
     "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
@@ -32,29 +30,34 @@
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
-    "@icons/material": "^0.4.1",
     "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",
     "eth-json-rpc-infura": "^5.1.0",
     "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
-    "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
-    "qrcode.react": "^3.1.0"
+    "qrcode.react": "^3.1.0",
+    "socket.io-client": "^4.5.4"
   },
-  "version": "0.0.1",
+  "version": "0.1.11-alpha",
   "devDependencies": {
-    "@typescript-eslint/parser": "^5.43.0",
-    "eslint": "^8.0.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.25.2",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-react": "^7.31.10",
-    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.7.1"
+    "prettier": "^2.8.3",
+    "typescript": "^4.9.4"
+  },
+  "preconstruct": {
+    "packages": [
+      "lib/design-system",
+      "lib/multiplayer",
+      "lib/conduit",
+      "lib/room"
+    ]
   }
 }

@@ -1,18 +1,8 @@
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { useMemo, useState } from 'react';
-import {
-  Flex,
-  Grid,
-  IconButton,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { useMemo } from 'react';
+import { TextInput, Text, Button, Flex, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
@@ -59,16 +49,12 @@ export const createRoomForm = (
   };
 };
 
-export const NewRoom = observer(() => {
-  const { dimensions } = useTrayApps();
-  const { theme, spaces } = useServices();
-  const [loading, setLoading] = useState(false);
+const NewRoomPresenter = () => {
+  const { ship, spaces } = useServices();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms();
+  const roomsManager = useRooms(ship?.patp);
 
-  const { dockColor, windowColor, inputColor } = theme.currentTheme;
-
-  const { form, name, isPrivate } = useMemo(() => createRoomForm(), []);
+  const { form, name } = useMemo(() => createRoomForm(), []);
 
   const createRoom = (evt: any) => {
     // setLoading(true);
@@ -76,91 +62,76 @@ export const NewRoom = observer(() => {
     evt.stopPropagation();
     const spacePath =
       spaces.selected?.type !== 'our' ? spaces.selected!.path : null;
-    roomsManager.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
 
   return (
-    <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
-      expand
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBlur
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...theme,
-          windowColor,
-        }}
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
       >
-        <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
-          <IconButton
+        <Flex justifyContent="center" alignItems="center">
+          <Button.IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
-            customBg={dockColor}
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomsApp.setView('list');
             }}
           >
-            <Icons name="ArrowLeftLine" />
-          </IconButton>
-          <Text
+            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+          </Button.IconButton>
+          <Text.Custom
             ml={2}
             opacity={0.8}
-            style={{ textTransform: 'uppercase' }}
+            textTransform="uppercase"
             fontWeight={600}
           >
             New Room
-          </Text>
+          </Text.Custom>
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
-      </Titlebar>
-
-      <Flex style={{ marginTop: 58 }} flex={1} flexDirection="column">
-        <Flex
-          flexDirection="row"
-          alignItems="center"
-          style={{
-            gap: 8,
-          }}
-        >
-          <Input
-            tabIndex={2}
-            className="realm-cursor-text-cursor"
-            type="text"
-            placeholder="Name your room"
-            autoFocus
-            wrapperStyle={{
-              cursor: 'none',
-              borderRadius: 6,
-              backgroundColor: inputColor,
-            }}
-            value={name.state.value}
-            error={
-              name.computed.isDirty && name.computed.ifWasEverBlurredThenError
-            }
-            onChange={(e: any) => {
-              name.actions.onChange(e.target.value);
-            }}
-            onKeyDown={(evt: any) => {
-              if (evt.key === 'Enter' && form.computed.isValid) {
-                createRoom(evt);
+      </Flex>
+      <Flex flexDirection="column">
+        <Flex flexDirection="row" alignItems="center" flex={3} gap={8}>
+          <Flex flex={2}>
+            <TextInput
+              id="room-name-new"
+              name="room-name-new"
+              tabIndex={2}
+              className="realm-cursor-text-cursor"
+              width="100%"
+              type="text"
+              autoFocus
+              placeholder="Name your room"
+              style={{ width: '100%' }}
+              value={name.state.value}
+              error={
+                name.computed.isDirty && name.computed.ifWasEverBlurredThenError
               }
-            }}
-            onFocus={() => name.actions.onFocus()}
-            onBlur={() => name.actions.onBlur()}
-          />
-          <TextButton
+              onChange={(e: any) => {
+                name.actions.onChange(e.target.value);
+              }}
+              onKeyDown={(evt: any) => {
+                if (evt.key === 'Enter' && form.computed.isValid) {
+                  createRoom(evt);
+                }
+              }}
+              onFocus={() => name.actions.onFocus()}
+              onBlur={() => name.actions.onBlur()}
+            />
+          </Flex>
+          <Button.TextButton
             tabIndex={2}
-            showBackground
-            textColor="#0FC383"
-            highlightColor="#0FC383"
+            fontWeight={500}
+            color="intent-success"
             disabled={!form.computed.isValid}
-            style={{ borderRadius: 6, height: 34 }}
+            style={{ borderRadius: 6, height: 32 }}
             onKeyDown={(evt: any) => {
               if (evt.key === 'Enter' && form.computed.isValid) {
                 createRoom(evt);
@@ -170,8 +141,8 @@ export const NewRoom = observer(() => {
               createRoom(evt);
             }}
           >
-            {loading ? <Spinner size={0} /> : 'Start'}
-          </TextButton>
+            Start
+          </Button.TextButton>
         </Flex>
         <Flex mt={3} justifyContent="flex-start">
           {/* <Checkbox
@@ -191,6 +162,8 @@ export const NewRoom = observer(() => {
           /> */}
         </Flex>
       </Flex>
-    </Grid.Column>
+    </>
   );
-});
+};
+
+export const NewRoom = observer(NewRoomPresenter);

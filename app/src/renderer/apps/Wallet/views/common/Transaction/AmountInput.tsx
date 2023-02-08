@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Input, ContainerFlex, FlexHider } from './styled';
-import { ERC20Type } from 'os/services/tray/wallet.model';
+import { Input } from '@holium/design-system';
+import { ContainerFlex, FlexHider } from './styled';
+import {
+  ERC20Type,
+  ProtocolType,
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 // TODO: replace with actual exchange rate
-const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
-const usdToEth = (usd: number) =>
-  isNaN(usd) ? 0 : (usd / 1715.66).toFixed(12);
+const ethToUsd = (eth: number, currentPrice: number) =>
+  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
+const usdToEth = (usd: number, currentPrice: number) =>
+  isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(8));
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -25,11 +30,17 @@ export const AmountInput = observer(
     setValid: (valid: boolean, amount?: number) => void;
     coin?: ERC20Type | null;
   }) => {
-    const amountRef = React.createRef();
+    const amountRef = React.createRef<HTMLInputElement>();
     const { theme } = useServices();
     const { walletApp } = useTrayApps();
 
-    const [inCrypto, setInCrypto] = useState(true);
+    const [inCryptoToggle, setInCryptoToggle] = useState(true);
+    const showUsd =
+      walletApp.navState.protocol === ProtocolType.ETH_MAIN ||
+      (walletApp.navState.protocol === ProtocolType.ETH_GORLI && !props.coin);
+
+    const inCrypto = showUsd ? inCryptoToggle : true;
+
     const [amount, setAmount] = useState<string | number>(0);
     const [amountError, setAmountError] = useState(false);
 
@@ -38,7 +49,11 @@ export const AmountInput = observer(
 
     const check = (inCrypto: boolean, value: string | number) => {
       const numVal = Number(value);
-      const amountInCrypto = inCrypto ? value : usdToEth(numVal);
+      let amountInCrypto = numVal;
+      if (walletApp.ethereum.conversions.usd && !inCrypto) {
+        amountInCrypto = usdToEth(numVal, walletApp.ethereum.conversions.usd);
+        // inCrypto ? numVal : usdToEth(numVal, currentPrice);
+      }
       if (amountInCrypto > props.max) {
         setAmountError(true);
         return props.setValid(false);
@@ -46,7 +61,7 @@ export const AmountInput = observer(
         return props.setValid(false);
       } else {
         setAmountError(false);
-        return props.setValid(true, numVal);
+        return props.setValid(true, amountInCrypto);
       }
     };
 
@@ -64,18 +79,20 @@ export const AmountInput = observer(
     };
 
     const toggleInCrypto = () => {
-      const toggled = !inCrypto;
+      if (showUsd) {
+        const toggled = !inCrypto;
 
-      setInCrypto(toggled);
-      check(toggled, amount);
+        setInCryptoToggle(toggled);
+        check(toggled, amount);
 
-      if (!toggled) {
-        setAmount(Number(amount).toFixed(2));
+        if (!toggled) {
+          setAmount(0);
+        }
       }
     };
 
     const inputContainerClicked = () => {
-      (amountRef.current as HTMLElement).focus();
+      amountRef.current && (amountRef.current as HTMLElement).focus();
     };
 
     return (
@@ -93,6 +110,7 @@ export const AmountInput = observer(
             AMOUNT
           </Text>
           <ContainerFlex
+            className="realm-cursor-hover"
             focusBorder={themeData.colors.brand.primary}
             px={1}
             py={1}
@@ -109,19 +127,17 @@ export const AmountInput = observer(
             }`}
           >
             <Flex
-              pl="10px"
+              px={1}
               flexDirection="column"
               justifyContent="center"
               alignItems="flex-start"
             >
               {inCrypto ? (
-                /* @ts-expect-error */
                 <Input
-                  autoFocus
                   ref={amountRef}
-                  mode={theme.currentTheme.mode}
+                  style={{ width: '80%' }}
+                  autoFocus
                   type="number"
-                  color={themeData.colors.text.primary}
                   placeholder="0.00000000"
                   value={amount || ''}
                   onChange={onChange}
@@ -131,54 +147,66 @@ export const AmountInput = observer(
                   <Text pt="2px" fontSize="12px">
                     $
                   </Text>
-                  {/* @ts-expect-error */}
                   <Input
                     autoFocus
                     ref={amountRef}
-                    mode={theme.currentTheme.mode}
+                    style={{ width: '80%' }}
                     type="number"
-                    color={themeData.colors.text.primary}
                     placeholder="0.00"
                     value={amount || ''}
                     onChange={onChange}
                   />
                 </Flex>
               )}
-              <Box hidden={!amount}>
-                <Text fontSize="11px" color={themeData.colors.text.disabled}>
-                  {inCrypto
-                    ? `$${ethToUsd(Number(amount))} USD`
-                    : `${usdToEth(Number(amount))} ${
-                        props.coin
-                          ? props.coin.name
-                          : abbrMap[
-                              walletApp.navState.network as
-                                | 'bitcoin'
-                                | 'ethereum'
-                            ]
-                      }`}
-                </Text>
-              </Box>
+              {showUsd && (
+                <Box hidden={!amount}>
+                  <Text fontSize="11px" color={themeData.colors.text.disabled}>
+                    {walletApp.ethereum.conversions.usd &&
+                      (inCrypto
+                        ? `$${ethToUsd(
+                            Number(amount),
+                            walletApp.ethereum.conversions.usd
+                          )} USD`
+                        : `${usdToEth(
+                            Number(amount),
+                            walletApp.ethereum.conversions.usd
+                          )} ${
+                            props.coin
+                              ? props.coin.name
+                              : walletApp.navState.protocol ===
+                                ProtocolType.UQBAR
+                              ? 'zigs'
+                              : abbrMap[
+                                  walletApp.navState.network as
+                                    | 'bitcoin'
+                                    | 'ethereum'
+                                ]
+                          }`)}
+                  </Text>
+                </Box>
+              )}
             </Flex>
             <Flex
               p="4px"
               justifyContent="center"
               alignItems="center"
-              background={lighten(0.02, theme.currentTheme.windowColor)}
+              background={theme.currentTheme.windowColor}
               border={`solid 1px ${themeData.colors.ui.borderColor}`}
               borderRadius="5px"
               onClick={toggleInCrypto}
             >
-              <Text mr={1} variant="body" fontSize="12px">
+              <Text variant="body" fontSize="12px">
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
+                    : walletApp.navState.protocol === ProtocolType.UQBAR
+                    ? 'zigs'
                     : abbrMap[
                         walletApp.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}
               </Text>
-              <Icons name="UpDown" size="12px" />
+              {showUsd && <Icons ml={1} name="UpDown" size="12px" />}
             </Flex>
           </ContainerFlex>
         </FlexHider>

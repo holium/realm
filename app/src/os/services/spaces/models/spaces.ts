@@ -5,7 +5,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { ThemeModel } from '../../theme.model';
-import { LoaderModel } from '../../common.model';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { VisaModel } from './visas';
 
@@ -22,12 +22,12 @@ export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
     name: types.string,
-    description: types.maybeNull(types.string),
-    color: types.maybeNull(types.string),
+    description: types.optional(types.string, ''),
+    color: types.optional(types.string, '#000000'),
     type: types.enumeration(['group', 'our', 'space']),
     archetype: types.optional(types.enumeration(['home', 'community']), 'home'), // TODO remove the optional
-    picture: types.maybeNull(types.string),
-    access: types.maybeNull(types.string),
+    picture: types.optional(types.string, ''),
+    access: types.optional(types.string, 'public'),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
     invitations: types.optional(VisaModel, {
@@ -43,8 +43,8 @@ export const SpaceModel = types
       })
     ),
   })
-  .views((self) => ({}))
-  .actions((self) => ({}));
+  .views(() => ({}))
+  .actions(() => ({}));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
 
@@ -55,6 +55,9 @@ export const SpacesStore = types
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
     // friends: types.optional(FriendsStore, { all: {} }),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .views((self) => ({
     get isLoading() {
@@ -78,11 +81,14 @@ export const SpacesStore = types
       return self.spaces.get(spacePath);
       // }
     },
+    get subscriptionState() {
+      return self.subscription.state;
+    },
   }))
   .actions((self) => ({
-    initialScry: (data: any, persistedState: any, ship: Patp) => {
+    initialScry: (data: any, _persistedState: any, ship: Patp) => {
       Object.entries(data).forEach(
-        ([path, space]: [path: string, space: any]) => {
+        ([path, _space]: [path: string, space: any]) => {
           // console.log(path, space);
           // const persistedData =
           //   persistedState && persistedState.spaces
@@ -167,6 +173,11 @@ export const SpacesStore = types
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath)!;
       return self.selected;
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

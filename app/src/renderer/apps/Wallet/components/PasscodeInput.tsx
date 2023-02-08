@@ -13,6 +13,7 @@ interface PasscodeInputProps {
   checkStored?: boolean;
   checkAgainst?: number[];
   onError?: any;
+  keepLoading?: boolean;
 }
 
 export const PasscodeInput: FC<PasscodeInputProps> = observer(
@@ -44,7 +45,9 @@ export const PasscodeInput: FC<PasscodeInputProps> = observer(
         if (props.checkStored) {
           setLoading(true);
           codeIsCorrect = await WalletActions.checkPasscode(newInputCode);
-          setLoading(false);
+          if (!props.keepLoading) {
+            setLoading(false);
+          }
         } else if (props.checkAgainst) {
           codeIsCorrect =
             props.checkAgainst.toString() === newInputCode.toString();

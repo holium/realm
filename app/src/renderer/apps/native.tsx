@@ -1,18 +1,18 @@
 import { SystemApp } from './System';
-import { Browser, BrowserProps } from './Browser';
-import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
+import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar/Toolbar';
+import { BrowserWebview } from './Browser/BrowserWebview';
 
-export interface NativeRenders {
-  [key: string]: {
-    titlebar?: React.FC<any>;
-    component: React.FC<any>;
-  };
+export enum WindowId {
+  Browser = 'os-browser',
+  Settings = 'os-settings',
 }
 
-export const nativeRenderers: NativeRenders = {
+export const nativeRenderers = {
   'os-browser': {
     titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
-    component: (props: BrowserProps) => <Browser {...props} />,
+    component: ({ isResizing = false, isDragging = false }) => (
+      <BrowserWebview isResizing={isResizing} isDragging={isDragging} />
+    ),
   },
   'os-settings': {
     component: (props: any) => <SystemApp {...props} />,

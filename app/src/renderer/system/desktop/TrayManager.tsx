@@ -1,37 +1,44 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
-import { useServices } from 'renderer/logic/store';
-import { TrayMenu } from './components/SystemBar/components/TrayMenu';
-import { MiniApp } from './components/SystemBar/components/MiniAppWindow';
+import { TrayApp } from '@holium/design-system';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
-export const TrayManager = observer(() => {
-  const { theme } = useServices();
-  const trayAppRef = useRef<HTMLDivElement>();
-  const { windowColor, textColor } = theme.currentTheme;
-  const { activeApp, coords } = useTrayApps();
+const TrayManagerPresenter = () => {
+  const { activeApp, coords, walletApp, dimensions, setActiveApp } =
+    useTrayApps();
+  const [walletForceActive, setWalletForceActive] = useState(false);
+  if (walletForceActive && activeApp !== 'wallet-tray') {
+    WalletActions.setForceActive(false);
+    setWalletForceActive(false);
+  }
+  if (walletApp.forceActive && !walletForceActive) {
+    setWalletForceActive(true);
+    setActiveApp('wallet-tray');
+  }
 
   if (!activeApp) return null;
 
   const TrayAppView = trayAppRenderers[activeApp].component;
-
+  const height = document.body.clientHeight;
   return (
-    <TrayMenu
+    <TrayApp
+      zIndex={100}
       id={activeApp as TrayAppKeys}
-      coords={coords}
-      body={
-        <MiniApp
-          id={`${activeApp}-app`}
-          innerRef={trayAppRef}
-          backgroundColor={windowColor}
-          textColor={textColor}
-        >
-          {TrayAppView && <TrayAppView />}
-        </MiniApp>
-      }
-    />
+      coords={{
+        x: coords.left,
+        y: height - dimensions.height - coords.bottom,
+        height: dimensions.height,
+        width: dimensions.width,
+      }}
+      closeTray={() => {
+        setActiveApp(null);
+      }}
+    >
+      {TrayAppView && <TrayAppView />}
+    </TrayApp>
   );
-});
+};
 
-export default { TrayManager };
+export const TrayManager = observer(TrayManagerPresenter);

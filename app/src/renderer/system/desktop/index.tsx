@@ -1,37 +1,32 @@
-import { useMemo } from 'react';
+import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
 import { HomePane } from './components/Home';
 import { useServices } from 'renderer/logic/store';
-import { observer } from 'mobx-react';
 import { TrayManager } from './TrayManager';
-import { createManager, RoomsProvider } from 'renderer/apps/Rooms/useRooms';
-import { RoomsManager } from '@holium/realm-room';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 
-export const Desktop = observer(() => {
+const DesktopPresenter = () => {
   const { ship, desktop } = useServices();
-
-  const manager = useMemo<RoomsManager>(() => createManager(ship!.patp), []);
+  useRooms(ship?.patp); // creates first instance of roomsManager
 
   return (
-    <RoomsProvider value={manager}>
-      <Fill>
-        <Layer zIndex={0}>
-          <WindowManager />
-        </Layer>
-        <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
-        <Layer zIndex={12}>
-          <Bottom size={58}>
-            <SystemBar />
-          </Bottom>
-        </Layer>
-        <Layer zIndex={13}>
-          <TrayManager />
-        </Layer>
-      </Fill>
-    </RoomsProvider>
+    <Fill>
+      <Layer zIndex={15}>
+        <TrayManager />
+      </Layer>
+      <Layer zIndex={0}>
+        <WindowManager />
+      </Layer>
+      <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
+      <Layer zIndex={14}>
+        <Bottom size={56}>
+          <SystemBar />
+        </Bottom>
+      </Layer>
+    </Fill>
   );
-});
+};
 
-export default Desktop;
+export const Desktop = observer(DesktopPresenter);

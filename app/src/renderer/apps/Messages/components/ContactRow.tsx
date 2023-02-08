@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useState, useMemo, useCallback } from 'react';
+import { MouseEvent, useState, useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
@@ -26,6 +26,7 @@ import { ShipActions } from 'renderer/logic/actions/ship';
 interface DMContact {
   theme: ThemeModelType;
   dm: DMPreviewType;
+  refreshDms: () => Promise<void>;
   onClick: (evt: any) => void;
 }
 
@@ -37,9 +38,8 @@ interface RowProps {
 
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
-  width: calc(100% - 16px);
+  width: 100%;
   padding: 8px;
-  margin: 0 8px;
   gap: 10px;
   display: flex;
   flex-direction: row;
@@ -57,8 +57,7 @@ export const Row = styled(motion.div)<RowProps>`
     `}
 `;
 
-export const ContactRow: FC<DMContact> = (props: DMContact) => {
-  const { dm, theme, onClick } = props;
+export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
   const isGroup = dm.type === 'group' || dm.type === 'group-pending';
   const isPending = dm.type === 'pending' || dm.type === 'group-pending';
 
@@ -83,12 +82,16 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       if (dm.lastMessage?.length > 0 && !isPending) {
         const lastSender = dm.lastMessage[0];
         content = dm.lastMessage[1];
-        type = Object.keys(content)[0];
-        // @ts-expect-error
-        content = { text: `${lastSender.mention}: ${content[type]}` };
+        if (content) {
+          type = Object.keys(content)[0];
+          // @ts-expect-error
+          content = { text: `${lastSender.mention}: ${content[type]}` };
+        } else {
+          content = { text: '' };
+        }
       } else {
         content = {
-          text: isPending ? 'Group chat invite' : 'No messages yet',
+          text: isPending ? 'Group chat invite' : '',
         };
       }
 
@@ -102,7 +105,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
         if (content) {
           type = Object.keys(content)[0];
         } else {
-          content = { text: 'No messages yet' };
+          content = { text: '' };
         }
         return getTextFromContent(type, content);
       }
@@ -152,23 +155,28 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       if (isGroup) {
         ShipActions.acceptGroupDm(groupModel.path)
           .then((response: any) => {
-            console.log('accept ContactRow response', response);
-            setAcceptLoading(false);
+            console.log('Accept ContactRow response:', response);
+            refreshDms();
           })
           .catch(() => {
+            console.error('Error accepting group DM.');
+          })
+          .finally(() => {
             setAcceptLoading(false);
           });
         console.log('accepting group dm');
       } else {
         ShipActions.acceptDm(dmModel.to)
           .then((response: any) => {
-            console.log('accept ContactRow response', response);
-            setAcceptLoading(false);
+            console.log('Accept ContactRow response:', response);
+            refreshDms();
           })
           .catch(() => {
+            console.error('Error accepting DM.');
+          })
+          .finally(() => {
             setAcceptLoading(false);
           });
-        console.log('accepting');
       }
     },
     [dmModel.to, groupModel.path, isGroup]
@@ -182,23 +190,27 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       if (isGroup) {
         ShipActions.declineGroupDm(groupModel.path)
           .then((response: any) => {
-            console.log('response', response);
-            setRejectLoading(false);
+            console.log('Decline group DM response', response);
+            refreshDms();
           })
           .catch(() => {
+            console.error('Error declining group DM.');
+          })
+          .finally(() => {
             setRejectLoading(false);
           });
-        console.log('rejecting group dm');
       } else {
         DmActions.declineDm(dmModel.to)
           .then((response: any) => {
-            console.log('response', response);
-            setRejectLoading(false);
+            console.log('Decline DM response:', response);
+            refreshDms();
           })
           .catch(() => {
+            console.error('Error declining DM.');
+          })
+          .finally(() => {
             setRejectLoading(false);
           });
-        console.log('rejecting');
       }
     },
     [dmModel.to, groupModel.path, isGroup]

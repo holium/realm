@@ -1,15 +1,12 @@
-import { FC, useCallback } from 'react';
+import { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 
 interface TitlebarStyleProps {
-  customBg: string;
   hasBorder: boolean;
   zIndex: number;
   isAppWindow?: boolean;
@@ -20,30 +17,25 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  /* flex: 1 1 auto; */
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   position: ${(props: TitlebarStyleProps) =>
     props.isAppWindow ? 'relative' : 'absolute'};
-  backdrop-filter: ${(props: TitlebarStyleProps) =>
-    props.hasBlur ? 'blur(16px)' : 'none'};
+  /* backdrop-filter: ${(props: TitlebarStyleProps) =>
+    props.hasBlur ? 'blur(16px)' : 'none'}; */
   top: 0;
   left: 0;
   right: 0;
   height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 54)}px;
   padding: 0 4px 0
     ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-transform: translateZ(0);
-  --webkit-backface-visibility: hidden;
-  --webkit-perspective: 1000;
-  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   ${(props: TitlebarStyleProps) => css`
-    background: ${props.customBg};
     z-index: ${props.zIndex};
     border-bottom: ${props.hasBorder
-      ? `1px solid ${rgba(darken(0.5, props.customBg), 0.25)}`
+      ? ' 1px solid var(--rlm-border-color)'
       : 'none'};
   `}
 `;
@@ -85,33 +77,34 @@ interface TitlebarProps {
   children?: React.ReactNode;
 }
 
-export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
-  const {
-    children,
-    showDevToolsToggle,
-    closeButton,
-    hasBorder,
-    zIndex,
-    noTitlebar,
-    isAppWindow,
-    dragControls,
-    onDragStop,
-    onDragStart,
-    onClose,
-    onDevTools,
-    maximizeButton,
-    minimizeButton,
-    onMaximize,
-    onMinimize,
-    navigationButtons,
-    shareable,
-    hasBlur,
-  } = props;
-  const { windowColor, iconColor } = props.theme;
+export const Titlebar = ({
+  children,
+  app,
+  showDevToolsToggle,
+  closeButton,
+  hasBorder = true,
+  zIndex = 2,
+  noTitlebar,
+  isAppWindow,
+  dragControls,
+  onDragStop,
+  onDragStart,
+  onClose,
+  onDevTools,
+  maximizeButton,
+  minimizeButton,
+  onMaximize,
+  onMinimize,
+  navigationButtons,
+  shareable,
+  hasBlur,
+  theme,
+}: TitlebarProps) => {
+  const { windowColor, iconColor } = theme;
 
   let titleSection: any;
-  if (props.app) {
-    const { title, icon } = props.app;
+  if (app) {
+    const { title, icon } = app;
     titleSection = (
       <Flex gap={4} alignItems="center">
         <Flex justifyContent="center" alignItems="center">
@@ -156,7 +149,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       transition={{
         background: { duration: 0.25 },
       }}
-      customBg={rgba(windowColor!, 0.9)}
+      // customBg={windowColor!}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
@@ -242,12 +235,4 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       )}
     </TitlebarStyle>
   );
-};
-
-Titlebar.defaultProps = {
-  zIndex: 2,
-  hasBorder: true,
-  // minimizeButton: true,
-  // maximizeButton: true,
-  // showDevToolsToggle: true,
 };

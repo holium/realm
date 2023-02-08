@@ -23,14 +23,6 @@ const radius = {
   xxl: 20,
 };
 
-const scales = {
-  sm: 0.07,
-  md: 0.05,
-  lg: 0.07,
-  xl: 0.05,
-  xxl: 0.02,
-};
-
 interface TileStyleProps {}
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;
@@ -81,7 +73,6 @@ export const AppRowStyle = styled(motion.div)<RowProps>`
 `;
 
 interface AppRowProps {
-  caption: string;
   app: any;
   descriptionWidth?: number;
   onClick?: (evt: React.MouseEvent<HTMLElement>, app: DocketAppType) => void;
@@ -89,7 +80,6 @@ interface AppRowProps {
 }
 
 export const AppRow = ({
-  caption,
   descriptionWidth,
   app,
   onClick,
@@ -99,7 +89,7 @@ export const AppRow = ({
   const rowRef = useRef<any>(null);
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   let image = app.image;
-  if (app && app.href && app.href.site) {
+  if (app && !app.image && app.href && app.href.site) {
     // for the case an image is served by the ship
     // we wont have it until install, so set to null
     image = null;

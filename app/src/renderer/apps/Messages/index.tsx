@@ -8,7 +8,7 @@ import { useTrayApps } from '../store';
 import { useServices } from '../../logic/store';
 import useStorage from 'renderer/logic/lib/useStorage';
 
-export const MessagesTrayApp = observer(() => {
+const MessagesTrayAppPresenter = () => {
   const { theme } = useServices();
   const { dimensions } = useTrayApps();
   const { dmApp } = useTrayApps();
@@ -78,4 +78,6 @@ export const MessagesTrayApp = observer(() => {
   }
 
   return viewSwitcher;
-});
+};
+
+export const MessagesTrayApp = observer(MessagesTrayAppPresenter);

@@ -8,6 +8,7 @@ type AppStatusFlags = {
   isFailed: boolean;
   isSuspended: boolean;
   hasFailed: boolean;
+  isDesktop: boolean;
 };
 export const getAppTileFlags = (
   installStatus: InstallStatus
@@ -16,13 +17,15 @@ export const getAppTileFlags = (
     installStatus !== InstallStatus.installed &&
     installStatus !== InstallStatus.suspended &&
     installStatus !== InstallStatus.failed &&
-    installStatus !== InstallStatus.uninstalled;
+    installStatus !== InstallStatus.uninstalled &&
+    installStatus !== InstallStatus.desktop;
 
   const isFaded =
     isInstalling ||
     installStatus === InstallStatus.suspended ||
     installStatus === InstallStatus.failed ||
-    installStatus === InstallStatus.uninstalled;
+    installStatus === InstallStatus.uninstalled ||
+    installStatus === InstallStatus.desktop;
 
   return {
     isInstalled: installStatus === InstallStatus.installed,
@@ -32,5 +35,6 @@ export const getAppTileFlags = (
     isFailed: installStatus === InstallStatus.failed,
     isUninstalled: installStatus === InstallStatus.uninstalled,
     hasFailed: installStatus === InstallStatus.failed,
+    isDesktop: installStatus === InstallStatus.desktop,
   };
 };

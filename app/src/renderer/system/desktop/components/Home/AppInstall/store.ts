@@ -109,9 +109,11 @@ export const AppInstallStore = types
       self.dimensions = dimensions;
       self.coords = calculatePopoverAnchorById(popoverId, {
         anchorOffset: {
-          x: -40,
-          y: 20,
+          x: 0,
+          y: 4,
         },
+        dimensions,
+        centered: true,
       });
     },
   }));
@@ -132,9 +134,9 @@ export const appInstallStore = AppInstallStore.create({
   selectedShip: '',
   selectedDesk: '',
   loadingState: '',
-  coords: (persistedState && persistedState.coords) || {
-    left: 0,
-    top: 0,
+  coords: {
+    left: persistedState?.coords?.left ?? 0,
+    top: persistedState?.coords?.top ?? 0,
   },
   dimensions: { height: 450, width: 550 },
 });

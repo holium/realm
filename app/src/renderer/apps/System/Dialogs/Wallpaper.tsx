@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -71,16 +71,16 @@ const createWallpaperForm = (
   };
 };
 
-export const WallpaperDialog: FC = observer(() => {
+const WallpaperDialogPresenter = () => {
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
     () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
     []
   );
 
-  const onChange = (evt: any) => {
+  const onChange = () => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
     theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
@@ -140,11 +140,13 @@ export const WallpaperDialog: FC = observer(() => {
           showBackground
           highlightColor={theme.currentTheme.accentColor}
           textColor={theme.currentTheme.accentColor}
-          onClick={(evt: any) => onChange(evt)}
+          onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}
         </TextButton>
       </Flex>
     </Flex>
   );
-});
+};
+
+const WallpaperDialog = observer(WallpaperDialogPresenter);

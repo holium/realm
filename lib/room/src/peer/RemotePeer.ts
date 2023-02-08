@@ -1,6 +1,5 @@
 import SimplePeer from 'simple-peer';
 import { action, makeObservable, observable } from 'mobx';
-import { patp2dec } from 'urbit-ob';
 import { Patp } from '../types';
 import { DataPacket } from '../helpers/data';
 import { Peer, PeerConfig } from './Peer';
@@ -8,10 +7,12 @@ import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
 import { isFireFox, isSafari } from '../utils';
 
-type SignalData = SimplePeer.SignalData | { type: 'ready'; from: Patp };
+type SignalData =
+  | SimplePeer.SignalData
+  | { type: 'ack-waiting' | 'waiting'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
-  peer?: SimplePeer.Instance;
+  peer: SimplePeer.Instance | null = null;
   isInitiator: boolean;
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
@@ -46,11 +47,8 @@ export class RemotePeer extends Peer {
       _onStream: action.bound,
       _onTrack: action.bound,
       _onData: action.bound,
+      onWaiting: action.bound,
     });
-  }
-
-  static isInitiator(localPatpId: number, remotePatp: Patp) {
-    return localPatpId < patp2dec(remotePatp);
   }
 
   createConnection() {
@@ -61,6 +59,7 @@ export class RemotePeer extends Peer {
       initiator: this.isInitiator,
       config: this.rtcConfig,
       objectMode: true,
+      trickle: true,
     });
     this.peer.on('connect', this._onConnect.bind(this));
     this.peer.on('close', this._onClose.bind(this));
@@ -79,17 +78,34 @@ export class RemotePeer extends Peer {
   }
 
   dial() {
+    if (this.status !== PeerConnectionState.New) {
+      console.log('dialing, not new status');
+      this.removeTracks();
+      this.peer?.destroy();
+    }
+    this.setStatus(PeerConnectionState.New);
+    // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
-      // notify the peer that we want to connect
-      this.sendSignal(this.patp, { type: 'ready', from: this.our });
+      this.createConnection();
+      console.log(`%waiting to ${this.patp}`);
+      this.sendSignal(this.patp, { type: 'waiting', from: this.our });
+    }
+  }
+
+  onWaiting() {
+    if (this.isInitiator) {
+      this.createConnection();
     }
   }
 
   peerSignal(data: SimplePeer.SignalData) {
-    if (this.peer?.destroyed) {
-      this.createConnection();
+    // TODO go through the flow where a peer is destroyed and attempts to reconnect
+    if (!this.peer?.destroyed) {
+      this.peer?.signal(data);
+    } else {
+      console.log('peerSignal: peer destroyed, not signaling', this.patp);
+      this.setStatus(PeerConnectionState.Destroyed);
     }
-    this.peer?.signal(data);
   }
 
   _onConnect() {
@@ -101,14 +117,16 @@ export class RemotePeer extends Peer {
   _onClose() {
     // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
-    this.removeTracks();
+    // this.hangup();
     this.emit(PeerEvent.Closed);
   }
 
   _onError(err: Error) {
-    // console.log('RemotePeer onError', err);
+    // @ts-ignore
+    console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
-    this.removeTracks();
+    // this.pee
+    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
   }
 
@@ -120,25 +138,24 @@ export class RemotePeer extends Peer {
   }
 
   _onStream(stream: MediaStream) {
-    // console.log('RemotePeer onStream', stream);
     this.emit(PeerEvent.MediaStreamAdded, stream);
   }
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
+    // TODO make sure we're not adding the same track twice
     this.tracks.set(track.id, track);
     if (track.kind === 'video') {
-      stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
-        this.videoTracks.set(video.id, video);
-        this.attach(video);
-        this.emit(PeerEvent.VideoTrackAdded, stream, video);
-      });
+      this.videoTracks.set(track.id, track);
+      this.attach(track);
+      this.emit(PeerEvent.VideoTrackAdded, stream, track);
     }
     if (track.kind === 'audio') {
-      stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
-        this.audioTracks.set(audio.id, audio);
-        this.attach(audio);
-        this.emit(PeerEvent.AudioTrackAdded, stream, audio);
-      });
+      if (this.audioTracks.size > 0) {
+        this.removeAudioTracks();
+      }
+      this.audioTracks.set(track.id, track);
+      this.attach(track);
+      this.emit(PeerEvent.AudioTrackAdded, stream, track);
     }
   }
 
@@ -152,7 +169,7 @@ export class RemotePeer extends Peer {
 
   sendData(data: DataPacket): void {
     if (this.status !== PeerConnectionState.Connected) {
-      throw new Error("can't send data unless connected");
+      console.warn("can't send data unless connected, still trying");
     }
     this.peer?.send(JSON.stringify(data));
   }
@@ -173,7 +190,26 @@ export class RemotePeer extends Peer {
     this.videoTracks.clear();
   }
 
+  removeVideoTracks() {
+    this.videoTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.tracks.delete(track.id);
+      this.detach(track);
+      this.emit(PeerEvent.VideoTrackRemoved, track);
+    });
+  }
+
+  removeAudioTracks() {
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.tracks.delete(track.id);
+      this.detach(track);
+      this.emit(PeerEvent.AudioTrackRemoved, track);
+    });
+  }
+
   hangup() {
+    this.removeTracks();
     this.peer?.destroy();
   }
 
@@ -195,7 +231,7 @@ export class RemotePeer extends Peer {
     } else if (element instanceof HTMLVideoElement) {
       this.isVideoAttached = true;
     }
-    console.log('attached', element);
+    // console.log('attached', element);
     return element;
   }
 

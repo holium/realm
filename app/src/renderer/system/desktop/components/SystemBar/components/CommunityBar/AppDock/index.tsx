@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import {
   AppType,
@@ -20,239 +20,260 @@ import {
   installLabel,
   resumeSuspendLabel,
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
+import { debounce } from 'lodash';
 
-export const AppDock = observer(() => {
+const AppDockPresenter = () => {
   const { desktop, spaces, bazaar, theme } = useServices();
 
-  const dividerBg = useMemo(
-    () => rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4),
-    [theme.currentTheme]
+  const spacePath = spaces.selected?.path;
+  const dock = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
+  const dockApps = spacePath
+    ? ((bazaar.getDockApps(spacePath) ?? []) as AppType[])
+    : [];
+
+  const [localDockApps, setLocalDockApps] = useState<AppType[]>(dockApps);
+
+  const pointerDownRef = useRef<{
+    tileId: string;
+    rect: DOMRect;
+  } | null>(null);
+
+  const debouncedSetLocalDockApps = useCallback(
+    debounce(setLocalDockApps, 500),
+    []
   );
 
-  const spacePath = spaces.selected?.path!;
-  const dock = bazaar.getDock(spacePath);
-
-  const orderedList = useMemo(
-    () => (spacePath ? bazaar.getDockApps(spacePath) : []),
-    [bazaar, spacePath]
-  );
-
-  const pinnedApps = useMemo(() => {
-    return (
-      <Reorder.Group
-        axis="x"
-        style={{
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 8,
-        }}
-        values={orderedList || []}
-        onReorder={(newOrder: any) => {
-          const newPinList = newOrder.map((app: any) => app.id);
-          SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
-        }}
-      >
-        {orderedList?.map((app: AppType | any) => {
-          const selected = desktop.isActiveWindow(app.id);
-          const open = desktop.isOpenWindow(app.id);
-          const { isSuspended, isUninstalled } = getAppTileFlags(
-            app.installStatus || InstallStatus.installed
-          );
-          const suspendRow = isSuspended
-            ? [
-                {
-                  label: resumeSuspendLabel(app.installStatus),
-                  section: 2,
-                  disabled: false,
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    return handleResumeSuspend(app.id, app.installStatus);
-                  },
-                },
-              ]
-            : [];
-
-          const installRow =
-            app.type === 'urbit' && isUninstalled
-              ? [
-                  {
-                    label: installLabel(app.installStatus),
-                    // section: 2,
-                    disabled: false,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      const appHost = (app as UrbitAppType).host;
-                      return handleInstallation(
-                        appHost,
-                        app.id,
-                        app.installStatus
-                      );
-                    },
-                  },
-                ]
-              : [];
-          const tileId = `pinned-${app.id}-${spaces.selected?.path}`;
-
-          return (
-            <Reorder.Item
-              key={tileId}
-              value={app}
-              style={{ zIndex: 1 }}
-              initial={{
-                opacity: 0.0,
-              }}
-              animate={{
-                opacity: 1,
-                transition: {
-                  opacity: { duration: 0.25, delay: 0.5 },
-                },
-              }}
-              exit={{
-                opacity: 0.5,
-                transition: {
-                  opacity: { duration: 1, delay: 0 },
-                },
-              }}
-              onClick={() => {
-                const selectedApp = app;
-                if (desktop.isOpenWindow(selectedApp.id)) {
-                  DesktopActions.setActive(spacePath, selectedApp.id);
-                } else {
-                  console.log(selectedApp);
-                  DesktopActions.openAppWindow(spacePath, selectedApp);
-                }
-              }}
-              whileDrag={{ zIndex: 20 }}
-            >
-              <AppTile
-                tileId={tileId}
-                tileSize="sm"
-                installStatus={app.installStatus}
-                isAnimated={
-                  app.installStatus !== InstallStatus.suspended &&
-                  app.installStatus !== InstallStatus.failed
-                }
-                app={app}
-                selected={selected}
-                open={open}
-                onAppClick={() => {
-                  const selectedApp = app;
-                  if (desktop.isOpenWindow(selectedApp.id)) {
-                    DesktopActions.setActive(spacePath, selectedApp.id);
-                  } else {
-                    DesktopActions.openAppWindow(spacePath, selectedApp);
-                  }
-                }}
-                contextMenuOptions={[
-                  ...installRow,
-                  ...suspendRow,
-                  {
-                    label: 'Unpin',
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      SpacesActions.unpinApp(spacePath, app.id);
-                    },
-                  },
-                  {
-                    label: 'Close',
-                    section: 2,
-                    disabled: !open,
-                    onClick: (evt: any) => {
-                      DesktopActions.closeAppWindow(spacePath, app);
-                      evt.stopPropagation();
-                    },
-                  },
-                ]}
-              />
-            </Reorder.Item>
-          );
-        })}
-      </Reorder.Group>
-    );
-  }, [desktop, orderedList, spacePath, spaces.selected]);
+  useEffect(() => {
+    // If the dock length changes, e.g. from the AppGrid, we update the local dock.
+    debouncedSetLocalDockApps(dockApps);
+  }, [dockApps.length]);
 
   const activeAndUnpinned = useMemo(
     () =>
       desktop.openApps.filter(
         (appWindow: any) =>
-          dock &&
-          dock.findIndex((pinned: any) => appWindow.id === pinned) === -1
+          dock && dock.findIndex((pinned) => appWindow.id === pinned) === -1
       ),
     [desktop.openApps, dock]
   );
 
-  const activeAndUnpinnedApps = useMemo(
-    () => (
-      <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
-        {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = bazaar.getApp(unpinnedApp.id)!;
-          const selected = desktop.isActiveWindow(app.id);
-          const open = desktop.isOpenWindow(app.id);
-          const tileId = `unpinned-${app.id}`;
-          return (
+  if (!spacePath) return null;
+
+  const pinnedApps = (
+    <Reorder.Group
+      axis="x"
+      style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 8,
+      }}
+      values={localDockApps || []}
+      onReorder={(newOrder: AppType[]) => {
+        // First we update the dock locally so the user doesn't have to
+        // wait for the subscription to come back.
+        setLocalDockApps(newOrder);
+        const newPinList = newOrder.map((app) => app.id);
+        SpacesActions.setPinnedOrder(spacePath, newPinList);
+      }}
+    >
+      {localDockApps?.map((app: AppType | any) => {
+        const selected = desktop.isActiveWindow(app.id);
+        const open = desktop.isOpenWindow(app.id);
+        const { isSuspended, isUninstalled } = getAppTileFlags(
+          app.installStatus || InstallStatus.installed
+        );
+        const suspendRow = isSuspended
+          ? [
+              {
+                label: resumeSuspendLabel(app.installStatus),
+                section: 2,
+                disabled: false,
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  return handleResumeSuspend(app.id, app.installStatus);
+                },
+              },
+            ]
+          : [];
+
+        const installRow =
+          app.type === 'urbit' && isUninstalled
+            ? [
+                {
+                  label: installLabel(app.installStatus),
+                  // section: 2,
+                  disabled: false,
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    const appHost = (app as UrbitAppType).host;
+                    return handleInstallation(
+                      appHost,
+                      app.id,
+                      app.installStatus
+                    );
+                  },
+                },
+              ]
+            : [];
+        const tileId = `pinned-${app.id}-${spacePath}`;
+        const onClick = () => {
+          if (desktop.isOpenWindow(app.id)) {
+            DesktopActions.setActive(spacePath, app.id);
+          } else {
+            DesktopActions.openAppWindow(spacePath, app);
+          }
+        };
+
+        return (
+          <Reorder.Item
+            key={tileId}
+            value={app}
+            style={{ zIndex: 1 }}
+            initial={{
+              opacity: 0.0,
+            }}
+            animate={{
+              opacity: 1,
+              transition: {
+                opacity: { duration: 0.25, delay: 0.5 },
+              },
+            }}
+            exit={{
+              opacity: 0.5,
+              transition: {
+                opacity: { duration: 1, delay: 0 },
+              },
+            }}
+            whileDrag={{ zIndex: 20 }}
+            onPointerDown={() => {
+              const rect = document
+                .getElementById(tileId)
+                ?.getBoundingClientRect();
+              if (rect) pointerDownRef.current = { tileId, rect };
+            }}
+            onPointerUp={(e) => {
+              // Make sure it's a left click.
+              if (e.button !== 0) return;
+
+              if (tileId !== pointerDownRef.current?.tileId) return;
+
+              const pointerDownRect = pointerDownRef.current?.rect;
+              const pointerUpRect = document
+                .getElementById(tileId)
+                ?.getBoundingClientRect();
+
+              if (!pointerDownRect || !pointerUpRect) return;
+
+              // < 5px movement is a click
+              const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
+              const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
+
+              if (diffX < 5 && diffY < 5) onClick();
+            }}
+          >
             <AppTile
-              key={tileId}
               tileId={tileId}
               tileSize="sm"
+              installStatus={app.installStatus}
+              isAnimated={
+                app.installStatus !== InstallStatus.suspended &&
+                app.installStatus !== InstallStatus.failed
+              }
               app={app}
               selected={selected}
               open={open}
               contextMenuOptions={[
+                ...installRow,
+                ...suspendRow,
                 {
-                  label: 'Pin',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    SpacesActions.pinApp(spaces.selected?.path!, app.id);
+                  id: `${app.id}-unpin}`,
+                  label: 'Unpin',
+                  onClick: () => {
+                    SpacesActions.unpinApp(spacePath, app.id);
                   },
                 },
                 {
+                  id: `${app.id}-close}`,
                   label: 'Close',
-                  disabled: !open,
                   section: 2,
-                  onClick: (evt: any) => {
-                    DesktopActions.closeAppWindow(
-                      spaces.selected?.path!,
-                      toJS(app)
-                    );
-                    evt.stopPropagation();
+                  disabled: !open,
+                  onClick: () => {
+                    DesktopActions.closeAppWindow(spacePath, app);
                   },
                 },
               ]}
-              onAppClick={(selectedApp: any) => {
-                if (desktop.isOpenWindow(selectedApp.id)) {
-                  if (desktop.isMinimized(selectedApp.id)) {
-                    DesktopActions.toggleMinimized(
-                      spaces.selected!.path,
-                      selectedApp.id
-                    );
-                  } else {
-                    DesktopActions.setActive(
-                      spaces.selected!.path,
-                      selectedApp.id
-                    );
-                  }
-                } else {
-                  DesktopActions.openAppWindow(
-                    spaces.selected!.path,
-                    JSON.parse(JSON.stringify(selectedApp))
-                  );
-                }
-              }}
             />
-          );
-        })}
-      </Flex>
-    ),
-    [activeAndUnpinned, bazaar, desktop, spaces.selected]
+          </Reorder.Item>
+        );
+      })}
+    </Reorder.Group>
+  );
+
+  const activeAndUnpinnedApps = (
+    <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
+      {activeAndUnpinned.map((unpinnedApp: any) => {
+        const app = bazaar.getApp(unpinnedApp.id)!;
+        const selected = desktop.isActiveWindow(app.id);
+        const open = desktop.isOpenWindow(app.id);
+        const tileId = `unpinned-${app.id}`;
+        return (
+          <AppTile
+            key={tileId}
+            tileId={tileId}
+            tileSize="sm"
+            app={app}
+            selected={selected}
+            open={open}
+            contextMenuOptions={[
+              {
+                id: `${app.id}-pin}`,
+                label: 'Pin',
+                onClick: () => {
+                  SpacesActions.pinApp(spacePath, app.id);
+                },
+              },
+              {
+                id: `${app.id}-close}`,
+                label: 'Close',
+                disabled: !open,
+                section: 2,
+                onClick: () => {
+                  DesktopActions.closeAppWindow(spacePath, toJS(app));
+                },
+              },
+            ]}
+            onAppClick={(selectedApp) => {
+              if (desktop.isOpenWindow(selectedApp.id)) {
+                if (desktop.isMinimized(selectedApp.id)) {
+                  DesktopActions.toggleMinimized(spacePath, selectedApp.id);
+                } else {
+                  DesktopActions.setActive(spacePath, selectedApp.id);
+                }
+              } else {
+                DesktopActions.openAppWindow(
+                  spacePath,
+                  JSON.parse(JSON.stringify(selectedApp))
+                );
+              }
+            }}
+          />
+        );
+      })}
+    </Flex>
   );
 
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
       <AnimatePresence>
         {pinnedApps}
-        {activeAndUnpinned.length && orderedList?.length ? (
-          <Divider key="app-dock-divider" customBg={dividerBg} ml={2} mr={2} />
+        {activeAndUnpinned.length && localDockApps?.length ? (
+          <Divider
+            key="app-dock-divider"
+            customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
+            ml={2}
+            mr={2}
+          />
         ) : (
           []
         )}
@@ -260,4 +281,6 @@ export const AppDock = observer(() => {
       {activeAndUnpinnedApps}
     </Flex>
   );
-});
+};
+
+export const AppDock = observer(AppDockPresenter);

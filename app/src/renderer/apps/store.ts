@@ -8,15 +8,15 @@ import {
   onSnapshot,
   applySnapshot,
 } from 'mobx-state-tree';
-
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
-  NetworkType,
+  NetworkStoreType,
+  ProtocolType,
   SharingMode,
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet.model';
+} from 'os/services/tray/wallet-lib/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
@@ -65,6 +65,9 @@ const TrayAppStore = types
     setTrayAppHeight(height: number) {
       self.dimensions.height = height;
     },
+    getTrayAppHeight() {
+      return self.dimensions.height;
+    },
     closeActiveApp() {
       self.activeApp = null;
     },
@@ -103,44 +106,50 @@ const persistedState = loadSnapshot();
 const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    network: NetworkType.ETHEREUM,
-    btcNetwork: 'mainnet',
-  },
-  navHistory: [],
-  bitcoin: {
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      blocked: [],
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  testnet: {
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      blocked: [],
-      defaultIndex: 0,
-    },
-    conversions: {},
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+    transSend: false,
   },
   ethereum: {
-    network: 'gorli',
+    block: 0,
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
-      blocked: [],
       defaultIndex: 0,
     },
     initialized: false,
     conversions: {},
   },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
   creationMode: 'default',
   sharingMode: 'anybody',
-  ourPatp: '~zod',
-  lastInteraction: new Date(),
+  lastInteraction: Date.now(),
   initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  forceActive: false,
 };
 
 export const trayStore = TrayAppStore.create({
@@ -182,132 +191,26 @@ export function useTrayApps() {
   return store;
 }
 
-// Set up room listeners
-// const protocol = new RealmProtocol(
-//   testShip,
-//   {
-//     rtc: {
-//       iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-//     },
-//   },
-//   ShipConfig[testShip]
-// );
-// export const RoomManager = new RoomManager()
-
-// export const LiveRoom = new Room((to: Patp[], data: any) => {
-//   SlipActions.sendSlip(to, data);
-// });
-
-// SlipActions.onSlip((_event: Event, slip: SlipType) => {
-//   LiveRoom.onSlip(slip);
-// });
-
-// RoomsActions.onRoomUpdate(
-//   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
-//     console.log('room diff in renderer', diff);
-//     LiveRoom.onDiff(diff, room);
-//     // @ts-expect-error
-//     if (diff.exit) {
-//       SoundActions.playRoomLeave();
-//     }
-//     // @ts-expect-error
-//     if (diff.enter) {
-//       SoundActions.playRoomEnter();
-//     }
-//   }
-// );
-
-// Watch actions for sound trigger
-// onAction(trayStore, (call) => {
-//   if (call.path === '/roomsApp') {
-//     if (call.name === '@APPLY_SNAPSHOT') return;
-//     const patchArg = call.args![0][0];
-//     if (patchArg.path === '/liveRoom') {
-//       if (patchArg.op === 'replace') {
-//         patchArg.value
-//           ? SoundActions.playRoomEnter()
-//           : SoundActions.playRoomLeave();
-//         if (patchArg.value) {
-//           // Entering or switching room
-//           // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
-//           // console.log('entering and switching to connect');
-//           // if (room) {
-//           //   if (LiveRoom.state === RoomState.Disconnected) {
-//           //     // not init yet, so leave
-//           //     // this case is hit if we boot realm and are still in a room from a previous session.
-//           //     RoomsActions.leaveRoom(room.id);
-//           //     return;
-//           //   }
-//           //   // LiveRoom.connect(room);
-//           // }
-//         }
-//       }
-//     }
-//   }
-// });
-
-OSActions.onBoot((_event: any, response: any, session: any) => {
-  console.log('session', session);
-  if (response.loggedIn && response.ship) {
-    // This resets the wallet app to the default state
-    // applySnapshot(trayStore.walletApp, walletAppDefault);
-    // RoomsActions.resetLocal();
-    // RoomsActions.exitRoom();
-    // LiveRoom.leave();
-    // const protocol = new RoomProtocol(
-    //   session.ship,
-    //   {
-    //     rtc: {
-    //       iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-    //     },
-    //   },
-    //   session
-    // );
-    // const roomManager = new RoomsManager(protocol);
-    // protocol.init(session);
-    // console.log(roomManager);
-    // if (response.ship.patp) LiveRoom.init(response.ship.patp!);
-  }
-});
-
-// After boot, set the initial data
-OSActions.onConnected((_event: any, response: any) => {
-  console.log('on connected', response);
+OSActions.onLogout((_event: any) => {
   applySnapshot(trayStore.walletApp, walletAppDefault);
 });
 
-// OSActions.onLogout((_event: any) => {
-
-// })
-
-// OSActions.onEffect((_event: any, value: any) => {
-//   if (value.response === 'initial') {
-//     if (value.resource === 'ship') {
-// RoomsActions.resetLocal();
-// RoomsActions.exitRoom();
-// LiveRoom.leave();
-//       LiveRoom.init(value.model.patp!);
-//     }
-//   }
-// });
-
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {
+  if (value.response === 'initial') {
+    if (value.resource === 'wallet') {
+      applySnapshot(trayStore.walletApp, value.model);
+    }
+  }
   if (value.response === 'patch') {
-    // if (value.resource === 'rooms') {
-    //   applyPatch(trayStore.roomsApp, value.patch);
-    // }
     if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
   }
 });
+
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {
-  // if (response.rooms) {
-  //   applySnapshot(trayStore.roomsApp, response.rooms);
-  // }
-
   if (response.wallet) {
     applySnapshot(trayStore.walletApp, response.wallet);
   }

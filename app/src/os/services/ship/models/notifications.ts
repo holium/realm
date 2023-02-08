@@ -1,7 +1,5 @@
-import { Conduit } from '@holium/conduit';
-import { NotificationApi } from '../../../api/notifications';
 import { cast, Instance, types, flow } from 'mobx-state-tree';
-import { daToUnix, decToUd, udToDec, unixToDa } from '@urbit/api';
+import { daToUnix, udToDec } from '@urbit/api';
 import bigInt from 'big-integer';
 
 const NotificationContentTypes = types.union(
@@ -47,7 +45,7 @@ export const NotificationModel = types
       //  ::  %read-count: set unread count to zero
       //  [%read-count =place]
     },
-    archive(lid: string, bin: PlaceModelType) {
+    archive(_lid: string, _bin: PlaceModelType) {
       // ::  %archive: archive single notification
       // ::  if .time is ~, then archiving unread notification
       // ::  else, archiving read notification
@@ -242,10 +240,10 @@ export const NotificationStore = types
       );
       // Only set as seen if it is unseen
       if (notif) {
-        const response = yield NotificationApi.sawPlace(
-          notif?.place,
-          decToUd(unixToDa(Date.now() * 1000).toString())
-        );
+        // const response = yield NotificationApi.sawPlace(
+        //   notif?.place,
+        //   decToUd(unixToDa(Date.now() * 1000).toString())
+        // );
       }
       // if (unseen) {
       // const response = yield NotificationApi.sawPlace(
@@ -258,14 +256,14 @@ export const NotificationStore = types
       //   // self.seen.unshift(unseen);
       // }
     }),
-    setDismissed: flow(function* (link: string) {
-      const unseen = self.unseen.find(
-        (notification: NotificationModelType) => notification.link === link
-      );
-      const seen = self.seen.find(
-        (notification: NotificationModelType) => notification.link === link
-      );
-      const notif = unseen || seen;
+    setDismissed: flow(function* (_link: string) {
+      // const unseen = self.unseen.find(
+      //   (notification: NotificationModelType) => notification.link === link
+      // );
+      // const seen = self.seen.find(
+      //   (notification: NotificationModelType) => notification.link === link
+      // );
+      // const notif = unseen || seen;
     }),
     getByLink(link: string) {
       const unseen = self.unseen.find(
@@ -323,9 +321,10 @@ const RawTimeBox = {
 // 👇️ type Values = 1 | "James Doe" | 100
 export type RawTimeBoxType = typeof RawTimeBox;
 // 👇️ type Values = 1 | "James Doe" | 100
-export type RawNotificationType = typeof RawTimeBox.notifications[0];
+export type RawNotificationType = (typeof RawTimeBox.notifications)[0];
 
-export type RawNotificationBody = typeof RawTimeBox.notifications[0]['body'][0];
+export type RawNotificationBody =
+  (typeof RawTimeBox.notifications)[0]['body'][0];
 
 // Notes
 //

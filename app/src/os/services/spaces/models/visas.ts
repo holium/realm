@@ -31,7 +31,7 @@ export const VisaModel = types
     },
   }))
   .actions((self) => ({
-    initial(data: any) {
+    initial(_data: any) {
       // console.log(data);
       // set initial data
     },

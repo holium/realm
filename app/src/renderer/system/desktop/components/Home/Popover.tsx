@@ -38,15 +38,22 @@ export const RealmPopoverWrapper = styled(styled.div<
   z-index: 4;
 `)(compose(space, color, typography));
 
-export const RealmPopover = observer((props: RealmPopoverProps) => {
+const RealmPopoverPresenter = (props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
   const { theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
 
   const handleClickOutside = useCallback(
     (event: any) => {
-      // If we aren't clicking on a tray icon, close tray
-      if (`${id}-trigger` !== event.target.id) {
+      // If we aren't clicking on the tray's trigger,
+      // nor any of its children, then close the tray.
+      const trigger = document.getElementById(`${id}-trigger`);
+      if (
+        trigger &&
+        event.target &&
+        trigger !== event.target &&
+        !trigger.contains(event.target as Node)
+      ) {
         // we are clicking on an element that should close the tray
         if (event.target.getAttribute('data-close-tray') === 'true') {
           onClose();
@@ -126,7 +133,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   ...dimensions,
                   height: 'fit-content',
                   overflowY: 'auto',
-                  maxHeight: '50vh',
+                  maxHeight: '55vh',
                 }}
                 color={textColor}
                 customBg={windowColor}
@@ -142,4 +149,6 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
       </RealmPopoverWrapper>
     </Box>
   );
-});
+};
+
+export const RealmPopover = observer(RealmPopoverPresenter);

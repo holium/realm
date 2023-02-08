@@ -1,14 +1,15 @@
-import { FC, useState } from 'react';
+import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Card } from 'renderer/components';
+import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
   formatEthAmount,
+  formatZigAmount,
   getBaseTheme,
   getMockCoinIcon,
   formatCoinAmount,
@@ -21,15 +22,27 @@ import {
   ERC20Type,
   EthWalletType,
   BitcoinWalletType,
-} from 'os/services/tray/wallet.model';
+  NetworkType,
+  ProtocolType,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
 import { motion } from 'framer-motion';
-// import { CoinList } from './CoinList';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../../components/WalletCardWrapper';
+import TransactionPasscode from '../Transaction/TransactionPasscode';
 
-const CardWithShadow = styled(Card)`
-  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.1);
+const BreadCrumb = styled(Text)`
+  transition: var(--transition);
+
+  &:hover {
+    transition: var(--transition);
+    text-decoration: underline;
+  }
 `;
 
 interface DetailHeroProps {
@@ -54,11 +67,6 @@ interface DetailHeroProps {
   };
 }
 
-const transitionConfig = {
-  layout: { duration: 0.1 },
-  // opacity: { ease: 'smooth' },
-};
-
 export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
     const { theme } = useServices();
@@ -67,22 +75,47 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
+    const fadedTextColor = useMemo(
+      () => rgba(theme.currentTheme.textColor, 0.4),
+      [theme.currentTheme.textColor]
+    );
+
+    const [showPasscode, setShowPasscode] = useState(false);
 
     const amountDisplay =
-      walletApp.navState.network === 'ethereum'
+      walletApp.navState.network === NetworkType.ETHEREUM
         ? !props.coin
-          ? `${formatEthAmount(props.wallet.balance).eth} ETH`
+          ? walletApp.navState.protocol === ProtocolType.UQBAR
+            ? `${formatZigAmount(
+                (props.wallet as EthWalletType).data.get(
+                  walletApp.navState.protocol
+                )!.balance
+              )} zigs`
+            : `${
+                formatEthAmount(
+                  (props.wallet as EthWalletType).data.get(
+                    walletApp.navState.protocol
+                  )!.balance
+                ).eth
+              } ETH`
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
-        : `${formatBtcAmount(props.wallet.balance).btc} BTC`;
+        : `${
+            formatBtcAmount((props.wallet as BitcoinWalletType).balance).btc
+          } BTC`;
+
     const amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
           ? walletApp.ethereum.conversions.usd
             ? '$' +
               `${convertEthAmountToUsd(
-                formatEthAmount(props.wallet.balance),
+                formatEthAmount(
+                  (props.wallet as EthWalletType).data.get(
+                    walletApp.navState.protocol
+                  )!.balance
+                ),
                 walletApp.ethereum.conversions.usd
               )}`
             : ''
@@ -96,48 +129,47 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         : walletApp.bitcoin.conversions.usd
         ? '$' +
           `${convertBtcAmountToUsd(
-            formatBtcAmount(props.wallet.balance),
+            formatBtcAmount((props.wallet as BitcoinWalletType).balance),
             walletApp.bitcoin.conversions.usd
           )}`
         : '';
 
     const accountDisplay = !props.coin ? (
-      <Flex
+      <Text
         layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         mt={2}
         fontWeight={600}
-        color={rgba(theme.currentTheme.textColor, 0.4)}
+        color={fadedTextColor}
         style={{ textTransform: 'uppercase' }}
       >
         {props.wallet.nickname}
-      </Flex>
+      </Text>
     ) : (
       <Flex
         mt={2}
-        layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
         alignItems="center"
         gap={8}
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
       >
-        {/* <IconButton onClick={async () => await WalletActions.navigateBack()}>
-          <Icons
-            name="ArrowLeftLine"
-            size={1}
-            color={theme.currentTheme.iconColor}
-          />
-        </IconButton> */}
         <Flex flexDirection="row" alignItems="center">
-          <Text
+          <BreadCrumb
             fontWeight={500}
             fontSize={2}
-            color={rgba(theme.currentTheme.textColor, 0.4)}
+            color={fadedTextColor}
             style={{ textTransform: 'uppercase' }}
+            onClick={WalletActions.navigateBack}
           >
-            {`${props.wallet.nickname} / `}
-          </Text>
+            {`${props.wallet.nickname}`}
+          </BreadCrumb>
+          <Text
+            pl="2px"
+            fontWeight={500}
+            fontSize={2}
+            color={fadedTextColor}
+          >{` / `}</Text>
 
           <Text
             fontSize={2}
@@ -152,30 +184,81 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       </Flex>
     );
 
-    return (
-      <CardWithShadow
+    const [transactionAmount, setTransactionAmount] = useState(0);
+    const [transactionRecipient, setTransactionRecipient] = useState<{
+      address?: string;
+      patp?: string;
+      patpAddress?: string;
+      color?: string;
+    }>({});
+
+    const sendTransaction = async (passcode: number[]) => {
+      try {
+        if (walletApp.navState.network === NetworkType.ETHEREUM) {
+          if (walletApp.navState.protocol === ProtocolType.UQBAR) {
+            await WalletActions.submitUqbarTransaction(
+              walletApp.currentWallet!.index.toString(),
+              passcode
+            );
+          } else {
+            props.coin
+              ? await WalletActions.sendERC20Transaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  props.coin.address,
+                  passcode,
+                  transactionRecipient.patp
+                )
+              : await WalletActions.sendEthereumTransaction(
+                  walletApp.currentWallet!.index.toString(),
+                  transactionRecipient.address ||
+                    transactionRecipient.patpAddress!,
+                  transactionAmount.toString(),
+                  passcode,
+                  transactionRecipient.patp
+                );
+          }
+        }
+
+        props.close();
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    return showPasscode ? (
+      <TransactionPasscode
+        onSuccess={(code: number[]) => {
+          sendTransaction(code);
+        }}
+      />
+    ) : (
+      <WalletCardStyle
         layout="size"
+        elevation="none"
         layoutId={`wallet-card-${props.wallet.address}`}
-        transition={transitionConfig}
-        padding="16px 12px"
-        minHeight="240px"
+        transition={walletCardStyleTransition}
+        pb="8px"
+        px="12px"
+        minHeight="220px"
         height="auto"
         width="100%"
-        flexDirection="column"
-        justifyContent="flex-start"
+        isSelected
+        mode={theme.currentTheme.mode}
         customBg={lighten(0.04, theme.currentTheme.windowColor)}
         borderColor={
           theme.currentTheme.mode === 'dark'
             ? darken(0.1, theme.currentTheme.backgroundColor)
             : darken(0.1, theme.currentTheme.windowColor)
         }
-        borderRadius="16px"
       >
         <Flex
           p={2}
+          layout="position"
           width="100%"
           minHeight="38px"
-          transition={transitionConfig}
           style={{ height: props.QROpen ? 242 : 38 }}
           background={
             theme.currentTheme.mode === 'dark'
@@ -190,7 +273,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
-              <Icons name="Ethereum" height="20px" mr={2} />
+              {walletApp.navState.network === NetworkType.ETHEREUM ? (
+                <Icons name="Ethereum" height="20px" mr={2} />
+              ) : (
+                <Icons name="Bitcoin" height="20px" mr={2} />
+              )}
               <Text pt="2px" textAlign="center" fontSize="14px">
                 {shortened(props.wallet.address)}
               </Text>
@@ -242,7 +329,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         </Flex>
         <Box
           layout="position"
-          transition={transitionConfig}
+          transition={walletCardStyleTransition}
           py={2}
           width="100%"
           hidden={props.hideWalletHero}
@@ -259,12 +346,12 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         <Flex
           flexDirection="row"
           layout="position"
-          layoutId={`wallet-buttons-${props.wallet.address}`}
-          // mt={props.coin ? 0 : 3}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={transitionConfig}
+          exit={{ opacity: 1 }}
+          transition={walletCardStyleTransition}
+          // padding="15px 12px"
+          pb="15px"
         >
           <SendReceiveButtons
             hidden={props.sendTrans}
@@ -278,10 +365,15 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             onScreenChange={props.onScreenChange}
             close={props.close}
             coin={props.coin}
+            onConfirm={() => setShowPasscode(true)}
+            setTransactionAmount={setTransactionAmount}
+            transactionAmount={transactionAmount}
+            setTransactionRecipient={setTransactionRecipient}
+            transactionRecipient={transactionRecipient}
           />
         </Flex>
         {coinView}
-      </CardWithShadow>
+      </WalletCardStyle>
     );
   }
 );
@@ -315,31 +407,43 @@ function CopyButton(props: CopyProps) {
   );
 }
 
-function SendReceiveButtons(props: {
+const SendReceiveButtons = (props: {
   hidden: boolean;
   windowColor: string;
   send: any;
   receive: any;
-}) {
+}) => {
   const panelBackground = darken(0.04, props.windowColor);
 
-  return (
-    <Box width="100%" hidden={props.hidden}>
-      <Flex mt="12px" width="100%" justifyContent="center" alignItems="center">
-        <Box mr="16px" onClick={props.receive}>
-          <CircleButton
-            icon="Receive"
-            title="Receive"
-            iconColor={panelBackground}
-          />
-        </Box>
-        <Box onClick={props.send}>
-          <CircleButton icon="Send" title="Send" iconColor={panelBackground} />
-        </Box>
-      </Flex>
-    </Box>
+  return useMemo(
+    () => (
+      <Box width="100%" hidden={props.hidden}>
+        <Flex
+          mt="12px"
+          width="100%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Box mr="16px" onClick={props.receive}>
+            <CircleButton
+              icon="Receive"
+              title="Receive"
+              iconColor={panelBackground}
+            />
+          </Box>
+          <Box onClick={props.send}>
+            <CircleButton
+              icon="Send"
+              title="Send"
+              iconColor={panelBackground}
+            />
+          </Box>
+        </Flex>
+      </Box>
+    ),
+    [props]
   );
-}
+};
 
 interface BalanceInterface {
   address: string;
@@ -357,7 +461,7 @@ function Balance(props: BalanceInterface) {
       <Text
         mt={1}
         layout="position"
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         layoutId={`wallet-balance-${props.address}`}
         fontWeight={600}
         fontSize={7}
@@ -368,7 +472,7 @@ function Balance(props: BalanceInterface) {
         mt={1}
         layout="position"
         layoutId={`wallet-usd-${props.address}`}
-        transition={transitionConfig}
+        transition={walletCardStyleTransition}
         variant="body"
         color={props.colors.text.secondary}
       >
@@ -379,12 +483,14 @@ function Balance(props: BalanceInterface) {
     <Flex
       mt={1}
       layout="position"
-      transition={transitionConfig}
+      transition={walletCardStyleTransition}
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
     >
-      <motion.img layout="position" height="26px" src={coinIcon} />
+      <Flex width={26} height={26}>
+        <motion.img height="26px" src={coinIcon} />
+      </Flex>
       <Text
         mt={1}
         layout="position"

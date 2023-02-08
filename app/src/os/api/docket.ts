@@ -131,7 +131,7 @@ export const DocketApi = {
               reject('add ally error');
             });
           },
-          onEvent: async (data: any, _id?: number, mark?: string) => {
+          onEvent: async (data: any, _id?: number) => {
             // console.log(data);
             if (doneCallback(data)) {
               if (timeout) {
@@ -188,7 +188,7 @@ export const DocketApi = {
                 reject('delete ally error');
               });
           },
-          onEvent: async (data: any, _id?: number, mark?: string) => {
+          onEvent: async (data: any, _id?: number) => {
             // console.log(data);
             if (data.hasOwnProperty('del') && data.del === ship) {
               if (timeout) {
@@ -385,7 +385,7 @@ export const DocketApi = {
               reject('install app error');
             });
           },
-          onEvent: async (data: any, _id?: number, mark?: string) => {
+          onEvent: async (data: any, _id?: number) => {
             if (data.hasOwnProperty('add-charge')) {
               const charge = data['add-charge'].charge;
               // according to Tlon source, this determines when the app is fully installed

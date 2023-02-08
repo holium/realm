@@ -1,4 +1,6 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
+import { getPreloadPath } from '../main';
+import { hideCursor } from './hideCursor';
 
 export const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.handle(
@@ -15,8 +17,18 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     }
   );
 
-  ipcMain.handle('close-app', async (event, location: any) => {
-    const views = mainWindow.getBrowserViews();
+  mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
+    webPreferences.preload = getPreloadPath();
+    webPreferences.nodeIntegration = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = false;
+  });
+
+  mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+    webContents.on('dom-ready', () => {
+      hideCursor(webContents);
+      webContents.send('add-mouse-listeners');
+    });
   });
 };
 

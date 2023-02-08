@@ -1,27 +1,20 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Flex, Text } from 'renderer/components';
-import { Notification, NotificationProps } from './Notification';
+import { Notification } from './Notification';
 import { useTrayApps } from 'renderer/apps/store';
 import { WindowedList } from '@holium/design-system';
 import { NotificationModelType } from 'os/services/spaces/models/beacon';
+import { observer } from 'mobx-react';
 
 interface INotificationList {
   unseen: NotificationModelType[];
   seen: NotificationModelType[];
 }
 
-export const NotificationList: FC<INotificationList> = ({
-  unseen,
-  seen,
-}: INotificationList) => {
+const NotificationListPresenter = ({ unseen, seen }: INotificationList) => {
   const { dimensions } = useTrayApps();
 
-  type ListData = {
-    type: string;
-    data: NotificationProps | string;
-  };
-
-  const listData: ListData[] = useMemo(
+  const listData = useMemo(
     () => [
       { type: 'title', data: 'Unseen' },
       ...(unseen.length === 0
@@ -43,7 +36,8 @@ export const NotificationList: FC<INotificationList> = ({
 
   return (
     <Flex
-      padding="60px 14px"
+      pt={40}
+      pb={70}
       position="relative"
       flexDirection="column"
       height={dimensions.height}
@@ -60,7 +54,7 @@ export const NotificationList: FC<INotificationList> = ({
               </Text>
             );
           } else if (item.type === 'notification') {
-            const notification = item.data as NotificationProps;
+            const notification = item.data as NotificationModelType;
             return (
               <Notification key={`seen-${index}`} {...notification} seen />
             );
@@ -83,3 +77,5 @@ export const NotificationList: FC<INotificationList> = ({
     </Flex>
   );
 };
+
+export const NotificationList = observer(NotificationListPresenter);

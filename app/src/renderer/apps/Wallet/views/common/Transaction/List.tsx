@@ -1,54 +1,55 @@
-import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 import { darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
+import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
+import { Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
+import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
-  shortened,
   monthNames,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
-  convertBtcAmountToUsd,
+  shortened,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
+import {
+  TransactionType,
+  WalletView,
+} from 'os/services/tray/wallet-lib/wallet.model';
 
-const NoScrollBar = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-`;
-interface InputProps {
-  hoverBg: string;
-}
+export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
 interface TransactionProps {
+  isCoin?: boolean;
   transaction: TransactionType;
 }
-export const Transaction = observer((props: TransactionProps) => {
+const TransactionPresenter = (props: TransactionProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const hoverBackground = darken(0.0325, theme.currentTheme.windowColor);
-
-  const { transaction } = props;
+  const { transaction, isCoin } = props;
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt
+    transaction.completedAt || transaction.initiatedAt || 0
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
   const onClick = () => {
+    console.log('clicked', toJS(transaction));
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-      detail: { type: 'transaction', key: transaction.hash },
+      detail: {
+        type: 'transaction',
+        txtype: (walletApp.navState.detail?.txtype as TxType) || 'general',
+        coinKey: walletApp.navState.detail?.coinKey,
+        key: transaction.hash,
+      },
     });
   };
 
@@ -56,7 +57,7 @@ export const Transaction = observer((props: TransactionProps) => {
     <Row customBg={hoverBackground} onClick={onClick}>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Flex flexDirection="column" justifyContent="center">
-          <Text variant="h5" fontSize={3}>
+          <Text.Custom fontWeight={500} fontSize={3}>
             {transaction.status !== 'pending'
               ? wasSent
                 ? 'Sent'
@@ -64,9 +65,9 @@ export const Transaction = observer((props: TransactionProps) => {
               : wasSent
               ? 'Sending'
               : 'Receiving'}
-          </Text>
+          </Text.Custom>
           <Flex>
-            <Text
+            <OldText
               variant="body"
               fontSize={1}
               color={
@@ -80,13 +81,19 @@ export const Transaction = observer((props: TransactionProps) => {
               {`${
                 monthNames[completedDate.getMonth()]
               } ${completedDate.getDate()}`}
-            </Text>
-            <Text mx={1} variant="body" fontSize={1} color="text.disabled">
+            </OldText>
+            <OldText mx={1} variant="body" fontSize={1} color="text.disabled">
               ·
-            </Text>
-            <Text variant="body" fontSize={1} color="text.disabled">
+            </OldText>
+            <Text.Custom
+              truncate
+              width={130}
+              variant="body"
+              fontSize={1}
+              opacity={0.5}
+            >
               {wasSent ? 'To:' : 'From:'} {themDisplay}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
         <Flex
@@ -94,85 +101,79 @@ export const Transaction = observer((props: TransactionProps) => {
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text variant="body" fontSize={2}>
+          <Text.Body fontSize={2}>
             {transaction.type === 'sent' ? '-' : ''}{' '}
             {isEth ? `${ethAmount.eth}` /* ETH` */ : `${btcAmount.btc} BTC`}
-          </Text>
-          <Text variant="body" fontSize={1} color="text.disabled">
-            {transaction.type === 'sent' ? '-' : ''}$
-            {isEth
-              ? convertEthAmountToUsd(
+          </Text.Body>
+          {!isCoin && (
+            <Text.Hint opacity={0.5}>
+              {transaction.type === 'sent' ? '-' : ''}$
+              {isEth &&
+                `${convertEthAmountToUsd(
                   ethAmount,
                   walletApp.ethereum.conversions.usd
-                )
-              : convertBtcAmountToUsd(
-                  btcAmount,
-                  walletApp.bitcoin.conversions.usd
-                )}{' '}
-            USD
-          </Text>
+                )} USD`}
+            </Text.Hint>
+          )}
         </Flex>
       </Flex>
     </Row>
   );
-});
+};
+
+export const Transaction = observer(TransactionPresenter);
 
 interface TransactionListProps {
+  height: number;
   transactions: TransactionType[];
   hidePending: boolean;
   ethType?: string;
 }
-export const TransactionList = observer((props: TransactionListProps) => {
+const TransactionListPresenter = (props: TransactionListProps) => {
+  const { height = 230, ethType } = props;
   const { theme } = useServices();
-  // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(
-    (trans) => trans.status === 'pending'
+    (tx) => tx.status === 'pending'
   ).length;
 
-  // const [coinTransactions, setCoinTransactions] = useState(null);
-  useEffect(() => {
-    if (props.ethType !== 'ethereum' && props.ethType) {
-      const ourAddress = props.transactions[0].ourAddress;
-      // console.log('ourAddress', ourAddress, props.ethType);
-      WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-        (txns: any) => {
-          console.log(txns);
-        }
-      );
-    }
-  }, [props.ethType, props.transactions]);
-
-  const transactions = props.transactions.filter((trans) =>
-    props.ethType ? trans.ethType === props.ethType : true
-  );
+  let transactions = props.transactions;
+  if (ethType === 'ETH') {
+    transactions = props.transactions.filter((tx) =>
+      ethType ? tx.ethType === ethType : true
+    );
+  }
 
   return (
     <>
       <NoScrollBar
         width="100%"
-        height={pending && !props.hidePending ? '165px' : '210px'}
+        height={pending && !props.hidePending ? height - 54 : height}
         flexDirection="column"
         margin="auto"
-        overflow="scroll"
+        overflow="auto"
       >
         {transactions.length ? (
           transactions.map((transaction, index) => (
-            <Transaction key={index} transaction={transaction} />
+            <Transaction
+              isCoin={ethType !== undefined}
+              key={index}
+              transaction={transaction}
+            />
           ))
         ) : (
-          <Text
+          <OldText
             mt={6}
             variant="h5"
             textAlign="center"
             color={theme.currentTheme.iconColor}
           >
             No transactions
-          </Text>
+          </OldText>
         )}
       </NoScrollBar>
-      {transactions.length > 3 && (
-        <Flex pt={1} width="100%" justifyContent="center">
+      {transactions.length > 4 && (
+        <Flex pt="2px" width="100%" justifyContent="center">
           <Icons
             name="ChevronDown"
             size={1}
@@ -182,4 +183,6 @@ export const TransactionList = observer((props: TransactionListProps) => {
       )}
     </>
   );
-});
+};
+
+export const TransactionList = observer(TransactionListPresenter);
