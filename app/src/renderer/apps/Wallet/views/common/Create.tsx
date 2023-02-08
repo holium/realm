@@ -40,7 +40,7 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
   });
 
   return (
-    <Flex p={4} height="100%" width="100%" flexDirection="column">
+    <Flex p={1} height="100%" width="100%" flexDirection="column">
       <Text mt={2} variant="h4">
         Create Address
       </Text>

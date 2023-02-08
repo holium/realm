@@ -17,8 +17,6 @@ export const WalletList = observer(() => {
   const List: FC = () => {
     return (
       <Flex
-        py={1}
-        px={3}
         height="100%"
         width="100%"
         flexDirection="column"

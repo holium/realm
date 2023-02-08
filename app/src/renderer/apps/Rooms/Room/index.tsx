@@ -1,17 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import {
-  Badge,
-  Flex,
-  Grid,
-  IconButton,
-  Icons,
-  Text,
-} from 'renderer/components';
+import { darken } from 'polished';
+import { Badge } from 'renderer/components';
+import { Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
@@ -22,10 +15,10 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
   const { ship, theme } = useServices();
-  const { roomsApp, dimensions } = useTrayApps();
+  const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship!.patp);
 
-  const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
+  const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const muted = roomsManager?.protocol.local?.isMuted;
 
@@ -69,42 +62,27 @@ const RoomPresenter = () => {
   }
 
   return (
-    <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
-      expand
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBlur
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...theme,
-          windowColor,
-        }}
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
       >
-        <Flex
-          mt={2}
-          gap={10}
-          ml={3}
-          mr={2}
-          justifyContent="center"
-          alignItems="center"
-        >
-          <IconButton
+        <Flex gap={10} justifyContent="center" alignItems="center">
+          <Button.IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
-            customBg={dockColor}
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomsApp.setView('list');
             }}
           >
-            <Icons name="ArrowLeftLine" />
-          </IconButton>
+            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+          </Button.IconButton>
           <Flex flexDirection="column">
-            <Text
+            <Text.Custom
               fontSize={3}
               fontWeight={600}
               opacity={0.8}
@@ -115,21 +93,21 @@ const RoomPresenter = () => {
               }}
             >
               {presentRoom.title}
-            </Text>
+            </Text.Custom>
             <Flex mt="2px">
-              <Text fontSize={2} fontWeight={400} opacity={0.5}>
+              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
                 {creatorStr}
-              </Text>
-              <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
+              </Text.Custom>
+              <Text.Custom mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
                 •
-              </Text>
-              <Text fontSize={2} fontWeight={400} opacity={0.5}>
+              </Text.Custom>
+              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
                 {`${presentCount} ${peopleText}`}
-              </Text>
+              </Text.Custom>
             </Flex>
           </Flex>
         </Flex>
-        <Flex gap={12} ml={1} pl={2} pr={2}>
+        <Flex gap={12}>
           {/* <IconButton
             className="realm-cursor-hover"
             size={26}
@@ -158,34 +136,25 @@ const RoomPresenter = () => {
             <Icons name="InfoCircle" />
           </IconButton> */}
         </Flex>
-      </Titlebar>
-      <Flex
-        position="relative"
-        style={{ marginTop: 54 }}
-        flex={1}
-        flexDirection="column"
-      >
+      </Flex>
+      <Flex position="relative" flex={1} flexDirection="column">
         {roomView === 'voice' && <VoiceView />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         <Flex
-          pb={16}
-          pl={1}
-          pr={1}
+          px={1}
+          pb={1}
           flexDirection="row"
           justifyContent="space-between"
           alignItems="center"
         >
           <Flex alignItems="center">
-            <IconButton
+            <Button.IconButton
               className="realm-cursor-hover"
               size={26}
-              color={
-                presentRoom.creator === ship!.patp
-                  ? rgba('#E56262', 0.7)
-                  : undefined
+              customColor={
+                presentRoom.creator === ship!.patp ? '#E56262' : undefined
               }
-              customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (presentRoom.creator === ship!.patp) {
@@ -195,8 +164,8 @@ const RoomPresenter = () => {
                 }
               }}
             >
-              <Icons name="RoomLeave" />
-            </IconButton>
+              <Icon name="RoomLeave" size={22} opacity={0.7} />
+            </Button.IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
@@ -239,11 +208,10 @@ const RoomPresenter = () => {
               minimal
               count={unreadCount}
             >
-              <IconButton
+              <Button.IconButton
                 className="realm-cursor-hover"
                 size={26}
-                customBg={dockColor}
-                color={roomView === 'chat' ? accentColor : undefined}
+                customColor={roomView === 'chat' ? accentColor : undefined}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   roomView === 'chat'
@@ -251,13 +219,13 @@ const RoomPresenter = () => {
                     : setRoomView('chat');
                 }}
               >
-                <Icons name="Chat3" />
-              </IconButton>
+                <Icon name="Chat3" size={22} opacity={0.7} />
+              </Button.IconButton>
             </Badge>
           </Flex>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </>
   );
 };
 

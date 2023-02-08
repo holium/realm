@@ -62,7 +62,7 @@ const ChatLogPresenter = (props: ChatLogProps) => {
       messages={messages}
       isGroup={isGroup}
       ship={ship!}
-      height={dimensions.height}
+      height={dimensions.height - 60}
       currentTheme={theme.currentTheme as any}
     />
   );

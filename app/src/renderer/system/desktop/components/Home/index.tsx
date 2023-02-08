@@ -14,6 +14,7 @@ interface HomeWindowProps {}
 
 const HomeWindow = styled(motion.div)<HomeWindowProps>`
   height: 100%;
+  position: relative;
   ::-webkit-scrollbar {
     display: none;
   }

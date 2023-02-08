@@ -1,15 +1,7 @@
 import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Flex,
-  Text,
-  Button,
-  Icons,
-  Sigil,
-  Anchor,
-  Spinner,
-} from 'renderer/components';
-import { TextInput } from '@holium/design-system';
+import { Sigil, Anchor, Spinner } from 'renderer/components';
+import { TextInput, Flex, Text, Button, Icon } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -77,16 +69,21 @@ const TransactionDetailPresenter = () => {
     : `${btcAmount.btc} BTC`;
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" py={1} px={4}>
-      <Text fontSize={2} color={themeData.colors.text.disabled}>
+    <Flex width="100%" height="100%" flexDirection="column" py={1}>
+      <Text.Custom fontSize={2} color={themeData.colors.text.disabled}>
         Transaction
-      </Text>
+      </Text.Custom>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
           <Flex alignItems="center">
-            <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+            <Text.Custom
+              opacity={0.9}
+              fontWeight={600}
+              fontSize={7}
+              animate={false}
+            >
               Pending
-            </Text>
+            </Text.Custom>
             <Spinner
               ml={3}
               mt={1}
@@ -95,17 +92,21 @@ const TransactionDetailPresenter = () => {
             />
           </Flex>
         ) : (
-          <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+          <Text.Custom
+            opacity={0.9}
+            fontWeight={600}
+            fontSize={7}
+            animate={false}
+          >
             {wasSent ? `Sent` : `Received`}
-          </Text>
+          </Text.Custom>
         )}
         <Flex
           flexDirection="column"
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text
-            variant="body"
+          <Text.Custom
             fontSize={4}
             color={
               wasSent
@@ -114,13 +115,9 @@ const TransactionDetailPresenter = () => {
             }
           >
             {wasSent && '-'} {amountDisplay}
-          </Text>
+          </Text.Custom>
           {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
-            <Text
-              variant="body"
-              fontSize={2}
-              color={themeData.colors.text.secondary}
-            >
+            <Text.Custom fontSize={2} color={themeData.colors.text.secondary}>
               $
               {isEth
                 ? convertEthAmountToUsd(
@@ -131,25 +128,21 @@ const TransactionDetailPresenter = () => {
                     btcAmount,
                     walletApp.bitcoin.conversions.usd
                   )}
-            </Text>
+            </Text.Custom>
           )}
         </Flex>
       </Flex>
       <Flex mt={8} width="100%" justifyContent="space-between">
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
-        </Text>
+        </Text.Custom>
         <Flex alignItems="center">
           {!transaction.theirPatp ? (
-            <Icons
-              name="Spy"
-              size="20px"
-              color={themeData.colors.text.secondary}
-            />
+            <Icon name="Spy" size={18} opacity={0.5} />
           ) : (
             <Sigil
               color={
@@ -162,9 +155,9 @@ const TransactionDetailPresenter = () => {
               patp={transaction.theirPatp}
             />
           )}
-          <Text variant="body" fontSize={1} ml={2}>
+          <Text.Custom fontSize={1} ml={2}>
             {themDisplay}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
       <Flex
@@ -173,16 +166,14 @@ const TransactionDetailPresenter = () => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           DATE
-        </Text>
-        <Text variant="body" fontSize={1}>
-          {getDisplayDate(completed)}
-        </Text>
+        </Text.Custom>
+        <Text.Custom fontSize={1}>{getDisplayDate(completed)}</Text.Custom>
       </Flex>
       <Flex
         position="relative"
@@ -190,13 +181,13 @@ const TransactionDetailPresenter = () => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           HASH
-        </Text>
+        </Text.Custom>
         <Flex position="relative" left="10px">
           <Anchor
             fontSize={1}
@@ -204,42 +195,38 @@ const TransactionDetailPresenter = () => {
             href={`https://goerli.etherscan.io/tx/${transaction.hash}`}
           >
             {transaction.hash.slice(0, 12)}...{' '}
-            <Icons mb={1} name="Link" size={1} />
+            <Icon mb={1} name="Link" size={16} opacity={0.5} />
           </Anchor>
         </Flex>
       </Flex>
-      <Text
-        mt={8}
-        mb={2}
-        ml={1}
-        variant="label"
-        color={themeData.colors.text.secondary}
-        fontSize={1}
-      >
-        Notes
-      </Text>
-      <Flex width="100%" flexDirection="column" justifyContent="center">
-        <TextInput
-          id="transaction-notes"
-          name="transaction-notes"
-          type="textarea"
-          rows={4}
-          cols={50}
-          value={notes}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setNotes(e.target.value)
-          }
-          placeholder="Transaction notes..."
-        />
-        <Flex mt={4} width="100%" justifyContent="flex-end">
-          <Button
-            width="100%"
-            disabled={notes === transaction.notes}
-            isLoading={loading}
-            onClick={saveNotes}
-          >
-            Save notes
-          </Button>
+      <Flex flexDirection="column" mt={8}>
+        <Text.Label style={{ marginBottom: 4 }} opacity={0.7} fontSize={1}>
+          Notes
+        </Text.Label>
+        <Flex width="100%" flexDirection="column" justifyContent="center">
+          <TextInput
+            id="transaction-notes"
+            name="transaction-notes"
+            type="textarea"
+            rows={4}
+            cols={50}
+            value={notes}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setNotes(e.target.value)
+            }
+            placeholder="Transaction notes..."
+          />
+          <Flex mt={4} width="100%" justifyContent="flex-end">
+            <Button.Primary
+              width="100%"
+              height={32}
+              justifyContent="center"
+              disabled={notes === transaction.notes && !loading}
+              onClick={saveNotes}
+            >
+              {loading ? <Spinner size={0} color="white" /> : 'Save notes'}
+            </Button.Primary>
+          </Flex>
         </Flex>
       </Flex>
     </Flex>
