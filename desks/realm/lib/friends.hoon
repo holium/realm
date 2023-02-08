@@ -247,7 +247,7 @@
     :~  ['pinned' b+pinned.friend]
         ['tags' [%a (turn ~(tap in tags.friend) |=(tag=cord s+tag))]]
         ['status' s+status.friend]
-        :-  'contact-info'
+        :-  'contactInfo'
           ?~  contact-info.friend  ~
           %-  pairs
           ^-  (list [@t json])

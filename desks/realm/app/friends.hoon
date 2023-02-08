@@ -182,6 +182,21 @@
   ?>  =(our.bowl src.bowl)
   ~&  >  ['adding friend' ship]
   =/  ufren  (~(get by friends) ship)
+  =/  our-contact
+    ^-  contact-info:store
+    =/  our-fren  (~(get by friends) our.bowl)
+    ?~  our-fren  *contact-info:store
+    ?~  contact-info.u.our-fren  *contact-info:store
+    u.contact-info.u.our-fren
+  =/  our-contact
+    ^-  contact-info-edit:store
+    %=  our-contact
+      nickname  `nickname.our-contact
+      bio       `bio.our-contact
+      color     `color.our-contact
+    ==
+  =/  dock  [ship dap.bowl]
+  =/  share-contact-cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
   :: If fren is in friends
   ?.  ?=(~ ufren)
     =/  status  ?:(=(%follower status.u.ufren) %fren %following)
@@ -191,35 +206,21 @@
       :: If fren is follower, confirm new frenship
       ?.  =(%follower status.u.ufren)  core
       %-  emit
-      =/  dock  [ship dap.bowl]
       =/  cage  friends-action+!>([%yes-fren ~])
       [%pass / %agent dock %poke cage]
-    %-  emit
-    [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
+    %-  emil
+    :~  [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
+        [%pass / %agent dock %poke share-contact-cage]
+    ==
   :: If the fren is not added yet
   =/  fren     [.(status %following)]:*friend:store
   =.  friends  (~(put by friends) ship fren)
   %-  emil
   %+  welp  contact-cards
-  =/  dock  [ship dap.bowl]
   :~  =/  cage  friends-action+!>([%be-fren ~])
       [%pass / %agent dock %poke cage]
       [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
-      =/  our-contact
-        ^-  contact-info:store
-        =/  our-fren  (~(get by friends) our.bowl)
-        ?~  our-fren  *contact-info:store
-        ?~  contact-info.u.our-fren  *contact-info:store
-        u.contact-info.u.our-fren
-      =/  our-contact
-        ^-  contact-info-edit:store
-        %=  our-contact
-          nickname  `nickname.our-contact
-          bio       `bio.our-contact
-          color     `color.our-contact
-        ==
-      =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
-      [%pass / %agent dock %poke cage]
+      [%pass / %agent dock %poke share-contact-cage]
   ==
   ++  contact-cards
     ^-  (list card)

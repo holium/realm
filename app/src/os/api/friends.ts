@@ -19,7 +19,7 @@ export const FriendsApi = {
     const preparedData: any = {
       nickname: data.nickname,
       color: removeHash(data.color),
-      avatar: data.avatar || '',
+      avatar: data.avatar || null,
       bio: data.bio || null,
       cover: data.cover || null,
     };
@@ -129,16 +129,38 @@ export const FriendsApi = {
       path: `/all`,
       onEvent: async (data: any, _id?: number) => {
         if (data.friends) {
+          Object.keys(data.friends).forEach((ship: string) => {
+            data.friends[ship] = {
+              ...data.friends[ship],
+              contactInfo: {
+                ...data.friends[ship].contactInfo,
+                color: data.friends[ship].contactInfo.color && cleanNounColor(data.friends[ship].contactInfo.color),
+              }
+            }
+          })
           friendsStore.initial(data.friends);
         }
         if (data.friend) {
           const patp = data.friend.ship;
-          const update = data.friend.friend;
+          const friend = data.friend.friend;
+          const update = {
+            ...friend,
+            contactInfo: {
+              ...friend.contactInfo,
+              color: friend.contactInfo.color && cleanNounColor(friend.contactInfo.color),
+            }
+          };
           friendsStore.update(patp, update);
         }
         if (data['new-friend']) {
           const patp = data['new-friend'].ship;
-          const friend = data['new-friend'].friend;
+          const friend = {
+            ...data['new-friend'].friend,
+            contactInfo: {
+              ...data['new-friend'].friend.contactInfo,
+              color: data['new-friend'].friend.contactInfo.color && cleanNounColor(data['new-friend'].friend.contactInfo.color),
+            }
+          }
           friendsStore.add(patp, friend);
         }
         if (data['bye-friend']) {

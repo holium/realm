@@ -266,6 +266,7 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
 
     try {
+      /*
       // TODO rewrite the contact store logic
       try {
         this.core.conduit!.watch({
@@ -279,7 +280,7 @@ export class ShipService extends BaseService {
         });
       } catch {
         console.log('Subscription failed');
-      }
+      }*/
 
       FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
