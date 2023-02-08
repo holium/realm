@@ -23,5 +23,3 @@ export const SystemBar: FC<SystemBarProps> = () => {
     </Flex>
   );
 };
-
-export default SystemBar;

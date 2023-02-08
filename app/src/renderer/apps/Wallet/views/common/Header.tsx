@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { rgba } from 'polished';
 import { Icon, Flex, Button, Text } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -19,7 +18,7 @@ type Props = {
   onAddWallet: () => void;
   hide: boolean;
 };
-
+const ethBg = rgba('#627EEA', 0.14);
 export const WalletHeader = ({
   theme,
   hide,
@@ -27,8 +26,6 @@ export const WalletHeader = ({
   isOnboarding,
   onAddWallet,
 }: Props) => {
-  const ethBg = useMemo(() => rgba('#627EEA', 0.14), []);
-
   if (hide) return null;
 
   return (

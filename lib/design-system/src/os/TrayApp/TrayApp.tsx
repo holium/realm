@@ -26,7 +26,7 @@ const AppSection = styled(motion.div)`
 
 type TrayAppProps = {
   id: string;
-  coords: any;
+  coords: DOMRect;
   children: JSX.Element;
   isOpen?: boolean;
   closeTray: () => void;
@@ -69,13 +69,12 @@ export const TrayApp = ({
       document.removeEventListener('click', handleClickOutside);
     };
   }, [handleClickOutside]);
-
+  const appId = `${id}-app`;
   return (
     <AnimatePresence>
       {isOpen && (
         <Wrapper
-          key={`${id}-app`}
-          id={`${id}-app`}
+          id={appId}
           initial={{
             x: coords.x,
             y: coords.y + 8,

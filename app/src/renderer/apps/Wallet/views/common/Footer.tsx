@@ -22,26 +22,27 @@ const Wrapper = styled(Box)`
 `;
 
 interface WalletFooterProps {
-  hidden: boolean;
+  hidden?: boolean;
 }
 
-export const WalletFooter = observer(
-  ({ hidden = false }: WalletFooterProps) => {
-    const { walletApp } = useTrayApps();
+export const WalletFooterPresenter = ({
+  hidden = false,
+}: WalletFooterProps) => {
+  const { walletApp } = useTrayApps();
 
-    useEffect(() => {
-      WalletActions.uqbarDeskExists();
-    }, []);
+  useEffect(() => {
+    WalletActions.uqbarDeskExists();
+  }, []);
 
-    return (
-      <Wrapper hidden={hidden}>
-        <Flex justifyContent="space-between">
-          <Box mr={1}>
-            <WalletNetwork network={walletApp.navState.protocol} />
-          </Box>
-          <Flex>
-            <Flex mr="10px">
-              {/*walletApp.navState.network === NetworkType.ETHEREUM &&
+  return (
+    <Wrapper hidden={hidden}>
+      <Flex justifyContent="space-between">
+        <Box mr={1}>
+          <WalletNetwork network={walletApp.navState.protocol} />
+        </Box>
+        <Flex>
+          <Flex mr="10px">
+            {/*walletApp.navState.network === NetworkType.ETHEREUM &&
                 (uqbarDeskExists ? (
                   <ImageToggle
                     src={UqbarLogo}
@@ -66,20 +67,17 @@ export const WalletFooter = observer(
                     />
                   </Tooltip>
                 ))*/}
-            </Flex>
-            <Button.IconButton
-              size={24}
-              onClick={async () =>
-                await WalletActions.navigate(WalletView.SETTINGS)
-              }
-            >
-              <Icon name="Settings" size={20} opacity={0.5} />
-            </Button.IconButton>
           </Flex>
+          <Button.IconButton
+            size={24}
+            onClick={() => WalletActions.navigate(WalletView.SETTINGS)}
+          >
+            <Icon name="Settings" size={20} opacity={0.5} />
+          </Button.IconButton>
         </Flex>
-      </Wrapper>
-    );
-  }
-);
+      </Flex>
+    </Wrapper>
+  );
+};
 
-export default WalletFooter;
+export const WalletFooter = observer(WalletFooterPresenter);
