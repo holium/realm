@@ -155,8 +155,11 @@ export const AuthStore = types
     },
     deleteShip(patp: string) {
       // set first ship
-      // todo handle case where you remove all ships
-      self.selected = self.ships.get(self.order[0]);
+      if (self.order.length == 1) {
+        self.selected = undefined;
+      } else {
+        self.selected = self.ships.get(self.order[0]);
+      }
       // remove ship from order list
       self.order.splice(
         self.order.findIndex((value: string) => value === `auth${patp}`),

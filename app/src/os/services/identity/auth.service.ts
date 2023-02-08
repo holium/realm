@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
@@ -392,6 +393,11 @@ export class AuthService extends BaseService {
 
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
+    let shipStorageDirPath = this.db.path.split("/");
+    shipStorageDirPath.pop();
+    shipStorageDirPath.push(`realm.${ship}`);
+    shipStorageDirPath = shipStorageDirPath.join('/');
+    fs.rmSync(shipStorageDirPath, { recursive: true, force: true });
   }
 
   setMnemonic(_event: any, patp: string, passcode: string, mnemonic: string) {
