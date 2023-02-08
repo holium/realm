@@ -102,10 +102,11 @@ export const SpacesList = observer(
     }
 
     return (
-      <Flex flex={1} px={10} width="100%">
+      <Flex flex={1} width="100%">
         <WindowedList
+          rowHeight={56}
           key={`${spaces.length}-${incoming.length}`}
-          width={358}
+          width={354}
           data={listData}
           rowRenderer={({ space, visa }) => {
             if (space) {

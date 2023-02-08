@@ -1,39 +1,42 @@
 import { observer } from 'mobx-react';
 import { useEffect } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { Box, Flex, IconButton, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
+import styled from 'styled-components';
+
+const Wrapper = styled(Box)`
+  position: absolute;
+  z-index: 3;
+  bottom: -12px;
+  left: -12px;
+  right: -12px;
+  padding: 12px;
+  height: 50px;
+  width: calc(100% + 24px);
+  /* background-color: var(--rlm-window-bg); */
+  /* backdrop-filter: blur(24px); */
+  display: ${(props) => (props.hidden ? 'none' : 'block')};
+`;
 
 interface WalletFooterProps {
   hidden: boolean;
 }
 
-export const WalletFooter = observer((props: WalletFooterProps) => {
+export const WalletFooterPresenter = ({
+  hidden = false,
+}: WalletFooterProps) => {
   const { walletApp } = useTrayApps();
-  const { theme } = useServices();
 
   useEffect(() => {
     WalletActions.uqbarDeskExists();
   }, []);
 
   return (
-    <Box
-      position="absolute"
-      z-index={3}
-      bottom={0}
-      px="12px"
-      pb="12px"
-      pt="12px"
-      width="100%"
-      hidden={props.hidden}
-    >
-      <Flex
-        justifyContent="space-between"
-        style={{ backgroundColor: theme.currentTheme.windowColor }}
-      >
+    <Wrapper hidden={hidden}>
+      <Flex justifyContent="space-between">
         <Box mr={1}>
           <WalletNetwork network={walletApp.navState.protocol} />
         </Box>
@@ -65,17 +68,26 @@ export const WalletFooter = observer((props: WalletFooterProps) => {
                   </Tooltip>
                 ))*/}
           </Flex>
-          <IconButton
+          <Button.IconButton
+            size={24}
             onClick={async () =>
               await WalletActions.navigate(WalletView.SETTINGS)
             }
           >
-            <Icons name="Settings" size={2} />
-          </IconButton>
+            <Icon name="Settings" size={20} opacity={0.5} />
+          </Button.IconButton>
         </Flex>
+        <Button.IconButton
+          size={26}
+          onClick={async () =>
+            await WalletActions.navigate(WalletView.SETTINGS)
+          }
+        >
+          <Icon name="Settings" size={24} opacity={0.7} />
+        </Button.IconButton>
       </Flex>
-    </Box>
+    </Wrapper>
   );
-});
+};
 
-export default WalletFooter;
+export const WalletFooter = observer(WalletFooterPresenter);

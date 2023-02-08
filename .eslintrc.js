@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['react-app', 'plugin:prettier/recommended'],
-  plugins: ['unused-imports'],
+  plugins: ['unused-imports', 'react-native-web'],
   parser: '@typescript-eslint/parser',
   root: true,
   rules: {

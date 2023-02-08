@@ -43,7 +43,7 @@ const WalletAppPresenter = (props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
 
-  const { walletApp } = useTrayApps();
+  const { walletApp, dimensions } = useTrayApps();
   let transactions: any = [];
   for (const key of walletApp.currentStore.wallets.keys()) {
     const wallet = walletApp.currentStore.wallets.get(key);
@@ -120,7 +120,7 @@ const WalletAppPresenter = (props: any) => {
     <Flex
       onClick={(evt: any) => evt.stopPropagation()}
       position="relative"
-      height="100%"
+      height={dimensions.height - 24}
       width="100%"
       flexDirection="column"
     >

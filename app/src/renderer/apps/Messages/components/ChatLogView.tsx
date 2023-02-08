@@ -29,10 +29,10 @@ export const ChatLogView = ({
         overflowY="auto"
         alignContent="center"
         flexDirection="column-reverse"
-        paddingY={60}
+        pb={44}
       >
         <WindowedList
-          width={388}
+          width={364}
           data={messages}
           rowRenderer={(message, index, measure) => (
             <ChatMessage

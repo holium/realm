@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { rgba } from 'polished';
-import { Icons, Flex, IconButton, Text } from 'renderer/components';
+import { Icon, Flex, Button, Text } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';
@@ -12,6 +12,7 @@ type Props = {
     iconColor: string;
     windowColor: string;
     textColor: string;
+    mode: string;
   };
   network: Network | string;
   onSetNetwork: (network: Network) => void;
@@ -26,8 +27,12 @@ export const WalletHeader = ({
   isOnboarding,
   onAddWallet,
 }: Props) => {
+<<<<<<< HEAD
   const { iconColor } = theme;
   const ethBg = useMemo(() => rgba('#627EEA', 0.1), []);
+=======
+  const ethBg = useMemo(() => rgba('#627EEA', 0.14), []);
+>>>>>>> spaces-selector-component
 
   if (hide) return null;
 
@@ -36,27 +41,25 @@ export const WalletHeader = ({
       width="100%"
       justifyContent="space-between"
       alignItems="center"
-      pl={3}
-      pr={3}
-      pt={3}
       // height={40}
       pb={2}
     >
       {showBack && !isOnboarding ? (
-        <IconButton
+        <Button.IconButton
+          size={26}
           mt={isOnboarding ? 1 : 0}
           onClick={async () => await WalletActions.navigateBack()}
         >
-          <Icons name="ArrowLeftLine" size={1} color={iconColor} />
-        </IconButton>
+          <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
+        </Button.IconButton>
       ) : (
         <Flex
           mt={isOnboarding ? 1 : 0}
           justifyContent="center"
           alignItems="center"
-          width="24px"
+          width="26px"
         >
-          <Icons name="WalletNew" size="20px" opacity={0.6} />
+          <Icon name="WalletTray" size={24} opacity={0.6} />
         </Flex>
       )}
 
@@ -70,10 +73,16 @@ export const WalletHeader = ({
             background={ethBg}
             borderRadius={6}
           >
-            <Icons mr="6px" name="Ethereum" pointerEvents="none" />
-            <Text fontSize={1} fontWeight={500} color={'#627EEA'}>
+            <Icon mr="6px" size={20} name="Ethereum" pointerEvents="none" />
+            <Text.Custom
+              fontSize={2}
+              fontWeight={500}
+              style={{
+                color: theme.mode === 'dark' ? '#869cf5' : '#627EEA',
+              }}
+            >
               Ethereum
-            </Text>
+            </Text.Custom>
           </Flex>
           {/* <RadioGroup
             customBg={windowColor}
@@ -97,9 +106,9 @@ export const WalletHeader = ({
               onSetNetwork(value);
             }}
           /> */}
-          <IconButton onClick={onAddWallet}>
-            <Icons name="Plus" />
-          </IconButton>
+          <Button.IconButton size={26} onClick={onAddWallet}>
+            <Icon name="Plus" size={24} opacity={0.5} />
+          </Button.IconButton>
         </>
       )}
     </Flex>
