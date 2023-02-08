@@ -18,7 +18,4 @@ Because builds require complex notarization processes and other code signing and
 
 Fortunately, there is an easier solution. Force two consecutive draft builds and use the resulting
 
-Here's how:
-
-- PR and merge into the draft branch
--
+To build a draft version of the app, push code changes to the `draft` branch. This is the only Gihub workflow configured to run on pushes vs. PR/closed/merged.
