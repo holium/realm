@@ -3,6 +3,7 @@ export * from './Box/Box';
 export * from './Button/Button';
 export * from './Flex/Flex';
 export * from './Icon/Icon';
+// export { IconPathsType } from './Icon/icons';
 export * from './Skeleton/Skeleton';
 export * from './Text/Text';
 export * from './WindowedList/WindowedList';

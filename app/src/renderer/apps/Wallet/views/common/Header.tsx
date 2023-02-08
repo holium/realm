@@ -27,12 +27,7 @@ export const WalletHeader = ({
   isOnboarding,
   onAddWallet,
 }: Props) => {
-<<<<<<< HEAD
-  const { iconColor } = theme;
-  const ethBg = useMemo(() => rgba('#627EEA', 0.1), []);
-=======
   const ethBg = useMemo(() => rgba('#627EEA', 0.14), []);
->>>>>>> spaces-selector-component
 
   if (hide) return null;
 

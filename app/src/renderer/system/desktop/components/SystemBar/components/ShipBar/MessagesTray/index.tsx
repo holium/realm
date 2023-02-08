@@ -4,15 +4,14 @@ import { Badge, Flex } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { Icon, BarButton } from '@holium/design-system';
-
-const iconSize = 28;
-const position = 'top-left';
-const anchorOffset = { x: 4, y: 24 };
-const dimensions = { height: 600, width: 390 };
+import { AppRegistry } from 'renderer/apps/registry';
 
 const MessagesTrayPresenter = () => {
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
+
+  const { name, icon, iconSize, position, anchorOffset, dimensions } =
+    AppRegistry['messages'];
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -55,13 +54,13 @@ const MessagesTrayPresenter = () => {
         count={0}
       >
         <BarButton
-          id="wallet-tray-icon"
+          id="messages-tray-icon"
           height={28}
           whileTap={{ scale: 0.95 }}
           transition={{ scale: 0.1 }}
           width={28}
         >
-          <Icon name="Messages" size={24} pointerEvents="none" />
+          <Icon name={icon} size={24} pointerEvents="none" />
         </BarButton>
         {/* <IconButton
             size={iconSize}
