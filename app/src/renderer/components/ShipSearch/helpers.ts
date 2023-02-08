@@ -16,7 +16,6 @@ export const searchPatpOrNickname = (
         color: '#000000',
         avatar: null,
         nickname: '',
-        status: '',
         bio: '',
         cover: '',
       },

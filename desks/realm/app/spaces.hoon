@@ -536,11 +536,12 @@
         [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
       ==
       ::  share contact with all members
-      %+  turn  ~(tap in ~(key by members))
+      %+  murn  ~(tap in ~(key by members))
       |=  =ship
-      ^-  card
+      ^-  (unit card)
+      ?~  =(our.bowl ship)  ~
       =/  cage  friends-action+!>([%share-contact ship])
-      [%pass / %agent [our.bowl %friends] %poke cage]
+      `[%pass / %agent [our.bowl %friends] %poke cage]
     ::
     ++  on-current
       |=  [path=space-path:store]

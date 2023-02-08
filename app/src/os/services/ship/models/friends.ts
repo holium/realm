@@ -69,7 +69,9 @@ export const FriendsStore = types
           status: value[1].status,
         })
       );
-      return list.filter((friend: any) => !friend.pinned && !(friend.status === 'our'));
+      return list.filter(
+        (friend: any) => !friend.pinned && !(friend.status === 'our')
+      );
     },
     get list() {
       return Array.from(self.all.entries()).map(

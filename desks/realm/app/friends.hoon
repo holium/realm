@@ -410,6 +410,7 @@
       u.color.edit
     =.  avatar.contact-info
       ?~  avatar.edit  avatar.contact-info
+      ?:  =('' u.avatar.edit)  ~
       avatar.edit
     =.  cover.contact-info
       ?~  cover.edit  cover.contact-info

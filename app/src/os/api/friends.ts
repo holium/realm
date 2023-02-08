@@ -134,10 +134,12 @@ export const FriendsApi = {
               ...data.friends[ship],
               contactInfo: {
                 ...data.friends[ship].contactInfo,
-                color: data.friends[ship].contactInfo.color && cleanNounColor(data.friends[ship].contactInfo.color),
-              }
-            }
-          })
+                color:
+                  data.friends[ship].contactInfo.color &&
+                  cleanNounColor(data.friends[ship].contactInfo.color),
+              },
+            };
+          });
           friendsStore.initial(data.friends);
         }
         if (data.friend) {
@@ -147,8 +149,10 @@ export const FriendsApi = {
             ...friend,
             contactInfo: {
               ...friend.contactInfo,
-              color: friend.contactInfo.color && cleanNounColor(friend.contactInfo.color),
-            }
+              color:
+                friend.contactInfo.color &&
+                cleanNounColor(friend.contactInfo.color),
+            },
           };
           friendsStore.update(patp, update);
         }
@@ -158,9 +162,11 @@ export const FriendsApi = {
             ...data['new-friend'].friend,
             contactInfo: {
               ...data['new-friend'].friend.contactInfo,
-              color: data['new-friend'].friend.contactInfo.color && cleanNounColor(data['new-friend'].friend.contactInfo.color),
-            }
-          }
+              color:
+                data['new-friend'].friend.contactInfo.color &&
+                cleanNounColor(data['new-friend'].friend.contactInfo.color),
+            },
+          };
           friendsStore.add(patp, friend);
         }
         if (data['bye-friend']) {
