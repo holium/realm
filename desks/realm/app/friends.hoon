@@ -29,7 +29,7 @@
       abet:(add-frens:core ~(tap in ~(key by pals-following:core)))
     ::
     ?.  has-contact-store:core  [cards this]
-    :_  this(sync-contact-store %.n, friends (rolodex-to-friends:lib friends rolodex:core))
+    :_  this(sync-contact-store %.y, friends (rolodex-to-friends:lib friends rolodex:core))
     %+  welp  cards
     [%pass /contacts %agent [our.bowl %contact-store] %watch /all]~
   ::
@@ -46,7 +46,7 @@
       :-  ~
       %=  this
           state  :*  %1
-                     %.n
+                     %.y
                      is-public.old
                      ^-  friends:store
                      %-  malt
@@ -159,7 +159,7 @@
 ++  core  .
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
-++  emil  |=(new-cards=(list card) core(cards (weld new-cards cards)))
+++  emil  |=(new-cards=(list card) core(cards (welp (flop new-cards) cards)))
 ++  action
   |=  =action:store
   ^-  (quip card _state)
@@ -223,7 +223,7 @@
   ==
   ++  contact-cards
     ^-  (list card)
-    :: ?.  sync-contact-store  ~
+    ?.  sync-contact-store  ~
     %+  welp
       :: allow ship to view our contact info
       ?:  contact-is-public:core  ~
