@@ -83,9 +83,6 @@ export class Realm extends EventEmitter {
     install: async (ship: string) => {
       return await ipcRenderer.invoke('core:install-realm', ship);
     },
-    update: async (session: ISession) => {
-      return await ipcRenderer.invoke('realm.update', session);
-    },
     showOpenDialog: async () => {
       return await ipcRenderer.invoke('realm.show-open-dialog');
     },
@@ -243,35 +240,6 @@ export class Realm extends EventEmitter {
 
   get credentials() {
     return this.session;
-  }
-
-  // it is possible that the user changes their ship's code from the dojo or other
-  //  means. in this case, the UI needs to obtain the new ship code and then
-  //  refresh the conduit connection when this happens
-  async update(session: ISession) {
-    if (!this.session) {
-      console.log('Conduit.refresh called with unexpected session');
-      return;
-    }
-    if (!this.conduit) {
-      console.log('Conduit.refresh called with unexpected conduit');
-      return;
-    }
-    this.isReconnecting = true;
-    try {
-      console.log('refreshing token => %o', this.session);
-      const cookie: string | undefined = await this.conduit.refresh(
-        this.session.url,
-        this.session.code
-      );
-      if (this.session) {
-        this.saveSession({ ...this.session, cookie: cookie || null });
-      } else {
-        console.warn('unexpected session => %o', this.session);
-      }
-    } catch (e) {
-      console.log(e);
-    }
   }
 
   async disconnect() {

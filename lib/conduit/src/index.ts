@@ -100,7 +100,7 @@ export class Conduit extends EventEmitter {
         try {
           this.updateStatus(ConduitState.Refreshing);
           cookie = await Conduit.fetchCookie(this.url, this.code!);
-          console.log(cookie);
+          // console.log(cookie);
           if (cookie) {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {
