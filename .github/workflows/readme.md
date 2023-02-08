@@ -19,3 +19,9 @@ Because builds require complex notarization processes and other code signing and
 Fortunately, there is an easier solution. Force two consecutive draft builds and use the resulting
 
 To build a draft version of the app, push code changes to the `draft` branch. This is the only Gihub workflow configured to run on pushes vs. PR/closed/merged.
+
+## Code signing and notarizing when running locally
+
+`npx cross-env RELEASE_CHANNEL=draft APPLE_ID=<your id> APPLE_ID_PASS=<your password> CSC_NAME=<csc name> CSC_LINK=<csc link> yarn package:prerelease:mac`
+
+To get the values for the environment variables, please contact patrick@holium.com
