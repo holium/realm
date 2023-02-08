@@ -29,4 +29,5 @@
       [%remove-device =device-id:notify]
   ==
 +$  create-chat-data  [metadata=(map cord cord) type=@tas]
+::  types: %channel, %group, %dm
 --

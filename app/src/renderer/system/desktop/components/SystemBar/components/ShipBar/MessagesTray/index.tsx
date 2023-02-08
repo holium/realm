@@ -10,7 +10,7 @@ const MessagesTrayPresenter = () => {
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
 
-  const { name, icon, iconSize, position, anchorOffset, dimensions } =
+  const { icon, iconSize, position, anchorOffset, dimensions } =
     AppRegistry['messages'];
 
   const onButtonClick = useCallback(

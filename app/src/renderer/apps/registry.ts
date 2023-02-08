@@ -1,7 +1,7 @@
-import type { IconPathsType } from '@holium/design-system';
+// import type { IconPathsType } from '@holium/design-system';
 type AppEntry = {
   name: string;
-  icon: IconPathsType;
+  icon: any;
   iconSize: number;
   position: string;
   anchorOffset: {
