@@ -25,7 +25,6 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
-  console.log('PR => %o', { github, context });
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -59,7 +58,7 @@ module.exports = async ({ github, context }, workflowId) => {
     }
   );
   const buildTitle =
-    (github.event_name === 'pull_request' &&
+    (context.eventName === 'pull_request' &&
       context.payload.pull_request.title) ||
     'auto draft build';
   console.log(
@@ -147,14 +146,11 @@ module.exports = async ({ github, context }, workflowId) => {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
     }
-    if (
-      github.event_name === 'pull_request' &&
-      context.payload.pull_request.base.ref === 'draft'
-    ) {
+    if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
     } else if (
-      github.event_name === 'pull_request' &&
-      context.payload.pull_request.base.ref === 'master'
+      context.eventName === 'pull_request' &&
+      context.ref === 'master'
     ) {
       ci.channel = 'alpha';
     } else {
