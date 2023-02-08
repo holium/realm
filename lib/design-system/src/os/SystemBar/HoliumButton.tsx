@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
-import { darken } from 'polished';
 import styled from 'styled-components';
-import { getVar } from '../../util/colors';
 
 const CrossPath = styled(motion.path)`
   transition: var(--transition);
   fill: var(--rlm-text-color);
-  opacity: 0.8;
+  fill-opacity: 0.7;
   &:hover {
     cursor: pointer;
   }
@@ -14,26 +12,24 @@ const CrossPath = styled(motion.path)`
 
 const CirclePath = styled(motion.circle)`
   transition: var(--transition);
-  fill-opacity: 0.2;
-  fill: ${() =>
-    getVar('theme-mode') === 'dark'
-      ? darken(1, getVar('dock'))
-      : darken(0.4, getVar('dock'))};
+  fill: var(--rlm-home-button-color);
 `;
 
 const HoliSvg = styled(motion.svg)`
+  transition: var(--transition);
   &:hover {
     ${CirclePath} {
       transition: var(--transition);
       cursor: pointer;
-      fill: ${() => darken(1, getVar('dock'))};
+      filter: brightness(95%);
     }
   }
   &:active {
+    transition: var(--transition);
     ${CirclePath} {
       transition: var(--transition);
       cursor: pointer;
-      fill: ${() => darken(1.5, getVar('dock'))};
+      filter: brightness(90%);
     }
   }
 `;
@@ -54,7 +50,6 @@ export const HoliumButton = () => {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M14.6893 3.53857C17.1382 3.69894 19.5416 4.715 21.4133 6.58673C23.2851 8.45846 24.3011 10.8618 24.4615 13.3108H17.5706C15.9793 13.3108 14.6893 12.0207 14.6893 10.4294V3.53857ZM24.4572 14.7515C24.2839 17.1789 23.2692 19.5575 21.4133 21.4134C19.5416 23.2851 17.1382 24.3011 14.6893 24.4615V17.6328C14.6893 16.0415 15.9793 14.7515 17.5706 14.7515H24.4572ZM13.2486 24.4573C10.8212 24.2839 8.44259 23.2693 6.5867 21.4134C4.7308 19.5575 3.71617 17.1789 3.5428 14.7515H10.3672C11.9586 14.7515 13.2486 16.0415 13.2486 17.6328V24.4573ZM3.53854 13.3108C3.69892 10.8618 4.71497 8.45846 6.5867 6.58673C8.44259 4.73083 10.8212 3.7162 13.2486 3.54283V10.4294C13.2486 12.0207 11.9586 13.3108 10.3672 13.3108H3.53854Z"
-        fillOpacity="0.7"
       />
       <defs>
         <filter
