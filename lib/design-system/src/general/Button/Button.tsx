@@ -205,7 +205,10 @@ const TextButton = styled(Base)<TextButtonProps>`
   }
 `;
 
-export type IconButtonProps = ButtonProps & { showOnHover?: boolean };
+export type IconButtonProps = ButtonProps & {
+  showOnHover?: boolean;
+  customColor?: string;
+};
 
 const IconButton = styled(Base)<IconButtonProps>`
   padding: 0px;
@@ -218,16 +221,17 @@ const IconButton = styled(Base)<IconButtonProps>`
     transition: var(--transition);
     background-color: var(--rlm-overlay-hover);
   }
-  &:active:not([disabled]) {
+  /* &:active:not([disabled]) {
     transition: var(--transition);
     background-color: var(--rlm-overlay-active);
-  }
+  } */
   &:focus:not([disabled]) {
     outline: none;
     background-color: var(--rlm-overlay-active);
   }
   svg {
-    fill: var(--rlm-icon-color);
+    fill: ${(props) =>
+      props.customColor ? props.customColor : 'var(--rlm-icon-color)'};
   }
 `;
 

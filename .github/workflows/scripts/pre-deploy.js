@@ -42,45 +42,37 @@ module.exports = async ({ github, context }, workflowId) => {
     //   note: use alpha|latest to keep in line with channel naming expectations
     //     of the electron-builder library
     channel: undefined,
+    // if you want to have the build script remove a release, set the release version/tag here
+    // removeRelease: undefined,
   };
   // disable this workflow to prevent multiple builds running simultaneously
+  // console.log(
+  //   `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
+  // );
+  // await github.request(
+  //   'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
+  //   {
+  //     owner: 'holium',
+  //     repo: 'realm',
+  //     workflow_id: workflowId,
+  //   }
+  // );
+  const buildTitle =
+    (context.eventName === 'pull_request' &&
+      context.payload.pull_request.title) ||
+    'auto draft build';
   console.log(
-    `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
+    `init.js: PR title = '${buildTitle}'. testing if matches version format...`
   );
-  await github.request(
-    'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
-    {
-      owner: 'holium',
-      repo: 'realm',
-      workflow_id: workflowId,
-    }
-  );
-  // const packageFilename = './app/release/app/package.json';
-  // // this script is always called at the root of the repo; therefore
-  // //  read release package.json for build info
-  // const pkg = JSON.parse(fs.readFileSync(packageFilename));
-  // ci.packageVersion = pkg.version;
-  // PR title is a required property of the PR event
-  // const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
-  //   owner: 'holium',
-  //   repo: 'realm',
-  //   per_page: 1, // only give the last result
-  //   sort: 'created',
-  //   direction: 'desc',
-  // });
-  // console.log('logs => %o', tags.data);
-  // const currentBuildTag = tags.data[0].name;
-  console.log(
-    `init.js: PR title = '${context.payload.pull_request.title}'. testing if matches version format...`
-  );
+
   // does the PR title match our required naming convention for manual staging/production builds?
-  let matches = context.payload.pull_request.title.match(
-    /(release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  let matches = buildTitle.match(
+    /(draft|release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   );
   // matches null if no match
   if (matches) {
     console.log(
-      `init.js: '${context.payload.pull_request.title}' matches version format. using as version string.`
+      `init.js: '${buildTitle}' matches version format. using as version string.`
     );
     const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
       matches[5]
@@ -111,9 +103,15 @@ module.exports = async ({ github, context }, workflowId) => {
       );
     }
     ci.isNewBuild = true;
-    ci.releaseName = context.payload.pull_request.title;
+    ci.releaseName = buildTitle;
     ci.buildVersion = tagName;
     switch (matches[1]) {
+      // test and staging builds produce alphas. the only difference is
+      // that 'draft' stays in draft mode and sets the release channel used by auto-updater
+      // to 'draft' or 'staging' respectively
+      case 'draft':
+        ci.channel = 'draft';
+        break;
       case 'staging':
         ci.channel = 'alpha';
         break;
@@ -124,7 +122,6 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'latest';
         break;
     }
-    // ci.channel = `${matches[1] === 'staging' ? 'alpha' : 'latest'}`;
     ci.version.major = parseInt(matches[3]);
     ci.version.minor = parseInt(matches[4]);
     ci.version.build = parseInt(matches[5]);
@@ -143,40 +140,41 @@ module.exports = async ({ github, context }, workflowId) => {
       }
     );
     if (releases.data.length > 0) {
-      const release = releases.data[0];
-      ci.isNewBuild = !release.draft;
-      // if the latest release is a draft, it means the prior build failed; therefore
-      //  rerun the build using the same tag (version) information
-      buildVersion = release.tag_name;
+      // if there is at least one release, use it's tag name to determine next version
+      buildVersion = releases.data[0].tag_name;
     } else {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
-      ci.isNewBuild = true;
+    }
+    if (context.eventName === 'pull_request' && context.ref === 'draft') {
+      ci.channel = 'draft';
+    } else if (
+      context.eventName === 'pull_request' &&
+      context.ref === 'master'
+    ) {
+      ci.channel = 'alpha';
+    } else {
+      ci.channel = 'draft';
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
       /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
     );
     if (!matches) throw Error("error: 'buildVersion' format unexpected");
-    let buildNumber = parseInt(matches[4]);
-    // only increment build # if last release was not a draft or no release found
-    //  therefore version value of first build ever should be '0.0.0' which would
-    //  build as version '0.0.1'
-    if (ci.isNewBuild) {
-      buildNumber++;
-    }
+    // always bump version
+    let buildNumber = parseInt(matches[4]) + 1;
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
-    }.${buildNumber}-alpha`;
-    ci.releaseName = `staging-${matches[1] ? 'v' : ''}${matches[2]}.${
-      matches[3]
-    }.${buildNumber}`;
+    }.${buildNumber}-${ci.channel}`;
+    ci.isNewBuild = true;
+    ci.releaseName = `${ci.channel === 'alpha' ? 'staging' : ci.channel}-${
+      matches[1] ? 'v' : ''
+    }${matches[2]}.${matches[3]}.${buildNumber}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;
     // all non-manual builds are considered staging (alpha)
-    ci.channel = 'alpha';
   }
   // see: https://www.electron.build/tutorials/release-using-channels.html
   // must append '-alpha' to the version in order to build assets with the '-alpha' appended.

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Grid, Flex, Icons, Text, IconButton } from 'renderer/components';
+import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
 import { nativeApps } from '..';
@@ -11,12 +11,10 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useRooms } from '../Rooms/useRooms';
-import { Avatar } from '@holium/design-system';
 
 const AccountTrayAppPresenter = () => {
-  const { ship, theme, beacon } = useServices();
-  const { dimensions, setActiveApp } = useTrayApps();
-  const { backgroundColor, iconColor } = theme.currentTheme;
+  const { ship, beacon } = useServices();
+  const { setActiveApp } = useTrayApps();
   const currentShip = ship!;
   const roomsManager = useRooms(ship!.patp);
 
@@ -43,19 +41,14 @@ const AccountTrayAppPresenter = () => {
   let subtitle;
   if (currentShip.nickname) {
     subtitle = (
-      <Text opacity={0.7} fontSize={2} fontWeight={400}>
+      <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
         {currentShip.patp}
-      </Text>
+      </Text.Custom>
     );
   }
 
   return (
-    <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
+    <>
       <Flex
         pl={4}
         pr={4}
@@ -73,39 +66,23 @@ const AccountTrayAppPresenter = () => {
         }}
       >
         <Flex gap={10} alignItems="center">
-          <Text fontWeight={500} fontSize={3}>
+          <Text.Custom fontWeight={500} fontSize={3}>
             Notifications
-          </Text>
-          <Text opacity={0.5} fontSize={2}>
+          </Text.Custom>
+          <Text.Custom opacity={0.5} fontSize={2}>
             {beacon.unseen.length}
-          </Text>
-        </Flex>
-        <Flex gap={10} alignItems="center">
-          {/* <TextButton
-            style={{ fontWeight: 400 }}
-            textColor={rgba(textColor, 0.5)}
-            highlightColor={lighten(0.4, textColor)}
-            disabled={true}
-            // disabled={notifications.seen.length === 0}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              // submitNewChat(evt);
-            }}
-          >
-            Show archived
-          </TextButton> */}
+          </Text.Custom>
         </Flex>
       </Flex>
       <NotificationList unseen={beacon.unseen} seen={beacon.seen} />
-
       <Flex
         position="absolute"
         bottom={0}
         left={0}
         right={0}
         justifyContent="space-between"
-        pt={3}
-        pb={4}
+        pt={4}
+        pb={3}
         px={4}
         style={{
           minHeight: 58,
@@ -122,7 +99,7 @@ const AccountTrayAppPresenter = () => {
             sigilColor={[currentShip.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
-            <Text
+            <Text.Custom
               style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -133,16 +110,14 @@ const AccountTrayAppPresenter = () => {
               variant="body"
             >
               {currentShip.nickname || currentShip.patp}
-            </Text>
+            </Text.Custom>
             {subtitle}
           </Flex>
         </Flex>
-        <Flex gap={16} alignItems="center">
-          <IconButton
+        <Flex gap={12} alignItems="center">
+          <Button.IconButton
+            size={28}
             className="realm-cursor-hover"
-            customBg={backgroundColor}
-            size={26}
-            color={iconColor}
             style={{ cursor: 'none' }}
             onClick={async () => {
               await roomsManager.cleanup();
@@ -151,22 +126,20 @@ const AccountTrayAppPresenter = () => {
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
           >
-            <Icons name="Lock" />
-          </IconButton>
-          <IconButton
+            <Icon name="Lock" size={22} opacity={0.7} />
+          </Button.IconButton>
+          <Button.IconButton
             className="realm-cursor-hover"
             data-close-tray="true"
             style={{ cursor: 'none' }}
-            customBg={backgroundColor}
-            size={26}
-            color={iconColor}
+            size={28}
             onClick={() => openSettingsApp()}
           >
-            <Icons name="Settings" />
-          </IconButton>
+            <Icon name="Settings" size={22} opacity={0.7} />
+          </Button.IconButton>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </>
   );
 };
 

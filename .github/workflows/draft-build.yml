@@ -1,16 +1,19 @@
-# PR into the test-build branch to run this script
-# bump
-name: test-build
-run-name: Test Build - ${{ github.actor }}
+# PR into the draft-build branch to run this script
+name: draft-build
+run-name: Draft Build - ${{ github.actor }}
 on:
   pull_request:
     types:
       - closed
     branches:
-      - test-build
+      - draft
+  push:
+    branches:
+      - draft
+#
 jobs:
   pre-deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
@@ -30,7 +33,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin test-build
+          git pull origin draft
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -38,11 +41,22 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'test-build.yml')
+            const result = script({github, context}, 'draft-build.yml')
             console.log(result)
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      # - name: Remove existing release
+      #   if: ${{ fromJSON(steps.ci.outputs.result).removeRelease  }}
+      #   # create annotated tag for this branch. this will become basis for the release
+      #   run: |
+      #     git config --global user.email realm-builder-no-reply@holium.com
+      #     git config --global user.name ${{ github.actor }}
+      #     gh release delete $BUILD_VERSION --cleanup-tag --yes
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #     BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).removeRelease }}
       #
       - name: Start release draft
         if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
@@ -63,7 +77,7 @@ jobs:
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-mac:
-    if: github.event.pull_request.merged == true
+    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     needs: [pre-deploy]
     runs-on: macos-latest
     steps:
@@ -106,7 +120,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin test-build
+          git pull origin draft
         #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -114,7 +128,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'draft-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -122,7 +136,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+        run: npx cross-env RELEASE_CHANNEL=draft APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -134,14 +148,14 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          # mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
+          mv -f ./app/release/build/latest-mac.yml ./app/release/build/draft-mac.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   build-windows:
-    if: github.event.pull_request.merged == true
+    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     container:
@@ -161,7 +175,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git config --global --add safe.directory '*'
-          git pull origin test-build
+          git pull origin draft
       #
       - name: Install yarn
         run: npm install -g yarn
@@ -185,7 +199,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'test-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'draft-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -194,7 +208,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env RELEASE_CHANNEL=draft GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -203,8 +217,8 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
-          # mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.*
+          mv -f ./app/release/build/latest.yml ./app/release/build/draft.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
@@ -227,7 +241,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin test-build
+  #         git pull origin draft
   #     #
   #     - name: Bump desks version
   #       uses: actions/github-script@v6
@@ -318,7 +332,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - run: |
-          # test builds should stay in draft form
+          # draft builds to stay in draft form
           gh release edit $BUILD_VERSION --prerelease=false --draft=true --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -340,7 +354,7 @@ jobs:
   #       run: |
   #         git config --global user.email realm-builder-no-reply@holium.com
   #         git config --global user.name ${{ github.actor }}
-  #         git pull origin test-build
+  #         git pull origin draft
   #     #
   #     - name: Delete release draft
   #       if: ${{ fromJSON(needs.pre-deploy.outputs.ci).isNewBuild }}
@@ -377,7 +391,7 @@ jobs:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
             const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
-            const result = script({github, context}, 'test-build.yml', ci)
+            const result = script({github, context}, 'draft-build.yml', ci)
             console.log(result)
             return result
         env:

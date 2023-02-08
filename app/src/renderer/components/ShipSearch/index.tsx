@@ -4,12 +4,11 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
 import { Flex, Text, Box, IconButton, Icons } from '../';
-import { Row } from '../NewRow';
 import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
-import { Avatar, WindowedList } from '@holium/design-system';
+import { Row, Avatar, WindowedList } from '@holium/design-system';
 
 const resultHeight = 50;
 
@@ -47,7 +46,7 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
 `;
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
-  ({ search, isDropdown, selected, customBg, onSelected }: ShipSearchProps) => {
+  ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
     const { theme, ship, friends } = useServices();
     const { mode, dockColor, windowColor } = theme.currentTheme;
 
@@ -74,7 +73,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         <Row
           key={contact[0]}
           style={{ justifyContent: 'space-between' }}
-          customBg={customBg}
           onClick={(evt: any) => {
             evt.stopPropagation();
             isDropdown && onSelected([contact[0], nickname], contact[1]);

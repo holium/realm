@@ -36,10 +36,10 @@ const FeaturedListPresenter = () => {
     );
   }
   return (
-    <Flex flex={1} px={10} width="100%">
+    <Flex flex={1} width="100%">
       <WindowedList
         key={`featured-spaces-${listData.length}`}
-        width={358}
+        width={354}
         data={listData}
         rowRenderer={(data: any) => {
           const onJoin = async () => {
