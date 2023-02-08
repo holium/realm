@@ -241,7 +241,7 @@
     |=  [=msg-id:sur tbl=messages-table:sur]
     ^-  messages-table:sur
     =/  start=uniq-id:sur  [msg-id 0]
-    (lot:msgon:sur tbl `start ~)
+    (lot:msgon:sur tbl ~ `start)
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)

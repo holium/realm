@@ -8,7 +8,7 @@
 ::  then msg-part-id
 ++  idx-sort
   |=  [a=uniq-id b=uniq-id]
-  ?:  (gth timestamp.msg-id.a timestamp.msg-id.b)
+  ?.  =(timestamp.msg-id.a timestamp.msg-id.b)
     (gth timestamp.msg-id.a timestamp.msg-id.b)
   :: same timestamp, so either ships sent msg at same time, or order by
   :: msg-part-id
