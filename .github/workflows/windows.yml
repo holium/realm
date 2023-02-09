@@ -97,24 +97,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      # on windows, write out the app-update.yml file. the windows binary
-      #  will use this configuration when checking for updates
-      #  note: this step MUST happen here so that it is bundled correctly during
-      #  'Build and install' step
-      - name: Configure auto update
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const script = require('./.github/workflows/scripts/configure-auto-update.js')
-            const result = script({github, context}, 'windows.yml', 'windows', JSON.parse(process.env.CI_ENV))
-            console.log(result)
-            return result
-        env:
-          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and install
         run: |
-          npx cross-env-shell RELEASE_CHANNEL=windows GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -127,7 +113,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           # rename the latest.yml (windows) file to name based on channel
-          mv -f ./app/release/build/latest.yml ./app/release/build/windows.yml
+          mv -f ./app/release/build/latest.yml ./app/release/build/$RELEASE_CHANNEL.yml
           git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
@@ -136,3 +122,4 @@ jobs:
           RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
           BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
           CHANGELOG: ${{ github.event.pull_request.body }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}

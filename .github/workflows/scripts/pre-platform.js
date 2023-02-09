@@ -9,5 +9,21 @@ module.exports = ({ github, context }, workflowId, platform, ci) => {
   const pkg = JSON.parse(fs.readFileSync(pkgfile));
   pkg.version = ci.buildVersion;
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
+
+  // only on windows
+  if (platform === 'windows') {
+    const filename = './app/src/main/updater/app-update.yml';
+    const lines = [
+      `provider: generic`,
+      `url: ${
+        ['latest', 'hotfix'].indexOf(env.channel) !== -1
+          ? process.env.GH_PROXY
+          : process.env.GH_PROXY_STAGING
+      }`,
+      `channel: ${env.channel}`,
+    ];
+    fs.writeFileSync(filename, lines.join('\r\n'));
+  }
+
   return ci;
 };
