@@ -107,7 +107,6 @@ jobs:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
         # create annotated tag for this branch. this will become basis for the release
         run: |
           git config --global user.email realm-builder-no-reply@holium.com

@@ -179,7 +179,7 @@ const AppUpdateError = (props: AppUpdateErrorProps) => {
           opacity={0.5}
           width="inherit"
           height={80}
-          style={{ wordBreak: 'break-word' }}
+          style={{ wordBreak: 'break-word', overflowY: 'scroll' }}
         >
           {error}
         </Text.Custom>
