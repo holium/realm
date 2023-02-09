@@ -8,7 +8,11 @@ import { ThemeType } from '../../../../theme';
 import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { WindowByType } from './WindowByType';
-import { DragHandleWrapper, RightDragHandleStyle } from './DragHandles';
+import {
+  DragHandleWrapper,
+  LeftDragHandleStyle,
+  RightDragHandleStyle,
+} from './DragHandles';
 import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { nativeApps } from 'renderer/apps';
@@ -45,7 +49,7 @@ interface AppWindowProps {
   desktopRef: any;
 }
 
-const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
+const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
 
@@ -271,6 +275,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     borderRadius = 16;
     const onCloseDialog = dialogConfig.onClose;
     const onOpenDialog = dialogConfig.onOpen;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
       onOpenDialog && onOpenDialog();
@@ -354,7 +359,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
             window={window}
           />
           <DragHandleWrapper>
-            {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
+            <LeftDragHandleStyle drag onDrag={handleResize} />
             <RightDragHandleStyle
               className="app-window-resize app-window-resize-br"
               drag
@@ -397,6 +402,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
       motionY,
     ]
   );
-});
+};
 
-export default AppWindow;
+export const AppWindow = observer(AppWindowPresenter);

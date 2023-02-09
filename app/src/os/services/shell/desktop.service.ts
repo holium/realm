@@ -30,7 +30,7 @@ import { IpcRendererEvent } from 'electron/renderer';
  */
 export class DesktopService extends BaseService {
   private readonly state: DesktopStoreType; // for state management
-  handlers = {
+  handlers: Record<string, (...args: any[]) => void> = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
     'realm.desktop.open-home-pane': this.openHomePane,
@@ -112,8 +112,7 @@ export class DesktopService extends BaseService {
     super(core, options);
 
     this.state = DesktopStore.create({});
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-expect-error
+    Object.keys(this.handlers).forEach((handlerName) => {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }

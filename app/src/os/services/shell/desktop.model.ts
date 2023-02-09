@@ -12,7 +12,7 @@ const BoundsModel = types.model({
 
 type BoundsModelType = Instance<typeof BoundsModel>;
 
-export const WindowModel = types
+const WindowModel = types
   .model('WindowModel', {
     /**
      * The `appId` is used to map the window to the corresponding app.
@@ -91,15 +91,10 @@ export const DesktopStore = types
     get openWindows() {
       return Array.from(self.windows.values());
     },
-    isOpenWindow(appId: string) {
-      return (
-        Array.from(self.windows.values()).findIndex(
-          (appWindow) => appWindow.appId === appId
-        ) > -1
-      );
-    },
     getWindowByAppId(appId: string) {
-      return self.windows.get(appId);
+      return Array.from(self.windows.values()).find(
+        (appWindow) => appWindow.appId === appId
+      );
     },
     get isHomePaneOpen() {
       return self.isHomePaneOpen;

@@ -79,7 +79,7 @@ const AppDockPresenter = () => {
     >
       {localDockApps?.map((app: AppType | any) => {
         const selected = desktop.getWindowByAppId(app.id)?.isActive;
-        const open = desktop.isOpenWindow(app.id);
+        const open = Boolean(desktop.getWindowByAppId(app.id));
         const { isSuspended, isUninstalled } = getAppTileFlags(
           app.installStatus || InstallStatus.installed
         );
@@ -118,7 +118,7 @@ const AppDockPresenter = () => {
             : [];
         const tileId = `pinned-${app.id}-${spacePath}`;
         const onClick = () => {
-          if (desktop.isOpenWindow(app.id)) {
+          if (open) {
             DesktopActions.setActive(spacePath, app.id);
           } else {
             DesktopActions.openAppWindow(spacePath, app);
@@ -215,7 +215,7 @@ const AppDockPresenter = () => {
       {activeAndUnpinned.map((unpinnedApp: any) => {
         const app = bazaar.getApp(unpinnedApp.id)!;
         const selected = desktop.getWindowByAppId(app.id)?.isActive;
-        const open = desktop.isOpenWindow(app.id);
+        const open = Boolean(desktop.getWindowByAppId(app.id));
         const tileId = `unpinned-${app.id}`;
         return (
           <AppTile
@@ -244,8 +244,9 @@ const AppDockPresenter = () => {
               },
             ]}
             onAppClick={(selectedApp) => {
-              if (desktop.isOpenWindow(selectedApp.id)) {
-                if (desktop.getWindowByAppId(selectedApp.id)?.isMinimized) {
+              const window = desktop.getWindowByAppId(selectedApp.id);
+              if (window) {
+                if (window.isMinimized) {
                   DesktopActions.toggleMinimized(spacePath, selectedApp.id);
                 } else {
                   DesktopActions.setActive(spacePath, selectedApp.id);

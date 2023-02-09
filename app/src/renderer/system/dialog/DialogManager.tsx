@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useServices } from 'renderer/logic/store';
-import AppWindow from '../desktop/components/Window/Window';
+import { AppWindow } from '../desktop/components/Window/Window';
 import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
