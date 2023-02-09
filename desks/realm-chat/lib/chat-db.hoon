@@ -302,7 +302,7 @@
     ++  peers-table
       |=  tbl=peers-table:sur
       ^-  json
-      a+(turn ~(val by tbl) |=(a=(list peer-row:sur) a+(turn a peer-row)))
+      a+(zing (turn ~(val by tbl) |=(a=(list peer-row:sur) (turn a peer-row))))
     ::
     ++  messages-table
       |=  tbl=messages-table:sur
