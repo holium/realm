@@ -22,6 +22,10 @@ import {
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
+import {
+  denormalizeBounds,
+  normalizeBounds,
+} from 'os/services/shell/lib/window-manager';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -63,21 +67,25 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const activeWindow = window;
+  const denormalizedBounds = useMemo(
+    () => denormalizeBounds(activeWindow.bounds, shell.desktopDimensions),
+    [activeWindow.bounds, shell.desktopDimensions]
+  );
 
-  const motionX = useMotionValue(activeWindow ? activeWindow.bounds.x : 20);
-  const motionY = useMotionValue(activeWindow ? activeWindow.bounds.y : 20);
+  const motionX = useMotionValue(activeWindow ? denormalizedBounds.x : 20);
+  const motionY = useMotionValue(activeWindow ? denormalizedBounds.y : 20);
   const motionHeight = useMotionValue(
-    activeWindow ? activeWindow.bounds.height : 600
+    activeWindow ? denormalizedBounds.height : 600
   );
   const motionWidth = useMotionValue(
-    activeWindow ? activeWindow.bounds.width : 600
+    activeWindow ? denormalizedBounds.width : 600
   );
 
   useEffect(() => {
-    motionX.set(activeWindow.bounds.x);
-    motionY.set(activeWindow.bounds.y);
-    motionWidth.set(activeWindow.bounds.width);
-    motionHeight.set(activeWindow.bounds.height);
+    motionX.set(denormalizedBounds.x);
+    motionY.set(denormalizedBounds.y);
+    motionWidth.set(denormalizedBounds.width);
+    motionHeight.set(denormalizedBounds.height);
   }, [activeWindow.bounds]);
 
   const windowId = `app-window-${activeWindow.appId}`;
@@ -107,6 +115,28 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
     }
   }, []);
 
+  const updateWindowBounds = useCallback(() => {
+    DesktopActions.setWindowBounds(
+      activeWindow.appId,
+      normalizeBounds(
+        {
+          x: motionX.get(),
+          y: motionY.get(),
+          height: motionHeight.get(),
+          width: motionWidth.get(),
+        },
+        shell.desktopDimensions
+      )
+    );
+  }, [
+    activeWindow.appId,
+    motionX,
+    motionY,
+    motionHeight,
+    motionWidth,
+    shell.desktopDimensions,
+  ]);
+
   // Toggles maximize or not
   const maximize = () => {
     if (!unmaximize) {
@@ -129,23 +159,12 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
       motionWidth.set(unmaximize.width);
       setUnmaximize(undefined);
     }
-    activeWindow &&
-      DesktopActions.setWindowBounds(activeWindow.appId, {
-        x: Math.round(motionX.get()),
-        y: Math.round(motionY.get()),
-        height: Math.round(motionHeight.get()),
-        width: Math.round(motionWidth.get()),
-      });
+
+    updateWindowBounds();
   };
   const onDragStop = () => {
     setIsDragging(false);
-    activeWindow &&
-      DesktopActions.setWindowBounds(activeWindow.appId, {
-        x: Math.round(motionX.get()),
-        y: Math.round(motionY.get()),
-        height: Math.round(motionHeight.get()),
-        width: Math.round(motionWidth.get()),
-      });
+    updateWindowBounds();
   };
 
   const onDragStart = () => {
@@ -369,13 +388,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
               }}
               onPointerUp={() => {
                 setIsResizing(false);
-                activeWindow &&
-                  DesktopActions.setWindowBounds(activeWindow.appId, {
-                    x: motionX.get(),
-                    y: motionY.get(),
-                    height: motionHeight.get(),
-                    width: motionWidth.get(),
-                  });
+                updateWindowBounds();
               }}
               onPanEnd={() => setIsResizing(false)}
               onTap={() => setIsResizing(false)}

@@ -184,12 +184,7 @@ export class DesktopService extends BaseService {
     _spaceId: string,
     selectedApp: AppType
   ) {
-    const { desktopDimensions } = this.core.services.shell;
-
-    const newWindow = this.state.openWindow(
-      selectedApp,
-      desktopDimensions as any
-    );
+    const newWindow = this.state.openWindow(selectedApp);
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
 

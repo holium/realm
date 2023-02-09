@@ -2,7 +2,7 @@ import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { getInitialWindowBounds } from './lib/window-manager';
 
-// Bounds are normalized to a 10x10 grid.
+// Bounds are using the realm.config 1-10 scale.
 const BoundsModel = types.model({
   x: types.number,
   y: types.number,
@@ -138,10 +138,7 @@ export const DesktopStore = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(
-      app: AppType,
-      desktopDimensions: Pick<BoundsModelType, 'width' | 'height'>
-    ) {
+    openWindow(app: AppType) {
       let glob;
       let href;
       if (app.type === 'urbit') {
@@ -162,7 +159,7 @@ export const DesktopStore = types
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
-        bounds: getInitialWindowBounds(app, desktopDimensions),
+        bounds: getInitialWindowBounds(app),
       });
 
       self.windows.set(newWindow.appId, newWindow);

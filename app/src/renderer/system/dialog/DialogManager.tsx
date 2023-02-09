@@ -12,7 +12,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface DialogManagerProps {
   dialogId?: string;
-  dialogProps: any;
+  dialogProps: Record<string, any>;
 }
 
 const DialogManagerPresenter = ({
@@ -57,7 +57,7 @@ const DialogManagerPresenter = ({
             ...window,
             bounds: {
               ...window.bounds,
-              ...getCenteredXY(window.bounds, shell.desktopDimensions),
+              ...getCenteredXY(window.bounds),
             },
           }}
         />
