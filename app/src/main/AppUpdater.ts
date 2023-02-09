@@ -27,7 +27,10 @@ const getAssetPath = (...paths: string[]): string => {
  *
  */
 
-log.transports.file.level = isDevelopment ? 'debug' : 'info';
+// for now, until we get Windows and Linux auto updating pipelines to fully work,
+//  log ALL builds, not just dev or prod
+// log.transports.file.level = isDevelopment ? 'debug' : 'info';
+log.transports.file.level = 'debug';
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
