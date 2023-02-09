@@ -117,8 +117,8 @@ export class AppUpdater implements IAppUpdater {
       );
       const parts = [
         `provider: generic`,
-        `url: ${AUTOUPDATE_FEED_URL}`,
-        `channel: ${RELEASE_CHANNEL}`,
+        `url: ${process.env.AUTOUPDATE_FEED_URL}`,
+        `channel: ${process.env.RELEASE_CHANNEL}`,
       ];
       fs.writeFileSync(
         updateConfigPath,
