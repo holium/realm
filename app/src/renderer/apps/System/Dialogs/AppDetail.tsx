@@ -123,13 +123,11 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     ) as AppType;
   } else if (appId) {
     app = bazaar.getApp(appId)! as AppType;
-    console.log('worked?');
   } else {
     return null;
   }
 
   const isInstalled = app && app.installStatus === 'installed';
-  console.log(type, appId, isInstalled, app?.type, deskHash);
 
   let graphic;
   let title = app.title;
