@@ -1,4 +1,4 @@
-import { types, applySnapshot, Instance } from 'mobx-state-tree';
+import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { getInitialWindowBounds } from './lib/window-manager';
 
@@ -20,13 +20,7 @@ export const WindowModel = types
     appId: types.identifier,
     glob: types.optional(types.boolean, false),
     href: types.maybeNull(Glob),
-    /**
-     * The `title` is shown in the titlebar.
-     */
     title: types.optional(types.string, ''),
-    /**
-     * The z-index of the window.
-     */
     zIndex: types.number,
     type: types.optional(
       types.enumeration(['urbit', 'web', 'native', 'dialog', 'dev']),
@@ -38,7 +32,7 @@ export const WindowModel = types
     bounds: BoundsModel,
     /**
      * The previous size and position of the window.
-     * Needed for returning from maximized state.
+     * Needed for returning from maximized/fullscreen state.
      */
     prevBounds: types.optional(BoundsModel, {
       x: 0,
@@ -47,7 +41,7 @@ export const WindowModel = types
       height: 0,
     }),
     /**
-     * Whether the window is active.
+     * The ative window has a titlebar with full contrast.
      */
     isActive: types.optional(types.boolean, false),
     /**
@@ -82,6 +76,7 @@ export const WindowModel = types
   }));
 
 export interface WindowModelType extends Instance<typeof WindowModel> {}
+export interface CreateWindowProps extends SnapshotIn<typeof WindowModel> {}
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -158,6 +153,13 @@ export const DesktopStore = types
 
       self.windows.set(newWindow.appId, newWindow);
       if (self.isHomePaneOpen) self.isHomePaneOpen = false;
+
+      return newWindow;
+    },
+    openDialog(windowProps: CreateWindowProps) {
+      const newWindow = WindowModel.create(windowProps);
+
+      self.windows.set(newWindow.appId, newWindow);
 
       return newWindow;
     },

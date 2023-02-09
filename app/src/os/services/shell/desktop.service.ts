@@ -4,7 +4,11 @@ import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { DesktopStoreType, DesktopStore } from './desktop.model';
+import {
+  DesktopStoreType,
+  DesktopStore,
+  CreateWindowProps,
+} from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 
@@ -35,6 +39,7 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
+    'realm.desktop.open-dialog': this.openDialog,
     'realm.desktop.toggle-minimized': this.toggleMinimized,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
@@ -83,6 +88,9 @@ export class DesktopService extends BaseService {
         spaceId,
         app
       );
+    },
+    openDialog: async (windowProps: CreateWindowProps) => {
+      return await ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
     toggleMinimized: async (spaceId: string, windowId: string) => {
       return await ipcRenderer.invoke(
@@ -171,7 +179,11 @@ export class DesktopService extends BaseService {
     this.state?.setBounds(windowId, dimensions);
   }
 
-  openAppWindow(_event: any, _spaceId: string, selectedApp: AppType) {
+  openAppWindow(
+    _event: IpcRendererEvent,
+    _spaceId: string,
+    selectedApp: AppType
+  ) {
     const { desktopDimensions } = this.core.services.shell;
 
     const newWindow = this.state.openWindow(
@@ -200,6 +212,10 @@ export class DesktopService extends BaseService {
         value: credentials.cookie!.split('=')[1].split('; ')[0],
       });
     }
+  }
+
+  openDialog(_event: IpcRendererEvent, windowProps: CreateWindowProps) {
+    this.state.openDialog(windowProps);
   }
 
   toggleMinimized(_event: any, _spaceId: string, windowId: string) {

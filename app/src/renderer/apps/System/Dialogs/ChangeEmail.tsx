@@ -19,7 +19,6 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { WindowModel } from 'os/services/shell/desktop.model';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
@@ -27,7 +26,7 @@ export const ChangeEmailDialogConfig: DialogConfig = {
     ShellActions.closeDialog();
     ShellActions.setBlur(false);
   },
-  window: WindowModel.create({
+  windowProps: {
     appId: 'change-email-dialog',
     title: 'Change Email Dialog',
     zIndex: 13,
@@ -38,7 +37,7 @@ export const ChangeEmailDialogConfig: DialogConfig = {
       width: 450,
       height: 420,
     },
-  }),
+  },
   hasCloseButton: false,
   unblurOnClose: true,
   noTitlebar: false,

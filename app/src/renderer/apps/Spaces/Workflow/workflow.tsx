@@ -7,7 +7,6 @@ import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { toJS } from 'mobx';
-import { WindowModel } from 'os/services/shell/desktop.model';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
@@ -38,7 +37,7 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false, true);
       ShellActions.closeDialog();
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: 'create-space-1',
       zIndex: 13,
       type: 'dialog',
@@ -48,7 +47,7 @@ export const spacesDialogs: DialogRenderers = {
         width: 550,
         height: 570,
       },
-    }),
+    },
     hasCloseButton: true,
   },
   'create-space-2': {
@@ -74,7 +73,7 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: 'create-space-2',
       zIndex: 13,
       type: 'dialog',
@@ -84,7 +83,7 @@ export const spacesDialogs: DialogRenderers = {
         width: 550,
         height: 570,
       },
-    }),
+    },
     hasCloseButton: true,
   },
   'create-space-3': {
@@ -113,7 +112,7 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: 'create-space-3',
       zIndex: 13,
       type: 'dialog',
@@ -123,7 +122,7 @@ export const spacesDialogs: DialogRenderers = {
         width: 550,
         height: 570,
       },
-    }),
+    },
     hasCloseButton: true,
   },
   'edit-space': (dialogProps: any) => ({
@@ -170,7 +169,7 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: 'edit-space',
       zIndex: 13,
       type: 'dialog',
@@ -180,7 +179,7 @@ export const spacesDialogs: DialogRenderers = {
         width: 550,
         height: 570,
       },
-    }),
+    },
     hasCloseButton: true,
   }),
   'create-space-4': {
@@ -213,7 +212,7 @@ export const spacesDialogs: DialogRenderers = {
     isValidated: (state: any) => {
       return state && state.members;
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: 'create-space-4',
       zIndex: 13,
       type: 'dialog',
@@ -223,7 +222,7 @@ export const spacesDialogs: DialogRenderers = {
         width: 550,
         height: 570,
       },
-    }),
+    },
     hasCloseButton: true,
   },
 };

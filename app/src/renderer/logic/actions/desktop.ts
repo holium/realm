@@ -2,6 +2,10 @@
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
+import {
+  CreateWindowProps,
+  WindowModelType,
+} from 'os/services/shell/desktop.model';
 import { SpacesActions } from './spaces';
 
 /**
@@ -49,6 +53,11 @@ export const DesktopActions = {
     // dont add recent apps unitl they are open
     SpacesActions.addRecentApp(app.id);
     return result;
+  },
+  openDialog: async (
+    windowProps: CreateWindowProps
+  ): Promise<WindowModelType> => {
+    return await window.electron.os.desktop.openDialog(windowProps);
   },
   toggleMinimized: async (spacePath: string, windowId: string) => {
     return await window.electron.os.desktop.toggleMinimized(

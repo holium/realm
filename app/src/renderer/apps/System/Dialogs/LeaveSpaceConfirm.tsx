@@ -47,7 +47,7 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
       />
     ),
     onClose: () => {},
-    window: {
+    windowProps: {
       appId: 'leave-space-dialog',
       title: 'Leave Space Dialog',
       zIndex: 13,

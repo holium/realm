@@ -27,7 +27,6 @@ import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
 import AccessGatePassed from 'renderer/system/onboarding/AccessGatePassed.dialog';
 import ViewCode from './ViewCode.dialog';
 import CheckInstallationDialog from './CheckInstallation.dialog';
-import { WindowModel } from 'os/services/shell/desktop.model';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
@@ -46,7 +45,7 @@ const initialOnboardingDialogs: DialogRenderers = {
       OnboardingActions.agreedToDisclaimer();
       OnboardingActions.setStep(OnboardingStep.ACCESS_GATE);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.DISCLAIMER,
       zIndex: 13,
       type: 'dialog',
@@ -56,7 +55,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         width: 520,
         height: 490,
       },
-    }),
+    },
   },
   [OnboardingStep.ACCESS_GATE]: {
     workflow: true,
@@ -70,7 +69,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.ACCESS_GATE,
       zIndex: 13,
       type: 'dialog',
@@ -80,7 +79,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         width: 400,
         height: 420,
       },
-    }),
+    },
   },
   [OnboardingStep.ACCESS_GATE_PASSED]: {
     workflow: true,
@@ -94,7 +93,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.EMAIL);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.ACCESS_GATE_PASSED,
       zIndex: 13,
       type: 'dialog',
@@ -104,7 +103,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         width: 400,
         height: 300,
       },
-    }),
+    },
   },
   [OnboardingStep.EMAIL]: {
     workflow: true,
@@ -117,7 +116,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.EMAIL,
       zIndex: 13,
       type: 'dialog',
@@ -127,7 +126,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         width: 450,
         height: 420, // ayyyy
       },
-    }),
+    },
   },
   [OnboardingStep.HAVE_URBIT_ID]: {
     workflow: true,
@@ -145,7 +144,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         ? await OnboardingActions.setStep(OnboardingStep.ADD_SHIP)
         : await OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.HAVE_URBIT_ID,
       zIndex: 13,
       type: 'dialog',
@@ -155,7 +154,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         width: 460,
         height: 370,
       },
-    }),
+    },
   },
 };
 
@@ -171,7 +170,7 @@ const selfHostedDialogs: DialogRenderers = {
     },
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.PRE_INSTALLATION_CHECK),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.ADD_SHIP,
       zIndex: 13,
       type: 'dialog',
@@ -181,7 +180,7 @@ const selfHostedDialogs: DialogRenderers = {
         width: 460,
         height: 400,
       },
-    }),
+    },
   },
 };
 
@@ -204,7 +203,7 @@ const completeProfileDialogs: DialogRenderers = {
     onNext: () => {
       OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.PRE_INSTALLATION_CHECK,
       zIndex: 13,
       type: 'dialog',
@@ -214,7 +213,7 @@ const completeProfileDialogs: DialogRenderers = {
         width: 520,
         height: 490,
       },
-    }),
+    },
   },
   [OnboardingStep.PROFILE_SETUP]: {
     workflow: true,
@@ -225,7 +224,7 @@ const completeProfileDialogs: DialogRenderers = {
       await OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.PROFILE_SETUP,
       zIndex: 13,
       type: 'dialog',
@@ -235,7 +234,7 @@ const completeProfileDialogs: DialogRenderers = {
         width: 560,
         height: 380,
       },
-    }),
+    },
   },
   [OnboardingStep.SET_PASSWORD]: {
     workflow: true,
@@ -259,7 +258,7 @@ const completeProfileDialogs: DialogRenderers = {
         await OnboardingActions.setStep(OnboardingStep.INSTALL_AGENT);
       }
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.SET_PASSWORD,
       zIndex: 13,
       type: 'dialog',
@@ -269,7 +268,7 @@ const completeProfileDialogs: DialogRenderers = {
         width: 560,
         height: 380,
       },
-    }),
+    },
   },
   [OnboardingStep.INSTALL_AGENT]: {
     workflow: true,
@@ -279,7 +278,7 @@ const completeProfileDialogs: DialogRenderers = {
     hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.INSTALL_AGENT,
       zIndex: 13,
       type: 'dialog',
@@ -289,7 +288,7 @@ const completeProfileDialogs: DialogRenderers = {
         width: 560,
         height: 380,
       },
-    }),
+    },
   },
 };
 
@@ -305,7 +304,7 @@ const hostingProviderDialogs: DialogRenderers = {
     },
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.SELECT_PATP),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.ACCESS_CODE,
       zIndex: 13,
       type: 'dialog',
@@ -315,7 +314,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 500,
         height: 400,
       },
-    }),
+    },
   },
   [OnboardingStep.SELECT_PATP]: {
     workflow: true,
@@ -328,7 +327,7 @@ const hostingProviderDialogs: DialogRenderers = {
     },
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.SELECT_PATP,
       zIndex: 13,
       type: 'dialog',
@@ -338,7 +337,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 460,
         height: 440,
       },
-    }),
+    },
   },
   [OnboardingStep.SELECT_HOSTING_PLAN]: {
     workflow: true,
@@ -351,7 +350,7 @@ const hostingProviderDialogs: DialogRenderers = {
     },
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.STRIPE_PAYMENT),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.SELECT_HOSTING_PLAN,
       zIndex: 13,
       type: 'dialog',
@@ -361,7 +360,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 750,
         height: 550,
       },
-    }),
+    },
   },
   [OnboardingStep.STRIPE_PAYMENT]: {
     workflow: true,
@@ -373,7 +372,7 @@ const hostingProviderDialogs: DialogRenderers = {
       await OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.CONFIRMATION),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.STRIPE_PAYMENT,
       zIndex: 13,
       type: 'dialog',
@@ -383,7 +382,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 750,
         height: 550,
       },
-    }),
+    },
   },
   [OnboardingStep.CONFIRMATION]: {
     workflow: true,
@@ -392,7 +391,7 @@ const hostingProviderDialogs: DialogRenderers = {
     component: (props: BaseDialogProps) => <HostingConfirmation {...props} />,
     onNext: async () =>
       await OnboardingActions.setStep(OnboardingStep.VIEW_CODE),
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.CONFIRMATION,
       zIndex: 13,
       type: 'dialog',
@@ -402,7 +401,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 460,
         height: 360,
       },
-    }),
+    },
   },
   [OnboardingStep.VIEW_CODE]: {
     workflow: true,
@@ -414,7 +413,7 @@ const hostingProviderDialogs: DialogRenderers = {
       setState({ ...state, isHosted: true });
       await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);
     },
-    window: WindowModel.create({
+    windowProps: {
       appId: OnboardingStep.VIEW_CODE,
       zIndex: 13,
       type: 'dialog',
@@ -424,7 +423,7 @@ const hostingProviderDialogs: DialogRenderers = {
         width: 460,
         height: 360,
       },
-    }),
+    },
   },
 };
 

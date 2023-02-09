@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, ReactNode, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -8,6 +8,7 @@ import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface DialogManagerProps {
   dialogId?: string;
@@ -20,9 +21,9 @@ const DialogManagerPresenter = ({
 }: DialogManagerProps) => {
   const { shell } = useServices();
   const desktopRef = useRef<HTMLDivElement>(null);
+  const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
   let dialogConfig: DialogConfig;
-  let dialogWindow: React.ReactNode | undefined;
   const isOpen = dialogId !== undefined;
 
   // clear dialog on escape pressed if closable
@@ -40,28 +41,31 @@ const DialogManagerPresenter = ({
     { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
   );
 
-  if (isOpen) {
-    const dialogRenderer = dialogRenderers[dialogId];
-    dialogConfig =
-      dialogRenderer instanceof Function
-        ? dialogRenderer(dialogProps.toJSON())
-        : dialogRenderer;
-    dialogWindow = (
-      <AppWindow
-        desktopRef={desktopRef}
-        window={{
-          ...dialogConfig.window,
-          bounds: {
-            ...dialogConfig.window.bounds,
-            ...getCenteredXY(
-              dialogConfig!.window.bounds,
-              shell.desktopDimensions
-            ),
-          },
-        }}
-      />
-    );
-  }
+  useEffect(() => {
+    const openDialogWindow = async (did: string) => {
+      const dialogRenderer = dialogRenderers[did];
+      dialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(dialogProps.toJSON())
+          : dialogRenderer;
+      const window = await DesktopActions.openDialog(dialogConfig.windowProps);
+
+      setDialogWindow(
+        <AppWindow
+          desktopRef={desktopRef}
+          window={{
+            ...window,
+            bounds: {
+              ...window.bounds,
+              ...getCenteredXY(window.bounds, shell.desktopDimensions),
+            },
+          }}
+        />
+      );
+    };
+
+    if (dialogId) openDialogWindow(dialogId);
+  }, [dialogId]);
 
   return (
     <motion.div
@@ -79,7 +83,7 @@ const DialogManagerPresenter = ({
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {dialogWindow as any}
+      {dialogWindow}
     </motion.div>
   );
 };
