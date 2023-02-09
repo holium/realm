@@ -155,7 +155,7 @@ export const AuthStore = types
     },
     deleteShip(patp: string) {
       // set first ship
-      if (self.order.length == 1) {
+      if (self.order.length === 1) {
         self.selected = undefined;
       } else {
         self.selected = self.ships.get(self.order[0]);

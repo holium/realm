@@ -393,7 +393,7 @@ export class AuthService extends BaseService {
 
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
-    let shipStorageDirPath = this.db.path.split("/");
+    let shipStorageDirPath = this.db.path.split('/');
     shipStorageDirPath.pop();
     shipStorageDirPath.push(`realm.${ship}`);
     shipStorageDirPath = shipStorageDirPath.join('/');
