@@ -106,8 +106,7 @@ export class SpacesService extends BaseService {
     scryAllies: async () => await ipcRenderer.invoke('realm.bazaar.scryAllies'),
     scryTreaties: async (ship: Patp) =>
       await ipcRenderer.invoke('realm.bazaar.scryTreaties', ship),
-    scryHash: async (app: string) =>
-      await ipcRenderer.invoke('realm.bazaar.scryHash', app),
+    scryHash: (app: string) => ipcRenderer.invoke('realm.bazaar.scryHash', app),
 
     getOurGroups: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-our-groups');

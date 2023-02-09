@@ -80,8 +80,6 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   const { theme, bazaar } = useServices();
   const { selectedApp, setSearchMode } = useAppInstaller();
   const [copied, setCopied] = useState<boolean>(false);
-  const [app, setApp] = useState<AppType | null>(null);
-  const [onClose, setOnClose] = useState<any>(ShellActions.closeDialog);
   const [deskHash, setDeskHash] = useState<string>('fake');
 
   useEffect(() => {
@@ -91,49 +89,47 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   }, [copied]);
 
   useEffect(() => {
-    if (type === 'app-install') {
-      setOnClose(() => {
-        setSearchMode('none');
-      });
-      const catalogEntry = bazaar.getApp(selectedApp!.id.split('/')[1]);
-      setApp(
-        getSnapshot(
-          UrbitApp.create({
-            ...selectedApp!,
-            title: selectedApp?.title || selectedApp!.id.split('/')[1],
-            type: AppTypes.Urbit,
-            href: getSnapshot(selectedApp!.href),
-            config: {
-              size: [10, 10],
-              showTitlebar: true,
-              titlebarBorder: true,
-            },
-            id: selectedApp!.id.split('/')[1]!,
-            host: selectedApp!.id.split('/')[0],
-            installStatus:
-              (catalogEntry && catalogEntry.installStatus) ||
-              InstallStatus.uninstalled,
-          })
-        ) as AppType
-      );
-    } else if (appId) {
-      setApp(bazaar.getApp(appId)! as AppType);
-    }
-  }, [type]);
-
-  const isInstalled = app && app.installStatus === 'installed';
-
-  useEffect(() => {
-    if (app && isInstalled) {
-      SpacesActions.scryHash(app.id).then((r: any) =>
+    if (appId) {
+      SpacesActions.scryHash(appId).then((r: any) =>
         setDeskHash(r && r['app-hash'])
       );
     }
-  }, [app]);
+  }, [appId]);
 
-  if (!app) {
+  let app: AppType;
+  let onClose: any = ShellActions.closeDialog;
+  if (type === 'app-install') {
+    onClose = () => {
+      setSearchMode('none');
+    };
+    const catalogEntry = bazaar.getApp(selectedApp!.id.split('/')[1]);
+    app = getSnapshot(
+      UrbitApp.create({
+        ...selectedApp!,
+        title: selectedApp?.title || selectedApp!.id.split('/')[1],
+        type: AppTypes.Urbit,
+        href: getSnapshot(selectedApp!.href),
+        config: {
+          size: [10, 10],
+          showTitlebar: true,
+          titlebarBorder: true,
+        },
+        id: selectedApp!.id.split('/')[1]!,
+        host: selectedApp!.id.split('/')[0],
+        installStatus:
+          (catalogEntry && catalogEntry.installStatus) ||
+          InstallStatus.uninstalled,
+      })
+    ) as AppType;
+  } else if (appId) {
+    app = bazaar.getApp(appId)! as AppType;
+    console.log('worked?');
+  } else {
     return null;
   }
+
+  const isInstalled = app && app.installStatus === 'installed';
+  console.log(type, appId, isInstalled, app?.type, deskHash);
 
   let graphic;
   let title = app.title;
@@ -165,7 +161,9 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
         {app.href && app.href.glob && app.href.glob['glob-reference'] && (
           <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
         )}
-        {isInstalled && <KPI title="Desk Hash" value={deskHash} />}
+        {isInstalled && deskHash !== 'fake' && (
+          <KPI title="Desk Hash" value={deskHash} />
+        )}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
