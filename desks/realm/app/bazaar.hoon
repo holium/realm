@@ -105,12 +105,16 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
       ::
+      [%x %app-hash @ ~]     ::  ~/scry/bazaar/app-hash/app-name
+        =/  hash  .^(@uv %cz [(scot %p our.bowl) i.t.t.path (scot %da now.bowl) ~])
+        ``bazaar-view+!>([%app-hash hash])
+      ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
-        ``bazaar-view+!>([%catalog catalog.state now.bowl])
+        ``bazaar-view+!>([%catalog catalog.state])
       ::
       [%x %installed ~]   ::  ~/scry/bazaar/installed
         =/  apps          (skim ~(tap by catalog.state) skim-installed:helpers:bazaar:core)
-       ``bazaar-view+!>([%installed `catalog:store`(malt apps) now.bowl])
+       ``bazaar-view+!>([%installed `catalog:store`(malt apps)])
       ::
       [%x %allies ~]     ::  ~/scry/bazaar/allies
         =/  allies   allies:scry:bazaar:core

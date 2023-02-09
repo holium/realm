@@ -475,6 +475,13 @@ export const NewBazaarStore = types
     //
     // Scries
     //
+    scryHash: flow(function* (conduit: Conduit, app: string) {
+      try {
+        return yield BazaarApi.scryHash(conduit, app);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     scryAllies: flow(function* (conduit: Conduit) {
       try {
         const allies = yield BazaarApi.scryAllies(conduit);

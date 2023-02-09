@@ -100,10 +100,11 @@
       [%clear-stall path=space-path:spaces]
   ==
 +$  view
-  $%  [%catalog =catalog now=@da]
-      [%installed =catalog now=@da]
+  $%  [%catalog =catalog]
+      [%installed =catalog]
       [%allies =allies:ally:treaty]
       [%treaties treaties=(map [=ship =desk] =treaty:treaty)]
+      [%app-hash hash=@uv]
   ==
 --
 

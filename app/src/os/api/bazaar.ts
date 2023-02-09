@@ -40,6 +40,13 @@ export const BazaarApi = {
   getApps: (_conduit: Conduit, _path: string, _tag: string) => null,
   getAllies: (_conduit: Conduit, _path: string) => null,
   getTreaties: (_conduit: Conduit, _patp: string) => null,
+  scryHash: async (conduit: Conduit, app: string): Promise<any> => {
+    const response = await conduit.scry({
+      app: 'bazaar',
+      path: `/app-hash/${app}`,
+    });
+    return response;
+  },
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
       app: 'bazaar',

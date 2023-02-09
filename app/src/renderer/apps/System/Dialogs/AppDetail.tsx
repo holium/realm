@@ -12,6 +12,7 @@ import {
 import styled from 'styled-components';
 
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useServices } from 'renderer/logic/store';
 import {
   UrbitApp,
@@ -80,6 +81,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   const { theme, bazaar } = useServices();
   const { selectedApp, setSearchMode } = useAppInstaller();
   const [copied, setCopied] = useState<boolean>(false);
+  const [deskHash, setDeskHash] = useState<string>('fake');
 
   useEffect(() => {
     if (copied) {
@@ -118,6 +120,14 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     return null;
   }
 
+  const isInstalled = app && app.installStatus === 'installed';
+
+  useEffect(() => {
+    if(app && isInstalled) {
+      SpacesActions.scryHash(app.id).then(r => setDeskHash(r && r['app-hash']));
+    }
+  }, []);
+
   let graphic;
   let title = app.title;
   let kpis: React.ReactNode = [];
@@ -142,11 +152,11 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     if (app && app.href && !app.title) {
       title = app.id.split('/')[1];
     }
-    console.log(app, app.version, app.href, app.href.glob);
     kpis = (
       <>
         <KPI title="Developer desk" value={`${app.host || ''}/${app.id}`} />
-        {app.href && app.href.glob && <KPI title="Glob Hash" value={app.href.glob!['glob-reference']!.hash} />}
+        {app.href && app.href.glob && app.href.glob['glob-reference'] && <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />}
+        {isInstalled && <KPI title="Desk Hash" value={deskHash} />}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
@@ -169,8 +179,6 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
       </>
     );
   }
-
-  const isInstalled = app.installStatus === 'installed';
 
   if (app.type === 'native') {
     app as NativeAppType;
