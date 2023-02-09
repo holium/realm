@@ -25,6 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
+  console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -155,7 +156,12 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.channel = 'alpha';
     } else {
       // channel set to branch name
-      ci.channel = context.ref;
+      const tic = context.ref.lastIndexOf('/');
+      if (tic !== -1) {
+        ci.channel = context.ref.substring(tic + 1);
+      } else {
+        ci.channel = context.ref;
+      }
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
