@@ -119,7 +119,7 @@ jobs:
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          RELEASE_NAME: ${{ fromJSON(needs.pre-deploy.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(needs.pre-deploy.outputs.result).buildVersion }}
           CHANGELOG: ${{ github.event.pull_request.body }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
