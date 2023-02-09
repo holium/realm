@@ -106,7 +106,12 @@ export class AppUpdater implements IAppUpdater {
       // on windows builds, we generate an auto update config file at runtime
       //  since there are issues with our current package.json scripts and persisting
       //  environment variables across script commands
-      this.autoUpdater.updateConfigPath = resolveUpdaterPath('app-update.yml');
+      this.autoUpdater.updateConfigPath = `${process.resourcesPath}/updater/app-update.yml`;
+      log.verbose(
+        'autoUpdater.updateConfigPath => %o',
+        this.autoUpdater.updateConfigPath
+      );
+      // this.autoUpdater.updateConfigPath = resolveUpdaterPath('app-update.yml');
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({
