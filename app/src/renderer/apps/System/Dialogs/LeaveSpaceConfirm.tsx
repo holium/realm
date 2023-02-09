@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
@@ -47,18 +48,21 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
       />
     ),
     onClose: () => {},
-    windowProps: {
+    getWindowProps: (desktopDimensions) => ({
       appId: 'leave-space-dialog',
       title: 'Leave Space Dialog',
       zIndex: 13,
       type: 'dialog',
-      bounds: {
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 180,
-      },
-    },
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 320,
+          height: 180,
+        },
+        desktopDimensions
+      ),
+    }),
     hasCloseButton: false,
     noTitlebar: true,
   } as DialogConfig);

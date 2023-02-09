@@ -47,7 +47,9 @@ const DialogManagerPresenter = ({
         dialogRenderer instanceof Function
           ? dialogRenderer(dialogProps.toJSON())
           : dialogRenderer;
-      const window = await DesktopActions.openDialog(dialogConfig.windowProps);
+      const window = await DesktopActions.openDialog(
+        dialogConfig.getWindowProps(shell.desktopDimensions)
+      );
 
       setDialogWindow(
         <AppWindow

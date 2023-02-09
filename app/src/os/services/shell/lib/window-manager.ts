@@ -1,6 +1,6 @@
 import { AppType, RealmConfigType } from 'os/services/spaces/models/bazaar';
 import { Dimensions, Position, Bounds } from 'os/types';
-import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
+import { getDefaultAppDimensions } from './dimensions';
 
 /**
  * getCenteredPosition
@@ -52,10 +52,15 @@ export const getFullscreenBounds = (desktopDimensions: Dimensions): Bounds => {
  * @returns dimensions normalized to the 1-10 scale
  */
 const getCenteredBounds = (app: any, desktopDimensions: Dimensions): Bounds => {
-  if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
+  const defaultAppDimensions = getDefaultAppDimensions(
+    app.id,
+    desktopDimensions
+  );
+
+  if (defaultAppDimensions) {
     const defaultDimensions = {
-      width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width ?? 6,
-      height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height ?? 6,
+      width: defaultAppDimensions.width,
+      height: defaultAppDimensions.height,
     };
     const defaultPosition = getCenteredPosition(defaultDimensions);
 
@@ -157,6 +162,15 @@ export const normalizeBounds = (
     height: heightUnit,
   };
 };
+
+// Convert from pixels to the 1-10 scale.
+export const normalizeDimensions = (
+  dimensions: Dimensions,
+  desktopDimensions: Dimensions
+): Dimensions => ({
+  width: dimensions.width / (desktopDimensions.width / 10),
+  height: dimensions.height / (desktopDimensions.height / 10),
+});
 
 // Convert from the 1-10 scale to pixels.
 export const denormalizeBounds = (

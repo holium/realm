@@ -193,10 +193,13 @@ const AppDockPresenter = () => {
       (appWindow: WindowModelType) =>
         dock.findIndex((pinned) => appWindow.appId === pinned) === -1
     )
-    .map((unpinnedApp: WindowModelType, index) => {
-      const appId = unpinnedApp.appId;
+    .map((unpinnedAppWindow: WindowModelType, index) => {
+      const appId = unpinnedAppWindow.appId;
       const app = bazaar.getApp(appId);
       const tileId = `unpinned-${appId}-${index}`;
+
+      if (!app) return null;
+
       return (
         <AppTile
           key={tileId}
@@ -204,7 +207,7 @@ const AppDockPresenter = () => {
           tileSize="sm"
           app={app}
           open={true}
-          selected={unpinnedApp.isActive}
+          selected={unpinnedAppWindow.isActive}
           contextMenuOptions={[
             {
               id: `${appId}-pin}`,

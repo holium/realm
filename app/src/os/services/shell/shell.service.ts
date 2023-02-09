@@ -105,14 +105,6 @@ export class ShellService extends BaseService {
     return this.state?.isFullscreen;
   }
 
-  public onDevtoolsOpened(callback: any) {
-    ipcRenderer.on('realm.shell.devtools-opened', callback);
-  }
-
-  public onDevtoolsClosed(callback: any) {
-    ipcRenderer.on('realm.shell.devtools-closed', callback);
-  }
-
   setFullscreen(_event: any, isFullscreen: boolean) {
     this.state?.setFullscreen(isFullscreen);
   }

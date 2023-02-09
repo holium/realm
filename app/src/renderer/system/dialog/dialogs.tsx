@@ -7,6 +7,7 @@ import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceC
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
+import { Dimensions } from 'os/types';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -36,7 +37,7 @@ export type DialogConfig = {
   titlebar?: React.FC<any>;
   component: React.FC<any>;
   stateKey?: string;
-  windowProps: CreateWindowProps;
+  getWindowProps: (dekstopDimensions: Dimensions) => CreateWindowProps;
 } & BaseDialogProps;
 
 export interface DialogRenderers {
