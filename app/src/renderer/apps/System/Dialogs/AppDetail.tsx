@@ -271,12 +271,13 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!app) return null;
-                  const content = `web+urbitgraph://${
-                    (app as UrbitAppType).host || ''
-                  }/${app.id}`;
-                  navigator.clipboard.writeText(content);
-                  setCopied(true);
+                  if (app) {
+                    const content = `web+urbitgraph://${
+                      (app as UrbitAppType).host || ''
+                    }/${app.id}`;
+                    navigator.clipboard.writeText(content);
+                    setCopied(true);
+                  }
                 }}
               >
                 <>
