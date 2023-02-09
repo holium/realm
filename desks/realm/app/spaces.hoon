@@ -739,6 +739,8 @@
     ++  handle-edit-role
       |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
       ^-  (quip card _state)
+      =/  src-roles  roles:(~(got by (~(got by membership) path)) src.bowl)
+      ?>  (~(has in src-roles) %admin)
       =/  space-members  (~(got by membership) path)
       =/  member-state  (~(got by space-members) member)
       =.  roles.member-state  role-set
