@@ -1,0 +1,130 @@
+# push to 'windows' branch to run this script
+# need a better way of getting windows only builds out to speed
+#  up testing the process.
+name: windows-build
+run-name: Windows Build - ${{ github.actor }}
+on:
+  push:
+    branches:
+      - windows
+#
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      # the full CI object returned by the post-deploy script
+      ci: ${{ steps.ci.outputs.result }}
+      release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+      build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
+      build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
+      build_version_build: ${{ fromJSON(steps.ci.outputs.result).version.build }}
+      channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin windows
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: ci
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-deploy.js')
+            const result = script({github, context}, 'windows.yml')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Create windows draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          mkdir -p ./app/release/build
+          touch ./app/release/build/log.txt
+          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
+  #
+  build-windows:
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git config --global --add safe.directory '*'
+          git pull origin windows
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
+        run: |
+          apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'windows.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build and install
+        run: |
+          npx cross-env RELEASE_CHANNEL=windows GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+        env:
+          USERNAME: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          mv -f ./app/release/build/latest.yml ./app/release/build/windows.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}

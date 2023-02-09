@@ -31,6 +31,7 @@ const getAssetPath = (...paths: string[]): string => {
 //  log ALL builds, not just dev or prod
 // log.transports.file.level = isDevelopment ? 'debug' : 'info';
 log.transports.file.level = 'verbose';
+log.verbose(process.env);
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline

@@ -154,7 +154,8 @@ module.exports = async ({ github, context }, workflowId) => {
     ) {
       ci.channel = 'alpha';
     } else {
-      ci.channel = 'draft';
+      // channel set to branch name
+      ci.channel = context.ref;
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
