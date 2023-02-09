@@ -16,11 +16,11 @@ module.exports = ({ github, context }, workflowId, platform, ci) => {
     const lines = [
       `provider: generic`,
       `url: ${
-        ['latest', 'hotfix'].indexOf(env.channel) !== -1
+        ['latest', 'hotfix'].indexOf(ci.channel) !== -1
           ? process.env.GH_PROXY
           : process.env.GH_PROXY_STAGING
       }`,
-      `channel: ${env.channel}`,
+      `channel: ${ci.channel}`,
     ];
     fs.writeFileSync(filename, lines.join('\r\n'));
   }
