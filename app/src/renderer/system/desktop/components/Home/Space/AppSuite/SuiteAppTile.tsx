@@ -168,7 +168,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
         contextMenuOptions={contextMenuOptions}
         onAppClick={(selectedApp: AppType) => {
           DesktopActions.openAppWindow(space.path, selectedApp);
-          DesktopActions.setHomePane(false);
+          DesktopActions.closeHomePane();
         }}
       />
     </Box>

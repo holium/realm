@@ -22,8 +22,11 @@ export const DesktopActions = {
   setActive: async (spacePath: string, app: any) => {
     return await window.electron.os.desktop.setActive(spacePath, app);
   },
-  setHomePane: async (isHome: boolean) => {
-    return await window.electron.os.desktop.setHomePane(isHome);
+  openHomePane: async () => {
+    return await window.electron.os.desktop.openHomePane();
+  },
+  closeHomePane: async () => {
+    return await window.electron.os.desktop.closeHomePane();
   },
   setMouseColor: async (mouseColor: string) => {
     window.electron.app.mouseColorChanged(mouseColor);

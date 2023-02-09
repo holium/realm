@@ -15,22 +15,23 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+import { WindowModel } from 'os/services/shell/desktop.model';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
   onClose: () => {},
-  window: {
-    id: 'wallpaper-dialog',
+  window: WindowModel.create({
+    appId: 'wallpaper-dialog',
     title: 'Wallpaper Dialog',
     zIndex: 13,
     type: 'dialog',
-    dimensions: {
+    bounds: {
       x: 0,
       y: 0,
       width: 300,
       height: 300,
     },
-  },
+  }),
   hasCloseButton: false,
   noTitlebar: true,
 };

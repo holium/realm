@@ -49,11 +49,11 @@ export const DeleteSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
     ),
     onClose: () => {},
     window: {
-      id: 'delete-space-dialog',
+      appId: 'delete-space-dialog',
       title: 'Delete Space Dialog',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
+      bounds: {
         x: 0,
         y: 0,
         width: 320,

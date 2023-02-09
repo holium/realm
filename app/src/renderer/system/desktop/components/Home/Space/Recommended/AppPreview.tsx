@@ -182,7 +182,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
                   DesktopActions.openAppWindow(space!.path, toJS(app));
-                  DesktopActions.setHomePane(false);
+                  DesktopActions.closeHomePane();
                 }}
               >
                 Open

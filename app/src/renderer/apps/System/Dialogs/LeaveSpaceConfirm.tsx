@@ -48,11 +48,11 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
     ),
     onClose: () => {},
     window: {
-      id: 'leave-space-dialog',
+      appId: 'leave-space-dialog',
       title: 'Leave Space Dialog',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
+      bounds: {
         x: 0,
         y: 0,
         width: 320,

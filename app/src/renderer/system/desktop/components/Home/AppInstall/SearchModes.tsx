@@ -158,7 +158,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
       descriptionWidth={450}
       onClick={() => {
         DesktopActions.openAppWindow(space, toJS(app));
-        DesktopActions.setHomePane(false);
+        DesktopActions.closeHomePane();
       }}
     />
   ));

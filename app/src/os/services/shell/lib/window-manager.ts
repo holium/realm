@@ -111,7 +111,7 @@ export const getCenteredDimensions = (
 };
 
 /**
- * getInitialWindowDimensions
+ * getInitialWindowBounds
  *
  * Determines how the window should be opened, centered or fullscreen, and then
  * calculates the window x, y, width, and height
@@ -120,7 +120,7 @@ export const getCenteredDimensions = (
  * @param isFullscreen
  * @returns dimensions: { x: number; y: number; width: number; height: number }
  */
-export const getInitialWindowDimensions = (
+export const getInitialWindowBounds = (
   app: AppType,
   desktopDimensions: DesktopDimensions
 ): AppDimensions => {

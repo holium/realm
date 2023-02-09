@@ -119,7 +119,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
                 currentSpace.path,
                 toJS(selectedApp)
               );
-              DesktopActions.setHomePane(false);
+              DesktopActions.closeHomePane();
             }}
           />
         );

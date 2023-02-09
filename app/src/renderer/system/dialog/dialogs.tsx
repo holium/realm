@@ -1,4 +1,4 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { WindowModelType } from '../../../os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
@@ -36,7 +36,7 @@ export type DialogConfig = {
   titlebar?: React.FC<any>;
   component: React.FC<any>;
   stateKey?: string;
-  window: WindowModelProps;
+  window: WindowModelType;
 } & BaseDialogProps;
 
 export interface DialogRenderers {

@@ -6,6 +6,7 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
+import { IpcRendererEvent } from 'electron/renderer';
 
 /**
  * DesktopService
@@ -28,7 +29,8 @@ export class DesktopService extends BaseService {
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
-    'realm.desktop.set-home-pane': this.setHomePane,
+    'realm.desktop.open-home-pane': this.openHomePane,
+    'realm.desktop.close-home-pane': this.closeHomePane,
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
@@ -45,8 +47,11 @@ export class DesktopService extends BaseService {
         theme
       );
     },
-    setHomePane: async (isHome: boolean) => {
-      return await ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
+    openHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.open-home-pane');
+    },
+    closeHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.close-home-pane');
     },
     setActive: async (spaceId: string, appId: string) => {
       return await ipcRenderer.invoke(
@@ -144,9 +149,14 @@ export class DesktopService extends BaseService {
     this.state?.setActive(appId);
   }
 
-  setHomePane(_event: any, isHome: boolean) {
-    this.state?.setHomePane(isHome);
-    this.core.services.shell.setBlur(null, isHome);
+  openHomePane(event: IpcRendererEvent) {
+    this.state.openHomePane();
+    this.core.services.shell.setBlur(event, true);
+  }
+
+  closeHomePane(event: IpcRendererEvent) {
+    this.state.closeHomePane();
+    this.core.services.shell.setBlur(event, false);
   }
 
   setMouseColor(_event: any, mouseColor: string) {
@@ -158,13 +168,13 @@ export class DesktopService extends BaseService {
     windowId: any,
     dimensions: { width: number; height: number; x: number; y: number }
   ) {
-    this.state?.setDimensions(windowId, dimensions);
+    this.state?.setBounds(windowId, dimensions);
   }
 
   openAppWindow(_event: any, _spaceId: string, selectedApp: AppType) {
     const { desktopDimensions } = this.core.services.shell;
 
-    const newWindow = this.state.openBrowserWindow(
+    const newWindow = this.state.openWindow(
       selectedApp,
       desktopDimensions as any
     );
@@ -196,6 +206,6 @@ export class DesktopService extends BaseService {
     this.state?.toggleMinimize(windowId);
   }
   closeAppWindow(_event: any, _spaceId: string, selectedApp: any) {
-    this.state?.closeBrowserWindow(selectedApp.id);
+    this.state?.closeWindow(selectedApp.id);
   }
 }

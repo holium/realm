@@ -1,8 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-// import { Spinner, Flex } from 'renderer/components';
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { WindowModelType } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -12,7 +11,7 @@ import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
 
 interface AppViewProps {
-  window: WindowModelProps;
+  window: WindowModelType;
   isResizing: boolean;
   isDragging: boolean;
   hasTitlebar: boolean;
@@ -34,7 +33,7 @@ const AppViewPresenter = (props: AppViewProps) => {
     url: null,
   });
 
-  const isActive = desktop.isActiveWindow(window.id);
+  const isActive = desktop.getWindowByAppId(window.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +52,7 @@ const AppViewPresenter = (props: AppViewProps) => {
 
   useEffect(() => {
     const webView: Electron.WebviewTag = document.getElementById(
-      `${window.id}-urbit-webview`
+      `${window.appId}-urbit-webview`
     ) as Electron.WebviewTag;
 
     if (window && ship && webView) {
@@ -64,14 +63,14 @@ const AppViewPresenter = (props: AppViewProps) => {
           'console-message',
           (e: Electron.ConsoleMessageEvent) => {
             if (e.level === 3) {
-              console.error(`${window.id} => `, e.message);
+              console.error(`${window.appId} => `, e.message);
             }
           }
         );
       }
       const css = `
           ${genCSSVariables(theme.currentTheme)}
-          ${applyStyleOverrides(window.id, theme.currentTheme)}
+          ${applyStyleOverrides(window.appId, theme.currentTheme)}
         `;
 
       webView.addEventListener('did-attach', () => {
@@ -88,7 +87,7 @@ const AppViewPresenter = (props: AppViewProps) => {
         webView.closeDevTools();
       });
 
-      let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
+      let appUrl = `${ship.url}/apps/${window.appId}/?spaceId=${spaces.selected?.path}`;
 
       if (window.href?.site) {
         appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
@@ -114,7 +113,7 @@ const AppViewPresenter = (props: AppViewProps) => {
   useEffect(() => {
     if (ready) {
       const webView: Electron.WebviewTag = document.getElementById(
-        `${window.id}-urbit-webview`
+        `${window.appId}-urbit-webview`
       ) as Electron.WebviewTag;
 
       webView?.send('mouse-color', desktop.mouseColor);
@@ -126,10 +125,10 @@ const AppViewPresenter = (props: AppViewProps) => {
     if (ready) {
       const css = `
         ${genCSSVariables(theme.currentTheme)}
-        ${applyStyleOverrides(window.id, theme.currentTheme)}
+        ${applyStyleOverrides(window.appId, theme.currentTheme)}
       `;
       const webView: Electron.WebviewTag = document.getElementById(
-        `${window.id}-urbit-webview`
+        `${window.appId}-urbit-webview`
       ) as Electron.WebviewTag;
       webView.insertCSS(css);
     }
@@ -157,7 +156,7 @@ const AppViewPresenter = (props: AppViewProps) => {
         )} */}
         <WebView
           ref={webViewRef}
-          id={`${window.id}-urbit-webview`}
+          id={`${window.appId}-urbit-webview`}
           partition="urbit-webview"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-expect-error
@@ -176,7 +175,7 @@ const AppViewPresenter = (props: AppViewProps) => {
         />
       </View>
     );
-  }, [lockView, window.id, appConfig.url]);
+  }, [lockView, window.appId, appConfig.url]);
 };
 
 export const AppView = observer(AppViewPresenter);

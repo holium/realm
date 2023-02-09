@@ -1,8 +1,8 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { nativeRenderers, WindowId } from 'renderer/apps/native';
+import { WindowModelType } from 'os/services/shell/desktop.model';
+import { nativeRenderers, AppId } from 'renderer/apps/native';
 
 export interface NativeViewProps {
-  window: WindowModelProps | any;
+  window: WindowModelType;
   isResizing: boolean;
   isDragging: boolean;
   hasTitlebar: boolean | undefined;
@@ -13,7 +13,7 @@ export const NativeView = ({
   isResizing,
   isDragging,
 }: NativeViewProps) => {
-  const ViewComponent = nativeRenderers[window.id as WindowId].component;
+  const ViewComponent = nativeRenderers[window.appId as AppId].component;
 
   return <ViewComponent isResizing={isResizing} isDragging={isDragging} />;
 };

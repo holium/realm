@@ -26,6 +26,7 @@ import { darken, rgba } from 'polished';
 import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { WindowModel } from 'os/services/shell/desktop.model';
 
 const TileStyle = styled(Box)`
   position: relative;
@@ -308,17 +309,17 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
     onClose: () => {
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'app-detail-dialog',
+    window: WindowModel.create({
+      appId: 'app-detail-dialog',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
+      bounds: {
         x: 0,
         y: 0,
         width: 600,
         height: 480,
       },
-    },
+    }),
     hasCloseButton: true,
     unblurOnClose: false,
     draggable: false,

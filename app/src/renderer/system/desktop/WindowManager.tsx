@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import AppWindow from './components/Window';
+import AppWindow from './components/Window/Window';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -13,7 +13,6 @@ import {
 const WindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
-  const isOpen = !desktop.showHomePane;
   const desktopRef = useRef<any>(null);
   const id = 'desktop-fill';
 
@@ -57,7 +56,7 @@ const WindowManagerPresenter = () => {
       id={id}
       ref={desktopRef}
       animate={{
-        display: isOpen ? 'block' : 'none',
+        display: desktop.isHomePaneOpen ? 'none' : 'block',
       }}
       style={{
         bottom: 0,
