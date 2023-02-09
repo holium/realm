@@ -7,6 +7,7 @@ export const InstallerStyle = createGlobalStyle<InstallerStyleProps>`
   :root {
     font-family: 'Rubik', system-ui, sans-serif;
     color: var(--rlm-text-color);
+    overflow-y: hidden;
     --theme-mode: 'light';
     --blur: blur(24px);
     --transition: all 0.25s ease;
