@@ -223,6 +223,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
           onDragStart={onDragStart}
           onDragStop={onDragStop}
           onClose={onClose}
+          onMinimize={onMinimize}
           onMaximize={onMaximize}
         />
       );
