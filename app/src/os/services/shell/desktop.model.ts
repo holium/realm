@@ -1,4 +1,5 @@
 import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
+import { Dimensions } from 'os/types';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { getInitialWindowBounds } from './lib/window-manager';
 
@@ -130,7 +131,7 @@ export const DesktopStore = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: AppType) {
+    openWindow(app: AppType, desktopDimensions: Dimensions | undefined) {
       let glob;
       let href;
       if (app.type === 'urbit') {
@@ -151,7 +152,7 @@ export const DesktopStore = types
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
-        bounds: getInitialWindowBounds(app),
+        bounds: getInitialWindowBounds(app, desktopDimensions),
       });
 
       self.windows.set(newWindow.appId, newWindow);

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useServices } from 'renderer/logic/store';
 import { AppWindow } from '../desktop/components/Window/Window';
-import { getCenteredXY } from 'os/services/shell/lib/window-manager';
+import { getCenteredPosition } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -55,7 +55,7 @@ const DialogManagerPresenter = ({
             ...window,
             bounds: {
               ...window.bounds,
-              ...getCenteredXY(window.bounds),
+              ...getCenteredPosition(window.bounds),
             },
           }}
         />

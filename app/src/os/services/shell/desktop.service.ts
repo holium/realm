@@ -80,8 +80,8 @@ export class DesktopService extends BaseService {
       );
     },
 
-    openAppWindow: async (app: AppType) => {
-      return await ipcRenderer.invoke('realm.desktop.open-app-window', app);
+    openAppWindow: (app: AppType) => {
+      return ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
     openDialog: (windowProps: CreateWindowProps) => {
       return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
@@ -168,9 +168,12 @@ export class DesktopService extends BaseService {
   }
 
   openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
-    const newWindow = this.state.openWindow(selectedApp);
+    const desktopDimensions = this.core.services.shell.desktopDimensions;
+    const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
     this.core.services.shell.setBlur(null, false);
-    const credentials = this.core.credentials!;
+    const credentials = this.core.credentials;
+
+    if (!credentials) return console.error('No credentials found');
 
     if (selectedApp.type === 'urbit') {
       const appUrl = newWindow.href?.glob
