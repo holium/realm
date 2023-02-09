@@ -33,7 +33,7 @@ const getAssetPath = (...paths: string[]): string => {
 log.transports.file.level = 'verbose';
 log.verbose(process.env);
 
-const { AUTOUPDATE_FEED_URL, RELEASE_CHANNEL } = process.env;
+// const { AUTOUPDATE_FEED_URL, RELEASE_CHANNEL } = process.env;
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
@@ -56,7 +56,7 @@ export interface IAppUpdater {
 //   an 'alpha' channel user. the rule is:
 //  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
 const determineReleaseChannel = () => {
-  let releaseChannel = RELEASE_CHANNEL || 'latest';
+  let releaseChannel = process.env.AUTOUPDATE_CHANNEL || 'latest';
   const settingsFilename = `${app.getPath('userData')}/settings.json`;
   if (fs.existsSync(settingsFilename)) {
     var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
@@ -118,7 +118,7 @@ export class AppUpdater implements IAppUpdater {
       const parts = [
         `provider: generic`,
         `url: ${process.env.AUTOUPDATE_FEED_URL}`,
-        `channel: ${process.env.RELEASE_CHANNEL}`,
+        `channel: ${process.env.AUTOUPDATE_CHANNEL}`,
       ];
       fs.writeFileSync(
         updateConfigPath,
