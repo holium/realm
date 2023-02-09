@@ -100,7 +100,7 @@
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
   =.  messages-table.state  (remove-messages-for-path messages-table.state path)
-  =/  thechange  db-change+!>(~[[%del-row %paths path] [%del-row %peers path]])
+  =/  thechange  db-change+!>(~[[%del-paths-row path] [%del-peers-rows path]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -135,7 +135,7 @@
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
-  =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a]))
+  =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
   =.  messages-table.state  -.remove-result
 
   =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id)
@@ -163,7 +163,7 @@
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
-  =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-row %messages a])))
+  =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a])))
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -192,7 +192,7 @@
     %member
   =/  peers  (snoc (~(got by peers-table.state) path.act) row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  =/  thechange  db-change+!>(~[[%del-row %peers path.act] [%add-row [%peers peers]]])
+  =/  thechange  db-change+!>(~[[%del-peers-row path.act] [%add-row [%peers peers]]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
@@ -222,11 +222,11 @@
   =/  thechange
     ?:  our-kicked
       :: for now we are assuming that subscribed clients are intelligent
-      :: enough to realize that a %del-row %paths also means remove the
+      :: enough to realize that a %del-paths-row also means remove the
       :: related messages
-      db-change+!>(~[[%del-row %peers path.act] [%del-row %paths path.act]])
+      db-change+!>(~[[%del-peers-row path.act] [%del-paths-row path.act]])
     :: else just update the peers table
-    db-change+!>(~[[%del-row %peers path.act] [%add-row %peers peers]])
+    db-change+!>(~[[%del-peers-row path.act] [%add-row %peers peers]])
 
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
@@ -319,19 +319,16 @@
       ?-  -.ch
         %add-row
           :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
-        %del-row
-          ?-  -.+.ch
-            %paths
-              :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' s+(spat path.ch)])
-            %peers
-              :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' s+(spat path.ch)])
-            %messages
-              :~
-                ['type' %s -.ch]
-                ['table' %s -.+.ch]
-                ['msg-id' a+~[s+(scot %da timestamp.msg-id.uniq-id.ch) s+(scot %p sender.msg-id.uniq-id.ch)]]
-                ['msg-part-id' n+(scot %ud msg-part-id.uniq-id.ch)]
-              ==
+        %del-paths-row
+          :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)])
+        %del-peers-row
+          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)])
+        %del-messages-row
+          :~
+            ['type' %s -.ch]
+            ['table' %s %messages]
+            ['msg-id' a+~[s+(scot %da timestamp.msg-id.uniq-id.ch) s+(scot %p sender.msg-id.uniq-id.ch)]]
+            ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
           ==
       ==
     ++  any-row
@@ -359,11 +356,11 @@
       %-  pairs
       :~  path+s+(spat path.msg-part)
           msg-id+(msg-id-to-json msg-id.msg-part)
-          msg-part-id+n+(scot %ud msg-part-id.msg-part)
+          msg-part-id+(numb msg-part-id.msg-part)
           content+(content-to-json content.msg-part)
           reply-to+(reply-to-to-json reply-to.msg-part)
           metadata+(metadata-to-json metadata.msg-part)
-          timestamp+s+(scot %da timestamp.msg-part)
+          timestamp+(time timestamp.msg-part)
       ==
     ++  reply-to-to-json
       |=  =reply-to:sur
