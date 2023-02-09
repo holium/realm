@@ -106,11 +106,11 @@
     ?+    path  (on-peek:def path)
       ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
-        ``bazaar-view+!>([%catalog catalog.state])
+        ``bazaar-view+!>([%catalog catalog.state now.bowl])
       ::
       [%x %installed ~]   ::  ~/scry/bazaar/installed
         =/  apps          (skim ~(tap by catalog.state) skim-installed:helpers:bazaar:core)
-       ``bazaar-view+!>([%installed `catalog:store`(malt apps)])
+       ``bazaar-view+!>([%installed `catalog:store`(malt apps) now.bowl])
       ::
       [%x %allies ~]     ::  ~/scry/bazaar/allies
         =/  allies   allies:scry:bazaar:core

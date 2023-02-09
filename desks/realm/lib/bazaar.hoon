@@ -126,7 +126,7 @@
       ::
         %initial
       %-  pairs
-      :~  [%catalog (catalog-js:encode catalog.rct)]
+      :~  [%catalog (catalog-js:encode catalog.rct *@da)]
           [%stalls (stalls-js:encode stalls.rct)]
           [%docks (docks-js:encode docks.rct)]
           [%recommendations a+(turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
@@ -183,7 +183,7 @@
         %joined-bazaar
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%catalog (catalog-js:encode catalog.rct)]
+          [%catalog (catalog-js:encode catalog.rct *@da)]
           [%stall (stall-js:encode stall.rct)]
       ==
       ::
@@ -191,7 +191,7 @@
       =/  data=(list [@tas json])
           ?~  det.rct         [%none ~]~
           ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
-          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct) *@da)]~
       =/  data
         %+  weld  data
         ^-  (list [@tas json])
@@ -226,14 +226,14 @@
       :: ==
         %rebuild-catalog
       %-  pairs
-      :~  [%catalog (catalog-js:encode catalog.rct)]
+      :~  [%catalog (catalog-js:encode catalog.rct *@da)]
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
         %rebuild-stall
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%catalog (catalog-js:encode catalog.rct)]
+          [%catalog (catalog-js:encode catalog.rct *@da)]
           [%stall (stall-js:encode stall.rct)]
       ==
       ::
@@ -253,10 +253,10 @@
     ?-  -.vi
       ::
         %catalog
-      (catalog-js:encode catalog.vi)
+      (catalog-js:encode catalog.vi now.vi)
       ::
         %installed
-      (catalog-js:encode catalog.vi)
+      (catalog-js:encode catalog.vi now.vi)
       ::
         %allies
       (allies-js:encode allies.vi)
@@ -285,7 +285,7 @@
     ^-  json
     %-  pairs
     :~  ['appId' s+app-id]
-        ['app' (urbit-app:encode app-id app)]
+        ['app' (urbit-app:encode app-id app *@da)]
         ['grid' (grid-index-js:encode grid-index)]
     ==
   ::
@@ -343,16 +343,16 @@
       [app-id (numb ~(wyt in member-set))]
   ::
   ++  catalog-js
-    |=  =catalog:store
+    |=  [=catalog:store now=@da]
     ^-  json
     %-  pairs
     %+  turn  ~(tap by catalog)
       |=  [=app-id:store app=app:store]
       ^-  [cord json]
-      [app-id (app-detail:encode app-id app)]
+      [app-id (app-detail:encode app-id app now)]
   ::
   ++  app-detail
-    |=  [=app-id:store =app:store]
+    |=  [=app-id:store =app:store now=@da]
     ?-  -.app
       ::
       %native
@@ -377,12 +377,12 @@
             ['config' (config:enjs:realm config.web-app.app)]
         ==
       ::
-      %urbit   (urbit-app:encode app-id +.app)
+      %urbit   (urbit-app:encode app-id +.app now)
       ::
     ==
   ::
   ++  urbit-app
-    |=  [=app-id app=urbit-app:store]
+    |=  [=app-id app=urbit-app:store now=@da]
     %+  merge  (dkt docket.app)
     %-  pairs
     :~
@@ -390,6 +390,7 @@
       ['installStatus' [%s `@t`install-status.app]]
       ['config' (config:enjs:realm config.app)]
       ['host' ?~(host.app ~ s+(scot %p u.host.app))]
+      ['deskHash' ?~(host.app ~ s+(scot %uv .^(@uv %cz /(scot %p u.host.app)/app-id/(scot %da now))))]
     ==
   ::
   ++  dkt

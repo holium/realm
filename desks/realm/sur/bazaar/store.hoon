@@ -100,8 +100,8 @@
       [%clear-stall path=space-path:spaces]
   ==
 +$  view
-  $%  [%catalog =catalog]
-      [%installed =catalog]
+  $%  [%catalog =catalog now=@da]
+      [%installed =catalog now=@da]
       [%allies =allies:ally:treaty]
       [%treaties treaties=(map [=ship =desk] =treaty:treaty)]
   ==

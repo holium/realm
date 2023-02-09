@@ -142,9 +142,11 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     if (app && app.href && !app.title) {
       title = app.id.split('/')[1];
     }
+    console.log(app, app.version, app.href, app.href.glob);
     kpis = (
       <>
         <KPI title="Developer desk" value={`${app.host || ''}/${app.id}`} />
+        {app.href && app.href.glob && <KPI title="Glob Hash" value={app.href.glob!['glob-reference']!.hash} />}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
