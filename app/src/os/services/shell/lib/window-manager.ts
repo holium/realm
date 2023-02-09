@@ -24,15 +24,20 @@ export const getCenteredPosition = (windowDimensions: Dimensions): Position => {
  *
  * @returns bounds normalized to the 1-10 scale
  */
-const getFullscreenBounds = (): Bounds => {
-  const normalizedMargin = 16 / 10;
-  const normalizedTrayHeight = 50 / 10;
-  const windowHeight = 10 - normalizedMargin - normalizedTrayHeight;
-  const windowWidth = 10 - normalizedMargin;
+export const getFullscreenBounds = (desktopDimensions: Dimensions): Bounds => {
+  const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
+  const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
+  const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
+
+  const offsetX = 2 * normalizedPaddingX;
+  const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
+
+  const windowWidth = 10 - offsetX;
+  const windowHeight = 10 - offsetY;
 
   return {
     x: 0,
-    y: normalizedMargin / 2,
+    y: normalizedPaddingY,
     width: windowWidth,
     height: windowHeight,
   };
@@ -46,9 +51,8 @@ const getFullscreenBounds = (): Bounds => {
  * @param app
  * @returns dimensions normalized to the 1-10 scale
  */
-const getCenteredBounds = (app: any): Bounds => {
+const getCenteredBounds = (app: any, desktopDimensions: Dimensions): Bounds => {
   if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
-    console.log(DEFAULT_APP_WINDOW_DIMENSIONS);
     const defaultDimensions = {
       width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width ?? 6,
       height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height ?? 6,
@@ -62,7 +66,6 @@ const getCenteredBounds = (app: any): Bounds => {
       height: app.dimensions?.height ?? defaultDimensions.height,
     };
   } else if (app.type === 'web' && app.web.dimensions) {
-    console.log(app.web.dimensions);
     const defaultXY = getCenteredPosition(app.web.dimensions);
 
     return {
@@ -72,8 +75,7 @@ const getCenteredBounds = (app: any): Bounds => {
       height: app.web.dimensions.height,
     };
   } else {
-    console.log('fullScreenBounds');
-    const fullScreenBounds = getFullscreenBounds();
+    const fullScreenBounds = getFullscreenBounds(desktopDimensions);
 
     return {
       x: app.dimensions?.x ?? fullScreenBounds.x,
@@ -92,13 +94,13 @@ const getCenteredBounds = (app: any): Bounds => {
  */
 export const getInitialWindowBounds = (
   app: AppType,
-  desktopDimensions: Dimensions | undefined
+  desktopDimensions: Dimensions
 ): Bounds => {
-  if (app.config && desktopDimensions) {
+  if (app.config) {
     return getConfigBounds(app.config, desktopDimensions);
   }
 
-  return getCenteredBounds(app);
+  return getCenteredBounds(app, desktopDimensions);
 };
 
 /**
@@ -114,21 +116,23 @@ const getConfigBounds = (
   const configX = config.size[0];
   const configY = config.size[1];
 
-  const padding = (8 / desktopDimensions.width) * 10;
-  const dockHeight = (50 / desktopDimensions.height) * 10;
-  const offsetX = 2 * padding;
-  const offsetY = dockHeight + 3 * padding;
+  const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
+  const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
+  const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
+
+  const offsetX = 2 * normalizedPaddingX;
+  const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
 
   const appWidth = configX - offsetX;
   const appHeight = configY - offsetY;
-  const appXY = getCenteredPosition({
+  const appPosition = getCenteredPosition({
     width: appWidth,
     height: appHeight,
   });
 
   return {
-    x: appXY.x - padding,
-    y: appXY.y - dockHeight / 2,
+    x: appPosition.x - offsetX / 2,
+    y: appPosition.y - offsetY / 2 + normalizedPaddingY,
     width: appWidth,
     height: appHeight,
   };

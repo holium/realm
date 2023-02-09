@@ -96,10 +96,15 @@ const AppDockPresenter = () => {
         : [];
     const tileId = `pinned-${app.id}-${spacePath}-${index}`;
     const onClick = () => {
-      if (open) {
-        DesktopActions.setActive(app.id);
+      const window = desktop.getWindowByAppId(app.id);
+      if (window) {
+        if (window.isMinimized) {
+          DesktopActions.toggleMinimized(app.id);
+        } else {
+          DesktopActions.setActive(app.id);
+        }
       } else {
-        DesktopActions.openAppWindow(app);
+        DesktopActions.openAppWindow(toJS(app));
       }
     };
 
@@ -217,11 +222,7 @@ const AppDockPresenter = () => {
           onAppClick={(selectedApp) => {
             const window = desktop.getWindowByAppId(selectedApp.id);
             if (window) {
-              if (window.state === 'minimized') {
-                DesktopActions.toggleMinimized(selectedApp.id);
-              } else {
-                DesktopActions.setActive(selectedApp.id);
-              }
+              DesktopActions.setActive(selectedApp.id);
             } else {
               DesktopActions.openAppWindow(toJS(selectedApp));
             }

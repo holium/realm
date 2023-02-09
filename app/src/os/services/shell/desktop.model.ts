@@ -1,7 +1,11 @@
 import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
 import { Dimensions } from 'os/types';
 import { AppType, Glob } from '../spaces/models/bazaar';
-import { getInitialWindowBounds } from './lib/window-manager';
+import { toJS } from 'mobx';
+import {
+  getFullscreenBounds,
+  getInitialWindowBounds,
+} from './lib/window-manager';
 
 // Bounds are using the realm.config 1-10 scale.
 const BoundsModel = types.model({
@@ -54,29 +58,33 @@ const WindowModel = types
     ),
   })
   .actions((self) => ({
-    setZIndex(newZ: number) {
-      self.zIndex = newZ;
-    },
-  }))
-  .actions((self) => ({
-    normal() {
-      self.state = 'normal';
-      self.bounds = self.prevBounds;
+    setZIndex(zIndex: number) {
+      self.zIndex = zIndex;
     },
     minimize() {
-      self.state = 'minimized';
-      self.prevBounds = self.bounds;
+      if (self.state === 'minimized') {
+        self.state = 'normal';
+      } else {
+        self.state = 'minimized';
+      }
     },
-    maximize() {
-      self.state = 'maximized';
-      self.prevBounds = self.bounds;
-    },
-    fullscreen() {
-      self.state = 'fullscreen';
-      self.prevBounds = self.bounds;
+    maximize(desktopDimensions: Dimensions) {
+      if (self.state === 'maximized') {
+        self.state = 'normal';
+        self.bounds = { ...self.prevBounds };
+      } else {
+        self.state = 'maximized';
+        self.prevBounds = { ...self.bounds };
+        self.bounds = getFullscreenBounds(desktopDimensions);
+      }
     },
     setIsActive(isActive: boolean) {
       self.isActive = isActive;
+    },
+  }))
+  .views((self) => ({
+    get isMinimized() {
+      return self.state === 'minimized';
     },
   }));
 
@@ -131,7 +139,7 @@ export const DesktopStore = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: AppType, desktopDimensions: Dimensions | undefined) {
+    openWindow(app: AppType, desktopDimensions: Dimensions) {
       let glob;
       let href;
       if (app.type === 'urbit') {
@@ -171,19 +179,27 @@ export const DesktopStore = types
       const window = self.getWindowByAppId(appId);
       if (!window) return console.error('Window not found');
 
-      console.log('toggle minimize', window.state);
-
-      if (window.state === 'minimized') window.normal();
-      else window.minimize();
+      window.minimize();
     },
-    toggleMaximize(appId: string) {
+    toggleMaximize(appId: string, desktopDimensions: Dimensions) {
       const window = self.getWindowByAppId(appId);
       if (!window) return console.error('Window not found');
 
-      if (window.state === 'maximized') window.normal();
-      else window.maximize();
+      window.maximize(desktopDimensions);
+
+      return toJS(window.bounds);
     },
     closeWindow(appId: string) {
+      const windows = Array.from(self.windows.values());
+      const activeWindow = windows.find((app: WindowModelType) => app.isActive);
+      if (activeWindow?.appId === appId) {
+        const nextWindow = windows.filter(
+          (app: WindowModelType) => !app.isMinimized
+        )[0];
+        if (nextWindow) {
+          this.setActive(nextWindow.appId);
+        }
+      }
       self.windows.delete(appId);
     },
   }));

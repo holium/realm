@@ -102,6 +102,8 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
     if (motionHeight.get() >= 400 || info.delta.y > 0) {
       motionHeight.set(motionHeight.get() + info.delta.y);
     }
+
+    updateWindowBounds();
   }, []);
 
   const updateWindowBounds = useCallback(() => {
@@ -135,7 +137,17 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
     setIsDragging(true);
   };
 
-  const onMaximize = () => DesktopActions.toggleMaximized(activeWindow.appId);
+  const onMaximize = async () => {
+    const newBounds = await DesktopActions.toggleMaximized(activeWindow.appId);
+    const denormalizedBounds = denormalizeBounds(
+      newBounds,
+      shell.desktopDimensions
+    );
+    motionX.set(denormalizedBounds.x);
+    motionY.set(denormalizedBounds.y);
+    motionWidth.set(denormalizedBounds.width);
+    motionHeight.set(denormalizedBounds.height);
+  };
 
   const onMinimize = () => DesktopActions.toggleMinimized(activeWindow.appId);
 
@@ -312,7 +324,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
           zIndex: window.zIndex,
           borderRadius,
           background: windowColor,
-          display: window.state === 'minimized' ? 'none' : 'block',
+          display: window.isMinimized ? 'none' : 'block',
         }}
         color={textColor}
         customBg={windowColor}
@@ -362,6 +374,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
     [
       theme.currentTheme,
       window.bounds,
+      window.isMinimized,
       window.state,
       isResizing,
       isDragging,

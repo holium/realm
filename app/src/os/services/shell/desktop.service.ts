@@ -168,7 +168,7 @@ export class DesktopService extends BaseService {
   }
 
   openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
-    const desktopDimensions = this.core.services.shell.desktopDimensions;
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
     const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials;
@@ -205,7 +205,8 @@ export class DesktopService extends BaseService {
   }
 
   toggleMaximized(_event: any, appId: string) {
-    this.state.toggleMaximize(appId);
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    return this.state.toggleMaximize(appId, desktopDimensions);
   }
 
   closeAppWindow(_event: IpcRendererEvent, appId: string) {

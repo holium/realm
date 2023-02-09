@@ -7,6 +7,7 @@ import {
   WindowModelType,
 } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { Bounds } from 'os/types';
 import { SpacesActions } from './spaces';
 
 /**
@@ -58,7 +59,7 @@ export const DesktopActions = {
   toggleMinimized: (appId: string) => {
     return window.electron.os.desktop.toggleMinimized(appId);
   },
-  toggleMaximized: (appId: string) => {
+  toggleMaximized: (appId: string): Promise<Bounds> => {
     return window.electron.os.desktop.toggleMaximized(appId);
   },
   closeAppWindow: (appId: string) => {
