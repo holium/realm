@@ -99,17 +99,32 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
+      // good ole windows. trying a hack since setFeedURL is not working
+    } else if (process.platform === 'win32') {
+      const updateConfigPath = `${app.getPath(
+        'userData'
+      )}/windows-app-update.json`;
+      fs.writeFileSync(
+        updateConfigPath,
+        JSON.stringify({
+          provider: 'generic',
+          url: process.env.AUTOUPDATE_FEED_URL,
+          channel: determineReleaseChannel(),
+        })
+      );
+      this.autoUpdater.updateConfigPath = updateConfigPath;
+    } else {
+      // proxy private github repo requests
+      this.autoUpdater.setFeedURL({
+        provider: 'generic',
+        // see the app/src/renderer/system/updater/readme.md for more information
+        url: process.env.AUTOUPDATE_FEED_URL,
+        channel: determineReleaseChannel(),
+      });
     }
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     this.autoUpdater.autoDownload = false;
-    // proxy private github repo requests
-    this.autoUpdater.setFeedURL({
-      provider: 'generic',
-      // see the app/src/renderer/system/updater/readme.md for more information
-      url: process.env.AUTOUPDATE_FEED_URL,
-      channel: determineReleaseChannel(),
-    });
     this.autoUpdater.on('error', (error) => {
       this.progressWindow?.webContents.send('auto-updater-message', {
         name: 'error',
