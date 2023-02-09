@@ -171,8 +171,6 @@ export const DesktopStore = types
     openDialog(windowProps: CreateWindowProps) {
       const newWindow = WindowModel.create(windowProps);
 
-      self.windows.set(newWindow.appId, newWindow);
-
       return newWindow;
     },
     toggleMinimize(appId: string) {
