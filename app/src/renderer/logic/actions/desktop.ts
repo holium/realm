@@ -6,6 +6,7 @@ import {
   CreateWindowProps,
   WindowModelType,
 } from 'os/services/shell/desktop.model';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { SpacesActions } from './spaces';
 
 /**
@@ -45,7 +46,7 @@ export const DesktopActions = {
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);
   },
-  openAppWindow: async (spacePath: string, app: any) => {
+  openAppWindow: async (spacePath: string, app: AppType) => {
     const result = await window.electron.os.desktop.openAppWindow(
       spacePath,
       app

@@ -8,11 +8,7 @@ import { ThemeType } from '../../../../theme';
 import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { WindowByType } from './WindowByType';
-import {
-  DragHandleWrapper,
-  LeftDragHandleStyle,
-  RightDragHandleStyle,
-} from './DragHandles';
+import { DragHandleWrapper, RightDragHandleStyle } from './DragHandles';
 import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { nativeApps } from 'renderer/apps';
@@ -359,7 +355,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
             window={window}
           />
           <DragHandleWrapper>
-            <LeftDragHandleStyle drag onDrag={handleResize} />
+            {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
             <RightDragHandleStyle
               className="app-window-resize app-window-resize-br"
               drag

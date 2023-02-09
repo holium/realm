@@ -158,6 +158,7 @@ export const DesktopStore = types
         title: app.title,
         glob,
         href,
+        active: true,
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
@@ -165,7 +166,6 @@ export const DesktopStore = types
       });
 
       self.windows.set(newWindow.appId, newWindow);
-      this.setActive(newWindow.appId);
       if (self.homePaneOpen) self.homePaneOpen = false;
 
       return newWindow;

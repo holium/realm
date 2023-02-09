@@ -83,7 +83,7 @@ export class DesktopService extends BaseService {
       );
     },
 
-    openAppWindow: async (spaceId: string, app: any) => {
+    openAppWindow: async (spaceId: string, app: AppType) => {
       return await ipcRenderer.invoke(
         'realm.desktop.open-app-window',
         spaceId,

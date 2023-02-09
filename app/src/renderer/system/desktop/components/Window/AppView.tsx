@@ -9,6 +9,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { applyStyleOverrides } from './style-overrides';
 import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
+import { AppType } from 'os/services/spaces/models/bazaar';
 
 interface AppViewProps {
   window: WindowModelType;
@@ -21,9 +22,8 @@ const View = styled(motion.div)`
   transform: translateZ(0);
 `;
 
-const AppViewPresenter = (props: AppViewProps) => {
-  const { isResizing, isDragging, window } = props;
-  const { ship, desktop, theme, spaces } = useServices();
+const AppViewPresenter = ({ isResizing, isDragging, window }: AppViewProps) => {
+  const { ship, desktop, theme, spaces, bazaar } = useServices();
   const [ready, setReady] = useState(false);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
@@ -33,6 +33,7 @@ const AppViewPresenter = (props: AppViewProps) => {
     url: null,
   });
 
+  const app = bazaar.getApp(window.appId) as AppType;
   const isActive = desktop.getWindowByAppId(window.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
@@ -93,7 +94,7 @@ const AppViewPresenter = (props: AppViewProps) => {
         appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
       }
 
-      DesktopActions.openAppWindow('', toJS(window));
+      DesktopActions.openAppWindow('', toJS(app));
       setAppConfig({ url: appUrl });
     }
 

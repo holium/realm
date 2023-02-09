@@ -12,7 +12,7 @@ import EmailDialog from 'renderer/system/onboarding/Email.dialog';
 import HaveUrbitDialog from 'renderer/system/onboarding/HaveUrbit.dialog';
 import { AddShip } from 'renderer/system/onboarding/AddShip.dialog';
 import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
-import SetPassword from 'renderer/system/onboarding/SetPassword.dialog';
+import { SetPassword } from 'renderer/system/onboarding/SetPassword.dialog';
 import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
 import SelectPatp from 'renderer/system/onboarding/SelectPatp.dialog';
 import SelectPlan, {
