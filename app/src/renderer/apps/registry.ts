@@ -15,8 +15,8 @@ type AppEntry = {
 };
 
 export const AppRegistry: { [key: string]: AppEntry } = {
-  messages: {
-    name: 'Courier',
+  chat: {
+    name: 'Chat',
     icon: 'Messages',
     iconSize: 28,
     position: 'top-left',

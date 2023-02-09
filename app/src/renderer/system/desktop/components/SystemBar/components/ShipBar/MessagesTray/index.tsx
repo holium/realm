@@ -11,7 +11,7 @@ const MessagesTrayPresenter = () => {
     useTrayApps();
 
   const { icon, iconSize, position, anchorOffset, dimensions } =
-    AppRegistry['messages'];
+    AppRegistry['chat'];
 
   const onButtonClick = useCallback(
     (evt: any) => {

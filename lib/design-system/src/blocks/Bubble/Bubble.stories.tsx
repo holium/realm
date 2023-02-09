@@ -76,7 +76,7 @@ webpack building...
           { plain: 'Meme drop' },
           {
             image:
-              'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+              'https://www.memeatlas.com/images/boomers/boomer-toilet-paper-back-pack.jpg',
           },
         ]}
         onReaction={() => {}}
@@ -231,7 +231,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       message={[
         { plain: 'Open Graph' },
         {
-          link: 'https://www.cnn.com/2023/01/25/tech/meta-facebook-trump-decision/index.html',
+          link: 'https://www.coindesk.com/layer2/2022/09/24/urbit-courts-daos-crypto-teams-in-push-to-make-internet-p2p-again/',
         },
       ]}
       onReaction={() => {}}
@@ -331,7 +331,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         message={[
           {
             image:
-              'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+              'https://www.memeatlas.com/images/wojaks/wojak-npc-thinks-he-isnt-npc.jpg',
           },
         ]}
         reactions={[

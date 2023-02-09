@@ -14,9 +14,10 @@ import {
   DMPreviewType,
 } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
+import { AppRegistry } from '../registry';
 
 export const CourierRoot = () => {
-  const { dimensions, dmApp } = useTrayApps();
+  const { dmApp } = useTrayApps();
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
@@ -48,7 +49,7 @@ export const CourierRoot = () => {
           fontSize={17}
           fontWeight={500}
         >
-          Messages
+          {AppRegistry['chat'].name}
         </Text.Custom>
         <Button.IconButton
           className="realm-cursor-hover"

@@ -52,7 +52,6 @@ export class DiskStore {
     }
 
     // autosave snapshots
-
     onSnapshot(this.model, (snapshot) => {
       this.persisted.store = castToSnapshot(snapshot);
     });

@@ -80,7 +80,7 @@ const createWindow = async () => {
     fullscreen: true,
     acceptFirstMouse: true,
     webPreferences: {
-      nodeIntegration: false,
+      nodeIntegration: true,
       webviewTag: true,
       sandbox: false,
       contextIsolation: true,
