@@ -65,7 +65,7 @@ const DialogManagerPresenter = ({
     };
 
     if (dialogId) openDialogWindow(dialogId);
-  }, [dialogId]);
+  }, [dialogId, shell.desktopDimensions]);
 
   return (
     <motion.div
