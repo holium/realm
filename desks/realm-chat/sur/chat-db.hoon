@@ -106,9 +106,9 @@
 +$  db-change-type
   $%
     [%add-row =db-row]
-    [%del-row %paths =path]
-    [%del-row %peers =path]
-    [%del-row %messages =uniq-id]
+    [%del-paths-row =path]
+    [%del-peers-row =path]
+    [%del-messages-row =uniq-id]
   ==
 +$  db-row
   $%  [%paths =path-row]

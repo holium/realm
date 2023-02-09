@@ -167,8 +167,7 @@
 ++  is-new-message
   |=  ch=*
   ^-  ?
-  ?+  -.ch  !!
+  ?+  -.ch  %.n
     %add-row  =(-.+.ch %messages)
-    %del-row  %.n
   ==
 --
