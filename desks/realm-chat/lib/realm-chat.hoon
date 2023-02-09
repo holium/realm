@@ -283,7 +283,7 @@
           [%react so]
           [%break ul]
           [%ship (su ;~(pfix sig fed:ag))]
-          [%link (at ~[so so])]
+          [%link so]
           [%custom (at ~[so so])]
       ==
     ::

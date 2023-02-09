@@ -86,7 +86,7 @@
     [them us ~]
 
   =.  peers-table.state  (~(put by peers-table.state) path.act thepeers)
-  =/  thechange  db-change+!>((limo [[%add-row %paths row] [%add-row %peers thepeers] ~]))
+  =/  thechange  db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
@@ -387,9 +387,6 @@
           ==
         %break
           :~  break+~
-          ==
-        %link
-          :~  link+a+[[%s -.+.content] [%s +.+.content] ~]
           ==
         %custom
           :~  custom+a+[[%s -.+.content] [%s +.+.content] ~]

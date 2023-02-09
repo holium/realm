@@ -55,7 +55,7 @@
       [%inline-code p=cord]
       [%ship p=ship]
       [%code p=cord]
-      [%link p=cord q=cord]  :: p is visible name, q is actual link, they can be the same
+      [%link p=cord]
       [%image p=cord]
       [%ur-link p=cord]      :: for links to places on the urbit network
       [%react p=cord]        :: for emojii reactions to messages
