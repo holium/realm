@@ -25,8 +25,8 @@ export class ShellService extends BaseService {
         checkDouble
       );
     },
-    setDesktopDimensions: async (width: number, height: number) => {
-      return await ipcRenderer.invoke(
+    setDesktopDimensions: (width: number, height: number) => {
+      return ipcRenderer.invoke(
         'realm.shell.set-desktop-dimensions',
         width,
         height
@@ -103,6 +103,14 @@ export class ShellService extends BaseService {
 
   get isFullscreen() {
     return this.state?.isFullscreen;
+  }
+
+  public onDevtoolsOpened(callback: any) {
+    ipcRenderer.on('realm.shell.devtools-opened', callback);
+  }
+
+  public onDevtoolsClosed(callback: any) {
+    ipcRenderer.on('realm.shell.devtools-closed', callback);
   }
 
   setFullscreen(_event: any, isFullscreen: boolean) {

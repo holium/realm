@@ -51,6 +51,19 @@ const AppDockPresenter = () => {
 
   if (!spacePath) return null;
 
+  const onClickDockedApp = (dockedApp: AppType) => {
+    const window = desktop.getWindowByAppId(dockedApp.id);
+    if (window) {
+      if (window.isMinimized) {
+        DesktopActions.toggleMinimized(dockedApp.id);
+      } else {
+        DesktopActions.setActive(dockedApp.id);
+      }
+    } else {
+      DesktopActions.openAppWindow(toJS(dockedApp));
+    }
+  };
+
   const pinnedApps = localDockApps?.map((app: AppType | undefined, index) => {
     if (!app) return null;
     const selected = desktop.getWindowByAppId(app.id)?.isActive;
@@ -95,18 +108,6 @@ const AppDockPresenter = () => {
           ]
         : [];
     const tileId = `pinned-${app.id}-${spacePath}-${index}`;
-    const onClick = () => {
-      const window = desktop.getWindowByAppId(app.id);
-      if (window) {
-        if (window.isMinimized) {
-          DesktopActions.toggleMinimized(app.id);
-        } else {
-          DesktopActions.setActive(app.id);
-        }
-      } else {
-        DesktopActions.openAppWindow(toJS(app));
-      }
-    };
 
     return (
       <Reorder.Item
@@ -150,7 +151,7 @@ const AppDockPresenter = () => {
           const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
           const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
 
-          if (diffX < 5 && diffY < 5) onClick();
+          if (diffX < 5 && diffY < 5) onClickDockedApp(app);
         }}
       >
         <AppTile
@@ -219,14 +220,7 @@ const AppDockPresenter = () => {
               onClick: () => app && DesktopActions.closeAppWindow(app.id),
             },
           ]}
-          onAppClick={(selectedApp) => {
-            const window = desktop.getWindowByAppId(selectedApp.id);
-            if (window) {
-              DesktopActions.setActive(selectedApp.id);
-            } else {
-              DesktopActions.openAppWindow(toJS(selectedApp));
-            }
-          }}
+          onAppClick={onClickDockedApp}
         />
       );
     });
