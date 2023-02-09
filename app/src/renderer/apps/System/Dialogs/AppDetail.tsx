@@ -88,7 +88,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     }
   }, [copied]);
 
-  let app: AppType;
+  let app: AppType | null = null;
   let onClose: any = ShellActions.closeDialog;
   if (type === 'app-install') {
     onClose = () => {
@@ -251,6 +251,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   !isInstalled &&
+                    app &&
                     SpacesActions.installApp(
                       (app as UrbitAppType).host!,
                       app.id
@@ -270,6 +271,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (!app) return null;
                   const content = `web+urbitgraph://${
                     (app as UrbitAppType).host || ''
                   }/${app.id}`;
