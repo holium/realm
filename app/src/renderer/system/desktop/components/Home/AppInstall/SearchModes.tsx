@@ -11,6 +11,7 @@ import {
   InstallStatus,
   UrbitAppType,
   DocketAppType,
+  AppType,
 } from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
 import { useServices } from 'renderer/logic/store';
@@ -94,8 +95,7 @@ const SearchModesPresenter = () => {
 export const SearchModes = observer(SearchModesPresenter);
 
 const AppInstallStartPresenter = () => {
-  const { bazaar, theme, spaces } = useServices();
-  const spacePath: string = spaces.selected?.path!;
+  const { bazaar, theme } = useServices();
   const appInstaller = useAppInstaller();
 
   const textFaded = useMemo(
@@ -109,7 +109,7 @@ const AppInstallStartPresenter = () => {
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(spacePath, bazaar.getRecentApps(), theme.currentTheme)}
+          {renderApps(bazaar.getRecentApps() as AppType[], theme.currentTheme)}
         </Flex>
       </Flex>
       <div style={{ marginTop: '16px', marginBottom: '16px' }}>
@@ -135,7 +135,7 @@ const AppInstallStartPresenter = () => {
 
 const AppInstallStart = observer(AppInstallStartPresenter);
 
-const renderApps = (space: string, apps: any, theme: any) => {
+const renderApps = (apps: AppType[], theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!apps || apps.length === 0) {
@@ -157,7 +157,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
       app={app}
       descriptionWidth={450}
       onClick={() => {
-        DesktopActions.openAppWindow(space, toJS(app));
+        DesktopActions.openAppWindow(toJS(app));
         DesktopActions.closeHomePane();
       }}
     />
@@ -206,13 +206,13 @@ const renderDevs = (
     );
   });
 };
-const renderAppSearch = (apps: any, theme: any) => {
+const renderAppSearch = (apps: AppType[], theme: any) => {
   return (
     <Flex flexDirection="column" gap={12}>
       <Text fontWeight={'bold'} mb={1}>
         Installed Apps
       </Text>
-      {renderApps('', apps, theme)}
+      {renderApps(apps, theme)}
     </Flex>
   );
 };

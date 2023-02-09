@@ -71,7 +71,6 @@ export function useBrowser() {
 RealmActions.onBrowserOpen((_event: any, url: string) => {
   const relic = servicesStore.bazaar.getApp('os-browser');
   DesktopActions.openAppWindow(
-    '',
     toJS(relic) || (nativeApps['os-browser'] as AppType)
   ).then(() => {
     browserState.setUrl(url);

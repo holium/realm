@@ -115,10 +115,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               ...installRow,
             ]}
             onAppClick={(selectedApp: AppType) => {
-              DesktopActions.openAppWindow(
-                currentSpace.path,
-                toJS(selectedApp)
-              );
+              DesktopActions.openAppWindow(toJS(selectedApp));
               DesktopActions.closeHomePane();
             }}
           />

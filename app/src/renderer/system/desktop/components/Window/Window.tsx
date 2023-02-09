@@ -10,7 +10,6 @@ import { Titlebar } from './Titlebar';
 import { WindowByType } from './WindowByType';
 import { DragHandleWrapper, RightDragHandleStyle } from './DragHandles';
 import { Flex } from 'renderer/components';
-import { toJS } from 'mobx';
 import { nativeApps } from 'renderer/apps';
 import { nativeRenderers, AppId } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
@@ -46,22 +45,12 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 interface AppWindowProps {
   window: WindowModelType;
   children?: ReactNode;
-  desktopRef: any;
 }
 
-const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
+const AppWindowPresenter = ({ window }: AppWindowProps) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
 
-  const [unmaximize, setUnmaximize] = useState<
-    | {
-        x: number;
-        y: number;
-        height: number;
-        width: number;
-      }
-    | undefined
-  >();
   const dragControls = useDragControls();
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -137,31 +126,6 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
     shell.desktopDimensions,
   ]);
 
-  // Toggles maximize or not
-  const maximize = () => {
-    if (!unmaximize) {
-      setUnmaximize({
-        x: motionX.get(),
-        y: motionY.get(),
-        height: motionHeight.get(),
-        width: motionWidth.get(),
-      });
-      const offset = Boolean(shell.isFullscreen) ? 0 : 30;
-      const desktopDims = desktopRef.current!.getBoundingClientRect();
-      motionX.set(0);
-      motionY.set(8);
-      motionHeight.set(desktopDims.height - (16 + offset) - 50);
-      motionWidth.set(desktopDims.width - 16);
-    } else {
-      motionX.set(unmaximize.x);
-      motionY.set(unmaximize.y);
-      motionHeight.set(unmaximize.height);
-      motionWidth.set(unmaximize.width);
-      setUnmaximize(undefined);
-    }
-
-    updateWindowBounds();
-  };
   const onDragStop = () => {
     setIsDragging(false);
     updateWindowBounds();
@@ -171,10 +135,12 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
     setIsDragging(true);
   };
 
+  const onMaximize = () => DesktopActions.toggleMaximized(activeWindow.appId);
+
+  const onMinimize = () => DesktopActions.toggleMinimized(activeWindow.appId);
+
   const onClose = () => {
-    activeWindow.isActive
-      ? DesktopActions.closeAppWindow('', toJS(activeWindow))
-      : {};
+    activeWindow.isActive && DesktopActions.closeAppWindow(activeWindow.appId);
   };
 
   const onDevTools = useCallback(() => {
@@ -190,7 +156,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
   }, [webViewId]);
 
   const onMouseDown = () => {
-    DesktopActions.setActive('', window.appId);
+    DesktopActions.setActive(window.appId);
   };
 
   let hideTitlebarBorder = false;
@@ -219,13 +185,11 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
       zIndex={window.zIndex}
       dragControls={dragControls}
       onDevTools={onDevTools}
-      onDragStart={() => onDragStart()}
-      onDragStop={() => onDragStop()}
-      onClose={() => onClose()}
-      onMaximize={() => maximize()}
-      onMinimize={() => {
-        DesktopActions.toggleMinimized('', window.appId);
-      }}
+      onDragStart={onDragStart}
+      onDragStop={onDragStop}
+      onClose={onClose}
+      onMaximize={onMaximize}
+      onMinimize={onMinimize}
       theme={theme.currentTheme}
       app={window}
     />
@@ -244,10 +208,10 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
-          onClose={() => onClose()}
-          onMaximize={() => maximize()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
+          onClose={onClose}
+          onMaximize={onMaximize}
         />
       );
     } else {
@@ -263,13 +227,11 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
           zIndex={window.zIndex}
           dragControls={dragControls}
           onDevTools={onDevTools}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
-          onClose={() => onClose()}
-          onMinimize={() => {
-            DesktopActions.toggleMinimized('', window.appId);
-          }}
-          onMaximize={() => maximize()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
+          onClose={onClose}
+          onMinimize={onMinimize}
+          onMaximize={onMaximize}
           theme={theme.currentTheme}
           app={window}
         />
@@ -304,10 +266,10 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
           onClose={onCloseDialog}
-          onMaximize={() => maximize()}
+          onMaximize={onMaximize}
         />
       );
     }
@@ -332,7 +294,6 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
           transition: {
             duration: 0.15,
           },
-          // display: window.minimized ? 'none' : 'block',
         }}
         transition={{
           background: { duration: 0.25 },
@@ -351,7 +312,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
           zIndex: window.zIndex,
           borderRadius,
           background: windowColor,
-          display: window.isMinimized ? 'none' : 'block',
+          display: window.state === 'minimized' ? 'none' : 'block',
         }}
         color={textColor}
         customBg={windowColor}
@@ -401,8 +362,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
     [
       theme.currentTheme,
       window.bounds,
-      window.isMinimized,
-      unmaximize,
+      window.state,
       isResizing,
       isDragging,
       motionHeight,

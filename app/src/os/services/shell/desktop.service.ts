@@ -42,6 +42,7 @@ export class DesktopService extends BaseService {
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.open-dialog': this.openDialog,
     'realm.desktop.toggle-minimized': this.toggleMinimized,
+    'realm.desktop.toggle-maximized': this.toggleMaximized,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
@@ -59,12 +60,8 @@ export class DesktopService extends BaseService {
     closeHomePane: async () => {
       return await ipcRenderer.invoke('realm.desktop.close-home-pane');
     },
-    setActive: async (spaceId: string, appId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.set-active',
-        spaceId,
-        appId
-      );
+    setActive: async (appId: string) => {
+      return await ipcRenderer.invoke('realm.desktop.set-active', appId);
     },
     setWindowBounds: async (
       appId: any,
@@ -83,29 +80,20 @@ export class DesktopService extends BaseService {
       );
     },
 
-    openAppWindow: async (spaceId: string, app: AppType) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.open-app-window',
-        spaceId,
-        app
-      );
+    openAppWindow: async (app: AppType) => {
+      return await ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
     openDialog: (windowProps: CreateWindowProps) => {
       return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
-    toggleMinimized: async (spaceId: string, windowId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.toggle-minimized',
-        spaceId,
-        windowId
-      );
+    toggleMinimized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-minimized', appId);
     },
-    closeAppWindow: async (spaceId: string, app: any) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.close-app-window',
-        spaceId,
-        app
-      );
+    toggleMaximized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-maximized', appId);
+    },
+    closeAppWindow: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.close-app-window', appId);
     },
   };
 
@@ -153,8 +141,8 @@ export class DesktopService extends BaseService {
     // }
   }
 
-  setActive(_event: any, _spaceId: string, appId: string) {
-    this.state?.setActive(appId);
+  setActive(_event: IpcRendererEvent, appId: string) {
+    this.state.setActive(appId);
   }
 
   openHomePane(event: IpcRendererEvent) {
@@ -179,11 +167,7 @@ export class DesktopService extends BaseService {
     this.state?.setBounds(appId, bounds);
   }
 
-  openAppWindow(
-    _event: IpcRendererEvent,
-    _spaceId: string,
-    selectedApp: AppType
-  ) {
+  openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
     const newWindow = this.state.openWindow(selectedApp);
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
@@ -213,10 +197,15 @@ export class DesktopService extends BaseService {
     return toJS(this.state.openDialog(windowProps));
   }
 
-  toggleMinimized(_event: any, _spaceId: string, windowId: string) {
-    this.state?.toggleMinimize(windowId);
+  toggleMinimized(_event: any, appId: string) {
+    this.state.toggleMinimize(appId);
   }
-  closeAppWindow(_event: any, _spaceId: string, selectedApp: any) {
-    this.state?.closeWindow(selectedApp.id);
+
+  toggleMaximized(_event: any, appId: string) {
+    this.state.toggleMaximize(appId);
+  }
+
+  closeAppWindow(_event: IpcRendererEvent, appId: string) {
+    this.state.closeWindow(appId);
   }
 }

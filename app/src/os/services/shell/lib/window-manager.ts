@@ -2,8 +2,8 @@ import { AppType, RealmConfigType } from 'os/services/spaces/models/bazaar';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
 
 type Position = { x: number; y: number };
-type Dimension = { width: number; height: number };
-type Bounds = Position & Dimension;
+type Dimensions = { width: number; height: number };
+type Bounds = Position & Dimensions;
 
 /**
  * getCenteredXY
@@ -13,11 +13,11 @@ type Bounds = Position & Dimension;
  * @param Bounds
  * @returns position normalized to the 1-10 scale
  */
-export const getCenteredXY = (windowDimensions: Dimension): Position => {
+export const getCenteredXY = (windowDimensions: Dimensions): Position => {
   const appWidth = windowDimensions.width;
   const appHeight = windowDimensions.height;
-  const x = Math.floor(5 - appWidth / 2);
-  const y = Math.floor(5 - appHeight / 2);
+  const x = 5 - appWidth / 2;
+  const y = 5 - appHeight / 2;
 
   return { x, y };
 };
@@ -53,18 +53,17 @@ const getFullscreenBounds = (): Bounds => {
  */
 const getCenteredBounds = (app: any): Bounds => {
   if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
-    const defaultAppDimensions = {
-      width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width ?? 3,
-      height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height ?? 3,
+    const defaultDimensions = {
+      width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width ?? 6,
+      height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height ?? 6,
     };
-    const defaultXY = getCenteredXY(defaultAppDimensions);
+    const defaultPosition = getCenteredXY(defaultDimensions);
+
     return {
-      x: app.dimensions ? app.dimensions.x : defaultXY.x,
-      y: app.dimensions ? app.dimensions.y : defaultXY.y,
-      width: app.dimensions ? app.dimensions.width : defaultAppDimensions.width,
-      height: app.dimensions
-        ? app.dimensions.height
-        : defaultAppDimensions.height,
+      x: app.dimensions?.x ?? defaultPosition.x,
+      y: app.dimensions?.y ?? defaultPosition.y,
+      width: app.dimensions?.width ?? defaultDimensions.width,
+      height: app.dimensions?.height ?? defaultDimensions.height,
     };
   } else if (app.type === 'web' && app.web.dimensions) {
     const defaultXY = getCenteredXY(app.web.dimensions);
@@ -76,13 +75,13 @@ const getCenteredBounds = (app: any): Bounds => {
       height: app.web.dimensions.height,
     };
   } else {
-    const fullDims = getFullscreenBounds();
+    const fullScreenBounds = getFullscreenBounds();
 
     return {
-      x: app.dimensions ? app.dimensions.x : fullDims.x,
-      y: app.dimensions ? app.dimensions.y : fullDims.y,
-      width: app.dimensions ? app.dimensions.width : fullDims.width,
-      height: app.dimensions ? app.dimensions.height : fullDims.height,
+      x: app.dimensions?.x ?? fullScreenBounds.x,
+      y: app.dimensions?.y ?? fullScreenBounds.y,
+      width: app.dimensions?.width ?? fullScreenBounds.width,
+      height: app.dimensions?.height ?? fullScreenBounds.height,
     };
   }
 };
@@ -106,12 +105,10 @@ export const getInitialWindowBounds = (app: AppType): Bounds => {
  * @returns bounds normalized to the 1-10 scale
  */
 const getConfigBounds = (config: RealmConfigType): Bounds => {
-  const xUnit = config.size[0];
-  const yUnit = config.size[1];
-  const normalizedXOffset = 16 / 10;
-  const appWidth = xUnit - normalizedXOffset;
-  const normalizedYOffset = (58 + 8) / 10;
-  const appHeight = yUnit - normalizedYOffset;
+  const configX = config.size[0];
+  const configY = config.size[1];
+  const appWidth = configX - 16 / 10;
+  const appHeight = configY - (58 + 8) / 10;
   const appXY = getCenteredXY({
     width: appWidth,
     height: appHeight,
@@ -128,14 +125,14 @@ const getConfigBounds = (config: RealmConfigType): Bounds => {
 // Convert from pixels to the 1-10 scale.
 export const normalizeBounds = (
   bounds: Bounds,
-  desktopDimensions: Dimension
+  desktopDimensions: Dimensions
 ): Bounds => {
   const xUnitSize = desktopDimensions.width / 10;
   const yUnitSize = desktopDimensions.height / 10;
-  const xUnit = Math.round(bounds.x / xUnitSize);
-  const yUnit = Math.round(bounds.y / yUnitSize);
-  const widthUnit = Math.round(bounds.width / xUnitSize);
-  const heightUnit = Math.round(bounds.height / yUnitSize);
+  const xUnit = bounds.x / xUnitSize;
+  const yUnit = bounds.y / yUnitSize;
+  const widthUnit = bounds.width / xUnitSize;
+  const heightUnit = bounds.height / yUnitSize;
 
   return {
     x: xUnit,
@@ -148,7 +145,7 @@ export const normalizeBounds = (
 // Convert from the 1-10 scale to pixels.
 export const denormalizeBounds = (
   bounds: Bounds,
-  desktopDimensions: Dimension
+  desktopDimensions: Dimensions
 ): Bounds => {
   const xUnitSize = desktopDimensions.width / 10;
   const yUnitSize = desktopDimensions.height / 10;

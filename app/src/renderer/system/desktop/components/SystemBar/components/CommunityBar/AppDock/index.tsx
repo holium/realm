@@ -97,9 +97,9 @@ const AppDockPresenter = () => {
     const tileId = `pinned-${app.id}-${spacePath}-${index}`;
     const onClick = () => {
       if (open) {
-        DesktopActions.setActive(spacePath, app.id);
+        DesktopActions.setActive(app.id);
       } else {
-        DesktopActions.openAppWindow(spacePath, app);
+        DesktopActions.openAppWindow(app);
       }
     };
 
@@ -174,9 +174,7 @@ const AppDockPresenter = () => {
               label: 'Close',
               section: 2,
               disabled: !open,
-              onClick: () => {
-                DesktopActions.closeAppWindow(spacePath, app);
-              },
+              onClick: () => DesktopActions.closeAppWindow(app.id),
             },
           ]}
         />
@@ -213,21 +211,19 @@ const AppDockPresenter = () => {
               id: `${appId}-close}`,
               label: 'Close',
               section: 2,
-              onClick: () => {
-                DesktopActions.closeAppWindow(spacePath, toJS(app));
-              },
+              onClick: () => app && DesktopActions.closeAppWindow(app.id),
             },
           ]}
           onAppClick={(selectedApp) => {
             const window = desktop.getWindowByAppId(selectedApp.id);
             if (window) {
-              if (window.isMinimized) {
-                DesktopActions.toggleMinimized(spacePath, selectedApp.id);
+              if (window.state === 'minimized') {
+                DesktopActions.toggleMinimized(selectedApp.id);
               } else {
-                DesktopActions.setActive(spacePath, selectedApp.id);
+                DesktopActions.setActive(selectedApp.id);
               }
             } else {
-              DesktopActions.openAppWindow(spacePath, toJS(selectedApp));
+              DesktopActions.openAppWindow(toJS(selectedApp));
             }
           }}
         />

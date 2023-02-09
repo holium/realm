@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { AppWindow } from './components/Window/Window';
@@ -13,7 +13,6 @@ import {
 const WindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
-  const desktopRef = useRef<any>(null);
   const id = 'desktop-fill';
 
   const windows = Array.from(desktop.windows.values());
@@ -54,7 +53,6 @@ const WindowManagerPresenter = () => {
   return (
     <motion.div
       id={id}
-      ref={desktopRef}
       animate={{
         display: desktop.isHomePaneOpen ? 'none' : 'block',
       }}
@@ -70,11 +68,7 @@ const WindowManagerPresenter = () => {
       }}
     >
       {windows.map((window: any, index: number) => (
-        <AppWindow
-          key={`${window.id}-${index}`}
-          desktopRef={desktopRef}
-          window={window}
-        />
+        <AppWindow key={`${window.id}-${index}`} window={window} />
       ))}
     </motion.div>
   );

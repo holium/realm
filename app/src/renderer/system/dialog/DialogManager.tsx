@@ -1,4 +1,4 @@
-import { useRef, useState, ReactNode, useEffect } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -20,7 +20,6 @@ const DialogManagerPresenter = ({
   dialogProps,
 }: DialogManagerProps) => {
   const { shell } = useServices();
-  const desktopRef = useRef<HTMLDivElement>(null);
   const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
   let dialogConfig: DialogConfig;
@@ -52,7 +51,6 @@ const DialogManagerPresenter = ({
 
       setDialogWindow(
         <AppWindow
-          desktopRef={desktopRef}
           window={{
             ...window,
             bounds: {
@@ -70,7 +68,6 @@ const DialogManagerPresenter = ({
   return (
     <motion.div
       id="dialog-fill"
-      ref={desktopRef}
       style={{
         display: isOpen ? 'block' : 'none',
         bottom: 0,

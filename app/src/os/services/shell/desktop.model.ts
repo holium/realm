@@ -43,7 +43,7 @@ const WindowModel = types
     /**
      * The ative window has a titlebar with full contrast.
      */
-    active: types.optional(types.boolean, false),
+    isActive: types.optional(types.boolean, false),
     /**
      * The visual state of the window.
      */
@@ -55,23 +55,6 @@ const WindowModel = types
   .actions((self) => ({
     setZIndex(newZ: number) {
       self.zIndex = newZ;
-    },
-  }))
-  .views((self) => ({
-    get isMinimized() {
-      return self.state === 'minimized';
-    },
-    get isMaximized() {
-      return self.state === 'maximized';
-    },
-    get isFullscreen() {
-      return self.state === 'fullscreen';
-    },
-    get isNormal() {
-      return self.state === 'normal';
-    },
-    get isActive() {
-      return self.active;
     },
   }))
   .actions((self) => ({
@@ -92,7 +75,7 @@ const WindowModel = types
       self.prevBounds = self.bounds;
     },
     setIsActive(isActive: boolean) {
-      self.active = isActive;
+      self.isActive = isActive;
     },
   }));
 
@@ -130,6 +113,15 @@ export const DesktopStore = types
       self.homePaneOpen = false;
     },
     setActive(appId: string) {
+      self.windows.forEach((win) => {
+        if (appId === win.appId) {
+          win.setZIndex(self.windows.size + 1);
+        } else {
+          if (win.zIndex > 1) {
+            win.setZIndex(win.zIndex - 1);
+          }
+        }
+      });
       self.windows.forEach((window) => {
         window.setIsActive(window.appId === appId);
       });
@@ -155,7 +147,7 @@ export const DesktopStore = types
         title: app.title,
         glob,
         href,
-        active: true,
+        isActive: true,
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
@@ -177,6 +169,8 @@ export const DesktopStore = types
     toggleMinimize(appId: string) {
       const window = self.getWindowByAppId(appId);
       if (!window) return console.error('Window not found');
+
+      console.log('toggle minimize', window.state);
 
       if (window.state === 'minimized') window.normal();
       else window.minimize();

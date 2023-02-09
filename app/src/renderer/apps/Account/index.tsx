@@ -37,7 +37,7 @@ const AccountTrayAppPresenter = () => {
   }, []);
 
   const openSettingsApp = () => {
-    DesktopActions.openAppWindow('', nativeApps['os-settings'] as AppType);
+    DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
   };
 
   let subtitle;

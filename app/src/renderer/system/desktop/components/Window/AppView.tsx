@@ -94,7 +94,7 @@ const AppViewPresenter = ({ isResizing, isDragging, window }: AppViewProps) => {
         appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
       }
 
-      DesktopActions.openAppWindow('', toJS(app));
+      DesktopActions.openAppWindow(toJS(app));
       setAppConfig({ url: appUrl });
     }
 
@@ -156,7 +156,7 @@ const AppViewPresenter = ({ isResizing, isDragging, window }: AppViewProps) => {
           </Flex>
         )} */}
         <WebView
-          ref={webViewRef}
+          innerRef={webViewRef}
           id={`${window.appId}-urbit-webview`}
           partition="urbit-webview"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
