@@ -36,11 +36,11 @@ export const DesktopActions = {
     window.electron.app.mouseColorChanged(mouseColor);
     await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setAppDimensions: (
+  setWindowBounds: (
     windowId: string,
     dimensions: { width: number; height: number; x: number; y: number }
   ) => {
-    window.electron.os.desktop.setAppDimensions(windowId, dimensions);
+    window.electron.os.desktop.setWindowBounds(windowId, dimensions);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);

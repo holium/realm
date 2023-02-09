@@ -73,6 +73,27 @@ const WindowModel = types
     get isActive() {
       return self.isActive;
     },
+  }))
+  .actions((self) => ({
+    normal() {
+      self.state = 'normal';
+      self.bounds = self.prevBounds;
+    },
+    minimize() {
+      self.state = 'minimized';
+      self.prevBounds = self.bounds;
+    },
+    maximize() {
+      self.state = 'maximized';
+      self.prevBounds = self.bounds;
+    },
+    fullscreen() {
+      self.state = 'fullscreen';
+      self.prevBounds = self.bounds;
+    },
+    setIsActive(isActive: boolean) {
+      self.isActive = isActive;
+    },
   }));
 
 export interface WindowModelType extends Instance<typeof WindowModel> {}
@@ -91,13 +112,11 @@ export const DesktopStore = types
     get openWindows() {
       return Array.from(self.windows.values());
     },
-    getWindowByAppId(appId: string) {
-      return Array.from(self.windows.values()).find(
-        (appWindow) => appWindow.appId === appId
-      );
-    },
     get isHomePaneOpen() {
       return self.isHomePaneOpen;
+    },
+    getWindowByAppId(appId: string) {
+      return self.windows.get(appId);
     },
   }))
   .actions((self) => ({
@@ -112,12 +131,12 @@ export const DesktopStore = types
     },
     setActive(appId: string) {
       self.windows.forEach((window) => {
-        window.isActive = window.appId === appId;
+        window.setIsActive(window.appId === appId);
       });
     },
     setBounds(appId: string, bounds: BoundsModelType) {
-      const windowDimensions = self.windows.get(appId)?.bounds;
-      if (windowDimensions) applySnapshot(windowDimensions, bounds);
+      const windowBounds = self.getWindowByAppId(appId)?.bounds;
+      if (windowBounds) applySnapshot(windowBounds, bounds);
     },
     openWindow(
       app: AppType,
@@ -139,7 +158,6 @@ export const DesktopStore = types
         title: app.title,
         glob,
         href,
-        isActive: true,
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
@@ -147,6 +165,7 @@ export const DesktopStore = types
       });
 
       self.windows.set(newWindow.appId, newWindow);
+      this.setActive(newWindow.appId);
       if (self.isHomePaneOpen) self.isHomePaneOpen = false;
 
       return newWindow;
@@ -159,28 +178,18 @@ export const DesktopStore = types
       return newWindow;
     },
     toggleMinimize(appId: string) {
-      const window = self.windows.get(appId);
-      if (!window) return console.error('WindowModel not found');
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
 
-      if (window.state === 'minimized' && window.prevBounds) {
-        window.state = 'normal';
-        window.bounds = window.prevBounds;
-      } else {
-        window.state = 'minimized';
-        window.prevBounds = window.bounds;
-      }
+      if (window.state === 'minimized') window.normal();
+      else window.minimize();
     },
     toggleMaximize(appId: string) {
-      const window = self.windows.get(appId);
-      if (!window) return console.error('WindowModel not found');
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
 
-      if (window.state === 'maximized' && window.prevBounds) {
-        window.state = 'normal';
-        window.bounds = window.prevBounds;
-      } else {
-        window.state = 'maximized';
-        window.prevBounds = window.bounds;
-      }
+      if (window.state === 'maximized') window.normal();
+      else window.maximize();
     },
     closeWindow(appId: string) {
       self.windows.delete(appId);

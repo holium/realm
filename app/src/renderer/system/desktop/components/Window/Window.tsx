@@ -134,7 +134,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
       setUnmaximize(undefined);
     }
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.appId, {
+      DesktopActions.setWindowBounds(activeWindow.appId, {
         x: Math.round(motionX.get()),
         y: Math.round(motionY.get()),
         height: Math.round(motionHeight.get()),
@@ -144,7 +144,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
   const onDragStop = () => {
     setIsDragging(false);
     activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.appId, {
+      DesktopActions.setWindowBounds(activeWindow.appId, {
         x: Math.round(motionX.get()),
         y: Math.round(motionY.get()),
         height: Math.round(motionHeight.get()),
@@ -374,7 +374,7 @@ const AppWindowPresenter = ({ window, desktopRef }: AppWindowProps) => {
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  DesktopActions.setAppDimensions(activeWindow.appId, {
+                  DesktopActions.setWindowBounds(activeWindow.appId, {
                     x: motionX.get(),
                     y: motionY.get(),
                     height: motionHeight.get(),

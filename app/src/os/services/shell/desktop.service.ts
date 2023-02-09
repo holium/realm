@@ -35,7 +35,7 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-active': this.setActive,
     'realm.desktop.open-home-pane': this.openHomePane,
     'realm.desktop.close-home-pane': this.closeHomePane,
-    'realm.desktop.set-app-dimensions': this.setAppDimensions,
+    'realm.desktop.set-window-bounds': this.setWindowBounds,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
@@ -65,14 +65,14 @@ export class DesktopService extends BaseService {
         appId
       );
     },
-    setAppDimensions: async (
-      windowId: any,
-      dimensions: { width: number; height: number; x: number; y: number }
+    setWindowBounds: async (
+      appId: any,
+      bounds: { width: number; height: number; x: number; y: number }
     ) => {
       return await ipcRenderer.invoke(
-        'realm.desktop.set-app-dimensions',
-        windowId,
-        dimensions
+        'realm.desktop.set-window-bounds',
+        appId,
+        bounds
       );
     },
     setMouseColor: async (mouseColor: string) => {
@@ -170,12 +170,12 @@ export class DesktopService extends BaseService {
     this.state?.setMouseColor(mouseColor);
   }
 
-  setAppDimensions(
+  setWindowBounds(
     _event: any,
-    windowId: any,
-    dimensions: { width: number; height: number; x: number; y: number }
+    appId: string,
+    bounds: { width: number; height: number; x: number; y: number }
   ) {
-    this.state?.setBounds(windowId, dimensions);
+    this.state?.setBounds(appId, bounds);
   }
 
   openAppWindow(
