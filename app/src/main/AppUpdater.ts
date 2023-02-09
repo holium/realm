@@ -7,7 +7,7 @@
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater, UpdateInfo, NsisUpdater } from 'electron-updater';
+import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 const fs = require('fs');
@@ -102,26 +102,32 @@ export class AppUpdater implements IAppUpdater {
       );
       // good ole windows. trying a hack since setFeedURL is not working
     } else if (process.platform === 'win32') {
-      this.autoUpdater = new NsisUpdater({
-        provider: 'generic',
-        url: process.env.AUTOUPDATE_FEED_URL,
-        channel: determineReleaseChannel(),
-      });
-      // const updateConfigPath = `${app.getPath(
-      //   'userData'
-      // )}/windows-app-update.json`;
-      // log.verbose(
-      //   `Running on Windows platform. Updating config path to '${updateConfigPath}'...`
-      // );
-      // fs.writeFileSync(
-      //   updateConfigPath,
-      //   JSON.stringify({
-      //     provider: 'generic',
-      //     url: process.env.AUTOUPDATE_FEED_URL,
-      //     channel: determineReleaseChannel(),
-      //   })
-      // );
-      // this.autoUpdater.updateConfigPath = updateConfigPath;
+      // this.autoUpdater = new NsisUpdater({
+      //   provider: 'generic',
+      //   url: process.env.AUTOUPDATE_FEED_URL,
+      //   channel: determineReleaseChannel(),
+      // });
+      const updateConfigPath = `${app.getPath(
+        'userData'
+      )}/windows-app-update.yaml`;
+      log.verbose(
+        `Running on Windows platform. Updating config path to '${updateConfigPath}'...`
+      );
+      const parts = [
+        `provider: generic`,
+        `url: ${process.env.AUTOUPDATE_FEED_URL}`,
+        `channel: ${process.env.RELEASE_CHANNEL}`,
+      ];
+      fs.writeFileSync(
+        updateConfigPath,
+        parts.join('\r\n')
+        // JSON.stringify({
+        //   provider: 'generic',
+        //   url: process.env.AUTOUPDATE_FEED_URL,
+        //   channel: determineReleaseChannel(),
+        // })
+      );
+      this.autoUpdater.updateConfigPath = updateConfigPath;
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({
