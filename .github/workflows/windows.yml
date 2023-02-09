@@ -46,24 +46,6 @@ jobs:
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #
-      - name: Create windows draft
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
-        # create annotated tag for this branch. this will become basis for the release
-        run: |
-          mkdir -p ./app/release/build
-          touch ./app/release/build/log.txt
-          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
-          git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
-          CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-windows:
     needs: [pre-deploy]
@@ -138,11 +120,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
-      - name: Deploy binaries and other artifacts to draft release
+      - name: Deploy binaries and other artifacts
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        # create annotated tag for this branch. this will become basis for the release
         run: |
-          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          # rename the latest.yml (windows) file to name based on channel
           mv -f ./app/release/build/latest.yml ./app/release/build/windows.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
