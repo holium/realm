@@ -15,11 +15,10 @@ export const FriendsApi = {
     };
   },
   saveContact: async (conduit: Conduit, ship: string, data: any) => {
-    console.log('data', data);
     const preparedData: any = {
       nickname: data.nickname,
       color: removeHash(data.color),
-      avatar: data.avatar || null,
+      avatar: data.avatar,
       bio: data.bio || null,
       cover: data.cover || null,
     };
