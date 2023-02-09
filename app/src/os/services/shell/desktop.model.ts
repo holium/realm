@@ -43,7 +43,7 @@ const WindowModel = types
     /**
      * The ative window has a titlebar with full contrast.
      */
-    isActive: types.optional(types.boolean, false),
+    active: types.optional(types.boolean, false),
     /**
      * The visual state of the window.
      */
@@ -71,7 +71,7 @@ const WindowModel = types
       return self.state === 'normal';
     },
     get isActive() {
-      return self.isActive;
+      return self.active;
     },
   }))
   .actions((self) => ({
@@ -92,7 +92,7 @@ const WindowModel = types
       self.prevBounds = self.bounds;
     },
     setIsActive(isActive: boolean) {
-      self.isActive = isActive;
+      self.active = isActive;
     },
   }));
 
@@ -103,7 +103,7 @@ export const DesktopStore = types
   .model('DesktopStore', {
     windows: types.map(WindowModel),
     mouseColor: types.optional(types.string, '#4E9EFD'),
-    isHomePaneOpen: types.optional(types.boolean, false),
+    homePaneOpen: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -113,7 +113,7 @@ export const DesktopStore = types
       return Array.from(self.windows.values());
     },
     get isHomePaneOpen() {
-      return self.isHomePaneOpen;
+      return self.homePaneOpen;
     },
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
@@ -124,10 +124,10 @@ export const DesktopStore = types
       self.mouseColor = color;
     },
     openHomePane() {
-      self.isHomePaneOpen = true;
+      self.homePaneOpen = true;
     },
     closeHomePane() {
-      self.isHomePaneOpen = false;
+      self.homePaneOpen = false;
     },
     setActive(appId: string) {
       self.windows.forEach((window) => {
@@ -166,7 +166,7 @@ export const DesktopStore = types
 
       self.windows.set(newWindow.appId, newWindow);
       this.setActive(newWindow.appId);
-      if (self.isHomePaneOpen) self.isHomePaneOpen = false;
+      if (self.homePaneOpen) self.homePaneOpen = false;
 
       return newWindow;
     },

@@ -54,10 +54,8 @@ export const DesktopActions = {
     SpacesActions.addRecentApp(app.id);
     return result;
   },
-  openDialog: async (
-    windowProps: CreateWindowProps
-  ): Promise<WindowModelType> => {
-    return await window.electron.os.desktop.openDialog(windowProps);
+  openDialog: (windowProps: CreateWindowProps): Promise<WindowModelType> => {
+    return window.electron.os.desktop.openDialog(windowProps);
   },
   toggleMinimized: async (spacePath: string, windowId: string) => {
     return await window.electron.os.desktop.toggleMinimized(

@@ -11,6 +11,7 @@ import {
 } from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
+import { toJS } from 'mobx';
 
 /**
  * DesktopService
@@ -89,8 +90,8 @@ export class DesktopService extends BaseService {
         app
       );
     },
-    openDialog: async (windowProps: CreateWindowProps) => {
-      return await ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
+    openDialog: (windowProps: CreateWindowProps) => {
+      return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
     toggleMinimized: async (spaceId: string, windowId: string) => {
       return await ipcRenderer.invoke(
@@ -214,7 +215,7 @@ export class DesktopService extends BaseService {
   }
 
   openDialog(_event: IpcRendererEvent, windowProps: CreateWindowProps) {
-    this.state.openDialog(windowProps);
+    return toJS(this.state.openDialog(windowProps));
   }
 
   toggleMinimized(_event: any, _spaceId: string, windowId: string) {
