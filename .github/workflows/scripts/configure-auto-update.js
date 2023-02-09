@@ -6,8 +6,8 @@ module.exports = ({ github, context }, workflowId, platform, ci) => {
     `provider: generic`,
     `url: ${
       ['latest', 'hotfix'].indexOf(env.channel) !== -1
-        ? 'https://ghproxy.holium.xyz'
-        : 'https://ghproxy-staging.holium.xyz'
+        ? process.env.GH_PROXY
+        : process.env.GH_PROXY_STAGING
     }`,
     `channel: ${env.channel}`,
   ];

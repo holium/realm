@@ -8,6 +8,10 @@ on:
     branches:
       - windows
 #
+env:
+  GH_PROXY: ${{ secrets.GH_PROXY }}
+  GH_PROXY_STAGING: ${{ secrets.GH_PROXY_STAGING }}
+#
 jobs:
   pre-deploy:
     runs-on: ubuntu-latest
