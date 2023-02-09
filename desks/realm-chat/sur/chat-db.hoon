@@ -107,13 +107,13 @@
   $%
     [%add-row =db-row]
     [%del-paths-row =path]
-    [%del-peers-row =path]
+    [%del-peers-row =path =ship]
     [%del-messages-row =uniq-id]
   ==
 +$  db-row
   $%  [%paths =path-row]
       [%messages =msg-part]
-      [%peers peers=(list peer-row)]
+      [%peers =peer-row]
   ==
 +$  db-change  (list db-change-type)
 ::

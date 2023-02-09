@@ -100,7 +100,10 @@
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
   =.  messages-table.state  (remove-messages-for-path messages-table.state path)
-  =/  thechange  db-change+!>(~[[%del-paths-row path] [%del-peers-rows path]])
+  :: for now we are assuming that subscribed clients are intelligent
+  :: enough to realize that a %del-paths-row also means remove the
+  :: related messages and peers
+  =/  thechange  db-change+!>(~[[%del-paths-row path]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -192,7 +195,7 @@
     %member
   =/  peers  (snoc (~(got by peers-table.state) path.act) row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  =/  thechange  db-change+!>(~[[%del-peers-row path.act] [%add-row [%peers peers]]])
+  =/  thechange  db-change+!>(~[[%add-row [%peers row]]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
@@ -223,10 +226,10 @@
     ?:  our-kicked
       :: for now we are assuming that subscribed clients are intelligent
       :: enough to realize that a %del-paths-row also means remove the
-      :: related messages
-      db-change+!>(~[[%del-peers-row path.act] [%del-paths-row path.act]])
+      :: related messages and peers
+      db-change+!>(~[[%del-paths-row path.act]])
     :: else just update the peers table
-    db-change+!>(~[[%del-peers-row path.act] [%add-row %peers peers]])
+    db-change+!>(~[[%del-peers-row path.act patp.act]])
 
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
@@ -322,7 +325,7 @@
         %del-paths-row
           :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)])
         %del-peers-row
-          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)])
+          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)])
         %del-messages-row
           :~
             ['type' %s -.ch]
@@ -340,7 +343,7 @@
         %messages
           (messages-row [msg-id.msg-part.db-row msg-part-id.msg-part.db-row] msg-part.db-row)
         %peers
-          a+(turn peers.db-row peer-row)
+          (peer-row peer-row.db-row)
       ==
     ++  path-row
       |=  =path-row:sur
