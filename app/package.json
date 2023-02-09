@@ -228,7 +228,7 @@
         "from": "./src/main/updater/",
         "to": "updater",
         "filter": [
-          "initial.html"
+          "**/*"
         ]
       }
     ]

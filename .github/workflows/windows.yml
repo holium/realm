@@ -115,20 +115,14 @@ jobs:
       #  will use this configuration when checking for updates
       #  note: this step MUST happen here so that it is bundled correctly during
       #  'Build and install' step
-      - name: Run pre-deploy script
+      - name: Configure auto update
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs')
-            const env = JSON.parse(process.env.CI_ENV)
-            const filename = './app/src/main/updater/app-update.yml'
-            const lines = [
-              `provider: generic`,
-              `url: ${['latest', 'hotfix'].indexOf(env.channel) !== -1 ?
-               'https://ghproxy.holium.xyz' : 'https://ghproxy-staging.holium.xyz'}`,
-              `channel: ${env.channel}`
-            ]
-            fs.writeFileSync(filename, lines.join('\r\n'))
+            const script = require('./.github/workflows/scripts/configure-auto-update.js')
+            const result = script({github, context}, 'windows.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
