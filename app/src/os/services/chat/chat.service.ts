@@ -5,7 +5,7 @@ import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import Realm from '../..';
-import { MessagesRow, PathsRow, PeersRow } from './chat.types';
+import { ChatDBReactions, MessagesRow, PathsRow, PeersRow } from './chat.types';
 
 export class ChatService extends EventEmitter {
   core: Realm;
@@ -41,13 +41,41 @@ export class ChatService extends EventEmitter {
     });
   }
 
-  onDBUpdate(data: {
-    tables: { messages: MessagesRow[]; paths: PathsRow[]; peers: PeersRow[][] };
-  }) {
-    console.log(data);
-    this.insertMessages(data.tables.messages);
-    this.insertPaths(data.tables.paths);
-    this.insertPeers(data.tables.peers[0]);
+  onDBUpdate(data: ChatDBReactions) {
+    if ('tables' in data) {
+      this.insertMessages(data.tables.messages);
+      this.insertPaths(data.tables.paths);
+      this.insertPeers(data.tables.peers);
+      return;
+    } else if (data.type === 'add-row') {
+      if (data.table === 'messages') {
+        this.insertMessages(data.row as MessagesRow[]);
+      }
+      if (data.table === 'paths') {
+        this.insertPaths(data.row as PathsRow[]);
+      }
+      if (data.table === 'peers') {
+        this.insertPeers(data.row as PeersRow[]);
+      }
+      return;
+    } else {
+      console.log(data);
+      return;
+    }
+
+    // if (data.type === 'del-peers-row') {
+    //   this.deletePeersRow(data.path);
+    //   return;
+    // }
+    // if (data.type === 'del-paths-row') {
+    //   this.deletePathsRow(data.path);
+    //   return;
+    // }
+    // if (data.type === 'del-messages-row') {
+    //   this.deleteMessagesRow(data.id);
+    //   return;
+    // }
+    // console.log(data);
   }
   onQuit() {
     console.log('fail!');
