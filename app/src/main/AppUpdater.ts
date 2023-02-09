@@ -99,18 +99,20 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
-    } else if (process.env.OS_PLATFORM === 'windows') {
-      this.autoUpdater.updateConfigPath = `${app.getPath(
+      // good ole windows. trying a hack since setFeedURL is not working
+    } else if (process.platform === 'win32') {
+      const updateConfigPath = `${app.getPath(
         'userData'
       )}/windows-app-update.json`;
       fs.writeFileSync(
-        this.autoUpdater.updateConfigPath,
+        updateConfigPath,
         JSON.stringify({
           provider: 'generic',
           url: process.env.AUTOUPDATE_FEED_URL,
           channel: determineReleaseChannel(),
         })
       );
+      this.autoUpdater.updateConfigPath = updateConfigPath;
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({
