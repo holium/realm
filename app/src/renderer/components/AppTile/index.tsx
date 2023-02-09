@@ -3,7 +3,11 @@ import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 import { darken, desaturate } from 'polished';
 import { Flex, Box, Text, Spinner } from 'renderer/components';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
+import {
+  AppType,
+  InstallStatus,
+  DevAppType,
+} from 'os/services/spaces/models/bazaar';
 import { lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
@@ -115,7 +119,7 @@ interface AppTileProps {
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
-  app: AppType;
+  app: AppType | DevAppType;
   tileId: string;
   variants?: any;
   isAnimated?: boolean;
@@ -198,6 +202,7 @@ const AppTilePresenter = ({
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
+          // @ts-ignore
           backgroundColor={app.image && appColor}
           bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
@@ -244,6 +249,7 @@ const AppTilePresenter = ({
 
     // set image or icon
     let graphic;
+    // @ts-ignore
     if (app.image) {
       graphic = (
         <TileStyle
@@ -292,11 +298,13 @@ const AppTilePresenter = ({
             height={sizes[tileSize]}
             width={sizes[tileSize]}
             key={app.title}
+            // @ts-ignore
             src={app.image}
           />
           {title}
         </TileStyle>
       );
+      // @ts-ignore
     } else if (app.icon) {
       const iconTileSize = sizes[tileSize];
       const iconSize =
@@ -334,6 +342,7 @@ const AppTilePresenter = ({
           width={sizes[tileSize]}
           backgroundColor={tileBg}
         >
+          {/* @ts-ignore */}
           <Icons name={app.icon} height={iconSize} width={iconSize} />
           {title}
         </TileStyle>
