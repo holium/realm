@@ -30,7 +30,7 @@ const getAssetPath = (...paths: string[]): string => {
 // for now, until we get Windows and Linux auto updating pipelines to fully work,
 //  log ALL builds, not just dev or prod
 // log.transports.file.level = isDevelopment ? 'debug' : 'info';
-log.transports.file.level = 'debug';
+log.transports.file.level = 'verbose';
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
@@ -104,6 +104,9 @@ export class AppUpdater implements IAppUpdater {
       const updateConfigPath = `${app.getPath(
         'userData'
       )}/windows-app-update.json`;
+      log.verbose(
+        `Running on Windows platform. Updating config path to '${updateConfigPath}'...`
+      );
       fs.writeFileSync(
         updateConfigPath,
         JSON.stringify({
