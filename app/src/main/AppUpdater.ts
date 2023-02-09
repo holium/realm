@@ -102,34 +102,11 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
-      // good ole windows. trying a hack since setFeedURL is not working
     } else if (process.platform === 'win32') {
-      // this.autoUpdater = new NsisUpdater({
-      //   provider: 'generic',
-      //   url: process.env.AUTOUPDATE_FEED_URL,
-      //   channel: determineReleaseChannel(),
-      // });
-      const updateConfigPath = `${app.getPath(
-        'userData'
-      )}/windows-app-update.yaml`;
-      log.verbose(
-        `Running on Windows platform. Updating config path to '${updateConfigPath}'...`
-      );
-      const parts = [
-        `provider: generic`,
-        `url: ${process.env.AUTOUPDATE_FEED_URL}`,
-        `channel: ${process.env.AUTOUPDATE_CHANNEL}`,
-      ];
-      fs.writeFileSync(
-        updateConfigPath,
-        parts.join('\r\n')
-        // JSON.stringify({
-        //   provider: 'generic',
-        //   url: process.env.AUTOUPDATE_FEED_URL,
-        //   channel: determineReleaseChannel(),
-        // })
-      );
-      this.autoUpdater.updateConfigPath = updateConfigPath;
+      // on windows builds, we generate an auto update config file at runtime
+      //  since there are issues with our current package.json scripts and persisting
+      //  environment variables across script commands
+      this.autoUpdater.updateConfigPath = resolveUpdaterPath('app-update.yml');
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({
