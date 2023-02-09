@@ -574,6 +574,7 @@
       %kick-member          (handle-kick +.act)
       %group-kick-member    (group-handle-kick +.act)
       %revoke-invite        (handle-deported +.act)
+      %edit-member-role     (handle-edit-role +.act)
     ==
     ::
     ++  handle-send  ::  Sends an invite to a ship
@@ -734,6 +735,16 @@
       =.  invitations.state           (~(del by invitations.state) path)
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]~
+    ::
+    ++  handle-edit-role
+      |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  space-members  (~(got by membership) path)
+      =/  member-state  (~(got by space-members) member)
+      =.  roles.member-state  role-set
+      =.  space-members  (~(put by space-members) [member member-state])
+      =.  membership  (~(put by membership) [path space-members])
+      `state
     ::
     --
   ++  reaction

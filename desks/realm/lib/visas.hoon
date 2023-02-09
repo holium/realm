@@ -83,6 +83,18 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
+        %edit-member-role
+      :-  %revoke-invite
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+          [%ship s+(scot %p ship.act)]
+          :-  %roles
+            :-  %a
+            ^-  (list json)
+            %+  turn  ~(tap in role-set.act)
+            |=  =role:membership
+            s+(scot %tas role)
+      ==
     ==
   ::
   ++  reaction
@@ -231,6 +243,7 @@
           [%stamped path-payload]
           [%kick-member kicked-payload]
           [%revoke-invite path-payload]
+          [%edit-member-role edit-member-role-payload]
       ==
     ::
     ++  kicked-payload
@@ -301,6 +314,14 @@
       ?:  =('joined' p.json)      %joined
       ?:  =('host' p.json)        %host
       !!
+    ::
+    ++  edit-member-role-payload
+      %-  ot
+      :~  [%path pth]
+          [%ship (su ;~(pfix sig fed:ag))]
+          :: expects an array of roles
+          [%role (as rol)]
+      ==
     --
   --
   ::
