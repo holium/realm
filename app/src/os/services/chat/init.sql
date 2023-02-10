@@ -7,7 +7,7 @@ create table if not exists messages
     content_data TEXT    not null,
     reply_to     TEXT,
     metadata     text,
-    timestamp    text not null,
+    timestamp    integer not null,
     sender       text    not null
 );
 

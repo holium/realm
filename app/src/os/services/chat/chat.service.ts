@@ -1,5 +1,5 @@
-import { ipcRenderer, app } from 'electron';
-import { EventEmitter } from 'stream';
+import { ipcMain, ipcRenderer, app } from 'electron';
+import { BaseService } from '../base.service';
 import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
@@ -7,22 +7,50 @@ import { Patp } from '../../types';
 import Realm from '../..';
 import { ChatDBReactions, MessagesRow, PathsRow, PeersRow } from './chat.types';
 
-export class ChatService extends EventEmitter {
-  core: Realm;
-  options: any;
+export class ChatService extends BaseService {
   db: Database.Database | null = null;
   initSql = fs.readFileSync(`${path.resolve(__dirname)}/init.sql`, 'utf8');
   lastTimestamp = 0;
 
+  /**
+   * Handlers for the ipcRenderer invoked functions
+   **/
+  handlers = {
+    'realm.chat.get-chat-list': this.getChatList,
+    'realm.chat.get-chat-log': this.getChatLog,
+    'realm.chat.send-chat': this.sendChat,
+    'realm.chat.read-chat': this.readChat,
+  };
+
+  /**
+   * Preload functions to register with the renderer
+   */
+  static preload = {
+    getChatList: async () =>
+      await ipcRenderer.invoke('realm.chat.get-chat-list'),
+    getChatLog: async (
+      path: string,
+      params?: { start: number; amount: number }
+    ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
+    sendChat: async (path: string, fragments: any[]) =>
+      await ipcRenderer.invoke('realm.chat.send-chat', path, fragments),
+    readChat: async (path: string) =>
+      await ipcRenderer.invoke('realm.chat.read-chat', path),
+  };
+
   constructor(core: Realm, options: any = {}) {
-    super();
-    this.core = core;
-    this.options = options;
+    super(core, options);
     this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
-    this.onDBUpdate = this.onDBUpdate.bind(this);
+    this.onDbUpdate = this.onDbUpdate.bind(this);
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-expect-error
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
   }
-
+  // ----------------------------------------------
+  // ----------------- DB setup -------------------
+  // ----------------------------------------------
   async subscribe(ship: Patp) {
     this.db = new Database(`${app.getPath('userData')}/realm.${ship}/chat.db`, {
       // verbose: console.log,
@@ -35,14 +63,14 @@ export class ChatService extends EventEmitter {
     await this.core.conduit!.watch({
       app: 'chat-db',
       path: '/db',
-      onEvent: this.onDBUpdate,
+      onEvent: this.onDbUpdate,
       onQuit: this.onQuit,
       onError: this.onError,
     });
   }
-
-  onDBUpdate(data: ChatDBReactions) {
+  onDbUpdate(data: ChatDBReactions) {
     if ('tables' in data) {
+      console.log('got tables', data.tables);
       this.insertMessages(data.tables.messages);
       this.insertPaths(data.tables.paths);
       this.insertPeers(data.tables.peers);
@@ -158,13 +186,72 @@ export class ChatService extends EventEmitter {
     });
     insertMany(peers);
   }
+  // ----------------------------------------------
+  // ----------------- DB queries -----------------
+  // ----------------------------------------------
 
-  /**
-   * Preload functions to register with the renderer
-   */
-  static preload = {
-    sendSlip: async (to: Patp[], data: any) =>
-      await ipcRenderer.invoke('realm.slip.send', to, data),
-    onSlip: (callback: any) => ipcRenderer.on('realm.on-slip', callback),
-  };
+  getChatList() {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+        SELECT
+            path,
+            msg_id id,
+            MAX(json_object(content_type, content_data)) lastMessage,
+            sender,
+            MAX(timestamp) as timestamp
+        FROM (SELECT path,
+                    msg_id,
+                    content_type,
+                    content_data,
+                    sender,
+                    timestamp
+              FROM messages
+              WHERE path LIKE '%realm-chat%' and sender != ?
+              ORDER BY msg_id, msg_part_id)
+        GROUP BY msg_id
+        ORDER BY timestamp DESC;
+    `);
+    const result = query.all(`~${this.core.conduit?.ship}`);
+
+    return result.map((row) => {
+      return { ...row, lastMessage: JSON.parse(row.lastMessage) };
+    });
+  }
+
+  getChatLog(path: string, params?: { start: number; amount: number }) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      SELECT
+        path,
+        msg_id id,
+        json_group_array(json_object(content_type, content_data)) content,
+        sender,
+        MAX(timestamp) as timestamp
+      FROM (SELECT path,
+                  msg_id,
+                  content_type,
+                  content_data,
+                  sender,
+                  timestamp
+            FROM messages
+            WHERE path = ?
+            ORDER BY msg_id, msg_part_id)
+      GROUP BY msg_id
+      ORDER BY timestamp DESC;
+    `);
+    const result = query.all(path);
+    return result.map((row) => {
+      return { ...row, content: JSON.parse(row.content) };
+    });
+  }
+
+  sendChat(path: string, fragments: any[]) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    // this.core.conduit.sendChat(path, fragments);
+  }
+
+  readChat(path: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    // this.core.conduit.readChat(path);
+  }
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Flex,
   Text,
@@ -7,6 +7,8 @@ import {
   InputBox,
   TextInput,
   Input,
+  WindowedList,
+  Box,
 } from '@holium/design-system';
 import {
   PreviewDMType,
@@ -15,10 +17,27 @@ import {
 } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
 import { AppRegistry } from '../registry';
+import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+import { ChatRow } from './components/ChatRow';
 
 export const CourierRoot = () => {
   const { dmApp } = useTrayApps();
   const [searchString, setSearchString] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [chatList, setChatList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setIsFetching(true);
+    ChatDBActions.getChatList()
+      .then((list) => {
+        setIsFetching(false);
+        setChatList(list);
+      })
+      .catch((err) => {
+        setIsFetching(false);
+        console.log(err);
+      });
+  }, []);
 
   const searchFilter = useCallback(
     (preview: DMPreviewType) => {
@@ -84,6 +103,32 @@ export const CourierRoot = () => {
           />
         </InputBox>
       </Flex>
+      <WindowedList
+        // key={lastTimeSent}
+        width={364}
+        height={544}
+        rowHeight={57}
+        data={chatList}
+        filter={searchFilter}
+        rowRenderer={(chat, index) => {
+          console.log(chat);
+          return (
+            <Box display="block" key={`dm-${index}`}>
+              <ChatRow
+                patp={chat.sender}
+                sigilColor={'#000'}
+                lastMessage={chat.lastMessage}
+                timestamp={chat.timestamp}
+
+                // onClick={(evt: any) => {
+                //   evt.stopPropagation();
+                //   onSelectDm(dm);
+                // }}
+              />
+            </Box>
+          );
+        }}
+      />
     </Flex>
   );
 };
