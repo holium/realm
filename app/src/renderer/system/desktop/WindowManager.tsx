@@ -59,7 +59,7 @@ const WindowManagerPresenter = () => {
       style={{
         bottom: 0,
         padding: '8px',
-        position: 'absolute',
+        position: 'fixed',
         left: 0,
         top: 0,
         right: 0,
