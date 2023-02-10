@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { Reorder } from 'framer-motion';
 import {
   AppType,
@@ -96,67 +96,70 @@ export const PinnedDockApp = ({
         ]
       : [];
 
-  return (
-    <Reorder.Item
-      value={app.id}
-      initial={{
-        opacity: 0.0,
-      }}
-      animate={{
-        opacity: 1,
-        transition: {
-          opacity: { duration: 0.25, delay: 0.5 },
-        },
-      }}
-      exit={{
-        opacity: 0.5,
-        transition: {
-          opacity: { duration: 1, delay: 0 },
-        },
-      }}
-      whileDrag={{ zIndex: 20 }}
-      onPointerDown={() => {
-        const rect = document.getElementById(tileId)?.getBoundingClientRect();
-        if (rect) pointerDownRef.current = { tileId, rect };
-      }}
-      onPointerUp={(e) => {
-        // Make sure it's a left click.
-        if (e.button !== 0) return;
+  return useMemo(
+    () => (
+      <Reorder.Item
+        value={app.id}
+        initial={{
+          opacity: 0.0,
+        }}
+        animate={{
+          opacity: 1,
+          transition: {
+            opacity: { duration: 0.25, delay: 0.5 },
+          },
+        }}
+        exit={{
+          opacity: 0.5,
+          transition: {
+            opacity: { duration: 1, delay: 0 },
+          },
+        }}
+        whileDrag={{ zIndex: 20 }}
+        onPointerDown={() => {
+          const rect = document.getElementById(tileId)?.getBoundingClientRect();
+          if (rect) pointerDownRef.current = { tileId, rect };
+        }}
+        onPointerUp={(e) => {
+          // Make sure it's a left click.
+          if (e.button !== 0) return;
 
-        if (tileId !== pointerDownRef.current?.tileId) return;
+          if (tileId !== pointerDownRef.current?.tileId) return;
 
-        const pointerDownRect = pointerDownRef.current?.rect;
-        const pointerUpRect = document
-          .getElementById(tileId)
-          ?.getBoundingClientRect();
+          const pointerDownRect = pointerDownRef.current?.rect;
+          const pointerUpRect = document
+            .getElementById(tileId)
+            ?.getBoundingClientRect();
 
-        if (!pointerDownRect || !pointerUpRect) return;
+          if (!pointerDownRect || !pointerUpRect) return;
 
-        // < 5px movement is a click
-        const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
-        const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
+          // < 5px movement is a click
+          const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
+          const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
 
-        if (diffX < 5 && diffY < 5) onClick(app);
-      }}
-    >
-      <AppTile
-        tileId={tileId}
-        tileSize="sm"
-        installStatus={app.installStatus as InstallStatus}
-        app={app}
-        open={isOpen}
-        selected={isSelected}
-        isAnimated={
-          app.installStatus !== InstallStatus.suspended &&
-          app.installStatus !== InstallStatus.failed
-        }
-        contextMenuOptions={[
-          ...installOption,
-          ...suspendOption,
-          ...unpinOption,
-          ...closeOption,
-        ]}
-      />
-    </Reorder.Item>
+          if (diffX < 5 && diffY < 5) onClick(app);
+        }}
+      >
+        <AppTile
+          tileId={tileId}
+          tileSize="sm"
+          installStatus={app.installStatus as InstallStatus}
+          app={app}
+          open={isOpen}
+          selected={isSelected}
+          isAnimated={
+            app.installStatus !== InstallStatus.suspended &&
+            app.installStatus !== InstallStatus.failed
+          }
+          contextMenuOptions={[
+            ...installOption,
+            ...suspendOption,
+            ...unpinOption,
+            ...closeOption,
+          ]}
+        />
+      </Reorder.Item>
+    ),
+    [app, tileId, isOpen, isSelected, onClick]
   );
 };

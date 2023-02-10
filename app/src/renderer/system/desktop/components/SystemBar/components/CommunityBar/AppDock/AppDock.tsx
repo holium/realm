@@ -58,9 +58,9 @@ const AppDockPresenterView = ({
 
   const pinnedAppTiles = useMemo(
     () =>
-      pinnedDockApps.map((app, index) => {
+      pinnedDockApps.map((app) => {
         const window = desktop.getWindowByAppId(app.id);
-        const pinnedTileId = `pinned-${app.id}-${spacePath}-${index}`;
+        const pinnedTileId = `pinned-${app.id}-${spacePath}`;
 
         return (
           <PinnedDockApp
