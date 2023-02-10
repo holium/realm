@@ -1,11 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import { Flex, Divider } from 'renderer/components';
-import {
-  AppType,
-  InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { AppTile } from 'renderer/components/AppTile';
+import { AppType, NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
@@ -13,45 +9,33 @@ import { Reorder, AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
-import {
-  handleInstallation,
-  handleResumeSuspend,
-  installLabel,
-  resumeSuspendLabel,
-} from 'renderer/system/desktop/components/Home/AppInstall/helpers';
-import { debounce } from 'lodash';
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { DesktopStoreType } from 'os/services/shell/desktop.model';
+import { PinnedDockApp } from './PinnedDockApp';
+import { UnpinnedDockApp } from './UnpinnedDockApp';
+import { ThemeStoreType } from 'renderer/logic/theme';
 
-const AppDockPresenter = () => {
-  const { desktop, spaces, bazaar, theme } = useServices();
+type Props = {
+  dockAppIds: string[];
+  pinnedDockApps: AppType[];
+  unpinnedDockApps: AppType[];
+  spacePath: string;
+  desktop: DesktopStoreType;
+  bazaar: NewBazaarStoreType;
+  theme: ThemeStoreType;
+  setDockAppIds: (appIds: string[]) => void;
+};
 
-  const spacePath = spaces.selected?.path;
-  const dock = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
-  const dockApps = spacePath
-    ? ((bazaar.getDockApps(spacePath) ?? []) as AppType[])
-    : [];
-
-  const [localDockApps, setLocalDockApps] = useState<AppType[]>(dockApps);
-
-  const pointerDownRef = useRef<{
-    tileId: string;
-    rect: DOMRect;
-  } | null>(null);
-
-  const debouncedSetLocalDockApps = useCallback(
-    debounce(setLocalDockApps, 500),
-    []
-  );
-
-  useEffect(() => {
-    // If the dock length changes, e.g. from the AppGrid, we update the local dock.
-    debouncedSetLocalDockApps(dockApps);
-  }, [dockApps.length]);
-
-  if (!spacePath) return null;
-
-  const onClickDockedApp = (dockedApp: AppType) => {
+const AppDockPresenterView = ({
+  dockAppIds,
+  pinnedDockApps,
+  unpinnedDockApps,
+  spacePath,
+  desktop,
+  bazaar,
+  theme,
+  setDockAppIds,
+}: Props) => {
+  const onClickDockedApp = useCallback((dockedApp: AppType) => {
     const window = desktop.getWindowByAppId(dockedApp.id);
     if (window) {
       if (window.isMinimized) {
@@ -62,171 +46,42 @@ const AppDockPresenter = () => {
     } else {
       DesktopActions.openAppWindow(toJS(dockedApp));
     }
-  };
+  }, []);
 
-  const pinnedApps = localDockApps?.map((app: AppType | undefined, index) => {
-    if (!app) return null;
-    const selected = desktop.getWindowByAppId(app.id)?.isActive;
-    const open = Boolean(desktop.getWindowByAppId(app.id));
-    const { isSuspended, isUninstalled } = getAppTileFlags(
-      (app.installStatus as InstallStatus) || InstallStatus.installed
-    );
-    const suspendRow = isSuspended
-      ? [
-          {
-            label: resumeSuspendLabel(app.installStatus as InstallStatus),
-            section: 2,
-            disabled: false,
-            onClick: (evt: any) => {
-              evt.stopPropagation();
-              return handleResumeSuspend(
-                app.id,
-                app.installStatus as InstallStatus
-              );
-            },
-          },
-        ]
-      : [];
+  const pinnedAppTiles = useMemo(
+    () =>
+      pinnedDockApps.map((app) => {
+        const window = desktop.getWindowByAppId(app.id);
 
-    const installRow =
-      app.type === 'urbit' && isUninstalled
-        ? [
-            {
-              label: installLabel(app.installStatus as InstallStatus),
-              // section: 2,
-              disabled: false,
-              onClick: (evt: any) => {
-                evt.stopPropagation();
-                const appHost = (app as UrbitAppType).host;
-                return handleInstallation(
-                  appHost,
-                  app.id,
-                  app.installStatus as InstallStatus
-                );
-              },
-            },
-          ]
-        : [];
-    const tileId = `pinned-${app.id}-${spacePath}-${index}`;
+        return (
+          <PinnedDockApp
+            app={app}
+            spacePath={spacePath}
+            isOpen={Boolean(window)}
+            isSelected={Boolean(window?.isActive)}
+            onClick={onClickDockedApp}
+          />
+        );
+      }),
+    [pinnedDockApps, desktop, spacePath]
+  );
 
-    return (
-      <Reorder.Item
-        key={tileId}
-        value={app}
-        style={{ zIndex: 1 }}
-        initial={{
-          opacity: 0.0,
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            opacity: { duration: 0.25, delay: 0.5 },
-          },
-        }}
-        exit={{
-          opacity: 0.5,
-          transition: {
-            opacity: { duration: 1, delay: 0 },
-          },
-        }}
-        whileDrag={{ zIndex: 20 }}
-        onPointerDown={() => {
-          const rect = document.getElementById(tileId)?.getBoundingClientRect();
-          if (rect) pointerDownRef.current = { tileId, rect };
-        }}
-        onPointerUp={(e) => {
-          // Make sure it's a left click.
-          if (e.button !== 0) return;
+  const unpinnedAppTiles = useMemo(
+    () =>
+      unpinnedDockApps.map((app) => {
+        const window = desktop.getWindowByAppId(app.id);
 
-          if (tileId !== pointerDownRef.current?.tileId) return;
-
-          const pointerDownRect = pointerDownRef.current?.rect;
-          const pointerUpRect = document
-            .getElementById(tileId)
-            ?.getBoundingClientRect();
-
-          if (!pointerDownRect || !pointerUpRect) return;
-
-          // < 5px movement is a click
-          const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
-          const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
-
-          if (diffX < 5 && diffY < 5) onClickDockedApp(app);
-        }}
-      >
-        <AppTile
-          tileId={tileId}
-          tileSize="sm"
-          installStatus={app.installStatus as InstallStatus}
-          isAnimated={
-            app.installStatus !== InstallStatus.suspended &&
-            app.installStatus !== InstallStatus.failed
-          }
-          app={app}
-          selected={selected}
-          open={open}
-          contextMenuOptions={[
-            ...installRow,
-            ...suspendRow,
-            {
-              id: `${app.id}-unpin}`,
-              label: 'Unpin',
-              onClick: () => {
-                SpacesActions.unpinApp(spacePath, app.id);
-              },
-            },
-            {
-              id: `${app.id}-close}`,
-              label: 'Close',
-              section: 2,
-              disabled: !open,
-              onClick: () => DesktopActions.closeAppWindow(app.id),
-            },
-          ]}
-        />
-      </Reorder.Item>
-    );
-  });
-
-  const unpinnedApps = desktop.openWindows
-    .filter(
-      (appWindow: WindowModelType) =>
-        dock.findIndex((pinned) => appWindow.appId === pinned) === -1
-    )
-    .map((unpinnedAppWindow: WindowModelType, index) => {
-      const appId = unpinnedAppWindow.appId;
-      const app = bazaar.getApp(appId);
-      const tileId = `unpinned-${appId}-${index}`;
-
-      if (!app) return null;
-
-      return (
-        <AppTile
-          key={tileId}
-          tileId={tileId}
-          tileSize="sm"
-          app={app}
-          open={true}
-          selected={unpinnedAppWindow.isActive}
-          contextMenuOptions={[
-            {
-              id: `${appId}-pin}`,
-              label: 'Pin',
-              onClick: () => {
-                SpacesActions.pinApp(spacePath, appId);
-              },
-            },
-            {
-              id: `${appId}-close}`,
-              label: 'Close',
-              section: 2,
-              onClick: () => app && DesktopActions.closeAppWindow(app.id),
-            },
-          ]}
-          onAppClick={onClickDockedApp}
-        />
-      );
-    });
+        return (
+          <UnpinnedDockApp
+            app={app}
+            spacePath={spacePath}
+            isSelected={Boolean(window?.isActive)}
+            onClick={onClickDockedApp}
+          />
+        );
+      }),
+    [unpinnedDockApps, bazaar, spacePath]
+  );
 
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
@@ -239,19 +94,18 @@ const AppDockPresenter = () => {
             flexDirection: 'row',
             gap: 8,
           }}
-          values={localDockApps || []}
-          onReorder={(newOrder: AppType[]) => {
+          values={dockAppIds}
+          onReorder={(newOrder: string[]) => {
             // First we update the dock locally so the user doesn't have to
             // wait for the subscription to come back.
-            setLocalDockApps(newOrder);
-            const newPinList = newOrder.map((app) => app.id);
-            SpacesActions.setPinnedOrder(spacePath, newPinList);
+            setDockAppIds(newOrder);
+            SpacesActions.setPinnedOrder(spacePath, newOrder);
           }}
         >
-          {pinnedApps}
+          {pinnedAppTiles}
         </Reorder.Group>
 
-        {Boolean(unpinnedApps.length && localDockApps?.length) && (
+        {pinnedAppTiles.length > 0 && unpinnedAppTiles.length > 0 && (
           <Divider
             key={`app-dock-divider-${spacePath}`}
             customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
@@ -261,9 +115,51 @@ const AppDockPresenter = () => {
         )}
       </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
-        {unpinnedApps}
+        {unpinnedAppTiles}
       </Flex>
     </Flex>
+  );
+};
+
+const AppDockPresenter = () => {
+  const { desktop, spaces, bazaar, theme } = useServices();
+
+  const spacePath = spaces.selected?.path;
+  const dockAppIds: string[] = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
+  const dockApps = spacePath
+    ? ((bazaar.getDockApps(spacePath) ?? []) as AppType[])
+    : [];
+  const pinnedDockApps = dockApps.filter(Boolean);
+  const unpinnedDockApps = desktop.openWindows
+    .filter((appWindow) => !dockAppIds.includes(appWindow.appId))
+    .map((appWindow) => bazaar.getApp(appWindow.appId))
+    .filter(Boolean) as AppType[];
+
+  const [localDockAppIds, setLocalDockAppIds] = useState<string[]>(dockAppIds);
+
+  const debouncedSetLocalDockApps = useCallback(
+    debounce(setLocalDockAppIds, 500),
+    []
+  );
+
+  useEffect(() => {
+    // If the dock length changes, e.g. from the AppGrid, we update the local dock.
+    debouncedSetLocalDockApps(dockAppIds);
+  }, [dockApps.length]);
+
+  if (!spacePath) return null;
+
+  return (
+    <AppDockPresenterView
+      dockAppIds={localDockAppIds}
+      pinnedDockApps={pinnedDockApps}
+      unpinnedDockApps={unpinnedDockApps}
+      spacePath={spacePath}
+      desktop={desktop}
+      bazaar={bazaar}
+      theme={theme}
+      setDockAppIds={setLocalDockAppIds}
+    />
   );
 };
 
