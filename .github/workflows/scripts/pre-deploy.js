@@ -25,7 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
-  console.log('context.ref => %o', context.ref);
+  // console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
