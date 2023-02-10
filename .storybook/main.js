@@ -16,8 +16,11 @@ module.exports = {
   },
 
   stories: [
-    "../app/src/**/*.stories.@(js|jsx|ts|tsx|mdx)",
-    "../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+    "../app/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../lib/conduit/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../lib/multiplayer/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../lib/room/src/**/*.stories.@(js|jsx|ts|tsx)"
   ],
   addons: [
     '@storybook/addon-links',
