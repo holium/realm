@@ -22,7 +22,6 @@ const devtoolsConfig =
       }
     : {};
 
-console.log('webpack config env: %o', process.env);
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
   mode: 'production',

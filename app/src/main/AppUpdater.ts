@@ -31,7 +31,7 @@ const getAssetPath = (...paths: string[]): string => {
 //  log ALL builds, not just dev or prod
 // log.transports.file.level = isDevelopment ? 'debug' : 'info';
 log.transports.file.level = 'verbose';
-log.verbose(process.env);
+// log.verbose(process.env);
 
 // const { AUTOUPDATE_FEED_URL, RELEASE_CHANNEL } = process.env;
 
@@ -111,7 +111,6 @@ export class AppUpdater implements IAppUpdater {
         'autoUpdater.updateConfigPath => %o',
         this.autoUpdater.updateConfigPath
       );
-      // this.autoUpdater.updateConfigPath = resolveUpdaterPath('app-update.yml');
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({

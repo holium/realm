@@ -34,6 +34,7 @@ const View = (props: { children: React.ReactNode; hideCursor?: boolean }) => {
         position="relative"
         height="100vh"
         width="100%"
+        style={{ overflowY: 'hidden' }}
       >
         <Flex
           position="absolute"
@@ -178,7 +179,7 @@ const AppUpdateError = (props: AppUpdateErrorProps) => {
           fontWeight={400}
           opacity={0.5}
           width="inherit"
-          height={80}
+          height={72}
           style={{ wordBreak: 'break-word', overflowY: 'scroll' }}
         >
           {error}
