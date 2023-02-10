@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /**
  * Detect Element Resize.
  * https://github.com/sdecima/javascript-detect-element-resize
@@ -84,13 +85,18 @@ export default function createDetectElementResize(hostWindow: Window) {
         return;
       }
 
+      // @ts-ignore
       var element = this;
+      // @ts-ignore
       resetTriggers(this);
 
+      // @ts-ignore
       if (this.__resizeRAF__) {
+        // @ts-ignore
         cancelFrame(this.__resizeRAF__);
       }
 
+      // @ts-ignore
       this.__resizeRAF__ = requestFrame(function () {
         if (checkTriggers(element)) {
           element.__resizeLast__.width = element.offsetWidth;
@@ -176,7 +182,7 @@ export default function createDetectElementResize(hostWindow: Window) {
 
         var elementStyle = _window.getComputedStyle(element);
 
-        if (elementStyle && elementStyle.position == 'static') {
+        if (elementStyle && elementStyle.position === 'static') {
           element.style.position = 'relative';
         }
 
@@ -203,7 +209,7 @@ export default function createDetectElementResize(hostWindow: Window) {
         if (animationstartevent) {
           element.__resizeTriggers__.__animationListener__ =
             function animationListener(e: any) {
-              if (e.animationName == animationName) {
+              if (e.animationName === animationName) {
                 resetTriggers(element);
               }
             };

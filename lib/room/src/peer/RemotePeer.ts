@@ -12,7 +12,7 @@ type SignalData =
   | { type: 'ack-waiting' | 'waiting'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
-  peer?: SimplePeer.Instance;
+  peer: SimplePeer.Instance | null = null;
   isInitiator: boolean;
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;

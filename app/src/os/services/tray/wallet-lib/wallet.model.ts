@@ -3,7 +3,6 @@ import {
   types,
   Instance,
   getSnapshot,
-  flow,
   cast,
 } from 'mobx-state-tree';
 import { WalletApi } from '../../../api/wallet';
@@ -75,7 +74,6 @@ export enum NetworkType {
   ETHEREUM = 'ethereum',
   BITCOIN = 'bitcoin',
 }
-const Networks = types.enumeration(Object.values(NetworkType));
 
 export enum ProtocolType {
   ETH_MAIN = 'Ethereum Mainnet',
@@ -177,18 +175,19 @@ const TransactionList = types
     ) {
       for (const transaction of transactions) {
         const previousTransaction = self.transactions.get(transaction.hash);
+        const sent = address === transaction.from;
         const newTransaction = {
           hash: transaction.hash,
           walletIndex: index,
           amount: transaction.value?.toString() || '0',
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
-          type: address === transaction.from ? 'sent' : 'received',
+          type: sent ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt || '',
           completedAt: transaction.metadata.blockTimestamp,
-          ourAddress: transaction.from,
+          ourAddress: sent ? transaction.from : transaction.to,
           theirPatp: previousTransaction?.theirPatp,
-          theirAddress: transaction.to,
+          theirAddress: sent ? transaction.to : transaction.from,
           status: 'succeeded',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
@@ -244,7 +243,7 @@ const BitcoinWallet = types
     setBalance(balance: string) {
       self.balance = balance;
     },
-    applyTransactions(transactions: any) {},
+    applyTransactions(_transactions: any) {},
   }));
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
@@ -470,7 +469,7 @@ const EthWallet = types
         transactionList: {},
       });
     },
-    updateNftTransfers(protocol: ProtocolType, transfers: any) {},
+    updateNftTransfers(_protocol: ProtocolType, _transfers: any) {},
     setBalance(protocol: ProtocolType, balance: string) {
       self.data.get(protocol)!.balance = balance;
     },
@@ -643,7 +642,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings.defaultIndex = index;
     },
-    applyWalletUpdate: flow(function* (wallet: any) {
+    applyWalletUpdate(wallet: any) {
       let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
@@ -712,7 +711,7 @@ export const EthStore = types
           }
         }
       }
-    }),
+    },
     setProtocol(protocol: ProtocolType) {
       self.protocol = protocol;
       self.wallets.forEach((wallet: any) => (wallet.protocol = protocol));
@@ -780,22 +779,16 @@ export const WalletNavState = types
       switch (self.protocol) {
         case ProtocolType.ETH_MAIN:
           return NetworkStoreType.ETHEREUM;
-          break;
         case ProtocolType.ETH_GORLI:
           return NetworkStoreType.ETHEREUM;
-          break;
         case ProtocolType.UQBAR:
           return NetworkStoreType.ETHEREUM;
-          break;
         case ProtocolType.BTC_MAIN:
           return NetworkStoreType.BTC_MAIN;
-          break;
         case ProtocolType.BTC_TEST:
           return NetworkStoreType.BTC_TEST;
-          break;
         default:
           return NetworkStoreType.ETHEREUM;
-          break;
       }
     },
   }));
@@ -882,7 +875,6 @@ export const WalletStore = types
     },
   }))
   .actions((self) => {
-    const initialState = {};
     return {
       setInitialized(initialized: boolean) {
         self.initialized = initialized;

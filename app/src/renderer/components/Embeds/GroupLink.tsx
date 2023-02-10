@@ -12,7 +12,7 @@ interface GroupViewProps {
   peers?: number;
 }
 
-const EmptyGroup = styled.div`
+const EmptyGroup = styled.div<{ color?: string }>`
   height: 48px;
   width: 48px;
   background: ${(p) => p.color || '#000'};
@@ -47,6 +47,7 @@ export const GroupLink = (props: GroupViewProps) => {
               width={48}
               height={48}
               src={props.picture}
+              alt="group link image"
             />
           ) : (
             <EmptyGroup color={props.color} />

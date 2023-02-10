@@ -133,7 +133,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
       const Spacer = (props: any) => (
         <Box m={1} height={24} width={64} borderBottom={props.border} />
       );
-      const Next = (props: any) => (
+      const Next = () => (
         <Box
           m={1}
           height={24}

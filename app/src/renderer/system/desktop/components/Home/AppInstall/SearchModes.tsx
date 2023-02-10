@@ -1,4 +1,4 @@
-import { FC, useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import { rgba } from 'polished';
@@ -11,6 +11,7 @@ import {
   InstallStatus,
   UrbitAppType,
   DocketAppType,
+  AppType,
 } from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
 import { useServices } from 'renderer/logic/store';
@@ -18,7 +19,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { toJS } from 'mobx';
 
-export const SearchModes = observer(() => {
+const SearchModesPresenter = () => {
   const { bazaar, theme } = useServices();
   const [data, setData] = useState<any>([]);
   const {
@@ -89,11 +90,12 @@ export const SearchModes = observer(() => {
       {searchMode === 'app-summary' && renderAppSummary()}
     </>
   );
-});
+};
 
-const AppInstallStart = observer(() => {
-  const { bazaar, theme, spaces } = useServices();
-  const spacePath: string = spaces.selected?.path!;
+export const SearchModes = observer(SearchModesPresenter);
+
+const AppInstallStartPresenter = () => {
+  const { bazaar, theme } = useServices();
   const appInstaller = useAppInstaller();
 
   const textFaded = useMemo(
@@ -107,7 +109,7 @@ const AppInstallStart = observer(() => {
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(spacePath, bazaar.getRecentApps(), theme.currentTheme)}
+          {renderApps(bazaar.getRecentApps() as AppType[], theme.currentTheme)}
         </Flex>
       </Flex>
       <div style={{ marginTop: '16px', marginBottom: '16px' }}>
@@ -129,9 +131,11 @@ const AppInstallStart = observer(() => {
       </Flex>
     </NoScrollBar>
   );
-});
+};
 
-const renderApps = (space: string, apps: any, theme: any) => {
+const AppInstallStart = observer(AppInstallStartPresenter);
+
+const renderApps = (apps: AppType[], theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!apps || apps.length === 0) {
@@ -150,12 +154,11 @@ const renderApps = (space: string, apps: any, theme: any) => {
   return installedApps.map((app: any, index: number) => (
     <AppRow
       key={index}
-      caption={app.title}
       app={app}
       descriptionWidth={450}
       onClick={() => {
-        DesktopActions.openAppWindow(space, toJS(app));
-        DesktopActions.setHomePane(false);
+        DesktopActions.openAppWindow(toJS(app));
+        DesktopActions.closeHomePane();
       }}
     />
   ));
@@ -203,18 +206,18 @@ const renderDevs = (
     );
   });
 };
-const renderAppSearch = (apps: any, theme: any) => {
+const renderAppSearch = (apps: AppType[], theme: any) => {
   return (
     <Flex flexDirection="column" gap={12}>
       <Text fontWeight={'bold'} mb={1}>
         Installed Apps
       </Text>
-      {renderApps('', apps, theme)}
+      {renderApps(apps, theme)}
     </Flex>
   );
 };
 
-const AppProviders: FC<any> = observer(() => {
+const AppProvidersPresenter = () => {
   const appInstaller = useAppInstaller();
   const { bazaar } = useServices();
   const onProviderClick = (ship: string) => {
@@ -249,8 +252,11 @@ const AppProviders: FC<any> = observer(() => {
       </>
     )
   );
-});
-const ShipSearch: FC<any> = observer(() => {
+};
+
+const AppProviders = observer(AppProvidersPresenter);
+
+const ShipSearchPresenter = () => {
   const { theme } = useServices();
 
   return (
@@ -263,9 +269,11 @@ const ShipSearch: FC<any> = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
 
-const DevApps = observer(() => {
+const ShipSearch = observer(ShipSearchPresenter);
+
+const DevAppsPresenter = () => {
   const { theme, bazaar } = useServices();
   const {
     searchString,
@@ -339,7 +347,6 @@ const DevApps = observer(() => {
       {apps?.map((app: DocketAppType, index: number) => (
         <div key={index}>
           <AppRow
-            caption={app.title}
             app={app}
             actionRenderer={(app: DocketAppType) =>
               app.id && <InstallButton app={app} />
@@ -364,9 +371,11 @@ const DevApps = observer(() => {
       ))}
     </>
   );
-});
+};
 
-const DevAppSearch: FC = observer(() => {
+const DevApps = observer(DevAppsPresenter);
+
+const DevAppSearchPresenter = () => {
   const { theme } = useServices();
   const { selectedShip } = useAppInstaller();
 
@@ -386,4 +395,6 @@ const DevAppSearch: FC = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+const DevAppSearch = observer(DevAppSearchPresenter);

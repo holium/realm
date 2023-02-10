@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { sigil, reactRenderer } from '@tlon/sigil-js';
 import { AvatarWrapper, SigilStyle } from './Sigil.styles';
 
@@ -16,19 +16,18 @@ export interface SigilProps {
   opacity?: number;
 }
 
-export const Sigil: FC<SigilProps> = (props: SigilProps) => {
-  const {
-    patp,
-    avatar,
-    size,
-    color,
-    borderRadiusOverride,
-    simple,
-    clickable,
-    isLogin,
-    opacity,
-  } = props;
-  return useMemo(() => {
+export const Sigil = ({
+  patp,
+  avatar,
+  size = 30,
+  color,
+  borderRadiusOverride,
+  simple = true,
+  clickable,
+  isLogin,
+  opacity,
+}: SigilProps) =>
+  useMemo(() => {
     const sigilSize = size / 2;
     const horizontalPadding = sigilSize / 2;
     return avatar ? (
@@ -85,11 +84,5 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
       </SigilStyle>
     );
   }, [patp, avatar, color]);
-};
-
-Sigil.defaultProps = {
-  size: 30,
-  simple: true,
-};
 
 export default { Sigil };

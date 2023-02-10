@@ -1,5 +1,4 @@
 import {
-  FC,
   useMemo,
   Dispatch,
   SetStateAction,
@@ -26,7 +25,7 @@ interface ImportProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-export const Import: FC<ImportProps> = observer((props: ImportProps) => {
+const ImportPresenter = (props: ImportProps) => {
   const { theme } = useServices();
   const themeData = useMemo(
     () => getBaseTheme(theme.currentTheme),
@@ -38,9 +37,6 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
     props.setSeedPhrase(phrase);
     props.setScreen(NewWalletScreen.PASSCODE);
   };
-
-  console.log(phrase);
-  console.log('is valid? ', ethers.utils.isValidMnemonic(phrase));
 
   return (
     <Flex width="100%" height="100%" flexDirection="column">
@@ -67,7 +63,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setPhrase(e.target.value)
             }
-            autoFocus={true}
+            // autoFocus={true}
           />
         </FormControl.Field>
         <Flex mt={7} width="100%">
@@ -94,4 +90,6 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Import = observer(ImportPresenter);

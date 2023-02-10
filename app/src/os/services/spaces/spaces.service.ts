@@ -300,7 +300,7 @@ export class SpacesService extends BaseService {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core!.conduit);
+    this.models.beacon.load(this.core!.conduit!);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -315,7 +315,13 @@ export class SpacesService extends BaseService {
       this.models.visas.initialIncoming(visas);
     });
 
-    this.state.selected && this.setTheme(this.state.selected?.theme);
+    // setting provider to current space host
+    if (this.state.selected) {
+      this.setTheme(this.state.selected.theme);
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected.path)
+      );
+    }
 
     // initial sync effect
     const syncEffect = {
@@ -353,12 +359,6 @@ export class SpacesService extends BaseService {
 
     BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
 
-    // setting provider to current space host
-    if (this.state.selected) {
-      this.core.services.ship.rooms.setProvider(
-        getHost(this.state.selected!.path)
-      );
-    }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
     BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
@@ -387,8 +387,7 @@ export class SpacesService extends BaseService {
     );
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
-    const selected = this.state?.selectSpace(spacePath);
-    selected && this.setTheme({ ...selected.theme, id });
+    this.setSelected(_event, spacePath);
     return spacePath;
   }
 
@@ -446,13 +445,14 @@ export class SpacesService extends BaseService {
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    // don't block for responsiveness, what about error handling?
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+      console.error('Error setting current space', e);
+    });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
-    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
-    // if (currentRoomProvider !== spaceHost)
-    console.log(spaceHost);
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
@@ -627,11 +627,11 @@ export class SpacesService extends BaseService {
     });
   }
 
-  async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
   }
 
-  async newInstaller(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.newInstaller(
     //   this.core.conduit!,
     //   ship,
@@ -671,11 +671,11 @@ export class SpacesService extends BaseService {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }
 
-  async addApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
   }
 
-  async removeApp(_event: IpcMainInvokeEvent, appId: string) {
+  async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
@@ -688,8 +688,8 @@ export class SpacesService extends BaseService {
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
     return await this.models.beacon.notes
-      .get(noteId)
-      .markSeen(this.core.conduit!, noteId);
+      ?.get(noteId)
+      ?.markSeen(this.core.conduit!);
     // return await BeaconApi.sawNote(this.core.conduit!, noteId);
   }
   async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {

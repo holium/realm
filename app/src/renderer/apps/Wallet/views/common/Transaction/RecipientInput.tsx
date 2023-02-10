@@ -9,8 +9,8 @@ import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
-import { Input, ContainerFlex } from './styled';
-import { Avatar } from '@holium/design-system';
+import { ContainerFlex } from './styled';
+import { Avatar, Input } from '@holium/design-system';
 
 export const RecipientInput = observer(
   (props: {
@@ -166,7 +166,6 @@ export const RecipientInput = observer(
           <Avatar
             sigilColor={[metadata.color, 'white']}
             avatar={metadata.avatar}
-            // avatar="https://pbs.twimg.com/profile_images/1617694432182116355/dl7EmMk5_400x400.jpg"
             simple={true}
             size={24}
             patp={valueCache}
@@ -222,6 +221,7 @@ export const RecipientInput = observer(
             TO
           </Text>
           <ContainerFlex
+            className="realm-cursor-hover"
             focusBorder={themeData.colors.brand.primary}
             px={1}
             py={1}
@@ -241,7 +241,6 @@ export const RecipientInput = observer(
             </Flex>
             <Flex flexDirection="column">
               <Input
-                mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
                 width="100%"
                 placeholder="@p or recipient’s address"
                 spellCheck="false"

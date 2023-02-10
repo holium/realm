@@ -1,4 +1,4 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { CreateWindowProps } from '../../../os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
@@ -7,6 +7,7 @@ import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceC
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
+import { Dimensions } from 'os/types';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -29,13 +30,14 @@ export type BaseDialogProps = {
   draggable?: boolean;
   unblurOnClose?: boolean;
   theme?: ThemeModelType;
+  edit?: any;
 } & BaseWorkflowProps;
 
 export type DialogConfig = {
   titlebar?: React.FC<any>;
   component: React.FC<any>;
   stateKey?: string;
-  window: WindowModelProps;
+  getWindowProps: (dekstopDimensions: Dimensions) => CreateWindowProps;
 } & BaseDialogProps;
 
 export interface DialogRenderers {

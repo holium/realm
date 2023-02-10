@@ -18,9 +18,7 @@ export default function initCellMetadata({
   let offset = 0;
 
   for (var i = 0; i < cellCount; i++) {
-    const size = sizeGetter({
-      index: i,
-    });
+    const size = sizeGetter();
 
     if (size == null || isNaN(size)) {
       throw Error(`Invalid size returned for cell ${i} of value ${size}`);

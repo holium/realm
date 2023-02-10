@@ -1,20 +1,8 @@
 import { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Grid,
-  Flex,
-  Text,
-  Input,
-  Icons,
-  IconButton,
-  FormControl,
-  TextButton,
-  Tag,
-  Spinner,
-} from 'renderer/components';
+import { FormControl, Tag, Spinner } from 'renderer/components';
+import { Flex, Text, TextInput, Icon, Button } from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
 import { DMPreviewType } from 'os/services/ship/models/courier';
@@ -28,10 +16,9 @@ interface IProps {
   onCreateNewDm: (newDmKey: DMPreviewType) => void;
 }
 
-export const NewChat = observer((props: IProps) => {
-  const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
+const NewChatPresenter = (props: IProps) => {
+  const { height, headerOffset, onBack, onCreateNewDm } = props;
   const { contacts } = useServices();
-  const { textColor, iconColor, dockColor, windowColor } = theme;
   const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 
@@ -106,11 +93,11 @@ export const NewChat = observer((props: IProps) => {
               }}
             >
               <Flex alignItems="center" width="max-content">
-                <Text fontSize={2}>{contactName}</Text>
+                <Text.Custom fontSize={2}>{contactName}</Text.Custom>
                 {nickname ? (
-                  <Text ml={2} fontSize={2} opacity={0.7}>
+                  <Text.Custom ml={2} fontSize={2} opacity={0.7}>
                     {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-                  </Text>
+                  </Text.Custom>
                 ) : (
                   []
                 )}
@@ -123,54 +110,48 @@ export const NewChat = observer((props: IProps) => {
   }
 
   return (
-    <Grid.Column
-      style={{ position: 'relative', color: textColor }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...props.theme,
-          windowColor,
-        }}
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb="10px"
       >
         <Flex flex={1} justifyContent="space-between" alignItems="center">
-          <Flex position="relative" zIndex={3} pl={3}>
-            <IconButton
-              customBg={dockColor}
+          <Flex position="relative" zIndex={3}>
+            <Button.IconButton
               className="realm-cursor-hover"
-              size={28}
-              color={iconColor}
+              size={26}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onBack();
               }}
             >
-              <Icons name="ArrowLeftLine" />
-            </IconButton>
+              <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+            </Button.IconButton>
           </Flex>
           <Flex
             zIndex={2}
             position="absolute"
-            width="100%"
+            width="calc(100% - 24px)"
             flexDirection="row"
             alignItems="center"
             justifyContent="center"
             flex={1}
           >
-            <Text
+            <Text.Custom
               opacity={0.8}
-              style={{ textTransform: 'uppercase' }}
+              textTransform="uppercase"
               fontWeight={600}
             >
               New Chat
-            </Text>
+            </Text.Custom>
           </Flex>
-          <Flex position="relative" zIndex={3} pr="6px">
-            <TextButton
+          <Flex position="relative" zIndex={3}>
+            <Button.TextButton
+              showOnHover
+              height={26}
+              fontWeight={500}
               disabled={selectedPatp.size === 0}
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -178,44 +159,33 @@ export const NewChat = observer((props: IProps) => {
               }}
             >
               Create
-            </TextButton>
+            </Button.TextButton>
           </Flex>
         </Flex>
-      </Titlebar>
-      <Grid.Column
+      </Flex>
+      <Flex
         gap={4}
         pt={0}
         mb={3}
-        noGutter
-        expand
-        marginTop={headerOffset}
+        flexDirection="column"
         overflowY="hidden"
+        position="relative"
         height={height - headerOffset}
-        style={{ backgroundColor: windowColor, position: 'relative' }}
       >
-        <FormControl.Field mt={2}>
-          <Input
+        <FormControl.Field>
+          <TextInput
+            id="new-chat-patp-search"
+            name="new-chat-patp-search"
             tabIndex={1}
-            name="new-contact"
+            mx={2}
+            width="100%"
             className="realm-cursor-text-cursor"
-            height={32}
             placeholder="Who would you like to add?"
-            // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
             value={patp}
             onChange={(e: any) => setPatp(e.target.value)}
             // onFocus={() => urbitId.actions.onFocus()}
             // onBlur={() => urbitId.actions.onBlur()}
-            wrapperStyle={{
-              marginLeft: 8,
-              marginRight: 8,
-              width: 'calc(100% - 16px)',
-              borderRadius: 9,
-              borderColor: 'transparent',
-              backgroundColor:
-                theme.mode === 'dark'
-                  ? lighten(0.1, windowColor)
-                  : darken(0.055, windowColor),
-            }}
+            // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
           />
         </FormControl.Field>
         {loading && (
@@ -230,21 +200,22 @@ export const NewChat = observer((props: IProps) => {
             position="absolute"
           >
             <Spinner size={1} />
-            <Text mt={3} opacity={0.4}>
+            <Text.Custom mt={3} opacity={0.4}>
               {selectedPatp.size > 1 ? 'Creating group chat...' : ''}
-            </Text>
+            </Text.Custom>
           </Flex>
         )}
         {contactArray}
-        <Flex pl={2} pr={2} flex={1} flexDirection="column">
+        <Flex flex={1} flexDirection="column">
           <ShipSearch
             search={patp}
             selected={selectedPatp}
-            customBg={windowColor}
             onSelected={(contact: any) => onShipSelected(contact)}
           />
         </Flex>
-      </Grid.Column>
-    </Grid.Column>
+      </Flex>
+    </>
   );
-});
+};
+
+export const NewChat = observer(NewChatPresenter);

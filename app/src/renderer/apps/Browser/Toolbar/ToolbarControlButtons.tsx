@@ -6,6 +6,7 @@ type Props = {
   showDevToolsToggle: boolean;
   toggleDevTools: () => void;
   onClose: () => void;
+  onMinimize: () => void;
   onMaximize: () => void;
 };
 
@@ -14,6 +15,7 @@ export const ToolbarControlButtons = ({
   showDevToolsToggle,
   toggleDevTools,
   onClose,
+  onMinimize,
   onMaximize,
 }: Props) => (
   <Flex gap={4}>
@@ -28,6 +30,15 @@ export const ToolbarControlButtons = ({
         }}
       />
     )}
+    <WindowIcon
+      icon="Minimize"
+      iconColor={iconColor}
+      bg="#97A3B2"
+      onClick={(evt) => {
+        evt.stopPropagation();
+        onMinimize && onMinimize();
+      }}
+    />
     <WindowIcon
       icon="Expand"
       iconColor={iconColor}

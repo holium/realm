@@ -73,6 +73,7 @@ export const Message = ({
               width={250}
               src={message}
               onLoad={onImageLoad}
+              alt="message image"
             />
           </a>
         );
@@ -109,6 +110,7 @@ export const Message = ({
       if (typeof message === 'string') {
         messageContainer = <Text fontSize={2}>{message}</Text>;
       } else {
+        // @ts-ignore
         messageContainer = <Text fontSize={2}>{message.expression}</Text>;
       }
       break;

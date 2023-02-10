@@ -1,15 +1,10 @@
 import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
 import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
-import Realm from '../../../..';
 import { removeDots } from '../../../../api/uqbar';
 import EncryptedStore from '../../../../lib/encryptedStore';
 
 export class RealmSigner implements BaseSigner {
-  private core: Realm;
-  constructor(core: Realm) {
-    this.core = core;
-  }
   // TODO use ethers wallet encryption
   setMnemonic(mnemonic: string, patp: string, passcode: string) {
     /*const encryptedMnemonic = safeStorage

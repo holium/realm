@@ -538,7 +538,7 @@ export class RealmProtocol extends BaseProtocol {
    * @param rid
    */
   hangupAll() {
-    this.presentRoom = undefined;
+    this.presentRoom = null;
     this.disposePresentRoom && this.disposePresentRoom();
     //  hangup all peers
     this.peers.forEach((peer) => {

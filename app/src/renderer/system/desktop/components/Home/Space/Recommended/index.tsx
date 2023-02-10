@@ -1,10 +1,9 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 import { AppPreview } from './AppPreview';
 
-export const RecommendedApps: FC = observer(() => {
+const RecommendedAppsPresenter = () => {
   const { spaces, bazaar } = useServices();
 
   const currentSpace = spaces.selected;
@@ -35,4 +34,6 @@ export const RecommendedApps: FC = observer(() => {
         )}
     </Flex>
   );
-});
+};
+
+export const RecommendedApps = observer(RecommendedAppsPresenter);

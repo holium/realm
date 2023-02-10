@@ -1,55 +1,48 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { Box, Flex, IconButton, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
-// @ts-expect-error its there...
+import styled from 'styled-components';
+
+const Wrapper = styled(Box)`
+  position: absolute;
+  z-index: 3;
+  bottom: -12px;
+  left: -12px;
+  right: -12px;
+  padding: 12px;
+  height: 50px;
+  width: calc(100% + 24px);
+  /* background-color: var(--rlm-window-bg); */
+  /* backdrop-filter: blur(24px); */
+  display: ${(props) => (props.hidden ? 'none' : 'block')};
+`;
 
 interface WalletFooterProps {
-  hidden: boolean;
+  hidden?: boolean;
 }
 
-export const WalletFooter: FC<WalletFooterProps> = observer(
-  (props: WalletFooterProps) => {
-    const { walletApp } = useTrayApps();
-    const { theme } = useServices();
+export const WalletFooterPresenter = ({
+  hidden = false,
+}: WalletFooterProps) => {
+  const { walletApp } = useTrayApps();
 
-    const [click, setClick] = useState(false);
-    const [uqbarDeskExists, setUqbarDeskExists] = useState(false);
-    const toggleUqbar = () => {
-      if (click) {
-        WalletActions.toggleUqbar();
-      }
-      setClick(!click);
-    };
+  useEffect(() => {
+    WalletActions.uqbarDeskExists();
+  }, []);
 
-    useEffect(() => {
-      WalletActions.uqbarDeskExists().then((exists) => {
-        setUqbarDeskExists(exists);
-      });
-    }, []);
-
-    return (
-      <Box width="100%" hidden={props.hidden}>
-        <Flex
-          z-index={3}
-          bottom={0}
-          px="12px"
-          pb="12px"
-          pt="12px"
-          width="100%"
-          justifyContent="space-between"
-          style={{ backgroundColor: theme.currentTheme.windowColor }}
-        >
-          <Box mr={1}>
-            <WalletNetwork network={walletApp.navState.protocol} />
-          </Box>
-          <Flex>
-            <Flex mr="10px">
-              {/*walletApp.navState.network === NetworkType.ETHEREUM &&
+  return (
+    <Wrapper hidden={hidden}>
+      <Flex justifyContent="space-between">
+        <Box mr={1}>
+          <WalletNetwork network={walletApp.navState.protocol} />
+        </Box>
+        <Flex>
+          <Flex mr="10px">
+            {/*walletApp.navState.network === NetworkType.ETHEREUM &&
                 (uqbarDeskExists ? (
                   <ImageToggle
                     src={UqbarLogo}
@@ -74,19 +67,17 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
                     />
                   </Tooltip>
                 ))*/}
-            </Flex>
-            <IconButton
-              onClick={async () =>
-                await WalletActions.navigate(WalletView.SETTINGS)
-              }
-            >
-              <Icons name="Settings" size={2} />
-            </IconButton>
           </Flex>
+          <Button.IconButton
+            size={24}
+            onClick={() => WalletActions.navigate(WalletView.SETTINGS)}
+          >
+            <Icon name="Settings" size={20} opacity={0.5} />
+          </Button.IconButton>
         </Flex>
-      </Box>
-    );
-  }
-);
+      </Flex>
+    </Wrapper>
+  );
+};
 
-export default WalletFooter;
+export const WalletFooter = observer(WalletFooterPresenter);

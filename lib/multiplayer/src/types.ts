@@ -133,6 +133,7 @@ export interface RealmMultiplayerInterface {
     event: string,
     handler: (payload: T) => void
   ) => () => void;
+  // eslint-disable-next-line no-restricted-globals
   close: typeof close;
 }
 

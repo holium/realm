@@ -22,7 +22,7 @@ export const MiniAppWindow = styled(motion.div)<MiniAppStyleProps>`
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   background: var(--rlm-window-color);
-  border: 1px solid var(--rlm-window-border-color);
+  border: 1px solid var(--rlm-border-color);
   z-index: 12;
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
 `;
@@ -36,7 +36,7 @@ interface MiniAppProps {
   children: any | React.ReactNode;
 }
 
-export const MiniApp = observer(({ id, children, innerRef }: MiniAppProps) => {
+const MiniAppPresenter = ({ id, children, innerRef }: MiniAppProps) => {
   const { dimensions } = useTrayApps();
 
   return (
@@ -53,4 +53,6 @@ export const MiniApp = observer(({ id, children, innerRef }: MiniAppProps) => {
       {children}
     </MiniAppWindow>
   );
-});
+};
+
+export const MiniApp = observer(MiniAppPresenter);

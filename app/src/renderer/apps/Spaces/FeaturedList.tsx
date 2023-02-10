@@ -18,7 +18,7 @@ export interface Space {
   token?: string;
 }
 
-export const FeaturedList = observer(() => {
+const FeaturedListPresenter = () => {
   const { theme, spaces, bulletin } = useServices();
   const { windowColor } = theme.currentTheme;
 
@@ -36,10 +36,10 @@ export const FeaturedList = observer(() => {
     );
   }
   return (
-    <Flex flex={1} px={10} width="100%">
+    <Flex flex={1} width="100%">
       <WindowedList
         key={`featured-spaces-${listData.length}`}
-        width={358}
+        width={354}
         data={listData}
         rowRenderer={(data: any) => {
           const onJoin = async () => {
@@ -125,4 +125,6 @@ export const FeaturedList = observer(() => {
       />
     </Flex>
   );
-});
+};
+
+export const FeaturedList = observer(FeaturedListPresenter);

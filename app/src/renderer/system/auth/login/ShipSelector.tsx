@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
 import { motion, Reorder } from 'framer-motion';
@@ -25,7 +25,7 @@ export const SelectedLine = styled(motion.div)`
     lighten(0.05, props.theme.colors.brand.primary)};
 `;
 
-export const ShipSelector: FC = observer(() => {
+const ShipSelectorPresenter = () => {
   const { identity } = useServices();
   const { auth } = identity;
   const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
@@ -40,7 +40,7 @@ export const ShipSelector: FC = observer(() => {
         value={shipKey}
         style={{ zIndex: 1 }}
         whileDrag={{ zIndex: 20 }}
-        onDragStart={(evt: any) => setDragging(true)}
+        onDragStart={() => setDragging(true)}
         onClick={() => {
           !dragging && AuthActions.setSelected(ship.patp);
         }}
@@ -112,4 +112,6 @@ export const ShipSelector: FC = observer(() => {
       {shipList}
     </Reorder.Group>
   );
-});
+};
+
+export const ShipSelector = observer(ShipSelectorPresenter);

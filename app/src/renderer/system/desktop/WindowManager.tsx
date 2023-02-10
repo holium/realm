@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import AppWindow from './components/Window';
+import { AppWindow } from './components/Window/Window';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -10,11 +10,9 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-export const WindowManager = observer(() => {
+const WindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
-  const isOpen = !desktop.showHomePane;
-  const desktopRef = useRef<any>(null);
   const id = 'desktop-fill';
 
   const windows = Array.from(desktop.windows.values());
@@ -55,9 +53,8 @@ export const WindowManager = observer(() => {
   return (
     <motion.div
       id={id}
-      ref={desktopRef}
       animate={{
-        display: isOpen ? 'block' : 'none',
+        display: desktop.isHomePaneOpen ? 'none' : 'block',
       }}
       style={{
         bottom: 0,
@@ -71,12 +68,10 @@ export const WindowManager = observer(() => {
       }}
     >
       {windows.map((window: any, index: number) => (
-        <AppWindow
-          key={`${window.id}-${index}`}
-          desktopRef={desktopRef}
-          window={window}
-        />
+        <AppWindow key={`${window.id}-${index}`} window={window} />
       ))}
     </motion.div>
   );
-});
+};
+
+export const WindowManager = observer(WindowManagerPresenter);

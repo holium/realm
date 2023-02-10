@@ -1,15 +1,12 @@
-import React, { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Card } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
-export const HelpPanel: FC<any> = observer(() => {
-  const { theme, ship, contacts } = useServices();
-
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
-
+const HelpPanelPresenter = () => {
+  const { theme } = useServices();
+  const { windowColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   return (
@@ -17,10 +14,6 @@ export const HelpPanel: FC<any> = observer(() => {
       <Text fontSize={7} fontWeight={600} mb={6}>
         Help
       </Text>
-
-      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      Coming Soon
-    </Text> */}
       <Card
         p="20px"
         width="100%"
@@ -33,4 +26,6 @@ export const HelpPanel: FC<any> = observer(() => {
       </Card>
     </Flex>
   );
-});
+};
+
+export const HelpPanel = observer(HelpPanelPresenter);

@@ -1,4 +1,4 @@
-import { PointerEvent, useRef } from 'react';
+import { PointerEvent, RefObject, useRef } from 'react';
 import styled from 'styled-components';
 import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { Icons } from 'renderer/components';
@@ -21,21 +21,24 @@ export interface BrowserToolbarProps {
   windowColor: string;
   showDevToolsToggle: boolean;
   dragControls: ReturnType<typeof useDragControls>;
+  innerRef?: RefObject<HTMLDivElement>;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
   onDragStop: (e: PointerEvent<HTMLDivElement>) => void;
   onClose: () => any;
+  onMinimize: () => any;
   onMaximize: () => any;
 }
 
 export const BrowserToolbar = observer(
   ({
     zIndex,
-    windowColor,
     showDevToolsToggle = true,
     dragControls,
+    innerRef,
     onDragStop,
     onDragStart,
     onClose,
+    onMinimize,
     onMaximize,
   }: BrowserToolbarProps) => {
     const { currentTab } = useBrowser();
@@ -87,11 +90,11 @@ export const BrowserToolbar = observer(
 
     return (
       <ToolbarStyle
+        ref={innerRef}
         hasBlur={false}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         zIndex={zIndex}
-        customBg={windowColor}
         hasBorder
       >
         <Icons name="AppIconCompass" size="28px" />
@@ -109,6 +112,7 @@ export const BrowserToolbar = observer(
           showDevToolsToggle={showDevToolsToggle}
           toggleDevTools={toggleDevTools}
           onClose={onClose}
+          onMinimize={onMinimize}
           onMaximize={onMaximize}
         />
       </ToolbarStyle>

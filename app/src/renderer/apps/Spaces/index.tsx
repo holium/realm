@@ -1,14 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import {
-  Grid,
-  Flex,
-  IconButton,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { Input, Spinner } from 'renderer/components';
+import { Text, Flex, Button, Icon } from '@holium/design-system';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
@@ -21,15 +13,14 @@ import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
 import { FeaturedList } from './FeaturedList';
 
-export const SpacesTrayApp = observer(() => {
+const SpacesTrayAppPresenter = () => {
   const { ship, theme, spaces } = useServices();
   const { dimensions } = useTrayApps();
-
   const themeData = getBaseTheme(theme.currentTheme);
   const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
-  const { dockColor, iconColor, textColor, windowColor, mode, inputColor } =
-    spaceTheme;
+  const { windowColor, mode, inputColor } = spaceTheme;
   const [searchString, setSearchString] = useState<string>('');
+
   const isValidSpace = (space: string) => {
     if (!space.includes('/')) {
       return false;
@@ -39,14 +30,13 @@ export const SpacesTrayApp = observer(() => {
     const spaceName = pathArr[1];
     return ship.length > 1 && isValidPatp(ship) && spaceName.length > 0;
   };
-
   const themeInputColor = useMemo(
     () =>
       mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
     [inputColor, mode]
   );
 
-  const bottomHeight = 58;
+  const bottomHeight = 54;
 
   const [searchVisible, setSearchVisible] = useState(false);
 
@@ -65,170 +55,149 @@ export const SpacesTrayApp = observer(() => {
   }
 
   return (
-    <Grid.Column
-      style={{
-        position: 'relative',
-        height: dimensions.height,
-        background: windowColor,
-      }}
-      expand
-      noGutter
-      overflowY="hidden"
+    <Flex
+      height={dimensions.height - 24}
+      flexDirection="column"
+      position="relative"
     >
-      <Grid.Row
-        style={{
-          position: 'relative',
-          zIndex: 5,
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 50,
-          paddingLeft: 16,
-          paddingRight: 16,
-        }}
-        expand
-        noGutter
-        justify="space-between"
-        align="center"
+      <Flex
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
       >
-        <Text
-          opacity={0.8}
-          color={textColor}
-          style={{ textTransform: 'uppercase' }}
-          fontWeight={600}
+        <Text.Custom
+          fontWeight="600"
+          textTransform="uppercase"
+          pl={1}
+          opacity={0.7}
         >
           Spaces
-        </Text>
-        <Flex>
-          <IconButton
+        </Text.Custom>
+        <Flex flexDirection="row" gap={8}>
+          <Button.IconButton
             className="realm-cursor-hover"
-            style={{ cursor: 'none' }}
-            customBg={dockColor}
-            size={28}
-            color={iconColor}
-            data-close-tray="false"
+            width={26}
+            height={26}
             onClick={() => {
               SpacesActions.setJoin('initial');
               setSearchVisible(!searchVisible);
             }}
-            mr={1}
           >
-            <Icons name="SearchSm" opacity={0.7} />
-          </IconButton>
-          <IconButton
+            <Icon name="Search" size={20} opacity={0.7} />
+          </Button.IconButton>
+          <Button.IconButton
             className="realm-cursor-hover"
-            style={{ cursor: 'none' }}
-            customBg={dockColor}
-            size={28}
-            color={iconColor}
             data-close-tray="true"
+            width={26}
+            height={26}
             onClick={() => {
               ShellActions.openDialog('create-space-1');
             }}
           >
-            <Icons name="Plus" opacity={0.7} />
-          </IconButton>
+            <Icon name="Plus" size={24} opacity={0.7} />
+          </Button.IconButton>
         </Flex>
-      </Grid.Row>
+      </Flex>
       {searchVisible && spaces.join.state !== 'loaded' ? (
         <Flex
           position="absolute"
+          flexDirection="column"
           width="100%"
-          style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
+          style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
           overflowY="hidden"
         >
-          <Grid.Column>
-            <Flex position="relative">
-              <Input
-                tabIndex={1}
-                autoCapitalize="false"
-                autoCorrect="false"
-                autoComplete="false"
-                name="person"
-                height={34}
-                placeholder="Enter space path (e.g. ~zod/galaxy-space)"
-                bg={
-                  mode === 'light'
-                    ? lighten(0.2, inputColor)
-                    : darken(0.005, inputColor)
-                }
-                wrapperMotionProps={{
-                  initial: {
-                    backgroundColor: themeInputColor,
-                  },
-                  animate: {
-                    backgroundColor: themeInputColor,
-                  },
-                  transition: {
-                    backgroundColor: { duration: 0.3 },
-                    borderColor: { duration: 0.3 },
-                    color: { duration: 0.5 },
-                  },
-                }}
-                wrapperStyle={{
-                  borderRadius: 6,
-                  paddingRight: 4,
-                }}
-                onChange={(evt: any) => {
-                  evt.stopPropagation();
-                  SpacesActions.setJoin('initial');
-                  setSearchString(evt.target.value);
-                }}
-                rightInteractive
-                rightIcon={
-                  <TextButton
-                    disabled={!isValidSpace(searchString)}
-                    onClick={(evt: any) => {
-                      SpacesActions.setJoin('loading');
-                      SpacesActions.joinSpace(searchString);
-                    }}
-                  >
-                    {spaces.join.state === 'loading' ? (
-                      <Spinner size={0} />
-                    ) : (
-                      'Join'
-                    )}
-                  </TextButton>
-                }
-                onKeyDown={(evt: any) => {
-                  if (evt.key === 'Enter' && isValidSpace(searchString)) {
+          <Flex position="relative" flexDirection="column">
+            <Input
+              tabIndex={1}
+              autoCapitalize="false"
+              autoCorrect="false"
+              autoComplete="false"
+              name="person"
+              height={34}
+              placeholder="Enter space path (e.g. ~zod/galaxy-space)"
+              bg={
+                mode === 'light'
+                  ? lighten(0.2, inputColor)
+                  : darken(0.005, inputColor)
+              }
+              wrapperMotionProps={{
+                initial: {
+                  backgroundColor: themeInputColor,
+                },
+                animate: {
+                  backgroundColor: themeInputColor,
+                },
+                transition: {
+                  backgroundColor: { duration: 0.3 },
+                  borderColor: { duration: 0.3 },
+                  color: { duration: 0.5 },
+                },
+              }}
+              wrapperStyle={{
+                borderRadius: 6,
+                paddingRight: 4,
+              }}
+              onChange={(evt: any) => {
+                evt.stopPropagation();
+                SpacesActions.setJoin('initial');
+                setSearchString(evt.target.value);
+              }}
+              rightInteractive
+              rightIcon={
+                <Button.TextButton
+                  disabled={!isValidSpace(searchString)}
+                  onClick={() => {
                     SpacesActions.setJoin('loading');
                     SpacesActions.joinSpace(searchString);
-                  }
-                }}
-              />
+                  }}
+                >
+                  {spaces.join.state === 'loading' ? (
+                    <Spinner size={0} />
+                  ) : (
+                    'Join'
+                  )}
+                </Button.TextButton>
+              }
+              onKeyDown={(evt: any) => {
+                if (evt.key === 'Enter' && isValidSpace(searchString)) {
+                  SpacesActions.setJoin('loading');
+                  SpacesActions.joinSpace(searchString);
+                }
+              }}
+            />
+          </Flex>
+          <Flex width="100%" justifyContent="flex-end">
+            <Text.Custom fontSize="11px" color={themeData.colors.text.error}>
+              {spaces.join.state === 'error' &&
+                `Failed to join ${searchString}.`}
+              &nbsp;&nbsp;&nbsp;
+            </Text.Custom>
+          </Flex>
+          <Flex flexDirection="column" width="100%">
+            <Text.Custom
+              ml={1}
+              mt={1}
+              fontSize={2}
+              opacity={0.7}
+              fontWeight={500}
+            >
+              Featured
+            </Text.Custom>
+            <Flex
+              position="absolute"
+              width="100%"
+              style={{ bottom: bottomHeight, top: 80, left: 0, right: 0 }}
+              overflowY="hidden"
+            >
+              <FeaturedList />
             </Flex>
-            <Flex width="100%" justifyContent="flex-end">
-              <Text
-                variant="body"
-                fontSize="11px"
-                color={themeData.colors.text.error}
-              >
-                {spaces.join.state === 'error' &&
-                  `Failed to join ${searchString}.`}
-                &nbsp;&nbsp;&nbsp;
-              </Text>
-            </Flex>
-            <Flex flexDirection="column" width="100%">
-              <Text ml={1} mt={1} fontSize={2} opacity={0.7} fontWeight={500}>
-                Featured
-              </Text>
-              <Flex
-                position="absolute"
-                width="100%"
-                style={{ bottom: bottomHeight, top: 80, left: 0, right: 0 }}
-                overflowY="hidden"
-              >
-                <FeaturedList />
-              </Flex>
-            </Flex>
-          </Grid.Column>
+          </Flex>
         </Flex>
       ) : (
         <Flex
           position="absolute"
           width="100%"
-          style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
+          style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
           overflowY="hidden"
         >
           <SpacesList
@@ -243,15 +212,12 @@ export const SpacesTrayApp = observer(() => {
           />
         </Flex>
       )}
-      <Grid.Row expand noGutter></Grid.Row>
       <Flex
         position="absolute"
         bottom={0}
         left={0}
         right={0}
-        pl={4}
-        pr={4}
-        mb={2}
+        mb={1}
         flex={1}
         height={bottomHeight}
       >
@@ -264,6 +230,8 @@ export const SpacesTrayApp = observer(() => {
           }
         />
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
-});
+};
+
+export const SpacesTrayApp = observer(SpacesTrayAppPresenter);

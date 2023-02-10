@@ -64,7 +64,7 @@ const placementMaps = {
 interface TooltipStyleProps {
   placement: MenuOrientation;
 }
-// Tooltip
+
 export const TooltipStyle = styled(
   styled.div<TooltipStyleProps>`
     // position: absolute;
@@ -131,8 +131,7 @@ const baseMotionProps = {
 };
 
 export const Tooltip = (props: TooltipProps) => {
-  // const domNode = document.createElement('div');
-  const { id, style, content, delay, placement, children, show } = props;
+  const { id, style, content, placement, children, show } = props;
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   const [isVisible, setIsVisible] = React.useState(false);
@@ -146,6 +145,7 @@ export const Tooltip = (props: TooltipProps) => {
     );
   }
   return (
+    // @ts-ignore
     <TooltipWrapper ref={tooltipRef} style={style}>
       <Portal>
         {isVisible && (
@@ -156,6 +156,7 @@ export const Tooltip = (props: TooltipProps) => {
               {...props}
               {...baseMotionProps}
             >
+              {/* @ts-ignore */}
               <TooltipStyle
                 style={{ left: coords.left, top: coords.top }}
                 placement={placement}
@@ -183,7 +184,7 @@ export const Tooltip = (props: TooltipProps) => {
           evt.stopPropagation();
           show && setIsVisible(true);
         }}
-        onMouseLeave={(evt: any) => {
+        onMouseLeave={() => {
           // evt.stopPropagation();
           setIsVisible(false);
         }}

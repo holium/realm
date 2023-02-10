@@ -15,7 +15,7 @@ interface OurHomeProps {
   isOpen?: boolean;
 }
 
-export const OurHome = observer((props: OurHomeProps) => {
+const OurHomePresenter = (props: OurHomeProps) => {
   const { isOpen } = props;
   const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -147,4 +147,6 @@ export const OurHome = observer((props: OurHomeProps) => {
       </NoScrollBar>
     </Flex>
   );
-});
+};
+
+export const OurHome = observer(OurHomePresenter);

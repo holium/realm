@@ -1,9 +1,7 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import PasscodeInput from '../../../components/PasscodeInput';
-import { useTrayApps } from 'renderer/apps/store';
 
 interface PasscodeProps {
   onSuccess: (passcode: number[]) => void;
@@ -11,9 +9,6 @@ interface PasscodeProps {
 
 export const TransactionPasscode: FC<PasscodeProps> = observer(
   (props: PasscodeProps) => {
-    const { walletApp } = useTrayApps();
-    const { theme } = useServices();
-
     return (
       <Flex
         width="100%"

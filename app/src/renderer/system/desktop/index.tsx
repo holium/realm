@@ -1,27 +1,25 @@
+import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
-import { HomePane } from './components/Home';
+import { HomePane } from './components/Home/HomePane';
 import { useServices } from 'renderer/logic/store';
-import { observer } from 'mobx-react';
 import { TrayManager } from './TrayManager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 
-export const Desktop = observer(() => {
+const DesktopPresenter = () => {
   const { ship, desktop } = useServices();
-  const our = ship!.patp;
-  // creates first instance of roomsManager
-  useRooms(our);
+  useRooms(ship?.patp); // creates first instance of roomsManager
 
   return (
     <Fill>
+      <Layer zIndex={15}>
+        <TrayManager />
+      </Layer>
       <Layer zIndex={0}>
         <WindowManager />
       </Layer>
-      <Layer zIndex={1}>{desktop.showHomePane && <HomePane />}</Layer>
-      <Layer zIndex={13}>
-        <TrayManager />
-      </Layer>
+      <Layer zIndex={1}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>
         <Bottom size={56}>
           <SystemBar />
@@ -29,6 +27,6 @@ export const Desktop = observer(() => {
       </Layer>
     </Fill>
   );
-});
+};
 
-export default Desktop;
+export const Desktop = observer(DesktopPresenter);

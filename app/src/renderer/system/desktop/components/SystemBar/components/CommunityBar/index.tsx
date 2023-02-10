@@ -14,5 +14,3 @@ export const CommunityBar = () => {
     </BarStyle>
   );
 };
-
-export default { CommunityBar };

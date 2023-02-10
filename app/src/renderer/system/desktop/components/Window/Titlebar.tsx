@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react';
+import { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -77,33 +77,34 @@ interface TitlebarProps {
   children?: React.ReactNode;
 }
 
-export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
-  const {
-    children,
-    showDevToolsToggle,
-    closeButton,
-    hasBorder,
-    zIndex,
-    noTitlebar,
-    isAppWindow,
-    dragControls,
-    onDragStop,
-    onDragStart,
-    onClose,
-    onDevTools,
-    maximizeButton,
-    minimizeButton,
-    onMaximize,
-    onMinimize,
-    navigationButtons,
-    shareable,
-    hasBlur,
-  } = props;
-  const { windowColor, iconColor } = props.theme;
+export const Titlebar = ({
+  children,
+  app,
+  showDevToolsToggle,
+  closeButton,
+  hasBorder = true,
+  zIndex = 2,
+  noTitlebar,
+  isAppWindow,
+  dragControls,
+  onDragStop,
+  onDragStart,
+  onClose,
+  onDevTools,
+  maximizeButton,
+  minimizeButton,
+  onMaximize,
+  onMinimize,
+  navigationButtons,
+  shareable,
+  hasBlur,
+  theme,
+}: TitlebarProps) => {
+  const { windowColor, iconColor } = theme;
 
   let titleSection: any;
-  if (props.app) {
-    const { title, icon } = props.app;
+  if (app) {
+    const { title, icon } = app;
     titleSection = (
       <Flex gap={4} alignItems="center">
         <Flex justifyContent="center" alignItems="center">
@@ -197,7 +198,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
         isAppWindow && <Flex></Flex>
       )}
       {children}
-      {(maximizeButton || closeButton) && (
+      {(maximizeButton || closeButton || minimizeButton) && (
         <Flex gap={4} alignItems="center">
           {minimizeButton && (
             <WindowIcon
@@ -234,12 +235,4 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       )}
     </TitlebarStyle>
   );
-};
-
-Titlebar.defaultProps = {
-  zIndex: 2,
-  hasBorder: true,
-  // minimizeButton: true,
-  // maximizeButton: true,
-  // showDevToolsToggle: true,
 };

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
@@ -22,7 +22,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 
-export const AccountPanel: FC<any> = observer(() => {
+const AccountPanelPresenter = () => {
   const { theme, ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
   const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
@@ -332,4 +332,6 @@ export const AccountPanel: FC<any> = observer(() => {
       </Card>
     </Flex>
   );
-});
+};
+
+export const AccountPanel = observer(AccountPanelPresenter);

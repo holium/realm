@@ -30,7 +30,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
     isSubscribed ? '#38CD7C' : '#EA2424'};
 `;
 
-export const SystemPanel = observer(() => {
+const SystemPanelPresenter = () => {
   const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
@@ -41,14 +41,11 @@ export const SystemPanel = observer(() => {
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
-  type mouseOptionType = 'system' | 'realm';
   useEffect(() => {
     RealmActions.getMediaStatus().then((status) => {
       setMediaStatus(status);
     });
   }, []);
-
-  const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
 
   const apps = [
     {
@@ -316,4 +313,6 @@ export const SystemPanel = observer(() => {
     </Card> */}
     </Flex>
   );
-});
+};
+
+export const SystemPanel = observer(SystemPanelPresenter);

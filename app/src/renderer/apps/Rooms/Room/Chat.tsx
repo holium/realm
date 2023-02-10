@@ -1,12 +1,5 @@
-import { FC, useRef, useMemo, useState, useCallback } from 'react';
-import {
-  Flex,
-  Text,
-  Input,
-  Spinner,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import { useRef, useMemo, useCallback } from 'react';
+import { Flex, Text, Input, IconButton, Icons } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
@@ -14,8 +7,6 @@ import { useServices } from 'renderer/logic/store';
 import { WindowedList } from '@holium/design-system';
 import { RoomChatMessage } from './RoomChatMessage';
 import { useRooms } from '../useRooms';
-
-interface RoomChatProps {}
 
 export const chatForm = (
   defaults: any = {
@@ -40,14 +31,13 @@ export const chatForm = (
   };
 };
 
-export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
+const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
-  const [loading, setLoading] = useState(false);
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
+  const { theme: themeStore, ship } = useServices();
 
-  const roomsManager = useRooms();
-  const { theme: themeStore } = useServices();
+  const roomsManager = useRooms(ship!.patp);
 
   const theme = themeStore.currentTheme;
 
@@ -158,11 +148,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
                   handleChat(evt);
                 }}
               >
-                {loading ? (
-                  <Spinner size={0} />
-                ) : (
-                  <Icons opacity={0.5} name="ArrowRightLine" />
-                )}
+                <Icons opacity={0.5} name="ArrowRightLine" />
               </IconButton>
             </Flex>
           }
@@ -170,4 +156,6 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const RoomChat = observer(RoomChatPresenter);

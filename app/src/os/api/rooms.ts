@@ -4,7 +4,6 @@ import {
   RoomsModelType,
 } from '../services/tray/rooms.model';
 import { Patp } from '@urbit/api';
-import { RoomDiff } from '../services/tray/rooms.service';
 import { toJS } from 'mobx';
 
 export const RoomsApi = {
@@ -69,7 +68,7 @@ export const RoomsApi = {
   },
 
   setProvider: async (conduit: Conduit, patp: string) => {
-    const response = await conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { 'set-provider': patp },
@@ -77,7 +76,7 @@ export const RoomsApi = {
   },
 
   joinRoom: async (conduit: Conduit, roomId: string) => {
-    const response = await conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { enter: roomId },
@@ -85,7 +84,7 @@ export const RoomsApi = {
   },
 
   sendChat: async (conduit: Conduit, chat: string) => {
-    const response = await conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { chat },
@@ -100,7 +99,7 @@ export const RoomsApi = {
   ) => {
     // TODO add to roomapp state after poke???
 
-    const response = await conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: {
@@ -126,7 +125,7 @@ export const RoomsApi = {
     roomId: string,
     state: RoomsAppStateType
   ) => {
-    const response = await conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { exit: null },
@@ -140,12 +139,8 @@ export const RoomsApi = {
       },
     });
   },
-  deleteRoom: async (
-    conduit: Conduit,
-    roomId: string,
-    state: RoomsAppStateType
-  ) => {
-    const response = await conduit.poke({
+  deleteRoom: async (conduit: Conduit, roomId: string) => {
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { delete: roomId },
@@ -197,7 +192,7 @@ export const RoomsApi = {
   watchUpdates: (
     conduit: Conduit,
     state: RoomsAppStateType,
-    onDiff: (diff: RoomDiff, room: RoomsModelType) => void
+    onDiff: (diff: any, room: RoomsModelType) => void
   ): void => {
     conduit.watch({
       app: 'room',

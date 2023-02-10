@@ -9,7 +9,6 @@ import {
   border,
   position,
   color,
-  backgroundColor,
   SpaceProps,
   LayoutProps,
   FlexboxProps,
@@ -40,7 +39,7 @@ export const BarStyle = styled(motion.div)<BarStyleProps>`
   -webkit-backface-visibility: hidden;
   transition: var(--transition-slow);
   background: var(--rlm-dock-color);
-  ${compose(space, layout, flexbox, border, position, color, backgroundColor)}
+  ${compose(space, layout, flexbox, border, position, color)}
 `;
 
 export const Bar: FC<BarStyleProps> = ({ children, ...rest }) => {

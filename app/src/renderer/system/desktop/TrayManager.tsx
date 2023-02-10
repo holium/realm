@@ -1,14 +1,13 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
-import { TrayMenu } from './components/SystemBar/components/TrayMenu';
-import { MiniApp } from './components/SystemBar/components/MiniAppWindow';
+import { TrayApp } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-export const TrayManager = observer(() => {
-  const trayAppRef = useRef<HTMLDivElement>();
-  const { activeApp, coords, walletApp, setActiveApp } = useTrayApps();
+const TrayManagerPresenter = () => {
+  const { activeApp, coords, walletApp, dimensions, setActiveApp } =
+    useTrayApps();
   const [walletForceActive, setWalletForceActive] = useState(false);
   if (walletForceActive && activeApp !== 'wallet-tray') {
     WalletActions.setForceActive(false);
@@ -22,18 +21,24 @@ export const TrayManager = observer(() => {
   if (!activeApp) return null;
 
   const TrayAppView = trayAppRenderers[activeApp].component;
-
+  const height = document.body.clientHeight;
   return (
-    <TrayMenu
+    <TrayApp
+      zIndex={100}
       id={activeApp as TrayAppKeys}
-      coords={coords}
-      body={
-        <MiniApp id={`${activeApp}-app`} innerRef={trayAppRef}>
-          {TrayAppView && <TrayAppView />}
-        </MiniApp>
-      }
-    />
+      coords={{
+        x: coords.left,
+        y: height - dimensions.height - coords.bottom,
+        height: dimensions.height,
+        width: dimensions.width,
+      }}
+      closeTray={() => {
+        setActiveApp(null);
+      }}
+    >
+      {TrayAppView && <TrayAppView />}
+    </TrayApp>
   );
-});
+};
 
-export default { TrayManager };
+export const TrayManager = observer(TrayManagerPresenter);

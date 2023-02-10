@@ -10,3 +10,7 @@ export const isImgUrl = (url: string): Promise<boolean> => {
 export const pluralize = (word: string, amount: number) => {
   return `${word}${amount === 1 ? '' : 's'}`;
 };
+
+export const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};

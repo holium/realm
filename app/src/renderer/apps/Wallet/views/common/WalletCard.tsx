@@ -54,16 +54,9 @@ export const WalletCard: FC<WalletCardProps> = ({
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
-  const numSize =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-          .transactionList.size
-      : (wallet as BitcoinWalletType).transactionList.size;
 
   const transactions = getTransactions(walletTransactions || new Map());
 
-  const ethTicker =
-    walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
   const amountDisplay =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? walletApp.navState.protocol === ProtocolType.UQBAR
@@ -132,6 +125,7 @@ export const WalletCard: FC<WalletCardProps> = ({
                 .slice(0, 6)
                 .map((coin: ERC20Type, index: number) => (
                   <img
+                    alt={coin.name}
                     src={coin.logo || getMockCoinIcon(coin.name)}
                     style={{ height: '14px', marginRight: '4px' }}
                     key={index}

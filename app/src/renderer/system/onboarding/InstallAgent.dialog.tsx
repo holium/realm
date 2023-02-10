@@ -16,15 +16,17 @@ import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
 
-export const InstallAgent = observer(() => {
+const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  const shipName = onboarding.ship!.patp;
-  const shipNick = onboarding.ship!.nickname;
-  const shipColor = onboarding.ship!.color!;
-  const avatar = onboarding.ship!.avatar;
+  if (!onboarding.ship) return null;
+
+  const shipName = onboarding.ship.patp;
+  const shipNick = onboarding.ship.nickname;
+  const shipColor = onboarding.ship.color;
+  const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
@@ -60,7 +62,7 @@ export const InstallAgent = observer(() => {
           avatar={avatar}
           patp={shipName}
           borderRadiusOverride="6px"
-          color={[shipColor, 'white']}
+          color={[shipColor ?? 'black', 'white']}
         />
         <Flex
           style={{ width: 210 }}
@@ -150,6 +152,8 @@ export const InstallAgent = observer(() => {
       </Box>
     </Grid.Column>
   );
-});
+};
+
+const InstallAgent = observer(InstallAgentPresenter);
 
 export default InstallAgent;

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
@@ -19,6 +19,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
@@ -26,24 +27,27 @@ export const ChangeEmailDialogConfig: DialogConfig = {
     ShellActions.closeDialog();
     ShellActions.setBlur(false);
   },
-  window: {
-    id: 'change-email-dialog',
+  getWindowProps: (desktopDimensions) => ({
+    appId: 'change-email-dialog',
     title: 'Change Email Dialog',
     zIndex: 13,
     type: 'dialog',
-    dimensions: {
-      x: 0,
-      y: 0,
-      width: 450,
-      height: 420,
-    },
-  },
+    bounds: normalizeBounds(
+      {
+        x: 0,
+        y: 0,
+        width: 450,
+        height: 420,
+      },
+      desktopDimensions
+    ),
+  }),
   hasCloseButton: false,
   unblurOnClose: true,
   noTitlebar: false,
 };
 
-export const ChangeEmailDialog: FC = observer(() => {
+const ChangeEmailDialogPresenter = () => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
@@ -75,10 +79,12 @@ export const ChangeEmailDialog: FC = observer(() => {
       {Screen}
     </Flex>
   );
-});
+};
+
+const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
 function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
-  const { onboarding, identity } = useServices();
+  const { identity } = useServices();
   const [email, setEmail] = useState(identity.auth.email!);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -143,12 +149,12 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   );
 }
 
+const validChars =
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
 function VerifyScreen(props: { theme: ThemeType; done: any }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
-  const [verified, setVerified] = useState(false);
-  const validChars =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   const submit = async (code: string) => {
     const wasCorrect = await AuthActions.verifyNewEmail(code);
