@@ -60,8 +60,23 @@ jobs:
           cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
+      #
       - name: Install app dependencies
         run: yarn install
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'linux.yml', 'linux', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
       - name: Build linux version
         run: |
           sudo dpkg --add-architecture i386

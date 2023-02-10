@@ -10,8 +10,8 @@ module.exports = ({ github, context }, workflowId, platform, ci) => {
   pkg.version = ci.buildVersion;
   fs.writeFileSync(pkgfile, JSON.stringify(pkg, null, 2));
 
-  // only on windows
-  if (platform === 'windows') {
+  // windows and linux builds
+  if (['windows', 'linux'].includes(platform)) {
     const filename = './app/src/main/updater/app-update.yml';
     const lines = [
       `provider: generic`,
