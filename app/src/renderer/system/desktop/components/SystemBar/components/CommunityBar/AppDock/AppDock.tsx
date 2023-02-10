@@ -1,8 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
-import { Reorder, AnimatePresence } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import { Flex, Divider } from 'renderer/components';
 import { AppType, NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
@@ -34,10 +34,7 @@ const AppDockPresenterView = ({
   theme,
   setDockAppIds,
 }: Props) => {
-  const showDivider = useMemo(
-    () => pinnedDockApps.length > 0 && unpinnedDockApps.length > 0,
-    [pinnedDockApps, unpinnedDockApps]
-  );
+  const [localDockAppIds, setLocalDockAppIds] = useState(dockAppIds);
 
   const onClickDockedApp = useCallback((dockedApp: AppType) => {
     const window = desktop.getWindowByAppId(dockedApp.id);
@@ -51,6 +48,13 @@ const AppDockPresenterView = ({
       DesktopActions.openAppWindow(toJS(dockedApp));
     }
   }, []);
+
+  const onOrderUpdate = useCallback(() => {
+    // First we update the dock locally so the user doesn't have to
+    // wait for the subscription to come back.
+    setDockAppIds(localDockAppIds);
+    SpacesActions.setPinnedOrder(spacePath, localDockAppIds);
+  }, [localDockAppIds]);
 
   const pinnedAppTiles = useMemo(
     () =>
@@ -93,45 +97,39 @@ const AppDockPresenterView = ({
     [unpinnedDockApps, bazaar, spacePath]
   );
 
+  const showDivider = useMemo(
+    () => pinnedDockApps.length > 0 && unpinnedDockApps.length > 0,
+    [pinnedDockApps, unpinnedDockApps]
+  );
+
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
-      <AnimatePresence>
-        <Reorder.Group
-          key={`dock-${spacePath}`}
-          axis="x"
-          style={{
-            display: 'flex',
-            position: 'relative',
-            flexDirection: 'row',
-            gap: 8,
-          }}
-          values={dockAppIds}
-          onReorder={(newOrder: string[]) => {
-            // First we update the dock locally so the user doesn't have to
-            // wait for the subscription to come back.
-            setDockAppIds(newOrder);
-            SpacesActions.setPinnedOrder(spacePath, newOrder);
-          }}
-        >
-          {pinnedAppTiles}
-        </Reorder.Group>
-        {showDivider && (
-          <Divider
-            key={`dock-divider-${spacePath}`}
-            ml={2}
-            mr={2}
-            customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
-          />
-        )}
-        <Flex
-          position="relative"
-          flexDirection="row"
-          alignItems="center"
-          gap={8}
-        >
-          {unpinnedAppTiles}
-        </Flex>
-      </AnimatePresence>
+      <Reorder.Group
+        key={`dock-${spacePath}`}
+        axis="x"
+        style={{
+          display: 'flex',
+          position: 'relative',
+          flexDirection: 'row',
+          gap: 8,
+        }}
+        values={dockAppIds}
+        onMouseUp={onOrderUpdate}
+        onReorder={setLocalDockAppIds}
+      >
+        {pinnedAppTiles}
+      </Reorder.Group>
+      {showDivider && (
+        <Divider
+          key={`dock-divider-${spacePath}`}
+          ml={2}
+          mr={2}
+          customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
+        />
+      )}
+      <Flex position="relative" flexDirection="row" alignItems="center" gap={8}>
+        {unpinnedAppTiles}
+      </Flex>
     </Flex>
   );
 };
@@ -147,7 +145,7 @@ const AppDockPresenter = () => {
   const pinnedDockApps = dockApps.filter(Boolean);
   const unpinnedDockApps = desktop.openWindows
     .filter((appWindow) => !dockAppIds.includes(appWindow.appId))
-    .map((appWindow) => bazaar.getApp(appWindow.appId))
+    .map((appWindow) => toJS(bazaar.getApp(appWindow.appId)))
     .filter(Boolean) as AppType[];
 
   if (!spacePath) return null;
@@ -155,8 +153,8 @@ const AppDockPresenter = () => {
   return (
     <AppDockPresenterView
       dockAppIds={dockAppIds}
-      pinnedDockApps={pinnedDockApps}
-      unpinnedDockApps={unpinnedDockApps}
+      pinnedDockApps={toJS(pinnedDockApps)}
+      unpinnedDockApps={toJS(unpinnedDockApps)}
       spacePath={spacePath}
       desktop={desktop}
       bazaar={bazaar}
