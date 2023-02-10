@@ -291,11 +291,6 @@ export class AuthService extends BaseService {
 
       this.state.login(shipId);
 
-      // this.core.services.desktop.setMouseColor(
-      //   null,
-      //   this.state.selected?.color!
-      // );
-
       this.core.services.shell.setBlur(null, false);
 
       const { code } = this.readCredentials(patp, password);

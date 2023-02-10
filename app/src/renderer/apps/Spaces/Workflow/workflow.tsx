@@ -1,12 +1,12 @@
+import { toJS } from 'mobx';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
-
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { CreateSpaceModal } from './SelectType';
 import { SpacesCreateForm } from './Details';
 import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { toJS } from 'mobx';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
@@ -25,6 +25,7 @@ export const spacesDialogs: DialogRenderers = {
     workflow: true,
     firstStep: true,
     customNext: true,
+    hasCloseButton: true,
     component: (props: any) => <CreateSpaceModal {...props} />,
     hasPrevious: () => true,
     onOpen: () => {
@@ -37,23 +38,25 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false, true);
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'create-space-1',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-1',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
   'create-space-2': {
     workflow: true,
     customNext: false,
-    // stateKey: 'create-space',
+    hasCloseButton: true,
     component: (props: any) => <SelectArchetype {...props} />,
     hasPrevious: () => true,
     isValidated: (data: any) => {
@@ -73,21 +76,24 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'create-space-2',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-2',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
   'create-space-3': {
     workflow: true,
+    hasCloseButton: true,
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
     onNext: (_evt: any, _state: any, _setState: any) => {
@@ -112,21 +118,24 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    window: {
-      id: 'create-space-3',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-3',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
   'edit-space': (dialogProps: any) => ({
     workflow: true,
+    hasCloseButton: true,
     component: (props: any) => (
       <SpacesCreateForm edit={dialogProps} {...props} />
     ),
@@ -169,21 +178,24 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    window: {
-      id: 'edit-space',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'edit-space',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   }),
   'create-space-4': {
     workflow: true,
+    hasCloseButton: true,
     component: (props: any) => <InviteMembers {...props} />,
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
@@ -212,17 +224,19 @@ export const spacesDialogs: DialogRenderers = {
     isValidated: (state: any) => {
       return state && state.members;
     },
-    window: {
-      id: 'create-space-4',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-4',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
 };

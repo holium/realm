@@ -25,6 +25,7 @@ export interface BrowserToolbarProps {
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
   onDragStop: (e: PointerEvent<HTMLDivElement>) => void;
   onClose: () => any;
+  onMinimize: () => any;
   onMaximize: () => any;
 }
 
@@ -37,6 +38,7 @@ export const BrowserToolbar = observer(
     onDragStop,
     onDragStart,
     onClose,
+    onMinimize,
     onMaximize,
   }: BrowserToolbarProps) => {
     const { currentTab } = useBrowser();
@@ -110,6 +112,7 @@ export const BrowserToolbar = observer(
           showDevToolsToggle={showDevToolsToggle}
           toggleDevTools={toggleDevTools}
           onClose={onClose}
+          onMinimize={onMinimize}
           onMaximize={onMaximize}
         />
       </ToolbarStyle>

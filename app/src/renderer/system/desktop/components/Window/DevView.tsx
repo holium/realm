@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { WindowModelType } from 'os/services/shell/desktop.model';
 
 interface Props {
-  window: WindowModelProps;
+  window: WindowModelType;
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
@@ -29,7 +29,7 @@ export const DevView = (props: Props) => {
   };
 
   useEffect(() => {
-    const webview: any = document.getElementById(`${window.id}-web-webview`);
+    const webview: any = document.getElementById(`${window.appId}-web-webview`);
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
     webview?.addEventListener('did-finish-load', () => {
@@ -47,10 +47,10 @@ export const DevView = (props: Props) => {
   useEffect(() => {
     webViewRef.current?.addEventListener('dom-ready', () => {
       webViewRef.current?.send('load-ship', JSON.stringify(ship));
-      webViewRef.current?.send('load-window-id', window.id);
+      webViewRef.current?.send('load-window-id', window.appId);
       setReady(true);
     });
-  }, [ship, window.id]);
+  }, [ship, window.appId]);
 
   useEffect(() => {
     const css = `
@@ -88,7 +88,7 @@ export const DevView = (props: Props) => {
 
     if (ready) {
       const webview = document.getElementById(
-        `${window.id}-web-webview`
+        `${window.appId}-web-webview`
       ) as Electron.WebviewTag | null;
       webview?.insertCSS(css);
       webview?.addEventListener('did-frame-finish-load', () => {
@@ -110,7 +110,7 @@ export const DevView = (props: Props) => {
       >
         <WebView
           ref={webViewRef}
-          id={`${window.id}-web-webview`}
+          id={`${window.appId}-web-webview`}
           src={window.href?.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
