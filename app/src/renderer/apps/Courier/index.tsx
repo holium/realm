@@ -57,11 +57,33 @@ export const CourierRoot = () => {
 
   return (
     <Flex flexDirection="column">
-      <Flex mb={2} flexDirection="row" alignItems="center">
+      <Flex mb={2} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
-        <Text.Custom
+        <Flex flex={1} pl={3} pr={2} alignItems="center">
+          <InputBox
+            width="100%"
+            borderRadius={16}
+            height={34}
+            inputId="dm-search"
+          >
+            <Input
+              id="dm-search"
+              name="dm-search"
+              style={{
+                padding: '0px 6px',
+                height: 26,
+              }}
+              placeholder="Search"
+              onChange={(evt: any) => {
+                evt.stopPropagation();
+                setSearchString(evt.target.value);
+              }}
+            />
+          </InputBox>
+        </Flex>
+        {/* <Text.Custom
           flex={1}
           opacity={0.8}
           textAlign="center"
@@ -69,7 +91,7 @@ export const CourierRoot = () => {
           fontWeight={500}
         >
           {AppRegistry['chat'].name}
-        </Text.Custom>
+        </Text.Custom> */}
         <Button.IconButton
           className="realm-cursor-hover"
           size={26}
@@ -78,10 +100,10 @@ export const CourierRoot = () => {
             dmApp.setView('new-chat');
           }}
         >
-          <Icon name="Plus" size={24} opacity={0.7} />
+          <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-      <Flex py={1}>
+      {/* <Flex py={1}>
         <InputBox
           width="100%"
           borderRadius={16}
@@ -102,7 +124,7 @@ export const CourierRoot = () => {
             }}
           />
         </InputBox>
-      </Flex>
+      </Flex> */}
       <WindowedList
         // key={lastTimeSent}
         width={364}
