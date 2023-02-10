@@ -172,8 +172,8 @@ const SpacesCreateFormPresenter = ({
   const { nameField, descriptionField, pictureField, colorField } =
     useMemo(() => {
       if (edit) {
-        const space = spaces.spaces.get(edit.space)!;
-        return createSpaceForm(space);
+        const space = spaces.spaces.get(edit.space);
+        if (space) return createSpaceForm(space);
       } else if (workflowState.type === 'group') {
         return createSpaceForm({
           name: workflowState.title,
@@ -181,14 +181,14 @@ const SpacesCreateFormPresenter = ({
           color: workflowState.color,
           picture: workflowState.image,
         });
-      } else {
-        return createSpaceForm({
-          name: '',
-          description: '',
-          color: workflowState.color,
-          picture: '',
-        });
       }
+
+      return createSpaceForm({
+        name: '',
+        description: '',
+        color: workflowState.color,
+        picture: '',
+      });
     }, []);
 
   return (

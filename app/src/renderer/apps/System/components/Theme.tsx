@@ -15,6 +15,10 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
 import { Member } from 'os/types';
+import { ShipModelType } from 'os/services/ship/models/ship';
+import { MembershipType } from 'os/services/spaces/models/members';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { ThemeStoreType } from 'renderer/logic/theme';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -55,21 +59,28 @@ const wpGallery: { [key: string]: string } = {
   // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
 };
 
-const ThemePanelPresenter = () => {
-  const { theme, ship, spaces, membership } = useServices();
+type ThemePanelPresenterViewProps = {
+  theme: ThemeStoreType;
+  ship: ShipModelType;
+  space: SpaceModelType;
+  membership: MembershipType;
+};
+
+const ThemePanelPresenterView = ({
+  theme,
+  ship,
+  membership,
+  space,
+}: ThemePanelPresenterViewProps) => {
   const { windowColor, accentColor, inputColor } = theme.currentTheme;
-
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
+  const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
   const wpGalleryKeys = Object.keys(wpGallery);
 
-  const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
-
-  // used MembersList.tsx as reference material
-  const members = Array.from(membership.getMembersList(spaces.selected!.path));
+  const members = Array.from(membership.getMembersList(space.path));
   const me = members.find(
     (member: Member) =>
-      member.patp === ship!.patp && member.roles.indexOf('admin') !== -1
+      member.patp === ship.patp && member.roles.indexOf('admin') !== -1
   );
   // is 'me' (currently logged in user) an admin?
   const canEditSpace = me !== undefined;
@@ -85,9 +96,9 @@ const ThemePanelPresenter = () => {
 
       if (values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
-        await theme.setWallpaper(spaces.selected!.path, values.customWallpaper);
+        await theme.setWallpaper(space.path, values.customWallpaper);
       } else if (wpOption !== undefined) {
-        await theme.setWallpaper(spaces.selected!.path, wpGallery[wpOption]);
+        await theme.setWallpaper(space.path, wpGallery[wpOption]);
       }
 
       // TODO doesnt work
@@ -289,6 +300,21 @@ const ThemePanelPresenter = () => {
         />
       </Card>
     </Flex>
+  );
+};
+
+const ThemePanelPresenter = () => {
+  const { theme, ship, spaces, membership } = useServices();
+
+  if (!spaces.selected || !ship || !membership) return null;
+
+  return (
+    <ThemePanelPresenterView
+      theme={theme}
+      ship={ship}
+      space={spaces.selected}
+      membership={membership}
+    />
   );
 };
 

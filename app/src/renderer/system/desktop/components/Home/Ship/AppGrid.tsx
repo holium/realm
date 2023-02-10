@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import {
   AppType,
+  DevAppType,
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
@@ -24,11 +25,14 @@ interface AppGridProps {
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected!;
-  const apps = [...bazaar.installed, ...bazaar.devApps];
+  const apps = [...bazaar.installed, ...bazaar.devApps] as (
+    | AppType
+    | DevAppType
+  )[];
 
   return (
     <>
-      {apps.map((app: any, index: number) => {
+      {apps.map((app, index: number) => {
         const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
         const weRecommended = bazaar.isRecommended(app.id);
         const installStatus = app.installStatus as InstallStatus;
@@ -83,6 +87,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
             contextMenuOptions={[
               {
                 label: isAppPinned ? 'Unpin app' : 'Pin app',
+                // @ts-ignore
                 disabled: app.type === 'web',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
@@ -93,6 +98,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+                // @ts-ignore
                 disabled: app.type === 'web',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
@@ -103,6 +109,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: 'App info',
+                // @ts-ignore
                 disabled: app.type === 'web',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
@@ -114,12 +121,9 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               ...suspendRow,
               ...installRow,
             ]}
-            onAppClick={(selectedApp: AppType) => {
-              DesktopActions.openAppWindow(
-                currentSpace.path,
-                toJS(selectedApp)
-              );
-              DesktopActions.setHomePane(false);
+            onAppClick={(selectedApp) => {
+              DesktopActions.openAppWindow(toJS(selectedApp));
+              DesktopActions.closeHomePane();
             }}
           />
         );

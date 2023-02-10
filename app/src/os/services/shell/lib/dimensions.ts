@@ -1,6 +1,7 @@
-export const DEFAULT_APP_WINDOW_DIMENSIONS: {
-  [key: string]: { width: number; height: number };
-} = {
+import { Dimensions } from 'os/types';
+import { normalizeDimensions } from './window-manager';
+
+const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   ballot: {
     width: 1200,
     height: 1000,
@@ -53,4 +54,15 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 700,
     height: 700,
   },
+};
+
+export const getDefaultAppDimensions = (
+  appId: string,
+  desktopDimensions: Dimensions
+) => {
+  const defaultDimensions = DEFAULT_APP_WINDOW_DIMENSIONS[appId];
+
+  if (!defaultDimensions) return null;
+
+  return normalizeDimensions(defaultDimensions, desktopDimensions);
 };

@@ -3,6 +3,7 @@ import { DetailedHTMLProps, WebViewHTMLAttributes } from 'react';
 type WebViewProps = {
   id: string;
   isLocked: boolean;
+  innerRef?: React.Ref<HTMLWebViewElement>;
 } & DetailedHTMLProps<
   WebViewHTMLAttributes<HTMLWebViewElement>,
   HTMLWebViewElement
@@ -11,13 +12,20 @@ type WebViewProps = {
 /**
  * Use this component instead of the native webview element.
  */
-export const WebView = ({ id, isLocked, ...rest }: WebViewProps) => (
+export const WebView = ({
+  id,
+  isLocked,
+  innerRef,
+  style,
+  ...rest
+}: WebViewProps) => (
   <webview
     id={id}
-    {...rest}
+    ref={innerRef}
     style={{
-      ...rest.style,
+      ...style,
       pointerEvents: isLocked ? 'none' : 'auto',
     }}
+    {...rest}
   />
 );

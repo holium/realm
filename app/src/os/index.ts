@@ -9,7 +9,6 @@ import {
 } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
-// ---
 import { Conduit, ConduitState } from '@holium/conduit';
 import { AuthService } from './services/identity/auth.service';
 import { ShipService } from './services/ship/ship.service';

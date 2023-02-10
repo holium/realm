@@ -46,17 +46,17 @@ module.exports = async ({ github, context }, workflowId) => {
     // removeRelease: undefined,
   };
   // disable this workflow to prevent multiple builds running simultaneously
-  console.log(
-    `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
-  );
-  await github.request(
-    'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
-    {
-      owner: 'holium',
-      repo: 'realm',
-      workflow_id: workflowId,
-    }
-  );
+  // console.log(
+  //   `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
+  // );
+  // await github.request(
+  //   'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable',
+  //   {
+  //     owner: 'holium',
+  //     repo: 'realm',
+  //     workflow_id: workflowId,
+  //   }
+  // );
   const buildTitle =
     (context.eventName === 'pull_request' &&
       context.payload.pull_request.title) ||

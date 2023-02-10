@@ -12,6 +12,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useRooms } from '../Rooms/useRooms';
+import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
   const { ship, beacon } = useServices();
@@ -36,7 +37,7 @@ const AccountTrayAppPresenter = () => {
   }, []);
 
   const openSettingsApp = () => {
-    DesktopActions.openAppWindow('', nativeApps['os-settings']);
+    DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
   };
 
   let subtitle;

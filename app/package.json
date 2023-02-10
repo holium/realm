@@ -230,7 +230,14 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      {
+        "from": "./src/main/updater/",
+        "to": "updater",
+        "filter": [
+          "initial.html"
+        ]
+      }
     ]
   },
   "repository": {

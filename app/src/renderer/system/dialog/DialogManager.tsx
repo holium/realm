@@ -1,91 +1,90 @@
-import { FC, useRef } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useServices } from 'renderer/logic/store';
-import AppWindow from '../desktop/components/Window';
-import { getCenteredXY } from 'os/services/shell/lib/window-manager';
+import { AppWindow } from '../desktop/components/Window/Window';
+import { getCenteredPosition } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface DialogManagerProps {
   dialogId?: string;
-  dialogProps: any;
+  dialogProps: Record<string, any>;
 }
 
-export const DialogManager: FC<DialogManagerProps> = observer(
-  (props: DialogManagerProps) => {
-    const { dialogId, dialogProps } = props;
+const DialogManagerPresenter = ({
+  dialogId,
+  dialogProps,
+}: DialogManagerProps) => {
+  const { shell } = useServices();
+  const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
-    const { shell } = useServices();
+  let dialogConfig: DialogConfig;
+  const isOpen = dialogId !== undefined;
 
-    const desktopRef = useRef<any>(null);
-    let dialogWindow: React.ReactNode | undefined;
-    const isOpen = dialogId !== undefined;
+  // clear dialog on escape pressed if closable
+  useHotkeys(
+    'esc',
+    () => {
+      const notOnboardingDialog = !Object.values(OnboardingStep).includes(
+        dialogId as any
+      );
+      if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
+        ShellActions.closeDialog();
+        if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
+      }
+    },
+    { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
+  );
 
-    let dialogConfig: DialogConfig;
-    if (isOpen) {
-      const dialogRenderer = dialogRenderers[dialogId];
+  useEffect(() => {
+    const openDialogWindow = async (did: string) => {
+      const dialogRenderer = dialogRenderers[did];
       dialogConfig =
         dialogRenderer instanceof Function
           ? dialogRenderer(dialogProps.toJSON())
           : dialogRenderer;
-    }
+      const window = await DesktopActions.openDialog(
+        dialogConfig.getWindowProps(shell.desktopDimensions)
+      );
 
-    // clear dialog on escape pressed if closable
-    useHotkeys(
-      'esc',
-      () => {
-        const notOnboardingDialog = !Object.values(OnboardingStep).includes(
-          dialogId as any
-        );
-        if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
-          ShellActions.closeDialog();
-          if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
-        }
-      },
-      { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
-    );
-
-    if (isOpen) {
-      const dimensions = {
-        ...dialogConfig!.window.dimensions,
-        ...getCenteredXY(
-          dialogConfig!.window.dimensions,
-          shell.desktopDimensions
-        ),
-      };
-
-      dialogWindow = (
+      setDialogWindow(
         <AppWindow
-          desktopRef={desktopRef}
           window={{
-            ...dialogConfig!.window,
-            dimensions,
+            ...window,
+            bounds: {
+              ...window.bounds,
+              ...getCenteredPosition(window.bounds),
+            },
           }}
         />
       );
-    }
+    };
 
-    return (
-      <motion.div
-        id="dialog-fill"
-        ref={desktopRef}
-        style={{
-          display: isOpen ? 'block' : 'none',
-          bottom: 0,
-          padding: '8px',
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          right: 0,
-          height: `calc(100vh - ${0}px)`,
-          paddingTop: shell.isFullscreen ? 0 : 30,
-        }}
-      >
-        {dialogWindow as any}
-      </motion.div>
-    );
-  }
-);
+    if (dialogId) openDialogWindow(dialogId);
+  }, [dialogId, shell.desktopDimensions]);
+
+  return (
+    <motion.div
+      id="dialog-fill"
+      style={{
+        display: isOpen ? 'block' : 'none',
+        bottom: 0,
+        padding: '8px',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        right: 0,
+        height: `calc(100vh - ${0}px)`,
+        paddingTop: shell.isFullscreen ? 0 : 30,
+      }}
+    >
+      {dialogWindow}
+    </motion.div>
+  );
+};
+
+export const DialogManager = observer(DialogManagerPresenter);
