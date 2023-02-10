@@ -19,6 +19,7 @@ export const Row = styled(Button.Base)<RowProps>`
   align-items: center;
   background-color: transparent;
   gap: 6px;
+  color: var(--rlm-text-color);
   transition: var(--transition);
 
   &:active:not([disabled]) {

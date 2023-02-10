@@ -143,6 +143,7 @@ export const AppRow = ({
                 height={sizes.sm}
                 width={sizes.sm}
                 src={image}
+                alt="app tile icon"
               />
             )}
             {app.icon && <Icons name={app.icon} height={16} width={16} />}

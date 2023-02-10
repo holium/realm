@@ -2,7 +2,7 @@ import { SystemApp } from './System';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar/Toolbar';
 import { BrowserWebview } from './Browser/BrowserWebview';
 
-export enum WindowId {
+export enum AppId {
   Browser = 'os-browser',
   Settings = 'os-settings',
 }

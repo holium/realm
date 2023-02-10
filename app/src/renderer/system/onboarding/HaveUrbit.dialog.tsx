@@ -4,7 +4,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
-const HaveUrbitDialog = observer((props: BaseDialogProps) => {
+const HaveUrbitDialogPresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
@@ -85,6 +85,6 @@ const HaveUrbitDialog = observer((props: BaseDialogProps) => {
       </Grid.Row>
     </Grid.Column>
   );
-});
+};
 
-export default HaveUrbitDialog;
+export const HaveUrbitDialog = observer(HaveUrbitDialogPresenter);

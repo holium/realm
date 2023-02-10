@@ -68,7 +68,7 @@ const CursorCore = ({
       previousTimeRef.current = time;
       requestRef.current = requestAnimationFrame(animateOuterCursor);
     },
-    [requestRef] // eslint-disable-line
+    [requestRef]
   );
 
   // RAF for animateOuterCursor

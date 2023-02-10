@@ -21,10 +21,12 @@ const InstallAgentPresenter = () => {
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  const shipName = onboarding.ship!.patp;
-  const shipNick = onboarding.ship!.nickname;
-  const shipColor = onboarding.ship!.color!;
-  const avatar = onboarding.ship!.avatar;
+  if (!onboarding.ship) return null;
+
+  const shipName = onboarding.ship.patp;
+  const shipNick = onboarding.ship.nickname;
+  const shipColor = onboarding.ship.color!;
+  const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');

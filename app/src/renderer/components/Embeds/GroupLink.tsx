@@ -47,6 +47,7 @@ export const GroupLink = (props: GroupViewProps) => {
               width={48}
               height={48}
               src={props.picture}
+              alt="group link image"
             />
           ) : (
             <EmptyGroup color={props.color} />

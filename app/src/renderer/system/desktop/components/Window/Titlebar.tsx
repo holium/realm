@@ -198,7 +198,7 @@ export const Titlebar = ({
         isAppWindow && <Flex></Flex>
       )}
       {children}
-      {(maximizeButton || closeButton) && (
+      {(maximizeButton || closeButton || minimizeButton) && (
         <Flex gap={4} alignItems="center">
           {minimizeButton && (
             <WindowIcon
