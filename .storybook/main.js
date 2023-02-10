@@ -1,4 +1,20 @@
+const path = require("path");
+
 module.exports = {
+  webpackFinal: async (config) => {
+    const modules = [
+      path.resolve(__dirname, '../app/src'),
+      path.resolve(__dirname, '../lib/conduit/src'),
+      path.resolve(__dirname, '../lib/design-system/src'),
+      path.resolve(__dirname, '../lib/multiplayer/src'),
+      path.resolve(__dirname, '../lib/room/src'),
+    ];
+    
+    config.resolve.modules.push(...modules);
+
+    return config;
+  },
+
   stories: [
     "../app/src/**/*.stories.@(js|jsx|ts|tsx|mdx)",
     "../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx|mdx)"
@@ -12,5 +28,5 @@ module.exports = {
   framework: '@storybook/react',
   core: {
     builder: '@storybook/builder-webpack5',
-  },
+  }
 };
