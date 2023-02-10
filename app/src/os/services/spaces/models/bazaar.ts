@@ -535,6 +535,9 @@ export const NewBazaarStore = types
     ) => {
       self.subscription.set(newSubscriptionStatus);
     },
+    setDock(path: string, dock: string[]) {
+      self.docks.set(path, dock);
+    },
   }))
   .views((self) => ({
     get installed() {

@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
-import { Flex, Divider } from 'renderer/components';
-import { AppType, NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { useCallback, useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder, AnimatePresence } from 'framer-motion';
+import { Flex, Divider } from 'renderer/components';
+import { AppType, NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -150,34 +149,21 @@ const AppDockPresenter = () => {
     .map((appWindow) => bazaar.getApp(appWindow.appId))
     .filter(Boolean) as AppType[];
 
-  const [localDockAppIds, setLocalDockAppIds] = useState<string[]>(
-    toJS(dockAppIds)
-  );
-  console.log('dockAppIds', toJS(dockAppIds));
-  console.log('localDockAppIds', localDockAppIds);
-
-  const debouncedSetLocalDockApps = useCallback(
-    debounce(setLocalDockAppIds, 500),
-    []
-  );
-
-  useEffect(() => {
-    // If the dock length changes, e.g. from the AppGrid, we update the local dock.
-    debouncedSetLocalDockApps(toJS(dockAppIds));
-  }, [dockAppIds.length]);
+  console.log('pinnedDockApps', pinnedDockApps);
+  console.log('unpinnedDockApps', unpinnedDockApps);
 
   if (!spacePath) return null;
 
   return (
     <AppDockPresenterView
-      dockAppIds={localDockAppIds}
+      dockAppIds={dockAppIds}
       pinnedDockApps={pinnedDockApps}
       unpinnedDockApps={unpinnedDockApps}
       spacePath={spacePath}
       desktop={desktop}
       bazaar={bazaar}
       theme={theme}
-      setDockAppIds={setLocalDockAppIds}
+      setDockAppIds={(appIds) => bazaar.setDock(spacePath, appIds)}
     />
   );
 };

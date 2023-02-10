@@ -98,7 +98,7 @@ export const PinnedDockApp = ({
 
   return (
     <Reorder.Item
-      value={app}
+      value={app.id}
       initial={{
         opacity: 0.0,
       }}
