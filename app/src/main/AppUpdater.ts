@@ -56,7 +56,7 @@ export interface IAppUpdater {
 //   an 'alpha' channel user. the rule is:
 //  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
 const determineReleaseChannel = () => {
-  let releaseChannel = process.env.AUTOUPDATE_CHANNEL || 'latest';
+  let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
   const settingsFilename = `${app.getPath('userData')}/settings.json`;
   if (fs.existsSync(settingsFilename)) {
     var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));

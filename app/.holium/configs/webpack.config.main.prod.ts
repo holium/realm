@@ -69,7 +69,7 @@ const configuration: webpack.Configuration = {
         process.env.RELEASE_CHANNEL === 'hotfix'
           ? '~hostyv:realm,courier'
           : '~nimwyd-ramwyl-dozzod-hostyv:realm,courier',
-      AUTOUPDATE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
+      RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
     }),
   ],
   /**
