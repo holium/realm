@@ -36,7 +36,8 @@ const NotificationListPresenter = ({ unseen, seen }: INotificationList) => {
 
   return (
     <Flex
-      padding="60px 14px"
+      pt={40}
+      pb={70}
       position="relative"
       flexDirection="column"
       height={dimensions.height}

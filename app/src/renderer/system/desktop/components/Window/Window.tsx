@@ -5,26 +5,26 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
-import { AppView } from './AppView';
-import { DevView } from './DevView';
+import { WindowByType } from './WindowByType';
 import { DragHandleWrapper, RightDragHandleStyle } from './DragHandles';
 import { Flex } from 'renderer/components';
-import { toJS } from 'mobx';
-import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
-import { nativeRenderers, WindowId } from 'renderer/apps/native';
+import { nativeRenderers, AppId } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { DialogView } from '../../../dialog/Dialog/Dialog';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
+import {
+  denormalizeBounds,
+  normalizeBounds,
+} from 'os/services/shell/lib/window-manager';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -43,48 +43,42 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 `;
 
 interface AppWindowProps {
-  window: WindowModelProps;
+  window: WindowModelType;
   children?: ReactNode;
-  desktopRef: any;
 }
 
-const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
-  const { shell, bazaar, desktop, theme } = useServices();
+const AppWindowPresenter = ({ window }: AppWindowProps) => {
+  const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
 
-  const [unmaximize, setUnmaximize] = useState<
-    | {
-        x: number;
-        y: number;
-        height: number;
-        width: number;
-      }
-    | undefined
-  >();
   const dragControls = useDragControls();
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const activeWindow = window;
+  const denormalizedBounds = useMemo(
+    () => denormalizeBounds(activeWindow.bounds, shell.desktopDimensions),
+    [activeWindow.bounds, shell.desktopDimensions]
+  );
 
-  const motionX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
-  const motionY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
+  const motionX = useMotionValue(activeWindow ? denormalizedBounds.x : 20);
+  const motionY = useMotionValue(activeWindow ? denormalizedBounds.y : 20);
   const motionHeight = useMotionValue(
-    activeWindow ? activeWindow.dimensions.height : 600
+    activeWindow ? denormalizedBounds.height : 600
   );
   const motionWidth = useMotionValue(
-    activeWindow ? activeWindow.dimensions.width : 600
+    activeWindow ? denormalizedBounds.width : 600
   );
 
   useEffect(() => {
-    motionX.set(activeWindow.dimensions.x);
-    motionY.set(activeWindow.dimensions.y);
-    motionWidth.set(activeWindow.dimensions.width);
-    motionHeight.set(activeWindow.dimensions.height);
-  }, [activeWindow.dimensions]);
+    motionX.set(denormalizedBounds.x);
+    motionY.set(denormalizedBounds.y);
+    motionWidth.set(denormalizedBounds.width);
+    motionHeight.set(denormalizedBounds.height);
+  }, [activeWindow.bounds]);
 
-  const windowId = `app-window-${activeWindow?.id}`;
-  const webViewId = getWebViewId(activeWindow.id, window.type);
+  const windowId = `app-window-${activeWindow.appId}`;
+  const webViewId = getWebViewId(activeWindow.appId, window.type!);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -108,57 +102,57 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     if (motionHeight.get() >= 400 || info.delta.y > 0) {
       motionHeight.set(motionHeight.get() + info.delta.y);
     }
+
+    updateWindowBounds();
   }, []);
 
-  // Toggles maximize or not
-  const maximize = () => {
-    if (!unmaximize) {
-      setUnmaximize({
-        x: motionX.get(),
-        y: motionY.get(),
-        height: motionHeight.get(),
-        width: motionWidth.get(),
-      });
-      const offset = shell.isFullscreen ? 0 : 30;
-      const desktopDims = desktopRef.current!.getBoundingClientRect();
-      motionX.set(0);
-      motionY.set(8);
-      motionHeight.set(desktopDims.height - (16 + offset) - 50);
-      motionWidth.set(desktopDims.width - 16);
-    } else {
-      motionX.set(unmaximize.x);
-      motionY.set(unmaximize.y);
-      motionHeight.set(unmaximize.height);
-      motionWidth.set(unmaximize.width);
-      setUnmaximize(undefined);
-    }
-    activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, {
-        x: Math.round(motionX.get()),
-        y: Math.round(motionY.get()),
-        height: Math.round(motionHeight.get()),
-        width: Math.round(motionWidth.get()),
-      });
-  };
+  const updateWindowBounds = useCallback(() => {
+    DesktopActions.setWindowBounds(
+      activeWindow.appId,
+      normalizeBounds(
+        {
+          x: motionX.get(),
+          y: motionY.get(),
+          height: motionHeight.get(),
+          width: motionWidth.get(),
+        },
+        shell.desktopDimensions
+      )
+    );
+  }, [
+    activeWindow.appId,
+    motionX,
+    motionY,
+    motionHeight,
+    motionWidth,
+    shell.desktopDimensions,
+  ]);
+
   const onDragStop = () => {
     setIsDragging(false);
-    activeWindow &&
-      DesktopActions.setAppDimensions(activeWindow.id, {
-        x: Math.round(motionX.get()),
-        y: Math.round(motionY.get()),
-        height: Math.round(motionHeight.get()),
-        width: Math.round(motionWidth.get()),
-      });
+    updateWindowBounds();
   };
 
   const onDragStart = () => {
     setIsDragging(true);
   };
 
+  const onMaximize = async () => {
+    const newBounds = await DesktopActions.toggleMaximized(activeWindow.appId);
+    const denormalizedBounds = denormalizeBounds(
+      newBounds,
+      shell.desktopDimensions
+    );
+    motionX.set(denormalizedBounds.x);
+    motionY.set(denormalizedBounds.y);
+    motionWidth.set(denormalizedBounds.width);
+    motionHeight.set(denormalizedBounds.height);
+  };
+
+  const onMinimize = () => DesktopActions.toggleMinimized(activeWindow.appId);
+
   const onClose = () => {
-    desktop.activeWindow
-      ? DesktopActions.closeAppWindow('', toJS(activeWindow))
-      : {};
+    activeWindow.isActive && DesktopActions.closeAppWindow(activeWindow.appId);
   };
 
   const onDevTools = useCallback(() => {
@@ -174,7 +168,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   }, [webViewId]);
 
   const onMouseDown = () => {
-    DesktopActions.setActive('', window.id);
+    DesktopActions.setActive(window.appId);
   };
 
   let hideTitlebarBorder = false;
@@ -186,7 +180,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   let showDevToolsToggle = true;
   let maximizeButton = true;
   let borderRadius = 12;
-  const appInfo = bazaar.getApp(window.id);
+  const appInfo = bazaar.getApp(window.appId);
   if (appInfo?.type === 'urbit') {
     hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
     // noTitlebar = !appInfo.config?.showTitlebar || false;
@@ -203,22 +197,20 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
       zIndex={window.zIndex}
       dragControls={dragControls}
       onDevTools={onDevTools}
-      onDragStart={() => onDragStart()}
-      onDragStop={() => onDragStop()}
-      onClose={() => onClose()}
-      onMaximize={() => maximize()}
-      onMinimize={() => {
-        DesktopActions.toggleMinimized('', window.id);
-      }}
+      onDragStart={onDragStart}
+      onDragStop={onDragStop}
+      onClose={onClose}
+      onMaximize={onMaximize}
+      onMinimize={onMinimize}
       theme={theme.currentTheme}
       app={window}
     />
   );
   if (window.type === 'native') {
-    hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
-    noTitlebar = nativeApps[window.id].native!.noTitlebar!;
+    hideTitlebarBorder = nativeApps[window.appId].native!.hideTitlebarBorder!;
+    noTitlebar = nativeApps[window.appId].native!.noTitlebar!;
     // @ts-ignore
-    CustomTitlebar = nativeRenderers[window.id as WindowId].titlebar;
+    CustomTitlebar = nativeRenderers[window.appId as AppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
     if (CustomTitlebar) {
@@ -228,10 +220,11 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
-          onClose={() => onClose()}
-          onMaximize={() => maximize()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
+          onClose={onClose}
+          onMinimize={onMinimize}
+          onMaximize={onMaximize}
         />
       );
     } else {
@@ -247,13 +240,11 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           zIndex={window.zIndex}
           dragControls={dragControls}
           onDevTools={onDevTools}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
-          onClose={() => onClose()}
-          onMinimize={() => {
-            DesktopActions.toggleMinimized('', window.id);
-          }}
-          onMaximize={() => maximize()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
+          onClose={onClose}
+          onMinimize={onMinimize}
+          onMaximize={onMaximize}
           theme={theme.currentTheme}
           app={window}
         />
@@ -262,7 +253,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
   }
   if (window.type === 'dialog') {
     hideTitlebarBorder = true;
-    const dialogRenderer = dialogRenderers[window.id];
+    const dialogRenderer = dialogRenderers[window.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
@@ -274,6 +265,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     borderRadius = 16;
     const onCloseDialog = dialogConfig.onClose;
     const onOpenDialog = dialogConfig.onOpen;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
       onOpenDialog && onOpenDialog();
@@ -287,10 +279,10 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onDragStart={() => onDragStart()}
-          onDragStop={() => onDragStop()}
+          onDragStart={onDragStart}
+          onDragStop={onDragStop}
           onClose={onCloseDialog}
-          onMaximize={() => maximize()}
+          onMaximize={onMaximize}
         />
       );
     }
@@ -315,7 +307,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           transition: {
             duration: 0.15,
           },
-          // display: window.minimized ? 'none' : 'block',
         }}
         transition={{
           background: { duration: 0.25 },
@@ -334,7 +325,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           zIndex: window.zIndex,
           borderRadius,
           background: windowColor,
-          display: window.minimized ? 'none' : 'block',
+          display: window.isMinimized ? 'none' : 'block',
         }}
         color={textColor}
         customBg={windowColor}
@@ -350,7 +341,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
           }}
         >
           {titlebar}
-          <WindowType
+          <WindowByType
             hasTitlebar
             isResizing={isResizing}
             isDragging={isDragging}
@@ -371,13 +362,7 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
               }}
               onPointerUp={() => {
                 setIsResizing(false);
-                activeWindow &&
-                  DesktopActions.setAppDimensions(activeWindow.id, {
-                    x: motionX.get(),
-                    y: motionY.get(),
-                    height: motionHeight.get(),
-                    width: motionWidth.get(),
-                  });
+                updateWindowBounds();
               }}
               onPanEnd={() => setIsResizing(false)}
               onTap={() => setIsResizing(false)}
@@ -389,9 +374,9 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
     ),
     [
       theme.currentTheme,
-      window.dimensions,
-      window.minimized,
-      unmaximize,
+      window.bounds,
+      window.isMinimized,
+      window.state,
       isResizing,
       isDragging,
       motionHeight,
@@ -400,62 +385,6 @@ const AppWindow = observer(({ window, desktopRef }: AppWindowProps) => {
       motionY,
     ]
   );
-});
-
-export default AppWindow;
-
-interface WindowTypeProps {
-  hasTitlebar: boolean;
-  isResizing: boolean;
-  isDragging: boolean;
-  window: WindowModelProps;
-}
-
-const WindowType = ({
-  hasTitlebar,
-  isResizing,
-  isDragging,
-  window,
-}: WindowTypeProps) => {
-  switch (window.type) {
-    case 'native':
-      return (
-        <NativeView
-          isDragging={isDragging}
-          isResizing={isResizing}
-          hasTitlebar={nativeApps[window.id].native?.hideTitlebarBorder}
-          window={window}
-        />
-      );
-    case 'urbit':
-      return (
-        <AppView
-          isDragging={isDragging}
-          hasTitlebar={hasTitlebar}
-          isResizing={isResizing}
-          window={window}
-        />
-      );
-    case 'web':
-      return (
-        <DevView
-          hasTitlebar={hasTitlebar}
-          isResizing={isResizing}
-          window={window}
-        />
-      );
-    case 'dev':
-      return (
-        <DevView
-          hasTitlebar={hasTitlebar}
-          isResizing={isResizing}
-          window={window}
-        />
-      );
-
-    case 'dialog':
-      return <DialogView window={window} />;
-    default:
-      return <div>No view</div>;
-  }
 };
+
+export const AppWindow = observer(AppWindowPresenter);

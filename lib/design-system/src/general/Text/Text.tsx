@@ -133,10 +133,7 @@ const Label = styled(Default)<TextProps>`
   font-size: 0.8rem;
 `;
 
-const Custom = styled(BaseText)<TextProps>`
-  margin-top: 0px;
-  margin-bottom: 0px;
-`;
+const Custom = styled(BaseText)<TextProps>``;
 
 const Patp = styled(motion.p)<TextProps>`
   font-weight: 400;

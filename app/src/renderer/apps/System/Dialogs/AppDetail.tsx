@@ -26,6 +26,7 @@ import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { darken, rgba } from 'polished';
 import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 const TileStyle = styled(Box)`
   position: relative;
@@ -96,7 +97,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     }
   }, [appId]);
 
-  let app: AppType;
+  let app: AppType | null = null;
   let onClose: any = ShellActions.closeDialog;
   if (type === 'app-install') {
     onClose = () => {
@@ -263,6 +264,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   !isInstalled &&
+                    app &&
                     SpacesActions.installApp(
                       (app as UrbitAppType).host!,
                       app.id
@@ -282,11 +284,13 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const content = `web+urbitgraph://${
-                    (app as UrbitAppType).host || ''
-                  }/${app.id}`;
-                  navigator.clipboard.writeText(content);
-                  setCopied(true);
+                  if (app) {
+                    const content = `web+urbitgraph://${
+                      (app as UrbitAppType).host || ''
+                    }/${app.id}`;
+                    navigator.clipboard.writeText(content);
+                    setCopied(true);
+                  }
                 }}
               >
                 <>
@@ -321,17 +325,20 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
     onClose: () => {
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'app-detail-dialog',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'app-detail-dialog',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 600,
-        height: 480,
-      },
-    },
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 600,
+          height: 480,
+        },
+        desktopDimensions
+      ),
+    }),
     hasCloseButton: true,
     unblurOnClose: false,
     draggable: false,

@@ -10,10 +10,9 @@ import { OurHome } from './Ship';
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 
-interface HomeWindowProps {}
-
-const HomeWindow = styled(motion.div)<HomeWindowProps>`
+const HomeWindow = styled(motion.div)`
   height: 100%;
+  position: relative;
   ::-webkit-scrollbar {
     display: none;
   }
@@ -21,7 +20,7 @@ const HomeWindow = styled(motion.div)<HomeWindowProps>`
 
 const HomePanePresenter = () => {
   const { theme, spaces, desktop } = useServices();
-  const isOpen = desktop.showHomePane;
+  const isOpen = desktop.isHomePaneOpen;
 
   const isOur = spaces.selected?.type === 'our';
 

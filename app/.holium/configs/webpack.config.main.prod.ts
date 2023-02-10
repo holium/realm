@@ -29,6 +29,7 @@ const configuration: webpack.Configuration = {
   entry: {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
+    updater: path.join(webpackPaths.srcMainPath, 'updater.ts'),
   },
   output: {
     path: webpackPaths.distMainPath,
@@ -59,11 +60,13 @@ const configuration: webpack.Configuration = {
       DEBUG_PROD: false,
       START_MINIMIZED: false,
       AUTOUPDATE_FEED_URL:
-        process.env.RELEASE_CHANNEL === 'alpha'
+        process.env.RELEASE_CHANNEL === 'alpha' ||
+        process.env.RELEASE_CHANNEL === 'draft'
           ? 'https://ghproxy-staging.holium.xyz'
           : 'https://ghproxy.holium.xyz',
       INSTALL_MOON:
-        process.env.RELEASE_CHANNEL === 'alpha'
+        process.env.RELEASE_CHANNEL === 'alpha' ||
+        process.env.RELEASE_CHANNEL === 'draft'
           ? '~nimwyd-ramwyl-dozzod-hostyv:realm,courier'
           : '~hostyv:realm,courier',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',

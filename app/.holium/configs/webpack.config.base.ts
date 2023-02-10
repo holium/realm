@@ -3,7 +3,6 @@
  */
 
 import webpack from 'webpack';
-import path from 'path';
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
 

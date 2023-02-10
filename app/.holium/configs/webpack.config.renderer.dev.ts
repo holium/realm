@@ -56,7 +56,13 @@ const configuration: webpack.Configuration = {
     },
     mouse: {
       import: path.join(webpackPaths.srcRendererPath, 'mouse.tsx'),
-    }
+    },
+    updater: {
+      import: path.join(
+        webpackPaths.srcRendererPath,
+        'system/updater/index.tsx'
+      ),
+    },
   },
   output: {
     path: webpackPaths.distRendererPath,
@@ -157,6 +163,20 @@ const configuration: webpack.Configuration = {
     new HtmlWebpackPlugin({
       chunks: ['mouse'],
       filename: path.join('mouse.html'),
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['updater'],
+      filename: path.join('updater.html'),
       template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
       minify: {
         collapseWhitespace: true,
