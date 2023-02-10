@@ -209,6 +209,7 @@
       =/  cage  friends-action+!>([%yes-fren ~])
       [%pass / %agent dock %poke cage]
     %-  emil
+    %+  welp  contact-cards
     :~  [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
         [%pass / %agent dock %poke share-contact-cage]
     ==
@@ -234,8 +235,8 @@
       [%pass / %agent dock %poke cage]~
     ::
     :: add ourselves to ship's contacts
-    =/  dock  [ship %contact-hook]
-    =/  cage  contact-ship-add+!>(our.bowl)
+    =/  dock  [ship %contact-push-hook]
+    =/  cage  contact-share+!>([%share our.bowl])
     [%pass / %agent dock %poke cage]~
   --
 ::

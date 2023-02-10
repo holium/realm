@@ -32,7 +32,7 @@ export const FriendsApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    return await conduit.poke(payload);
   },
   /**
    * getFriends: returns a map of friends
@@ -131,7 +131,7 @@ export const FriendsApi = {
           Object.keys(data.friends).forEach((ship: string) => {
             data.friends[ship] = {
               ...data.friends[ship],
-              contactInfo: {
+              contactInfo: data.friends[ship].contactInfo && {
                 ...data.friends[ship].contactInfo,
                 color:
                   data.friends[ship].contactInfo.color &&
@@ -146,7 +146,7 @@ export const FriendsApi = {
           const friend = data.friend.friend;
           const update = {
             ...friend,
-            contactInfo: {
+            contactInfo: friend.contactInfo && {
               ...friend.contactInfo,
               color:
                 friend.contactInfo.color &&
@@ -159,7 +159,7 @@ export const FriendsApi = {
           const patp = data['new-friend'].ship;
           const friend = {
             ...data['new-friend'].friend,
-            contactInfo: {
+            contactInfo: data['new-friend'].friend.contactInfo && {
               ...data['new-friend'].friend.contactInfo,
               color:
                 data['new-friend'].friend.contactInfo.color &&
