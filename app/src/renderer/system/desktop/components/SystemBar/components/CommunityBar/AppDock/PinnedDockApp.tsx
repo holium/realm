@@ -17,6 +17,7 @@ import {
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 
 type Props = {
+  tileId: string;
   app: AppType;
   spacePath: string;
   isOpen: boolean;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export const PinnedDockApp = ({
+  tileId,
   app,
   spacePath,
   isOpen,
@@ -36,7 +38,6 @@ export const PinnedDockApp = ({
     rect: DOMRect;
   } | null>(null);
 
-  const tileId = `pinned-${app.id}-${spacePath}`;
   const { isSuspended, isUninstalled } = getAppTileFlags(
     (app.installStatus as InstallStatus) || InstallStatus.installed
   );
@@ -97,7 +98,6 @@ export const PinnedDockApp = ({
 
   return (
     <Reorder.Item
-      key={tileId}
       value={app}
       initial={{
         opacity: 0.0,

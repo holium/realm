@@ -297,7 +297,7 @@ const AppTilePresenter = ({
             draggable="false"
             height={sizes[tileSize]}
             width={sizes[tileSize]}
-            key={app.title}
+            key={`app-image-${tileId}`}
             // @ts-ignore
             src={app.image}
           />
@@ -381,7 +381,7 @@ const AppTilePresenter = ({
           }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-          key={app.title}
+          key={tileId}
           backgroundColor={tileBg}
           height={sizes[tileSize]}
           width={sizes[tileSize]}

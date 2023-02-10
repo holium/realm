@@ -35,6 +35,11 @@ const AppDockPresenterView = ({
   theme,
   setDockAppIds,
 }: Props) => {
+  const showDivider = useMemo(
+    () => pinnedDockApps.length > 0 && unpinnedDockApps.length > 0,
+    [pinnedDockApps, unpinnedDockApps]
+  );
+
   const onClickDockedApp = useCallback((dockedApp: AppType) => {
     const window = desktop.getWindowByAppId(dockedApp.id);
     if (window) {
@@ -50,11 +55,14 @@ const AppDockPresenterView = ({
 
   const pinnedAppTiles = useMemo(
     () =>
-      pinnedDockApps.map((app) => {
+      pinnedDockApps.map((app, index) => {
         const window = desktop.getWindowByAppId(app.id);
+        const pinnedTileId = `pinned-${app.id}-${spacePath}-${index}`;
 
         return (
           <PinnedDockApp
+            key={`tile-${pinnedTileId}`}
+            tileId={pinnedTileId}
             app={app}
             spacePath={spacePath}
             isOpen={Boolean(window)}
@@ -68,11 +76,14 @@ const AppDockPresenterView = ({
 
   const unpinnedAppTiles = useMemo(
     () =>
-      unpinnedDockApps.map((app) => {
+      unpinnedDockApps.map((app, index) => {
         const window = desktop.getWindowByAppId(app.id);
+        const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
 
         return (
           <UnpinnedDockApp
+            key={`tile-${unpinnedTileId}`}
+            tileId={unpinnedTileId}
             app={app}
             spacePath={spacePath}
             isSelected={Boolean(window?.isActive)}
@@ -87,10 +98,11 @@ const AppDockPresenterView = ({
     <Flex position="relative" flexDirection="row" alignItems="center">
       <AnimatePresence>
         <Reorder.Group
+          key={`dock-${spacePath}`}
           axis="x"
           style={{
-            position: 'relative',
             display: 'flex',
+            position: 'relative',
             flexDirection: 'row',
             gap: 8,
           }}
@@ -104,19 +116,22 @@ const AppDockPresenterView = ({
         >
           {pinnedAppTiles}
         </Reorder.Group>
-
-        {pinnedAppTiles.length > 0 && unpinnedAppTiles.length > 0 && (
+        {showDivider && (
           <Divider
-            key={`app-dock-divider-${spacePath}`}
-            customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
             ml={2}
             mr={2}
+            customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
           />
         )}
+        <Flex
+          position="relative"
+          flexDirection="row"
+          alignItems="center"
+          gap={8}
+        >
+          {unpinnedAppTiles}
+        </Flex>
       </AnimatePresence>
-      <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
-        {unpinnedAppTiles}
-      </Flex>
     </Flex>
   );
 };
@@ -135,7 +150,11 @@ const AppDockPresenter = () => {
     .map((appWindow) => bazaar.getApp(appWindow.appId))
     .filter(Boolean) as AppType[];
 
-  const [localDockAppIds, setLocalDockAppIds] = useState<string[]>(dockAppIds);
+  const [localDockAppIds, setLocalDockAppIds] = useState<string[]>(
+    toJS(dockAppIds)
+  );
+  console.log('dockAppIds', toJS(dockAppIds));
+  console.log('localDockAppIds', localDockAppIds);
 
   const debouncedSetLocalDockApps = useCallback(
     debounce(setLocalDockAppIds, 500),
@@ -144,8 +163,8 @@ const AppDockPresenter = () => {
 
   useEffect(() => {
     // If the dock length changes, e.g. from the AppGrid, we update the local dock.
-    debouncedSetLocalDockApps(dockAppIds);
-  }, [dockApps.length]);
+    debouncedSetLocalDockApps(toJS(dockAppIds));
+  }, [dockAppIds.length]);
 
   if (!spacePath) return null;
 
