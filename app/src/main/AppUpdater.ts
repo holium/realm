@@ -7,7 +7,7 @@
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater, UpdateInfo } from 'electron-updater';
+import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 const fs = require('fs');
@@ -31,6 +31,9 @@ const getAssetPath = (...paths: string[]): string => {
 //  log ALL builds, not just dev or prod
 // log.transports.file.level = isDevelopment ? 'debug' : 'info';
 log.transports.file.level = 'verbose';
+// log.verbose(process.env);
+
+// const { AUTOUPDATE_FEED_URL, RELEASE_CHANNEL } = process.env;
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
@@ -99,23 +102,15 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
-      // good ole windows. trying a hack since setFeedURL is not working
-    } else if (process.platform === 'win32') {
-      const updateConfigPath = `${app.getPath(
-        'userData'
-      )}/windows-app-update.json`;
+    } else if (process.platform === 'win32' || process.platform === 'linux') {
+      // on windows builds, we generate an auto update config file at runtime
+      //  since there are issues with our current package.json scripts and persisting
+      //  environment variables across script commands
+      this.autoUpdater.updateConfigPath = `${process.resourcesPath}/updater/app-update.yml`;
       log.verbose(
-        `Running on Windows platform. Updating config path to '${updateConfigPath}'...`
+        'autoUpdater.updateConfigPath => %o',
+        this.autoUpdater.updateConfigPath
       );
-      fs.writeFileSync(
-        updateConfigPath,
-        JSON.stringify({
-          provider: 'generic',
-          url: process.env.AUTOUPDATE_FEED_URL,
-          channel: determineReleaseChannel(),
-        })
-      );
-      this.autoUpdater.updateConfigPath = updateConfigPath;
     } else {
       // proxy private github repo requests
       this.autoUpdater.setFeedURL({
