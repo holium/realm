@@ -1,0 +1,95 @@
+# push to 'linux' branch to run this script
+# need a better way of getting linux only builds out to speed
+#  up testing the process.
+name: linux-build
+run-name: Linux Build - ${{ github.actor }}
+on:
+  push:
+    branches:
+      - linux
+#
+env:
+  GH_PROXY: ${{ secrets.GH_PROXY }}
+  GH_PROXY_STAGING: ${{ secrets.GH_PROXY_STAGING }}
+#
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      # the full CI object returned by the post-deploy script
+      ci: ${{ steps.ci.outputs.result }}
+      release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+      build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
+      build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
+      build_version_build: ${{ fromJSON(steps.ci.outputs.result).version.build }}
+      channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin linux
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: ci
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-deploy.js')
+            const result = script({github, context}, 'linux.yml')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #
+  build-linux:
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Install app dependencies
+        run: yarn install
+      - name: Build linux version
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+          sudo apt update
+          sudo apt install aptitude
+          sudo aptitude install -y -q winehq-staging
+          sudo aptitude install -y -q wine-staging
+          sudo apt update
+          GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          # rename the latest.yml (linux) file to name based on channel
+          mv -f ./app/release/build/latest.yml ./app/release/build/$RELEASE_CHANNEL.yml
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
