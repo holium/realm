@@ -27,6 +27,7 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
+    ~&  wex.bowl
     :: do a quick check to make sure we are subbed to /db in %chat-db
     =/  cards  ?:  =(wex.bowl ~)  
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
@@ -108,7 +109,7 @@
             ~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
             :_  this
             :~
-              [%pass /db %agent [our.bowl %graph-store] %watch /db]
+              [%pass /db %agent [our.bowl %chat-db] %watch /db]
             ==
           %fact
             ?+    p.cage.sign  `this
