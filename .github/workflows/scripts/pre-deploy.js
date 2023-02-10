@@ -25,6 +25,7 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, workflowId) => {
+  console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -129,19 +130,26 @@ module.exports = async ({ github, context }, workflowId) => {
     let buildVersion = undefined;
     // grab the latest annotated tag of any kind (draft, prerelease, release), and interrogate it to determine
     //  how to move forward
-    const releases = await github.request(
-      'GET /repos/{owner}/{repo}/releases',
-      {
-        owner: 'holium',
-        repo: 'realm',
-        per_page: 1, // only give the last result
-        sort: 'created',
-        direction: 'desc',
-      }
-    );
-    if (releases.data.length > 0) {
+    // const releases = await github.request(
+    //   'GET /repos/{owner}/{repo}/releases',
+    //   {
+    //     owner: 'holium',
+    //     repo: 'realm',
+    //     per_page: 1, // only give the last result
+    //     sort: 'created',
+    //     direction: 'desc',
+    //   }
+    // );
+    const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
+      owner: 'holium',
+      repo: 'realm',
+      per_page: 1, // only give the last result
+      sort: 'created',
+      direction: 'desc',
+    });
+    if (tags.data.length > 0) {
       // if there is at least one release, use it's tag name to determine next version
-      buildVersion = releases.data[0].tag_name;
+      buildVersion = tags.data[0].name;
     } else {
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
@@ -154,7 +162,14 @@ module.exports = async ({ github, context }, workflowId) => {
     ) {
       ci.channel = 'alpha';
     } else {
+      // channel set to branch name
       ci.channel = 'draft';
+      // const tic = context.ref.lastIndexOf('/');
+      // if (tic !== -1) {
+      //   ci.channel = context.ref.substring(tic + 1);
+      // } else {
+      //   ci.channel = context.ref;
+      // }
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
