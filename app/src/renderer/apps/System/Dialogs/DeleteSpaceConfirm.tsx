@@ -1,3 +1,4 @@
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useState } from 'react';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
@@ -48,18 +49,21 @@ export const DeleteSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
       />
     ),
     onClose: () => {},
-    window: {
-      id: 'delete-space-dialog',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'delete-space-dialog',
       title: 'Delete Space Dialog',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 180,
-      },
-    },
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 320,
+          height: 180,
+        },
+        desktopDimensions
+      ),
+    }),
     hasCloseButton: false,
     noTitlebar: true,
   } as DialogConfig);

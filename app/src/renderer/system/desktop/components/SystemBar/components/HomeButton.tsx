@@ -7,7 +7,8 @@ const HomeButtonPresenter = () => {
   const { desktop } = useServices();
 
   const onHome = () => {
-    DesktopActions.setHomePane(!desktop.showHomePane);
+    if (desktop.isHomePaneOpen) DesktopActions.closeHomePane();
+    else DesktopActions.openHomePane();
   };
 
   return (
@@ -17,7 +18,7 @@ const HomeButtonPresenter = () => {
       animate={{ scale: 1 }}
       transition={{ scale: 0.5 }}
       whileTap={{ scale: 0.95 }}
-      onClick={() => onHome()}
+      onClick={onHome}
     >
       <HoliumButton />
     </BarStyle>

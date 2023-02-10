@@ -182,7 +182,7 @@ export default function createDetectElementResize(hostWindow: Window) {
 
         var elementStyle = _window.getComputedStyle(element);
 
-        if (elementStyle && elementStyle.position == 'static') {
+        if (elementStyle && elementStyle.position === 'static') {
           element.style.position = 'relative';
         }
 
@@ -209,7 +209,7 @@ export default function createDetectElementResize(hostWindow: Window) {
         if (animationstartevent) {
           element.__resizeTriggers__.__animationListener__ =
             function animationListener(e: any) {
-              if (e.animationName == animationName) {
+              if (e.animationName === animationName) {
                 resetTriggers(element);
               }
             };
