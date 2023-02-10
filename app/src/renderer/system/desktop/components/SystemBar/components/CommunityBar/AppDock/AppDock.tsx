@@ -117,6 +117,7 @@ const AppDockPresenterView = ({
         </Reorder.Group>
         {showDivider && (
           <Divider
+            key={`dock-divider-${spacePath}`}
             ml={2}
             mr={2}
             customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
@@ -148,9 +149,6 @@ const AppDockPresenter = () => {
     .filter((appWindow) => !dockAppIds.includes(appWindow.appId))
     .map((appWindow) => bazaar.getApp(appWindow.appId))
     .filter(Boolean) as AppType[];
-
-  console.log('pinnedDockApps', pinnedDockApps);
-  console.log('unpinnedDockApps', unpinnedDockApps);
 
   if (!spacePath) return null;
 
