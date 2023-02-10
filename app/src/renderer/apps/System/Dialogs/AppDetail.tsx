@@ -80,7 +80,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   const { theme, bazaar } = useServices();
   const { selectedApp, setSearchMode } = useAppInstaller();
   const [copied, setCopied] = useState<boolean>(false);
-  const [deskHash, setDeskHash] = useState<string>('fake');
+  const [deskHash, setDeskHash] = useState<string | null>(null);
 
   useEffect(() => {
     if (copied) {
@@ -90,8 +90,8 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
 
   useEffect(() => {
     if (appId) {
-      SpacesActions.scryHash(appId).then((r: any) =>
-        setDeskHash(r && r['app-hash'])
+      SpacesActions.scryHash(appId).then(
+        (result) => result && setDeskHash(result['app-hash'])
       );
     }
   }, [appId]);
@@ -159,9 +159,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
         {app.href && app.href.glob && app.href.glob['glob-reference'] && (
           <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
         )}
-        {isInstalled && deskHash !== 'fake' && (
-          <KPI title="Desk Hash" value={deskHash} />
-        )}
+        {isInstalled && deskHash && <KPI title="Desk Hash" value={deskHash} />}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
