@@ -73,10 +73,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     const shipName = onboarding.ship!.patp;
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
-    const [avatarImg, setAvatarImg] = useState(
-      /*onboarding.ship ? */ onboarding.ship?.avatar!
-    );
-    // : ''
+    const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar!);
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 

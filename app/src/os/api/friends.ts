@@ -15,7 +15,7 @@ export const FriendsApi = {
     };
   },
   saveContact: async (conduit: Conduit, ship: string, data: any) => {
-    const preparedData: any = {
+    const preparedData = {
       nickname: data.nickname,
       color: removeHash(data.color),
       avatar: data.avatar,
@@ -32,7 +32,7 @@ export const FriendsApi = {
         },
       },
     };
-    return await conduit.poke(payload);
+    return conduit.poke(payload);
   },
   /**
    * getFriends: returns a map of friends

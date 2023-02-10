@@ -18,7 +18,7 @@ interface IProps {
 
 const NewChatPresenter = (props: IProps) => {
   const { height, headerOffset, onBack, onCreateNewDm } = props;
-  const contacts = useServices().friends;
+  const { friends } = useServices();
   const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 
@@ -34,7 +34,7 @@ const NewChatPresenter = (props: IProps) => {
       const contactsList = Array.from(selectedPatp.values());
       const metadata: any = [];
       for (let i = 0; i < contactsList.length; i++) {
-        metadata.push(contacts.getContactAvatarMetadata(contactsList[i]));
+        metadata.push(friends.getContactAvatarMetadata(contactsList[i]));
       }
       // if (contacts.getContactAvatarMetadata(contactsList[0])) {
       //   metadata = contacts.getContactAvatarMetadata(contactsList[0]);
@@ -45,7 +45,7 @@ const NewChatPresenter = (props: IProps) => {
       setLoading(false);
       onCreateNewDm(newDm);
     },
-    [contacts, onCreateNewDm, selectedPatp]
+    [friends, onCreateNewDm, selectedPatp]
   );
 
   const onShipSelected = (contact: [string, string?]) => {

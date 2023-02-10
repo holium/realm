@@ -37,6 +37,16 @@ export const FriendModel = types.model({
 
 export type FriendType = Instance<typeof FriendModel>;
 
+type ContactUpdateJsonPayload = {
+  'contact-update': {
+    initial?: {
+      'is-public': boolean;
+      rolodex: { [patp: string]: ContactModelType };
+    };
+    edit?: any;
+  };
+};
+
 export const FriendsStore = types
   .model('FriendsStore', {
     all: types.map(FriendModel),
@@ -110,15 +120,7 @@ export const FriendsStore = types
     },
   }))
   .actions((self) => ({
-    setInitial(json: {
-      'contact-update': {
-        initial?: {
-          'is-public': boolean;
-          rolodex: { [patp: string]: ContactModelType };
-        };
-        edit?: any;
-      };
-    }) {
+    setInitial(json: ContactUpdateJsonPayload) {
       // ------------------
       // ---- initial -----
       // ------------------
