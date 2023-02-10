@@ -102,7 +102,7 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
-    } else if (process.platform === 'win32') {
+    } else if (process.platform === 'win32' || process.platform === 'linux') {
       // on windows builds, we generate an auto update config file at runtime
       //  since there are issues with our current package.json scripts and persisting
       //  environment variables across script commands
