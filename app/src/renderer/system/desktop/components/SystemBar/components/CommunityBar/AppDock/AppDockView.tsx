@@ -33,11 +33,12 @@ const AppDockViewPresenter = ({
     if (appWindow) {
       if (appWindow.isMinimized) {
         DesktopActions.toggleMinimized(dockedApp.id);
+      } else {
+        DesktopActions.setActive(dockedApp.id);
       }
     } else {
       DesktopActions.openAppWindow(dockedApp);
     }
-    DesktopActions.setActive(dockedApp.id);
   }, []);
 
   const onOrderUpdate = useCallback(() => {

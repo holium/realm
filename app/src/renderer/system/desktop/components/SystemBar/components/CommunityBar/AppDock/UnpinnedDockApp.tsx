@@ -25,8 +25,8 @@ export const UnpinnedDockApp = ({
     tileId={tileId}
     tileSize="sm"
     app={app}
-    open={true}
-    selected={isActive}
+    isOpen={true}
+    isActive={isActive}
     contextMenuOptions={[
       {
         id: `${app.id}-pin}`,

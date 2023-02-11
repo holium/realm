@@ -18,6 +18,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { Variants } from 'framer-motion';
 
 const sizes = {
   sm: 32,
@@ -60,7 +61,7 @@ const scales = {
 };
 
 interface TileHighlightProps {
-  isSelected?: boolean;
+  isActive?: boolean;
   isOpen?: boolean;
   theme: ThemeType;
 }
@@ -77,7 +78,7 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
       background-color: ${lighten(0.05, props.theme.colors.icon.app)};
     `}
   ${(props: TileHighlightProps) =>
-    props.isSelected &&
+    props.isActive &&
     css`
       background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
     `}
@@ -115,18 +116,18 @@ const TileStyle = styled(Box)<TileStyleProps>`
 
 export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
-  contextMenuOptions?: ContextMenuOption[];
-  onAppClick?: (app: AppType) => void;
-  selected?: boolean;
-  open?: boolean;
   app: AppType | DevAppType;
   tileId: string;
-  variants?: any;
-  isAnimated?: boolean;
+  contextMenuOptions?: ContextMenuOption[];
+  variants?: Variants;
   tileSize: AppTileSize;
   installStatus?: InstallStatus;
+  isOpen?: boolean;
   hasTitle?: boolean;
+  isActive?: boolean;
+  isAnimated?: boolean;
   highlightOnHover?: boolean;
+  onAppClick?: (app: AppType) => void;
 }
 
 const AppTilePresenter = ({
@@ -134,13 +135,13 @@ const AppTilePresenter = ({
   tileId,
   contextMenuOptions,
   variants,
-  selected,
   tileSize = 'md',
-  open,
+  isOpen = false,
+  isActive = false,
   isAnimated = true,
-  onAppClick,
   hasTitle,
   installStatus = InstallStatus.installed,
+  onAppClick,
 }: AppTileProps) => {
   const { theme } = useServices();
   const { getOptions, setOptions, getColors, setColors } = useContextMenu();
@@ -190,277 +191,258 @@ const AppTilePresenter = ({
     isDesktop,
   } = getAppTileFlags(installStatus || InstallStatus.installed);
 
-  return useMemo(() => {
-    let title;
-    let status;
-    if (isAppGrid) {
-      const appColor = app.color;
-      title = (
+  let title;
+  let status;
+  if (isAppGrid) {
+    const appColor = app.color;
+    title = (
+      <Text
+        position="absolute"
+        style={{ pointerEvents: 'none' }}
+        left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+        padding=".2rem"
+        borderRadius={4}
+        // @ts-ignore
+        backgroundColor={app.image && appColor}
+        bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+        fontWeight={500}
+        fontSize={2}
+        color={textColor}
+      >
+        {app.title}
+      </Text>
+    );
+    if (isSuspended || isFailed) {
+      let statusBadgeColor = isLight
+        ? darken(0.05, desaturate(1, app.color))
+        : lighten(0.1, desaturate(1, app.color));
+      if (isFailed) {
+        statusBadgeColor = isLight
+          ? rgba(darken(0.05, '#D0384E'), 0.1)
+          : rgba(lighten(0.1, '#D0384E'), 0.1);
+      }
+      status = (
         <Text
           position="absolute"
-          style={{ pointerEvents: 'none' }}
+          style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
-          padding=".2rem"
-          borderRadius={4}
-          // @ts-ignore
-          backgroundColor={app.image && appColor}
-          bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+          padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
+          borderRadius={6}
+          backgroundColor={rgba(statusBadgeColor, 0.5)}
+          top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
-          fontSize={2}
-          color={textColor}
+          textStyle="capitalize"
+          fontSize={tileSize === 'xl1' ? '13px' : 2}
+          color={isFailed ? '#5e0b18' : textColor}
+        >
+          {app.installStatus}
+        </Text>
+      );
+    }
+  }
+
+  const tileBg = app.color || '#F2F3EF';
+  const filter =
+    isSuspended || isFailed
+      ? { filter: 'grayscale(1)' }
+      : { filter: 'grayscale(0)' };
+
+  // set image or icon
+  let graphic;
+  // @ts-ignore
+  if (app.image) {
+    graphic = (
+      <TileStyle
+        id={tileId}
+        onContextMenu={(evt: any) => {
+          evt.stopPropagation();
+        }}
+        {...(isAnimated
+          ? {
+              whileHover: {
+                scale: 1 + scales[tileSize] / 2,
+                boxShadow: boxShadowHover,
+              },
+              whileTap: {
+                scale: 1 - scales[tileSize],
+                boxShadow: boxShadowHover,
+              },
+            }
+          : {})}
+        initial={{
+          opacity: isFaded ? 0.5 : 1,
+          ...filter,
+        }}
+        animate={{
+          opacity: isFaded ? 0.5 : 1,
+          boxShadow: boxShadowStyle,
+          ...filter,
+        }}
+        transition={{
+          scale: { duration: 0.1 },
+          boxShadow: { duration: 0.1 },
+        }}
+        minWidth={sizes[tileSize]}
+        style={{
+          borderRadius: radius[tileSize],
+          overflow: 'hidden',
+        }}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+        backgroundColor={tileBg}
+      >
+        <img
+          alt={app.title}
+          style={{ pointerEvents: 'none' }}
+          draggable="false"
+          height={sizes[tileSize]}
+          width={sizes[tileSize]}
+          key={`app-image-${tileId}`}
+          // @ts-ignore
+          src={app.image}
+        />
+        {title}
+      </TileStyle>
+    );
+    // @ts-ignore
+  } else if (app.icon) {
+    const iconTileSize = sizes[tileSize];
+    const iconSize =
+      iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
+
+    graphic = (
+      <TileStyle
+        id={tileId}
+        onContextMenu={(evt: any) => {
+          evt.stopPropagation();
+        }}
+        {...(isAnimated
+          ? {
+              whileHover: {
+                scale: 1 + scales[tileSize] / 2,
+                boxShadow: boxShadowHover,
+              },
+              whileTap: {
+                scale: 1 - scales[tileSize],
+                boxShadow: boxShadowHover,
+              },
+            }
+          : {})}
+        animate={{
+          opacity: isFaded ? 0.5 : 1,
+          boxShadow: boxShadowStyle,
+        }}
+        transition={{
+          scale: { duration: 0.1 },
+          boxShadow: { duration: 0.1 },
+        }}
+        minWidth={sizes[tileSize]}
+        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+        backgroundColor={tileBg}
+      >
+        {/* @ts-ignore */}
+        <Icons name={app.icon} height={iconSize} width={iconSize} />
+        {title}
+      </TileStyle>
+    );
+  } else {
+    graphic = (
+      <TileStyle
+        id={tileId}
+        onContextMenu={(evt: any) => {
+          evt.stopPropagation();
+        }}
+        {...(isAnimated
+          ? {
+              whileHover: {
+                scale: 1 + scales[tileSize] / 2,
+                boxShadow: boxShadowHover,
+              },
+              whileTap: {
+                scale: 1 - scales[tileSize],
+                boxShadow: boxShadowHover,
+              },
+            }
+          : {})}
+        initial={{
+          opacity: isFaded ? 0.5 : 1,
+          ...filter,
+        }}
+        animate={{
+          opacity: isFaded ? 0.5 : 1,
+          boxShadow: boxShadowStyle,
+          ...filter,
+        }}
+        transition={{
+          scale: { duration: 0.1 },
+          boxShadow: { duration: 0.1 },
+        }}
+        minWidth={sizes[tileSize]}
+        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+        key={tileId}
+        backgroundColor={tileBg}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+      >
+        {title}
+      </TileStyle>
+    );
+  }
+
+  return (
+    <Flex flexDirection="column" alignItems="center">
+      <Flex
+        position="relative"
+        ref={tileRef}
+        variants={variants}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAppClick &&
+            !isSuspended &&
+            !isFailed &&
+            !isUninstalled &&
+            !isInstalling &&
+            !isDesktop &&
+            onAppClick(app);
+        }}
+        className="app-dock-icon"
+      >
+        {status}
+        {isInstalling && !isUninstalled && (
+          <Flex
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            position="absolute"
+            left={0}
+            top={0}
+            right={0}
+            bottom={0}
+          >
+            <Spinner color="#FFF" size={loaderSizes[tileSize]} />
+          </Flex>
+        )}
+        {graphic}
+        <TileHighlight
+          layoutId="active-app"
+          isActive={isActive}
+          isOpen={isOpen}
+          transition={{ duration: 0.2 }}
+        />
+      </Flex>
+      {hasTitle && (
+        <Text
+          style={{ pointerEvents: 'none' }}
+          color={theme.currentTheme.textColor}
+          mt={2}
         >
           {app.title}
         </Text>
-      );
-      if (isSuspended || isFailed) {
-        let statusBadgeColor = isLight
-          ? darken(0.05, desaturate(1, app.color))
-          : lighten(0.1, desaturate(1, app.color));
-        if (isFailed) {
-          statusBadgeColor = isLight
-            ? rgba(darken(0.05, '#D0384E'), 0.1)
-            : rgba(lighten(0.1, '#D0384E'), 0.1);
-        }
-        status = (
-          <Text
-            position="absolute"
-            style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
-            left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
-            padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
-            borderRadius={6}
-            backgroundColor={rgba(statusBadgeColor, 0.5)}
-            top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
-            fontWeight={500}
-            textStyle="capitalize"
-            fontSize={tileSize === 'xl1' ? '13px' : 2}
-            color={isFailed ? '#5e0b18' : textColor}
-          >
-            {app.installStatus}
-          </Text>
-        );
-      }
-    }
-
-    const tileBg = app.color || '#F2F3EF';
-    const filter =
-      isSuspended || isFailed
-        ? { filter: 'grayscale(1)' }
-        : { filter: 'grayscale(0)' };
-
-    // set image or icon
-    let graphic;
-    // @ts-ignore
-    if (app.image) {
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          initial={{
-            opacity: isFaded ? 0.5 : 1,
-            ...filter,
-          }}
-          animate={{
-            opacity: isFaded ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-            ...filter,
-          }}
-          transition={{
-            scale: { duration: 0.1 },
-            boxShadow: { duration: 0.1 },
-          }}
-          minWidth={sizes[tileSize]}
-          style={{
-            borderRadius: radius[tileSize],
-            overflow: 'hidden',
-          }}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-          backgroundColor={tileBg}
-        >
-          <img
-            alt={app.title}
-            style={{ pointerEvents: 'none' }}
-            draggable="false"
-            height={sizes[tileSize]}
-            width={sizes[tileSize]}
-            key={`app-image-${tileId}`}
-            // @ts-ignore
-            src={app.image}
-          />
-          {title}
-        </TileStyle>
-      );
-      // @ts-ignore
-    } else if (app.icon) {
-      const iconTileSize = sizes[tileSize];
-      const iconSize =
-        iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
-
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          animate={{
-            opacity: isFaded ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-          }}
-          transition={{
-            scale: { duration: 0.1 },
-            boxShadow: { duration: 0.1 },
-          }}
-          minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-          backgroundColor={tileBg}
-        >
-          {/* @ts-ignore */}
-          <Icons name={app.icon} height={iconSize} width={iconSize} />
-          {title}
-        </TileStyle>
-      );
-    } else {
-      graphic = (
-        <TileStyle
-          id={tileId}
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          {...(isAnimated
-            ? {
-                whileHover: {
-                  scale: 1 + scales[tileSize] / 2,
-                  boxShadow: boxShadowHover,
-                },
-                whileTap: {
-                  scale: 1 - scales[tileSize],
-                  boxShadow: boxShadowHover,
-                },
-              }
-            : {})}
-          initial={{
-            opacity: isFaded ? 0.5 : 1,
-            ...filter,
-          }}
-          animate={{
-            opacity: isFaded ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
-            ...filter,
-          }}
-          transition={{
-            scale: { duration: 0.1 },
-            boxShadow: { duration: 0.1 },
-          }}
-          minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-          key={tileId}
-          backgroundColor={tileBg}
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-        >
-          {title}
-        </TileStyle>
-      );
-    }
-
-    return (
-      <Flex flexDirection="column" alignItems="center">
-        <Flex
-          position="relative"
-          ref={tileRef}
-          variants={variants}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAppClick &&
-              !isSuspended &&
-              !isFailed &&
-              !isUninstalled &&
-              !isInstalling &&
-              !isDesktop &&
-              onAppClick(app);
-          }}
-          className="app-dock-icon"
-        >
-          {status}
-          {isInstalling && !isUninstalled && (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              position="absolute"
-              left={0}
-              top={0}
-              right={0}
-              bottom={0}
-            >
-              <Spinner color="#FFF" size={loaderSizes[tileSize]} />
-            </Flex>
-          )}
-          {graphic}
-          <TileHighlight
-            layoutId="active-app"
-            isSelected={selected}
-            isOpen={open}
-            transition={{ duration: 0.2 }}
-          />
-        </Flex>
-        {hasTitle && (
-          <Text
-            style={{ pointerEvents: 'none' }}
-            color={theme.currentTheme.textColor}
-            mt={2}
-          >
-            {app.title}
-          </Text>
-        )}
-      </Flex>
-    );
-  }, [
-    app,
-    hasTitle,
-    isAnimated,
-    isFaded,
-    isFailed,
-    isInstalling,
-    isSuspended,
-    isUninstalled,
-    onAppClick,
-    open,
-    selected,
-    theme.currentTheme.textColor,
-    textColor,
-    tileId,
-    tileSize,
-    variants,
-  ]);
+      )}
+    </Flex>
+  );
 };
 
 export const AppTile = observer(AppTilePresenter);

@@ -159,8 +159,8 @@ export const PinnedDockApp = ({
           tileSize="sm"
           installStatus={app.installStatus as InstallStatus}
           app={app}
-          open={hasWindow}
-          selected={isActive}
+          isOpen={hasWindow}
+          isActive={isActive}
           isAnimated={
             app.installStatus !== InstallStatus.suspended &&
             app.installStatus !== InstallStatus.failed

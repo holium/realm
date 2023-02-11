@@ -61,12 +61,11 @@ const WindowModel = types
     setZIndex(zIndex: number) {
       self.zIndex = zIndex;
     },
+    normal() {
+      self.state = 'normal';
+    },
     minimize() {
-      if (self.state === 'minimized') {
-        self.state = 'normal';
-      } else {
-        self.state = 'minimized';
-      }
+      self.state = 'minimized';
     },
     maximize(desktopDimensions: Dimensions) {
       if (self.state === 'maximized') {
@@ -156,7 +155,6 @@ export const DesktopStore = types
         title: app.title,
         glob,
         href,
-        isActive: true,
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
@@ -164,6 +162,7 @@ export const DesktopStore = types
       });
 
       self.windows.set(newWindow.appId, newWindow);
+      this.setActive(newWindow.appId);
       if (self.homePaneOpen) self.homePaneOpen = false;
 
       return newWindow;
@@ -177,7 +176,13 @@ export const DesktopStore = types
       const window = self.getWindowByAppId(appId);
       if (!window) return console.error('Window not found');
 
-      window.minimize();
+      if (window.isMinimized) {
+        window.normal();
+        this.setActive(appId);
+      } else {
+        window.minimize();
+        window.setIsActive(false);
+      }
     },
     toggleMaximize(appId: string, desktopDimensions: Dimensions) {
       const window = self.getWindowByAppId(appId);
