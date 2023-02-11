@@ -13,6 +13,10 @@ const AppDockPresenter = () => {
     : [];
   const unpinnedDockApps = desktop.openWindows
     .filter(({ appId }) => !pinnedDockAppsOrder.includes(appId))
+    .filter(
+      ({ appId }, index, self) =>
+        self.findIndex(({ appId: id }) => id === appId) === index
+    )
     .map(({ appId }) => bazaar.getApp(appId))
     .filter(Boolean) as AppType[];
 
