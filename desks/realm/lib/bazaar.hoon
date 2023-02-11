@@ -264,6 +264,9 @@
         %treaties
       (treaty-map:encode treaties.vi)
       ::
+        %app-hash
+      s+(scot %uv hash.vi)
+      ::
     ==
   --
 ::
@@ -343,7 +346,7 @@
       [app-id (numb ~(wyt in member-set))]
   ::
   ++  catalog-js
-    |=  =catalog:store
+    |=  [=catalog:store]
     ^-  json
     %-  pairs
     %+  turn  ~(tap by catalog)

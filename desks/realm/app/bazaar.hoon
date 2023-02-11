@@ -105,6 +105,10 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
       ::
+      [%x %app-hash @ ~]     ::  ~/scry/bazaar/app-hash/app-name
+        =/  hash  .^(@uv %cz [(scot %p our.bowl) i.t.t.path (scot %da now.bowl) ~])
+        ``bazaar-view+!>([%app-hash hash])
+      ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
         ``bazaar-view+!>([%catalog catalog.state])
       ::
