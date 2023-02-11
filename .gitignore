@@ -132,6 +132,3 @@ app.dev.json
 
 # Storybook
 storybook-static
-
-# vscode eslint
-/.vscode
