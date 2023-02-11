@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { AppTile, AppTileSize } from 'renderer/components/AppTile';
+import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
 import {
   AppType,
   DevAppType,
