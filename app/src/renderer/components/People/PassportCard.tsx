@@ -29,8 +29,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
   const { courier } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
 
-  console.log('role', role)
-
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
   return (
