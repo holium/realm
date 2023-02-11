@@ -9,6 +9,7 @@ import { usePassportMenu } from './usePassportMenu';
 interface IPersonRow {
   listId: string;
   patp: string;
+  role?: string;
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -23,6 +24,7 @@ interface IPersonRow {
 export const PersonRow = ({
   listId,
   patp,
+  role,
   sigilColor,
   avatar,
   nickname,
@@ -73,6 +75,7 @@ export const PersonRow = ({
             id,
             options: {
               patp,
+              role,
               sigilColor,
               avatar,
               nickname,

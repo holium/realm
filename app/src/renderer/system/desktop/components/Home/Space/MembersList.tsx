@@ -80,6 +80,7 @@ const MembersListPresenter = (props: IMembersList) => {
       <PersonRow
         key={`${member.patp}-member`}
         patp={member.patp}
+        role={member.roles[0]}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { rgba, darken } from 'polished';
-import { Sigil, Flex, Box, Text, Icons } from '../';
+import { Sigil, Flex, Box, Text, Icons, Select } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -11,6 +11,7 @@ import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
 interface IPassport {
   patp: string;
+  role?: string;
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -23,10 +24,12 @@ interface IPassport {
 }
 
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
-  const { patp, sigilColor, avatar, nickname, description, onClose } = props;
+  const { patp, role, sigilColor, avatar, nickname, description, onClose } = props;
   const { textColor, windowColor } = props.theme!;
   const { courier } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
+
+  console.log('role', role)
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
@@ -62,6 +65,33 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
+          <Select
+            id="select-role"
+            placeholder="Select role"
+            customBg={windowColor}
+            textColor={textColor}
+            iconColor={iconColor}
+            selected={role}
+            // disabled={isOur}
+            options={[
+              { label: 'Initiate', value: 'initiate' },
+              { label: 'Member', value: 'member' },
+              { label: 'Admin', value: 'admin' },
+              // { label: 'Host', value: 'host' }, TODO elect a data host
+              { label: 'Owner', value: 'owner', hidden: true },
+            ]}
+            onClick={(selected: Roles) => {
+              /*setPermissionMap({
+                ...permissionMap,
+                [patp]: {
+                  primaryRole: selected,
+                  roles: [selected],
+                  alias: '',
+                  status: 'invited',
+                },
+              });*/
+            }}
+          />
           {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}
