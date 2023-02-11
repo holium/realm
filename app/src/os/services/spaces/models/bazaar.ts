@@ -613,16 +613,13 @@ export const NewBazaarStore = types
     isRecommended(appId: string) {
       return self.recommendations.includes(appId);
     },
-    getApp(appId: string) {
+    getApp(appId: string): AppType | DevAppType {
       const app = self.catalog.get(appId);
-      if (!app) {
-        // @ts-ignore
-        return self.devAppMap.get(appId);
-      }
-      return app;
+      if (app) return app;
+      return self.devAppMap.get(appId)!;
     },
-    getDock(path: string) {
-      return self.docks.get(path);
+    getDock(path: string): string[] {
+      return self.docks.get(path) ?? [];
     },
     getDockApps(path: string) {
       const dock = self.docks.get(path);

@@ -7,7 +7,8 @@ type Props = {
   tileId: string;
   app: AppType;
   spacePath: string;
-  isSelected: boolean;
+  isActive: boolean;
+  isMinimized: boolean;
   onClick: (app: AppType) => void;
 };
 
@@ -15,7 +16,8 @@ export const UnpinnedDockApp = ({
   tileId,
   app,
   spacePath,
-  isSelected,
+  isActive,
+  isMinimized,
   onClick,
 }: Props) => (
   <AppTile
@@ -24,7 +26,7 @@ export const UnpinnedDockApp = ({
     tileSize="sm"
     app={app}
     open={true}
-    selected={isSelected}
+    selected={isActive}
     contextMenuOptions={[
       {
         id: `${app.id}-pin}`,
@@ -32,6 +34,12 @@ export const UnpinnedDockApp = ({
         onClick: () => {
           SpacesActions.pinApp(spacePath, app.id);
         },
+      },
+      {
+        id: isMinimized ? `${app.id}-show}` : `${app.id}-hide}`,
+        label: isMinimized ? 'Show' : 'Hide',
+        section: 2,
+        onClick: () => DesktopActions.toggleMinimized(app.id),
       },
       {
         id: `${app.id}-close}`,

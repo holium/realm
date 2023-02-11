@@ -20,8 +20,9 @@ type Props = {
   tileId: string;
   app: AppType;
   spacePath: string;
-  isOpen: boolean;
-  isSelected: boolean;
+  hasWindow: boolean;
+  isActive: boolean;
+  isMinimized: boolean;
   onClick: (app: AppType) => void;
 };
 
@@ -29,8 +30,9 @@ export const PinnedDockApp = ({
   tileId,
   app,
   spacePath,
-  isOpen,
-  isSelected,
+  hasWindow,
+  isActive,
+  isMinimized,
   onClick,
 }: Props) => {
   const pointerDownRef = useRef<{
@@ -51,15 +53,26 @@ export const PinnedDockApp = ({
       },
     },
   ];
-  const closeOption: ContextMenuOption[] = [
-    {
-      id: `${app.id}-close}`,
-      label: 'Close',
-      section: 2,
-      disabled: !Boolean(window),
-      onClick: () => DesktopActions.closeAppWindow(app.id),
-    },
-  ];
+  const hideOrShowOption: ContextMenuOption[] = hasWindow
+    ? [
+        {
+          id: isMinimized ? `${app.id}-show}` : `${app.id}-hide}`,
+          label: isMinimized ? 'Show' : 'Hide',
+          section: 2,
+          onClick: () => DesktopActions.toggleMinimized(app.id),
+        },
+      ]
+    : [];
+  const closeOption: ContextMenuOption[] = hasWindow
+    ? [
+        {
+          id: `${app.id}-close}`,
+          label: 'Close',
+          section: 2,
+          onClick: () => DesktopActions.closeAppWindow(app.id),
+        },
+      ]
+    : [];
   const suspendOption: ContextMenuOption[] = isSuspended
     ? [
         {
@@ -146,8 +159,8 @@ export const PinnedDockApp = ({
           tileSize="sm"
           installStatus={app.installStatus as InstallStatus}
           app={app}
-          open={isOpen}
-          selected={isSelected}
+          open={hasWindow}
+          selected={isActive}
           isAnimated={
             app.installStatus !== InstallStatus.suspended &&
             app.installStatus !== InstallStatus.failed
@@ -156,11 +169,12 @@ export const PinnedDockApp = ({
             ...installOption,
             ...suspendOption,
             ...unpinOption,
+            ...hideOrShowOption,
             ...closeOption,
           ]}
         />
       </Reorder.Item>
     ),
-    [app, tileId, isOpen, isSelected, onClick]
+    [app, tileId, hasWindow, isActive, isMinimized, onClick]
   );
 };
