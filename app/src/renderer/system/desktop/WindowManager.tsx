@@ -67,8 +67,8 @@ const WindowManagerPresenter = () => {
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {windows.map((window: any, index: number) => (
-        <AppWindow key={`${window.id}-${index}`} window={window} />
+      {windows.map((appWindow, index: number) => (
+        <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
       ))}
     </motion.div>
   );

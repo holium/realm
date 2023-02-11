@@ -9,23 +9,23 @@ type Props = {
   hasTitlebar: boolean;
   isResizing: boolean;
   isDragging: boolean;
-  window: WindowModelType;
+  appWindow: WindowModelType;
 };
 
 export const WindowByType = ({
   hasTitlebar,
   isResizing,
   isDragging,
-  window,
+  appWindow,
 }: Props) => {
-  switch (window.type) {
+  switch (appWindow.type) {
     case 'native':
       return (
         <NativeView
           isDragging={isDragging}
           isResizing={isResizing}
-          hasTitlebar={nativeApps[window.appId].native?.hideTitlebarBorder}
-          window={window}
+          hasTitlebar={nativeApps[appWindow.appId].native?.hideTitlebarBorder}
+          appWindow={appWindow}
         />
       );
     case 'urbit':
@@ -34,7 +34,7 @@ export const WindowByType = ({
           isDragging={isDragging}
           hasTitlebar={hasTitlebar}
           isResizing={isResizing}
-          window={window}
+          appWindow={appWindow}
         />
       );
     case 'web':
@@ -42,7 +42,7 @@ export const WindowByType = ({
         <DevView
           hasTitlebar={hasTitlebar}
           isResizing={isResizing}
-          window={window}
+          appWindow={appWindow}
         />
       );
     case 'dev':
@@ -50,11 +50,11 @@ export const WindowByType = ({
         <DevView
           hasTitlebar={hasTitlebar}
           isResizing={isResizing}
-          window={window}
+          appWindow={appWindow}
         />
       );
     case 'dialog':
-      return <DialogView window={window} />;
+      return <DialogView appWindow={appWindow} />;
     default:
       return <div>No view</div>;
   }

@@ -5,13 +5,13 @@ import { WebView } from './WebView';
 import { WindowModelType } from 'os/services/shell/desktop.model';
 
 interface Props {
-  window: WindowModelType;
+  appWindow: WindowModelType;
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
 
 export const DevView = (props: Props) => {
-  const { window, isResizing } = props;
+  const { appWindow, isResizing } = props;
   const [ready, setReady] = useState(false);
 
   const { ship, desktop, theme } = useServices();
@@ -29,7 +29,9 @@ export const DevView = (props: Props) => {
   };
 
   useEffect(() => {
-    const webview: any = document.getElementById(`${window.appId}-web-webview`);
+    const webview: any = document.getElementById(
+      `${appWindow.appId}-web-webview`
+    );
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
     webview?.addEventListener('did-finish-load', () => {
@@ -43,14 +45,14 @@ export const DevView = (props: Props) => {
     });
   }, []);
 
-  // Sync ship model info into app window
+  // Sync ship model info into app appWindow
   useEffect(() => {
     webViewRef.current?.addEventListener('dom-ready', () => {
       webViewRef.current?.send('load-ship', JSON.stringify(ship));
-      webViewRef.current?.send('load-window-id', window.appId);
+      webViewRef.current?.send('load-appWindow-id', appWindow.appId);
       setReady(true);
     });
-  }, [ship, window.appId]);
+  }, [ship, appWindow.appId]);
 
   useEffect(() => {
     const css = `
@@ -64,7 +66,7 @@ export const DevView = (props: Props) => {
             ? darken(0.1, theme.currentTheme.windowColor)
             : darken(0.075, theme.currentTheme.windowColor)
         };
-        --rlm-window-color: ${theme.currentTheme.windowColor};
+        --rlm-appWindow-color: ${theme.currentTheme.windowColor};
         --rlm-card-color: ${
           theme.currentTheme.mode === 'light'
             ? lighten(0.05, theme.currentTheme.windowColor)
@@ -88,7 +90,7 @@ export const DevView = (props: Props) => {
 
     if (ready) {
       const webview = document.getElementById(
-        `${window.appId}-web-webview`
+        `${appWindow.appId}-web-webview`
       ) as Electron.WebviewTag | null;
       webview?.insertCSS(css);
       webview?.addEventListener('did-frame-finish-load', () => {
@@ -110,8 +112,8 @@ export const DevView = (props: Props) => {
       >
         <WebView
           ref={webViewRef}
-          id={`${window.appId}-web-webview`}
-          src={window.href?.site}
+          id={`${appWindow.appId}-web-webview`}
+          src={appWindow.href?.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
           isLocked={isResizing || loading}
@@ -124,6 +126,6 @@ export const DevView = (props: Props) => {
         />
       </div>
     ),
-    [window.href?.site, isResizing, loading, theme.currentTheme.windowColor]
+    [appWindow.href?.site, isResizing, loading, theme.currentTheme.windowColor]
   );
 };

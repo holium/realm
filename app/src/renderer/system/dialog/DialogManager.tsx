@@ -47,17 +47,17 @@ const DialogManagerPresenter = ({
         dialogRenderer instanceof Function
           ? dialogRenderer(dialogProps.toJSON())
           : dialogRenderer;
-      const window = await DesktopActions.openDialog(
+      const appWindow = await DesktopActions.openDialog(
         dialogConfig.getWindowProps(shell.desktopDimensions)
       );
 
       setDialogWindow(
         <AppWindow
-          window={{
-            ...window,
+          appWindow={{
+            ...appWindow,
             bounds: {
-              ...window.bounds,
-              ...getCenteredPosition(window.bounds),
+              ...appWindow.bounds,
+              ...getCenteredPosition(appWindow.bounds),
             },
           }}
         />
