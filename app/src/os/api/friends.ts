@@ -32,7 +32,7 @@ export const FriendsApi = {
         },
       },
     };
-    return await conduit.poke(payload);
+    return conduit.poke(payload);
   },
   /**
    * getFriends: returns a map of friends
