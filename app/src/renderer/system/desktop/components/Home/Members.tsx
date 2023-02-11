@@ -196,8 +196,6 @@ const MembersPresenter = ({ our }: IMembers) => {
           }}
           onChange={(e: any) => {
             person.actions.onChange(e.target.value);
-            console.log('value', person.state.value);
-            console.log('parsed', person.computed.parsed);
           }}
           onFocus={() => {
             person.actions.onFocus();
