@@ -131,7 +131,11 @@ const AppViewPresenter = ({ isResizing, isDragging, window }: AppViewProps) => {
       const webView: Electron.WebviewTag = document.getElementById(
         `${window.appId}-urbit-webview`
       ) as Electron.WebviewTag;
-      webView.insertCSS(css);
+      try {
+        webView.insertCSS(css);
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
 
