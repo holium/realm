@@ -99,6 +99,7 @@ export const PinnedDockApp = ({
   return useMemo(
     () => (
       <Reorder.Item
+        key={app.id}
         value={app.id}
         initial={{
           opacity: 0.0,

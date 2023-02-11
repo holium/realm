@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
@@ -21,7 +21,6 @@ type Props = {
   desktop: DesktopStoreType;
   bazaar: NewBazaarStoreType;
   theme: ThemeStoreType;
-  setDockAppIds: (appIds: string[]) => void;
 };
 
 const AppDockPresenterView = ({
@@ -32,7 +31,6 @@ const AppDockPresenterView = ({
   desktop,
   bazaar,
   theme,
-  setDockAppIds,
 }: Props) => {
   const [localDockAppIds, setLocalDockAppIds] = useState(dockAppIds);
 
@@ -41,66 +39,54 @@ const AppDockPresenterView = ({
     if (window) {
       if (window.isMinimized) {
         DesktopActions.toggleMinimized(dockedApp.id);
-      } else {
-        DesktopActions.setActive(dockedApp.id);
       }
+      DesktopActions.setActive(dockedApp.id);
     } else {
-      DesktopActions.openAppWindow(toJS(dockedApp));
+      DesktopActions.openAppWindow(dockedApp);
     }
   }, []);
 
   const onOrderUpdate = useCallback(() => {
     // First we update the dock locally so the user doesn't have to
-    // wait for the subscription to come back.
-    setDockAppIds(localDockAppIds);
-    SpacesActions.setPinnedOrder(spacePath, localDockAppIds);
+    // wait for the subscription to come back from Hoon side.
+    bazaar.setDock(spacePath, localDockAppIds);
+    SpacesActions.setPinnedOrder(spacePath, toJS(localDockAppIds));
   }, [localDockAppIds]);
 
-  const pinnedAppTiles = useMemo(
-    () =>
-      pinnedDockApps.map((app) => {
-        const window = desktop.getWindowByAppId(app.id);
-        const pinnedTileId = `pinned-${app.id}-${spacePath}`;
+  const pinnedAppTiles = pinnedDockApps.map((app) => {
+    const window = desktop.getWindowByAppId(app.id);
+    const pinnedTileId = `pinned-${app.id}-${spacePath}`;
 
-        return (
-          <PinnedDockApp
-            key={`tile-${pinnedTileId}`}
-            tileId={pinnedTileId}
-            app={app}
-            spacePath={spacePath}
-            isOpen={Boolean(window)}
-            isSelected={Boolean(window?.isActive)}
-            onClick={onClickDockedApp}
-          />
-        );
-      }),
-    [pinnedDockApps, desktop, spacePath]
-  );
+    return (
+      <PinnedDockApp
+        key={`tile-${pinnedTileId}`}
+        tileId={pinnedTileId}
+        app={app}
+        spacePath={spacePath}
+        isOpen={Boolean(window)}
+        isSelected={Boolean(window?.isActive)}
+        onClick={onClickDockedApp}
+      />
+    );
+  });
 
-  const unpinnedAppTiles = useMemo(
-    () =>
-      unpinnedDockApps.map((app, index) => {
-        const window = desktop.getWindowByAppId(app.id);
-        const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
+  const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
+    const window = desktop.getWindowByAppId(app.id);
+    const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
 
-        return (
-          <UnpinnedDockApp
-            key={`tile-${unpinnedTileId}`}
-            tileId={unpinnedTileId}
-            app={app}
-            spacePath={spacePath}
-            isSelected={Boolean(window?.isActive)}
-            onClick={onClickDockedApp}
-          />
-        );
-      }),
-    [unpinnedDockApps, bazaar, spacePath]
-  );
+    return (
+      <UnpinnedDockApp
+        key={`tile-${unpinnedTileId}`}
+        tileId={unpinnedTileId}
+        app={app}
+        spacePath={spacePath}
+        isSelected={Boolean(window?.isActive)}
+        onClick={onClickDockedApp}
+      />
+    );
+  });
 
-  const showDivider = useMemo(
-    () => pinnedDockApps.length > 0 && unpinnedDockApps.length > 0,
-    [pinnedDockApps, unpinnedDockApps]
-  );
+  const showDivider = pinnedDockApps.length > 0 && unpinnedDockApps.length > 0;
 
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
@@ -113,7 +99,7 @@ const AppDockPresenterView = ({
           flexDirection: 'row',
           gap: 8,
         }}
-        values={dockAppIds}
+        values={localDockAppIds}
         onMouseUp={onOrderUpdate}
         onReorder={setLocalDockAppIds}
       >
@@ -139,13 +125,12 @@ const AppDockPresenter = () => {
 
   const spacePath = spaces.selected?.path;
   const dockAppIds: string[] = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
-  const dockApps = spacePath
-    ? ((bazaar.getDockApps(spacePath) ?? []) as AppType[])
+  const pinnedDockApps = spacePath
+    ? ((bazaar.getDockApps(spacePath) ?? []).filter(Boolean) as AppType[])
     : [];
-  const pinnedDockApps = dockApps.filter(Boolean);
   const unpinnedDockApps = desktop.openWindows
-    .filter((appWindow) => !dockAppIds.includes(appWindow.appId))
-    .map((appWindow) => toJS(bazaar.getApp(appWindow.appId)))
+    .filter(({ appId }) => !dockAppIds.includes(appId))
+    .map(({ appId }) => bazaar.getApp(appId))
     .filter(Boolean) as AppType[];
 
   if (!spacePath) return null;
@@ -153,13 +138,12 @@ const AppDockPresenter = () => {
   return (
     <AppDockPresenterView
       dockAppIds={dockAppIds}
-      pinnedDockApps={toJS(pinnedDockApps)}
-      unpinnedDockApps={toJS(unpinnedDockApps)}
+      pinnedDockApps={pinnedDockApps}
+      unpinnedDockApps={unpinnedDockApps}
       spacePath={spacePath}
       desktop={desktop}
       bazaar={bazaar}
       theme={theme}
-      setDockAppIds={(appIds) => bazaar.setDock(spacePath, appIds)}
     />
   );
 };

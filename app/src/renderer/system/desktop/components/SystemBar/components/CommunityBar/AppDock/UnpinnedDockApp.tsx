@@ -19,6 +19,7 @@ export const UnpinnedDockApp = ({
   onClick,
 }: Props) => (
   <AppTile
+    key={app.id}
     tileId={tileId}
     tileSize="sm"
     app={app}
