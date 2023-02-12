@@ -43,11 +43,11 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 `;
 
 interface AppWindowProps {
-  window: WindowModelType;
+  appWindow: WindowModelType;
   children?: ReactNode;
 }
 
-const AppWindowPresenter = ({ window }: AppWindowProps) => {
+const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
 
@@ -55,7 +55,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const activeWindow = window;
+  const activeWindow = appWindow;
   const denormalizedBounds = useMemo(
     () => denormalizeBounds(activeWindow.bounds, shell.desktopDimensions),
     [activeWindow.bounds, shell.desktopDimensions]
@@ -78,14 +78,14 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
   }, [activeWindow.bounds]);
 
   const windowId = `app-window-${activeWindow.appId}`;
-  const webViewId = getWebViewId(activeWindow.appId, window.type!);
+  const webViewId = getWebViewId(activeWindow.appId, appWindow.type!);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
     if (windowEl) {
-      windowEl.style.zIndex = `${window.zIndex}`;
+      windowEl.style.zIndex = `${appWindow.zIndex}`;
     }
-  }, [window.zIndex]);
+  }, [appWindow.zIndex]);
 
   const resizeRightX = useMotionValue(0);
   const resizeRightY = useMotionValue(0);
@@ -168,7 +168,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
   }, [webViewId]);
 
   const onMouseDown = () => {
-    DesktopActions.setActive(window.appId);
+    DesktopActions.setActive(appWindow.appId);
   };
 
   let hideTitlebarBorder = false;
@@ -180,7 +180,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
   let showDevToolsToggle = true;
   let maximizeButton = true;
   let borderRadius = 12;
-  const appInfo = bazaar.getApp(window.appId);
+  const appInfo = bazaar.getApp(appWindow.appId);
   if (appInfo?.type === 'urbit') {
     hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
     // noTitlebar = !appInfo.config?.showTitlebar || false;
@@ -194,7 +194,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
       noTitlebar={noTitlebar}
       hasBorder={!hideTitlebarBorder}
       showDevToolsToggle={showDevToolsToggle}
-      zIndex={window.zIndex}
+      zIndex={appWindow.zIndex}
       dragControls={dragControls}
       onDevTools={onDevTools}
       onDragStart={onDragStart}
@@ -203,20 +203,21 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
       onMaximize={onMaximize}
       onMinimize={onMinimize}
       theme={theme.currentTheme}
-      app={window}
+      appWindow={appWindow}
     />
   );
-  if (window.type === 'native') {
-    hideTitlebarBorder = nativeApps[window.appId].native!.hideTitlebarBorder!;
-    noTitlebar = nativeApps[window.appId].native!.noTitlebar!;
+  if (appWindow.type === 'native') {
+    hideTitlebarBorder =
+      nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
+    noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
     // @ts-ignore
-    CustomTitlebar = nativeRenderers[window.appId as AppId].titlebar;
+    CustomTitlebar = nativeRenderers[appWindow.appId as AppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
     if (CustomTitlebar) {
       titlebar = (
         <CustomTitlebar
-          zIndex={window.zIndex}
+          zIndex={appWindow.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
@@ -237,7 +238,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
           noTitlebar={noTitlebar}
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
-          zIndex={window.zIndex}
+          zIndex={appWindow.zIndex}
           dragControls={dragControls}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
@@ -246,14 +247,14 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
           onMinimize={onMinimize}
           onMaximize={onMaximize}
           theme={theme.currentTheme}
-          app={window}
+          appWindow={appWindow}
         />
       );
     }
   }
-  if (window.type === 'dialog') {
+  if (appWindow.type === 'dialog') {
     hideTitlebarBorder = true;
-    const dialogRenderer = dialogRenderers[window.appId];
+    const dialogRenderer = dialogRenderers[appWindow.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
@@ -275,7 +276,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
     } else {
       titlebar = (
         <CustomTitlebar
-          zIndex={window.zIndex}
+          zIndex={appWindow.zIndex}
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
@@ -322,10 +323,10 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
           y: motionY,
           width: motionWidth,
           height: motionHeight,
-          zIndex: window.zIndex,
+          zIndex: appWindow.zIndex,
           borderRadius,
           background: windowColor,
-          display: window.isMinimized ? 'none' : 'block',
+          display: appWindow.isMinimized ? 'none' : 'block',
         }}
         color={textColor}
         customBg={windowColor}
@@ -345,7 +346,7 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
             hasTitlebar
             isResizing={isResizing}
             isDragging={isDragging}
-            window={window}
+            appWindow={appWindow}
           />
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
@@ -374,9 +375,9 @@ const AppWindowPresenter = ({ window }: AppWindowProps) => {
     ),
     [
       theme.currentTheme,
-      window.bounds,
-      window.isMinimized,
-      window.state,
+      appWindow.bounds,
+      appWindow.isMinimized,
+      appWindow.state,
       isResizing,
       isDragging,
       motionHeight,

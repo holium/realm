@@ -5,6 +5,7 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
+import { WindowModelType } from 'os/services/shell/desktop.model';
 
 interface TitlebarStyleProps {
   hasBorder: boolean;
@@ -67,19 +68,14 @@ interface TitlebarProps {
   isAppWindow?: boolean;
   noTitlebar?: boolean;
   shareable?: boolean;
-  app?: {
-    id?: string;
-    title?: string;
-    icon?: string;
-    color?: string;
-  };
+  appWindow: WindowModelType;
   hasBlur?: boolean;
   children?: React.ReactNode;
 }
 
 export const Titlebar = ({
   children,
-  app,
+  appWindow,
   showDevToolsToggle,
   closeButton,
   hasBorder = true,
@@ -100,22 +96,18 @@ export const Titlebar = ({
   hasBlur,
   theme,
 }: TitlebarProps) => {
-  const { windowColor, iconColor } = theme;
-
   let titleSection: any;
-  if (app) {
-    const { title, icon } = app;
+  if (appWindow) {
     titleSection = (
       <Flex gap={4} alignItems="center">
         <Flex justifyContent="center" alignItems="center">
-          {icon && <img height={24} width={24} src={icon} />}
           <Text
             opacity={0.7}
-            style={{ textTransform: 'capitalize' }}
+            style={{ textTransform: 'capitalize', userSelect: 'none' }}
             fontSize={2}
             fontWeight={500}
           >
-            {title}
+            {appWindow.title}
           </Text>
         </Flex>
       </Flex>
@@ -149,7 +141,6 @@ export const Titlebar = ({
       transition={{
         background: { duration: 0.25 },
       }}
-      // customBg={windowColor!}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
@@ -162,14 +153,14 @@ export const Titlebar = ({
         <Flex ml="2px" zIndex={zIndex + 1} gap={4} alignItems="center">
           {shareable && (
             <SharedAvatars
-              iconColor={iconColor!}
-              backgroundColor={windowColor}
+              iconColor={theme.iconColor!}
+              backgroundColor={theme.windowColor}
             />
           )}
           {showDevToolsToggle && (
             <WindowIcon
               icon="DevBox"
-              iconColor={iconColor!}
+              iconColor={theme.iconColor!}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -181,13 +172,13 @@ export const Titlebar = ({
             <>
               <WindowIcon
                 icon="ArrowLeftLine"
-                iconColor={iconColor!}
+                iconColor={theme.iconColor!}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
               <WindowIcon
                 icon="ArrowRightLine"
-                iconColor={iconColor!}
+                iconColor={theme.iconColor!}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
@@ -203,7 +194,7 @@ export const Titlebar = ({
           {minimizeButton && (
             <WindowIcon
               icon="Minimize"
-              iconColor={iconColor!}
+              iconColor={theme.iconColor!}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -214,7 +205,7 @@ export const Titlebar = ({
           {maximizeButton && (
             <WindowIcon
               icon="Expand"
-              iconColor={iconColor!}
+              iconColor={theme.iconColor!}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -225,7 +216,7 @@ export const Titlebar = ({
           {closeButton && (
             <WindowIcon
               icon="Close"
-              iconColor={iconColor!}
+              iconColor={theme.iconColor!}
               bg="#FF6240"
               fillWithBg
               onClick={onCloseButton}
