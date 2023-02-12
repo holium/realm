@@ -1,8 +1,10 @@
+import { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
 import { HoliumLogo } from './holium-logo';
-import { InstallerStyle } from './installer.styles';
+import { StandAloneMouse } from '../mouse/StandAloneMouse';
+import './installer.css';
 
 declare global {
   var autoUpdate: any;
@@ -25,51 +27,54 @@ type AppUpdateErrorProps = {
   error: string;
 };
 
-const View = (props: { children: React.ReactNode; hideCursor?: boolean }) => {
-  return (
-    <>
-      <InstallerStyle hideCursor={props.hideCursor} />
-      <Flex
-        flexDirection="column"
-        position="relative"
-        height="100vh"
-        width="100%"
-        style={{ overflowY: 'hidden' }}
-      >
-        <Flex
-          position="absolute"
-          top={58}
-          width="100%"
-          style={{
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <HoliumLogo />
-        </Flex>
-        <Flex
-          position="absolute"
-          gap={16}
-          top={172}
-          flexDirection="column"
-          alignItems="center"
-          width="100%"
-        >
-          {props.children || (
-            <Text.Custom pt={34} fontWeight={300} opacity={0.5}>
-              Checking for updates...
-            </Text.Custom>
-          )}
-        </Flex>
-      </Flex>
-    </>
-  );
+type Props = {
+  id: string;
+  children?: ReactNode;
 };
+
+const View = ({ id, children }: Props) => (
+  <Flex
+    id={id}
+    flexDirection="column"
+    position="relative"
+    height="100vh"
+    width="100%"
+    style={{ overflowY: 'hidden' }}
+  >
+    <StandAloneMouse containerId={id} />
+    <Flex
+      position="absolute"
+      top={58}
+      width="100%"
+      style={{
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <HoliumLogo />
+    </Flex>
+    <Flex
+      position="absolute"
+      gap={16}
+      top={172}
+      flexDirection="column"
+      alignItems="center"
+      width="100%"
+    >
+      {children ?? (
+        <Text.Custom pt={34} fontWeight={300} opacity={0.5}>
+          Checking for updates...
+        </Text.Custom>
+      )}
+    </Flex>
+  </Flex>
+);
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(<View hideCursor={false}> </View>);
+const containerId = 'splash-view';
+root.render(<View id={containerId} />);
 
 const UpdateAvailable = (props: UpdateAvailableProps) => {
   const { info } = props;
@@ -264,8 +269,7 @@ const UpdateStats = (props: UpdateStatsProps) => {
   );
 };
 
-// @ts-ignore
-window.autoUpdate.listen((event, message: any) => {
+window.autoUpdate.listen((_: any, message: any) => {
   console.log('message => %o', message);
   let view = undefined;
   switch (message.name) {
@@ -291,5 +295,6 @@ window.autoUpdate.listen((event, message: any) => {
       view = <AppUpdateError error={message.error} />;
       break;
   }
-  root.render(<View hideCursor={message.inAppWindow}>{view}</View>);
+  const containerId = 'updater-view';
+  root.render(<View id={containerId}>{view}</View>);
 });
