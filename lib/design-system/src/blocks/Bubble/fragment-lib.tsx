@@ -33,8 +33,7 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
-  /* margin-left: 1px;
-  margin-right: 1px; */
+  margin: 0 3px;
 `;
 
 export const FragmentBlock = styled(motion.span)`
@@ -46,6 +45,7 @@ export const FragmentBlock = styled(motion.span)`
 
 export const FragmentPlain = styled(FragmentBase)`
   font-weight: 400;
+  margin: 0 0;
 `;
 
 export const FragmentBold = styled(FragmentBase)`

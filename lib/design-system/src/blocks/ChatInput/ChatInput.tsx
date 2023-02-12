@@ -6,7 +6,7 @@ import { parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 24px;
+  line-height: 30px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;

@@ -20,6 +20,8 @@ const StyledBox = styled(Box)<StyledBoxProps>`
   background-color: var(--rlm-input-color);
   overflow: hidden;
   min-height: 32px;
+  box-sizing: content-box;
+
   ${(props) =>
     props.shouldHighlightOnFocus &&
     css`
@@ -110,7 +112,7 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
 
 StyledBox.defaultProps = {
   px: 1,
-  py: 1,
+  py: 0,
   mb: 0,
   shouldHighlightOnFocus: true,
 };
@@ -156,7 +158,7 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1}>
+    <Box display="flex" flexDirection="row" flex={1} height="inherit">
       {leftAdornment && (
         <Adornment mr={1} disabled={disabled}>
           {leftAdornment}
