@@ -39,6 +39,7 @@ const AppDockViewPresenter = ({
     } else {
       DesktopActions.openAppWindow(dockedApp);
     }
+    DesktopActions.closeHomePane();
   }, []);
 
   const onOrderUpdate = useCallback(() => {
