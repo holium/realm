@@ -45,7 +45,7 @@ export const DevView = (props: Props) => {
     });
   }, []);
 
-  // Sync ship model info into app appWindow
+  // Sync ship model info into app window
   useEffect(() => {
     webViewRef.current?.addEventListener('dom-ready', () => {
       webViewRef.current?.send('load-ship', JSON.stringify(ship));
@@ -66,7 +66,7 @@ export const DevView = (props: Props) => {
             ? darken(0.1, theme.currentTheme.windowColor)
             : darken(0.075, theme.currentTheme.windowColor)
         };
-        --rlm-appWindow-color: ${theme.currentTheme.windowColor};
+        --rlm-window-color: ${theme.currentTheme.windowColor};
         --rlm-card-color: ${
           theme.currentTheme.mode === 'light'
             ? lighten(0.05, theme.currentTheme.windowColor)
@@ -113,6 +113,7 @@ export const DevView = (props: Props) => {
         <WebView
           ref={webViewRef}
           id={`${appWindow.appId}-web-webview`}
+          appId={appWindow.appId}
           src={appWindow.href?.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"

@@ -77,7 +77,7 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
     motionHeight.set(denormalizedBounds.height);
   }, [activeWindow.bounds]);
 
-  const windowId = `app-appWindow-${activeWindow.appId}`;
+  const windowId = `app-window-${activeWindow.appId}`;
   const webViewId = getWebViewId(activeWindow.appId, appWindow.type!);
 
   useEffect(() => {
@@ -351,7 +351,7 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
             <RightDragHandleStyle
-              className="app-appWindow-resize app-appWindow-resize-br"
+              className="app-window-resize app-window-resize-br"
               drag
               style={{
                 x: resizeRightX,

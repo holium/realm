@@ -613,7 +613,7 @@ export const NewBazaarStore = types
     isRecommended(appId: string) {
       return self.recommendations.includes(appId);
     },
-    getApp(appId: string): AppType | DevAppType {
+    getApp(appId: string): AppType {
       const app = self.catalog.get(appId);
       if (app) return app;
       return self.devAppMap.get(appId)!;

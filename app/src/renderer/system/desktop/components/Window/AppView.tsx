@@ -166,6 +166,7 @@ const AppViewPresenter = ({
         <WebView
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
+          appId={appWindow.appId}
           partition="urbit-webview"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-expect-error

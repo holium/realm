@@ -134,6 +134,12 @@ export const DesktopStore = types
         window.setIsActive(window.appId === appId);
       });
     },
+    setInactive(appId: string) {
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
+
+      window.setIsActive(false);
+    },
     setBounds(appId: string, bounds: BoundsModelType) {
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
@@ -181,7 +187,7 @@ export const DesktopStore = types
         this.setActive(appId);
       } else {
         window.minimize();
-        window.setIsActive(false);
+        this.setInactive(appId);
       }
     },
     toggleMaximize(appId: string, desktopDimensions: Dimensions) {
