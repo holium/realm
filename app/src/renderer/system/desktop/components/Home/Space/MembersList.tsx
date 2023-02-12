@@ -14,7 +14,7 @@ interface IMembersList {
 
 const MembersListPresenter = (props: IMembersList) => {
   const { path } = props;
-  const { theme, spaces, membership, contacts, ship } = useServices();
+  const { theme, spaces, membership, ship, friends } = useServices();
 
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
@@ -74,7 +74,7 @@ const MembersListPresenter = (props: IMembersList) => {
   );
 
   const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
-    const contact = contacts.getContactAvatarMetadata(member.patp);
+    const contact = friends.getContactAvatarMetadata(member.patp);
 
     return (
       <PersonRow

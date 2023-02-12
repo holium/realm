@@ -49,6 +49,9 @@ export function bgIsLightOrDark(hexColor: string) {
 }
 
 export function cleanNounColor(ux: string) {
+  if (ux === '') {
+    return '#000';
+  }
   if (ux.length > 2 && ux.substring(0, 2) === '0x') {
     const value = ux.substring(2).replace('.', '').padStart(6, '0');
     return `#${value}`;

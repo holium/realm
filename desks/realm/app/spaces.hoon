@@ -530,10 +530,18 @@
       =.  membership.state      (~(put by membership.state) [path members])
       ~&  >>  [%remote-space path members]
       :_  state
+      %+  weld
       :~
         [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
         [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
       ==
+      ::  share contact with all members
+      %+  murn  ~(tap in ~(key by members))
+      |=  =ship
+      ^-  (unit card)
+      ?~  =(our.bowl ship)  ~
+      =/  cage  friends-action+!>([%share-contact ship])
+      `[%pass / %agent [our.bowl %friends] %poke cage]
     ::
     ++  on-current
       |=  [path=space-path:store]

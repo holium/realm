@@ -1,5 +1,6 @@
+import { Avatar } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box, Sigil } from 'renderer/components';
+import { Flex, Box } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
 interface AvatarRowProps {
@@ -7,13 +8,13 @@ interface AvatarRowProps {
   backgroundColor: string;
 }
 
-const AvatarRowPresenter = ({ people, backgroundColor }: AvatarRowProps) => {
-  const { contacts } = useServices();
+const AvatarRowPresenter = ({ people }: AvatarRowProps) => {
+  const { friends } = useServices();
 
   return (
     <Flex flexDirection="row" alignItems="center">
       {people.map((person: string, index: number) => {
-        const metadata = contacts.getContactAvatarMetadata(person);
+        const metadata = friends.getContactAvatarMetadata(person);
         return (
           <Box
             style={{
@@ -24,14 +25,14 @@ const AvatarRowPresenter = ({ people, backgroundColor }: AvatarRowProps) => {
             ml="-6px"
             zIndex={people.length - index}
           >
-            <Sigil
-              borderColor={backgroundColor}
+            <Avatar
+              // borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
               size={22}
               avatar={metadata && metadata.avatar}
               patp={person}
-              color={[(metadata && metadata.color) || '#000000', 'white']}
+              sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
             />
           </Box>
         );

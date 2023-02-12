@@ -1,11 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
-import { Box, Sigil, Text, Flex, Icons, Button } from 'renderer/components';
+import { Box, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { Avatar } from '@holium/design-system';
 
 export interface SelectPlanProps extends BaseDialogProps {
   patp: string;
@@ -61,8 +62,8 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
   const PlanetPreview = () => (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">
       <Box height={48} width={48} mb={12}>
-        <Sigil
-          color={['black', 'white']}
+        <Avatar
+          sigilColor={['black', 'white']}
           simple={false}
           size={48}
           patp={planet.patp}

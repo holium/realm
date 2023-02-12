@@ -5,7 +5,6 @@ import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,
@@ -24,6 +23,7 @@ import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
 interface LoginProps {
   addShip: () => void;
@@ -124,14 +124,14 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               gap={24}
             >
               <Box>
-                <Sigil
+                <Avatar
                   isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
                   avatar={pendingShip.avatar}
                   patp={pendingShip.patp}
-                  color={[pendingShip.color || '#000000', 'white']}
+                  sigilColor={[pendingShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>

@@ -1,7 +1,8 @@
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, Sigil, Icons, IconButton } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import styled from 'styled-components';
+import { Avatar } from '@holium/design-system';
 
 const sessionMembers: any[] = [
   {
@@ -57,12 +58,12 @@ export const SharedAvatars = ({
           evt.stopPropagation();
         }}
       >
-        <Sigil
+        <Avatar
           simple
           size={18}
           avatar={member.avatar}
           patp={member.patp}
-          color={[member.color || '#000000', 'white']}
+          sigilColor={[member.color || '#000000', 'white']}
         />
       </motion.div>
     ))}
