@@ -84,7 +84,7 @@
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
         %edit-member-role
-      :-  %revoke-invite
+      :-  %edit-member-role
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship s+(scot %p ship.act)]
@@ -139,6 +139,19 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%ship s+(scot %p ship.rct)]
+      ==
+      ::
+        %edited
+      :-  %edited
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%ship s+(scot %p ship.rct)]
+          :-  %roles
+            :-  %a
+            ^-  (list json)
+            %+  turn  ~(tap in role-set.rct)
+            |=  =role:membership
+            s+(scot %tas role)
       ==
     ==
   ::
@@ -320,7 +333,7 @@
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
           :: expects an array of roles
-          [%role (as rol)]
+          [%roles (as rol)]
       ==
     --
   --

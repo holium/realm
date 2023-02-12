@@ -18,10 +18,12 @@ const MembersListPresenter = (props: IMembersList) => {
 
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
-  const members = Array.from(membership.getMembersList(path));
+  let members = Array.from(membership.getMembersList(path));
   const admins = members.filter((member: Member) =>
     member.roles.includes('admin')
   );
+  members = members.filter((member: Member) => !member.roles.includes('admin'));
+
   const membersOnly = members.filter(
     (member: Member) =>
       member.roles.includes('member') || member.status.includes('invited')
@@ -80,7 +82,7 @@ const MembersListPresenter = (props: IMembersList) => {
       <PersonRow
         key={`${member.patp}-member`}
         patp={member.patp}
-        role={member.roles[0]}
+        roles={Array.from(member.roles!)}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}

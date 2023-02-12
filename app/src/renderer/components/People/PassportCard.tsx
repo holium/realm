@@ -8,10 +8,13 @@ import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+
+type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
 interface IPassport {
   patp: string;
-  role?: string;
+  roles?: string[];
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -24,13 +27,41 @@ interface IPassport {
 }
 
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
-  const { patp, role, sigilColor, avatar, nickname, description, onClose } = props;
+  const { patp, roles, sigilColor, avatar, nickname, description, onClose } =
+    props;
   const { textColor, windowColor } = props.theme!;
-  const { courier } = useServices();
+  const { courier, membership, spaces, ship } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
+
+  const ourRoles = membership.spaces
+    .get(spaces.selected!.path)!
+    .get(ship!.patp)!.roles;
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
+
+  let activeRole = 'initiate';
+  if (roles) {
+    if (roles.includes('admin')) activeRole = 'admin';
+    else if (roles.includes('member')) activeRole = 'member';
+    else if (roles.includes('initiate')) {
+      activeRole = 'initiate';
+    }
+  }
+  const setNewRole = (role: Roles) => {
+    const newRoles = roles
+      ? [...roles.filter((role) => role !== activeRole), role]
+      : [role];
+    console.log('old', roles);
+    console.log('new', newRoles);
+    SpacesActions.setRoles(patp, newRoles);
+  };
+  const isAdmin = roles!.includes('admin');
+  const isOwner = roles!.includes('owner');
+  const ourAdmin = ourRoles.includes('admin');
+  const ourOwner = ourRoles.includes('owner');
+  const allowRoleChange = (ourOwner || (ourAdmin && !isAdmin)) && !isOwner;
+
   return (
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">
@@ -63,33 +94,27 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          <Select
-            id="select-role"
-            placeholder="Select role"
-            customBg={windowColor}
-            textColor={textColor}
-            iconColor={iconColor}
-            selected={role}
-            // disabled={isOur}
-            options={[
-              { label: 'Initiate', value: 'initiate' },
-              { label: 'Member', value: 'member' },
-              { label: 'Admin', value: 'admin' },
-              // { label: 'Host', value: 'host' }, TODO elect a data host
-              { label: 'Owner', value: 'owner', hidden: true },
-            ]}
-            onClick={(selected: Roles) => {
-              /*setPermissionMap({
-                ...permissionMap,
-                [patp]: {
-                  primaryRole: selected,
-                  roles: [selected],
-                  alias: '',
-                  status: 'invited',
-                },
-              });*/
-            }}
-          />
+          {allowRoleChange && (
+            <Select
+              id="select-role"
+              placeholder="Select role"
+              customBg={windowColor}
+              textColor={textColor}
+              iconColor={iconColor}
+              selected={activeRole}
+              // disabled={isOur}
+              options={[
+                { label: 'Initiate', value: 'initiate' },
+                { label: 'Member', value: 'member' },
+                { label: 'Admin', value: 'admin' },
+                // { label: 'Host', value: 'host' }, TODO elect a data host
+                { label: 'Owner', value: 'owner', hidden: true },
+              ]}
+              onClick={(selected: Roles) => {
+                setNewRole(selected);
+              }}
+            />
+          )}
           {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}

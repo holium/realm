@@ -746,7 +746,8 @@
       =.  roles.member-state  role-set
       =.  space-members  (~(put by space-members) [member member-state])
       =.  membership  (~(put by membership) [path space-members])
-      `state
+      :_  state
+      [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
     ::
     --
   ++  reaction
@@ -759,6 +760,7 @@
       %invite-removed     `state
       %invite-accepted    (on-accepted +.rct)
       %kicked             (on-kicked +.rct)
+      %edited             (on-edited +.rct)
     ==
     ::
     ++  on-sent
@@ -798,6 +800,16 @@
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
     ::
+    ++  on-edited
+      |=  [path=space-path:store =ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  members  (~(got by membership.state) path)
+      =/  member   (~(got by members) ship)
+      =.  roles.member  role-set
+      =.  members  (~(put by members) [ship member])
+      =.  membership.state  (~(put by membership.state) [path members])
+      :_  state
+      [%give %fact [/updates ~] visa-reaction+!>([%edited path ship member])]~
     --
   ::
   ++  helpers

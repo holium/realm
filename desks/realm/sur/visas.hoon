@@ -46,6 +46,7 @@
       [%invite-removed path=path:spc]
       [%invite-accepted path=path:spc =ship =member:membership]
       [%kicked path=path:spc =ship]
+      [%edited path=path:spc =ship role-set=(set role:membership)]
   ==
 ::
 +$  view
