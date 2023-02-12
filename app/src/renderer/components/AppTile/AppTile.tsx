@@ -3,11 +3,7 @@ import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 import { darken, desaturate } from 'polished';
 import { Flex, Box, Text, Spinner } from 'renderer/components';
-import {
-  AppType,
-  InstallStatus,
-  DevAppType,
-} from 'os/services/spaces/models/bazaar';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
@@ -116,7 +112,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
 
 export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
-  app: AppType | DevAppType;
+  app: AppType;
   tileId: string;
   contextMenuOptions?: ContextMenuOption[];
   variants?: Variants;
@@ -426,7 +422,7 @@ const AppTilePresenter = ({
         )}
         {graphic}
         <TileHighlight
-          layoutId="active-app"
+          layoutId={`tile-highlight-${tileId}`}
           isActive={isActive}
           isOpen={isOpen}
           transition={{ duration: 0.2 }}
