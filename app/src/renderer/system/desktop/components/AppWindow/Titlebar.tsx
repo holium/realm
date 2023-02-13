@@ -5,7 +5,7 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 
 interface TitlebarStyleProps {
   hasBorder: boolean;
@@ -68,7 +68,7 @@ interface TitlebarProps {
   isAppWindow?: boolean;
   noTitlebar?: boolean;
   shareable?: boolean;
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
   hasBlur?: boolean;
   children?: React.ReactNode;
 }

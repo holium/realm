@@ -10,7 +10,7 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
+import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppWindowByType } from './AppWindowByType';
 import { LeftDragHandle, RightDragHandle } from './DragHandles';
@@ -51,7 +51,7 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 `;
 
 interface AppWindowProps {
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
   children?: ReactNode;
 }
 

@@ -17,8 +17,8 @@ const BoundsModel = types.model({
 
 type BoundsModelType = Instance<typeof BoundsModel>;
 
-const WindowModel = types
-  .model('WindowModel', {
+const AppWindowModel = types
+  .model('AppWindowModel', {
     /**
      * The `appId` is used to map the window to the corresponding app.
      */
@@ -87,12 +87,12 @@ const WindowModel = types
     },
   }));
 
-export interface WindowModelType extends Instance<typeof WindowModel> {}
-export interface CreateWindowProps extends SnapshotIn<typeof WindowModel> {}
+export interface AppWindowType extends Instance<typeof AppWindowModel> {}
+export interface CreateWindowProps extends SnapshotIn<typeof AppWindowModel> {}
 
 export const DesktopStore = types
   .model('DesktopStore', {
-    windows: types.map(WindowModel),
+    windows: types.map(AppWindowModel),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
   })
@@ -156,7 +156,7 @@ export const DesktopStore = types
         // app as DevApp
         href = { site: app.web.url };
       }
-      const newWindow = WindowModel.create({
+      const newWindow = AppWindowModel.create({
         appId: app.id,
         title: app.title,
         glob,
@@ -174,7 +174,7 @@ export const DesktopStore = types
       return newWindow;
     },
     openDialog(windowProps: CreateWindowProps) {
-      const newWindow = WindowModel.create(windowProps);
+      const newWindow = AppWindowModel.create(windowProps);
 
       return newWindow;
     },
@@ -200,10 +200,10 @@ export const DesktopStore = types
     },
     closeWindow(appId: string) {
       const windows = Array.from(self.windows.values());
-      const activeWindow = windows.find((app: WindowModelType) => app.isActive);
+      const activeWindow = windows.find((app: AppWindowType) => app.isActive);
       if (activeWindow?.appId === appId) {
         const nextWindow = windows.filter(
-          (app: WindowModelType) => !app.isMinimized
+          (app: AppWindowType) => !app.isMinimized
         )[0];
         if (nextWindow) {
           this.setActive(nextWindow.appId);

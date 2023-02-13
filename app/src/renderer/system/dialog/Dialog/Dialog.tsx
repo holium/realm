@@ -1,4 +1,4 @@
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import {
   FC,
   useEffect,
@@ -20,7 +20,7 @@ import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
 export interface DialogViewProps {
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
 }
 
 type ViewProps = {

@@ -1,11 +1,11 @@
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import {
   nativeRenderers,
   AppId,
 } from 'renderer/system/desktop/components/AppWindow/native';
 
 type Props = {
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
   isResizing: boolean;
   isDragging: boolean;
 };

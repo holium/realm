@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 
 interface Props {
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
   isResizing?: boolean;
 }
 

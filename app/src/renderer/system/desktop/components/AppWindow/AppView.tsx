@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -12,7 +12,7 @@ import { WebView } from './WebView';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
 interface AppViewProps {
-  appWindow: WindowModelType;
+  appWindow: AppWindowType;
   isResizing: boolean;
   isDragging: boolean;
 }
