@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Sigil, RadioList } from 'renderer/components';
+import { Flex, Text, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
+import { Avatar } from '@holium/design-system';
 
 type SystemPanelType =
   | 'system'
@@ -36,14 +37,14 @@ const SystemAppPresenter = () => {
             maxWidth={'220px'}
           >
             {/* sig and patp */}
-            <Sigil
+            <Avatar
               // borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
               size={55}
               avatar={ship!.avatar}
               patp={person}
-              color={[ship!.color || '#000000', 'white']}
+              sigilColor={[ship!.color || '#000000', 'white']}
             />
             <Flex
               flexDirection="column"

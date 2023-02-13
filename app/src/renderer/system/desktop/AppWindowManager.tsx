@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { AppWindow } from './components/Window/Window';
+import { AppWindow } from './components/AppWindow/AppWindow';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -10,7 +10,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-const WindowManagerPresenter = () => {
+const AppWindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
   const id = 'desktop-fill';
@@ -59,7 +59,7 @@ const WindowManagerPresenter = () => {
       style={{
         bottom: 0,
         padding: '8px',
-        position: 'absolute',
+        position: 'fixed',
         left: 0,
         top: 0,
         right: 0,
@@ -67,11 +67,11 @@ const WindowManagerPresenter = () => {
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {windows.map((window: any, index: number) => (
-        <AppWindow key={`${window.id}-${index}`} window={window} />
+      {windows.map((appWindow, index: number) => (
+        <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
       ))}
     </motion.div>
   );
 };
 
-export const WindowManager = observer(WindowManagerPresenter);
+export const AppWindowManager = observer(AppWindowManagerPresenter);

@@ -25,3 +25,13 @@ To build a draft version of the app, push code changes to the `draft` branch. Th
 `npx cross-env RELEASE_CHANNEL=draft APPLE_ID=<your id> APPLE_ID_PASS=<your password> CSC_NAME=<csc name> CSC_LINK=<csc link> yarn package:prerelease:mac`
 
 To get the values for the environment variables, please contact patrick@holium.com
+
+Branches you can push to and build:
+
+- `draft` - will build draft versions of mac, windows, and linux
+- `windows` - will build a draft windows version only
+
+Branches you _must_ PR before a build is triggered:
+
+- `master` - builds alpha versions of mac, windows, and linux
+- p`roduction` - builds release versions of mac, windowws, and linux

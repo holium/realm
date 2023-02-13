@@ -2,10 +2,7 @@
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
-import {
-  CreateWindowProps,
-  WindowModelType,
-} from 'os/services/shell/desktop.model';
+import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { Bounds } from 'os/types';
 import { SpacesActions } from './spaces';
@@ -38,11 +35,8 @@ export const DesktopActions = {
     window.electron.app.mouseColorChanged(mouseColor);
     await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setWindowBounds: (
-    windowId: string,
-    dimensions: { width: number; height: number; x: number; y: number }
-  ) => {
-    window.electron.os.desktop.setWindowBounds(windowId, dimensions);
+  setWindowBounds: (appId: string, bounds: Bounds) => {
+    window.electron.os.desktop.setWindowBounds(appId, bounds);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);
@@ -53,7 +47,7 @@ export const DesktopActions = {
     SpacesActions.addRecentApp(app.id);
     return result;
   },
-  openDialog: (windowProps: CreateWindowProps): Promise<WindowModelType> => {
+  openDialog: (windowProps: AppWindowProps): Promise<AppWindowType> => {
     return window.electron.os.desktop.openDialog(windowProps);
   },
   toggleMinimized: (appId: string) => {

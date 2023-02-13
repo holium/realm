@@ -1,14 +1,13 @@
-// import styled from 'styled-components';
 import { rgba, darken, lighten } from 'polished';
 import { ThemeType } from 'renderer/logic/theme';
 
-export const applyStyleOverrides = (windowId: string, theme: ThemeType) => {
+export const applyStyleOverrides = (appId: string, theme: ThemeType) => {
   const baseBg = theme.windowColor;
   const baseGray =
     theme.mode === 'light'
       ? darken(0.04, theme.windowColor)
       : lighten(0.005, theme.windowColor);
-  switch (windowId) {
+  switch (appId) {
     case 'talk':
     case 'groups':
       return `

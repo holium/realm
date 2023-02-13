@@ -10,7 +10,6 @@ import {
   Icons,
   Crest,
   Box,
-  Sigil,
   IconButton,
   Select,
   Skeleton,
@@ -25,6 +24,7 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { Avatar } from '@holium/design-system';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -77,7 +77,7 @@ export const createPeopleForm = (
 };
 
 const InviteMembersPresenter = (props: BaseDialogProps) => {
-  const { theme, ship, contacts } = useServices();
+  const { theme, ship, friends } = useServices();
   const { inputColor, iconColor, textColor, windowColor, mode } =
     theme.currentTheme;
   const { workflowState, setState } = props;
@@ -196,7 +196,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
     const isOur = patp === ship!.patp;
-    const contact = contacts.getContactAvatarMetadata(patp);
+    const contact = friends.getContactAvatarMetadata(patp);
 
     return (
       <Row
@@ -207,12 +207,12 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       >
         <Flex gap={10} flexDirection="row" alignItems="center">
           <Box>
-            <Sigil
+            <Avatar
               simple
               size={22}
               avatar={contact.avatar || null}
               patp={patp}
-              color={[contact.color || '#000000', 'white']}
+              sigilColor={[contact.color || '#000000', 'white']}
             />
           </Box>
           <Flex flexDirection="row" gap={8}>

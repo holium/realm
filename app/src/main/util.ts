@@ -20,7 +20,12 @@ if (process.env.NODE_ENV === 'development') {
     return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
   };
   resolveUpdaterPath = (htmlFileName: string) => {
-    return `file://${path.resolve(__dirname, './updater/', htmlFileName)}`;
+    const filename = `file://${path.resolve(
+      process.resourcesPath,
+      './updater/',
+      htmlFileName
+    )}`;
+    return filename;
   };
   resolveMediaPath = (htmlFileName: string) => {
     return `file://${path.resolve(__dirname, '../../media/', htmlFileName)}`;

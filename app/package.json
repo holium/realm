@@ -208,6 +208,7 @@
       ]
     },
     "win": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -235,7 +236,7 @@
         "from": "./src/main/updater/",
         "to": "updater",
         "filter": [
-          "initial.html"
+          "**/*"
         ]
       }
     ]

@@ -3,14 +3,7 @@ import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
-import {
-  Sigil,
-  Flex,
-  Box,
-  Text,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Box, Text, TextButton, Spinner } from 'renderer/components';
 import {
   DMPreviewType,
   PreviewDMType,
@@ -22,6 +15,7 @@ import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { Avatar } from '@holium/design-system';
 
 interface DMContact {
   theme: ThemeModelType;
@@ -126,12 +120,12 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     } else {
       return (
         <Box mt="2px" opacity={isPending ? 0.6 : 1}>
-          <Sigil
+          <Avatar
             simple
             size={28}
             avatar={dmModel.metadata.avatar}
             patp={dmModel.to}
-            color={[dmModel.metadata.color || '#000000', 'white']}
+            sigilColor={[dmModel.metadata.color || '#000000', 'white']}
           />
         </Box>
       );

@@ -1,9 +1,10 @@
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, Sigil, Icons, IconButton } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import styled from 'styled-components';
+import { Avatar } from '@holium/design-system';
 
-const sessionMembers: any[] = [
+const sessionMembers = [
   {
     patp: '~dev',
     color: '#8419D9',
@@ -16,17 +17,14 @@ const AddMember = styled(IconButton)<{ dashColor: any }>`
   border: 1px dashed ${(props: any) => darken(0.1, props.dashColor)};
 `;
 
-interface SharedSessionProps {
+type Props = {
   appId?: string;
   iconColor: string;
   backgroundColor?: string;
   dimensions?: any;
-}
+};
 
-export const SharedAvatars = ({
-  iconColor,
-  backgroundColor,
-}: SharedSessionProps) => (
+export const SharedAvatars = ({ iconColor, backgroundColor }: Props) => (
   <Flex pl={1} flexDirection="row" alignItems="center">
     {/* {sessionMembers.length === 0 && (
         <Icons name="Friends" mr={1} color={rgba(iconColor!, 0.7)} />
@@ -57,12 +55,12 @@ export const SharedAvatars = ({
           evt.stopPropagation();
         }}
       >
-        <Sigil
+        <Avatar
           simple
           size={18}
           avatar={member.avatar}
           patp={member.patp}
-          color={[member.color || '#000000', 'white']}
+          sigilColor={[member.color || '#000000', 'white']}
         />
       </motion.div>
     ))}

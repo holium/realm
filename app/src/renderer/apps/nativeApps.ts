@@ -1,8 +1,6 @@
-import { devApps } from './development';
 import { ThemeModelType } from 'os/services/theme.model';
-const isDev = true;
 
-export interface NativeAppType {
+type NativeAppType = {
   id: string;
   title: string;
   type: 'native' | 'web' | 'urbit';
@@ -23,11 +21,24 @@ export interface NativeAppType {
     theme?: ThemeModelType;
     development?: boolean;
   };
-}
+};
 
-interface AppManifestMap {
-  [key: string]: NativeAppType;
-}
+type AppManifestMap = Record<string, NativeAppType>;
+
+const devApps: AppManifestMap = {
+  'ballot-dev': {
+    id: 'ballot-dev',
+    title: 'Ballot - Dev',
+    type: 'web',
+    color: '#cebef0',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
+    web: {
+      openFullscreen: true,
+      url: 'http://localhost:3001/apps/ballot/',
+      development: true,
+    },
+  },
+};
 
 export const nativeApps: AppManifestMap = {
   'os-browser': {
@@ -52,13 +63,5 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
-  ...{ ...(isDev ? devApps : {}) },
+  ...devApps,
 };
-
-export const NativeAppList = Object.values(nativeApps);
-
-// id: types.identifier,
-// title: types.string,
-// type: types.optional(types.string, 'web'),
-// icon: types.maybeNull(types.string),
-// href: types.string,

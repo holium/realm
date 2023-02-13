@@ -1,11 +1,12 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { AppTile, AppTileSize } from 'renderer/components/AppTile';
+import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
 import {
   AppType,
-  DevAppType,
+  AppTypes,
   InstallStatus,
   UrbitAppType,
+  WebAppType,
 } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -25,10 +26,9 @@ interface AppGridProps {
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected!;
-  const apps = [...bazaar.installed, ...bazaar.devApps] as (
-    | AppType
-    | DevAppType
-  )[];
+  const apps = [...bazaar.installed, ...bazaar.devApps] as
+    | AppType[]
+    | WebAppType[];
 
   return (
     <>
@@ -83,12 +83,11 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
             }
             installStatus={installStatus}
             tileSize={tileSize}
-            app={app}
+            app={app as AppType}
             contextMenuOptions={[
               {
                 label: isAppPinned ? 'Unpin app' : 'Pin app',
-                // @ts-ignore
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   isAppPinned
@@ -98,8 +97,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-                // @ts-ignore
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   weRecommended
@@ -109,8 +107,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: 'App info',
-                // @ts-ignore
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   ShellActions.openDialogWithStringProps('app-detail-dialog', {
