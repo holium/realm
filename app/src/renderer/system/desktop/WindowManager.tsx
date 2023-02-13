@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { AppWindow } from './components/Window/Window';
+import { AppWindow } from './components/AppWindow/AppWindow';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';

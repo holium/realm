@@ -1,6 +1,6 @@
 import { PointerEvent, RefObject, useRef } from 'react';
 import styled from 'styled-components';
-import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
+import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';

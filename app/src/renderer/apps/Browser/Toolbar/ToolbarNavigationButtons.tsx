@@ -1,5 +1,5 @@
 import { Flex } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
+import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
 
 type Props = {
   iconColor: string;

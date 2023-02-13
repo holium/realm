@@ -25,7 +25,7 @@ import {
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { getWebViewId } from 'renderer/system/desktop/components/Window/util';
+import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/util';
 import {
   denormalizeBounds,
   normalizeBounds,
