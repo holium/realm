@@ -12,6 +12,7 @@ import {
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
+import { Bounds } from 'os/types';
 
 /**
  * DesktopService
@@ -63,15 +64,8 @@ export class DesktopService extends BaseService {
     setActive: async (appId: string) => {
       return await ipcRenderer.invoke('realm.desktop.set-active', appId);
     },
-    setWindowBounds: async (
-      appId: any,
-      bounds: { width: number; height: number; x: number; y: number }
-    ) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.set-window-bounds',
-        appId,
-        bounds
-      );
+    setWindowBounds: (appId: string, bounds: Bounds) => {
+      ipcRenderer.invoke('realm.desktop.set-window-bounds', appId, bounds);
     },
     setMouseColor: async (mouseColor: string) => {
       return await ipcRenderer.invoke(
@@ -159,11 +153,7 @@ export class DesktopService extends BaseService {
     this.state?.setMouseColor(mouseColor);
   }
 
-  setWindowBounds(
-    _event: any,
-    appId: string,
-    bounds: { width: number; height: number; x: number; y: number }
-  ) {
+  setWindowBounds(_event: any, appId: string, bounds: Bounds) {
     this.state?.setBounds(appId, bounds);
   }
 
