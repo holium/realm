@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { darken } from 'polished';
-import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
+import { AppWindowType } from '../../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps';
 import {
@@ -11,7 +11,7 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
-} from '../../../dialog/Dialog/DialogTitlebar';
+} from '../../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { AppType } from 'os/services/spaces/models/bazaar';
 

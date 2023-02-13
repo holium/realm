@@ -20,7 +20,7 @@ import {
   denormalizeBounds,
   normalizeBounds,
 } from 'os/services/shell/lib/window-manager';
-import { TitlebarByType } from './TitlebarByType';
+import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 interface AppWindowStyleProps {
   theme: ThemeType;

@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar';
 import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
 import { useServices } from 'renderer/logic/store';
 

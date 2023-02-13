@@ -3,8 +3,8 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
-import { WindowIcon } from './WindowIcon';
-import { SharedAvatars } from './SharedAvatars';
+import { WindowIcon } from '../WindowIcon';
+import { SharedAvatars } from '../SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 
 interface TitlebarStyleProps {
