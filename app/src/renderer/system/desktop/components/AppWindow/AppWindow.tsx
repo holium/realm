@@ -25,14 +25,14 @@ type Props = {
 const AppWindowPresenter = ({ appWindow }: Props) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
-  const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
-  const appInfo = bazaar.getApp(appWindow.appId);
 
   const dragControls = useDragControls();
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
+  const appInfo = bazaar.getApp(appWindow.appId);
   const activeWindow = appWindow;
+  const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
   const denormalizedBounds = useMemo(
     () => denormalizeBounds(activeWindow.bounds, shell.desktopDimensions),
     [activeWindow.bounds, shell.desktopDimensions]
@@ -129,13 +129,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     shell.desktopDimensions,
   ]);
 
+  const onDragStart = () => setIsDragging(true);
+
   const onDragStop = () => {
     setIsDragging(false);
     updateWindowBounds();
-  };
-
-  const onDragStart = () => {
-    setIsDragging(true);
   };
 
   const onMaximize = async () => {
@@ -152,9 +150,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const onMinimize = () => DesktopActions.toggleMinimized(activeWindow.appId);
 
-  const onClose = () => {
+  const onClose = () =>
     activeWindow.isActive && DesktopActions.closeAppWindow(activeWindow.appId);
-  };
 
   const onDevTools = useCallback(() => {
     const webView = document.getElementById(
@@ -168,9 +165,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       : webView.openDevTools();
   }, [webViewId]);
 
-  const onMouseDown = () => {
-    DesktopActions.setActive(appWindow.appId);
-  };
+  const onMouseDown = () => DesktopActions.setActive(appWindow.appId);
 
   return (
     <AppWindowContainer

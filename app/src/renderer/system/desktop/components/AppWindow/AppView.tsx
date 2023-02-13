@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -11,43 +10,34 @@ import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
-interface AppViewProps {
+const AppViewContainer = styled.div`
+  overflow: hidden;
+  width: inherit;
+  height: inherit;
+  position: relative;
+`;
+
+type Props = {
   appWindow: AppWindowType;
   isResizing: boolean;
   isDragging: boolean;
-}
+};
 
-const View = styled(motion.div)`
-  transform: translateZ(0);
-`;
-
-const AppViewPresenter = ({
-  isResizing,
-  isDragging,
-  appWindow,
-}: AppViewProps) => {
+const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
   const { ship, desktop, theme, spaces, bazaar } = useServices();
   const [ready, setReady] = useState(false);
-  const elementRef = useRef(null);
-  const webViewRef = useRef<any>(null);
+  const webViewRef = useRef<HTMLWebViewElement>(null);
 
-  const [appConfig, setAppConfig] = useState<any>({
-    name: null,
-    url: null,
-  });
+  const [appUrl, setAppUrl] = useState<string | null>(null);
 
   const app = bazaar.getApp(appWindow.appId) as AppType;
   const isActive = desktop.getWindowByAppId(appWindow.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
 
-  const onStartLoading = () => {
-    setLoading(true);
-  };
+  const onStartLoading = () => setLoading(true);
 
-  const onStopLoading = () => {
-    setLoading(false);
-  };
+  const onStopLoading = () => setLoading(false);
 
   const lockView = useMemo(
     () => isResizing || isDragging || loading || !isActive,
@@ -98,7 +88,7 @@ const AppViewPresenter = ({
       }
 
       DesktopActions.openAppWindow(toJS(app));
-      setAppConfig({ url: appUrl });
+      setAppUrl(appUrl);
     }
 
     () => {
@@ -142,26 +132,17 @@ const AppViewPresenter = ({
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
 
-  return useMemo(() => {
-    return (
-      <View
-        style={{
-          overflow: 'hidden',
-          width: 'inherit',
-          height: 'inherit',
-          position: 'relative',
-        }}
-        ref={elementRef}
-      >
+  return useMemo(
+    () => (
+      <AppViewContainer>
         <WebView
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
           appId={appWindow.appId}
           partition="urbit-webview"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
-          // @ts-expect-error
-          allowpopups="true"
-          src={appConfig.url}
+          allowpopups={true}
+          src={appUrl ?? ''}
           isLocked={lockView}
           style={{
             left: 0,
@@ -173,9 +154,10 @@ const AppViewPresenter = ({
             overflow: 'hidden',
           }}
         />
-      </View>
-    );
-  }, [lockView, appWindow.appId, appConfig.url]);
+      </AppViewContainer>
+    ),
+    [lockView, appWindow.appId, appUrl]
+  );
 };
 
 export const AppView = observer(AppViewPresenter);
