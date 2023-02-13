@@ -1,77 +1,34 @@
-import { useCallback } from 'react';
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
+import { ReactNode, useCallback } from 'react';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from '../WindowIcon';
 import { SharedAvatars } from '../SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
+import { TitlebarStyle, TitleCentered } from './Titlebar.styles';
 
-interface TitlebarStyleProps {
-  hasBorder: boolean;
-  zIndex: number;
-  isAppWindow?: boolean;
-  hasBlur?: boolean;
-}
-
-export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  position: ${(props: TitlebarStyleProps) =>
-    props.isAppWindow ? 'relative' : 'absolute'};
-  /* backdrop-filter: ${(props: TitlebarStyleProps) =>
-    props.hasBlur ? 'blur(16px)' : 'none'}; */
-  top: 0;
-  left: 0;
-  right: 0;
-  height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 54)}px;
-  padding: 0 4px 0
-    ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  ${(props: TitlebarStyleProps) => css`
-    z-index: ${props.zIndex};
-    border-bottom: ${props.hasBorder
-      ? ' 1px solid var(--rlm-border-color)'
-      : 'none'};
-  `}
-`;
-
-const TitleCentered = styled(Flex)`
-  position: absolute;
-  height: 30px;
-  left: 0;
-  right: 0;
-  text-align: center;
-`;
-
-interface TitlebarProps {
+type Props = {
   theme: Partial<ThemeModelType>;
   zIndex: number;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;
   dragControls?: any;
-  onDragStop?: (e: any) => void;
-  onDragStart?: (e: any) => void;
   navigationButtons?: boolean;
   closeButton?: boolean;
-  onClose?: () => void;
   maximizeButton?: boolean;
   minimizeButton?: boolean;
-  onMinimize?: () => void;
-  onMaximize?: () => void;
-  onDevTools?: () => void;
   isAppWindow?: boolean;
   noTitlebar?: boolean;
   shareable?: boolean;
   appWindow: AppWindowType;
   hasBlur?: boolean;
-  children?: React.ReactNode;
-}
+  children?: ReactNode;
+  onClose?: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  onDevTools?: () => void;
+  onDragStop?: (e: any) => void;
+  onDragStart?: (e: any) => void;
+};
 
 export const Titlebar = ({
   children,
@@ -83,42 +40,24 @@ export const Titlebar = ({
   noTitlebar,
   isAppWindow,
   dragControls,
-  onDragStop,
-  onDragStart,
-  onClose,
-  onDevTools,
   maximizeButton,
   minimizeButton,
-  onMaximize,
-  onMinimize,
   navigationButtons,
   shareable,
   hasBlur,
   theme,
-}: TitlebarProps) => {
-  let titleSection: any;
-  if (appWindow) {
-    titleSection = (
-      <Flex gap={4} alignItems="center">
-        <Flex justifyContent="center" alignItems="center">
-          <Text
-            opacity={0.7}
-            style={{ textTransform: 'capitalize', userSelect: 'none' }}
-            fontSize={2}
-            fontWeight={500}
-          >
-            {appWindow.title}
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  }
-
+  onClose,
+  onMaximize,
+  onMinimize,
+  onDevTools,
+  onDragStop,
+  onDragStart,
+}: Props) => {
   const onCloseButton = useCallback(
     (evt: any) => {
       evt.stopPropagation();
       // closeDevTools();
-      onClose && onClose();
+      onClose?.();
     },
     [onClose]
   );
@@ -144,9 +83,20 @@ export const Titlebar = ({
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
-      {titleSection && !noTitlebar && (
+      {appWindow && !noTitlebar && (
         <TitleCentered justifyContent="center" flex={1}>
-          {titleSection}
+          <Flex gap={4} alignItems="center">
+            <Flex justifyContent="center" alignItems="center">
+              <Text
+                opacity={0.7}
+                style={{ textTransform: 'capitalize', userSelect: 'none' }}
+                fontSize={2}
+                fontWeight={500}
+              >
+                {appWindow.title}
+              </Text>
+            </Flex>
+          </Flex>
         </TitleCentered>
       )}
       {shareable || navigationButtons || showDevToolsToggle ? (
@@ -186,7 +136,7 @@ export const Titlebar = ({
           )}
         </Flex>
       ) : (
-        isAppWindow && <Flex></Flex>
+        isAppWindow && <Flex />
       )}
       {children}
       {(maximizeButton || closeButton || minimizeButton) && (
