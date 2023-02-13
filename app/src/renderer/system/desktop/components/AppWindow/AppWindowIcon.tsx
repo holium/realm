@@ -12,7 +12,7 @@ interface WindowIconProps {
   onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const WindowIcon = ({
+export const AppWindowIcon = ({
   size = 24,
   disabled,
   icon,

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
-import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
+import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 import { useServices } from 'renderer/logic/store';
 
 const ToolbarStyle = styled(TitlebarStyle)`
@@ -54,7 +54,7 @@ export const DialogTitlebar = ({
         hasBorder
       >
         {onClose && (
-          <WindowIcon
+          <AppWindowIcon
             icon="Close"
             size={26}
             iconColor={iconColor}

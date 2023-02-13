@@ -1,5 +1,5 @@
 import { Flex } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
+import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 
 type Props = {
   iconColor: string;
@@ -19,21 +19,21 @@ export const ToolbarNavigationButtons = ({
   onRefresh,
 }: Props) => (
   <Flex flexDirection="row" alignItems="center" gap={4}>
-    <WindowIcon
+    <AppWindowIcon
       icon="ArrowLeftLine"
       disabled={!canGoBack}
       iconColor={iconColor}
       bg="#97A3B2"
       onClick={onBack}
     />
-    <WindowIcon
+    <AppWindowIcon
       icon="ArrowRightLine"
       disabled={!canGoForward}
       iconColor={iconColor}
       bg="#97A3B2"
       onClick={onForward}
     />
-    <WindowIcon
+    <AppWindowIcon
       icon="Refresh"
       iconColor={iconColor}
       bg="#97A3B2"

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
-import { WindowIcon } from '../WindowIcon';
+import { AppWindowIcon } from '../AppWindowIcon';
 import { SharedAvatars } from '../SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { TitlebarStyle, TitleCentered } from './Titlebar.styles';
@@ -98,7 +98,7 @@ export const Titlebar = ({
           />
         )}
         {showDevToolsToggle && (
-          <WindowIcon
+          <AppWindowIcon
             icon="DevBox"
             iconColor={theme.iconColor!}
             bg="#97A3B2"
@@ -110,13 +110,13 @@ export const Titlebar = ({
         )}
         {navigationButtons && (
           <>
-            <WindowIcon
+            <AppWindowIcon
               icon="ArrowLeftLine"
               iconColor={theme.iconColor!}
               bg="#97A3B2"
               onClick={() => {}}
             />
-            <WindowIcon
+            <AppWindowIcon
               icon="ArrowRightLine"
               iconColor={theme.iconColor!}
               bg="#97A3B2"
@@ -132,7 +132,7 @@ export const Titlebar = ({
     {(maximizeButton || closeButton || minimizeButton) && (
       <Flex gap={4} alignItems="center">
         {minimizeButton && (
-          <WindowIcon
+          <AppWindowIcon
             icon="Minimize"
             iconColor={theme.iconColor!}
             bg="#97A3B2"
@@ -143,7 +143,7 @@ export const Titlebar = ({
           />
         )}
         {maximizeButton && (
-          <WindowIcon
+          <AppWindowIcon
             icon="Expand"
             iconColor={theme.iconColor!}
             bg="#97A3B2"
@@ -154,7 +154,7 @@ export const Titlebar = ({
           />
         )}
         {closeButton && (
-          <WindowIcon
+          <AppWindowIcon
             icon="Close"
             iconColor={theme.iconColor!}
             bg="#FF6240"
