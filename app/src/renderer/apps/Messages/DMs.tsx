@@ -123,7 +123,7 @@ const DMsPresenter = (props: IProps) => {
               theme={theme}
               dm={dm}
               refreshDms={fetchPreviews}
-              onClick={(evt: any) => {
+              onClick={(evt) => {
                 evt.stopPropagation();
                 onSelectDm(dm);
               }}
