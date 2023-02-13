@@ -6,6 +6,7 @@ import {
   useState,
   ChangeEvent,
 } from 'react';
+import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
@@ -15,6 +16,12 @@ import { NewWalletScreen } from './index';
 import { TextInput } from '@holium/design-system';
 import VerifyPasscode from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+
+const NoResize = styled(Flex)`
+  textarea {
+    resize: none;
+  }
+`;
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
@@ -64,7 +71,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
         }}
       />
     ) : (
-      <Flex width="100%" height="100%" flexDirection="column">
+      <NoResize width="100%" height="100%" flexDirection="column">
         <Text mt={6} variant="h4">
           Recover Wallet
         </Text>
@@ -72,7 +79,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
           Please enter the mnemonic seed phrase for your existing wallet.
         </Text>
         <Flex mt={9} width="100%" flexDirection="column">
-          <Label mb={3} required={true}>
+          <Label mb={1} required={true}>
             Seed phrase
           </Label>
           <TextInput
@@ -122,7 +129,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             color={theme.currentTheme.iconColor}
           />
         </Flex>
-      </Flex>
+      </NoResize>
     );
   }
 );

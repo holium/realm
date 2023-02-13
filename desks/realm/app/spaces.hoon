@@ -3,7 +3,7 @@
 /-  vstore=visas
 /-  hark=hark-store
 /-  g=new-groups
-/+  default-agent, verb, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
+/+  default-agent, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
 ^-  agent:gall
 ::
 ::  %spaces [realm]: A store for Realm space metadata and members.
@@ -34,7 +34,6 @@
 =|  state-1
 =*  state  -
 =<
-  %+  verb  &
   %-  agent:dbug
   |_  =bowl:gall
   +*  this  .

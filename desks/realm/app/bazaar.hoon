@@ -7,7 +7,7 @@
 /-  store=bazaar-store, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
 /-  treaty, hood
-/+  verb, dbug, default-agent
+/+  dbug, default-agent
 =>
   |%
   +$  card  card:agent:gall
@@ -27,7 +27,6 @@
 =|  state-0
 =*  state  -
 =<
-  %+  verb  &
   %-  agent:dbug
   |_  =bowl:gall
   +*  this    .
