@@ -1,8 +1,5 @@
 import { AppWindowType } from 'os/services/shell/desktop.model';
-import {
-  nativeRenderers,
-  AppId,
-} from 'renderer/system/desktop/components/AppWindow/native';
+import { NativeAppId, nativeAppWindow } from './nativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
@@ -11,7 +8,7 @@ type Props = {
 };
 
 export const NativeView = ({ appWindow, isResizing, isDragging }: Props) => {
-  const ViewComponent = nativeRenderers[appWindow.appId as AppId].component;
+  const ViewComponent = nativeAppWindow[appWindow.appId as NativeAppId].view;
 
   return <ViewComponent isResizing={isResizing} isDragging={isDragging} />;
 };

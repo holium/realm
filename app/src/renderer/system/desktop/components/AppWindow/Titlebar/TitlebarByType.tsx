@@ -3,10 +3,6 @@ import { darken } from 'polished';
 import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import {
-  nativeRenderers,
-  AppId,
-} from 'renderer/system/desktop/components/AppWindow/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import {
@@ -17,6 +13,7 @@ import { AppType } from 'os/services/spaces/models/bazaar';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
+import { NativeAppId, nativeAppWindow } from '../nativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
@@ -49,7 +46,7 @@ export const TitlebarByType = ({
 }: Props) => {
   let hideTitlebarBorder = false;
   let noTitlebar = false;
-  let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps>;
+  let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps> | null;
   let showDevToolsToggle = true;
   let maximizeButton = true;
   if (appInfo?.type === 'urbit') {
@@ -82,8 +79,7 @@ export const TitlebarByType = ({
     hideTitlebarBorder =
       nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
     noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
-    // @ts-ignore
-    CustomTitlebar = nativeRenderers[appWindow.appId as AppId].titlebar;
+    CustomTitlebar = nativeAppWindow[appWindow.appId as NativeAppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
     if (CustomTitlebar) {
