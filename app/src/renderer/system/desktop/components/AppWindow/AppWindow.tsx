@@ -12,11 +12,14 @@ import styled from 'styled-components';
 import { ThemeType } from '../../../../theme';
 import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
-import { WindowByType } from './WindowByType';
+import { AppWindowByType } from './AppWindowByType';
 import { LeftDragHandle, RightDragHandle } from './DragHandles';
 import { Flex } from 'renderer/components';
 import { nativeApps } from 'renderer/apps';
-import { nativeRenderers, AppId } from 'renderer/apps/native';
+import {
+  nativeRenderers,
+  AppId,
+} from 'renderer/system/desktop/components/AppWindow/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -371,7 +374,7 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
           }}
         >
           {titlebar}
-          <WindowByType
+          <AppWindowByType
             hasTitlebar
             isResizing={isResizing}
             isDragging={isDragging}

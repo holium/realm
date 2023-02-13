@@ -1,6 +1,9 @@
-import { SystemApp } from './System';
-import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar/Toolbar';
-import { BrowserWebview } from './Browser/BrowserWebview';
+import { SystemApp } from '../../../../apps/System';
+import {
+  BrowserToolbar,
+  BrowserToolbarProps,
+} from '../../../../apps/Browser/Toolbar/Toolbar';
+import { BrowserWebview } from '../../../../apps/Browser/BrowserWebview';
 
 export enum AppId {
   Browser = 'os-browser',

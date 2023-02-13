@@ -54,11 +54,3 @@ export const nativeApps: AppManifestMap = {
   },
   ...{ ...(isDev ? devApps : {}) },
 };
-
-export const NativeAppList = Object.values(nativeApps);
-
-// id: types.identifier,
-// title: types.string,
-// type: types.optional(types.string, 'web'),
-// icon: types.maybeNull(types.string),
-// href: types.string,

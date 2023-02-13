@@ -1,4 +1,3 @@
-import { nativeApps } from 'renderer/apps';
 import { DialogView } from 'renderer/system/dialog/Dialog/Dialog';
 import { WindowModelType } from 'os/services/shell/desktop.model';
 import { AppView } from './AppView';
@@ -12,7 +11,7 @@ type Props = {
   appWindow: WindowModelType;
 };
 
-export const WindowByType = ({
+export const AppWindowByType = ({
   hasTitlebar,
   isResizing,
   isDragging,
@@ -24,7 +23,6 @@ export const WindowByType = ({
         <NativeView
           isDragging={isDragging}
           isResizing={isResizing}
-          hasTitlebar={nativeApps[appWindow.appId].native?.hideTitlebarBorder}
           appWindow={appWindow}
         />
       );
