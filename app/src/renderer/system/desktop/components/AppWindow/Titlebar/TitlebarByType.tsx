@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { darken } from 'polished';
-import { AppWindowType } from '../../../../../../os/services/shell/desktop.model';
+import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps';
 import {
@@ -8,26 +8,29 @@ import {
   AppId,
 } from 'renderer/system/desktop/components/AppWindow/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
-} from '../../../../dialog/Dialog/DialogTitlebar';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+} from 'renderer/system/dialog/Dialog/DialogTitlebar';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { AppWindowType } from 'os/services/shell/desktop.model';
+import { ShellStoreType } from 'os/services/shell/shell.model';
+import { ThemeType } from 'renderer/logic/theme';
 
 type Props = {
   appWindow: AppWindowType;
   appInfo: AppType;
-  shell: any;
-  dragControls: any;
-  currentTheme: any;
+  shell: ShellStoreType;
+  dragControls: DragControls;
+  currentTheme: ThemeType;
   windowColor: string;
-  onDevTools: () => void;
-  onDragStart: () => void;
-  onDragStop: () => void;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
+  onDevTools: () => void;
+  onDragStart: () => void;
+  onDragStop: () => void;
 };
 
 export const TitlebarByType = ({
@@ -152,10 +155,11 @@ export const TitlebarByType = ({
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
+          onClose={onCloseDialog ?? onClose}
+          onMinimize={onMinimize}
+          onMaximize={onMaximize}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
-          onClose={onCloseDialog}
-          onMaximize={onMaximize}
         />
       );
     }

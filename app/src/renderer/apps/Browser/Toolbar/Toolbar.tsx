@@ -22,9 +22,9 @@ export type BrowserToolbarProps = {
   showDevToolsToggle: boolean;
   dragControls: ReturnType<typeof useDragControls>;
   innerRef?: RefObject<HTMLDivElement>;
-  onClose: () => any;
-  onMinimize: () => any;
-  onMaximize: () => any;
+  onClose: () => void;
+  onMinimize: () => void;
+  onMaximize: () => void;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
   onDragStop: (e: PointerEvent<HTMLDivElement>) => void;
 };
