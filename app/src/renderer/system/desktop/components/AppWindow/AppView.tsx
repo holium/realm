@@ -5,7 +5,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { applyStyleOverrides } from './style-overrides';
+import { applyStyleOverrides } from './applyStyleOverrides';
 import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
 import { AppType } from 'os/services/spaces/models/bazaar';
