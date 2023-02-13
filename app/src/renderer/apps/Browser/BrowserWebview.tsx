@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
 import { useBrowser } from './store';
-import { WebView } from 'renderer/system/desktop/components/Window/WebView';
+import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
 
 type Props = {
   isDragging: boolean;

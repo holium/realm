@@ -156,12 +156,12 @@ const AppId = types.string;
 const OrderedAppList = types.array(types.string);
 // const RecommendedByShips = types.array(types.string);
 
-export const StallModel = types.model('StallModel', {
+const StallModel = types.model('StallModel', {
   suite: types.map(AppId), // (map index app-id)
   recommended: types.map(types.integer),
 });
 
-export const AllyModel = types.model('AllyModel', {
+const AllyModel = types.model('AllyModel', {
   ship: types.identifier,
   desks: types.optional(types.array(types.string), []),
 });

@@ -1,8 +1,9 @@
-import { CreateWindowProps } from '../../../os/services/shell/desktop.model';
+import { FC } from 'react';
+import { AppWindowProps } from 'os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
-import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
+import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
@@ -23,21 +24,21 @@ export interface BaseWorkflowProps {
 }
 
 export type BaseDialogProps = {
-  onOpen?: () => void; // is the funciton that executres when the dialog is opened
-  onClose?: () => void; // is the funciton that executres when the dialog is closed
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
   draggable?: boolean;
   unblurOnClose?: boolean;
   theme?: ThemeModelType;
   edit?: any;
+  onOpen?: () => void; // is the function that executes when the dialog is opened
+  onClose?: () => void; // is the function that executes when the dialog is closed
 } & BaseWorkflowProps;
 
 export type DialogConfig = {
-  titlebar?: React.FC<any>;
-  component: React.FC<any>;
+  titlebar?: FC<any>;
+  component: FC<any>;
   stateKey?: string;
-  getWindowProps: (dekstopDimensions: Dimensions) => CreateWindowProps;
+  getWindowProps: (dekstopDimensions: Dimensions) => AppWindowProps;
 } & BaseDialogProps;
 
 export interface DialogRenderers {

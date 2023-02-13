@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
-import { nativeApps } from '..';
+import { nativeApps } from '../nativeApps';
 import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
