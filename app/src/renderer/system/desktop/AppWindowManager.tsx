@@ -10,7 +10,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 
-const WindowManagerPresenter = () => {
+const AppWindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();
   const { shell, desktop } = useServices();
   const id = 'desktop-fill';
@@ -74,4 +74,4 @@ const WindowManagerPresenter = () => {
   );
 };
 
-export const WindowManager = observer(WindowManagerPresenter);
+export const AppWindowManager = observer(AppWindowManagerPresenter);

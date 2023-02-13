@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
-import { WindowManager } from './WindowManager';
+import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
 import { useServices } from 'renderer/logic/store';
 import { TrayManager } from './TrayManager';
@@ -17,7 +17,7 @@ const DesktopPresenter = () => {
         <TrayManager />
       </Layer>
       <Layer zIndex={0}>
-        <WindowManager />
+        <AppWindowManager />
       </Layer>
       <Layer zIndex={1}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>
