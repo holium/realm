@@ -321,7 +321,7 @@ export class WalletService extends BaseService {
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
-    this.signer = new RealmSigner(this.core);
+    this.signer = new RealmSigner();
   }
 
   async onLogin(ship: string) {
@@ -537,9 +537,9 @@ export class WalletService extends BaseService {
 
   async enqueueUqbarTransaction(
     _event: any,
-    walletIndex: string,
-    to: string,
-    amount: string
+    _walletIndex: string,
+    _to: string,
+    _amount: string
   ) {
     /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     // const protocol = this.wallet!.currentProtocol;

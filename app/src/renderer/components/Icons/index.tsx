@@ -1,5 +1,5 @@
 import { motion, SVGMotionProps } from 'framer-motion';
-import React, { forwardRef, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   compose,

@@ -4,10 +4,9 @@
   "description": "A desktop environment for Urbit",
   "private": "true",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\" \"npm run build:cursor\"",
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.prod.ts",
-    "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
     "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
@@ -20,7 +19,6 @@
     "start:main": "cross-env DEBUG_PROD=true INSTALL_MOON=bypass NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:onboard": "cross-env DEBUG_PROD=true INSTALL_MOON='~hostyv:realm,courier' NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
-    "dev:cursor": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
@@ -161,14 +159,6 @@
     "npm": ">=7.x"
   },
   "browserslist": [],
-  "workspaces": {
-    "packages": [
-      "*"
-    ],
-    "nohoist": [
-      "electron"
-    ]
-  },
   "build": {
     "electronVersion": "22.0.0",
     "productName": "Realm",
@@ -211,6 +201,7 @@
       ]
     },
     "win": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -234,8 +225,13 @@
     },
     "extraResources": [
       "./assets/**",
-      "./src/main/cursor.preload.js",
-      "./release/app/dist/main/cursor.js"
+      {
+        "from": "./src/main/updater/",
+        "to": "updater",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   },
   "repository": {

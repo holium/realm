@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { sigil, reactRenderer } from '@tlon/sigil-js';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
@@ -81,18 +81,15 @@ type AvatarProps = {
   borderRadiusOverride?: string;
 } & BoxProps;
 
-export const Avatar: FC<AvatarProps> = (props: AvatarProps) => {
-  const {
-    patp,
-    avatar,
-    size,
-    sigilColor = ['#000000', '#ffffff'],
-    simple,
-    clickable,
-    isLogin,
-    opacity,
-    ...rest
-  } = props;
+export const Avatar = ({
+  patp,
+  avatar,
+  size,
+  sigilColor = ['#000000', '#ffffff'],
+  simple,
+  clickable,
+  ...rest
+}: AvatarProps) => {
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {

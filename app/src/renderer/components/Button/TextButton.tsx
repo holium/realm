@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import {
   compose,
@@ -87,7 +87,7 @@ export const TextButtonStyle = styled(styled.div`
 );
 
 type TextButtonProps = {
-  children: ReactNode;
+  children?: ReactNode;
   tabIndex?: number;
   highlightColor?: string;
   showBackground?: boolean;
@@ -100,16 +100,12 @@ type TextButtonProps = {
   onKeyDown?: (evt: any) => void;
 } & PositionProps;
 
-export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
-  return (
-    <div
-      className={
-        props.disabled ? 'dynamic-mouse-disabled' : 'realm-cursor-hover'
-      }
-    >
-      <TextButtonStyle {...props}>{props.children}</TextButtonStyle>
-    </div>
-  );
-};
-
-TextButton.displayName = 'TextButton';
+export const TextButton = ({
+  children,
+  disabled,
+  ...rest
+}: TextButtonProps) => (
+  <div className={disabled ? 'dynamic-mouse-disabled' : 'realm-cursor-hover'}>
+    <TextButtonStyle {...rest}>{children}</TextButtonStyle>
+  </div>
+);

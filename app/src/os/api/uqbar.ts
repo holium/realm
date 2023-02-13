@@ -186,7 +186,7 @@ export const UqbarApi = {
     conduit.watch({
       app: 'wallet',
       path: '/book-updates',
-      onEvent: async (data: any, _id?: number, mark?: string) => {
+      onEvent: async (data: any, _id?: number) => {
         handleBookReactions(data, walletState);
       },
       onError: () => console.log('Subscription rejected'),
@@ -195,8 +195,8 @@ export const UqbarApi = {
     conduit.watch({
       app: 'wallet',
       path: '/metadata-updates',
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        handleMetadataReactions(data, walletState);
+      onEvent: async (_data: any, _id?: number) => {
+        // handleMetadataReactions(data, walletState);
       },
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription %spaces'),
@@ -204,8 +204,8 @@ export const UqbarApi = {
     conduit.watch({
       app: 'wallet',
       path: '/tx-updates',
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        handleTxReactions(conduit, data, walletState);
+      onEvent: async (_data: any, _id?: number) => {
+        // handleTxReactions(conduit, data, walletState);
       },
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription %spaces'),
@@ -237,27 +237,4 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
       }
     }
   }
-};
-
-const handleMetadataReactions = (data: any, walletState: WalletStoreType) => {};
-
-const handleTxReactions = (
-  conduit: Conduit,
-  data: any,
-  walletState: WalletStoreType
-) => {
-  // }, signTransaction: any) => {
-  /*if (removeDots(data[Object.keys(data)[0]].from) === walletState.ethereum.wallets.get('0')!.address) {
-    walletState.setProtocol(ProtocolType.UQBAR);
-    walletState.navigate(WalletView.TRANSACTION_CONFIRM, {
-      walletIndex: '0',
-      uqTx: data[Object.keys(data)[0]],
-      /*detail: {
-        type: 'transaction',
-        txtype: 'general',
-        key: '0'
-      }*/
-  /*  });
-    walletState.setForceActive(true);
-  }*/
 };

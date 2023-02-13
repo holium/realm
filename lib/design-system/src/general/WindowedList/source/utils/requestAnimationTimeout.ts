@@ -21,6 +21,7 @@ export const requestAnimationTimeout = (
 
   const timeout = () => {
     if (Date.now() - start >= delay) {
+      // @ts-ignore
       callback.call();
     } else {
       frame.id = raf(timeout);

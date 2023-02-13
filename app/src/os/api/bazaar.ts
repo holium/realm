@@ -37,9 +37,18 @@ export interface UninstallPoke {
 }
 
 export const BazaarApi = {
-  getApps: (conduit: Conduit, path: string, tag: string) => null,
-  getAllies: (conduit: Conduit, path: string) => null,
-  getTreaties: (conduit: Conduit, patp: string) => null,
+  getApps: (_conduit: Conduit, _path: string, _tag: string) => null,
+  getAllies: (_conduit: Conduit, _path: string) => null,
+  getTreaties: (_conduit: Conduit, _patp: string) => null,
+  scryHash: (
+    conduit: Conduit,
+    app: string
+  ): Promise<{ 'app-hash': string }> => {
+    return conduit.scry({
+      app: 'bazaar',
+      path: `/app-hash/${app}`,
+    });
+  },
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
       app: 'bazaar',
@@ -95,7 +104,7 @@ export const BazaarApi = {
           pin: body,
         },
         reaction: 'bazaar-reaction.pinned',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data.pinned);
         },
         onError: (e: any) => {
@@ -113,7 +122,7 @@ export const BazaarApi = {
           'reorder-pins': body,
         },
         reaction: 'bazaar-reaction.pins-reodered',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data['pins-reodered']);
         },
         onError: (e: any) => {
@@ -131,7 +140,7 @@ export const BazaarApi = {
           unpin: body,
         },
         reaction: 'bazaar-reaction.unpinned',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data.unpinned);
         },
         onError: (e: any) => {
@@ -149,7 +158,7 @@ export const BazaarApi = {
           'suite-add': body,
         },
         reaction: 'bazaar-reaction.suite-added',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data['suite-added']);
         },
         onError: (e: any) => {
@@ -170,7 +179,7 @@ export const BazaarApi = {
           'suite-remove': body,
         },
         reaction: 'bazaar-reaction.suite-removed',
-        onReaction(data) {
+        onReaction(data: any) {
           resolve(data['suite-removed']);
         },
         onError: (e: any) => {
@@ -217,7 +226,7 @@ export const BazaarApi = {
           // reject(e);
         },
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.log(e);
         // if (timeout) clearTimeout(timeout);
         // reject('add ally error');

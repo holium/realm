@@ -5,11 +5,8 @@ import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
 const HelpPanelPresenter = () => {
-  const { theme, ship, contacts } = useServices();
-
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
-
+  const { theme } = useServices();
+  const { windowColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   return (
@@ -17,10 +14,6 @@ const HelpPanelPresenter = () => {
       <Text fontSize={7} fontWeight={600} mb={6}>
         Help
       </Text>
-
-      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      Coming Soon
-    </Text> */}
       <Card
         p="20px"
         width="100%"

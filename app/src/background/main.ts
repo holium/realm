@@ -6,7 +6,7 @@ process.title = 'holium.realm';
 async function boot() {
   console.log('Booting...');
   try {
-    ipcRenderer.on('set-socket', (event, { socketId, mainWindowId }) => {
+    ipcRenderer.on('set-socket', (_, { socketId }) => {
       console.log('socketId', socketId);
     });
   } catch (e) {

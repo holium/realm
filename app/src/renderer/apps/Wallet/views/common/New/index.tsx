@@ -28,7 +28,7 @@ export enum NewWalletScreen {
 
 const EthNewPresenter = () => {
   const { theme } = useServices();
-  const { walletApp } = useTrayApps();
+  const { walletApp, dimensions } = useTrayApps();
   const initialScreen = walletApp.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;
@@ -88,14 +88,14 @@ const EthNewPresenter = () => {
   const currentComponent = components[screen];
 
   return (
-    <Box width="100%" height="100%" px={16} py={12}>
+    <Box width="100%" height="100%" px={1} py={2}>
       {currentComponent}
       {![NewWalletScreen.CREATE, NewWalletScreen.DETECTED_EXISTING].includes(
         screen
       ) && (
         <Flex
           position="absolute"
-          top="582px"
+          top={dimensions.height - 54}
           zIndex={999}
           onClick={() =>
             setScreen(

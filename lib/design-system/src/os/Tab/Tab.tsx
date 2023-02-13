@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { Flex, Text, Favicon, Row, BoxProps, Icon, Button } from '../..';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
@@ -44,19 +43,16 @@ export type TabProps = {
   onClose: (url: string) => void;
 } & BoxProps;
 
-export const Tab: FC<TabProps> = (props: TabProps) => {
-  const {
-    id,
-    favicon,
-    collapsed,
-    url,
-    title,
-    onNavigate,
-    onClose,
-    multiplayer,
-    width = 270,
-  } = props;
-
+export const Tab = ({
+  id,
+  favicon,
+  collapsed,
+  url,
+  title,
+  onNavigate,
+  onClose,
+  multiplayer,
+}: TabProps) => {
   if (collapsed) {
     return (
       <TabRow id={id} collapsed onClick={() => onNavigate(url)}>
@@ -112,7 +108,7 @@ export const Tab: FC<TabProps> = (props: TabProps) => {
           size={20}
           onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
             evt.stopPropagation();
-            onClose(props.url);
+            onClose(url);
           }}
         >
           <Icon name="Close" size={16} opacity={0.6} />

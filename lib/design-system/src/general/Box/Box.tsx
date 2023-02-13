@@ -28,6 +28,7 @@ import {
   variant,
 } from 'styled-system';
 import { ColorProps, colorStyle } from '../../util/colors';
+import { skeletonStyle } from '../../general/Skeleton/Skeleton';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -35,6 +36,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 export type BoxProps = {
   gap?: string | number | undefined;
   pointerEvents?: string;
+  isSkeleton?: boolean;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
@@ -74,7 +76,7 @@ const textTransform = style({
   cssProperty: 'textTransform',
 });
 
-const boxStyles = compose(
+export const boxStyles = compose(
   background,
   flexbox,
   grid,
@@ -97,10 +99,9 @@ const boxStyles = compose(
   })
 );
 
-export const Box = styled(motion.div)<BoxProps>(
-  {
-    boxSizing: 'border-box',
-  },
-  boxStyles,
-  colorStyle
-);
+export const Box = styled(motion.div)<BoxProps>`
+  box-sizing: border-box;
+  ${boxStyles}
+  ${colorStyle}
+  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
+`;

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Elements,
   PaymentElement,
@@ -6,22 +6,14 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Box,
-  Sigil,
-  Text,
-  Flex,
-  Button,
-  Icons,
-  Spinner,
-} from 'renderer/components';
+import { Box, Text, Flex, Button, Icons, Spinner } from 'renderer/components';
 import { transparentize, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Avatar } from '@holium/design-system';
 
 export interface StripePaymentProps extends BaseDialogProps {
   patp: string;
@@ -182,8 +174,8 @@ const MainComponent: FC<StripePaymentProps> = observer(
               alignItems="center"
               justifyContent="center"
             >
-              <Sigil
-                color={['black', 'white']}
+              <Avatar
+                sigilColor={['black', 'white']}
                 simple={false}
                 size={48}
                 patp={onboarding.planet!.patp}
@@ -214,6 +206,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
                   justifyContent="center"
                 >
                   <img
+                    alt="access code"
                     height={28}
                     style={{ borderRadius: 6 }}
                     src={onboarding?.accessCode?.image as string}
@@ -257,15 +250,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
         <Flex flex={3} alignItems="center" justifyContent="center" mt={8}>
           <form onSubmit={handleSubmit}>
             <Flex flexDirection="column">
-              <Flex
-                flex={6}
-                onMouseEnter={async () =>
-                  await ShellActions.setIsMouseInWebview(true)
-                }
-                onMouseLeave={async () =>
-                  await ShellActions.setIsMouseInWebview(false)
-                }
-              >
+              <Flex flex={6}>
                 <PaymentElement />
               </Flex>
               <Flex

@@ -67,6 +67,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
+    'realm.bazaar.scryHash': this.scryHash,
     'realm.bazaar.scryTreaties': this.scryTreaties,
     'realm.bazaar.scryAllies': this.scryAllies,
     'realm.spaces.get-members': this.getMembers,
@@ -105,6 +106,7 @@ export class SpacesService extends BaseService {
     scryAllies: async () => await ipcRenderer.invoke('realm.bazaar.scryAllies'),
     scryTreaties: async (ship: Patp) =>
       await ipcRenderer.invoke('realm.bazaar.scryTreaties', ship),
+    scryHash: (app: string) => ipcRenderer.invoke('realm.bazaar.scryHash', app),
 
     getOurGroups: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-our-groups');
@@ -300,7 +302,7 @@ export class SpacesService extends BaseService {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core!.conduit);
+    this.models.beacon.load(this.core!.conduit!);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -595,6 +597,10 @@ export class SpacesService extends BaseService {
     return await this.models.bazaar.unrecommendApp(this.core.conduit!, appId);
   }
 
+  async scryHash(_event: IpcMainInvokeEvent, app: string) {
+    return await this.models.bazaar.scryHash(this.core.conduit!, app);
+  }
+
   async scryTreaties(_event: IpcMainInvokeEvent, ship: Patp) {
     return await this.models.bazaar.scryTreaties(this.core.conduit!, ship);
   }
@@ -627,11 +633,11 @@ export class SpacesService extends BaseService {
     });
   }
 
-  async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
   }
 
-  async newInstaller(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.newInstaller(
     //   this.core.conduit!,
     //   ship,
@@ -671,11 +677,11 @@ export class SpacesService extends BaseService {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }
 
-  async addApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+  async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
   }
 
-  async removeApp(_event: IpcMainInvokeEvent, appId: string) {
+  async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
@@ -688,8 +694,8 @@ export class SpacesService extends BaseService {
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
     return await this.models.beacon.notes
-      .get(noteId)
-      .markSeen(this.core.conduit!, noteId);
+      ?.get(noteId)
+      ?.markSeen(this.core.conduit!);
     // return await BeaconApi.sawNote(this.core.conduit!, noteId);
   }
   async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {

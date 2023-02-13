@@ -31,6 +31,7 @@ export type InlineEditProps = StyledComponentProps<
     rightIcon?: JSX.Element;
     /** Does the input have a validation error */
     error?: boolean;
+    disabled?: boolean;
   } & TypographyFunctionsProps,
   never
 > & { theme: ThemeType };

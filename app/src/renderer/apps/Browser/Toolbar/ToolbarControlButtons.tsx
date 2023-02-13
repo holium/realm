@@ -1,11 +1,12 @@
 import { Flex } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
+import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 
 type Props = {
   iconColor: string;
   showDevToolsToggle: boolean;
   toggleDevTools: () => void;
   onClose: () => void;
+  onMinimize: () => void;
   onMaximize: () => void;
 };
 
@@ -14,11 +15,12 @@ export const ToolbarControlButtons = ({
   showDevToolsToggle,
   toggleDevTools,
   onClose,
+  onMinimize,
   onMaximize,
 }: Props) => (
   <Flex gap={4}>
     {showDevToolsToggle && (
-      <WindowIcon
+      <AppWindowIcon
         icon="DevBox"
         iconColor={iconColor}
         bg="#97A3B2"
@@ -28,7 +30,16 @@ export const ToolbarControlButtons = ({
         }}
       />
     )}
-    <WindowIcon
+    <AppWindowIcon
+      icon="Minimize"
+      iconColor={iconColor}
+      bg="#97A3B2"
+      onClick={(evt) => {
+        evt.stopPropagation();
+        onMinimize && onMinimize();
+      }}
+    />
+    <AppWindowIcon
       icon="Expand"
       iconColor={iconColor}
       bg="#97A3B2"
@@ -37,7 +48,7 @@ export const ToolbarControlButtons = ({
         onMaximize && onMaximize();
       }}
     />
-    <WindowIcon
+    <AppWindowIcon
       icon="Close"
       iconColor={iconColor}
       bg="#FF6240"

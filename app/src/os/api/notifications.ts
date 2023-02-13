@@ -42,10 +42,7 @@
 
 import { decToUd, unixToDa } from '@urbit/api';
 import { Conduit } from '@holium/conduit';
-import {
-  NotificationModelType,
-  NotificationStoreType,
-} from '../services/ship/models/notifications';
+import { NotificationStoreType } from '../services/ship/models/notifications';
 import { CourierStoreType } from '../services/ship/models/courier';
 
 export const NotificationApi: any = {
@@ -60,7 +57,7 @@ export const NotificationApi: any = {
     // console.log(response.more[0]['all-stats']);
     notifications.setAllStats(response);
   },
-  initial: async (conduit: Conduit, notifications: NotificationStoreType) => {
+  initial: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'hark-store',
       path: `/recent/inbox/${decToUd(
@@ -79,7 +76,7 @@ export const NotificationApi: any = {
     conduit.watch({
       app: 'hark-store',
       path: '/updates',
-      onEvent: async (data: any, id?: number, mark?: string) => {
+      onEvent: async (data: any) => {
         // console.log(data, mark);
         if (data.more) {
           // console.log(
@@ -101,7 +98,7 @@ export const NotificationApi: any = {
       json: { opened: null },
     });
   },
-  dismiss: async (conduit: Conduit, notification: NotificationModelType) => {
+  dismiss: async (conduit: Conduit) => {
     // const payload = [
     //   {
     //     id: 145,
@@ -141,41 +138,41 @@ export const NotificationApi: any = {
     });
   },
   //
-  archive: async (
-    lid: { archive: string },
-    bin: {
-      place: {
-        desk: string;
-        path: string;
-      };
-      path: string;
-    },
-    bowl: {
-      ourShip: string;
-      credentials: any;
-    }
-  ) => {
-    // ::  %archive: archive single notification
-    // ::  if .time is ~, then archiving unread notification
-    // ::  else, archiving read notification
-    // [%archive =lid =bin]
-    // const payload = {
-    //   app: 'dm-hook',
-    //   mark: `graph-update-3`,
-    //   json: {
-    //     'add-nodes': {
-    //       resource: { ship: bowl.ourShip, name: 'dm-inbox' },
-    //       nodes: {
-    //         [post.index]: {
-    //           post,
-    //           children: null,
-    //         },
-    //       },
-    //     },
-    //   },
-    // };
-    // return await quickPoke(bowl.ourShip, payload, bowl.credentials);
-  },
+  // archive: async (
+  //   lid: { archive: string },
+  //   bin: {
+  //     place: {
+  //       desk: string;
+  //       path: string;
+  //     };
+  //     path: string;
+  //   },
+  //   bowl: {
+  //     ourShip: string;
+  //     credentials: any;
+  //   }
+  // ) => {
+  //   ::  %archive: archive single notification
+  //   ::  if .time is ~, then archiving unread notification
+  //   ::  else, archiving read notification
+  //   [%archive =lid =bin]
+  //   const payload = {
+  //     app: 'dm-hook',
+  //     mark: `graph-update-3`,
+  //     json: {
+  //       'add-nodes': {
+  //         resource: { ship: bowl.ourShip, name: 'dm-inbox' },
+  //         nodes: {
+  //           [post.index]: {
+  //             post,
+  //             children: null,
+  //           },
+  //         },
+  //       },
+  //     },
+  //   };
+  //   return await quickPoke(bowl.ourShip, payload, bowl.credentials);
+  // },
   // requestTreaty: async (
   //   ship: string,
   //   desk: string,

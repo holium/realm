@@ -15,22 +15,26 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
   onClose: () => {},
-  window: {
-    id: 'wallpaper-dialog',
+  getWindowProps: (desktopDimensions) => ({
+    appId: 'wallpaper-dialog',
     title: 'Wallpaper Dialog',
     zIndex: 13,
     type: 'dialog',
-    dimensions: {
-      x: 0,
-      y: 0,
-      width: 300,
-      height: 300,
-    },
-  },
+    bounds: normalizeBounds(
+      {
+        x: 0,
+        y: 0,
+        width: 300,
+        height: 300,
+      },
+      desktopDimensions
+    ),
+  }),
   hasCloseButton: false,
   noTitlebar: true,
 };
@@ -74,13 +78,13 @@ const createWallpaperForm = (
 const WallpaperDialogPresenter = () => {
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
     () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
     []
   );
 
-  const onChange = (evt: any) => {
+  const onChange = () => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
     theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
@@ -140,7 +144,7 @@ const WallpaperDialogPresenter = () => {
           showBackground
           highlightColor={theme.currentTheme.accentColor}
           textColor={theme.currentTheme.accentColor}
-          onClick={(evt: any) => onChange(evt)}
+          onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}
         </TextButton>

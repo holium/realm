@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Icons, IconButton, Sigil } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
 import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { Avatar } from '@holium/design-system';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -15,7 +16,7 @@ interface OurHomeProps {
   isOpen?: boolean;
 }
 
-export const OurHome = observer((props: OurHomeProps) => {
+const OurHomePresenter = (props: OurHomeProps) => {
   const { isOpen } = props;
   const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -79,12 +80,12 @@ export const OurHome = observer((props: OurHomeProps) => {
         >
           <Flex>
             {ship && (
-              <Sigil
+              <Avatar
                 simple
                 size={32}
                 avatar={ship.avatar}
                 patp={ship.patp}
-                color={[ship.color || '#000000', 'white']}
+                sigilColor={[ship.color || '#000000', 'white']}
               />
             )}
           </Flex>
@@ -147,4 +148,6 @@ export const OurHome = observer((props: OurHomeProps) => {
       </NoScrollBar>
     </Flex>
   );
-});
+};
+
+export const OurHome = observer(OurHomePresenter);

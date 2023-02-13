@@ -2,7 +2,6 @@ import React, { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
 import {
   Box,
-  Sigil,
   Grid,
   Text,
   Flex,
@@ -16,6 +15,7 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Avatar } from '@holium/design-system';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -54,7 +54,12 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
         alignItems="center"
         justifyContent="space-around"
       >
-        <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
+        <Avatar
+          sigilColor={['black', 'white']}
+          size={25}
+          simple
+          patp={props.patp}
+        />
         <Text fontSize={14} fontWeight={400} pr={2}>
           {' '}
           {props.patp}{' '}
@@ -90,7 +95,12 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
         alignItems="center"
         justifyContent="space-around"
       >
-        <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
+        <Avatar
+          sigilColor={['black', 'white']}
+          size={25}
+          simple
+          patp={props.patp}
+        />
         <Text fontSize={14} fontWeight={400} color="brand.primary" pr={2}>
           {' '}
           {props.patp}{' '}
@@ -110,13 +120,32 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const loading = planets.length === 0;
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getPlanets = async () => {
-      const result = await OnboardingActions.getAvailablePlanets();
-      setPlanets(result);
+      setLoading(true);
+      OnboardingActions.getAvailablePlanets()
+        .then((result) => {
+          setPlanets(result);
+          if (result.length === 0) {
+            setError(true);
+            setErrorMessage(
+              `no ships available, contact hosting@holium.com for support`
+            );
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          setError(true);
+          setErrorMessage(
+            `an error occurred retrieving available planets. contact hosting@holium.com for support`
+          );
+        })
+        .finally(() => setLoading(false));
     };
 
     getPlanets();
@@ -216,9 +245,25 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
             another one.
           </Text>
         )}
+        {error && errorMessage?.length > 0 && (
+          <Text
+            color={baseTheme.colors.text.error}
+            fontSize={1}
+            textAlign="center"
+            mt={3}
+          >
+            No available planets found. Please contact Realm support.
+          </Text>
+        )}
       </Flex>
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
-        <TextButton>Next</TextButton>
+        <TextButton
+          disabled={
+            !(!loading && !error && planets.length > 0 && selectedIndex >= 0)
+          }
+        >
+          Next
+        </TextButton>
       </Box>
     </Grid.Column>
   );

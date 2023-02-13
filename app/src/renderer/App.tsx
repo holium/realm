@@ -13,18 +13,14 @@ import {
   servicesStore,
   useServices,
 } from './logic/store';
-import { Mouse } from './system/desktop/components/Mouse';
 import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { SelectionProvider } from './logic/lib/selection';
 import { ErrorBoundary } from './logic/ErrorBoundary';
-// import * as RealmMultiplayer from '@holium/realm-multiplayer';
-// import { Presences } from './system/desktop/components/Multiplayer/Presences';
-// import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 const AppPresenter = () => {
   const { booted } = useCore();
-  const { desktop, shell, theme } = useServices();
+  const { theme } = useServices();
 
   const themeMode = theme.currentTheme.mode;
 
@@ -45,16 +41,6 @@ const AppPresenter = () => {
     [booted, theme.currentTheme.backgroundColor]
   );
 
-  const mouseMemo = useMemo(() => {
-    return (
-      <Mouse
-        hide={shell.isMouseInWebview}
-        cursorColor={desktop.mouseColor}
-        animateOut={false}
-      />
-    );
-  }, [desktop.mouseColor, shell.isMouseInWebview]);
-
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
 
   useEffect(() => {
@@ -72,11 +58,9 @@ const AppPresenter = () => {
           <ServiceProvider value={servicesStore}>
             <SelectionProvider>
               <ContextMenuProvider>
-                {mouseMemo}
                 <ErrorBoundary>
                   {shellMemo}
                   {contextMenuMemo}
-                  {/* <MultiplayerMouse /> */}
                   <div id="portal-root" />
                 </ErrorBoundary>
               </ContextMenuProvider>
@@ -87,35 +71,5 @@ const AppPresenter = () => {
     </CoreProvider>
   );
 };
-
-// function MultiplayerMouse() {
-//   const { ship, spaces } = useServices();
-//   if (!ship?.isLoaded) return null;
-
-//   return (
-//     <RealmMultiplayer.Provider
-//       api={api}
-//       ship={ship}
-//       channel={spaces.selected?.path}
-//     >
-//       <Cursors />
-//     </RealmMultiplayer.Provider>
-//   );
-// }
-
-// function Cursors() {
-//   const { api } = useContext(
-//     RealmMultiplayer.Context as React.Context<{
-//       api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
-//     }>
-//   );
-//   const { shell } = useServices();
-//   useEffect(() => {
-//     api?.send({
-//       event: RealmMultiplayer.CursorEvent.Leave,
-//     });
-//   }, [shell.isMouseInWebview]);
-//   return <Presences />;
-// }
 
 export default observer(AppPresenter);

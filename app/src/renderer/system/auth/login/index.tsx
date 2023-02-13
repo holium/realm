@@ -1,11 +1,10 @@
-import { useRef, FC, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,
@@ -24,17 +23,16 @@ import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
 interface LoginProps {
   addShip: () => void;
 }
 
-export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip } = props;
+const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
-  const [isStale, setIsStale] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -126,14 +124,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
               gap={24}
             >
               <Box>
-                <Sigil
+                <Avatar
                   isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
                   avatar={pendingShip.avatar}
                   patp={pendingShip.patp}
-                  color={[pendingShip.color || '#000000', 'white']}
+                  sigilColor={[pendingShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -206,7 +204,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           ref={optionsRef}
                           luminosity={theme.currentTheme.mode}
                           opacity={1}
-                          onClick={(evt: any) => {
+                          onClick={() => {
                             setShow(true);
                           }}
                         >
@@ -275,7 +273,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
-                    {isStale && 'Stale connection. Refreshing token...'}
                     {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>
@@ -315,6 +312,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       </Bottom>
     </Fill>
   );
-});
+};
 
-export default Login;
+export const Login = observer(LoginPresenter);

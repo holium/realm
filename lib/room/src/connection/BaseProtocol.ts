@@ -16,9 +16,9 @@ export interface ProtocolConfig {
 
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
-  local?: LocalPeer;
+  local: LocalPeer | null = null;
   provider: string; // default is our
-  presentRoom?: RoomType;
+  presentRoom: RoomType | null = null;
   rooms: RoomMap;
   peers: Map<Patp, RemotePeer> = new Map();
   rtc: RTCConfiguration = {
@@ -32,7 +32,6 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   };
 
   constructor(our: Patp, config: ProtocolConfig, rooms: RoomMap = new Map()) {
-    // eslint-disable-next-line constructor-super
     super();
     this.our = our;
     this.provider = our;

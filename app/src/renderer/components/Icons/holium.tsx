@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React, { forwardRef } from 'react';
+import { SVGProps } from 'react';
 import styled from 'styled-components';
 import {
   compose,
@@ -17,25 +17,21 @@ import {
   TypographyProps,
 } from 'styled-system';
 
-export type IconProps = SpaceProps &
+type IconProps = SVGProps<SVGSVGElement> &
+  SpaceProps &
   ColorProps &
   LayoutProps &
   TypographyProps &
   WidthProps &
   HeightProps;
 
-const SvgComponent = forwardRef<
-  SVGSVGElement,
-  React.SVGProps<SVGSVGElement> & {
-    title?: string;
-  }
->(({ title, name, ...props }, svgRef) => {
+const SvgComponent = ({ width, height, fill }: IconProps) => {
   return (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      width={props.width || '1em'}
-      height={props.height || '1em'}
+      width={width || '1em'}
+      height={height || '1em'}
       fill="currentcolor"
       className="item"
     >
@@ -47,9 +43,9 @@ const SvgComponent = forwardRef<
         fill="none"
         strokeWidth="1.5px"
         variants={{
-          initial: { stroke: props.fill, pathLength: 0, opacity: 0.7 },
+          initial: { stroke: fill, pathLength: 0, opacity: 0.7 },
           show: {
-            stroke: props.fill,
+            stroke: fill,
             pathLength: 1.1,
             opacity: 1,
             transition: {
@@ -65,11 +61,11 @@ const SvgComponent = forwardRef<
       <motion.path
         variants={{
           initial: {
-            fill: props.fill,
+            fill: fill,
             opacity: 0,
           },
           show: {
-            fill: props.fill,
+            fill: fill,
             opacity: 1,
             transition: { opacity: { delay: 1.2 }, fill: { duration: 0.5 } },
           },
@@ -77,12 +73,12 @@ const SvgComponent = forwardRef<
         initial="initial"
         animate="show"
         // initial={{
-        //   fill: props.fill,
+        //   fill: fill,
         //   opacity: 0,
         //   transition: { delay: 1.2 }
         // }}
         // animate={{
-        //   fill: props.fill,
+        //   fill: fill,
         //   opacity: 0.9,
         //   // transition: { delay: 1.2, ease: 'easeInOut' },
         // }}
@@ -93,7 +89,7 @@ const SvgComponent = forwardRef<
       />
     </motion.svg>
   );
-});
+};
 
 SvgComponent.displayName = 'HoliumLogoAnimated';
 

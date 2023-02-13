@@ -35,7 +35,7 @@ export * from './Crest';
 export * from './ShipSearch';
 export * from './People';
 export * from './SpacePicture';
-export * from './AppTile';
+export * from './AppTile/AppTile';
 export * from './Notification/InnerNotification';
 export * from './ConnectionStatus';
 export * from './CopyButton';

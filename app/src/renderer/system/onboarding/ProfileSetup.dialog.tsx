@@ -8,7 +8,6 @@ import { TwitterPicker } from 'react-color';
 
 import {
   Grid,
-  Sigil,
   Text,
   Label,
   FormControl,
@@ -21,7 +20,8 @@ import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { AvatarInput, TextInput } from '@holium/design-system';
+import { Avatar, AvatarInput, TextInput } from '@holium/design-system';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface ColorTileProps {
   tileColor: string;
@@ -73,9 +73,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     const shipName = onboarding.ship!.patp;
     const [loading, setLoading] = useState(false);
     const [profileLoading, setProfileLoading] = useState(true);
-    const [avatarImg, setAvatarImg] = useState(
-      onboarding.ship ? onboarding.ship.avatar! : ''
-    );
+    const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar!);
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
@@ -88,8 +86,11 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
               color: values.color,
               nickname: values.nickname,
               avatar: avatarImg,
+              bio: '',
             };
             await OnboardingActions.setProfile(profileData);
+            const shipColor = values.color;
+            if (shipColor) DesktopActions.setMouseColor(shipColor);
             props.setState &&
               props.setState({ ...props.workflowState, profile: profileData });
             props.onNext && props.onNext();
@@ -125,7 +126,8 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
         .then((profile: any) => {
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
-          setAvatarImg(profile.avatar || '');
+          setAvatarImg(profile.avatar);
+          //  || '');
           setProfileLoading(false);
         })
         .catch((err) => {
@@ -193,13 +195,13 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                 xl={6}
                 pr={6}
               >
-                <Sigil
+                <Avatar
                   simple={false}
                   size={52}
                   avatar={avatarImg}
                   patp={shipName}
                   borderRadiusOverride="6px"
-                  color={[sigilColor.state.value, 'white']}
+                  sigilColor={[sigilColor.state.value, 'white']}
                 />
                 <Observer>
                   {() => (

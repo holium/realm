@@ -1,9 +1,10 @@
 import { FC, useEffect, useState, useRef } from 'react';
-import { Box, Sigil, Grid, Text, Flex, Button } from 'renderer/components';
+import { Box, Grid, Text, Flex, Button } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { Avatar } from '@holium/design-system';
 
 function useInterval(callback: any, delay: number) {
   const savedCallback = useRef();
@@ -13,14 +14,15 @@ function useInterval(callback: any, delay: number) {
   }, [callback]);
 
   useEffect(() => {
+    let intervalRef: NodeJS.Timer;
     function tick() {
       // @ts-expect-error
       savedCallback.current();
     }
     if (delay !== null) {
-      const id = setInterval(tick, delay);
-      return () => clearInterval(id);
+      intervalRef = setInterval(tick, delay);
     }
+    return () => clearInterval(intervalRef);
   }, [delay]);
 }
 
@@ -70,8 +72,8 @@ const HostingConfirmation: FC<BaseDialogProps> = observer(
             alignItems="center"
           >
             <Box height={48} width={48} mb={12}>
-              <Sigil
-                color={['black', 'white']}
+              <Avatar
+                sigilColor={['black', 'white']}
                 simple={false}
                 size={48}
                 patp={planet.patp}

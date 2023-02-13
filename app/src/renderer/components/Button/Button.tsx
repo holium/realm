@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { FC, forwardRef, PropsWithChildren, Ref } from 'react';
+import { forwardRef, PropsWithChildren, Ref } from 'react';
 import { darken } from 'polished';
 import styled, { StyledComponentProps } from 'styled-components';
 import {
@@ -213,73 +213,74 @@ export type ButtonProps = StyledComponentProps<
   never
 >;
 
-export const Button: FC<PropsWithChildren<ButtonProps>> = forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->((props: PropsWithChildren<ButtonProps>, ref) => {
-  const {
-    leftIcon,
-    rightIcon,
-    disabled,
-    isLoading,
-    children,
-    mb,
-    mt,
-    mx,
-    my,
-    ml,
-    mr,
-  } = props;
-  return (
-    <StyledButton
-      ref={ref}
-      py={2}
-      px={2}
-      disabled={disabled}
-      isLoading={isLoading}
-      {...props}
-      mx={mx}
-      my={my}
-      mb={mb}
-      mt={mt}
-      ml={ml}
-      mr={mr}
-    >
-      {isLoading && (
-        <Spinner
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          position="absolute"
-          top={0}
-          right={0}
-          bottom={0}
-          left={0}
-          size={0}
-          // color="brand.secondary"
-        />
-      )}
-      <Flex
-        alignItems="center"
-        position="relative"
-        justifyContent="center"
-        opacity={isLoading ? 0 : 1}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (props: PropsWithChildren<ButtonProps>, ref) => {
+    const {
+      leftIcon,
+      rightIcon,
+      disabled,
+      isLoading,
+      children,
+      mb,
+      mt,
+      mx,
+      my,
+      ml,
+      mr,
+    } = props;
+
+    return (
+      <StyledButton
+        // @ts-ignore
+        ref={ref}
+        py={2}
+        px={2}
+        disabled={disabled}
+        isLoading={isLoading}
+        {...props}
+        mx={mx}
+        my={my}
+        mb={mb}
+        mt={mt}
+        ml={ml}
+        mr={mr}
       >
-        {leftIcon && (
-          <IconButton disabled={disabled} mr={2}>
-            {leftIcon}
-          </IconButton>
+        {isLoading && (
+          <Spinner
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            position="absolute"
+            top={0}
+            right={0}
+            bottom={0}
+            left={0}
+            size={0}
+            // color="brand.secondary"
+          />
         )}
-        {children}
-        {rightIcon && (
-          <IconButton disabled={disabled} ml={2}>
-            {rightIcon}
-          </IconButton>
-        )}
-      </Flex>
-    </StyledButton>
-  );
-});
+        <Flex
+          alignItems="center"
+          position="relative"
+          justifyContent="center"
+          opacity={isLoading ? 0 : 1}
+        >
+          {leftIcon && (
+            <IconButton disabled={disabled} mr={2}>
+              {leftIcon}
+            </IconButton>
+          )}
+          {children}
+          {rightIcon && (
+            <IconButton disabled={disabled} ml={2}>
+              {rightIcon}
+            </IconButton>
+          )}
+        </Flex>
+      </StyledButton>
+    );
+  }
+);
 
 Button.displayName = 'Button';
 
