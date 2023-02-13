@@ -241,7 +241,7 @@ export class AppUpdater implements IAppUpdater {
     // if (!mainWindow) {
     this.progressWindow = new BrowserWindow({
       show: mainWindow ? true : false,
-      parent: mainWindow || undefined,
+      parent: mainWindow ?? undefined,
       width: 420,
       height: 310,
       icon: getAssetPath('icon.png'),
