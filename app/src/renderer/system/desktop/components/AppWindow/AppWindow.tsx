@@ -22,10 +22,10 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 
-interface AppWindowStyleProps {
+type AppWindowStyleProps = {
   theme: ThemeType;
   customBg?: string;
-}
+};
 
 const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
@@ -38,10 +38,10 @@ const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
     ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
 `;
 
-interface AppWindowProps {
+type AppWindowProps = {
   appWindow: AppWindowType;
   children?: ReactNode;
-}
+};
 
 const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
   const { shell, bazaar, theme } = useServices();
@@ -199,7 +199,6 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
       dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
       dragElastic={0}
       dragMomentum={false}
-      // dragConstraints={desktopRef}
       dragListener={false}
       drag={!isResizing}
       dragControls={dragControls}

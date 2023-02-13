@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { darken } from 'polished';
 import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
-import { nativeApps } from 'renderer/apps';
+import { nativeApps } from 'renderer/apps/nativeApps';
 import {
   nativeRenderers,
   AppId,
@@ -49,10 +49,7 @@ export const TitlebarByType = ({
 }: Props) => {
   let hideTitlebarBorder = false;
   let noTitlebar = false;
-  let CustomTitlebar:
-    | React.FC<BrowserToolbarProps>
-    | React.FC<DialogTitlebarProps>
-    | undefined; // todo fix typings
+  let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps>;
   let showDevToolsToggle = true;
   let maximizeButton = true;
   if (appInfo?.type === 'urbit') {

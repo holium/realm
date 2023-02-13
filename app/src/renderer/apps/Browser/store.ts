@@ -4,7 +4,7 @@ import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { nativeApps } from '..';
+import { nativeApps } from '../nativeApps';
 import { isUrlSafe } from './helpers/createUrl';
 import { servicesStore } from 'renderer/logic/store';
 import { AppType } from 'os/services/spaces/models/bazaar';
