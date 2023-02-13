@@ -5,20 +5,20 @@ import {
   useState,
   ChangeEvent,
 } from 'react';
+import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Icons,
-  Label,
-  FormControl,
-} from 'renderer/components';
+import { Button, Flex, Text, Label, FormControl } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
 import { TextInput } from '@holium/design-system';
+
+const NoResize = styled(Flex)`
+  textarea {
+    resize: none;
+  }
+`;
 
 interface ImportProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
@@ -39,7 +39,7 @@ const ImportPresenter = (props: ImportProps) => {
   };
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column">
+    <NoResize width="100%" height="100%" flexDirection="column">
       <Text mt={6} variant="h4">
         Import Wallet
       </Text>
@@ -49,7 +49,7 @@ const ImportPresenter = (props: ImportProps) => {
       </Text>
       <FormControl.FieldSet mt={9} width="100%" flexDirection="column">
         <FormControl.Field>
-          <Label mb={3} required={true}>
+          <Label mb={1} required={true}>
             Seed phrase
           </Label>
           <TextInput
@@ -76,19 +76,7 @@ const ImportPresenter = (props: ImportProps) => {
           </Button>
         </Flex>
       </FormControl.FieldSet>
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        onClick={() => props.setScreen(NewWalletScreen.CREATE)}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
-      </Flex>
-    </Flex>
+    </NoResize>
   );
 };
 
