@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
+import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 import { useServices } from 'renderer/logic/store';
 
-const ToolbarStyle = styled(TitlebarStyle)`
+const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0px 18px;
   height: 60px;
   background: transparent;
@@ -37,7 +37,7 @@ export const DialogTitlebar = ({
 
   return useMemo(() => {
     return (
-      <ToolbarStyle
+      <ToolbarContainer
         hasBlur={false}
         {...(dragControls
           ? {
@@ -66,7 +66,7 @@ export const DialogTitlebar = ({
             }}
           />
         )}
-      </ToolbarStyle>
+      </ToolbarContainer>
     );
   }, [zIndex, iconColor, windowColor]);
 };

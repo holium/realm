@@ -1,6 +1,6 @@
 import { PointerEvent, RefObject, useRef } from 'react';
 import styled from 'styled-components';
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
+import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 import { Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
@@ -10,7 +10,7 @@ import { useDragControls } from 'framer-motion';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
 
-const ToolbarStyle = styled(TitlebarStyle)`
+const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;
   background: transparent;
   gap: 12px;
@@ -88,13 +88,13 @@ const BrowserToolbarPresenter = ({
   };
 
   return (
-    <ToolbarStyle
+    <ToolbarContainer
       ref={innerRef}
-      hasBlur={false}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-      zIndex={zIndex}
       hasBorder
+      hasBlur={false}
+      zIndex={zIndex}
+      onPointerUp={onPointerUp}
+      onPointerDown={onPointerDown}
     >
       <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons
@@ -114,7 +114,7 @@ const BrowserToolbarPresenter = ({
         onMinimize={onMinimize}
         onMaximize={onMaximize}
       />
-    </ToolbarStyle>
+    </ToolbarContainer>
   );
 };
 

@@ -17,6 +17,7 @@ import {
   normalizeBounds,
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
+import rgba from 'polished/lib/color/rgba';
 
 type Props = {
   appWindow: AppWindowType;
@@ -201,11 +202,10 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         height: motionHeight,
         zIndex: appWindow.zIndex,
         borderRadius,
-        background: windowColor,
         display: appWindow.isMinimized ? 'none' : 'block',
       }}
       color={textColor}
-      customBg={windowColor}
+      customBg={rgba(windowColor, 0.9)}
       onMouseDown={onMouseDown}
     >
       <Flex

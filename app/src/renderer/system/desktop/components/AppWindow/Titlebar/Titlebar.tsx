@@ -4,7 +4,7 @@ import { Flex, Text } from 'renderer/components';
 import { AppWindowIcon } from '../AppWindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
-import { TitlebarStyle, TitleCentered } from './Titlebar.styles';
+import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 
 type Props = {
   theme: Partial<ThemeModelType>;
@@ -53,7 +53,7 @@ export const Titlebar = ({
   onDragStop,
   onDragStart,
 }: Props) => (
-  <TitlebarStyle
+  <TitlebarContainer
     hasBlur={hasBlur}
     {...(dragControls
       ? {
@@ -168,5 +168,5 @@ export const Titlebar = ({
         )}
       </Flex>
     )}
-  </TitlebarStyle>
+  </TitlebarContainer>
 );

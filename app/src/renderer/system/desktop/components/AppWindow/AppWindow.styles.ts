@@ -5,7 +5,7 @@ import { ThemeType } from '../../../../theme';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
-  customBg?: string;
+  customBg: string;
 };
 
 export const AppWindowContainer = styled(motion.div)<AppWindowStyleProps>`
@@ -13,10 +13,10 @@ export const AppWindowContainer = styled(motion.div)<AppWindowStyleProps>`
   border-radius: 9px;
   overflow: hidden;
   box-sizing: content-box;
-  transform: transale3d(0, 0, 0);
-  box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
-  border: 1px solid
-    ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
+  backdrop-filter: blur(24px);
+  box-shadow: ${(props) => props.theme.elevations.two};
+  border: 1px solid ${(props) => darken(0.1, props.customBg)};
+  background-color: ${(props) => props.customBg};
 `;
 
 export const LeftDragHandle = styled(motion.div)`
