@@ -9,7 +9,6 @@ import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify } from '../../lib/obj';
-import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
@@ -435,23 +434,32 @@ export class SpacesService extends BaseService {
       );
       this.setTheme(selected?.theme);
     }
-    return await SpacesApi.deleteSpace(this.core.conduit!, { path, name: space.name });
+    return await SpacesApi.deleteSpace(this.core.conduit!, {
+      path,
+      name: space!.name,
+    });
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
     const space = this.state?.getSpaceByPath(path);
-    return SpacesApi.joinSpace(this.core.conduit!, { path, name: space.name });
+    return SpacesApi.joinSpace(this.core.conduit!, { path, name: space!.name });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
     const space = this.state?.getSpaceByPath(path);
-    return await SpacesApi.leaveSpace(this.core.conduit!, { path, name: space.name });
+    return await SpacesApi.leaveSpace(this.core.conduit!, {
+      path,
+      name: space!.name,
+    });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     // don't block for responsiveness, what about error handling?
-    SpacesApi.setCurrentSpace(this.core.conduit!, { path, name: selected.type === 'our' ? 'our' : selected.name }).catch((e) => {
+    SpacesApi.setCurrentSpace(this.core.conduit!, {
+      path,
+      name: selected!.type === 'our' ? 'our' : selected!.name,
+    }).catch((e) => {
       console.error('Error setting current space', e);
     });
     this.setTheme(selected?.theme!);
@@ -480,7 +488,7 @@ export class SpacesService extends BaseService {
     const response = await SpacesApi.inviteMember(
       this.core.conduit!,
       path,
-      space.name,
+      space!.name,
       payload
     );
 
@@ -489,7 +497,12 @@ export class SpacesService extends BaseService {
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
     const space = this.state?.getSpaceByPath(path);
-    return await SpacesApi.kickMember(this.core.conduit!, path, space.name, patp);
+    return await SpacesApi.kickMember(
+      this.core.conduit!,
+      path,
+      space!.name,
+      patp
+    );
   }
 
   async getInvitations(_event: IpcMainInvokeEvent) {
@@ -515,7 +528,7 @@ export class SpacesService extends BaseService {
     return await SpacesApi.acceptInvite(
       this.core.conduit!,
       path,
-      space.name,
+      space!.name,
       this.models.membership,
       this.state!
     );
@@ -523,7 +536,7 @@ export class SpacesService extends BaseService {
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
     const space = this.state?.getSpaceByPath(path);
-    await SpacesApi.declineInvite(this.core.conduit!, path, space.name);
+    await SpacesApi.declineInvite(this.core.conduit!, path, space!.name);
     this.models.visas?.removeIncoming(path);
   }
 
