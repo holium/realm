@@ -1,17 +1,13 @@
-import { useState, useCallback, useEffect, useMemo, ReactNode } from 'react';
-import {
-  motion,
-  useMotionValue,
-  useDragControls,
-  PanInfo,
-} from 'framer-motion';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useMotionValue, useDragControls, PanInfo } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import styled from 'styled-components';
-import { ThemeType } from '../../../../theme';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
-import { LeftDragHandle, RightDragHandle } from './DragHandles';
+import {
+  AppWindowContainer,
+  LeftDragHandle,
+  RightDragHandle,
+} from './AppWindow.styles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -22,28 +18,11 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 
-type AppWindowStyleProps = {
-  theme: ThemeType;
-  customBg?: string;
-};
-
-const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
-  position: absolute;
-  border-radius: 9px;
-  overflow: hidden;
-  box-sizing: content-box;
-  transform: transale3d(0, 0, 0);
-  box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
-  border: 1px solid
-    ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
-`;
-
-type AppWindowProps = {
+type Props = {
   appWindow: AppWindowType;
-  children?: ReactNode;
 };
 
-const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
+const AppWindowPresenter = ({ appWindow }: Props) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
@@ -194,7 +173,7 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
   };
 
   return (
-    <AppWindowStyle
+    <AppWindowContainer
       id={windowId}
       dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
       dragElastic={0}
@@ -301,7 +280,7 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
           dragMomentum={false}
         />
       </Flex>
-    </AppWindowStyle>
+    </AppWindowContainer>
   );
 };
 
