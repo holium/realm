@@ -3,7 +3,7 @@
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
 import {
-  CreateWindowProps,
+  AppWindowProps,
   AppWindowType,
 } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
@@ -53,7 +53,7 @@ export const DesktopActions = {
     SpacesActions.addRecentApp(app.id);
     return result;
   },
-  openDialog: (windowProps: CreateWindowProps): Promise<AppWindowType> => {
+  openDialog: (windowProps: AppWindowProps): Promise<AppWindowType> => {
     return window.electron.os.desktop.openDialog(windowProps);
   },
   toggleMinimized: (appId: string) => {

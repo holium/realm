@@ -88,7 +88,7 @@ const AppWindowModel = types
   }));
 
 export interface AppWindowType extends Instance<typeof AppWindowModel> {}
-export interface CreateWindowProps extends SnapshotIn<typeof AppWindowModel> {}
+export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -173,7 +173,7 @@ export const DesktopStore = types
 
       return newWindow;
     },
-    openDialog(windowProps: CreateWindowProps) {
+    openDialog(windowProps: AppWindowProps) {
       const newWindow = AppWindowModel.create(windowProps);
 
       return newWindow;

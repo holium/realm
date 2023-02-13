@@ -7,7 +7,7 @@ import { BaseService } from '../base.service';
 import {
   DesktopStoreType,
   DesktopStore,
-  CreateWindowProps,
+  AppWindowProps,
 } from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
@@ -83,7 +83,7 @@ export class DesktopService extends BaseService {
     openAppWindow: (app: AppType) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
-    openDialog: (windowProps: CreateWindowProps) => {
+    openDialog: (windowProps: AppWindowProps) => {
       return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
     toggleMinimized: (appId: string) => {
@@ -196,7 +196,7 @@ export class DesktopService extends BaseService {
     }
   }
 
-  openDialog(_event: IpcRendererEvent, windowProps: CreateWindowProps) {
+  openDialog(_event: IpcRendererEvent, windowProps: AppWindowProps) {
     return toJS(this.state.openDialog(windowProps));
   }
 
