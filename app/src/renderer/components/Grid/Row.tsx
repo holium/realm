@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import config, { DIMENSIONS } from './helpers';
+import { config, DIMENSIONS } from './helpers';
 
 interface RowType {
   expand?: boolean;
@@ -12,7 +12,7 @@ interface RowType {
   debug?: boolean;
 }
 
-const Row = styled.div<RowType>`
+export const Row = styled.div<RowType>`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -101,5 +101,3 @@ Row.displayName = 'Row';
 Row.defaultProps = {
   debug: false,
 };
-
-export default Row;

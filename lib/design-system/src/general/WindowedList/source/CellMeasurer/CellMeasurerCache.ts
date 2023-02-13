@@ -21,7 +21,7 @@ type IndexParam = {
  * Caches measurements for a given cell.
  */
 
-export default class CellMeasurerCache implements CellMeasureCache {
+export class CellMeasurerCache implements CellMeasureCache {
   _cellHeightCache: Cache = {};
   _cellWidthCache: Cache = {};
   _columnWidthCache: Cache = {};

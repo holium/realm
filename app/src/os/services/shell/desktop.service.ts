@@ -2,7 +2,7 @@ import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import {
   DesktopStoreType,

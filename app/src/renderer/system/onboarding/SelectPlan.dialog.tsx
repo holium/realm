@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
 import { Box, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
@@ -12,7 +12,7 @@ export interface SelectPlanProps extends BaseDialogProps {
   patp: string;
 }
 
-const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
+const SelectPlanPresenter = (props: SelectPlanProps) => {
   const [subscribeLoading, setSubscribeLoading] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const { onboarding } = useServices();
@@ -164,6 +164,6 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
       </Button>
     </>
   );
-});
+};
 
-export default SelectPlan;
+export const SelectPlan = observer(SelectPlanPresenter);

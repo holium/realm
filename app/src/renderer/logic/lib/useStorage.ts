@@ -1,4 +1,4 @@
-import S3Client, { StorageClient, StorageAcl } from '../s3/S3Client';
+import { S3Client, StorageClient, StorageAcl } from '../s3/S3Client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { ShipActions } from '../actions/ship';
@@ -13,7 +13,7 @@ export interface IuseStorage {
   promptUpload: (elem: HTMLElement) => Promise<File>;
 }
 
-const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
+export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   const [uploading, setUploading] = useState(false);
   const [s3, setS3] = useState<any>();
 
@@ -125,5 +125,3 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
 
   return { canUpload, upload, uploadDefault, uploading, promptUpload };
 };
-
-export default useStorage;

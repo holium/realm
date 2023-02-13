@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 
-export const registerListeners = (mainWindow: BrowserWindow) => {
+const registerListeners = (mainWindow: BrowserWindow) => {
   const webContents = mainWindow.webContents;
   webContents.on('will-navigate', function (e, url) {
     if (url !== webContents.getURL()) {
@@ -25,7 +25,7 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
   );
 };
 
-export default { registerListeners };
+export const BrowserHelper = { registerListeners };
 
 //  webContents.on(
 //    'context-menu',

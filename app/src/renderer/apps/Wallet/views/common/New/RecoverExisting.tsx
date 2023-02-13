@@ -13,7 +13,7 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
 import { TextInput } from '@holium/design-system';
-import VerifyPasscode from './VerifyPasscode';
+import { VerifyPasscode } from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface RecoverExistingProps {

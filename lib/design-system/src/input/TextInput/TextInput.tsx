@@ -1,5 +1,5 @@
 import { Input, TextArea } from '../Input/Input';
-import InputBox, { InputBoxProps } from '../InputBox/InputBox';
+import { InputBox, InputBoxProps } from '../InputBox/InputBox';
 
 type TextInputProps = {
   id: string;

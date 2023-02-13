@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { MenuOrientation } from './types';
 import { calculateAnchorPoint } from 'os/lib/anchor-point';
+
 export const useMenu = (
   ref: any,
   config: { orientation: MenuOrientation; padding: number; menuWidth?: any }
@@ -43,5 +44,3 @@ export const useMenu = (
 
   return { anchorPoint, show, setShow };
 };
-
-export default useMenu;

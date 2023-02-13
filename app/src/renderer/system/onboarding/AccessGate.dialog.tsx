@@ -1,4 +1,4 @@
-import { FC, KeyboardEventHandler, useState } from 'react';
+import { KeyboardEventHandler, useState } from 'react';
 import { Text, Flex, Label, Button, Input, Box } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -6,7 +6,7 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+const AccessGatePresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);
 
@@ -76,6 +76,6 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       </Flex>
     </Flex>
   );
-});
+};
 
-export default AccessGate;
+export const AccessGate = observer(AccessGatePresenter);

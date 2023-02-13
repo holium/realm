@@ -84,5 +84,3 @@ export const Sigil = ({
       </SigilStyle>
     );
   }, [patp, avatar, color]);
-
-export default { Sigil };

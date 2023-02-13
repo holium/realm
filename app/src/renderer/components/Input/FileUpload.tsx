@@ -220,5 +220,3 @@ export const FileUpload: FC<IProps> = ({
 FileUpload.defaultProps = {
   width: 132,
 };
-
-export default FileUpload;

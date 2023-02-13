@@ -12,15 +12,15 @@ import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import MenuBuilder from './menu';
+import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
 import { Realm } from '../os';
-import FullscreenHelper from './helpers/fullscreen';
-import WebviewHelper from './helpers/webview';
-import DevHelper from './helpers/dev';
-import MediaHelper from './helpers/media';
-import MouseHelper from './helpers/mouse';
-import BrowserHelper from './helpers/browser';
+import { FullScreenHelper } from './helpers/fullscreen';
+import { WebViewHelper } from './helpers/webview';
+import { DevHelper } from './helpers/dev';
+import { MediaHelper } from './helpers/media';
+import { MouseHelper } from './helpers/mouse';
+import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction } from './helpers/env';
@@ -93,8 +93,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
 
-  FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow);
+  FullScreenHelper.registerListeners(mainWindow);
+  WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
