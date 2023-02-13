@@ -2775,7 +2775,7 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@preconstruct/cli@^2.2.1", "@preconstruct/cli@^2.2.2":
+"@preconstruct/cli@^2.2.1", "@preconstruct/cli@^2.2.2", "@preconstruct/cli@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@preconstruct/cli/-/cli-2.3.0.tgz#2ffca3c336ac17ab7d9c9b70627dc52e85601a69"
   integrity sha512-us4qOb1ocxGyvCj9vIg4Nc9Ylz2EKetFuxWyuFmuW+jg9NSdr3j9tUKQcNbPAW53jtslYdEKrRepDUoGK5oGFA==
