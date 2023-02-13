@@ -8,31 +8,19 @@ import {
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import styled from 'styled-components';
-
 import { ThemeType } from '../../../../theme';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
-import { Titlebar } from './Titlebar';
 import { AppWindowByType } from './AppWindowByType';
 import { LeftDragHandle, RightDragHandle } from './DragHandles';
 import { Flex } from 'renderer/components';
-import { nativeApps } from 'renderer/apps';
-import {
-  nativeRenderers,
-  AppId,
-} from 'renderer/system/desktop/components/AppWindow/native';
-import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import {
-  DialogTitlebar,
-  DialogTitlebarProps,
-} from '../../../dialog/Dialog/DialogTitlebar';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/util';
 import {
   denormalizeBounds,
   normalizeBounds,
 } from 'os/services/shell/lib/window-manager';
+import { TitlebarByType } from './TitlebarByType';
 
 interface AppWindowStyleProps {
   theme: ThemeType;
@@ -58,6 +46,8 @@ interface AppWindowProps {
 const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
   const { shell, bazaar, theme } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
+  const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
+  const appInfo = bazaar.getApp(appWindow.appId);
 
   const dragControls = useDragControls();
   const [isResizing, setIsResizing] = useState(false);
@@ -203,235 +193,116 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
     DesktopActions.setActive(appWindow.appId);
   };
 
-  let hideTitlebarBorder = false;
-  let noTitlebar = false;
-  let CustomTitlebar:
-    | React.FC<BrowserToolbarProps>
-    | React.FC<DialogTitlebarProps>
-    | undefined; // todo fix typings
-  let showDevToolsToggle = true;
-  let maximizeButton = true;
-  let borderRadius = 12;
-  const appInfo = bazaar.getApp(appWindow.appId);
-  if (appInfo?.type === 'urbit') {
-    hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
-    // noTitlebar = !appInfo.config?.showTitlebar || false;
-  }
-  let titlebar = (
-    <Titlebar
-      isAppWindow
-      maximizeButton={maximizeButton}
-      minimizeButton
-      closeButton
-      noTitlebar={noTitlebar}
-      hasBorder={!hideTitlebarBorder}
-      showDevToolsToggle={showDevToolsToggle}
-      zIndex={appWindow.zIndex}
+  return (
+    <AppWindowStyle
+      id={windowId}
+      dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
+      dragElastic={0}
+      dragMomentum={false}
+      // dragConstraints={desktopRef}
+      dragListener={false}
+      drag={!isResizing}
       dragControls={dragControls}
-      onDevTools={onDevTools}
-      onDragStart={onDragStart}
-      onDragStop={onDragStop}
-      onClose={onClose}
-      onMaximize={onMaximize}
-      onMinimize={onMinimize}
-      theme={theme.currentTheme}
-      appWindow={appWindow}
-    />
-  );
-  if (appWindow.type === 'native') {
-    hideTitlebarBorder =
-      nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
-    noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
-    // @ts-ignore
-    CustomTitlebar = nativeRenderers[appWindow.appId as AppId].titlebar;
-    // TODO: Remove hardcoded showDevToolsToggle
-    showDevToolsToggle = true;
-    if (CustomTitlebar) {
-      titlebar = (
-        <CustomTitlebar
-          zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
-          showDevToolsToggle
+      initial={{
+        opacity: 0,
+      }}
+      animate={{
+        opacity: 1,
+        transition: {
+          duration: 0.15,
+        },
+      }}
+      transition={{
+        background: { duration: 0.25 },
+      }}
+      exit={{
+        opacity: 0,
+        transition: {
+          duration: 0.1,
+        },
+      }}
+      style={{
+        x: motionX,
+        y: motionY,
+        width: motionWidth,
+        height: motionHeight,
+        zIndex: appWindow.zIndex,
+        borderRadius,
+        background: windowColor,
+        display: appWindow.isMinimized ? 'none' : 'block',
+      }}
+      color={textColor}
+      customBg={windowColor}
+      onMouseDown={onMouseDown}
+    >
+      <Flex
+        flexDirection="column"
+        style={{
+          overflow: 'hidden',
+          borderRadius,
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <TitlebarByType
+          appWindow={appWindow}
+          appInfo={appInfo}
+          shell={shell}
           dragControls={dragControls}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
-          onClose={onClose}
-          onMinimize={onMinimize}
-          onMaximize={onMaximize}
-        />
-      );
-    } else {
-      titlebar = (
-        <Titlebar
-          isAppWindow
-          maximizeButton={maximizeButton}
-          minimizeButton
-          closeButton
-          noTitlebar={noTitlebar}
-          hasBorder={!hideTitlebarBorder}
-          showDevToolsToggle={showDevToolsToggle}
-          zIndex={appWindow.zIndex}
-          dragControls={dragControls}
+          currentTheme={theme.currentTheme}
+          windowColor={windowColor}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
           onClose={onClose}
-          onMinimize={onMinimize}
           onMaximize={onMaximize}
-          theme={theme.currentTheme}
+          onMinimize={onMinimize}
+        />
+        <AppWindowByType
+          isResizing={isResizing}
+          isDragging={isDragging}
           appWindow={appWindow}
         />
-      );
-    }
-  }
-  if (appWindow.type === 'dialog') {
-    hideTitlebarBorder = true;
-    const dialogRenderer = dialogRenderers[appWindow.appId];
-    const dialogConfig: DialogConfig =
-      dialogRenderer instanceof Function
-        ? dialogRenderer(shell.dialogProps.toJSON())
-        : dialogRenderer;
-    noTitlebar = dialogConfig.noTitlebar!;
-    CustomTitlebar = DialogTitlebar;
-    showDevToolsToggle = false;
-    maximizeButton = false;
-    borderRadius = 16;
-    const onCloseDialog = dialogConfig.onClose;
-    const onOpenDialog = dialogConfig.onOpen;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      // trigger onOpen only once
-      onOpenDialog && onOpenDialog();
-    }, [onOpenDialog]);
-    if (noTitlebar) {
-      titlebar = <div />;
-    } else {
-      titlebar = (
-        <CustomTitlebar
-          zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
-          showDevToolsToggle
-          dragControls={dragControls}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
-          onClose={onCloseDialog}
-          onMaximize={onMaximize}
-        />
-      );
-    }
-  }
-
-  return useMemo(
-    () => (
-      <AppWindowStyle
-        id={windowId}
-        dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
-        dragElastic={0}
-        dragMomentum={false}
-        // dragConstraints={desktopRef}
-        dragListener={false}
-        drag={!isResizing}
-        dragControls={dragControls}
-        initial={{
-          opacity: 0,
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            duration: 0.15,
-          },
-        }}
-        transition={{
-          background: { duration: 0.25 },
-        }}
-        exit={{
-          opacity: 0,
-          transition: {
-            duration: 0.1,
-          },
-        }}
-        style={{
-          x: motionX,
-          y: motionY,
-          width: motionWidth,
-          height: motionHeight,
-          zIndex: appWindow.zIndex,
-          borderRadius,
-          background: windowColor,
-          display: appWindow.isMinimized ? 'none' : 'block',
-        }}
-        color={textColor}
-        customBg={windowColor}
-        onMouseDown={onMouseDown}
-      >
-        <Flex
-          flexDirection="column"
+        <LeftDragHandle
+          className="app-window-resize app-window-resize-lr"
+          drag
           style={{
-            overflow: 'hidden',
-            borderRadius,
-            width: '100%',
-            height: '100%',
+            x: resizeRightX,
+            y: resizeRightY,
           }}
-        >
-          {titlebar}
-          <AppWindowByType
-            isResizing={isResizing}
-            isDragging={isDragging}
-            appWindow={appWindow}
-          />
-          <LeftDragHandle
-            className="app-window-resize app-window-resize-lr"
-            drag
-            style={{
-              x: resizeRightX,
-              y: resizeRightY,
-            }}
-            onDrag={handleBottomLeftCornerResize}
-            onPointerDown={() => {
-              setIsResizing(true);
-            }}
-            onPointerUp={() => {
-              setIsResizing(false);
-              updateWindowBounds();
-            }}
-            onPanEnd={() => setIsResizing(false)}
-            onTap={() => setIsResizing(false)}
-            dragMomentum={false}
-          />
-          <RightDragHandle
-            className="app-window-resize app-window-resize-br"
-            drag
-            style={{
-              x: resizeRightX,
-              y: resizeRightY,
-            }}
-            onDrag={handleBottomRightCornerResize}
-            onPointerDown={() => {
-              setIsResizing(true);
-            }}
-            onPointerUp={() => {
-              setIsResizing(false);
-              updateWindowBounds();
-            }}
-            onPanEnd={() => setIsResizing(false)}
-            onTap={() => setIsResizing(false)}
-            dragMomentum={false}
-          />
-        </Flex>
-      </AppWindowStyle>
-    ),
-    [
-      theme.currentTheme,
-      appWindow.bounds,
-      appWindow.isMinimized,
-      appWindow.state,
-      isResizing,
-      isDragging,
-      motionHeight,
-      motionWidth,
-      motionX,
-      motionY,
-    ]
+          onDrag={handleBottomLeftCornerResize}
+          onPointerDown={() => {
+            setIsResizing(true);
+          }}
+          onPointerUp={() => {
+            setIsResizing(false);
+            updateWindowBounds();
+          }}
+          onPanEnd={() => setIsResizing(false)}
+          onTap={() => setIsResizing(false)}
+          dragMomentum={false}
+        />
+        <RightDragHandle
+          className="app-window-resize app-window-resize-br"
+          drag
+          style={{
+            x: resizeRightX,
+            y: resizeRightY,
+          }}
+          onDrag={handleBottomRightCornerResize}
+          onPointerDown={() => {
+            setIsResizing(true);
+          }}
+          onPointerUp={() => {
+            setIsResizing(false);
+            updateWindowBounds();
+          }}
+          onPanEnd={() => setIsResizing(false)}
+          onTap={() => setIsResizing(false)}
+          dragMomentum={false}
+        />
+      </Flex>
+    </AppWindowStyle>
   );
 };
 
