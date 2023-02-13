@@ -11,7 +11,7 @@ import {
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/util';
+import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/getWebViewId';
 import {
   denormalizeBounds,
   normalizeBounds,
