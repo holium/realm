@@ -1,5 +1,10 @@
 import { useState, useCallback, useEffect, useMemo, ReactNode } from 'react';
-import { motion, useMotionValue, useDragControls } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useDragControls,
+  PanInfo,
+} from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import styled from 'styled-components';
@@ -8,7 +13,7 @@ import { ThemeType } from '../../../../theme';
 import { WindowModelType } from '../../../../../os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { WindowByType } from './WindowByType';
-import { DragHandleWrapper, RightDragHandleStyle } from './DragHandles';
+import { LeftDragHandle, RightDragHandle } from './DragHandles';
 import { Flex } from 'renderer/components';
 import { nativeApps } from 'renderer/apps';
 import { nativeRenderers, AppId } from 'renderer/apps/native';
@@ -90,21 +95,45 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
   const resizeRightX = useMotionValue(0);
   const resizeRightY = useMotionValue(0);
 
-  const handleResize = useCallback((event: any, info: any) => {
-    event.stopPropagation();
-    event.preventDefault();
-    resizeRightX.set(resizeRightX.get() - info.offset.x);
-    resizeRightY.set(resizeRightY.get() - info.offset.y);
-    // if we are greater than the minimum or are moving in the postive direction
-    if (motionWidth.get() >= 400 || info.delta.x > 0) {
-      motionWidth.set(motionWidth.get() + info.delta.x);
-    }
-    if (motionHeight.get() >= 400 || info.delta.y > 0) {
-      motionHeight.set(motionHeight.get() + info.delta.y);
-    }
+  const handleBottomRightCornerResize = useCallback(
+    (event: MouseEvent, info: PanInfo) => {
+      event.stopPropagation();
+      event.preventDefault();
+      resizeRightX.set(resizeRightX.get() - info.offset.x);
+      resizeRightY.set(resizeRightY.get() - info.offset.y);
+      // if we are greater than the minimum or are moving in the postive direction
+      if (motionWidth.get() >= 400 || info.delta.x > 0) {
+        motionWidth.set(motionWidth.get() + info.delta.x);
+      }
+      if (motionHeight.get() >= 400 || info.delta.y > 0) {
+        motionHeight.set(motionHeight.get() + info.delta.y);
+      }
 
-    updateWindowBounds();
-  }, []);
+      updateWindowBounds();
+    },
+    []
+  );
+
+  const handleBottomLeftCornerResize = useCallback(
+    (event: MouseEvent, info: PanInfo) => {
+      event.stopPropagation();
+      event.preventDefault();
+      resizeRightX.set(resizeRightX.get() - info.offset.x);
+      resizeRightY.set(resizeRightY.get() - info.offset.y);
+
+      // if we are greater than the minimum or are moving in the postive direction
+      if (motionWidth.get() >= 400 || info.delta.x < 0) {
+        motionWidth.set(motionWidth.get() - info.delta.x);
+        motionX.set(motionX.get() + info.delta.x);
+      }
+      if (motionHeight.get() >= 400 || info.delta.y > 0) {
+        motionHeight.set(motionHeight.get() + info.delta.y);
+      }
+
+      updateWindowBounds();
+    },
+    []
+  );
 
   const updateWindowBounds = useCallback(() => {
     DesktopActions.setWindowBounds(
@@ -348,28 +377,44 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
             isDragging={isDragging}
             appWindow={appWindow}
           />
-          <DragHandleWrapper>
-            {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
-            <RightDragHandleStyle
-              className="app-window-resize app-window-resize-br"
-              drag
-              style={{
-                x: resizeRightX,
-                y: resizeRightY,
-              }}
-              onDrag={handleResize}
-              onPointerDown={() => {
-                setIsResizing(true);
-              }}
-              onPointerUp={() => {
-                setIsResizing(false);
-                updateWindowBounds();
-              }}
-              onPanEnd={() => setIsResizing(false)}
-              onTap={() => setIsResizing(false)}
-              dragMomentum={false}
-            />
-          </DragHandleWrapper>
+          <LeftDragHandle
+            className="app-window-resize app-window-resize-lr"
+            drag
+            style={{
+              x: resizeRightX,
+              y: resizeRightY,
+            }}
+            onDrag={handleBottomLeftCornerResize}
+            onPointerDown={() => {
+              setIsResizing(true);
+            }}
+            onPointerUp={() => {
+              setIsResizing(false);
+              updateWindowBounds();
+            }}
+            onPanEnd={() => setIsResizing(false)}
+            onTap={() => setIsResizing(false)}
+            dragMomentum={false}
+          />
+          <RightDragHandle
+            className="app-window-resize app-window-resize-br"
+            drag
+            style={{
+              x: resizeRightX,
+              y: resizeRightY,
+            }}
+            onDrag={handleBottomRightCornerResize}
+            onPointerDown={() => {
+              setIsResizing(true);
+            }}
+            onPointerUp={() => {
+              setIsResizing(false);
+              updateWindowBounds();
+            }}
+            onPanEnd={() => setIsResizing(false)}
+            onTap={() => setIsResizing(false)}
+            dragMomentum={false}
+          />
         </Flex>
       </AppWindowStyle>
     ),
