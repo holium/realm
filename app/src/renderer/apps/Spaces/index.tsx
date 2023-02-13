@@ -224,6 +224,7 @@ const SpacesTrayAppPresenter = () => {
         <YouRow
           colorTheme={windowColor}
           selected={`/${ship?.patp}/our` === spaces.selected?.path}
+          space={spaces.ourSpace}
           ship={ship!}
           onSelect={async (path: string) =>
             await SpacesActions.selectSpace(path)

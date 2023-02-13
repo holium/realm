@@ -89,13 +89,13 @@
       ::
         [%x %groups @ @ %members ~]
       =/  =ship                `@p`(slav %p i.t.t.path)
-      =/  name                 `@t`i.t.t.t.path
+      =/  name                 (parse-space-name:core i.t.t.t.path)
       =/  group                (get-group:grp [ship name] our.bowl now.bowl)
       ``groups-view+!>([%members fleet.group])
       ::
         [%x @ @ ~]
       =/  =ship                 `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (parse-space-name:core i.t.t.path)
       =/  space                 (~(got by spaces.state) [ship space-pth])
       ``spaces-view+!>([%space space])
       ::
@@ -104,13 +104,13 @@
       ::
         [%x @ @ %members ~]     ::  ~/scry/spaces/~zod/our/members.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (parse-space-name:core i.t.t.path)
       =/  members               (~(got by membership.state) [host space-pth])
       ``membership-view+!>([%members members])
       ::
         [%x @ @ %members @ ~]   ::  ~/scry/spaces/~zod/our/members/~dev.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (parse-space-name:core i.t.t.path)
       =/  patp                  `@p`(slav %p i.t.t.t.t.path)
       =/  members               (~(get by membership.state) [host space-pth])
       =/  member                (~(get by (need members)) patp)
@@ -119,7 +119,7 @@
       :: ::
         [%x @ @ %is-member @ ~] ::  ~/scry/spaces/~zod/our/is-member/~fes.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (parse-space-name:core i.t.t.path)
       =/  patp                  `@p`(slav %p i.t.t.t.t.path)
       =/  members               (~(get by membership.state) [host space-pth])
       ?~  members               ``membership-view+!>([%is-member %.n])
@@ -148,7 +148,7 @@
         ::
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
-        =/  space-pth           `@t`i.t.t.path
+        =/  space-pth             (parse-space-name:core i.t.t.path)
         =/  space               (~(got by spaces.state) [host space-pth])
         ?>  ?|  (check-member:security [host space-pth] src.bowl)     ::  only members should subscribe
                 =(access.space %public)                               :: allow public spaces to be watched
@@ -447,6 +447,7 @@
     ++  handle-current
       |=  [path=space-path:store]
       ^-  (quip card _state)
+      =.  space.path  (parse-space-name:core space.path)
       ?>  =(our.bowl src.bowl) :: only we can set current
       ?:  =(current.state path)
         `state
@@ -840,4 +841,13 @@
       :-  /spaces/(scot %p ship.pth)/(scot %tas space.pth)
       slug
   ==
+++  parse-space-name
+  |=  name=cord
+  =/  tname  (trip name)
+  :: if the space-name is coming in as a 0vXXX then we gotta parse to
+  :: the string, but if it was an old one pathed as just a @t, (like
+  :: 'our') we should just cast to @t and be done with it
+  ?:  &(=((snag 0 tname) '0') =((snag 1 tname) 'v'))
+    `@t`(slav %uv name)
+  `@t`name
 --

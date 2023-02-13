@@ -71,8 +71,10 @@ export const SpacesStore = types
         (space: SpaceModelType) => space.type !== 'our'
       );
     },
-    getOurSpace() {
-      // TODO get our space by type='our'
+    get ourSpace() {
+      return Array.from(self.spaces.values()).filter(
+        (space: SpaceModelType) => space.type === 'our'
+      )[0];
     },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our!.path) {
@@ -100,7 +102,7 @@ export const SpacesStore = types
       );
       applySnapshot(self.spaces, data);
 
-      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
+      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/0v74tbf`);
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
       // console.log('initial %spaces sync');
@@ -119,7 +121,7 @@ export const SpacesStore = types
       });
       // self.loader.set('loaded');
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
-      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
+      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/0v74tbf`);
       self.loader.state = 'loaded';
       console.log(self.loader.state);
     },

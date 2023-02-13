@@ -57,7 +57,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: payload.payload.name,
     };
     return await new Promise((resolve, reject) => {
       console.log({
@@ -85,11 +85,11 @@ export const SpacesApi = {
       });
     });
   },
-  deleteSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+  deleteSpace: async (conduit: Conduit, payload: { path: SpacePath, name: string }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: payload.name,
     };
     return await new Promise((resolve, reject) => {
       conduit.poke({
@@ -110,11 +110,11 @@ export const SpacesApi = {
       });
     });
   },
-  joinSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+  joinSpace: async (conduit: Conduit, payload: { path: SpacePath, name: string }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[0],
-      space: pathArr[1],
+      space: payload.name,
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -135,11 +135,11 @@ export const SpacesApi = {
       });
     });
   },
-  leaveSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+  leaveSpace: async (conduit: Conduit, payload: { path: SpacePath, name: string }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: payload.name,
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -160,11 +160,11 @@ export const SpacesApi = {
       });
     });
   },
-  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath, name: string }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: payload.name,
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -197,12 +197,13 @@ export const SpacesApi = {
   inviteMember: async (
     conduit: Conduit,
     path: SpacePath,
+    name: string,
     payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: name,
     };
     const response = await conduit.poke({
       app: 'spaces',
@@ -226,11 +227,11 @@ export const SpacesApi = {
    * @param patp
    * @returns
    */
-  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
+  kickMember: async (conduit: Conduit, path: SpacePath, name: string, patp: Patp) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: name,
     };
     const response = await conduit.poke({
       app: 'spaces',
@@ -254,13 +255,14 @@ export const SpacesApi = {
   acceptInvite: async (
     conduit: Conduit,
     path: SpacePath,
+    name: string,
     membersState: MembershipType,
     spacesState: SpacesStoreType
   ) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: name,
     };
     return await new Promise((resolve, reject) => {
       conduit.poke({
@@ -294,11 +296,11 @@ export const SpacesApi = {
    * @param path
    * @returns
    */
-  declineInvite: async (conduit: Conduit, path: SpacePath) => {
+  declineInvite: async (conduit: Conduit, path: SpacePath, name: string) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: pathArr[2],
+      space: name,
     };
 
     const response = await conduit.poke({

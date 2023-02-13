@@ -370,11 +370,10 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
-    const id = spaceToSnake(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
-        slug: id,
+        slug: body.name,
         payload: snakeify({
           name: body.name,
           description: body.description,
@@ -428,30 +427,33 @@ export class SpacesService extends BaseService {
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
+    const space = this.state?.getSpaceByPath(path);
     // if we have the deleted path already selected
     if (path === this.state?.selected?.path) {
       const selected = this.state?.selectSpace(
-        `/~${this.core.conduit?.ship}/our`
+        `/~${this.core.conduit?.ship}/0v74tbf`
       );
       this.setTheme(selected?.theme);
     }
-    return await SpacesApi.deleteSpace(this.core.conduit!, { path });
+    return await SpacesApi.deleteSpace(this.core.conduit!, { path, name: space.name });
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
-    return SpacesApi.joinSpace(this.core.conduit!, { path });
+    const space = this.state?.getSpaceByPath(path);
+    return SpacesApi.joinSpace(this.core.conduit!, { path, name: space.name });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
+    const space = this.state?.getSpaceByPath(path);
+    return await SpacesApi.leaveSpace(this.core.conduit!, { path, name: space.name });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    const selected = this.state?.selectSpace(path);
     // don't block for responsiveness, what about error handling?
-    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path, name: selected.type === 'our' ? 'our' : selected.name }).catch((e) => {
       console.error('Error setting current space', e);
     });
-    const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
@@ -474,9 +476,11 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
+    const space = this.state?.getSpaceByPath(path);
     const response = await SpacesApi.inviteMember(
       this.core.conduit!,
       path,
+      space.name,
       payload
     );
 
@@ -484,7 +488,8 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
+    const space = this.state?.getSpaceByPath(path);
+    return await SpacesApi.kickMember(this.core.conduit!, path, space.name, patp);
   }
 
   async getInvitations(_event: IpcMainInvokeEvent) {
@@ -506,16 +511,19 @@ export class SpacesService extends BaseService {
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
+    const space = this.state?.getSpaceByPath(path);
     return await SpacesApi.acceptInvite(
       this.core.conduit!,
       path,
+      space.name,
       this.models.membership,
       this.state!
     );
   }
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
-    await SpacesApi.declineInvite(this.core.conduit!, path);
+    const space = this.state?.getSpaceByPath(path);
+    await SpacesApi.declineInvite(this.core.conduit!, path, space.name);
     this.models.visas?.removeIncoming(path);
   }
 

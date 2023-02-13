@@ -71,13 +71,13 @@
         %remove
       :-  %remove
       %-  pairs
-      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(space-name:encode space.path.rct))]
       ==
     ::
         %remote-space
       :-  %remote-space
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(space-name:encode space.path.rct))]
           [%space (spc:encode space.rct)]
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
@@ -85,13 +85,13 @@
         %current
       :-  %current
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(space-name:encode space.path.rct))]
       ==
     
       ::   %members
       :: :-  %members
       :: %-  pairs
-      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(space-name:encode space.path.rct))]
       ::     [%members (membership-json:encode:memb-lib membership.rct)]
       :: ==
     ==
@@ -281,13 +281,16 @@
 ++  encode
   =,  enjs:format
   |%
+  ++  space-name
+    |=  name=cord
+    (scot %uv `@uvH`name)
   ++  spaces-map
     |=  =spaces:store
     ^-  json
     %-  pairs
     %+  turn  ~(tap by spaces)
     |=  [pth=space-path:store space=space:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    =/  spc-path  (spat /(scot %p ship.pth)/(space-name space.pth))
     ^-  [cord json]
     [spc-path (spc space)]
   ::
@@ -297,7 +300,7 @@
     %-  pairs
     %+  turn  ~(tap by membership)
     |=  [pth=space-path:store members=members:member-store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    =/  spc-path  (spat /(scot %p ship.pth)/(space-name space.pth))
     ^-  [cord json]
     [spc-path (membs members)]
   ::
@@ -322,13 +325,13 @@
     |=  current=space-path:store
     ^-  json
     %-  pairs
-    ['path' s+(spat /(scot %p ship.current)/(scot %tas space.current))]~
+    ['path' s+(spat /(scot %p ship.current)/(space-name space.current))]~
   ::
   ++  spc
     |=  =space
     ^-  json
     %-  pairs
-    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
+    :~  ['path' s+(spat /(scot %p ship.path.space)/(space-name space.path.space))]
         ['name' s+name.space]
         ['description' s+description.space]
         ['access' s+access.space]
@@ -361,7 +364,7 @@
     %-  pairs
     %+  turn  ~(tap by invitations)
     |=  [pth=space-path:store inv=invite:visas]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    =/  spc-path  (spat /(scot %p ship.pth)/(space-name space.pth))
     ^-  [cord json]
     [spc-path (invite inv)]
   ::
@@ -370,7 +373,7 @@
     ^-  json
     %-  pairs:enjs:format
     :~  ['inviter' s+(scot %p inviter.invite)]
-        ['path' s+(spat /(scot %p ship.path.invite)/(scot %tas space.path.invite))]
+        ['path' s+(spat /(scot %p ship.path.invite)/(space-name space.path.invite))]
         ['role' s+(scot %tas role.invite)]
         ['message' s+message.invite]
         ['name' s+name.invite]
