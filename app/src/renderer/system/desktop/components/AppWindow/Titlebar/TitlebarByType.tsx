@@ -13,7 +13,7 @@ import { AppType } from 'os/services/spaces/models/bazaar';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
-import { NativeAppId, nativeAppWindow } from '../nativeAppWindow';
+import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
@@ -79,7 +79,8 @@ export const TitlebarByType = ({
     hideTitlebarBorder =
       nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
     noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
-    CustomTitlebar = nativeAppWindow[appWindow.appId as NativeAppId].titlebar;
+    CustomTitlebar =
+      getNativeAppWindow[appWindow.appId as NativeAppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
     showDevToolsToggle = true;
     if (CustomTitlebar) {

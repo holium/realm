@@ -1,8 +1,8 @@
 import { DialogView } from 'renderer/system/dialog/Dialog/Dialog';
 import { AppWindowType } from 'os/services/shell/desktop.model';
-import { AppView } from './AppView';
-import { DevView } from './DevView';
-import { NativeView } from './NativeView';
+import { AppView } from './View/AppView';
+import { DevView } from './View/DevView';
+import { NativeView } from './View/NativeView';
 
 type Props = {
   isResizing: boolean;

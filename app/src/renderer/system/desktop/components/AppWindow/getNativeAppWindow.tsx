@@ -10,7 +10,7 @@ export enum NativeAppId {
   Settings = 'os-settings',
 }
 
-export const nativeAppWindow = {
+export const getNativeAppWindow = {
   'os-browser': {
     titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
     view: ({ isResizing = false, isDragging = false }) => (
