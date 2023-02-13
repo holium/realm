@@ -7,11 +7,9 @@ import { WindowModelType } from 'os/services/shell/desktop.model';
 interface Props {
   appWindow: WindowModelType;
   isResizing?: boolean;
-  hasTitlebar: boolean | undefined;
 }
 
-export const DevView = (props: Props) => {
-  const { appWindow, isResizing } = props;
+export const DevView = ({ appWindow, isResizing }: Props) => {
   const [ready, setReady] = useState(false);
 
   const { ship, desktop, theme } = useServices();

@@ -375,7 +375,6 @@ const AppWindowPresenter = ({ appWindow }: AppWindowProps) => {
         >
           {titlebar}
           <AppWindowByType
-            hasTitlebar
             isResizing={isResizing}
             isDragging={isDragging}
             appWindow={appWindow}

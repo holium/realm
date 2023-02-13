@@ -15,7 +15,6 @@ interface AppViewProps {
   appWindow: WindowModelType;
   isResizing: boolean;
   isDragging: boolean;
-  hasTitlebar: boolean;
 }
 
 const View = styled(motion.div)`
@@ -154,15 +153,6 @@ const AppViewPresenter = ({
         }}
         ref={elementRef}
       >
-        {/* {loading && (
-          <Flex
-            position="absolute"
-            left="calc(50% - 4px)"
-            top="calc(50% - 4px)"
-          >
-            <Spinner size={1} />
-          </Flex>
-        )} */}
         <WebView
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
