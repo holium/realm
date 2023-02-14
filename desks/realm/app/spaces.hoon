@@ -340,12 +340,21 @@
       ^-  (quip card _state)
       ?>  (has-auth:security path src.bowl %owner)
       ?:  =('our' space.path) :: we cannot delete our space
-        [~ state]
+        `state
       =.  spaces.state                (~(del by spaces.state) path)
       =.  membership.state            (~(del by membership.state) path)
       =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
-      :_  state
-      [%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      =/  membership  `(map ship member:membership-store)`(~(got by membership.state) path)
+      =.  cards
+        %+  weld  cards
+        %+  murn  ~(tap by membership)
+        |=  [=ship =member:membership-store]
+        ^-  (unit card)
+        ?:  =(%invited status.member)
+          `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
+        ~
+      [cards state]
     ::
     ++  handle-join
       |=  [path=space-path:store]
@@ -357,11 +366,8 @@
       ++  member-handle-join
         |=  [path=space-path:store]
         ^-  (quip card _state)
-        =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
-        =/  cards
-          :~  [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
-          ==
-        [cards state]
+        :_  state
+        [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]~
       ::
       ++  host-handle-join
         |=  [path=space-path:store =ship]
@@ -419,11 +425,18 @@
         =/  has-incoming          (~(get by invitations.state) path)
         =/  watch-path            [/spaces/(scot %p ship.path)/(scot %tas space.path)]
         =/  cards
+          ^-  (list card)
           :~
             [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%leave path])]
             [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
             [%pass watch-path %agent [our.bowl %spaces] %leave ~]
           ==
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
         ?~  has-incoming
           :_  state
           cards
@@ -503,12 +516,20 @@
           `state(membership (~(del by membership.state) path))
         =.  membership.state                (~(del by membership.state) path)
         =.  invitations.state               (~(del by invitations.state) path)
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
         =/  watch-paths                     [/updates ~]
-        :_  state
-        :~
-          [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [our.bowl %spaces] %leave ~]
-          [%give %fact watch-paths spaces-reaction+!>([%remove path])]
-        ==
+        =/  cards
+          ^-  (list card)
+          :~
+            [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [our.bowl %spaces] %leave ~]
+            [%give %fact watch-paths spaces-reaction+!>([%remove path])]
+          ==
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
+        [cards state]
       ::
       ++  host-on-remove
         |=  [path=space-path:store]
@@ -781,11 +802,19 @@
         =.  spaces.state              (~(del by spaces.state) path)
         =.  membership.state          (~(del by membership.state) path)
         =.  invitations.state         (~(del by invitations.state) path)
-        :_  state
-        :~
-          [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
-          [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
-        ==
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
+        =/  cards
+          ^-  (list card)
+          :~
+            [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
+            [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
+          ==
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
+        [cards state]
       =/  membs                       (~(got by membership.state) path)
       =.  membs                       (~(del by membs) ship)
       =.  membership.state            (~(put by membership.state) [path membs])
