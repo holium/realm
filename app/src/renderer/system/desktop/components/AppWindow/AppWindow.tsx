@@ -67,6 +67,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const resizeRightX = useMotionValue(0);
   const resizeRightY = useMotionValue(0);
+  const resizeLeftX = useMotionValue(0);
+  const resizeLeftY = useMotionValue(0);
 
   const handleBottomRightCornerResize = useCallback(
     (event: MouseEvent, info: PanInfo) => {
@@ -91,8 +93,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     (event: MouseEvent, info: PanInfo) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeRightX.set(resizeRightX.get() - info.offset.x);
-      resizeRightY.set(resizeRightY.get() - info.offset.y);
+      resizeLeftX.set(resizeLeftX.get() - info.offset.x);
+      resizeLeftY.set(resizeLeftY.get() - info.offset.y);
 
       // if we are greater than the minimum or are moving in the postive direction
       if (motionWidth.get() >= 400 || info.delta.x < 0) {
@@ -240,8 +242,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           className="app-window-resize app-window-resize-lr"
           drag
           style={{
-            x: resizeRightX,
-            y: resizeRightY,
+            x: resizeLeftX,
+            y: resizeLeftY,
           }}
           onDrag={handleBottomLeftCornerResize}
           onPointerDown={() => {
