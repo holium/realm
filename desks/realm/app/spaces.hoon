@@ -523,7 +523,7 @@
         =/  cards
           ^-  (list card)
           :~
-            [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [our.bowl %spaces] %leave ~]
+            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [our.bowl %spaces] %leave ~]
             [%give %fact watch-paths spaces-reaction+!>([%remove path])]
           ==
         =?  cards  update-current
