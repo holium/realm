@@ -1,0 +1,9 @@
+:~  
+    title+'Realm Notifications DB'
+    info+'A Realm dependency'
+    color+0xce.bef0
+    version+[0 1 1]
+    website+'https://holium.com'
+    license+'MIT'
+    base+'notif-db'
+==
