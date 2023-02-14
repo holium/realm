@@ -54,7 +54,7 @@ const AppWindowModel = types
      * The visual state of the window.
      */
     state: types.optional(
-      types.enumeration(['normal', 'minimized', 'maximized', 'fullscreen']),
+      types.enumeration(['normal', 'minimized', 'fullscreen']),
       'normal'
     ),
   })
@@ -69,11 +69,10 @@ const AppWindowModel = types
       self.state = 'minimized';
     },
     maximize(desktopDimensions: Dimensions) {
-      if (self.state === 'maximized') {
-        self.state = 'normal';
+      const isMaximized = isMaximizedBounds(self.bounds, desktopDimensions);
+      if (isMaximized) {
         self.bounds = { ...self.prevBounds };
       } else {
-        self.state = 'maximized';
         self.prevBounds = { ...self.bounds };
         self.bounds = getMaximizedBounds(desktopDimensions);
       }
@@ -157,14 +156,12 @@ export const DesktopStore = types
         // app as DevApp
         href = { site: app.web.url };
       }
-      const bounds = getInitialWindowBounds(app, desktopDimensions);
-      const isMaximized = isMaximizedBounds(bounds, desktopDimensions);
       const newWindow = AppWindowModel.create({
         appId: app.id,
         title: app.title,
         glob,
         href,
-        state: isMaximized ? 'maximized' : 'normal',
+        state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
         bounds: getInitialWindowBounds(app, desktopDimensions),
