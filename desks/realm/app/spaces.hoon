@@ -342,18 +342,19 @@
       ?:  =('our' space.path) :: we cannot delete our space
         `state
       =.  spaces.state                (~(del by spaces.state) path)
-      =.  membership.state            (~(del by membership.state) path)
       =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
-      =/  membership  `(map ship member:membership-store)`(~(got by membership.state) path)
+      =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
       =.  cards
         %+  weld  cards
-        %+  murn  ~(tap by membership)
+        %+  murn  ~(tap by space-members)
         |=  [=ship =member:membership-store]
         ^-  (unit card)
         ?:  =(%invited status.member)
           `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
         ~
+      =.  membership.state            (~(del by membership.state) path)
+      =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
       [cards state]
     ::
     ++  handle-join
