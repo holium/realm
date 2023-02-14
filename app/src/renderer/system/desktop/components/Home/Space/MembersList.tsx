@@ -112,13 +112,13 @@ const MembersListPresenter = (props: IMembersList) => {
             ? [
                 activeRole === 'admin'
                   ? {
-                      label: 'Demote to Member',
+                      label: 'Demote to member',
                       onClick: () => {
                         setNewRole('member');
                       },
                     }
                   : {
-                      label: 'Promote to Admin',
+                      label: 'Promote to admin',
                       onClick: () => {
                         setNewRole('admin');
                       },
