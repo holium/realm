@@ -26,11 +26,6 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
   const [view, setView] = useState('initial');
   const done = () => props.onNext && props.onNext();
 
-  console.log(
-    'recoveringAccount => %o',
-    props.workflowState?.recoveringAccount
-  );
-
   return (
     <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
       {view === 'initial' ? (
@@ -59,8 +54,6 @@ function InitialScreen(props: { done: any; recoveringAccount: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const onChange = (event: any) => setEmail(event.target.value);
-
-  console.log('recoveringAccount => %o', props.recoveringAccount);
 
   const onClick = async () => {
     setLoading(true);

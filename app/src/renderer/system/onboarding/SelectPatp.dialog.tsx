@@ -190,11 +190,6 @@ const SelectPatpPresenter = (props: BaseDialogProps) => {
     props.onNext && props.onNext();
   }
 
-  console.log(
-    'disabled => %o',
-    loading || error || planets.length === 0 || selectedIndex === -1
-  );
-
   return (
     <Grid.Column noGutter lg={12} xl={12}>
       <Flex
