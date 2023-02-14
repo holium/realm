@@ -19,6 +19,9 @@ import {
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
 
+const MIN_WIDTH = 500;
+const MIN_HEIGHT = 400;
+
 type Props = {
   appWindow: AppWindowType;
 };
@@ -76,15 +79,20 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       event.preventDefault();
       resizeRightX.set(resizeRightX.get() - info.offset.x);
       resizeRightY.set(resizeRightY.get() - info.offset.y);
-      // if we are greater than the minimum or are moving in the postive direction
-      if (motionWidth.get() >= 400 || info.delta.x > 0) {
-        motionWidth.set(motionWidth.get() + info.delta.x);
+
+      const newWidth = info.point.x - motionX.get();
+      const newHeight = info.point.y - motionY.get();
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionWidth.set(newWidth);
       }
-      if (motionHeight.get() >= 400 || info.delta.y > 0) {
-        motionHeight.set(motionHeight.get() + info.delta.y);
+      if (shouldUpdateHeight) {
+        motionHeight.set(newHeight);
       }
 
-      updateWindowBounds();
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
     []
   );
@@ -96,16 +104,20 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeLeftX.set(resizeLeftX.get() - info.offset.x);
       resizeLeftY.set(resizeLeftY.get() - info.offset.y);
 
-      // if we are greater than the minimum or are moving in the postive direction
-      if (motionWidth.get() >= 400 || info.delta.x < 0) {
-        motionWidth.set(motionWidth.get() - info.delta.x);
-        motionX.set(motionX.get() + info.delta.x);
+      const newWidth = motionX.get() + motionWidth.get() - info.point.x;
+      const newHeight = info.point.y - motionY.get();
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionX.set(info.point.x);
+        motionWidth.set(newWidth);
       }
-      if (motionHeight.get() >= 400 || info.delta.y > 0) {
-        motionHeight.set(motionHeight.get() + info.delta.y);
+      if (shouldUpdateHeight) {
+        motionHeight.set(newHeight);
       }
 
-      updateWindowBounds();
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
     []
   );
