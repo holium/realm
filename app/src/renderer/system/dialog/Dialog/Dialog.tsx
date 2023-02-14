@@ -8,13 +8,8 @@ import {
   ReactNode,
   RefObject,
 } from 'react';
-import {
-  Flex,
-  TextButton,
-  Spinner,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import { Flex, Spinner, IconButton, Icons } from 'renderer/components';
+import { Button } from '@holium/design-system';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
@@ -134,7 +129,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
               height={26}
             >
               {!customNext && onNext && (
-                <TextButton
+                <Button.TextButton
                   disabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {
                     onNext(evt, workflowState, setWorkflowState);
@@ -145,7 +140,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
                   ) : (
                     <>{nextButtonText || 'Next'}</>
                   )}
-                </TextButton>
+                </Button.TextButton>
               )}
             </Flex>
           </Flex>
