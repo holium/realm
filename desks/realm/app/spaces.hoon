@@ -809,7 +809,7 @@
           ^-  (list card)
           :~
             [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
-            [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
+            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [ship.path %spaces] %leave ~]
           ==
         =?  cards  update-current
           %+  welp  cards
