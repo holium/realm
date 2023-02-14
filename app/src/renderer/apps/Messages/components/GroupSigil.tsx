@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { Flex, Sigil } from 'renderer/components';
-import { toJS } from 'mobx';
+import { Flex } from 'renderer/components';
 import { Patp } from 'os/types';
+import { Avatar } from '@holium/design-system';
 
 interface GroupSigilProps {
   path: string;
@@ -14,7 +14,7 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   const len = patps.length;
   const renderSigil = (data: any, index: number) => {
     return (
-      <Sigil
+      <Avatar
         key={`${path}-sigil-${index}`}
         simple
         clickable={false}
@@ -22,7 +22,7 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
         size={18}
         avatar={data.avatar}
         patp={data.patp}
-        color={[data.color || '#000000', 'white']}
+        sigilColor={[data.color || '#000000', 'white']}
       />
     );
   };
@@ -53,7 +53,6 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   }
   if (len > 4) {
     // todo add +n
-    let plusEl = <div>+ {len - 4}</div>;
   }
   return (
     <Flex

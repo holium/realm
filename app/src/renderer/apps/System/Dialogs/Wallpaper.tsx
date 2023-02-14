@@ -1,42 +1,40 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { rgba } from 'polished';
 import {
-  Button,
   Flex,
   FormControl,
-  Grid,
-  Label,
   Input,
-  Text,
   TextButton,
   Spinner,
 } from 'renderer/components';
 import * as yup from 'yup';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
-import { toJS } from 'mobx';
-import { darken, lighten } from 'polished';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
   onClose: () => {},
-  window: {
-    id: 'wallpaper-dialog',
+  getWindowProps: (desktopDimensions) => ({
+    appId: 'wallpaper-dialog',
     title: 'Wallpaper Dialog',
     zIndex: 13,
     type: 'dialog',
-    dimensions: {
-      x: 0,
-      y: 0,
-      width: 300,
-      height: 300,
-    },
-  },
+    bounds: normalizeBounds(
+      {
+        x: 0,
+        y: 0,
+        width: 300,
+        height: 300,
+      },
+      desktopDimensions
+    ),
+  }),
   hasCloseButton: false,
   noTitlebar: true,
 };
@@ -77,19 +75,19 @@ const createWallpaperForm = (
   };
 };
 
-export const WallpaperDialog: FC = observer(() => {
+const WallpaperDialogPresenter = () => {
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
     () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
     []
   );
 
-  const onChange = (evt: any) => {
+  const onChange = () => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
-    theme.setWallpaper(spaces.selected!.path!, formData.imageUrl).then(() => {
+    theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
       ShellActions.closeDialog();
       ShellActions.setBlur(false);
       setLoading(false);
@@ -130,8 +128,9 @@ export const WallpaperDialog: FC = observer(() => {
         <TextButton
           tabIndex={2}
           style={{ fontWeight: 400 }}
-          highlightColor="#EC415A"
-          textColor="#EC415A"
+          showBackground
+          highlightColor={theme.currentTheme.backgroundColor}
+          textColor={rgba(theme.currentTheme.textColor, 0.7)}
           onClick={() => {
             ShellActions.closeDialog();
             ShellActions.setBlur(false);
@@ -142,11 +141,16 @@ export const WallpaperDialog: FC = observer(() => {
         <TextButton
           tabIndex={1}
           style={{ fontWeight: 400 }}
-          onClick={(evt: any) => onChange(evt)}
+          showBackground
+          highlightColor={theme.currentTheme.accentColor}
+          textColor={theme.currentTheme.accentColor}
+          onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}
         </TextButton>
       </Flex>
     </Flex>
   );
-});
+};
+
+const WallpaperDialog = observer(WallpaperDialogPresenter);

@@ -31,6 +31,7 @@ export type InlineEditProps = StyledComponentProps<
     rightIcon?: JSX.Element;
     /** Does the input have a validation error */
     error?: boolean;
+    disabled?: boolean;
   } & TypographyFunctionsProps,
   never
 > & { theme: ThemeType };
@@ -166,7 +167,7 @@ export const InlineEdit: any = forwardRef<HTMLInputElement, InlineEditProps>(
     if (!ref) ref = React.createRef();
     const keypressHandler = (event: any) => {
       if (event.key === 'Enter') {
-        // @ts-ignore
+        // @ts-expect-error
         ref.current.blur();
       }
     };

@@ -1,6 +1,9 @@
+import { patp2dec } from 'urbit-ob';
+import { Patp } from '@urbit/http-api';
+
 export function isFireFox(): boolean {
   if (!isWeb()) return false;
-  return navigator.userAgent.indexOf('Firefox') !== -1;
+  return navigator.userAgent.includes('Firefox');
 }
 
 export function isSafari(): boolean {
@@ -17,6 +20,10 @@ export function isWeb(): boolean {
   return typeof document !== 'undefined';
 }
 
-export async function sleep(duration: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, duration));
+export function isInitiator(localPatpId: number, remotePatp: Patp) {
+  return localPatpId < patp2dec(remotePatp);
+}
+
+export function isDialer(localPatp: string, remotePatp: Patp) {
+  return localPatp < remotePatp;
 }

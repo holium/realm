@@ -1,28 +1,28 @@
-import { FC, useState, useMemo } from 'react';
-import { toJS } from 'mobx';
+import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Input, Icons, IconButton, Sigil } from 'renderer/components';
+import { Flex, Icons, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
-import AppSearchApp from '../AppSearch';
+import { AppSearchApp } from '../AppInstall/AppSearch';
+import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { Avatar } from '@holium/design-system';
 
 type SidebarType = 'friends' | 'members' | null;
 
-type OurHomeProps = {
+interface OurHomeProps {
   isOpen?: boolean;
-};
+}
 
-export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
+const OurHomePresenter = (props: OurHomeProps) => {
   const { isOpen } = props;
-  const { friends, theme, ship } = useServices();
+  const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
-  const sidebarComponent = useMemo(() => {
-    return (
+  const sidebarComponent = useMemo(
+    () => (
       <AnimatePresence>
         {sidebar !== null && (
           <Flex
@@ -30,31 +30,31 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             right="8px"
             top="8px"
             bottom={58}
-            initial={{ opacity: 0, width: 40 }}
-            animate={{ opacity: 1, width: 330 }}
-            exit={{ opacity: 0, width: 40 }}
+            initial={{ opacity: 0, x: '88%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '88%' }}
             transition={{ duration: 0.25 }}
             flexDirection="column"
             flex={2}
           >
             <Members our />
-            {/* <Invitations /> */}
           </Flex>
         )}
       </AnimatePresence>
-    );
-  }, [sidebar, friends.all]);
+    ),
+    [sidebar]
+  );
 
   const highlightColor = '#4E9EFD';
 
   const iconHoverColor = useMemo(
     () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
-    [theme.currentTheme.windowColor]
+    [theme.currentTheme.iconColor]
   );
 
   return (
     <Flex flexDirection="row" height="calc(100vh - 50px)">
-      <Flex
+      <NoScrollBar
         flex={8}
         overflowY="auto"
         height="100%"
@@ -75,21 +75,21 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           mt={40}
           flexDirection="row"
           alignItems="center"
-          justifyContent={'center'}
-          width={'100%'}
+          justifyContent="center"
+          width="100%"
         >
           <Flex>
             {ship && (
-              <Sigil
+              <Avatar
                 simple
                 size={32}
                 avatar={ship.avatar}
                 patp={ship.patp}
-                color={[ship.color || '#000000', 'white']}
+                sigilColor={[ship.color || '#000000', 'white']}
               />
             )}
           </Flex>
-          <AppSearchApp />
+          <AppSearchApp mode="home" />
           <Flex justifyContent="flex-end">
             <IconButton
               size={3}
@@ -141,11 +141,13 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             flexWrap="wrap"
             flexDirection="row"
           >
-            <AppGrid isOpen={isOpen} tileSize="xl2" />
+            <AppGrid tileSize="xl2" />
           </Flex>
           {sidebarComponent}
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
-});
+};
+
+export const OurHome = observer(OurHomePresenter);

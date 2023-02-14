@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable react/prop-types */
 import { AnimatePresence, motion } from 'framer-motion';
 import * as React from 'react';
 import styled, { css } from 'styled-components';
@@ -7,7 +5,7 @@ import { compose, space, color, typography } from 'styled-system';
 import { Card, Box, MenuOrientation } from '.';
 import { Portal } from 'renderer/system/dialog/Portal';
 
-export type TooltipProps = {
+export interface TooltipProps {
   id: string;
   delay?: number; // 0.5
   style?: any;
@@ -15,7 +13,8 @@ export type TooltipProps = {
   content?: React.ReactNode | string;
   children: React.ReactNode;
   position?: any;
-};
+  show?: boolean;
+}
 
 const margin = 2;
 
@@ -62,8 +61,10 @@ const placementMaps = {
   `,
 };
 
-type TooltipStyleProps = { placement: MenuOrientation };
-// Tooltip
+interface TooltipStyleProps {
+  placement: MenuOrientation;
+}
+
 export const TooltipStyle = styled(
   styled.div<TooltipStyleProps>`
     // position: absolute;
@@ -71,7 +72,7 @@ export const TooltipStyle = styled(
     flex-direction: column;
     width: max-content;
     height: max-content;
-    overflow: visible;
+    overflow: hidden;
     color: ${(props) => props.theme.colors.text.primary};
     box-shadow: ${(props) => props.theme.elevations.one};
     ${(
@@ -111,7 +112,7 @@ const baseMotionProps = {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.2,
         delay: 1,
         ease: 'easeOut',
       },
@@ -120,7 +121,7 @@ const baseMotionProps = {
       opacity: 0,
       y: 4,
       transition: {
-        duration: 0.2,
+        duration: 0.1,
       },
     },
   },
@@ -130,8 +131,7 @@ const baseMotionProps = {
 };
 
 export const Tooltip = (props: TooltipProps) => {
-  // const domNode = document.createElement('div');
-  const { id, style, content, delay, placement, children } = props;
+  const { id, style, content, placement, children, show } = props;
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   const [isVisible, setIsVisible] = React.useState(false);
@@ -145,6 +145,7 @@ export const Tooltip = (props: TooltipProps) => {
     );
   }
   return (
+    // @ts-ignore
     <TooltipWrapper ref={tooltipRef} style={style}>
       <Portal>
         {isVisible && (
@@ -155,6 +156,7 @@ export const Tooltip = (props: TooltipProps) => {
               {...props}
               {...baseMotionProps}
             >
+              {/* @ts-ignore */}
               <TooltipStyle
                 style={{ left: coords.left, top: coords.top }}
                 placement={placement}
@@ -180,9 +182,9 @@ export const Tooltip = (props: TooltipProps) => {
             top: rect.top - rect.height,
           });
           evt.stopPropagation();
-          setIsVisible(true);
+          show && setIsVisible(true);
         }}
-        onMouseLeave={(evt: any) => {
+        onMouseLeave={() => {
           // evt.stopPropagation();
           setIsVisible(false);
         }}

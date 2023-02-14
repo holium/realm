@@ -7,7 +7,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface FinalizingProps {
   seedPhrase: string;
-  passcode: string;
+  passcode: number[];
 }
 
 export const Finalizing: FC<FinalizingProps> = observer(
@@ -18,9 +18,10 @@ export const Finalizing: FC<FinalizingProps> = observer(
       [theme.currentTheme.mode]
     );
 
-    let initWallet = async () => {
+    const initWallet = async () => {
       if (props.seedPhrase && props.passcode) {
         await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
+        await WalletActions.watchUpdates();
       }
     };
     useEffect(() => {

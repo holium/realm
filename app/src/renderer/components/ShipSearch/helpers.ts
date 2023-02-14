@@ -1,4 +1,4 @@
-import { ContactModelType } from 'os/services/ship/models/contacts';
+import { ContactModelType } from 'os/services/ship/models/friends';
 import { isValidPatp } from 'urbit-ob';
 
 export const searchPatpOrNickname = (
@@ -7,7 +7,7 @@ export const searchPatpOrNickname = (
   selected: Set<string>,
   our?: string
 ): Array<[string, ContactModelType]> => {
-  let results: Array<[string, ContactModelType]> = contacts;
+  const results: Array<[string, ContactModelType]> = contacts;
   // results from urbit-ob
   if (isValidPatp(search)) {
     results.push([
@@ -16,11 +16,8 @@ export const searchPatpOrNickname = (
         color: '#000000',
         avatar: null,
         nickname: '',
-        status: '',
         bio: '',
         cover: '',
-        groups: null,
-        'last-updated': 0,
       },
     ]);
   }

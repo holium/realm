@@ -1,13 +1,5 @@
-import { darken, rgba } from 'polished';
-import styled from 'styled-components';
-import { Flex, EmbedBox, Text, Skeleton } from '..';
-
-const EmptyIcon = styled.div`
-  height: 48px;
-  width: 48px;
-  background: ${(p) => p.color || 'lightgray'};
-  border-radius: 6px;
-`;
+import { ReactNode } from 'react';
+import { Flex, EmbedBox, Text, Skeleton } from '../index';
 
 interface AppLinkProps {
   loading?: boolean;
@@ -23,7 +15,7 @@ interface AppLinkProps {
 }
 
 export const AppLink = (props: AppLinkProps) => {
-  let innerContent: React.ReactNode;
+  let innerContent: ReactNode;
   if (props.loading) {
     innerContent = (
       <>
@@ -46,6 +38,7 @@ export const AppLink = (props: AppLinkProps) => {
       <>
         <Flex alignItems="center" mr={3}>
           <img
+            alt="App icon"
             style={{
               borderRadius: 6,
               // border: props.color

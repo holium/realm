@@ -2,7 +2,7 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { FC, useContext, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { theme as baseTheme } from './theme';
 import {
@@ -13,18 +13,14 @@ import {
   servicesStore,
   useServices,
 } from './logic/store';
-
-import { Mouse } from './system/desktop/components/Mouse';
-
 import { ShellActions } from './logic/actions/shell';
-// import * as RealmMultiplayer from '@holium/realm-multiplayer';
-// import { Presences } from './system/desktop/components/Multiplayer/Presences';
-// import { api } from './system/desktop/components/Multiplayer/multiplayer';
+import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
+import { SelectionProvider } from './logic/lib/selection';
+import { ErrorBoundary } from './logic/ErrorBoundary';
 
-export const App: FC = observer(() => {
-  const { booted, resuming } = useCore();
-  const { desktop, shell, theme } = useServices();
-  // const styleRef = useRef(null);
+const AppPresenter = () => {
+  const { booted } = useCore();
+  const { theme } = useServices();
 
   const themeMode = theme.currentTheme.mode;
 
@@ -42,18 +38,10 @@ export const App: FC = observer(() => {
           {/* <Spinner size={4} /> */}
         </div>
       ),
-    [booted, resuming]
+    [booted, theme.currentTheme.backgroundColor]
   );
 
-  const mouseMemo = useMemo(() => {
-    return (
-      <Mouse
-        hide={shell.isMouseInWebview}
-        cursorColor={desktop.mouseColor}
-        animateOut={false}
-      />
-    );
-  }, [desktop.mouseColor, shell.isMouseInWebview]);
+  const contextMenuMemo = useMemo(() => <ContextMenu />, []);
 
   useEffect(() => {
     return () => {
@@ -61,53 +49,27 @@ export const App: FC = observer(() => {
       ShellActions.closeDialog();
     };
   }, []);
-
   return (
     <CoreProvider value={coreStore}>
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle blur={true} />
+          <GlobalStyle blur={true} realmTheme={theme.currentTheme} />
           {/* Modal provider */}
           <ServiceProvider value={servicesStore}>
-            {mouseMemo}
-            {shellMemo}
-            {/* <MultiplayerMouse /> */}
-            <div id="portal-root" />
+            <SelectionProvider>
+              <ContextMenuProvider>
+                <ErrorBoundary>
+                  {shellMemo}
+                  {contextMenuMemo}
+                  <div id="portal-root" />
+                </ErrorBoundary>
+              </ContextMenuProvider>
+            </SelectionProvider>
           </ServiceProvider>
         </MotionConfig>
       </ThemeProvider>
     </CoreProvider>
   );
-});
+};
 
-// function MultiplayerMouse() {
-//   const { ship, spaces } = useServices();
-//   if (!ship?.isLoaded) return null;
-
-//   return (
-//     <RealmMultiplayer.Provider
-//       api={api}
-//       ship={ship}
-//       channel={spaces.selected?.path}
-//     >
-//       <Cursors />
-//     </RealmMultiplayer.Provider>
-//   );
-// }
-
-// function Cursors() {
-//   const { api } = useContext(
-//     RealmMultiplayer.Context as React.Context<{
-//       api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
-//     }>
-//   );
-//   const { shell } = useServices();
-//   useEffect(() => {
-//     api?.send({
-//       event: RealmMultiplayer.CursorEvent.Leave,
-//     });
-//   }, [shell.isMouseInWebview]);
-//   return <Presences />;
-// }
-
-export default App;
+export const App = observer(AppPresenter);

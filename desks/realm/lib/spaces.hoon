@@ -23,6 +23,7 @@
     [
       path=[ship slug]
       name=name:payload
+      description=description:payload
       type=type:payload
       access=access:payload
       picture=picture:payload
@@ -51,6 +52,7 @@
       :~  [%spaces (spaces-map:encode spaces.rct)]
           [%membership (membership-map:encode membership.rct)]
           [%invitations (invitations:encode invitations.rct)]
+          [%current (curr:encode current.rct)]
       ==
     ::
         %add
@@ -80,7 +82,11 @@
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
       ==
-
+        %current
+      :-  %current
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     
       ::   %members
       :: :-  %members
@@ -123,6 +129,7 @@
           [%remove path-key]
           [%join path-key]
           [%leave path-key]
+          [%current path-key]
           :: [%kicked kicked]
       ==
     ::
@@ -172,6 +179,7 @@
     ++  add-payload
       %-  ot
       :~  [%name so]
+          [%description so]
           [%type space-type]
           [%access access]
           [%picture so]
@@ -180,8 +188,10 @@
       ==
     ::
     ++  edit-payload
-      %-  of
+      %-  ot
       :~  [%name so]
+          [%description so]
+          [%access (su (perk %public %private ~))]
           [%picture so]
           [%color so]
           [%theme thm]
@@ -308,6 +318,11 @@
         ['status' s+(scot %tas status.member)]
         :: ['pinned' b+pinned.member]
     ==
+  ++  curr
+    |=  current=space-path:store
+    ^-  json
+    %-  pairs
+    ['path' s+(spat /(scot %p ship.current)/(scot %tas space.current))]~
   ::
   ++  spc
     |=  =space
@@ -315,6 +330,8 @@
     %-  pairs
     :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
         ['name' s+name.space]
+        ['description' s+description.space]
+        ['access' s+access.space]
         ['type' s+type.space]
         ['picture' s+picture.space]
         ['color' s+color.space]

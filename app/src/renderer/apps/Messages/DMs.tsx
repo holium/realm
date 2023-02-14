@@ -1,166 +1,194 @@
-import { FC, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import { Spinner } from 'renderer/components';
 import {
-  Grid,
+  Icon,
+  Text,
+  Button,
   Flex,
   Box,
-  Spinner,
-  Text,
-  Input,
-  Icons,
-  IconButton,
-} from 'renderer/components';
+  TextInput,
+  Skeleton,
+  WindowedList,
+} from '@holium/design-system';
 import { ContactRow } from './components/ContactRow';
-import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten, rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
+import {
+  PreviewDMType,
+  PreviewGroupDMType,
+  DMPreviewType,
+} from 'os/services/ship/models/courier';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;
   onNewChat: (evt: any) => void;
-};
+}
 
-export const DMs: FC<IProps> = observer((props: IProps) => {
-  const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
+const DMsPresenter = (props: IProps) => {
+  const { height, theme, onSelectDm, onNewChat } = props;
+
   const { courier } = useServices();
-  const { textColor, iconColor, dockColor, windowColor, mode } = theme;
-  const previews = useMemo(() => {
-    return Array.from(courier.previews.values()).sort((a, b) => {
-      // @ts-ignore
-      return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
-    });
-  }, [courier.previews]);
-  return (
-    <Grid.Column
-      style={{ position: 'relative', color: textColor }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBlur
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...props.theme,
-          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
-          // windowColor: rgba(windowColor, 0.8),
-          windowColor,
-        }}
-      >
-        <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
-          <Icons opacity={0.8} name="Messages" size={24} mr={2} />
-          <Text
-            opacity={0.8}
-            style={{ textTransform: 'uppercase' }}
-            fontWeight={600}
-          >
-            DMs
-          </Text>
+  const [searchString, setSearchString] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+
+  const previews = Array.from(courier.previews.values())
+    .sort((a, b) => b.lastTimeSent - a.lastTimeSent)
+    .filter(Boolean);
+  const lastTimeSent = previews[0]?.lastTimeSent;
+
+  const fetchPreviews = useCallback(async () => {
+    const newPreviews = await ShipActions.getDMs();
+    courier.setPreviews(newPreviews);
+  }, [courier]);
+
+  useEffect(() => {
+    const fetchPreviewsWithSkeleton = async () => {
+      setIsFetching(true);
+      await fetchPreviews();
+      setIsFetching(false);
+    };
+
+    if (previews.length === 0) fetchPreviewsWithSkeleton();
+  }, []);
+
+  const searchFilter = useCallback(
+    (preview: DMPreviewType) => {
+      if (!searchString || searchString.trim() === '') return true;
+      let to: string;
+      if (preview.type === 'group' || preview.type === 'group-pending') {
+        const dm = preview as PreviewGroupDMType;
+        to = Array.from(dm.to).join(', ');
+      } else {
+        const dm = preview as PreviewDMType;
+        to = dm.to;
+      }
+      return to.indexOf(searchString) === 0;
+    },
+    [searchString]
+  );
+
+  const DMList = () => {
+    if (isFetching) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="start"
+          overflow="hidden"
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Box key={index} mb={2} mx={4}>
+              <Skeleton height={57} borderRadius={8} />
+            </Box>
+          ))}
         </Flex>
-        <Flex flex={1}>
-          <Input
+      );
+    }
+
+    if (previews.length === 0) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={24}
+        >
+          <Text.Custom width={200} textAlign="center" opacity={0.3}>
+            No Direct Messages. Click the <b>+</b> to start.
+          </Text.Custom>
+        </Flex>
+      );
+    }
+
+    return (
+      <WindowedList
+        key={lastTimeSent}
+        width={364}
+        height={544}
+        rowHeight={57}
+        data={previews}
+        filter={searchFilter}
+        rowRenderer={(dm, index) => (
+          <Box
+            display="block"
+            key={`dm-${index}-${dm.lastTimeSent}-${dm.pending}`}
+          >
+            <ContactRow
+              theme={theme}
+              dm={dm}
+              refreshDms={fetchPreviews}
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onSelectDm(dm);
+              }}
+            />
+          </Box>
+        )}
+      />
+    );
+  };
+
+  return (
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Flex justifyContent="center" alignItems="center">
+          <Icon opacity={0.8} name="Messages" size={24} mr={3} />
+          <Text.Custom fontWeight="600" textTransform="uppercase" opacity={0.7}>
+            DMs
+          </Text.Custom>
+        </Flex>
+        <Flex flex={1} ml={3} mr={2}>
+          <TextInput
+            id="dm-search"
+            name="dm-search"
             className="realm-cursor-text-cursor"
             type="text"
+            height={30}
+            width="100%"
             placeholder="Search"
-            wrapperStyle={{
-              cursor: 'none',
-              borderRadius: 9,
-              borderColor: 'transparent',
-              backgroundColor:
-                theme.mode === 'dark'
-                  ? lighten(0.1, windowColor)
-                  : darken(0.055, windowColor),
+            onChange={(evt: any) => {
+              evt.stopPropagation();
+              setSearchString(evt.target.value);
             }}
           />
         </Flex>
-        <Flex ml={1} pl={2} pr={2}>
-          <IconButton
-            customBg={dockColor}
+        <Flex>
+          <Button.IconButton
             className="realm-cursor-hover"
-            size={28}
-            color={iconColor}
+            width={26}
+            height={26}
             onClick={onNewChat}
           >
-            <Icons name="Plus" />
-          </IconButton>
+            <Icon name="Plus" size={24} opacity={0.7} />
+          </Button.IconButton>
         </Flex>
-      </Titlebar>
-      <Flex
-        style={{
-          zIndex: 4,
-          position: 'relative',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: windowColor,
-        }}
-        mb={headerOffset}
-        overflowY="hidden"
-      >
-        <Grid.Column
-          gap={2}
-          mb={3}
-          pb={4}
-          noGutter
-          expand
-          height={height}
-          overflowY="auto"
-        >
-          {courier.loader.isLoading ? (
-            <Flex flex={1} alignItems="center" justifyContent="center">
-              <Spinner size={2} />
-            </Flex>
-          ) : (
-            <>
-              <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {previews.length === 0 && (
-                <Flex
-                  flex={1}
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap={24}
-                >
-                  {/* <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.6}
-                  >
-                    No DMs
-                  </Text> */}
-                  <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.3}
-                  >
-                    No Direct Messages. Click the <b>+</b> to start.
-                  </Text>
-                </Flex>
-              )}
-              {previews.map((dm: any, index: number) => (
-                <Box display="block" key={`${dm.to}-${index}`}>
-                  <ContactRow
-                    theme={theme}
-                    dm={dm}
-                    onClick={(evt: any) => {
-                      evt.stopPropagation();
-                      onSelectDm(dm);
-                    }}
-                  />
-                </Box>
-              ))}
-            </>
-          )}
-        </Grid.Column>
       </Flex>
-    </Grid.Column>
+      <Flex gap={2} flexDirection="column" height={height} overflowY="auto">
+        {courier.loader.isLoading ? (
+          <Flex flex={1} alignItems="center" justifyContent="center">
+            <Spinner size={2} />
+          </Flex>
+        ) : (
+          <>
+            <Box display="block" />
+            <DMList />
+            <Box display="block" />
+          </>
+        )}
+      </Flex>
+    </>
   );
-});
+};
+
+export const DMs = observer(DMsPresenter);

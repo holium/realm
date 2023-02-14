@@ -1,44 +1,51 @@
 import { ThemeModelType } from '../theme.model';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
-import Store from 'electron-store';
 import { toJS } from 'mobx';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  ModelSnapshotType,
-} from 'mobx-state-tree';
-
-import Realm from '../..';
+import fs from 'fs';
+import path from 'path';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
-import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
-import { snakeify, camelToSnake } from '../../lib/obj';
+import { snakeify } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { MemberRole, Patp, SpacePath } from 'os/types';
-import { BazaarApi } from '../../api/bazaar';
+import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
-import { loadMembersFromDisk } from './passports';
-import { loadBazaarFromDisk } from './bazaar';
-import { RoomsApi } from '../../api/rooms';
+import { MembershipStore, MembershipType } from './models/members';
+import { DiskStore } from '../base.store';
+import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
+import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
+import { BeaconApi, BeaconInboxType } from '../../api/beacon';
+import { formPathObj } from '../../lib/path';
+import { BulletinApi } from '../../api/bulletin';
+import { NotificationStore, NotificationStoreType } from './models/beacon';
+import { BulletinStore, BulletinStoreType } from './models/bulletin';
 
-const getHost = (path: string) => path.split('/')[1];
-import { BazaarStore } from './models/bazaar';
-import { MembershipStore } from './models/members';
+export const getHost = (path: string) => path.split('/')[1];
+let devApps: any = null;
 
-type SpaceModels = {
-  bazaar: any;
-  membership: any;
+// Loads the app.dev.json config file if it exists
+if (fs.existsSync(path.resolve(__dirname, '../../../app.dev.json'))) {
+  try {
+    devApps = require(path.resolve(__dirname, '../../../app.dev.json'));
+  } catch (err) {
+    console.error('Failed to load dev apps', err);
+  }
+}
+
+interface SpaceModels {
+  bazaar: NewBazaarStoreType;
+  membership: MembershipType;
   visas: VisaModelType;
-  // friends: FriendsType;
-};
+  beacon: NotificationStoreType;
+  bulletin: BulletinStoreType;
+}
 /**
  * SpacesService
  */
 export class SpacesService extends BaseService {
-  private db?: Store<SpacesStoreType>; // for persistance
+  private db?: DiskStore; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
     membership: MembershipStore.create({}),
@@ -46,7 +53,9 @@ export class SpacesService extends BaseService {
       incoming: {},
       outgoing: {},
     }),
-    bazaar: BazaarStore.create({ my: {} }),
+    bazaar: NewBazaarStore.create(),
+    beacon: NotificationStore.create(),
+    bulletin: BulletinStore.create(),
   };
 
   handlers = {
@@ -54,19 +63,24 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.join-space': this.joinSpace,
+    'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
+    'realm.bazaar.scryHash': this.scryHash,
+    'realm.bazaar.scryTreaties': this.scryTreaties,
+    'realm.bazaar.scryAllies': this.scryAllies,
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.get-invitations': this.getInvitations,
+    'realm.spaces.set-loader': this.setLoader,
+    'realm.spaces.set-join': this.setJoin,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
     'realm.spaces.bazaar.get-allies': this.getAllies,
     'realm.spaces.bazaar.get-treaties': this.getTreaties,
     'realm.spaces.bazaar.add-recent-app': this.addRecentApp,
-    'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
     'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
-    'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
     'realm.spaces.bazaar.pin-app': this.pinApp,
     'realm.spaces.bazaar.unpin-app': this.unpinApp,
     'realm.spaces.bazaar.set-pinned-order': this.setPinnedOrder,
@@ -74,117 +88,164 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.unrecommend-app': this.unrecommendApp,
     'realm.spaces.bazaar.suite-add': this.addToSuite,
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
+    'realm.spaces.bazaar.install-app-direct': this.installAppDirect,
     'realm.spaces.bazaar.install-app': this.installApp,
     'realm.spaces.bazaar.install-desk': this.installDesk,
+    'realm.spaces.bazaar.new-installer': this.newInstaller,
     'realm.spaces.bazaar.uninstall-app': this.uninstallApp,
     'realm.spaces.bazaar.add-ally': this.addAlly,
+    'realm.spaces.bazaar.add-app': this.addApp,
+    'realm.spaces.bazaar.remove-app': this.removeApp,
+    'realm.spaces.bazaar.suspend-app': this.suspendApp,
+    'realm.spaces.bazaar.revive-app': this.reviveApp,
+    'realm.spaces.beacon.saw-note': this.sawNote,
+    'realm.spaces.beacon.saw-inbox': this.sawInbox,
   };
 
   static preload = {
-    getOurGroups: () => {
-      return ipcRenderer.invoke('realm.spaces.get-our-groups');
+    scryAllies: async () => await ipcRenderer.invoke('realm.bazaar.scryAllies'),
+    scryTreaties: async (ship: Patp) =>
+      await ipcRenderer.invoke('realm.bazaar.scryTreaties', ship),
+    scryHash: (app: string) => ipcRenderer.invoke('realm.bazaar.scryHash', app),
+
+    getOurGroups: async () => {
+      return await ipcRenderer.invoke('realm.spaces.get-our-groups');
     },
-    selectSpace: (spaceId: string) => {
-      return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
+    selectSpace: async (spaceId: string) => {
+      return await ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
     pinApp: (path: string, appId: string, rank: number | null = null) => {
-      return ipcRenderer.invoke(
-        'realm.spaces.bazaar.pin-app',
-        path,
-        appId,
-        rank
-      );
+      ipcRenderer.invoke('realm.spaces.bazaar.pin-app', path, appId, rank);
     },
     unpinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
+      ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
     },
-    recommendApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke(
+    recommendApp: async (appId: string) => {
+      return await ipcRenderer.invoke(
         'realm.spaces.bazaar.recommend-app',
-        path,
         appId
       );
     },
-    unrecommendApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke(
+    unrecommendApp: async (appId: string) => {
+      return await ipcRenderer.invoke(
         'realm.spaces.bazaar.unrecommend-app',
-        path,
         appId
       );
     },
     setPinnedOrder: (path: string, newOrder: any[]) => {
-      return ipcRenderer.invoke(
+      ipcRenderer.invoke(
         'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
       );
     },
-    createSpace: (form: any) => {
-      return ipcRenderer.invoke('realm.spaces.create-space', form);
+    createSpace: async (form: any) => {
+      return await ipcRenderer.invoke('realm.spaces.create-space', form);
     },
-    updateSpace: (path: any, update: any) => {
+    updateSpace: async (path: any, update: any) => {
       return ipcRenderer.invoke('realm.spaces.update-space', path, update);
     },
-    deleteSpace: (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.delete-space', path);
+    deleteSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
-    getInvitations: () => {
-      return ipcRenderer.invoke('realm.spaces.get-invitations');
+    joinSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.join-space', path);
+    },
+    leaveSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.leave-space', path);
+    },
+    getInvitations: async () => {
+      return await ipcRenderer.invoke('realm.spaces.get-invitations');
+    },
+    setLoader: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
+      return await ipcRenderer.invoke('realm.spaces.set-loader', status);
+    },
+    setJoin: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
+      return await ipcRenderer.invoke('realm.spaces.set-join', status);
     },
     acceptInvite: async (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.accept-invite', path);
+      return await ipcRenderer.invoke('realm.spaces.accept-invite', path);
     },
     declineInvite: async (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.decline-invite', path);
+      return await ipcRenderer.invoke('realm.spaces.decline-invite', path);
     },
-    getMembers: (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.get-members', path);
+    getMembers: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.get-members', path);
     },
     inviteMember: async (
       path: string,
       payload: { patp: string; role: MemberRole; message: string }
     ) =>
-      ipcRenderer.invoke('realm.spaces.members.invite-member', path, payload),
+      await ipcRenderer.invoke(
+        'realm.spaces.members.invite-member',
+        path,
+        payload
+      ),
     //
     kickMember: async (path: string, patp: string) =>
-      ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
+      await ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
     //
     getApps: async (path: SpacePath, tag: string = 'all') =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
+      await ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
     getAllies: async (path: SpacePath) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
+      await ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
     getTreaties: async (patp: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', patp),
-    getRecentApps: async () =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-apps'),
-    addRecentApp: async (path: SpacePath, appId: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-app', path, appId),
-    getRecentDevs: async () =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
-    addRecentDev: async () =>
-      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
-    addToSuite: async (path: SpacePath, appId: string, rank: number) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
-    removeFromSuite: async (path: SpacePath, appId: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
+      await ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', patp),
+    addRecentApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-recent-app', appId),
+    addRecentDev: async (shipId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev', shipId),
+    addToSuite: async (path: SpacePath, appId: string, index: number) =>
+      await ipcRenderer.invoke(
+        'realm.spaces.bazaar.suite-add',
+        path,
+        appId,
+        index
+      ),
+    removeFromSuite: async (path: SpacePath, index: number) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, index),
     installDesk: async (ship: string, desk: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.install-desk', ship, desk),
-    installApp: async (app: any) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+      await ipcRenderer.invoke('realm.spaces.bazaar.install-desk', ship, desk),
+    newInstaller: async (ship: string, desk: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.new-installer', ship, desk),
+    installAppDirect: async (ship: string, desk: string) =>
+      await ipcRenderer.invoke(
+        'realm.spaces.bazaar.install-app-direct',
+        ship,
+        desk
+      ),
+    installApp: async (ship: string, desk: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.install-app', ship, desk),
     uninstallApp: async (desk: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.uninstall-app', desk),
+      await ipcRenderer.invoke('realm.spaces.bazaar.uninstall-app', desk),
     addAlly: async (ship: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
+    addApp: async (ship: string, desk: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
+    removeApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
+    suspendApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
+    reviveApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
+    sawNote: async (noteId: string) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-note', noteId),
+    sawInbox: async (inbox: BeaconInboxType) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-inbox', inbox),
   };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
     this.setTheme = this.setTheme.bind(this);
+  }
+
+  get currentPath() {
+    return this.state?.selected?.path;
   }
 
   get snapshot() {
@@ -196,21 +257,52 @@ export class SpacesService extends BaseService {
       membership: getSnapshot(this.models.membership),
       bazaar: getSnapshot(this.models.bazaar),
       visas: getSnapshot(this.models.visas),
+      beacon: getSnapshot(this.models.beacon),
+      bulletin: getSnapshot(this.models.bulletin),
     };
   }
 
-  async load(patp: string, docket: any) {
-    this.db = new Store({
-      name: 'spaces',
-      cwd: `realm.${patp}`,
-      accessPropertiesByDotNotation: true,
-    });
-
-    let persistedState: SpacesStoreType = this.db.store;
-    this.state = SpacesStore.create(castToSnapshot(persistedState));
+  async load(patp: string, isReconnecting: boolean) {
+    const secretKey: string | null = this.core.passwords.getPassword(patp);
+    this.db = new DiskStore('spaces', patp, secretKey!, SpacesStore);
+    this.state = this.db.model as SpacesStoreType;
+    if (!isReconnecting) this.state.setLoader('loading');
     // Load sub-models
-    this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
-    this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
+    const membershipStore = new DiskStore(
+      'membership',
+      patp,
+      secretKey!,
+      MembershipStore
+    );
+    const bazaarStore = new DiskStore(
+      'bazaar',
+      patp,
+      secretKey!,
+      NewBazaarStore,
+      {}
+    );
+    const beaconStore = new DiskStore(
+      'beacon',
+      patp,
+      secretKey!,
+      NotificationStore,
+      {}
+    );
+    const bulletinStore = new DiskStore(
+      'bulletin',
+      patp,
+      secretKey!,
+      BulletinStore,
+      {}
+    );
+    this.models.membership = membershipStore.model;
+    this.models.bazaar = bazaarStore.model;
+    this.models.bulletin = bulletinStore.model;
+    if (devApps) {
+      this.models.bazaar.loadDevApps(devApps);
+    }
+    this.models.beacon = beaconStore.model;
+    this.models.beacon.load(this.core!.conduit!);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -224,21 +316,23 @@ export class SpacesService extends BaseService {
     SpacesApi.getInvitations(this.core.conduit!).then((visas: any) => {
       this.models.visas.initialIncoming(visas);
     });
-    // Temporary setup
-    // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
-    // Get the initial scry
-    const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, persistedState, patp);
-    this.state!.selected && this.setTheme(this.state!.selected?.theme);
+    // setting provider to current space host
+    if (this.state.selected) {
+      this.setTheme(this.state.selected.theme);
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected.path)
+      );
+    }
 
-    this.state.setLoader('loaded');
     // initial sync effect
     const syncEffect = {
       model: {
-        spaces: getSnapshot(this.state!),
+        spaces: getSnapshot(this.state),
         membership: getSnapshot(this.models.membership),
         bazaar: getSnapshot(this.models.bazaar),
+        beacon: getSnapshot(this.models.beacon),
+        bulletin: getSnapshot(this.models.bulletin),
       },
       resource: 'spaces',
       key: null,
@@ -247,20 +341,12 @@ export class SpacesService extends BaseService {
 
     this.core.onEffect(syncEffect);
 
-    // set up snapshotting
-    onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
-    });
-
     // Start patching after we've initialized the state
-    onPatch(this.state, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'spaces',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
-    });
+    this.db.registerPatches(this.core.onEffect);
+    membershipStore.registerPatches(this.core.onEffect);
+    bazaarStore.registerPatches(this.core.onEffect);
+    beaconStore.registerPatches(this.core.onEffect);
+    bulletinStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -269,18 +355,14 @@ export class SpacesService extends BaseService {
       this.models.membership,
       this.models.bazaar,
       this.models.visas,
+      this.core.services.ship.rooms,
       this.setTheme
     );
-    // Subscribe to sync updates
-    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
-    //
-    // setting provider to current space host
-    this.core.services.ship.rooms!.setProvider(
-      null,
-      getHost(this.state.selected!.path)
-    );
-    BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
+
+    BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
+
+    BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
+    BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
 
   // ***********************************************************
@@ -288,15 +370,17 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
+    const id = spaceToSnake(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
-        slug: spaceToSnake(body.name),
+        slug: id,
         payload: snakeify({
           name: body.name,
+          description: body.description,
           type: body.type,
           access: body.access,
-          picture: body.picture,
+          picture: body.image,
           color: body.color,
           archetype: body.archetype,
         }),
@@ -305,13 +389,42 @@ export class SpacesService extends BaseService {
     );
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
-    const selected = this.state?.selectSpace(spacePath);
-    this.setTheme({ ...selected!.theme!, id: selected!.path });
+    this.setSelected(_event, spacePath);
     return spacePath;
   }
 
-  updateSpace(_event: IpcMainInvokeEvent, path: any, update: any) {
-    console.log('update space: ', path);
+  async updateSpace(_event: IpcMainInvokeEvent, path: any, body: any) {
+    // const members = body.members;
+    SpacesApi.updateSpace(
+      this.core.conduit!,
+      {
+        payload: {
+          name: body.name,
+          description: body.description,
+          access: body.access,
+          picture: body.picture,
+          color: body.color,
+          theme: {
+            mode: body.theme.mode,
+            'background-color': body.theme.backgroundColor,
+            'accent-color': body.theme.accentColor,
+            'input-color': body.theme.inputColor,
+            'dock-color': body.theme.dockColor,
+            'icon-color': body.theme.iconColor,
+            'text-color': body.theme.textColor,
+            'window-color': body.theme.windowColor,
+            wallpaper: body.theme.wallpaper,
+          },
+        },
+        path: path,
+      }
+      //members,
+    );
+    this.core.services.shell.closeDialog(_event);
+    this.core.services.shell.setBlur(_event, false);
+    const selected = this.state?.selectSpace(path);
+    this.setTheme({ ...selected!.theme!, id: selected!.path });
+    return path;
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
@@ -320,20 +433,31 @@ export class SpacesService extends BaseService {
       const selected = this.state?.selectSpace(
         `/~${this.core.conduit?.ship}/our`
       );
-      this.setTheme(selected?.theme!);
+      this.setTheme(selected?.theme);
     }
     return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
+  async joinSpace(_event: IpcMainInvokeEvent, path: string) {
+    return SpacesApi.joinSpace(this.core.conduit!, { path });
+  }
+
+  async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
+  }
+
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    // don't block for responsiveness, what about error handling?
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+      console.error('Error setting current space', e);
+    });
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
-    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
-    const spaceHost = getHost(this.state!.selected!.path);
-    // if (currentRoomProvider !== spaceHost)
-    this.core.services.ship.rooms!.setProvider(null, spaceHost);
+    const spaceHost = getHost(selected!.path);
+    this.core.services.ship.rooms.setProvider(spaceHost);
   }
+
   // ***********************************************************
   // *********************** MEMBERS ***************************
   // ***********************************************************
@@ -367,6 +491,20 @@ export class SpacesService extends BaseService {
     return await SpacesApi.getInvitations(this.core.conduit!);
   }
 
+  async setLoader(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
+    this.state!.setLoader(status);
+  }
+
+  async setJoin(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
+    this.state!.setJoin(status);
+  }
+
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
     return await SpacesApi.acceptInvite(
       this.core.conduit!,
@@ -379,7 +517,6 @@ export class SpacesService extends BaseService {
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
     await SpacesApi.declineInvite(this.core.conduit!, path);
     this.models.visas?.removeIncoming(path);
-    return;
   }
 
   setTheme(theme: ThemeModelType) {
@@ -413,126 +550,174 @@ export class SpacesService extends BaseService {
   // ***********************************************************
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
-    return await BazaarApi.getApps(this.core.conduit!, path, tag);
+    return BazaarApi.getApps(this.core.conduit!, path, tag);
   }
+
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
-    return await BazaarApi.getAllies(this.core.conduit!, path);
+    return BazaarApi.getAllies(this.core.conduit!, path);
   }
+
   async getTreaties(_event: IpcMainInvokeEvent, patp: string) {
-    return await BazaarApi.getTreaties(this.core.conduit!, patp);
+    return BazaarApi.getTreaties(this.core.conduit!, patp);
   }
-  async getRecentApps(_event: IpcMainInvokeEvent) {
-    return this.models.bazaar.getRecentApps();
+
+  async addRecentApp(_event: IpcMainInvokeEvent, appId: string) {
+    return this.models.bazaar.addRecentApp(appId);
   }
-  async addRecentApp(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
-  ) {
-    // console.log('addRecentApp => %o', { spacePath, appId });
-    return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
-  }
-  async addRecentDev(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    shipId: string
-  ) {
-    return this.models.bazaar.getBazaar(spacePath).addRecentDev(shipId);
-  }
-  async getRecentDevs(_event: IpcMainInvokeEvent) {
-    return this.models.bazaar.getRecentDevs();
+
+  async addRecentDev(_event: IpcMainInvokeEvent, shipId: string) {
+    return this.models.bazaar.addRecentDev(shipId);
   }
 
   async pinApp(
     _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
+    path: SpacePath,
     appId: string,
-    rank: number | null
+    index: number | null
   ) {
-    return await BazaarApi.pinApp(this.core.conduit!, spacePath, appId, rank);
+    return await this.models.bazaar.pinApp(this.core.conduit!, {
+      path: formPathObj(path),
+      'app-id': appId,
+      index,
+    });
   }
 
-  async unpinApp(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
-  ) {
-    return await BazaarApi.unpinApp(this.core.conduit!, spacePath, appId);
+  async unpinApp(_event: IpcMainInvokeEvent, path: SpacePath, appId: string) {
+    return await this.models.bazaar.unpinApp(this.core.conduit!, {
+      path: formPathObj(path),
+      'app-id': appId,
+    });
   }
 
-  async recommendApp(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
-  ) {
-    return await BazaarApi.recommendApp(this.core.conduit!, spacePath, appId);
+  async recommendApp(_event: IpcMainInvokeEvent, appId: string) {
+    return await this.models.bazaar.recommendApp(this.core.conduit!, appId);
   }
 
-  async unrecommendApp(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
-  ) {
-    return await BazaarApi.unrecommendApp(this.core.conduit!, spacePath, appId);
+  async unrecommendApp(_event: IpcMainInvokeEvent, appId: string) {
+    return await this.models.bazaar.unrecommendApp(this.core.conduit!, appId);
+  }
+
+  async scryHash(_event: IpcMainInvokeEvent, app: string) {
+    return await this.models.bazaar.scryHash(this.core.conduit!, app);
+  }
+
+  async scryTreaties(_event: IpcMainInvokeEvent, ship: Patp) {
+    return await this.models.bazaar.scryTreaties(this.core.conduit!, ship);
+  }
+
+  async scryAllies(_event: IpcMainInvokeEvent) {
+    return await this.models.bazaar.scryAllies(this.core.conduit!);
   }
 
   async addToSuite(
     _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
+    path: SpacePath,
     appId: string,
-    rank: number
+    index: number
   ) {
-    return await BazaarApi.addToSuite(
-      this.core.conduit!,
-      spacePath,
-      appId,
-      rank
-    );
+    return await this.models.bazaar.addToSuite(this.core.conduit!, {
+      path: formPathObj(path),
+      'app-id': appId,
+      index,
+    });
   }
 
   async removeFromSuite(
     _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
+    path: SpacePath,
+    index: number
   ) {
-    return await BazaarApi.removeFromSuite(
-      this.core.conduit!,
-      spacePath,
-      appId
-    );
+    return await this.models.bazaar.removeFromSuite(this.core.conduit!, {
+      path: formPathObj(path),
+      index,
+    });
   }
 
-  async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {
-    return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
+  async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
+    // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
   }
 
-  async installApp(_event: IpcMainInvokeEvent, app: any) {
-    return await BazaarApi.resolveAppInstall(this.core.conduit!, app);
+  async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
+    // return await BazaarApi.newInstaller(
+    //   this.core.conduit!,
+    //   ship,
+    //   desk,
+    //   this.models.bazaar
+    // );
+  }
+
+  async installAppDirect(
+    _event: IpcMainInvokeEvent,
+    ship: string,
+    desk: string
+  ) {
+    return await this.models.bazaar.installAppDirect(this.core.conduit!, {
+      ship,
+      desk,
+    });
+  }
+
+  async installApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+    return await this.models.bazaar.installApp(this.core.conduit!, {
+      ship,
+      desk,
+    });
   }
 
   async uninstallApp(_event: IpcMainInvokeEvent, desk: string) {
-    return await BazaarApi.uninstallApp(this.core.conduit!, desk);
+    return await this.models.bazaar.uninstallApp(this.core.conduit!, { desk });
+  }
+  async suspendApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.suspendApp(this.core.conduit!, desk);
+  }
+  async reviveApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.reviveApp(this.core.conduit!, desk);
+  }
+  async addAlly(_event: IpcMainInvokeEvent, ship: Patp) {
+    return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }
 
-  async addAlly(_event: IpcMainInvokeEvent, ship: any) {
-    return await BazaarApi.addAlly(this.core.conduit!, ship);
+  async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
+    // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
   }
 
-  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
-    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
+    // return await BazaarApi.removeApp(this.core.conduit!, appId);
+  }
+
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: string[]) {
+    this.models.bazaar.reorderPinnedApps(this.core.conduit!, {
+      path: formPathObj(path),
+      dock: order,
+    });
+  }
+
+  async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
+    return await this.models.beacon.notes
+      ?.get(noteId)
+      ?.markSeen(this.core.conduit!);
+    // return await BeaconApi.sawNote(this.core.conduit!, noteId);
+  }
+  async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {
+    return await this.models.beacon.sawInbox(this.core.conduit!, inbox);
   }
 
   setSpaceWallpaper(spacePath: string, theme: any) {
     const space = this.state!.getSpaceByPath(spacePath)!;
 
-    space.theme!.setTheme(theme);
-    // @ts-ignore
+    space.theme.setTheme(theme);
+
     delete theme.id;
     SpacesApi.updateSpace(this.core.conduit!, {
       path: space.path,
-      payload: { theme: snakeify(theme) },
+      payload: {
+        name: space.name,
+        description: space.description,
+        access: space.access,
+        picture: space.picture,
+        color: space.color,
+        theme: snakeify(theme),
+      },
     });
-    return;
   }
 }

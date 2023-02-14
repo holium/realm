@@ -1,10 +1,10 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import styled from 'styled-components';
-import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
-import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
+import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
+import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 import { useServices } from 'renderer/logic/store';
 
-const ToolbarStyle = styled(TitlebarStyle)`
+const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0px 18px;
   height: 60px;
   background: transparent;
@@ -12,35 +12,31 @@ const ToolbarStyle = styled(TitlebarStyle)`
   border-bottom: none;
 `;
 
-export type DialogTitlebarProps = {
+export interface DialogTitlebarProps {
   dragControls: any;
   onDragStart: any;
   onDragStop: any;
   zIndex: number;
   showDevToolsToggle: boolean;
   windowColor: string;
-  onClose?: () => void;
-  onMaximize: () => void;
-};
+  onClose: () => void;
+}
 
-export const DialogTitlebar: FC<DialogTitlebarProps> = (
-  props: DialogTitlebarProps
-) => {
-  const {
-    dragControls,
-    onDragStop,
-    onDragStart,
-    zIndex,
-    windowColor,
-    onClose,
-  } = props;
+export const DialogTitlebar = ({
+  dragControls,
+  onDragStop,
+  onDragStart,
+  zIndex,
+  windowColor,
+  onClose,
+}: DialogTitlebarProps) => {
   const { theme } = useServices();
 
   const { iconColor } = theme.currentTheme;
 
   return useMemo(() => {
     return (
-      <ToolbarStyle
+      <ToolbarContainer
         hasBlur={false}
         {...(dragControls
           ? {
@@ -54,14 +50,13 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
             }
           : {})}
         zIndex={zIndex}
-        customBg={windowColor!}
         hasBorder
       >
         {onClose && (
-          <WindowIcon
+          <AppWindowIcon
             icon="Close"
             size={26}
-            iconColor={iconColor!}
+            iconColor={iconColor}
             bg="#FF6240"
             fillWithBg
             onClick={(evt: any) => {
@@ -70,7 +65,7 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
             }}
           />
         )}
-      </ToolbarStyle>
+      </ToolbarContainer>
     );
   }, [zIndex, iconColor, windowColor]);
 };

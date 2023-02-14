@@ -1,6 +1,7 @@
-import { ChatModelType } from 'os/services/tray/rooms.model';
-import { lighten } from 'polished';
-import { FC, useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+import { ChatModelType } from '@holium/realm-room';
+import { lighten, darken } from 'polished';
+import { useEffect, useState } from 'react';
 import { Bubble } from 'renderer/apps/Messages/components/Bubble';
 import { Flex, Text, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -10,20 +11,17 @@ interface RoomChatMessageProps {
   doesPack: boolean;
 }
 
-export const RoomChatMessage: FC<RoomChatMessageProps> = ({
-  chat,
-  doesPack,
-}: RoomChatMessageProps) => {
-  const { theme: themeStore, ship } = useServices();
+const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
+  const { theme: themeStore } = useServices();
   const theme = themeStore.currentTheme;
 
   const [timeString, setTimeString] = useState('');
 
   useEffect(() => {
-    let dat = new Date(chat.timeReceived);
-    let hor = `${dat.getHours()}`.padStart(2, '0');
-    let min = `${dat.getMinutes()}`.padStart(2, '0');
-    let sec = `${dat.getSeconds()}`.padStart(2, '0');
+    const dat = new Date(chat.timeReceived);
+    const hor = `${dat.getHours()}`.padStart(2, '0');
+    const min = `${dat.getMinutes()}`.padStart(2, '0');
+    const sec = `${dat.getSeconds()}`.padStart(2, '0');
 
     setTimeString(`${hor}:${min}:${sec}`);
   }, [chat]);
@@ -33,8 +31,9 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
       key={chat.index}
       flexDirection="column"
       justifyContent="flex-end"
-      mt={doesPack ? 1 : 4}
-      mr={3}
+      pt={doesPack ? 1 : 4}
+      pl={3}
+      pr={3}
     >
       {!chat.isRightAligned && !doesPack && (
         // author string
@@ -47,20 +46,22 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
         <Tooltip placement="top" content={timeString} id={`${chat.index}`}>
           <Bubble
             primary={chat.isRightAligned}
+            color={chat.isRightAligned ? '#FFF' : theme.textColor}
             customBg={
               chat.isRightAligned
                 ? theme.accentColor
+                : theme.mode === 'light'
+                ? darken(0.1, theme.windowColor)
                 : lighten(0.1, theme.windowColor)
             }
           >
             <Text
-              color={theme.textColor}
               fontSize={2}
               style={{
                 maxWidth: '200px',
               }}
             >
-              {`${chat.contents}`}
+              {`${chat.content}`}
             </Text>
           </Bubble>
         </Tooltip>
@@ -68,3 +69,5 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
     </Flex>
   );
 };
+
+export const RoomChatMessage = observer(RoomChatMessagePresenter);

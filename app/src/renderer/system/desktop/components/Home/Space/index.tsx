@@ -1,67 +1,29 @@
-import { FC, useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 
-import { SpaceTitlebar } from './Titlebar';
-import { AppSuite } from './AppSuite';
+import { SpaceTitlebar } from './SpaceTitlebar';
+import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
-import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
-import { sampleSuite } from './sample-suite';
 
-type HomePaneProps = {
+interface HomePaneProps {
   isOpen?: boolean;
-};
+}
 
 type SidebarType = 'members' | null;
 
-export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
+const SpaceHomePresenter = (props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, theme, spaces, membership, bazaar } = useServices();
+  const { ship, spaces, membership } = useServices();
   const currentSpace = spaces.selected;
-  const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
-  const [apps, setApps] = useState<any>([]);
-  const [suite, setSuite] = useState<any>([]);
-  const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
-  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
-  // console.log('isAdmin => %o', isAdmin);
 
-  useEffect(() => {
-    if (currentSpace) {
-      const memberMap = membership.getMembersList(currentSpace.path);
-      setMembers(memberMap);
-    }
-  }, [currentSpace]);
-
-  useEffect(() => {
-    // console.log('AppSuite useEffect => %o', {
-    //   ship: ship?.patp,
-    //   path: currentSpace?.path,
-    // });
-    if (currentSpace) {
-      // @ts-ignore
-      const suite = Array(5).fill(undefined);
-      const apps = bazaar.getSuiteApps(currentSpace.path);
-      apps?.forEach((app, index) => suite.splice(app.ranks!.suite, 1, app));
-      // console.log(suite);
-      setSuite(suite);
-    }
-  }, [
-    currentSpace,
-    currentBazaar?.suiteChange,
-    bazaar.appsChange,
-    currentBazaar?.pinnedChange,
-  ]);
-
-  useEffect(() => {
-    const apps = bazaar.getAvailableApps();
-    setApps(apps);
-  }, [bazaar.appsChange]);
+  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -84,14 +46,15 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, members]);
-  if (!currentSpace) return null;
-  const membersCount = membership.getMemberCount(currentSpace.path);
+  }, [sidebar]);
 
-  const headerWidth = '50%';
-  const paneWidth = '50%';
+  if (!currentSpace) return null;
+
+  const membersCount = membership.getMemberCount(currentSpace.path);
+  const maxWidth = 880;
+
   return (
-    <Flex flexDirection="row" width="100%" height="calc(100vh - 58px)">
+    <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
       <Flex
         flex={1}
         overflowY="auto"
@@ -109,8 +72,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
-          minWidth={880}
-          width={headerWidth}
+          width={maxWidth}
           variants={{
             hidden: {
               opacity: 0,
@@ -132,7 +94,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         >
           <SpaceTitlebar
             space={currentSpace}
-            theme={theme.currentTheme}
             membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}
@@ -150,8 +111,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           flexDirection="row"
           justifyContent="space-between"
           gap={36}
-          minWidth={880}
-          width={paneWidth}
+          width={maxWidth}
         >
           {appGrid && (
             <Flex
@@ -181,12 +141,11 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}
-                width="880px"
-                // mb="180px"
+                width={maxWidth}
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid isOpen tileSize="xl2" />
+                <AppGrid tileSize="xl2" />
               </Flex>
             </Flex>
           )}
@@ -230,16 +189,9 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite
-                patp={ship!.patp!}
-                space={currentSpace}
-                apps={apps}
-                suite={suite}
-                isAdmin={isAdmin as boolean}
-                bazaar={bazaar}
-              />
+              <AppSuite patp={ship!.patp} isAdmin={isAdmin as boolean} />
               <RecommendedApps />
-              <RecentActivity />
+              {/* <RecentActivity /> */}
             </Flex>
           )}
           {sidebarComponent}
@@ -247,4 +199,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const SpaceHome = observer(SpaceHomePresenter);

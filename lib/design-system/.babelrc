@@ -1,0 +1,21 @@
+{
+  "ignore": [
+    ".template/<name>.stories.tsx",
+    ".template/index.tsx",
+    ".template/<name>.tests.tsx"
+  ],
+  "presets": [
+    "@babel/preset-env",
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic"
+      }
+    ],
+    ["@babel/preset-typescript", { "isTSX": true, "allExtensions": true }]
+  ],
+  "plugins": [
+    "babel-plugin-styled-components",
+    "@babel/plugin-proposal-class-properties"
+  ]
+}

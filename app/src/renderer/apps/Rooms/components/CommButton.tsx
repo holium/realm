@@ -4,10 +4,10 @@ import { darken } from 'polished';
 import { Flex, Icons, IconTypes } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
 
-type CommCircleProps = {
+interface CommCircleProps {
   customBg: string;
   theme: ThemeType;
-};
+}
 
 const CommCircle = styled(Flex)<CommCircleProps>`
   height: 40px;

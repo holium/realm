@@ -4,47 +4,13 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 ## Getting started
 
-Install all dependencies with `yarn` or `npm install`.
-
-**Note**: Run `yarn watch:cursor` one time to build the `mouse.js` preload. Need to refactor the default build
-process to include this step.
+You should build the project from root with `yarn` so that all the libs build properly.
 
 Start the app in dev mode with `yarn start` or `npm run start`.
 
-### Starting two instances for Playground testing
-
-You can start two instances of Realm by placing the `PORT` environment variable in front of the `yarn start` command.
-
-#### Start zod
-
-```bash
-PORT=1212 PLAYGROUND_PORT=3010 yarn start
-```
-
-Make sure to logout of any current session once the window opens. Login with the accounts after both instances and the playground app ui is running for each.
-I would not try to log in on the same account for now. This is not supported currently. Sign into separate accounts.
-
-#### Start bus
-
-```bash
-PORT=1213 PLAYGROUND_PORT=3011 yarn start
-```
-
-#### Start playground dev servers
-
-The env format is `.env.<patp>` as seen in the commands below.
-
-```bash
-yarn dev:env zod
-```
-
-```bash
-yarn dev:env bus
-```
-
 ## Developing apps within Realm
 
-You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/renderer/apps/development.ts`.
+You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/app.dev.json`.
 
 You can add a record for your development application in the following format:
 
@@ -53,12 +19,16 @@ You can add a record for your development application in the following format:
   "ballot-dev": {
     "id": "ballot-dev",
     "title": "Ballot - Dev",
-    "type": "web",
+    "type": "dev",
     "color": "#cebef0",
     "icon": "https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg",
+    "config": {
+      "size": [6, 8],
+      "showTitlebar": true,
+      "titlebarBorder": false
+    },
     "web": {
-      "openFullscreen": true,
-      "url": "http://localhost:3000/apps/ballot/" # the port for your dev server
+      "url": "http://localhost:3000/apps/ballot/"
     }
   }
 }
@@ -78,22 +48,14 @@ The project is structured with the goal of having a seperate process sync data f
                                 |
                           ____________
                          |            |
-                         |    Core    |
+                         |     OS     |
                          |____________|
 ```
 
 - `/renderer` is the GUI layer.
 - `/main` is the main electron process
-- `/core` is the core background process libs for syncing state and managing data.
+- `/os` is the core background process libs for syncing state and managing data.
 - `/background` is the background process logic, starts a tray icon for Realm.
-
-## Layers of the UI
-
-Layer 0: Background
-Layer 1: WindowManager
-Layer 2: SystemBar
-Layer 3: TrayMenus
-Layer 4: Modals, ContextMenu, Tooltips, Popovers
 
 ## Packaging for release
 

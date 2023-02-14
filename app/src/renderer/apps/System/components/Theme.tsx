@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -14,7 +14,11 @@ import { lighten } from 'polished';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { Member } from 'os/types';
+import { ShipModelType } from 'os/services/ship/models/ship';
+import { MembershipType } from 'os/services/spaces/models/members';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { ThemeStoreType } from 'renderer/logic/theme';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -22,61 +26,64 @@ const WallpaperPreview = styled(motion.img)`
   margin: 0 auto;
   border-radius: 6px;
   transition: all 0.25s ease;
-  draggable: false;
   -webkit-user-drag: none;
 `;
 
-export const ThemePanel: FC<any> = observer(() => {
-  const { theme, ship, contacts, spaces } = useServices();
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+type wpOptionType =
+  | 'blueorb'
+  | 'darkneon'
+  | 'hallway'
+  | 'sunorb'
+  | 'jiggleorb'
+  | 'sliceball'
+  | undefined;
 
+const wpGallery: { [key: string]: string } = {
+  blueorb:
+    'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80',
+  nightcity:
+    'https://images.unsplash.com/photo-1655463223445-7c7cc696fdf8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  oranges:
+    'https://images.unsplash.com/photo-1656567229591-72a12a4cb0d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  water:
+    'https://images.unsplash.com/photo-1660469770527-cd73fbc59cc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+  forestfog:
+    'https://images.unsplash.com/photo-1661749232278-3c8380532c07?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80',
+  darkneon:
+    'https://images.unsplash.com/photo-1650943574955-ac02c65cfc71?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2942&q=80',
+  ogdefault:
+    'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80',
+  // 'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
+  // 'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+  // 'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+  // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
+};
+
+type ThemePanelPresenterViewProps = {
+  theme: ThemeStoreType;
+  ship: ShipModelType;
+  space: SpaceModelType;
+  membership: MembershipType;
+};
+
+const ThemePanelPresenterView = ({
+  theme,
+  ship,
+  membership,
+  space,
+}: ThemePanelPresenterViewProps) => {
+  const { windowColor, accentColor, inputColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
-  type AppearanceType = 'dynamic' | 'light' | 'dark';
-
-  const [appearance, setAppearance] = useState<AppearanceType>('dynamic');
-
-  type wpOptionType =
-    | 'blueorb'
-    | 'darkneon'
-    | 'hallway'
-    | 'sunorb'
-    | 'jiggleorb'
-    | 'sliceball'
-    | undefined;
-
-  const wpGallery: { [key: string]: string } = {
-    blueorb:
-      'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80',
-    nightcity:
-      'https://images.unsplash.com/photo-1655463223445-7c7cc696fdf8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    oranges:
-      'https://images.unsplash.com/photo-1656567229591-72a12a4cb0d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    water:
-      'https://images.unsplash.com/photo-1660469770527-cd73fbc59cc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    forestfog:
-      'https://images.unsplash.com/photo-1661749232278-3c8380532c07?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80',
-    darkneon:
-      'https://images.unsplash.com/photo-1650943574955-ac02c65cfc71?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2942&q=80',
-    ogdefault:
-      'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80',
-    // 'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
-    // 'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    // 'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
-  };
-
+  const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
   const wpGalleryKeys = Object.keys(wpGallery);
 
-  const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
-
-  // const spaceAdmins = spaces.selected!.members.admins;
-  // const canEditSpace : boolean = spaceAdmins.find( (admin) => {
-  //   return admin.patp === ship!.patp;
-  // }) !== null;
-
-  const canEditSpace: boolean = spaces.selected!.path === `/${ship!.patp}/our`;
+  const members = Array.from(membership.getMembersList(space.path));
+  const me = members.find(
+    (member: Member) =>
+      member.patp === ship.patp && member.roles.indexOf('admin') !== -1
+  );
+  // is 'me' (currently logged in user) an admin?
+  const canEditSpace = me !== undefined;
 
   const themeForm = useForm({
     async onSubmit({ values }: any) {
@@ -89,9 +96,9 @@ export const ThemePanel: FC<any> = observer(() => {
 
       if (values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
-        await theme.setWallpaper(spaces.selected!.path, values.customWallpaper);
+        await theme.setWallpaper(space.path, values.customWallpaper);
       } else if (wpOption !== undefined) {
-        await theme.setWallpaper(spaces.selected!.path, wpGallery[wpOption]);
+        await theme.setWallpaper(space.path, wpGallery[wpOption]);
       }
 
       // TODO doesnt work
@@ -102,25 +109,6 @@ export const ThemePanel: FC<any> = observer(() => {
       // let mytheme = toJS(theme);
       // mytheme.accentColor = values.accentColor;
       // await DesktopActions.setTheme(mytheme)
-    },
-  });
-
-  const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
-  const isValidHexColor = (hex: string) => {
-    return hexRegex.test(hex);
-  };
-  // // // //
-  const accentColorField = useField({
-    id: 'accentColor',
-    form: themeForm,
-    initialValue: accentColor,
-    validate: (acc: string) => {
-      if (isValidHexColor(acc)) {
-        setValidatedColor(acc);
-        return { error: undefined, parsed: acc };
-      }
-
-      return { error: 'Invalid Color', parsed: undefined };
     },
   });
 
@@ -145,33 +133,31 @@ export const ThemePanel: FC<any> = observer(() => {
     },
   });
 
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [validatedColor, setValidatedColor] = useState(accentColor);
-
   return (
     <Flex
       gap={12}
       flexDirection="column"
       p="12px"
       width="100%"
-      overflowX={'scroll'}
+      overflowX={'auto'}
     >
       <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
         <Text fontSize={7} fontWeight={600}>
           Theme
         </Text>
 
-        <TextButton
-          style={{ fontWeight: 400 }}
-          showBackground
-          textColor={accentColor}
-          highlightColor={accentColor}
-          disabled={!themeForm.computed.isValid || !canEditSpace}
-          onClick={themeForm.actions.submit}
-        >
-          {canEditSpace ? 'Save' : 'Bad Space Permissions'}
-          {/* Save */}
-        </TextButton>
+        {canEditSpace && (
+          <TextButton
+            style={{ fontWeight: 400 }}
+            showBackground
+            textColor={accentColor}
+            highlightColor={accentColor}
+            disabled={!themeForm.computed.isValid || !canEditSpace}
+            onClick={themeForm.actions.submit}
+          >
+            Save
+          </TextButton>
+        )}
       </Flex>
 
       {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
@@ -208,12 +194,12 @@ export const ThemePanel: FC<any> = observer(() => {
           </Flex>
 
         </Flex>
-        
+
         <Flex gap={18}>
           <Text my='auto' fontWeight={500} >
             Accent Color
           </Text>
-          
+
           <Flex position="relative" justifyContent="flex-end">
               <ColorTile
               // id="space-color-tile"
@@ -256,7 +242,7 @@ export const ThemePanel: FC<any> = observer(() => {
             </Flex>
 
         </Flex>
-        
+
       </Card> */}
 
       {/* <Text
@@ -315,4 +301,21 @@ export const ThemePanel: FC<any> = observer(() => {
       </Card>
     </Flex>
   );
-});
+};
+
+const ThemePanelPresenter = () => {
+  const { theme, ship, spaces, membership } = useServices();
+
+  if (!spaces.selected || !ship || !membership) return null;
+
+  return (
+    <ThemePanelPresenterView
+      theme={theme}
+      ship={ship}
+      space={spaces.selected}
+      membership={membership}
+    />
+  );
+};
+
+export const ThemePanel = observer(ThemePanelPresenter);

@@ -2,121 +2,47 @@
 
 A desktop environment for Urbit.
 
-## Getting started
-
-In order to run Urbit locally, you will need to create a local fake ship. Once these ships are
-created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
-
 We use yarn workspace to manage the multiple modules.
 
-### 1. Build UI
+## Getting started
 
-#### Yarn
+We use yarn workspaces to build all packages for Realm.
 
 ```zsh
-# In the root directory
+# Install dependencies and build all packages
 yarn
+# Start the app
+yarn start
 ```
 
-#### Yarn link /libs
+### Dev setup
 
-`@holium/realm-multiplayer`:
+1. In order to run Urbit locally, you will need to create a local fake ship. To setup a fake ship see [`/.docs/DEV_SETUP.md`](/.docs/DEV_SETUP.md)
 
-```zsh
-cd lib/multiplayer
-yarn build
-yarn link
+2. Once these ships are created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
 
-cd ...
-## In the root directory
-yarn link "@holium/realm-multiplayer"
+### Downloading the binary from Releases
+
+If you download from releases, you will have to include a github token env when you open Realm for now, see docs in [`/app/release/app`](https://github.com/holium/realm/tree/main/app/release/app/README.md).
+
+In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com` (only if DEBUG_PROD=true).
+
+`~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
+
+### Build prerelease version
+
+```
+npx cross-env DEBUG_PROD=true yarn package:prerelease:mac
+npx cross-env DEBUG_PROD=true yarn package:prerelease:linux
+npx cross-env DEBUG_PROD=true yarn package:prerelease:win
 ```
 
-`@holium/conduit`:
+Building a prerelease will replace the `.d.ts` files in all the `/dist` folders, so make sure to run `rm -rf ./**/dist` followed by `yarn` in root when you want to run Realm in dev mode again.
 
-```zsh
-cd lib/conduit
+## Contributing
 
-yarn build
-yarn link
+For frontend development, make sure to:
 
-cd ...
-## In the root directory
-yarn link "@holium/conduit"
-```
-
-### 2. Fake ships and Urbit
-
-You will need to copy over the following desks:
-
-- %courier: messaging agents
-- %realm: core realm agents
-
-```zsh
-# Make ships folder
-mkdir ships
-cd ships
-# Download latest urbit
-curl -JLO https://urbit.org/install/mac/latest
-# Uncompress
-tar zxvf ./darwin.tgz --strip=1
-rm darwin.tgz
-```
-
-#### Download latest urbit pill
-
-First, you may need to download `git-lfs`
-
-```zsh
-brew install git-lfs
-git lfs install
-```
-
-After install `git-lfs`, clone the urbit repo.
-
-```zsh
-git clone https://github.com/urbit/urbit urbit-repo
-```
-
-This will add a `urbit` folder to your local repo which is ignored by git.
-
-#### Booting a fake ship for development
-
-You should run these in two separate terminal windows.
-
-**WARNING**: Never start the same ship twice or there will be networking problems.
-
-```zsh
-# The -F will create a fake zod
-./urbit -F zod -B ./urbit-repo/bin/multi-brass.pill
-
-# Optional:
-#   Fake bus for networking between fake ships
-./urbit -F bus -B ./urbit-repo/bin/multi-brass.pill
-```
-
-This will start booting a dev ship and may take a while.
-
-[See more docs for working with the developer environment.](https://urbit.org/docs/development/environment)
-
-#### Allow origin (CORS)
-
-You will want to run the following on both ships.
-
-```hoon
-~zod:dojo> |pass [%e [%approve-origin 'http://localhost:3010']]
-```
-
-```hoon
-~bus:dojo> |pass [%e [%approve-origin 'http://localhost:3010']]
-```
-
-### Starting the ship after install
-
-Now, you want to start your dev ship `zod`.
-
-**WARNING**: Never start the same ship twice or there will be networking problems. Make sure there is no instance of `~zod` running before running this:
-
-```zsh
-./urbit zod
-```
+1. Install the ESLint extension in your editor of choice ([VSCode link](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)). The Prettier extension is not needed since we're using it as an ESLint plugin.
+2. Configure your editor to format on save so you don't have to run `yarn lint` manually ([VSCode instruction](https://code.visualstudio.com/updates/v1_6#_format-on-save)).
+3. Follow the [Frontend Style Guide](./.docs/FRONTEND.md).

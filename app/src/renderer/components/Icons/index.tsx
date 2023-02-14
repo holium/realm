@@ -1,5 +1,5 @@
 import { motion, SVGMotionProps } from 'framer-motion';
-import React, { forwardRef, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import {
   compose,
@@ -47,7 +47,7 @@ const SvgComponent = forwardRef<
       {...props}
     >
       {title ? <title id={titleId}>{title}</title> : null}
-      {/* @ts-ignore */}
+      {/* @ts-expect-error */}
       {paths[name]}
     </motion.svg>
   );
@@ -58,5 +58,3 @@ export const Icons = styled(SvgComponent)<IconProps>`
   vertical-align: middle;
   ${compose(space, color, width, height, layout, typography)}
 `;
-
-export default Icons;

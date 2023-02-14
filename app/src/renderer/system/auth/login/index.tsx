@@ -1,12 +1,10 @@
-import { useRef, FC, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { toJS } from 'mobx';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,
@@ -21,18 +19,18 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import Portal from 'renderer/system/dialog/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
-type LoginProps = {
+interface LoginProps {
   addShip: () => void;
-  hasWallpaper?: boolean;
-};
+}
 
-export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip, hasWallpaper } = props;
-  const { identity, desktop, theme } = useServices();
+const LoginPresenter = ({ addShip }: LoginProps) => {
+  const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef(null);
@@ -40,7 +38,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
   const [incorrectPassword, setIncorrectPassword] = useState(false);
 
   // Setting up options menu
@@ -76,6 +73,20 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     }
   }, [pendingShip]);
 
+  const login = async () => {
+    const loggedIn = await AuthActions.login(
+      pendingShip!.patp,
+      // @ts-ignore
+      passwordRef!.current!.value
+    );
+    if (!loggedIn) {
+      // @ts-expect-error
+      submitRef.current.blur();
+      setIncorrectPassword(true);
+    }
+    trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
+  };
+
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
       // @ts-expect-error typescript...
@@ -89,18 +100,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const clickSubmit = async (event: any) => {
     event.stopPropagation();
     setHasFailed(false);
-    setLoading(true);
-    let loggedIn = await AuthActions.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
-    );
-    if (!loggedIn) {
-      // @ts-expect-error
-      submitRef.current.blur();
-      setIncorrectPassword(true);
-      setLoading(false);
-    }
+    login();
   };
 
   let colorProps = null;
@@ -124,14 +124,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
               gap={24}
             >
               <Box>
-                <Sigil
+                <Avatar
                   isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
                   avatar={pendingShip.avatar}
                   patp={pendingShip.patp}
-                  color={[pendingShip.color || '#000000', 'white']}
+                  sigilColor={[pendingShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -180,14 +180,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   alignItems="center"
                 >
                   <Input
-                    ref={passwordRef}
+                    innerRef={passwordRef}
                     wrapperRef={wrapperRef}
-                    {...(hasWallpaper
-                      ? { bg: 'bg.blendedBg' }
-                      : { bg: 'bg.secondary' })}
+                    bg="bg.blendedBg"
                     autoFocus
                     autoCorrect="false"
-                    bgOpacity={hasWallpaper ? 0.3 : 1}
+                    bgOpacity={0.3}
                     wrapperStyle={{
                       borderRadius: 8,
                       width: isVertical ? 320 : 260,
@@ -206,7 +204,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           ref={optionsRef}
                           luminosity={theme.currentTheme.mode}
                           opacity={1}
-                          onClick={(evt: any) => {
+                          onClick={() => {
                             setShow(true);
                           }}
                         >
@@ -225,9 +223,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                   width: menuWidth,
                                 }}
                                 isOpen={show}
-                                onClose={(evt) => {
-                                  setShow(false);
-                                }}
+                                onClose={() => setShow(false)}
                               >
                                 <MenuItem
                                   data-prevent-context-close={false}
@@ -240,8 +236,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                 <MenuItem
                                   label="Remove ship"
                                   customBg={theme.currentTheme.windowColor}
-                                  mt={1}
-                                  onClick={(_evt: any) => {
+                                  onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}
                                 />
@@ -265,7 +260,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             luminosity={theme.currentTheme.mode}
                             size={24}
                             canFocus
-                            onClick={(evt: any) => clickSubmit(evt)}
+                            onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icons name="ArrowRightLine" />
                           </IconButton>
@@ -317,6 +312,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       </Bottom>
     </Fill>
   );
-});
+};
 
-export default Login;
+export const Login = observer(LoginPresenter);

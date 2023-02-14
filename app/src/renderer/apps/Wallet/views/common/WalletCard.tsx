@@ -1,67 +1,101 @@
-import { FC } from 'react';
-import { transparentize } from 'polished';
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
+import { FC, useMemo } from 'react';
+import { darken, lighten, rgba } from 'polished';
 import { Text, Flex } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
-import { theme as themes } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
-import { formatEthAmount } from '../../lib/helpers';
+import {
+  formatEthAmount,
+  formatZigAmount,
+  getCoins,
+  getMockCoinIcon,
+  getTransactions,
+} from '../../lib/helpers';
+import {
+  EthWalletType,
+  BitcoinWalletType,
+  NetworkType,
+  ProtocolType,
+  ERC20Type,
+} from 'os/services/tray/wallet-lib/wallet.model';
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../components/WalletCardWrapper';
 
-type CardStyleProps = {
-  isSelected: boolean;
-  mode: string;
-};
-
-const CardStyle = styled(motion.div)<CardStyleProps>`
-  ${(props: CardStyleProps) =>
-    props.isSelected
-      ? css``
-      : css`
-          border: 1px solid
-            ${(props: CardStyleProps) =>
-              props.mode === 'light' ? ' #00000010' : '#83909F'};
-          border-radius: 12px;
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          padding: 16px 12px;
-        `}
-`;
 interface WalletCardProps {
-  wallet: any;
+  // wallet: EthWalletType | BitcoinWalletType;
+  walletKey: any;
   isSelected?: boolean;
   onSelect?: () => void;
   theme?: ThemeType;
 }
 
 export const WalletCard: FC<WalletCardProps> = ({
-  wallet,
+  walletKey,
   isSelected,
   onSelect,
 }: WalletCardProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
-
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
-  const themeData = themes[mode];
 
-  return (
-    <Flex mt={6}>
-      <CardStyle
+  const wallet = walletApp.currentStore.wallets.get(walletKey)!;
+
+  let coins: any = null;
+  if (walletApp.navState.network === NetworkType.ETHEREUM) {
+    coins = getCoins(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
+    );
+  }
+
+  const walletTransactions =
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+          .transactionList.transactions
+      : (wallet as BitcoinWalletType).transactionList.transactions;
+
+  const transactions = getTransactions(walletTransactions || new Map());
+
+  const amountDisplay =
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? walletApp.navState.protocol === ProtocolType.UQBAR
+        ? `${formatZigAmount(
+            (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+              .balance
+          )} zigs`
+        : `${
+            formatEthAmount(
+              (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+                .balance
+            ).eth
+          } ETH`
+      : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
+
+  return useMemo(
+    () => (
+      <WalletCardStyle
+        layout="size"
+        elevation="none"
+        layoutId={`wallet-card-${wallet.address}`}
+        justifyContent="flex-start"
+        transition={walletCardStyleTransition}
+        customBg={lighten(0.04, theme.currentTheme.windowColor)}
+        borderColor={
+          theme.currentTheme.mode === 'dark'
+            ? darken(0.1, theme.currentTheme.backgroundColor)
+            : darken(0.1, theme.currentTheme.windowColor)
+        }
         mode={mode}
-        layoutId={`wallet-container-${wallet.address}`}
-        layout
         isSelected={!!isSelected}
         onClick={onSelect}
       >
         <Text
           layoutId={`wallet-name-${wallet.address}`}
-          opacity={0.5}
+          layout="position"
+          transition={{ duration: 0.1 }}
           fontWeight={600}
-          color={transparentize(0.4, themeData.colors.text.primary)}
+          color={rgba(theme.currentTheme.textColor, 0.4)}
           style={{ textTransform: 'uppercase' }}
         >
           {wallet.nickname}
@@ -69,15 +103,47 @@ export const WalletCard: FC<WalletCardProps> = ({
         <Text
           mt={1}
           layoutId={`wallet-balance-${wallet.address}`}
-          opacity={0.9}
+          transition={{ duration: 0.1 }}
           fontWeight={600}
           fontSize={7}
         >
-          {/* @ts-ignore */}
           {amountDisplay}
         </Text>
-      </CardStyle>
-    </Flex>
+        <Flex
+          // layout="position"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+          pt={2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Flex>
+            {coins &&
+              coins
+                .slice(0, 6)
+                .map((coin: ERC20Type, index: number) => (
+                  <img
+                    alt={coin.name}
+                    src={coin.logo || getMockCoinIcon(coin.name)}
+                    style={{ height: '14px', marginRight: '4px' }}
+                    key={index}
+                  />
+                ))}
+            {coins && coins.length > 6 && (
+              <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+                +{coins.length - 6}
+              </Text>
+            )}
+          </Flex>
+          <Text variant="body" color={theme.currentTheme.iconColor}>
+            {transactions.length} Transactions
+          </Text>
+        </Flex>
+      </WalletCardStyle>
+    ),
+    [wallet, isSelected, theme, mode, coins, transactions.length]
   );
 };
 

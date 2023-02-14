@@ -6,12 +6,14 @@ import {
   MenuItemConstructorOptions,
 } from 'electron';
 
+import { AppUpdater } from './AppUpdater';
+
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
   submenu?: DarwinMenuItemConstructorOptions[] | Menu;
 }
 
-export default class MenuBuilder {
+export class MenuBuilder {
   mainWindow: BrowserWindow;
 
   constructor(mainWindow: BrowserWindow) {
@@ -74,6 +76,15 @@ export default class MenuBuilder {
           selector: 'hideOtherApplications:',
         },
         { label: 'Show All', selector: 'unhideAllApplications:' },
+        { type: 'separator' },
+        {
+          label: 'Check for Updates',
+          accelerator: 'Command+U',
+          click: () => {
+            const appUpdater = new AppUpdater();
+            appUpdater.checkForUpdates(this.mainWindow, true);
+          },
+        },
         { type: 'separator' },
         {
           label: 'Quit',

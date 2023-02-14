@@ -7,7 +7,7 @@ import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { AirliftInfo } from 'renderer/apps/Airlift/AirliftInfo';
 
-export type ViewRenderers = {
+export interface ViewRenderers {
   [key: string]: {
     dimensions: {
       height: number;
@@ -18,23 +18,36 @@ export type ViewRenderers = {
     component: React.FC<any>;
     onOpen?: (evt: any) => void;
   };
-};
+}
 
-const dimensions = {
+export const defaultTrayDimensions = {
+  'rooms-tray': {
+    width: 380,
+    height: 500,
+  },
+  'spaces-tray': {
+    width: 340,
+    height: 500,
+  },
   'account-tray': {
     width: 350,
     height: 238,
     maxHeight: 390,
   },
+  'messages-tray': {
+    width: 390,
+    height: 600,
+  },
+  'wallet-tray': {
+    width: 330,
+    height: 600,
+  },
 };
 
 export const trayAppRenderers: ViewRenderers = {
   'rooms-tray': {
-    dimensions: {
-      width: 380,
-      height: 500,
-    },
-    component: (props: any) => <RoomApp {...props} />,
+    dimensions: defaultTrayDimensions['rooms-tray'],
+    component: () => <RoomApp />,
   },
   'airlift-tray': {
     dimensions: {
@@ -44,19 +57,16 @@ export const trayAppRenderers: ViewRenderers = {
     component: (props: any) => <AirliftInfo {...props} />,
   },
   'spaces-tray': {
-    dimensions: {
-      width: 340,
-      height: 500,
-    },
-    component: (props: any) => <SpacesTrayApp {...props} />,
+    dimensions: defaultTrayDimensions['spaces-tray'],
+    component: () => <SpacesTrayApp />,
   },
   'account-tray': {
-    dimensions: dimensions['account-tray'],
+    dimensions: defaultTrayDimensions['account-tray'],
     growHeight: true,
-    component: (props: any) => <AccountTrayApp {...props} />,
+    component: () => <AccountTrayApp />,
     onOpen: (evt: any) => {
       const position = 'top-left';
-      const appDims = dimensions['account-tray'];
+      const appDims = defaultTrayDimensions['account-tray'];
       const anchorOffset = { x: 8, y: 26 };
       const { setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
         trayStore;
@@ -64,7 +74,7 @@ export const trayAppRenderers: ViewRenderers = {
         evt,
         anchorOffset,
         position,
-        dimensions
+        defaultTrayDimensions
       );
       setTrayAppCoords({
         left,
@@ -75,14 +85,11 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'messages-tray': {
-    dimensions: {
-      width: 390,
-      height: 600,
-    },
-    component: (props: any) => <MessagesTrayApp {...props} />,
+    dimensions: defaultTrayDimensions['messages-tray'],
+    component: () => <MessagesTrayApp />,
     onOpen: (evt: any) => {
       const position = 'top-left';
-      const appDims = dimensions['account-tray'];
+      const appDims = defaultTrayDimensions['messages-tray'];
       const anchorOffset = { x: 4, y: 26 };
       const { setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
         trayStore;
@@ -90,7 +97,7 @@ export const trayAppRenderers: ViewRenderers = {
         evt,
         anchorOffset,
         position,
-        dimensions
+        defaultTrayDimensions
       );
       setTrayAppCoords({
         left,
@@ -101,10 +108,7 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'wallet-tray': {
-    component: (props: any) => <WalletApp {...props} />,
-    dimensions: {
-      width: 330,
-      height: 600,
-    },
+    component: () => <WalletApp />,
+    dimensions: defaultTrayDimensions['wallet-tray'],
   },
 };

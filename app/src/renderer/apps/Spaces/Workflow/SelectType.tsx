@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Grid, Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
 import { ShipActions } from 'renderer/logic/actions/ship';
@@ -15,35 +14,16 @@ export const Wrapper = styled(motion.div)`
   box-sizing: border-box;
 `;
 
-const groups: any[] = [
-  // {
-  //   name: 'Swolesome Fund',
-  //   image:
-  //     'https://archiv.nyc3.digitaloceanspaces.com/littel-wolfur/2022.2.13..05.27.08-jacked.png',
-  //   participants: 60,
-  // },
-  // {
-  //   name: 'Other Life',
-  //   image:
-  //     'https://dl.airtable.com/.attachmentThumbnails/85973e6c8ac12bef0ce4fbc046a2fb7c/8c21d303',
-  //   participants: 1261,
-  // },
-];
-
 export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { theme } = useServices();
     const { windowColor } = theme.currentTheme;
-    const { workflowState, setState } = props;
+    const { setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       ShipActions.getOurGroups().then((ourGroups) => {
-        console.log(ourGroups);
-        // hacky check to fix incorrectly formed %da
-        setGroups(
-          ourGroups.filter((group: any) => !group.path.includes('/~2'))
-        );
+        setGroups(ourGroups);
         setLoading(false);
       });
     }, []);
@@ -69,6 +49,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
               return (
                 <SelectRow
                   key={groupKey}
+                  color={data.color}
                   image={data.picture}
                   customBg={windowColor}
                   title={data.name || groupKey}
@@ -78,10 +59,15 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                     setState &&
                       setState({
                         title,
+                        name: title,
                         image: data.picture,
+                        color: data.color || '#000000',
                         subtitle,
                         type: 'group',
+                        archetype: 'community',
+                        archetypeTitle: 'Group',
                         path: data.path,
+                        access: data.access,
                       });
                     props.onNext && props.onNext(_evt);
                   }}
@@ -135,21 +121,13 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                 setState({
                   title: 'New Space',
                   type: 'space',
+                  color: '#000000',
+                  image: '',
                   archetype: 'community',
                   archetypeTitle: 'Community',
+                  crestOption: 'color',
                 });
-              // setWorkspaceState({
-              //   archetype: 'community',
-              //   archetypeTitle: 'Community',
-              // });
-              // workflowState.set({
-              //   title: 'New Space',
-              //   type: 'space',
-              // });
               props.onNext && props.onNext(null, data);
-              // props.setState &&
-              //   props.setState({ title: 'New Space', type: 'space' });
-              // props.onNext && props.onNext(data);
             }}
           />
           <Flex mt={8} flex={1} flexDirection="column">

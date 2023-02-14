@@ -1,3 +1,4 @@
+export * from './Anchor';
 export * from './Box';
 export * from './Card';
 export * from './Column';
@@ -34,5 +35,9 @@ export * from './Crest';
 export * from './ShipSearch';
 export * from './People';
 export * from './SpacePicture';
-export * from './AppTile';
+export * from './AppTile/AppTile';
 export * from './Notification/InnerNotification';
+export * from './ConnectionStatus';
+export * from './CopyButton';
+export * from './urbitSvg';
+export * from './NoScrollbar';

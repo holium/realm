@@ -1,13 +1,14 @@
+import { toJS } from 'mobx';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
-
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { CreateSpaceModal } from './SelectType';
 import { SpacesCreateForm } from './Details';
 import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-type NewSpace = {
+interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
   archetype: 'home' | 'community';
   archetypeTitle?: 'Home' | 'Community';
@@ -15,15 +16,16 @@ type NewSpace = {
   picture?: string;
   members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
   name: string;
+  description: string;
   type: 'our' | 'group' | 'space';
-};
+}
 
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {
     workflow: true,
     firstStep: true,
     customNext: true,
-    // stateKey: 'create-space',
+    hasCloseButton: true,
     component: (props: any) => <CreateSpaceModal {...props} />,
     hasPrevious: () => true,
     onOpen: () => {
@@ -36,23 +38,25 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false, true);
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'create-space-1',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-1',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
   'create-space-2': {
     workflow: true,
     customNext: false,
-    // stateKey: 'create-space',
+    hasCloseButton: true,
     component: (props: any) => <SelectArchetype {...props} />,
     hasPrevious: () => true,
     isValidated: (data: any) => {
@@ -62,7 +66,7 @@ export const spacesDialogs: DialogRenderers = {
         return false;
       }
     },
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any) => {
       ShellActions.nextDialog('create-space-3');
     },
     onPrevious: () => {
@@ -72,25 +76,27 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    window: {
-      id: 'create-space-2',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-2',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
   'create-space-3': {
     workflow: true,
-    // stateKey: 'create-space',
+    hasCloseButton: true,
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any, _setState: any) => {
       ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
@@ -105,42 +111,107 @@ export const spacesDialogs: DialogRenderers = {
         state &&
         state.access &&
         state.name &&
-        state.color &&
-        state.picture !== undefined
+        (state.picture !== undefined || state.color !== undefined)
       ) {
         return true;
       } else {
         return false;
       }
     },
-    window: {
-      id: 'create-space-3',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-3',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
-  'create-space-4': {
+  'edit-space': (dialogProps: any) => ({
     workflow: true,
-    // stateKey: 'create-space',
-    component: (props: any) => <InviteMembers {...props} />,
-    hasPrevious: () => true,
-    nextButtonText: 'Create Place',
+    hasCloseButton: true,
+    component: (props: any) => (
+      <SpacesCreateForm edit={dialogProps} {...props} />
+    ),
+    hasPrevious: () => false,
+    nextButtonText: 'Update Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      const createForm: NewSpace = state;
+      if (state.crestOption === 'color') {
+        state.image = '';
+      }
+      let createForm = state;
+      if (!createForm.archetype) createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
-      // DesktopActions.setDialogLoading(true);
-      SpacesActions.createSpace(createForm).then(() => {
-        // DesktopActions.closeDialog();
+      createForm = {
+        name: createForm.name,
+        description: createForm.description || '',
+        access: createForm.access,
+        picture: createForm.image,
+        color: createForm.color,
+        theme: toJS(createForm.theme),
+      };
+      SpacesActions.updateSpace(state.path, createForm).then(() => {
         setState({ loading: false });
-        // DesktopActions.setBlur(false);
+      });
+    },
+    onPrevious: () => {},
+    onClose: () => {
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
+    },
+    isValidated: (state: any) => {
+      if (
+        state &&
+        state.access &&
+        state.name &&
+        (state.picture !== undefined || state.color !== undefined)
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'edit-space',
+      zIndex: 13,
+      type: 'dialog',
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
+  }),
+  'create-space-4': {
+    workflow: true,
+    hasCloseButton: true,
+    component: (props: any) => <InviteMembers {...props} />,
+    hasPrevious: () => true,
+    nextButtonText: 'Create Space',
+    onNext: (_evt: any, state: any, setState: any) => {
+      setState({
+        ...state,
+        loading: true,
+      });
+      delete state.archetypeTitle;
+      state.description = state.description || '';
+      if (state.crestOption === 'color') {
+        state.image = '';
+      }
+      const createForm: NewSpace = state;
+      SpacesActions.createSpace(createForm).then(() => {
+        setState({ loading: false });
       });
     },
     onPrevious: () => {
@@ -150,20 +221,22 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    isValidated: () => {
-      return true;
+    isValidated: (state: any) => {
+      return state && state.members;
     },
-    window: {
-      id: 'create-space-4',
+    getWindowProps: (desktopDimensions) => ({
+      appId: 'create-space-4',
       zIndex: 13,
       type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 550,
-        height: 570,
-      },
-    },
-    hasCloseButton: true,
+      bounds: normalizeBounds(
+        {
+          x: 0,
+          y: 0,
+          width: 550,
+          height: 570,
+        },
+        desktopDimensions
+      ),
+    }),
   },
 };

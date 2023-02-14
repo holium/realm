@@ -1,4 +1,4 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
@@ -6,30 +6,23 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, lighten, darken } from 'polished';
 
-import {
-  Flex,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  ShipSearch,
-} from 'renderer/components';
+import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
+import { Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
-import { toJS } from 'mobx';
 import { MembersList } from './Space/MembersList';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
-type HomeSidebarProps = {
+interface HomeSidebarProps {
   filterMode: 'light' | 'dark';
   customBg: string;
-};
+}
 
 const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   position: relative;
-  backdrop-filter: var(--blur-enabled);
-  transform: transale3d(0, 0, 0);
+  display: flex;
+  flex-direction: column;
   border-radius: 12px;
   padding: 16px 16px 0 16px;
   width: 100%;
@@ -71,22 +64,20 @@ export const createPeopleForm = (
   };
 };
 
-export const Members: FC<IMembers> = observer((props: IMembers) => {
-  const { our } = props;
-  const { theme, spaces, friends, membership } = useServices();
+const MembersPresenter = ({ our }: IMembers) => {
+  const { theme, spaces } = useServices();
   const searchRef = useRef(null);
 
-  const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
-    theme.currentTheme;
+  const { inputColor, windowColor, mode, dockColor } = theme.currentTheme;
 
-  const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
+  const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
 
-  const onShipSelected = (ship: [string, string?], metadata?: any) => {
+  const onShipSelected = (ship: [string, string?]) => {
     const patp = ship[0];
     const nickname = ship[1];
     if (our) {
@@ -101,7 +92,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    selectedNickname.add(nickname ? nickname : '');
+    selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     // const updatedAll = all;
     // // TODO check the contact store for metadata
@@ -148,7 +139,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           {our ? 'Friends' : 'Members'}
         </Text>
       </Flex>
-      <Flex position="relative" flex={1}>
+      <Flex position="relative">
         {/* Search and dropdown */}
         <Input
           tabIndex={1}
@@ -156,7 +147,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           autoCorrect="false"
           autoComplete="false"
           name="person"
-          ref={searchRef}
+          innerRef={searchRef}
           height={34}
           placeholder="Search..."
           // bg={
@@ -183,15 +174,15 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           }}
           rightInteractive
           rightIcon={
-            <TextButton
+            <Button.TextButton
               disabled={!person.computed.parsed}
-              onClick={(evt: any) => {
+              onClick={() => {
                 onShipSelected([person.computed.parsed!, '']);
                 person.actions.onChange('');
               }}
             >
               {our ? 'Add' : 'Invite'}
-            </TextButton>
+            </Button.TextButton>
           }
           value={person.state.value}
           error={
@@ -215,18 +206,19 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
         />
         <ShipSearch
           isDropdown
-          heightOffset={0}
           search={person.state.value}
           selected={selectedPatp}
           customBg={windowColor}
-          onSelected={(ship: [string, string?], metadata: any) => {
-            onShipSelected(ship, metadata);
+          onSelected={(ship: [string, string?]) => {
+            onShipSelected(ship);
             person.actions.onChange('');
           }}
         />
       </Flex>
-      {our && <FriendsList friends={friends.list} />}
+      {our && <FriendsList />}
       {!our && <MembersList path={spaces.selected!.path} />}
     </HomeSidebar>
   );
-});
+};
+
+export const Members = observer(MembersPresenter);

@@ -1,30 +1,15 @@
 import { FC, useState } from 'react';
-import { isValidPatp } from 'urbit-ob';
-import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { theme as themes } from 'renderer/theme';
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-} from 'os/services/tray/wallet.model';
-
-const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
-};
+import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface WalletInfoProps {
-  wallet: EthWalletType | BitcoinWalletType;
+  wallet: EthWalletType;
   QROpen: boolean;
   setQROpen: (open: boolean) => void;
   hideWalletHero: boolean;
@@ -36,8 +21,12 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
     const { theme } = useServices();
 
     const themeData = getBaseTheme(theme.currentTheme);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
-    let amountDisplay = `${formatEthAmount(props.wallet.balance).eth} ETH`;
+    const panelBorder = darken(0.08, theme.currentTheme.windowColor);
+    // TODO clean up everything
+    const amountDisplay = `${
+      // @ts-ignore
+      formatEthAmount(props.wallet ? props.wallet.balance : '0.0').eth
+    } ETH`;
 
     const CopyButton: FC<{ content: string }> = (props: {
       content: string;
@@ -84,9 +73,14 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
       >
         <Flex width="100%" justifyContent="space-between">
           <Flex>
-            <Icons name="Ethereum" height="20px" mr={2} />
+            <Text>aowsiehtoishrtoiwheotiwhet</Text>
+            {/*(typeof props.wallet) === EthWalletType
+            ? <Icons name="Ethereum" height="20px" mr={2} />
+            : <Icons name="Bitcoin" height="20px" mr={2} />
+    */}
+            <Icons name="Bitcoin" height="20px" mr={2} />
             <Text pt="2px" textAlign="center" fontSize="14px">
-              {shortened(props.wallet!.address)}
+              {props.wallet && shortened(props.wallet.address)}
             </Text>
           </Flex>
           <Flex>
@@ -97,7 +91,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
               />
             ) : (
               <>
-                <CopyButton content={props.wallet!.address} />
+                <CopyButton content={props.wallet && props.wallet.address} />
                 <Box onClick={() => props.setQROpen(!props.QROpen)}>
                   <Icons
                     ml={2}
@@ -126,7 +120,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
             <QRCodeSVG
               width="100%"
               height="100%"
-              value={props.wallet!.address}
+              value={props.wallet.address}
             />
           </Flex>
         </Box>
@@ -142,7 +136,6 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
             {props.wallet.nickname}
           </Text>
           <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-            {/* @ts-ignore */}
             {amountDisplay}
           </Text>
         </Box>

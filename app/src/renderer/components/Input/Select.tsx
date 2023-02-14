@@ -1,22 +1,71 @@
-import { FC, useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
+import { FC, useState, useEffect } from 'react';
+import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { RadioOption, Text, Icons, InputWrapper } from '../';
+import { RadioOption, Text, Icons, Flex } from '../';
 import { ThemeType } from 'renderer/theme';
-import MenuItemStyle from '../MenuItem/MenuItem.styles';
-import ReactDOM from 'react-dom';
+import { MenuItemStyle } from '../MenuItem/MenuItem.styles';
 
-type SelectWrapperStyle = {
+interface SelectWrapperStyle {
   customBg?: string;
   theme: ThemeType;
-};
+}
 
+const SelectWrapper = styled(Flex)<{ disabled?: boolean }>`
+  width: ${(props) => (props.width ? props.width : '100%')};
+  position: relative;
+  padding: 4px 8px;
+  border-radius: var(--rlm-border-radius-6);
+  border: 1px solid var(--rlm-border-color);
+  background-color: var(--rlm-input-color);
+  min-height: 32px;
+  select {
+    border-radius: var(--rlm-border-radius-4);
+    background-color: var(--rlm-input-color);
+    color: var(--rlm-text-color);
+    pointer-events: all;
+    flex: 1;
+    height: inherit;
+    appearance: none;
+    outline: none;
+    border: 1px transparent;
+    &::placeholder {
+      opacity: 0.5;
+    }
+  }
+  /* &:focus,
+  &:focus-within,
+  &:active {
+    transition: var(--transition);
+    outline: none;
+    border-color: var(--rlm-accent-color);
+    &::placeholder {
+      color: transparent;
+    }
+  } */
+  ${(props) =>
+    props.disabled &&
+    css`
+      pointer-events: none;
+      input {
+        pointer-events: none;
+      }
+      opacity: 0.6; /* correct opacity on iOS */
+      &::placeholder {
+        color: rgba(var(--rlm-text-color, #333333), 0.3);
+        opacity: 1;
+      }
+      &:hover {
+        border-color: transparent;
+      }
+    `}
+`;
 // const SelectItem = styled(MenuItemStyle)``;
 
 const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   z-index: 20;
   top: 32px;
-  right: 0px;
+  left: 0px;
+  /* right: 0px; */
   padding: 4px;
   position: absolute;
   border-radius: 6px;
@@ -25,9 +74,11 @@ const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   border: 1px solid
     ${(props: SelectWrapperStyle) => props.theme.colors.ui.borderColor};
   background-color: ${(props: SelectWrapperStyle) => props.customBg};
+  box-shadow: ${(props: SelectWrapperStyle) => props.theme.elevations.one};
 `;
 
 interface ISelectInput {
+  id: string;
   disabled?: boolean;
   placeholder?: string;
   defaultValue?: string;
@@ -36,11 +87,15 @@ interface ISelectInput {
   iconColor: string;
   options: RadioOption[];
   selected?: string;
+  height?: number;
+  inputColor?: string;
   onClick: (value: any) => void;
 }
 
 export const Select: FC<ISelectInput> = (props: ISelectInput) => {
   const {
+    id = 'select-input',
+    height,
     options,
     placeholder,
     selected,
@@ -50,18 +105,17 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
     disabled,
     onClick,
   } = props;
-  const selectRef = useRef(null);
 
   const [open, setOpen] = useState(false);
 
   const handleClickOutside = (event: any) => {
-    const domNode = ReactDOM.findDOMNode(selectRef.current);
-    const dropdownNode = document.getElementById('select-dropdown');
+    const domNode = document.getElementById(id);
+    const dropdownNode = document.getElementById(`${id}-dropdown`);
     const isVisible = dropdownNode
-      ? dropdownNode!.getAttribute('data-is-open') === 'true'
+      ? dropdownNode.getAttribute('data-is-open') === 'true'
       : false; // get if the picker is visible currently
     if (!domNode || !domNode.contains(event.target)) {
-      if ('select-input' === event.target.id) {
+      if (event.target.id === id) {
         return;
       }
       // You are clicking outside
@@ -81,7 +135,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
   const showMenu = {
     enter: {
       opacity: 1,
-      y: 0,
+      y: 4,
       display: 'block',
       transition: {
         duration: 0.3,
@@ -104,15 +158,14 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
   );
 
   return (
-    <InputWrapper
-      id="select-input"
+    <SelectWrapper
+      id={id}
       disabled={disabled}
-      shouldHighlightOnFocus={false}
       minHeight={30}
-      hasPointerEvents
+      height={height || 'min-content'}
       position="relative"
       flexDirection="row"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       gap={8}
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}
@@ -128,10 +181,12 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
       )}
       <Icons fill={iconColor} name="ArrowDown" />
       <SelectDropdown
-        id="select-dropdown"
+        id={`${id}-dropdown`}
         variants={showMenu}
+        data-is-open={open}
         initial="exit"
         animate={open ? 'enter' : 'exit'}
+        customBg={props.customBg}
       >
         {options
           .filter((option: RadioOption) => !option.hidden)
@@ -140,9 +195,6 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
               <MenuItemStyle
                 customBg={customBg}
                 color={textColor}
-                fontSize={2}
-                pt={2}
-                pb={2}
                 disabled={selected === option.value}
                 key={option.value}
                 onClick={() => {
@@ -154,7 +206,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
             );
           })}
       </SelectDropdown>
-    </InputWrapper>
+    </SelectWrapper>
   );
 };
 

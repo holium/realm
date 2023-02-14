@@ -1,11 +1,5 @@
-import Realm from '..';
 import { EventEmitter } from 'stream';
-import {
-  getSnapshot,
-  IModelType,
-  IType,
-  IStateTreeNode,
-} from 'mobx-state-tree';
+import { Realm } from '../index';
 
 /**
  * Base Service Interface
@@ -44,6 +38,6 @@ export class BaseService extends EventEmitter {
   static preload = {};
 }
 
-export type PreloadTypes = {
+export interface PreloadTypes {
   // Note the type of the static preload functions
-};
+}

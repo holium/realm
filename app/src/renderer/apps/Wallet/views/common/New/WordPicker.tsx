@@ -1,19 +1,7 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Box,
-  Icons,
-  TextButton,
-} from 'renderer/components';
-import { darken, lighten, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
-import { Wallet } from '../../../lib/wallet';
-import { WalletCard } from '../WalletCard';
-import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
-import { theme } from 'renderer/theme';
+import { Flex, Text, Box } from 'renderer/components';
+import { transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
@@ -26,27 +14,27 @@ interface WordPickerProps {
 
 export const WordPicker: FC<WordPickerProps> = observer(
   (props: WordPickerProps) => {
-    let [state, setState] = useState<{
-      wordsToSelect: { word: string; available: boolean }[];
+    const [state, setState] = useState<{
+      wordsToSelect: Array<{ word: string; available: boolean }>;
       selectedWords: string[];
     }>({ wordsToSelect: [], selectedWords: [] });
+    const [error, setError] = useState('');
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
 
     useEffect(() => {
-      let words = props.seedPhrase
+      const words = props.seedPhrase
         .trim()
         .split(' ')
         .sort((a, b) => a.localeCompare(b));
-      let wordsToSelect = words.map((word) => ({ word, available: true }));
-      let selectedWords: string[] = [];
+      const wordsToSelect = words.map((word) => ({ word, available: true }));
+      const selectedWords: string[] = [];
       setState({ wordsToSelect, selectedWords });
     }, [props.seedPhrase]);
 
     function selectWord(index: number) {
       let word = '';
-      let updatedWordsToSelect = state.wordsToSelect.map((element, i) => {
-        console.log(element);
+      const updatedWordsToSelect = state.wordsToSelect.map((element, i) => {
         if (i === index) {
           word = element.word;
           element.available = false;
@@ -55,7 +43,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
         return element;
       });
 
-      let updatedSelectedWords = state.selectedWords;
+      const updatedSelectedWords = state.selectedWords;
       updatedSelectedWords.push(word);
 
       setState({
@@ -64,16 +52,21 @@ export const WordPicker: FC<WordPickerProps> = observer(
       });
 
       if (updatedSelectedWords.join(' ') === props.seedPhrase) {
+        setError('');
         props.onValidChange(true);
+      } else if (updatedWordsToSelect.every((item) => !item.available)) {
+        setError('Recovery phrase does not match.');
+      } else {
+        setError('');
       }
     }
 
     function deselectWord() {
-      let updatedSelectedWords = state.selectedWords;
-      let word = updatedSelectedWords.pop();
+      const updatedSelectedWords = state.selectedWords;
+      const word = updatedSelectedWords.pop();
 
-      let wordNotFound = true;
-      let updatedWordsToSelect = state.wordsToSelect.map((element) => {
+      const wordNotFound = true;
+      const updatedWordsToSelect = state.wordsToSelect.map((element) => {
         if (wordNotFound && element.word === word) {
           element.available = true;
         }
@@ -86,8 +79,8 @@ export const WordPicker: FC<WordPickerProps> = observer(
       });
     }
 
-    let Select = (props: any) => {
-      let Available = (props: any) => (
+    const Select = (props: any) => {
+      const Available = (props: any) => (
         <Box
           m="4px"
           px="8px"
@@ -100,7 +93,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
           <Text variant="body">{props.word}</Text>
         </Box>
       );
-      let Unavailable = (props: any) => (
+      const Unavailable = (props: any) => (
         <Box m="6px" px="8px" py="6px" borderRadius={6}>
           <Text
             variant="body"
@@ -136,11 +129,11 @@ export const WordPicker: FC<WordPickerProps> = observer(
       );
     };
 
-    let Display = (props: any) => {
-      let Spacer = (props: any) => (
+    const Display = (props: any) => {
+      const Spacer = (props: any) => (
         <Box m={1} height={24} width={64} borderBottom={props.border} />
       );
-      let Next = (props: any) => (
+      const Next = () => (
         <Box
           m={1}
           height={24}
@@ -152,7 +145,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
           background={transparentize(0.8, themeData.colors.brand.primary)}
         />
       );
-      let Word = (props: any) => (
+      const Word = (props: any) => (
         <Flex
           m={1}
           height={24}
@@ -230,6 +223,9 @@ export const WordPicker: FC<WordPickerProps> = observer(
           background={props.background}
           theme={theme.currentTheme}
         />
+        <Text mt={1} variant="body" color={themeData.colors.text.error}>
+          {error}
+        </Text>
       </>
     );
   }

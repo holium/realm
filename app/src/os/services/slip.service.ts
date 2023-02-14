@@ -1,6 +1,5 @@
-import Realm from '..';
+import { Realm } from '../index';
 import { EventEmitter } from 'stream';
-import { toJS } from 'mobx';
 // import {
 //   getSnapshot,
 //   IModelType,
@@ -10,12 +9,12 @@ import { toJS } from 'mobx';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import { Patp } from '../types';
 
-export type SlipType = {
+export interface SlipType {
   time: Number;
   from: Patp;
   path: string[];
   data: any;
-};
+}
 
 /**
  * Slip Service
@@ -65,7 +64,7 @@ export class SlipService extends EventEmitter {
   ) {
     // If for some reason we are not connected
     // if (!this.slipId) await this.subscribe();
-    let now = Date.now();
+    const now = Date.now();
     // Poke slip
     this.core.conduit!.poke({
       app: 'slip',
@@ -73,9 +72,9 @@ export class SlipService extends EventEmitter {
       json: {
         slop: {
           time: now,
-          to: to,
+          to,
           path: [''],
-          data: data,
+          data,
         },
       },
     });
@@ -84,8 +83,8 @@ export class SlipService extends EventEmitter {
   handleSlip(slip: any) {
     // console.log(slip);
     if (!slip['slip-action']) return;
-    if (!slip['slip-action']['slip']) return;
-    slip = slip['slip-action']['slip'];
+    if (!slip['slip-action'].slip) return;
+    slip = slip['slip-action'].slip;
     let data;
     try {
       data = JSON.parse(slip.data);
@@ -118,8 +117,8 @@ export class SlipService extends EventEmitter {
    * Preload functions to register with the renderer
    */
   static preload = {
-    sendSlip: (to: Patp[], data: any) =>
-      ipcRenderer.invoke('realm.slip.send', to, data),
+    sendSlip: async (to: Patp[], data: any) =>
+      await ipcRenderer.invoke('realm.slip.send', to, data),
     onSlip: (callback: any) => ipcRenderer.on('realm.on-slip', callback),
   };
 }

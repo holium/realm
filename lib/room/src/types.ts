@@ -1,16 +1,20 @@
 export type Patp = string;
 
-export type SlipType = {
+export interface SlipType {
   from: Patp;
   data: any;
-};
+}
 
-export type EnterDiff = { enter: Patp };
-export type ExitDiff = { exit: Patp };
+export interface EnterDiff {
+  enter: Patp;
+}
+export interface ExitDiff {
+  exit: Patp;
+}
 export type DiffType = EnterDiff | ExitDiff;
 
-export type RoomsModelType = {
-  id: string;
+export interface RoomType {
+  rid: string;
   provider: string;
   creator: string;
   access: string;
@@ -18,18 +22,10 @@ export type RoomsModelType = {
   present: string[];
   whitelist: string[];
   capacity: number;
-  space: string;
-  cursors: boolean;
-};
-
-export enum PeerConnectionState {
-  Disconnected = 'disconnected',
-  Connecting = 'connecting',
-  Connected = 'connected',
-  Failed = 'failed',
-  New = 'new',
-  Closed = 'closed',
+  path: string | null;
 }
+
+export type RoomMap = Map<string, RoomType>;
 
 export enum RoomState {
   Starting = 'starting',
@@ -41,3 +37,11 @@ export enum RoomState {
   Added = 'added',
   Kicked = 'kicked',
 }
+
+export type ChatModelType = {
+  author: string;
+  index: number;
+  content: string;
+  timeReceived: number;
+  isRightAligned: boolean;
+};

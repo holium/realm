@@ -1,16 +1,5 @@
-import {
-  Instance,
-  types,
-  cast,
-  castToReferenceSnapshot,
-  tryReference,
-  applySnapshot,
-} from 'mobx-state-tree';
-import { toJS } from 'mobx';
-import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
+import { Instance, types, applySnapshot } from 'mobx-state-tree';
 
-import { TypedSchema } from 'yup/lib/util/types';
-import { RoomsApi } from '../../api/rooms';
 import { Patp } from 'os/types';
 
 export const DmAppState = types.model('DmAppState', {
@@ -65,7 +54,7 @@ export type ChatModelType = Instance<typeof ChatModel>;
 
 export const RoomsAppState = types
   .model('RoomsAppState', {
-    currentView: types.enumeration(['list', 'room', 'new-room']),
+    currentView: types.enumeration(['list', 'room', 'new-room', 'settings']),
     liveRoom: types.safeReference(RoomsModel),
     knownRooms: types.map(RoomsModel),
     outstandingRequest: types.maybe(types.boolean),
@@ -92,12 +81,12 @@ export const RoomsAppState = types
       return self.knownRooms.get(roomId)?.creator === patp;
     },
     isRoomValid(roomId: string) {
-      let room = self.knownRooms.get(roomId);
+      const room = self.knownRooms.get(roomId);
       if (!room) return false;
       return true;
     },
     isLiveRoom(roomId: string) {
-      let room = self.knownRooms.get(roomId);
+      const room = self.knownRooms.get(roomId);
       if (!room) return false;
       if (!self.liveRoom) return false;
       return room.id === self.liveRoom.id;
@@ -127,7 +116,7 @@ export const RoomsAppState = types
       self.invites.delete(id);
     },
     // Page nav
-    setView(view: 'list' | 'room' | 'new-room') {
+    setView(view: 'list' | 'room' | 'new-room' | 'settings') {
       self.currentView = view;
     },
     // Update handlers
@@ -139,7 +128,7 @@ export const RoomsAppState = types
     handleRoomUpdate(room: RoomsModelType, diff: any) {
       console.log(room, diff);
       // set room view if we just created this room
-      let knownRoom = self.knownRooms.get(room.id);
+      const knownRoom = self.knownRooms.get(room.id);
 
       //
       // TODOO diff for newly created room
@@ -241,24 +230,24 @@ export const RoomsAppState = types
       self.outstandingRequest = false;
     },
     appendOurChat(our: Patp, contents: string) {
-      let time = Date.now();
-      let chat: ChatModelType = {
+      const time = Date.now();
+      const chat: ChatModelType = {
         author: our,
         index: time,
         timeReceived: time,
-        contents: contents,
+        contents,
         isRightAligned: true,
       };
 
       self.chatData.set(String(time), chat);
     },
     handleInboundChat(from: Patp, contents: string) {
-      let time = Date.now();
-      let chat: ChatModelType = {
+      const time = Date.now();
+      const chat: ChatModelType = {
         author: from,
         index: time,
         timeReceived: time,
-        contents: contents,
+        contents,
         isRightAligned: false,
       };
 

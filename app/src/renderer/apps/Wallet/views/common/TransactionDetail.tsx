@@ -1,124 +1,119 @@
-import { FC, useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeType } from 'renderer/theme';
-import { darken, lighten, transparentize } from 'polished';
-
+import { Anchor, Spinner } from 'renderer/components';
 import {
+  Avatar,
+  TextInput,
   Flex,
   Text,
   Button,
-  Icons,
-  Sigil,
-  Anchor,
-  Spinner,
-} from 'renderer/components';
+  Icon,
+} from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
-import { WalletView } from 'os/services/tray/wallet.model';
 import {
   shortened,
-  fullMonthNames,
   getBaseTheme,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
+  getDisplayDate,
 } from '../../lib/helpers';
+import {
+  NetworkType,
+  EthWalletType,
+  BitcoinWalletType,
+  TransactionType,
+  ProtocolType,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import styled from 'styled-components';
 
-interface TextAreaInput {
-  theme: ThemeType;
-  desktopTheme: ThemeModelType;
-}
-const TextArea = styled.textarea<TextAreaInput>`
-  resize: none;
-  height: 120px;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  overflow: auto;
-  outline: none;
-  border-radius: 6px;
-  color: ${(props) => props.theme.colors.text.primary};
-  background-color: ${(props) =>
-    darken(
-      props.desktopTheme.mode === 'light' ? 0.05 : 0.02,
-      props.desktopTheme.windowColor
-    )};
-  ::placeholder {
-    color: ${(props) =>
-      transparentize(
-        props.desktopTheme.mode === 'light' ? 0.4 : 0.7,
-        lighten(0.02, props.theme.colors.text.secondary)
-      )};
-  }
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-`;
-
-export const TransactionDetail: FC = observer(() => {
+const TransactionDetailPresenter = () => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.transactions.get(
-    walletApp.currentTransaction!
-  )!;
-  console.log(transaction);
+  const transactionList =
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? walletApp.navState.detail?.txtype &&
+        walletApp.navState.detail!.txtype === 'coin'
+        ? (walletApp.currentWallet! as EthWalletType).data
+            .get(walletApp.navState.protocol)!
+            .coins.get(walletApp.navState.detail!.coinKey!)!.transactionList
+            .transactions
+        : (walletApp.currentWallet! as EthWalletType).data.get(
+            walletApp.navState.protocol
+          )!.transactionList.transactions
+      : (walletApp.currentWallet! as BitcoinWalletType).transactionList
+          .transactions;
+  const transaction = transactionList.get(
+    walletApp.navState.detail!.key
+  )! as TransactionType;
 
   const { theme } = useServices();
-  let themeData = getBaseTheme(theme.currentTheme);
+  const themeData = getBaseTheme(theme.currentTheme);
 
   const [notes, setNotes] = useState(transaction.notes);
   const [loading, setLoading] = useState(false);
 
-  let goBack = () => WalletActions.setView(walletApp.returnView! as WalletView);
-  let saveNotes = () => {
+  const saveNotes = () => {
     setLoading(true);
-    WalletActions.saveTransactionNotes(notes);
-    setLoading(false);
+    WalletActions.saveTransactionNotes(notes).then(() => {
+      setLoading(false);
+    });
   };
 
-  let wasSent = transaction.type === 'sent';
-  let isEth = transaction.network === 'ethereum';
-  let themDisplay =
+  const wasSent = transaction.type === 'sent';
+  const isEth = transaction.network === 'ethereum';
+  const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiated = new Date(transaction.initiatedAt);
-  let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-  let amountDisplay = isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`;
+  const completed = new Date(
+    transaction.completedAt || transaction.initiatedAt || ''
+  );
+
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const amountDisplay = isEth
+    ? `${ethAmount.eth}` /* ETH` */
+    : `${btcAmount.btc} BTC`;
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" p={3}>
-      <Text fontSize={1} color={themeData.colors.text.disabled}>
+    <Flex width="100%" height="100%" flexDirection="column" py={1}>
+      <Text.Custom fontSize={2} color={themeData.colors.text.disabled}>
         Transaction
-      </Text>
+      </Text.Custom>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
-          <Flex>
-            <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+          <Flex alignItems="center">
+            <Text.Custom
+              opacity={0.9}
+              fontWeight={600}
+              fontSize={7}
+              animate={false}
+            >
               Pending
-            </Text>
+            </Text.Custom>
             <Spinner
               ml={3}
               mt={1}
-              size={1}
+              size={0}
               color={themeData.colors.text.primary}
             />
           </Flex>
         ) : (
-          <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+          <Text.Custom
+            opacity={0.9}
+            fontWeight={600}
+            fontSize={7}
+            animate={false}
+          >
             {wasSent ? `Sent` : `Received`}
-          </Text>
+          </Text.Custom>
         )}
         <Flex
-          mt="18px"
           flexDirection="column"
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text
-            variant="body"
+          <Text.Custom
             fontSize={4}
             color={
               wasSent
@@ -127,49 +122,49 @@ export const TransactionDetail: FC = observer(() => {
             }
           >
             {wasSent && '-'} {amountDisplay}
-          </Text>
-          <Text
-            variant="body"
-            fontSize={2}
-            color={themeData.colors.text.secondary}
-          >
-            $
-            {isEth
-              ? convertEthAmountToUsd(ethAmount)
-              : convertBtcAmountToUsd(btcAmount)}
-          </Text>
+          </Text.Custom>
+          {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+            <Text.Custom fontSize={2} color={themeData.colors.text.secondary}>
+              $
+              {isEth
+                ? convertEthAmountToUsd(
+                    ethAmount,
+                    walletApp.ethereum.conversions.usd
+                  )
+                : convertBtcAmountToUsd(
+                    btcAmount,
+                    walletApp.bitcoin.conversions.usd
+                  )}
+            </Text.Custom>
+          )}
         </Flex>
       </Flex>
       <Flex mt={8} width="100%" justifyContent="space-between">
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
-        </Text>
+        </Text.Custom>
         <Flex alignItems="center">
           {!transaction.theirPatp ? (
-            <Icons
-              name="Spy"
-              size="20px"
-              color={themeData.colors.text.secondary}
-            />
+            <Icon name="Spy" size={18} opacity={0.5} />
           ) : (
-            <Sigil
-              color={
+            <Avatar
+              sigilColor={
                 theme.currentTheme.mode === 'light'
                   ? ['black', 'white']
                   : ['white', 'black']
               }
               simple={true}
               size={20}
-              patp={transaction.theirPatp!}
+              patp={transaction.theirPatp}
             />
           )}
-          <Text variant="body" fontSize={1} ml={2}>
+          <Text.Custom fontSize={1} ml={2}>
             {themDisplay}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
       <Flex
@@ -178,18 +173,14 @@ export const TransactionDetail: FC = observer(() => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           DATE
-        </Text>
-        <Text variant="body" fontSize={1}>
-          {fullMonthNames[initiated.getMonth()]} {initiated.getDate()}{' '}
-          {initiated.getFullYear() !== new Date().getFullYear() &&
-            `, ${initiated.getFullYear()}`}
-        </Text>
+        </Text.Custom>
+        <Text.Custom fontSize={1}>{getDisplayDate(completed)}</Text.Custom>
       </Flex>
       <Flex
         position="relative"
@@ -197,61 +188,56 @@ export const TransactionDetail: FC = observer(() => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text
-          variant="body"
+        <Text.Custom
           fontSize={1}
+          opacity={0.7}
           color={themeData.colors.text.secondary}
         >
           HASH
-        </Text>
+        </Text.Custom>
         <Flex position="relative" left="10px">
           <Anchor
             fontSize={1}
             color={themeData.colors.text.primary}
-            href={`https://etherscan.io/tx/${transaction.hash}`}
+            href={`https://goerli.etherscan.io/tx/${transaction.hash}`}
           >
             {transaction.hash.slice(0, 12)}...{' '}
-            <Icons mb={1} name="Link" size={1} />
+            <Icon mb={1} name="Link" size={16} opacity={0.5} />
           </Anchor>
         </Flex>
       </Flex>
-      <Text
-        mt={8}
-        mb={2}
-        ml={1}
-        variant="body"
-        color={themeData.colors.text.secondary}
-        fontSize={1}
-      >
-        Notes
-      </Text>
-      <Flex width="100%" flexDirection="column" justifyContent="center">
-        {/* @ts-ignore */}
-        <TextArea
-          theme={themeData}
-          desktopTheme={theme.currentTheme}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Transaction notes..."
-        />
-        <Flex mt={4} width="100%" justifyContent="flex-end">
-          <Button
-            width="100%"
-            disabled={notes === transaction.notes}
-            isLoading={loading}
-            onClick={saveNotes}
-          >
-            Save notes
-          </Button>
+      <Flex flexDirection="column" mt={8}>
+        <Text.Label style={{ marginBottom: 4 }} opacity={0.7} fontSize={1}>
+          Notes
+        </Text.Label>
+        <Flex width="100%" flexDirection="column" justifyContent="center">
+          <TextInput
+            id="transaction-notes"
+            name="transaction-notes"
+            type="textarea"
+            rows={4}
+            cols={50}
+            value={notes}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setNotes(e.target.value)
+            }
+            placeholder="Transaction notes..."
+          />
+          <Flex mt={4} width="100%" justifyContent="flex-end">
+            <Button.Primary
+              width="100%"
+              height={32}
+              justifyContent="center"
+              disabled={notes === transaction.notes && !loading}
+              onClick={saveNotes}
+            >
+              {loading ? <Spinner size={0} color="white" /> : 'Save notes'}
+            </Button.Primary>
+          </Flex>
         </Flex>
-      </Flex>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={goBack}>
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
       </Flex>
     </Flex>
   );
-});
+};
+
+export const TransactionDetail = observer(TransactionDetailPresenter);

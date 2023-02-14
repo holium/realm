@@ -3,9 +3,9 @@ import { MembershipType } from './../services/spaces/models/members';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { VisaModelType } from 'os/services/spaces/models/visas';
-import { reject } from 'lodash';
+import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { getHost } from '../services/spaces/spaces.service';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -33,7 +33,7 @@ export const SpacesApi = {
     conduit: Conduit,
     payload: { slug: string; payload: any; members: any }
   ): Promise<SpacePath> => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -53,13 +53,19 @@ export const SpacesApi = {
   updateSpace: async (
     conduit: Conduit,
     payload: { path: SpacePath; payload: any }
-  ) => {
+  ): Promise<SpacePath> => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
+      console.log({
+        update: {
+          path: pathObj,
+          payload: snakeify(payload.payload),
+        },
+      });
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -85,7 +91,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -94,7 +100,82 @@ export const SpacesApi = {
             path: pathObj,
           },
         },
+        reaction: 'spaces-reaction.remove',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  joinSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[0],
+      space: pathArr[1],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          join: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.remote-space',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  leaveSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          leave: {
+            path: pathObj,
+          },
+        },
         reaction: 'spaces-reaction.delete',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          current: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.current',
         onReaction: (data: any) => {
           resolve(data);
         },
@@ -181,7 +262,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
@@ -191,7 +272,7 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.remote-space',
-        onReaction(data, mark?) {
+        onReaction(data) {
           membersState.addMemberMap(
             data['remote-space'].path,
             data['remote-space'].members
@@ -243,8 +324,9 @@ export const SpacesApi = {
     conduit: Conduit,
     spacesState: SpacesStoreType,
     membersState: MembershipType,
-    bazaarState: BazaarStoreType,
+    bazaarState: NewBazaarStoreType,
     visaState: VisaModelType,
+    roomService: any,
     setTheme: (theme: any) => void
   ): void => {
     conduit.watch({
@@ -260,6 +342,7 @@ export const SpacesApi = {
             membersState,
             bazaarState,
             visaState,
+            roomService,
             setTheme
           );
         }
@@ -274,9 +357,18 @@ export const SpacesApi = {
           );
         }
       },
-
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription %spaces'),
+      onSubscribed: () => {
+        console.log('Subscribed to %spaces');
+        spacesState.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %spaces rejected');
+        spacesState.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %spaces subscription');
+        spacesState.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };
@@ -286,41 +378,66 @@ const handleSpacesReactions = (
   our: Patp,
   spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: BazaarStoreType,
+  _bazaarState: NewBazaarStoreType,
   visaState: VisaModelType,
+  roomService: any,
   setTheme: (theme: any) => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      spacesState.initialReaction(data['initial']);
-      membersState.initial(data['initial']['membership']);
-      visaState.initialIncoming(data['initial']['invitations']);
+      spacesState.initialReaction(data.initial, our);
+      membersState.initial(data.initial.membership);
+      if (data.initial.invitations) {
+        visaState.initialIncoming(data.initial.invitations);
+      }
+      // handle current
+      if (
+        data.initial.current &&
+        spacesState.selected?.path !== data.initial.current.path
+      ) {
+        const currentPath = data.initial.current.path;
+        spacesState.selectSpace(currentPath);
+        setTheme(spacesState.getSpaceByPath(currentPath)?.theme);
+        roomService.setProvider(getHost(currentPath));
+      }
+      // roomService!.setProvider(null, getHost(spacesState.selected!.path));
       break;
     case 'add':
-      const newSpace = spacesState.addSpace(data['add']);
-      membersState.addMemberMap(newSpace, data['add'].members);
-      bazaarState.addBazaar(newSpace);
+      const newSpace = spacesState.addSpace(data.add);
+      membersState.addMemberMap(newSpace, data.add.members);
       break;
     case 'replace':
-      spacesState.updateSpace(data['replace']);
+      spacesState.updateSpace(data.replace);
       break;
     case 'remove':
       const deleted = spacesState.deleteSpace(
         `/${our}/our`,
-        data['remove'],
+        data.remove,
         setTheme
       );
-
       membersState.removeMemberMap(deleted);
       break;
     case 'remote-space':
-      // membersState.addMemberMap(
-      //   data['remote-space'].path,
-      //   data['remote-space'].members
-      // );
-      // spacesState.addSpace(data['remote-space']);
-      // bazaarState.addBazaar(remoteSpace);
+      if (Object.keys(data['remote-space'].members).length === 0) {
+        spacesState.setJoin('error');
+      } else {
+        membersState.addMemberMap(
+          data['remote-space'].path,
+          data['remote-space'].members
+        );
+        spacesState.addSpace(data['remote-space']);
+      }
+      break;
+    case 'current':
+      if (spacesState.selected?.path !== data.current.path) {
+        console.log(
+          `%current old=${spacesState.selected?.path} new=${data.current.path}`
+        );
+        spacesState.selectSpace(data.current.path);
+        setTheme(spacesState.getSpaceByPath(data.current.path)?.theme);
+        roomService.setProvider(getHost(data.current.path));
+      }
       break;
     default:
       // unknown
@@ -360,7 +477,7 @@ const handleInviteReactions = (
 
       break;
     case 'kicked':
-      const kickedPayload = data['kicked'];
+      const kickedPayload = data.kicked;
       if (`~${ship}` === kickedPayload.ship) {
         spacesState.deleteSpace(
           `/~${ship}/our`,

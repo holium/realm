@@ -1,41 +1,32 @@
-import { darken, lighten, rgba } from 'polished';
+import { useMemo } from 'react';
+import { observer } from 'mobx-react';
+import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
-import {
-  Flex,
-  EmbedBox,
-  Text,
-  Skeleton,
-  Mention,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import { Flex, Text, Skeleton, Mention } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
-import { FC, useEffect, useMemo } from 'react';
-import { useServices } from 'renderer/logic/store';
 import { motion } from 'framer-motion';
-import { pathToDmInbox } from 'os/lib/graph-store';
 import { useTrayApps } from 'renderer/apps/store';
+import { useServices } from 'renderer/logic/store';
+import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
-const EmptyIcon = styled.div`
-  height: 48px;
-  width: 48px;
-  background: ${(p) => p.color || 'lightgray'};
-  border-radius: 6px;
-`;
+interface ContentType {
+  [key: string]: string;
+}
 
-type ContentType = { [key: string]: string };
-interface NotificationProps {
+export interface NotificationProps {
   loading?: boolean;
   dismissed?: boolean;
   image?: string;
-  title: ContentType[];
-  content: ContentType[];
+  title?: ContentType[];
+  content: any;
   seen?: boolean;
-  link: string;
-  time: string;
-  ship: string;
-  app: string;
+  inbox?: string;
+  desk?: string;
+  link?: string;
+  time: number;
+  ship?: string;
+  app?: string;
 }
 
 interface NotifTitleProps {
@@ -45,8 +36,7 @@ interface NotifTitleProps {
   bold?: boolean;
 }
 
-const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
-  const { content, fontSize, fontOpacity } = props;
+const NotifTitle = ({ content, fontSize, fontOpacity }: NotifTitleProps) => {
   let token: any = [];
   switch (Object.keys(content)[0]) {
     case 'text':
@@ -55,13 +45,32 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
           ? content.text.substring(0, 44) + '...'
           : content.text;
       token = (
-        <Text fontWeight={400} opacity={fontOpacity} fontSize={fontSize}>
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={400}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
           {trimmed}
         </Text>
       );
       break;
     case 'ship':
       token = <Mention height={19} mb={2} patp={content.ship} />;
+      break;
+    case 'emph':
+      token = (
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={'bold'}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
+          {Object.values(content)[0]}
+        </Text>
+      );
       break;
     default:
       token = (
@@ -74,10 +83,11 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
   return token;
 };
 
-export const Notification = (props: NotificationProps) => {
+const NotificationPresenter = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
   const seedColor = '#4E9EFD';
-  // const { dmApp, setActiveApp } = useTrayApps();
+  const { dmApp, setActiveApp } = useTrayApps();
+  const { courier } = useServices();
 
   const bgColor = useMemo(
     () =>
@@ -87,9 +97,6 @@ export const Notification = (props: NotificationProps) => {
     [seedColor && props.seen]
   );
 
-  useEffect(() => {
-    // ship?.notifications.setSeen(props.link);
-  }, []);
   if (props.loading) {
     innerContent = (
       <>
@@ -111,23 +118,25 @@ export const Notification = (props: NotificationProps) => {
     innerContent = (
       <>
         <motion.div style={{ display: 'inline-grid' }}>
-          <motion.div
-            style={{
-              margin: 0,
-              display: '-webkit-inline-box',
-              verticalAlign: 'middle',
-              gap: 4,
-              alignItems: 'center',
-            }}
-          >
-            {props.title.map((content: ContentType, index: number) => (
-              <NotifTitle
-                key={`title-${index}`}
-                fontSize={2}
-                content={content}
-              />
-            ))}
-          </motion.div>
+          {props.title && (
+            <motion.div
+              style={{
+                margin: 0,
+                display: '-webkit-inline-box',
+                verticalAlign: 'middle',
+                gap: 4,
+                alignItems: 'center',
+              }}
+            >
+              {props.title.map((content: ContentType, index: number) => (
+                <NotifTitle
+                  key={`title-${index}`}
+                  fontSize={2}
+                  content={content}
+                />
+              ))}
+            </motion.div>
+          )}
           <motion.div style={{ display: '-webkit-inline-box' }}>
             {props.content.map((content: ContentType, index: number) => (
               <NotifTitle
@@ -154,44 +163,41 @@ export const Notification = (props: NotificationProps) => {
     );
   }
 
-  const colors = {
-    customBg: '',
-    customTextColor: '',
-  };
-  if (props.seen) {
-  }
-
   return (
-    <NotifRow
-      className="realm-cursor-hover"
-      // p={3}
-      // pr={3}
-      baseBg={bgColor}
-      customBg={bgColor}
-      // customBg={}
-      // customTextColor={}
-      // seen={props.seen}
-      onClick={(evt: any) => {
-        evt.stopPropagation();
-        // TODO make this open dm and load url
-        //
-        // const path = pathToDmInbox(props.link);
-        // if (path.includes('dm-inbox')) {
-        //   dmApp.setPath(path);
-        //   setActiveApp('messages-tray');
-        // }
-        evt.preventDefault();
-      }}
-    >
-      {innerContent}
-    </NotifRow>
+    <Flex pb={1}>
+      <NotifRow
+        className="realm-cursor-hover"
+        baseBg={bgColor}
+        customBg={bgColor}
+        onClick={(evt: any) => {
+          evt.stopPropagation();
+          // TODO make this open dm and load url
+          if (props.inbox?.includes('dm')) {
+            const inbox = props.inbox.split('/');
+            let path: string = '';
+            Array.from(courier.dms.keys()).forEach((key) => {
+              if (key.includes(inbox[2])) {
+                path = key;
+              }
+            });
+            if (!path) return;
+            // ShipActions.draftDm()
+            const dmPreview = courier.previews.get(path)!;
+            openDMsToChat(dmApp, dmPreview, setActiveApp);
+          }
+          evt.preventDefault();
+        }}
+      >
+        {innerContent}
+      </NotifRow>
+    </Flex>
   );
 };
 
+export const Notification = observer(NotificationPresenter);
+
 const NotifRow = styled(Row)`
   border-radius: 12px;
-  /* padding: 10px 12px; */
-  margin-bottom: 4px;
   padding: 12px;
   justify-content: space-between;
   width: 100%;

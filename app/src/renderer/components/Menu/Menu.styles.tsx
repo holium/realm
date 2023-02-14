@@ -4,10 +4,10 @@ import { rgba, darken } from 'polished';
 import { compose, space, color, typography } from 'styled-system';
 import { ThemeType } from 'renderer/theme';
 
-type MenuWrapperStyleProps = {
+interface MenuWrapperStyleProps {
   customBg?: string;
   theme: ThemeType;
-};
+}
 
 export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
   z-index: 1000;
@@ -15,8 +15,7 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
   display: flex;
   margin-top: 1px;
   flex-direction: column;
-  --webkit-backdrop-filter: var(--blur-enabled);
-  --webkit-transform: transale3d(0, 0, 0);
+  backdrop-filter: var(--blur);
   ${(props: MenuWrapperStyleProps) => css`
     background: ${props.customBg || props.theme.colors.bg.secondary};
     border: 1px solid ${props.theme.colors.ui.input.borderColor};

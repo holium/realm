@@ -2,15 +2,15 @@ import { S3Api } from './../../api/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
-
-import Realm from '../..';
+import { Content } from '@urbit/api';
+import { S3Client, StorageAcl } from '../../s3/S3Client';
+import moment from 'moment';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import EncryptedStore from './encryptedStore';
-import { ShipModelType, ShipModel } from './models/ship';
-import { MSTAction, Patp } from '../../types';
-import { ContactApi } from '../../api/contacts';
+import { EncryptedStore } from '../../lib/encryptedStore';
+import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
+import { Patp } from '../../types';
 import { DmApi } from '../../api/dms';
-import { DocketApi } from '../../api/docket';
 import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
@@ -19,32 +19,25 @@ import { WalletService } from '../tray/wallet.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
-import { ContactStore, ContactStoreType } from './models/contacts';
-import { DocketStore, DocketStoreType } from './models/docket';
-import { ChatStoreType, ChatStore } from './models/dms';
-import { loadDMsFromDisk } from './stores/dms';
-import { loadCourierFromDisk } from './stores/courier';
-import { loadContactsFromDisk } from './stores/contacts';
-import { loadDocketFromDisk } from './stores/docket';
-import { loadFriendsFromDisk } from './stores/friends';
-import { loadNotificationsFromDisk } from './stores/notifications';
+import { ChatStoreType } from './models/dms';
 import { CourierApi } from '../../api/courier';
-import { CourierStoreType, PreviewGroupDMType } from './models/courier';
-import { toJS } from 'mobx';
 import {
-  NotificationStore,
-  NotificationStoreType,
-} from './models/notifications';
-import { NotificationApi } from '../../api/notifications';
+  CourierStore,
+  CourierStoreType,
+  DMLogType,
+  PreviewGroupDMType,
+} from './models/courier';
+import { toJS } from 'mobx';
+import { DiskStore } from '../base.store';
 
-export type ShipModels = {
+// upload support
+const fs = require('fs');
+
+export interface ShipModels {
   friends: FriendsType;
-  contacts?: ContactStoreType;
-  docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
-  notifications: NotificationStoreType;
-};
+}
 
 /**
  * ShipService
@@ -54,28 +47,21 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
-    contacts: undefined,
-    docket: DocketStore.create({ apps: {} }),
-    chat: undefined,
-    notifications: NotificationStore.create({
-      unseen: [],
-      seen: [],
-      all: [],
-      recent: [],
-    }),
   };
-  private metadataStore: {
+
+  private readonly metadataStore: {
     graph: { [key: string]: any };
   } = {
     graph: {},
   };
-  private services: { slip?: SlipService } = {};
+
+  private readonly services: { slip?: SlipService } = {};
   rooms: RoomsService;
   wallet: WalletService;
 
   handlers = {
     'realm.ship.get-dms': this.getDMs,
-    'realm.ship.get-dm-log': this.getDMLog,
+    'realm.ship.get-dm-log': this.getDmLog,
     'realm.ship.send-dm': this.sendDm,
     'realm.ship.get-metadata': this.getMetadata,
     'realm.ship.get-contact': this.getContact,
@@ -86,102 +72,112 @@ export class ShipService extends BaseService {
     'realm.ship.accept-group-dm-request': this.acceptGroupDm,
     'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
-    'realm.ship.get-app-preview': this.getAppPreview,
+    // 'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
     'realm.ship.add-friend': this.addFriend,
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
-    'realm.ship.get-notifications': this.getNotifications,
-    'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
+    'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
+    'realm.ship.upload-file': this.uploadFile,
   };
 
   static preload = {
-    getApps: () => {
-      return ipcRenderer.invoke('realm.ship.get-apps');
+    getApps: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-apps');
     },
-    getOurGroups: () => {
-      return ipcRenderer.invoke('realm.ship.get-our-groups');
+    getOurGroups: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-our-groups');
+    },
+    getGroup: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.get-group', path);
     },
     getGroupMembers: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-group-members', path);
     },
-    getAppPreview: (ship: string, desk: string) => {
-      return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
+    // getAppPreview: (ship: string, desk: string) => {
+    //   return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
+    // },
+    getMetadata: async (path: string) => {
+      return await ipcRenderer.invoke('realm.ship.get-metadata', path);
     },
-    getMetadata: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.get-metadata', path);
+    getS3Bucket: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-s3-bucket');
     },
-    getS3Bucket: () => {
-      return ipcRenderer.invoke('realm.ship.get-s3-bucket');
+    getContact: async (ship: string) => {
+      return await ipcRenderer.invoke('realm.ship.get-contact', ship);
     },
-    getContact: (ship: string) => {
-      return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    saveMyContact: async (profileData: any) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.save-my-contact',
+        profileData
+      );
     },
-    saveMyContact: (profileData: any) => {
-      return ipcRenderer.invoke('realm.ship.save-my-contact', profileData);
+    getDMs: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-dms');
     },
-    getDMs: () => {
-      return ipcRenderer.invoke('realm.ship.get-dms');
+    getDmLog: async (path: string): Promise<DMLogType> => {
+      return await ipcRenderer.invoke('realm.ship.get-dm-log', path);
     },
-    getDMLog: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.get-dm-log', toShip);
+    acceptDm: async (toShip: string) => {
+      return await ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
     },
-    acceptDm: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
+    declineDm: async (toShip: string) => {
+      return await ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
     },
-    declineDm: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
+    acceptGroupDm: async (path: string) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.accept-group-dm-request',
+        path
+      );
     },
-    acceptGroupDm: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.accept-group-dm-request', path);
+    declineGroupDm: async (path: string) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.decline-group-dm-request',
+        path
+      );
     },
-    declineGroupDm: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.decline-group-dm-request', path);
+    setScreen: async (screen: boolean) => {
+      return await ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
     },
-    setScreen: (screen: boolean) => {
-      return ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
+    sendDm: async (path: string, contents: Content[]) => {
+      return await ipcRenderer.invoke('realm.ship.send-dm', path, contents);
     },
-    sendDm: (toShip: string, content: any) => {
-      return ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
+    draftDm: async (patps: Patp[], metadata: any[]) => {
+      return await ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
     },
-    draftDm: (patps: Patp[], metadata: any[]) => {
-      return ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
-    },
-    removeDm: (ship: string, index: any) => {
-      return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
+    removeDm: async (ship: string, index: any) => {
+      return await ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
     readDm: async (ship: Patp) =>
-      ipcRenderer.invoke('realm.ship.read-dm', ship),
+      await ipcRenderer.invoke('realm.ship.read-dm', ship),
     readGroupDm: async (path: string) =>
-      ipcRenderer.invoke('realm.ship.read-group-dm', path),
-    getFriends: () => {
-      return ipcRenderer.invoke('realm.ship.get-friends');
+      await ipcRenderer.invoke('realm.ship.read-group-dm', path),
+    getFriends: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-friends');
     },
     addFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.ship.add-friend', patp),
+      await ipcRenderer.invoke('realm.ship.add-friend', patp),
     //
     editFriend: async (
       patp: Patp,
       payload: { pinned: boolean; tags: string[] }
-    ) => ipcRenderer.invoke('realm.ship.edit-friend', patp, payload),
+    ) => await ipcRenderer.invoke('realm.ship.edit-friend', patp, payload),
     //
     removeFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.ship.remove-friend', patp),
-    getNotifications: async (timestamp: number, length: number) =>
-      ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
-    openedNotifications: async () =>
-      ipcRenderer.invoke('realm.ship.opened-notifications'),
+      await ipcRenderer.invoke('realm.ship.remove-friend', patp),
+    uploadFile: async (params: FileUploadParams) =>
+      await ipcRenderer.invoke('realm.ship.upload-file', params),
   };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
@@ -193,39 +189,31 @@ export class ShipService extends BaseService {
 
   get modelSnapshots() {
     return {
-      chat: this.models.chat ? getSnapshot(this.models.chat) : null,
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
-      docket: this.models.docket ? getSnapshot(this.models.docket) : null,
-      contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
-      notifications: this.models.notifications
-        ? getSnapshot(this.models.notifications)
-        : null,
     };
   }
+
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
 
   async subscribe(ship: string, shipInfo: any) {
     //
-    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
-    this.core.sendLog(`secretKey: ${secretKey}`);
+    let secretKey: string | null = this.core.passwords.getPassword(ship);
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<ShipModelType>(storeParams)
-        : new EncryptedStore<ShipModelType>(storeParams);
+    // this.db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipModelType>(storeParams)
+    //     : new EncryptedStore<ShipModelType>(storeParams);
+    this.db = new Store(storeParams);
 
-    this.core.sendLog(`db: ${JSON.stringify(this.db)}`);
-
-    let persistedState: ShipModelType = this.db.store;
-    this.core.sendLog(`persistedState: ${JSON.stringify(persistedState)}`);
+    const persistedState: ShipModelType = this.db.store;
 
     // TODO set up multiple ships properly
     this.state = ShipModel.create({
@@ -235,102 +223,79 @@ export class ShipService extends BaseService {
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
-      cookie: persistedState.cookie || shipInfo.cookie,
       loggedIn: true,
       loader: { state: 'initial' },
     });
-    this.core.sendLog('before load from disk');
+    this.state.loader.set('loading');
 
-    this.models.notifications = loadNotificationsFromDisk(
+    const courierStore = new DiskStore(
+      'courier',
       ship,
-      secretKey,
-      this.core.onEffect
+      secretKey!,
+      CourierStore
     );
-    this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
-    this.models.courier = loadCourierFromDisk(
+    this.models.courier = courierStore.model;
+    const friendsStore = new DiskStore(
+      'friends',
       ship,
-      secretKey,
-      this.core.onEffect
+      secretKey!,
+      FriendsStore,
+      { all: {} }
     );
-    this.models.contacts = loadContactsFromDisk(
-      ship,
-      secretKey,
-      this.core.onEffect
-    );
-    this.models.docket = loadDocketFromDisk(
-      ship,
-      secretKey,
-      this.core.onEffect
-    );
-    this.models.friends = loadFriendsFromDisk(
-      ship,
-      secretKey,
-      this.core.onEffect
-    );
+    this.models.friends = friendsStore.model;
+
     secretKey = null;
-    this.core.sendLog('after load from disk');
+    courierStore.registerPatches(this.core.onEffect);
+    friendsStore.registerPatches(this.core.onEffect);
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
     onSnapshot(this.state, (snapshot: any) => {
-      this.db!.store = snapshot;
+      if (this.db) {
+        this.db.store = snapshot;
+      }
     });
     // 1. Send initial snapshot
-    // const syncEffect = {
-    //   model: getSnapshot(this.state!),
-    //   resource: 'ship',
-    //   key: ship,
-    //   response: 'initial',
-    // };
+    const syncEffect = {
+      model: getSnapshot(this.state!),
+      resource: 'ship',
+      key: ship,
+      response: 'initial',
+    };
     // console.log(syncEffect);
-    // this.core.onEffect(syncEffect);
+    this.core.onEffect(syncEffect);
 
     try {
-      await new Promise<ShipModelType>((resolve, reject) => {
-        // TODO rewrite the contact store logic
-        try {
-          this.core.conduit!.watch({
-            app: 'contact-store',
-            path: '/all',
-            onEvent: (data: any) => {
-              this.models.contacts!.setInitial(data);
-            },
-            onError: () => console.log('Subscription rejected'),
-            onQuit: () => console.log('Kicked from subscription'),
-          });
-        } catch {
-          console.log('Subscription failed');
-        }
-        this.core.sendLog(`after contact watch`);
-
-        FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
-
-        ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
-          this.state!.setOurMetadata(value);
+      /*
+      // TODO rewrite the contact store logic
+      try {
+        this.core.conduit!.watch({
+          app: 'contact-store',
+          path: '/all',
+          onEvent: (data: any) => {
+            this.models.friends!.setInitial(data);
+          },
+          onError: () => console.log('Subscription rejected'),
+          onQuit: () => console.log('Kicked from subscription'),
         });
+      } catch {
+        console.log('Subscription failed');
+      }*/
 
-        MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+      FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
-        // register dm update handler
-        DmApi.updates(this.core.conduit!, this.models.courier!);
-        CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-        NotificationApi.updates(
-          this.core.conduit!,
-          this.models.notifications!,
-          this.models.courier
-        );
-
-        DocketApi.getApps(this.core.conduit!).then((apps) => {
-          this.models.docket.setInitial(apps);
-          this.state!.loader.set('loaded');
-          this.core.sendLog(`docket laoded`);
-
-          resolve(this.state!);
-        });
+      FriendsApi.getContact(this.core.conduit!, ship).then((value: any) => {
+        this.state!.setOurMetadata(value);
       });
 
-      this.services.slip?.subscribe();
-      this.rooms?.onLogin(ship);
+      MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+
+      // register dm update handler
+      DmApi.updates(this.core.conduit!, this.models.courier!);
+      CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
+      this.state.loader.set('loaded');
+
+      this.rooms?.watch();
       this.wallet?.onLogin(ship);
 
       // return ship state
@@ -353,10 +318,6 @@ export class ShipService extends BaseService {
     return { ship: this.state, models: this.modelSnapshots };
   }
 
-  get roomSnapshot() {
-    return this.rooms?.snapshot;
-  }
-
   get walletSnapshot() {
     return this.wallet?.snapshot;
   }
@@ -374,21 +335,16 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
-    this.rooms?.onLogout();
     this.models.chat = undefined;
-    this.models.contacts = undefined;
     this.models.courier = undefined;
-    this.models.notifications = NotificationStore.create({});
-    // this.models.docket = undefined;
-    // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
+    this.wallet.logout();
   }
 
   storeNewShip(ship: AuthShipType): ShipModelType {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
-      cookie: ship.cookie,
       wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,
@@ -401,30 +357,38 @@ export class ShipService extends BaseService {
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<ShipModelType>(storeParams)
-        : new EncryptedStore<ShipModelType>(storeParams);
+
+    // TODO this should use DiskStore and be encrypted
+    this.db = new Store<ShipModelType>(storeParams);
+
+    // this.db =
+    // process.env.NODE_ENV === 'development'
+    //   ? new Store<ShipModelType>(storeParams)
+    //   : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;
   }
 
-  removeShip(patp: string) {
+  removeShip(_patp: string) {
     // TODO clean out the folder here.
-    const deletedShip = new Store<ShipModelType>({
-      name: 'ship',
-      cwd: `realm.${patp}`,
-      accessPropertiesByDotNotation: true,
-    });
-    deletedShip.clear();
+    // const deletedShip = new Store<ShipModelType>({
+    //   name: 'ship',
+    //   cwd: `realm.${patp}`,
+    //   accessPropertiesByDotNotation: true,
+    // });
+    // deletedShip.clear();
+    // this.db?.clear();
   }
 
   async getOurGroups(_event: any): Promise<any> {
     return await GroupsApi.getOur(this.core.conduit!);
   }
+  async getGroup(_event: any, path: string): Promise<any> {
+    return await GroupsApi.getGroup(this.core.conduit!, path);
+  }
   async getGroupMembers(_event: any, path: string): Promise<any> {
-    return await GroupsApi.getOur(this.core.conduit!);
+    return await GroupsApi.getGroupMembers(this.core.conduit!, path);
   }
 
   // ------------------------------------------
@@ -434,10 +398,12 @@ export class ShipService extends BaseService {
   async getFriends(_event: IpcMainInvokeEvent) {
     return await FriendsApi.getFriends(this.core.conduit!);
   }
+
   //
   async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.addFriend(this.core.conduit!, patp);
   }
+
   //
   async editFriend(
     _event: IpcMainInvokeEvent,
@@ -450,51 +416,50 @@ export class ShipService extends BaseService {
   async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
+
   // ---
   getContact(_event: any, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
-    const contact = this.models.contacts?.getContactAvatarMetadata(patp);
+    const contact = this.models.friends?.getContactAvatarMetadata(patp);
     return contact;
   }
+
   //
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
-    await ContactApi.saveContact(
+    await FriendsApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
       profileData
     );
 
     this.state?.setOurMetadata(profileData);
-
-    return;
   }
 
   getMetadata(_event: any, path: string): any {
-    return this.metadataStore['graph'][path];
+    return this.metadataStore.graph[path];
   }
 
-  async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
-    return await DocketApi.requestTreaty(
-      ship,
-      desk,
-      this.models.docket,
-      this.core.conduit!,
-      this.metadataStore
-    );
-  }
+  // async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
+  //   return await DocketApi.requestTreaty(
+  //     ship,
+  //     desk,
+  //     this.models.bazaar,
+  //     this.core.conduit!,
+  //     this.metadataStore
+  //   );
+  // }
 
   async getDMs() {
     if (!this.core.conduit) {
       return;
     }
-    return await CourierApi.getDMList(this.core.conduit);
+    return await CourierApi.getDmList(this.core.conduit);
   }
 
-  async getDMLog(_event: any, ship: Patp) {
-    const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
-    this.models.courier?.setDMLog(dmLog);
-    const dms = this.models.courier?.dms.get(dmLog.path);
-    return toJS(dms?.messages);
+  async getDmLog(_event: any, ship: Patp) {
+    const dmLog = await CourierApi.getDmLog(this.core.conduit!, ship);
+    this.models.courier?.setDmLog(dmLog);
+    return dmLog;
   }
 
   async acceptDm(_event: any, toShip: string) {
@@ -515,7 +480,7 @@ export class ShipService extends BaseService {
    * @returns
    */
   async readDm(_event: any, toShip: string) {
-    return await CourierApi.readDm(this.core.conduit!, toShip);
+    CourierApi.readDm(this.core.conduit!, toShip);
   }
 
   /**
@@ -538,7 +503,6 @@ export class ShipService extends BaseService {
     if (inviteId) {
       return await CourierApi.acceptGroupDm(this.core.conduit!, inviteId);
     }
-    return;
   }
 
   async declineGroupDm(_event: any, path: string) {
@@ -548,63 +512,91 @@ export class ShipService extends BaseService {
       await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
       return this.models.courier?.declineDm(path);
     }
-    return;
   }
 
   async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
     let draft: any;
     if (patps.length > 1) {
-      const reaction: any = await CourierApi.createGroupDM(
+      const reaction: any = await CourierApi.createGroupDm(
         this.core.conduit!,
         patps
       );
-      draft = this.models.courier?.draftGroupDM(
+      draft = this.models.courier?.draftGroupDm(
         reaction['group-dm-created'] as PreviewGroupDMType
       );
     } else {
       // single dm
-      draft = this.models.courier?.draftDM(patps, metadata);
+      draft = this.models.courier?.draftDm(patps, metadata);
     }
     return toJS(draft);
   }
 
-  async sendDm(_event: any, path: string, contents: any[]) {
-    const dmLog = this.models.courier?.dms.get(path)!;
-    const post = dmLog.sendDM(this.state!.patp, contents);
+  async sendDm(_event: any, path: string, contents: Content[]) {
+    const dmLog = this.models.courier?.dms.get(path);
+    if (!dmLog) throw new Error('DM log not found, check path');
 
-    if (dmLog.type === 'group') {
-      return await CourierApi.sendGroupDM(this.core.conduit!, path, post);
-    } else {
-      return await CourierApi.sendDM(this.core.conduit!, path, post);
-    }
+    return dmLog.sendDm(this.core.conduit!, this.state!.patp, path, contents);
   }
+
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
     console.log('removingDM', ourShip, toShip, removeIndex);
   }
 
-  async getS3Bucket(_event: any) {
+  async getS3Bucket(_event: any = undefined) {
     const [credentials, configuration] = await Promise.all([
       S3Api.getCredentials(this.core.conduit!),
       S3Api.getConfiguration(this.core.conduit!),
     ]);
 
     return {
-      credentials,
-      configuration,
+      ...credentials,
+      ...configuration,
     };
   }
-  async getNotifications(_event: any, timestamp: number, length: number) {
-    // console.log('getNotifications: %o, %o', timestamp, length);
-    // const timeboxes = this.state?.notifications.timeboxes();
-    // console.log(timeboxes);
-    return [];
-  }
-  async openedNotifications(_event: any) {
-    // console.log('getNotifications: %o, %o', timestamp, length);
-    await NotificationApi.opened(this.core.conduit!);
-    // const timeboxes = this.state?.notifications.timeboxes();
-    // console.log(timeboxes);
-    return;
+
+  async uploadFile(
+    _event: any,
+    args: FileUploadParams
+  ): Promise<string | undefined> {
+    // const args = params;
+    return await new Promise((resolve, reject) => {
+      // console.log('ShipActions.uploadFile - getting S3 bucket...');
+      this.getS3Bucket()
+        .then(async (response: any) => {
+          console.log(response);
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: response.credentials.endpoint,
+            signatureVersion: 'v4',
+          });
+          let fileContent, fileName, fileExtension;
+          if (args.source === 'file' && typeof args.content === 'string') {
+            fileContent = fs.readFileSync(args.content);
+            // console.log(fileContent);
+            const fileParts = args.content.split('.');
+            fileName = fileParts.slice(0, -1);
+            fileExtension = fileParts.pop();
+          } else if (args.source === 'buffer') {
+            fileContent = await Buffer.from(args.content, 'base64');
+            fileName = 'clipboard';
+            fileExtension = args.contentType.split('/')[1];
+          }
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: `${
+              this.state!.patp
+            }/${moment().unix()}-${fileName}.${fileExtension}`,
+            Body: fileContent,
+            ACL: StorageAcl.PublicRead,
+            ContentType: args.contentType,
+          };
+          // console.log('uploading file => %o', params);
+          const { Location } = await client.upload(params).promise();
+          // console.log('Location => %o', Location);
+          resolve(Location);
+        })
+        .catch(reject);
+    });
   }
 }

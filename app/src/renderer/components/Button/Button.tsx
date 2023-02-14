@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import { FC, forwardRef } from 'react';
-import { darken, lighten } from 'polished';
+import { forwardRef, PropsWithChildren, Ref } from 'react';
+import { darken } from 'polished';
 import styled, { StyledComponentProps } from 'styled-components';
 import {
   border,
@@ -22,7 +22,7 @@ import {
   SpaceProps,
   ColorProps,
 } from 'styled-system';
-import { Spinner, Flex, IconButton } from '..';
+import { Spinner, Flex, IconButton, BoxProps } from '..';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &
@@ -31,12 +31,20 @@ export type StyledButtonProps = SpaceProps &
   BackgroundProps &
   ColorProps &
   PositionProps &
+  BoxProps &
   FontWeightProps & {
     leftIcon?: JSX.Element;
     rightIcon?: JSX.Element;
     isLoading?: boolean;
     disabled?: boolean;
-    variant?: 'primary' | 'secondary' | 'base' | 'transparent' | 'minimal' | 'custom';
+    variant?:
+      | 'primary'
+      | 'secondary'
+      | 'base'
+      | 'transparent'
+      | 'minimal'
+      | 'custom'
+      | 'disabled';
   };
 
 const defaultButtonStyles = {
@@ -76,11 +84,6 @@ const buttonVariants = variant({
         backgroundColor: 'highlights.primaryExtraHighlight',
         borderColor: 'transparent',
       },
-      '&:disabled': {
-        color: 'text.disabled',
-        backgroundColor: 'ui.disabled',
-        borderColor: 'ui.disabled',
-      },
     },
     secondary: {
       ...defaultButtonStyles,
@@ -107,13 +110,13 @@ const buttonVariants = variant({
     },
     base: {
       ...defaultButtonStyles,
-      bg: darken(.03, '#f0ecec'),
+      bg: darken(0.03, '#f0ecec'),
       color: 'text.primary',
-      border: `1px solid ${darken(.09, '#f0ecec')}`,
+      border: `1px solid ${darken(0.09, '#f0ecec')}`,
       '&:hover': {
         transition: '0.2s ease',
-        backgroundColor: darken(.07, '#f0ecec'),
-      }
+        backgroundColor: darken(0.07, '#f0ecec'),
+      },
     },
     minimal: {
       ...defaultButtonStyles,
@@ -166,15 +169,41 @@ const buttonVariants = variant({
         borderColor: 'ui.disabled',
       },
     },
+    disabled: {
+      ...defaultButtonStyles,
+      opacity: 0.5,
+      color: 'text.disabled',
+      backgroundColor: 'ui.disabled',
+      borderColor: 'ui.disabled',
+    },
     custom: {
       ...defaultButtonStyles,
     },
   },
 });
 
-const StyledButton = styled.button<ButtonProps>`
+type PropsWithRefChildren<T> = T & { children?: React.ReactNode } & {
+  ref?: Ref<T>;
+};
+const StyledButton = styled.button<PropsWithRefChildren<ButtonProps>>`
+  ${(props) =>
+    props.disabled
+      ? `
+        opacity: 0.5;
+        pointer-events: none;
+      `
+      : buttonVariants}
   ${buttonVariants}
-  ${compose(space, layout, color, background, flexbox, border, position, fontWeight)}
+  ${compose(
+    space,
+    layout,
+    color,
+    background,
+    flexbox,
+    border,
+    position,
+    fontWeight
+  )}
 `;
 
 export type ButtonProps = StyledComponentProps<
@@ -184,73 +213,76 @@ export type ButtonProps = StyledComponentProps<
   never
 >;
 
-export const Button: FC<ButtonProps> = forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->((props: ButtonProps, ref) => {
-  const {
-    leftIcon,
-    rightIcon,
-    disabled,
-    isLoading,
-    children,
-    mb,
-    mt,
-    mx,
-    my,
-    ml,
-    mr,
-  } = props;
-  return (
-    <StyledButton
-      ref={ref}
-      py={2}
-      px={2}
-      disabled={disabled}
-      isLoading={isLoading}
-      {...props}
-      mx={mx}
-      my={my}
-      mb={mb}
-      mt={mt}
-      ml={ml}
-      mr={mr}
-    >
-      {isLoading && (
-        <Spinner
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          position="absolute"
-          top={0}
-          right={0}
-          bottom={0}
-          left={0}
-          size={0}
-          color="brand.primary"
-        />
-      )}
-      <Flex
-        alignItems="center"
-        position="relative"
-        justifyContent="center"
-        opacity={isLoading ? 0 : 1}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (props: PropsWithChildren<ButtonProps>, ref) => {
+    const {
+      leftIcon,
+      rightIcon,
+      disabled,
+      isLoading,
+      children,
+      mb,
+      mt,
+      mx,
+      my,
+      ml,
+      mr,
+    } = props;
+
+    return (
+      <StyledButton
+        // @ts-ignore
+        ref={ref}
+        py={2}
+        px={2}
+        disabled={disabled}
+        isLoading={isLoading}
+        {...props}
+        mx={mx}
+        my={my}
+        mb={mb}
+        mt={mt}
+        ml={ml}
+        mr={mr}
       >
-        {leftIcon && (
-          <IconButton disabled={disabled} mr={2}>
-            {leftIcon}
-          </IconButton>
+        {isLoading && (
+          <Spinner
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            position="absolute"
+            top={0}
+            right={0}
+            bottom={0}
+            left={0}
+            size={0}
+            // color="brand.secondary"
+          />
         )}
-        {children}
-        {rightIcon && (
-          <IconButton disabled={disabled} ml={2}>
-            {rightIcon}
-          </IconButton>
-        )}
-      </Flex>
-    </StyledButton>
-  );
-});
+        <Flex
+          alignItems="center"
+          position="relative"
+          justifyContent="center"
+          opacity={isLoading ? 0 : 1}
+        >
+          {leftIcon && (
+            <IconButton disabled={disabled} mr={2}>
+              {leftIcon}
+            </IconButton>
+          )}
+          {children}
+          {rightIcon && (
+            <IconButton disabled={disabled} ml={2}>
+              {rightIcon}
+            </IconButton>
+          )}
+        </Flex>
+      </StyledButton>
+    );
+  }
+);
+
+Button.displayName = 'Button';
 
 Button.defaultProps = {
   variant: 'primary',

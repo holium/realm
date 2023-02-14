@@ -6,8 +6,7 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { LoaderModel } from '../common.model';
-import { StepList } from '../common.model';
+import { LoaderModel, StepList } from '../common.model';
 import { Patp } from 'os/types';
 
 export const DEFAULT_WALLPAPER =
@@ -21,7 +20,6 @@ export const AuthShip = types
     nickname: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    cookie: types.maybeNull(types.string),
     mnemonic: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
@@ -33,7 +31,7 @@ export const AuthShip = types
     },
     setMnemonic(mnemonic: string) {
       self.mnemonic = mnemonic;
-    }
+    },
   }));
 
 export type AuthShipType = Instance<typeof AuthShip>;
@@ -46,6 +44,7 @@ export const AuthStore = types
     ships: types.map(AuthShip),
     order: types.optional(types.array(types.string), []), // patp string
     accountId: types.maybe(types.string),
+    email: types.maybe(types.string),
     clientSecret: types.maybe(types.string),
   })
   .views((self) => ({
@@ -54,6 +53,9 @@ export const AuthStore = types
     },
     get isLoaded() {
       return self.loader.isLoaded;
+    },
+    get isFirstTime() {
+      return self.firstTime;
     },
     get currentShip() {
       let selectedShip = self.selected;
@@ -97,7 +99,7 @@ export const AuthStore = types
     },
     get mnemonic(): any {
       return self.selected!.mnemonic;
-    }
+    },
   }))
   .actions((self) => ({
     setFirstTime() {
@@ -115,6 +117,9 @@ export const AuthStore = types
     setAccountId: (accountId: string) => {
       self.accountId = accountId;
     },
+    setEmail: (email: string) => {
+      self.email = email;
+    },
     setClientSecret: (secret: string) => {
       self.clientSecret = secret;
     },
@@ -128,14 +133,18 @@ export const AuthStore = types
       ) {
         self.order.push(id.toString());
       }
-      return;
     },
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);
     },
-    setShipProfile(id: string, nickname: string, color:string, avatar:string) {
-      let ship = self.ships.get(id);
-      if(!ship) return;
+    setShipProfile(
+      id: string,
+      nickname: string,
+      color: string,
+      avatar: string
+    ) {
+      const ship = self.ships.get(id);
+      if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;
       ship.avatar = avatar;
@@ -146,8 +155,11 @@ export const AuthStore = types
     },
     deleteShip(patp: string) {
       // set first ship
-      // todo handle case where you remove all ships
-      self.selected = self.ships.get(self.order[0]);
+      if (self.order.length === 1) {
+        self.selected = undefined;
+      } else {
+        self.selected = self.ships.get(self.order[0]);
+      }
       // remove ship from order list
       self.order.splice(
         self.order.findIndex((value: string) => value === `auth${patp}`),
@@ -175,7 +187,7 @@ export const AuthStore = types
       const loggedInShip = self.ships.get(id);
       self.selected = loggedInShip;
     },
-    logout(ship: string) {
+    logout(_ship: string) {
       try {
         // const [response, error] = yield AuthIPC.logout(ship);
         // if (error) throw error;
@@ -200,7 +212,7 @@ export const AuthStore = types
     }),
     setMnemonic: (mnemonic: string) => {
       self.selected?.setMnemonic(mnemonic);
-    }
+    },
   }));
 
 export type AuthStoreType = Instance<typeof AuthStore>;

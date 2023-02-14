@@ -1,21 +1,18 @@
-import { theme } from './../../../renderer/theme';
 import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
-import Store from 'electron-store';
-import { toJS } from 'mobx';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  clone,
-  cast,
-} from 'mobx-state-tree';
-import { rgba } from 'polished';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import { DesktopStoreType, DesktopStore } from './desktop.model';
+import {
+  DesktopStoreType,
+  DesktopStore,
+  AppWindowProps,
+} from './desktop.model';
+import { AppType } from '../spaces/models/bazaar';
+import { IpcRendererEvent } from 'electron/renderer';
+import { toJS } from 'mobx';
+import { Bounds } from 'os/types';
 
 /**
  * DesktopService
@@ -34,51 +31,63 @@ import { DesktopStoreType, DesktopStore } from './desktop.model';
  *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
-  private db?: Store<DesktopStoreType>; // for persistance
-  private state: DesktopStoreType; // for state management
-  handlers = {
+  private readonly state: DesktopStoreType; // for state management
+  handlers: Record<string, (...args: any[]) => void> = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
-    'realm.desktop.set-home-pane': this.setHomePane,
-    'realm.desktop.set-app-dimensions': this.setAppDimensions,
+    'realm.desktop.open-home-pane': this.openHomePane,
+    'realm.desktop.close-home-pane': this.closeHomePane,
+    'realm.desktop.set-window-bounds': this.setWindowBounds,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
+    'realm.desktop.open-dialog': this.openDialog,
+    'realm.desktop.toggle-minimized': this.toggleMinimized,
+    'realm.desktop.toggle-maximized': this.toggleMaximized,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
   static preload = {
     changeWallpaper: async (spaceId: string, theme: ThemeModelType) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.desktop.change-wallpaper',
         spaceId,
         theme
       );
     },
-    setHomePane: (isHome: boolean) => {
-      return ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
+    openHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.open-home-pane');
     },
-    setActive: (spaceId: string, appId: string) => {
-      return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
+    closeHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.close-home-pane');
     },
-    setAppDimensions: (
-      windowId: any,
-      dimensions: { width: number; height: number; x: number; y: number }
-    ) => {
-      return ipcRenderer.invoke(
-        'realm.desktop.set-app-dimensions',
-        windowId,
-        dimensions
+    setActive: async (appId: string) => {
+      return await ipcRenderer.invoke('realm.desktop.set-active', appId);
+    },
+    setWindowBounds: (appId: string, bounds: Bounds) => {
+      ipcRenderer.invoke('realm.desktop.set-window-bounds', appId, bounds);
+    },
+    setMouseColor: async (mouseColor: string) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.set-mouse-color',
+        mouseColor
       );
     },
-    setMouseColor: (mouseColor: string) => {
-      return ipcRenderer.invoke('realm.desktop.set-mouse-color', mouseColor);
+
+    openAppWindow: (app: AppType) => {
+      return ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
-    openAppWindow: (spaceId: string, app: any) => {
-      return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
+    openDialog: (windowProps: AppWindowProps) => {
+      return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
-    closeAppWindow: (spaceId: string, app: any) => {
-      return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
+    toggleMinimized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-minimized', appId);
+    },
+    toggleMaximized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-maximized', appId);
+    },
+    closeAppWindow: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.close-app-window', appId);
     },
   };
 
@@ -86,13 +95,12 @@ export class DesktopService extends BaseService {
     super(core, options);
 
     this.state = DesktopStore.create({});
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+    Object.keys(this.handlers).forEach((handlerName) => {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }
 
-  async load(patp: string, mouseColor: string) {
+  async load(_patp: string, mouseColor: string) {
     // const syncEffect = {
     //   model: getSnapshot(this.state!),
     //   resource: 'desktop',
@@ -125,60 +133,73 @@ export class DesktopService extends BaseService {
     // if (newTheme) {
     //   this.state?.setTheme(newTheme!);
     // }
-
-    return;
   }
 
-  setActive(_event: any, spaceId: string, appId: string) {
-    this.state?.setActive(appId);
+  setActive(_event: IpcRendererEvent, appId: string) {
+    this.state.setActive(appId);
   }
-  setHomePane(_event: any, isHome: boolean) {
-    this.state?.setHomePane(isHome);
-    this.core.services.shell.setBlur(null, isHome);
+
+  openHomePane(event: IpcRendererEvent) {
+    this.state.openHomePane();
+    this.core.services.shell.setBlur(event, true);
+  }
+
+  closeHomePane(event: IpcRendererEvent) {
+    this.state.closeHomePane();
+    this.core.services.shell.setBlur(event, false);
   }
 
   setMouseColor(_event: any, mouseColor: string) {
     this.state?.setMouseColor(mouseColor);
   }
-  setAppDimensions(
-    _event: any,
-    windowId: any,
-    dimensions: { width: number; height: number; x: number; y: number }
-  ) {
-    this.state?.setDimensions(windowId, dimensions);
-  }
-  openAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    let { desktopDimensions, isFullscreen } = this.core.services.shell;
-    // console.log(
-    //   'openAppWindow => %o',
-    //   JSON.parse(
-    //     JSON.stringify({ desktopDimensions, isFullscreen, selectedApp })
-    //   )
-    // );
-    const newWindow = this.state!.openBrowserWindow(
-      selectedApp,
-      desktopDimensions as any,
-      isFullscreen as boolean
-    );
-    this.core.services.shell.setBlur(null, false);
-    const credentials = this.core.credentials!;
 
-    if (
-      selectedApp.type === 'urbit' ||
-      (selectedApp.type === 'web' && !selectedApp.web?.development)
-    ) {
-      const appUrl = newWindow.glob
+  setWindowBounds(_event: any, appId: string, bounds: Bounds) {
+    this.state?.setBounds(appId, bounds);
+  }
+
+  openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
+    this.core.services.shell.setBlur(null, false);
+    const credentials = this.core.credentials;
+
+    if (!credentials) return console.error('No credentials found');
+
+    if (selectedApp.type === 'urbit') {
+      const appUrl = newWindow.href?.glob
         ? `${credentials.url}/apps/${selectedApp.id!}`
-        : `${credentials.url}/${selectedApp.id!}`;
-      // Hit the main process handler for setting partition cookies
+        : `${credentials.url}${newWindow.href?.site}`;
+
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
+        url: appUrl,
+        name: `urbauth-${credentials.ship}`,
+        value: credentials.cookie?.split('=')[1].split('; ')[0],
+      });
+    } else if (selectedApp.type === 'dev') {
+      const appUrl = selectedApp.web.url;
+      // Hit the main process handler for setting partition cookies
+      session.fromPartition(`${selectedApp.id}-web-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,
         value: credentials.cookie!.split('=')[1].split('; ')[0],
       });
     }
   }
-  closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    this.state?.closeBrowserWindow(selectedApp.id);
+
+  openDialog(_event: IpcRendererEvent, windowProps: AppWindowProps) {
+    return toJS(this.state.openDialog(windowProps));
+  }
+
+  toggleMinimized(_event: any, appId: string) {
+    this.state.toggleMinimize(appId);
+  }
+
+  toggleMaximized(_event: any, appId: string) {
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    return this.state.toggleMaximize(appId, desktopDimensions);
+  }
+
+  closeAppWindow(_event: IpcRendererEvent, appId: string) {
+    this.state.closeWindow(appId);
   }
 }

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
 import { motion, Reorder } from 'framer-motion';
@@ -6,9 +6,10 @@ import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { delay } from 'lodash';
 
-import { Flex, Sigil, Tooltip } from 'renderer/components';
+import { Flex, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { Avatar } from '@holium/design-system';
 
 // ----------------------------------------
 // -------- Local style components --------
@@ -25,7 +26,7 @@ export const SelectedLine = styled(motion.div)`
     lighten(0.05, props.theme.colors.brand.primary)};
 `;
 
-export const ShipSelector: FC = observer(() => {
+const ShipSelectorPresenter = () => {
   const { identity } = useServices();
   const { auth } = identity;
   const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
@@ -40,7 +41,7 @@ export const ShipSelector: FC = observer(() => {
         value={shipKey}
         style={{ zIndex: 1 }}
         whileDrag={{ zIndex: 20 }}
-        onDragStart={(evt: any) => setDragging(true)}
+        onDragStart={() => setDragging(true)}
         onClick={() => {
           !dragging && AuthActions.setSelected(ship.patp);
         }}
@@ -48,7 +49,7 @@ export const ShipSelector: FC = observer(() => {
           setDragging(false);
         }}
         onDragEnd={(_event: any) => {
-          delay(() => AuthActions.setOrder(toJS(auth.order)), 1500);
+          delay(async () => await AuthActions.setOrder(toJS(auth.order)), 1500);
         }}
       >
         <Flex position="relative" height="100%">
@@ -68,13 +69,13 @@ export const ShipSelector: FC = observer(() => {
               transition={{ scale: 0.2 }}
               whileTap={{ scale: 1.0 }}
             >
-              <Sigil
+              <Avatar
                 simple
                 isLogin
                 size={32}
                 avatar={ship.avatar}
                 patp={ship.patp}
-                color={[ship.color || '#000000', 'white']}
+                sigilColor={[ship.color || '#000000', 'white']}
               />
             </motion.div>
           </Tooltip>
@@ -112,4 +113,6 @@ export const ShipSelector: FC = observer(() => {
       {shipList}
     </Reorder.Group>
   );
-});
+};
+
+export const ShipSelector = observer(ShipSelectorPresenter);

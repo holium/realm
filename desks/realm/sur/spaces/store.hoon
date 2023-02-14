@@ -1,4 +1,4 @@
-::  sur/spaces.hoon
+::  sur/spaces/store.hoon
 ::  Defines the types for the spaces concept.
 :: 
 ::  A space is a higher level concept above a %landscape group.
@@ -7,6 +7,7 @@
 ::
 +$  space-path    path:spaces-path
 +$  space-name    name:spaces-path
++$  space-description  cord
 +$  group-space   [creator=ship name=@tas title=@t picture=@t color=@ux]
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -33,6 +34,7 @@
 +$  space
   $:  path=space-path
       name=space-name
+      description=space-description
       type=space-type
       access=space-access
       picture=@t
@@ -54,11 +56,13 @@
       [%remove path=space-path]
       [%join path=space-path]
       [%leave path=space-path]
+      [%current path=space-path]  :: set the currently opened space
       :: [%kicked path=space-path ship=ship]
   ==
 ::
 +$  add-payload
   $:  name=space-name
+      description=space-description
       type=space-type
       access=space-access
       picture=@t
@@ -67,20 +71,23 @@
   ==
 ::
 +$  edit-payload
-  $%  [%name name=@t]
-      [%picture picture=@t]
-      [%color color=@t]
-      [%theme =theme]
+  $:  name=@t
+      description=@t
+      access=space-access
+      picture=@t
+      color=@t
+      =theme
   ==
 ::
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces =membership:membership =invitations:visas]
+  $%  [%initial =spaces =membership:membership =invitations:visas current=space-path]
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
       [%remote-space path=space-path =space =members:membership]
+      [%current path=space-path]
   ==
 ::
 ::  Scry views

@@ -1,3 +1,5 @@
+import { Dimensions } from 'os/types';
+
 export const calculateAnchorPoint = (
   event: any,
   anchorOffset: any,
@@ -31,7 +33,7 @@ export const calculateAnchorPoint = (
       dimensions.width / 2;
     style = { ...style, left };
   }
-  let bottom = buttonEvent.srcElement.offsetHeight + anchorOffset.y;
+  const bottom = buttonEvent.srcElement.offsetHeight + anchorOffset.y;
   style = { ...style, bottom };
   return style;
 };
@@ -48,7 +50,7 @@ export const calculateAnchorPointById = (
     width: buttonWidth,
     height,
   } = el?.getBoundingClientRect();
-  const buttonTop = el.offsetHeight! + height;
+  const buttonTop = el.offsetHeight + height;
   let style: any = {};
 
   let left = null;
@@ -67,7 +69,43 @@ export const calculateAnchorPointById = (
     left = Math.round(buttonLeft - anchorOffset.x - dimensions.width / 2);
     style = { ...style, left };
   }
-  let bottom = Math.round(buttonTop - height + anchorOffset.y);
+  const bottom = Math.round(buttonTop - height + anchorOffset.y);
   style = { ...style, bottom };
   return style;
+};
+
+export const calculatePopoverAnchorById = (
+  popoverId: string,
+  config: {
+    dimensions?: Dimensions;
+    anchorOffset: { x?: number; y?: number };
+    centered?: boolean;
+  }
+) => {
+  const el = document.getElementById(popoverId)!;
+  const { centered, dimensions, anchorOffset } = config;
+  const divTop = el.offsetHeight;
+
+  const {
+    left: divLeft,
+    width: divWidth,
+    height: divHeight,
+  } = el?.getBoundingClientRect();
+
+  const offsetX = anchorOffset.x ?? 0;
+  const offsetY = anchorOffset.y ?? 0;
+
+  let coords = {
+    top: divTop + divHeight + offsetY,
+    left: divLeft + offsetX,
+  };
+
+  if (centered && dimensions) {
+    coords = {
+      ...coords,
+      left: divLeft + offsetX - dimensions.width / 2 + divWidth / 2,
+    };
+  }
+
+  return coords;
 };

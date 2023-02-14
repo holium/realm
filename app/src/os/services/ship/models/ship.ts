@@ -1,15 +1,20 @@
-import { toJS } from 'mobx';
 import {
   castToSnapshot,
   Instance,
   types,
-  detach,
   applySnapshot,
   destroy,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../../common.model';
-import { FriendsStore } from './friends';
-import { NotificationsStore } from './notifications';
+// import { NotificationsStore } from './notifications';
+
+export interface FileUploadParams {
+  source: 'file' | 'buffer';
+  // when source='file', content is filename; otherwise
+  //   content should be clipboard contents
+  content: string;
+  contentType: string;
+}
 
 export const ShipModel = types
   .model('ShipModel', {
@@ -18,7 +23,6 @@ export const ShipModel = types
     nickname: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    cookie: types.maybeNull(types.string),
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
@@ -35,7 +39,7 @@ export const ShipModel = types
       return self.loader.isLoading;
     },
     // get apps() {
-    //   return Array.from(self.docket.apps.values());
+    //   return Array .from(self.docket.apps.values());
     // },
   }))
   .actions((self) => ({

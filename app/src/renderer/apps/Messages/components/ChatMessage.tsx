@@ -1,68 +1,85 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { darken, lighten } from 'polished';
-import { Flex, Text } from 'renderer/components';
+import { Box, Flex, Text } from 'renderer/components';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
-import { displayDate } from 'os/lib/time';
+import { displayDate, displayTimestamp } from 'os/lib/time';
 import { GraphDMType } from 'os/services/ship/models/courier';
-import { ThemeType } from 'renderer/theme';
 
-type IProps = {
+interface IProps {
   isSending?: boolean;
   showAuthor: boolean;
+  showDate: boolean;
   theme: any;
-  our: string;
+  author: string;
+  primaryBubble: boolean;
   ourColor: string;
-  message: GraphDMType;
-};
+  contents: GraphDMType['contents'];
+  timeSent: number;
+  onImageLoad?: () => void;
+}
 
-export const ChatMessage: FC<IProps> = (props: IProps) => {
-  const { theme, our, ourColor, message, showAuthor, isSending } = props;
-  const primaryBubble = our === message.author;
-  const color = primaryBubble ? 'white' : undefined;
-
-  //
-  // Conditional to remove empty text blocks
-  //
-  if (
-    message.contents.length === 1 &&
-    'text' in message.contents[0] &&
-    message.contents[0].text === ''
-  ) {
-    return <div></div>;
-  }
-
+export const ChatMessage = ({
+  theme,
+  ourColor,
+  contents,
+  author,
+  showAuthor,
+  showDate,
+  isSending,
+  primaryBubble,
+  timeSent,
+  onImageLoad,
+}: IProps) => {
   const messageTypes = useMemo(
     () =>
-      message.contents.map((content: any) => {
+      contents.map((content: any) => {
         return Object.keys(content)[0];
       }),
-    [message.index]
+    [contents]
   );
-
   const referenceColor = useMemo(
     () =>
       theme.mode === 'light'
-        ? darken(0.075, theme!.windowColor)
-        : theme!.windowColor,
-    [theme.windowColor]
+        ? darken(0.075, theme.windowColor)
+        : theme.windowColor,
+    [theme.mode, theme.windowColor]
   );
 
-  const isMention = messageTypes.includes('mention');
-  return useMemo(
+  const color = useMemo(
+    () => (primaryBubble ? 'white' : undefined),
+    [primaryBubble]
+  );
+
+  const isMention = useMemo(
+    () => messageTypes.includes('mention'),
+    [messageTypes]
+  );
+
+  const chatMessageElement = useMemo(
     () => (
       <Flex
         opacity={isSending ? 0.5 : 1}
         alignItems={primaryBubble ? 'flex-end' : 'flex-start'}
         flexDirection="column"
-        mb={2}
-        pl={2}
-        pr={2}
+        pb={2}
       >
+        {showDate && (
+          <Box width="100%" mb={2}>
+            <Text
+              opacity={0.5}
+              fontSize="11px"
+              fontWeight={500}
+              textAlign="center"
+            >
+              {displayDate(timeSent)}
+            </Text>
+          </Box>
+        )}
         {showAuthor && (
           <Flex mb="2px" mr={primaryBubble ? 1 : 0} ml={primaryBubble ? 0 : 1}>
             <Text opacity={0.5} fontSize={1}>
-              {message.author}
+              {author}
             </Text>
           </Flex>
         )}
@@ -83,39 +100,61 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
               flexFlow: isMention ? 'wrap' : 'column',
             }}
           >
-            {message.contents.map(
-              (content: { [type: string]: any }, index: number) => {
-                const type = Object.keys(content)[0];
-                if (content[type] === '') {
-                  return;
-                }
-                return (
-                  <Message
-                    key={`${index}-message-${index}`}
-                    type={type}
-                    color={color}
-                    textColor={theme!.textColor}
-                    bgColor={referenceColor}
-                    content={content}
-                  />
-                );
-              }
-            )}
+            {contents.map((content: { [type: string]: any }, index: number) => {
+              const type = Object.keys(content)[0];
+              if (content[type] === '') return;
+              return (
+                <Message
+                  key={`${index}-message-${index}`}
+                  type={type}
+                  color={color}
+                  textColor={theme.textColor}
+                  bgColor={referenceColor}
+                  content={content}
+                  onImageLoad={onImageLoad}
+                />
+              );
+            })}
           </Flex>
 
-          {/* TODO detect if time is today, yesterday or full */}
           <Text
             mt="2px"
             color={color}
-            textAlign="right"
+            textAlign={primaryBubble ? 'right' : 'left'}
             fontSize={0}
             opacity={0.3}
           >
-            {displayDate(message.timeSent)}
+            {displayTimestamp(timeSent)}
           </Text>
         </Bubble>
       </Flex>
     ),
-    [message, theme, ourColor, isSending]
+    [
+      author,
+      color,
+      contents,
+      isMention,
+      isSending,
+      onImageLoad,
+      ourColor,
+      primaryBubble,
+      referenceColor,
+      showAuthor,
+      showDate,
+      theme.mode,
+      theme.textColor,
+      theme.windowColor,
+      timeSent,
+    ]
   );
+
+  if (
+    contents.length === 1 &&
+    'text' in contents[0] &&
+    contents[0].text === ''
+  ) {
+    return <div />;
+  }
+
+  return chatMessageElement;
 };

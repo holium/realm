@@ -1,24 +1,22 @@
-import { safeStorage } from "electron";
+import { safeStorage } from 'electron';
 
-export default class PasswordStore {
-  private passwords;
+export class PasswordStore {
+  private readonly passwords;
 
   constructor() {
-    this.passwords = new Map<string, Buffer | null>()
+    this.passwords = new Map<string, Buffer | null>();
   }
 
   getPassword(patp: string) {
-    let passwordBuffer = this.passwords.get(patp);
-    if (!passwordBuffer)
-      return null
+    const passwordBuffer = this.passwords.get(patp);
+    if (!passwordBuffer) return null;
 
     return safeStorage.decryptString(passwordBuffer);
   }
 
   setPassword(patp: string, password: string) {
-    let passwordBuffer = safeStorage.encryptString(password);
+    const passwordBuffer = safeStorage.encryptString(password);
     this.passwords.set(patp, passwordBuffer);
-
   }
 
   clearPassword(patp: string) {

@@ -2,7 +2,6 @@ import { Conduit } from '@holium/conduit';
 import { createPost } from '@urbit/api';
 import { CourierStoreType } from 'os/services/ship/models/courier';
 import { patp2dec } from 'urbit-ob';
-import { ChatStoreType } from '../services/ship/models/dms';
 
 export const DmApi = {
   getDMs: async (ship: string, conduit: Conduit) => {
@@ -10,11 +9,11 @@ export const DmApi = {
       app: 'graph-store',
       path: `/graph/${ship}/dm-inbox`,
     });
-    return response['graph-update']['add-graph']['graph'];
+    return response['graph-update']['add-graph'].graph;
   },
-  updates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
-    const ship = `~${conduit.ship}`;
-    return conduit.watch({
+  updates: async (conduit: Conduit, store: CourierStoreType): Promise<any> => {
+    // const ship = `~${conduit.ship}`;
+    return await conduit.watch({
       app: 'dm-hook',
       path: '/updates',
       onEvent: async (data: any) => {
@@ -24,7 +23,7 @@ export const DmApi = {
           )[0];
           switch (action) {
             case 'pendings':
-              const pendings: string[] = payload;
+              // const pendings: string[] = payload;
               // chatStore.setPendingDms(pendings);
               break;
             case 'screen':
@@ -50,7 +49,7 @@ export const DmApi = {
             case 'decline':
               const declinedContact = `~${payload}`;
               console.log('decline', payload, `/dm-inbox/${declinedContact}`);
-              store.rejectDmInvite(`/dm-inbox/${declinedContact}`);
+              store.rejectDmInvite();
               break;
             default:
               console.log('action', action);

@@ -1,17 +1,31 @@
-import { FC, useMemo, Dispatch, SetStateAction, useState } from 'react';
+import {
+  useMemo,
+  Dispatch,
+  SetStateAction,
+  useState,
+  ChangeEvent,
+} from 'react';
+import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Icons, Label, Input } from 'renderer/components';
+import { Button, Flex, Text, Label, FormControl } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
+import { TextInput } from '@holium/design-system';
+
+const NoResize = styled(Flex)`
+  textarea {
+    resize: none;
+  }
+`;
 
 interface ImportProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
   setSeedPhrase: (phrase: string) => void;
 }
 
-export const Import: FC<ImportProps> = observer((props: ImportProps) => {
+const ImportPresenter = (props: ImportProps) => {
   const { theme } = useServices();
   const themeData = useMemo(
     () => getBaseTheme(theme.currentTheme),
@@ -21,14 +35,11 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
 
   const saveSeedPhrase = () => {
     props.setSeedPhrase(phrase);
-    props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
+    props.setScreen(NewWalletScreen.PASSCODE);
   };
 
-  console.log(phrase);
-  console.log('is valid? ', ethers.utils.isValidMnemonic(phrase));
-
   return (
-    <Flex width="100%" height="100%" flexDirection="column">
+    <NoResize width="100%" height="100%" flexDirection="column">
       <Text mt={6} variant="h4">
         Import Wallet
       </Text>
@@ -36,18 +47,25 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
         If you have an existing mnemonic seed phrase, you can load it into Realm
         now.
       </Text>
-      <Flex mt={9} width="100%" flexDirection="column">
-        <Label mb={3} required={true}>
-          Seed phrase
-        </Label>
-        <Input
-          height="72px"
-          required={true}
-          as="textarea"
-          value={phrase}
-          onChange={(e) => setPhrase(e.target.value)}
-          autoFocus={true}
-        />
+      <FormControl.FieldSet mt={9} width="100%" flexDirection="column">
+        <FormControl.Field>
+          <Label mb={1} required={true}>
+            Seed phrase
+          </Label>
+          <TextInput
+            id="seed-phrase"
+            name="seed-phrase"
+            height="72px"
+            required={true}
+            type="textarea"
+            value={phrase}
+            cols={50}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPhrase(e.target.value)
+            }
+            // autoFocus={true}
+          />
+        </FormControl.Field>
         <Flex mt={7} width="100%">
           <Button
             width="100%"
@@ -57,19 +75,9 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
             Save
           </Button>
         </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        top="542px"
-        zIndex={999}
-        onClick={() => props.setScreen(NewWalletScreen.CREATE)}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
-      </Flex>
-    </Flex>
+      </FormControl.FieldSet>
+    </NoResize>
   );
-});
+};
+
+export const Import = observer(ImportPresenter);

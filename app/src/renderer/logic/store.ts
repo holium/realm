@@ -1,49 +1,41 @@
-import { AuthActions } from './actions/auth';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
   castToSnapshot,
   Instance,
-  onSnapshot,
-  tryReference,
   applySnapshot,
   types,
 } from 'mobx-state-tree';
-
 import { DesktopStore } from 'os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from 'os/services/spaces/models/spaces';
-import { BazaarStore } from 'os/services/spaces/models/bazaar';
+import { NewBazaarStore } from 'os/services/spaces/models/bazaar';
 import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
+import { DesktopActions } from './actions/desktop';
 import { MembershipStore } from 'os/services/spaces/models/members';
 import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
-import { DocketStore } from 'os/services/ship/models/docket';
-import { ChatStore } from 'os/services/ship/models/dms';
-import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
-import { NotificationStore } from 'os/services/ship/models/notifications';
-import { LiveRoom } from 'renderer/apps/store';
-import { RoomsActions } from './actions/rooms';
+// import { NotificationStore } from 'os/services/ship/models/notifications';
+import {
+  NotificationStore,
+  NotificationStoreType,
+} from 'os/services/spaces/models/beacon';
+// import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
-import { ThemeType } from 'renderer/theme';
+import { watchOnlineStatus } from './lib/offline';
+import { BulletinStore } from 'os/services/spaces/models/bulletin';
 import { AirliftStore } from 'os/services/tray/airlift.model';
 
-const loadSnapshot = (serviceKey: string) => {
-  const localStore = localStorage.getItem('servicesStore');
-  if (localStore) return JSON.parse(localStore)[serviceKey];
-  return {};
-};
-
-export const Services = types
+const Services = types
   .model('ServicesStore', {
     desktop: DesktopStore,
     shell: ShellStore,
@@ -54,16 +46,15 @@ export const Services = types
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
-    bazaar: BazaarStore,
+    bazaar: NewBazaarStore,
     membership: MembershipStore,
     visas: VisaModel,
-    docket: DocketStore,
-    dms: ChatStore,
+    // docket: DocketStore,
     courier: CourierStore,
-    contacts: ContactStore,
     friends: FriendsStore,
-    notifications: NotificationStore,
+    beacon: NotificationStore,
     airlift: AirliftStore,
+    bulletin: BulletinStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -71,6 +62,22 @@ export const Services = types
     },
     clearShip() {
       self.ship = undefined;
+    },
+    clearAll() {
+      self.spaces = castToSnapshot({
+        loader: { state: 'initial' },
+        join: { state: 'initial' },
+        spaces: undefined,
+      });
+      self.bazaar = castToSnapshot({});
+      self.membership = castToSnapshot({});
+      self.courier = castToSnapshot({});
+      self.friends = castToSnapshot({});
+      self.beacon = castToSnapshot({});
+      self.visas = castToSnapshot({
+        incoming: {},
+        outgoing: {},
+      });
     },
   }));
 
@@ -109,6 +116,7 @@ const services = Services.create({
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },
+    join: { state: 'initial' },
     spaces: undefined,
   },
   bazaar: {},
@@ -117,16 +125,12 @@ const services = Services.create({
     incoming: {},
     outgoing: {},
   },
-  docket: {},
-  dms: {},
   courier: {},
-  contacts: { ourPatp: '' },
   friends: {},
-  notifications: { unseen: [], seen: [], all: [], recent: [] },
+  beacon: { notes: {} },
+  bulletin: {},
   airlift: {
-    model: {
-
-    }
+    model: {},
   },
 });
 
@@ -135,7 +139,7 @@ export const servicesStore = services;
 // -------------------------------
 // Create core context
 // -------------------------------
-export type ServiceInstance = Instance<typeof Services>;
+type ServiceInstance = Instance<typeof Services>;
 const ServicesContext = createContext<null | ServiceInstance>(services);
 
 export const ServiceProvider = ServicesContext.Provider;
@@ -152,6 +156,17 @@ export const CoreStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     booted: types.optional(types.boolean, false),
     resuming: types.optional(types.boolean, false),
+    online: types.boolean,
+    connectionStatus: types.enumeration([
+      'connecting',
+      'initialized',
+      'connected',
+      'offline',
+      'failed',
+      'stale',
+      'refreshing',
+      'refreshed',
+    ]),
     onboarded: types.optional(types.boolean, false),
     loggedIn: types.optional(types.boolean, false),
   })
@@ -162,11 +177,18 @@ export const CoreStore = types
     setResuming(isResuming: boolean) {
       self.resuming = isResuming;
     },
+    setConnectionStatus(status: any) {
+      self.connectionStatus = status;
+      localStorage.setItem('connection-status', status);
+    },
     setBooted() {
       self.booted = true;
     },
     setLoggedIn(isLoggedIn: boolean) {
       self.loggedIn = isLoggedIn;
+    },
+    setOnline(isOnline: boolean) {
+      self.online = isOnline;
     },
     reset() {
       self.booted = false;
@@ -174,9 +196,18 @@ export const CoreStore = types
     login() {},
   }));
 
-export const coreStore = CoreStore.create();
+export const coreStore = CoreStore.create({
+  online: navigator.onLine,
+  connectionStatus:
+    (localStorage.getItem('connection-status') as any) || 'offline',
+});
+
 coreStore.reset(); // need to reset coreStore for proper boot sequence
 coreStore.setResuming(true); // need to start the renderer with resuming
+watchOnlineStatus(coreStore);
+OSActions.onConnectionStatus((_event: any, status: any) => {
+  coreStore.setConnectionStatus(status);
+});
 
 OSActions.boot();
 
@@ -192,19 +223,13 @@ OSActions.onSetTheme((_event: any, data: any) => {
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  console.log('onBoot', response);
+  // console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
   });
 
   if (response.models && response.ship) {
-    if (response.models.contacts) {
-      applySnapshot(
-        servicesStore.contacts,
-        castToSnapshot(response.models.contacts!)
-      );
-    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(response.models.friends)
@@ -215,19 +240,11 @@ OSActions.onBoot((_event: any, response: any) => {
         castToSnapshot(response.models.courier)
       );
     }
-    if (response.models.notifications) {
-      applySnapshot(
-        servicesStore.notifications,
-        castToSnapshot(response.models.notifications)
-      );
-    }
-    applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    if (response.models.chat) {
-      applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat));
-    }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
+    const shipColor = response.ship.color;
+    if (shipColor) DesktopActions.setMouseColor(shipColor);
     coreStore.setLoggedIn(true);
     ShellActions.setBlur(false);
   }
@@ -240,6 +257,7 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
     applySnapshot(servicesStore.visas, castToSnapshot(response.visas));
+    // console.log(res);
     if (servicesStore.spaces.selected) {
       const selected = servicesStore.spaces.selected;
       const bootTheme: any = {
@@ -249,9 +267,16 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.theme.setCurrentTheme(bootTheme);
     }
   }
+  if (response.bulletin) {
+    applySnapshot(servicesStore.bulletin, response.bulletin);
+  }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
   }
+  if (response.beacon) {
+    applySnapshot(servicesStore.beacon, response.beacon);
+  }
+
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
   }
@@ -286,42 +311,32 @@ export function useCore() {
   return store;
 }
 
-// onSnapshot(servicesStore, (snapshot) => {
-//   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
-// });
-
 OSActions.onLogin((_event: any) => {
   SoundActions.playLogin();
+  const shipColor = servicesStore.desktop.mouseColor;
+  if (shipColor) DesktopActions.setMouseColor(shipColor);
 });
 
 OSActions.onConnected(
-  (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    console.log('onConnected', initials.models);
+  (
+    _event: any,
+    initials: {
+      ship: ShipModelType;
+      models: ShipModels;
+      beacon: NotificationStoreType;
+    }
+  ) => {
     if (initials.models.courier) {
       applySnapshot(
         servicesStore.courier,
         castToSnapshot(initials.models.courier)
       );
     }
-    if (initials.models.contacts) {
-      applySnapshot(
-        servicesStore.contacts,
-        castToSnapshot(initials.models.contacts)
-      );
-    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
     );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(initials.models.notifications)
-    );
-    applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
-    if (initials.models.chat) {
-      applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat));
-    }
-
+    applySnapshot(servicesStore.beacon, castToSnapshot(initials.beacon));
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -333,11 +348,12 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave();
-  coreStore.setLoggedIn(false);
-  servicesStore.clearShip();
-  ShellActions.setBlur(true);
+  // LiveRoom.leave();
   SoundActions.playLogout();
+  servicesStore.clearAll();
+  servicesStore.clearShip();
+  coreStore.setLoggedIn(false);
+  ShellActions.setBlur(true);
 });
 
 // --------------------------------------
@@ -352,8 +368,11 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
     }
-    if (value.resource === 'notification') {
-      applyPatch(servicesStore.notifications, value.patch);
+    if (value.resource === 'beacon') {
+      applyPatch(servicesStore.beacon, value.patch);
+    }
+    if (value.resource === 'bulletin') {
+      applyPatch(servicesStore.bulletin, value.patch);
     }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);
@@ -376,15 +395,6 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'visas') {
       applyPatch(servicesStore.visas, value.patch);
     }
-    if (value.resource === 'docket') {
-      applyPatch(servicesStore.docket, value.patch);
-    }
-    if (value.resource === 'contacts') {
-      applyPatch(servicesStore.contacts, value.patch);
-    }
-    if (value.resource === 'dms') {
-      applyPatch(servicesStore.dms, value.patch);
-    }
     if (value.resource === 'courier') {
       applyPatch(servicesStore.courier, value.patch);
     }
@@ -400,20 +410,24 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
     }
-    if (value.resource === 'courier') {
-      applySnapshot(servicesStore.courier, value.model);
-    }
-    if (value.resource === 'ship') {
-      servicesStore.setShip(ShipModel.create(value.model));
-    }
+    // if (value.resource === 'courier') {
+    //   applySnapshot(servicesStore.courier, value.model);
+    // }
+    // if (value.resource === 'ship') {
+    //   servicesStore.setShip(ShipModel.create(value.model));
+    // }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
+      applySnapshot(servicesStore.beacon, castToSnapshot(value.model.beacon));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
+      applySnapshot(
+        servicesStore.bulletin,
+        castToSnapshot(value.model.bulletin)
+      );
       applySnapshot(
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
-      // applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
@@ -422,8 +436,4 @@ OSActions.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
   }
-});
-
-window.electron.app.setAppviewPreload((_event: any, data: any) => {
-  servicesStore.desktop.setAppviewPreload(data);
 });

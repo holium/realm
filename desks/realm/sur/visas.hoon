@@ -35,6 +35,7 @@
       [%invited path=path:spc =invite]
       [%stamped path=path:spc]
       [%kick-member path=path:spc =ship]
+      [%group-kick-member path=path:spc =ship]
       [%revoke-invite path=path:spc]
   ==
 

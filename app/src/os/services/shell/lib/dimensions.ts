@@ -1,48 +1,68 @@
-export const DEFAULT_APP_WINDOW_DIMENSIONS: {
-  [key: string]: { width: number; height: number };
-} = {
-  ['ballot']: {
+import { Dimensions } from 'os/types';
+import { normalizeDimensions } from './window-manager';
+
+const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
+  ballot: {
     width: 1200,
     height: 1000,
   },
-  ['campfire']: {
+  campfire: {
     width: 1200,
     height: 1000,
   },
-  ['escape']: {
+  escape: {
     width: 1200,
     height: 900,
   },
-  ['bitcoin']: {
+  bitcoin: {
     width: 800,
     height: 900,
   },
-  ['landscape']: {
+  landscape: {
     width: 1200,
     height: 900,
   },
-  ['chatstead']: {
+  talk: {
     width: 1200,
     height: 900,
   },
-  ['homestead']: {
+  groups: {
     width: 1200,
     height: 900,
   },
-  ['webterm']: {
+  engram: {
+    width: 1200,
+    height: 900,
+  },
+  webterm: {
     width: 780,
     height: 600,
   },
-  ['os-settings']: {
+  'os-settings': {
     width: 800,
     height: 650,
   },
-  ['sphinx']: {
+  sphinx: {
     width: 600,
     height: 700,
   },
-  ['channel']: {
+  channel: {
     width: 1000,
     height: 900,
   },
+  templeochess: {
+    width: 700,
+    height: 700,
+  },
+};
+
+export const getDefaultAppDimensions = (
+  appId: string,
+  desktopDimensions: Dimensions
+) => {
+  const defaultDimensions = DEFAULT_APP_WINDOW_DIMENSIONS[appId];
+
+  if (!defaultDimensions) return null;
+
+  return normalizeDimensions(defaultDimensions, desktopDimensions);
 };

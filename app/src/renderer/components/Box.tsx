@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
@@ -53,10 +52,10 @@ export type BoxProps = {
   TypographyProps & {
     textDecoration?:
       | TextDecorationOption
-      | (TextDecorationOption | null | string)[];
+      | Array<TextDecorationOption | null | string>;
     textTransform?:
       | TextTransformOption
-      | (TextTransformOption | null | string)[];
+      | Array<TextTransformOption | null | string>;
   } & HTMLAttributes<any>;
 
 const textDecoration = style({
@@ -99,5 +98,3 @@ export const Box = styled(motion.div)<BoxProps>(
   },
   boxStyles
 );
-
-export default { Box };

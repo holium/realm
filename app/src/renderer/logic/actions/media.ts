@@ -1,5 +1,5 @@
 export const MediaActions = {
-  askForMicrophone: () => {
-    return window.electron.app.askForMicrophone();
+  askForMicrophone: async () => {
+    return await window.electron.app.askForMicrophone();
   },
 };

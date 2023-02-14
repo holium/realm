@@ -1,5 +1,5 @@
-/-  store=bazaar, spaces-store, docket
-/+  docket-lib=docket
+/-  store=bazaar-store, spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
+/+  docket-lib=docket, realm=realm
 =<  [store .]
 =,  store
 |%
@@ -14,14 +14,21 @@
     |%
     ++  decode
       %-  of
-      :~  [%pin add-pin]
+      :~
+          [%pin add-pin]
           [%unpin rem-pin]
-          [%set-pin-order set-pin-order]
+          [%reorder-pins reorder-pins]
           [%recommend add-rec]
           [%unrecommend rem-rec]
           [%suite-add suite-add]
           [%suite-remove suite-remove]
           [%install-app install-app]
+          [%uninstall-app uninstall-app]
+          [%initialize ul]
+          [%rebuild-catalog ul]
+          [%rebuild-stall rebuild-stall]
+          [%clear-stall clear-stall]
+          [%set-host set-host]
       ==
     ::
     ++  install-app
@@ -30,11 +37,16 @@
           [%desk so]
       ==
     ::
+    ++  uninstall-app
+      %-  ot
+      :~  [%desk so]
+      ==
+    ::
     ++  add-pin
       %-  ot
       :~  [%path pth]
           [%app-id so]
-          [%rank (mu ni)]
+          [%index (mu ni)]
       ==
     ::
     ++  rem-pin
@@ -43,55 +55,60 @@
           [%app-id so]
       ==
     ::
-    ++  set-pin-order
+    ++  reorder-pins
       %-  ot
       :~  [%path pth]
-          [%order (ar so)]
+          [%dock (ar so)]
       ==
     ::
     ++  add-rec
       %-  ot
-      :~  [%path pth]
-          [%app-id so]
+      :~  [%app-id so]
       ==
     ::
     ++  rem-rec
       %-  ot
-      :~  [%path pth]
-          [%app-id so]
+      :~  [%app-id so]
       ==
     ::
     ++  suite-add
       %-  ot
       :~  [%path pth]
           [%app-id so]
-          [%rank ni]
+          [%index ni]
       ==
     ::
     ++  suite-remove
       %-  ot
       :~  [%path pth]
-          [%app-id so]
+          [%index ni]
       ==
-    ::
-    ++  tg
-      |=  =json
-      ^-  tag:store
-      ?>  ?=(%s -.json)
-      ?:  =('pinned' p.json)              %pinned
-      ?:  =('recommended' p.json)         %recommended
-      ?:  =('suite' p.json)               %suite
-      :: ?:  =('installed' p.json)           %installed
-      !!
     ::
     ++  pth
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
+    ::
+    ++  rebuild-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ::
+    ++  clear-stall
+      %-  ot
+      :~  [%path pth]
+          [%args ul]
+      ==
+    ::
+    ++  set-host
+      %-  ot
+      :~  [%app-id so]
+          [%host (su ;~(pfix sig fed:ag))]
+      ==
     --
   --
-::
 ::
 ::  json
 ::
@@ -101,101 +118,132 @@
   ++  reaction
     |=  rct=^reaction
     ^-  json
-    :: %+  frond  %bazaar-reaction
     %-  pairs
     :_  ~
     ^-  [cord json]
+    :-  -.rct
     ?-  -.rct
+      ::
         %initial
-      :-  %initial
       %-  pairs
-      :~  [%space-apps (space-apps-full:encode space-apps-full.rct)]
-          [%my (my:encode my.rct)]
+      :~  [%catalog (catalog-js:encode catalog.rct)]
+          [%stalls (stalls-js:encode stalls.rct)]
+          [%docks (docks-js:encode docks.rct)]
+          [%recommendations a+(turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
+          [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
+        %app-install-update
+      (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
+      ::
+        %pinned
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%id s+app-id.rct]
+          [%index (numb index.rct)]
+      ==
+      ::
+        %unpinned
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%id s+app-id.rct]
+      ==
+      ::
+        %pins-reodered
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%dock a+(turn dock.rct |=(=app-id:store s+app-id))]
+      ==
+      ::
+        %recommended
+      %-  pairs
+      :~  [%id s+app-id.rct]
+          [%stalls (stalls-js:encode stalls.rct)]
+      ==
+      ::
+        %unrecommended
+      %-  pairs
+      :~  [%id s+app-id.rct]
+          [%stalls (stalls-js:encode stalls.rct)]
       ==
     ::
-        %space-apps
-      :-  %space-apps
+        %suite-added
       %-  pairs
-      :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%apps (pairs (full-app-index:encode app-index-full.rct))]
-          [%sorts (pairs (app-sorts:encode sorts.rct))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%id s+app-id.rct]
+          [%index (numb index.rct)]
       ==
-    ::
-        %pin
-      :-  %pin
+      ::
+        %suite-removed
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%index (numb index.rct)]
       ==
-    ::
-        %unpin
-      :-  %unpin
+      ::
+        %joined-bazaar
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%catalog (catalog-js:encode catalog.rct)]
+          [%stall (stall-js:encode stall.rct)]
       ==
-    ::
-        %set-pin-order
-      :-  %set-pin-order
+      ::
+        %stall-update
+      =/  data=(list [@tas json])
+          ?~  det.rct         [%none ~]~
+          ?~  app.u.det.rct   [%remove-app s+app-id.u.det.rct]~
+          [%add-app (app-detail:encode app-id.u.det.rct (need app.u.det.rct))]~
+      =/  data
+        %+  weld  data
+        ^-  (list [@tas json])
+        :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+            [%stall (stall-js:encode stall.rct)]
+        ==
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (srt:encode ord.rct))]
-      ==
-    ::
-        %recommend
-      :-  %recommend
+      data
+      ::
+        %treaties-loaded
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%ship s+(scot %p ship.rct)]
       ==
-    ::
-        %unrecommend
-      :-  %unrecommend
+      ::
+        %new-ally
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%ship s+(scot %p ship.rct)]
+          [%desks (alliance:encode alliance.rct)]
       ==
-    ::
-        %suite-add
-      :-  %suite-add
+      ::
+        %ally-deleted
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%ship s+(scot %p ship.rct)]
       ==
-    ::
-        %suite-remove
-      :-  %suite-remove
+      ::
+      ::   %treaty-added
+      :: :-  %treaty-added
+      :: %-  pairs
+      :: :~  [%ship s+(crip "{<ship.rct>}")]
+      ::     [%desk s+desk.rct]
+      ::     [%docket (dkt:encode docket.rct)]
+      :: ==
+        %rebuild-catalog
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      :~  [%catalog (catalog-js:encode catalog.rct)]
+          [%grid (grid-index-js:encode grid-index.rct)]
       ==
-    ::
-        %set-suite-order
-      :-  %set-suite-order
+      ::
+        %rebuild-stall
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (srt:encode ord.rct))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%catalog (catalog-js:encode catalog.rct)]
+          [%stall (stall-js:encode stall.rct)]
       ==
-    ::
-        %app-installed
-      :-  %app-installed
+      ::
+        %clear-stall
       %-  pairs
-      :~  [%app-id s+app-id.rct]
-          [%app (pairs (app-detail:encode app.rct))]
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
-    ::
-        %app-uninstalled
-      :-  %app-uninstalled
-      %-  pairs
-      :~  [%app-id s+app-id.rct]
-      ==
-    ::
-        %treaty-added
-      :-  %treaty-added
-      %-  pairs
-      :~  [%ship s+(crip "{<ship.rct>}")]
-          [%desk s+desk.rct]
-          [%docket (pairs (dkt:encode docket.rct))]
-      ==
-    ::
-        %my-recommendations
-        :-  %my-recommendations
-        [%a (turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
     ==
   ::
-  ++  view :: encodes for on-peek
+  ++  view  :: encodes for on-peek
     |=  vi=view:store
     ^-  json
     %-  pairs
@@ -204,149 +252,153 @@
     :-  -.vi
     ?-  -.vi
       ::
-        %apps
-      (pairs (full-app-index:encode app-index-full.vi))
+        %catalog
+      (catalog-js:encode catalog.vi)
       ::
-        %sites
-      [%a (sites:encode sites.vi)]
+        %installed
+      (catalog-js:encode catalog.vi)
+      ::
+        %allies
+      (allies-js:encode allies.vi)
+      ::
+        %treaties
+      (treaty-map:encode treaties.vi)
+      ::
+        %app-hash
+      s+(scot %uv hash.vi)
+      ::
     ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
-  ++  my
-    |=  [=my:store]
-    ^-  json
-    %-  pairs
-    :~  [%recommendations a+(turn ~(tap in recommendations.my) |=(=app-id:store s+app-id))]
-    ==
-  ++  sites
-    |=  [stes=(set [ship=@p desk=@tas])]
-    ^-  (list json)
-    %+  turn  ~(tap in stes)
-    |=  [ship=@p desk=@tas]
-    ^-  json
-    %-  pairs
-    :~  [%ship s+(crip "{<ship>}")]
-        [%desk s+desk]
-    ==
   ::
-  ++  space-apps-full
-    |=  =space-apps-full:store
+  ++  grid-index-js
+    |=  =grid-index:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by space-apps-full)
-    |=  [pth=space-path:spaces-store catalog=[=app-index-full:store =sorts:store]]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (apps-full catalog)]
+    %+  turn  ~(tap by grid-index)
+      |=  [idx=@ud desk=@tas]
+      ^-  [cord json]
+      [(cord (scot %ud idx)) s+(scot %tas desk)]
   ::
-  ++  apps-full
-    |=  [index=app-index-full:store =sorts:store]
+  ++  urbit-app-update
+    |=  [=app-id app=urbit-app:store =grid-index:store]
     ^-  json
     %-  pairs
-    :~  [%apps (pairs (full-app-index index))]
-        [%sorts (pairs (app-sorts sorts))]
+    :~  ['appId' s+app-id]
+        ['app' (urbit-app:encode app-id app)]
+        ['grid' (grid-index-js:encode grid-index)]
     ==
   ::
-  ++  app-sorts
-    |=  =sorts:store
-    ^-  (list [cord json])
-    :~  [pinned+a+(turn pinned.sorts |=(=app-id:store s+app-id))]
-        [recommended+a+(turn recommended.sorts |=(=app-id:store s+app-id))]
-        [suite+a+(turn suite.sorts |=(=app-id:store s+app-id))]
-    ==
+  ++  merge
+    |=  [a=json b=json]
+    ^-  json
+    ?>  &(?=(%o -.a) ?=(%o -.b))
+    [%o (~(uni by p.a) p.b)]
   ::
-  ++  space-apps-lite
-    |=  =space-apps-lite:store
+  ++  stalls-js
+    |=  =stalls:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by space-apps-lite)
-    |=  [pth=space-path:spaces-store catalog=[=app-index-lite:store =sorts:store]]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (apps-lite catalog)]
+    %+  turn  ~(tap by stalls)
+      |=  [pth=space-path:spaces-store =stall:store]
+      =/  spc-path      (spat /(scot %p ship.pth)/(scot %tas space.pth))
+      ^-  [cord json]
+      [spc-path (stall-js:encode stall)]
   ::
-  ++  apps-lite
-    |=  [index=app-index-lite:store =sorts:store]
-    (pairs (weld (lite-app-index index) (app-sorts sorts)))
+  ++  stall-js
+    |=  =stall:store
+    ^-  json
+    %-  pairs
+    :~  ['suite' (suite-js:encode suite.stall)]
+        ['recommended' (recommended-js:encode recommended.stall)]
+    ==
+  ::
+  ++  docks-js
+    |=  =docks:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by docks)
+      |=  [pth=space-path:spaces-store =dock:store]
+      =/  spc-path      (spat /(scot %p ship.pth)/(scot %tas space.pth))
+      ^-  [cord json]
+      [spc-path a+(turn dock |=(=app-id:store s+app-id))]
+  ::
+  ++  suite-js
+    |=  =suite:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by suite)
+      |=  [index=@ud =app-id:store]
+      ^-  [cord json]
+      [(scot %ud index) s+(cord app-id)]
+  ::
+  ++  recommended-js
+    |=  =recommended:store
+    ^-  json
+    %-  pairs
+    ::  TODO sort and only return the last 4
+    %+  turn  ~(tap by recommended)
+      |=  [=app-id:store =member-set:store]
+      ^-  [cord json]
+      [app-id (numb ~(wyt in member-set))]
+  ::
+  ++  catalog-js
+    |=  [=catalog:store]
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by catalog)
+      |=  [=app-id:store app=app:store]
+      ^-  [cord json]
+      [app-id (app-detail:encode app-id app)]
   ::
   ++  app-detail
-    |=  =app:store
-    ^-  (list [cord json])
+    |=  [=app-id:store =app:store]
     ?-  -.app
       ::
       %native
-        :: :~  desk+s+desk.native-app.app
-        :~  type+s+%native
-            title+s+title.native-app.app
-            info+s+info.native-app.app
-            :: color+s+(scot %ux color.native-app.app)
-            color+s+color.native-app.app
-            icon+s+icon.native-app.app
-            :: href+(href href.native-app.app)
+        ^-  json
+        %-  pairs
+        :~  ['id' s+app-id]
+            ['type' s+%native]
+            ['title' s+title.native-app.app]
+            ['info' s+info.native-app.app]
+            ['color' s+color.native-app.app]
+            ['icon' s+icon.native-app.app]
+            ['config' (config:enjs:realm config.native-app.app)]
         ==
       ::
       %web
-        :~  title+s+title.web-app.app
-            href+s+href.web-app.app
+        ^-  json
+        %-  pairs
+        :~  ['id' s+app-id]
+            ['title' s+title.web-app.app]
+            ['href' s+href.web-app.app]
+            ['favicon' s+favicon.web-app.app]
+            ['config' (config:enjs:realm config.web-app.app)]
         ==
       ::
-      %urbit
-        =/  ins=(list [cord json])  [%installed [%b installed.app]]~
-        (weld (dkt docket.app) ins)
+      %urbit   (urbit-app:encode app-id +.app)
       ::
-      %missing  ~
     ==
   ::
-  ++  srt
-    |=  ord=(list app-id)
-    ^-  (list [cord json])
-    :~  [%sort a+(turn ord |=(=app-id:store s+app-id))]
-    ==
-  ::
-  ++  app-full
-    |=  =app-full:store
-    ^-  (list [cord json])
-    =/  head=(list [cord json])
-    :~  [id+s+id.app-full]
-        ['ranks' (rnks ranks.sieve.app-full)]
-        ['tags' a+(turn ~(tap in tags.sieve.app-full) |=(tg=tag:store s+(scot %tas tg)))]
-        ['recommended' n+(crip "{<recommended.entry.app-full>}")]
-    ==
-    =/  detail=(list [cord json])  (app-detail:encode app.entry.app-full)
-    ?~  detail  ~  (weld head detail)
-  ::
-  ++  full-app-index
-    |=  =app-index-full:store
-    ^-  (list [cord json])
-    %+  turn  ~(tap by app-index-full)
-    |=  [=app-id:store =app-full:store]
-    ^-  [cord json]
-    [app-id (pairs (app-full:encode app-full))]
-  ::
-  ++  lite-app-index
-    |=  =app-index-lite:store
-    ^-  (list [cord json])
-    %+  turn  ~(tap by app-index-lite)
-    |=  [=app-id:store app=app-lite:store]
-    ^-  [cord json]
-    [app-id (app-lite app)]
-  ::
-  ++  app-lite
-    |=  app=app-lite:store
-    ^-  json
+  ++  urbit-app
+    |=  [=app-id app=urbit-app:store]
+    %+  merge  (dkt docket.app)
     %-  pairs
-    :~  [%id s+id.app]
-        :: ['ship' s+(scot %p ship.app-entry)]
-        ['ranks' (rnks ranks.sieve.app)]
-        ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
+    :~
+      ['id' s+app-id]
+      ['installStatus' [%s `@t`install-status.app]]
+      ['config' (config:enjs:realm config.app)]
+      ['host' ?~(host.app ~ s+(scot %p u.host.app))]
     ==
   ::
   ++  dkt
     |=  [=docket:docket]
-    ^-  (list [cord json])
+    ^-  json
+    %-  pairs
     :~  type+s+%urbit
         title+s+title.docket
         info+s+info.docket
@@ -385,7 +437,7 @@
       %http  s+url.loc
       %ames  s+(scot %p ship.loc)
     ==
-      ::
+  ::
   ++  version
     |=  v=version:docket
     ^-  json
@@ -400,63 +452,55 @@
     ?>  ?=(%n -.p)
     (trip p.p)
   ::
-  ++  rnks
-    |=  =ranks:store
+  ++  allies-js
+    |=  =allies:ally:treaty
     ^-  json
     %-  pairs
-    :~  [%pinned n+(crip "{<pinned.ranks>}")]
-        [%recommended n+(crip "{<recommended.ranks>}")]
-        [%suite n+(crip "{<suite.ranks>}")]
-    ==
-    :: %+  turn  ~(tap by ranks)
-    :: |=  [=tag:store rank=@ud]
-    :: ^-  [cord json]
-    :: ?-  tag
-    ::   %pinned       ['pinned' n+(cord "{<rank>}")]
-    ::   %recommended  ['recommended' n+(cord "{<rank>}")]
-    ::   %suite        ['suite' n+(cord "{<rank>}")]
-    ::   %installed    ['installed' n+(cord "{<rank>}")]
-    :: ==
+      %+  turn  ~(tap by allies)
+      |=  [s=^ship a=alliance:treaty]
+      [(scot %p s) (alliance a)]
   ::
-  :: ++  dkt
-  ::   |=  [d=(unit [=app-id:store =docket:docket])]
-  ::   ^-  json
-  ::   ?~  d  ~
-  ::   =/  dk  (docket:enjs:docket-lib docket.u.d)
-  ::   ?>  ?=([%o *] dk)
-  ::   (~(put by p.dk) %id s+app-id.u.d)
-  :: ::
-  :: ++  dkt
-  ::   |=  d=docket:docket
-  ::   ^-  json
-  ::   %-  pairs
-  ::   :~  title+s+title.d
-  ::       info+s+info.d
-  ::       color+s+(scot %ux color.d)
-  ::       href+(href href.d)
-  ::       image+?~(image.d ~ s+u.image.d)
-  ::       version+(version version.d)
-  ::       license+s+license.d
-  ::       website+s+website.d
-  ::   ==
-  :: ::
-  :: ++  href
-  ::   |=  h=href:docket
-  ::   %+  frond  -.h
-  ::   ?-    -.h
-  ::       %site  s+(spat path.h)
-  ::       %glob
-  ::     %-  pairs
-  ::     :~  base+s+base.h
-  ::         glob-reference+(glob-reference glob-reference.h)
-  ::     ==
-  ::   ==
-  :: ::
-  :: ++  version
-  ::   |=  v=version:docket
-  ::   ^-  json
-  ::   :-  %s
-  ::   %-  crip
-  ::   "{(num major.v)}.{(num minor.v)}.{(num patch.v)}"
+  ++  treaty-map
+    |=  t-map=(map [=^ship =desk] =treaty:treaty)
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by t-map)
+      |=  [[s=^ship =desk] t=treaty:treaty]
+      [(foreign-desk s desk) (treaty-js t)]
+  ::
+  ++  treaty-js
+    |=  t=treaty:treaty
+    ^-  json
+    %+  merge  (dkt docket.t)
+    %-  pairs
+    :~  ['ship' s+(scot %p ship.t)]
+        ['desk' s+desk.t]
+        ['cass' (case case.t)]
+        ['hash' s+(scot %uv hash.t)]
+    ==
+  ::
+  ++  foreign-desk
+    |=  [s=^ship =desk]
+    ^-  cord
+    (crip "{(scow %p s)}/{(trip desk)}")
+  ::
+  ++  case
+    |=  c=^case
+    %+  frond  -.c
+    ?-  -.c
+      %da   s+(scot %da p.c)
+      %tas  s+(scot %tas p.c)
+      %ud   (numb p.c)
+    ==
+  ::
+  ++  alliance
+    |=  a=alliance:treaty
+    ^-  json
+    :-  %a
+    %+  turn  ~(tap in a)
+      |=  [=^ship =desk]
+      ^-  json
+      s+(foreign-desk ship desk)
+  ::
   --
 --

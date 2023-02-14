@@ -1,5 +1,6 @@
-import { FC, useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch, SetStateAction, useEffect } from 'react';
 import { observer } from 'mobx-react';
+import { ethers } from 'ethers';
 import { Button, Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -8,16 +9,21 @@ import { NewWalletScreen } from './index';
 interface BackupProps {
   seedPhrase: string;
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
+  setSeedPhrase: (phrase: string) => void;
 }
 
-export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
+const BackupPresenter = (props: BackupProps) => {
   const { theme } = useServices();
 
-  const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
+  useEffect(() => {
+    props.setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+  }, []);
+
+  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
-  let [blurred, setBlurred] = useState(false);
-  let [copied, setCopied] = useState(false);
+  const [blurred, setBlurred] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function copy() {
     navigator.clipboard.writeText(props.seedPhrase);
@@ -96,24 +102,13 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
           </Flex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="center">
-          <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>
+          <Button onClick={() => props.setScreen(NewWalletScreen.CONFIRM)}>
             I wrote it down
-          </Button>{' '}
-          {/* TODO: link to confirm instead after demo */}
+          </Button>
         </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        top="542px"
-        zIndex={999}
-        onClick={() => props.setScreen(NewWalletScreen.CREATE)}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
       </Flex>
     </>
   );
-});
+};
+
+export const Backup = observer(BackupPresenter);

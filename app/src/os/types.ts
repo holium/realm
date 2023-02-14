@@ -1,9 +1,9 @@
-export type MSTAction = {
+export interface MSTAction {
   name: string;
   path: string;
   args: any[];
-};
-export type ShipInfoType = {
+}
+export interface ShipInfoType {
   url: string;
   cookie: string;
   theme?: any;
@@ -12,16 +12,16 @@ export type ShipInfoType = {
   nickname?: string;
   avatar?: string;
   loggedIn?: boolean;
-};
+}
 
-export type PostType = {
+export interface PostType {
   index: string;
   author: string;
   'time-sent': number;
   signatures: any[];
   contents: any[];
   hash: string;
-};
+}
 // common
 export type Patp = string;
 //
@@ -37,7 +37,7 @@ export type SpaceArchetype =
   | 'investment-dao';
 export type SpaceType = 'group' | 'space' | 'our';
 //
-export type Invite = {
+export interface Invite {
   inviter: Patp;
   path: SpacePath;
   role: MemberRole;
@@ -45,34 +45,39 @@ export type Invite = {
   name: string;
   type: SpaceType;
   invitedAt: Date;
-};
-export type SpaceInvitations = {
+}
+export interface SpaceInvitations {
   [patp: Patp]: Invite;
-};
-export type IncomingInvitations = {
+}
+export interface IncomingInvitations {
   [path: SpacePath]: Invite;
-};
-export type OutgoingInvitations = {
+}
+export interface OutgoingInvitations {
   [path: SpacePath]: Members;
-};
-export type Invitations = {
+}
+export interface Invitations {
   incoming: IncomingInvitations;
   outgoing: OutgoingInvitations;
-};
+}
 //
 //
 // sur/membership.hoon
 export type MemberRole = 'initiate' | 'member' | 'admin' | 'owner';
 export type MemberStatus = 'invited' | 'joined' | 'host';
-export type Member = {
+export interface Member {
   roles: MemberRole[];
   status: MemberStatus;
-};
-export type Members = {
+  patp: string;
+}
+export interface Members {
   [patp: Patp]: Member;
-};
-export type Membership = {
+}
+export interface Membership {
   [path: SpacePath]: Members;
-};
+}
 
-// sur/passports.hoon
+export type Position = { x: number; y: number };
+
+export type Dimensions = { width: number; height: number };
+
+export type Bounds = Position & Dimensions;

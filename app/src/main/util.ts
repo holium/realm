@@ -1,8 +1,8 @@
-/* eslint import/prefer-default-export: off, import/no-mutable-exports: off */
 import { URL } from 'url';
 import path from 'path';
 
 export let resolveHtmlPath: (htmlFileName: string) => string;
+export let resolveUpdaterPath: (mediaFileName: string) => string;
 export let resolveMediaPath: (mediaFileName: string) => string;
 
 if (process.env.NODE_ENV === 'development') {
@@ -12,9 +12,20 @@ if (process.env.NODE_ENV === 'development') {
     url.pathname = htmlFileName;
     return url.href;
   };
+  resolveUpdaterPath = (htmlFileName: string) => {
+    return `file://${path.resolve(__dirname, './updater/', htmlFileName)}`;
+  };
 } else {
   resolveHtmlPath = (htmlFileName: string) => {
     return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+  };
+  resolveUpdaterPath = (htmlFileName: string) => {
+    const filename = `file://${path.resolve(
+      process.resourcesPath,
+      './updater/',
+      htmlFileName
+    )}`;
+    return filename;
   };
   resolveMediaPath = (htmlFileName: string) => {
     return `file://${path.resolve(__dirname, '../../media/', htmlFileName)}`;

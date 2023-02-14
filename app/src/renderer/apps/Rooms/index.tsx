@@ -1,28 +1,40 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-// import { toJS } from 'mobx';
-import { ThemeModelType } from 'os/services/theme.model';
-import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
-import { Rooms, RoomListProps } from './List';
+import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
+import { useRooms } from './useRooms';
+import { Settings } from './Settings';
+import { useServices } from 'renderer/logic/store';
+import { Flex } from '@holium/design-system';
 
-export const RoomViews: { [key: string]: any } = {
-  list: (props: RoomListProps) => <Rooms {...props} />,
-  'new-room': (props: any) => <NewRoom {...props} />,
-  room: (props: any) => <Room {...props} />,
+const RoomViews: { [key: string]: any } = {
+  list: () => <Rooms />,
+  'new-room': () => <NewRoom />,
+  room: () => <Room />,
+  settings: () => <Settings />,
 };
 
-export type RoomAppProps = {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-};
-
-export const RoomApp: FC<RoomAppProps> = observer((props: RoomAppProps) => {
-  const { roomsApp } = useTrayApps();
+export const RoomAppPresenter = () => {
+  const { ship } = useServices();
+  const { roomsApp, dimensions } = useTrayApps();
+  const roomsManager = useRooms(ship!.patp);
+  useEffect(() => {
+    if (roomsManager?.live.room) {
+      roomsApp.setView('room');
+    }
+  }, [roomsApp, roomsManager?.live.room]);
   const View = RoomViews[roomsApp.currentView];
-  return <View {...props} />;
-});
+  return (
+    <Flex
+      position="relative"
+      height={dimensions.height - 24}
+      flexDirection="column"
+    >
+      <View />
+    </Flex>
+  );
+};
+
+export const RoomApp = observer(RoomAppPresenter);

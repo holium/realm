@@ -4,15 +4,14 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
 import { ThemeModel } from '../../theme.model';
-import { LoaderModel } from '../../common.model';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { VisaModel } from './visas';
 
 import { TokenModel } from './token';
 // import { FriendsStore } from '../../ship/models/friends';
-import { MembersModel, MembersStore } from './members';
+import { MembersStore } from './members';
 import { Patp } from 'os/types';
 
 export const DocketMap = types.map(
@@ -23,10 +22,12 @@ export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
     name: types.string,
-    color: types.maybeNull(types.string),
+    description: types.optional(types.string, ''),
+    color: types.optional(types.string, '#000000'),
     type: types.enumeration(['group', 'our', 'space']),
-    archetype: types.optional(types.enumeration(['home', 'community']), 'home'), //TODO remove the optional
-    picture: types.maybeNull(types.string),
+    archetype: types.optional(types.enumeration(['home', 'community']), 'home'), // TODO remove the optional
+    picture: types.optional(types.string, ''),
+    access: types.optional(types.string, 'public'),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
     invitations: types.optional(VisaModel, {
@@ -42,17 +43,21 @@ export const SpaceModel = types
       })
     ),
   })
-  .views((self) => ({}))
-  .actions((self) => ({}));
+  .views(() => ({}))
+  .actions(() => ({}));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
 
 export const SpacesStore = types
   .model('SpacesStore', {
     loader: types.optional(LoaderModel, { state: 'initial' }),
+    join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
     // friends: types.optional(FriendsStore, { all: {} }),
+    subscription: types.optional(SubscriptionModel, {
+      state: 'subscribing',
+    }),
   })
   .views((self) => ({
     get isLoading() {
@@ -76,11 +81,14 @@ export const SpacesStore = types
       return self.spaces.get(spacePath);
       // }
     },
+    get subscriptionState() {
+      return self.subscription.state;
+    },
   }))
   .actions((self) => ({
-    initialScry: (data: any, persistedState: any, ship: Patp) => {
+    initialScry: (data: any, _persistedState: any, ship: Patp) => {
       Object.entries(data).forEach(
-        ([path, space]: [path: string, space: any]) => {
+        ([path, _space]: [path: string, space: any]) => {
           // console.log(path, space);
           // const persistedData =
           //   persistedState && persistedState.spaces
@@ -99,7 +107,7 @@ export const SpacesStore = types
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
-    initialReaction: (data: { spaces: any; members: any }) => {
+    initialReaction: (data: { spaces: any; members: any }, ship: Patp) => {
       Object.keys(data.spaces).forEach((key: string) => {
         // if (!data.spaces[key].members) {
         //   data.spaces[key].members = { all: {} };
@@ -109,13 +117,21 @@ export const SpacesStore = types
         // });
         data.spaces[key].theme.id = `${key}`;
       });
+      // self.loader.set('loaded');
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
+      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
+      self.loader.state = 'loaded';
+      console.log(self.loader.state);
     },
     addSpace: (addReaction: { space: any; members: any }) => {
-      // console.log(addReaction);
       const space = addReaction.space;
-      addReaction.space.theme.id = addReaction.space.path;
-      const newSpace = SpaceModel.create(space);
+      const newSpace = SpaceModel.create({
+        ...space,
+        theme: {
+          id: space.path,
+          ...space.theme,
+        },
+      });
       // newSpace.members?.initial(addReaction.members);
       self.spaces.set(space.path, newSpace);
       return newSpace.path;
@@ -147,13 +163,21 @@ export const SpacesStore = types
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;
     },
+    setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
+      self.join.state = status;
+    },
     setOurSpace(ourSpace: any) {
       // self.our = ourSpace;
       if (!self.selected) self.selected = ourSpace;
     },
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath)!;
-      return self.selected!;
+      return self.selected;
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
     },
   }));
 

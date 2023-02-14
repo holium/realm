@@ -1,53 +1,44 @@
-import { FC, createRef, useMemo, useRef } from 'react';
-import { rgba } from 'polished';
+import { useState } from 'react';
 import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
-import { useServices } from 'renderer/logic/store';
-import { TrayMenu } from './components/SystemBar/components/TrayMenu';
-import { MiniApp } from './components/SystemBar/components/MiniAppWindow';
+import { TrayApp } from '@holium/design-system';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
-type TrayManagerProps = {};
-
-export const TrayManager: FC<TrayManagerProps> = observer(
-  (props: TrayManagerProps) => {
-    const { theme } = useServices();
-    let trayAppRef: any;
-
-    const { windowColor, textColor } = theme.currentTheme;
-    const { activeApp, dimensions, coords } = useTrayApps();
-
-    let TrayAppView: FC<any> | undefined;
-    if (activeApp) {
-      TrayAppView = trayAppRenderers[activeApp]!.component!;
-      trayAppRef = createRef<HTMLDivElement>();
-    }
-    return useMemo(
-      () =>
-        TrayAppView ? (
-          <TrayMenu
-            id={activeApp! as TrayAppKeys}
-            coords={coords}
-            dimensions={dimensions}
-            content={
-              <MiniApp
-                id={`${activeApp}-app`}
-                ref={trayAppRef}
-                dimensions={dimensions}
-                backgroundColor={windowColor}
-                textColor={textColor}
-              >
-                <TrayAppView
-                  theme={theme.currentTheme}
-                  dimensions={dimensions}
-                />
-              </MiniApp>
-            }
-          />
-        ) : null,
-      [TrayAppView, activeApp, coords, dimensions]
-    );
+const TrayManagerPresenter = () => {
+  const { activeApp, coords, walletApp, dimensions, setActiveApp } =
+    useTrayApps();
+  const [walletForceActive, setWalletForceActive] = useState(false);
+  if (walletForceActive && activeApp !== 'wallet-tray') {
+    WalletActions.setForceActive(false);
+    setWalletForceActive(false);
   }
-);
+  if (walletApp.forceActive && !walletForceActive) {
+    setWalletForceActive(true);
+    setActiveApp('wallet-tray');
+  }
 
-export default { TrayManager };
+  if (!activeApp) return null;
+
+  const TrayAppView = trayAppRenderers[activeApp].component;
+  const height = document.body.clientHeight;
+  return (
+    <TrayApp
+      zIndex={100}
+      id={activeApp as TrayAppKeys}
+      coords={{
+        x: coords.left,
+        y: height - dimensions.height - coords.bottom,
+        height: dimensions.height,
+        width: dimensions.width,
+      }}
+      closeTray={() => {
+        setActiveApp(null);
+      }}
+    >
+      {TrayAppView && <TrayAppView />}
+    </TrayApp>
+  );
+};
+
+export const TrayManager = observer(TrayManagerPresenter);

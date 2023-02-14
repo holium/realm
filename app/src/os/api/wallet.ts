@@ -1,27 +1,46 @@
-import { hashHostnameBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { Conduit } from '@holium/conduit';
+import {
+  ProtocolType,
+  UISettingsType,
+  WalletStoreType,
+  NetworkStoreType,
+} from '../services/tray/wallet-lib/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'set-xpub': {
-          network: network,
-          xpub: xpub,
+          network,
+          xpub,
         },
       },
     };
     await conduit.poke(payload);
   },
-  setWalletCreationMode: async (conduit: Conduit, mode: string) => {
+  getEthXpub: async (conduit: Conduit) => {
+    return await conduit.scry({
+      app: 'realm-wallet',
+      path: '/eth-xpub',
+    });
+  },
+  setSettings: async (
+    conduit: Conduit,
+    network: string,
+    settings: UISettingsType
+  ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
-        'set-wallet-creation-mode': {
-          mode: mode,
+        'set-network-settings': {
+          network,
+          mode: settings.walletCreationMode,
+          who: settings.sharingMode,
+          blocked: settings.blocked,
+          'share-index': settings.defaultIndex,
         },
       },
     };
@@ -33,29 +52,12 @@ export const WalletApi = {
     index: number
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'change-default-wallet': {
-          network: network,
-          index: index,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
-  setNetworkProvider: async (
-    conduit: Conduit,
-    network: string,
-    provider: string
-  ) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'set-network-provider': {
-          network: network,
-          provider: provider,
+          network,
+          index,
         },
       },
     };
@@ -68,35 +70,22 @@ export const WalletApi = {
     nickname: string
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'create-wallet': {
           sndr: sender,
-          network: network,
-          nickname: nickname,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
-  requestAddress: async (conduit: Conduit, network: string, from: string) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'request-address': {
-          network: network,
-          from: from,
+          network,
+          nickname,
         },
       },
     };
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
-    return new Promise<string>((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
       conduit.watch({
-        app: 'wallet',
+        app: 'realm-wallet',
         path: '/address/' + network + '/' + from,
         onEvent: (data: any) => {
           resolve(data);
@@ -111,55 +100,26 @@ export const WalletApi = {
       });
     });
   },
-  enqueueTransaction: async (
+  setTransaction: async (
     conduit: Conduit,
     network: string,
+    net: string,
+    wallet: number,
+    contract: string | null,
     hash: string,
     transaction: any
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
-        'enqueue-transaction': {
-          network: network,
-          hash: hash,
-          transaction: transaction,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
-  setTransactionPending: async (conduit: Conduit, transactionKey: any) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'set-transaction-pending': {
-          transactionKey: transactionKey,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
-  addSmartContract: async (
-    conduit: Conduit,
-    contractId: string,
-    contractType: string,
-    name: string,
-    contractAddress: string,
-    walletIndex: string
-  ) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'add-smart-contract': {
-          'contract-id': contractId,
-          'contract-type': contractType,
-          name: name,
-          address: contractAddress,
-          'wallet-index': walletIndex,
+        'set-transaction': {
+          network,
+          net,
+          wallet,
+          contract,
+          hash,
+          transaction,
         },
       },
     };
@@ -168,60 +128,151 @@ export const WalletApi = {
   saveTransactionNotes: async (
     conduit: Conduit,
     network: string,
+    net: string,
+    wallet: number,
+    contract: string | null,
     hash: string,
     notes: string
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'save-transaction-notes': {
-          network: network,
-          hash: hash,
-          notes: notes
-        }
-      }
+          network,
+          net,
+          wallet,
+          contract,
+          hash,
+          notes,
+        },
+      },
     };
     await conduit.poke(payload);
   },
-  getHistory: async (conduit: Conduit) => {
-    return await conduit.scry({
-      app: 'wallet',
-      path: '/history',
-    });
-  },
-  subscribeToTransactions(
-    conduit: Conduit,
-    handler: (transaction: any) => void
-  ) {
-    conduit.watch({
-      app: 'wallet',
-      path: '/transactions',
-      onEvent: (data: any) => {
-        handler(data);
+  setPasscodeHash: async (conduit: Conduit, passcodeHash: string) => {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-passcode-hash': {
+          hash: passcodeHash,
+        },
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
-    });
+    };
+    await conduit.poke(payload);
   },
   getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/wallets',
     });
   },
-  subscribeToWallets: async (
+  getSettings: async (conduit: Conduit) => {
+    return await conduit.scry({
+      app: 'realm-wallet',
+      path: '/settings',
+    });
+  },
+  /**
+   * watchUpdates
+   *
+   * @param conduit
+   * @param walletState
+   */
+  watchUpdates: (
     conduit: Conduit,
-    handler: (transaction: any) => void
-  ) => {
+    walletState: WalletStoreType,
+    onWallet: () => void
+  ): void => {
     conduit.watch({
-      app: 'wallet',
-      path: '/wallets',
-      onEvent: (data: any) => {
-        handler(data);
+      app: 'realm-wallet',
+      path: '/updates',
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        if (mark === 'realm-wallet-update') {
+          handleWalletReactions(data, walletState, onWallet);
+        }
       },
       onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
+      onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
+  initialize: async (conduit: Conduit) => {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        initialize: null,
+      },
+    };
+    await conduit.poke(payload);
+  },
+};
+
+export const handleWalletReactions = (
+  data: any,
+  walletState: WalletStoreType,
+  onWallet: () => void
+) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    case 'wallet':
+      const wallet = data.wallet;
+      if (wallet.network === 'ethereum') {
+        walletState!.ethereum.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'bitcoin') {
+        walletState!.bitcoin.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'btctestnet') {
+        walletState!.btctest.applyWalletUpdate(wallet);
+      }
+      onWallet();
+      break;
+    case 'wallets':
+      const wallets = data.wallets;
+      if (
+        Object.keys(wallets.ethereum).length !== 0 ||
+        Object.keys(wallets.bitcoin).length !== 0 ||
+        Object.keys(wallets.btctestnet).length !== 0
+      ) {
+        walletState!.setInitialized(true);
+      }
+      walletState!.ethereum.initial(wallets);
+      walletState!.bitcoin.initial(wallets.bitcoin);
+      walletState!.btctest.initial(wallets.btctestnet);
+      onWallet();
+      break;
+    case 'transaction':
+      const transaction = data.transaction;
+      const network: NetworkStoreType =
+        transaction.net === ProtocolType.ETH_MAIN ||
+        transaction.net === ProtocolType.ETH_GORLI ||
+        transaction.net === ProtocolType.UQBAR
+          ? NetworkStoreType.ETHEREUM
+          : transaction.net === ProtocolType.BTC_MAIN
+          ? NetworkStoreType.BTC_MAIN
+          : NetworkStoreType.BTC_TEST;
+      if (network === NetworkStoreType.ETHEREUM) {
+        walletState!.ethereum.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(
+            transaction.net,
+            transaction.contract,
+            transaction.transaction
+          );
+      } else if (network === NetworkStoreType.BTC_MAIN) {
+        /*walletState!.bitcoin.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(transaction.net, transaction.transaction);*/
+      } else if (network === NetworkStoreType.BTC_TEST) {
+        /*walletState!.btctest.wallets.get(
+          transaction.index
+        )!.applyTransactions(transaction.net, transaction.transaction);*/
+      }
+      break;
+    case 'settings':
+      walletState.setSettings(data.settings);
+      break;
+    default:
+      break;
+  }
 };

@@ -1,18 +1,21 @@
 import {
   applySnapshot,
   castToSnapshot,
-  getSnapshot,
   cast,
   Instance,
   types,
-  IMSTMap,
-  onSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp, SpacePath } from '../../../types';
 // import { InvitationsModel } from './invitations';
 
-const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);
+const Roles = types.enumeration([
+  'initiate',
+  'member',
+  'admin',
+  'owner',
+  'moderator',
+]);
 const Status = types.enumeration(['invited', 'joined', 'host']);
 
 export const MembersModel = types.model({
@@ -33,14 +36,15 @@ const generateMemberList = (entries: any) => {
 };
 
 export const MembershipStore = types
-  .model({
+  .model('MembershipStore', {
     selected: types.safeReference(types.map(MembersModel)),
     spaces: types.map(types.map(MembersModel)),
   })
   .views((self) => ({
     isAdmin(path: string, patp: Patp) {
-      const roles = self.spaces.get(path)?.get(patp)!.roles;
-      return roles?.includes('admin');
+      const member = self.spaces.get(path)?.get(patp);
+      if (!member) return false;
+      return member.roles?.includes('admin');
     },
     getMemberCount(path: SpacePath) {
       const members = self.spaces.get(path);
@@ -52,7 +56,7 @@ export const MembershipStore = types
     },
     getSpaceMembers(path: SpacePath) {
       const members = self.spaces.get(path);
-      if (!members) return {};
+      if (!members) return types.map(MembersModel).create();
       return members;
     },
     getMembersList(path: SpacePath) {
@@ -93,7 +97,7 @@ export const MembershipStore = types
 export type MembershipType = Instance<typeof MembershipStore>;
 
 export const MembersStore = types
-  .model({
+  .model('MembersStore', {
     all: types.map(MembersModel),
   })
   .views((self) => ({

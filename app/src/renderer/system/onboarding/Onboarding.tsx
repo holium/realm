@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
@@ -6,27 +6,26 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { Flex } from 'renderer/components';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
-type OnboardingProps = {
+interface OnboardingProps {
   firstTime: boolean;
   exit: () => void;
-};
-export const Onboarding: FC<OnboardingProps> = observer(
-  (props: OnboardingProps) => {
-    let { onboarding } = useServices();
+}
+export const OnboardingPresenter = (props: OnboardingProps) => {
+  const { onboarding } = useServices();
 
-    useEffect(() => {
-      ShellActions.openDialog(
-        props.firstTime ? onboarding.currentStep : OnboardingStep.HAVE_URBIT_ID
-      );
+  useEffect(() => {
+    ShellActions.openDialog(
+      props.firstTime ? onboarding.currentStep : OnboardingStep.HAVE_URBIT_ID
+    );
 
-      return () => {
-        ShellActions.closeDialog();
-      };
-    }, []);
+    return () => {
+      ShellActions.closeDialog();
+    };
+  }, []);
 
-    return (
-      <Flex position="absolute" bottom={40} left={40}>
-        {/* <IconButton
+  return (
+    <Flex position="absolute" bottom={40} left={40}>
+      {/* <IconButton
           onClick={() => {
             ShellActions.closeDialog();
             props.exit();
@@ -34,9 +33,8 @@ export const Onboarding: FC<OnboardingProps> = observer(
         >
           <Icons name="ArrowLeftLine" />
         </IconButton> */}
-      </Flex>
-    );
-  }
-);
+    </Flex>
+  );
+};
 
-export default Onboarding;
+export const Onboarding = observer(OnboardingPresenter);

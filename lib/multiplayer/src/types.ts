@@ -1,13 +1,16 @@
-export type Vec2 = { x: number; y: number };
+export interface Vec2 {
+  x: number;
+  y: number;
+}
 
 export type SendPartial<T> = Omit<T, 'id'>;
 
-export type MultiplayerShipType = {
+export interface MultiplayerShipType {
   patp: string;
   nickname: string | null;
   color: string | null;
   avatar: string | null;
-};
+}
 
 export enum RealmEvent {
   Join = 'join',
@@ -130,6 +133,7 @@ export interface RealmMultiplayerInterface {
     event: string,
     handler: (payload: T) => void
   ) => () => void;
+  // eslint-disable-next-line no-restricted-globals
   close: typeof close;
 }
 

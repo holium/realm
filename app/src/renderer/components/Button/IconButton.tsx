@@ -13,7 +13,7 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import type { ThemeType } from '../../theme';
 
 type IProps = {
@@ -43,7 +43,6 @@ export const IconButton = styled(motion.button)<IProps>`
   justify-content: center;
   position: relative;
   pointer-events: auto;
-  will-change: transform;
   height: ${(props: IProps) => `${props.size}px`};
   width: ${(props: IProps) => `${props.size}px`};
   svg {

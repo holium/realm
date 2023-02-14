@@ -1,4 +1,4 @@
-import { detach, Instance, types, destroy } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 
 export const StepList = types.enumeration([
   'add-ship',
@@ -47,3 +47,20 @@ export const LoaderModel = types
   }));
 
 export type LoaderModelType = Instance<typeof LoaderModel>;
+
+export const SubscriptionModel = types
+  .model({
+    state: types.optional(
+      types.enumeration('LoaderState', [
+        'subscribed',
+        'subscribing',
+        'unsubscribed',
+      ]),
+      'subscribing'
+    ),
+  })
+  .actions((self) => ({
+    set(state: 'subscribed' | 'subscribing' | 'unsubscribed') {
+      self.state = state;
+    },
+  }));

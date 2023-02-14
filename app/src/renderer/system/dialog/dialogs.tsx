@@ -1,10 +1,16 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { FC } from 'react';
+import { AppWindowProps } from 'os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
-import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
+import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
+import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
+import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
+import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
+import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
+import { Dimensions } from 'os/types';
 
-export type BaseWorkflowProps = {
+export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
   firstStep?: boolean; // identifies the first dialog in a workflow
   customNext?: boolean; // an override to remove the next button if the dialog has a custom "next" component
@@ -15,29 +21,36 @@ export type BaseWorkflowProps = {
   isValidated?: (state: any) => boolean; // a function that takes in the state and can then check for value.
   onNext?: (evt?: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.
   onPrevious?: (data?: any) => void; // is the function that executes whent the back arrow is clicked.
-};
+}
 
 export type BaseDialogProps = {
-  onOpen?: () => void; // is the funciton that executres when the dialog is opened
-  onClose?: () => void; // is the funciton that executres when the dialog is closed
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
+  draggable?: boolean;
+  unblurOnClose?: boolean;
   theme?: ThemeModelType;
+  edit?: any;
+  onOpen?: () => void; // is the function that executes when the dialog is opened
+  onClose?: () => void; // is the function that executes when the dialog is closed
 } & BaseWorkflowProps;
 
 export type DialogConfig = {
-  titlebar?: React.FC<any>;
-  component: React.FC<any>;
+  titlebar?: FC<any>;
+  component: FC<any>;
   stateKey?: string;
-  window: WindowModelProps;
+  getWindowProps: (dekstopDimensions: Dimensions) => AppWindowProps;
 } & BaseDialogProps;
 
-export type DialogRenderers = {
-  [key: string]: DialogConfig;
-};
+export interface DialogRenderers {
+  [key: string]: DialogConfig | ((props: any) => DialogConfig);
+}
 
 export const dialogRenderers: DialogRenderers = {
+  'app-detail-dialog': AppDetailDialog,
   'wallpaper-dialog': WallpaperDialogConfig,
+  'leave-space-dialog': LeaveSpaceDialogConfig,
+  'delete-space-dialog': DeleteSpaceDialogConfig,
+  'change-email-dialog': ChangeEmailDialogConfig,
   ...spacesDialogs,
   ...onboardingDialogs,
 };

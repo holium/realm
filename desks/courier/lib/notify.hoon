@@ -1,25 +1,24 @@
 /-  sur=notify, courier
+/+  c-lib=courier
 =<  [sur .]
 =,  sur
 |%
 ++  generate-push-notification
   |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
-  =/  new-push
-    ?-    type.new-dm  
-      %dm                 (dm-notif our app-id new-dm)
-      %pending            (dm-notif our app-id new-dm)
-      %group              (group-notif our app-id new-dm)
-      %group-pending      (group-notif our app-id new-dm)
-    ==
-  new-push
+  ?-    type.new-dm  
+    %dm                 (dm-notif our app-id new-dm)
+    %pending            (dm-notif our app-id new-dm)
+    %group              (group-notif our app-id new-dm)
+    %group-pending      (group-notif our app-id new-dm)
+  ==
 ::
 ++  dm-notif
   |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
   =/  from      (rear ~(tap in to.new-dm))
   =/  content   (crip "from {(scow %p from)}")
-  =/  mtd       ^-(mtd:sur [path.new-dm])
+  =/  mtd       ^-(mtd:sur [path.new-dm member-meta=(~(put by *mem-meta:sur) (scot %p from) (snag 0 metadata.new-dm))])
   =/  new-push
     [
       app-id=app-id
@@ -32,15 +31,15 @@
 ++  group-notif
   |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
-  =/  from      (turn ~(tap in to.new-dm) |=([p=@p] (scow %p p)))
-  :: =/  content   (crip "New message from {(scow %p from)}")
-  :: =/  content   (crip "New group DM from {<from>}")
+  =/  from        (turn ~(tap in to.new-dm) |=([p=@p] (scot %p p)))
+  =/  list-mems   (turn from |=([p=@t] [p (snag (need (find [p]~ from)) metadata.new-dm)]))
+  =/  members     (~(gas by *mem-meta:sur) list-mems)
   =/  new-push
     [
       app-id=app-id
-      data=[path=path.new-dm]
+      data=[path=path.new-dm member-meta=members]
       subtitle=(malt ~[['en' 'New Group DM']])
-      contents=`(map cord cord)`(malt ~[['en' (crip "Message contents")]])
+      contents=*(map cord cord)
     ]
   new-push
 ::
@@ -81,19 +80,28 @@
     |=  [notif=notification:sur =devices:sur]
     ^-  json
     =/  player-ids  ~(val by devices)
-    %-  pairs
+    =/  base-list
     :~  
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
         ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
         ['subtitle' (contents subtitle.notif)]
-        ['contents' (contents contents.notif)]
     ==
+    ?~  contents.notif
+      (pairs base-list)
+    %-  pairs
+    :-
+      ['contents' (contents contents.notif)]
+      base-list
     ++  mtd 
       |=  =mtd:sur
       ^-  json
+      ~&  mtd
       %-  pairs
-      ['path' s+path.mtd]~
+      :~
+        ['path' s+path.mtd]
+        ['usrinfo' o+(~(run by member-meta.mtd) mtd:encode:c-lib)]
+      ==
     ::
     ++  contents 
       |=  contents=(map cord cord)

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { KeyboardEventHandler, useState } from 'react';
 import { Text, Flex, Label, Button, Input, Box } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -6,7 +6,7 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
-const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+const AccessGatePresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);
 
@@ -15,16 +15,14 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const [error, setError] = useState('');
 
   const onChange = (event: any) => {
-    if (accessCode.length > 21) return;
-
-    let value = event.target.value.trim();
+    const value = event.target.value.trim();
     setAccessCode(value);
     setError('');
   };
 
   const checkCode = async () => {
     setLoading(true);
-    let response = await OnboardingActions.checkGatedAccess(accessCode);
+    const response = await OnboardingActions.checkGatedAccess(accessCode);
     setLoading(false);
 
     if (!response.success) {
@@ -33,6 +31,10 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
 
     setError('');
     props.onNext && props.onNext();
+  };
+
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') checkCode();
   };
 
   return (
@@ -54,6 +56,7 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
           type="text"
           required={true}
           spellCheck={false}
+          onKeyDown={onKeyDown}
         />
         <Box hidden={!error} mt={2}>
           <Text variant="body" color={themeData.colors.text.error}>
@@ -73,6 +76,6 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       </Flex>
     </Flex>
   );
-});
+};
 
-export default AccessGate;
+export const AccessGate = observer(AccessGatePresenter);

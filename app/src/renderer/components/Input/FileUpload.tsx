@@ -96,14 +96,10 @@ interface IProps {
   maxFileSizeInBytes?: number;
 }
 
-const KILO_BYTES_PER_BYTE = 1000;
 const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 500000;
 
 const convertNestedObjectToArray = (nestedObj: any) =>
   Object.keys(nestedObj).map((key) => nestedObj[key]);
-
-const convertBytesToKB = (bytes: number) =>
-  Math.round(bytes / KILO_BYTES_PER_BYTE);
 
 export const FileUpload: FC<IProps> = ({
   theme,
@@ -122,18 +118,17 @@ export const FileUpload: FC<IProps> = ({
   const fileInputField = useRef(null);
   const [files, setFiles] = useState<any>({});
 
-  const handleUploadBtnClick = () => {
-    // @ts-ignore
-    fileInputField.current!.click();
-  };
+  // const handleUploadBtnClick = () => {
+  //   // @ts-expect-error
+  //   fileInputField.current!.click();
+  // };
 
   const addNewFiles = (newFiles: any) => {
-    for (let file of newFiles) {
+    for (const file of newFiles) {
       if (file.size <= maxFileSizeInBytes) {
         if (!multiple) {
           return { file };
         }
-        // @ts-ignore
         files[file.name] = file;
       }
     }
@@ -148,7 +143,7 @@ export const FileUpload: FC<IProps> = ({
   const handleNewFileUpload = (evt: any) => {
     const { files: newFiles } = evt.target;
     if (newFiles.length) {
-      let updatedFiles = addNewFiles(newFiles);
+      const updatedFiles = addNewFiles(newFiles);
       setFiles(updatedFiles);
       callUpdateFilesCb(updatedFiles);
       onChange(evt);
@@ -157,16 +152,15 @@ export const FileUpload: FC<IProps> = ({
 
   const removeFile = (fileName: string) => {
     delete files[fileName];
-    // @ts-ignore
+    // @ts-expect-error
     fileInputField.current.value = '';
     setFiles({ ...files });
     callUpdateFilesCb({ ...files });
   };
 
-  // @ts-ignore
-  let file = files['file'];
+  const file = files.file;
 
-  let isImageFile = file && file.type.split('/')[0] === 'image';
+  const isImageFile = file && file.type.split('/')[0] === 'image';
 
   return (
     <>
@@ -179,19 +173,23 @@ export const FileUpload: FC<IProps> = ({
         color={'color'}
       >
         {label && (
+          // @ts-ignore
           <Label mb={1} htmlFor="avatar">
             {label}
           </Label>
         )}
+        {/* @ts-ignore */}
         <FileUploadContainer size={width} theme={theme}>
           {!file && <div className="file-upload-icon">{icon && icon}</div>}
           {file && isImageFile && (
             <ImagePreview
+              // @ts-ignore
               src={URL.createObjectURL(file)}
               alt={`file preview`}
             />
           )}
           <FormField
+            // @ts-ignore
             name={name}
             required={required}
             type="file"
@@ -205,6 +203,7 @@ export const FileUpload: FC<IProps> = ({
         </FileUploadContainer>
         {file && (
           <Button
+            // @ts-ignore
             type="button"
             style={{ margin: '5px 0' }}
             theme={theme}
@@ -221,5 +220,3 @@ export const FileUpload: FC<IProps> = ({
 FileUpload.defaultProps = {
   width: 132,
 };
-
-export default FileUpload;

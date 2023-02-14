@@ -6,7 +6,6 @@ import {
   BackgroundColorProps,
   ColorProps,
 } from 'styled-system';
-import { rgba, lighten } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 
@@ -26,6 +25,9 @@ export const Bubble = styled(motion.div)<BubbleProps>`
   ${(props: BubbleProps) =>
     props.primary
       ? css`
+          * {
+            color: #fff;
+          }
           border-bottom-right-radius: 0px;
         `
       : css`

@@ -1,16 +1,23 @@
-import { FC, useRef, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-import { lighten, rgba, darken } from 'polished';
-import { Flex, Box, Text, ContextMenu } from '..';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { toJS } from 'mobx';
-import { bgIsLightOrDark } from 'os/lib/color';
-import Icons from '../Icons';
-import { Portal } from 'renderer/system/dialog/Portal';
-import { AnimatePresence } from 'framer-motion';
-import { ThemeType } from 'renderer/theme';
+import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
+import styled, { css } from 'styled-components';
+import { darken, desaturate } from 'polished';
+import { Flex, Box, Text, Spinner } from 'renderer/components';
+import {
+  AppType,
+  InstallStatus,
+  DevAppType,
+} from 'os/services/spaces/models/bazaar';
+import { lighten, rgba } from 'polished';
+import { bgIsLightOrDark } from 'os/lib/color';
+import { Icons } from '../Icons';
+import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 const sizes = {
   sm: 32,
@@ -20,6 +27,16 @@ const sizes = {
   xl1: 160,
   xl2: 196,
   xxl: 210,
+};
+
+const loaderSizes = {
+  sm: 0,
+  md: 0,
+  lg: 1,
+  xl: 2,
+  xl1: 3,
+  xl2: 3,
+  xxl: 3,
 };
 
 const radius = {
@@ -66,7 +83,10 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
     `}
 `;
 
-interface TileStyleProps {}
+interface TileStyleProps {
+  highlightOnHover?: boolean;
+}
+
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;
   display: flex;
@@ -74,6 +94,16 @@ const TileStyle = styled(Box)<TileStyleProps>`
   justify-content: center;
   align-items: center;
   user-select: none;
+  transition: var(--transition);
+  ${(props: TileStyleProps) =>
+    props.highlightOnHover &&
+    css`
+      &:hover {
+        transition: var(--transition);
+        filter: brightness(0.92);
+      }
+    `}
+
   img {
     --webkit-user-select: none;
     --khtml-user-select: none;
@@ -85,63 +115,94 @@ const TileStyle = styled(Box)<TileStyleProps>`
 
 export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
-  isPinned?: boolean;
-  contextPosition?: 'above' | 'below';
-  allowContextMenu?: boolean;
-  contextMenu?: any[] | (() => any[]); // todo types
+  contextMenuOptions?: ContextMenuOption[];
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
-  app: AppType | any;
+  app: AppType | DevAppType;
+  tileId: string;
   variants?: any;
-  isVisible?: boolean;
   isAnimated?: boolean;
   tileSize: AppTileSize;
+  installStatus?: InstallStatus;
   hasTitle?: boolean;
+  highlightOnHover?: boolean;
 }
 
-export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
-  const {
-    app,
-    contextMenu,
-    contextPosition,
-    variants,
-    selected,
-    tileSize,
-    allowContextMenu,
-    isPinned,
-    open,
-    isAnimated,
-    onAppClick,
-    hasTitle,
-  } = props;
+const AppTilePresenter = ({
+  app,
+  tileId,
+  contextMenuOptions,
+  variants,
+  selected,
+  tileSize = 'md',
+  open,
+  isAnimated = true,
+  onAppClick,
+  hasTitle,
+  installStatus = InstallStatus.installed,
+}: AppTileProps) => {
   const { theme } = useServices();
-
+  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
   const tileRef = useRef(null);
+  const isAppGrid =
+    tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
+  const boxShadowStyle = isAppGrid ? '0px 2px 8px rgba(0, 0, 0, 0.15)' : 'none';
+  const boxShadowHover = isAppGrid ? '0px 4px 8px rgba(0, 0, 0, 0.15)' : 'none';
+
+  const isLight = useMemo(() => {
+    return bgIsLightOrDark(app.color) === 'light';
+  }, [app.color]);
+
+  const textColor = useMemo(
+    () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
+    [isLight]
+  );
+  const contextMenuColors = useMemo(
+    () => ({ textColor, backgroundColor: app.color }),
+    [app.color, textColor]
+  );
+
+  useEffect(() => {
+    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+      setOptions(tileId, contextMenuOptions);
+    }
+
+    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+      setColors(tileId, contextMenuColors);
+    }
+  }, [
+    contextMenuColors,
+    contextMenuOptions,
+    getColors,
+    getOptions,
+    setColors,
+    setOptions,
+    tileId,
+  ]);
+
+  const {
+    isInstalling,
+    isFaded,
+    isSuspended,
+    isUninstalled,
+    isFailed,
+    isDesktop,
+  } = getAppTileFlags(installStatus || InstallStatus.installed);
 
   return useMemo(() => {
     let title;
-    const isAppGrid =
-      tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
-    const boxShadowStyle = isAppGrid
-      ? '0px 2px 8px rgba(0, 0, 0, 0.15)'
-      : 'none';
-    const boxShadowHover = isAppGrid
-      ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
-      : 'none';
-    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-    const isLight = lightOrDark === 'light';
-    const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
+    let status;
     if (isAppGrid) {
-      // @ts-ignore
       const appColor = app.color;
       title = (
         <Text
           position="absolute"
-          // style={{ mixBlendMode: 'hard-light' }}
+          style={{ pointerEvents: 'none' }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
+          // @ts-ignore
           backgroundColor={app.image && appColor}
           bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
@@ -151,11 +212,44 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           {app.title}
         </Text>
       );
+      if (isSuspended || isFailed) {
+        let statusBadgeColor = isLight
+          ? darken(0.05, desaturate(1, app.color))
+          : lighten(0.1, desaturate(1, app.color));
+        if (isFailed) {
+          statusBadgeColor = isLight
+            ? rgba(darken(0.05, '#D0384E'), 0.1)
+            : rgba(lighten(0.1, '#D0384E'), 0.1);
+        }
+        status = (
+          <Text
+            position="absolute"
+            style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+            left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+            padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
+            borderRadius={6}
+            backgroundColor={rgba(statusBadgeColor, 0.5)}
+            top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+            fontWeight={500}
+            textStyle="capitalize"
+            fontSize={tileSize === 'xl1' ? '13px' : 2}
+            color={isFailed ? '#5e0b18' : textColor}
+          >
+            {app.installStatus}
+          </Text>
+        );
+      }
     }
-    const tileId = `app-tile-grid-${app.id}`;
+
+    const tileBg = app.color || '#F2F3EF';
+    const filter =
+      isSuspended || isFailed
+        ? { filter: 'grayscale(1)' }
+        : { filter: 'grayscale(0)' };
 
     // set image or icon
     let graphic;
+    // @ts-ignore
     if (app.image) {
       graphic = (
         <TileStyle
@@ -175,10 +269,19 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
                 },
               }
             : {})}
-          animate={{
-            boxShadow: boxShadowStyle,
+          initial={{
+            opacity: isFaded ? 0.5 : 1,
+            ...filter,
           }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
+          animate={{
+            opacity: isFaded ? 0.5 : 1,
+            boxShadow: boxShadowStyle,
+            ...filter,
+          }}
+          transition={{
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
+          }}
           minWidth={sizes[tileSize]}
           style={{
             borderRadius: radius[tileSize],
@@ -186,19 +289,22 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
+          backgroundColor={tileBg}
         >
           <img
+            alt={app.title}
             style={{ pointerEvents: 'none' }}
             draggable="false"
             height={sizes[tileSize]}
             width={sizes[tileSize]}
             key={app.title}
+            // @ts-ignore
             src={app.image}
           />
           {title}
         </TileStyle>
       );
+      // @ts-ignore
     } else if (app.icon) {
       const iconTileSize = sizes[tileSize];
       const iconSize =
@@ -223,15 +329,20 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isFaded ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
+          transition={{
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
+          }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
+          backgroundColor={tileBg}
         >
+          {/* @ts-ignore */}
           <Icons name={app.icon} height={iconSize} width={iconSize} />
           {title}
         </TileStyle>
@@ -255,17 +366,23 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
                 },
               }
             : {})}
+          initial={{
+            opacity: isFaded ? 0.5 : 1,
+            ...filter,
+          }}
           animate={{
+            opacity: isFaded ? 0.5 : 1,
             boxShadow: boxShadowStyle,
+            ...filter,
           }}
           transition={{
-            scale: { duration: 0.5 },
-            boxShadow: { duration: 0.5 },
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
           }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           key={app.title}
-          backgroundColor={app.color}
+          backgroundColor={tileBg}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
         >
@@ -273,33 +390,39 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
         </TileStyle>
       );
     }
+
     return (
       <Flex flexDirection="column" alignItems="center">
         <Flex
           position="relative"
           ref={tileRef}
           variants={variants}
-          onClick={(evt: any) => {
-            evt.stopPropagation();
-            onAppClick && onAppClick(app);
+          onClick={(e) => {
+            e.stopPropagation();
+            onAppClick &&
+              !isSuspended &&
+              !isFailed &&
+              !isUninstalled &&
+              !isInstalling &&
+              !isDesktop &&
+              onAppClick(app);
           }}
           className="app-dock-icon"
         >
-          {allowContextMenu && (
-            <Portal>
-              <AnimatePresence>
-                <ContextMenu
-                  position={contextPosition!}
-                  isComponentContext
-                  textColor={textColor}
-                  customBg={app.color}
-                  containerId={tileId}
-                  parentRef={tileRef}
-                  style={{ minWidth: 180 }}
-                  menu={contextMenu || []}
-                />
-              </AnimatePresence>
-            </Portal>
+          {status}
+          {isInstalling && !isUninstalled && (
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              position="absolute"
+              left={0}
+              top={0}
+              right={0}
+              bottom={0}
+            >
+              <Spinner color="#FFF" size={loaderSizes[tileSize]} />
+            </Flex>
           )}
           {graphic}
           <TileHighlight
@@ -310,17 +433,34 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           />
         </Flex>
         {hasTitle && (
-          <Text color={theme.currentTheme.textColor} mt={2}>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.currentTheme.textColor}
+            mt={2}
+          >
             {app.title}
           </Text>
         )}
       </Flex>
     );
-  }, [app, isPinned, selected, open]);
-});
-
-AppTile.defaultProps = {
-  tileSize: 'md',
-  allowContextMenu: false,
-  isAnimated: true,
+  }, [
+    app,
+    hasTitle,
+    isAnimated,
+    isFaded,
+    isFailed,
+    isInstalling,
+    isSuspended,
+    isUninstalled,
+    onAppClick,
+    open,
+    selected,
+    theme.currentTheme.textColor,
+    textColor,
+    tileId,
+    tileSize,
+    variants,
+  ]);
 };
+
+export const AppTile = observer(AppTilePresenter);

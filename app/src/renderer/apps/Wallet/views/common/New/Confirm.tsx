@@ -1,8 +1,7 @@
-import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text } from 'renderer/components';
 import { darken, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { WordPicker } from './WordPicker';
 import { NewWalletScreen } from './index';
@@ -12,22 +11,12 @@ interface ConfirmProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
 }
 
-export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
-  let { setTrayAppDimensions, dimensions } = useTrayApps();
-  let [valid, setValid] = useState(false);
+const ConfirmPresenter = (props: ConfirmProps) => {
+  const [valid, setValid] = useState(false);
   const { theme } = useServices();
 
-  const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
+  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
-
-  useEffect(() => {
-    let prevDims = dimensions;
-    setTrayAppDimensions({ height: 560, width: 360 });
-
-    return () => {
-      setTrayAppDimensions(prevDims);
-    };
-  }, []);
 
   return (
     <Flex
@@ -62,4 +51,6 @@ export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Confirm = observer(ConfirmPresenter);

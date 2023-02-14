@@ -1,36 +1,11 @@
-import { FC, useMemo } from 'react';
-import { Flex, Icons, IconButton } from 'renderer/components';
-import { SystemBarStyle } from '../../SystemBar.styles';
+import { Flex } from 'renderer/components';
 import { SpaceSelector } from './SpaceSelector';
-import { AppDock } from './AppDock';
-import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { RoomTray } from './Rooms';
-import { AirliftTray } from './Airlift';
-import { rgba } from 'polished';
+import { AppDock } from './AppDock/AppDock';
+import { BarStyle } from '@holium/design-system';
 
-type CommunityBarProps = {};
-
-export const CommunityBar: FC<CommunityBarProps> = observer(() => {
-  const { theme } = useServices();
-
-  const { dockColor } = useMemo(
-    () => ({
-      ...theme.currentTheme,
-      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
-    }),
-    [theme.currentTheme.dockColor]
-  );
-
+export const CommunityBar = () => {
   return (
-    <SystemBarStyle
-      initial={{ backgroundColor: dockColor }}
-      animate={{ backgroundColor: dockColor }}
-      transition={{ backgroundColor: { duration: 0.5 } }}
-      pr={3}
-      width="100%"
-      backgroundColor={dockColor}
-    >
+    <BarStyle pl="2px" pr={1} flex={1}>
       <SpaceSelector />
       <Flex flex={1}>
         <AppDock />
@@ -38,11 +13,7 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
       <Flex>
         <AirliftTray />
       </Flex>
-      <Flex>
-        <RoomTray />
-      </Flex>
-    </SystemBarStyle>
+      <Flex>{/* <RoomTray /> */}</Flex>
+    </BarStyle>
   );
-});
-
-export default { CommunityBar };
+};

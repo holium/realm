@@ -1,4 +1,4 @@
-import { toJS } from 'mobx';
+import { useEffect, useState } from 'react';
 import { Text, GroupLink } from 'renderer/components';
 import { AppLink } from 'renderer/components/Embeds/AppLink';
 import { TextParsed } from '../components/TextContent';
@@ -9,74 +9,78 @@ export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {
     return getReferenceData(content.reference);
   } else {
-    return content[type];
+    if (typeof content[type] === 'string') {
+      return content[type];
+    } else {
+      if (content[type] && content[type].expression) {
+        return content[type].expression;
+      }
+    }
   }
 };
 
-export const getReferenceView = async (
-  reference: any,
-  setter: any,
-  embedColor?: string,
-  textColor?: string
-) => {
+type Props = {
+  reference: any;
+  embedColor?: string;
+  textColor?: string;
+};
+
+export const ReferenceView = ({ reference, embedColor, textColor }: Props) => {
   const referenceType: any = Object.keys(reference)[0];
+  const [groupReference, setGroupReference] = useState<any | null>(null);
+
+  useEffect(() => {
+    const getAndSetGroupReference = async () => {
+      const res = await ShipActions.getMetadata(
+        `${reference.group}/groups${reference.group}`
+      );
+      setGroupReference(res);
+    };
+
+    if (referenceType === 'group') getAndSetGroupReference();
+  }, [reference.group, referenceType]);
+
   switch (referenceType) {
     case 'group':
-      ShipActions.getMetadata(
-        `${reference.group}/groups${reference.group}`
-      ).then((response: any) => {
-        if (response) {
-          setter(
-            <GroupLink
-              {...response.metadata}
-              textColor={textColor}
-              bgColor={embedColor}
-              description={null}
-              color={
-                response.metadata.color
-                  ? cleanNounColor(response.metadata.color)
-                  : null
-              }
-            />
-          );
-        } else {
-          setter(
-            <GroupLink
-              textColor={textColor}
-              bgColor={embedColor}
-              title={reference.group.replace('/ship/', '')}
-              description="Could not load metadata"
-              color="#a1a1a1"
-            />
-          );
-        }
-      });
-      setter(
+      if (groupReference) {
+        return (
+          <GroupLink
+            {...groupReference.metadata}
+            textColor={textColor}
+            bgColor={embedColor}
+            description={null}
+            color={
+              groupReference.metadata.color
+                ? cleanNounColor(groupReference.metadata.color)
+                : null
+            }
+          />
+        );
+      }
+      return (
         <GroupLink
-          bgColor={embedColor}
           textColor={textColor}
-          loading
-          title=""
-          description=""
-          color=""
+          bgColor={embedColor}
+          title={reference.group.replace('/ship/', '')}
+          description="Could not load metadata"
+          color="#a1a1a1"
         />
       );
-
-      break;
     case 'app':
-      ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
-        (response: any) => {
-          setter(
-            <AppLink
-              {...response}
-              textColor={textColor}
-              bgColor={embedColor}
-              color={response.color ? cleanNounColor(response.color) : null}
-            />
-          );
-        }
-      );
-      setter(
+      // TODO reimplement
+      // ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
+      //   (response: any) => {
+      //     return (
+      //       <AppLink
+      //         {...response}
+      //         textColor={textColor}
+      //         bgColor={embedColor}
+      //         color={response.color ? cleanNounColor(response.color) : null}
+      //       />
+      //     );
+      //   }
+      // );
+      return (
         <AppLink
           bgColor={embedColor}
           textColor={textColor}
@@ -88,20 +92,16 @@ export const getReferenceView = async (
           color=""
         />
       );
-      break;
     case 'code':
-      setter(<Text fontSize={2}>{reference.code.expression}</Text>);
-      break;
+      return <Text fontSize={2}>{reference.code.expression}</Text>;
     case 'graph':
-      setter(<Text fontSize={2}>{reference.graph.graph}</Text>);
-      break;
+      return <Text fontSize={2}>{reference.graph.graph}</Text>;
     default:
-      setter(<TextParsed content={reference[referenceType]} />);
-      break;
+      return <TextParsed content={reference[referenceType]} />;
   }
 };
 
-export const getReferenceData = (reference: any) => {
+const getReferenceData = (reference: any) => {
   const referenceType: any = Object.keys(reference)[0];
   let text: string = '';
   switch (referenceType) {

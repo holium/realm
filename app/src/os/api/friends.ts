@@ -1,8 +1,39 @@
 import { Conduit } from '@holium/conduit';
+import { cleanNounColor, removeHash } from '../../os/lib/color';
 import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
 
 export const FriendsApi = {
+  getContact: async (conduit: Conduit, ship: string) => {
+    const contact = await conduit.scry({
+      app: 'friends',
+      path: `/contact/${ship}`,
+    });
+    return {
+      ...contact,
+      color: contact.color && cleanNounColor(contact.color),
+    };
+  },
+  saveContact: async (conduit: Conduit, ship: string, data: any) => {
+    const preparedData = {
+      nickname: data.nickname,
+      color: removeHash(data.color),
+      avatar: data.avatar,
+      bio: data.bio || null,
+      cover: data.cover || null,
+    };
+    const payload = {
+      app: 'friends',
+      mark: 'friends-action',
+      json: {
+        'set-contact': {
+          ship,
+          'contact-info': preparedData,
+        },
+      },
+    };
+    return conduit.poke(payload);
+  },
   /**
    * getFriends: returns a map of friends
    *
@@ -88,23 +119,53 @@ export const FriendsApi = {
    * @param conduit the conduit instance
    * @param state the state-tree
    */
-  watchFriends: (conduit: Conduit, friendsStore: FriendsType): Promise<any> => {
-    return conduit.watch({
+  watchFriends: async (
+    conduit: Conduit,
+    friendsStore: FriendsType
+  ): Promise<any> => {
+    return await conduit.watch({
       app: 'friends',
       path: `/all`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
-        if (data['friends']) {
-          friendsStore.initial(data['friends']);
+      onEvent: async (data: any, _id?: number) => {
+        if (data.friends) {
+          Object.keys(data.friends).forEach((ship: string) => {
+            data.friends[ship] = {
+              ...data.friends[ship],
+              contactInfo: data.friends[ship].contactInfo && {
+                ...data.friends[ship].contactInfo,
+                color:
+                  data.friends[ship].contactInfo.color &&
+                  cleanNounColor(data.friends[ship].contactInfo.color),
+              },
+            };
+          });
+          friendsStore.initial(data.friends);
         }
-        if (data['friend']) {
-          const patp = data['friend'].ship;
-          const update = data['friend'].friend;
+        if (data.friend) {
+          const patp = data.friend.ship;
+          const friend = data.friend.friend;
+          const update = {
+            ...friend,
+            contactInfo: friend.contactInfo && {
+              ...friend.contactInfo,
+              color:
+                friend.contactInfo.color &&
+                cleanNounColor(friend.contactInfo.color),
+            },
+          };
           friendsStore.update(patp, update);
         }
         if (data['new-friend']) {
           const patp = data['new-friend'].ship;
-          const friend = data['new-friend'].friend;
+          const friend = {
+            ...data['new-friend'].friend,
+            contactInfo: data['new-friend'].friend.contactInfo && {
+              ...data['new-friend'].friend.contactInfo,
+              color:
+                data['new-friend'].friend.contactInfo.color &&
+                cleanNounColor(data['new-friend'].friend.contactInfo.color),
+            },
+          };
           friendsStore.add(patp, friend);
         }
         if (data['bye-friend']) {
@@ -112,8 +173,18 @@ export const FriendsApi = {
           friendsStore.remove(patp);
         }
       },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
+      onSubscribed: () => {
+        console.log('Subscribed to %friends');
+        friendsStore.setSubscriptionStatus('subscribed');
+      },
+      onError: () => {
+        console.error('Subscription to %friends rejected');
+        friendsStore.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %friends subscription');
+        friendsStore.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
 };

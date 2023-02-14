@@ -16,7 +16,9 @@ import checkNodeEnv from '../scripts/check-node-env';
 if (process.env.NODE_ENV === 'production') {
   checkNodeEnv('development');
 }
+const useLocalWalletAPI = process.env.USE_LOCAL_WALLET_API || true;
 const playgroundPort = process.env.PLAYGROUND_PORT || 3010;
+
 const port = process.env.PORT || 1212;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -46,20 +48,30 @@ const configuration: webpack.Configuration = {
 
   target: ['web', 'electron-renderer'],
 
-  entry: [
-    `webpack-dev-server/client?http://localhost:${port}/dist`,
-    'webpack/hot/only-dev-server',
-    path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-  ],
+  entry: {
+    w1: `webpack-dev-server/client?http://localhost:${port}/dist`,
+    w2: 'webpack/hot/only-dev-server',
+    app: {
+      import: path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    },
+    mouse: {
+      import: path.join(webpackPaths.srcRendererPath, 'mouse.tsx'),
+    },
+    updater: {
+      import: path.join(
+        webpackPaths.srcRendererPath,
+        'system/updater/index.tsx'
+      ),
+    },
+  },
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: '/',
-    filename: 'renderer.dev.js',
+    filename: '[name].renderer.dev.js',
     library: {
       type: 'umd',
     },
   },
-
   module: {
     rules: [
       {
@@ -93,13 +105,6 @@ const configuration: webpack.Configuration = {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
-      // {
-      //   test: /\.(wav)$/i,
-      //   type: 'asset/resource',
-      //   // generator: {
-      //   //   filename: 'sounds/[name]',
-      //   // },
-      // },
     ],
   },
   plugins: [
@@ -112,7 +117,9 @@ const configuration: webpack.Configuration = {
             sourceType: 'var',
           }),
         ]),
-
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new webpack.NoEmitOnErrorsPlugin(),
 
     /**
@@ -130,6 +137,7 @@ const configuration: webpack.Configuration = {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
       PLAYGROUND_PORT: playgroundPort,
+      USE_LOCAL_WALLET_API: useLocalWalletAPI,
     }),
 
     new webpack.LoaderOptionsPlugin({
@@ -139,7 +147,36 @@ const configuration: webpack.Configuration = {
     new ReactRefreshWebpackPlugin(),
 
     new HtmlWebpackPlugin({
+      chunks: ['app'],
       filename: path.join('index.html'),
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['mouse'],
+      filename: path.join('mouse.html'),
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['updater'],
+      filename: path.join('updater.html'),
       template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
       minify: {
         collapseWhitespace: true,

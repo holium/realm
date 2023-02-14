@@ -1,62 +1,91 @@
 import { Conduit } from '@holium/conduit';
-import { createPost, Post } from '@urbit/api';
-import { CourierStoreType } from '../services/ship/models/courier';
+import { Post } from '@urbit/api';
+import { CourierStoreType, DMLogType } from '../services/ship/models/courier';
 import { Patp } from '../types';
 
-export const CourierApi = {
-  getDMList: async (conduit: Conduit) => {
+type CourierApiType = {
+  /* TODO: Typeset Counduit returns */
+  getDmList: (conduit: Conduit) => Promise<any>;
+  getDmLog: (conduit: Conduit, ship: Patp) => Promise<any>;
+  dmUpdates: (conduit: Conduit, store: CourierStoreType) => Promise<any>;
+  sendDm: (conduit: Conduit, path: string, post: Post) => Promise<number>;
+  sendGroupDm: (conduit: Conduit, path: string, post: Post) => Promise<number>;
+  createGroupDm: (conduit: Conduit, ships: Patp[]) => Promise<any>;
+  readDm: (conduit: Conduit, ship: Patp) => Promise<any>;
+  readGroupDm: (conduit: Conduit, host: Patp, name: string) => Promise<any>;
+  acceptDm: (conduit: Conduit, toShip: string) => Promise<any>;
+  declineDm: (conduit: Conduit, toShip: string) => Promise<any>;
+  acceptGroupDm: (conduit: Conduit, inviteId: string) => Promise<any>;
+  declineGroupDm: (conduit: Conduit, inviteId: string) => Promise<any>;
+  setScreen: (conduit: Conduit, screen: boolean) => Promise<any>;
+};
+
+export const CourierApi: CourierApiType = {
+  getDmList: async (conduit) => {
     const response = await conduit.scry({
       app: 'courier',
       path: `/dms`,
     });
-    return response['inbox'];
+    return response.inbox;
   },
-  getDMLog: async (to: Patp, conduit: Conduit) => {
-    const response = await conduit.scry({
-      app: 'courier',
-      path: `/dms/${to}`,
-    });
-    return response['dm-log'];
+  getDmLog: async (conduit, to) => {
+    try {
+      const response = await conduit.scry({
+        app: 'courier',
+        path: `/dms/${to}`,
+      });
+      return response['dm-log'];
+    } catch (e) {
+      console.log(e);
+    }
   },
 
-  dmUpdates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
-    return conduit.watch({
+  dmUpdates: async (conduit, store) => {
+    return await conduit.watch({
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
             store.setPreviews(payload);
             break;
           case 'dm-received':
-            store.setReceivedDM(payload);
+            /* TODO: don't send this event to self */
+            const self = `~${conduit.ship}`;
+            const isFromSelf = payload.messages?.[0].author === self;
+            if (isFromSelf) {
+              store.updatePreviewsFromDmLog(payload as DMLogType);
+            } else {
+              store.setReceivedDm(payload as DMLogType);
+            }
             break;
           case 'group-dm-created':
-            // console.log('group-dm-created', payload);
-            // if()
-            // store.setReceivedDM(payload);
+            store.setNewPreview(payload);
             break;
           case 'invite-dm':
-            console.log('invited to dm', payload);
             store.setNewPreview(payload);
             break;
           default:
             console.log('action', action);
             break;
         }
-
-        // store.
       },
-      onError: (id, err) => {
-        console.log(err);
-        console.log('Subscription rejected');
+      onSubscribed: () => {
+        console.log('Subscribed to %courier');
+        store.setSubscriptionStatus('subscribed');
       },
-      onQuit: () => console.log('Kicked from courier subscription'),
+      onError: () => {
+        console.error('Subscription to %courier rejected');
+        store.setSubscriptionStatus('unsubscribed');
+      },
+      onQuit: () => {
+        console.error('Kicked from %courier subscription');
+        store.setSubscriptionStatus('unsubscribed');
+      },
     });
   },
-  sendDM: async (conduit: Conduit, path: string, post: Post) => {
+  sendDm: async (conduit, path, post) => {
     const to = path.split('/')[2]; // /dm-inbox/<to @p>
     const payload = {
       app: 'courier',
@@ -70,12 +99,8 @@ export const CourierApi = {
     };
     return await conduit.poke(payload);
   },
-  sendGroupDM: async (
-    conduit: Conduit,
-    path: string, // i.e. /~fes/~2022.8.31..18.41.37
-    post: Post
-  ) => {
-    const split = path.split('/');
+  sendGroupDm: async (conduit, path, post) => {
+    const split = path.split('/'); // Path example: /~fes/~2022.8.31..18.41.37
     const host = split[1];
     const timestamp = split[2];
     const payload = {
@@ -90,8 +115,8 @@ export const CourierApi = {
     };
     return await conduit.poke(payload);
   },
-  createGroupDM: async (conduit: Conduit, ships: Patp[]) => {
-    return new Promise((resolve, reject) => {
+  createGroupDm: async (conduit, ships) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'courier',
         mark: `graph-dm-action`,
@@ -111,7 +136,7 @@ export const CourierApi = {
     });
   },
   // Set read status
-  readDm: async (conduit: Conduit, ship: Patp) => {
+  readDm: async (conduit, ship) => {
     await conduit.poke({
       app: 'courier',
       mark: 'graph-dm-action',
@@ -121,9 +146,8 @@ export const CourierApi = {
         },
       },
     });
-    return;
   },
-  readGroupDm: async (conduit: Conduit, host: Patp, name: string) => {
+  readGroupDm: async (conduit, host, name) => {
     await conduit.poke({
       app: 'courier',
       mark: 'graph-dm-action',
@@ -133,31 +157,23 @@ export const CourierApi = {
         },
       },
     });
-    return;
   },
   // Dm invite flow
-  acceptDm: async (conduit: Conduit, toShip: string) => {
+  acceptDm: async (conduit, toShip) => {
     console.log('accepting dm');
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         accept: toShip,
       },
     };
     return await conduit.poke(payload);
   },
-  declineDm: async (conduit: Conduit, toShip: string) => {
-    console.log({
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
-      json: {
-        decline: toShip,
-      },
-    });
+  declineDm: async (conduit, toShip) => {
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         decline: toShip,
       },
@@ -165,21 +181,18 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   // Group invite flow
-  acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
+  acceptGroupDm: async (conduit, inviteId) => {
     const payload = {
-      app: 'invite-store',
-      mark: 'invite-action',
+      app: 'courier',
+      mark: 'accept-group-dm',
       json: {
-        accept: {
-          term: 'graph',
-          uid: inviteId,
-        },
+        accept: inviteId,
       },
     };
     console.log('accepting dm', payload);
     return await conduit.poke(payload);
   },
-  declineGroupDm: async (conduit: Conduit, inviteId: string) => {
+  declineGroupDm: async (conduit, inviteId) => {
     const payload = {
       app: 'invite-store',
       mark: 'invite-action',
@@ -192,15 +205,12 @@ export const CourierApi = {
     };
     return await conduit.poke(payload);
   },
-  setScreen: async (
-    conduit: Conduit,
-    screen: boolean // should we screen dms from randos
-  ) => {
+  setScreen: async (conduit, screen) => {
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
       json: {
-        screen,
+        screen, // should we screen dms from randos
       },
     };
     return await conduit.poke(payload);

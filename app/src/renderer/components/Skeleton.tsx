@@ -1,16 +1,17 @@
-import styled, { css } from 'styled-components';
+import styled, { css, CSSProperties } from 'styled-components';
 
 interface ISkeleton {
   height: number;
   width?: number;
   borderRadius?: number;
+  style?: CSSProperties;
 }
 
 export const Skeleton = styled.div<ISkeleton>`
   ${(props: ISkeleton) =>
     css`
       height: ${props.height}px;
-      width: ${props.width ? `${props.width}px` : '100%'}px;
+      width: ${props.width ? `${props.width}px` : '100%'};
       border-radius: ${props.borderRadius || 4}px;
     `}
   display: block;

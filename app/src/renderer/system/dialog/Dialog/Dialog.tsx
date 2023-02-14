@@ -1,6 +1,13 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { FC, useEffect, useRef, useState, useMemo } from 'react';
-
+import { AppWindowType } from 'os/services/shell/desktop.model';
+import {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  ReactNode,
+  RefObject,
+} from 'react';
 import {
   Flex,
   TextButton,
@@ -8,19 +15,27 @@ import {
   IconButton,
   Icons,
 } from 'renderer/components';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
 export interface DialogViewProps {
-  window: WindowModelProps;
+  appWindow: AppWindowType;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
+type ViewProps = {
+  ref: RefObject<HTMLDivElement>;
+  background: string;
+  hasTitleBar?: boolean;
+  children?: ReactNode;
+};
+
+const View = styled.div<ViewProps>`
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   width: inherit;
@@ -29,19 +44,27 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
   background: ${(props) => props.background};
 `;
 
-export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
-  const { window } = props;
-  const { theme } = useServices();
+export const DialogView = ({ appWindow }: DialogViewProps) => {
+  const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
-  const ViewComponent: FC<any> | undefined = useMemo(
-    () => dialogRenderers[window.id].component!,
-    [window.id]
-  );
+  const ViewComponent: FC<any> | undefined = useMemo(() => {
+    const dialogRenderer = dialogRenderers[appWindow.appId];
+    const dialogConfig: DialogConfig =
+      dialogRenderer instanceof Function
+        ? dialogRenderer(shell.dialogProps.toJSON())
+        : dialogRenderer;
+    return dialogConfig.component!;
+  }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
+  const dialogRenderer = dialogRenderers[appWindow.appId];
+  const dialogConfig: DialogConfig =
+    dialogRenderer instanceof Function
+      ? dialogRenderer(shell.dialogProps.toJSON())
+      : dialogRenderer;
   const {
     workflow,
     customNext,
@@ -51,7 +74,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
     hasPrevious,
     onPrevious,
     isValidated,
-  } = dialogRenderers[window.id];
+  } = dialogConfig;
   useEffect(() => {
     if (firstStep) {
       setValidated(false);
@@ -64,62 +87,70 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
 
   return (
     <View ref={elementRef} background={theme.currentTheme.windowColor}>
-      <Flex flex={1}>
-        {ViewComponent && (
-          <ViewComponent
-            onNext={(data: any) => {
-              setValidated(false);
-              onNext && onNext(data);
-            }}
-            isValidated={isValidated}
-            onPrevious={onPrevious}
-            setState={setWorkflowState}
-            workflowState={workflowState}
-            theme={theme.currentTheme}
-          />
+      <Flex
+        flex={1}
+        flexDirection="column"
+        justifyContent="space-between"
+        gap={16}
+        minHeight={0}
+      >
+        <Flex flex={1} minHeight={0}>
+          {ViewComponent && (
+            <ViewComponent
+              onNext={(data: any) => {
+                setValidated(false);
+                onNext && onNext(data);
+              }}
+              isValidated={isValidated}
+              onPrevious={onPrevious}
+              setState={setWorkflowState}
+              workflowState={workflowState}
+              theme={theme.currentTheme}
+            />
+          )}
+        </Flex>
+        {workflow && (
+          <Flex
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+            width={customNext ? 30 : undefined}
+          >
+            <Flex alignItems="center" justifyContent="flex-start">
+              {onPrevious && hasPrevious && hasPrevious() && (
+                <IconButton
+                  customBg={theme.currentTheme.windowColor}
+                  onClick={() => {
+                    onPrevious();
+                  }}
+                >
+                  <Icons name="ArrowLeftLine" />
+                </IconButton>
+              )}
+            </Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              height={26}
+            >
+              {!customNext && onNext && (
+                <TextButton
+                  disabled={!validated || workflowState.loading}
+                  onClick={(evt: any) => {
+                    onNext(evt, workflowState, setWorkflowState);
+                  }}
+                >
+                  {workflowState.loading ? (
+                    <Spinner size={0} />
+                  ) : (
+                    <>{nextButtonText || 'Next'}</>
+                  )}
+                </TextButton>
+              )}
+            </Flex>
+          </Flex>
         )}
       </Flex>
-      {workflow && (
-        <Flex
-          position="absolute"
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-          bottom={20}
-          right={20}
-          left={20}
-          width={customNext ? 30 : undefined}
-        >
-          <Flex alignItems="center" justifyContent="flex-start">
-            {onPrevious && hasPrevious && hasPrevious() !== false && (
-              <IconButton
-                customBg={theme.currentTheme.windowColor}
-                onClick={() => {
-                  onPrevious();
-                }}
-              >
-                <Icons name="ArrowLeftLine" />
-              </IconButton>
-            )}
-          </Flex>
-          <Flex alignItems="center" justifyContent="space-between">
-            {!customNext && onNext && (
-              <TextButton
-                disabled={!validated || workflowState.loading}
-                onClick={(evt: any) => {
-                  onNext(evt, workflowState, setWorkflowState);
-                }}
-              >
-                {workflowState.loading ? (
-                  <Spinner size={0} />
-                ) : (
-                  <>{nextButtonText || 'Next'}</>
-                )}
-              </TextButton>
-            )}
-          </Flex>
-        </Flex>
-      )}
     </View>
   );
 };

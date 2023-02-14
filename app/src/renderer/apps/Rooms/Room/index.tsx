@@ -1,161 +1,114 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
-import { rgba } from 'polished';
-import { toJS } from 'mobx';
-import {
-  ContextMenu,
-  Flex,
-  Grid,
-  IconButton,
-  Icons,
-  Text,
-} from 'renderer/components';
-import { LiveRoom, useTrayApps } from 'renderer/apps/store';
+import { darken } from 'polished';
+import { Badge } from 'renderer/components';
+import { Flex, Button, Icon, Text } from '@holium/design-system';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
-import { RoomInfo } from './Info';
-import { handleLocalEvents } from '../listeners';
-
-export type BaseRoomProps = {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-};
+import { useRooms } from '../useRooms';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
-export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
-  const { dimensions } = props;
+const RoomPresenter = () => {
   const { ship, theme } = useServices();
   const { roomsApp } = useTrayApps();
+  const roomsManager = useRooms(ship!.patp);
 
-  const { dockColor, windowColor, accentColor, inputColor, textColor } =
-    theme.currentTheme;
+  const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const muted = LiveRoom.our?.isMuted;
-  console.log('muted', muted);
+  const muted = roomsManager?.protocol.local?.isMuted;
+
+  const presentRoom = useMemo(() => {
+    if (!roomsManager?.live.room) return;
+    return roomsManager?.live.room;
+  }, [roomsManager?.live.room]);
+
+  const [readChat, setReadChat] = useState(roomsManager?.live.chat.slice());
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    handleLocalEvents(
-      RoomsActions.setMuted,
-      RoomsActions.setCursors,
-      LiveRoom.our
-    );
-  }, []);
-
-  // const getMicrophone = async () => {
-  //   LiveRoom.our.audio?.unmute();
-  //   const track = await LiveRoom.our.setMicrophoneEnabled(true);
-  //   console.log(track);
-  //   // const audioMedia = await navigator.mediaDevices.getUserMedia({
-  //   //   audio: true,
-  //   //   video: false,
-  //   // });
-  //   // setAudio(audioMedia);
-  // };
-
-  // const stopMicrophone = () => {
-  //   LiveRoom.our.audio?.mute();
-  //   audio?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-  //   setAudio(null);
-  // };
-
-  // useEffect(() => {
-  //   window.electron.app.askForMicrophone().then((hasMic: any) => {
-  //    console.log('hasMic', hasMic);
-  //   });
-  // }, []);
-
-  // TODO exit routine
-  // // logout on window close or refresh
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", logout);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", logout);
-  //   };
-  // }, []);
-  // //
+    const latestChat = roomsManager?.live.chat.slice();
+    if (roomView === 'chat') {
+      setReadChat(latestChat);
+      setUnreadCount(0);
+    } else {
+      setUnreadCount(
+        latestChat
+          ? latestChat.filter(
+              (msg) => !readChat?.includes(msg) && msg.author !== ship?.patp
+            ).length
+          : 0
+      );
+    }
+  }, [roomView, roomsManager?.live.chat.length]);
 
   useEffect(() => {
-    if (!roomsApp.liveRoom) RoomsActions.setView('list');
-  }, [roomsApp.liveRoom]);
+    if (!presentRoom) roomsApp.setView('list');
+  }, [presentRoom, roomsApp]);
 
-  if (!roomsApp.liveRoom) return <div />;
-  const { present, id, creator } = roomsApp.liveRoom;
+  if (!presentRoom) return <div />;
+  const { rid, creator } = presentRoom;
+  const presentCount = (roomsManager?.protocol.peers.size ?? 0) + 1; // to include self
   const creatorStr =
-    roomsApp.liveRoom?.creator.length > 14
-      ? `${roomsApp.liveRoom?.creator.substring(0, 14)}...`
-      : roomsApp.liveRoom?.creator;
+    creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
   let peopleText = 'people';
-  if (present!.length === 1) {
+  if (presentCount === 1) {
     peopleText = 'person';
   }
-  // console.log(toJS(roomsApp.liveRoom));
+
   return (
-    <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
-      expand
-      overflowY="hidden"
-    >
-      <Titlebar
-        hasBlur
-        hasBorder={false}
-        zIndex={5}
-        theme={{
-          ...props.theme,
-          windowColor,
-        }}
+    <>
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
       >
-        <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
-          <IconButton
+        <Flex gap={10} justifyContent="center" alignItems="center">
+          <Button.IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
-            customBg={dockColor}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              RoomsActions.setView('list');
+              roomsApp.setView('list');
             }}
           >
-            <Icons name="ArrowLeftLine" />
-          </IconButton>
-          <Flex ml={2} flexDirection="column">
-            <Text
-              fontSize={2}
+            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+          </Button.IconButton>
+          <Flex flexDirection="column">
+            <Text.Custom
+              fontSize={3}
               fontWeight={600}
+              opacity={0.8}
               style={{
                 wordWrap: 'normal',
                 textOverflow: 'ellipsis',
                 textTransform: 'uppercase',
               }}
             >
-              {roomsApp.liveRoom?.title}
-            </Text>
-
-            <Flex>
-              {/* <Text fontSize={2} fontWeight={400} opacity={0.7}>
+              {presentRoom.title}
+            </Text.Custom>
+            <Flex mt="2px">
+              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
                 {creatorStr}
-              </Text>
-              <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.7}>
+              </Text.Custom>
+              <Text.Custom mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
                 •
-              </Text> */}
-              <Text fontSize={2} fontWeight={400} opacity={0.7}>
-                {`${roomsApp.liveRoom?.present.length} ${peopleText}`}
-              </Text>
+              </Text.Custom>
+              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
+                {`${presentCount} ${peopleText}`}
+              </Text.Custom>
             </Flex>
           </Flex>
         </Flex>
-        <Flex gap={12} ml={1} pl={2} pr={2}>
-          <IconButton
+        <Flex gap={12}>
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             customBg={dockColor}
@@ -169,84 +122,65 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             }}
           >
             <Icons name="UserAdd" />
-          </IconButton>
-          <IconButton
+          </IconButton> */}
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
             color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              console.log('clicked room info button');
               roomView === 'info' ? setRoomView('voice') : setRoomView('info');
             }}
           >
             <Icons name="InfoCircle" />
-          </IconButton>
+          </IconButton> */}
         </Flex>
-      </Titlebar>
-      <Flex
-        position="relative"
-        style={{ marginTop: 54 }}
-        flex={1}
-        flexDirection="column"
-      >
-        {roomView === 'voice' && (
-          <VoiceView host={creator} present={present} audio={null} />
-        )}
+      </Flex>
+      <Flex position="relative" flex={1} flexDirection="column">
+        {roomView === 'voice' && <VoiceView />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
-        {roomView === 'info' && <RoomInfo />}
         <Flex
-          pb={16}
-          pl={1}
-          pr={1}
+          px={1}
+          pb={1}
           flexDirection="row"
           justifyContent="space-between"
           alignItems="center"
         >
           <Flex alignItems="center">
-            <IconButton
+            <Button.IconButton
               className="realm-cursor-hover"
               size={26}
-              color={
-                roomsApp.isCreator(ship!.patp!, id)
-                  ? rgba('#E56262', 0.7)
-                  : undefined
+              customColor={
+                presentRoom.creator === ship!.patp ? '#E56262' : undefined
               }
-              customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (!id || !roomsApp.knownRooms.get(id)) {
-                  // bad state
-                  RoomsActions.resetLocal();
-                }
-                if (roomsApp.isCreator(ship!.patp!, id)) {
-                  // SoundActions.playRoomLeave();
-                  RoomsActions.deleteRoom(id);
+                if (presentRoom.creator === ship!.patp) {
+                  roomsManager?.deleteRoom(rid);
                 } else {
-                  RoomsActions.leaveRoom(id);
+                  roomsManager?.leaveRoom();
                 }
-                LiveRoom.leave();
               }}
             >
-              <Icons name="RoomLeave" />
-            </IconButton>
+              <Icon name="RoomLeave" size={22} opacity={0.7} />
+            </Button.IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon={muted ? 'MicOff' : 'MicOn'}
-              customBg={dockColor}
+              customBg={
+                mode === 'light'
+                  ? darken(0.04, dockColor)
+                  : darken(0.01, dockColor)
+              }
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (muted) {
-                  console.log('unmuting time');
-                  console.log(LiveRoom.our);
-                  LiveRoom.our?.unmute();
+                  roomsManager?.unmute();
                 } else {
-                  console.log('muting time');
-                  console.log(LiveRoom.our);
-                  LiveRoom.our?.mute();
+                  roomsManager?.mute();
                 }
               }}
             />
@@ -266,23 +200,33 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             /> */}
           </Flex>
           <Flex alignItems="center">
-            <IconButton
-              className="realm-cursor-hover"
-              size={26}
-              customBg={dockColor}
-              color={roomView === 'chat' ? accentColor : undefined}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                roomView === 'chat'
-                  ? setRoomView('voice')
-                  : setRoomView('chat');
-              }}
+            <Badge
+              wrapperHeight={26}
+              wrapperWidth={26}
+              top={1}
+              right={1}
+              minimal
+              count={unreadCount}
             >
-              <Icons name="Chat3" />
-            </IconButton>
+              <Button.IconButton
+                className="realm-cursor-hover"
+                size={26}
+                customColor={roomView === 'chat' ? accentColor : undefined}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  roomView === 'chat'
+                    ? setRoomView('voice')
+                    : setRoomView('chat');
+                }}
+              >
+                <Icon name="Chat3" size={22} opacity={0.7} />
+              </Button.IconButton>
+            </Badge>
           </Flex>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </>
   );
-});
+};
+
+export const Room = observer(RoomPresenter);

@@ -1,17 +1,22 @@
-/**
- * Room streaming lib
- */
+import { RealmProtocol } from './connection/RealmProtocol';
+import { TestProtocol } from './connection/TestProtocol';
+import { RoomsManager } from './RoomsManager';
+import { RemotePeer } from './peer/RemotePeer';
+import { LocalPeer } from './peer/LocalPeer';
 
-export { Room } from './room';
+export { RoomsManager, TestProtocol, RealmProtocol, RemotePeer, LocalPeer };
 
-export {
-  Participant,
-  LocalParticipant,
-  RemoteParticipant,
-} from './participant';
+export type {
+  Patp,
+  SlipType,
+  EnterDiff,
+  ExitDiff,
+  DiffType,
+  RoomType,
+} from './types';
 
-export { LocalTrack } from './track';
-
-export type { ConnectionState } from './participant/Participant';
-
-export { PeerConnectionState, RoomState } from './types';
+export { RoomState } from './types';
+export { PeerConnectionState } from './peer/types';
+export { RoomManagerEvent } from './events';
+export { ProtocolEvent } from './connection/events';
+export type { ChatModelType } from './types';

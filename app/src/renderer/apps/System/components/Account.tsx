@@ -1,13 +1,15 @@
-import React, { FC, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
+import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
   Flex,
   Text,
   Card,
-  Input,
   RadioGroup,
   TextButton,
   Spinner,
+  Anchor,
+  CopyButton,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -15,17 +17,35 @@ import { ColorPicker } from './ColorPicker';
 import { useForm, useField } from 'mobx-easy-form';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { useTrayApps } from 'renderer/apps/store';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
-export const AccountPanel: FC<any> = observer(() => {
-  const { theme, ship, contacts } = useServices();
+const AccountPanelPresenter = () => {
+  const { theme, ship, identity } = useServices();
+  const { setActiveApp } = useTrayApps();
+  const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
+  const showAccessKey = useToggle(false);
 
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
+  const { windowColor, textColor, accentColor } = theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const url = identity.auth.currentShip!.url;
+  const isHostedShip = url.includes('holium.network');
+  const email = identity.auth.email;
+  const [code, setCode] = useState('');
+
+  useEffect(() => {
+    async function getCode() {
+      const code = await AuthActions.getCode();
+      setCode(code);
+    }
+    getCode();
+  }, []);
 
   type avatarOptionType = 'color' | 'image';
 
@@ -38,7 +58,7 @@ export const AccountPanel: FC<any> = observer(() => {
       let profileData = {
         color: values.avatarColor,
         nickname: values.nickname,
-        avatar: values.avatarImage,
+        avatar: avatarImg,
       };
 
       if (avatarOption === 'color') {
@@ -59,12 +79,6 @@ export const AccountPanel: FC<any> = observer(() => {
     id: 'avatarColor',
     form: profileForm,
     initialValue: ship!.color!,
-  });
-
-  const avatarImageField = useField({
-    id: 'avatarImage',
-    form: profileForm,
-    initialValue: ship!.avatar ? ship!.avatar : '',
   });
 
   const nicknameField = useField({
@@ -93,7 +107,6 @@ export const AccountPanel: FC<any> = observer(() => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
@@ -113,7 +126,7 @@ export const AccountPanel: FC<any> = observer(() => {
               Urbit ID
             </Text>
             <Text flex={3} mx={4}>
-              {ship!.patp!}
+              {ship!.patp}
               {/* ~sampel-palnet-sampel-palnet */}
             </Text>
           </Flex>
@@ -123,18 +136,14 @@ export const AccountPanel: FC<any> = observer(() => {
               Nickname
             </Text>
             <Flex flex={3}>
-              <Input
+              <TextInput
+                id="account-nickname"
+                name="account-nickname"
                 className="realm-cursor-text-cursor"
+                width="100%"
                 type="text"
                 placeholder="(none)"
                 value={nicknameField.state.value}
-                wrapperStyle={{
-                  cursor: 'none',
-                  borderRadius: 9,
-                  backgroundColor: inputColor,
-                }}
-                // defaultValue={ship!.nickname ? ship!.nickname : ''}
-                // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
                 onChange={(e: any) =>
                   nicknameField.actions.onChange(e.target.value)
                 }
@@ -181,30 +190,16 @@ export const AccountPanel: FC<any> = observer(() => {
                       '#8419D9',
                     ]}
                     onChange={(color: string) =>
-                      // console.log('color avatar input', color)
                       avatarColorField.actions.onChange(color)
                     }
                   />
                 )}
                 {avatarOption === 'image' && (
-                  <Input
-                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute ~bacwyls
-                    className="realm-cursor-text-cursor"
-                    type="text"
-                    placeholder="Paste url here"
-                    value={avatarImageField.state.value}
-                    wrapperStyle={{
-                      cursor: 'none',
-                      borderRadius: 9,
-                      backgroundColor: inputColor,
-                    }}
-                    // defaultValue={customWallpaper.state.value}
-                    // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-                    onChange={
-                      (e: any) =>
-                        avatarImageField.actions.onChange(e.target.value)
-                      // customWallpaper.actions.onChange(e.target.value)
-                    }
+                  <AvatarInput
+                    id="system-account-avatar-input"
+                    width="100%"
+                    initialValue={ship!.avatar! || ''}
+                    onSave={(url) => setAvatarImg(url)}
                   />
                 )}
               </Flex>
@@ -227,10 +222,10 @@ export const AccountPanel: FC<any> = observer(() => {
           {isLoading && <Spinner size={1} />}
         </Flex>
       </Card>
-      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      HOSTING
-    </Text>
-    <Card
+      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+        HOSTING
+      </Text>
+      <Card
         p="20px"
         width="100%"
         // minHeight="240px"
@@ -239,11 +234,104 @@ export const AccountPanel: FC<any> = observer(() => {
         flexDirection={'column'}
         mb={2}
       >
-        <Text>
-          Coming Soon
-        </Text>
+        <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            Email
+          </Text>
+          <Flex justifyContent="space-between" flex={3}>
+            <Text color={textColor}> {email} </Text>
+            <TextButton
+              style={{ fontWeight: 400 }}
+              showBackground
+              textColor={accentColor}
+              highlightColor={accentColor}
+              onClick={() => {
+                ShellActions.setBlur(true);
+                ShellActions.openDialog('change-email-dialog');
+                setActiveApp(null);
+              }}
+            >
+              Change Email
+            </TextButton>
+          </Flex>
+        </Flex>
 
-    </Card> */}
+        {isHostedShip && (
+          <>
+            <Flex
+              flexDirection={'row'}
+              flex={4}
+              mt={4}
+              justifyContent="flex-start"
+            >
+              <Text fontWeight={500} flex={1} margin={'auto'}>
+                Payment
+              </Text>
+              <Flex justifyContent="space-between" flex={3}>
+                <Text color={textColor}>Credit Card</Text>
+                <Anchor
+                  href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg"
+                  p={0}
+                  m={0}
+                >
+                  <TextButton
+                    style={{ fontWeight: 400 }}
+                    showBackground
+                    textColor={accentColor}
+                    highlightColor={accentColor}
+                  >
+                    Manage billing
+                  </TextButton>
+                </Anchor>
+              </Flex>
+            </Flex>
+          </>
+        )}
+
+        <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            URL
+          </Text>
+          <Text color={textColor} flex={3}>
+            {url}
+          </Text>
+        </Flex>
+
+        <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            Access Code
+          </Text>
+          {code === '' ? (
+            <Flex flex={3}>
+              <Spinner size={1} />
+            </Flex>
+          ) : (
+            <Flex flex={3} gap={6} alignItems="center">
+              <TextInput
+                id="system-account-access-code"
+                name="access-code"
+                py={2}
+                width={285}
+                value={code}
+                readOnly={true}
+                type={showAccessKey.isOn ? 'text' : 'password'}
+                rightAdornment={
+                  <Button.IconButton onClick={showAccessKey.toggle}>
+                    <Icon
+                      name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
+                      opacity={0.5}
+                      size={18}
+                    />
+                  </Button.IconButton>
+                }
+              />
+              <CopyButton content={code} />
+            </Flex>
+          )}
+        </Flex>
+      </Card>
     </Flex>
   );
-});
+};
+
+export const AccountPanel = observer(AccountPanelPresenter);

@@ -1,8 +1,12 @@
-import { average, prominent } from 'color.js';
-import { ThemeModelType } from 'os/services/theme.model';
 // const colors = ['#005050', '#000000', '#505050', '#000050', '#a05050'];
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
+
+import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
+import { AppType } from 'os/services/spaces/models/bazaar';
+import { Bounds } from 'os/types';
+import { SpacesActions } from './spaces';
+
 /**
  * DesktopActions for interfacing with core process
  */
@@ -16,34 +20,47 @@ export const DesktopActions = {
     //   sample: 80,
     //   format: 'hex',
     // });
-    return window.electron.os.desktop.changeWallpaper(spacePath, theme);
+    return await window.electron.os.desktop.changeWallpaper(spacePath, theme);
   },
-  setActive: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.setActive(spacePath, app);
+  setActive: async (appId: string) => {
+    return await window.electron.os.desktop.setActive(appId);
   },
-  setHomePane: async (isHome: boolean) => {
-    return window.electron.os.desktop.setHomePane(isHome);
+  openHomePane: async () => {
+    return await window.electron.os.desktop.openHomePane();
+  },
+  closeHomePane: async () => {
+    return await window.electron.os.desktop.closeHomePane();
   },
   setMouseColor: async (mouseColor: string) => {
-    return window.electron.os.desktop.setMouseColor(mouseColor);
+    window.electron.app.mouseColorChanged(mouseColor);
+    await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setAppDimensions: async (
-    windowId: any,
-    dimensions: { width: number; height: number; x: number; y: number }
-  ) => {
-    return window.electron.os.desktop.setAppDimensions(windowId, dimensions);
+  setWindowBounds: (appId: string, bounds: Bounds) => {
+    window.electron.os.desktop.setWindowBounds(appId, bounds);
   },
-  setPartitionCookies: (partition: string, cookies: any) => {
-    return window.electron.app.setPartitionCookies(partition, cookies);
+  setPartitionCookies: async (partition: string, cookies: any) => {
+    return await window.electron.app.setPartitionCookies(partition, cookies);
   },
-  openAppWindow: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.openAppWindow(spacePath, app);
+  openAppWindow: async (app: AppType) => {
+    const result = await window.electron.os.desktop.openAppWindow(app);
+    // dont add recent apps unitl they are open
+    SpacesActions.addRecentApp(app.id);
+    return result;
   },
-  closeAppWindow: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.closeAppWindow(spacePath, app);
+  openDialog: (windowProps: AppWindowProps): Promise<AppWindowType> => {
+    return window.electron.os.desktop.openDialog(windowProps);
+  },
+  toggleMinimized: (appId: string) => {
+    return window.electron.os.desktop.toggleMinimized(appId);
+  },
+  toggleMaximized: (appId: string): Promise<Bounds> => {
+    return window.electron.os.desktop.toggleMaximized(appId);
+  },
+  closeAppWindow: (appId: string) => {
+    return window.electron.os.desktop.closeAppWindow(appId);
   },
   toggleDevTools: async () => {
-    return window.electron.app.toggleDevTools();
+    return await window.electron.app.toggleDevTools();
   },
 };
 
