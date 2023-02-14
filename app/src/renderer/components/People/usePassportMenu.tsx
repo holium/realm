@@ -15,7 +15,6 @@ type AnchorPoint = { x: number; y: number };
 
 type PassportMenuOptions = {
   patp: string;
-  roles?: string[];
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;

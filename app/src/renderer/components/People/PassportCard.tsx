@@ -12,7 +12,6 @@ import { Avatar } from '@holium/design-system';
 
 interface IPassport {
   patp: string;
-  roles?: string[];
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -25,15 +24,13 @@ interface IPassport {
 }
 
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
-  const { patp, roles, sigilColor, avatar, nickname, description, onClose } =
-    props;
+  const { patp, sigilColor, avatar, nickname, description, onClose } = props;
   const { textColor, windowColor } = props.theme!;
   const { courier } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
-
   return (
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">
@@ -58,16 +55,14 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
               </Text>
             </>
           ) : (
-            <>
-              <Text fontWeight={500} fontSize={3}>
-                {patp}
-              </Text>
-            </>
+            <Text fontWeight={500} fontSize={3}>
+              {patp}
+            </Text>
           )}
         </Flex>
       </Flex>
       <Flex gap={12} flexDirection="column">
-        <Flex flexDirection="row" gap={4} alignItems="center">
+        <Flex flexDirection="row" gap={4}>
           {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}

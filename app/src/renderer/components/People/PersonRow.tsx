@@ -10,7 +10,6 @@ import { Avatar } from '@holium/design-system';
 interface IPersonRow {
   listId: string;
   patp: string;
-  roles?: string[];
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -25,7 +24,6 @@ interface IPersonRow {
 export const PersonRow = ({
   listId,
   patp,
-  roles,
   sigilColor,
   avatar,
   nickname,
@@ -76,7 +74,6 @@ export const PersonRow = ({
             id,
             options: {
               patp,
-              roles,
               sigilColor,
               avatar,
               nickname,
