@@ -1,8 +1,7 @@
 import styled from 'styled-components';
-import { Sigil } from 'renderer/components';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { useServices } from 'renderer/logic/store';
-import { Box, Row, Text, Flex } from '@holium/design-system';
+import { Avatar, Box, Row, Text, Flex } from '@holium/design-system';
 
 const Wrapper = styled(Box)`
   position: absolute;
@@ -40,13 +39,13 @@ export const YouRow = (props: SpaceRowProps) => {
         }}
       >
         <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
-          <Sigil
+          <Avatar
             simple
             borderRadiusOverride="6px"
             size={32}
             avatar={currentShip.avatar}
             patp={currentShip.patp}
-            color={[currentShip.color || '#000000', 'white']}
+            sigilColor={[currentShip.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom fontSize={3} fontWeight={500}>

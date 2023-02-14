@@ -7,7 +7,7 @@
 import path from 'path';
 import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater, UpdateInfo } from 'electron-updater';
+import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 const fs = require('fs');
@@ -30,7 +30,10 @@ const getAssetPath = (...paths: string[]): string => {
 // for now, until we get Windows and Linux auto updating pipelines to fully work,
 //  log ALL builds, not just dev or prod
 // log.transports.file.level = isDevelopment ? 'debug' : 'info';
-log.transports.file.level = 'debug';
+log.transports.file.level = 'verbose';
+// log.verbose(process.env);
+
+// const { AUTOUPDATE_FEED_URL, RELEASE_CHANNEL } = process.env;
 
 // a note on isOnline...
 //  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
@@ -99,17 +102,27 @@ export class AppUpdater implements IAppUpdater {
         __dirname,
         'dev-app-update.json'
       );
+    } else if (process.platform === 'win32' || process.platform === 'linux') {
+      // on windows builds, we generate an auto update config file at runtime
+      //  since there are issues with our current package.json scripts and persisting
+      //  environment variables across script commands
+      this.autoUpdater.updateConfigPath = `${process.resourcesPath}/updater/app-update.yml`;
+      log.verbose(
+        'autoUpdater.updateConfigPath => %o',
+        this.autoUpdater.updateConfigPath
+      );
+    } else {
+      // proxy private github repo requests
+      this.autoUpdater.setFeedURL({
+        provider: 'generic',
+        // see the app/src/renderer/system/updater/readme.md for more information
+        url: process.env.AUTOUPDATE_FEED_URL,
+        channel: determineReleaseChannel(),
+      });
     }
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     this.autoUpdater.autoDownload = false;
-    // proxy private github repo requests
-    this.autoUpdater.setFeedURL({
-      provider: 'generic',
-      // see the app/src/renderer/system/updater/readme.md for more information
-      url: process.env.AUTOUPDATE_FEED_URL,
-      channel: determineReleaseChannel(),
-    });
     this.autoUpdater.on('error', (error) => {
       this.progressWindow?.webContents.send('auto-updater-message', {
         name: 'error',
@@ -228,7 +241,7 @@ export class AppUpdater implements IAppUpdater {
     // if (!mainWindow) {
     this.progressWindow = new BrowserWindow({
       show: mainWindow ? true : false,
-      parent: mainWindow || undefined,
+      parent: mainWindow ?? undefined,
       width: 420,
       height: 310,
       icon: getAssetPath('icon.png'),

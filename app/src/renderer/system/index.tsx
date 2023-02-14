@@ -4,7 +4,7 @@ import { ViewPort, Layer } from 'react-spaces';
 
 import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
-import { Desktop } from './desktop';
+import { Desktop } from './desktop/Desktop';
 import {
   BackgroundImage,
   BackgroundFill,

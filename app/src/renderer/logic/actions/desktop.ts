@@ -2,6 +2,9 @@
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
+import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
+import { AppType } from 'os/services/spaces/models/bazaar';
+import { Bounds } from 'os/types';
 import { SpacesActions } from './spaces';
 
 /**
@@ -19,42 +22,42 @@ export const DesktopActions = {
     // });
     return await window.electron.os.desktop.changeWallpaper(spacePath, theme);
   },
-  setActive: async (spacePath: string, app: any) => {
-    return await window.electron.os.desktop.setActive(spacePath, app);
+  setActive: async (appId: string) => {
+    return await window.electron.os.desktop.setActive(appId);
   },
-  setHomePane: async (isHome: boolean) => {
-    return await window.electron.os.desktop.setHomePane(isHome);
+  openHomePane: async () => {
+    return await window.electron.os.desktop.openHomePane();
+  },
+  closeHomePane: async () => {
+    return await window.electron.os.desktop.closeHomePane();
   },
   setMouseColor: async (mouseColor: string) => {
     window.electron.app.mouseColorChanged(mouseColor);
     await window.electron.os.desktop.setMouseColor(mouseColor);
   },
-  setAppDimensions: (
-    windowId: string,
-    dimensions: { width: number; height: number; x: number; y: number }
-  ) => {
-    window.electron.os.desktop.setAppDimensions(windowId, dimensions);
+  setWindowBounds: (appId: string, bounds: Bounds) => {
+    window.electron.os.desktop.setWindowBounds(appId, bounds);
   },
   setPartitionCookies: async (partition: string, cookies: any) => {
     return await window.electron.app.setPartitionCookies(partition, cookies);
   },
-  openAppWindow: async (spacePath: string, app: any) => {
-    const result = await window.electron.os.desktop.openAppWindow(
-      spacePath,
-      app
-    );
+  openAppWindow: async (app: AppType) => {
+    const result = await window.electron.os.desktop.openAppWindow(app);
     // dont add recent apps unitl they are open
     SpacesActions.addRecentApp(app.id);
     return result;
   },
-  toggleMinimized: async (spacePath: string, windowId: string) => {
-    return await window.electron.os.desktop.toggleMinimized(
-      spacePath,
-      windowId
-    );
+  openDialog: (windowProps: AppWindowProps): Promise<AppWindowType> => {
+    return window.electron.os.desktop.openDialog(windowProps);
   },
-  closeAppWindow: async (spacePath: string, app: any) => {
-    return await window.electron.os.desktop.closeAppWindow(spacePath, app);
+  toggleMinimized: (appId: string) => {
+    return window.electron.os.desktop.toggleMinimized(appId);
+  },
+  toggleMaximized: (appId: string): Promise<Bounds> => {
+    return window.electron.os.desktop.toggleMaximized(appId);
+  },
+  closeAppWindow: (appId: string) => {
+    return window.electron.os.desktop.closeAppWindow(appId);
   },
   toggleDevTools: async () => {
     return await window.electron.app.toggleDevTools();

@@ -6,21 +6,14 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Box,
-  Sigil,
-  Text,
-  Flex,
-  Button,
-  Icons,
-  Spinner,
-} from 'renderer/components';
+import { Box, Text, Flex, Button, Icons, Spinner } from 'renderer/components';
 import { transparentize, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Avatar } from '@holium/design-system';
 
 export interface StripePaymentProps extends BaseDialogProps {
   patp: string;
@@ -181,8 +174,8 @@ const MainComponent: FC<StripePaymentProps> = observer(
               alignItems="center"
               justifyContent="center"
             >
-              <Sigil
-                color={['black', 'white']}
+              <Avatar
+                sigilColor={['black', 'white']}
                 simple={false}
                 size={48}
                 patp={onboarding.planet!.patp}

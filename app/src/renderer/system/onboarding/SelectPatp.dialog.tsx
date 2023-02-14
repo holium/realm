@@ -2,7 +2,6 @@ import React, { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
 import {
   Box,
-  Sigil,
   Grid,
   Text,
   Flex,
@@ -16,6 +15,7 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Avatar } from '@holium/design-system';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -54,7 +54,12 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
         alignItems="center"
         justifyContent="space-around"
       >
-        <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
+        <Avatar
+          sigilColor={['black', 'white']}
+          size={25}
+          simple
+          patp={props.patp}
+        />
         <Text fontSize={14} fontWeight={400} pr={2}>
           {' '}
           {props.patp}{' '}
@@ -90,7 +95,12 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
         alignItems="center"
         justifyContent="space-around"
       >
-        <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
+        <Avatar
+          sigilColor={['black', 'white']}
+          size={25}
+          simple
+          patp={props.patp}
+        />
         <Text fontSize={14} fontWeight={400} color="brand.primary" pr={2}>
           {' '}
           {props.patp}{' '}

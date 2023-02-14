@@ -6,14 +6,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, lighten, darken } from 'polished';
 
-import {
-  Flex,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  ShipSearch,
-} from 'renderer/components';
+import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
+import { Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
@@ -180,7 +174,7 @@ const MembersPresenter = ({ our }: IMembers) => {
           }}
           rightInteractive
           rightIcon={
-            <TextButton
+            <Button.TextButton
               disabled={!person.computed.parsed}
               onClick={() => {
                 onShipSelected([person.computed.parsed!, '']);
@@ -188,7 +182,7 @@ const MembersPresenter = ({ our }: IMembers) => {
               }}
             >
               {our ? 'Add' : 'Invite'}
-            </TextButton>
+            </Button.TextButton>
           }
           value={person.state.value}
           error={

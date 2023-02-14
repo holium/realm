@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
+import { Flex, Box, Icons, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
@@ -13,6 +13,7 @@ import {
   ERC20Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { Avatar } from '@holium/design-system';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -185,8 +186,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         {props.transactionRecipient.patp &&
                           props.transactionRecipient.address && (
                             <Flex gap={8} alignItems="center">
-                              <Sigil
-                                color={[
+                              <Avatar
+                                sigilColor={[
                                   props.transactionRecipient.color || 'black',
                                   'white',
                                 ]}

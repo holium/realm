@@ -192,7 +192,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=alpha GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

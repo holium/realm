@@ -67,6 +67,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
+    'realm.bazaar.scryHash': this.scryHash,
     'realm.bazaar.scryTreaties': this.scryTreaties,
     'realm.bazaar.scryAllies': this.scryAllies,
     'realm.spaces.get-members': this.getMembers,
@@ -106,6 +107,7 @@ export class SpacesService extends BaseService {
     scryAllies: async () => await ipcRenderer.invoke('realm.bazaar.scryAllies'),
     scryTreaties: async (ship: Patp) =>
       await ipcRenderer.invoke('realm.bazaar.scryTreaties', ship),
+    scryHash: (app: string) => ipcRenderer.invoke('realm.bazaar.scryHash', app),
 
     getOurGroups: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-our-groups');
@@ -603,6 +605,10 @@ export class SpacesService extends BaseService {
 
   async unrecommendApp(_event: IpcMainInvokeEvent, appId: string) {
     return await this.models.bazaar.unrecommendApp(this.core.conduit!, appId);
+  }
+
+  async scryHash(_event: IpcMainInvokeEvent, app: string) {
+    return await this.models.bazaar.scryHash(this.core.conduit!, app);
   }
 
   async scryTreaties(_event: IpcMainInvokeEvent, ship: Patp) {

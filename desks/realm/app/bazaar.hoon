@@ -7,7 +7,7 @@
 /-  store=bazaar-store, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
 /-  treaty, hood
-/+  verb, dbug, default-agent
+/+  dbug, default-agent
 =>
   |%
   +$  card  card:agent:gall
@@ -27,7 +27,6 @@
 =|  state-0
 =*  state  -
 =<
-  %+  verb  &
   %-  agent:dbug
   |_  =bowl:gall
   +*  this    .
@@ -104,6 +103,10 @@
     |=  =path
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
+      ::
+      [%x %app-hash @ ~]     ::  ~/scry/bazaar/app-hash/app-name
+        =/  hash  .^(@uv %cz [(scot %p our.bowl) i.t.t.path (scot %da now.bowl) ~])
+        ``bazaar-view+!>([%app-hash hash])
       ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
         ``bazaar-view+!>([%catalog catalog.state])

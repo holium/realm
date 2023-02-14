@@ -201,6 +201,7 @@
       ]
     },
     "win": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -223,7 +224,14 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      {
+        "from": "./src/main/updater/",
+        "to": "updater",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   },
   "repository": {

@@ -4,8 +4,15 @@ import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { DesktopStoreType, DesktopStore } from './desktop.model';
+import {
+  DesktopStoreType,
+  DesktopStore,
+  AppWindowProps,
+} from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
+import { IpcRendererEvent } from 'electron/renderer';
+import { toJS } from 'mobx';
+import { Bounds } from 'os/types';
 
 /**
  * DesktopService
@@ -25,15 +32,18 @@ import { AppType } from '../spaces/models/bazaar';
  */
 export class DesktopService extends BaseService {
   private readonly state: DesktopStoreType; // for state management
-  handlers = {
+  handlers: Record<string, (...args: any[]) => void> = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
-    'realm.desktop.set-home-pane': this.setHomePane,
-    'realm.desktop.set-app-dimensions': this.setAppDimensions,
+    'realm.desktop.open-home-pane': this.openHomePane,
+    'realm.desktop.close-home-pane': this.closeHomePane,
+    'realm.desktop.set-window-bounds': this.setWindowBounds,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
+    'realm.desktop.open-dialog': this.openDialog,
     'realm.desktop.toggle-minimized': this.toggleMinimized,
+    'realm.desktop.toggle-maximized': this.toggleMaximized,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
@@ -45,25 +55,17 @@ export class DesktopService extends BaseService {
         theme
       );
     },
-    setHomePane: async (isHome: boolean) => {
-      return await ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
+    openHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.open-home-pane');
     },
-    setActive: async (spaceId: string, appId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.set-active',
-        spaceId,
-        appId
-      );
+    closeHomePane: async () => {
+      return await ipcRenderer.invoke('realm.desktop.close-home-pane');
     },
-    setAppDimensions: async (
-      windowId: any,
-      dimensions: { width: number; height: number; x: number; y: number }
-    ) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.set-app-dimensions',
-        windowId,
-        dimensions
-      );
+    setActive: async (appId: string) => {
+      return await ipcRenderer.invoke('realm.desktop.set-active', appId);
+    },
+    setWindowBounds: (appId: string, bounds: Bounds) => {
+      ipcRenderer.invoke('realm.desktop.set-window-bounds', appId, bounds);
     },
     setMouseColor: async (mouseColor: string) => {
       return await ipcRenderer.invoke(
@@ -72,26 +74,20 @@ export class DesktopService extends BaseService {
       );
     },
 
-    openAppWindow: async (spaceId: string, app: any) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.open-app-window',
-        spaceId,
-        app
-      );
+    openAppWindow: (app: AppType) => {
+      return ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
-    toggleMinimized: async (spaceId: string, windowId: string) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.toggle-minimized',
-        spaceId,
-        windowId
-      );
+    openDialog: (windowProps: AppWindowProps) => {
+      return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
-    closeAppWindow: async (spaceId: string, app: any) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.close-app-window',
-        spaceId,
-        app
-      );
+    toggleMinimized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-minimized', appId);
+    },
+    toggleMaximized: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.toggle-maximized', appId);
+    },
+    closeAppWindow: (appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.close-app-window', appId);
     },
   };
 
@@ -99,8 +95,7 @@ export class DesktopService extends BaseService {
     super(core, options);
 
     this.state = DesktopStore.create({});
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-expect-error
+    Object.keys(this.handlers).forEach((handlerName) => {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }
@@ -140,36 +135,35 @@ export class DesktopService extends BaseService {
     // }
   }
 
-  setActive(_event: any, _spaceId: string, appId: string) {
-    this.state?.setActive(appId);
+  setActive(_event: IpcRendererEvent, appId: string) {
+    this.state.setActive(appId);
   }
 
-  setHomePane(_event: any, isHome: boolean) {
-    this.state?.setHomePane(isHome);
-    this.core.services.shell.setBlur(null, isHome);
+  openHomePane(event: IpcRendererEvent) {
+    this.state.openHomePane();
+    this.core.services.shell.setBlur(event, true);
+  }
+
+  closeHomePane(event: IpcRendererEvent) {
+    this.state.closeHomePane();
+    this.core.services.shell.setBlur(event, false);
   }
 
   setMouseColor(_event: any, mouseColor: string) {
     this.state?.setMouseColor(mouseColor);
   }
 
-  setAppDimensions(
-    _event: any,
-    windowId: any,
-    dimensions: { width: number; height: number; x: number; y: number }
-  ) {
-    this.state?.setDimensions(windowId, dimensions);
+  setWindowBounds(_event: any, appId: string, bounds: Bounds) {
+    this.state?.setBounds(appId, bounds);
   }
 
-  openAppWindow(_event: any, _spaceId: string, selectedApp: AppType) {
-    const { desktopDimensions } = this.core.services.shell;
-
-    const newWindow = this.state.openBrowserWindow(
-      selectedApp,
-      desktopDimensions as any
-    );
+  openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
     this.core.services.shell.setBlur(null, false);
-    const credentials = this.core.credentials!;
+    const credentials = this.core.credentials;
+
+    if (!credentials) return console.error('No credentials found');
 
     if (selectedApp.type === 'urbit') {
       const appUrl = newWindow.href?.glob
@@ -192,10 +186,20 @@ export class DesktopService extends BaseService {
     }
   }
 
-  toggleMinimized(_event: any, _spaceId: string, windowId: string) {
-    this.state?.toggleMinimize(windowId);
+  openDialog(_event: IpcRendererEvent, windowProps: AppWindowProps) {
+    return toJS(this.state.openDialog(windowProps));
   }
-  closeAppWindow(_event: any, _spaceId: string, selectedApp: any) {
-    this.state?.closeBrowserWindow(selectedApp.id);
+
+  toggleMinimized(_event: any, appId: string) {
+    this.state.toggleMinimize(appId);
+  }
+
+  toggleMaximized(_event: any, appId: string) {
+    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    return this.state.toggleMaximize(appId, desktopDimensions);
+  }
+
+  closeAppWindow(_event: IpcRendererEvent, appId: string) {
+    this.state.closeWindow(appId);
   }
 }

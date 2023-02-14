@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
-import { Sigil } from 'renderer/components';
-import { Flex, Icon, Text, Button } from '@holium/design-system';
+import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
-import { nativeApps } from '..';
+import { nativeApps } from '../nativeApps';
 import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -12,6 +11,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useRooms } from '../Rooms/useRooms';
+import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
   const { ship, beacon } = useServices();
@@ -36,7 +36,7 @@ const AccountTrayAppPresenter = () => {
   }, []);
 
   const openSettingsApp = () => {
-    DesktopActions.openAppWindow('', nativeApps['os-settings']);
+    DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
   };
 
   let subtitle;
@@ -91,13 +91,13 @@ const AccountTrayAppPresenter = () => {
         }}
       >
         <Flex alignItems="center">
-          <Sigil
+          <Avatar
             simple
             borderRadiusOverride="4px"
             size={32}
             avatar={currentShip.avatar}
             patp={currentShip.patp}
-            color={[currentShip.color || '#000000', 'white']}
+            sigilColor={[currentShip.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom
