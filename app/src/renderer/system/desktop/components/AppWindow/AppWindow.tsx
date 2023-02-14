@@ -3,11 +3,8 @@ import { useMotionValue, useDragControls, PanInfo } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
-import {
-  AppWindowContainer,
-  LeftDragHandle,
-  RightDragHandle,
-} from './AppWindow.styles';
+import { AppWindowContainer } from './AppWindow.styles';
+import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -68,17 +65,17 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     }
   }, [appWindow.zIndex]);
 
-  const resizeRightX = useMotionValue(0);
-  const resizeRightY = useMotionValue(0);
-  const resizeLeftX = useMotionValue(0);
-  const resizeLeftY = useMotionValue(0);
+  const resizeBottomRightX = useMotionValue(0);
+  const resizeBottomRightY = useMotionValue(0);
+  const resizeBottomLeftX = useMotionValue(0);
+  const resizeBottomLefty = useMotionValue(0);
 
   const handleBottomRightCornerResize = useCallback(
     (event: MouseEvent, info: PanInfo) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeRightX.set(resizeRightX.get() - info.offset.x);
-      resizeRightY.set(resizeRightY.get() - info.offset.y);
+      resizeBottomRightX.set(resizeBottomRightX.get() - info.offset.x);
+      resizeBottomRightY.set(resizeBottomRightY.get() - info.offset.y);
 
       const newWidth = info.point.x - motionX.get();
       const newHeight = info.point.y - motionY.get();
@@ -101,8 +98,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     (event: MouseEvent, info: PanInfo) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeLeftX.set(resizeLeftX.get() - info.offset.x);
-      resizeLeftY.set(resizeLeftY.get() - info.offset.y);
+      resizeBottomLeftX.set(resizeBottomLeftX.get() - info.offset.x);
+      resizeBottomLefty.set(resizeBottomLefty.get() - info.offset.y);
 
       const newWidth = motionX.get() + motionWidth.get() - info.point.x;
       const newHeight = info.point.y - motionY.get();
@@ -250,43 +247,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           isDragging={isDragging}
           appWindow={appWindow}
         />
-        <LeftDragHandle
-          className="app-window-resize app-window-resize-lr"
-          drag
-          style={{
-            x: resizeLeftX,
-            y: resizeLeftY,
+        <AppWindowResizeHandles
+          bottomLeft={{
+            x: resizeBottomLeftX,
+            y: resizeBottomLefty,
           }}
-          onDrag={handleBottomLeftCornerResize}
-          onPointerDown={() => {
-            setIsResizing(true);
+          bottomRight={{
+            x: resizeBottomRightX,
+            y: resizeBottomRightY,
           }}
-          onPointerUp={() => {
-            setIsResizing(false);
-            updateWindowBounds();
-          }}
-          onPanEnd={() => setIsResizing(false)}
-          onTap={() => setIsResizing(false)}
-          dragMomentum={false}
-        />
-        <RightDragHandle
-          className="app-window-resize app-window-resize-br"
-          drag
-          style={{
-            x: resizeRightX,
-            y: resizeRightY,
-          }}
-          onDrag={handleBottomRightCornerResize}
-          onPointerDown={() => {
-            setIsResizing(true);
-          }}
-          onPointerUp={() => {
-            setIsResizing(false);
-            updateWindowBounds();
-          }}
-          onPanEnd={() => setIsResizing(false)}
-          onTap={() => setIsResizing(false)}
-          dragMomentum={false}
+          setIsResizing={setIsResizing}
+          onDragBottomLeft={handleBottomLeftCornerResize}
+          onDragBottomRight={handleBottomRightCornerResize}
         />
       </Flex>
     </AppWindowContainer>
