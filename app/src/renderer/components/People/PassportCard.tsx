@@ -94,7 +94,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          {allowRoleChange && (
+          {allowRoleChange ? (
             <Select
               id="select-role"
               placeholder="Select role"
@@ -114,6 +114,8 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                 setNewRole(selected);
               }}
             />
+          ) : (
+            <Flex />
           )}
           {walletApp.initialized && (
             <PassportButton

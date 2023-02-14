@@ -185,6 +185,7 @@
           %fact
             ?+  p.cage.sign  `this
                 %group-update-0
+              ~&  'got groups update'
               =/  groups-update  q:!<(update:g q.cage.sign)
               ?+  -.groups-update  `this
                   %fleet
@@ -284,6 +285,7 @@
     ++  handle-add
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
+      ~&  >  'handling add'
       ?>  (team:title our.bowl src.bowl)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
       ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
@@ -351,6 +353,7 @@
     ++  handle-join
       |=  [path=space-path:store]
       ^-  (quip card _state)
+      ~&  >  'handling join'
       ?:  (is-host:core ship.path)
         (host-handle-join path src.bowl)
       (member-handle-join path)
@@ -396,8 +399,10 @@
               :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
               [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
           ==
+        ~&  >  'handling join cards'
         =?  cards  =(%group type:(~(got by spaces.state) path))
           %+  weld  cards
+            ~&  >  'adding ship to group'
             =/  action  [path now.bowl %fleet (silt ~[ship]) %add ~]
             `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
         [cards state]
@@ -625,6 +630,7 @@
     ++  handle-accept
       |=  [path=space-path:store]
       ^-  (quip card _state)
+      ~&  'handling accept'
       ?.  (is-host:core ship.path)
         (member-handle-accept path)
       (host-handle-accept path)
@@ -644,11 +650,17 @@
         =.  membership.state            (~(put by membership.state) [path members])
         =/  member-path                 /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths                 [/updates member-path ~]
-        :_  state
-        :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
-            [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
-        ==
+        =/  cards=(list card)
+          :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
+              :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+              [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
+          ==
+        =?  cards  =(%group type:(~(got by spaces.state) path))
+          %+  weld  cards
+            ~&  >  'adding ship to group'
+            =/  action  [path now.bowl %fleet (silt ~[src.bowl]) %add ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(`action:g`action)]~  :: Add member to group
+        [cards state]
     ::
     ++  handle-decline
       |=  [path=space-path:store]
@@ -746,8 +758,19 @@
       =.  roles.member-state  role-set
       =.  space-members  (~(put by space-members) [member member-state])
       =.  membership  (~(put by membership) [path space-members])
-      :_  state
-      [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+      =/  cards
+        ^-  (list card)
+        [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+      =?  cards  =(%group type:(~(got by spaces.state) path))
+        %+  weld  cards
+          ?:  (~(has in role-set) %admin)
+            ::  %member to %admin
+            =/  action  [path now.bowl %fleet (silt ~[member]) %add-sects (sy [%admin ~])]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+          ::  remove %admin status
+          =/  action  [path now.bowl %fleet (silt ~[member]) %del-sects (sy [%admin ~])]
+          `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+      [cards state]
     ::
     --
   ++  reaction
