@@ -275,7 +275,6 @@ export const SpacesApi = {
         },
       },
     };
-    console.log(JSON.stringify(payload));
     return conduit.poke(payload);
   },
   /**
@@ -524,7 +523,6 @@ const handleInviteReactions = (
       state.removeMember(kickedPayload.path, kickedPayload.ship);
       break;
     case 'edited':
-      console.log('got edited data', data);
       const editedPayload = data.edited;
       state.editMember(
         editedPayload.path,

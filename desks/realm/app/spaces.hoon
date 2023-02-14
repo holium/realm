@@ -184,7 +184,6 @@
           %fact
             ?+  p.cage.sign  `this
                 %group-update-0
-              ~&  'got groups update'
               =/  groups-update  q:!<(update:g q.cage.sign)
               ?+  -.groups-update  `this
                   %fleet
@@ -284,7 +283,6 @@
     ++  handle-add
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
-      ~&  >  'handling add'
       ?>  (team:title our.bowl src.bowl)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
       ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
@@ -352,7 +350,6 @@
     ++  handle-join
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      ~&  >  'handling join'
       ?:  (is-host:core ship.path)
         (host-handle-join path src.bowl)
       (member-handle-join path)
@@ -398,10 +395,8 @@
               :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
               [%give %fact watch-paths visa-reaction+!>([%invite-accepted path ship member])]      ::  Notify watchers
           ==
-        ~&  >  'handling join cards'
         =?  cards  =(%group type:(~(got by spaces.state) path))
           %+  weld  cards
-            ~&  >  'adding ship to group'
             =/  action  [path now.bowl %fleet (silt ~[ship]) %add ~]
             `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Add member to group
         [cards state]
@@ -637,7 +632,6 @@
     ++  handle-accept
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      ~&  'handling accept'
       ?.  (is-host:core ship.path)
         (member-handle-accept path)
       (host-handle-accept path)
@@ -664,7 +658,6 @@
           ==
         =?  cards  =(%group type:(~(got by spaces.state) path))
           %+  weld  cards
-            ~&  >  'adding ship to group'
             =/  action  [path now.bowl %fleet (silt ~[src.bowl]) %add ~]
             `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(`action:g`action)]~  :: Add member to group
         [cards state]
