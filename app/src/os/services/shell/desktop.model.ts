@@ -3,8 +3,9 @@ import { Dimensions } from 'os/types';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { toJS } from 'mobx';
 import {
-  getFullscreenBounds,
+  getMaximizedBounds,
   getInitialWindowBounds,
+  isMaximizedBounds,
 } from './lib/window-manager';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -40,10 +41,10 @@ const AppWindowModel = types
      * Needed for returning from maximized/fullscreen state.
      */
     prevBounds: types.optional(BoundsModel, {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
+      x: 1,
+      y: 1,
+      width: 5,
+      height: 5,
     }),
     /**
      * The ative window has a titlebar with full contrast.
@@ -74,7 +75,7 @@ const AppWindowModel = types
       } else {
         self.state = 'maximized';
         self.prevBounds = { ...self.bounds };
-        self.bounds = getFullscreenBounds(desktopDimensions);
+        self.bounds = getMaximizedBounds(desktopDimensions);
       }
     },
     setIsActive(isActive: boolean) {
@@ -156,12 +157,14 @@ export const DesktopStore = types
         // app as DevApp
         href = { site: app.web.url };
       }
+      const bounds = getInitialWindowBounds(app, desktopDimensions);
+      const isMaximized = isMaximizedBounds(bounds, desktopDimensions);
       const newWindow = AppWindowModel.create({
         appId: app.id,
         title: app.title,
         glob,
         href,
-        state: 'normal',
+        state: isMaximized ? 'maximized' : 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
         bounds: getInitialWindowBounds(app, desktopDimensions),
