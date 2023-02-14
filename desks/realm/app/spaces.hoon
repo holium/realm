@@ -354,7 +354,6 @@
           `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
         ~
       =.  membership.state            (~(del by membership.state) path)
-      =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
       [cards state]
     ::
     ++  handle-join
