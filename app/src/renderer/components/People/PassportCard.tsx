@@ -95,29 +95,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          {allowRoleChange ? (
-            <Select
-              id="select-role"
-              placeholder="Select role"
-              customBg={windowColor}
-              textColor={textColor}
-              iconColor={iconColor}
-              selected={activeRole}
-              // disabled={isOur}
-              options={[
-                { label: 'Initiate', value: 'initiate' },
-                { label: 'Member', value: 'member' },
-                { label: 'Admin', value: 'admin' },
-                // { label: 'Host', value: 'host' }, TODO elect a data host
-                { label: 'Owner', value: 'owner', hidden: true },
-              ]}
-              onClick={(selected: Roles) => {
-                setNewRole(selected);
-              }}
-            />
-          ) : (
-            <Flex />
-          )}
           {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}
@@ -165,6 +142,29 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
           >
             <Icons name="StartDM" color={iconColor} size="16px" />
           </PassportButton>
+          {allowRoleChange ? (
+            <Select
+              id="select-role"
+              placeholder="Select role"
+              customBg={windowColor}
+              textColor={textColor}
+              iconColor={iconColor}
+              selected={activeRole}
+              // disabled={isOur}
+              options={[
+                { label: 'Initiate', value: 'initiate' },
+                { label: 'Member', value: 'member' },
+                { label: 'Admin', value: 'admin' },
+                // { label: 'Host', value: 'host' }, TODO elect a data host
+                { label: 'Owner', value: 'owner', hidden: true },
+              ]}
+              onClick={(selected: Roles) => {
+                setNewRole(selected);
+              }}
+            />
+          ) : (
+            <Flex />
+          )}
         </Flex>
         {description && (
           <Flex flexDirection="column" gap={4}>
