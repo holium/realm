@@ -2,6 +2,7 @@ import { Flex } from 'renderer/components';
 import { SpaceSelector } from './SpaceSelector';
 import { AppDock } from './AppDock/AppDock';
 import { BarStyle } from '@holium/design-system';
+import { AirliftTray } from './Airlift';
 
 export const CommunityBar = () => {
   return (
