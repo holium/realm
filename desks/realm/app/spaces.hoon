@@ -350,9 +350,8 @@
         %+  murn  ~(tap by space-members)
         |=  [=ship =member:membership-store]
         ^-  (unit card)
-        ?:  =(%invited status.member)
-          `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
-        ~
+        ?.  =(%invited status.member)  ~
+        `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
       =.  membership.state            (~(del by membership.state) path)
       [cards state]
     ::
