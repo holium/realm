@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { rgba, darken } from 'polished';
-import { Flex, Box, Text, Icons, Select } from '../';
+import { Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -8,10 +8,7 @@ import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { Avatar } from '@holium/design-system';
-
-type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
 interface IPassport {
   patp: string;
@@ -31,40 +28,11 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
   const { patp, roles, sigilColor, avatar, nickname, description, onClose } =
     props;
   const { textColor, windowColor } = props.theme!;
-  const { courier, membership, spaces, ship } = useServices();
+  const { courier } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
-
-  const ourRoles = membership.spaces
-    .get(spaces.selected!.path)!
-    .get(ship!.patp)!.roles;
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
-
-  let activeRole = 'initiate';
-  if (roles) {
-    if (roles.includes('admin')) activeRole = 'admin';
-    else if (roles.includes('member')) activeRole = 'member';
-    else if (roles.includes('initiate')) {
-      activeRole = 'initiate';
-    }
-  }
-  const activeRoleText =
-    activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
-
-  const setNewRole = (role: Roles) => {
-    const newRoles = roles
-      ? [...roles.filter((role) => role !== activeRole), role]
-      : [role];
-    console.log('old', roles);
-    console.log('new', newRoles);
-    SpacesActions.setRoles(patp, newRoles);
-  };
-  const isAdmin = roles!.includes('admin');
-  const isOwner = roles!.includes('owner');
-  const ourAdmin = ourRoles.includes('admin');
-  const ourOwner = ourRoles.includes('owner');
-  const allowRoleChange = (ourOwner || (ourAdmin && !isAdmin)) && !isOwner;
 
   return (
     <Flex flexDirection="column" gap={14}>
@@ -147,30 +115,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
           >
             <Icons name="StartDM" color={iconColor} size="16px" />
           </PassportButton>
-          {allowRoleChange ? (
-            <Select
-              id="select-role"
-              placeholder="Select role"
-              customBg={windowColor}
-              textColor={textColor}
-              iconColor={iconColor}
-              selected={activeRole}
-              options={[
-                { label: 'Initiate', value: 'initiate' },
-                { label: 'Member', value: 'member' },
-                { label: 'Admin', value: 'admin' },
-                // { label: 'Host', value: 'host' }, TODO elect a data host
-                { label: 'Owner', value: 'owner', hidden: true },
-              ]}
-              onClick={(selected: Roles) => {
-                setNewRole(selected);
-              }}
-            />
-          ) : (
-            <Text fontSize={2} opacity={0.6} marginLeft={5}>
-              {activeRoleText}
-            </Text>
-          )}
         </Flex>
         {description && (
           <Flex flexDirection="column" gap={4}>

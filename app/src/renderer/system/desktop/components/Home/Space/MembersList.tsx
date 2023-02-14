@@ -12,6 +12,8 @@ interface IMembersList {
   path: string;
 }
 
+type Roles = 'initiate' | 'member' | 'admin' | 'owner';
+
 const MembersListPresenter = (props: IMembersList) => {
   const { path } = props;
   const { theme, spaces, membership, ship, friends } = useServices();
@@ -78,11 +80,26 @@ const MembersListPresenter = (props: IMembersList) => {
   const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
     const contact = friends.getContactAvatarMetadata(member.patp);
 
+    const roles = Array.from(member.roles!);
+    let activeRole = 'initiate';
+    if (roles) {
+      if (roles.includes('admin')) activeRole = 'admin';
+      else if (roles.includes('member')) activeRole = 'member';
+      else if (roles.includes('initiate')) {
+        activeRole = 'initiate';
+      }
+    }
+    const setNewRole = (role: Roles) => {
+      const newRoles = roles
+        ? [...roles.filter((role) => role !== activeRole), role]
+        : [role];
+      SpacesActions.setRoles(member.patp, newRoles);
+    };
+
     return (
       <PersonRow
         key={`${member.patp}-member`}
         patp={member.patp}
-        roles={Array.from(member.roles!)}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}
@@ -91,8 +108,21 @@ const MembersListPresenter = (props: IMembersList) => {
         rowBg={rowBg}
         theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship!.patp)
+          membership.isAdmin(path, ship!.patp) && member.patp !== ship!.patp
             ? [
+                activeRole === 'admin'
+                  ? {
+                      label: 'Demote to Member',
+                      onClick: () => {
+                        setNewRole('member');
+                      },
+                    }
+                  : {
+                      label: 'Promote to Admin',
+                      onClick: () => {
+                        setNewRole('admin');
+                      },
+                    },
                 {
                   label: 'Kick',
                   onClick: () => {
