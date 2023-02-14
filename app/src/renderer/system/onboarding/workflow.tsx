@@ -71,8 +71,12 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (_data: any) => {
-      OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
+    onNext: (recoveringAccount: boolean) => {
+      if (recoveringAccount) {
+        OnboardingActions.setStep(OnboardingStep.EMAIL);
+      } else {
+        OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
+      }
     },
     getWindowProps: (desktopDimensions) => ({
       appId: OnboardingStep.ACCESS_GATE,

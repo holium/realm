@@ -15,7 +15,7 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Button } from '@holium/design-system';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -190,6 +190,11 @@ const SelectPatpPresenter = (props: BaseDialogProps) => {
     props.onNext && props.onNext();
   }
 
+  console.log(
+    'disabled => %o',
+    loading || error || planets.length === 0 || selectedIndex === -1
+  );
+
   return (
     <Grid.Column noGutter lg={12} xl={12}>
       <Flex
@@ -252,18 +257,18 @@ const SelectPatpPresenter = (props: BaseDialogProps) => {
             textAlign="center"
             mt={3}
           >
-            No available planets found. Please contact Realm support.
+            {errorMessage}
           </Text>
         )}
       </Flex>
       <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
-        <TextButton
+        <Button.TextButton
           disabled={
-            !(!loading && !error && planets.length > 0 && selectedIndex >= 0)
+            loading || error || planets.length === 0 || selectedIndex === -1
           }
         >
           Next
-        </TextButton>
+        </Button.TextButton>
       </Box>
     </Grid.Column>
   );

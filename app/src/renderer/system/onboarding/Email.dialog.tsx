@@ -26,10 +26,18 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
   const [view, setView] = useState('initial');
   const done = () => props.onNext && props.onNext();
 
+  console.log(
+    'recoveringAccount => %o',
+    props.workflowState?.recoveringAccount
+  );
+
   return (
     <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
       {view === 'initial' ? (
-        <InitialScreen done={() => setView('verify')} />
+        <InitialScreen
+          done={() => setView('verify')}
+          recoveringAccount={props.workflowState.recoveringAccount}
+        />
       ) : (
         <VerifyScreen
           verificationCode={onboarding.verificationCode!}
@@ -44,7 +52,7 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
 
 export const EmailDialog = observer(EmailDialogPresenter);
 
-function InitialScreen(props: { done: any }) {
+function InitialScreen(props: { done: any; recoveringAccount: boolean }) {
   const { onboarding, theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [email, setEmail] = useState(onboarding.email || '');
@@ -52,9 +60,14 @@ function InitialScreen(props: { done: any }) {
   const [error, setError] = useState('');
   const onChange = (event: any) => setEmail(event.target.value);
 
+  console.log('recoveringAccount => %o', props.recoveringAccount);
+
   const onClick = async () => {
     setLoading(true);
-    const response = await OnboardingActions.setEmail(email);
+    const response = await OnboardingActions.setEmail(
+      email,
+      props.recoveringAccount
+    );
     setLoading(false);
 
     response.success ? props.done() : setError(response.errorMessage);

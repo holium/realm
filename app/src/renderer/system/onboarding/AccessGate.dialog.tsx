@@ -30,7 +30,14 @@ const AccessGatePresenter = (props: BaseDialogProps) => {
     }
 
     setError('');
-    props.onNext && props.onNext();
+    props.onNext && props.onNext(false);
+  };
+
+  const goToEmail = async (/*evt: any*/) => {
+    setError('');
+    props.setState &&
+      props.setState({ ...props.workflowState, recoveringAccount: true });
+    props.onNext && props.onNext(true);
   };
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -73,6 +80,17 @@ const AccessGatePresenter = (props: BaseDialogProps) => {
             Submit
           </Button>
         </Flex>
+      </Flex>
+      <Flex width="100%" justifyContent="center">
+        <Text
+          mt={20}
+          fontSize={2}
+          fontWeight={400}
+          color={themeData.colors.text.disabled}
+          onClick={(evt: any) => goToEmail(evt)}
+        >
+          Already signed up?
+        </Text>
       </Flex>
     </Flex>
   );
