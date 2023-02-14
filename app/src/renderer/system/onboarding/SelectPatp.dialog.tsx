@@ -116,7 +116,7 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
   );
 };
 
-const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+const SelectPatpPresenter = (props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
@@ -267,6 +267,6 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       </Box>
     </Grid.Column>
   );
-});
+};
 
-export default SelectPatp;
+export const SelectPatp = observer(SelectPatpPresenter);

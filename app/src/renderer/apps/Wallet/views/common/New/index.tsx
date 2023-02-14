@@ -9,7 +9,7 @@ import { Confirm } from './Confirm';
 import { CreatePasscode } from './CreatePasscode';
 import { ConfirmPasscode } from './ConfirmPasscode';
 import { Finalizing } from './Finalizing';
-import DetectedExisting from './DetectedExisting';
+import { DetectedExisting } from './DetectedExisting';
 import { RecoverExisting } from './RecoverExisting';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';

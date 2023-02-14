@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import List from './source/List/List';
+import { List } from './source/List/List';
 
 export const StyledList = styled(List)<{ hideScrollbar: boolean }>`
   ${({ hideScrollbar }) =>

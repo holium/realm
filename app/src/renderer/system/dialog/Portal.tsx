@@ -14,5 +14,3 @@ export const Portal = ({ children }: { children: React.ReactNode }) => {
 
   return createPortal(children, el);
 };
-
-export default Portal;

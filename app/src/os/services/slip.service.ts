@@ -1,4 +1,4 @@
-import Realm from '..';
+import { Realm } from '../index';
 import { EventEmitter } from 'stream';
 // import {
 //   getSnapshot,

@@ -258,5 +258,3 @@ export const theme = {
 };
 
 export type ThemeType = typeof theme.light;
-
-export default theme;

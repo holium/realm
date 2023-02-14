@@ -13,7 +13,7 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { Avatar, Button, Icon, TextInput } from '@holium/design-system';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 
-const ViewCode = observer(function Component() {
+const ViewCodePresenter = () => {
   const { theme } = useServices();
   const [accessCode, setAccessCode] = useState('');
   const { onboarding } = useServices();
@@ -97,6 +97,6 @@ const ViewCode = observer(function Component() {
       </Flex>
     </Grid.Column>
   );
-});
+};
 
-export default ViewCode;
+export const ViewCode = observer(ViewCodePresenter);

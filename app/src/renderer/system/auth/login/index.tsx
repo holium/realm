@@ -19,7 +19,7 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import Portal from 'renderer/system/dialog/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';

@@ -1,4 +1,4 @@
-import { FC, KeyboardEventHandler, useEffect, useState } from 'react';
+import { KeyboardEventHandler, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
@@ -19,32 +19,30 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ThemeType } from 'renderer/theme';
 
-export const EmailDialog: FC<BaseDialogProps> = observer(
-  (props: BaseDialogProps) => {
-    const { onboarding } = useServices();
-    const { theme } = useServices();
-    const baseTheme = getBaseTheme(theme.currentTheme);
-    const [view, setView] = useState('initial');
-    const done = () => props.onNext && props.onNext();
+const EmailDialogPresenter = (props: BaseDialogProps) => {
+  const { onboarding } = useServices();
+  const { theme } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
+  const [view, setView] = useState('initial');
+  const done = () => props.onNext && props.onNext();
 
-    return (
-      <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
-        {view === 'initial' ? (
-          <InitialScreen done={() => setView('verify')} />
-        ) : (
-          <VerifyScreen
-            verificationCode={onboarding.verificationCode!}
-            done={done}
-            theme={baseTheme as ThemeType}
-            newAccount={onboarding.newAccount}
-          />
-        )}
-      </Flex>
-    );
-  }
-);
+  return (
+    <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
+      {view === 'initial' ? (
+        <InitialScreen done={() => setView('verify')} />
+      ) : (
+        <VerifyScreen
+          verificationCode={onboarding.verificationCode!}
+          done={done}
+          theme={baseTheme as ThemeType}
+          newAccount={onboarding.newAccount}
+        />
+      )}
+    </Flex>
+  );
+};
 
-export default EmailDialog;
+export const EmailDialog = observer(EmailDialogPresenter);
 
 function InitialScreen(props: { done: any }) {
   const { onboarding, theme } = useServices();

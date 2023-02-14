@@ -9,11 +9,11 @@ import {
 } from 'mobx-state-tree';
 import bcrypt from 'bcryptjs';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
-import EncryptedStore from '../../lib/encryptedStore';
+import { EncryptedStore } from '../../lib/encryptedStore';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)

@@ -1,8 +1,7 @@
 import styled, { css } from 'styled-components';
 import { space, layout, SpaceProps, LayoutProps, compose } from 'styled-system';
 import type { ThemeType } from '../../theme';
-
-import config, { DIMENSIONS } from './helpers';
+import { config, DIMENSIONS } from './helpers';
 
 type ContainerType = SpaceProps &
   LayoutProps & {
@@ -14,7 +13,7 @@ type ContainerType = SpaceProps &
     theme: ThemeType;
   };
 
-const Container = styled(styled.div`
+export const Container = styled(styled.div`
   margin-right: auto;
   margin-left: auto;
   width: 100vw;
@@ -67,5 +66,3 @@ Container.defaultProps = {
   scroll: false,
   offset: 0,
 };
-
-export default Container;

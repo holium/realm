@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { DragControls } from 'framer-motion';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { AppWindowIcon } from '../AppWindowIcon';
@@ -12,7 +13,7 @@ type Props = {
   zIndex: number;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;
-  dragControls?: any;
+  dragControls?: DragControls;
   navigationButtons?: boolean;
   closeButton?: boolean;
   maximizeButton?: boolean;

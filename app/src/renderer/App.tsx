@@ -72,4 +72,4 @@ const AppPresenter = () => {
   );
 };
 
-export default observer(AppPresenter);
+export const App = observer(AppPresenter);

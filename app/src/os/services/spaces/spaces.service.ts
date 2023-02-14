@@ -4,7 +4,7 @@ import { toJS } from 'mobx';
 import fs from 'fs';
 import path from 'path';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';

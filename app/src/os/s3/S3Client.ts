@@ -25,7 +25,7 @@ export interface StorageClient {
   upload: (params: UploadParams) => StorageUpload;
 }
 
-export default class S3Client implements StorageClient {
+export class S3Client implements StorageClient {
   config: S3.ClientConfiguration;
   client: S3 | null = null;
   S3!: typeof import('aws-sdk/clients/s3');
