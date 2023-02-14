@@ -155,8 +155,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
               textColor={textColor}
               iconColor={iconColor}
               selected={activeRole}
-              // disabled={isOur}
-              align-content="flex-end"
               options={[
                 { label: 'Initiate', value: 'initiate' },
                 { label: 'Member', value: 'member' },
