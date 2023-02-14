@@ -49,6 +49,9 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       activeRole = 'initiate';
     }
   }
+  const activeRoleText =
+    activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
+
   const setNewRole = (role: Roles) => {
     const newRoles = roles
       ? [...roles.filter((role) => role !== activeRole), role]
@@ -87,14 +90,16 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
               </Text>
             </>
           ) : (
-            <Text fontWeight={500} fontSize={3}>
-              {patp}
-            </Text>
+            <>
+              <Text fontWeight={500} fontSize={3}>
+                {patp}
+              </Text>
+            </>
           )}
         </Flex>
       </Flex>
       <Flex gap={12} flexDirection="column">
-        <Flex flexDirection="row" gap={4}>
+        <Flex flexDirection="row" gap={4} alignItems="center">
           {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}
@@ -151,6 +156,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
               iconColor={iconColor}
               selected={activeRole}
               // disabled={isOur}
+              align-content="flex-end"
               options={[
                 { label: 'Initiate', value: 'initiate' },
                 { label: 'Member', value: 'member' },
@@ -163,7 +169,9 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
               }}
             />
           ) : (
-            <Flex />
+            <Text fontSize={2} opacity={0.6} marginLeft={5}>
+              {activeRoleText}
+            </Text>
           )}
         </Flex>
         {description && (
