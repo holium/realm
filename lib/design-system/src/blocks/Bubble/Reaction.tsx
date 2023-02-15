@@ -1,9 +1,6 @@
-import { useState, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useState, useMemo, useEffect } from 'react';
 import styled, { css } from 'styled-components';
-import { darken } from 'polished';
 import { Flex, Box, Icon, Text } from '../..';
-import { getVar } from '../../util/colors';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
@@ -11,9 +8,27 @@ import EmojiPicker, {
   SkinTones,
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
+import { AnimatePresence } from 'framer-motion';
+
+const WIDTH = 350;
+
+const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
+  const menuWidth = WIDTH;
+  const menuHeight = 450;
+
+  const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
+  const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
+
+  const offset = 3;
+  const x = willGoOffScreenHorizontally ? 0 - menuWidth - offset : 0 + offset;
+  const y = willGoOffScreenVertically ? 0 - menuHeight - offset : 0 + offset;
+
+  return { x, y };
+};
 
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
+  position: relative;
   flex-direction: row;
   gap: 4px;
   ${({ variant }) =>
@@ -61,8 +76,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   ${({ selected }) =>
     selected
       ? css`
-          border: 1px solid #efbb92;
-          background: #fff6ef;
+          border: 1px solid var(--rlm-accent-color);
         `
       : 'border: 1px solid var(--rlm-border-color);'}
   border-radius: 16px;
@@ -74,7 +88,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && 'color: #e47a27;'}
+            ${selected && 'color: var(--rlm-accent-color);'}
           }
         `
       : css`
@@ -102,14 +116,14 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
           &:hover {
             transition: var(--transition);
             cursor: pointer;
-            background: ${() => darken(0.05, '#fff6ef')};
+            filter: brightness(0.96);
           }
         `
       : css`
           &:hover {
             transition: var(--transition);
             cursor: pointer;
-            background: ${() => darken(0.05, getVar('input'))};
+            filter: brightness(0.96);
           }
         `}
 `;
@@ -140,7 +154,11 @@ export const Reactions = (props: ReactionProps) => {
     reactions = [],
     onReaction,
   } = props;
-  const [reacting, setReacting] = useState<boolean>(false);
+  const [isReacting, setIsReacting] = useState<boolean>(false);
+  const [anchorPoint, setAnchorPoint] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const reactionsAggregated = useMemo(
     () =>
@@ -174,7 +192,7 @@ export const Reactions = (props: ReactionProps) => {
   };
 
   const onClick = (emoji: string) => {
-    setReacting(false);
+    setIsReacting(false);
     if (checkDupe(emoji)) {
       onReaction({ emoji, action: 'remove', by: window.ship as any });
     } else {
@@ -182,13 +200,41 @@ export const Reactions = (props: ReactionProps) => {
     }
   };
 
+  const handleClickOutside = (event: MouseEvent) => {
+    if (isReacting) {
+      const addButton = document.getElementById('reaction-add-button');
+      const dropdownNode = document.getElementById('emoji-picker');
+      const isVisible = dropdownNode
+        ? dropdownNode.getAttribute('data-is-open') === 'true'
+        : false; // get if the picker is visible currently
+
+      if (
+        // @ts-ignore
+        addButton?.contains(event.target) ||
+        // @ts-ignore
+        dropdownNode?.contains(event.target) ||
+        !isVisible
+      ) {
+        return;
+      }
+      // You are clicking outside
+      if (isVisible) {
+        setIsReacting(false);
+      }
+    }
+  };
+
+  const root = document.getElementById('root');
+  useEffect(() => {
+    if (!root) return;
+    root.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      root.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [root, handleClickOutside]);
+
   return (
-    <ReactionRow
-      variant={variant}
-      onHoverEnd={() => {
-        setReacting(false);
-      }}
-    >
+    <ReactionRow variant={variant}>
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
         return (
           <ReactionButton
@@ -212,20 +258,34 @@ export const Reactions = (props: ReactionProps) => {
       })}
       <Flex className="bubble-reactions">
         <ReactionButton
+          id="reaction-add-button"
           size={size}
           onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
             evt.stopPropagation();
-            setReacting(!reacting);
+            const { x, y } = getAnchorPoint(evt);
+            setAnchorPoint({ x, y });
+            setIsReacting(!isReacting);
           }}
         >
           <Icon size={18} opacity={0.5} name="Plus" pointerEvents="none" />
         </ReactionButton>
         <AnimatePresence>
-          {reacting && (
-            <Flex position="absolute" zIndex={4}>
+          {isReacting && anchorPoint && (
+            <Flex
+              id="emoji-picker"
+              data-is-open={isReacting.toString()}
+              position="absolute"
+              zIndex={4}
+              initial={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 0 }}
+              animate={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 1 }}
+              exit={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
               <EmojiPicker
                 emojiVersion="0.6"
-                // zIndex={4}
+                previewConfig={{
+                  showPreview: false,
+                }}
                 defaultSkinTone={SkinTones.NEUTRAL}
                 onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
                   evt.stopPropagation();
