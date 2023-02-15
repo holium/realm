@@ -27,7 +27,7 @@ const ShipConfig: { [ship: string]: any } = {
   },
   '~fes': {
     ship: 'fes',
-    url: 'http://localhost:8083',
+    url: 'http://localhost:8080',
     code: 'lagfep-borweb-sabler-dacnus',
   },
   '~sun': {
