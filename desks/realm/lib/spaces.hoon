@@ -86,6 +86,7 @@
       :-  %current
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(space-name:encode space.path.rct))]
+          [%space s+space.path.rct]
       ==
     
       ::   %members
@@ -325,7 +326,9 @@
     |=  current=space-path:store
     ^-  json
     %-  pairs
-    ['path' s+(spat /(scot %p ship.current)/(space-name space.current))]~
+    :~  ['path' s+(spat /(scot %p ship.current)/(space-name space.current))]
+        ['space' s+space.current]
+    ==
   ::
   ++  spc
     |=  =space

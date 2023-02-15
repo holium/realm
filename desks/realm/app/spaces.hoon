@@ -546,7 +546,6 @@
     ++  on-current
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      :: TODO I don't know when/why this function is called yet. Revisit
       :_  state(current path)
       [%give %fact [/current ~] spaces-reaction+!>([%current path])]~
     ::
