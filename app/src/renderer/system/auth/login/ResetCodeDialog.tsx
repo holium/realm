@@ -68,8 +68,8 @@ const ResetCodeDialogPresenter = ({ ship, password }: ResetCodeProps) => {
           ShellActions.closeDialog();
           setSavingShipCode(false);
         }
-      } catch (reason: any) {
-        setErrorMessage('Error updating ship code.');
+      } catch (reason: Error) {
+        setErrorMessage(error.message);
       } finally {
         setSavingShipCode(false);
       }
