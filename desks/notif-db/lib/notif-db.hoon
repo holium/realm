@@ -40,11 +40,7 @@
   ?.  =(stop index)
     [tbl ids]
   $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs))))
-++  rows-by-path
-  |=  [app=@tas =path]
-  %+  turn
-    (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))
-  |=([k=@ud v=notif-row:sur] v)
+::
 ::
 ::  poke actions
 ::
@@ -52,23 +48,28 @@
 ::  :notif-db &ndb-poke [%create %chat-db /realm-chat/path-id %message 'the message' ~]
   |=  [act=create-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  row=notif-row:sur
-  [
+  =/  row=notif-row:sur  [
     next.state
     app.act
     path.act
     type.act
+    title.act
     content.act
+    image.act
+    buttons.act
+    link.act
     metadata.act
     now.bowl
-    *@ud
+    *@da
+    %.n
+    *@da
     %.n
   ]
   =.  notifs-table.state  (put:notifon:sur notifs-table.state next.state row)
   =.  next.state          +(next.state)
   =/  thechange  db-change+!>((limo [[%add-row row] ~]))
   =/  gives  :~
-    [%give %fact [/db ~] thechange]
+    [%give %fact [/db /new ~] thechange]
   ==
   [gives state]
 ::
@@ -182,7 +183,19 @@
       :~  [%app (se %tas)]
           [%path pa]
           [%type (se %tas)]
+          [%title so]
           [%content so]
+          [%image so]
+          [%buttons (ar button)]
+          [%link so]
+          [%metadata (om so)]
+      ==
+    ::
+    ++  button
+      %-  ot
+      :~  [%label so]
+          [%path pa]
+          [%data so]
           [%metadata (om so)]
       ==
     ::
@@ -222,11 +235,17 @@
           app+s+app.notif-row
           path+s+(spat path.notif-row)
           type+s+type.notif-row
+          title+s+title.notif-row
           content+s+content.notif-row
+          image+s+image.notif-row
+          buttons+a+(turn buttons.notif-row button-up)
+          link+s+link.notif-row
           metadata+(metadata-to-json metadata.notif-row)
           created-at+(time created-at.notif-row)
           read-at+(time read-at.notif-row)
           read+b+read.notif-row
+          dismissed-at+(time dismissed-at.notif-row)
+          dismissed+b+dismissed.notif-row
       ==
     ::
     ++  changes
@@ -244,7 +263,16 @@
         %update-row
           :~(['type' %s -.ch] ['row' (notifs-row id.notif-row.ch notif-row.ch)])
         %del-row
-          :~(['type' %s -.ch] ['id' (numb id.notif-row.ch)])
+          :~(['type' %s -.ch] ['id' (numb id.ch)])
+      ==
+    ++  button-up
+      |=  b=button:sur
+      ^-  json
+      %-  pairs
+      :~  ['label' %s label.b]
+          ['path' s+(spat path.b)]
+          ['data' s+data.b]
+          ['metadata' (metadata-to-json metadata.b)]
       ==
     ++  metadata-to-json
       |=  m=(map cord cord)

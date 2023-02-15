@@ -31,7 +31,7 @@
     =/  act  !<(action:sur vase)
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
-      %create-path 
+      %create
         (create:db-lib +.act state bowl)
       %read-id
         (read-id:db-lib +.act state bowl)
@@ -60,6 +60,15 @@
           =/  changes  (turn (tap:notifon:sur notifs-table.state) keyval-to-change:core)
           :~  [%give %fact ~ db-change+!>(changes)]
           ==
+      ::
+        [%new ~]  :: the "new notificaitons only" path
+          ~  :: we don't "prime" this path with anything, only give-facts on %create action
+      :: /path/<app name>/<the/actual/path>
+        [%path @ *]  :: the "everything" path
+          =/  path-notifs   (notifs-by-path:core i.t.path t.t.path) :: list of [key val] of matching notif-rows
+          =/  changes  (turn path-notifs keyval-to-change:core)
+          :~  [%give %fact ~ db-change+!>(changes)]
+          ==
     ==
     [cards this]
   ::
@@ -67,6 +76,7 @@
     |=  =path
     ^-  (unit (unit cage))
     ?+    path  !!
+    :: TODO notifs since timestamp
     ::
       [%x %db ~]
         ``rows+!>(all-rows:core)
@@ -134,11 +144,14 @@
 ++  rows-by-path
   |=  [app=@tas =path]
   %+  turn
-    (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))
+    (notifs-by-path app path)
   |=([k=@ud v=notif-row:sur] v)
 ++  rows-by-type
   |=  [app=@tas =path type=@tas]
   %+  turn
     (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v) =(type type.v))))
   |=([k=@ud v=notif-row:sur] v)
+++  notifs-by-path
+  |=  [app=@tas =path]
+  (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))
 --
