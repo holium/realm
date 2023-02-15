@@ -99,7 +99,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           # rename the latest.yml (linux) file to name based on channel
-          mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL.yml
+          mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
           git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
           gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
