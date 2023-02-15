@@ -383,7 +383,7 @@ export class AuthService extends BaseService {
         cookie,
       });
       return 'continue';
-    } catch (e) {
+    } catch (e: any) {
       this.core.sendLog(e);
       this.state.setLoader('error');
       return `error:${e.response?.status}`;
