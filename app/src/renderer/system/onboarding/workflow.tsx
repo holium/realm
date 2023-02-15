@@ -71,8 +71,8 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (recoveringAccount: boolean) => {
-      if (recoveringAccount) {
+    onNext: (isRecoveringAccount: boolean) => {
+      if (isRecoveringAccount) {
         OnboardingActions.setStep(OnboardingStep.EMAIL);
       } else {
         OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);

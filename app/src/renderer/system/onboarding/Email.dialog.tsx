@@ -31,7 +31,7 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
       {view === 'initial' ? (
         <InitialScreen
           done={() => setView('verify')}
-          recoveringAccount={props.workflowState.recoveringAccount}
+          isRecoveringAccount={props.workflowState.isRecoveringAccount}
         />
       ) : (
         <VerifyScreen
@@ -47,7 +47,7 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
 
 export const EmailDialog = observer(EmailDialogPresenter);
 
-function InitialScreen(props: { done: any; recoveringAccount: boolean }) {
+function InitialScreen(props: { done: any; isRecoveringAccount: boolean }) {
   const { onboarding, theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [email, setEmail] = useState(onboarding.email || '');
@@ -59,7 +59,7 @@ function InitialScreen(props: { done: any; recoveringAccount: boolean }) {
     setLoading(true);
     const response = await OnboardingActions.setEmail(
       email,
-      props.recoveringAccount
+      props.isRecoveringAccount
     );
     setLoading(false);
 

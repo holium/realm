@@ -77,12 +77,12 @@ export class OnboardingService extends BaseService {
 
     async setEmail(
       email: string,
-      recoveringAccount: boolean
+      isRecoveringAccount: boolean
     ): Promise<{ success: boolean; errorMessage: string }> {
       return await ipcRenderer.invoke(
         'realm.onboarding.setEmail',
         email,
-        recoveringAccount
+        isRecoveringAccount
       );
     },
 
@@ -330,7 +330,7 @@ export class OnboardingService extends BaseService {
   async setEmail(
     _event: any,
     email: string,
-    recoveringAccount: boolean
+    isRecoveringAccount: boolean
   ): Promise<{ success: boolean; errorMessage: string }> {
     const { auth } = this.core.services.identity;
     this.state.setEmail(email);
@@ -351,7 +351,7 @@ export class OnboardingService extends BaseService {
         this.state.setNewAccount(false);
       }
       // if no account found and we are attempting to recover, this is an error condition
-      else if (recoveringAccount) {
+      else if (isRecoveringAccount) {
         return {
           success: false,
           errorMessage: `Account not found using email address '${email}`,
