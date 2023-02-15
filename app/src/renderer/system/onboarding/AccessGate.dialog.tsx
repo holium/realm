@@ -33,7 +33,7 @@ const AccessGatePresenter = (props: BaseDialogProps) => {
     props.onNext && props.onNext(false);
   };
 
-  const goToEmail = async (/*evt: any*/) => {
+  const goToEmail = () => {
     setError('');
     props.setState &&
       props.setState({ ...props.workflowState, isRecoveringAccount: true });
@@ -87,7 +87,7 @@ const AccessGatePresenter = (props: BaseDialogProps) => {
           fontSize={2}
           fontWeight={400}
           color={themeData.colors.text.disabled}
-          onClick={(/*evt: any*/) => goToEmail()}
+          onClick={goToEmail}
         >
           Already signed up?
         </Text>
