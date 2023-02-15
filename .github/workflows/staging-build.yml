@@ -177,7 +177,7 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
+          GH_TOKEN=$GH_TOKEN npx yarn package:prerelease:linux
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       #
