@@ -14,7 +14,6 @@
 +$  card  card:agent:gall
 --
 ::
-%+  verb  &
 %-  agent:dbug
 =|  state-0
 =*  state  -

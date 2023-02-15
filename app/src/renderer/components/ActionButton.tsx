@@ -120,5 +120,3 @@ ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,
 };
-
-export default ActionButton;

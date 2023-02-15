@@ -7,7 +7,7 @@ import {
   RemotePeer,
 } from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 (window as any).global = window;
@@ -219,36 +219,34 @@ type ISpeaker = {
   type: 'host' | 'speaker' | 'listener';
 };
 
-const OurMic: FC<ISpeaker> = observer((props: ISpeaker) => {
-  const { our, patp } = props;
-
-  return (
-    <div className="speaker-container">
-      <p style={{ margin: 0 }}>{patp}</p>
-      <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
-        {our}
-      </p>
-      <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
-        <button
-          onClick={() => {
-            if (our) {
-              if (roomsManager.muteStatus) {
-                roomsManager.unmute();
-              } else {
-                roomsManager.mute();
-              }
+const OurMicPresenter = ({ our, patp }: ISpeaker) => (
+  <div className="speaker-container">
+    <p style={{ margin: 0 }}>{patp}</p>
+    <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
+      {our}
+    </p>
+    <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
+      <button
+        onClick={() => {
+          if (our) {
+            if (roomsManager.muteStatus) {
+              roomsManager.unmute();
+            } else {
+              roomsManager.mute();
             }
-          }}
-        >
-          {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
-        </button>
-      </div>
-
-      <div>
-        <p>Microphone: {'activated'}</p>
-      </div>
+          }
+        }}
+      >
+        {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
+      </button>
     </div>
-  );
-});
 
-export default observer(AppPresenter);
+    <div>
+      <p>Microphone: {'activated'}</p>
+    </div>
+  </div>
+);
+
+const OurMic = observer(OurMicPresenter);
+
+export const App = observer(AppPresenter);

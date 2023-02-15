@@ -1,16 +1,9 @@
-import { MouseEvent, useState, useMemo, useCallback } from 'react';
+import { MouseEventHandler, useState, useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
-import {
-  Sigil,
-  Flex,
-  Box,
-  Text,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Box, Text, TextButton, Spinner } from 'renderer/components';
 import {
   DMPreviewType,
   PreviewDMType,
@@ -22,12 +15,13 @@ import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { Avatar } from '@holium/design-system';
 
 interface DMContact {
   theme: ThemeModelType;
   dm: DMPreviewType;
   refreshDms: () => Promise<void>;
-  onClick: (evt: any) => void;
+  onClick: MouseEventHandler<HTMLDivElement>;
 }
 
 interface RowProps {
@@ -38,9 +32,8 @@ interface RowProps {
 
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
-  width: calc(100% - 16px);
+  width: 100%;
   padding: 8px;
-  margin: 0 8px;
   gap: 10px;
   display: flex;
   flex-direction: row;
@@ -127,12 +120,12 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     } else {
       return (
         <Box mt="2px" opacity={isPending ? 0.6 : 1}>
-          <Sigil
+          <Avatar
             simple
             size={28}
             avatar={dmModel.metadata.avatar}
             patp={dmModel.to}
-            color={[dmModel.metadata.color || '#000000', 'white']}
+            sigilColor={[dmModel.metadata.color || '#000000', 'white']}
           />
         </Box>
       );
@@ -148,8 +141,8 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     isPending,
   ]);
 
-  const onAccept = useCallback(
-    (evt: MouseEvent) => {
+  const onAccept: MouseEventHandler = useCallback(
+    (evt) => {
       evt.stopPropagation();
       setAcceptLoading(true);
 
@@ -183,8 +176,8 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     [dmModel.to, groupModel.path, isGroup]
   );
 
-  const onDecline = useCallback(
-    (evt: MouseEvent) => {
+  const onDecline: MouseEventHandler = useCallback(
+    (evt) => {
       evt.stopPropagation();
       setRejectLoading(true);
 
@@ -222,7 +215,7 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
       isPending={isPending}
       className={isPending ? '' : 'realm-cursor-hover'}
       customBg={theme.windowColor}
-      onClick={(evt: any) => !isPending && onClick(evt)}
+      onClick={(evt) => !isPending && onClick(evt)}
     >
       <Flex flex={1} gap={10} maxWidth="100%">
         {sigil}

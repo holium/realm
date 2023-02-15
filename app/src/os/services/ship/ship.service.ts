@@ -3,14 +3,13 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 import { Content } from '@urbit/api';
-import S3Client, { StorageAcl } from '../../s3/S3Client';
+import { S3Client, StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import EncryptedStore from '../../lib/encryptedStore';
+import { EncryptedStore } from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { Patp } from '../../types';
-import { ContactApi } from '../../api/contacts';
 import { DmApi } from '../../api/dms';
 import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
@@ -20,7 +19,6 @@ import { WalletService } from '../tray/wallet.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
-import { ContactStore, ContactStoreType } from './models/contacts';
 import { ChatStoreType } from './models/dms';
 import { CourierApi } from '../../api/courier';
 import {
@@ -37,7 +35,6 @@ const fs = require('fs');
 
 export interface ShipModels {
   friends: FriendsType;
-  contacts?: ContactStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
 }
@@ -50,7 +47,6 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
-    contacts: undefined,
   };
 
   private readonly metadataStore: {
@@ -194,7 +190,6 @@ export class ShipService extends BaseService {
   get modelSnapshots() {
     return {
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
-      contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
     };
   }
@@ -240,14 +235,6 @@ export class ShipService extends BaseService {
       CourierStore
     );
     this.models.courier = courierStore.model;
-    const contactStore = new DiskStore(
-      'contacts',
-      ship,
-      secretKey!,
-      ContactStore,
-      { ourPatp: ship }
-    );
-    this.models.contacts = contactStore.model;
     const friendsStore = new DiskStore(
       'friends',
       ship,
@@ -259,7 +246,6 @@ export class ShipService extends BaseService {
 
     secretKey = null;
     courierStore.registerPatches(this.core.onEffect);
-    contactStore.registerPatches(this.core.onEffect);
     friendsStore.registerPatches(this.core.onEffect);
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
@@ -280,24 +266,25 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
 
     try {
+      /*
       // TODO rewrite the contact store logic
       try {
         this.core.conduit!.watch({
           app: 'contact-store',
           path: '/all',
           onEvent: (data: any) => {
-            this.models.contacts!.setInitial(data);
+            this.models.friends!.setInitial(data);
           },
           onError: () => console.log('Subscription rejected'),
           onQuit: () => console.log('Kicked from subscription'),
         });
       } catch {
         console.log('Subscription failed');
-      }
+      }*/
 
       FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
-      ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
+      FriendsApi.getContact(this.core.conduit!, ship).then((value: any) => {
         this.state!.setOurMetadata(value);
       });
 
@@ -349,7 +336,6 @@ export class ShipService extends BaseService {
     this.db = undefined;
     this.state = undefined;
     this.models.chat = undefined;
-    this.models.contacts = undefined;
     this.models.courier = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
     this.wallet.logout();
@@ -434,13 +420,13 @@ export class ShipService extends BaseService {
   // ---
   getContact(_event: any, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
-    const contact = this.models.contacts?.getContactAvatarMetadata(patp);
+    const contact = this.models.friends?.getContactAvatarMetadata(patp);
     return contact;
   }
 
   //
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
-    await ContactApi.saveContact(
+    await FriendsApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
       profileData

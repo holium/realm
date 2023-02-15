@@ -71,7 +71,7 @@ const resolveConfig = (props: { theme: any }) => {
   return conf;
 };
 
-export default function config(props = { theme: {} }) {
+export function config(props = { theme: {} }) {
   const customConf = hasCustomConf(props);
   if (configs[0] === customConf) {
     return configs[1];

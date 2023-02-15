@@ -1,98 +1,93 @@
-import {
-  AppType,
-  UrbitAppType,
-  NativeAppType,
-  DevAppType,
-  RealmConfigType,
-} from 'os/services/spaces/models/bazaar';
-import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
-type DesktopDimensions = { width: number; height: number };
-type AppDimensions = { x: number; y: number; width: number; height: number };
+import { AppType, RealmConfigType } from 'os/services/spaces/models/bazaar';
+import { Dimensions, Position, Bounds } from 'os/types';
+import { getDefaultAppDimensions } from './dimensions';
 
 /**
- * getCenteredXY
+ * getCenteredPosition
  *
- * Calculates the x and y of a centered window based on the height and width
+ * Calculates the x and y of a centered window based on the height and width.
  *
- * @param appDimensions
- * @param desktopDimensions
- * @returns { x: number; y: number }
+ * @param Bounds
+ * @returns position normalized to the 1-10 scale
  */
-export const getCenteredXY = (
-  appDimensions: {
-    width: number;
-    height: number;
-  },
-  desktopDimensions: DesktopDimensions,
-  offset: number = 58
-): { x: number; y: number } => {
-  const appWidth = appDimensions.width;
-  const appHeight = appDimensions.height;
-  const desktopWidth = desktopDimensions.width;
-  const desktopHeight = desktopDimensions.height;
+export const getCenteredPosition = (windowDimensions: Dimensions): Position => {
+  const x = 5 - windowDimensions.width / 2;
+  const y = 5 - windowDimensions.height / 2;
 
-  const x = Math.floor(desktopWidth / 2 - appWidth / 2);
-  const y = Math.floor(desktopHeight / 2 - appHeight / 2) - offset;
   return { x, y };
 };
 
 /**
- * getFullscreenDimensions
+ * getMaximizedBounds
  *
- * Uses the window height and width to calculate a fullscreen window position.
+ * Calculates the bounds for a fullscreen window.
  *
- * @param isFullscreen
- * @returns { x: number; y: number; width: number; height: number }
+ * @returns bounds normalized to the 1-10 scale
  */
-export const getFullscreenDimensions = (
-  desktopDimensions: DesktopDimensions,
-  isFullscreen?: boolean
-): AppDimensions => {
-  const offset = isFullscreen ? 0 : 30;
-  const { width, height } = desktopDimensions;
-  const windowHeight = height - (16 + offset) - 50;
-  const windowWidth = width - 16;
+export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
+  const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
+  const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
+  const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
+
+  const offsetX = 2 * normalizedPaddingX;
+  const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
+
+  const windowWidth = 10 - offsetX;
+  const windowHeight = 10 - offsetY;
+
   return {
     x: 0,
-    y: 8,
+    y: normalizedPaddingY,
     width: windowWidth,
     height: windowHeight,
   };
 };
 
+export const isMaximizedBounds = (
+  bounds: Bounds,
+  desktopDimensions: Dimensions
+) => {
+  const maximizedBounds = getMaximizedBounds(desktopDimensions);
+  const margin = 0.01;
+
+  return (
+    Math.abs(bounds.x - maximizedBounds.x) < margin &&
+    Math.abs(bounds.y - maximizedBounds.y) < margin &&
+    Math.abs(bounds.width - maximizedBounds.width) < margin &&
+    Math.abs(bounds.height - maximizedBounds.height) < margin
+  );
+};
+
 /**
- * getCenteredDimensions
+ * getCenteredBounds
  *
- * Calculates the position of a window opened with default dimensions and centered
+ * Calculates the position of a window opened with default dimensions and centered.
  *
  * @param app
- * @returns { x: number; y: number; width: number; height: number }
+ * @returns dimensions normalized to the 1-10 scale
  */
-export const getCenteredDimensions = (
-  app: any,
-  desktopDimensions: DesktopDimensions
-): AppDimensions => {
-  const { width, height } = desktopDimensions;
-  if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
-    const defaultAppDimensions = {
-      width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-        ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-        : 600,
-      height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-        ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-        : 600,
+const getCenteredBounds = (app: any, desktopDimensions: Dimensions): Bounds => {
+  const defaultAppDimensions = getDefaultAppDimensions(
+    app.id,
+    desktopDimensions
+  );
+
+  if (defaultAppDimensions) {
+    const defaultDimensions = {
+      width: defaultAppDimensions.width,
+      height: defaultAppDimensions.height,
     };
-    const defaultXY = getCenteredXY(defaultAppDimensions, { width, height });
+    const defaultPosition = getCenteredPosition(defaultDimensions);
+
     return {
-      x: app.dimensions ? app.dimensions.x : defaultXY.x,
-      y: app.dimensions ? app.dimensions.y : defaultXY.y,
-      width: app.dimensions ? app.dimensions.width : defaultAppDimensions.width,
-      height: app.dimensions
-        ? app.dimensions.height
-        : defaultAppDimensions.height,
+      x: app.dimensions?.x ?? defaultPosition.x,
+      y: app.dimensions?.y ?? defaultPosition.y,
+      width: app.dimensions?.width ?? defaultDimensions.width,
+      height: app.dimensions?.height ?? defaultDimensions.height,
     };
   } else if (app.type === 'web' && app.web.dimensions) {
-    const defaultXY = getCenteredXY(app.web.dimensions, desktopDimensions);
+    const defaultXY = getCenteredPosition(app.web.dimensions);
+
     return {
       x: defaultXY.x,
       y: defaultXY.y,
@@ -100,104 +95,114 @@ export const getCenteredDimensions = (
       height: app.web.dimensions.height,
     };
   } else {
-    const fullDims = getFullscreenDimensions(desktopDimensions, true);
+    const fullScreenBounds = getMaximizedBounds(desktopDimensions);
+
     return {
-      x: app.dimensions ? app.dimensions.x : fullDims.x,
-      y: app.dimensions ? app.dimensions.y : fullDims.y,
-      width: app.dimensions ? app.dimensions.width : fullDims.width,
-      height: app.dimensions ? app.dimensions.height : fullDims.height,
+      x: app.dimensions?.x ?? fullScreenBounds.x,
+      y: app.dimensions?.y ?? fullScreenBounds.y,
+      width: app.dimensions?.width ?? fullScreenBounds.width,
+      height: app.dimensions?.height ?? fullScreenBounds.height,
     };
   }
 };
 
 /**
- * getInitialWindowDimensions
- *
- * Determines how the window should be opened, centered or fullscreen, and then
- * calculates the window x, y, width, and height
+ * getInitialWindowBounds
  *
  * @param app
- * @param isFullscreen
- * @returns dimensions: { x: number; y: number; width: number; height: number }
+ * @returns bounds normalized to the 1-10 scale
  */
-export const getInitialWindowDimensions = (
+export const getInitialWindowBounds = (
   app: AppType,
-  desktopDimensions: DesktopDimensions
-): AppDimensions => {
-  let dimensions: { x: number; y: number; width: number; height: number };
-  let realmConfig: RealmConfigType | null;
-  switch (app.type) {
-    case 'urbit':
-      realmConfig = (app as UrbitAppType).config;
-      if (realmConfig) {
-        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
-        break;
-      }
-      dimensions = getCenteredDimensions(
-        app as UrbitAppType,
-        desktopDimensions
-      );
-      break;
-    case 'dev':
-      realmConfig = (app as DevAppType).config;
-      if (realmConfig) {
-        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
-        break;
-      }
-      dimensions = getCenteredDimensions(app as DevAppType, desktopDimensions);
-      break;
-    case 'native':
-      realmConfig = (app as NativeAppType).config;
-      if (realmConfig) {
-        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
-        break;
-      }
-      dimensions = getCenteredDimensions(
-        app as NativeAppType,
-        desktopDimensions
-      );
-      break;
-    // case 'dialog':
-    //   const dialog: any = app;
-    //   if (dialog.native?.openFullscreen) {
-    //     dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
-    //     break;
-    //   }
-    //   dimensions = getCenteredDimensions(dialog, desktopDimensions);
-    //   break;
+  desktopDimensions: Dimensions
+): Bounds => {
+  if (app.config) {
+    return getConfigBounds(app.config, desktopDimensions);
   }
-  return dimensions!;
+
+  return getCenteredBounds(app, desktopDimensions);
 };
 
 /**
- * normalizeConfigSize - computes the dimensions of a window based on the realm.config 1-10 scale
+ * getConfigBounds - computes the bounds of a window based on the app's config.
  *
- * @param desktopDimensions - { width: number; height: number }
  * @param config - RealmConfigType { size: [number, number], showTitlebar: boolean, titlebarBorder: boolean }
- * @returns dimensions: { x: number; y: number; width: number; height: number }
+ * @returns bounds normalized to the 1-10 scale
  */
-export const normalizeConfigSize = (
-  desktopDimensions: DesktopDimensions,
-  config: RealmConfigType
-): AppDimensions => {
-  const xUnit = config.size[0];
-  const yUnit = config.size[1];
+const getConfigBounds = (
+  config: RealmConfigType,
+  desktopDimensions: Dimensions
+): Bounds => {
+  const configX = config.size[0];
+  const configY = config.size[1];
+
+  const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
+  const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
+  const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
+
+  const offsetX = 2 * normalizedPaddingX;
+  const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
+
+  const appWidth = configX - offsetX;
+  const appHeight = configY - offsetY;
+  const appPosition = getCenteredPosition({
+    width: appWidth,
+    height: appHeight,
+  });
+
+  return {
+    x: appPosition.x - offsetX / 2,
+    y: appPosition.y - offsetY / 2 + normalizedPaddingY,
+    width: appWidth,
+    height: appHeight,
+  };
+};
+
+// Convert from pixels to the 1-10 scale.
+export const normalizeBounds = (
+  bounds: Bounds,
+  desktopDimensions: Dimensions
+): Bounds => {
   const xUnitSize = desktopDimensions.width / 10;
   const yUnitSize = desktopDimensions.height / 10;
-  const appWidth = xUnit * xUnitSize;
-  const appHeight = yUnit * yUnitSize - 58 - 8;
-  const appXY = getCenteredXY(
-    {
-      width: appWidth,
-      height: appHeight,
-    },
-    desktopDimensions,
-    24
-  );
+  const xUnit = bounds.x / xUnitSize;
+  const yUnit = bounds.y / yUnitSize;
+  const widthUnit = bounds.width / xUnitSize;
+  const heightUnit = bounds.height / yUnitSize;
+
   return {
-    x: appXY.x,
-    y: appXY.y,
-    width: appWidth - 16,
-    height: appHeight,
+    x: xUnit,
+    y: yUnit,
+    width: widthUnit,
+    height: heightUnit,
+  };
+};
+
+// Convert from pixels to the 1-10 scale.
+export const normalizeDimensions = (
+  dimensions: Dimensions,
+  desktopDimensions: Dimensions
+): Dimensions => ({
+  width: dimensions.width / (desktopDimensions.width / 10),
+  height: dimensions.height / (desktopDimensions.height / 10),
+});
+
+// Convert from the 1-10 scale to pixels.
+export const denormalizeBounds = (
+  bounds: Bounds,
+  desktopDimensions: Dimensions
+): Bounds => {
+  const xUnitSize = desktopDimensions.width / 10;
+  const yUnitSize = desktopDimensions.height / 10;
+  const x = bounds.x * xUnitSize;
+  const y = bounds.y * yUnitSize;
+  const width = bounds.width * xUnitSize;
+  const height = bounds.height * yUnitSize;
+
+  return {
+    x,
+    y,
+    width,
+    height,
   };
 };

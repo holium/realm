@@ -1,12 +1,10 @@
-import { KeyboardEventHandler, useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
-import { useForm, useField } from 'mobx-easy-form';
 import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,
@@ -18,16 +16,15 @@ import {
   Spinner,
   FormControl,
 } from 'renderer/components';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import Portal from 'renderer/system/dialog/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { Button, Icon, TextInput } from '@holium/design-system';
-import * as yup from 'yup';
+import { Avatar } from '@holium/design-system';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 interface LoginProps {
   addShip: () => void;
@@ -41,12 +38,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
-  const showAccessKey = useToggle(false);
-  const [savingShipCode, setSavingShipCode] = useState(false);
-  const [saveShipCodeResult, setSaveShipCodeResult] = useState('');
-  const [showShipCode, setShowShipCode] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Setting up options menu
   const menuWidth = 180;
@@ -97,7 +89,11 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       //  assume 400 means they may have changed ship code. ask them to enter the new one.
       if (parts.length > 1 && parseInt(parts[1]) === 400) {
         setLoginError('missing');
-        setShowShipCode(true);
+        ShellActions.openDialogWithStringProps('reset-code-dialog', {
+          ship: pendingShip!.patp,
+          // @ts-ignore
+          password: passwordRef.current?.value,
+        });
       } else {
         // assume all others are incorrect passwords
         setLoginError('password');
@@ -122,60 +118,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     login();
   };
 
-  const shipForm = useForm({
-    async onSubmit({ values }: any) {
-      try {
-        setSavingShipCode(true);
-        const result = await AuthActions.updateShipCode(
-          pendingShip!.patp,
-          // @ts-ignore
-          passwordRef.current!.value,
-          // @ts-ignore
-          values.code
-        );
-        setSaveShipCodeResult(result);
-        if (result === 'success') {
-          // @ts-ignore
-          if (passwordRef.current) {
-            // @ts-ignore
-            passwordRef.current.value = '';
-          }
-          accessKey.state.value = '';
-          setLoginError('');
-          setSuccessMessage(
-            'Successfully changed the ship code. Please try to login again.'
-          );
-          setSavingShipCode(false);
-        } else if (result === 'error') {
-          setLoginError('code');
-        }
-      } catch (reason: any) {
-        setLoginError('code');
-      } finally {
-        setSavingShipCode(false);
-      }
-    },
-  });
-
-  const accessKey = useField({
-    id: 'code',
-    form: shipForm,
-    initialValue: '',
-    validationSchema: yup
-      .string()
-      .matches(
-        /[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}$/,
-        'Access key not in correct format'
-      )
-      .required('Please enter access key'),
-  });
-
-  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Enter') {
-      if (shipForm.computed.isValid) shipForm.actions.submit();
-    }
-  };
-
   let colorProps = null;
   // if (theme) {
   colorProps = {
@@ -197,14 +139,14 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               gap={24}
             >
               <Box>
-                <Sigil
+                <Avatar
                   isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
                   avatar={pendingShip.avatar}
                   patp={pendingShip.patp}
-                  color={[pendingShip.color || '#000000', 'white']}
+                  sigilColor={[pendingShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -317,9 +259,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                             </Portal>
                           )}
                         </AnimatePresence>
-                        {auth.loader.isLoading &&
-                        !hasFailed &&
-                        !savingShipCode ? (
+                        {auth.loader.isLoading && !hasFailed ? (
                           <Flex
                             justifyContent="center"
                             alignItems="center"
@@ -356,109 +296,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       {loginError === 'missing' && 'Unable to connect to ship.'}
                       {loginError === 'code' && 'Error saving new ship code'}
                     </FormControl.Error>
-                  )}
-
-                  {showShipCode && (
-                    <>
-                      <Text
-                        mt="1px"
-                        initial={{ opacity: 0 }}
-                        exit={{ opacity: 1 }}
-                        animate={{
-                          opacity: 1,
-                        }}
-                        transition={{
-                          opacity: { duration: 1, ease: 'easeOut' },
-                        }}
-                        {...colorProps}
-                        fontWeight={400}
-                        fontSize={14}
-                        width={isVertical ? 320 : 260}
-                        // opacity={0.35}
-                      >
-                        Has your ship code changed? If so, enter the new code
-                        below and click the Update button.
-                      </Text>
-                      <TextInput
-                        ml={2}
-                        mr={2}
-                        id="onboarding-access-key"
-                        // tabIndex={3}
-                        paddingLeft={2}
-                        name="code"
-                        placeholder="sample-micsev-bacmug-moldex"
-                        // defaultValue={accessKey.state.value}
-                        value={accessKey.state.value}
-                        autoCapitalize="false"
-                        autoCorrect="false"
-                        spellCheck="false"
-                        type={showAccessKey.isOn ? 'text' : 'password'}
-                        width={isVertical ? 320 : 260}
-                        error={
-                          accessKey.computed.ifWasEverBlurredThenError &&
-                          accessKey.computed.isDirty &&
-                          accessKey.computed.error
-                        }
-                        onChange={(e: any) => {
-                          accessKey.actions.onChange(e.target.value);
-                        }}
-                        onFocus={() => accessKey.actions.onFocus()}
-                        onBlur={() => accessKey.actions.onBlur()}
-                        onKeyDown={onKeyDown}
-                        rightAdornment={
-                          <Flex
-                            flexDirection={'row'}
-                            height={32}
-                            alignItems={'center'}
-                          >
-                            {saveShipCodeResult === 'success' && (
-                              <Icon
-                                mr={1}
-                                name={'CheckCircle'}
-                                opacity={1}
-                                size={18}
-                                color={'intent-success'}
-                              />
-                            )}
-                            <Button.IconButton onClick={showAccessKey.toggle}>
-                              <Icon
-                                name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
-                                opacity={0.5}
-                                size={18}
-                              />
-                            </Button.IconButton>
-                            <Button.TextButton
-                              marginLeft={1}
-                              onClick={() => {
-                                if (shipForm.computed.isValid)
-                                  shipForm.actions.submit();
-                              }}
-                            >
-                              {(savingShipCode && (
-                                <Flex
-                                  justifyContent="center"
-                                  alignItems="center"
-                                  width={24}
-                                  height={24}
-                                >
-                                  <Spinner size={0} />
-                                </Flex>
-                              )) ||
-                                'Save'}
-                            </Button.TextButton>
-                          </Flex>
-                        }
-                      />
-                      {successMessage !== '' && (
-                        <Text
-                          color={'#008000'}
-                          textShadow="0.5px 0.5px #000800"
-                          fontSize={14}
-                        >
-                          {successMessage}
-                        </Text>
-                      )}
-                    </>
                   )}
                 </Flex>
               </Flex>

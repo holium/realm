@@ -73,6 +73,7 @@ export const Message = ({
               width={250}
               src={message}
               onLoad={onImageLoad}
+              alt="message image"
             />
           </a>
         );

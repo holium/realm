@@ -1,6 +1,6 @@
 import { BrowserWindow } from 'electron';
 
-export const registerListeners = (mainWindow: BrowserWindow) => {
+const registerListeners = (mainWindow: BrowserWindow) => {
   mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', true);
     // Kiosk mode will prevent any native OS edge events or the ability
@@ -16,4 +16,4 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
   });
 };
 
-export default { registerListeners };
+export const FullScreenHelper = { registerListeners };

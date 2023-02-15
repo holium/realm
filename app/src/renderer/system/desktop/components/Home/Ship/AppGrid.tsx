@@ -1,10 +1,12 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { AppTile, AppTileSize } from 'renderer/components/AppTile';
+import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
 import {
   AppType,
+  AppTypes,
   InstallStatus,
   UrbitAppType,
+  WebAppType,
 } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -24,11 +26,13 @@ interface AppGridProps {
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected!;
-  const apps = [...bazaar.installed, ...bazaar.devApps];
+  const apps = [...bazaar.installed, ...bazaar.devApps] as
+    | AppType[]
+    | WebAppType[];
 
   return (
     <>
-      {apps.map((app: any, index: number) => {
+      {apps.map((app, index: number) => {
         const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
         const weRecommended = bazaar.isRecommended(app.id);
         const installStatus = app.installStatus as InstallStatus;
@@ -79,11 +83,11 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
             }
             installStatus={installStatus}
             tileSize={tileSize}
-            app={app}
+            app={app as AppType}
             contextMenuOptions={[
               {
                 label: isAppPinned ? 'Unpin app' : 'Pin app',
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   isAppPinned
@@ -93,7 +97,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   weRecommended
@@ -103,7 +107,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               },
               {
                 label: 'App info',
-                disabled: app.type === 'web',
+                disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   ShellActions.openDialogWithStringProps('app-detail-dialog', {
@@ -114,12 +118,9 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               ...suspendRow,
               ...installRow,
             ]}
-            onAppClick={(selectedApp: AppType) => {
-              DesktopActions.openAppWindow(
-                currentSpace.path,
-                toJS(selectedApp)
-              );
-              DesktopActions.setHomePane(false);
+            onAppClick={(selectedApp) => {
+              DesktopActions.openAppWindow(toJS(selectedApp));
+              DesktopActions.closeHomePane();
             }}
           />
         );

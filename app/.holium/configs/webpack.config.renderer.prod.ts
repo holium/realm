@@ -33,6 +33,10 @@ const configuration: webpack.Configuration = {
   entry: {
     app: path.join(webpackPaths.srcRendererPath, 'index.tsx'),
     mouse: path.join(webpackPaths.srcRendererPath, 'mouse.tsx'),
+    updater: path.join(
+      webpackPaths.srcRendererPath,
+      'system/updater/index.tsx'
+    ),
   },
   output: {
     path: webpackPaths.distRendererPath,
@@ -127,6 +131,18 @@ const configuration: webpack.Configuration = {
     new HtmlWebpackPlugin({
       chunks: ['mouse'],
       filename: 'mouse.html',
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['updater'],
+      filename: 'updater.html',
       template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
       minify: {
         collapseWhitespace: true,

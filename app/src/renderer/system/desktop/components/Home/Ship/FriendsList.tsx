@@ -9,7 +9,7 @@ import { WindowedList } from '@holium/design-system';
 
 const FriendsListPresenter = () => {
   const paneRef = useRef(null);
-  const { theme, contacts, friends } = useServices();
+  const { theme, friends } = useServices();
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
   const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
@@ -82,7 +82,7 @@ const FriendsListPresenter = () => {
   );
 
   const FriendRow = ({ friend }: { friend: FriendType & { patp: string } }) => {
-    const contact = contacts.getContactAvatarMetadata(friend.patp);
+    const contact = friends.getContactAvatarMetadata(friend.patp);
     const pinOption = [
       {
         label: friend.pinned ? 'Unpin' : 'Pin',

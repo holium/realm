@@ -1,4 +1,4 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import {
   FC,
   useEffect,
@@ -20,7 +20,7 @@ import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
 export interface DialogViewProps {
-  window: WindowModelProps;
+  appWindow: AppWindowType;
 }
 
 type ViewProps = {
@@ -44,8 +44,7 @@ const View = styled.div<ViewProps>`
   background: ${(props) => props.background};
 `;
 
-export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
-  const { window } = props;
+export const DialogView = ({ appWindow }: DialogViewProps) => {
   const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
@@ -53,15 +52,15 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [validated, setValidated] = useState<boolean>(false);
 
   const ViewComponent: FC<any> | undefined = useMemo(() => {
-    const dialogRenderer = dialogRenderers[window.id];
+    const dialogRenderer = dialogRenderers[appWindow.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     return dialogConfig.component!;
-  }, [window.id, shell.dialogProps.toJSON()]);
+  }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
-  const dialogRenderer = dialogRenderers[window.id];
+  const dialogRenderer = dialogRenderers[appWindow.appId];
   const dialogConfig: DialogConfig =
     dialogRenderer instanceof Function
       ? dialogRenderer(shell.dialogProps.toJSON())

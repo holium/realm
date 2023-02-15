@@ -27,6 +27,9 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   ${(props) => css`
     :root {
       --rlm-font: 'Rubik', sans-serif;
+      --rlm-home-button-color: ${props.realmTheme.mode === 'light'
+        ? rgba(darken(0.2, props.realmTheme.dockColor), 0.5)
+        : rgba(darken(0.15, props.realmTheme.dockColor), 0.6)};
       --rlm-base-color: ${props.realmTheme.backgroundColor};
       --rlm-accent-color: ${props.realmTheme.accentColor};
       --rlm-input-color: ${props.realmTheme.inputColor};
@@ -44,10 +47,10 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --rlm-intent-caution-color: #ffbc32;
       --rlm-intent-success-color: #0fc383;
       --rlm-overlay-hover: ${props.realmTheme.mode === 'light'
-        ? 'rgba(0, 0, 0, 0.05)'
+        ? 'rgba(0, 0, 0, 0.04)'
         : 'rgba(255, 255, 255, 0.06)'};
       --rlm-overlay-active: ${props.realmTheme.mode === 'light'
-        ? 'rgba(0, 0, 0, 0.09)'
+        ? 'rgba(0, 0, 0, 0.06)'
         : 'rgba(255, 255, 255, 0.09)'};
     }
   `}
@@ -126,5 +129,3 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
 
 `;
-
-export default { GlobalStyle };

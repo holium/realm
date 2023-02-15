@@ -27,5 +27,3 @@ export const Contain = (props: ContainProps) => {
     />
   );
 };
-
-export default Contain;

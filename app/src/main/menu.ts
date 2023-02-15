@@ -5,20 +5,19 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
-import { IAppUpdater } from './AppUpdater';
+
+import { AppUpdater } from './AppUpdater';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
   submenu?: DarwinMenuItemConstructorOptions[] | Menu;
 }
 
-export default class MenuBuilder {
+export class MenuBuilder {
   mainWindow: BrowserWindow;
-  appUpdater: IAppUpdater;
 
-  constructor(mainWindow: BrowserWindow, appUpdater: IAppUpdater) {
+  constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
-    this.appUpdater = appUpdater;
   }
 
   buildMenu(): Menu {
@@ -82,7 +81,8 @@ export default class MenuBuilder {
           label: 'Check for Updates',
           accelerator: 'Command+U',
           click: () => {
-            this.appUpdater.checkForUpdates();
+            const appUpdater = new AppUpdater();
+            appUpdater.checkForUpdates(this.mainWindow, true);
           },
         },
         { type: 'separator' },

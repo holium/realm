@@ -1,6 +1,6 @@
 import { Flex } from 'renderer/components';
 import { SpaceSelector } from './SpaceSelector';
-import { AppDock } from './AppDock';
+import { AppDock } from './AppDock/AppDock';
 import { BarStyle } from '@holium/design-system';
 
 export const CommunityBar = () => {
@@ -14,5 +14,3 @@ export const CommunityBar = () => {
     </BarStyle>
   );
 };
-
-export default { CommunityBar };

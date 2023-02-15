@@ -1,7 +1,5 @@
-import Column from './Column';
-import Row from './Row';
-import Box from './Container';
+import { Column } from './Column';
+import { Row } from './Row';
+import { Container } from './Container';
 
-export const Grid = { Row, Column, Box };
-
-export default Grid;
+export const Grid = { Row, Column, Container };

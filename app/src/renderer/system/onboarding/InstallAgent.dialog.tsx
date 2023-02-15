@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 
 import {
   Grid,
-  Sigil,
   Text,
   Flex,
   ActionButton,
@@ -15,16 +14,19 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  const shipName = onboarding.ship!.patp;
-  const shipNick = onboarding.ship!.nickname;
-  const shipColor = onboarding.ship!.color!;
-  const avatar = onboarding.ship!.avatar;
+  if (!onboarding.ship) return null;
+
+  const shipName = onboarding.ship.patp;
+  const shipNick = onboarding.ship.nickname;
+  const shipColor = onboarding.ship.color!;
+  const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
@@ -54,13 +56,13 @@ const InstallAgentPresenter = () => {
         handle core OS functionality.
       </Text>
       <Flex flexDirection="column" alignItems="center" justifyContent="center">
-        <Sigil
+        <Avatar
           simple={false}
           size={52}
           avatar={avatar}
           patp={shipName}
           borderRadiusOverride="6px"
-          color={[shipColor, 'white']}
+          sigilColor={[shipColor, 'white']}
         />
         <Flex
           style={{ width: 210 }}
@@ -152,6 +154,4 @@ const InstallAgentPresenter = () => {
   );
 };
 
-const InstallAgent = observer(InstallAgentPresenter);
-
-export default InstallAgent;
+export const InstallAgent = observer(InstallAgentPresenter);
