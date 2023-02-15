@@ -9,6 +9,7 @@ import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpac
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { Dimensions } from 'os/types';
+import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -51,6 +52,7 @@ export const dialogRenderers: DialogRenderers = {
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
   'change-email-dialog': ChangeEmailDialogConfig,
+  'reset-code-dialog': ResetCodeDialogConfig,
   ...spacesDialogs,
   ...onboardingDialogs,
 };
