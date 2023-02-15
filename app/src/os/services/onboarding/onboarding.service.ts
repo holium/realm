@@ -77,7 +77,7 @@ export class OnboardingService extends BaseService {
 
     async setEmail(
       email: string,
-      recoveringAccount: boolean
+      isRecoveringAccount: boolean
     ): Promise<{ success: boolean; errorMessage: string }> {
       return await ipcRenderer.invoke(
         'realm.onboarding.setEmail',
