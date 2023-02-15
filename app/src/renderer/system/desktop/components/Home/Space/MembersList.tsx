@@ -12,16 +12,20 @@ interface IMembersList {
   path: string;
 }
 
+type Roles = 'initiate' | 'member' | 'admin' | 'owner';
+
 const MembersListPresenter = (props: IMembersList) => {
   const { path } = props;
   const { theme, spaces, membership, ship, friends } = useServices();
 
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
-  const members = Array.from(membership.getMembersList(path));
+  let members = Array.from(membership.getMembersList(path));
   const admins = members.filter((member: Member) =>
     member.roles.includes('admin')
   );
+  members = members.filter((member: Member) => !member.roles.includes('admin'));
+
   const membersOnly = members.filter(
     (member: Member) =>
       member.roles.includes('member') || member.status.includes('invited')
@@ -76,6 +80,22 @@ const MembersListPresenter = (props: IMembersList) => {
   const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
     const contact = friends.getContactAvatarMetadata(member.patp);
 
+    const roles = Array.from(member.roles!);
+    let activeRole = 'initiate';
+    if (roles) {
+      if (roles.includes('admin')) activeRole = 'admin';
+      else if (roles.includes('member')) activeRole = 'member';
+      else if (roles.includes('initiate')) {
+        activeRole = 'initiate';
+      }
+    }
+    const setNewRole = (role: Roles) => {
+      const newRoles = roles
+        ? [...roles.filter((role) => role !== activeRole), role]
+        : [role];
+      SpacesActions.setRoles(member.patp, newRoles);
+    };
+
     return (
       <PersonRow
         key={`${member.patp}-member`}
@@ -88,8 +108,21 @@ const MembersListPresenter = (props: IMembersList) => {
         rowBg={rowBg}
         theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship!.patp)
+          membership.isAdmin(path, ship!.patp) && member.patp !== ship!.patp
             ? [
+                activeRole === 'admin'
+                  ? {
+                      label: 'Demote to member',
+                      onClick: () => {
+                        setNewRole('member');
+                      },
+                    }
+                  : {
+                      label: 'Promote to admin',
+                      onClick: () => {
+                        setNewRole('admin');
+                      },
+                    },
                 {
                   label: 'Kick',
                   onClick: () => {
