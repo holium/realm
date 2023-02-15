@@ -83,7 +83,7 @@
         ?>  =(our.bowl src.bowl)
         =;  cage
           [%give %fact ~[/all] cage]~
-        friends-reaction+!>([%friends (non-contacts:core friends)])
+        friends-reaction+!>([%friends friends])
       ==
     [cards this]
   ::
