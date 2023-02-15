@@ -233,14 +233,6 @@ export const Reactions = (props: ReactionProps) => {
     };
   }, [root, handleClickOutside]);
 
-  // handle the case where we have a ship string (urbit-api) or a ship object (realm)
-  let currentShip = window.ship;
-  // @ts-ignore
-  if (window.ship.patp) {
-    // @ts-ignore
-    currentShip = window.ship.patp;
-  }
-
   return (
     <ReactionRow variant={variant}>
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
@@ -253,7 +245,7 @@ export const Reactions = (props: ReactionProps) => {
               evt.stopPropagation();
               onClick(reaction.emoji);
             }}
-            selected={reaction.by.includes(currentShip)}
+            selected={reaction.by.includes(window.ship)}
           >
             <Emoji
               unified={reaction.emoji}
