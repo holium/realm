@@ -33,7 +33,7 @@ const AccessGatePresenter = (props: BaseDialogProps) => {
     props.onNext && props.onNext(false);
   };
 
-  const goToEmail = async (/*evt: any*/) => {
+  const goToEmail = () => {
     setError('');
     props.setState &&
       props.setState({ ...props.workflowState, recoveringAccount: true });
