@@ -116,7 +116,7 @@
   |=  [flag=? state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r) (mark-row-unread r))))
-  =/  thechange  db-change+!>((limo [[%update-all ?:(flag %read %unread)] ~]))
+  =/  thechange  db-change+!>((limo [[%update-all flag] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -143,10 +143,56 @@
 ::  :notif-db &ndb-poke [%delete 0]
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  [~ state]
+  =.  notifs-table.state  (remove-notif-from-table notifs-table.state id)
+  =/  thechange  db-change+!>((limo [[%del-row id] ~]))
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+  ==
+  [gives state]
 ::
 ::  JSON
 ::
+++  dejs
+  =,  dejs:format
+  |%
+  ++  action
+    |=  jon=json
+    ^-  ^action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%create de-create]
+          [%read-id ni]
+          [%read-app (se %tas)]
+          [%read-path app-and-path]
+          [%read-all bo]
+          [%update de-update]
+          [%delete ni]
+      ==
+    ::
+    ++  de-update
+      %-  ot
+      :-  [%id ni]
+      de-create-list
+    ::
+    ++  de-create  (ot de-create-list)
+    ::
+    ++  de-create-list
+      :~  [%app (se %tas)]
+          [%path pa]
+          [%type (se %tas)]
+          [%content so]
+          [%metadata (om so)]
+      ==
+    ::
+    ++  app-and-path
+      %-  ot
+      :~  [%app (se %tas)]
+          [%path pa]
+      ==
+    --
+  --
 ++  enjs
   =,  enjs:format
   |%
@@ -194,7 +240,7 @@
         %add-row
           :~(['type' %s -.ch] ['row' (notifs-row id.notif-row.ch notif-row.ch)])
         %update-all
-          :~(['type' %s -.ch] ['read' %b =(flag.ch %read)])
+          :~(['type' %s -.ch] ['read' %b flag.ch])
         %update-row
           :~(['type' %s -.ch] ['row' (notifs-row id.notif-row.ch notif-row.ch)])
         %del-row

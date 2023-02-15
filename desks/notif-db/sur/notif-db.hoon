@@ -41,7 +41,7 @@
 +$  db-change-type
   $%
     [%add-row =notif-row]
-    [%update-all flag=?(%read %unread)]
+    [%update-all flag=?]
     [%update-row =notif-row]
     [%del-row =id]
   ==
