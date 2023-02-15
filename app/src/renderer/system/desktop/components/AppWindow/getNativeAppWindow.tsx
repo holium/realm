@@ -1,3 +1,4 @@
+import { AirliftInfo } from 'renderer/apps/Airlift/AirliftInfo';
 import { BrowserWebview } from 'renderer/apps/Browser/BrowserWebview';
 import {
   BrowserToolbar,
@@ -20,5 +21,9 @@ export const getNativeAppWindow = {
   'os-settings': {
     titlebar: null,
     view: (props: any) => <SystemApp {...props} />,
+  },
+  airlift: {
+    titlebar: null,
+    view: (props: any) => <AirliftInfo {...props} />,
   },
 };

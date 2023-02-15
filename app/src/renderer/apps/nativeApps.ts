@@ -63,5 +63,17 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  airlift: {
+    id: 'airlift',
+    title: 'Airlift',
+    color: '#ACBCCB',
+    icon: 'AppIconSettings',
+    type: 'native',
+    native: {
+      hideTitlebarBorder: true,
+    },
+    // titlebar: (props: AirliftToolbarProps) => <AirliftToolbar {...props} />,
+    // component: (props: any) => <Airlift {...props} />,*/
+  },
   ...devApps,
 };
