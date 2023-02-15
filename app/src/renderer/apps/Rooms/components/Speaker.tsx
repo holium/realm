@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { Flex, Icons, Text, Sigil, FlexProps } from 'renderer/components';
+import { Flex, Icons, Text, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
@@ -11,6 +11,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { Avatar } from '@holium/design-system';
 
 interface ISpeaker {
   person: string;
@@ -25,14 +26,14 @@ const speakerType = {
   listener: 'Listener',
 };
 
-export const Speaker = observer((props: ISpeaker) => {
+const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, theme, contacts } = useServices();
+  const { ship, theme, friends } = useServices();
   const speakerRef = useRef<any>(null);
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
-  const metadata = contacts.getContactAvatarMetadata(person);
+  const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
   const peer = isOur
@@ -121,7 +122,7 @@ export const Speaker = observer((props: ISpeaker) => {
         alignItems="center"
         gap={10}
       >
-        <Sigil
+        <Avatar
           clickable={false}
           opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
           borderRadiusOverride="6px"
@@ -129,7 +130,7 @@ export const Speaker = observer((props: ISpeaker) => {
           size={36}
           avatar={metadata && metadata.avatar}
           patp={person}
-          color={[(metadata && metadata.color) || '#000000', 'white']}
+          sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
         />
         <Text
           style={{ pointerEvents: 'none' }}
@@ -160,7 +161,9 @@ export const Speaker = observer((props: ISpeaker) => {
       </Flex>
     </SpeakerWrapper>
   );
-});
+};
+
+export const Speaker = observer(SpeakerPresenter);
 
 type SpeakerStyle = FlexProps & { hoverBg: string };
 

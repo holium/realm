@@ -5,7 +5,7 @@ import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { BarButton, Icon } from '@holium/design-system';
 
 const position = 'top-left';
-const anchorOffset = { x: 4, y: 26 };
+const anchorOffset = { x: 4, y: 24 };
 const dimensions = { height: 620, width: 340 };
 
 export const WalletTrayPresenter: FC = () => {

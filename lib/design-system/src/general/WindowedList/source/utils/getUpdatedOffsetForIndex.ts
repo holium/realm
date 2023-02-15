@@ -12,7 +12,7 @@ import { Alignment } from '../Grid/types';
  * @param currentOffset Container's current (x or y) offset
  * @return Offset to use to ensure the specified cell is visible
  */
-export default function getUpdatedOffsetForIndex({
+export function getUpdatedOffsetForIndex({
   align = 'auto',
   cellOffset,
   cellSize,

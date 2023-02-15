@@ -4,7 +4,7 @@
 ::    Notifications hub for realm.
 ::
 /-  store=realm-beacon, hark
-/+  default-agent, verb, dbug
+/+  default-agent, dbug
 ::
 =>
   |%
@@ -19,7 +19,6 @@
 =|  state-0
 =*  state  -
 =<
-  %+  verb  &
   %-  agent:dbug
   |_  =bowl:gall
   +*  this    .

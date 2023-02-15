@@ -9,7 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
 
 const RoomTrayPresenter = () => {
-  const { ship, contacts, spaces } = useServices();
+  const { ship, friends, spaces } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   const {
@@ -57,7 +57,7 @@ const RoomTrayPresenter = () => {
 
   const participants =
     roomsManager?.presentRoom?.present.map((patp: string) => {
-      const metadata = contacts.getContactAvatarMetadata(patp);
+      const metadata = friends.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];
 
@@ -84,7 +84,7 @@ const RoomTrayPresenter = () => {
           roomsManager?.mute();
         }
       }}
-      onCursor={(enabled: boolean) => {}}
+      onCursor={() => {}}
       onLeave={() => {}}
     />
   );

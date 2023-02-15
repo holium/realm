@@ -9,8 +9,8 @@ import type {
   CellRendererParams,
   RenderedSection,
 } from '../Grid/types';
-import accessibilityOverscanIndicesGetter from '../Grid/accessibilityOverscanIndicesGetter';
-import Grid from '../Grid/Grid';
+import { accessibilityOverscanIndicesGetter } from '../Grid/accessibilityOverscanIndicesGetter';
+import { Grid } from '../Grid/Grid';
 
 /**
  * This component renders a virtualized list of elements with either fixed or dynamic heights.
@@ -86,7 +86,7 @@ type Props = {
   width: number;
 };
 
-export default class List extends PureComponent<Props> {
+export class List extends PureComponent<Props> {
   static defaultProps = {
     estimatedRowSize: 30,
     onScroll: () => {},

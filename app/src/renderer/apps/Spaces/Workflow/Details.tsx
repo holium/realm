@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Grid,
   Text,
@@ -84,10 +84,13 @@ export const createSpaceForm = ({
 type CrestOptionType = 'color' | 'image';
 type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
-export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
+const SpacesCreateFormPresenter = ({
+  edit,
+  workflowState,
+  setState,
+}: BaseDialogProps) => {
   const { theme, spaces } = useServices();
   const { inputColor, windowColor, textColor } = theme.currentTheme;
-  const { workflowState, setState } = props;
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -137,8 +140,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
         access: 'public',
       });
     }
-    if (props.edit) {
-      const space = spaces.spaces.get(props.edit.space)!;
+    if (edit) {
+      const space = spaces.spaces.get(edit.space)!;
       setWorkspaceState({
         ...space,
         description: space.description,
@@ -168,9 +171,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
 
   const { nameField, descriptionField, pictureField, colorField } =
     useMemo(() => {
-      if (props.edit) {
-        const space = spaces.spaces.get(props.edit.space)!;
-        return createSpaceForm(space);
+      if (edit) {
+        const space = spaces.spaces.get(edit.space);
+        if (space) return createSpaceForm(space);
       } else if (workflowState.type === 'group') {
         return createSpaceForm({
           name: workflowState.title,
@@ -178,14 +181,14 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
           color: workflowState.color,
           picture: workflowState.image,
         });
-      } else {
-        return createSpaceForm({
-          name: '',
-          description: '',
-          color: workflowState.color,
-          picture: '',
-        });
       }
+
+      return createSpaceForm({
+        name: '',
+        description: '',
+        color: workflowState.color,
+        picture: '',
+      });
     }, []);
 
   return (
@@ -470,4 +473,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
       </Flex>
     </Grid.Column>
   );
-});
+};
+
+export const SpacesCreateForm = observer(SpacesCreateFormPresenter);

@@ -82,6 +82,7 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
       </p>
       <Box height={containerHeight} borderRadius={12} overflow="hidden">
         <WindowedList
+          key={`list-${itemHeight}`}
           data={data}
           filter={getFilterFunction()}
           rowRenderer={(row, index) => (

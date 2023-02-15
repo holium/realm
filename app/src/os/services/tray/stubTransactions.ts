@@ -1,4 +1,4 @@
-import { TransactionType } from './wallet.model';
+import { TransactionType } from './wallet-lib/wallet.model';
 
 const transactionList = [
   {
@@ -107,15 +107,14 @@ const transactionList = [
 interface StringMap {
   [key: string]: TransactionType;
 }
-const stubTransactions = transactionList.reduce<StringMap>(
+
+export const stubTransactions = transactionList.reduce<StringMap>(
   (accum, curr: any) => {
     accum[curr.hash] = curr;
     return accum;
   },
   {}
 );
-
-export default stubTransactions;
 
 // export function genStubTransactions (address: string) {
 //   return transactionList.reduce((accum, curr) => {

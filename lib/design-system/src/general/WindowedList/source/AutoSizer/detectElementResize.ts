@@ -11,7 +11,7 @@
  * 4) Add nonce for style element.
  * 5) Added support for injecting custom window object
  **/
-export default function createDetectElementResize(hostWindow: Window) {
+export function createDetectElementResize(hostWindow: Window) {
   // Check `document` and `window` in case of server-side rendering
   var _window: any;
 
@@ -85,13 +85,18 @@ export default function createDetectElementResize(hostWindow: Window) {
         return;
       }
 
+      // @ts-ignore
       var element = this;
+      // @ts-ignore
       resetTriggers(this);
 
+      // @ts-ignore
       if (this.__resizeRAF__) {
+        // @ts-ignore
         cancelFrame(this.__resizeRAF__);
       }
 
+      // @ts-ignore
       this.__resizeRAF__ = requestFrame(function () {
         if (checkTriggers(element)) {
           element.__resizeLast__.width = element.offsetWidth;
@@ -177,7 +182,7 @@ export default function createDetectElementResize(hostWindow: Window) {
 
         var elementStyle = _window.getComputedStyle(element);
 
-        if (elementStyle && elementStyle.position == 'static') {
+        if (elementStyle && elementStyle.position === 'static') {
           element.style.position = 'relative';
         }
 
@@ -204,7 +209,7 @@ export default function createDetectElementResize(hostWindow: Window) {
         if (animationstartevent) {
           element.__resizeTriggers__.__animationListener__ =
             function animationListener(e: any) {
-              if (e.animationName == animationName) {
+              if (e.animationName === animationName) {
                 resetTriggers(element);
               }
             };

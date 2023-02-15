@@ -31,5 +31,3 @@ const col = style({
 export const Column = styled(Box)<Omit<ColumnProps, 'width'>>(
   compose(col, inset)
 );
-
-export default { Column };

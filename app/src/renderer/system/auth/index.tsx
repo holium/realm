@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex } from 'renderer/components';
 import { Login } from './login';
@@ -12,8 +12,7 @@ interface LoginProps {
   firstTime: boolean;
 }
 
-export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
-  const { hasWallpaper, firstTime } = props;
+const AuthPresenter = ({ firstTime }: LoginProps) => {
   const { onboarding } = useServices();
   const [addShip, setAddShip] = useState(false);
 
@@ -37,10 +36,10 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
       {firstTime || addShip ? (
         <Onboarding firstTime={firstTime} exit={() => setAddShip(false)} />
       ) : (
-        <Login hasWallpaper={hasWallpaper} addShip={() => setAddShip(true)} />
+        <Login addShip={() => setAddShip(true)} />
       )}
     </Flex>
   );
-});
+};
 
-export default Auth;
+export const Auth = observer(AuthPresenter);

@@ -55,7 +55,7 @@ const AccountPanelPresenter = () => {
 
   const profileForm = useForm({
     async onSubmit({ values }: any) {
-      const profileData = {
+      let profileData = {
         color: values.avatarColor,
         nickname: values.nickname,
         avatar: avatarImg,

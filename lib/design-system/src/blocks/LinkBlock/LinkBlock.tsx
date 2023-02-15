@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Flex, skeletonStyle, Text, Bookmark } from '../..';
@@ -46,8 +46,7 @@ type LinkBlockProps = {
 
 type LinkType = 'opengraph' | 'url' | 'twitter';
 
-export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
-  const { link, by, metadata, ...rest } = props;
+export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
   const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [linkType, setLinkType] = useState<LinkType>('opengraph');
@@ -114,7 +113,7 @@ export const LinkBlock: FC<LinkBlockProps> = (props: LinkBlockProps) => {
         isSkeleton={!openGraph || !imgLoaded}
         src={openGraph?.ogImage.url}
         alt={openGraph?.ogTitle}
-        onError={(evt: React.SyntheticEvent<HTMLImageElement, Event>) => {}}
+        onError={() => {}}
         onLoad={() => setImgLoaded(true)}
       />
       <Flex width="100%" gap={2} flexDirection="column">

@@ -1,48 +1,28 @@
-import { BrowserWindow, ipcMain } from 'electron';
-import { WebViewsData } from 'main/main';
-import { Vec2, MouseState } from 'renderer/system/mouse/AnimatedCursor';
+import { BrowserWindow, ipcMain, screen } from 'electron';
+import { MouseState } from 'renderer/system/mouse/AnimatedCursor';
 
-const registerListeners = (
-  mouseWindow: BrowserWindow,
-  webViews: WebViewsData
-) => {
-  ipcMain.handle('mouse-entered-webview', (_, id: string) => {
-    webViews[id].hasMouseInside = true;
+const registerListeners = (mouseWindow: BrowserWindow) => {
+  ipcMain.handle('mouse-over', () => {
+    mouseWindow.webContents.send('mouse-over');
   });
 
-  ipcMain.handle('mouse-left-webview', (_, id: string) => {
-    webViews[id].hasMouseInside = false;
+  ipcMain.handle('mouse-out', () => {
+    mouseWindow.webContents.send('mouse-out');
   });
 
-  ipcMain.handle(
-    'mouse-move',
-    (
-      _,
-      position: Vec2,
-      state: MouseState,
-      isDragging: boolean,
-      isWebview: boolean
-    ) => {
-      if (isWebview) {
-        const activeWebviewPosition = Object.values(webViews).find(
-          (webView) => webView.hasMouseInside
-        )?.position;
-        if (!activeWebviewPosition) return;
-        const absolutePosition = {
-          x: activeWebviewPosition.x + position.x,
-          y: activeWebviewPosition.y + position.y,
-        };
-        mouseWindow.webContents.send(
-          'mouse-move',
-          absolutePosition,
-          state,
-          isDragging
-        );
-      } else {
-        mouseWindow.webContents.send('mouse-move', position, state, isDragging);
-      }
-    }
-  );
+  ipcMain.handle('mouse-move', (_, state: MouseState, isDragging: boolean) => {
+    const screenPosition = screen.getCursorScreenPoint();
+    const webContentsPosition = {
+      x: screenPosition.x - mouseWindow.getPosition()[0],
+      y: screenPosition.y - mouseWindow.getPosition()[1],
+    };
+    mouseWindow.webContents.send(
+      'mouse-move',
+      webContentsPosition,
+      state,
+      isDragging
+    );
+  });
 
   ipcMain.handle('mouse-down', () => {
     mouseWindow.webContents.send('mouse-down');
@@ -57,4 +37,4 @@ const registerListeners = (
   });
 };
 
-export default { registerListeners };
+export const MouseHelper = { registerListeners };

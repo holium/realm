@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { MenuOrientation } from './types';
 import { calculateAnchorPoint } from 'os/lib/anchor-point';
+
 export const useMenu = (
   ref: any,
   config: { orientation: MenuOrientation; padding: number; menuWidth?: any }
@@ -9,7 +10,7 @@ export const useMenu = (
   const [show, setShow] = useState(false);
 
   const handleMenu = useCallback(
-    (event) => {
+    (event: any) => {
       // If the id of the menu matches the parent of the click, show the menu
       if (event.target.id === ref.current.id && !show) {
         event.preventDefault();
@@ -43,5 +44,3 @@ export const useMenu = (
 
   return { anchorPoint, show, setShow };
 };
-
-export default useMenu;

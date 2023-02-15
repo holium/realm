@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
@@ -8,11 +9,11 @@ import {
 } from 'mobx-state-tree';
 import bcrypt from 'bcryptjs';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
-import EncryptedStore from '../../lib/encryptedStore';
+import { EncryptedStore } from '../../lib/encryptedStore';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
@@ -291,11 +292,6 @@ export class AuthService extends BaseService {
 
       this.state.login(shipId);
 
-      // this.core.services.desktop.setMouseColor(
-      //   null,
-      //   this.state.selected?.color!
-      // );
-
       this.core.services.shell.setBlur(null, false);
 
       const { code } = this.readCredentials(patp, password);
@@ -392,6 +388,11 @@ export class AuthService extends BaseService {
 
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
+    let shipStorageDirPath: string[] = this.db.path.split('/');
+    shipStorageDirPath.pop();
+    shipStorageDirPath.push(`realm.${ship}`);
+    const newPath: string = shipStorageDirPath.join('/');
+    fs.rmSync(newPath, { recursive: true, force: true });
   }
 
   setMnemonic(_event: any, patp: string, passcode: string, mnemonic: string) {

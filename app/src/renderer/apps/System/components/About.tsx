@@ -5,11 +5,8 @@ import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
 const AboutPanelPresenter = () => {
-  const { theme, ship, contacts } = useServices();
-
-  const { windowColor, textColor, accentColor, inputColor } =
-    theme.currentTheme;
-
+  const { theme } = useServices();
+  const { windowColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   return (
@@ -20,7 +17,6 @@ const AboutPanelPresenter = () => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}

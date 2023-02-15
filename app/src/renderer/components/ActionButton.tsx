@@ -59,6 +59,8 @@ type ActionButtonProps = {
   children: React.ReactNode;
   disabled?: boolean;
   rightContent?: React.ReactNode;
+  tabIndex?: number;
+  onClick?: (e: MouseEvent) => void;
 } & HeightProps &
   SpaceProps;
 
@@ -107,6 +109,7 @@ export const ActionButton = forwardRef<HTMLButtonElement, ButtonProps>(
   (props: ButtonProps, ref) => {
     const { disabled, children, rightContent } = props;
     return (
+      // @ts-ignore
       <StyledButton ref={ref} disabled={disabled} {...props}>
         {children} {rightContent}
       </StyledButton>
@@ -117,5 +120,3 @@ ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,
 };
-
-export default ActionButton;

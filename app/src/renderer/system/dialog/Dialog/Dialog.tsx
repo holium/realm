@@ -1,6 +1,13 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { FC, useEffect, useRef, useState, useMemo } from 'react';
-
+import { AppWindowType } from 'os/services/shell/desktop.model';
+import {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  ReactNode,
+  RefObject,
+} from 'react';
 import {
   Flex,
   TextButton,
@@ -13,10 +20,17 @@ import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
 export interface DialogViewProps {
-  window: WindowModelProps;
+  appWindow: AppWindowType;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
+type ViewProps = {
+  ref: RefObject<HTMLDivElement>;
+  background: string;
+  hasTitleBar?: boolean;
+  children?: ReactNode;
+};
+
+const View = styled.div<ViewProps>`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -30,8 +44,7 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
   background: ${(props) => props.background};
 `;
 
-export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
-  const { window } = props;
+export const DialogView = ({ appWindow }: DialogViewProps) => {
   const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
@@ -39,15 +52,15 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [validated, setValidated] = useState<boolean>(false);
 
   const ViewComponent: FC<any> | undefined = useMemo(() => {
-    const dialogRenderer = dialogRenderers[window.id];
+    const dialogRenderer = dialogRenderers[appWindow.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     return dialogConfig.component!;
-  }, [window.id, shell.dialogProps.toJSON()]);
+  }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
-  const dialogRenderer = dialogRenderers[window.id];
+  const dialogRenderer = dialogRenderers[appWindow.appId];
   const dialogConfig: DialogConfig =
     dialogRenderer instanceof Function
       ? dialogRenderer(shell.dialogProps.toJSON())

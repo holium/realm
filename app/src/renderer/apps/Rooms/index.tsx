@@ -7,6 +7,7 @@ import { Room } from './Room';
 import { useRooms } from './useRooms';
 import { Settings } from './Settings';
 import { useServices } from 'renderer/logic/store';
+import { Flex } from '@holium/design-system';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,
@@ -17,7 +18,7 @@ const RoomViews: { [key: string]: any } = {
 
 export const RoomAppPresenter = () => {
   const { ship } = useServices();
-  const { roomsApp } = useTrayApps();
+  const { roomsApp, dimensions } = useTrayApps();
   const roomsManager = useRooms(ship!.patp);
   useEffect(() => {
     if (roomsManager?.live.room) {
@@ -25,7 +26,15 @@ export const RoomAppPresenter = () => {
     }
   }, [roomsApp, roomsManager?.live.room]);
   const View = RoomViews[roomsApp.currentView];
-  return <View />;
+  return (
+    <Flex
+      position="relative"
+      height={dimensions.height - 24}
+      flexDirection="column"
+    >
+      <View />
+    </Flex>
+  );
 };
 
 export const RoomApp = observer(RoomAppPresenter);

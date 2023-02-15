@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import * as Amplitude from '@amplitude/analytics-browser';
 import { BrowserTracing } from '@sentry/tracing';
-import App from './App';
+import { App } from './App';
 
 const environment = process.env.NODE_ENV;
 const isProd = environment === 'production';

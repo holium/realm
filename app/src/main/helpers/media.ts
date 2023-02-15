@@ -1,6 +1,6 @@
 import { ipcMain, systemPreferences } from 'electron';
 
-export const registerListeners = () => {
+const registerListeners = () => {
   ipcMain.handle('ask-for-mic', async (_event) => {
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');
@@ -34,4 +34,4 @@ export const registerListeners = () => {
   // );
 };
 
-export default { registerListeners };
+export const MediaHelper = { registerListeners };

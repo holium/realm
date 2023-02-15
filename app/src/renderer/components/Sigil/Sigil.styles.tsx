@@ -1,4 +1,5 @@
-import styled, { css } from 'styled-components';
+import { ReactNode } from 'react';
+import styled, { css, CSSProperties } from 'styled-components';
 import {
   compose,
   space,
@@ -14,6 +15,9 @@ import {
 
 export type SigilStyleProps = BorderProps &
   OpacityProps & {
+    id?: string;
+    children?: ReactNode;
+    style: CSSProperties;
     clickable?: boolean;
     active?: boolean;
     sigilColor?: string;

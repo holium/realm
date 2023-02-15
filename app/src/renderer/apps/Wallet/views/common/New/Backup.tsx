@@ -1,4 +1,4 @@
-import { FC, useState, Dispatch, SetStateAction, useEffect } from 'react';
+import { useState, Dispatch, SetStateAction, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ethers } from 'ethers';
 import { Button, Flex, Text, Box, Icons } from 'renderer/components';
@@ -12,7 +12,7 @@ interface BackupProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
+const BackupPresenter = (props: BackupProps) => {
   const { theme } = useServices();
 
   useEffect(() => {
@@ -109,4 +109,6 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
       </Flex>
     </>
   );
-});
+};
+
+export const Backup = observer(BackupPresenter);

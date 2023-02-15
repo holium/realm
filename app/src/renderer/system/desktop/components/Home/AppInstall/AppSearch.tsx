@@ -37,7 +37,7 @@ export const searchForm = (
 
 const dimensions = { height: 450, width: 550 };
 
-const AppSearchApp = observer((props: AppSearchProps) => {
+const AppSearchAppPresenter = (props: AppSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
@@ -147,9 +147,14 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         defaultValue={search.state.value}
         onChange={(evt) => {
           evt.stopPropagation();
+          // @ts-ignore
+          // @ts-ignore
           search.actions.onChange(evt.target.value);
+          // @ts-ignore
           appInstaller.setSearchString(evt.target.value);
+          // @ts-ignore
           if (evt.target.value) {
+            // @ts-ignore
             if (evt.target.value[0] === '~') {
               appInstaller.setSearchMode('ship-search');
               // setData([]);
@@ -185,6 +190,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       />
     </Flex>
   );
-});
+};
 
-export default AppSearchApp;
+export const AppSearchApp = observer(AppSearchAppPresenter);

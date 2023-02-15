@@ -60,7 +60,9 @@ export const ImageToggle = (props: {
   onClick: () => void;
 }) => {
   return (
+    // @ts-ignore
     <Label disabled={props.disabled} onClick={props.onClick}>
+      {/* @ts-ignore */}
       <Input checked={props.checked} type="checkbox" readOnly />
       <Switch src={props.src} color={props.color} />
     </Label>

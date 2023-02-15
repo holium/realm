@@ -1,5 +1,5 @@
 import { Input, TextArea } from '../Input/Input';
-import InputBox, { InputBoxProps } from '../InputBox/InputBox';
+import { InputBox, InputBoxProps } from '../InputBox/InputBox';
 
 type TextInputProps = {
   id: string;
@@ -11,6 +11,7 @@ type TextInputProps = {
   readOnly?: boolean;
   placeholder?: string;
   defaultValue?: string;
+  autoFocus?: boolean;
 } & Partial<InputBoxProps> & { cols?: number; rows?: number };
 
 export const TextInput = ({
@@ -24,6 +25,7 @@ export const TextInput = ({
   tabIndex,
   disabled,
   readOnly,
+  autoFocus,
   onChange,
   onFocus,
   onBlur,
@@ -42,6 +44,7 @@ export const TextInput = ({
         tabIndex={tabIndex}
         disabled={disabled}
         readOnly={readOnly}
+        autoFocus={autoFocus}
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
@@ -56,6 +59,7 @@ export const TextInput = ({
         type={type}
         placeholder={placeholder}
         defaultValue={defaultValue}
+        autoFocus={autoFocus}
         value={value}
         required={required}
         tabIndex={tabIndex}

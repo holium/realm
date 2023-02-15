@@ -79,7 +79,6 @@ export const createManager = (our: Patp) => {
 };
 
 let roomsManager: null | RoomsManager;
-let curPatp: string | null;
 
 RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
   if (protocol) {
@@ -93,12 +92,10 @@ export function useRooms(our?: Patp): RoomsManager {
   }
 
   if (!roomsManager && our) {
-    curPatp = our;
     roomsManager = createManager(our);
     OSActions.onLogout(() => {
       protocol = null;
       roomsManager = null;
-      curPatp = null;
     });
   }
   if (!roomsManager) {

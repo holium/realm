@@ -9,13 +9,13 @@
 var fs = require('fs');
 module.exports = async ({ github, context }, workflowId, ci) => {
   // re-enable the workflow that was disabled when the build started
-  console.log(`enabling workflow ${workflowId}...`);
-  await github.request(
-    'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable',
-    {
-      owner: 'holium',
-      repo: 'realm',
-      workflow_id: workflowId,
-    }
-  );
+  // console.log(`enabling workflow ${workflowId}...`);
+  // await github.request(
+  //   'PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable',
+  //   {
+  //     owner: 'holium',
+  //     repo: 'realm',
+  //     workflow_id: workflowId,
+  //   }
+  // );
 };

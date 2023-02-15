@@ -6,7 +6,7 @@
  * @param size Either a fixed size or a function that returns the size for a given given an index.
  * @return Object mapping cell index to cell metadata (size, offset)
  */
-export default function initCellMetadata({
+export function initCellMetadata({
   cellCount,
   size,
 }: {
@@ -18,9 +18,7 @@ export default function initCellMetadata({
   let offset = 0;
 
   for (var i = 0; i < cellCount; i++) {
-    const size = sizeGetter({
-      index: i,
-    });
+    const size = sizeGetter();
 
     if (size == null || isNaN(size)) {
       throw Error(`Invalid size returned for cell ${i} of value ${size}`);

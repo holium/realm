@@ -60,7 +60,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
             }}
             width="100%"
             height={`${height}px`}
-            onError={(err) => {
+            onError={() => {
               setIsError(true);
             }}
             style={{

@@ -14,7 +14,6 @@ export interface Wallet {
 type Addr = string;
 
 export class RealmWallet {
-  private readonly nicknames: Map<Addr, string> = new Map();
   private hdNode?: ethers.utils.HDNode;
   private readonly ethProvider: ethers.providers.Provider =
     ethers.getDefaultProvider();

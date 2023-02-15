@@ -6,9 +6,10 @@ import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { delay } from 'lodash';
 
-import { Flex, Sigil, Tooltip } from 'renderer/components';
+import { Flex, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { Avatar } from '@holium/design-system';
 
 // ----------------------------------------
 // -------- Local style components --------
@@ -40,7 +41,7 @@ const ShipSelectorPresenter = () => {
         value={shipKey}
         style={{ zIndex: 1 }}
         whileDrag={{ zIndex: 20 }}
-        onDragStart={(evt: any) => setDragging(true)}
+        onDragStart={() => setDragging(true)}
         onClick={() => {
           !dragging && AuthActions.setSelected(ship.patp);
         }}
@@ -68,13 +69,13 @@ const ShipSelectorPresenter = () => {
               transition={{ scale: 0.2 }}
               whileTap={{ scale: 1.0 }}
             >
-              <Sigil
+              <Avatar
                 simple
                 isLogin
                 size={32}
                 avatar={ship.avatar}
                 patp={ship.patp}
-                color={[ship.color || '#000000', 'white']}
+                sigilColor={[ship.color || '#000000', 'white']}
               />
             </motion.div>
           </Tooltip>

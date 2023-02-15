@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 
-export const registerListeners = (mainWindow: BrowserWindow) => {
-  mainWindow.on('enter-full-screen', (e: any) => {
+const registerListeners = (mainWindow: BrowserWindow) => {
+  mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', true);
     // Kiosk mode will prevent any native OS edge events or the ability
     // to easily exit. We want to put a button in the Realm experience to
@@ -10,10 +10,10 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     // mainWindow.setKiosk(true);
   });
 
-  mainWindow.on('leave-full-screen', (e: any) => {
+  mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', false);
     // mainWindow.setKiosk(false);
   });
 };
 
-export default { registerListeners };
+export const FullScreenHelper = { registerListeners };

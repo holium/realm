@@ -177,5 +177,3 @@ export const InputBox = ({
     )}
   </StyledBox>
 );
-
-export default InputBox;

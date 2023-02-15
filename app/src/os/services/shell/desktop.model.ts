@@ -1,21 +1,29 @@
-// import { osState, shipState } from './../store';
-import { types, applySnapshot, Instance } from 'mobx-state-tree';
-import { getInitialWindowDimensions } from './lib/window-manager';
-import { Glob } from '../ship/models/docket';
-import { AppType } from '../spaces/models/bazaar';
+import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
+import { Dimensions } from 'os/types';
+import { AppType, Glob } from '../spaces/models/bazaar';
+import { toJS } from 'mobx';
+import {
+  getMaximizedBounds,
+  getInitialWindowBounds,
+  isMaximizedBounds,
+} from './lib/window-manager';
 
-const DimensionsModel = types.model({
+// Bounds are using the realm.config 1-10 scale.
+const BoundsModel = types.model({
   x: types.number,
   y: types.number,
   width: types.number,
   height: types.number,
 });
 
-type DimensionModelType = Instance<typeof DimensionsModel>;
+type BoundsModelType = Instance<typeof BoundsModel>;
 
-const Window = types
-  .model('WindowModel', {
-    id: types.identifier,
+const AppWindowModel = types
+  .model('AppWindowModel', {
+    /**
+     * The `appId` is used to map the window to the corresponding app.
+     */
+    appId: types.identifier,
     glob: types.optional(types.boolean, false),
     href: types.maybeNull(Glob),
     title: types.optional(types.string, ''),
@@ -24,77 +32,97 @@ const Window = types
       types.enumeration(['urbit', 'web', 'native', 'dialog', 'dev']),
       'urbit'
     ),
-    dimensions: DimensionsModel,
-    minimized: types.optional(types.boolean, false),
+    /**
+     * The size and position of the window.
+     */
+    bounds: BoundsModel,
+    /**
+     * The previous size and position of the window.
+     * Needed for returning from maximized/fullscreen state.
+     */
+    prevBounds: types.optional(BoundsModel, {
+      x: 1,
+      y: 1,
+      width: 5,
+      height: 5,
+    }),
+    /**
+     * The ative window has a titlebar with full contrast.
+     */
+    isActive: types.optional(types.boolean, false),
+    /**
+     * The visual state of the window.
+     */
+    state: types.optional(
+      types.enumeration(['normal', 'minimized', 'fullscreen']),
+      'normal'
+    ),
   })
   .actions((self) => ({
-    setZIndex(newZ: number) {
-      self.zIndex = newZ;
+    setZIndex(zIndex: number) {
+      self.zIndex = zIndex;
+    },
+    normal() {
+      self.state = 'normal';
+    },
+    minimize() {
+      self.state = 'minimized';
+    },
+    maximize(desktopDimensions: Dimensions) {
+      const isMaximized = isMaximizedBounds(self.bounds, desktopDimensions);
+      if (isMaximized) {
+        self.bounds = { ...self.prevBounds };
+      } else {
+        self.prevBounds = { ...self.bounds };
+        self.bounds = getMaximizedBounds(desktopDimensions);
+      }
+    },
+    setIsActive(isActive: boolean) {
+      self.isActive = isActive;
+    },
+  }))
+  .views((self) => ({
+    get isMinimized() {
+      return self.state === 'minimized';
     },
   }));
 
-export type WindowModelType = Instance<typeof Window>;
-export interface WindowModelProps {
-  id: string;
-  title?: string;
-  glob?: boolean;
-  href?: { site: string; glob: any };
-  zIndex: number;
-  type: 'urbit' | 'web' | 'native' | 'dialog' | 'dev';
-  dimensions: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  minimized?: boolean;
-}
+export interface AppWindowType extends Instance<typeof AppWindowModel> {}
+export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
 
 export const DesktopStore = types
   .model('DesktopStore', {
-    showHomePane: types.optional(types.boolean, false),
-    dynamicMouse: types.optional(types.boolean, true),
+    windows: types.map(AppWindowModel),
     mouseColor: types.optional(types.string, '#4E9EFD'),
-    activeWindow: types.safeReference(Window),
-    windows: types.map(Window),
+    homePaneOpen: types.optional(types.boolean, false),
   })
   .views((self) => ({
-    get currentOrder() {
-      return self.windows.size + 1;
-    },
     get hasOpenWindow() {
-      return self.activeWindow !== undefined;
+      return self.windows.size > 0;
     },
-    get openApps() {
+    get openWindows() {
       return Array.from(self.windows.values());
     },
-    get openAppIds() {
-      return Array.from(self.windows.values()).map((window: any) => window.id);
+    get isHomePaneOpen() {
+      return self.homePaneOpen;
     },
-    isOpenWindow(appId: string) {
-      return (
-        Array.from(self.windows.values()).findIndex(
-          (appWindow: any) => appWindow.id === appId
-        ) > -1
-      );
-    },
-    isActiveWindow(appId: string) {
-      return self.activeWindow?.id === appId;
-    },
-    isMinimized(appId: string) {
-      return self.windows.get(appId)?.minimized;
+    getWindowByAppId(appId: string) {
+      return self.windows.get(appId);
     },
   }))
   .actions((self) => ({
-    setMouseColor(newMouseColor: string = '#4E9EFD') {
-      self.mouseColor = newMouseColor;
+    setMouseColor(color: string) {
+      self.mouseColor = color;
     },
-    setHomePane(isHome: boolean) {
-      self.showHomePane = isHome;
+    openHomePane() {
+      self.homePaneOpen = true;
     },
-    setActive(activeWindowId: string) {
-      self.windows.forEach((win: WindowModelType) => {
-        if (activeWindowId === win.id) {
+    closeHomePane() {
+      self.homePaneOpen = false;
+    },
+    setActive(appId: string) {
+      self.windows.forEach((win) => {
+        if (appId === win.appId) {
           win.setZIndex(self.windows.size + 1);
         } else {
           if (win.zIndex > 1) {
@@ -102,17 +130,21 @@ export const DesktopStore = types
           }
         }
       });
-      self.activeWindow = self.windows.get(activeWindowId);
+      self.windows.forEach((window) => {
+        window.setIsActive(window.appId === appId);
+      });
     },
-    setDimensions(windowId: string, dimensions: DimensionModelType) {
-      const windowDimensions = self.windows.get(windowId)?.dimensions;
-      windowDimensions && applySnapshot(windowDimensions, dimensions);
+    setInactive(appId: string) {
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
+
+      window.setIsActive(false);
     },
-    openBrowserWindow(
-      app: AppType,
-      desktopDimensions: { width: number; height: number },
-      isFullscreen: boolean
-    ) {
+    setBounds(appId: string, bounds: BoundsModelType) {
+      const windowBounds = self.getWindowByAppId(appId)?.bounds;
+      if (windowBounds) applySnapshot(windowBounds, bounds);
+    },
+    openWindow(app: AppType, desktopDimensions: Dimensions) {
       let glob;
       let href;
       if (app.type === 'urbit') {
@@ -124,51 +156,61 @@ export const DesktopStore = types
         // app as DevApp
         href = { site: app.web.url };
       }
-      const newWindow = Window.create({
-        id: app.id,
+      const newWindow = AppWindowModel.create({
+        appId: app.id,
         title: app.title,
         glob,
         href,
+        state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
-        dimensions: getInitialWindowDimensions(
-          app,
-          desktopDimensions,
-          isFullscreen
-        ),
+        bounds: getInitialWindowBounds(app, desktopDimensions),
       });
-      self.windows.set(newWindow.id, newWindow);
-      this.setActive(newWindow.id);
-      if (self.showHomePane) {
-        self.showHomePane = false;
-      }
+
+      self.windows.set(newWindow.appId, newWindow);
+      this.setActive(newWindow.appId);
+      if (self.homePaneOpen) self.homePaneOpen = false;
+
       return newWindow;
     },
-    toggleMinimize(windowId: string) {
-      const window = self.windows.get(windowId);
-      if (!window) {
-        return console.error('Window not found');
-      }
-      if (window) {
-        window.minimized = !window.minimized;
-        if (window.minimized) {
-          self.activeWindow?.id === windowId && (self.activeWindow = undefined);
-        } else {
-          self.activeWindow = window;
-        }
-        self.windows.set(windowId, window);
+    openDialog(windowProps: AppWindowProps) {
+      const newWindow = AppWindowModel.create(windowProps);
+
+      return newWindow;
+    },
+    toggleMinimize(appId: string) {
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
+
+      if (window.isMinimized) {
+        window.normal();
+        this.setActive(appId);
+      } else {
+        window.minimize();
+        this.setInactive(appId);
       }
     },
-    closeBrowserWindow(appId: any) {
-      if (self.activeWindow?.id === appId) {
-        const nextWindow = Array.from(self.windows.values()).filter(
-          (app: WindowModelType) => !app.minimized
+    toggleMaximize(appId: string, desktopDimensions: Dimensions) {
+      const window = self.getWindowByAppId(appId);
+      if (!window) return console.error('Window not found');
+
+      window.maximize(desktopDimensions);
+
+      return toJS(window.bounds);
+    },
+    closeWindow(appId: string) {
+      const windows = Array.from(self.windows.values());
+      const activeWindow = windows.find((app: AppWindowType) => app.isActive);
+      if (activeWindow?.appId === appId) {
+        const nextWindow = windows.filter(
+          (app: AppWindowType) => !app.isMinimized
         )[0];
         if (nextWindow) {
-          this.setActive(nextWindow.id);
+          this.setActive(nextWindow.appId);
         }
       }
       self.windows.delete(appId);
     },
   }));
+
 export type DesktopStoreType = Instance<typeof DesktopStore>;

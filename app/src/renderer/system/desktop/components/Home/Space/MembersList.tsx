@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { Flex, Text, PersonRow } from 'renderer/components';
@@ -12,16 +12,20 @@ interface IMembersList {
   path: string;
 }
 
-export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
+type Roles = 'initiate' | 'member' | 'admin' | 'owner';
+
+const MembersListPresenter = (props: IMembersList) => {
   const { path } = props;
-  const { theme, spaces, membership, contacts, ship } = useServices();
+  const { theme, spaces, membership, ship, friends } = useServices();
 
   const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
 
-  const members = Array.from(membership.getMembersList(path));
+  let members = Array.from(membership.getMembersList(path));
   const admins = members.filter((member: Member) =>
     member.roles.includes('admin')
   );
+  members = members.filter((member: Member) => !member.roles.includes('admin'));
+
   const membersOnly = members.filter(
     (member: Member) =>
       member.roles.includes('member') || member.status.includes('invited')
@@ -74,7 +78,23 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
   );
 
   const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
-    const contact = contacts.getContactAvatarMetadata(member.patp);
+    const contact = friends.getContactAvatarMetadata(member.patp);
+
+    const roles = Array.from(member.roles!);
+    let activeRole = 'initiate';
+    if (roles) {
+      if (roles.includes('admin')) activeRole = 'admin';
+      else if (roles.includes('member')) activeRole = 'member';
+      else if (roles.includes('initiate')) {
+        activeRole = 'initiate';
+      }
+    }
+    const setNewRole = (role: Roles) => {
+      const newRoles = roles
+        ? [...roles.filter((role) => role !== activeRole), role]
+        : [role];
+      SpacesActions.setRoles(member.patp, newRoles);
+    };
 
     return (
       <PersonRow
@@ -88,8 +108,21 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
         rowBg={rowBg}
         theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship!.patp)
+          membership.isAdmin(path, ship!.patp) && member.patp !== ship!.patp
             ? [
+                activeRole === 'admin'
+                  ? {
+                      label: 'Demote to member',
+                      onClick: () => {
+                        setNewRole('member');
+                      },
+                    }
+                  : {
+                      label: 'Promote to admin',
+                      onClick: () => {
+                        setNewRole('admin');
+                      },
+                    },
                 {
                   label: 'Kick',
                   onClick: () => {
@@ -132,4 +165,6 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
       />
     </Flex>
   );
-});
+};
+
+export const MembersList = observer(MembersListPresenter);

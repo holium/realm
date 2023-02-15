@@ -41,10 +41,10 @@ export const BASE_CONF = {
   },
 };
 
-const configs = [];
-const hasCustomConf = (props) =>
+const configs: string[] = [];
+const hasCustomConf = (props: { theme: any }) =>
   JSON.stringify((props.theme && props.theme[CUSTOM_CONF]) || {});
-const resolveConfig = (props) => {
+const resolveConfig = (props: { theme: any }) => {
   const themeConf = (props.theme && props.theme[CUSTOM_CONF]) || {};
 
   const conf = {
@@ -52,23 +52,26 @@ const resolveConfig = (props) => {
     ...themeConf,
   };
 
-  conf.media = Object.keys(conf.breakpoints).reduce((media, breakpoint) => {
-    const breakpointWidth = conf.breakpoints[breakpoint];
-    media[breakpoint] = makeMedia(
-      [
-        conf.mediaQuery,
-        breakpointWidth >= 0 && `(min-width: ${breakpointWidth}rem)`,
-      ]
-        .filter(Boolean)
-        .join(' and ')
-    );
-    return media;
-  }, {});
+  conf.media = Object.keys(conf.breakpoints).reduce(
+    (media: any, breakpoint) => {
+      const breakpointWidth = conf.breakpoints[breakpoint];
+      media[breakpoint] = makeMedia(
+        [
+          conf.mediaQuery,
+          breakpointWidth >= 0 && `(min-width: ${breakpointWidth}rem)`,
+        ]
+          .filter(Boolean)
+          .join(' and ')
+      );
+      return media;
+    },
+    {}
+  );
 
   return conf;
 };
 
-export default function config(props = {}) {
+export function config(props = { theme: {} }) {
   const customConf = hasCustomConf(props);
   if (configs[0] === customConf) {
     return configs[1];
@@ -81,9 +84,8 @@ export default function config(props = {}) {
 
   return conf;
 }
-// @ts-nocheck
+
 function makeMedia(media: string) {
-  // css();
   return (...args: string[]) => css`
     @media ${media} {
       ${

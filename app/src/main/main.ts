@@ -12,33 +12,24 @@ import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import MenuBuilder from './menu';
+import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
 import { Realm } from '../os';
-import FullscreenHelper from './helpers/fullscreen';
-import WebviewHelper from './helpers/webview';
-import DevHelper from './helpers/dev';
-import MediaHelper from './helpers/media';
-import MouseHelper from './helpers/mouse';
-import BrowserHelper from './helpers/browser';
+import { FullScreenHelper } from './helpers/fullscreen';
+import { WebViewHelper } from './helpers/webview';
+import { DevHelper } from './helpers/dev';
+import { MediaHelper } from './helpers/media';
+import { MouseHelper } from './helpers/mouse';
+import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isProduction } from './helpers/env';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
 let mainWindow: BrowserWindow;
-let mouseWindow: BrowserWindow;
-export type WebViewsData = Record<
-  string,
-  {
-    position: { x: number; y: number };
-    hasMouseInside: boolean;
-  }
->;
-const webViewsData: WebViewsData = {};
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -102,8 +93,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
 
-  FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow, webViewsData);
+  FullScreenHelper.registerListeners(mainWindow);
+  WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -112,7 +103,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('dom-ready', () => {
     hideCursor(mainWindow.webContents);
-    mainWindow.webContents.send('add-mouse-listeners', { isWebview: false });
+    mainWindow.webContents.send('add-mouse-listeners');
   });
 
   // TODO why is this rendering multiple times?
@@ -136,13 +127,7 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
-  // Remove this if your app does not use auto updates
-  const appUpdater = new AppUpdater();
-  // if (process.env.NODE_ENV === 'production') {
-  //   appUpdater = new AppUpdater();
-  // }
-
-  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
+  const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
@@ -185,12 +170,11 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   // Hide the traffic lights on macOS.
-  if (process.platform === 'darwin') {
-    newMouseWindow.setWindowButtonVisibility(false);
-  }
+  if (isMac) newMouseWindow.setWindowButtonVisibility(false);
 
   newMouseWindow.webContents.on('did-finish-load', () => {
     hideCursor(newMouseWindow.webContents);
+    if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
   });
 
   newMouseWindow.on('close', () => {
@@ -211,31 +195,27 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow, webViewsData);
-
-  mouseWindow = newMouseWindow;
+  MouseHelper.registerListeners(newMouseWindow);
 };
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (!isMac) app.quit();
 });
 
 app
   .whenReady()
-  .then(() => {
-    createWindow();
-    createMouseOverlayWindow();
-    app.on('activate', () => {
+  .then(async () => {
+    new AppUpdater().checkForUpdates().then(() => {
+      createWindow();
+      createMouseOverlayWindow();
+    });
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) {
+      if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
-      }
-      if (mouseWindow === null) {
         createMouseOverlayWindow();
       }
     });

@@ -1,4 +1,4 @@
-import { FC, useState, useCallback, KeyboardEvent } from 'react';
+import { useState, useCallback, KeyboardEvent } from 'react';
 import {
   Grid,
   Text,
@@ -12,7 +12,7 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import _ from 'lodash';
-import { AccessCode } from 'os/api/holium';
+import { AccessCode as AccessCodeType } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 
 const stubAccessCode = {
@@ -24,7 +24,7 @@ const stubAccessCode = {
   type: 'DAO',
 };
 
-const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
+const AccessCodeDisplay = (props: { accessCode: AccessCodeType }) => {
   const accessCode = props.accessCode;
 
   return (
@@ -43,7 +43,12 @@ const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
         justifyContent="space-around"
       >
         {accessCode.image ? (
-          <img height={60} style={{ borderRadius: 6 }} src={accessCode.image} />
+          <img
+            alt="Accesscode"
+            height={60}
+            style={{ borderRadius: 6 }}
+            src={accessCode.image}
+          />
         ) : (
           <></>
         )}
@@ -63,11 +68,10 @@ const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   );
 };
 
-const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+const AccessCodePresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();
   const [inputText, setInputText] = useState('');
-  const [codeLoading, setCodeLoading] = useState(false);
-  const [accessCode, setAccessCode] = useState<AccessCode | null>(null);
+  const [accessCode, setAccessCode] = useState<AccessCodeType | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   async function getAccessCode(code: string) {
@@ -86,14 +90,12 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
     //   : setErrorMessage('');
 
     // TODO: Remove when fixed
-    setCodeLoading(true);
     if (code === stubAccessCode.id) {
       setAccessCode(stubAccessCode);
       setErrorMessage('');
     } else {
       setErrorMessage('Invalid access code.');
     }
-    setCodeLoading(false);
   }
   const debouncedGetAccessCode = useCallback(
     _.debounce(getAccessCode, 500, { leading: true }),
@@ -220,6 +222,6 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       </Grid.Row>
     </Grid.Column>
   );
-});
+};
 
-export default AccessCode;
+export const AccessCode = observer(AccessCodePresenter);
