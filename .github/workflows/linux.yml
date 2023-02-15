@@ -80,15 +80,6 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          # sudo dpkg --add-architecture i386
-          # sudo mkdir -pm755 /etc/apt/keyrings
-          # sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          # sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-          # sudo apt update
-          # sudo apt install aptitude
-          # sudo aptitude install -y -q winehq-staging
-          # sudo aptitude install -y -q wine-staging
-          # sudo apt update
           GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
