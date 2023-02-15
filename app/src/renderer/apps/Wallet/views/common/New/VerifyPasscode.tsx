@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react';
 import { Flex, Text, Icons } from 'renderer/components';
-import PasscodeInput from '../../../components/PasscodeInput';
+import { PasscodeInput } from '../../../components/PasscodeInput';
 
 interface LockedProps {
   onSuccess: any;
 }
 
-export const VerifyPasscode = observer(({ onSuccess }: LockedProps) => (
+const VerifyPasscodePresenter = ({ onSuccess }: LockedProps) => (
   <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
     <Flex
       flex={1}
@@ -26,6 +26,6 @@ export const VerifyPasscode = observer(({ onSuccess }: LockedProps) => (
       <PasscodeInput checkStored={true} onSuccess={onSuccess} />
     </Flex>
   </Flex>
-));
+);
 
-export default VerifyPasscode;
+export const VerifyPasscode = observer(VerifyPasscodePresenter);

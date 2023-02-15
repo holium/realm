@@ -7,7 +7,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import bcrypt from 'bcryptjs';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import {
   OnboardingStore,

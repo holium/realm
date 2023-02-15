@@ -1,5 +1,5 @@
 import type { Alignment, CellSize } from '../types';
-import ScalingCellSizeAndPositionManager from './ScalingCellSizeAndPositionManager';
+import { ScalingCellSizeAndPositionManager } from './ScalingCellSizeAndPositionManager';
 
 /**
  * Helper function that determines when to update scroll offsets to ensure that a scroll-to-index remains visible.
@@ -30,7 +30,7 @@ type Params = {
   // Callback to invoke with an scroll-to-index value
   updateScrollIndexCallback: (index: number) => void;
 };
-export default function updateScrollIndexHelper({
+export function updateScrollIndexHelper({
   cellSize,
   cellSizeAndPositionManager,
   previousCellsCount,

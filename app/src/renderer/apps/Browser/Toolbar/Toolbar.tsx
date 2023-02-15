@@ -9,6 +9,7 @@ import { ToolbarSearchInput } from './ToolbarSearchInput';
 import { useDragControls } from 'framer-motion';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
+import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;
@@ -43,6 +44,7 @@ const BrowserToolbarPresenter = ({
   const { currentTab } = useBrowser();
   const { theme } = useServices();
   const { iconColor } = theme.currentTheme;
+  const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -95,6 +97,7 @@ const BrowserToolbarPresenter = ({
       zIndex={zIndex}
       onPointerUp={onPointerUp}
       onPointerDown={onPointerDown}
+      onClick={onDoubleClick}
     >
       <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons

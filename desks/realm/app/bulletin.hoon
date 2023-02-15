@@ -1,5 +1,5 @@
 /-  store=bulletin
-/+  dbug, verb, default-agent
+/+  dbug, default-agent
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -14,7 +14,6 @@
 =|  state-0
 =*  state  -
 %-  agent:dbug
-%+  verb  |
 =<
   ^-  agent:gall
   |_  =bowl:gall

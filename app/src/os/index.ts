@@ -17,8 +17,8 @@ import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
-import HoliumAPI from './api/holium';
-import PasswordStore from './lib/passwordStore';
+import { HoliumAPI } from './api/holium';
+import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
 import { ChatService } from './services/chat/chat.service';
@@ -517,5 +517,3 @@ export class Realm extends EventEmitter {
     }
   }
 }
-
-export default Realm;

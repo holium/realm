@@ -37,7 +37,7 @@ export const searchForm = (
 
 const dimensions = { height: 450, width: 550 };
 
-const AppSearchApp = observer((props: AppSearchProps) => {
+const AppSearchAppPresenter = (props: AppSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
@@ -190,6 +190,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       />
     </Flex>
   );
-});
+};
 
-export default AppSearchApp;
+export const AppSearchApp = observer(AppSearchAppPresenter);

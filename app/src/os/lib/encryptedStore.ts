@@ -9,7 +9,7 @@ interface EncryptedStoreParams {
   accessPropertiesByDotNotation?: boolean;
 }
 
-export default class EncryptedStore<T> {
+export class EncryptedStore<T> {
   private db;
   private readonly secretKey;
   private _store;

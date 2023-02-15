@@ -11,7 +11,7 @@
  * 4) Add nonce for style element.
  * 5) Added support for injecting custom window object
  **/
-export default function createDetectElementResize(hostWindow: Window) {
+export function createDetectElementResize(hostWindow: Window) {
   // Check `document` and `window` in case of server-side rendering
   var _window: any;
 

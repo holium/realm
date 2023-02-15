@@ -1,11 +1,11 @@
-import type { CellRangeRendererParams } from './types';
 import React from 'react';
+import type { CellRangeRendererParams } from './types';
 /**
  * Default implementation of cellRangeRenderer used by Grid.
  * This renderer supports cell-caching while the user is scrolling.
  */
 
-export default function defaultCellRangeRenderer({
+export function defaultCellRangeRenderer({
   cellCache,
   cellRenderer,
   columnSizeAndPositionManager,

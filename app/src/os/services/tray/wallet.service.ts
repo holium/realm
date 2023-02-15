@@ -1,6 +1,6 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { BaseService } from '../base.service';
-import Realm from '../..';
+import { Realm } from '../../index';
 import {
   WalletStore,
   WalletStoreType,

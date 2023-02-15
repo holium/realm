@@ -14,7 +14,7 @@ import {
   SharingMode,
   UISettingsType,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import DeletePasscode from './DeletePasscode';
+import { DeletePasscode } from './DeletePasscode';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
