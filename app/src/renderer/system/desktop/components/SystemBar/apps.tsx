@@ -54,7 +54,7 @@ export const trayAppRenderers: ViewRenderers = {
       width: 330,
       height: 180,
     },
-    component: (props: any) => <AirliftInfo {...props} />,
+    component: () => <AirliftInfo />,
   },
   'spaces-tray': {
     dimensions: defaultTrayDimensions['spaces-tray'],
