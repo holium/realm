@@ -1,14 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { darken, transparentize } from 'polished';
-import {
-  Box,
-  Grid,
-  Text,
-  Flex,
-  Spinner,
-  TextButton,
-  UrbitSVG,
-} from 'renderer/components';
+import { Box, Grid, Text, Flex, Spinner, UrbitSVG } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
