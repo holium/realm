@@ -330,7 +330,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
         with:
           environment: staging
-          sourcemaps: './lib'
+          sourcemaps: './dist'
           version: $BUILD_VERSION
 
   #
