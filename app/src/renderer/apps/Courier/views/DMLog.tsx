@@ -120,7 +120,7 @@ export const DMLogPresenter = () => {
           )}
         />
       </Box>
-      <ChatInputBox path={selectedPath} onSend={onSend} />
+      <ChatInputBox onSend={onSend} />
     </Flex>
   );
 };
