@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
-import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
+import { genCSSVariables } from 'renderer/logic/theme';
+import { observer } from 'mobx-react';
 
 interface Props {
   appWindow: AppWindowType;
   isResizing?: boolean;
 }
 
-export const DevView = ({ appWindow, isResizing }: Props) => {
+export const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
   const [ready, setReady] = useState(false);
 
   const { ship, desktop, theme } = useServices();
@@ -26,6 +27,8 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
     setLoading(false);
   };
 
+  const css = genCSSVariables(theme.currentTheme);
+
   useEffect(() => {
     const webview: any = document.getElementById(
       `${appWindow.appId}-web-webview`
@@ -34,7 +37,6 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
     webview?.addEventListener('did-stop-loading', onStopLoading);
     webview?.addEventListener('did-finish-load', () => {
       webview.send('mouse-color', desktop.mouseColor);
-      const css = '* { cursor: none !important; }';
       webview.insertCSS(css);
     });
 
@@ -53,39 +55,6 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
   }, [ship, appWindow.appId]);
 
   useEffect(() => {
-    const css = `
-      :root {
-        --rlm-font: 'Rubik', sans-serif;
-        --rlm-base-color: ${theme.currentTheme.backgroundColor};
-        --rlm-accent-color: ${theme.currentTheme.accentColor};
-        --rlm-input-color: ${theme.currentTheme.inputColor};
-        --rlm-border-color: ${
-          theme.currentTheme.mode === 'light'
-            ? darken(0.1, theme.currentTheme.windowColor)
-            : darken(0.075, theme.currentTheme.windowColor)
-        };
-        --rlm-window-color: ${theme.currentTheme.windowColor};
-        --rlm-card-color: ${
-          theme.currentTheme.mode === 'light'
-            ? lighten(0.05, theme.currentTheme.windowColor)
-            : darken(0.025, theme.currentTheme.windowColor)
-        };
-        --rlm-theme-mode: ${theme.currentTheme.mode};
-        --rlm-text-color: ${theme.currentTheme.textColor};
-        --rlm-icon-color: ${theme.currentTheme.iconColor};
-      }
-      div[data-radix-portal] {
-        z-index: 2000 !important;
-      }
-   
-      #rlm-cursor {
-        position: absolute;
-        z-index: 2147483646 !important;
-      }
-
-      
-    `;
-
     if (ready) {
       const webview = document.getElementById(
         `${appWindow.appId}-web-webview`
@@ -96,6 +65,8 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
       });
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
+
+
 
   return useMemo(
     () => (
@@ -117,7 +88,6 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
           webpreferences="sandbox=false"
           isLocked={isResizing || loading}
           style={{
-            background: lighten(0.04, theme.currentTheme.windowColor),
             width: 'inherit',
             height: '100%',
             position: 'relative',
@@ -125,6 +95,8 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
         />
       </div>
     ),
-    [appWindow.href?.site, isResizing, loading, theme.currentTheme.windowColor]
+    [appWindow.href?.site, isResizing, loading, theme.currentTheme]
   );
 };
+
+export const DevView = observer(DevViewPresenter);

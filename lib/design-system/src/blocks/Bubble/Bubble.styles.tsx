@@ -42,11 +42,17 @@ export const BubbleStyle = styled(Box)`
       opacity: 1;
     }
   }
+  &.bubble-our {
+    .bubble-reactions {
+      transition: var(--transition);
+      opacity: 0;
+    }
+  }
 
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
 `;
 
-export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
+export const BubbleAuthor = styled(Text.Custom) <{ authorColor?: string }>`
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;

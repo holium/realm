@@ -17,7 +17,7 @@ import { ChatRowType } from './types';
 import { useChatStore } from './store';
 
 export const Inbox = () => {
-  const { dmApp } = useTrayApps();
+  const { dmApp, dimensions } = useTrayApps();
   const { setChat } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export const Inbox = () => {
   );
 
   return (
-    <Flex flexDirection="column">
+    <Flex height={dimensions.height - 24} flexDirection="column">
       <Flex mb={2} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
@@ -87,7 +87,7 @@ export const Inbox = () => {
       </Flex>
       <WindowedList
         // key={lastTimeSent}
-        width={364}
+        width={dimensions.width - 26}
         height={544}
         rowHeight={57}
         data={chatList}

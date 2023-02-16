@@ -24,39 +24,49 @@ export const ChatRow = ({
   );
 
   return (
-    <Row onClick={onClick}>
+    <Row
+      layout="preserve-aspect"
+      layoutId={`chat-${path}-container`}
+      onClick={onClick}
+      animate={{ height: 54 }}
+    >
       <Flex flexDirection="row" gap={12} alignItems="center" width="100%">
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
-          <Avatar
-            // layoutId={`chat-${path}-avatar`}
-            // layout="position"
-            // transition={{
-            //   duration: 0.1,
-            //   spring: { damping: 0, stiffness: 10000 },
-            //   layout: { duration: 0.1, ease: 'easeInOut' },
-            // }}
-            patp={patp}
-            avatar={avatar}
-            size={28}
-            sigilColor={[sigilColor, '#ffffff']}
-            simple
-
-          />
+          <Flex
+            layoutId={`chat-${path}-avatar`}
+            layout="position"
+            transition={{
+              duration: 0.1,
+            }}
+          >
+            <Avatar
+              patp={patp}
+              avatar={avatar}
+              size={28}
+              sigilColor={[sigilColor, '#ffffff']}
+              simple
+            />
+          </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
-              // layoutId={`chat-${path}-name`}
-              // layout="position"
-              // transition={{
-              //   duration: 0.1,
-              //   spring: { damping: 0, stiffness: 10000 },
-              //   layout: { duration: 0.1, ease: 'easeInOut' },
-              // }}
+              layoutId={`chat-${path}-name`}
+              layout="position"
+              transition={{
+                duration: 0.1,
+              }}
               fontWeight={500}
               fontSize={3}
             >
               {patp}
             </Text.Custom>
-            <Text.Custom fontWeight={400} fontSize={2} opacity={0.5}>
+            <Text.Custom
+              textAlign="left"
+              truncate
+              width={230}
+              fontWeight={400}
+              fontSize={2}
+              opacity={0.5}
+            >
               {lastMessage ? Object.values(lastMessage)[0] : 'No messages yet'}
             </Text.Custom>
           </Flex>

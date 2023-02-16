@@ -40,6 +40,7 @@ export const Bubble = (props: BubbleProps) => {
     <Flex
       key={id}
       display="inline-flex"
+      mx="1px"
       justifyContent={our ? 'flex-end' : 'flex-start'}
     >
       <BubbleStyle id={id} className={our ? 'bubble-our' : ''}>
@@ -64,10 +65,10 @@ export const Bubble = (props: BubbleProps) => {
             // TODO somehow pass in the onReplyClick function
 
             return (
-              <>
+              <span key={`${id}-index-${index}`}>
                 {lineBreak && <br />}
                 {renderFragment(fragment, index, author)}
-              </>
+              </span>
             );
           })}
         </FragmentBlock>

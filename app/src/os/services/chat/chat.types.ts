@@ -30,15 +30,38 @@ export type DbChangeType =
   | 'del-messages-row'
   | 'add-row';
 
-export type ChatDBReactions =
+export type AddRow = {
+  table: ChatTables;
+  type: 'add-row';
+  row: PathsRow | MessagesRow | PeersRow;
+};
+
+export type DelPeersRow = {
+  table: ChatTables;
+  type: 'del-peers-row';
+  path: string;
+};
+export type DelPathsRow = {
+  table: ChatTables;
+  type: 'del-paths-row';
+  path: string;
+};
+export type DelMessagesRow = {
+  table: ChatTables;
+  type: 'del-messages-row';
+  id: string;
+};
+
+export type ChatDbOps = AddRow | DelPeersRow | DelPathsRow | DelMessagesRow;
+
+export type ChatDbChangeReactions =
+  | AddRow[]
+  | DelPeersRow[]
+  | DelPathsRow[]
+  | DelMessagesRow[];
+
+export type ChatDbReactions =
   | {
       tables: { messages: MessagesRow[]; paths: PathsRow[]; peers: PeersRow[] };
     }
-  | {
-      table: ChatTables;
-      type: 'add-row';
-      row: PathsRow[] | MessagesRow[] | PeersRow[];
-    }
-  | { table: ChatTables; type: 'del-peers-row'; path: string }
-  | { table: ChatTables; type: 'del-paths-row'; path: string }
-  | { table: ChatTables; type: 'del-messages-row'; id: string };
+  | ChatDbChangeReactions;

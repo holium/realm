@@ -26,7 +26,7 @@ export const AppRegistry: { [key: string]: AppEntry } = {
     },
     dimensions: {
       height: 650,
-      width: 390,
+      width: 400,
     },
   },
 };

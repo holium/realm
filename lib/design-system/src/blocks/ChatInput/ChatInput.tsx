@@ -6,7 +6,7 @@ import { parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 30px;
+  line-height: 32px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;
@@ -102,6 +102,7 @@ export const ChatInput = ({
         placeholder="New message"
         rows={1}
         value={value}
+        // autoFocus
         tabIndex={tabIndex}
         disabled={disabled}
         onChange={onChange}

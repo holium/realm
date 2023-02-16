@@ -13,6 +13,7 @@ import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
 
 export const genCSSVariables = (theme: ThemeType) => {
+  // console.log(toJS(theme));
   return `
       * { cursor: none !important; }
       :root {
@@ -26,6 +27,7 @@ export const genCSSVariables = (theme: ThemeType) => {
             : darken(0.075, theme.windowColor)
         };
         --rlm-window-color: ${theme.windowColor};
+        --rlm-dock-color: ${rgba(theme.windowColor, 0.75)};
         --rlm-card-color: ${
           theme.mode === 'light'
             ? lighten(0.05, theme.windowColor)
@@ -35,6 +37,16 @@ export const genCSSVariables = (theme: ThemeType) => {
         --rlm-text-color: ${theme.textColor};
         --rlm-icon-color: ${theme.iconColor};
         --rlm-mouse-color: ${theme.mouseColor};
+        --rlm-intent-alert-color: #ff6240;
+        --rlm-intent-caution-color: #ffbc32;
+        --rlm-intent-success-color: #0fc383;
+        --rlm-border-radius-4: 4px;
+        --rlm-border-radius-6: 6px;
+        --rlm-border-radius-9: 9px;
+        --rlm-border-radius-12: 12px;
+        --rlm-border-radius-12: 16px;
+        --rlm-overlay-hover: rgba(0, 0, 0, 0.05);
+        --rlm-overlay-active: rgba(0, 0, 0, 0.09);
       }
    
       div[data-radix-portal] {
