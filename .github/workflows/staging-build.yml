@@ -261,7 +261,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-windows, build-liinux]
+    needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
