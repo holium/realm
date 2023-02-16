@@ -75,7 +75,6 @@
     "react-hotkeys-hook": "^3.4.7",
     "react-spaces": "^0.3.2",
     "react-spinners": "^0.13.4",
-    "secure-electron-store": "^3.0.3",
     "socket.io-client": "^4.5.4",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
