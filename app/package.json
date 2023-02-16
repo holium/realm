@@ -78,7 +78,6 @@
     "react-dom": "^18.0.0",
     "react-hotkeys-hook": "^3.4.7",
     "react-infinite-scroll-component": "^6.1.0",
-    "react-inverted-scrollview": "^1.0.7",
     "react-router-dom": "^6.3.0",
     "react-spaces": "^0.3.2",
     "react-spinners": "^0.13.4",
