@@ -234,20 +234,20 @@
       (changes:encode db)
     ::
     ++  rows :: encodes for on-peek
-      |=  tbl=notifs-table:sur
+      |=  rws=(list notif-row:sur)
       ^-  json
-      (notifs-table:encode tbl)
+      (notifs:encode rws)
   --
 ++  encode
   =,  enjs:format
   |%
-    ++  notifs-table
-      |=  tbl=notifs-table:sur
+    ++  notifs
+      |=  rows=(list notif-row:sur)
       ^-  json
-      [%a (turn (tap:notifon:sur tbl) notifs-row)]
+      [%a (turn rows notifs-row)]
     ::
     ++  notifs-row
-      |=  [k=id:sur =notif-row:sur]
+      |=  =notif-row:sur
       ^-  json
       %-  pairs
       :~  id+(numb id.notif-row)
@@ -276,11 +276,11 @@
       %-  pairs
       ?-  -.ch
         %add-row
-          :~(['type' %s -.ch] ['row' (notifs-row id.notif-row.ch notif-row.ch)])
+          :~(['type' %s -.ch] ['row' (notifs-row notif-row.ch)])
         %update-all
           :~(['type' %s -.ch] ['read' %b flag.ch])
         %update-row
-          :~(['type' %s -.ch] ['row' (notifs-row id.notif-row.ch notif-row.ch)])
+          :~(['type' %s -.ch] ['row' (notifs-row notif-row.ch)])
         %del-row
           :~(['type' %s -.ch] ['id' (numb id.ch)])
       ==

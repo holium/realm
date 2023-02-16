@@ -59,18 +59,16 @@
     ?+  path      !!
       ::
         [%db ~]  :: the "everything" path
-          =/  changes  (turn (tap:notifon:sur notifs-table.state) keyval-to-change:core)
-          :~  [%give %fact ~ db-change+!>(changes)]
-          ==
+          ~  :: don't "prime" this path with anything, only give-facts on db changes (pokes)
       ::
         [%new ~]  :: the "new notificaitons only" path
           ~  :: we don't "prime" this path with anything, only give-facts on %create action
       :: /path/<app name>/<the/actual/path>
-        [%path @ *]  :: the "everything" path
-          =/  path-notifs   (notifs-by-path:core i.t.path t.t.path) :: list of [key val] of matching notif-rows
-          =/  changes  (turn path-notifs keyval-to-change:core)
-          :~  [%give %fact ~ db-change+!>(changes)]
-          ==
+      ::[%path @ *]
+      ::  =/  path-notifs   (notifs-by-path:core i.t.path t.t.path) :: list of [key val] of matching notif-rows
+      ::  =/  changes  (turn path-notifs keyval-to-change:core)
+      ::  :~  [%give %fact ~ db-change+!>(changes)]
+      ::  ==
     ==
     [cards this]
   ::
@@ -88,6 +86,12 @@
     ::
       [%x %db %reads ~]
         ``rows+!>(all-read-rows:core)
+    ::
+      [%x %db %dismissed ~]
+        ``rows+!>(all-dismissed-rows:core)
+    ::
+      [%x %db %not-dismissed ~]
+        ``rows+!>(all-not-dismissed-rows:core)
     ::
       [%x %db %notif @ ~]
         =/  theid    (slav %ud i.t.t.t.path)
@@ -109,7 +113,7 @@
       [%x %db %since @ ~]
         =/  index  (slav %ud i.t.t.t.path)
         =/  new-rows  
-            (turn (tap:notifon:sur (lot:notifon:sur notifs-table.state `index ~)) val-r:core)
+            (turn (tap:notifon:sur (lot:notifon:sur notifs-table.state ~ `index)) val-r:core)
         ``rows+!>(new-rows)
     ==
   :: notif-db does not subscribe to anything.
@@ -144,6 +148,14 @@
   |=([k=@ud v=notif-row:sur] v)
 ++  all-rows
   (turn (tap:notifon:sur notifs-table.state) val-r)
+++  all-dismissed-rows
+  %+  turn
+    (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] dismissed.v))
+  val-r
+++  all-not-dismissed-rows
+  %+  turn
+    (skip (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] dismissed.v))
+  val-r
 ++  all-unread-rows
   %+  turn
     (skip (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] read.v))
