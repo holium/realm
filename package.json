@@ -34,7 +34,6 @@
   "dependencies": {
     "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
-    "eth-block-tracker": "^6.0.0",
     "eth-json-rpc-infura": "^5.1.0",
     "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
