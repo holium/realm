@@ -14336,11 +14336,6 @@ node-releases@^2.0.8:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.9.tgz#fe66405285382b0c4ac6bcfbfbe7e8a510650b4d"
   integrity sha512-2xfmOrRkGogbTK9R6Leda0DGiXeY3p2NJpy4+gNCffdUvV6mdEJnaDEic1i3Ec2djAo8jWYoJMR5PB0MSMpxUA==
 
-non-fungible-token-abi@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/non-fungible-token-abi/-/non-fungible-token-abi-1.0.1.tgz#0d34b9ef75be80dc23d2aa05f4de12e3721d80b9"
-  integrity sha512-cvPhpGrwLmaGIaw6cZFY8TbeTdzzwgcOlqwv/ONBpEC/NQZSTcogYG70aUn/O5dpxlppQT5iUotKItpO/DlnTA==
-
 nopt@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-6.0.0.tgz#245801d8ebf409c6df22ab9d95b65e1309cdb16d"
