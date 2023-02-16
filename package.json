@@ -32,6 +32,7 @@
     "storybook": "start-storybook -p 6006"
   },
   "dependencies": {
+    "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",

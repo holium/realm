@@ -1600,7 +1600,7 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@etchteam/storybook-addon-css-variables-theme@^1.3.3":
+"@etchteam/storybook-addon-css-variables-theme@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@etchteam/storybook-addon-css-variables-theme/-/storybook-addon-css-variables-theme-1.4.0.tgz#88ebb740191319ef2bf22278642f650a42a4b195"
   integrity sha512-cyhh0Qp4YD6qV3V+j2xzw+ddVWRzw0myojdGsPgJ+vsJeo3vuL+vArEHWVn7Z1kmkgrDxF8pNpGDj7UnpL7wjA==
