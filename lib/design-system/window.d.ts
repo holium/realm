@@ -1,6 +1,5 @@
 export {};
+
 declare global {
-  interface Window {
-    ship: string;
-  }
+  var ship: string;
 }

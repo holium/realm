@@ -173,7 +173,7 @@ export const Reactions = (props: ReactionProps) => {
     const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
       const reaction = reactionsAggregated[index];
-      if (reaction.by.includes(window.ship as any)) {
+      if (reaction.by.includes(window.ship)) {
         return true;
       }
     }
@@ -183,9 +183,9 @@ export const Reactions = (props: ReactionProps) => {
   const onClick = (emoji: string) => {
     setIsReacting(false);
     if (checkDupe(emoji)) {
-      onReaction({ emoji, action: 'remove', by: window.ship as any });
+      onReaction({ emoji, action: 'remove', by: window.ship });
     } else {
-      onReaction({ emoji, action: 'add', by: window.ship as any });
+      onReaction({ emoji, action: 'add', by: window.ship });
     }
   };
 

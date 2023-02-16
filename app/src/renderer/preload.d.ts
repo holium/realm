@@ -1,18 +1,17 @@
 import { AppPreloadType } from 'main/preload';
 import { OSPreloadType } from 'os/preload';
 
+export {};
+
 declare global {
-  interface Window {
-    electron: {
-      app: AppPreloadType;
-      os: OSPreloadType;
-    };
-    audio: any;
-    ship: string;
-  }
+  var electron: {
+    app: AppPreloadType;
+    os: OSPreloadType;
+  };
+  var audio: HTMLAudioElement;
+  var ship: string;
 }
 
-export {};
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
