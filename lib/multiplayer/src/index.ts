@@ -1,6 +1,7 @@
 import {
   RealmMultiplayerProvider as Provider,
   RealmMultiplayerContext as Context,
+  useRealmMultiplayer,
 } from './Provider';
 import { Clickable } from './Clickable';
 import { useChannel, useShips } from './hooks';
@@ -11,7 +12,14 @@ declare global {
   var realmMultiplayer: RealmMultiplayerInterface | undefined;
 }
 
-export { Context, Provider, Clickable, useShips, useChannel };
+export {
+  Context,
+  Provider,
+  Clickable,
+  useShips,
+  useChannel,
+  useRealmMultiplayer,
+};
 export type {
   Vec2,
   SendPartial,

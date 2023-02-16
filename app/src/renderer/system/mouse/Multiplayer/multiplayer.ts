@@ -1,5 +1,3 @@
-// Functions that manage multiplayer
-
 import {
   RealmMultiplayerInterface,
   AnyPayload,
@@ -21,7 +19,7 @@ const presenceStates: Record<PresenceStateKey, Record<SessionId, object>> = {};
 let ship: MultiplayerShipType | undefined;
 
 // initialize websocket connection, join an initial room, and set up subscriptions dispatch
-export const init: RealmMultiplayerInterface['init'] = ({
+const init: RealmMultiplayerInterface['init'] = ({
   roomId,
   ship: initShip,
 }) => {
@@ -30,8 +28,7 @@ export const init: RealmMultiplayerInterface['init'] = ({
   // ship is loaded into webview via ipc + contextBridge, separately from preload
   // so we need to wait for it to be loaded
   function tryInit() {
-    // @ts-ignore
-    ship = initShip ? JSON.parse(JSON.stringify(initShip)) : globalThis.ship;
+    ship = initShip;
     if (!ship) {
       console.error('no ship info, trying again in 10ms');
       setTimeout(() => {
@@ -43,7 +40,8 @@ export const init: RealmMultiplayerInterface['init'] = ({
   }
 
   function _init() {
-    socket = new WebSocket('ws://localhost:3001/ws');
+    // eslint-disable-next-line no-restricted-globals
+    socket = new WebSocket(`ws://${location.host}/ws`);
     socket.addEventListener('open', () => {
       join(roomId);
       // Special presence state we provide everyone: ship info
@@ -116,11 +114,11 @@ export const init: RealmMultiplayerInterface['init'] = ({
   }
 };
 
-export const close: RealmMultiplayerInterface['close'] = () => {
+const close: RealmMultiplayerInterface['close'] = () => {
   socket?.close();
 };
 
-export const join: RealmMultiplayerInterface['join'] = (roomId) => {
+const join: RealmMultiplayerInterface['join'] = (roomId) => {
   socket?.send(
     JSON.stringify({
       event: 'join',
@@ -129,9 +127,8 @@ export const join: RealmMultiplayerInterface['join'] = (roomId) => {
   );
 };
 
-export type SendPartial<T> = Omit<T, 'id'>;
-
-export const send: RealmMultiplayerInterface['send'] = (payload) => {
+const send: RealmMultiplayerInterface['send'] = (payload) => {
+  console.log('sending', payload);
   if (socket?.readyState !== WebSocket.OPEN || !ship) return;
   socket.send(
     JSON.stringify({
@@ -141,7 +138,7 @@ export const send: RealmMultiplayerInterface['send'] = (payload) => {
   );
 };
 
-export const getPresenceState: RealmMultiplayerInterface['getPresenceState'] = (
+const getPresenceState: RealmMultiplayerInterface['getPresenceState'] = (
   key: string
 ) => {
   return presenceStates[key];
@@ -153,10 +150,7 @@ function updatePresenceState(payload: PresenceStatePayload) {
   presenceStates[key][payload.id] = value;
 }
 
-export const subscribe: RealmMultiplayerInterface['subscribe'] = (
-  event,
-  handler
-) => {
+const subscribe: RealmMultiplayerInterface['subscribe'] = (event, handler) => {
   // add handler to subscription handlers for event
   subscriptions[event] = subscriptions[event] || new Set();
   subscriptions[event].add(handler);
@@ -166,7 +160,7 @@ export const subscribe: RealmMultiplayerInterface['subscribe'] = (
   };
 };
 
-export const leave: RealmMultiplayerInterface['leave'] = (roomId) => {
+const leave: RealmMultiplayerInterface['leave'] = (roomId) => {
   socket?.send(
     JSON.stringify({
       event: 'join',
@@ -188,6 +182,5 @@ export const api: RealmMultiplayerInterface = {
 
 function getSessionID() {
   if (!ship) throw new Error('ship not loaded');
-  // @ts-ignore
-  return globalThis.id + ship.patp;
+  return ship.patp;
 }

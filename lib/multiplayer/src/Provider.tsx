@@ -1,4 +1,10 @@
-import { createContext, PropsWithChildren, useEffect, useState } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { MultiplayerShipType, RealmMultiplayerInterface } from './types';
 
 type RealmMultiplayerContextState = {
@@ -17,6 +23,7 @@ export const RealmMultiplayerProvider = ({
   children,
 }: PropsWithChildren<RealmMultiplayerContextState>) => {
   const [_api, setApi] = useState<RealmMultiplayerInterface | undefined>(api);
+
   useEffect(() => {
     if (!channel || channel === '') return;
 
@@ -34,9 +41,12 @@ export const RealmMultiplayerProvider = ({
       _api?.close();
     };
   }, [channel]);
+
   return (
     <RealmMultiplayerContext.Provider value={{ channel, ship, api: _api }}>
       {children}
     </RealmMultiplayerContext.Provider>
   );
 };
+
+export const useRealmMultiplayer = () => useContext(RealmMultiplayerContext);
