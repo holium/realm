@@ -30,7 +30,8 @@ export const AirliftToolbarStyle = styled(motion.div)<AirliftToolbarStyleProps>`
   top: 0;
   left: 0;
   right: 0;
-  height: ${(props: AirliftToolbarStyleProps) => (props.isAppWindow ? 30 : 54)}px;
+  height: ${(props: AirliftToolbarStyleProps) =>
+    props.isAppWindow ? 30 : 54}px;
   padding: 0 4px 0
     ${(props: AirliftToolbarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
   --webkit-transform: translate3d(0, 0, 0);
@@ -77,7 +78,9 @@ export type AirliftToolbarProps = {
   children?: React.ReactNode;
 };
 
-export const AirliftToolbar: FC<AirliftToolbarProps> = (props: AirliftToolbarProps) => {
+export const AirliftToolbar: FC<AirliftToolbarProps> = (
+  props: AirliftToolbarProps
+) => {
   const {
     children,
     showDevToolsToggle,
@@ -104,16 +107,21 @@ export const AirliftToolbar: FC<AirliftToolbarProps> = (props: AirliftToolbarPro
     // const { title, icon } = props.app!;
     titleSection = (
       <Flex gap={4} alignItems="center">
-        <Flex flexDirection="row" justifyContent="center" alignItems="left" >
+        <Flex flexDirection="row" justifyContent="center" alignItems="left">
           <Text
             opacity={0.7}
-//            style={{ textTransform: 'capitalize' }}
+            //            style={{ textTransform: 'capitalize' }}
             fontSize={2}
             fontWeight={500}
           >
             %
           </Text>
-          <Input opacity={0.7} fontSize={2} fontWeight={500} small={true}></Input>
+          <Input
+            opacity={0.7}
+            fontSize={2}
+            fontWeight={500}
+            small={true}
+          ></Input>
         </Flex>
       </Flex>
     );
@@ -156,15 +164,13 @@ export const AirliftToolbar: FC<AirliftToolbarProps> = (props: AirliftToolbarPro
         </TitleCentered>
       )}
       {shareable || navigationButtons ? (
-        <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
-        </Flex>
+        <Flex zIndex={zIndex + 1} gap={4} alignItems="center"></Flex>
       ) : (
         isAppWindow && <Flex></Flex>
       )}
       {children}
       {(maximizeButton || closeButton) && (
-        <Flex gap={4} alignItems="center">
-        </Flex>
+        <Flex gap={4} alignItems="center"></Flex>
       )}
     </AirliftToolbarStyle>
   );

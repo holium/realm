@@ -5,7 +5,7 @@ import { MessagesTrayApp } from 'renderer/apps/Messages';
 import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { AirliftInfo } from 'renderer/apps/Airlift/AirliftInfo';
+import { AirliftCommandPalette } from 'renderer/apps/Airlift/AirliftCommandPalette';
 
 export interface ViewRenderers {
   [key: string]: {
@@ -54,7 +54,7 @@ export const trayAppRenderers: ViewRenderers = {
       width: 330,
       height: 180,
     },
-    component: () => <AirliftInfo />,
+    component: () => <AirliftCommandPalette />,
   },
   'spaces-tray': {
     dimensions: defaultTrayDimensions['spaces-tray'],

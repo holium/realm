@@ -1,10 +1,10 @@
-import { AirliftInfo } from 'renderer/apps/Airlift/AirliftInfo';
 import { BrowserWebview } from 'renderer/apps/Browser/BrowserWebview';
 import {
   BrowserToolbar,
   BrowserToolbarProps,
 } from 'renderer/apps/Browser/Toolbar/Toolbar';
 import { SystemApp } from 'renderer/apps/System';
+import { AirliftCommandPalette } from 'renderer/apps/Airlift/AirliftCommandPalette';
 
 export enum NativeAppId {
   Browser = 'os-browser',
@@ -24,6 +24,6 @@ export const getNativeAppWindow = {
   },
   airlift: {
     titlebar: null,
-    view: (props: any) => <AirliftInfo {...props} />,
+    view: (props: any) => <AirliftCommandPalette {...props} />,
   },
 };

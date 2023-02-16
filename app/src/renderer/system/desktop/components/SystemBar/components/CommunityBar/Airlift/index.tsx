@@ -11,7 +11,8 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
-const iconSize = 28;
+const ICON_SIZE = 28;
+
 export const AirliftTray: FC = observer(() => {
   const { theme, ship } = useServices();
   // TODO ship.cookie
@@ -100,7 +101,7 @@ export const AirliftTray: FC = observer(() => {
       <IconButton
         id="airlift-tray-icon"
         ref={airliftButtonRef}
-        size={iconSize}
+        size={ICON_SIZE}
         customBg={iconHoverColor}
         color={textColor}
         mt="2px"
