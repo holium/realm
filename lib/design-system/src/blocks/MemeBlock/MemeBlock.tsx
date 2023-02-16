@@ -29,13 +29,27 @@ type MemeBlockProps = {
 } & BlockProps;
 
 export const MemeBlock: FC<MemeBlockProps> = (props: MemeBlockProps) => {
-  const { image, by, date, reactions = [], onReaction, ...rest } = props;
+  const {
+    image,
+    by,
+    date,
+    reactions = [],
+    onLoaded,
+    onReaction,
+    ...rest
+  } = props;
 
   const dateDisplay = timelineDate(new Date(date));
 
   return (
     <Block {...rest}>
-      <MemeStyle src={image} draggable={false} />
+      <MemeStyle
+        src={image}
+        onLoad={() => {
+          onLoaded && onLoaded();
+        }}
+        draggable={false}
+      />
       <Flex
         width="100%"
         justifyContent="space-between"

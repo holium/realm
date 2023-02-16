@@ -36,8 +36,16 @@ export const FragmentBase = styled(Text.Custom)<TextProps>`
   margin: 0 3px;
 `;
 
+const BlockWrapper = styled(motion.span)`
+  padding: 8px 0px;
+  display: inline-block;
+  height: 100%;
+`;
+
 export const FragmentBlock = styled(motion.span)`
-  line-height: 1.4;
+  /* line-height: 1.4; */
+  height: 100%;
+  width: 100%;
   blockquote {
     margin: 4px 4px;
   }
@@ -179,7 +187,8 @@ export const FragmentBlockquote = styled(motion.blockquote)`
 export const renderFragment = (
   fragment: FragmentType,
   index: number,
-  author: string
+  author: string,
+  onLoaded?: () => void // used in the case where async data is loaded
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -248,7 +257,7 @@ export const renderFragment = (
 
     case 'code':
       return (
-        <CodeWrapper my={1}>
+        <CodeWrapper py={1}>
           <FragmentCodeBlock key={index}>
             {(fragment as FragmentCodeType).code}
           </FragmentCodeBlock>
@@ -256,23 +265,24 @@ export const renderFragment = (
       );
     case 'link':
       return (
-        <LinkBlock
-          my={1}
-          draggable={false}
-          key={index}
-          mode="embed"
-          link={(fragment as FragmentLinkType).link}
-          id={author + index}
-          by={author}
-          width={350}
-        />
+        <BlockWrapper>
+          <LinkBlock
+            draggable={false}
+            key={index}
+            mode="embed"
+            link={(fragment as FragmentLinkType).link}
+            id={author + index}
+            by={author}
+            onLoaded={onLoaded}
+            minWidth={320}
+          />
+        </BlockWrapper>
       );
 
     case 'image':
       return (
-        <>
+        <BlockWrapper>
           <ImageBlock
-            my={1}
             draggable={false}
             mode="embed"
             variant="content"
@@ -280,8 +290,9 @@ export const renderFragment = (
             id={author + index}
             image={(fragment as FragmentImageType).image}
             by={author}
+            onLoaded={onLoaded}
           />
-        </>
+        </BlockWrapper>
       );
 
     case 'reply':

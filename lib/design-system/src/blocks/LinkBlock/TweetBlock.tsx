@@ -35,7 +35,7 @@ type TweetBlockProps = {
 } & BlockProps;
 
 export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
-  const { id, link, ...rest } = props;
+  const { id, link, onLoaded, ...rest } = props;
   let tweetEmbed: any = null;
   const [tweetLoaded, setTweetLoaded] = useState(false);
   const themeMode = getVar('theme-mode') || 'light';
@@ -45,6 +45,7 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
       tweetEmbed = (
         <TwitterTweetEmbed
           onLoad={() => {
+            onLoaded && onLoaded();
             setTweetLoaded(true);
           }}
           tweetId={tweetId}

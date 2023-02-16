@@ -19,6 +19,7 @@ export type BubbleProps = {
   reactions?: FragmentReactionType[];
   onReaction: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
+  onLoaded?: () => void;
 } & BoxProps;
 
 export const Bubble = (props: BubbleProps) => {
@@ -30,6 +31,7 @@ export const Bubble = (props: BubbleProps) => {
     authorColor,
     message,
     reactions = [],
+    onLoaded,
     onReaction,
     // onReplyClick = () => {},
   } = props;
@@ -67,7 +69,7 @@ export const Bubble = (props: BubbleProps) => {
             return (
               <span key={`${id}-index-${index}`}>
                 {lineBreak && <br />}
-                {renderFragment(fragment, index, author)}
+                {renderFragment(fragment, index, author, onLoaded)}
               </span>
             );
           })}

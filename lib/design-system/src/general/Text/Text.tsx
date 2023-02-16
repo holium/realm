@@ -133,7 +133,9 @@ const Label = styled(Default)<TextProps>`
   font-size: 0.8rem;
 `;
 
-const Custom = styled(BaseText)<TextProps>``;
+const Custom = styled(BaseText)<TextProps>`
+  height: initial;
+`;
 
 const Patp = styled(motion.p)<TextProps>`
   font-weight: 400;
@@ -147,8 +149,6 @@ const Patp = styled(motion.p)<TextProps>`
 `;
 
 const Anchor = styled(motion.a)<TextProps>`
-  ${boxStyles}
-  ${colorStyle}
   &:hover {
     cursor: pointer;
     text-decoration: underline;
@@ -159,6 +159,8 @@ const Anchor = styled(motion.a)<TextProps>`
       line-height: normal;
       ${skeletonStyle}
     `};
+  ${boxStyles}
+  ${colorStyle}
 `;
 
 export const Text = {

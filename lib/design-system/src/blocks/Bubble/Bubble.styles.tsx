@@ -6,8 +6,9 @@ export const BubbleStyle = styled(Box)`
   display: inline-flex;
   flex-direction: column;
   width: auto;
-  gap: 2px;
-  padding: 6px 8px 6px 8px;
+  /* gap: 2px; */
+  padding: 8px;
+  /* padding: 6px 8px 6px 8px; */
   font-size: 14px;
   align-self: flex-start;
   min-width: 150px;
@@ -16,7 +17,7 @@ export const BubbleStyle = styled(Box)`
   border-radius: 9px 9px 9px 0px;
   &.bubble-our {
     background: var(--rlm-accent-color);
-    border-radius: 9px 9px 0px 9px !important;
+    border-radius: 12px 12px 0px 12px !important;
     ${Text.Custom} {
       color: #ffffff;
     }
@@ -52,7 +53,8 @@ export const BubbleStyle = styled(Box)`
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
 `;
 
-export const BubbleAuthor = styled(Text.Custom) <{ authorColor?: string }>`
+export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
+  margin-top: -2px;
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;
@@ -66,4 +68,5 @@ export const BubbleFooter = styled(Box)`
   justify-content: flex-end;
   width: 100%;
   font-size: 12px;
+  margin-bottom: -2px;
 `;

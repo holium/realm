@@ -95,31 +95,32 @@ export const DMLogPresenter = () => {
         }
       />
 
-      <Box height={550} width="inherit">
-        <WindowedList
-          startAtBottom
-          hideScrollbar
-          height={548}
-          data={chats}
-          rowRenderer={(row: any, index: number) => (
-            <Box
-              key={`${row.id}-${index}`}
-              pt={2}
-              pb={index === chats.length - 1 ? 2 : 0}
-            >
-              <Bubble
-                id={row.id}
-                our={row.sender === ship?.patp}
-                author={row.sender}
-                authorColor={metadata.color}
-                message={row.content}
-                sentAt={new Date(row.timestamp).toISOString()}
-                onReaction={() => {}}
-              />
-            </Box>
-          )}
-        />
-      </Box>
+      <WindowedList
+        startAtBottom
+        hideScrollbar
+        width={dimensions.width - 24}
+        height={550}
+        data={chats}
+        rowRenderer={(row, index, measure) => (
+          <Box
+            key={`${row.id}-${row.timestamp}-${index}`}
+            pt={2}
+            // pb={2}
+            pb={index === chats.length - 1 ? 2 : 0}
+          >
+            <Bubble
+              id={row.id}
+              our={row.sender === ship?.patp}
+              author={row.sender}
+              authorColor={metadata.color}
+              message={row.content}
+              sentAt={new Date(row.timestamp).toISOString()}
+              onLoad={measure}
+              onReaction={() => {}}
+            />
+          </Box>
+        )}
+      />
       <ChatInputBox onSend={onSend} />
     </Flex>
   );

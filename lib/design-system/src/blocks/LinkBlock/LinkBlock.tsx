@@ -8,11 +8,27 @@ import { TweetBlock } from './TweetBlock';
 
 const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
 
+const LinkTitle = styled(Text.Anchor)`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+`;
+
+const LinkDescription = styled(Text.Custom)`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  height: 1rem;
+`;
+
 const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   width: 100%;
   height: 170px;
   object-fit: cover;
   border-radius: 4px;
+  margin-bottom: 0.25rem;
   background: var(--rlm-window-color);
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
@@ -46,7 +62,7 @@ type LinkBlockProps = {
 
 type LinkType = 'opengraph' | 'url' | 'twitter';
 
-export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
+export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
   const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [linkType, setLinkType] = useState<LinkType>('opengraph');
@@ -62,6 +78,7 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
             const data = await res.json();
             if (!data || data.error) setLinkType('url');
             setOpenGraph(data);
+            onLoaded && onLoaded();
           } else {
             setLinkType('url');
           }
@@ -113,12 +130,18 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
         isSkeleton={!openGraph || !imgLoaded}
         src={openGraph?.ogImage.url}
         alt={openGraph?.ogTitle}
-        onError={() => {}}
-        onLoad={() => setImgLoaded(true)}
+        onError={() => {
+          // onLoaded && onLoaded();
+        }}
+        onLoad={() => {
+          setImgLoaded(true);
+          // onLoaded && onLoaded();
+        }}
       />
-      <Flex width="100%" gap={2} flexDirection="column">
-        <Text.Anchor
+      <Flex mb="0.25rem" width="100%" flexDirection="column">
+        <LinkTitle
           isSkeleton={!openGraph}
+          mb="0.25rem"
           fontSize={2}
           fontWeight={500}
           width={rest.width || 'inherit'}
@@ -128,21 +151,21 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
           }}
         >
           {openGraph?.ogTitle}
-        </Text.Anchor>
-        <Text.Custom
+        </LinkTitle>
+        <LinkDescription
           isSkeleton={!openGraph}
           fontSize={1}
           opacity={0.7}
           width={rest.width || 'inherit'}
         >
           {description}
-        </Text.Custom>
+        </LinkDescription>
       </Flex>
       <Flex
         className="block-footer"
         flex={1}
         justifyContent="space-between"
-        width="inherit"
+        width="100%"
       >
         <Flex
           flexDirection="row"
@@ -168,7 +191,14 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
           </Text.Anchor>
         </Flex>
 
-        <Text.Custom className="block-author" noSelection fontSize={0}>
+        <Text.Custom
+          truncate
+          width="50%"
+          textAlign="right"
+          className="block-author"
+          noSelection
+          fontSize={0}
+        >
           {by}
         </Text.Custom>
       </Flex>

@@ -117,12 +117,12 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     padding-inline-start: 0px;
   }
 
-  a {
+  /* a {
     text-decoration: none;
     height: fit-content;
     width: fit-content;
     margin: 10px;
-  }
+  } */
 
   fieldset {
     border: 0;

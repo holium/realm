@@ -79,6 +79,9 @@ export class ChatService extends BaseService {
       // verbose: console.log,
     });
     this.db.exec(this.initSql);
+    // get the last index
+    // scry with the last index
+
     // let path = '/db'
     // if (lastTimestamp !== 0) {
     //   path= `/db?since=${lastTimestamp}`
