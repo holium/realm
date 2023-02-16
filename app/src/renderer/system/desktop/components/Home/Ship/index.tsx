@@ -6,7 +6,7 @@ import { Flex, Icons, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
-import AppSearchApp from '../AppInstall/AppSearch';
+import { AppSearchApp } from '../AppInstall/AppSearch';
 import { NoScrollBar } from 'renderer/components/NoScrollbar';
 import { Avatar } from '@holium/design-system';
 

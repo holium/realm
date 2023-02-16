@@ -18,13 +18,13 @@ export const getCenteredPosition = (windowDimensions: Dimensions): Position => {
 };
 
 /**
- * getFullscreenBounds
+ * getMaximizedBounds
  *
  * Calculates the bounds for a fullscreen window.
  *
  * @returns bounds normalized to the 1-10 scale
  */
-export const getFullscreenBounds = (desktopDimensions: Dimensions): Bounds => {
+export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
   const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
   const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
@@ -41,6 +41,21 @@ export const getFullscreenBounds = (desktopDimensions: Dimensions): Bounds => {
     width: windowWidth,
     height: windowHeight,
   };
+};
+
+export const isMaximizedBounds = (
+  bounds: Bounds,
+  desktopDimensions: Dimensions
+) => {
+  const maximizedBounds = getMaximizedBounds(desktopDimensions);
+  const margin = 0.01;
+
+  return (
+    Math.abs(bounds.x - maximizedBounds.x) < margin &&
+    Math.abs(bounds.y - maximizedBounds.y) < margin &&
+    Math.abs(bounds.width - maximizedBounds.width) < margin &&
+    Math.abs(bounds.height - maximizedBounds.height) < margin
+  );
 };
 
 /**
@@ -80,7 +95,7 @@ const getCenteredBounds = (app: any, desktopDimensions: Dimensions): Bounds => {
       height: app.web.dimensions.height,
     };
   } else {
-    const fullScreenBounds = getFullscreenBounds(desktopDimensions);
+    const fullScreenBounds = getMaximizedBounds(desktopDimensions);
 
     return {
       x: app.dimensions?.x ?? fullScreenBounds.x,

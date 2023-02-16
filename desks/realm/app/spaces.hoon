@@ -582,6 +582,7 @@
       %kick-member          (handle-kick +.act)
       %group-kick-member    (group-handle-kick +.act)
       %revoke-invite        (handle-deported +.act)
+      %edit-member-role     (handle-edit-role +.act)
     ==
     ::
     ++  handle-send  ::  Sends an invite to a ship
@@ -651,11 +652,16 @@
         =.  membership.state            (~(put by membership.state) [path members])
         =/  member-path                 /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths                 [/updates member-path ~]
-        :_  state
-        :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
-            [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
-        ==
+        =/  cards=(list card)
+          :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
+              :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+              [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
+          ==
+        =?  cards  =(%group type:(~(got by spaces.state) path))
+          %+  weld  cards
+            =/  action  [path now.bowl %fleet (silt ~[src.bowl]) %add ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(`action:g`action)]~  :: Add member to group
+        [cards state]
     ::
     ++  handle-decline
       |=  [path=space-path:store]
@@ -743,6 +749,30 @@
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]~
     ::
+    ++  handle-edit-role
+      |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  src-roles  roles:(~(got by (~(got by membership) path)) src.bowl)
+      ?>  (~(has in src-roles) %admin)
+      =/  space-members  (~(got by membership) path)
+      =/  member-state  (~(got by space-members) member)
+      =.  roles.member-state  role-set
+      =.  space-members  (~(put by space-members) [member member-state])
+      =.  membership  (~(put by membership) [path space-members])
+      =/  cards
+        ^-  (list card)
+        [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+      =?  cards  =(%group type:(~(got by spaces.state) path))
+        %+  weld  cards
+          ?:  (~(has in role-set) %admin)
+            ::  %member to %admin
+            =/  action  [path now.bowl %fleet (silt ~[member]) %add-sects (sy [%admin ~])]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+          ::  remove %admin status
+          =/  action  [path now.bowl %fleet (silt ~[member]) %del-sects (sy [%admin ~])]
+          `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+      [cards state]
+    ::
     --
   ++  reaction
     |=  [rct=reaction:vstore]
@@ -754,6 +784,7 @@
       %invite-removed     `state
       %invite-accepted    (on-accepted +.rct)
       %kicked             (on-kicked +.rct)
+      %edited             (on-edited +.rct)
     ==
     ::
     ++  on-sent
@@ -793,6 +824,16 @@
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
     ::
+    ++  on-edited
+      |=  [path=space-path:store =ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  members  (~(got by membership.state) path)
+      =/  member   (~(got by members) ship)
+      =.  roles.member  role-set
+      =.  members  (~(put by members) [ship member])
+      =.  membership.state  (~(put by membership.state) [path members])
+      :_  state
+      [%give %fact [/updates ~] visa-reaction+!>([%edited path ship member])]~
     --
   ::
   ++  helpers

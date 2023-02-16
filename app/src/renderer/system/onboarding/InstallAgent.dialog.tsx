@@ -154,6 +154,4 @@ const InstallAgentPresenter = () => {
   );
 };
 
-const InstallAgent = observer(InstallAgentPresenter);
-
-export default InstallAgent;
+export const InstallAgent = observer(InstallAgentPresenter);

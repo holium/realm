@@ -263,6 +263,39 @@ export const SpacesApi = {
     return response;
   },
   /**
+   * setRoles
+   *
+   * @param conduit
+   * @param path
+   * @param patp
+   * @param roles
+   * @returns
+   */
+  setRoles: async (
+    conduit: Conduit,
+    path: SpacePath,
+    patp: Patp,
+    roles: string[]
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const payload = {
+      app: 'spaces',
+      mark: 'visa-action',
+      json: {
+        'edit-member-role': {
+          path: pathObj,
+          ship: patp,
+          roles,
+        },
+      },
+    };
+    return conduit.poke(payload);
+  },
+  /**
    * acceptInvite
    *
    * @param conduit
@@ -507,6 +540,14 @@ const handleInviteReactions = (
         );
       }
       state.removeMember(kickedPayload.path, kickedPayload.ship);
+      break;
+    case 'edited':
+      const editedPayload = data.edited;
+      state.editMember(
+        editedPayload.path,
+        editedPayload.ship,
+        editedPayload.roles
+      );
       break;
     default:
       // unknown

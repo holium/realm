@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect, Fragment } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
-import IsDevice from './isDevice';
+import { IsDevice } from './isDevice';
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 

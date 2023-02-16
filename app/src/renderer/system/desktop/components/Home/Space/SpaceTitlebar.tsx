@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { Flex, SpacePicture, Icons, IconButton } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import AppSearchApp from '../AppInstall/AppSearch';
+import { AppSearchApp } from '../AppInstall/AppSearch';
 import { useServices } from 'renderer/logic/store';
 
 interface SpaceTitlebarProps {

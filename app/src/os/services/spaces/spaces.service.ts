@@ -4,7 +4,7 @@ import { toJS } from 'mobx';
 import fs from 'fs';
 import path from 'path';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
@@ -75,6 +75,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.set-join': this.setJoin,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
+    'realm.spaces.members.set-roles': this.setRoles,
     'realm.spaces.bazaar.get-apps': this.getApps,
     'realm.spaces.bazaar.get-allies': this.getAllies,
     'realm.spaces.bazaar.get-treaties': this.getTreaties,
@@ -180,10 +181,10 @@ export class SpacesService extends BaseService {
         path,
         payload
       ),
-    //
     kickMember: async (path: string, patp: string) =>
       await ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
-    //
+    setRoles: async (patp: string, roles: string[]) =>
+      await ipcRenderer.invoke('realm.spaces.members.set-roles', patp, roles),
     getApps: async (path: SpacePath, tag: string = 'all') =>
       await ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
     getAllies: async (path: SpacePath) =>
@@ -502,6 +503,15 @@ export class SpacesService extends BaseService {
       path,
       space!.name,
       patp
+    );
+  }
+
+  async setRoles(_event: IpcMainInvokeEvent, patp: Patp, roles: string[]) {
+    return await SpacesApi.setRoles(
+      this.core.conduit!,
+      this.state!.selected!.path,
+      patp,
+      roles
     );
   }
 

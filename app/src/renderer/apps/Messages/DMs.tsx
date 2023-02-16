@@ -36,9 +36,9 @@ const DMsPresenter = (props: IProps) => {
   const [searchString, setSearchString] = useState<string>('');
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const previews = Array.from(courier.previews.values()).sort(
-    (a, b) => b.lastTimeSent - a.lastTimeSent
-  );
+  const previews = Array.from(courier.previews.values())
+    .sort((a, b) => b.lastTimeSent - a.lastTimeSent)
+    .filter(Boolean);
   const lastTimeSent = previews[0]?.lastTimeSent;
 
   const fetchPreviews = useCallback(async () => {
@@ -123,7 +123,7 @@ const DMsPresenter = (props: IProps) => {
               theme={theme}
               dm={dm}
               refreshDms={fetchPreviews}
-              onClick={(evt: any) => {
+              onClick={(evt) => {
                 evt.stopPropagation();
                 onSelectDm(dm);
               }}

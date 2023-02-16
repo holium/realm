@@ -1,4 +1,4 @@
-import { MouseEvent, useState, useMemo, useCallback } from 'react';
+import { MouseEventHandler, useState, useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
@@ -21,7 +21,7 @@ interface DMContact {
   theme: ThemeModelType;
   dm: DMPreviewType;
   refreshDms: () => Promise<void>;
-  onClick: (evt: any) => void;
+  onClick: MouseEventHandler<HTMLDivElement>;
 }
 
 interface RowProps {
@@ -141,8 +141,8 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     isPending,
   ]);
 
-  const onAccept = useCallback(
-    (evt: MouseEvent) => {
+  const onAccept: MouseEventHandler = useCallback(
+    (evt) => {
       evt.stopPropagation();
       setAcceptLoading(true);
 
@@ -176,8 +176,8 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
     [dmModel.to, groupModel.path, isGroup]
   );
 
-  const onDecline = useCallback(
-    (evt: MouseEvent) => {
+  const onDecline: MouseEventHandler = useCallback(
+    (evt) => {
       evt.stopPropagation();
       setRejectLoading(true);
 
@@ -215,7 +215,7 @@ export const ContactRow = ({ dm, theme, refreshDms, onClick }: DMContact) => {
       isPending={isPending}
       className={isPending ? '' : 'realm-cursor-hover'}
       customBg={theme.windowColor}
-      onClick={(evt: any) => !isPending && onClick(evt)}
+      onClick={(evt) => !isPending && onClick(evt)}
     >
       <Flex flex={1} gap={10} maxWidth="100%">
         {sigil}

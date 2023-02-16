@@ -4,9 +4,7 @@ const isFocusableElement = (element: Element): boolean =>
   element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
 
 const isResizeHandler = (element: Element): boolean =>
-  element.classList.contains('app-window-resize') ||
-  element.classList.contains('app-window-resize-br') ||
-  element.classList.contains('app-window-resize-lr');
+  element.classList.contains('app-window-resize');
 
 const isClickableElement = (element: Element): boolean =>
   element instanceof HTMLElement ||

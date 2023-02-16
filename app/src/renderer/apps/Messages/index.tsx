@@ -6,7 +6,7 @@ import { NewChat } from './NewChat';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
 import { useServices } from '../../logic/store';
-import useStorage from 'renderer/logic/lib/useStorage';
+import { useStorage } from 'renderer/logic/lib/useStorage';
 
 const MessagesTrayAppPresenter = () => {
   const { theme } = useServices();

@@ -32,14 +32,9 @@
     "storybook": "start-storybook -p 6006"
   },
   "dependencies": {
+    "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
-    "bitcore-lib": "^8.25.40",
-    "eth-block-tracker": "^6.0.0",
-    "eth-json-rpc-infura": "^5.1.0",
-    "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
-    "memoize-one": "^6.0.0",
-    "non-fungible-token-abi": "^1.0.1",
     "qrcode.react": "^3.1.0",
     "socket.io-client": "^4.5.4"
   },
