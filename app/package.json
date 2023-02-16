@@ -63,7 +63,6 @@
     "mobx-react": "^7.3.0",
     "mobx-state-tree": "^5.1.3",
     "moment": "^2.29.4",
-    "mst-middlewares": "^5.1.3",
     "node-fetch": "2",
     "non-fungible-token-abi": "^1.0.1",
     "path-browserify": "^1.0.1",
