@@ -54,7 +54,6 @@
     "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
     "eventsource": "^2.0.0",
-    "extract-colors": "^1.1.22",
     "framer-motion": "^6.2.10",
     "human-standard-token-abi": "^2.0.0",
     "lodash": "^4.17.21",

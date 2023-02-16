@@ -10317,11 +10317,6 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-colors@^1.1.22:
-  version "1.1.23"
-  resolved "https://registry.yarnpkg.com/extract-colors/-/extract-colors-1.1.23.tgz#06a0af10e5b2b8a185ae5d878c5f003c6133500e"
-  integrity sha512-fns3J+bJdgZnKjtbUec4yrvVe1c5EVFVeDWbeh0TYXFL8lqOXlnxcbdJ627F4Qiaz9Hc0YHFMiAJLfcw8PaieQ==
-
 extract-zip@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-2.0.1.tgz#663dca56fe46df890d5f131ef4a06d22bb8ba13a"
