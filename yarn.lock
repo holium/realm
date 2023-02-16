@@ -7422,7 +7422,7 @@ check-types@^11.1.1:
   resolved "https://registry.yarnpkg.com/check-types/-/check-types-11.2.2.tgz#7afc0b6a860d686885062f2dba888ba5710335b4"
   integrity sha512-HBiYvXvn9Z70Z88XKjz3AEKd4HJhBXsa3j7xFnITAzoS8+q6eIGi8qDB8FKPBAjtuxjI/zFpwuiCb8oDtKOYrA==
 
-"chokidar@>=3.0.0 <4.0.0", chokidar@^3.0.2, chokidar@^3.4.1, chokidar@^3.4.2, chokidar@^3.5.3:
+"chokidar@>=3.0.0 <4.0.0", chokidar@^3.4.1, chokidar@^3.4.2, chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
@@ -9019,13 +9019,6 @@ electron-devtools-installer@^3.2.0:
     semver "^7.2.1"
     tslib "^2.1.0"
     unzip-crx-3 "^0.2.0"
-
-electron-hot-reload@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/electron-hot-reload/-/electron-hot-reload-0.1.4.tgz#3270b1d1c2ef03a07c4260406a713acea6de6cc7"
-  integrity sha512-D1BFhNgLgpHl7lPHMKr+0BGF0X1DFzQAxz/5uZRY7xo0NxB2PxzjdUaGtCmIITV8oR1GxKN+o3DzVCUEQ53b+w==
-  dependencies:
-    chokidar "^3.0.2"
 
 electron-is-accelerator@^0.1.0:
   version "0.1.2"
