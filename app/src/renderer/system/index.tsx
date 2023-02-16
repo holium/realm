@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 
@@ -23,7 +23,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 });
 
 const ShellPresenter = () => {
-  const { shell, theme, identity, ship } = useServices();
+  const { shell, theme, identity, ship, spaces } = useServices();
   const { resuming } = useCore();
 
   const isFullscreen = shell.isFullscreen;
@@ -47,6 +47,19 @@ const ShellPresenter = () => {
 
   const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
 
+  useEffect(() => {
+    if (!ship || !shipLoaded) return;
+    if (ship.color) window.electron.app.setMouseColor(ship.color);
+    if (spaces.selected?.path)
+      window.electron.app.setMultiplayerChannel(spaces.selected.path);
+    window.electron.app.setMultiplayerShip({
+      patp: ship?.patp,
+      nickname: ship?.nickname,
+      color: ship?.color,
+      avatar: ship?.avatar,
+    });
+  }, [ship, shipLoaded, spaces.selected?.path]);
+
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
@@ -68,7 +81,6 @@ const ShellPresenter = () => {
 };
 
 export const Shell = observer(ShellPresenter);
-
 const BgImage = ({
   blurred,
   wallpaper,

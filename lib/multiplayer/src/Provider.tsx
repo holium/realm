@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { RealmMultiplayerInterface } from './types';
+import { MultiplayerShipType, RealmMultiplayerInterface } from './types';
 
 interface RealmMultiplayerContextState {
-  ship?: any;
-  channel?: string;
+  ship: MultiplayerShipType;
+  channel: string;
   api?: RealmMultiplayerInterface;
 }
 
 export const RealmMultiplayerContext =
-  React.createContext<RealmMultiplayerContextState>({});
+  React.createContext<RealmMultiplayerContextState>({} as any);
 
 export function RealmMultiplayerProvider({
   channel,

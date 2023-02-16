@@ -1,4 +1,5 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
+import { ShipModelType } from 'os/services/ship/models/ship';
 import { MouseState } from 'renderer/system/mouse/AnimatedCursor';
 
 const registerListeners = (mouseWindow: BrowserWindow) => {
@@ -12,9 +13,10 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
 
   ipcMain.handle('mouse-move', (_, state: MouseState, isDragging: boolean) => {
     const screenPosition = screen.getCursorScreenPoint();
+    const mouseScreenPosition = mouseWindow.getPosition();
     const webContentsPosition = {
-      x: screenPosition.x - mouseWindow.getPosition()[0],
-      y: screenPosition.y - mouseWindow.getPosition()[1],
+      x: screenPosition.x - mouseScreenPosition[0],
+      y: screenPosition.y - mouseScreenPosition[1],
     };
     mouseWindow.webContents.send(
       'mouse-move',
@@ -34,6 +36,15 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
 
   ipcMain.handle('mouse-color', (_, color: string) => {
     mouseWindow.webContents.send('mouse-color', color);
+  });
+
+  ipcMain.handle('set-multiplayer-ship', (_, ship: ShipModelType) => {
+    console.log('asdfsdsafasafsdfadsfds', ship);
+    mouseWindow.webContents.send('set-multiplayer-ship', ship);
+  });
+
+  ipcMain.handle('set-multiplayer-channel', (_, channel: string) => {
+    mouseWindow.webContents.send('set-multiplayer-channel', channel);
   });
 };
 

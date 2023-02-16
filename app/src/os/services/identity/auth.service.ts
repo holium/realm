@@ -27,7 +27,7 @@ export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
   private readonly state: AuthStoreType;
 
-  handlers = {
+  handlers: Record<string, (...args: any[]) => any> = {
     'realm.auth.add-ship': this.addShip,
     'realm.auth.get-ships': this.getShips,
     'realm.auth.set-first-time': this.setFirstTime,
@@ -105,7 +105,6 @@ export class AuthService extends BaseService {
       defaults: AuthStore.create({ firstTime: true }),
     });
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
     const persistedState: AuthStoreType = this.db.store;

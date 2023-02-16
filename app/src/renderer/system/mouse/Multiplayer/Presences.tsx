@@ -1,9 +1,6 @@
-// Loaded in the webview/appview preload script, connects to websocket directly
-// and renders cursor based on presence
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { subscribe, close } from './multiplayer';
 import {
   CursorMovePayload,
   CursorEvent,
@@ -13,16 +10,25 @@ import {
   RealmEvent,
   PresenceStateSyncPayload,
   Ship,
+  CursorDownPayload,
+  CursorOutPayload,
+  CursorOverPayload,
+  CursorUpPayload,
 } from '@holium/realm-multiplayer';
+import { subscribe, close, send, SendPartial } from './multiplayer';
 import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 import { AnimatedCursor } from '../AnimatedCursor';
+import { MULTI_CLICK_ID_ATTRIB } from '../Presences';
+
+// Loaded in the webview/appview preload script, connects to websocket directly
+// and renders cursor based on presence.
 
 interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
   isClicking?: boolean;
 }
 
 // Manage websocket connection within realm or an individual app
-export function Presences() {
+export const Presences = () => {
   const [cursors, setCursors] = useState<Record<string, CursorState>>({});
   const [ships, setShips] = useState<Record<string, Ship>>({});
 
@@ -88,106 +94,119 @@ export function Presences() {
   }, []);
 
   // Send information about current user cursor
-  // const onMouseMove = useCallback((e: MouseEvent) => {
-  //   const payload: SendPartial<CursorMovePayload> = {
-  //     event: CursorEvent.Move,
-  //     position: { x: e.pageX, y: e.pageY },
-  //   };
+  const onMouseMove = useCallback((e: MouseEvent) => {
+    const payload: SendPartial<CursorMovePayload> = {
+      event: CursorEvent.Move,
+      position: { x: e.pageX, y: e.pageY },
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onClick = useCallback((e: MouseEvent) => {
-  //   // prevent multiplayer clicks from creating infinite loop
-  //   if (!e.isTrusted) return;
-  //   const targetId = (e.target as HTMLElement | null)?.getAttribute(
-  //     MULTI_CLICK_ID_ATTRIB
-  //   ); // element user clicked on
-  //   if (!targetId) return;
-  //   const payload: SendPartial<CursorClickPayload> = {
-  //     event: CursorEvent.Click,
-  //     target: targetId,
-  //   };
+  const onClick = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorClickPayload> = {
+      event: CursorEvent.Click,
+      target: targetId,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onMouseOver = useCallback((e: MouseEvent) => {
-  //   // prevent multiplayer clicks from creating infinite loop
-  //   if (!e.isTrusted) return;
-  //   const targetId = (e.target as HTMLElement | null)?.getAttribute(
-  //     MULTI_CLICK_ID_ATTRIB
-  //   ); // element user clicked on
-  //   if (!targetId) return;
-  //   const payload: SendPartial<CursorOverPayload> = {
-  //     event: CursorEvent.Over,
-  //     target: targetId,
-  //   };
+  const onMouseOver = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorOverPayload> = {
+      event: CursorEvent.Over,
+      target: targetId,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onMouseDown = useCallback((e: MouseEvent) => {
-  //   // prevent multiplayer clicks from creating infinite loop
-  //   if (!e.isTrusted) return;
-  //   const targetId = (e.target as HTMLElement | null)?.getAttribute(
-  //     MULTI_CLICK_ID_ATTRIB
-  //   ); // element user clicked on
-  //   if (!targetId) return;
-  //   const payload: SendPartial<CursorDownPayload> = {
-  //     event: CursorEvent.Down,
-  //     target: targetId,
-  //   };
+  const onMouseDown = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorDownPayload> = {
+      event: CursorEvent.Down,
+      target: targetId,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onMouseUp = useCallback((e: MouseEvent) => {
-  //   // prevent multiplayer clicks from creating infinite loop
-  //   if (!e.isTrusted) return;
-  //   const targetId = (e.target as HTMLElement | null)?.getAttribute(
-  //     MULTI_CLICK_ID_ATTRIB
-  //   ); // element user clicked on
-  //   if (!targetId) return;
-  //   const payload: SendPartial<CursorUpPayload> = {
-  //     event: CursorEvent.Up,
-  //     target: targetId,
-  //   };
+  const onMouseUp = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorUpPayload> = {
+      event: CursorEvent.Up,
+      target: targetId,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onMouseOut = useCallback((e: MouseEvent) => {
-  //   // prevent multiplayer clicks from creating infinite loop
-  //   if (!e.isTrusted) return;
-  //   const targetId = (e.target as HTMLElement | null)?.getAttribute(
-  //     MULTI_CLICK_ID_ATTRIB
-  //   ); // element user clicked on
-  //   if (!targetId) return;
-  //   const payload: SendPartial<CursorOutPayload> = {
-  //     event: CursorEvent.Out,
-  //     target: targetId,
-  //   };
+  const onMouseOut = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorOutPayload> = {
+      event: CursorEvent.Out,
+      target: targetId,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // const onMouseLeave = useCallback(() => {
-  //   const payload: SendPartial<CursorLeavePayload> = {
-  //     event: CursorEvent.Leave,
-  //   };
+  const onMouseLeave = useCallback(() => {
+    const payload: SendPartial<CursorLeavePayload> = {
+      event: CursorEvent.Leave,
+    };
 
-  //   send(payload);
-  // }, []);
+    send(payload);
+  }, []);
 
-  // useEventListener('mousemove', onMouseMove);
-  // useEventListener('mouseleave', onMouseLeave, document);
-  // useEventListener('blur', onMouseLeave);
-  // useEventListener('click', onClick);
-  // useEventListener('mouseover', onMouseOver);
-  // useEventListener('mousedown', onMouseDown);
-  // useEventListener('mouseup', onMouseUp);
-  // useEventListener('mouseout', onMouseOut);
+  useEffect(() => {
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseleave', onMouseLeave);
+    document.addEventListener('blur', onMouseLeave);
+    document.addEventListener('click', onClick);
+    document.addEventListener('mouseover', onMouseOver);
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mouseout', onMouseOut);
+
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseleave', onMouseLeave);
+      document.removeEventListener('blur', onMouseLeave);
+      document.removeEventListener('click', onClick);
+      document.removeEventListener('mouseover', onMouseOver);
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mouseout', onMouseOut);
+    };
+  }, []);
 
   return (
     <>
@@ -195,6 +214,7 @@ export function Presences() {
         const ship = ships[id];
         if (!ship) return null;
         const { patp, color } = ship;
+
         return (
           <div key={id}>
             <AnimatedCursor
@@ -220,7 +240,7 @@ export function Presences() {
       })}
     </>
   );
-}
+};
 
 const CursorName = styled(motion.div)`
   position: absolute;

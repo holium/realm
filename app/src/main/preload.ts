@@ -2,13 +2,11 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
 import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
+import { MultiplayerShipType } from '@holium/realm-multiplayer';
 
 const appPreload = {
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
-  },
-  setMouseColor(callback: any) {
-    ipcRenderer.on('mouse-color', callback);
   },
   openApp: async (app: any, partition: string) => {
     return await ipcRenderer.invoke('open-app', app, partition);
@@ -54,7 +52,7 @@ const appPreload = {
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
-  mouseColorChanged(hex: string) {
+  setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },
   onMouseMove(
@@ -80,6 +78,22 @@ const appPreload = {
   onMouseColorChange(callback: (hex: string) => void) {
     ipcRenderer.on('mouse-color', (_, hex: string) => {
       callback(hex);
+    });
+  },
+  setMultiplayerShip(ship: MultiplayerShipType) {
+    ipcRenderer.invoke('set-multiplayer-ship', ship);
+  },
+  setMultiplayerChannel(channel: string) {
+    ipcRenderer.invoke('set-multiplayer-channel', channel);
+  },
+  onSetMultiplayerShip(callback: (ship: MultiplayerShipType) => void) {
+    ipcRenderer.on('set-multiplayer-ship', (_, ship: MultiplayerShipType) => {
+      callback(ship);
+    });
+  },
+  onSetMultiplayerChannel(callback: (channel: string) => void) {
+    ipcRenderer.on('set-multiplayer-channel', (_, channel: string) => {
+      callback(channel);
     });
   },
 };

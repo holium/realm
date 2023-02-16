@@ -8,7 +8,7 @@ import { ShipModelType } from '../../../os/services/ship/models/ship';
 import { rgbToString, hexToRgb } from '../../../os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
 
-const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
+export const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
 declare global {
   interface Window {
