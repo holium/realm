@@ -431,7 +431,7 @@ export class SpacesService extends BaseService {
     // if we have the deleted path already selected
     if (path === this.state?.selected?.path) {
       const selected = this.state?.selectSpace(
-        `/~${this.core.conduit?.ship}/0v74tbf`
+        `/~${this.core.conduit?.ship}/our`
       );
       this.setTheme(selected?.theme);
     }
