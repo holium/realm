@@ -7,9 +7,7 @@
 mkdir ships
 cd ships
 # Download latest urbit
-curl -JLO https://urbit.org/install/mac/latest
-# Uncompress
-tar zxvf ./darwin.tgz --strip=1
+curl -L https://urbit.org/install/macos-aarch64/latest | tar xzk -s '/.*/urbit/' && ./urbit
 ```
 
 Now you should have the urbit files in the `ships` folder. This folder is ignored by GIT.
