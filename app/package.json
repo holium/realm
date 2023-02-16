@@ -81,7 +81,6 @@
     "styled-system": "^5.1.5",
     "typed-emitter": "^2.1.0",
     "urbit-ob": "^5.0.1",
-    "valid-url": "^1.0.9",
     "yup": "^0.32.11"
   },
   "devDependencies": {
