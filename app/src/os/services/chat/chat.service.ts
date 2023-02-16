@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
-import Realm from '../..';
+import { Realm } from '../..';
 import { ChatDBReactions, MessagesRow, PathsRow, PeersRow } from './chat.types';
 
 export class ChatService extends BaseService {
@@ -218,7 +218,11 @@ export class ChatService extends BaseService {
     });
   }
 
-  getChatLog(path: string, params?: { start: number; amount: number }) {
+  getChatLog(
+    _evt: any,
+    path: string,
+    params?: { start: number; amount: number }
+  ) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT

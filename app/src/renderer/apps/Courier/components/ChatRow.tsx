@@ -1,33 +1,59 @@
-import { Row, Avatar, Flex, Text, chatDate } from '@holium/design-system';
+import { Row, Avatar, Flex, Text, timelineDate } from '@holium/design-system';
+import React, { useMemo } from 'react';
+import { useServices } from 'renderer/logic/store';
 
 type ChatRowProps = {
+  path: string;
   patp: string;
-  avatar?: string;
-  sigilColor: string;
   lastMessage: string;
-  timestamp: string;
+  timestamp: number;
+  onClick: (evt: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 export const ChatRow = ({
+  path,
   patp,
-  avatar,
-  sigilColor,
   lastMessage,
   timestamp,
+  onClick,
 }: ChatRowProps) => {
+  const { friends } = useServices();
+  const { avatar, color: sigilColor } = useMemo(
+    () => friends.getContactAvatarMetadata(patp),
+    []
+  );
+
   return (
-    <Row>
+    <Row onClick={onClick}>
       <Flex flexDirection="row" gap={12} alignItems="center" width="100%">
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Avatar
+            // layoutId={`chat-${path}-avatar`}
+            // layout="position"
+            // transition={{
+            //   duration: 0.1,
+            //   spring: { damping: 0, stiffness: 10000 },
+            //   layout: { duration: 0.1, ease: 'easeInOut' },
+            // }}
             patp={patp}
             avatar={avatar}
             size={28}
-            sigilColor={[sigilColor, '#fff']}
+            sigilColor={[sigilColor, '#ffffff']}
             simple
+
           />
           <Flex alignItems="flex-start" flexDirection="column">
-            <Text.Custom fontWeight={500} fontSize={3}>
+            <Text.Custom
+              // layoutId={`chat-${path}-name`}
+              // layout="position"
+              // transition={{
+              //   duration: 0.1,
+              //   spring: { damping: 0, stiffness: 10000 },
+              //   layout: { duration: 0.1, ease: 'easeInOut' },
+              // }}
+              fontWeight={500}
+              fontSize={3}
+            >
               {patp}
             </Text.Custom>
             <Text.Custom fontWeight={400} fontSize={2} opacity={0.5}>
@@ -42,7 +68,7 @@ export const ChatRow = ({
             fontSize={2}
             opacity={0.3}
           >
-            {chatDate(new Date(timestamp))}
+            {timelineDate(new Date(timestamp))}
           </Text.Custom>
           <Flex height={14}>{/* unread count */}</Flex>
         </Flex>

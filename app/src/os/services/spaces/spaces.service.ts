@@ -455,6 +455,7 @@ export class SpacesService extends BaseService {
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // setting provider to current space host
+    console.log('selected', selected, path);
     const spaceHost = getHost(selected!.path);
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
