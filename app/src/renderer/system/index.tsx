@@ -28,7 +28,7 @@ const ShellPresenter = () => {
 
   const isFullscreen = shell.isFullscreen;
   const wallpaper = theme.currentTheme.wallpaper;
-  const firstTime = identity.auth.firstTime;
+  const firstTime = useMemo(() => identity.auth.firstTime, [identity.auth]);
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = !!bgImage;
@@ -48,7 +48,10 @@ const ShellPresenter = () => {
     [ship?.loader.isLoaded]
   );
 
-  const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
+  const GUI = useMemo(
+    () => (shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />),
+    [shipLoaded, firstTime]
+  );
 
   useEffect(() => {
     if (!ship || !shipLoaded) return;
@@ -91,11 +94,8 @@ const ShellPresenter = () => {
 };
 
 export const Shell = observer(ShellPresenter);
-const BgImage = ({
-  blurred,
-  wallpaper,
-  nft,
-}: {
+
+type BgImageProps = {
   blurred: boolean;
   wallpaper: string;
   nft?: {
@@ -105,8 +105,10 @@ const BgImage = ({
     tokenStandard: string;
     tokenId: string;
   };
-}) => {
-  return useMemo(
+};
+
+const BgImage = ({ blurred, wallpaper, nft }: BgImageProps) =>
+  useMemo(
     () => (
       <AnimatePresence>
         <BackgroundImage
@@ -126,4 +128,3 @@ const BgImage = ({
     ),
     [blurred, wallpaper, nft]
   );
-};
