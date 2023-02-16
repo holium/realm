@@ -43,7 +43,10 @@ const ShellPresenter = () => {
     [shell.dialogId, shell.dialogProps]
   );
 
-  const shipLoaded = ship?.loader.isLoaded;
+  const shipLoaded = useMemo(
+    () => ship?.loader.isLoaded,
+    [ship?.loader.isLoaded]
+  );
 
   const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
 
@@ -53,12 +56,19 @@ const ShellPresenter = () => {
     if (spaces.selected?.path)
       window.electron.app.setMultiplayerChannel(spaces.selected.path);
     window.electron.app.setMultiplayerShip({
-      patp: ship?.patp,
-      nickname: ship?.nickname,
-      color: ship?.color,
-      avatar: ship?.avatar,
+      patp: ship.patp,
+      nickname: ship.nickname,
+      color: ship.color,
+      avatar: ship.avatar,
     });
-  }, [ship, shipLoaded, spaces.selected?.path]);
+  }, [
+    ship?.avatar,
+    ship?.color,
+    ship?.nickname,
+    ship?.patp,
+    shipLoaded,
+    spaces.selected?.path,
+  ]);
 
   return (
     <ViewPort>
