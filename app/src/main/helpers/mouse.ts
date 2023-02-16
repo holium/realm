@@ -39,7 +39,6 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
   });
 
   ipcMain.handle('set-multiplayer-ship', (_, ship: ShipModelType) => {
-    console.log('asdfsdsafasafsdfadsfds', ship);
     mouseWindow.webContents.send('set-multiplayer-ship', ship);
   });
 

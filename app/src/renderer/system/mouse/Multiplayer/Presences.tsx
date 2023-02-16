@@ -20,9 +20,6 @@ import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 import { AnimatedCursor } from '../AnimatedCursor';
 import { MULTI_CLICK_ID_ATTRIB } from '../Presences';
 
-// Loaded in the webview/appview preload script, connects to websocket directly
-// and renders cursor based on presence.
-
 interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
   isClicking?: boolean;
 }
