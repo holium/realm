@@ -15,37 +15,38 @@
   r
 ::
 ++  mark-row-read
-  |=  [r=notif-row:sur]
-  =.  read.r  %.y
+  |=  [r=notif-row:sur =bowl:gall]
+  =.  read-at.r  now.bowl
+  =.  read.r     %.y
   r
 ::
 ++  mark-app-read
-  |=  [tbl=notifs-table:sur app=@tas]
+  |=  [tbl=notifs-table:sur app=@tas =bowl:gall]
   =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] =(app app.v)))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
   |-
-  ?.  =(stop index)
+  ?:  =(stop index)
     [tbl ids]
-  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs))))
+  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) bowl)))
 ::
 ++  mark-path-read
-  |=  [tbl=notifs-table:sur app=@tas =path]
+  |=  [tbl=notifs-table:sur app=@tas =path =bowl:gall]
   =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
   |-
-  ?.  =(stop index)
+  ?:  =(stop index)
     [tbl ids]
-  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs))))
+  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) bowl)))
 ::
 ::
 ::  poke actions
 ::
 ++  create
-::  :notif-db &ndb-poke [%create %chat-db /realm-chat/path-id %message 'the message' ~]
+:: :notif-db &ndb-poke [%create %chat-db /realm-chat/path-id %message 'Title' 'the message' '' ~ '' ~]
   |=  [act=create-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  row=notif-row:sur  [
@@ -77,8 +78,7 @@
 ::  :notif-db &ndb-poke [%read-id 0]
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  row  (got:notifon:sur notifs-table.state id)
-  =.  read.row  %.y
+  =/  row  (mark-row-read (got:notifon:sur notifs-table.state id) bowl)
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
   =/  thechange  db-change+!>((limo [[%update-row row] ~]))
   =/  gives  :~
@@ -91,7 +91,7 @@
   |=  [app=@tas state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ::  mark-result is like: [notifs-table ids]
-  =/  mark-result  (mark-app-read notifs-table.state app)
+  =/  mark-result  (mark-app-read notifs-table.state app bowl)
   =.  notifs-table.state  -:mark-result
   =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
@@ -100,11 +100,11 @@
   [gives state]
 ::
 ++  read-path
-::  :notif-db &ndb-poke [%read-path %chat-db /messages]
+::  :notif-db &ndb-poke [%read-path %chat-db /realm-chat/path-id]
   |=  [act=[app=@tas =path] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ::  mark-result is like: [notifs-table ids]
-  =/  mark-result  (mark-path-read notifs-table.state app.act path.act)
+  =/  mark-result  (mark-path-read notifs-table.state app.act path.act bowl)
   =.  notifs-table.state  -:mark-result
   =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
@@ -116,22 +116,40 @@
 ::  :notif-db &ndb-poke [%read-all %.y]
   |=  [flag=? state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r) (mark-row-unread r))))
+  =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r bowl) (mark-row-unread r))))
   =/  thechange  db-change+!>((limo [[%update-all flag] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
   [gives state]
 ::
+++  dismiss-id
+::  :notif-db &ndb-poke [%dismiss-id 0]
+  |=  [=id:sur state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  row  (got:notifon:sur notifs-table.state id)
+  =.  dismissed.row     %.y
+  =.  dismissed-at.row  now.bowl
+  =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
+  =/  thechange  db-change+!>((limo [[%update-row row] ~]))
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+  ==
+  [gives state]
+::
 ++  update
-::  :notif-db &ndb-poke [%update 0 %chat-db /realm-chat/path-id %message 'the mes...' ~]
+:: :notif-db &ndb-poke [%update 0 %chat-db /realm-chat/path-id %message 'T2' 'the mes...' '' ~ '' ~]
   |=  [act=[=id:sur =create-action:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  row  (got:notifon:sur notifs-table.state id.act)
   =.  app.row        app.create-action.act
   =.  path.row       path.create-action.act
   =.  type.row       type.create-action.act
+  =.  title.row      title.create-action.act
   =.  content.row    content.create-action.act
+  =.  image.row      image.create-action.act
+  =.  buttons.row    buttons.create-action.act
+  =.  link.row       link.create-action.act
   =.  metadata.row   metadata.create-action.act
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id.act row)
   =/  thechange  db-change+!>([[%update-row row] ~])
@@ -168,6 +186,7 @@
           [%read-app (se %tas)]
           [%read-path app-and-path]
           [%read-all bo]
+          [%dismiss-id ni]
           [%update de-update]
           [%delete ni]
       ==

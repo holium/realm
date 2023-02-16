@@ -41,6 +41,8 @@
         (read-path:db-lib +.act state bowl)
       %read-all
         (read-all:db-lib +.act state bowl)
+      %dismiss-id
+        (dismiss-id:db-lib +.act state bowl)
       %update
         (update:db-lib +.act state bowl)
       %delete
@@ -102,6 +104,13 @@
         =/  theapp    `@tas`i.t.t.t.t.path
         =/  thepath   t.t.t.t.t.path
         ``rows+!>((rows-by-type:core theapp thepath thetype))
+    ::
+    :: notifs since index
+      [%x %db %since @ ~]
+        =/  index  (slav %ud i.t.t.t.path)
+        =/  new-rows  
+            (turn (tap:notifon:sur (lot:notifon:sur notifs-table.state `index ~)) val-r:core)
+        ``rows+!>(new-rows)
     ==
   :: notif-db does not subscribe to anything.
   :: notif-db does not care
@@ -131,26 +140,28 @@
 ++  keyval-to-change
   |=  [key=id:sur val=notif-row:sur]
   [%add-row val]
+++  val-r
+  |=([k=@ud v=notif-row:sur] v)
 ++  all-rows
-  (turn (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] v))
+  (turn (tap:notifon:sur notifs-table.state) val-r)
 ++  all-unread-rows
   %+  turn
     (skip (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] read.v))
-  |=([k=@ud v=notif-row:sur] v)
+  val-r
 ++  all-read-rows
   %+  turn
     (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] read.v))
-  |=([k=@ud v=notif-row:sur] v)
+  val-r
 ++  rows-by-path
   |=  [app=@tas =path]
   %+  turn
     (notifs-by-path app path)
-  |=([k=@ud v=notif-row:sur] v)
+  val-r
 ++  rows-by-type
   |=  [app=@tas =path type=@tas]
   %+  turn
     (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v) =(type type.v))))
-  |=([k=@ud v=notif-row:sur] v)
+  val-r
 ++  notifs-by-path
   |=  [app=@tas =path]
   (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))

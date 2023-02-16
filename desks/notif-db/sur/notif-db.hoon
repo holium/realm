@@ -46,6 +46,7 @@
       [%read-app app=@tas]
       [%read-path app=@tas =path]
       [%read-all read=?]
+      [%dismiss-id =id]
       [%update =id =create-action]
       [%delete =id]
   ==
