@@ -177,6 +177,11 @@ const createMouseOverlayWindow = () => {
     if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
   });
 
+  newMouseWindow.webContents.on('cursor-changed', () => {
+    hideCursor(newMouseWindow.webContents);
+    if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
+  });
+
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
   });
