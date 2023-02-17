@@ -114,7 +114,7 @@ jobs:
       - name: Install sentry-cli
         run: |
           npm install @sentry/cli
-          ./node_modules/.bin/sentry-cli --auth-token $SENTRY_API_KEY releases files "$BUILD_VERSION" upload-sourcemaps ./app/release/app/dist
+          ./node_modules/.bin/sentry-cli releases --auth-token $SENTRY_API_KEY --org assembly-capital --project realm-desktop files "$BUILD_VERSION" upload-sourcemaps ./app/release/app/dist
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
