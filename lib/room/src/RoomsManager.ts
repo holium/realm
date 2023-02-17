@@ -245,6 +245,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     // creates a room in the current provider
     const room = this.protocol.createRoom(title, access, path);
     this.emit(RoomManagerEvent.CreatedRoom, room);
+    return room.rid;
   }
 
   async deleteRoom(rid: string) {

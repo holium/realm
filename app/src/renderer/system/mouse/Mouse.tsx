@@ -35,7 +35,7 @@ const shipConfigs: Record<string, ShipConfig> = {
   },
 };
 
-let roomsManager: RoomsManager;
+let roomsManager: RoomsManager | null = null;
 
 export const Mouse = () => {
   const { ship } = useRealmMultiplayer();
@@ -57,10 +57,7 @@ export const Mouse = () => {
       position: newPosition,
     };
 
-    console.log('cursorPayload', cursorPayload);
-    console.log('roomsManager', roomsManager);
-
-    roomsManager.sendData({
+    roomsManager?.sendData({
       kind: DataPacket_Kind.DATA,
       value: { cursor: cursorPayload },
     });
@@ -87,13 +84,15 @@ export const Mouse = () => {
           handlers
         );
         roomsManager = new RoomsManager(protocol);
+        const rid = roomsManager.createRoom('test', 'public', 'test');
+        roomsManager.enterRoom(rid);
         setRoomsManager(roomsManager);
         api.subscribe({
           app: 'rooms-v2',
           path: '/lib',
           event: (data: any, mark: any) => {
             console.log('lib', data);
-            (roomsManager.protocol as RealmProtocol).onSignal(data, mark);
+            (roomsManager?.protocol as RealmProtocol).onSignal(data, mark);
           },
         });
         roomsManager.on(
@@ -118,10 +117,9 @@ export const Mouse = () => {
       // A) mouse layer tracking is disabled, or
       // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
       if (!mouseLayerTracking.isOn) {
-        console.log('newCoordinates', newCoordinates);
         setPosition(newCoordinates);
-      } else {
-        if (isDragging) updateMousePosition(newCoordinates);
+      } else if (isDragging) {
+        updateMousePosition(newCoordinates);
       }
       setState(newState);
     });
@@ -139,7 +137,6 @@ export const Mouse = () => {
     };
 
     window.electron.app.onEnableMouseLayerTracking(() => {
-      alert('hello');
       mouseLayerTracking.toggleOn();
       window.addEventListener('mousemove', handleMouseMove);
     });
