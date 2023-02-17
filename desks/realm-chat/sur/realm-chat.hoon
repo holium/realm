@@ -28,5 +28,5 @@
       [%set-device =device-id:notify =player-id:notify]
       [%remove-device =device-id:notify]
   ==
-+$  create-chat-data  [metadata=(map cord cord) type=@tas]
++$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship)]
 --

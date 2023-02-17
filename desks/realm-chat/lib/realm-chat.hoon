@@ -86,15 +86,23 @@
 ::  poke actions
 ::
 ++  create-chat
-::  :realm-chat &action [%create-chat ~ %chat]
+::  :realm-chat &action [%create-chat ~ %chat ~]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(type.act %chat)  :: for now only support %chat type paths
   :: TODO COMMENT/UNCOMMENT THIS TO USE REAL paths or TESTING paths
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   ::=/  chat-path  /realm-chat/path-id
+
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act]
   =/  cards  
-    [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path chat-path act])]~
+    :-
+      [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path pathrow])]
+      :: for each "initial" peer they passed in, we poke ourselves with %add-ship-to-chat
+      %:  turn
+        peers.act
+        |=(s=ship [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %action !>([%add-ship-to-chat chat-path s])])
+      ==
   [cards state]
 ++  add-ship-to-chat
 ::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
@@ -209,7 +217,7 @@
     |%
     ++  decode
       %-  of
-      :~  [%create-chat meta-and-type]
+      :~  [%create-chat create-chat]
           [%add-ship-to-chat path-and-ship]
           [%remove-ship-from-chat path-and-ship]
           [%send-message path-and-fragments]
@@ -222,11 +230,14 @@
           [%remove-device remove-device]
       ==
     ::
-    ++  meta-and-type
+    ++  create-chat
       %-  ot
       :~  [%metadata (om so)]
           [%type (se %tas)]
+          [%peers (ar de-ship)]
       ==
+    ::
+    ++  de-ship  (su ;~(pfix sig fed:ag))
     ::
     ++  set-device
       %-  ot
@@ -243,13 +254,13 @@
       %-  ot
       :~  
           [%path pa]
-          [%ship (su ;~(pfix sig fed:ag))]
+          [%ship de-ship]
       ==
     ::
     ++  de-edit-info
       %-  ot
       :~  
-          [%msg-id (at ~[(se %da) (su ;~(pfix sig fed:ag))])]
+          [%msg-id (at ~[(se %da) de-ship])]
           [%path pa]
           de-frag
       ==
@@ -282,7 +293,7 @@
           [%ur-link so]
           [%react so]
           [%break ul]
-          [%ship (su ;~(pfix sig fed:ag))]
+          [%ship de-ship]
           [%link so]
           [%custom (at ~[so so])]
       ==
@@ -292,7 +303,7 @@
       :~  
           [%path pa]
           :: TODO decide if di for millisecond time is easier than (se %da)
-          [%msg-id (at ~[(se %da) (su ;~(pfix sig fed:ag))])]
+          [%msg-id (at ~[(se %da) de-ship])]
       ==
     --
   --
