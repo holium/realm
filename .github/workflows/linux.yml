@@ -88,6 +88,10 @@ jobs:
           sudo aptitude install -y -q winehq-staging
           sudo aptitude install -y -q wine-staging
           sudo apt update
+          cat > .env <<EOF
+          RELEASE_CHANNEL=$RELEASE_CHANNEL
+          SENTRY_RELEASE=$BUILD_VERSION
+          EOF
           GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

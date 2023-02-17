@@ -320,6 +320,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
       #
+      - name: Install sentry-cli
+        run: |
+          npm install @sentry/cli
+          ./node_modules/.bin/sentry-cli
+          ./node_modules/.bin/sentry-cli login --auth-token $SENTRY_API_KEY
+          ./node_modules/.bin/sentry-cli releases files "$BUILD_VERSION" upload-sourcemaps ./dist
+        env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
+      #
       # remove for now. will need to offload this to a test build pipeline until
       #   can get this correct
       # - name: Create Sentry release
