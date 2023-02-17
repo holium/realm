@@ -9,7 +9,13 @@ const isProd = environment === 'production';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
+  console.log(
+    `Initializing Sentry [release: ${process.env.SENTRY_RELEASE}]...`
+  );
   Sentry.init({
+    // this is defined 'on-the-fly' during staging/production builds where
+    //  a .env file is defined with various values
+    release: process.env.SENTRY_RELEASE,
     environment,
     dsn: process.env.SENTRY_DSN,
     integrations: [new BrowserTracing()],
