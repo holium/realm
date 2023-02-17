@@ -14,7 +14,6 @@ import { toJS } from 'mobx';
 
 export const genCSSVariables = (theme: ThemeType) => {
   return `
-      * { cursor: none !important; }
       :root {
         --rlm-font: 'Rubik', sans-serif;
         --rlm-base-color: ${theme.backgroundColor};
