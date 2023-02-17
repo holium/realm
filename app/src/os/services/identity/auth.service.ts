@@ -45,6 +45,7 @@ export class AuthService extends BaseService {
       this.resendNewEmailVerificationCode,
     'realm.auth.verify-new-email': this.verifyNewEmail,
     'realm.auth.get-code': this.getCode,
+    'realm.auth.update-ship-code': this.updateShipCode,
   };
 
   static preload = {
@@ -83,6 +84,17 @@ export class AuthService extends BaseService {
     verifyNewEmail: async (verificationCode: string): Promise<boolean> =>
       await ipcRenderer.invoke('realm.auth.verify-new-email', verificationCode),
     getCode: async () => await ipcRenderer.invoke('realm.auth.get-code'),
+    updateShipCode: async (
+      patp: string,
+      password: string,
+      code: string
+    ): Promise<string> =>
+      await ipcRenderer.invoke(
+        'realm.auth.update-ship-code',
+        patp,
+        password,
+        code
+      ),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -269,7 +281,69 @@ export class AuthService extends BaseService {
     return db.store;
   }
 
-  async login(_event: any, patp: string, password: string): Promise<boolean> {
+  async updateShipCode(
+    _event: any,
+    patp: string,
+    password: string,
+    code: string
+  ): Promise<string> {
+    let result = '';
+    try {
+      const ship = this.state.ships.get(`auth${patp}`)!;
+      if (!ship) {
+        throw new Error('ship not found');
+      }
+
+      if (ship.passwordHash === null) {
+        throw new Error('login: passwordHash is null');
+      }
+
+      const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
+      if (!passwordCorrect) {
+        throw new Error('login: password is incorrect');
+      }
+
+      this.core.passwords.setPassword(patp, password);
+
+      this.core.services.identity.auth.storeCredentials(ship.patp, password, {
+        code: code,
+      });
+
+      let cookie = null,
+        connectConduit = false;
+      // in the case of development or DEBUG_PROD builds, we auto connect at startup; therefore
+      //  when this is the case, get a new cookie in order to refresh the conduit
+      if (
+        process.env.NODE_ENV === 'development' ||
+        process.env.DEBUG_PROD === 'true'
+      ) {
+        cookie = await getCookie({
+          patp,
+          url: ship.url,
+          code: code,
+        });
+        connectConduit = true;
+      }
+
+      this.core.setSession(
+        {
+          ship: ship.patp,
+          url: ship.url,
+          code,
+          cookie: cookie,
+        },
+        connectConduit
+      );
+      result = 'success';
+    } catch (e) {
+      this.core.sendLog(e);
+      this.state.setLoader('error');
+      result = 'error';
+    }
+    return result;
+  }
+
+  async login(_event: any, patp: string, password: string): Promise<string> {
     try {
       const shipId = `auth${patp}`;
       this.state.setLoader('loading');
@@ -294,25 +368,25 @@ export class AuthService extends BaseService {
 
       this.core.services.shell.setBlur(null, false);
 
-      const { code } = this.readCredentials(patp, password);
+      const credentials = this.readCredentials(patp, password);
 
       const cookie = await getCookie({
         patp,
         url: ship.url,
-        code,
+        code: credentials.code,
       });
 
       this.core.setSession({
         ship: ship.patp,
         url: ship.url,
-        code,
+        code: credentials.code,
         cookie,
       });
-      return true;
-    } catch (e) {
+      return 'continue';
+    } catch (e: any) {
       this.core.sendLog(e);
       this.state.setLoader('error');
-      return false;
+      return `error:${e.response?.status}`;
     }
   }
 
