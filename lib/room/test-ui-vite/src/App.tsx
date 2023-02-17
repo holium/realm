@@ -51,7 +51,6 @@ const shipData = ShipConfig[testShip];
 export let roomsManager: RoomsManager;
 
 const AppPresenter = () => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
     let api: any = null;
