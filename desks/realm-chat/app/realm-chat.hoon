@@ -99,6 +99,13 @@
             ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
             `this
         ==
+      [%selfpoke ~]
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%realm-chat: {<(spat wire)>} selfpoke failed"
+            `this
+        ==
       [%db ~]
         ?+    -.sign  !!
           %watch-ack
