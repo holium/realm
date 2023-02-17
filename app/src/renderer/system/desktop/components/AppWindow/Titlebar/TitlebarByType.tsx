@@ -130,11 +130,12 @@ export const TitlebarByType = ({
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     noTitlebar = dialogConfig.noTitlebar!;
-    const onCloseDialog = dialogConfig.onClose;
+    const onCloseDialog = dialogConfig.hasCloseButton ? onClose : undefined;
     const onOpenDialog = dialogConfig.onOpen;
-    CustomTitlebar = DialogTitlebar;
+    CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
+    // console.log('dialogConfig', dialogConfig, onClose);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
@@ -149,9 +150,7 @@ export const TitlebarByType = ({
           windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onClose={onCloseDialog ?? onClose}
-          onMinimize={onMinimize}
-          onMaximize={onMaximize}
+          onClose={onCloseDialog}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
         />

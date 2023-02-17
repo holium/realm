@@ -1,19 +1,11 @@
 import { useState, useCallback, KeyboardEvent } from 'react';
-import {
-  Grid,
-  Text,
-  Flex,
-  Button,
-  Box,
-  Icons,
-  BigInput,
-} from 'renderer/components';
+import { Grid, Button, Box } from 'renderer/components';
+import { HoliumButton, TextInput, Text, Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import _ from 'lodash';
 import { AccessCode as AccessCodeType } from 'os/api/holium';
-import { useServices } from 'renderer/logic/store';
 
 const stubAccessCode = {
   title: 'Combine DAO',
@@ -58,10 +50,10 @@ const AccessCodeDisplay = (props: { accessCode: AccessCodeType }) => {
           alignItems="flex-start"
           justifyContent="center"
         >
-          <Text variant="h5">{accessCode.title}</Text>
-          <Text mt={2} variant="body">
+          <Text.H5>{accessCode.title}</Text.H5>
+          <Text.Custom mt={2} fontSize={2}>
             {accessCode.description}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
     </Flex>
@@ -69,7 +61,6 @@ const AccessCodeDisplay = (props: { accessCode: AccessCodeType }) => {
 };
 
 const AccessCodePresenter = (props: BaseDialogProps) => {
-  const { theme } = useServices();
   const [inputText, setInputText] = useState('');
   const [accessCode, setAccessCode] = useState<AccessCodeType | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -141,20 +132,21 @@ const AccessCodePresenter = (props: BaseDialogProps) => {
           alignItems="center"
           justifyContent="center"
         >
-          <Icons
-            name="Holium"
-            size={30}
-            color={theme.currentTheme.mode === 'light' ? 'black' : 'white'}
-          />
+          <HoliumButton />
           {accessCode ? (
-            <Text ml={12} fontSize={3} fontWeight={400} color="text.success">
-              Access code found!
-            </Text>
+            <Text.Custom
+              ml={12}
+              fontSize={3}
+              fontWeight={400}
+              color="intent-success"
+            >
+              Group code found!
+            </Text.Custom>
           ) : (
-            <Text ml={12} fontSize={3} fontWeight={400}>
+            <Text.Custom ml={12} fontSize={3} fontWeight={400}>
               {' '}
-              Have an Access Code?{' '}
-            </Text>
+              Have a Group Code?{' '}
+            </Text.Custom>
           )}
         </Flex>
       </Grid.Row>
@@ -183,27 +175,31 @@ const AccessCodePresenter = (props: BaseDialogProps) => {
           ) : (
             <>
               <Box mb={36}>
-                <Text variant="body" textAlign="center">
-                  Realm access codes can be used to pre-join certain groups or
+                <Text.Custom fontSize={2} lineHeight="1.4" textAlign="center">
+                  Realm group codes can be used to pre-join certain groups or
                   for pricing discounts. If you have one, please enter it now.
-                </Text>
+                </Text.Custom>
               </Box>
               <Flex
                 flexDirection="column"
                 alignItems="center"
                 justifyContent="center"
               >
-                <BigInput
+                <TextInput
+                  name="access-code"
+                  id="access-code"
+                  fontSize="20px"
                   mt={16}
-                  value={inputText}
+                  height={50}
                   placeholder="alchemy-dao"
-                  onChange={inputChangeHandler}
+                  textAlign="center"
+                  value={inputText}
+                  onChange={(evt: any) => inputChangeHandler(evt.target.value)}
                   onKeyDown={onKeyDown}
                 />
+
                 <Box mt={12} height={18}>
-                  <Text variant="body" color="text.error">
-                    {errorMessage}
-                  </Text>
+                  <Text.Custom color="intent-alert">{errorMessage}</Text.Custom>
                 </Box>
                 <Box mt={16}>
                   <Button
@@ -212,7 +208,7 @@ const AccessCodePresenter = (props: BaseDialogProps) => {
                     onClick={proceedWithout}
                   >
                     {' '}
-                    I don't have an access code{' '}
+                    I don't have a group code{' '}
                   </Button>
                 </Box>
               </Flex>

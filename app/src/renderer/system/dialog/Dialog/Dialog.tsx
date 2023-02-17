@@ -8,8 +8,8 @@ import {
   RefObject,
 } from 'react';
 import styled from 'styled-components';
-import { Button } from '@holium/design-system';
-import { Flex, Spinner, IconButton, Icons } from 'renderer/components';
+import { Button, Icon } from '@holium/design-system';
+import { Flex, Spinner } from 'renderer/components';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { AppWindowType } from 'os/services/shell/desktop.model';
@@ -106,6 +106,8 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
         </Flex>
         {workflow && (
           <Flex
+            key={workflowState.id}
+            id={workflowState.id}
             flexDirection="row"
             justifyContent="space-between"
             alignItems="center"
@@ -113,14 +115,14 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
           >
             <Flex alignItems="center" justifyContent="flex-start">
               {onPrevious && hasPrevious && hasPrevious() && (
-                <IconButton
-                  customBg={theme.currentTheme.windowColor}
+                <Button.IconButton
+                  size={26}
                   onClick={() => {
                     onPrevious();
                   }}
                 >
-                  <Icons name="ArrowLeftLine" />
-                </IconButton>
+                  <Icon name="ArrowLeftLine" size={20} opacity={0.5} />
+                </Button.IconButton>
               )}
             </Flex>
             <Flex

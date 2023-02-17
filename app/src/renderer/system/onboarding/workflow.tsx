@@ -87,7 +87,7 @@ const initialOnboardingDialogs: DialogRenderers = {
           x: 0,
           y: 0,
           width: 400,
-          height: 420,
+          height: 370,
         },
         desktopDimensions
       ),
@@ -131,6 +131,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
+    // onPrevious: () => {
     getWindowProps: (desktopDimensions) => ({
       appId: OnboardingStep.EMAIL,
       zIndex: 13,
@@ -139,8 +140,8 @@ const initialOnboardingDialogs: DialogRenderers = {
         {
           x: 0,
           y: 0,
-          width: 450,
-          height: 420, // ayyyy
+          width: 400,
+          height: 370, // ayyyy
         },
         desktopDimensions
       ),
