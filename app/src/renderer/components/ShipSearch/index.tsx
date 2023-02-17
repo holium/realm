@@ -99,7 +99,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 customBg={dockColor}
                 size={24}
                 canFocus
-                isDisabled={selected.size > 0}
+                // isDisabled={selected.size > 0}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   onSelected([contact[0], nickname]);

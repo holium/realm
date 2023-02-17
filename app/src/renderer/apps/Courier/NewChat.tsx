@@ -47,8 +47,8 @@ export const NewChat = () => {
   };
 
   return (
-    <Flex gap={8} height={dimensions.height - 24} flexDirection="column">
-      <Flex minHeight={36} height={36} flexDirection="row" alignItems="center">
+    <Flex gap={8} height={dimensions.height - 14} flexDirection="column">
+      <Flex minHeight={32} height={36} flexDirection="row" alignItems="center">
         <Flex width={120}>
           <Button.IconButton
             size={26}
@@ -65,11 +65,15 @@ export const NewChat = () => {
           width="100%"
           textAlign="center"
           fontWeight={500}
-          mb={1}
+          // mb={1}
         >
           New Chat
         </Text.Custom>
-        <Flex width={120} justifyContent="flex-end"></Flex>
+        <Flex width={120} alignItems="flex-start" justifyContent="flex-end">
+          {selectedPatp.size > 0 && (
+            <Button.TextButton showOnHover>Create</Button.TextButton>
+          )}
+        </Flex>
       </Flex>
       <TextInput
         id="dm-search"
@@ -134,7 +138,7 @@ const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
 
         return (
           <Flex
-            // height={64}
+            key={ship}
             width={50}
             position="relative"
             flexDirection="column"
@@ -147,10 +151,10 @@ const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
               simple
             />
             <Text.Custom mt={1} width={50} truncate opacity={0.7} fontSize={1}>
-              {ship}
+              {metadata.nickname || ship}
             </Text.Custom>
             <RemoveWrapper>
-              <Button.IconButton
+              <Button.Base
                 className="new-chat-remove-ship"
                 size={18}
                 borderRadius={11}
@@ -160,7 +164,7 @@ const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
                 }}
               >
                 <Icon name="Close" size={16} />
-              </Button.IconButton>
+              </Button.Base>
             </RemoveWrapper>
           </Flex>
         );

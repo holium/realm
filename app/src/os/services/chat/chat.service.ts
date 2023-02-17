@@ -14,6 +14,7 @@ import {
   ChatDbOps,
   AddRow,
 } from './chat.types';
+import { CONSOLE_LEVELS } from '@sentry/utils';
 
 type ChatUpdateType =
   | 'message-received'
@@ -95,12 +96,14 @@ export class ChatService extends BaseService {
     });
   }
 
-  onDbUpdate(data: ChatDbReactions) {
+  onDbUpdate(data: ChatDbReactions, _id?: number, mark?: string) {
+    console.log(mark);
     if ('tables' in data) {
       this.insertMessages(data.tables.messages);
       this.insertPaths(data.tables.paths);
       this.insertPeers(data.tables.peers);
     } else if (Array.isArray(data)) {
+      console.log('db update', data);
       data.forEach(this.handleDBChange);
     } else {
       console.log(data);
@@ -262,8 +265,7 @@ export class ChatService extends BaseService {
               WHERE path LIKE '%realm-chat%'
                 and sender != ?
               GROUP BY msg_id
-              ORDER BY timestamp DESC
-              LIMIT 1)
+              ORDER BY timestamp DESC)
         GROUP BY path
         ORDER BY timestamp DESC;
     `);
@@ -358,5 +360,26 @@ export class ChatService extends BaseService {
   readChat(path: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     // this.core.conduit.readChat(path);
+  }
+
+  async createChat(_evt: any, peers: string[], metadata: any) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'create-chat': {
+          type: 'chat',
+          metadata: {},
+        },
+      },
+    };
+    try {
+      const result = await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to create chat');
+    }
   }
 }

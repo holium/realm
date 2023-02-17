@@ -36,7 +36,7 @@ export const Inbox = () => {
       });
   }, []);
 
-  const lastTimeSent = chatList[0]?.timestamp;
+  // const lastTimeSent = chatList[0]?.timestamp;
 
   const searchFilter = useCallback(
     (preview: ChatRowType) => {
@@ -88,28 +88,26 @@ export const Inbox = () => {
         </Button.IconButton>
       </Flex>
       <WindowedList
-        key={lastTimeSent}
+        // key={lastTimeSent}
         width={dimensions.width - 26}
         height={544}
-        rowHeight={57}
+        rowHeight={54}
         data={chatList}
         filter={searchFilter}
         rowRenderer={(chat: ChatRowType, index: number) => {
           return (
-            <Box display="block" key={`dm-${index}`}>
-              <ChatRow
-                path={chat.path}
-                patp={chat.sender}
-                lastMessage={chat.lastMessage}
-                timestamp={chat.timestamp}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setChat(chat.path, chat.sender, 'dm');
-                  console.log('open chat');
-                  // onSelectDm(dm);
-                }}
-              />
-            </Box>
+            <ChatRow
+              key={`dm-${index}-${chat.timestamp}`}
+              path={chat.path}
+              patp={chat.sender}
+              lastMessage={chat.lastMessage}
+              timestamp={chat.timestamp}
+              onClick={(evt) => {
+                evt.stopPropagation();
+                setChat(chat.path, chat.sender, 'dm');
+                // onSelectDm(dm);
+              }}
+            />
           );
         }}
       />
