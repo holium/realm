@@ -76,9 +76,14 @@ export class OnboardingService extends BaseService {
     },
 
     async setEmail(
-      email: string
+      email: string,
+      isRecoveringAccount: boolean
     ): Promise<{ success: boolean; errorMessage: string }> {
-      return await ipcRenderer.invoke('realm.onboarding.setEmail', email);
+      return await ipcRenderer.invoke(
+        'realm.onboarding.setEmail',
+        email,
+        isRecoveringAccount
+      );
     },
 
     async verifyEmail(verificationCode: string) {
@@ -325,7 +330,8 @@ export class OnboardingService extends BaseService {
 
   async setEmail(
     _event: any,
-    email: string
+    email: string,
+    isRecoveringAccount: boolean
   ): Promise<{ success: boolean; errorMessage: string }> {
     const { auth } = this.core.services.identity;
     this.state.setEmail(email);
@@ -344,6 +350,13 @@ export class OnboardingService extends BaseService {
       if (account?.id) {
         id = account.id;
         this.state.setNewAccount(false);
+      }
+      // if no account found and we are attempting to recover, this is an error condition
+      else if (isRecoveringAccount) {
+        return {
+          success: false,
+          errorMessage: `Account not found using email address '${email}`,
+        };
       } else {
         const newAccount = await this.core.holiumClient.createAccount(
           email,

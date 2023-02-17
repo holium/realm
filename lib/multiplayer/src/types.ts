@@ -138,6 +138,8 @@ export interface RealmMultiplayerInterface {
 }
 
 declare global {
-  var ship: MultiplayerShipType;
-  var id: string;
+  var multiplayer: {
+    id: string;
+    ship: MultiplayerShipType;
+  };
 }

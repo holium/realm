@@ -300,7 +300,6 @@ export class Conduit extends EventEmitter {
       };
       this.sse.onerror = async (error) => {
         console.log('sse error', error);
-        // @ts-ignore
         if (error.status === 403) {
           // @ts-ignore
           error.originator = 'sse';
