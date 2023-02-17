@@ -50,7 +50,7 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
 }
 
 function getSessionID() {
-  return window.id + window.ship.patp;
+  return window.multiplayer.id + window.multiplayer.ship.patp;
 }
 
 // Manage websocket connection within realm or an individual app
@@ -114,7 +114,7 @@ export const Presences = () => {
   // const onMouseMove = useCallback((e: MouseEvent) => {
   //   try {
   //     // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
-  //     const ship = window.ship;
+  //     const ship = window.multiplayer.ship;
 
   //     if (socket.current?.readyState !== WebSocket.OPEN || !ship) return;
   //     const payload: CursorMovePayload = {
@@ -142,7 +142,7 @@ export const Presences = () => {
   //   if (!e.isTrusted) return;
   //   try {
   //     // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
-  //     const ship = window.ship;
+  //     const ship = window.multiplayer.ship;
   //     const targetId = (e.target as HTMLElement | null)?.getAttribute(
   //       'data-multi-click-id'
   //     ); // element user clicked on
