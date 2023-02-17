@@ -1,7 +1,6 @@
 import { FC, createRef, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
@@ -10,6 +9,8 @@ import { useTrayApps } from 'renderer/apps/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { Icon } from '@holium/design-system';
+import { IconButton } from 'renderer/components';
 
 const ICON_SIZE = 28;
 
@@ -105,11 +106,11 @@ export const AirliftTray: FC = observer(() => {
         customBg={iconHoverColor}
         color={textColor}
         mt="2px"
-        draggable={true}
-        onDragStart={onButtonDragStart}
+        // draggable={true}
+        // onDragStart={onButtonDragStart}
         // mb="-2px"
       >
-        <Icons name="Airlift" pointerEvents="none" />
+        <Icon name="Airlift" size={ICON_SIZE} pointerEvents="none" />
       </IconButton>
     </motion.div>
   );

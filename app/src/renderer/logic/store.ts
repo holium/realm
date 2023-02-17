@@ -33,7 +33,7 @@ import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
-import { AirliftStore } from 'os/services/tray/airlift.model';
+import { AirliftStore } from 'os/services/shell/airlift.model';
 
 const Services = types
   .model('ServicesStore', {
@@ -129,9 +129,7 @@ const services = Services.create({
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
-  airlift: {
-    model: {},
-  },
+  airlift: { model: {} },
 });
 
 export const servicesStore = services;
@@ -400,6 +398,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'friends') {
       applyPatch(servicesStore.friends, value.patch);
+    }
+    if (value.resource === 'airlift') {
+      applyPatch(servicesStore.airlift, value.patch);
     }
   }
   // TODO do we need initial anymore?

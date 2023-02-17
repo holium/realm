@@ -1,24 +1,19 @@
-import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { AppWindow } from './components/AppWindow/AppWindow';
 import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import {
-  ContextMenuOption,
-  useContextMenu,
-} from 'renderer/components/ContextMenu';
+import { Airlift } from 'renderer/apps/Airlift';
 
 const AirliftManagerPresenter = () => {
-  const { getOptions, setOptions } = useContextMenu();
-  const { shell, desktop } = useServices();
+  // const { getOptions, setOptions } = useContextMenu();
+  const { shell, airlift, desktop, spaces } = useServices();
   const id = 'airlift-fill';
 
-  const airlifts = Array.from(desktop.airlifts.values());
+  const airlifts = Array.from(
+    airlift.airlifts.get(spaces.selected!.path)?.values() || []
+  );
   // const windows = Array.from(desktop.windows.values());
 
-  const contextMenuOptions: ContextMenuOption[] = useMemo(
+  /*const contextMenuOptions: ContextMenuOption[] = useMemo(
     () => [
       {
         label: 'Change wallpaper',
@@ -49,7 +44,7 @@ const AirliftManagerPresenter = () => {
     if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
       setOptions(id, contextMenuOptions);
     }
-  }, [contextMenuOptions, getOptions, setOptions]);
+  }, [contextMenuOptions, getOptions, setOptions]);*/
 
   return (
     <motion.div
@@ -68,8 +63,9 @@ const AirliftManagerPresenter = () => {
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {windows.map((appWindow, index: number) => (
-        <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
+      {airlifts.map((appWindow, index: number) => (
+        // <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
+        <Airlift />
       ))}
     </motion.div>
   );

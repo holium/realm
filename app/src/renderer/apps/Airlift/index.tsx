@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { AirliftAgent } from './AirliftAgent';
 
 export type AirliftProps = {
-  isResizing: boolean;
+  // isResizing: boolean;
 };
 
 export const Airlift: FC<AirliftProps> = observer((/*props: AirliftProps*/) => {

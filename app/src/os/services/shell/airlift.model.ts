@@ -1,12 +1,4 @@
-import {
-  Instance,
-  types,
-  cast,
-  castToReferenceSnapshot,
-  tryReference,
-  applySnapshot,
-} from 'mobx-state-tree';
-import { type } from 'os';
+import { Instance, types } from 'mobx-state-tree';
 
 const BehnTimerCard = types
   .model('BehnTimerCard', {
@@ -15,9 +7,15 @@ const BehnTimerCard = types
   })
   .views((self) => ({
     get code() {
-      return '[%pass ' + self.wire + ' %arvo %b %wait (add now.bowl ' + self.duration + ')]';
-    }
-  }))
+      return (
+        '[%pass ' +
+        self.wire +
+        ' %arvo %b %wait (add now.bowl ' +
+        self.duration +
+        ')]'
+      );
+    },
+  }));
 
 const AirliftCard = types.union(BehnTimerCard);
 
@@ -27,7 +25,7 @@ export const AirliftArm = types
     body: types.string,
     cards: types.map(AirliftCard),
     expanded: types.boolean,
-    view: types.enumeration(['options', 'code', 'cards'])
+    view: types.enumeration(['options', 'code', 'cards']),
   })
   .views((self) => ({
     get code() {
@@ -43,16 +41,16 @@ export const AirliftArm = types
         }
         code += '  ==\n';
       } else {
-        code += '  `this\n'
+        code += '  `this\n';
       }
       return code;
-    }
+    },
   }))
   .actions((self) => ({
     expand() {
       self.expanded = true;
-    }
-  })); 
+    },
+  }));
 
 export type AirliftArmType = Instance<typeof AirliftArm>;
 
@@ -80,36 +78,33 @@ const AirliftAgent = types
                   +*  this  .
                       def   ~(. (default-agent this %.n) bowl)
                   ::
-                  `
+                  `;
       for (var arm in self.arms) {
         code += (arm as any).code;
       }
-      code += '--'
-      return code
-    }
-
+      code += '--';
+      return code;
+    },
   }))
-  .actions((self) => ({
-
-  }));
+  .actions((self) => ({}));
 
 export const AirliftDesk = types.model('AirliftDesk', {
   agents: types.map(AirliftAgent),
-})
+});
 
-export const AirliftModel = types
-  .model('AirliftModel', {
-    desks: types.map(AirliftDesk),
-  })
-export type AirliftStoreType = Instance<typeof AirliftStore>;
+export const AirliftModel = types.model('AirliftModel', {
+  desks: types.map(AirliftDesk),
+});
+export type AirliftModelType = Instance<typeof AirliftModel>;
 
 export const AirliftStore = types
   .model('AirliftStore', {
-    model: AirliftModel
+    model: AirliftModel,
+    airlifts: types.map(types.map(AirliftModel)),
   })
   .views((self) => ({
     initial(agents: any) {
-/*      self.model = AirliftModel.create({
+      /*      self.model = AirliftModel.create({
       })
       const btcWallets = wallets.bitcoin;
       Object.entries(btcWallets).forEach(([key, wallet]) => {

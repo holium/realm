@@ -1,7 +1,7 @@
-import { AirliftService } from 'os/services/tray/airlift.service';
+import { AirliftService } from 'os/services/shell/airlift.service';
 
 /**
  * AirliftActions for interfacing with core process
  */
 type AirliftActionType = typeof AirliftService.preload;
-export const AirliftActions: AirliftActionType = window.electron.os.tray.airlift;
+export const AirliftActions: AirliftActionType = window.electron.os.airlift;

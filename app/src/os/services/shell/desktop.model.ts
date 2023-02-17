@@ -47,7 +47,7 @@ const AppWindowModel = types
       height: 5,
     }),
     /**
-     * The ative window has a titlebar with full contrast.
+     * The active window has a titlebar with full contrast.
      */
     isActive: types.optional(types.boolean, false),
     /**

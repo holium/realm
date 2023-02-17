@@ -21,6 +21,7 @@ import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
+import { AirliftService } from './services/shell/airlift.service';
 
 export interface ISession {
   ship: string;
@@ -49,6 +50,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
+    airlift: AirliftService;
   };
 
   readonly holiumClient: HoliumAPI;
@@ -129,6 +131,7 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
+      airlift: new AirliftService(this),
     };
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
@@ -187,6 +190,7 @@ export class Realm extends EventEmitter {
     let spaces = null;
     const desktop = this.services.desktop.snapshot;
     const shell = this.services.shell.snapshot;
+    const airlift = this.services.airlift.snapshot;
     let membership = null;
     let bazaar = null;
     let beacon = null;
@@ -218,6 +222,7 @@ export class Realm extends EventEmitter {
       spaces,
       desktop,
       shell,
+      airlift,
       bazaar,
       beacon,
       membership,
@@ -425,6 +430,7 @@ export class Realm extends EventEmitter {
     await this.services.ship.subscribe(sessionPatp, this.session);
     // this.sendLog('after ship subscribe');
     await this.services.spaces.load(sessionPatp, params.reconnecting);
+    await this.services.airlift.load(sessionPatp);
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: this.services.ship.snapshot,

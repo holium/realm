@@ -3,15 +3,13 @@ import { Flex, IconButton, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { Icon } from '@holium/design-system';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { nativeApps } from '../nativeApps';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { AirliftActions } from 'renderer/logic/actions/airlift';
 
 const ICON_SIZE = 28;
 
 export const AirliftCommandPalette: FC = observer(() => {
   // const { dimensions } = props;
-  const { theme } = useServices();
+  const { theme, spaces } = useServices();
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
@@ -36,7 +34,8 @@ export const AirliftCommandPalette: FC = observer(() => {
       });
       window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
-      DesktopActions.openAppWindow(nativeApps['airlift'] as AppType);
+      // DesktopActions.openAppWindow(nativeApps['airlift'] as AppType);
+      AirliftActions.dropAirlift(spaces.selected!.path, 'agent');
     },
     []
     /*[activeApp, anchorOffset, position, dimensions]*/
