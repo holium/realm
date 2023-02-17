@@ -36,11 +36,18 @@
   =/  current  (snag 0 badkvs)
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
+++  make-msg-from-minimal-frags
+  |=  [msg-act=insert-message-action:sur id=msg-id:sur] 
+  ^-  message:sur
+  =/  result        *message:sur
+  =/  counter=@ud   0
+  |-
+  ?:  =(counter (lent fragments.msg-act)) :: stop condition
+    result
+  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter)), counter +(counter))
 ++  add-message-to-table
   |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p]
-  =/  msg-id=msg-id:sur   [timestamp.msg-act sender]
-  =/  intermediate-fn     |=(a=minimal-fragment:sur (fill-out-minimal-fragment a path.msg-act msg-id (need (find ~[a] fragments.msg-act))))
-  =/  msg=message:sur     (turn fragments.msg-act intermediate-fn)
+  =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender])
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
 ++  messages-start-paths
@@ -110,7 +117,7 @@
   [gives state]
 ::
 ++  insert
-::  :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain 'hello'] ~ ~] ~])]
+:: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '2'] ~ ~] [[%plain '2'] ~ ~] [[%plain '4'] ~ ~] [[%plain '5'] ~ ~] [[%plain '6'] ~ ~] [[%plain '7'] ~ ~] [[%plain '8'] ~ ~] [[%plain '9'] ~ ~] ~])]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
