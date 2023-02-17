@@ -156,7 +156,7 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
           isSkeleton={!openGraph}
           fontSize={1}
           opacity={0.7}
-          width={rest.width || 'inherit'}
+          width={rest.width || 'calc(100% - 16px)'}
         >
           {description}
         </LinkDescription>
