@@ -231,6 +231,7 @@ export const Reactions = (props: ReactionProps) => {
               evt.stopPropagation();
               onClick(reaction.emoji);
             }}
+            // @ts-ignore
             selected={reaction.by.includes(window.ship)}
           >
             <Emoji
