@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MultiplayerShipType, Provider } from '@holium/realm-multiplayer';
 import { api } from './multiplayer';
 import { Presences } from './Presences';
+import { Mouse } from '../Mouse';
 
 export const MultiplayerMouse = () => {
   const [ship, setShip] = useState<MultiplayerShipType | null>(null);
@@ -16,6 +17,7 @@ export const MultiplayerMouse = () => {
 
   return (
     <Provider api={api} ship={ship} channel={channel}>
+      <Mouse />
       <Presences />
     </Provider>
   );
