@@ -197,7 +197,6 @@ const AccessCodePresenter = (props: BaseDialogProps) => {
                   onChange={(evt: any) => inputChangeHandler(evt.target.value)}
                   onKeyDown={onKeyDown}
                 />
-
                 <Box mt={12} height={18}>
                   <Text.Custom color="intent-alert">{errorMessage}</Text.Custom>
                 </Box>
