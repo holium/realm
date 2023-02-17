@@ -44,17 +44,6 @@ export const AirliftCommandPalette: FC = observer(() => {
 
   return (
     <Flex flexDirection="column" gap="15">
-      <Flex
-        // style={{ marginTop: 54, maxHeight: '100%' }}
-        gap={8}
-        flex={1}
-        overflowY={'scroll'}
-      >
-        <Text fontSize={2}>
-          To drop an Airlift, drag an icon from the Command Palette into the
-          current Space.
-        </Text>
-      </Flex>
       <Flex flexDirection="row" justifyContent="space-around">
         <Flex flexGrow={1}>
           <Text>Inputs</Text>
@@ -91,6 +80,17 @@ export const AirliftCommandPalette: FC = observer(() => {
           </IconButton>
           <Icon name="QRCode" size={ICON_SIZE} />
         </Flex>
+      </Flex>
+      <Flex
+        // style={{ marginTop: 54, maxHeight: '100%' }}
+        gap={8}
+        flex={1}
+        overflowY={'scroll'}
+      >
+        <Text fontSize={1}>
+          To drop an Airlift, drag an icon from the Command Palette into the
+          current Space.
+        </Text>
       </Flex>
     </Flex>
   );

@@ -6,6 +6,7 @@ import { HomePane } from './components/Home/HomePane';
 import { useServices } from 'renderer/logic/store';
 import { TrayManager } from './TrayManager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { AirliftManager } from './AirliftManager';
 
 const DesktopPresenter = () => {
   const { ship, desktop } = useServices();
@@ -15,6 +16,9 @@ const DesktopPresenter = () => {
     <Fill>
       <Layer zIndex={15}>
         <TrayManager />
+      </Layer>
+      <Layer zIndex={-1}>
+        <AirliftManager />
       </Layer>
       <Layer zIndex={0}>
         <AppWindowManager />

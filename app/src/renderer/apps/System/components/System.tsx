@@ -254,7 +254,7 @@ const SystemPanelPresenter = () => {
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
-        DEV TOOLS
+        AIRLIFT
       </Text>
       <Card
         p="20px"
