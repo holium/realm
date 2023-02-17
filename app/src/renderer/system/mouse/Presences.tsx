@@ -12,7 +12,6 @@ const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
 declare global {
   interface Window {
-    ship: ShipModelType;
     id: string;
   }
 }
