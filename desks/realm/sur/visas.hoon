@@ -37,6 +37,7 @@
       [%kick-member path=path:spc =ship]
       [%group-kick-member path=path:spc =ship]
       [%revoke-invite path=path:spc]
+      [%edit-member-role path=path:spc =ship role-set=(set role:membership)]
   ==
 
 +$  reaction
@@ -45,6 +46,7 @@
       [%invite-removed path=path:spc]
       [%invite-accepted path=path:spc =ship =member:membership]
       [%kicked path=path:spc =ship]
+      [%edited path=path:spc =ship role-set=(set role:membership)]
   ==
 ::
 +$  view

@@ -141,7 +141,8 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
           appId={appWindow.appId}
           partition="urbit-webview"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
-          allowpopups={true}
+          // @ts-ignore
+          allowpopups="true"
           src={appUrl ?? ''}
           isLocked={lockView}
           style={{

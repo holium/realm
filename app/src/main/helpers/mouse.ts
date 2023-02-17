@@ -37,4 +37,4 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
   });
 };
 
-export default { registerListeners };
+export const MouseHelper = { registerListeners };

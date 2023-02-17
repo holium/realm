@@ -1,9 +1,8 @@
-import { observer } from 'mobx-react';
 import { Flex, Text, Icons } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import PasscodeInput from '../../components/PasscodeInput';
+import { PasscodeInput } from '../../components/PasscodeInput';
 
-const LockedPresenter = () => {
+export const Locked = () => {
   const unlock = () => {
     WalletActions.navigateBack();
     WalletActions.watchUpdates();
@@ -31,5 +30,3 @@ const LockedPresenter = () => {
     </Flex>
   );
 };
-
-export const Locked = observer(LockedPresenter);

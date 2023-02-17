@@ -129,5 +129,3 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
 
 `;
-
-export default { GlobalStyle };

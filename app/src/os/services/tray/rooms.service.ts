@@ -1,5 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { PokeParams, Scry } from '@holium/conduit/src/types';
 

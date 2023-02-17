@@ -6,7 +6,7 @@ import { Flex, Box, Text, Spinner } from 'renderer/components';
 import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from 'os/lib/color';
-import Icons from '../Icons';
+import { Icons } from '../Icons';
 import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { getAppTileFlags } from 'renderer/logic/lib/app';

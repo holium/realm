@@ -96,5 +96,3 @@ export const CrestSymbol = styled(SvgComponent)<IconProps>`
   vertical-align: middle;
   ${compose(space, color, width, height, layout, typography)}
 `;
-
-export default CrestSymbol;
