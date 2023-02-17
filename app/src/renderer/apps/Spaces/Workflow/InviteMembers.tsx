@@ -108,6 +108,8 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
     setState?.(newState);
   };
 
+  console.log(workflowState);
+
   // Setting up options menu
   useEffect(() => {
     /*      if (props.edit) {

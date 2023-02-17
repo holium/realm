@@ -1,4 +1,3 @@
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import {
   FC,
   useEffect,
@@ -8,11 +7,12 @@ import {
   ReactNode,
   RefObject,
 } from 'react';
-import { Flex, Spinner, IconButton, Icons } from 'renderer/components';
+import styled from 'styled-components';
 import { Button } from '@holium/design-system';
+import { Flex, Spinner, IconButton, Icons } from 'renderer/components';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import styled from 'styled-components';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 
 export interface DialogViewProps {
   appWindow: AppWindowType;
@@ -130,6 +130,8 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
             >
               {!customNext && onNext && (
                 <Button.TextButton
+                  showOnHover
+                  fontWeight={500}
                   disabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {
                     onNext(evt, workflowState, setWorkflowState);
