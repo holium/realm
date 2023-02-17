@@ -17,8 +17,8 @@ import { ChatRowType } from './types';
 import { useChatStore } from './store';
 
 export const Inbox = () => {
-  const { dmApp, dimensions } = useTrayApps();
-  const { setChat } = useChatStore();
+  const { dimensions } = useTrayApps();
+  const { setChat, setSubroute } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [chatList, setChatList] = useState<ChatRowType[]>([]);
@@ -35,6 +35,8 @@ export const Inbox = () => {
         console.log(err);
       });
   }, []);
+
+  const lastTimeSent = chatList[0]?.timestamp;
 
   const searchFilter = useCallback(
     (preview: ChatRowType) => {
@@ -79,14 +81,14 @@ export const Inbox = () => {
           size={26}
           onClick={(evt) => {
             evt.stopPropagation();
-            dmApp.setView('new-chat');
+            setSubroute('new');
           }}
         >
           <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
       <WindowedList
-        // key={lastTimeSent}
+        key={lastTimeSent}
         width={dimensions.width - 26}
         height={544}
         rowHeight={57}

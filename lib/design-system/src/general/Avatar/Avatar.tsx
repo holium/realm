@@ -18,7 +18,7 @@ export type AvatarStyleProps = BoxProps &
     theme: any;
   };
 
-export const AvatarWrapper = styled(Box) <AvatarStyleProps>`
+export const AvatarWrapper = styled(Box)<AvatarStyleProps>`
   overflow: hidden;
   box-sizing: content-box;
   pointer-events: none;
@@ -61,7 +61,7 @@ export const AvatarWrapper = styled(Box) <AvatarStyleProps>`
     `}
 `;
 
-const AvatarInner = styled(Box) <{ src: string }>`
+const AvatarInner = styled(Box)<{ src: string }>`
   background-image: url(${(props) => props.src});
   background-size: cover;
   background-position: center;
@@ -80,7 +80,7 @@ type AvatarProps = {
   opacity?: number;
   layoutId?: string;
   layout?: any;
-  transition?: any
+  transition?: any;
   borderRadiusOverride?: string;
 } & BoxProps;
 
@@ -107,7 +107,7 @@ export const Avatar = ({
   }, []);
 
   let innerContent = null;
-  if (avatar && isValid) {
+  if (avatar) {
     innerContent = (
       <AvatarInner
         src={avatar}

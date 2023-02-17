@@ -51,6 +51,9 @@ export const ChatRow = ({
             <Text.Custom
               layoutId={`chat-${path}-name`}
               layout="position"
+              truncate
+              textAlign="left"
+              width={210}
               transition={{
                 duration: 0.1,
               }}
@@ -62,7 +65,7 @@ export const ChatRow = ({
             <Text.Custom
               textAlign="left"
               truncate
-              width={230}
+              width={210}
               fontWeight={400}
               fontSize={2}
               opacity={0.5}

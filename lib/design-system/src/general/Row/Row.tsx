@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Button } from '..';
+import { Box } from '..';
 
 interface RowProps {
   small?: boolean;
@@ -9,7 +9,7 @@ interface RowProps {
   noHover?: boolean;
 }
 
-export const Row = styled(Button.Base)<RowProps>`
+export const Row = styled(Box)<RowProps>`
   border-radius: 6px;
   width: 100%;
   padding: 8px;
@@ -60,7 +60,7 @@ export const Row = styled(Button.Base)<RowProps>`
 `;
 
 Row.defaultProps = {
-  onMouseOut: (evt: React.MouseEvent<HTMLButtonElement>) => {
+  onMouseOut: (evt: React.MouseEvent<HTMLDivElement>) => {
     evt.currentTarget.blur();
   },
 };

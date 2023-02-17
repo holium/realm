@@ -58,7 +58,7 @@ export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;
-  color: ${(props) => props.authorColor ?? 'var(--rlm-text-color)'};
+  /* color: ${(props) => props.authorColor ?? 'var(--rlm-text-color)'}; */
 `;
 
 export const BubbleFooter = styled(Box)`
