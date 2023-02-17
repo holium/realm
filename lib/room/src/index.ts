@@ -20,3 +20,5 @@ export { PeerConnectionState } from './peer/types';
 export { RoomManagerEvent } from './events';
 export { ProtocolEvent } from './connection/events';
 export type { ChatModelType } from './types';
+export type { DataPacket } from './helpers/data';
+export { DataPacket_Kind } from './helpers/data';

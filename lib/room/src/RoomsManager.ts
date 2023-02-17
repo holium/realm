@@ -256,7 +256,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     await this.protocol.deleteRoom(rid);
   }
 
-  sendData(data: any) {
+  sendData(data: Omit<DataPacket, 'from'>) {
     this.protocol.sendData({ from: this.our, ...data });
   }
 

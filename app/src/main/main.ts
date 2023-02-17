@@ -173,7 +173,7 @@ const createMouseOverlayWindow = () => {
   // Hide the traffic lights on macOS.
   if (isMac) newMouseWindow.setWindowButtonVisibility(false);
 
-  newMouseWindow.webContents.on('did-finish-load', () => {
+  newMouseWindow.webContents.on('cursor-changed', () => {
     hideCursor(newMouseWindow.webContents);
     if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
   });

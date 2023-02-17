@@ -14,7 +14,7 @@ export interface DataPayload {
   data: any;
 }
 
-export interface TrackMetaPayload {
+interface TrackMetaPayload {
   peer: Patp;
   isMuted: boolean;
   isCursorSharing: boolean;

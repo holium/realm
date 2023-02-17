@@ -14,7 +14,6 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
   isClicking?: boolean;
 }
 
-// Manage websocket connection within realm or an individual app
 export const Presences = () => {
   const { api } = useRealmMultiplayer();
   const [cursors, setCursors] = useState<Record<string, CursorState>>({});

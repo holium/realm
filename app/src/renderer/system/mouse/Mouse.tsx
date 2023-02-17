@@ -5,31 +5,110 @@ import { AnimatedCursor, MouseState } from './AnimatedCursor';
 import { Position } from 'os/types';
 import {
   CursorEvent,
-  CursorMovePayload,
-  SendPartial,
+  CursorPayload,
   useRealmMultiplayer,
 } from '@holium/realm-multiplayer';
+import {
+  DataPacket_Kind,
+  RealmProtocol,
+  RoomManagerEvent,
+  RoomsManager,
+} from '@holium/realm-room';
+import Urbit from '@urbit/http-api';
+
+type ShipConfig = {
+  ship: string;
+  url: string;
+  code: string;
+};
+
+const shipConfigs: Record<string, ShipConfig> = {
+  '~zod': {
+    ship: 'zod',
+    url: 'http://localhost',
+    code: 'lidlut-tabwed-pillex-ridrup',
+  },
+  '~bus': {
+    ship: 'bus',
+    url: 'http://localhost:8080',
+    code: 'riddec-bicrym-ridlev-pocsef',
+  },
+};
+
+let roomsManager: RoomsManager;
 
 export const Mouse = () => {
-  const { api } = useRealmMultiplayer();
+  const { ship } = useRealmMultiplayer();
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
   const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const active = useToggle(false);
   const visible = useToggle(false);
   const mouseLayerTracking = useToggle(false);
+  const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
 
   const updateMousePosition = useCallback((newPosition: Position) => {
     // Update the coordinates locally.
     setPosition(newPosition);
     // Signal to the rest of the network.
-    const payload: SendPartial<CursorMovePayload> = {
+    const cursorPayload: CursorPayload = {
+      id: ship.patp,
       event: CursorEvent.Move,
       position: newPosition,
     };
 
-    if (api) api.send(payload);
+    console.log('cursorPayload', cursorPayload);
+    console.log('roomsManager', roomsManager);
+
+    roomsManager.sendData({
+      kind: DataPacket_Kind.DATA,
+      value: { cursor: cursorPayload },
+    });
   }, []);
+
+  useEffect(() => {
+    let api: any = null;
+    if (!roomsApi) {
+      Urbit.authenticate(shipConfigs[ship.patp]).then(async (newApi) => {
+        api = newApi;
+        await api.connect();
+        const handlers = {
+          poke: api.poke.bind(api),
+          scry: api.scry.bind(api),
+        };
+
+        const protocol = new RealmProtocol(
+          ship.patp,
+          {
+            rtc: {
+              iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+            },
+          },
+          handlers
+        );
+        roomsManager = new RoomsManager(protocol);
+        setRoomsManager(roomsManager);
+        api.subscribe({
+          app: 'rooms-v2',
+          path: '/lib',
+          event: (data: any, mark: any) => {
+            console.log('lib', data);
+            (roomsManager.protocol as RealmProtocol).onSignal(data, mark);
+          },
+        });
+        roomsManager.on(
+          RoomManagerEvent.OnDataChannel,
+          (_rid: string, _peer: string, data: any) => {
+            console.log('peer data', data);
+          }
+        );
+      });
+    }
+
+    return () => {
+      api?.delete();
+    };
+  }, [roomsApi === null]);
 
   useEffect(() => {
     window.electron.app.onMouseOver(visible.toggleOn);
@@ -39,6 +118,7 @@ export const Mouse = () => {
       // A) mouse layer tracking is disabled, or
       // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
       if (!mouseLayerTracking.isOn) {
+        console.log('newCoordinates', newCoordinates);
         setPosition(newCoordinates);
       } else {
         if (isDragging) updateMousePosition(newCoordinates);
@@ -59,6 +139,7 @@ export const Mouse = () => {
     };
 
     window.electron.app.onEnableMouseLayerTracking(() => {
+      alert('hello');
       mouseLayerTracking.toggleOn();
       window.addEventListener('mousemove', handleMouseMove);
     });
