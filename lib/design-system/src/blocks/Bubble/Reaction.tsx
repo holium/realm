@@ -73,12 +73,11 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   align-items: center;
   justify-content: center;
   background: var(--rlm-input-color);
-  ${({ selected }) =>
+  border: ${({ selected }) =>
     selected
-      ? css`
-          border: 1px solid var(--rlm-accent-color);
-        `
-      : 'border: 1px solid var(--rlm-border-color);'}
+      ? '1px solid var(--rlm-accent-color)'
+      : '1px solid var(--rlm-window-color)'};
+
   border-radius: 16px;
   transition: var(--transition);
   ${({ size, selected }) =>
@@ -110,22 +109,12 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
       padding: 0 6px 0 4px;
       gap: 4px;
     `}
-  ${({ selected }: ReactionButtonProps) =>
-    selected
-      ? css`
-          &:hover {
-            transition: var(--transition);
-            cursor: pointer;
-            filter: brightness(0.96);
-          }
-        `
-      : css`
-          &:hover {
-            transition: var(--transition);
-            cursor: pointer;
-            filter: brightness(0.96);
-          }
-        `}
+
+  &:hover {
+    transition: var(--transition);
+    cursor: pointer;
+    filter: brightness(0.96);
+  }
 `;
 
 export type ReactionAggregateType = {
@@ -200,38 +189,35 @@ export const Reactions = (props: ReactionProps) => {
     }
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (isReacting) {
-      const addButton = document.getElementById('reaction-add-button');
-      const dropdownNode = document.getElementById('emoji-picker');
-      const isVisible = dropdownNode
-        ? dropdownNode.getAttribute('data-is-open') === 'true'
-        : false; // get if the picker is visible currently
-
-      if (
-        // @ts-ignore
-        addButton?.contains(event.target) ||
-        // @ts-ignore
-        dropdownNode?.contains(event.target) ||
-        !isVisible
-      ) {
-        return;
-      }
-      // You are clicking outside
-      if (isVisible) {
-        setIsReacting(false);
-      }
-    }
-  };
-
   const root = document.getElementById('root');
   useEffect(() => {
     if (!root) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isReacting) {
+        const addButton = document.getElementById('reaction-add-button');
+        const dropdownNode = document.getElementById('emoji-picker');
+        const isVisible = dropdownNode
+          ? dropdownNode.getAttribute('data-is-open') === 'true'
+          : false; // get if the picker is visible currently
+
+        if (
+          addButton?.contains(event.target as Node) ||
+          dropdownNode?.contains(event.target as Node) ||
+          !isVisible
+        ) {
+          return;
+        }
+        // You are clicking outside
+        if (isVisible) {
+          setIsReacting(false);
+        }
+      }
+    };
     root.addEventListener('mousedown', handleClickOutside);
     return () => {
       root.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [root, handleClickOutside]);
+  }, [root, isReacting]);
 
   return (
     <ReactionRow variant={variant}>
