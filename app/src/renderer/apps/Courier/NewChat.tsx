@@ -1,14 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import {
   Flex,
   Text,
   Icon,
   Button,
-  InputBox,
   TextInput,
-  Input,
-  WindowedList,
-  Box,
   Avatar,
 } from '@holium/design-system';
 import { useTrayApps } from '../store';
@@ -17,16 +13,34 @@ import { ShipSearch } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 
 export const NewChat = () => {
+  const { ship } = useServices();
   const { dimensions } = useTrayApps();
-  const { setChat, setSubroute } = useChatStore();
+  const { setSubroute } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
 
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
+
+  const onCreateChat = () => {
+    let title: string;
+    if (selectedPatp.size === 1) {
+      title = Array.from(selectedNickname)[0] || Array.from(selectedPatp)[0];
+    } else {
+      title = Array.from(selectedNickname).join(', ');
+    }
+    ChatDBActions.createChat(Array.from(selectedPatp), 'chat', {
+      title,
+      creator: ship!.patp,
+      timestamp: Date.now().toString(),
+    }).then(() => {
+      setSubroute('inbox');
+    });
+  };
 
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
@@ -65,13 +79,20 @@ export const NewChat = () => {
           width="100%"
           textAlign="center"
           fontWeight={500}
-          // mb={1}
         >
           New Chat
         </Text.Custom>
         <Flex width={120} alignItems="flex-start" justifyContent="flex-end">
           {selectedPatp.size > 0 && (
-            <Button.TextButton showOnHover>Create</Button.TextButton>
+            <Button.TextButton
+              showOnHover
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onCreateChat();
+              }}
+            >
+              Create
+            </Button.TextButton>
           )}
         </Flex>
       </Flex>

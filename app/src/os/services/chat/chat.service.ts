@@ -10,11 +10,10 @@ import {
   MessagesRow,
   PathsRow,
   PeersRow,
-  DbChangeType,
   ChatDbOps,
   AddRow,
+  DelPathsRow,
 } from './chat.types';
-import { CONSOLE_LEVELS } from '@sentry/utils';
 
 type ChatUpdateType =
   | 'message-received'
@@ -23,6 +22,14 @@ type ChatUpdateType =
   | 'path-deleted'
   | 'peer-added'
   | 'peer-deleted';
+
+type ChatPathMetadata = {
+  title?: string;
+  creator: string;
+  timestamp: string;
+};
+
+type ChatType = 'chat' | 'channel';
 
 export class ChatService extends BaseService {
   db: Database.Database | null = null;
@@ -35,8 +42,11 @@ export class ChatService extends BaseService {
   handlers = {
     'realm.chat.get-chat-list': this.getChatList,
     'realm.chat.get-chat-log': this.getChatLog,
-    'realm.chat.send-chat': this.sendChat,
+    'realm.chat.send-message': this.sendMessage,
+    'realm.chat.delete-message': this.deleteMessage,
     'realm.chat.read-chat': this.readChat,
+    'realm.chat.create-chat': this.createChat,
+    'realm.chat.leave-chat': this.leaveChat,
   };
 
   /**
@@ -49,10 +59,16 @@ export class ChatService extends BaseService {
       path: string,
       params?: { start: number; amount: number }
     ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
-    sendChat: (path: string, fragments: any[]) =>
-      ipcRenderer.invoke('realm.chat.send-chat', path, fragments),
-    readChat: async (path: string) =>
-      await ipcRenderer.invoke('realm.chat.read-chat', path),
+    sendMessage: (path: string, fragments: any[]) =>
+      ipcRenderer.invoke('realm.chat.send-message', path, fragments),
+    deleteMessage: (path: string, msgId: string) =>
+      ipcRenderer.invoke('realm.chat.delete-message', path, msgId),
+    createChat: (peers: string[], type: ChatType, metadata: ChatPathMetadata) =>
+      ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
+    readChat: (path: string) =>
+      ipcRenderer.invoke('realm.chat.read-chat', path),
+    leaveChat: (path: string) =>
+      ipcRenderer.invoke('realm.chat.leave-chat', path),
     onDbChange: (
       callback: (evt: IpcRendererEvent, type: ChatUpdateType, data: any) => void
     ) => ipcRenderer.on('realm.chat.on-db-change', callback),
@@ -66,6 +82,7 @@ export class ChatService extends BaseService {
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
     this.sendChatUpdate = this.sendChatUpdate.bind(this);
+    this.deletePath = this.deletePath.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -108,20 +125,6 @@ export class ChatService extends BaseService {
     } else {
       console.log(data);
     }
-
-    // if (data.type === 'del-peers-row') {
-    //   this.deletePeersRow(data.path);
-    //   return;
-    // }
-    // if (data.type === 'del-paths-row') {
-    //   this.deletePathsRow(data.path);
-    //   return;
-    // }
-    // if (data.type === 'del-messages-row') {
-    //   this.deleteMessagesRow(data.id);
-    //   return;
-    // }
-    // console.log(data);
   }
 
   handleDBChange(dbChange: ChatDbOps) {
@@ -147,10 +150,13 @@ export class ChatService extends BaseService {
         case 'peers':
           console.log('add-row to peers', addRow.row);
           const peers = [addRow.row] as PeersRow[];
-
           this.insertPeers(peers);
           break;
       }
+    } else if (dbChange.type === 'del-paths-row') {
+      console.log('del-paths-row', dbChange);
+      const delPathsRow = dbChange as DelPathsRow;
+      this.deletePath(delPathsRow.row);
     }
   }
 
@@ -243,6 +249,21 @@ export class ChatService extends BaseService {
     });
     insertMany(peers);
   }
+
+  deletePath(path: string) {
+    if (!this.db) throw new Error('No db connection');
+    const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
+    console.log('deleting path', path);
+    deletePath.run(path);
+    // delete all messages in that path
+    const deleteMessages = this.db.prepare(
+      'DELETE FROM messages WHERE path = ?'
+    );
+    deleteMessages.run(path);
+    // delete all peers in that path
+    const deletePeers = this.db.prepare('DELETE FROM peers WHERE path = ?');
+    deletePeers.run(path);
+  }
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
@@ -250,60 +271,144 @@ export class ChatService extends BaseService {
   getChatList() {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
-        SELECT path,
-              msg_id id,
-              MAX(json_object(content_type, content_data)) lastMessage,
+      WITH formed_messages AS (
+          WITH formed_fragments AS (
+              WITH realm_chat as (
+                  SELECT *
+                  FROM messages
+                  WHERE path LIKE '%realm-chat%'
+                  ORDER BY msg_part_id, timestamp DESC
+              )
+              SELECT
+                  realm_chat.path,
+                  realm_chat.msg_id,
+                  realm_chat.msg_part_id,
+                  json_object(realm_chat.content_type, realm_chat.content_data) content,
+                  realm_chat.sender,
+                  realm_chat.timestamp,
+                  realm_chat.reply_to,
+                  realm_chat.metadata
+              FROM realm_chat
+              ORDER BY 
+                  realm_chat.timestamp DESC, 
+                  realm_chat.msg_id DESC, 
+                  realm_chat.msg_part_id
+          )
+          SELECT
+              path,
+              msg_id,
+              msg_part_id,
+              json_group_array(content) as contents,
               sender,
-              MAX(timestamp) as                            timestamp
-        FROM (SELECT path,
-                    msg_id,
-                    content_type,
-                    content_data,
-                    sender,
-                    MAX(timestamp) as timestamp
-              FROM messages
-              WHERE path LIKE '%realm-chat%'
-                and sender != ?
-              GROUP BY msg_id
-              ORDER BY timestamp DESC)
-        GROUP BY path
-        ORDER BY timestamp DESC;
+              reply_to,
+              metadata,
+              MAX(timestamp) m_timestamp
+          FROM formed_fragments
+          GROUP BY msg_id
+          ORDER BY m_timestamp DESC, 
+                  msg_id DESC, 
+                  msg_part_id DESC
+      ), chat_with_messages AS (
+          SELECT
+              path,
+              contents lastMessage,
+              sender lastSender,
+              m_timestamp timestamp
+          FROM formed_messages
+          GROUP BY formed_messages.path
+      )
+      SELECT
+          paths.path,
+          type,
+          metadata,
+          (
+              SELECT json_group_array(ship)
+              FROM peers
+              WHERE peers.path = paths.path AND ship != ?
+          ) AS peers,
+          lastMessage,
+          lastSender,
+          timestamp
+      FROM paths
+      LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
+      WHERE paths.path LIKE '%realm-chat%'
+      ORDER BY 
+          (timestamp IS NULL) DESC, 
+          timestamp DESC;
     `);
     const result = query.all(`~${this.core.conduit?.ship}`);
 
     return result.map((row) => {
-      return { ...row, lastMessage: JSON.parse(row.lastMessage) };
+      return {
+        ...row,
+        peers: row.peers ? JSON.parse(row.peers) : null,
+        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+        lastMessage: row.lastMessage
+          ? JSON.parse(row.lastMessage).map(
+              (message: any) => message && JSON.parse(message)
+            )
+          : null,
+      };
     });
   }
 
   getChatLog(
     _evt: any,
     path: string,
-    params?: { start: number; amount: number }
+    _params?: { start: number; amount: number }
   ) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
+      WITH formed_fragments AS (
+          WITH realm_chat as (
+              SELECT *
+              FROM messages
+              WHERE path = ?
+              ORDER BY msg_part_id, timestamp DESC
+          )
+          SELECT
+              realm_chat.path,
+              realm_chat.msg_id,
+              realm_chat.msg_part_id,
+              json_object(realm_chat.content_type, realm_chat.content_data) content,
+              realm_chat.sender,
+              realm_chat.timestamp,
+              realm_chat.reply_to,
+              realm_chat.metadata
+          FROM realm_chat
+          ORDER BY
+              realm_chat.timestamp DESC,
+              realm_chat.msg_id DESC,
+              realm_chat.msg_part_id
+      )
       SELECT
-        path,
-        msg_id id,
-        json_group_array(json_object(content_type, content_data)) content,
-        sender,
-        MAX(timestamp) as timestamp
-      FROM (SELECT path,
-                  msg_id,
-                  content_type,
-                  content_data,
-                  sender,
-                  timestamp
-            FROM messages
-            WHERE path = ?
-            ORDER BY msg_id, msg_part_id)
+          msg_id,
+          json_group_array(content) as contents,
+          sender,
+          reply_to,
+          metadata,
+          (
+              SELECT json_group_array(ship)
+              FROM peers
+              WHERE peers.path = formed_fragments.path AND ship != ?
+              ) AS peers,
+          MAX(formed_fragments.timestamp) timestamp
+      FROM formed_fragments
       GROUP BY msg_id
       ORDER BY timestamp;
     `);
-    const result = query.all(path);
+    const result = query.all(path, `~${this.core.conduit?.ship}`);
     return result.map((row) => {
-      return { ...row, content: JSON.parse(row.content) };
+      return {
+        ...row,
+        peers: row.peers ? JSON.parse(row.peers) : null,
+        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+        content: row.contents
+          ? JSON.parse(row.contents).map((fragment: any) =>
+              JSON.parse(fragment)
+            )
+          : null,
+      };
     });
   }
 
@@ -330,13 +435,16 @@ export class ChatService extends BaseService {
     `);
     const result = query.all(path, msgId);
     const rows = result.map((row) => {
-      return { ...row, content: JSON.parse(row.content) };
+      return {
+        ...row,
+        content: JSON.parse(row.content),
+      };
     });
     if (rows.length === 0) return null;
     return rows[0];
   }
 
-  async sendChat(_evt: any, path: string, fragments: any[]) {
+  async sendMessage(_evt: any, path: string, fragments: any[]) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
@@ -348,21 +456,49 @@ export class ChatService extends BaseService {
         },
       },
     };
-    const result = await this.core.conduit.poke(payload);
+    await this.core.conduit.poke(payload);
     return {
       path,
       pending: true,
       content: fragments,
     };
-    // this.core.conduit.sendChat(path, fragments);
   }
 
-  readChat(path: string) {
+  editMessage(path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    // this.core.conduit.readChat(path);
+    // this.core.conduit.editChat(path, metadata);
   }
 
-  async createChat(_evt: any, peers: string[], metadata: any) {
+  async deleteMessage(path: string, msgId: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const splitId = msgId.split('~');
+    const timestamp = splitId[1];
+    const sender = splitId[2];
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'delete-message': {
+          'msg-id': [`~${timestamp}`, `~${sender}`],
+          path,
+        },
+      },
+    };
+    console.log(payload);
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to create chat');
+    }
+  }
+
+  async createChat(
+    _evt: any,
+    peers: string[],
+    type: ChatType,
+    metadata: ChatPathMetadata
+  ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
@@ -370,13 +506,92 @@ export class ChatService extends BaseService {
       reaction: '',
       json: {
         'create-chat': {
-          type: 'chat',
-          metadata: {},
+          type,
+          metadata,
+          peers,
         },
       },
     };
     try {
-      const result = await this.core.conduit.poke(payload);
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to create chat');
+    }
+  }
+
+  readChat(path: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    // this.core.conduit.readChat(path);
+  }
+
+  async addShipToChat(_evt: any, path: string, ship: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'add-ship-from-chat': {
+          ship,
+          path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to create chat');
+    }
+  }
+
+  async removeShipFromChat(_evt: any, path: string, ship: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'remove-ship-from-chat': {
+          ship,
+          path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to create chat');
+    }
+  }
+
+  /**
+   * leaveChat
+   *
+   * @description calls remove-ship-from-chat with our ship
+   * which will remove us from the chat and delete it if we
+   * are the host
+   *
+   * @param _evt
+   * @param path
+   */
+  async leaveChat(_evt: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'remove-ship-from-chat': {
+          ship: `~${this.core.conduit?.ship}`,
+          path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');

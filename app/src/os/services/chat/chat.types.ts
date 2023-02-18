@@ -44,7 +44,7 @@ export type DelPeersRow = {
 export type DelPathsRow = {
   table: ChatTables;
   type: 'del-paths-row';
-  path: string;
+  row: string;
 };
 export type DelMessagesRow = {
   table: ChatTables;

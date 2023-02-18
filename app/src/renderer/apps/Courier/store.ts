@@ -21,12 +21,12 @@ const CourierAppModel = types
   })
   .actions((self) => ({
     setSubroute(subroute: Subroutes) {
-      self.subroute = subroute;
       if (subroute === 'inbox') {
         self.selectedPath = undefined;
         self.title = undefined;
         self.type = undefined;
       }
+      self.subroute = subroute;
     },
     setChat(path: string, title: string, type: 'dm' | 'group' | 'channel') {
       self.selectedPath = path;

@@ -1,12 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   Flex,
-  Text,
   Icon,
   Button,
-  InputBox,
   TextInput,
-  Input,
   WindowedList,
   Box,
 } from '@holium/design-system';
@@ -20,18 +17,14 @@ export const Inbox = () => {
   const { dimensions } = useTrayApps();
   const { setChat, setSubroute } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
-  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [chatList, setChatList] = useState<ChatRowType[]>([]);
 
   useEffect(() => {
-    setIsFetching(true);
     ChatDBActions.getChatList()
       .then((list) => {
-        setIsFetching(false);
         setChatList(list);
       })
       .catch((err) => {
-        setIsFetching(false);
         console.log(err);
       });
   }, []);
@@ -88,26 +81,34 @@ export const Inbox = () => {
         </Button.IconButton>
       </Flex>
       <WindowedList
-        // key={lastTimeSent}
         width={dimensions.width - 26}
         height={544}
-        rowHeight={54}
+        rowHeight={52}
         data={chatList}
         filter={searchFilter}
-        rowRenderer={(chat: ChatRowType, index: number) => {
+        rowRenderer={(chat, index) => {
+          let title: string = 'New chat';
+          let timestamp = chat.timestamp;
+          if (chat.peers && chat.peers.length === 1) {
+            title = chat.peers[0];
+          }
+          if (!chat.lastMessage) {
+            timestamp = parseInt(chat.metadata.timestamp);
+          }
           return (
-            <ChatRow
-              key={`dm-${index}-${chat.timestamp}`}
-              path={chat.path}
-              patp={chat.sender}
-              lastMessage={chat.lastMessage}
-              timestamp={chat.timestamp}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setChat(chat.path, chat.sender, 'dm');
-                // onSelectDm(dm);
-              }}
-            />
+            <Box height={52} layoutId={`chat-${chat.path}-container`}>
+              <ChatRow
+                key={`dm-${index}-${timestamp}`}
+                path={chat.path}
+                title={title}
+                lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                timestamp={timestamp}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  setChat(chat.path, title, 'dm');
+                }}
+              />
+            </Box>
           );
         }}
       />

@@ -2,7 +2,9 @@ export type ChatRowType = {
   id: string;
   path: string;
   sender: string;
-  lastMessage: string;
+  peers: string[];
+  metadata: any;
+  lastMessage: any[];
   timestamp: number;
 };
 

@@ -5,10 +5,8 @@ import {
   Box,
   Bubble,
   Flex,
-  Text,
-  Button,
-  Icon,
   WindowedList,
+  Text,
 } from '@holium/design-system';
 
 import { useServices } from 'renderer/logic/store';
@@ -21,9 +19,8 @@ import { ChatLogHeader } from '../components/ChatLogHeader';
 export const DMLogPresenter = () => {
   const { dimensions } = useTrayApps();
   const { friends, ship } = useServices();
-  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [chats, setChats] = useState<any[]>([]);
-  const { selectedPath, title, type, setSubroute } = useChatStore();
+  const { selectedPath, title, setSubroute } = useChatStore();
   const metadata = useMemo(
     () =>
       title
@@ -33,15 +30,12 @@ export const DMLogPresenter = () => {
   );
 
   useEffect(() => {
-    setIsFetching(true);
     if (!selectedPath) return;
     ChatDBActions.getChatLog(selectedPath)
       .then((list) => {
-        setIsFetching(false);
         setChats(list);
       })
       .catch((err) => {
-        setIsFetching(false);
         console.log(err);
       });
   }, [selectedPath]);
@@ -57,7 +51,7 @@ export const DMLogPresenter = () => {
   if (!selectedPath) return null;
 
   const onSend = (fragments: any[]) => {
-    ChatDBActions.sendChat(
+    ChatDBActions.sendMessage(
       selectedPath,
       fragments.map((frag) => {
         return {
@@ -75,7 +69,7 @@ export const DMLogPresenter = () => {
       layoutId={`chat-${selectedPath}-container`}
       flexDirection="column"
       // initial={{ height: 54 }}
-      height={dimensions.height - 24}
+      // // height={dimensions.height - 24}
       // animate={{ height: dimensions.height - 24 }}
       // exit={{ height: 54 }}
       // height={dimensions.height - 24}
@@ -94,33 +88,59 @@ export const DMLogPresenter = () => {
           />
         }
       />
-
-      <WindowedList
-        startAtBottom
-        hideScrollbar
-        width={dimensions.width - 24}
-        height={550}
-        data={chats}
-        rowRenderer={(row, index, measure) => (
-          <Box
-            key={`${row.id}-${row.timestamp}-${index}`}
-            pt={2}
-            // pb={2}
-            pb={index === chats.length - 1 ? 2 : 0}
+      <Flex
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.2 }}
+      >
+        {chats.length === 0 ? (
+          <Flex
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            width={dimensions.width - 24}
+            height={dimensions.height - 100}
           >
-            <Bubble
-              id={row.id}
-              our={row.sender === ship?.patp}
-              author={row.sender}
-              authorColor={metadata.color}
-              message={row.content}
-              sentAt={new Date(row.timestamp).toISOString()}
-              onLoad={measure}
-              onReaction={() => {}}
-            />
-          </Box>
+            <Text.Custom
+              textAlign="center"
+              width={300}
+              fontSize={3}
+              opacity={0.5}
+            >
+              You haven't sent or received any messages in this chat yet.
+            </Text.Custom>
+          </Flex>
+        ) : (
+          <WindowedList
+            startAtBottom
+            hideScrollbar
+            width={dimensions.width - 24}
+            height={550}
+            data={chats}
+            rowRenderer={(row, index, measure) => {
+              // TODO add context menu for delete, reply, etc
+              return (
+                <Box
+                  key={`${row.id}-${row.timestamp}-${index}`}
+                  pt={2}
+                  pb={index === chats.length - 1 ? 2 : 0}
+                >
+                  <Bubble
+                    id={row.id}
+                    our={row.sender === ship?.patp}
+                    author={row.sender}
+                    authorColor={metadata.color}
+                    message={row.content}
+                    sentAt={new Date(row.timestamp).toISOString()}
+                    onLoad={measure}
+                    onReaction={() => {}}
+                  />
+                </Box>
+              );
+            }}
+          />
         )}
-      />
+      </Flex>
       <ChatInputBox onSend={onSend} />
     </Flex>
   );

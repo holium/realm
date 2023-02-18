@@ -102,7 +102,7 @@ export const FragmentReplyTo = styled(motion.blockquote)`
 export const FragmentInlineCode = styled(FragmentBase)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
-  padding: 0px 3px;
+  /* padding: 0px 3px; */
 `;
 
 export const FragmentShip = styled(FragmentBase)`

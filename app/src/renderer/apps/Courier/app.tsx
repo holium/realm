@@ -1,4 +1,4 @@
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { Inbox } from './Inbox';
 import { NewChat } from './NewChat';
@@ -10,15 +10,16 @@ export const CourierAppPresenter = () => {
     if (chatStore.type === 'dm') {
       return <DMLog />;
     }
+    return null;
   };
 
   return (
     <ChatProvider value={chatStore}>
-      <AnimatePresence>
+      <LayoutGroup>
         {chatStore.subroute === 'inbox' && <Inbox />}
         {chatStore.subroute === 'chat' && renderLog()}
         {chatStore.subroute === 'new' && <NewChat />}
-      </AnimatePresence>
+      </LayoutGroup>
     </ChatProvider>
   );
 };

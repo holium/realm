@@ -1,36 +1,97 @@
+import { useMemo, useEffect } from 'react';
+import { isValidPatp } from 'urbit-ob';
 import { Row, Avatar, Flex, Text, timelineDate } from '@holium/design-system';
-import React, { useMemo } from 'react';
 import { useServices } from 'renderer/logic/store';
+import { ContextMenuOption, useContextMenu } from 'renderer/components';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type ChatRowProps = {
   path: string;
-  patp: string;
+  title: string;
   lastMessage: string;
   timestamp: number;
-  onClick: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export const ChatRow = ({
   path,
-  patp,
+  title,
   lastMessage,
   timestamp,
   onClick,
 }: ChatRowProps) => {
   const { friends } = useServices();
-  const { avatar, color: sigilColor } = useMemo(
-    () => friends.getContactAvatarMetadata(patp),
-    []
-  );
+  const { getOptions, setOptions } = useContextMenu();
+
+  let avatarElement = null;
+
+  if (isValidPatp(title)) {
+    const {
+      patp,
+      avatar,
+      color: sigilColor,
+    } = friends.getContactAvatarMetadata(title);
+    avatarElement = (
+      <Avatar
+        patp={patp}
+        avatar={avatar}
+        size={28}
+        sigilColor={[sigilColor, '#ffffff']}
+        simple
+      />
+    );
+  }
+
+  const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
+
+  const contextMenuOptions = useMemo(() => {
+    const menu = [];
+    menu.push({
+      id: `${chatRowId}-pin-chat`,
+      label: 'Pin chat',
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+    menu.push({
+      id: `${chatRowId}-leave-chat`,
+      label: 'Leave chat',
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        ShellActions.setBlur(true);
+        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+          path,
+          title,
+        });
+      },
+    });
+    return menu.filter(Boolean) as ContextMenuOption[];
+  }, [path]);
+
+  useEffect(() => {
+    if (contextMenuOptions !== getOptions(chatRowId)) {
+      setOptions(chatRowId, contextMenuOptions);
+    }
+  }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
+
+  const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
 
   return (
     <Row
-      layout="preserve-aspect"
-      layoutId={`chat-${path}-container`}
-      onClick={onClick}
-      animate={{ height: 54 }}
+      id={chatRowId}
+      onClick={(evt: any) => {
+        if (!contextMenuButtonIds.includes(evt.target.id)) {
+          onClick(evt);
+        }
+      }}
     >
-      <Flex flexDirection="row" gap={12} alignItems="center" width="100%">
+      <Flex
+        pointerEvents="none"
+        flexDirection="row"
+        gap={12}
+        alignItems="center"
+        width="100%"
+      >
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
             layoutId={`chat-${path}-avatar`}
@@ -39,13 +100,7 @@ export const ChatRow = ({
               duration: 0.1,
             }}
           >
-            <Avatar
-              patp={patp}
-              avatar={avatar}
-              size={28}
-              sigilColor={[sigilColor, '#ffffff']}
-              simple
-            />
+            {avatarElement}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
@@ -60,7 +115,7 @@ export const ChatRow = ({
               fontWeight={500}
               fontSize={3}
             >
-              {patp}
+              {title}
             </Text.Custom>
             <Text.Custom
               textAlign="left"
