@@ -11,6 +11,7 @@ import { FragmentReactionType } from './Bubble.types';
 import { AnimatePresence } from 'framer-motion';
 
 const WIDTH = 350;
+const ship = window.ship ?? 'zod';
 
 const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
   const menuWidth = WIDTH;
@@ -173,7 +174,7 @@ export const Reactions = (props: ReactionProps) => {
     const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
       const reaction = reactionsAggregated[index];
-      if (reaction.by.includes(window.ship as any)) {
+      if (reaction.by.includes(ship)) {
         return true;
       }
     }
@@ -183,9 +184,9 @@ export const Reactions = (props: ReactionProps) => {
   const onClick = (emoji: string) => {
     setIsReacting(false);
     if (checkDupe(emoji)) {
-      onReaction({ emoji, action: 'remove', by: window.ship as any });
+      onReaction({ emoji, action: 'remove', by: ship });
     } else {
-      onReaction({ emoji, action: 'add', by: window.ship as any });
+      onReaction({ emoji, action: 'add', by: ship });
     }
   };
 
@@ -231,7 +232,7 @@ export const Reactions = (props: ReactionProps) => {
               evt.stopPropagation();
               onClick(reaction.emoji);
             }}
-            selected={reaction.by.includes(window.ship)}
+            selected={reaction.by.includes(ship)}
           >
             <Emoji
               unified={reaction.emoji}
