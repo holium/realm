@@ -9,6 +9,8 @@ import EmojiPicker, {
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
 import { AnimatePresence } from 'framer-motion';
+import { lighten } from 'polished';
+import { getVar } from '../../util/colors';
 
 const WIDTH = 350;
 const ship = window.ship ?? 'zod';
@@ -73,7 +75,8 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background: var(--rlm-input-color);
+  background: ${({ selected }) =>
+    selected ? () => lighten(0.3, getVar('accent')) : 'var(--rlm-input-color)'};
   border: ${({ selected }) =>
     selected
       ? '1px solid var(--rlm-accent-color)'
