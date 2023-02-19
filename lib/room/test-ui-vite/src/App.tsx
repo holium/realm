@@ -4,17 +4,23 @@ import {
   RoomsManager,
   RealmProtocol,
   RoomManagerEvent,
-  RemotePeer,
 } from '@holium/realm-room';
 import Urbit from '@urbit/http-api';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import { Speaker } from './Speaker';
 
 (window as any).global = window;
 (window as any).process = process;
 (window as any).Buffer = [];
 
-const ShipConfig: { [ship: string]: any } = {
+type ShipConfig = {
+  ship: string;
+  url: string;
+  code: string;
+};
+
+const shipConfigs: Record<string, ShipConfig> = {
   '~zod': {
     ship: 'zod',
     url: 'http://localhost',
@@ -43,7 +49,7 @@ const ShipConfig: { [ship: string]: any } = {
 };
 
 const testShip = window.location.href.split('/')[3] || '~fes';
-const shipData = ShipConfig[testShip];
+const shipData = shipConfigs[testShip];
 // NOTE: to connect one ship to another, you must manually poke the ship to `set-provider` like:
 // :rooms-v2 &rooms-v2-session-action [%set-provider ~dev]
 //  (^ on the dojo of ~fes if he wanted to connect to a room hosted by ~dev)
@@ -51,7 +57,6 @@ const shipData = ShipConfig[testShip];
 export let roomsManager: RoomsManager;
 
 const AppPresenter = () => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const [roomsApi, setRoomsManager] = useState<RoomsManager | null>(null);
   useEffect(() => {
     let api: any = null;
@@ -165,7 +170,7 @@ const AppPresenter = () => {
         </div>
         <div className="speaker-grid">
           {roomsManager.live.room && (
-            <OurMic
+            <Speaker
               our
               patp={roomsManager.our}
               type={roomsManager.local.host ? 'host' : 'speaker'}
@@ -210,43 +215,5 @@ const AppPresenter = () => {
     </div>
   );
 };
-
-type ISpeaker = {
-  our: boolean;
-  patp: string;
-  peer?: RemotePeer;
-  cursors?: boolean;
-  type: 'host' | 'speaker' | 'listener';
-};
-
-const OurMicPresenter = ({ our, patp }: ISpeaker) => (
-  <div className="speaker-container">
-    <p style={{ margin: 0 }}>{patp}</p>
-    <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
-      {our}
-    </p>
-    <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
-      <button
-        onClick={() => {
-          if (our) {
-            if (roomsManager.muteStatus) {
-              roomsManager.unmute();
-            } else {
-              roomsManager.mute();
-            }
-          }
-        }}
-      >
-        {our ? (roomsManager.muteStatus ? 'Unmute' : 'Mute') : 'Mute'}
-      </button>
-    </div>
-
-    <div>
-      <p>Microphone: {'activated'}</p>
-    </div>
-  </div>
-);
-
-const OurMic = observer(OurMicPresenter);
 
 export const App = observer(AppPresenter);
