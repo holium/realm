@@ -1,7 +1,19 @@
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
-import { Airlift } from 'renderer/apps/Airlift';
+import ReactFlow, {
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+  NodeChange,
+  EdgeChange,
+  Connection,
+  Edge,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { AgentNode } from 'renderer/apps/Airlift/AgentNode';
+import 'renderer/apps/Airlift/AgentNode/index.css';
+import { useCallback, useMemo, useState } from 'react';
 
 const AirliftManagerPresenter = () => {
   // const { getOptions, setOptions } = useContextMenu();
@@ -9,10 +21,44 @@ const AirliftManagerPresenter = () => {
   const id = 'airlift-fill';
 
   const airlifts = Array.from(
-    airlift.airlifts.get(spaces.selected!.path)?.values() || []
+    (spaces.selected && airlift.airlifts.get(spaces.selected.path)?.values()) ||
+      []
   );
 
-  console.log('airlifts', airlifts);
+  const initialNodes = [
+    {
+      id: '2',
+      data: { value: 123 },
+      position: { x: 100, y: 100 },
+      type: 'agent',
+    },
+  ];
+
+  const nodeTypes = useMemo(() => {
+    return {
+      agent: AgentNode,
+    };
+  }, []);
+
+  const [nodes, setNodes] = useState(initialNodes);
+  const [edges, setEdges] = useState([]);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      return setNodes((nds) => applyNodeChanges(changes, nds));
+    },
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) =>
+      setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
+  const onConnect = useCallback(
+    (connection: Edge<any> | Connection) =>
+      setEdges((eds: Edge<any>[]) => addEdge(connection, eds)),
+    [setEdges]
+  );
 
   return (
     <motion.div
@@ -31,11 +77,15 @@ const AirliftManagerPresenter = () => {
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {airlifts.map((airlift: any, index: number) => {
-        return (
-          <Airlift key={`${airlift.airliftId}-${index}`} airlift={airlift} />
-        );
-      })}
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        fitView
+      />
     </motion.div>
   );
 };

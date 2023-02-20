@@ -14,6 +14,7 @@ import rgba from 'polished/lib/color/rgba';
 import { AirliftModelType } from 'os/services/shell/airlift.model';
 import { AirliftAgent } from './Airlift.styles';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
+import { Text } from 'renderer/components';
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -51,8 +52,8 @@ const AirliftPresenter = ({ airlift }: Props) => {
     motionHeight.set(denormalizedBounds.height);
   }, [airlift.bounds]);
 
-  const windowId = `app-window-${airlift.appId}`;
-  const webViewId = getWebViewId(airlift.appId, airlift.type!);
+  const windowId = `airlift-${airlift.airliftId}`;
+  const webViewId = getWebViewId(airlift.airliftId, airlift.type!);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -144,20 +145,6 @@ const AirliftPresenter = ({ airlift }: Props) => {
     updateWindowBounds();
   };
 
-  const onMaximize = async () => {
-    const newBounds = await DesktopActions.toggleMaximized(airlift.appId);
-    const denormalizedBounds = denormalizeBounds(
-      newBounds,
-      shell.desktopDimensions
-    );
-    motionX.set(denormalizedBounds.x);
-    motionY.set(denormalizedBounds.y);
-    motionWidth.set(denormalizedBounds.width);
-    motionHeight.set(denormalizedBounds.height);
-  };
-
-  const onMinimize = () => DesktopActions.toggleMinimized(airlift.appId);
-
   const onClose = () =>
     AirliftActions.removeAirlift(spaces.selected!.path, airlift.airliftId);
 
@@ -222,6 +209,7 @@ const AirliftPresenter = ({ airlift }: Props) => {
           height: '100%',
         }}
       >
+        <Text>blah</Text>
         {/* only for ui airlifts
        <AirliftResizeHandles
           bottomLeft={{

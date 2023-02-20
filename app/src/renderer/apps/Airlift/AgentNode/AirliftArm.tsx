@@ -22,10 +22,6 @@ export const AirliftArm: FC<AirliftArmProps> = observer(
       <div onClick={onArmExpand}>
         <Icons name="AirliftArm" />
       </div>
-      /*<div>
-      {arm.expanded ?
-      <div></div>
-      :<Icons name='AirliftArm' /*onClick={onArmExpand}*/
     );
   }
 );
