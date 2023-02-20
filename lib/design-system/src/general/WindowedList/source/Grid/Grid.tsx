@@ -15,15 +15,16 @@ import type {
 } from './types';
 import type { AnimationTimeoutId } from '../utils/requestAnimationTimeout';
 import React, { UIEventHandler } from 'react';
-import calculateSizeAndPositionDataAndUpdateScrollOffset from './utils/calculateSizeAndPositionDataAndUpdateScrollOffset';
-import ScalingCellSizeAndPositionManager from './utils/ScalingCellSizeAndPositionManager';
-import createCallbackMemoizer from '../utils/createCallbackMemoizer';
-import defaultOverscanIndicesGetter, {
+import { calculateSizeAndPositionDataAndUpdateScrollOffset } from './utils/calculateSizeAndPositionDataAndUpdateScrollOffset';
+import { ScalingCellSizeAndPositionManager } from './utils/ScalingCellSizeAndPositionManager';
+import { createCallbackMemoizer } from '../utils/createCallbackMemoizer';
+import {
+  defaultOverscanIndicesGetter,
   SCROLL_DIRECTION_BACKWARD,
   SCROLL_DIRECTION_FORWARD,
 } from './defaultOverscanIndicesGetter';
-import updateScrollIndexHelper from './utils/updateScrollIndexHelper';
-import defaultCellRangeRenderer from './defaultCellRangeRenderer';
+import { updateScrollIndexHelper } from './utils/updateScrollIndexHelper';
+import { defaultCellRangeRenderer } from './defaultCellRangeRenderer';
 import scrollbarSize from 'dom-helpers/scrollbarSize';
 import { polyfill } from 'react-lifecycles-compat';
 import {
@@ -238,7 +239,7 @@ type State = {
  * Renders tabular data with virtualization along the vertical and horizontal axes.
  * Row heights and column widths must be known ahead of time and specified as properties.
  */
-class Grid extends React.PureComponent<Props, State> {
+export class Grid extends React.PureComponent<Props, State> {
   static defaultProps = {
     autoContainerWidth: false,
     cellRangeRenderer: defaultCellRangeRenderer,
@@ -1587,4 +1588,3 @@ class Grid extends React.PureComponent<Props, State> {
 }
 
 polyfill(Grid as any);
-export default Grid;

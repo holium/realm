@@ -18,5 +18,3 @@ export const Flex = styled(Box)<FlexProps>({
 Flex.defaultProps = {
   display: 'flex',
 };
-
-export default { Flex };

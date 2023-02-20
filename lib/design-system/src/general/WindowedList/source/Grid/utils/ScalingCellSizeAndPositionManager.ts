@@ -1,5 +1,5 @@
 import type { Alignment, CellSizeGetter, VisibleCellRange } from '../types';
-import CellSizeAndPositionManager from './CellSizeAndPositionManager';
+import { CellSizeAndPositionManager } from './CellSizeAndPositionManager';
 import { getMaxElementSize } from './maxElementSize';
 
 type ContainerSizeAndOffset = {
@@ -22,7 +22,7 @@ type Params = {
 /**
  * Extends CellSizeAndPositionManager and adds scaling behavior for lists that are too large to fit within a browser's native limits.
  */
-export default class ScalingCellSizeAndPositionManager {
+export class ScalingCellSizeAndPositionManager {
   _cellSizeAndPositionManager: CellSizeAndPositionManager;
   _maxScrollSize: number;
 

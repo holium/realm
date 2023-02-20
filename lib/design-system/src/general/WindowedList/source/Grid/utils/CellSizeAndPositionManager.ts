@@ -27,7 +27,7 @@ type SizeAndPositionData = {
  * Just-in-time calculates and caches size and position information for a collection of cells.
  */
 
-export default class CellSizeAndPositionManager {
+export class CellSizeAndPositionManager {
   // Cache of size and position data for cells, mapped by cell index.
   // Note that invalid values may exist in this map so only rely on cells up to this._lastMeasuredIndex
   _cellSizeAndPositionData = {};

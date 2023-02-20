@@ -57,7 +57,6 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
 
   * {
     box-sizing: border-box;
-    cursor: none !important;
     font-family: "Rubik", sans-serif;
   }
 
@@ -129,5 +128,3 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
 
 `;
-
-export default { GlobalStyle };

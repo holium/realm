@@ -56,9 +56,9 @@
     "@urbit/http-api": "^2.3.0",
     "async-await-queue": "^1.2.1",
     "babel-loader": "^8.2.5",
-    "protobufjs": "^7.0.0",
     "simple-peer": "^9.11.1",
     "ts-debounce": "^4.0.0",
+    "typed-emitter": "^2.1.0",
     "urbit-ob": "^5.0.1"
   }
 }

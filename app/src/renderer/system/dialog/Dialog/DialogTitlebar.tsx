@@ -19,8 +19,7 @@ export interface DialogTitlebarProps {
   zIndex: number;
   showDevToolsToggle: boolean;
   windowColor: string;
-  onClose: () => void;
-  onMaximize: () => void;
+  onClose?: () => void;
 }
 
 export const DialogTitlebar = ({

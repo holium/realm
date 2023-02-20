@@ -6,26 +6,28 @@ import {
   BaseDialogProps,
   DialogRenderers,
 } from 'renderer/system/dialog/dialogs';
-import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
-import EmailDialog from 'renderer/system/onboarding/Email.dialog';
+import { DisclaimerDialog } from 'renderer/system/onboarding/Disclaimer.dialog';
+import { EmailDialog } from 'renderer/system/onboarding/Email.dialog';
 import { HaveUrbitDialog } from 'renderer/system/onboarding/HaveUrbit.dialog';
 import { AddShip } from 'renderer/system/onboarding/AddShip.dialog';
-import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
+import { ProfileSetup } from 'renderer/system/onboarding/ProfileSetup.dialog';
 import { SetPassword } from 'renderer/system/onboarding/SetPassword.dialog';
-import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
-import SelectPatp from 'renderer/system/onboarding/SelectPatp.dialog';
-import SelectPlan, {
+import { InstallAgent } from 'renderer/system/onboarding/InstallAgent.dialog';
+import { SelectPatp } from 'renderer/system/onboarding/SelectPatp.dialog';
+import {
+  SelectPlan,
   SelectPlanProps,
 } from 'renderer/system/onboarding/SelectPlan.dialog';
-import StripePayment, {
+import {
+  StripePayment,
   StripePaymentProps,
 } from 'renderer/system/onboarding/StripePayment.dialog';
-import HostingConfirmation from 'renderer/system/onboarding/HostingConfirmation.dialog';
-import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
-import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
-import AccessGatePassed from 'renderer/system/onboarding/AccessGatePassed.dialog';
-import ViewCode from './ViewCode.dialog';
-import CheckInstallationDialog from './CheckInstallation.dialog';
+import { HostingConfirmation } from 'renderer/system/onboarding/HostingConfirmation.dialog';
+import { AccessCode } from 'renderer/system/onboarding/AccessCode.dialog';
+import { AccessGate } from 'renderer/system/onboarding/AccessGate.dialog';
+import { AccessGatePassed } from 'renderer/system/onboarding/AccessGatePassed.dialog';
+import { ViewCode } from './ViewCode.dialog';
+import { CheckInstallationDialog } from './CheckInstallation.dialog';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 const initialOnboardingDialogs: DialogRenderers = {
@@ -69,8 +71,12 @@ const initialOnboardingDialogs: DialogRenderers = {
     onOpen: () => {
       ShellActions.setBlur(true);
     },
-    onNext: (_data: any) => {
-      OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
+    onNext: (isRecoveringAccount: boolean) => {
+      if (isRecoveringAccount) {
+        OnboardingActions.setStep(OnboardingStep.EMAIL);
+      } else {
+        OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
+      }
     },
     getWindowProps: (desktopDimensions) => ({
       appId: OnboardingStep.ACCESS_GATE,
@@ -81,7 +87,7 @@ const initialOnboardingDialogs: DialogRenderers = {
           x: 0,
           y: 0,
           width: 400,
-          height: 420,
+          height: 370,
         },
         desktopDimensions
       ),
@@ -125,6 +131,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
+    // onPrevious: () => {
     getWindowProps: (desktopDimensions) => ({
       appId: OnboardingStep.EMAIL,
       zIndex: 13,
@@ -133,8 +140,8 @@ const initialOnboardingDialogs: DialogRenderers = {
         {
           x: 0,
           y: 0,
-          width: 450,
-          height: 420, // ayyyy
+          width: 400,
+          height: 370, // ayyyy
         },
         desktopDimensions
       ),

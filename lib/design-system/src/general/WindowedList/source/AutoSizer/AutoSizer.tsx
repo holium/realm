@@ -1,5 +1,5 @@
 import { Component, ReactElement } from 'react';
-import createDetectElementResize from './detectElementResize';
+import { createDetectElementResize } from './detectElementResize';
 
 export type Size = {
   width: number;
@@ -21,7 +21,7 @@ type DetectElementResize = {
   removeResizeListener: ResizeHandler;
 };
 
-export default class AutoSizer extends Component<Props, Size> {
+export class AutoSizer extends Component<Props, Size> {
   static defaultProps = {
     disableWidth: false,
     disableHeight: false,
