@@ -10,6 +10,7 @@ export const Mouse = () => {
   const active = useToggle(false);
   const visible = useToggle(false);
   const mouseLayerTracking = useToggle(false);
+  const disabled = useToggle(false);
 
   useEffect(() => {
     window.electron.app.onMouseOver(visible.toggleOn);
@@ -43,10 +44,14 @@ export const Mouse = () => {
       window.addEventListener('mousemove', handleMouseMove);
     });
 
+    window.electron.app.onDisableCustomMouse(disabled.toggleOn);
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
+
+  if (disabled.isOn) return null;
 
   return (
     <AnimatedCursor

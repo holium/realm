@@ -54,6 +54,9 @@ const appPreload = {
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
+  onDisableCustomMouse(callback: () => void) {
+    ipcRenderer.on('disable-custom-mouse', callback);
+  },
   mouseColorChanged(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },

@@ -4,5 +4,5 @@
     "baseUrl": "src"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "test-ui"]
+  "exclude": ["node_modules", "dist", "test-ui-vite"]
 }

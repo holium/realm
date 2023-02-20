@@ -13,7 +13,7 @@ interface Props {
 export const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
   const [ready, setReady] = useState(false);
 
-  const { ship, desktop, theme } = useServices();
+  const { ship, theme } = useServices();
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 
@@ -35,14 +35,7 @@ export const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     );
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
-    webview?.addEventListener('did-finish-load', () => {
-      webview.send('mouse-color', desktop.mouseColor);
-      webview.insertCSS(css);
-    });
-
-    webview?.addEventListener('close', () => {
-      webview?.closeDevTools();
-    });
+    webview?.addEventListener('close', webview?.closeDevTools);
   }, []);
 
   // Sync ship model info into app window
@@ -65,8 +58,6 @@ export const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       });
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
-
-
 
   return useMemo(
     () => (
