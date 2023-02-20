@@ -103,6 +103,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     width: 100vw;
     margin: 0;
     overflow: hidden; 
+    position: relative;
   }
 
   li {

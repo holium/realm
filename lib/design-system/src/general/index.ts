@@ -7,6 +7,7 @@ export * from './Icon/Icon';
 export * from './Skeleton/Skeleton';
 export * from './Text/Text';
 export * from './WindowedList/WindowedList';
+export * from './Card/Card';
 export { Row } from './Row/Row';
 export { Favicon } from './Favicon/Favicon';
 export { SectionDivider } from './SectionDivider/SectionDivider';
