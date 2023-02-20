@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { cleanNounColor, removeHash } from '../lib/color';
+import { cleanNounColor } from '../lib/color';
 
 export const ContactApi = {
   getContact: async (conduit: Conduit, ship: string) => {
@@ -20,7 +20,7 @@ export const ContactApi = {
       throw err;
     }
   },
-  saveContact: async (conduit: Conduit, ship: string, data: any) => {
+  /*saveContact: async (conduit: Conduit, ship: string, data: any) => {
     const preparedData: any = {
       nickname: data.nickname,
       color: removeHash(data.color),
@@ -66,7 +66,7 @@ export const ContactApi = {
       color: `#${preparedData.color}`,
       avatar: preparedData.avatar,
     };
-  },
+  }*/
 };
 
 // const response = await Conduit.pokeOnce(
