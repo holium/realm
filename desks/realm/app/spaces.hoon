@@ -3,7 +3,7 @@
 /-  vstore=visas
 /-  hark=hark-store
 /-  g=new-groups
-/+  default-agent, verb, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
+/+  default-agent, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
 ^-  agent:gall
 ::
 ::  %spaces [realm]: A store for Realm space metadata and members.
@@ -34,7 +34,6 @@
 =|  state-1
 =*  state  -
 =<
-  %+  verb  &
   %-  agent:dbug
   |_  =bowl:gall
   +*  this  .
@@ -341,12 +340,20 @@
       ^-  (quip card _state)
       ?>  (has-auth:security path src.bowl %owner)
       ?:  =('our' space.path) :: we cannot delete our space
-        [~ state]
+        `state
       =.  spaces.state                (~(del by spaces.state) path)
-      =.  membership.state            (~(del by membership.state) path)
       =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
-      :_  state
-      [%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
+      =.  cards
+        %+  weld  cards
+        %+  murn  ~(tap by space-members)
+        |=  [=ship =member:membership-store]
+        ^-  (unit card)
+        ?.  =(%invited status.member)  ~
+        `[%pass / %agent [ship dap.bowl] %poke visa-action+!>([%revoke-invite path])]
+      =.  membership.state            (~(del by membership.state) path)
+      [cards state]
     ::
     ++  handle-join
       |=  [path=space-path:store]
@@ -358,11 +365,8 @@
       ++  member-handle-join
         |=  [path=space-path:store]
         ^-  (quip card _state)
-        =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
-        =/  cards
-          :~  [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
-          ==
-        [cards state]
+        :_  state
+        [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]~
       ::
       ++  host-handle-join
         |=  [path=space-path:store =ship]
@@ -420,11 +424,18 @@
         =/  has-incoming          (~(get by invitations.state) path)
         =/  watch-path            [/spaces/(scot %p ship.path)/(scot %tas space.path)]
         =/  cards
+          ^-  (list card)
           :~
             [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%leave path])]
             [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
             [%pass watch-path %agent [our.bowl %spaces] %leave ~]
           ==
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
         ?~  has-incoming
           :_  state
           cards
@@ -504,12 +515,20 @@
           `state(membership (~(del by membership.state) path))
         =.  membership.state                (~(del by membership.state) path)
         =.  invitations.state               (~(del by invitations.state) path)
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
         =/  watch-paths                     [/updates ~]
-        :_  state
-        :~
-          [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [our.bowl %spaces] %leave ~]
-          [%give %fact watch-paths spaces-reaction+!>([%remove path])]
-        ==
+        =/  cards
+          ^-  (list card)
+          :~
+            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [our.bowl %spaces] %leave ~]
+            [%give %fact watch-paths spaces-reaction+!>([%remove path])]
+          ==
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
+        [cards state]
       ::
       ++  host-on-remove
         |=  [path=space-path:store]
@@ -530,10 +549,18 @@
       =.  membership.state      (~(put by membership.state) [path members])
       ~&  >>  [%remote-space path members]
       :_  state
+      %+  weld
       :~
         [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
         [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
       ==
+      ::  share contact with all members
+      %+  murn  ~(tap in ~(key by members))
+      |=  =ship
+      ^-  (unit card)
+      ?~  =(our.bowl ship)  ~
+      =/  cage  friends-action+!>([%share-contact ship])
+      `[%pass / %agent [our.bowl %friends] %poke cage]
     ::
     ++  on-current
       |=  [path=space-path:store]
@@ -574,6 +601,7 @@
       %kick-member          (handle-kick +.act)
       %group-kick-member    (group-handle-kick +.act)
       %revoke-invite        (handle-deported +.act)
+      %edit-member-role     (handle-edit-role +.act)
     ==
     ::
     ++  handle-send  ::  Sends an invite to a ship
@@ -643,11 +671,16 @@
         =.  membership.state            (~(put by membership.state) [path members])
         =/  member-path                 /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths                 [/updates member-path ~]
-        :_  state
-        :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
-            [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
-        ==
+        =/  cards=(list card)
+          :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
+              :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+              [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
+          ==
+        =?  cards  =(%group type:(~(got by spaces.state) path))
+          %+  weld  cards
+            =/  action  [path now.bowl %fleet (silt ~[src.bowl]) %add ~]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(`action:g`action)]~  :: Add member to group
+        [cards state]
     ::
     ++  handle-decline
       |=  [path=space-path:store]
@@ -735,6 +768,30 @@
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]~
     ::
+    ++  handle-edit-role
+      |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  src-roles  roles:(~(got by (~(got by membership) path)) src.bowl)
+      ?>  (~(has in src-roles) %admin)
+      =/  space-members  (~(got by membership) path)
+      =/  member-state  (~(got by space-members) member)
+      =.  roles.member-state  role-set
+      =.  space-members  (~(put by space-members) [member member-state])
+      =.  membership  (~(put by membership) [path space-members])
+      =/  cards
+        ^-  (list card)
+        [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+      =?  cards  =(%group type:(~(got by spaces.state) path))
+        %+  weld  cards
+          ?:  (~(has in role-set) %admin)
+            ::  %member to %admin
+            =/  action  [path now.bowl %fleet (silt ~[member]) %add-sects (sy [%admin ~])]
+            `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+          ::  remove %admin status
+          =/  action  [path now.bowl %fleet (silt ~[member]) %del-sects (sy [%admin ~])]
+          `(list card)`[%pass / %agent [our.bowl %groups] %poke group-action+!>(action)]~  :: Edit member in group
+      [cards state]
+    ::
     --
   ++  reaction
     |=  [rct=reaction:vstore]
@@ -746,6 +803,7 @@
       %invite-removed     `state
       %invite-accepted    (on-accepted +.rct)
       %kicked             (on-kicked +.rct)
+      %edited             (on-edited +.rct)
     ==
     ::
     ++  on-sent
@@ -774,17 +832,35 @@
         =.  spaces.state              (~(del by spaces.state) path)
         =.  membership.state          (~(del by membership.state) path)
         =.  invitations.state         (~(del by invitations.state) path)
-        :_  state
-        :~
-          [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
-          [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
-        ==
+        =/  update-current  =(path current.state)
+        =?  current.state  update-current
+          [our.bowl 'our']
+        =/  cards
+          ^-  (list card)
+          :~
+            [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
+            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [ship.path %spaces] %leave ~]
+          ==
+        =?  cards  update-current
+          %+  welp  cards
+          [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
+        [cards state]
       =/  membs                       (~(got by membership.state) path)
       =.  membs                       (~(del by membs) ship)
       =.  membership.state            (~(put by membership.state) [path membs])
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
     ::
+    ++  on-edited
+      |=  [path=space-path:store =ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
+      =/  members  (~(got by membership.state) path)
+      =/  member   (~(got by members) ship)
+      =.  roles.member  role-set
+      =.  members  (~(put by members) [ship member])
+      =.  membership.state  (~(put by membership.state) [path members])
+      :_  state
+      [%give %fact [/updates ~] visa-reaction+!>([%edited path ship member])]~
     --
   ::
   ++  helpers

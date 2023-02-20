@@ -156,12 +156,12 @@ const AppId = types.string;
 const OrderedAppList = types.array(types.string);
 // const RecommendedByShips = types.array(types.string);
 
-export const StallModel = types.model('StallModel', {
+const StallModel = types.model('StallModel', {
   suite: types.map(AppId), // (map index app-id)
   recommended: types.map(types.integer),
 });
 
-export const AllyModel = types.model('AllyModel', {
+const AllyModel = types.model('AllyModel', {
   ship: types.identifier,
   desks: types.optional(types.array(types.string), []),
 });
@@ -475,6 +475,13 @@ export const NewBazaarStore = types
     //
     // Scries
     //
+    scryHash: flow(function* (conduit: Conduit, app: string) {
+      try {
+        return yield BazaarApi.scryHash(conduit, app);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     scryAllies: flow(function* (conduit: Conduit) {
       try {
         const allies = yield BazaarApi.scryAllies(conduit);
@@ -527,6 +534,9 @@ export const NewBazaarStore = types
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
       self.subscription.set(newSubscriptionStatus);
+    },
+    setDock(path: string, dock: string[]) {
+      self.docks.set(path, dock);
     },
   }))
   .views((self) => ({
@@ -603,16 +613,13 @@ export const NewBazaarStore = types
     isRecommended(appId: string) {
       return self.recommendations.includes(appId);
     },
-    getApp(appId: string) {
+    getApp(appId: string): AppType {
       const app = self.catalog.get(appId);
-      if (!app) {
-        // @ts-ignore
-        return self.devAppMap.get(appId);
-      }
-      return app;
+      if (app) return app;
+      return self.devAppMap.get(appId)!;
     },
-    getDock(path: string) {
-      return self.docks.get(path);
+    getDock(path: string): string[] {
+      return self.docks.get(path) ?? [];
     },
     getDockApps(path: string) {
       const dock = self.docks.get(path);

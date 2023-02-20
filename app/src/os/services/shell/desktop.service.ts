@@ -2,16 +2,17 @@ import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import {
   DesktopStoreType,
   DesktopStore,
-  CreateWindowProps,
+  AppWindowProps,
 } from './desktop.model';
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
+import { Bounds } from 'os/types';
 
 /**
  * DesktopService
@@ -63,15 +64,8 @@ export class DesktopService extends BaseService {
     setActive: async (appId: string) => {
       return await ipcRenderer.invoke('realm.desktop.set-active', appId);
     },
-    setWindowBounds: async (
-      appId: any,
-      bounds: { width: number; height: number; x: number; y: number }
-    ) => {
-      return await ipcRenderer.invoke(
-        'realm.desktop.set-window-bounds',
-        appId,
-        bounds
-      );
+    setWindowBounds: (appId: string, bounds: Bounds) => {
+      ipcRenderer.invoke('realm.desktop.set-window-bounds', appId, bounds);
     },
     setMouseColor: async (mouseColor: string) => {
       return await ipcRenderer.invoke(
@@ -83,7 +77,7 @@ export class DesktopService extends BaseService {
     openAppWindow: (app: AppType) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', app);
     },
-    openDialog: (windowProps: CreateWindowProps) => {
+    openDialog: (windowProps: AppWindowProps) => {
       return ipcRenderer.invoke('realm.desktop.open-dialog', windowProps);
     },
     toggleMinimized: (appId: string) => {
@@ -159,11 +153,7 @@ export class DesktopService extends BaseService {
     this.state?.setMouseColor(mouseColor);
   }
 
-  setWindowBounds(
-    _event: any,
-    appId: string,
-    bounds: { width: number; height: number; x: number; y: number }
-  ) {
+  setWindowBounds(_event: any, appId: string, bounds: Bounds) {
     this.state?.setBounds(appId, bounds);
   }
 
@@ -196,7 +186,7 @@ export class DesktopService extends BaseService {
     }
   }
 
-  openDialog(_event: IpcRendererEvent, windowProps: CreateWindowProps) {
+  openDialog(_event: IpcRendererEvent, windowProps: AppWindowProps) {
     return toJS(this.state.openDialog(windowProps));
   }
 

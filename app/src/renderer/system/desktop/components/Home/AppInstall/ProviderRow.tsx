@@ -3,8 +3,9 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Sigil } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { ThemeType } from '../../../../../theme';
+import { Avatar } from '@holium/design-system';
 
 interface RowProps {
   theme: ThemeType;
@@ -66,12 +67,12 @@ export const ProviderRow = ({ id, ship, color, onClick }: ProviderRowProps) => {
           onClick && onClick(ship);
         }}
       >
-        <Sigil
+        <Avatar
           simple
           size={28}
           // avatar={item.avatar}
           patp={ship}
-          color={[color || '#000000', 'white']}
+          sigilColor={[color || '#000000', 'white']}
         />
         <Flex flexDirection="column" flex={1}>
           <Text fontWeight={500} color={currentTheme.textColor}>

@@ -12,6 +12,7 @@ import {
 import styled from 'styled-components';
 
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useServices } from 'renderer/logic/store';
 import {
   UrbitApp,
@@ -25,7 +26,6 @@ import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { darken, rgba } from 'polished';
 import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 const TileStyle = styled(Box)`
@@ -81,12 +81,21 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   const { theme, bazaar } = useServices();
   const { selectedApp, setSearchMode } = useAppInstaller();
   const [copied, setCopied] = useState<boolean>(false);
+  const [deskHash, setDeskHash] = useState<string | null>(null);
 
   useEffect(() => {
     if (copied) {
       setTimeout(() => setCopied(false), 1000);
     }
   }, [copied]);
+
+  useEffect(() => {
+    if (appId) {
+      SpacesActions.scryHash(appId).then(
+        (result) => result && setDeskHash(result['app-hash'])
+      );
+    }
+  }, [appId]);
 
   let app: AppType | null = null;
   let onClose: any = ShellActions.closeDialog;
@@ -119,6 +128,8 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     return null;
   }
 
+  const isInstalled = app && app.installStatus === 'installed';
+
   let graphic;
   let title = app.title;
   let kpis: React.ReactNode = [];
@@ -146,6 +157,10 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     kpis = (
       <>
         <KPI title="Developer desk" value={`${app.host || ''}/${app.id}`} />
+        {app.href && app.href.glob && app.href.glob['glob-reference'] && (
+          <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
+        )}
+        {isInstalled && deskHash && <KPI title="Desk Hash" value={deskHash} />}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
@@ -168,8 +183,6 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
       </>
     );
   }
-
-  const isInstalled = app.installStatus === 'installed';
 
   if (app.type === 'native') {
     app as NativeAppType;

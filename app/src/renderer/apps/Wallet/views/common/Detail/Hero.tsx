@@ -34,7 +34,7 @@ import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../../components/WalletCardWrapper';
-import TransactionPasscode from '../Transaction/TransactionPasscode';
+import { TransactionPasscode } from '../Transaction/TransactionPasscode';
 
 const BreadCrumb = styled(Text)`
   transition: var(--transition);

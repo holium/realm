@@ -71,5 +71,3 @@ export function uuid() {
   lastId++;
   return `icon-${lastId}`;
 }
-
-export default Icon;

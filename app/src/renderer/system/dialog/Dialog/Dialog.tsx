@@ -1,4 +1,3 @@
-import { WindowModelType } from 'os/services/shell/desktop.model';
 import {
   FC,
   useEffect,
@@ -8,19 +7,15 @@ import {
   ReactNode,
   RefObject,
 } from 'react';
-import {
-  Flex,
-  TextButton,
-  Spinner,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import styled from 'styled-components';
+import { Button, Icon } from '@holium/design-system';
+import { Flex, Spinner } from 'renderer/components';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import styled from 'styled-components';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 
 export interface DialogViewProps {
-  window: WindowModelType;
+  appWindow: AppWindowType;
 }
 
 type ViewProps = {
@@ -44,8 +39,7 @@ const View = styled.div<ViewProps>`
   background: ${(props) => props.background};
 `;
 
-export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
-  const { window } = props;
+export const DialogView = ({ appWindow }: DialogViewProps) => {
   const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
@@ -53,15 +47,15 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [validated, setValidated] = useState<boolean>(false);
 
   const ViewComponent: FC<any> | undefined = useMemo(() => {
-    const dialogRenderer = dialogRenderers[window.appId];
+    const dialogRenderer = dialogRenderers[appWindow.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     return dialogConfig.component!;
-  }, [window.appId, shell.dialogProps.toJSON()]);
+  }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
-  const dialogRenderer = dialogRenderers[window.appId];
+  const dialogRenderer = dialogRenderers[appWindow.appId];
   const dialogConfig: DialogConfig =
     dialogRenderer instanceof Function
       ? dialogRenderer(shell.dialogProps.toJSON())
@@ -112,6 +106,8 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
         </Flex>
         {workflow && (
           <Flex
+            key={workflowState.id}
+            id={workflowState.id}
             flexDirection="row"
             justifyContent="space-between"
             alignItems="center"
@@ -119,14 +115,14 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           >
             <Flex alignItems="center" justifyContent="flex-start">
               {onPrevious && hasPrevious && hasPrevious() && (
-                <IconButton
-                  customBg={theme.currentTheme.windowColor}
+                <Button.IconButton
+                  size={26}
                   onClick={() => {
                     onPrevious();
                   }}
                 >
-                  <Icons name="ArrowLeftLine" />
-                </IconButton>
+                  <Icon name="ArrowLeftLine" size={20} opacity={0.5} />
+                </Button.IconButton>
               )}
             </Flex>
             <Flex
@@ -135,7 +131,9 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
               height={26}
             >
               {!customNext && onNext && (
-                <TextButton
+                <Button.TextButton
+                  showOnHover
+                  fontWeight={500}
                   disabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {
                     onNext(evt, workflowState, setWorkflowState);
@@ -146,7 +144,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
                   ) : (
                     <>{nextButtonText || 'Next'}</>
                   )}
-                </TextButton>
+                </Button.TextButton>
               )}
             </Flex>
           </Flex>

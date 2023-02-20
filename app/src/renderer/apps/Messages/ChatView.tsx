@@ -12,8 +12,8 @@ import {
 import { lighten, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { Content } from '@urbit/api';
-import { Input, Sigil, Spinner, Tooltip } from 'renderer/components';
-import { Button, Icon, Text, Box, Flex } from '@holium/design-system';
+import { Input, Spinner, Tooltip } from 'renderer/components';
+import { Avatar, Button, Icon, Text, Box, Flex } from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { createDmForm } from './forms/chatForm';
 import { useServices } from 'renderer/logic/store';
@@ -275,12 +275,12 @@ export const ChatView = observer(({ selectedChat, theme, storage }: Props) => {
     } else {
       const dmModel = selectedChat as PreviewDMType;
       return (
-        <Sigil
+        <Avatar
           simple
           size={28}
           avatar={dmModel.metadata.avatar}
           patp={dmModel.to}
-          color={[dmModel.metadata.color || '#000000', 'white']}
+          sigilColor={[dmModel.metadata.color || '#000000', 'white']}
         />
       );
     }

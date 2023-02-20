@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
 import { space, layout, SpaceProps, LayoutProps, compose } from 'styled-system';
 
-import config, { DIMENSIONS } from './helpers';
+import { config, DIMENSIONS } from './helpers';
 
 type ColumnType = SpaceProps &
   LayoutProps & {
@@ -23,7 +23,7 @@ type ColumnType = SpaceProps &
     style?: any;
   };
 
-const Column = styled(styled.div<ColumnType>`
+export const Column = styled(styled.div<ColumnType>`
   box-sizing: border-box;
   flex: 1 0 auto;
   max-width: 100%;
@@ -158,5 +158,3 @@ Column.defaultProps = {
   // lg: 12,
   // xl: 12,
 };
-
-export default Column;

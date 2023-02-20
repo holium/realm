@@ -98,5 +98,3 @@ export const Box = styled(motion.div)<BoxProps>(
   },
   boxStyles
 );
-
-export default { Box };

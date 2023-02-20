@@ -9,7 +9,6 @@ import {
   Box,
   Spinner,
   Flex,
-  TextButton,
   UrbitSVG,
 } from 'renderer/components';
 import { observer } from 'mobx-react';
@@ -120,6 +119,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>Urbit ID</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-patp"
                   tabIndex={1}
                   name="patp"
@@ -146,6 +146,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>URL</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-ship-url"
                   tabIndex={2}
                   name="url"
@@ -172,6 +173,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>Access key</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-access-key"
                   tabIndex={3}
                   name="code"
@@ -211,14 +213,17 @@ const AddShipPresenter = (props: BaseDialogProps) => {
           </Flex>
         </Grid.Column>
       </Grid.Column>
-      <Box position="absolute" left={385} bottom={20}>
-        <TextButton
+      <Box position="absolute" right={24} bottom={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
           disabled={!shipForm.computed.isValid || loading}
           onClick={shipForm.actions.submit}
           style={{ minWidth: 45 }}
         >
           {loading ? <Spinner size={0} /> : 'Next'}
-        </TextButton>
+        </Button.TextButton>
       </Box>
     </Grid.Column>
   );

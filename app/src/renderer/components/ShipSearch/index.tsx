@@ -3,13 +3,12 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
-import { Flex, Text, Box, Sigil, IconButton, Icons } from '../';
-import { Row } from '@holium/design-system';
-import { ContactModelType } from 'os/services/ship/models/contacts';
+import { Flex, Text, Box, IconButton, Icons } from '../';
+import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
-import { WindowedList } from '@holium/design-system';
+import { Row, Avatar, WindowedList } from '@holium/design-system';
 
 const resultHeight = 50;
 
@@ -48,13 +47,18 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
-    const { theme, ship, contacts } = useServices();
+    const { theme, ship, friends } = useServices();
     const { mode, dockColor, windowColor } = theme.currentTheme;
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
-      const contactsList = ship ? Array.from(contacts.rolodex.entries()) : [];
-      return searchPatpOrNickname(search, contactsList, selected, ship?.patp);
-    }, [contacts.rolodex, search, selected, ship]);
+      // const contactsList = ship ? friends.contacts : [];
+      return searchPatpOrNickname(
+        search,
+        friends.contacts,
+        selected,
+        ship?.patp
+      );
+    }, [friends.all, search, selected, ship]);
 
     const isOpen = useMemo(
       () => search.length && results.length,
@@ -76,12 +80,12 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         >
           <Flex gap={10} flexDirection="row" alignItems="center">
             <Box>
-              <Sigil
+              <Avatar
                 simple
                 size={22}
                 avatar={avatar}
                 patp={contact[0]}
-                color={[sigilColor || '#000000', 'white']}
+                sigilColor={[sigilColor || '#000000', 'white']}
               />
             </Box>
             <Text fontSize={2}>{contact[0]}</Text>

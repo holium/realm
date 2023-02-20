@@ -19,12 +19,9 @@ import deleteSourceMaps from '../scripts/delete-source-maps';
 checkNodeEnv('production');
 deleteSourceMaps();
 
-const devtoolsConfig =
-  process.env.DEBUG_PROD === 'true'
-    ? {
-        devtool: 'source-map',
-      }
-    : {};
+const devtoolsConfig = {
+  devtool: 'source-map',
+};
 
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
@@ -105,6 +102,10 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       INSTALL_MOON: '~hostyv',
       DEBUG_PROD: false,
+      SENTRY_DSN:
+        'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
+      AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
+      AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
     }),
     new MiniCssExtractPlugin({
       filename: '[name].style.css',

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
 import { useBrowser } from './store';
-import { WebView } from 'renderer/system/desktop/components/Window/WebView';
+import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
 
 type Props = {
   isDragging: boolean;
@@ -12,11 +12,14 @@ type Props = {
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
 
-  const id = 'os-browser-web-webview';
+  const appId = 'os-browser';
+  const webViewId = `${appId}-web-webview`;
   const { loader } = currentTab;
 
   useEffect(() => {
-    const webView = document.getElementById(id) as Electron.WebviewTag | null;
+    const webView = document.getElementById(
+      webViewId
+    ) as Electron.WebviewTag | null;
 
     if (!webView) return;
 
@@ -37,7 +40,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
       // Error code 3 is a bug and not a terminal error.
       if (e.errorCode !== -3) setError();
     });
-  }, [id]);
+  }, [webViewId]);
 
   return useMemo(
     () => (
@@ -58,7 +61,8 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
           </Text>
         ) : (
           <WebView
-            id={id}
+            id={webViewId}
+            appId={appId}
             src={currentTab.url}
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
@@ -75,7 +79,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
         )}
       </>
     ),
-    [currentTab.id, currentTab.url, isDragging, isResizing, loader.state]
+    [currentTab.url, isDragging, isResizing, loader.state, webViewId]
   );
 };
 

@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
-import { Flex, Box, Sigil, Text, MenuItemProps } from '../';
+import { Flex, Box, Text, MenuItemProps } from '../';
 import { Row } from 'renderer/components/NewRow';
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { ThemeType } from '../../logic/theme';
 import { usePassportMenu } from './usePassportMenu';
+import { Avatar } from '@holium/design-system';
 
 interface IPersonRow {
   listId: string;
@@ -95,12 +96,12 @@ export const PersonRow = ({
           style={{ pointerEvents: 'none' }}
         >
           <Box>
-            <Sigil
+            <Avatar
               simple
               size={22}
               avatar={avatar}
               patp={patp}
-              color={[sigilColor || '#000000', 'white']}
+              sigilColor={[sigilColor || '#000000', 'white']}
             />
           </Box>
           <Flex flex={1} height="22px" overflow="hidden" alignItems="center">

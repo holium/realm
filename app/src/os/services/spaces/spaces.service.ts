@@ -4,7 +4,7 @@ import { toJS } from 'mobx';
 import fs from 'fs';
 import path from 'path';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
@@ -67,6 +67,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
+    'realm.bazaar.scryHash': this.scryHash,
     'realm.bazaar.scryTreaties': this.scryTreaties,
     'realm.bazaar.scryAllies': this.scryAllies,
     'realm.spaces.get-members': this.getMembers,
@@ -75,6 +76,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.set-join': this.setJoin,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
+    'realm.spaces.members.set-roles': this.setRoles,
     'realm.spaces.bazaar.get-apps': this.getApps,
     'realm.spaces.bazaar.get-allies': this.getAllies,
     'realm.spaces.bazaar.get-treaties': this.getTreaties,
@@ -105,6 +107,7 @@ export class SpacesService extends BaseService {
     scryAllies: async () => await ipcRenderer.invoke('realm.bazaar.scryAllies'),
     scryTreaties: async (ship: Patp) =>
       await ipcRenderer.invoke('realm.bazaar.scryTreaties', ship),
+    scryHash: (app: string) => ipcRenderer.invoke('realm.bazaar.scryHash', app),
 
     getOurGroups: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-our-groups');
@@ -179,10 +182,10 @@ export class SpacesService extends BaseService {
         path,
         payload
       ),
-    //
     kickMember: async (path: string, patp: string) =>
       await ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
-    //
+    setRoles: async (patp: string, roles: string[]) =>
+      await ipcRenderer.invoke('realm.spaces.members.set-roles', patp, roles),
     getApps: async (path: SpacePath, tag: string = 'all') =>
       await ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
     getAllies: async (path: SpacePath) =>
@@ -485,6 +488,15 @@ export class SpacesService extends BaseService {
     return await SpacesApi.kickMember(this.core.conduit!, path, patp);
   }
 
+  async setRoles(_event: IpcMainInvokeEvent, patp: Patp, roles: string[]) {
+    return await SpacesApi.setRoles(
+      this.core.conduit!,
+      this.state!.selected!.path,
+      patp,
+      roles
+    );
+  }
+
   async getInvitations(_event: IpcMainInvokeEvent) {
     return await SpacesApi.getInvitations(this.core.conduit!);
   }
@@ -593,6 +605,10 @@ export class SpacesService extends BaseService {
 
   async unrecommendApp(_event: IpcMainInvokeEvent, appId: string) {
     return await this.models.bazaar.unrecommendApp(this.core.conduit!, appId);
+  }
+
+  async scryHash(_event: IpcMainInvokeEvent, app: string) {
+    return await this.models.bazaar.scryHash(this.core.conduit!, app);
   }
 
   async scryTreaties(_event: IpcMainInvokeEvent, ship: Patp) {

@@ -12,18 +12,18 @@ import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import MenuBuilder from './menu';
+import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
 import { Realm } from '../os';
-import FullscreenHelper from './helpers/fullscreen';
-import WebviewHelper from './helpers/webview';
-import DevHelper from './helpers/dev';
-import MediaHelper from './helpers/media';
-import MouseHelper from './helpers/mouse';
-import BrowserHelper from './helpers/browser';
+import { FullScreenHelper } from './helpers/fullscreen';
+import { WebViewHelper } from './helpers/webview';
+import { DevHelper } from './helpers/dev';
+import { MediaHelper } from './helpers/media';
+import { MouseHelper } from './helpers/mouse';
+import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isMac, isProduction } from './helpers/env';
+import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -93,8 +93,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
 
-  FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow);
+  FullScreenHelper.registerListeners(mainWindow);
+  WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
@@ -102,7 +102,8 @@ const createWindow = async () => {
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.webContents.on('dom-ready', () => {
-    hideCursor(mainWindow.webContents);
+    // We use the default cursor for Linux.
+    if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners');
   });
 
@@ -169,13 +170,19 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
-  // Hide the traffic lights on macOS.
-  if (isMac) newMouseWindow.setWindowButtonVisibility(false);
+  const mouseSetup = () => {
+    if (isMac) {
+      hideCursor(newMouseWindow.webContents);
+      newMouseWindow.setWindowButtonVisibility(false);
+      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
+    } else if (isWindows) {
+      hideCursor(newMouseWindow.webContents);
+    } else {
+      newMouseWindow.webContents.send('disable-custom-mouse');
+    }
+  };
 
-  newMouseWindow.webContents.on('did-finish-load', () => {
-    hideCursor(newMouseWindow.webContents);
-    if (isMac) newMouseWindow.webContents.send('enable-mouse-layer-tracking');
-  });
+  mainWindow.on('focus', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();

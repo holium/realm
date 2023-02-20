@@ -99,8 +99,6 @@ export const HoliumAnimated = styled(SvgComponent)<IconProps>`
   ${compose(space, color, width, height, layout, typography)}
 `;
 
-export default HoliumAnimated;
-
 export const SplashWordMark = (animateProps: any) => {
   return (
     <motion.svg

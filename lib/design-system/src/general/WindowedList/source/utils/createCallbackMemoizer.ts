@@ -6,7 +6,7 @@ type CallBackProps = {
 /**
  * Helper utility that updates the specified callback whenever any of the specified indices have changed.
  */
-export default function createCallbackMemoizer(requireAllKeys = true) {
+export function createCallbackMemoizer(requireAllKeys = true) {
   let cachedIndices: Record<string, any> = {};
   return ({ callback, indices }: CallBackProps) => {
     const keys = Object.keys(indices);

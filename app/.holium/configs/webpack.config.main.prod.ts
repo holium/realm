@@ -15,12 +15,9 @@ import deleteSourceMaps from '../scripts/delete-source-maps';
 checkNodeEnv('production');
 deleteSourceMaps();
 
-const devtoolsConfig =
-  process.env.DEBUG_PROD === 'true'
-    ? {
-        devtool: 'source-map',
-      }
-    : {};
+const devtoolsConfig = {
+  devtool: 'source-map',
+};
 
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
@@ -60,15 +57,15 @@ const configuration: webpack.Configuration = {
       DEBUG_PROD: false,
       START_MINIMIZED: false,
       AUTOUPDATE_FEED_URL:
-        process.env.RELEASE_CHANNEL === 'alpha' ||
-        process.env.RELEASE_CHANNEL === 'draft'
-          ? 'https://ghproxy-staging.holium.xyz'
-          : 'https://ghproxy.holium.xyz',
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+          ? 'https://ghproxy.holium.xyz'
+          : 'https://ghproxy-staging.holium.xyz',
       INSTALL_MOON:
-        process.env.RELEASE_CHANNEL === 'alpha' ||
-        process.env.RELEASE_CHANNEL === 'draft'
-          ? '~nimwyd-ramwyl-dozzod-hostyv:realm,courier'
-          : '~hostyv:realm,courier',
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+          ? '~hostyv:realm,courier'
+          : '~nimwyd-ramwyl-dozzod-hostyv:realm,courier',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
     }),
   ],
