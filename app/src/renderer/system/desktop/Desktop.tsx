@@ -17,13 +17,13 @@ const DesktopPresenter = () => {
       <Layer zIndex={15}>
         <TrayManager />
       </Layer>
-      <Layer zIndex={-1}>
+      <Layer zIndex={0}>
         <AirliftManager />
       </Layer>
-      <Layer zIndex={0}>
+      <Layer zIndex={1}>
         <AppWindowManager />
       </Layer>
-      <Layer zIndex={1}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
+      <Layer zIndex={2}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>
         <Bottom size={56}>
           <SystemBar />

@@ -7,6 +7,8 @@ export type AirliftAgentProps = {
   desk: string;
   agent: string;
   arms: any;
+  onDragStart: () => void;
+  onDragStop: () => void;
 };
 
 export const AirliftAgent: FC<AirliftAgentProps> = observer(

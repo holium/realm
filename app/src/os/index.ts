@@ -190,7 +190,6 @@ export class Realm extends EventEmitter {
     let spaces = null;
     const desktop = this.services.desktop.snapshot;
     const shell = this.services.shell.snapshot;
-    const airlift = this.services.airlift.snapshot;
     let membership = null;
     let bazaar = null;
     let beacon = null;
@@ -198,6 +197,7 @@ export class Realm extends EventEmitter {
     let wallet = null;
     let visas = null;
     let models = {};
+    let airlift = null;
 
     if (this.session) {
       ship = this.services.ship.snapshot;
@@ -209,6 +209,7 @@ export class Realm extends EventEmitter {
       bulletin = this.services.spaces.modelSnapshots.bulletin;
       membership = this.services.spaces.modelSnapshots.membership;
       visas = this.services.spaces.modelSnapshots.visas;
+      airlift = this.services.airlift.snapshot;
     }
 
     if (this.conduit) {

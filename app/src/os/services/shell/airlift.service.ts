@@ -4,7 +4,7 @@ import { Realm } from '../../';
 
 import { BaseService } from '../base.service';
 import { DiskStore } from '../base.store';
-import { AirliftStore, AirliftStoreType, AirliftModel } from './airlift.model';
+import { AirliftStore, AirliftStoreType } from './airlift.model';
 
 /**
  * AirliftService
@@ -16,10 +16,18 @@ export class AirliftService extends BaseService {
   handlers = {
     'realm.airlift.expand-arm': this.expandArm,
     'realm.airlift.drop-airlift': this.dropAirlift,
+    'realm.airlift.remove-airlift': this.removeAirlift,
   };
 
   static preload = {
     dropAirlift: (spacePath: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.drop-airlift',
+        spacePath,
+        airliftId
+      );
+    },
+    removeAirlift: (spacePath: string, airliftId: string) => {
       return ipcRenderer.invoke(
         'realm.airlift.drop-airlift',
         spacePath,
@@ -96,10 +104,10 @@ export class AirliftService extends BaseService {
   // ************************ AIRLIFT ***************************
   // ***********************************************************
   async expandArm(_event: any, desk: string, agent: string, arm: string) {
-    this.state!.model.desks.get(desk)!
+    /* this.state!.model.desks.get(desk)!
       .agents.get(agent)!
       .arms.get(arm)!
-      .expand();
+      .expand();*/
   }
 
   async dropAirlift(
@@ -107,7 +115,14 @@ export class AirliftService extends BaseService {
     space: string,
     airliftId: string
   ) {
-    console.log(airliftId);
-    this.state!.airlifts.get(space)!.put(AirliftModel.create());
+    this.state!.dropAirlift(space, airliftId, { x: 3, y: 3 });
+  }
+
+  async removeAirlift(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    airliftId: string
+  ) {
+    this.state!.removeAirlift(space, airliftId);
   }
 }

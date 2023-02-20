@@ -129,7 +129,7 @@ const services = Services.create({
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
-  airlift: { model: {} },
+  airlift: {},
 });
 
 export const servicesStore = services;
@@ -264,6 +264,9 @@ OSActions.onBoot((_event: any, response: any) => {
       };
       servicesStore.theme.setCurrentTheme(bootTheme);
     }
+  }
+  if (response.airlift) {
+    applySnapshot(servicesStore.airlift, response.airlift);
   }
   if (response.bulletin) {
     applySnapshot(servicesStore.bulletin, response.bulletin);
@@ -429,6 +432,9 @@ OSActions.onEffect((_event: any, value: any) => {
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
+    }
+    if (value.resource === 'airlift') {
+      applySnapshot(servicesStore.airlift, castToSnapshot(value.model.airlift));
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);

@@ -11,40 +11,8 @@ const AirliftManagerPresenter = () => {
   const airlifts = Array.from(
     airlift.airlifts.get(spaces.selected!.path)?.values() || []
   );
-  // const windows = Array.from(desktop.windows.values());
 
-  /*const contextMenuOptions: ContextMenuOption[] = useMemo(
-    () => [
-      {
-        label: 'Change wallpaper',
-        onClick: () => {
-          ShellActions.setBlur(true);
-          ShellActions.openDialog('wallpaper-dialog');
-        },
-      },
-      {
-        label: 'Show dashboard',
-        disabled: true,
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          console.log('changing wallpaper');
-        },
-      },
-      {
-        label: 'Toggle devtools',
-        onClick: () => {
-          DesktopActions.toggleDevTools();
-        },
-      },
-    ],
-    []
-  );
-
-  useEffect(() => {
-    if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
-      setOptions(id, contextMenuOptions);
-    }
-  }, [contextMenuOptions, getOptions, setOptions]);*/
+  console.log('airlifts', airlifts);
 
   return (
     <motion.div
@@ -63,10 +31,11 @@ const AirliftManagerPresenter = () => {
         paddingTop: shell.isFullscreen ? 0 : 30,
       }}
     >
-      {airlifts.map((appWindow, index: number) => (
-        // <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
-        <Airlift />
-      ))}
+      {airlifts.map((airlift: any, index: number) => {
+        return (
+          <Airlift key={`${airlift.airliftId}-${index}`} airlift={airlift} />
+        );
+      })}
     </motion.div>
   );
 };
