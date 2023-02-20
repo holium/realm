@@ -616,15 +616,15 @@ export class OnboardingService extends BaseService {
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
 
     try {
-      const updatedProfile = await ContactApi.saveContact(
+      /*const updatedProfile = await ContactApi.saveContact(
         tempConduit,
         patp,
         profileData
-      );
+      );*/
 
-      this.state.ship.setContactMetadata(updatedProfile);
+      this.state.ship.setContactMetadata(profileData);
 
-      return updatedProfile;
+      return profileData;
     } catch (err) {
       console.error(err);
       throw new Error('Error updating profile');

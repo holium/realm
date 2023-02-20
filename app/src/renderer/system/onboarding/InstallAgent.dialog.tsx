@@ -15,6 +15,7 @@ import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { Avatar } from '@holium/design-system';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
@@ -33,6 +34,11 @@ const InstallAgentPresenter = () => {
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => {
       setInstalling(false);
+      ShipActions.saveMyContact({
+        color: onboarding.ship!.color,
+        nickname: onboarding.ship!.nickname,
+        avatar: onboarding.ship!.avatar,
+      });
     });
   };
 
