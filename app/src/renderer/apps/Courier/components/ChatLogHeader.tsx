@@ -96,15 +96,15 @@ export const ChatLogHeader = ({
               </Button.IconButton>
             }
             options={[
-              // {
-              //   id: 'edit-chat',
-              //   icon: 'Edit',
-              //   label: 'Edit',
-              //   disabled: false,
-              //   onClick: (evt) => {
-              //     evt.stopPropagation();
-              //   },
-              // },
+              {
+                id: 'pin-chat',
+                icon: 'Pin',
+                label: 'Pin',
+                disabled: false,
+                onClick: (evt) => {
+                  evt.stopPropagation();
+                },
+              },
               {
                 id: 'chat-info',
                 icon: 'Info',
@@ -125,24 +125,27 @@ export const ChatLogHeader = ({
                 },
               },
               {
-                id: 'leave-chat',
-                icon: 'Trash',
-                label: 'Delete',
+                id: 'clear-history',
+                icon: 'ClearHistory',
+                section: 2,
+                label: 'Clear history',
                 disabled: false,
                 onClick: (evt) => {
                   evt.stopPropagation();
                 },
               },
-
-              // {
-              //   id: 'add-person',
-              //   icon: 'UserAdd',
-              //   label: 'Add person',
-              //   disabled: false,
-              //    onClick: (evt) => {
-              //     evt.stopPropagation();
-              //   }
-              // },
+              {
+                id: 'leave-chat',
+                icon: 'Trash',
+                section: 2,
+                iconColor: '#ff6240',
+                labelColor: '#ff6240',
+                label: 'Delete chat',
+                disabled: false,
+                onClick: (evt) => {
+                  evt.stopPropagation();
+                },
+              },
             ]}
           />
         )}

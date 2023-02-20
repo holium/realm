@@ -1,31 +1,47 @@
 import { useMemo, useEffect } from 'react';
 import { isValidPatp } from 'urbit-ob';
-import { Row, Avatar, Flex, Text, timelineDate } from '@holium/design-system';
+import {
+  Row,
+  Avatar,
+  Flex,
+  Text,
+  timelineDate,
+  MenuItemProps,
+} from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
-import { ContextMenuOption, useContextMenu } from 'renderer/components';
+import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { useChatStore } from '../store';
+import { ChatPathType } from 'os/services/chat/chat.service';
+import { GroupSigil } from './GroupSigil';
 
 type ChatRowProps = {
   path: string;
   title: string;
+  peers: string[];
   lastMessage: string;
+  metadata: any;
   timestamp: number;
+  type: ChatPathType;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export const ChatRow = ({
   path,
   title,
+  peers,
   lastMessage,
   timestamp,
+  type,
+  metadata,
   onClick,
 }: ChatRowProps) => {
   const { friends } = useServices();
+  const { setSubroute, setChat } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
 
   let avatarElement = null;
-
-  if (isValidPatp(title)) {
+  if (type === 'dm' && isValidPatp(title)) {
     const {
       patp,
       avatar,
@@ -40,6 +56,10 @@ export const ChatRow = ({
         simple
       />
     );
+  } else if (type === 'group') {
+    avatarElement = <GroupSigil path={path} patps={peers} />;
+  } else {
+    // TODO space type
   }
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
@@ -48,14 +68,50 @@ export const ChatRow = ({
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
-      label: 'Pin chat',
+      icon: 'Pin',
+      label: 'Pin',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
+        // TODO poke pin / unpin
+      },
+    });
+    // menu.push({
+    //   id: `${chatRowId}-read-chat`,
+    //   icon: 'MessageRead',
+    //   label: 'Mark as read',
+    //   disabled: false,
+    //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+    //     evt.stopPropagation();
+    //     // TODO poke read
+    //   },
+    // });
+    menu.push({
+      id: `${chatRowId}-chat-info`,
+      icon: 'Info',
+      label: 'Info',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        setChat(path, title, type, peers, metadata);
+        setSubroute('chat-info');
+      },
+    });
+    menu.push({
+      id: `${chatRowId}-mute-chat`,
+      icon: 'NotificationOff',
+      label: 'Mute',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        // TODO poke mute notifications
       },
     });
     menu.push({
       id: `${chatRowId}-leave-chat`,
-      label: 'Leave chat',
+      label: 'Delete chat',
+      icon: 'Trash',
+      iconColor: '#ff6240',
+      labelColor: '#ff6240',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
         ShellActions.setBlur(true);
@@ -65,7 +121,7 @@ export const ChatRow = ({
         });
       },
     });
-    return menu.filter(Boolean) as ContextMenuOption[];
+    return menu.filter(Boolean) as MenuItemProps[];
   }, [path]);
 
   useEffect(() => {

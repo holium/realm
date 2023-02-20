@@ -1,54 +1,50 @@
 import { FC } from 'react';
+import { Flex } from 'renderer/components';
 import { Patp } from 'os/types';
-import { Flex, Avatar } from '@holium/design-system';
+import { Avatar } from '@holium/design-system';
+import { useServices } from 'renderer/logic/store';
 
 interface GroupSigilProps {
   path: string;
   patps: Patp[];
-  metadata: any[];
 }
 
 export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
-  const { path, patps, metadata } = props;
+  const { path, patps } = props;
+  const { friends } = useServices();
+
   const len = patps.length;
   const renderSigil = (data: any, index: number) => {
+    const {
+      patp,
+      avatar,
+      color: sigilColor,
+    } = friends.getContactAvatarMetadata(data);
     return (
       <Avatar
         key={`${path}-sigil-${index}`}
         simple
         clickable={false}
         borderRadiusOverride="2px"
-        size={18}
-        avatar={data.avatar}
-        patp={data.patp}
-        sigilColor={[data.color || '#000000', 'white']}
+        size={16}
+        avatar={avatar}
+        patp={patp}
+        sigilColor={[sigilColor || '#000000', 'white']}
       />
     );
   };
   let rowOne: any[] = [];
   let rowTwo: any[] = [];
   if (len === 2) {
-    rowOne = [
-      sigilInfo(patps[0], metadata[0]),
-      sigilInfo(patps[1], metadata[1]),
-    ];
+    rowOne = [patps[0], patps[1]];
   }
   if (len === 3) {
-    rowOne = [sigilInfo(patps[0], metadata[0])];
-    rowTwo = [
-      sigilInfo(patps[1], metadata[1]),
-      sigilInfo(patps[2], metadata[2]),
-    ];
+    rowOne = [patps[0]];
+    rowTwo = [patps[1], patps[2]];
   }
   if (len >= 4) {
-    rowOne = [
-      sigilInfo(patps[0], metadata[0]),
-      sigilInfo(patps[1], metadata[1]),
-    ];
-    rowTwo = [
-      sigilInfo(patps[2], metadata[2]),
-      sigilInfo(patps[3], metadata[3]),
-    ];
+    rowOne = [patps[0], patps[1]];
+    rowTwo = [patps[2], patps[3]];
   }
   if (len > 4) {
     // todo add +n
@@ -56,8 +52,8 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   return (
     <Flex
       gap={2}
-      height={40}
-      width={40}
+      height={36}
+      width={36}
       alignItems="center"
       justifyContent="center"
       flexDirection="column"
@@ -72,11 +68,4 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
       )}
     </Flex>
   );
-};
-
-const sigilInfo = (patp: Patp, metadata?: any) => {
-  return {
-    patp,
-    ...metadata,
-  };
 };

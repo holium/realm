@@ -77,6 +77,9 @@ export const MenuBottomLeft: ComponentStory<typeof Menu> = () => (
           {
             id: 'option-2',
             label: 'Option 2',
+            icon: 'Pin',
+            iconColor: '#4E9EFD',
+            labelColor: '#4E9EFD',
             disabled: false,
             onClick: () => console.log('Option 2 clicked'),
           },

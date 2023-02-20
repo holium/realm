@@ -1,5 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { Card, Box, BoxProps } from '../../';
+import styled from 'styled-components';
 import {
   getAnchorPointByTarget,
   getMenuHeight,
@@ -16,6 +17,13 @@ const MAX_HEIGHT = 300;
 const MENU_ITEM_HEIGHT = 36;
 const DIVIDER_HEIGHT = 2;
 const PADDING = 4;
+
+const Divider = styled(Box)`
+  width: 95%;
+  border: 1px solid var(--rlm-border-color);
+  opacity: 0.3;
+  margin: 1px auto;
+`;
 
 type MenuType = 'custom' | 'options';
 
@@ -69,16 +77,23 @@ export const Menu = ({
 
   if (!children && options && options.length > 0) {
     type = 'options';
-    innerContent = options.map((option) => {
+    innerContent = options.map((option, index) => {
+      const divider =
+        index > 0 && options[index - 1].section !== option.section;
       return (
-        <MenuItem
-          key={option.id}
-          id={option.id}
-          icon={option.icon}
-          label={option.label}
-          disabled={option.disabled}
-          onClick={option.onClick}
-        />
+        <div key={option.id}>
+          {divider && <Divider />}
+          <MenuItem
+            key={option.id}
+            id={option.id}
+            icon={option.icon}
+            iconColor={option.iconColor}
+            label={option.label}
+            labelColor={option.labelColor}
+            disabled={option.disabled}
+            onClick={option.onClick}
+          />
+        </div>
       );
     });
   } else {
@@ -180,8 +195,6 @@ export const Menu = ({
           )}
         </AnimatePresence>
       </MenuPortal>
-      {/* <Portal> */}
-      {/* </Portal> */}
     </>
   );
 };

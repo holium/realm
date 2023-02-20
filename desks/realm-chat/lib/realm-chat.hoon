@@ -89,7 +89,7 @@
 ::  :realm-chat &action [%create-chat ~ %chat ~]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  ?>  =(type.act %chat)  :: for now only support %chat type paths
+  :: ?>  =(type.act %chat)  :: for now only support %chat type paths
   :: TODO COMMENT/UNCOMMENT THIS TO USE REAL paths or TESTING paths
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   ::=/  chat-path  /realm-chat/path-id

@@ -29,7 +29,7 @@ type ChatPathMetadata = {
   timestamp: string;
 };
 
-type ChatType = 'chat' | 'channel';
+export type ChatPathType = 'dm' | 'group' | 'space';
 
 export class ChatService extends BaseService {
   db: Database.Database | null = null;
@@ -63,8 +63,11 @@ export class ChatService extends BaseService {
       ipcRenderer.invoke('realm.chat.send-message', path, fragments),
     deleteMessage: (path: string, msgId: string) =>
       ipcRenderer.invoke('realm.chat.delete-message', path, msgId),
-    createChat: (peers: string[], type: ChatType, metadata: ChatPathMetadata) =>
-      ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
+    createChat: (
+      peers: string[],
+      type: ChatPathType,
+      metadata: ChatPathMetadata
+    ) => ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
     readChat: (path: string) =>
       ipcRenderer.invoke('realm.chat.read-chat', path),
     leaveChat: (path: string) =>
@@ -496,7 +499,7 @@ export class ChatService extends BaseService {
   async createChat(
     _evt: any,
     peers: string[],
-    type: ChatType,
+    type: ChatPathType,
     metadata: ChatPathMetadata
   ) {
     if (!this.core.conduit) throw new Error('No conduit connection');

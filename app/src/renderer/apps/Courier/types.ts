@@ -1,9 +1,12 @@
+import { ChatPathType } from 'os/services/chat/chat.service';
+
 export type ChatRowType = {
   id: string;
   path: string;
   sender: string;
   peers: string[];
   metadata: any;
+  type: ChatPathType;
   lastMessage: any[];
   timestamp: number;
 };

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
+import { isValidPatp } from 'urbit-ob';
 import {
   Avatar,
   Box,
@@ -15,19 +16,51 @@ import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
+import { GroupSigil } from '../components/GroupSigil';
 
 export const DMLogPresenter = () => {
   const { dimensions } = useTrayApps();
   const { friends, ship } = useServices();
   const [chats, setChats] = useState<any[]>([]);
-  const { selectedPath, title, setSubroute } = useChatStore();
-  const metadata = useMemo(
-    () =>
-      title
-        ? friends.getContactAvatarMetadata(title)
-        : { patp: title!, color: '#000', nickname: '', avatar: '' },
-    [title]
+  const { selectedPath, title, type, peers, metadata, setSubroute } =
+    useChatStore();
+
+  console.log('selectedPath', selectedPath);
+
+  const { color: sigilColor } = useMemo(
+    () => friends.getContactAvatarMetadata(ship!.patp),
+    []
   );
+
+  console.log('sigilColor', sigilColor);
+
+  let avatarElement = null;
+  if (type === 'dm' && isValidPatp(title)) {
+    const {
+      patp,
+      avatar,
+      color: sigilColor,
+    } = title
+      ? friends.getContactAvatarMetadata(title)
+      : { patp: title!, color: '#000', avatar: '' };
+    avatarElement = (
+      <Avatar
+        patp={patp}
+        avatar={avatar}
+        size={28}
+        sigilColor={[sigilColor, '#ffffff']}
+        simple
+      />
+    );
+  } else if (type === 'group') {
+    avatarElement = (
+      <GroupSigil path={selectedPath!} patps={peers as string[]} />
+    );
+  } else {
+    // TODO space type
+  }
+
+  console.log('avatarElement', avatarElement);
 
   useEffect(() => {
     if (!selectedPath) return;
@@ -48,6 +81,7 @@ export const DMLogPresenter = () => {
     });
   }, [selectedPath, chats]);
 
+  console.log();
   if (!selectedPath) return null;
 
   const onSend = (fragments: any[]) => {
@@ -63,6 +97,8 @@ export const DMLogPresenter = () => {
     );
   };
 
+  console.log(avatarElement);
+
   return (
     <Flex
       layout="preserve-aspect"
@@ -75,19 +111,11 @@ export const DMLogPresenter = () => {
       // height={dimensions.height - 24}
     >
       <ChatLogHeader
-        title={metadata.patp}
+        title={metadata ? metadata.title : ''}
         path={selectedPath}
         onBack={() => setSubroute('inbox')}
         hasMenu
-        avatar={
-          <Avatar
-            patp={metadata.patp}
-            avatar={metadata.avatar}
-            size={28}
-            sigilColor={[metadata.color, '#ffffff']}
-            simple
-          />
-        }
+        avatar={avatarElement}
       />
       <Flex
         initial={{ opacity: 0 }}
@@ -130,7 +158,7 @@ export const DMLogPresenter = () => {
                     id={row.id}
                     our={row.sender === ship?.patp}
                     author={row.sender}
-                    authorColor={metadata.color}
+                    authorColor={sigilColor}
                     message={row.content}
                     sentAt={new Date(row.timestamp).toISOString()}
                     onLoad={measure}

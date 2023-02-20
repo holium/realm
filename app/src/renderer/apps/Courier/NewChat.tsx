@@ -14,26 +14,34 @@ import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+import { ChatPathType } from 'os/services/chat/chat.service';
 
 export const NewChat = () => {
-  const { ship } = useServices();
+  const { ship, friends } = useServices();
   const { dimensions } = useTrayApps();
   const { setSubroute } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
-
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
-  const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
-    new Set()
-  );
 
   const onCreateChat = () => {
     let title: string;
+    let chatType: ChatPathType;
     if (selectedPatp.size === 1) {
-      title = Array.from(selectedNickname)[0] || Array.from(selectedPatp)[0];
+      chatType = 'dm';
+      const metadata = friends.getContactAvatarMetadata(
+        Array.from(selectedPatp)[0]
+      );
+      title = metadata.nickname || metadata.patp;
     } else {
-      title = Array.from(selectedNickname).join(', ');
+      title = Array.from(selectedPatp)
+        .map((patp: string) => {
+          const metadata = friends.getContactAvatarMetadata(patp);
+          return metadata.nickname || metadata.patp;
+        })
+        .join(', ');
+      chatType = 'group';
     }
-    ChatDBActions.createChat(Array.from(selectedPatp), 'chat', {
+    ChatDBActions.createChat(Array.from(selectedPatp), chatType, {
       title,
       creator: ship!.patp,
       timestamp: Date.now().toString(),
@@ -44,20 +52,14 @@ export const NewChat = () => {
 
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
-    const nickname = contact[1];
-    // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    selectedNickname.add(nickname || '');
-    setSelectedNickname(new Set(selectedNickname));
     setSearchString('');
   };
 
   const onShipRemove = (contact: [string, string?]) => {
     selectedPatp.delete(contact[0]);
-    selectedNickname.delete(contact[1]!);
     setSelected(new Set(selectedPatp));
-    setSelectedNickname(new Set(selectedNickname));
   };
 
   return (

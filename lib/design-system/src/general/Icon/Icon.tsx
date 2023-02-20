@@ -34,17 +34,19 @@ const SvgComponent = forwardRef<
     name: IconPathsType;
     title?: string;
     color?: ColorVariants;
+    iconColor?: string;
   }
->(({ title, name, width, height, color, ...rest }, svgRef) => {
+>(({ title, name, width, height, color, iconColor, ...rest }, svgRef) => {
   const [titleId] = useState(() => (title ? uuid() : undefined));
 
+  let fillColor = iconColor || (color && getVar(color)) || 'currentcolor';
   return (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       width={width || '1em'}
       height={height || '1em'}
-      fill={color ? getVar(color) : 'currentcolor'}
+      fill={fillColor}
       ref={svgRef}
       aria-labelledby={titleId}
       pointerEvents="none"

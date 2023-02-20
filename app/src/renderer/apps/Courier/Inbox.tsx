@@ -12,8 +12,9 @@ import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatRow } from './components/ChatRow';
 import { ChatRowType } from './types';
 import { useChatStore } from './store';
+import { observer } from 'mobx-react';
 
-export const Inbox = () => {
+export const InboxPresenter = () => {
   const { dimensions } = useTrayApps();
   const { setChat, setSubroute } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
@@ -87,7 +88,7 @@ export const Inbox = () => {
         data={chatList}
         filter={searchFilter}
         rowRenderer={(chat, index) => {
-          let title: string = 'New chat';
+          let title: string = chat.metadata.title;
           let timestamp = chat.timestamp;
           if (chat.peers && chat.peers.length === 1) {
             title = chat.peers[0];
@@ -101,11 +102,21 @@ export const Inbox = () => {
                 key={`dm-${index}-${timestamp}`}
                 path={chat.path}
                 title={title}
+                peers={chat.peers}
                 lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                type={chat.type}
                 timestamp={timestamp}
+                metadata={chat.metadata}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  setChat(chat.path, title, 'dm');
+                  console.log('chat clicked', chat, timestamp);
+                  setChat(
+                    chat.path,
+                    title,
+                    chat.type,
+                    chat.peers,
+                    chat.metadata
+                  );
                 }}
               />
             </Box>
@@ -115,3 +126,5 @@ export const Inbox = () => {
     </Flex>
   );
 };
+
+export const Inbox = observer(InboxPresenter);
