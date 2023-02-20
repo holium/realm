@@ -17,6 +17,7 @@
 +$  action
   $%
       [%create-chat =create-chat-data]
+      [%edit-chat =path metadata=(map cord cord)]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
       [%send-message =path fragments=(list minimal-fragment:db)]

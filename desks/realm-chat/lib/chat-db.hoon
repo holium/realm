@@ -6,9 +6,9 @@
 /-  *versioned-state, sur=chat-db
 |%
 ++  fill-out-minimal-fragment
-  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud]
+  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da]
   ^-  msg-part:sur
-  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id]
+  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at]
 ++  get-full-message
   |=  [tbl=messages-table:sur =msg-id:sur]
   ^-  message:sur
@@ -37,17 +37,18 @@
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
 ++  make-msg-from-minimal-frags
-  |=  [msg-act=insert-message-action:sur id=msg-id:sur] 
+  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da] 
   ^-  message:sur
   =/  result        *message:sur
   =/  counter=@ud   0
   |-
   ?:  =(counter (lent fragments.msg-act)) :: stop condition
     result
-  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter)), counter +(counter))
+  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at)), counter +(counter))
+::
 ++  add-message-to-table
-  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p]
-  =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender])
+  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p updated-at=@da]
+  =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender] updated-at)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
 ++  messages-start-paths
@@ -60,42 +61,67 @@
 ::  poke actions
 ::
 ++  create-path
-::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat]
-  |=  [act=create-path-action:sur state=state-0 =bowl:gall]
+::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da]
+  |=  [row=path-row:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  row=path-row:sur   :+
-    path.act
-    metadata.act
-    type.act
-  =.  paths-table.state  (~(put by paths-table.state) path.act row)
-  ~&  >  '%chat-db: new path created'
-  ~&  >  path.act
+  =.  paths-table.state  (~(put by paths-table.state) path.row row)
 
   :: if this poke comes from ourselves, we are the host, but if it
   :: comes from elsewhere, we are being invited, and they are the host
   =/  thepeers
     ?:  =(src.bowl our.bowl)
-      =/  peer=peer-row:sur   :+
-        path.act
+      =/  peer=peer-row:sur   [
+        path.row
         our.bowl
         %host
+        created-at.row
+        updated-at.row
+      ]
       [peer ~]
 
     :: else, poke came from not-us
-    =/  us=peer-row:sur   :+
-      path.act
+    =/  us=peer-row:sur    [
+      path.row
       our.bowl
       %member
-    =/  them=peer-row:sur   :+
-      path.act
+      created-at.row
+      updated-at.row
+    ]
+    =/  them=peer-row:sur  [
+      path.row
       src.bowl
       %host
+      created-at.row
+      updated-at.row
+    ]
     [them us ~]
 
-  =.  peers-table.state  (~(put by peers-table.state) path.act thepeers)
+  =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
   =/  thechange  db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
   =/  gives  :~
-    [%give %fact [/db (weld /db/path path.act) ~] thechange]
+    [%give %fact [/db (weld /db/path path.row) ~] thechange]
+  ==
+  [gives state]
+::
+++  edit-path-metadata
+::  :chat-db &db-action [%edit-path-metadata /a/path/to/a/chat ~]
+  |=  [[=path metadata=(map cord cord)] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  original-peers-list   (~(got by peers-table.state) path)
+  :: edit-path-metadata pokes are only valid from the ship which is
+  :: the %host of the path
+  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
+  ?>  =(patp.host-peer-row src.bowl)
+
+  =/  row=path-row:sur   (~(got by paths-table.state) path)
+  =.  metadata.row       metadata
+  =.  updated-at.row     now.bowl
+  =.  paths-table.state  (~(put by paths-table.state) path row)
+
+  =/  thechange  db-change+!>(~[[%upd-paths-row row]])
+  =/  gives  :~
+    [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
   [gives state]
 ::
@@ -124,7 +150,7 @@
   =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
 
-  =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl)
+  =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
   =.  messages-table.state  -.add-result
   =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
   :: message-paths is all the sup.bowl paths that start with
@@ -148,7 +174,7 @@
   =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
   =.  messages-table.state  -.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id)
+  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
   :: message-paths is all the sup.bowl paths that start with
@@ -187,7 +213,7 @@
 ::
 ++  add-peer
 ::  :chat-db &db-action [%add-peer [/a/path/to/a/chat ~bus]]
-  |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
+  |=  [act=[=path patp=ship timestamp=time] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
@@ -196,10 +222,13 @@
   =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
   ?>  =(patp.host-peer-row src.bowl)
 
-  =/  row=peer-row:sur   :+
+  =/  row=peer-row:sur   [
     path.act
     patp.act
     %member
+    timestamp.act
+    timestamp.act
+  ]
   =/  peers  (snoc (~(got by peers-table.state) path.act) row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   =/  thechange  db-change+!>(~[[%add-row [%peers row]]])
@@ -247,11 +276,56 @@
 ::
 ++  from
   |%
-  ++  start
+  ++  start-lot
+    :: this is very efficient, but does not capture the updated-at rows
+    :: so we will use ++start (below) until this is necessary
     |=  [=msg-id:sur tbl=messages-table:sur]
     ^-  messages-table:sur
     =/  start=uniq-id:sur  [msg-id 0]
     (lot:msgon:sur tbl ~ `start)
+  ++  start
+    |=  [t=time tbl=messages-table:sur]
+    ^-  messages-table:sur
+    :: this is very efficient, but does not capture the updated-at rows
+    :: so we will go the long way around until efficiency becomes
+    :: necessary
+    ::=/  start=uniq-id:sur  [msg-id 0]
+    ::(lot:msgon:sur tbl ~ `start)
+    %+  gas:msgon:sur
+      *messages-table:sur
+    %+  skim
+      (tap:msgon:sur tbl)
+    |=([k=uniq-id:sur v=msg-part:sur] |((gth created-at.v t) (gth updated-at.v t)))
+  ++  path-start
+    |=  [t=time tbl=paths-table:sur]
+    ^-  paths-table:sur
+    %-  malt
+    %+  skim
+      ~(tap by tbl)
+    |=([k=path v=path-row:sur] |((gth created-at.v t) (gth updated-at.v t)))
+  ++  peer-start
+    |=  [t=time tbl=peers-table:sur]
+    ^-  peers-table:sur
+
+    =/  individual-rows=(list peer-row)  (zing ~(val by tbl))
+    =/  valid-rows
+      %+  skim
+        individual-rows
+      |=(r=peer-row:sur |((gth created-at.r t) (gth updated-at.r t)))
+
+    =/  index=@ud  0
+    =/  len=@ud    (lent valid-rows)
+    =/  result=peers-table:sur  *peers-table:sur
+    |-
+    ?:  =(index len)
+      result
+    =/  i  (snag 0 valid-rows)
+    =/  pre  (~(get by result) path.i)
+    =/  lis
+    ?~  pre
+      (limo ~[i])
+    (snoc (need pre) i)
+    $(result (~(put by result) path.i lis), index +(index))
   ++  paths-list
     |=  [tbl=paths-table:sur]
     ^-  (list path)
@@ -329,6 +403,8 @@
       ?-  -.ch
         %add-row
           :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
+        %upd-paths-row
+          :~(['type' %s %update] ['table' %s %paths] ['row' (path-row path-row.ch)])
         %del-paths-row
           :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)])
         %del-peers-row
@@ -359,6 +435,8 @@
       :~  path+s+(spat path.path-row)
           metadata+(metadata-to-json metadata.path-row)
           type+s+type.path-row
+          created-at+(time created-at.path-row)
+          updated-at+(time updated-at.path-row)
       ==
     ++  messages-row
       |=  [k=uniq-id:sur =msg-part:sur]
@@ -370,7 +448,8 @@
           content+(content-to-json content.msg-part)
           reply-to+(reply-to-to-json reply-to.msg-part)
           metadata+(metadata-to-json metadata.msg-part)
-          timestamp+(time timestamp.msg-part)
+          created-at+(time created-at.msg-part)
+          updated-at+(time updated-at.msg-part)
       ==
     ++  reply-to-to-json
       |=  =reply-to:sur
@@ -414,6 +493,8 @@
       :~  path+s+(spat path.peer-row)
           ship+s+(scot %p patp.peer-row)
           role+s+role.peer-row
+          created-at+(time created-at.peer-row)
+          updated-at+(time updated-at.peer-row)
       ==
   --
 --

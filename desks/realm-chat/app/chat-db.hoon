@@ -34,6 +34,8 @@
       :: paths-table pokes
       %create-path 
         (create-path:db-lib +.act state bowl)
+      %edit-path-metadata
+        (edit-path-metadata:db-lib +.act state bowl)
       %leave-path 
         (leave-path:db-lib +.act state bowl)
       :: messages-table pokes
@@ -60,13 +62,15 @@
     ?+  path      !!
       ::
         [%db ~]  :: the "everything" path
-          :~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
-          ==
+          :::~  [%give %fact ~ db-dump+!>(tables+all-tables:core)]
+          ::==
+          ~  :: we are not "priming" these subscriptions with anything, since the client can just scry if they need. the sub is for receiving new updates
       :: /db/messages/start/~zod/~2023.1.17..19.50.46..be0e
         [%db %messages %start @ @ ~]  :: the "recent messages" path
-          =/  sender=@p       `@p`(slav %p i.t.t.t.path)
-          =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
-          [%give %fact ~ db-dump+!>([%tables [[%messages (start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state)] ~]])]~
+          ::=/  sender=@p       `@p`(slav %p i.t.t.t.path)
+          ::=/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
+          ::[%give %fact ~ db-dump+!>([%tables [[%messages (start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state)] ~]])]~
+          ~  :: we are not "priming" these subscriptions with anything, since the client can just scry if they need. the sub is for receiving new updates
       :: /db/path/the/actual/path/here
         [%db %path *]  :: the "path" path, subscribe by path explicitly
           =/  thepathrow   (~(get by paths-table.state) t.t.path)
@@ -103,10 +107,57 @@
       [%x %db %messages ~]
         ``db-dump+!>(tables+[messages+messages-table.state ~])
     ::
+    :: /db/start-ms/<time>.json
+    :: all tables, but only with created-at or updated-at after <time>
+      [%x %db %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
+        =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
+        =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
+        ``db-dump+!>(tables+[msgs paths peers ~])
+    ::
+    :: /db/paths/start-ms/<time>.json
+      [%x %db %paths %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
+        ``db-dump+!>(tables+[paths ~])
+    ::
+    :: /db/peers/start-ms/<time>.json
+      [%x %db %peers %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
+        ``db-dump+!>(tables+[peers ~])
+    ::
+      [%x %db %messages %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        ``db-dump+!>(tables+[messages+(start:from:db-lib timestamp messages-table.state) ~])
+    ::
+    :: /db/start/<time>.json
+    :: all tables, but only with created-at or updated-at after <time>
+      [%x %db %start @ ~]
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
+        =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
+        =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
+        ``db-dump+!>(tables+[msgs paths peers ~])
+    ::
+    :: /db/paths/start/<time>.json
+      [%x %db %paths %start @ ~]
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
+        ``db-dump+!>(tables+[paths ~])
+    ::
+    :: /db/peers/start/<time>.json
+      [%x %db %peers %start @ ~]
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
+        ``db-dump+!>(tables+[peers ~])
+    ::
+    ::  USE THIS ONE FOR PRECISE msg-id PINPOINTING
       [%x %db %messages %start @ @ ~]
         =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
         =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.t.path)
-        ``db-dump+!>(tables+[messages+(start:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
+        ``db-dump+!>(tables+[messages+(start-lot:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
     ==
   :: chat-db does not subscribe to anything.
   :: chat-db does not care
