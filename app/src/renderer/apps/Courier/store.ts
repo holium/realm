@@ -1,18 +1,12 @@
-import {
-  applyPatch,
-  Instance,
-  types,
-  onSnapshot,
-  applySnapshot,
-} from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 
-type Subroutes = 'inbox' | 'chat' | 'new';
+type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
 const CourierAppModel = types
   .model('CourierAppModel', {
     subroute: types.optional(
-      types.enumeration<Subroutes>(['inbox', 'chat', 'new']),
+      types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
       'inbox'
     ),
     selectedPath: types.maybe(types.string),

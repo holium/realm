@@ -1,4 +1,5 @@
 import { Flex, Button, Text, Icon, Menu } from '@holium/design-system';
+import { useChatStore } from '../store';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -6,6 +7,7 @@ type ChatLogHeaderProps = {
   subtitle?: string;
   avatar: React.ReactNode;
   onBack: () => void;
+  hasMenu: boolean;
 };
 
 export const ChatLogHeader = ({
@@ -14,7 +16,9 @@ export const ChatLogHeader = ({
   subtitle,
   avatar,
   onBack,
+  hasMenu = true,
 }: ChatLogHeaderProps) => {
+  const { setSubroute } = useChatStore();
   return (
     <Flex
       pt="2px"
@@ -81,46 +85,67 @@ export const ChatLogHeader = ({
         </Flex>
       </Flex>
       <Flex>
-        <Menu
-          id={`chat-${path}-menu`}
-          orientation="bottom-left"
-          offset={{ x: 0, y: 2 }}
-          triggerEl={
-            <Button.IconButton size={26}>
-              <Icon name="MoreHorizontal" size={22} opacity={0.5} />
-            </Button.IconButton>
-          }
-          options={[
-            {
-              id: 'edit-chat',
-              icon: 'Edit',
-              label: 'Edit',
-              disabled: false,
-              onClick: () => console.log('Option 2 clicked'),
-            },
-            {
-              id: 'chat-info',
-              icon: 'Info',
-              label: 'Info',
-              disabled: false,
-              onClick: () => console.log('Option 2 clicked'),
-            },
-            {
-              id: 'mute-chat',
-              icon: 'NotificationOff',
-              label: 'Mute',
-              disabled: false,
-              onClick: () => console.log('Option 2 clicked'),
-            },
-            {
-              id: 'add-person',
-              icon: 'UserAdd',
-              label: 'Add person',
-              disabled: false,
-              onClick: () => console.log('Option 1 clicked'),
-            },
-          ]}
-        ></Menu>
+        {hasMenu && (
+          <Menu
+            id={`chat-${path}-menu`}
+            orientation="bottom-left"
+            offset={{ x: 2, y: 2 }}
+            triggerEl={
+              <Button.IconButton size={26}>
+                <Icon name="MoreHorizontal" size={22} opacity={0.5} />
+              </Button.IconButton>
+            }
+            options={[
+              // {
+              //   id: 'edit-chat',
+              //   icon: 'Edit',
+              //   label: 'Edit',
+              //   disabled: false,
+              //   onClick: (evt) => {
+              //     evt.stopPropagation();
+              //   },
+              // },
+              {
+                id: 'chat-info',
+                icon: 'Info',
+                label: 'Info',
+                disabled: false,
+                onClick: (evt) => {
+                  evt.stopPropagation();
+                  setSubroute('chat-info');
+                },
+              },
+              {
+                id: 'mute-chat',
+                icon: 'NotificationOff',
+                label: 'Mute',
+                disabled: false,
+                onClick: (evt) => {
+                  evt.stopPropagation();
+                },
+              },
+              {
+                id: 'leave-chat',
+                icon: 'Trash',
+                label: 'Delete',
+                disabled: false,
+                onClick: (evt) => {
+                  evt.stopPropagation();
+                },
+              },
+
+              // {
+              //   id: 'add-person',
+              //   icon: 'UserAdd',
+              //   label: 'Add person',
+              //   disabled: false,
+              //    onClick: (evt) => {
+              //     evt.stopPropagation();
+              //   }
+              // },
+            ]}
+          />
+        )}
       </Flex>
     </Flex>
   );

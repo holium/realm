@@ -78,6 +78,7 @@ export const DMLogPresenter = () => {
         title={metadata.patp}
         path={selectedPath}
         onBack={() => setSubroute('inbox')}
+        hasMenu
         avatar={
           <Avatar
             patp={metadata.patp}
