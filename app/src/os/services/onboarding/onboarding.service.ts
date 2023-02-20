@@ -610,25 +610,11 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-
-    try {
-      /*const updatedProfile = await ContactApi.saveContact(
-        tempConduit,
-        patp,
-        profileData
-      );*/
-
-      this.state.ship.setContactMetadata(profileData);
-
-      return profileData;
-    } catch (err) {
-      console.error(err);
-      throw new Error('Error updating profile');
-    }
+    this.state.ship.setContactMetadata({
+      ...profileData,
+      avatar: profileData.avatar || undefined,
+    });
+    return profileData;
   }
 
   async setPassword(_event: any, password: string) {
