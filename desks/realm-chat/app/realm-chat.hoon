@@ -54,6 +54,7 @@
     ^-  (quip card _this)
     ?>  ?=(%action mark)
     =/  act  !<(action vase)
+    ~&  >  "%realm-chat poked {<-.act>}"
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: meta-chat management pokes
@@ -196,5 +197,13 @@
 ::
 ++  notif-new-msg
   |=  [=msg-part:db-sur =ship]
-  [%pass /dbpoke %agent [ship %notif-db] %poke %ndb-poke !>([%create %realm-chat /new-messages %message 'New Message' (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])]
+  ^-  card  [
+    %pass
+    /dbpoke
+    %agent
+    [ship %notif-db]
+    %poke
+    %ndb-poke
+    !>([%create %realm-chat /new-messages %message 'New Message' (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])
+  ]
 --
