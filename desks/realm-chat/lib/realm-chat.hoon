@@ -23,6 +23,7 @@
   ?+  -.tbl  !!
     %paths  (snag 0 ~(val by paths-table.tbl))
   ==
+::
 ++  scry-peers
   |=  [=path =bowl:gall]
   ^-  (list peer-row:db)
@@ -37,15 +38,19 @@
   ?+  -.tbl  !!
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
+::
 ++  into-insert-message-poke
   |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db)] ts=@da]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts act])]
+::
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit act])]
+::
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%delete msg-id])]
+::
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
   ^-  (list card)
@@ -53,6 +58,22 @@
     peers
     |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%kick-peer path.p kickee])])
   ==
+::
+++  create-path-db-poke
+  |=  [=ship row=path-row:db]
+  ^-  card
+  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%create-path row])]
+::
+++  into-add-peer-pokes
+  |=  [s=ship peers=(list ship) =path t=@da]
+  ^-  (list card)
+  %:  turn
+    %+  skip
+      peers
+    |=(p=ship =(p s)) :: skip the peer who matches the root-ship that we are poking
+    |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %db-action !>([%add-peer path peer t])])
+  ==
+::
 ++  push-notification-card
   |=  [=bowl:gall state=state-0 chat-path=path subtitle=@t content=@t]
   ^-  card
@@ -86,23 +107,38 @@
 ::  poke actions
 ::
 ++  create-chat
-::  :realm-chat &action [%create-chat ~ %chat ~]
+::  :realm-chat &action [%create-chat ~ %chat (limo [~fes ~bus ~dev ~])]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ?>  =(type.act %chat)  :: for now only support %chat type paths
   :: TODO COMMENT/UNCOMMENT THIS TO USE REAL paths or TESTING paths
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   ::=/  chat-path  /realm-chat/path-id
+  =/  all-peers  [our.bowl peers.act]
+  =/  t=@da  now.bowl
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t]
 
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act now.bowl now.bowl]
   =/  cards  
-    :-
-      [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path pathrow])]
-      :: for each "initial" peer they passed in, we poke ourselves with %add-ship-to-chat
+    :: for each "initial" peer they passed in, we poke ourselves with %add-ship-to-chat
+    %+  weld
+      ^-  (list card)
+      %+  weld
+        ^-  (list card)
+        %:  turn
+          all-peers
+          |=(s=ship (create-path-db-poke s pathrow))
+        ==
+      ^-  (list card)
+      %-  zing
       %:  turn
         peers.act
-        |=(s=ship [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %action !>([%add-ship-to-chat chat-path s])])
+        |=(s=ship (into-add-peer-pokes s peers.act chat-path t))
       ==
+    ^-  (list card)
+    %+  turn
+      peers.act
+    |=(s=ship [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%add-peer chat-path s t])])
+
   [cards state]
 ::
 ++  edit-chat
@@ -175,6 +211,7 @@
     ==
   :: then send pokes to all the peers about inserting a message
   [cards state]
+::
 ++  edit-message
 ::  :realm-chat &action [%edit-message [~2023.2.3..16.23.37..72f6 ~zod] /realm-chat/path-id (limo [[[%plain 'edited'] ~ ~] ~])]
   |=  [act=edit-message-action:db state=state-0 =bowl:gall]
@@ -188,6 +225,7 @@
       |=(p=peer-row:db (into-edit-message-poke p act))
     ==
   [cards state]
+::
 ++  delete-message
 ::  :realm-chat &action [%delete-message /realm-chat/path-id ~2023.2.3..16.23.37..72f6 ~zod]
   |=  [act=[=path =msg-id:db] state=state-0 =bowl:gall]
@@ -201,6 +239,7 @@
       |=(p=peer-row:db (into-delete-message-poke p msg-id.act))
     ==
   [cards state]
+::
 ++  disable-push
   |=  [state=state-0]
   ^-  (quip card state-0)
@@ -223,6 +262,15 @@
   |=  [[=device-id:notify =player-id:notify] state=state-0]
   ^-  (quip card state-0)
   =.  devices.state         (~(put by devices.state) device-id player-id)
+  `state
+::
+++  mute-chat
+  |=  [[chat-path=path mute=?] state=state-0]
+  ^-  (quip card state-0)
+  =/  new-mutes
+    ?:  mute  (snoc mutes.state chat-path)
+    (skip mutes.state |=(p=path =(p chat-path)))
+  =.  mutes.state   new-mutes
   `state
 ::
 ::  JSON
@@ -249,6 +297,7 @@
           [%disable-push ul]
           [%set-device set-device]
           [%remove-device remove-device]
+          [%mute-chat mute-chat]
       ==
     ::
     ++  create-chat
@@ -275,6 +324,12 @@
     ++  remove-device
       %-  ot
       :~  [%device-id so]
+      ==
+    ::
+    ++  mute-chat
+      %-  ot
+      :~  [%path pa]
+          [%mute bo]
       ==
     ::
     ++  path-and-ship

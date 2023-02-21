@@ -18,6 +18,7 @@
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
           %.y                                     :: push-enabled
+          *(list path)                            :: list of muted chats
       ==
     :_  this(state default-state)
     :~
@@ -32,10 +33,21 @@
     =/  cards  ?:  =(wex.bowl ~)  
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     ~
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  [cards this(state old)]
-    ==
+    :: REMOVE THIS SECTION WHEN YOU DONT WANT TO AUTO-BORK STATE EVERY TIME
+    =/  default-state=state-0
+      :*  %0
+          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
+          (sham our.bowl)                         :: uuid:notify
+          *devices:notify
+          %.y                                     :: push-enabled
+          *(list path)
+      ==
+    [cards this(state default-state)]
+    :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
+    ::=/  old  !<(versioned-state old-state)
+    ::?-  -.old
+    ::  %0  [cards this(state old)]
+    ::==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -69,6 +81,8 @@
         (remove-device:lib +.act state)
       %set-device
         (set-device:lib +.act state)
+      %mute-chat
+        (mute-chat:lib +.act state)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -121,36 +135,36 @@
             ==
           %fact
             ?+    p.cage.sign  `this
-                %db-dump
-                  ::~&  >>>  'we got a new db-dump thing'
-                  ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
-                  `this
-                %db-change
-                  =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
-                  ?. :: ?. not ?: to reverse order
-                  :: the following conditions must ALL be true in order
-                  :: for us to send out a push-notification
-                  ?&  (lien thechange is-new-message)     :: the change includes a new message
-                      push-enabled.state                  :: push is enabled
-                      (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
-                  ==
-                    :: at least one of the conditions was not met,
-                    :: so just ignore the %fact
-                    `this
-                  :: ELSE, push notify about the new message
-                  =/  firstelem=db-change-type:db-sur  (snag 0 (skim thechange is-new-message))
-                  ?+  -.firstelem  `this
-                    %add-row
-                    ?+  -.db-row.firstelem  `this
-                      %messages
-                      :: if it's our message, don't do anything
-                      ?:  =(sender.msg-id.msg-part.db-row.firstelem our.bowl)
-                        `this
-                      =/  thepath  path.msg-part.db-row.firstelem
-                      =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.firstelem)}"))
-                      [[push-card ~] this]
+              %db-dump
+                ::~&  >>>  'we got a new db-dump thing'
+                ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
+                `this
+              %db-change
+                =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
+                :: only notify on new messages
+                ?.  (lien thechange is-new-message)  `this
+                =/  msg=db-change-type:db-sur  (snag 0 (skim thechange is-new-message))
+                ?+  -.msg  `this
+                  %add-row
+                  ?+  -.db-row.msg  `this
+                    %messages
+                    =/  thepath  path.msg-part.db-row.msg
+                    ?:
+                    ?|  =(sender.msg-id.msg-part.db-row.msg our.bowl) :: if it's our message, don't do anything
+                        (lien mutes.state |=(p=path =(p thepath)))    :: if it's a muted path, don't do anything
                     ==
+                      `this
+                    =/  notif-db-card  (notif-new-msg:core msg-part.db-row.msg our.bowl)
+                    ?:  :: if we should do a push notification also,
+                    ?&  push-enabled.state                  :: push is enabled
+                        (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
+                    ==
+                      =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.msg)}"))
+                      [[push-card notif-db-card ~] this]
+                    :: otherwise, just send to notif-db
+                    [[notif-db-card ~] this]
                   ==
+                ==
             ==
         ==
     ==
@@ -179,4 +193,8 @@
   ?+  -.ch  %.n
     %add-row  =(-.+.ch %messages)
   ==
+::
+++  notif-new-msg
+  |=  [=msg-part:db-sur =ship]
+  [%pass /dbpoke %agent [ship %notif-db] %poke %ndb-poke !>([%create %realm-chat /new-messages %message 'New Message' (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])]
 --

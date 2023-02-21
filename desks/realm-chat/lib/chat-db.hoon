@@ -9,6 +9,7 @@
   |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da]
   ^-  msg-part:sur
   [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at]
+::
 ++  get-full-message
   |=  [tbl=messages-table:sur =msg-id:sur]
   ^-  message:sur
@@ -18,6 +19,7 @@
   ?~  (has:msgon:sur tbl [msg-id index])
     result
   $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
+::
 ++  remove-message-from-table
   |=  [tbl=messages-table:sur =msg-id:sur]
   =/  part-counter=@ud  0
@@ -51,6 +53,7 @@
   =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender] updated-at)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
+::
 ++  messages-start-paths
   |=  [=bowl:gall]
   ^-  (list path)
