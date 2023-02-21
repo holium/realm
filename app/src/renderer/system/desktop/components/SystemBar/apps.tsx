@@ -1,7 +1,6 @@
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
-import { MessagesTrayApp } from 'renderer/apps/Messages';
 import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
