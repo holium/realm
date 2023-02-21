@@ -25,6 +25,11 @@ export class LocalPeer extends Peer {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
   };
+  audioContext: AudioContext | null = null;
+  analyser: AnalyserNode | null = null;
+  bufferLength: number = 16;
+  dataArray: Float32Array | null = null;
+  currentFrameId: number = 0;
 
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
@@ -129,23 +134,29 @@ export class LocalPeer extends Peer {
       });
   }
 
+  draw() {
+    if (
+      this.analyser === null ||
+      this.dataArray === null ||
+      this.bufferLength === 0
+    ) {
+      console.log('LocalPeer.draw called with invalid internal state');
+      return;
+    }
+    this.currentFrameId = requestAnimationFrame(this.draw);
+    //window.cancelAnimationFrame(frameId);
+    this.analyser?.getFloatTimeDomainData(this.dataArray);
+    let total = 0;
+    for (let i = 0; i < this.bufferLength; i++) {
+      // let v = dataArray[i] / 128.0;
+      total += this.dataArray[i];
+    }
+    const avg = total / (this.analyser.fftSize * 1.0);
+    console.log('average decibel => %o', avg);
+  }
+
   setMedia(stream: MediaStream) {
     this.stream = stream;
-    //
-    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    this.audioCtx.createMediaStreamSource(this.stream);
-    this.analyser = this.audioCtx.createAnalyser();
-    this.analyser.minDecibels = -90;
-    this.analyser.maxDecibels = -10;
-    this.analyser.smoothingTimeConstant = 0.85;
-    this.analyser.connect(this.audioCtx.destination);
-    this.analyser.fftSize = 2048;
-    // We can use Float32Array instead of Uint8Array if we want higher precision
-    // const dataArray = new Float32Array(bufferLength);
-    const dataArray = new Uint8Array(this.analyser.fftSize);
-
-    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-    //
     this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
       this.audioTracks.set(audio.id, audio);
       this.emit(PeerEvent.AudioTrackAdded, stream, audio);
@@ -156,6 +167,24 @@ export class LocalPeer extends Peer {
         this.emit(PeerEvent.VideoTrackAdded, stream, video);
       });
     }
+    // start listening for talking
+    this.audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    this.audioContext.createMediaStreamSource(this.stream);
+    this.analyser = this.audioContext.createAnalyser();
+    this.analyser.minDecibels = -90;
+    this.analyser.maxDecibels = -10;
+    this.analyser.smoothingTimeConstant = 0.85;
+    this.analyser.connect(this.audioContext.destination);
+    // analyser.fftSize = 2048;
+    this.bufferLength = this.analyser.fftSize = 16;
+    // We can use Float32Array instead of Uint8Array if we want higher precision
+    // const dataArray = new Float32Array(bufferLength);
+    this.dataArray = new Float32Array(this.bufferLength);
+    // canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+    // const draw = function () {
+    // };
+    this.draw();
     this.status = PeerConnectionState.Broadcasting;
   }
 
