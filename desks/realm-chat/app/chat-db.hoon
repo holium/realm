@@ -118,18 +118,18 @@
     ::
     :: /db/paths/start-ms/<time>.json
       [%x %db %paths %start-ms @ ~]
-        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
         =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
         ``db-dump+!>(tables+[paths ~])
     ::
     :: /db/peers/start-ms/<time>.json
       [%x %db %peers %start-ms @ ~]
-        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
         =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
         ``db-dump+!>(tables+[peers ~])
     ::
       [%x %db %messages %start-ms @ ~]
-        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
         ``db-dump+!>(tables+[messages+(start:from:db-lib timestamp messages-table.state) ~])
     ::
     :: /db/start/<time>.json
@@ -143,13 +143,13 @@
     ::
     :: /db/paths/start/<time>.json
       [%x %db %paths %start @ ~]
-        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
         =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
         ``db-dump+!>(tables+[paths ~])
     ::
     :: /db/peers/start/<time>.json
       [%x %db %peers %start @ ~]
-        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
         =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
         ``db-dump+!>(tables+[peers ~])
     ::
