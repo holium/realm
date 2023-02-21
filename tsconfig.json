@@ -6,7 +6,7 @@
     "lib/conduit",
     "lib/design-system",
     "lib/multiplayer",
-    "lib/room/test-ui",
+    "lib/room/test-ui-vite",
     "lib/room"
   ]
 }

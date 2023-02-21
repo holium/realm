@@ -1,25 +1,19 @@
-import { useCallback } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Flex } from '@holium/design-system';
 
 const handleStyle = { left: 10 };
 
 export function AgentNode({ data, isConnectable }) {
-  const onChange = useCallback((evt: any) => {
-    console.log(evt.target.value);
-  }, []);
-
   return (
-    <div className="text-updater-node">
-      <Handle
+    <Flex className="text-updater-node">
+      {/*<Handle
         type="target"
         position={Position.Top}
         isConnectable={isConnectable}
-      />
-      <div>
-        <label htmlFor="text">Text:</label>
-        <input id="text" name="text" onChange={onChange} className="nodrag" />
-      </div>
-      <Handle
+  />*/}
+      <label htmlFor="text">Text:</label>
+      {/*<Flex>
+      </Flex>*/}
+      {/*<Handle
         type="source"
         position={Position.Bottom}
         id="a"
@@ -31,7 +25,7 @@ export function AgentNode({ data, isConnectable }) {
         position={Position.Bottom}
         id="b"
         isConnectable={isConnectable}
-      />
-    </div>
+  />*/}
+    </Flex>
   );
 }

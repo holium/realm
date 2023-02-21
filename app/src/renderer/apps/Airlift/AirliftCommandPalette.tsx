@@ -13,7 +13,7 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
-  const onButtonDragStart = useCallback(
+  /*const onButtonDragStart = useCallback(
     (evt: any) => {
       evt.preventDefault();
       window.addEventListener('mouseup', onButtonDragEnd);
@@ -23,8 +23,11 @@ export const AirliftCommandPalette: FC = observer(() => {
       window.dispatchEvent(iconEvent);
     },
     []
-    /*[activeApp, anchorOffset, position, dimensions]*/
-  );
+  );*/
+  const onButtonDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
+  };
 
   const onButtonDragEnd = useCallback(
     (evt: any) => {
@@ -57,7 +60,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
-            onDragStart={onButtonDragStart}
+            onDragStart={(event) => onButtonDragStart(event, 'agent')}
             color={textColor}
             // mb="-2px"
           >
@@ -71,7 +74,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
-            onDragStart={onButtonDragStart}
+            onDragStart={(event) => onButtonDragStart(event, 'agent')}
             color={textColor}
             // mb="-2px"
           >

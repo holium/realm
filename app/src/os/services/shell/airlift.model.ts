@@ -1,4 +1,5 @@
-import { Instance, types } from 'mobx-state-tree';
+import { Instance, types, castToSnapshot, getSnapshot } from 'mobx-state-tree';
+import { Node, NodeChange, applyNodeChanges } from 'reactflow';
 
 // Bounds are using the realm.config 1-10 scale.
 const BoundsModel = types.model({
@@ -105,7 +106,7 @@ export const AirliftDesk = types.model('AirliftDesk', {
 export const AirliftModel = types.model('AirliftModel', {
   airliftId: types.identifier,
   zIndex: types.number,
-  type: types.enumeration(['']),
+  type: types.enumeration(['agent']),
   desks: types.map(AirliftDesk),
   /**
    * The size and position of the window.
@@ -123,10 +124,95 @@ export const AirliftModel = types.model('AirliftModel', {
 });
 export type AirliftModelType = Instance<typeof AirliftModel>;
 
+export function fakeDefault<T>() {
+  return undefined as any as T;
+}
+
+export const NodeData = types.model('NodeData', {
+  value: types.number,
+});
+
+enum Position {
+  Left = 'left',
+  Top = 'top',
+  Right = 'right',
+  Bottom = 'bottom',
+}
+const PositionEnum = types.enumeration<Position>(Object.values(Position));
+
+const NodeType = types.model('NodeType', {
+  id: types.string,
+  position: types.model({
+    x: types.number,
+    y: types.number,
+  }),
+  data: types.optional(types.frozen(), {}), // You can replace "frozen" with the appropriate type for your "data" property.
+  type: types.optional(types.string, ''),
+  style: types.maybe(types.frozen()),
+  className: types.maybe(types.string),
+  sourcePosition: types.maybe(PositionEnum),
+  targetPosition: types.maybe(PositionEnum),
+  hidden: types.maybe(types.boolean),
+  selected: types.maybe(types.boolean),
+  dragging: types.maybe(types.boolean),
+  draggable: types.maybe(types.boolean),
+  selectable: types.maybe(types.boolean),
+  connectable: types.maybe(types.boolean),
+  deletable: types.maybe(types.boolean),
+  dragHandle: types.maybe(types.string),
+  width: types.maybeNull(types.number),
+  height: types.maybeNull(types.number),
+  parentNode: types.maybe(types.string),
+  zIndex: types.maybe(types.number),
+  extent: types.maybe(types.frozen()),
+  expandParent: types.maybe(types.boolean),
+  positionAbsolute: types.maybe(
+    types.model({
+      x: types.number,
+      y: types.number,
+    })
+  ),
+  ariaLabel: types.maybe(types.string),
+  focusable: types.maybe(types.boolean),
+  resizing: types.maybe(types.boolean),
+  /*internalsSymbol: types.maybe(
+    types.model({
+      z: types.maybe(types.number),
+      handleBounds: types.maybe(NodeHandleBounds),
+      isParent: types.maybe(types.boolean),
+    })
+  ),*/
+});
+
+export const FlowStore = types
+  .model('FlowStore', {
+    nodes: types.array(NodeType),
+  })
+  .actions((self) => ({
+    onNodesChange: (changes: NodeChange[]) => {
+      // console.log(changes);
+      /*changes.forEach((change) => {
+        if (change.type === 'add' && change.path.includes('position')) {
+          const node = getNodeByPath(change.path, self.nodes);
+          if (node) {
+            detach(node.position);
+          }
+        }
+      });*/
+      const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
+      self.nodes = castToSnapshot(applyNodeChanges(changes, newNodes));
+    },
+    dropAirlift: (airlift: Node) => {
+      // self.nodes = types.array(NodeType).create(self.nodes.concat(airlift));
+      self.nodes = castToSnapshot(self.nodes.concat(airlift));
+    },
+  }));
+
 export const AirliftStore = types
   .model('AirliftStore', {
     // model: AirliftModel,
     airlifts: types.map(types.map(AirliftModel)),
+    flowStore: FlowStore,
   })
   .views((self) => ({
     initial(agents: any) {
@@ -147,22 +233,20 @@ export const AirliftStore = types
     },
   }))
   .actions((self) => ({
-    dropAirlift(
-      space: string,
-      airliftId: string,
-      location: { x: number; y: number }
-    ) {
-      const newAirlift = AirliftModel.create({
+    //dropAirlift(space: string, type: string, airliftId: string, location: any) {
+    dropAirlift(airlift: Node) {
+      self.flowStore.dropAirlift(airlift);
+      /*const newAirlift = AirliftModel.create({
         airliftId,
         zIndex: self.airlifts.size + 1,
-        type: '',
+        type,
         bounds: location, //getInitialWindowBounds(app, desktopDimensions),
       });
       if (!self.airlifts.has(space)) {
         self.airlifts.set(space, {});
       }
       self.airlifts.get(space)!.set(airliftId, newAirlift);
-      console.log('success');
+      console.log('success');*/
     },
     removeAirlift(space: string, airliftId: string) {
       self.airlifts.get(space)!.delete(airliftId);

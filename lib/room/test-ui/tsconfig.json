@@ -1,8 +1,0 @@
-{
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "src"
-  },
-  "include": ["src", "config-overrides.js", "server.js"],
-  "exclude": ["node_modules"]
-}

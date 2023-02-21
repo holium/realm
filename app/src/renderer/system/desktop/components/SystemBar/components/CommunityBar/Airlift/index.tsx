@@ -1,16 +1,12 @@
-import { FC, createRef, useCallback, useMemo } from 'react';
+import { createRef, FC, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
-import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { nativeApps } from 'renderer/apps/nativeApps';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { Icon } from '@holium/design-system';
-import { IconButton } from 'renderer/components';
+import { motion } from 'framer-motion';
 
 const ICON_SIZE = 28;
 
@@ -58,31 +54,6 @@ export const AirliftTray: FC = observer(() => {
     [activeApp, anchorOffset, position, dimensions]
   );
 
-  const onButtonDragStart = useCallback(
-    (evt: any) => {
-      evt.preventDefault();
-      window.addEventListener('mouseup', onButtonDragEnd);
-      const iconEvent = new CustomEvent('icon', {
-        detail: 'Airlift',
-      });
-      window.dispatchEvent(iconEvent);
-    },
-    [activeApp, anchorOffset, position, dimensions]
-  );
-
-  const onButtonDragEnd = useCallback(
-    (evt: any) => {
-      evt.preventDefault();
-      const iconEvent = new CustomEvent('icon', {
-        detail: null,
-      });
-      window.dispatchEvent(iconEvent);
-      window.removeEventListener('mouseup', onButtonDragEnd);
-      DesktopActions.openAppWindow(nativeApps['airlift'] as AppType);
-    },
-    [activeApp, anchorOffset, position, dimensions]
-  );
-
   const iconHoverColor = useMemo(
     () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
     [theme.currentTheme.windowColor]
@@ -92,26 +63,14 @@ export const AirliftTray: FC = observer(() => {
     <motion.div
       id="airlift-tray-icon"
       className="realm-cursor-hover"
-      // @ts-expect-error -
-      ref={airliftButtonRef}
-      whileTap={{ scale: 0.975 }}
-      transRoom={{ scale: 0.2 }}
-      position="relative"
+      style={{
+        position: 'relative',
+      }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ scale: 0.2 }}
       onClick={onButtonClick}
     >
-      <IconButton
-        id="airlift-tray-icon"
-        ref={airliftButtonRef}
-        size={ICON_SIZE}
-        customBg={iconHoverColor}
-        color={textColor}
-        mt="2px"
-        // draggable={true}
-        // onDragStart={onButtonDragStart}
-        // mb="-2px"
-      >
-        <Icon name="Airlift" size={ICON_SIZE} pointerEvents="none" />
-      </IconButton>
+      <Icon name="Airlift" size={ICON_SIZE} pointerEvents="none" opacity={1} />
     </motion.div>
   );
 });

@@ -214,6 +214,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         zIndex: appWindow.zIndex,
         borderRadius,
         display: appWindow.isMinimized ? 'none' : 'block',
+        pointerEvents: 'auto',
       }}
       color={textColor}
       customBg={rgba(windowColor, 0.9)}

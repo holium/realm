@@ -76,7 +76,7 @@ export const IconButton = styled(motion.button)<IProps>`
           &:hover {
             transition: ${props.theme.transition};
             transform: translateZ(0);
-            opacity: 0.5;
+            opacity: ${props.opacity || 0.5};
             background: ${props.theme.colors.highlights.bgHighlight};
           }
         `

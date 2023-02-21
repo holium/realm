@@ -65,6 +65,7 @@ const AppWindowManagerPresenter = () => {
         right: 0,
         height: `calc(100vh - ${0}px)`,
         paddingTop: shell.isFullscreen ? 0 : 30,
+        pointerEvents: 'none',
       }}
     >
       {windows.map((appWindow, index: number) => (

@@ -5,6 +5,7 @@ import { Realm } from '../../';
 import { BaseService } from '../base.service';
 import { DiskStore } from '../base.store';
 import { AirliftStore, AirliftStoreType } from './airlift.model';
+import { NodeChange } from 'reactflow';
 
 /**
  * AirliftService
@@ -17,19 +18,32 @@ export class AirliftService extends BaseService {
     'realm.airlift.expand-arm': this.expandArm,
     'realm.airlift.drop-airlift': this.dropAirlift,
     'realm.airlift.remove-airlift': this.removeAirlift,
+    'realm.airlift.on-nodes-change': this.onNodesChange,
+    /*'realm.airlift.on-edges-change': this.onEdgesChange,
+    'realm.airlift.on-connect': this.onConnect,*/
   };
 
   static preload = {
-    dropAirlift: (spacePath: string, airliftId: string) => {
+    /*dropAirlift: (
+      spacePath: string,
+      type: string,
+      airliftId: string,
+      position: any
+    ) => {
       return ipcRenderer.invoke(
         'realm.airlift.drop-airlift',
         spacePath,
-        airliftId
+        type,
+        airliftId,
+        position
       );
+    },*/
+    dropAirlift: (airlift: any) => {
+      return ipcRenderer.invoke('realm.airlift.drop-airlift', airlift);
     },
     removeAirlift: (spacePath: string, airliftId: string) => {
       return ipcRenderer.invoke(
-        'realm.airlift.drop-airlift',
+        'realm.airlift.remove-airlift',
         spacePath,
         airliftId
       );
@@ -37,6 +51,15 @@ export class AirliftService extends BaseService {
     expandArm: (desk: string, agent: string, arm: string) => {
       return ipcRenderer.invoke('realm.airlift.expand-arm', desk, agent, arm);
     },
+    onNodesChange: (changes: NodeChange[]) => {
+      return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
+    },
+    /*onEdgesChange: (changes: EdgeChange[]) => {
+      return ipcRenderer.invoke('realm.airlift.on-edges-change', changes);
+    },
+    onConnect: (connection: Connection) => {
+      return ipcRenderer.invoke('realm.airlift.on-connect', connection);
+    },*/
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -72,7 +95,7 @@ export class AirliftService extends BaseService {
       desks: {},
     });*/
     this.db = new DiskStore('airlift', patp, secretKey!, AirliftStore, {
-      model: {},
+      flowStore: {},
     });
     this.state = this.db.model as AirliftStoreType;
     this.db.initialUpdate(this.core.onEffect);
@@ -110,12 +133,17 @@ export class AirliftService extends BaseService {
       .expand();*/
   }
 
-  async dropAirlift(
+  /*async dropAirlift(
     _event: IpcMainInvokeEvent,
     space: string,
-    airliftId: string
+    type: string,
+    airliftId: string,
+    location: any
   ) {
-    this.state!.dropAirlift(space, airliftId, { x: 3, y: 3 });
+    this.state!.dropAirlift(space, type, airliftId, location);
+  }*/
+  async dropAirlift(_event: IpcMainInvokeEvent, newAirlift: any) {
+    this.state!.dropAirlift(newAirlift);
   }
 
   async removeAirlift(
@@ -125,4 +153,14 @@ export class AirliftService extends BaseService {
   ) {
     this.state!.removeAirlift(space, airliftId);
   }
+
+  async onNodesChange(_event: IpcMainInvokeEvent, changes: NodeChange[]) {
+    this.state!.flowStore.onNodesChange(changes);
+  }
+  /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
+    this.state!.flowStore.onEdgesChange(changes);
+  }
+  async onConnect(_event: IpcMainInvokeEvent, connection: Connection) {
+    this.state!.flowStore.onConnect(connection);
+  }*/
 }

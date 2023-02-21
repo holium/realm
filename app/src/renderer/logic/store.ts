@@ -78,6 +78,7 @@ const Services = types
         incoming: {},
         outgoing: {},
       });
+      self.airlift = castToSnapshot({});
     },
   }));
 
@@ -129,7 +130,7 @@ const services = Services.create({
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
-  airlift: {},
+  airlift: { flowStore: {} },
 });
 
 export const servicesStore = services;

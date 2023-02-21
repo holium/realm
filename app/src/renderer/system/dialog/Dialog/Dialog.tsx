@@ -1,4 +1,3 @@
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import {
   FC,
   useEffect,
@@ -8,16 +7,12 @@ import {
   ReactNode,
   RefObject,
 } from 'react';
-import {
-  Flex,
-  TextButton,
-  Spinner,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import styled from 'styled-components';
+import { Button, Icon } from '@holium/design-system';
+import { Flex, Spinner } from 'renderer/components';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import styled from 'styled-components';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 
 export interface DialogViewProps {
   appWindow: AppWindowType;
@@ -111,6 +106,8 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
         </Flex>
         {workflow && (
           <Flex
+            key={workflowState.id}
+            id={workflowState.id}
             flexDirection="row"
             justifyContent="space-between"
             alignItems="center"
@@ -118,14 +115,14 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
           >
             <Flex alignItems="center" justifyContent="flex-start">
               {onPrevious && hasPrevious && hasPrevious() && (
-                <IconButton
-                  customBg={theme.currentTheme.windowColor}
+                <Button.IconButton
+                  size={26}
                   onClick={() => {
                     onPrevious();
                   }}
                 >
-                  <Icons name="ArrowLeftLine" />
-                </IconButton>
+                  <Icon name="ArrowLeftLine" size={20} opacity={0.5} />
+                </Button.IconButton>
               )}
             </Flex>
             <Flex
@@ -134,7 +131,9 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
               height={26}
             >
               {!customNext && onNext && (
-                <TextButton
+                <Button.TextButton
+                  showOnHover
+                  fontWeight={500}
                   disabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {
                     onNext(evt, workflowState, setWorkflowState);
@@ -145,7 +144,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
                   ) : (
                     <>{nextButtonText || 'Next'}</>
                   )}
-                </TextButton>
+                </Button.TextButton>
               )}
             </Flex>
           </Flex>

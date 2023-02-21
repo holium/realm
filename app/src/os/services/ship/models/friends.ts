@@ -65,6 +65,7 @@ export const FriendsStore = types
           tags: toJS(value[1].tags),
           status: value[1].status,
         }))
+        .filter((friend: any) => friend.status !== 'contact')
         .filter((friend: any) => friend.pinned);
       return list.filter((friend: any) => friend.pinned);
     },
@@ -79,21 +80,21 @@ export const FriendsStore = types
           status: value[1].status,
         })
       );
-      return list.filter(
-        (friend: any) => !friend.pinned && !(friend.status === 'our')
-      );
+      return list
+        .filter((friend: any) => friend.status !== 'contact')
+        .filter((friend: any) => !friend.pinned && !(friend.status === 'our'));
     },
     get list() {
-      return Array.from(self.all.entries()).map(
-        (value: [patp: string, friend: FriendType]) => ({
+      return Array.from(self.all.entries())
+        .map((value: [patp: string, friend: FriendType]) => ({
           ...value[1],
           color: cleanNounColor(value[1].contactInfo?.color || ''),
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
           status: value[1].status,
-        })
-      );
+        }))
+        .filter((friend: any) => friend.status !== 'contact');
     },
     get contacts(): [string, ContactModelType][] {
       const filtered = Array.from(self.all.entries()).filter(

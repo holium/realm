@@ -8,6 +8,7 @@ declare global {
       os: OSPreloadType;
     };
     audio: any;
+    ship: string;
   }
 }
 
