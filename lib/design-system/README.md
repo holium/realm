@@ -31,3 +31,7 @@ index.ts - exports all components
   /Component.tsx - component
   /Component.stories.tsx - storybook stories
 ```
+
+### Publishing
+
+remove `postinstall: preconstruct dev` before publishing to NPM.
