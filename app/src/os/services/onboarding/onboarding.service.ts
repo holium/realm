@@ -17,6 +17,7 @@ import {
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
+import { FriendsApi } from '../../api/friends';
 import { DocketApi } from '../../api/docket';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
@@ -594,7 +595,16 @@ export class OnboardingService extends BaseService {
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
-    const ourProfile = await ContactApi.getContact(tempConduit, patp);
+    let ourProfile;
+    try {
+      ourProfile = await FriendsApi.getContact(tempConduit, patp);
+    } catch (e) {
+      try {
+        ourProfile = await ContactApi.getContact(tempConduit, patp);
+      } catch (e) {
+        ourProfile = { color: '#000' };
+      }
+    }
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;

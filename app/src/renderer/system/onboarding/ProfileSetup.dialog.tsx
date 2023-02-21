@@ -123,8 +123,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
         //  || '');
         setProfileLoading(false);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         setProfileLoading(false);
       });
   }, []);
