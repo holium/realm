@@ -319,7 +319,7 @@
     |-
     ?:  =(index len)
       result
-    =/  i  (snag 0 valid-rows)
+    =/  i  (snag index valid-rows)
     =/  pre  (~(get by result) path.i)
     =/  lis
     ?~  pre
