@@ -1,14 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { isValidPatp } from 'urbit-ob';
-import {
-  Avatar,
-  Box,
-  Bubble,
-  Flex,
-  WindowedList,
-  Text,
-} from '@holium/design-system';
+import { Box, Bubble, Flex, WindowedList, Text } from '@holium/design-system';
 
 import { useServices } from 'renderer/logic/store';
 import { useChatStore } from '../store';
@@ -16,7 +8,6 @@ import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { GroupSigil } from '../components/GroupSigil';
 import { ChatAvatar } from '../components/ChatAvatar';
 
 export const DMLogPresenter = () => {

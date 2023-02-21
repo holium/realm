@@ -1,27 +1,11 @@
 import { useEffect, useState } from 'react';
-import {
-  Flex,
-  Avatar,
-  Text,
-  Box,
-  SectionDivider,
-  Button,
-} from '@holium/design-system';
+import { Flex, Text, Box, SectionDivider, Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { InlineEdit, PersonRow } from 'renderer/components';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { useChatStore } from '../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
-
-// type ChatInfoProps = {
-//   path: string;
-//   title: string;
-//   subtitle?: string;
-//   avatar: React.ReactNode;
-//   onBack: () => void;
-//   peers: string[];
-// };
 
 export const ChatInfo = () => {
   // const { dimensions } = useTrayApps();
@@ -51,7 +35,6 @@ export const ChatInfo = () => {
   const editMetadata = (editedMetadata: any) => {
     if (!selectedPath) return;
     editedMetadata = { ...metadata, ...editedMetadata };
-    console.log(selectedPath, editedMetadata);
     ChatDBActions.editChat(selectedPath, editedMetadata);
     updateMetadata(editedMetadata);
   };

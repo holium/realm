@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';
-import { darken, rgba } from 'polished';
+import { rgba } from 'polished';
 import {
   compose,
   space,
