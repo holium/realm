@@ -3,6 +3,7 @@
 ::
 |%
 +$  card  card:agent:gall
++$  pins  (set path)
 +$  versioned-state
   $%  state-0
   ==
@@ -13,6 +14,7 @@
       =devices:notify        :: (map device-id player-id)
       push-enabled=?
       mutes=(list path)      :: the list of muted chat `path`s
+      =pins                  :: the set of pinned chat `path`s
   ==
 ::
 +$  action
@@ -31,7 +33,8 @@
       [%disable-push ~]
       [%set-device =device-id:notify =player-id:notify]
       [%remove-device =device-id:notify]
-      [%mute-chat =path mute=?]
+      [%mute-chat =path mute=?]  :: toggles the muted-state of the path
+      [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
   ==
 +$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship)]
 --

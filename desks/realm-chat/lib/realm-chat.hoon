@@ -273,8 +273,30 @@
   =.  mutes.state   new-mutes
   `state
 ::
+++  pin-chat
+  |=  [[chat-path=path pin=?] state=state-0]
+  ^-  (quip card state-0)
+  =/  new-pins
+    ?:  pin
+      (~(put in pins.state) chat-path)
+    (~(del in pins.state) chat-path)
+  =.  pins.state   new-pins
+  `state
+::
 ::  JSON
 ::
+++  encode
+  =,  enjs:format
+  |%
+    ++  paths
+      |=  path-set=pins
+      ^-  json
+      a+(turn `(list ^path)`~(tap in path-set) enpath)
+    ++  enpath
+      |=  p=^path
+      ^-  json
+      s+(spat p)
+  --
 ++  dejs
   =,  dejs:format
   |%
@@ -298,6 +320,7 @@
           [%set-device set-device]
           [%remove-device remove-device]
           [%mute-chat mute-chat]
+          [%pin-chat pin-chat]
       ==
     ::
     ++  create-chat
@@ -330,6 +353,12 @@
       %-  ot
       :~  [%path pa]
           [%mute bo]
+      ==
+    ::
+    ++  pin-chat
+      %-  ot
+      :~  [%path pa]
+          [%pin bo]
       ==
     ::
     ++  path-and-ship

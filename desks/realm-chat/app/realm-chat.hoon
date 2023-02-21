@@ -19,6 +19,7 @@
           *devices:notify
           %.y                                     :: push-enabled
           *(list path)                            :: list of muted chats
+          ~                                   :: list of pinned chats
       ==
     :_  this(state default-state)
     :~
@@ -40,7 +41,8 @@
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
           %.y                                     :: push-enabled
-          *(list path)
+          *(list path)                            :: list of muted chats
+          ~                                   :: list of pinned chats
       ==
     [cards this(state default-state)]
     :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
@@ -84,6 +86,8 @@
         (set-device:lib +.act state)
       %mute-chat
         (mute-chat:lib +.act state)
+      %pin-chat
+        (pin-chat:lib +.act state)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -94,6 +98,7 @@
     ^-  (quip card _this)
     !!
   :: we support devices peek for push notifications
+  :: and pins peek for list of pinned chats
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
@@ -102,6 +107,10 @@
       [%x %devices ~]
         ?>  =(our.bowl src.bowl)
         ``notify-view+!>([%devices devices.state])
+    ::
+      [%x %pins ~]
+        ?>  =(our.bowl src.bowl)
+        ``pins+!>(pins.state)
     ==
   ::
   ++  on-agent
