@@ -1,7 +1,7 @@
 import { isValidPatp } from 'urbit-ob';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { Avatar, Box, Button, Icon } from '@holium/design-system';
+import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
 import { useServices } from 'renderer/logic/store';
@@ -15,6 +15,7 @@ type ChatAvatarProps = {
   canEdit?: boolean;
   size?: number;
   peers: string[];
+  onUpload?: (evt: any) => void;
 };
 
 export const ChatAvatar = ({
@@ -23,16 +24,15 @@ export const ChatAvatar = ({
   path,
   peers,
   image,
+  onUpload,
   canEdit = false,
   size = 28,
 }: ChatAvatarProps) => {
   const { friends } = useServices();
   const [showEdit, setShowEdit] = useState(false);
   let avatarElement = null;
-  if (image) {
-    // TODO: add image support
-  }
-  if (type === 'dm' && isValidPatp(title)) {
+
+  if (!image && type === 'dm' && isValidPatp(title)) {
     const {
       patp,
       avatar,
@@ -49,7 +49,8 @@ export const ChatAvatar = ({
         simple
       />
     );
-  } else if (type === 'group') {
+  }
+  if (!image && type === 'group') {
     avatarElement = (
       <GroupSigil
         path={path!}
@@ -57,12 +58,20 @@ export const ChatAvatar = ({
         patps={peers.filter((peer) => peer !== window.ship) as string[]}
       />
     );
-  } else {
-    // TODO space type
   }
+  if (!image && type === 'space') {
+  }
+  if (image) {
+    // TODO: add image support
+    avatarElement = (
+      <ImageCrest height={size} width={size} borderRadius={4} src={image} />
+    );
+  }
+
   return (
     <ChatAvatarBox
       position="relative"
+      canEdit={canEdit}
       onHoverStart={() => {
         canEdit && setShowEdit(true);
       }}
@@ -80,10 +89,7 @@ export const ChatAvatar = ({
             className="chat-info-edit-image"
             size={24}
             borderRadius={12}
-            onClick={(evt) => {
-              evt.stopPropagation();
-              // onRemove([ship, '']);
-            }}
+            onClick={onUpload}
           >
             <Icon name="Edit" size={16} />
           </Button.Base>
@@ -93,14 +99,22 @@ export const ChatAvatar = ({
   );
 };
 
-const ChatAvatarBox = styled(Box)`
+type ChatAvatarBoxProps = {
+  canEdit: boolean;
+} & BoxProps;
+
+const ChatAvatarBox = styled(Box)<ChatAvatarBoxProps>`
   border-radius: 4px;
   position: relative;
   transition: var(--transition);
-  &:hover {
-    transition: var(--transition);
-    background: var(--rlm-overlay-hover);
-  }
+  ${(props) =>
+    props.canEdit &&
+    css`
+      &:hover {
+        transition: var(--transition);
+        background: var(--rlm-overlay-hover);
+      }
+    `}
 `;
 
 const EditWrapper = styled(motion.div)`
@@ -122,4 +136,21 @@ const EditWrapper = styled(motion.div)`
       filter: brightness(0.95);
     }
   }
+`;
+
+interface CrestStyleProps {
+  height: number;
+  width: number;
+  src: string;
+  borderRadius: number;
+}
+
+export const ImageCrest = styled(motion.div)<CrestStyleProps>`
+  border-radius: ${(p) => p.borderRadius}px;
+  background-image: url(${(props) => props.src});
+  height: ${(props) => props.height}px;
+  width: ${(props) => props.width}px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 `;

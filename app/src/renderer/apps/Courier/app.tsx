@@ -5,14 +5,17 @@ import { NewChat } from './NewChat';
 import { ChatProvider, chatStore } from './store';
 import { ChatInfo } from './views/ChatInfo';
 import { DMLog } from './views/DMLog';
+import { useStorage } from 'renderer/logic/lib/useStorage';
 
 export const CourierAppPresenter = () => {
+  const storage = useStorage();
+
   return (
     <ChatProvider value={chatStore}>
       <LayoutGroup>
         {chatStore.subroute === 'inbox' && <Inbox />}
         {chatStore.subroute === 'chat' && <DMLog />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo />}
+        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
         {chatStore.subroute === 'new' && <NewChat />}
       </LayoutGroup>
     </ChatProvider>

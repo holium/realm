@@ -9,6 +9,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export const DMLogPresenter = () => {
   const { dimensions } = useTrayApps();
@@ -44,6 +45,7 @@ export const DMLogPresenter = () => {
   if (!selectedPath) return null;
 
   const onSend = (fragments: any[]) => {
+    SoundActions.playDMSend();
     ChatDBActions.sendMessage(
       selectedPath,
       fragments.map((frag) => {
@@ -82,6 +84,7 @@ export const DMLogPresenter = () => {
               type={type}
               path={selectedPath}
               peers={peers}
+              image={metadata?.image}
             />
           )
         }
@@ -119,17 +122,17 @@ export const DMLogPresenter = () => {
               // TODO add context menu for delete, reply, etc
               return (
                 <Box
-                  key={`${row.id}-${row.timestamp}-${index}`}
+                  key={`${row.id}-${row.createdAt}-${index}`}
                   pt={2}
                   pb={index === chats.length - 1 ? 2 : 0}
                 >
                   <Bubble
                     id={row.id}
-                    our={row.sender === ship?.patp}
+                    isOur={row.sender === ship?.patp}
                     author={row.sender}
                     authorColor={sigilColor}
                     message={row.content}
-                    sentAt={new Date(row.timestamp).toISOString()}
+                    sentAt={new Date(row.createdAt).toISOString()}
                     onLoad={measure}
                     onReaction={() => {}}
                   />

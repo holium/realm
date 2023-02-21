@@ -1,6 +1,6 @@
 import { MouseEventHandler } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Row, Text, Icon } from '../../';
+import { Flex, Row, Text, Icon, TextProps } from '../../';
 import { IconPathsType } from '../../general/Icon/icons';
 
 export type MenuItemProps = {
@@ -14,11 +14,15 @@ export type MenuItemProps = {
   onClick: MouseEventHandler<HTMLElement>;
 };
 
-const MenuItemLabel = styled(Text.Custom)<{ labelColor?: string }>`
+type MenuItemLabelProps = {
+  labelColor?: string;
+} & TextProps;
+
+const MenuItemLabel = styled(Text.Custom)<MenuItemLabelProps>`
   ${(props) =>
     props.labelColor &&
     css`
-      color: ${props.labelColor};
+      color: ${props.labelColor || 'inherit'};
     `}
 `;
 
@@ -32,8 +36,18 @@ export const MenuItem = ({
   onClick,
 }: MenuItemProps) => {
   return (
-    <Row height={34} id={id} disabled={disabled} onClick={onClick}>
-      <Flex flexDirection="row" gap={10} alignItems="center">
+    <Row
+      height={34}
+      id={id}
+      disabled={disabled}
+      onClick={(evt) => !disabled && onClick(evt)}
+    >
+      <Flex
+        pointerEvents={disabled ? 'none' : 'all'}
+        flexDirection="row"
+        gap={10}
+        alignItems="center"
+      >
         {icon && (
           <Icon
             iconColor={iconColor}

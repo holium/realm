@@ -44,6 +44,7 @@ export const ChatRow = ({
       id: `${chatRowId}-pin-chat`,
       icon: 'Pin',
       label: 'Pin',
+      disabled: true,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
         // TODO poke pin / unpin
@@ -74,7 +75,7 @@ export const ChatRow = ({
       id: `${chatRowId}-mute-chat`,
       icon: 'NotificationOff',
       label: 'Mute',
-      disabled: false,
+      disabled: true,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
         // TODO poke mute notifications
@@ -131,7 +132,13 @@ export const ChatRow = ({
             }}
           >
             {title && type && path && peers && (
-              <ChatAvatar title={title} type={type} path={path} peers={peers} />
+              <ChatAvatar
+                title={title}
+                type={type}
+                path={path}
+                peers={peers}
+                image={metadata?.image}
+              />
             )}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">

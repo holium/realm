@@ -121,6 +121,7 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         <WindowedList
+          // TODO fix this (chats without messages have timestamp in metadata)
           key={`inbox-${chatList.length}`}
           width={dimensions.width - 26}
           height={544}
@@ -129,7 +130,7 @@ export const InboxPresenter = () => {
           filter={searchFilter}
           rowRenderer={(chat, index) => {
             let title: string = chat.metadata.title;
-            let timestamp = chat.timestamp;
+            let timestamp = chat.createdAt;
             if (!chat.lastMessage) {
               timestamp = parseInt(chat.metadata.timestamp);
             }

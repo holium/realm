@@ -9,7 +9,7 @@ import {
 } from '@holium/design-system';
 import { useTrayApps } from '../store';
 import { useChatStore } from './store';
-import { ShipSearch } from 'renderer/components';
+import { ShipSearch, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -20,6 +20,7 @@ export const NewChat = () => {
   const { ship, friends } = useServices();
   const { dimensions } = useTrayApps();
   const { setSubroute } = useChatStore();
+  const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
 
@@ -41,15 +42,22 @@ export const NewChat = () => {
         .join(', ');
       chatType = 'group';
     }
+    setCreating(true);
     ChatDBActions.createChat(Array.from(selectedPatp), chatType, {
       title,
       description: '',
       image: '',
       creator: ship!.patp,
       timestamp: Date.now().toString(),
-    }).then(() => {
-      setSubroute('inbox');
-    });
+    })
+      .then(() => {
+        setSubroute('inbox');
+        setCreating(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setCreating(false);
+      });
   };
 
   const onShipSelected = (contact: [string, string?]) => {
@@ -90,12 +98,13 @@ export const NewChat = () => {
           {selectedPatp.size > 0 && (
             <Button.TextButton
               showOnHover
+              disabled={creating}
               onClick={(evt) => {
                 evt.stopPropagation();
                 onCreateChat();
               }}
             >
-              Create
+              {creating ? <Spinner size={0} color="#FFF" /> : 'Create'}
             </Button.TextButton>
           )}
         </Flex>

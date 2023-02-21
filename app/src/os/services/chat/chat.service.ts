@@ -13,6 +13,8 @@ import {
   ChatDbOps,
   AddRow,
   DelPathsRow,
+  DelPeersRow,
+  UpdateRow,
 } from './chat.types';
 
 type ChatUpdateType =
@@ -198,6 +200,31 @@ export class ChatService extends BaseService {
       }
     }
     if (dbChange.type === 'update') {
+      const update = dbChange as UpdateRow;
+      switch (update.table) {
+        case 'messages':
+          // console.log('update messages', update.row);
+          // const message = update.row as MessagesRow;
+          // this.insertMessages([message]);
+          // const msg = this.getChatMessage(
+          //   message.path,
+          //   `${message['msg-id'][0]}${message['msg-id'][1]}`
+          // );
+          // console.log('UPDATED MESSAGE', msg);
+          // this.sendChatUpdate('message-updated', msg);
+          break;
+        case 'paths':
+          console.log('update paths', update.row);
+          const path = update.row as PathsRow;
+          this.insertPaths([path]);
+          // this.sendChatUpdate('path-updated', path.path);
+          break;
+        case 'peers':
+          console.log('update peers', update.row);
+          const peers = update.row as PeersRow;
+          this.insertPeers([peers]);
+          break;
+      }
     }
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
@@ -213,9 +240,9 @@ export class ChatService extends BaseService {
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
-      //  const delPathsRow = dbChange as DelPeersRow;
-      //  this.deletePath(delPathsRow.row);
-      //  this.sendChatUpdate('path-deleted', delPathsRow.row);
+      const delPathsRow = dbChange as DelPeersRow;
+      this.deletePath(delPathsRow.path);
+      this.sendChatUpdate('peer-deleted', delPathsRow);
     }
   }
 
@@ -307,7 +334,7 @@ export class ChatService extends BaseService {
   insertPeers(peers: PeersRow[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
-      `INSERT OR IGNORE INTO peers (
+      `REPLACE INTO peers (
           path, 
           ship, 
           role,
@@ -415,8 +442,8 @@ export class ChatService extends BaseService {
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path LIKE '%realm-chat%'
       ORDER BY
-        (chat_with_messages.created_at IS NULL) DESC,
-        chat_with_messages.created_at DESC;
+          chat_with_messages.created_at DESC,
+          json_extract(json(metadata), '$.timestamp') DESC;
     `);
     const result = query.all(`~${this.core.conduit?.ship}`);
 
@@ -543,12 +570,12 @@ export class ChatService extends BaseService {
   getChatPeers(_evt: any, path: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
-      SELECT ship
+      SELECT ship AS peer, role
       FROM peers
       WHERE path = ?;
     `);
     const result = query.all(path);
-    return result.map((row) => row.ship);
+    return result;
   }
 
   // ------------------------------

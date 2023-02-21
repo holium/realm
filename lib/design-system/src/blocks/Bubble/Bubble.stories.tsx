@@ -25,7 +25,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -37,7 +37,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -69,7 +69,7 @@ webpack building...
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -102,7 +102,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -141,7 +141,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -175,7 +175,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -207,7 +207,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -231,14 +231,14 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       message={[
         { plain: 'Open Graph' },
         {
-          link: 'https://www.coindesk.com/layer2/2022/09/24/urbit-courts-daos-crypto-teams-in-push-to-make-internet-p2p-again/',
+          link: 'https://www.coindesk.com/layer2/2022/09/24/urbit-cisOurts-daos-crypto-teams-in-push-to-make-internet-p2p-again/',
         },
       ]}
       onReaction={() => {}}
     />
 
     <Bubble
-      our
+      isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
@@ -277,7 +277,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
-      our
+      isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
@@ -294,14 +294,14 @@ export const Image: ComponentStory<typeof Bubble> = () => (
 
 export const Reactions: ComponentStory<typeof Bubble> = () => {
   const [reacts, setReacts] = useState<FragmentReactionType[]>([]);
-  const ourPatp = '~lomder-librun';
-  window.ship = ourPatp;
+  const isOurPatp = '~lomder-librun';
+  window.ship = isOurPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: ourPatp, emoji: payload.emoji }]);
+      setReacts([...reacts, { author: isOurPatp, emoji: payload.emoji }]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === ourPatp
+        (r) => r.emoji === payload.emoji && r.author === isOurPatp
       );
       if (removeIdx === -1) {
         return;
@@ -369,7 +369,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
     />
     <Bubble
       author="~lomder-librun"
-      our
+      isOur
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
         {

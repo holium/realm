@@ -8,7 +8,8 @@ export type ChatRowType = {
   metadata: any;
   type: ChatPathType;
   lastMessage: any[];
-  timestamp: number;
+  createdAt: number;
+  updatedAt: number;
 };
 
 export type ContactMetadata = {
