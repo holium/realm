@@ -121,6 +121,7 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         <WindowedList
+          // TODO fix this (chats without messages have timestamp in metadata)
           key={`inbox-${chatList.length}`}
           width={dimensions.width - 26}
           height={544}

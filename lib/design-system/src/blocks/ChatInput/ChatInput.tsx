@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Icon, Button, InputBox, BoxProps, TextArea, Flex } from '../..';
 import { FragmentType } from '../Bubble/Bubble.types';
@@ -15,6 +15,7 @@ const ChatBox = styled(TextArea)`
 type ChatInputProps = {
   id: string;
   disabled?: boolean;
+  isFocused?: boolean;
   onSend: (fragments: FragmentType[]) => void;
   onAttachment?: (file: any) => void;
 } & BoxProps;
@@ -30,6 +31,7 @@ export const ChatInput = ({
   id,
   tabIndex,
   disabled,
+  isFocused,
   onSend,
   onAttachment,
   ...chatInputProps
@@ -37,16 +39,26 @@ export const ChatInput = ({
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    if (inputRef.current && isFocused) {
+      inputRef.current.focus();
+    } else {
+      inputRef.current?.blur();
+    }
+  }, [isFocused, inputRef]);
+
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = evt.target;
     setValue(value);
   };
 
-  const onFocus = (evt: React.FocusEvent<HTMLTextAreaElement>) => {
+  const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
+    // TODO
     // console.log('onFocus', evt);
   };
 
-  const onBlur = (evt: React.FocusEvent<HTMLTextAreaElement>) => {
+  const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
+    // TODO
     // console.log('onBlur', evt);
   };
 
@@ -70,6 +82,7 @@ export const ChatInput = ({
         <Button.IconButton
           ml={1}
           onClick={() => {
+            // TODO
             // onAttachment();
           }}
         >
@@ -102,7 +115,6 @@ export const ChatInput = ({
         placeholder="New message"
         rows={1}
         value={value}
-        // autoFocus
         tabIndex={tabIndex}
         disabled={disabled}
         onChange={onChange}

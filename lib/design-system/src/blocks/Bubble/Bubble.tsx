@@ -14,7 +14,7 @@ export type BubbleProps = {
   author: string;
   authorColor?: string;
   sentAt: string;
-  our?: boolean;
+  isOur?: boolean;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
   onReaction: (payload: OnReactionPayload) => void;
@@ -26,7 +26,7 @@ export const Bubble = (props: BubbleProps) => {
   const {
     id,
     author,
-    our,
+    isOur,
     sentAt,
     authorColor,
     message,
@@ -43,10 +43,10 @@ export const Bubble = (props: BubbleProps) => {
       key={id}
       display="inline-flex"
       mx="1px"
-      justifyContent={our ? 'flex-end' : 'flex-start'}
+      justifyContent={isOur ? 'flex-end' : 'flex-start'}
     >
-      <BubbleStyle id={id} className={our ? 'bubble-our' : ''}>
-        {!our && (
+      <BubbleStyle id={id} className={isOur ? 'bubble-our' : ''}>
+        {!isOur && (
           <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
         )}
         <FragmentBlock>

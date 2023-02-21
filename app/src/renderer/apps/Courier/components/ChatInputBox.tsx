@@ -1,10 +1,12 @@
 import { Box, ChatInput } from '@holium/design-system';
+import { useState } from 'react';
 
 type CourierInputProps = {
   onSend: (fragments: any[]) => void;
 };
 
 export const ChatInputBox = ({ onSend }: CourierInputProps) => {
+  const [isFocused, setIsFocused] = useState(false);
   return (
     <Box
       width="100%"
@@ -17,10 +19,15 @@ export const ChatInputBox = ({ onSend }: CourierInputProps) => {
         duration: 0.1,
       }}
       onAnimationComplete={() => {
-        document.getElementById('chat-send')?.focus();
+        setIsFocused(true);
       }}
     >
-      <ChatInput id="chat-send" onSend={onSend} onAttachment={() => {}} />
+      <ChatInput
+        id="chat-log-input"
+        isFocused={isFocused}
+        onSend={onSend}
+        onAttachment={() => {}}
+      />
     </Box>
   );
 };

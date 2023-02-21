@@ -103,7 +103,7 @@ export const ChatLogHeader = ({
                 id: 'pin-chat',
                 icon: 'Pin',
                 label: 'Pin',
-                disabled: false,
+                disabled: true,
                 onClick: (evt) => {
                   evt.stopPropagation();
                 },
@@ -122,7 +122,7 @@ export const ChatLogHeader = ({
                 id: 'mute-chat',
                 icon: 'NotificationOff',
                 label: 'Mute',
-                disabled: false,
+                disabled: true,
                 onClick: (evt) => {
                   evt.stopPropagation();
                 },
@@ -132,7 +132,7 @@ export const ChatLogHeader = ({
                 icon: 'ClearHistory',
                 section: 2,
                 label: 'Clear history',
-                disabled: false,
+                disabled: true,
                 onClick: (evt) => {
                   evt.stopPropagation();
                 },

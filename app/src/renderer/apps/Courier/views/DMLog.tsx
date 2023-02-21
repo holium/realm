@@ -128,7 +128,7 @@ export const DMLogPresenter = () => {
                 >
                   <Bubble
                     id={row.id}
-                    our={row.sender === ship?.patp}
+                    isOur={row.sender === ship?.patp}
                     author={row.sender}
                     authorColor={sigilColor}
                     message={row.content}
