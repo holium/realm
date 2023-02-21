@@ -131,6 +131,21 @@ export class LocalPeer extends Peer {
 
   setMedia(stream: MediaStream) {
     this.stream = stream;
+    //
+    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioCtx.createMediaStreamSource(this.stream);
+    this.analyser = this.audioCtx.createAnalyser();
+    this.analyser.minDecibels = -90;
+    this.analyser.maxDecibels = -10;
+    this.analyser.smoothingTimeConstant = 0.85;
+    this.analyser.connect(this.audioCtx.destination);
+    this.analyser.fftSize = 2048;
+    // We can use Float32Array instead of Uint8Array if we want higher precision
+    // const dataArray = new Float32Array(bufferLength);
+    const dataArray = new Uint8Array(this.analyser.fftSize);
+
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+    //
     this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
       this.audioTracks.set(audio.id, audio);
       this.emit(PeerEvent.AudioTrackAdded, stream, audio);

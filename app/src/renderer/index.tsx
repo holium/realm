@@ -9,8 +9,8 @@ const isProd = environment === 'production';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
-  console.log(
-    `Initializing Sentry [release: ${process.env.SENTRY_RELEASE}]...`
+  process.stdout.write(
+    `Initializing Sentry [release: ${process.env.SENTRY_RELEASE}]...\n`
   );
   Sentry.init({
     // this is defined 'on-the-fly' during staging/production builds where
