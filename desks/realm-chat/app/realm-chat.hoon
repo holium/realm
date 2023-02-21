@@ -46,8 +46,9 @@
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: meta-chat management pokes
       %create-chat
-        ~&  >  '%realm-chat: %create-chat action'
         (create-chat:lib +.act state bowl)
+      %edit-chat
+        (edit-chat:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
       %remove-ship-from-chat

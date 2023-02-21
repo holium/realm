@@ -24,6 +24,8 @@
   $:  =path
       metadata=(map cord cord)
       type=@tas     :: not officially specified, up to user to interpret for maybe %dm vs %group or %chat vs %board or whatever
+      created-at=time
+      updated-at=time  :: updated when %edit-path-medatata is hit
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -39,7 +41,8 @@
       =content
       =reply-to
       metadata=(map cord cord)
-      timestamp=@da
+      created-at=@da
+      updated-at=@da  :: set to now.bowl when %edit action. means it can be out of sync between ships, but shouldn't matter
   ==
 +$  content
   $%  [%custom name=cord value=cord] :: general data type
@@ -70,6 +73,8 @@
   $:  =path
       patp=ship
       role=?(%member %host)
+      created-at=time
+      updated-at=time  :: not used really yet, but if we implement a way to change peers role, then this would be needed
   ==
 ::
 +$  peers-table  (map path (list peer-row))
@@ -86,15 +91,15 @@
 ::
 +$  action
   $%  
-      [%create-path =create-path-action]
+      [%create-path =path-row]
+      [%edit-path-metadata =path metadata=(map cord cord)]
       [%leave-path =path]
       [%insert =insert-message-action]
       [%edit =edit-message-action]
       [%delete =msg-id]
-      [%add-peer =path patp=ship]
+      [%add-peer =path patp=ship timestamp=time]
       [%kick-peer =path patp=ship]
   ==
-+$  create-path-action      [=path metadata=(map cord cord) type=@tas]
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
 +$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment)]
 +$  edit-message-action     [=msg-id =path fragments=(list minimal-fragment)]
@@ -106,6 +111,7 @@
 +$  db-change-type
   $%
     [%add-row =db-row]
+    [%upd-paths-row =path-row]
     [%del-paths-row =path]
     [%del-peers-row =path =ship]
     [%del-messages-row =uniq-id]
@@ -117,8 +123,4 @@
   ==
 +$  db-change  (list db-change-type)
 ::
-+$  reaction
-  $%  
-      [%example =ship]
-  ==
 --

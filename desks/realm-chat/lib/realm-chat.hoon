@@ -94,7 +94,7 @@
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   ::=/  chat-path  /realm-chat/path-id
 
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act now.bowl now.bowl]
   =/  cards  
     :-
       [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%create-path pathrow])]
@@ -104,12 +104,29 @@
         |=(s=ship [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %action !>([%add-ship-to-chat chat-path s])])
       ==
   [cards state]
+::
+++  edit-chat
+::  :realm-chat &action [%edit-chat /realm-chat/path-id ~]
+  |=  [act=[=path metadata=(map cord cord)] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  pathpeers  (scry-peers path.act bowl)
+
+  =/  cards  
+    :: we poke all peers/members' db with edit-path-metadata (including ourselves)
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-metadata path.act metadata.act])])
+    ==
+  [cards state]
+::
 ++  add-ship-to-chat
 ::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathrow  (scry-path-row path.act bowl)
   =/  pathpeers  (scry-peers path.act bowl)
+  =/  t=@da  now.bowl
   =/  cards
     :-  
       ::  we poke the newly-added ship's db with a create-path,
@@ -119,7 +136,7 @@
       :: we poke all peers/members' db with add-peer (including ourselves)
       %:  turn
         pathpeers
-        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%add-peer path.act ship.act])])
+        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%add-peer path.act ship.act t])])
       ==
   [cards state]
 ::  allows self to remove self, or %host to kick others
@@ -189,16 +206,19 @@
   ^-  (quip card state-0)
   =.  push-enabled.state  %.n
   `state
+::
 ++  enable-push
   |=  [state=state-0]
   ^-  (quip card state-0)
   =.  push-enabled.state  %.y
   `state
+::
 ++  remove-device
   |=  [=device-id:notify state=state-0]
   ^-  (quip card state-0)
   =.  devices.state         (~(del by devices.state) device-id)
   `state
+::
 ++  set-device
   |=  [[=device-id:notify =player-id:notify] state=state-0]
   ^-  (quip card state-0)
@@ -218,6 +238,7 @@
     ++  decode
       %-  of
       :~  [%create-chat create-chat]
+          [%edit-chat edit-chat]
           [%add-ship-to-chat path-and-ship]
           [%remove-ship-from-chat path-and-ship]
           [%send-message path-and-fragments]
@@ -235,6 +256,12 @@
       :~  [%metadata (om so)]
           [%type (se %tas)]
           [%peers (ar de-ship)]
+      ==
+    ::
+    ++  edit-chat
+      %-  ot
+      :~  [%path pa]
+          [%metadata (om so)]
       ==
     ::
     ++  de-ship  (su ;~(pfix sig fed:ag))
