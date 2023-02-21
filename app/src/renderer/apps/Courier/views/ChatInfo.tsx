@@ -8,14 +8,11 @@ import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
 
 export const ChatInfo = () => {
-  // const { dimensions } = useTrayApps();
-  // const { friends } = useServices();
   const { selectedPath, metadata, type, updateMetadata, title, setSubroute } =
     useChatStore();
   const { friends, ship, theme } = useServices();
   const [peers, setPeers] = useState<string[]>([]);
   const [image, setImage] = useState(metadata?.image || '');
-  // const peers = [ship!.patp, '~hosryc-matbel'];
 
   const contactMetadata = title
     ? friends.getContactAvatarMetadata(title)
