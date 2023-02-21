@@ -184,23 +184,62 @@ const NodeType = types.model('NodeType', {
   ),*/
 });
 
+function handleParentExpand(res: any[], updateItem: any) {
+  const parent = res.find((e) => e.id === updateItem.parentNode);
+
+  if (parent) {
+    const extendWidth = updateItem.position.x + updateItem.width - parent.width;
+    const extendHeight =
+      updateItem.position.y + updateItem.height - parent.height;
+
+    if (
+      extendWidth > 0 ||
+      extendHeight > 0 ||
+      updateItem.position.x < 0 ||
+      updateItem.position.y < 0
+    ) {
+      parent.style = { ...parent.style } || {};
+
+      parent.style.width = parent.style.width ?? parent.width;
+      parent.style.height = parent.style.height ?? parent.height;
+
+      if (extendWidth > 0) {
+        parent.style.width += extendWidth;
+      }
+
+      if (extendHeight > 0) {
+        parent.style.height += extendHeight;
+      }
+
+      if (updateItem.position.x < 0) {
+        const xDiff = Math.abs(updateItem.position.x);
+        parent.position.x = parent.position.x - xDiff;
+        parent.style.width += xDiff;
+        updateItem.position.x = 0;
+      }
+
+      if (updateItem.position.y < 0) {
+        const yDiff = Math.abs(updateItem.position.y);
+        parent.position.y = parent.position.y - yDiff;
+        parent.style.height += yDiff;
+        updateItem.position.y = 0;
+      }
+
+      parent.width = parent.style.width;
+      parent.height = parent.style.height;
+    }
+  }
+}
+
 export const FlowStore = types
   .model('FlowStore', {
     nodes: types.array(NodeType),
   })
   .actions((self) => ({
     onNodesChange: (changes: NodeChange[]) => {
-      // console.log(changes);
-      /*changes.forEach((change) => {
-        if (change.type === 'add' && change.path.includes('position')) {
-          const node = getNodeByPath(change.path, self.nodes);
-          if (node) {
-            detach(node.position);
-          }
-        }
-      });*/
-      const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
-      self.nodes = castToSnapshot(applyNodeChanges(changes, newNodes));
+      // const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
+      const newNodes = getSnapshot(self.nodes);
+      self.nodes = cast(applyNodeChanges(changes, newNodes));
     },
     dropAirlift: (airlift: Node) => {
       // self.nodes = types.array(NodeType).create(self.nodes.concat(airlift));

@@ -67,7 +67,7 @@ const AirliftManagerPresenter = () => {
     useState<ReactFlowInstance | null>(null);
 
   const getId = (nodeType: string) =>
-    `airlift_${nodeType}_${airlifts.length + 1}`;
+    `airlift_${nodeType}_${airlift.flowStore.nodes.length + 1}`;
 
   const onDrop = useCallback(
     (event: any) => {
@@ -91,6 +91,7 @@ const AirliftManagerPresenter = () => {
         position,
         data: { label: `${type} node`, value: 123 },
       };
+      console.log(newNode);
 
       /*AirliftActions.dropAirlift(
         spaces.selected!.path,
