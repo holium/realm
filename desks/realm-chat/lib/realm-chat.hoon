@@ -116,7 +116,7 @@
   ::=/  chat-path  /realm-chat/path-id
   =/  all-peers  [our.bowl peers.act]
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~] :: final item is `pins` which always starts null
 
   =/  cards  
     :: for each "initial" peer they passed in, we poke ourselves with %add-ship-to-chat
@@ -153,6 +153,26 @@
     %:  turn
       pathpeers
       |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-metadata path.act metadata.act])])
+    ==
+  [cards state]
+::
+++  pin-message
+::  :realm-chat &action [%pin-message /realm-chat/path-id [*@da ~zod] %.y]
+  |=  [act=[=path =msg-id:db pin=?] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  pathrow=path-row:db  (scry-path-row path.act bowl)
+  =.  pins.pathrow
+    ?:  pin.act
+      (~(put in pins.pathrow) msg-id.act)
+    (~(del in pins.pathrow) msg-id.act)
+
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  cards  
+    :: we poke all peers/members' db with edit-path-pins (including ourselves)
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-pins path.act pins.pathrow])])
     ==
   [cards state]
 ::
@@ -268,8 +288,9 @@
   |=  [[chat-path=path mute=?] state=state-0]
   ^-  (quip card state-0)
   =/  new-mutes
-    ?:  mute  (snoc mutes.state chat-path)
-    (skip mutes.state |=(p=path =(p chat-path)))
+    ?:  mute
+      (~(put in mutes.state) chat-path)
+    (~(del in mutes.state) chat-path)
   =.  mutes.state   new-mutes
   `state
 ::
@@ -309,6 +330,7 @@
       %-  of
       :~  [%create-chat create-chat]
           [%edit-chat edit-chat]
+          [%pin-message pin-message]
           [%add-ship-to-chat path-and-ship]
           [%remove-ship-from-chat path-and-ship]
           [%send-message path-and-fragments]
@@ -415,6 +437,15 @@
           [%path pa]
           :: TODO decide if di for millisecond time is easier than (se %da)
           [%msg-id (at ~[(se %da) de-ship])]
+      ==
+    ::
+    ++  pin-message
+      %-  ot
+      :~  
+          [%path pa]
+          :: TODO decide if di for millisecond time is easier than (se %da)
+          [%msg-id (at ~[(se %da) de-ship])]
+          [%pin bo]
       ==
     --
   --

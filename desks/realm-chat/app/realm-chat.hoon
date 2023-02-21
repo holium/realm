@@ -18,8 +18,8 @@
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
           %.y                                     :: push-enabled
-          *(list path)                            :: list of muted chats
-          ~                                   :: list of pinned chats
+          ~                                   :: set of muted chats
+          ~                                   :: set of pinned chats
       ==
     :_  this(state default-state)
     :~
@@ -41,8 +41,8 @@
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
           %.y                                     :: push-enabled
-          *(list path)                            :: list of muted chats
-          ~                                   :: list of pinned chats
+          ~                                   :: set of muted chats
+          ~                                   :: set of pinned chats
       ==
     [cards this(state default-state)]
     :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
@@ -64,6 +64,8 @@
         (create-chat:lib +.act state bowl)
       %edit-chat
         (edit-chat:lib +.act state bowl)
+      %pin-message
+        (pin-message:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
       %remove-ship-from-chat
@@ -161,7 +163,7 @@
                     =/  thepath  path.msg-part.db-row.msg
                     ?:
                     ?|  =(sender.msg-id.msg-part.db-row.msg our.bowl) :: if it's our message, don't do anything
-                        (lien mutes.state |=(p=path =(p thepath)))    :: if it's a muted path, don't do anything
+                        (~(has in mutes.state) thepath)               :: if it's a muted path, don't do anything
                     ==
                       `this
                     =/  notif-db-card  (notif-new-msg:core msg-part.db-row.msg our.bowl)

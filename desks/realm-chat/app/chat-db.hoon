@@ -37,6 +37,8 @@
         (create-path:db-lib +.act state bowl)
       %edit-path-metadata
         (edit-path-metadata:db-lib +.act state bowl)
+      %edit-path-pins
+        (edit-path-pins:db-lib +.act state bowl)
       %leave-path 
         (leave-path:db-lib +.act state bowl)
       :: messages-table pokes

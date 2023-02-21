@@ -64,7 +64,7 @@
 ::  poke actions
 ::
 ++  create-path
-::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da]
+::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~]
   |=  [row=path-row:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =.  paths-table.state  (~(put by paths-table.state) path.row row)
@@ -119,6 +119,28 @@
 
   =/  row=path-row:sur   (~(got by paths-table.state) path)
   =.  metadata.row       metadata
+  =.  updated-at.row     now.bowl
+  =.  paths-table.state  (~(put by paths-table.state) path row)
+
+  =/  thechange  db-change+!>(~[[%upd-paths-row row]])
+  =/  gives  :~
+    [%give %fact [/db (weld /db/path path) ~] thechange]
+  ==
+  [gives state]
+::
+++  edit-path-pins
+::  :chat-db &db-action [%edit-path-pins /a/path/to/a/chat ~]
+  |=  [[=path =pins:sur] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  original-peers-list   (~(got by peers-table.state) path)
+  :: edit-path-pins pokes are only valid from the ship which is
+  :: the %host of the path
+  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
+  ?>  =(patp.host-peer-row src.bowl)
+
+  =/  row=path-row:sur   (~(got by paths-table.state) path)
+  =.  pins.row           pins
   =.  updated-at.row     now.bowl
   =.  paths-table.state  (~(put by paths-table.state) path row)
 
@@ -440,6 +462,7 @@
           type+s+type.path-row
           created-at+(time created-at.path-row)
           updated-at+(time updated-at.path-row)
+          pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
       ==
     ++  messages-row
       |=  [k=uniq-id:sur =msg-part:sur]

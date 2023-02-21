@@ -2,8 +2,9 @@
 ::  realm-chat [realm]
 ::
 |%
-+$  card  card:agent:gall
-+$  pins  (set path)
++$  card   card:agent:gall
++$  pins   (set path)
++$  mutes  (set path)
 +$  versioned-state
   $%  state-0
   ==
@@ -13,7 +14,7 @@
       =uuid:notify           :: (sham @p)
       =devices:notify        :: (map device-id player-id)
       push-enabled=?
-      mutes=(list path)      :: the list of muted chat `path`s
+      =mutes                 :: the list of muted chat `path`s
       =pins                  :: the set of pinned chat `path`s
   ==
 ::
@@ -22,6 +23,7 @@
       :: interface to %chat-db
       [%create-chat =create-chat-data]
       [%edit-chat =path metadata=(map cord cord)]
+      [%pin-message =path =msg-id:db pin=?]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
       [%send-message =path fragments=(list minimal-fragment:db)]

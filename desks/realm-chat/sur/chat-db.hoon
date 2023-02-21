@@ -20,12 +20,14 @@
 ::
 ::  database types
 ::
++$  pins  (set msg-id)
 +$  path-row
   $:  =path
       metadata=(map cord cord)
       type=@tas     :: not officially specified, up to user to interpret for maybe %dm vs %group or %chat vs %board or whatever
       created-at=time
       updated-at=time  :: updated when %edit-path-medatata is hit
+      =pins
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -93,6 +95,7 @@
   $%  
       [%create-path =path-row]
       [%edit-path-metadata =path metadata=(map cord cord)]
+      [%edit-path-pins =path =pins]
       [%leave-path =path]
       [%insert =insert-message-action]
       [%edit =edit-message-action]
@@ -122,5 +125,4 @@
       [%peers =peer-row]
   ==
 +$  db-change  (list db-change-type)
-::
 --
