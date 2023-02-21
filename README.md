@@ -11,6 +11,10 @@ We use yarn workspaces to build all packages for Realm.
 ```zsh
 # Install dependencies and build all packages
 yarn
+# Note: you may have to rebuild sqlite3
+cd app
+./node_modules/.bin/electron-rebuild
+cd ..
 # Start the app
 yarn start
 ```

@@ -253,7 +253,7 @@ export const Reactions = (props: ReactionProps) => {
             setIsReacting(!isReacting);
           }}
         >
-          <Icon size={18} opacity={0.5} name="Plus" pointerEvents="none" />
+          <Icon size={18} opacity={0.5} name="Reaction" pointerEvents="none" />
         </ReactionButton>
         <AnimatePresence>
           {isReacting && anchorPoint && (

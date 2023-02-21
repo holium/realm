@@ -8,6 +8,7 @@ export const Input = styled(motion.input)`
   pointer-events: all;
   flex: 1;
   height: inherit;
+  padding: 0 6px;
   appearance: none;
   outline: none;
   border: 1px transparent;
@@ -23,6 +24,7 @@ export const TextArea = styled(motion.textarea)`
   width: 100%;
   pointer-events: all;
   appearance: none;
+  height: inherit;
   outline: none;
   border: 1px transparent;
   &::placeholder {

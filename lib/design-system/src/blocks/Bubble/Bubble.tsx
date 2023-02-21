@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { Flex, Text, BoxProps } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
@@ -11,7 +10,7 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
-type TemplateProps = {
+export type BubbleProps = {
   author: string;
   authorColor?: string;
   sentAt: string;
@@ -20,9 +19,10 @@ type TemplateProps = {
   reactions?: FragmentReactionType[];
   onReaction: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
+  onLoaded?: () => void;
 } & BoxProps;
 
-export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
+export const Bubble = (props: BubbleProps) => {
   const {
     id,
     author,
@@ -31,6 +31,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
     authorColor,
     message,
     reactions = [],
+    onLoaded,
     onReaction,
     // onReplyClick = () => {},
   } = props;
@@ -41,6 +42,7 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
     <Flex
       key={id}
       display="inline-flex"
+      mx="1px"
       justifyContent={our ? 'flex-end' : 'flex-start'}
     >
       <BubbleStyle id={id} className={our ? 'bubble-our' : ''}>
@@ -65,10 +67,10 @@ export const Bubble: FC<TemplateProps> = (props: TemplateProps) => {
             // TODO somehow pass in the onReplyClick function
 
             return (
-              <>
+              <span key={`${id}-index-${index}`}>
                 {lineBreak && <br />}
-                {renderFragment(fragment, index, author)}
-              </>
+                {renderFragment(fragment, index, author, onLoaded)}
+              </span>
             );
           })}
         </FragmentBlock>

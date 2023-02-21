@@ -43,6 +43,7 @@ export const ConfirmDialog: FC<ConfirmDialogProps> = observer(
         {props.innerContent}
         <Flex justifyContent="space-between">
           <TextButton
+            data-close-tray="false"
             tabIndex={2}
             showBackground
             highlightColor={theme.currentTheme.accentColor}
@@ -56,6 +57,7 @@ export const ConfirmDialog: FC<ConfirmDialogProps> = observer(
             {props.cancelText}
           </TextButton>
           <TextButton
+            data-close-tray="false"
             tabIndex={1}
             highlightColor="#EC415A"
             showBackground

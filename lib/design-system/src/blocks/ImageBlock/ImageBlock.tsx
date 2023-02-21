@@ -9,7 +9,7 @@ type ImageBlockProps = {
 } & BlockProps;
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
-  const { image, by, variant, width = 'inherit', ...rest } = props;
+  const { image, by, variant, width = 'inherit', onLoaded, ...rest } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
@@ -20,8 +20,12 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         draggable={false}
         onError={() => {
           // TODO: handle error using placeholder image
+          onLoaded && onLoaded();
         }}
-        onLoad={() => setImgLoaded(true)}
+        onLoad={() => {
+          onLoaded && onLoaded();
+          setImgLoaded(true);
+        }}
       />
       <Flex className="block-footer">
         <Flex></Flex>

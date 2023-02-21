@@ -1,4 +1,5 @@
 export { Bubble } from './Bubble/Bubble';
+export * from './Bubble/Bubble.types';
 export * from './Bubble/Bubble.styles';
 export { Reactions } from './Bubble/Reaction';
 export { Block, BlockStyle } from './Block/Block';
@@ -8,3 +9,4 @@ export * from './LinkBlock/LinkBlock';
 export * from './MediaBlock/MediaBlock';
 export * from './MemeBlock/MemeBlock';
 export * from './TextBlock/TextBlock';
+export * from './ChatInput/ChatInput';

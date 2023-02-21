@@ -1,10 +1,10 @@
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
-import { MessagesTrayApp } from 'renderer/apps/Messages';
 import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { CourierApp } from 'renderer/apps/Courier/app';
 
 export interface ViewRenderers {
   [key: string]: {
@@ -78,7 +78,7 @@ export const trayAppRenderers: ViewRenderers = {
   },
   'messages-tray': {
     dimensions: defaultTrayDimensions['messages-tray'],
-    component: () => <MessagesTrayApp />,
+    component: () => <CourierApp />,
     onOpen: (evt: any) => {
       const position = 'top-left';
       const appDims = defaultTrayDimensions['messages-tray'];

@@ -53,7 +53,6 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   box-sizing: content-box;
   align-items: flex-start;
   padding: 6px;
-  gap: 6px;
   background: var(--rlm-card-color);
   color: var(--rlm-text-color) !important;
   ${Text.Custom} {
@@ -73,13 +72,13 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
     transition: var(--transition);
     opacity: 0;
   }
-
+  /* 
   &:hover {
     .block-author {
       transition: var(--transition);
       opacity: 0.5;
     }
-  }
+  } */
   ${(props) =>
     (props.variant === 'overlay' || props.variant === 'content') &&
     css`
@@ -132,6 +131,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
 export type BlockProps = {
   id: string;
   draggable?: boolean;
+  onLoaded?: () => void;
 } & StyleProps;
 
 type BlockElProps = BlockProps & { children?: React.ReactNode };

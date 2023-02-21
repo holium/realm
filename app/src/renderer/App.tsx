@@ -62,6 +62,7 @@ const AppPresenter = () => {
                   {shellMemo}
                   {contextMenuMemo}
                   <div id="portal-root" />
+                  <div id="menu-root" />
                 </ErrorBoundary>
               </ContextMenuProvider>
             </SelectionProvider>

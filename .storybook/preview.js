@@ -5,6 +5,7 @@ import dark from '!!style-loader?injectType=lazyStyleTag!css-loader!./mock-theme
 export const decorators = [cssVariablesTheme];
 
 export const parameters = {
+  layout: 'fullscreen',
   actions: { argTypesRegex: '^on[A-Z].*' },
   controls: {
     matchers: {

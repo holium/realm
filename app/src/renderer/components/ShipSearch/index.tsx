@@ -51,13 +51,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
     const { mode, dockColor, windowColor } = theme.currentTheme;
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
-      // const contactsList = ship ? friends.contacts : [];
-      return searchPatpOrNickname(
-        search,
-        friends.contacts,
-        selected,
-        ship?.patp
-      );
+      return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
     }, [friends.all, search, selected, ship]);
 
     const isOpen = useMemo(
@@ -105,7 +99,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 customBg={dockColor}
                 size={24}
                 canFocus
-                isDisabled={selected.size > 0}
+                // isDisabled={selected.size > 0}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   onSelected([contact[0], nickname]);

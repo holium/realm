@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, safeStorage } from 'electron';
+import { ipcMain, ipcRenderer, IpcRendererEvent, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -128,10 +128,8 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
     },
 
-    async preInstallSysCheck() {
-      return await ipcRenderer.invoke('realm.onboarding.pre-install-syscheck');
-    },
-
+    preInstallSysCheck: () =>
+      ipcRenderer.invoke('realm.onboarding.pre-install-syscheck'),
     async prepareCheckout(billingPeriod: string) {
       return await ipcRenderer.invoke(
         'realm.onboarding.prepareCheckout',
@@ -170,19 +168,16 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke('realm.onboarding.selectPlanet', patp);
     },
 
-    async getProfile() {
-      return await ipcRenderer.invoke('realm.onboarding.getProfile');
+    getProfile() {
+      return ipcRenderer.invoke('realm.onboarding.getProfile');
     },
 
-    async setProfile(profileData: {
+    setProfile(profileData: {
       nickname: string;
       color: string;
       avatar: string | null;
     }) {
-      return await ipcRenderer.invoke(
-        'realm.onboarding.setProfile',
-        profileData
-      );
+      return ipcRenderer.invoke('realm.onboarding.setProfile', profileData);
     },
 
     async setPassword(password: string) {
@@ -212,6 +207,7 @@ export class OnboardingService extends BaseService {
       process.env.NODE_ENV === 'production'
         ? 'pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K'
         : 'pk_test_51LJKtvHhoM3uGGuYXzsCKctrpF6Lp9WAqRYEZbBQHxoccDHQLyrYSPt4bUOK6BbSkV5ogtYERCKVi7IAKmeXmYgU00Wv7Q9518';
+
     this.db = new Store({
       name: `realm.onboarding`,
       accessPropertiesByDotNotation: true,
@@ -264,12 +260,17 @@ export class OnboardingService extends BaseService {
     cookie: string,
     code: string | undefined = undefined
   ) {
-    if (this.conduit !== undefined) {
-      await this.closeConduit();
+    try {
+      if (this.conduit !== undefined) {
+        await this.closeConduit();
+      }
+      this.conduit = new Conduit();
+      await this.conduit.init(url, patp.substring(1), cookie!, code);
+
+      return this.conduit;
+    } catch (e) {
+      throw new Error('Failed to connect to ship.');
     }
-    this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie!, code);
-    return this.conduit;
   }
 
   reset() {
@@ -383,7 +384,6 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
-
     const success = await this.core.holiumClient.resendVerificationCode(
       auth.accountId
     );
@@ -431,11 +431,15 @@ export class OnboardingService extends BaseService {
     return { invalid: !accessCode, accessCode };
   }
 
-  async preInstallSysCheck(_event: any) {
+  async preInstallSysCheck(_event: IpcRendererEvent) {
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
+    console.log('preInstallSysCheck', url, patp, cookie, code);
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-    this.state.preInstallSysCheck(tempConduit);
+    console.log('about to check');
+    const isChecked = await this.state.preInstallSysCheck(tempConduit);
+    console.log('isChecked', isChecked);
+    return isChecked;
   }
 
   async prepareCheckout(_event: any, billingPeriod: string) {
@@ -560,6 +564,7 @@ export class OnboardingService extends BaseService {
       const { patp, url, code } = shipData;
       const cookie = await getCookie({ patp, url, code });
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+      const sanitizedCookie = cookie.split('; ')[0];
 
       if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
         return {
@@ -568,9 +573,14 @@ export class OnboardingService extends BaseService {
         };
       }
       // TODO this should be removed.
-      this.core.saveSession({ ship: patp, url, cookie, code });
+      this.core.saveSession({
+        ship: patp,
+        url,
+        cookie: sanitizedCookie,
+        code,
+      });
       this.state.setShip({ patp, url });
-      return { success: true, url, cookie, patp, code: code };
+      return { success: true, url, cookie, patp, code: sanitizedCookie };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       return {
@@ -587,14 +597,24 @@ export class OnboardingService extends BaseService {
   async getProfile(_event: any) {
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
-
+    //
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-    // await this.tempConduit.init(url, patp.substring(1), cookie!);
+    await tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
+    // const ourProfile = await scry(
+    //   `${url}/~/scry/contact-store/contact/${patp}.json`,
+    //   {
+    //     headers: {
+    //       Cookie: cookie!,
+    //     },
+    //   }
+    // );
+    // console.log('ourProfile', ourProfile.data['contact-update'].add.contact);
     const ourProfile = await ContactApi.getContact(tempConduit, patp);
+    // console.log('ourProfile', ourProfile);
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;

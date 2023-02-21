@@ -86,6 +86,15 @@ export type FragmentReactionType = {
   emoji: string; // emoji.unified -> see emoji-picker-react
 };
 
+export type ChatMessageType = {
+  author: string;
+  authorColor?: string;
+  sentAt: string;
+  our?: boolean;
+  message?: FragmentType[];
+  reactions?: FragmentReactionType[];
+};
+
 export const BLOCK_TYPES = [
   'image',
   'video',
@@ -98,9 +107,30 @@ export const TEXT_TYPES = [
   'plain',
   'bold',
   'italics',
+  'strike',
   'bold-italics',
   'bold-strike',
   'bold-italics-strike',
   'inline-code',
   'ship',
 ];
+
+export type FragmentKeyTypes =
+  | 'plain'
+  | 'bold'
+  | 'italics'
+  | 'strike'
+  | 'bold-italics'
+  | 'bold-strike'
+  | 'bold-italics-strike'
+  | 'inline-code'
+  | 'ship'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'link'
+  | 'blockquote'
+  | 'code'
+  | 'tab'
+  | 'reply'
+  | 'break';

@@ -153,7 +153,7 @@ const walletAppDefault = {
 };
 
 export const trayStore = TrayAppStore.create({
-  activeApp: null,
+  activeApp: 'messages-tray',
   // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,

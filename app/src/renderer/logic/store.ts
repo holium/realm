@@ -237,6 +237,7 @@ OSActions.onBoot((_event: any, response: any) => {
     }
   }
   if (response.ship) {
+    window.ship = response.ship.patp;
     servicesStore.setShip(ShipModel.create(response.ship));
     const shipColor = response.ship.color;
     if (shipColor) DesktopActions.setMouseColor(shipColor);

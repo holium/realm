@@ -107,9 +107,11 @@ const Base = styled(motion.button)<ButtonProps>`
   &:hover:not([disabled]) {
     cursor: pointer;
     transition: var(--transition);
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
     transition: var(--transition);
+    filter: brightness(0.95);
   }
   &:disabled {
     cursor: not-allowed !important;
@@ -125,10 +127,10 @@ const Primary = styled(Base)<ButtonProps>`
   background-color: var(--rlm-accent-color);
   color: #ffffff;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('accent'))};
+    background-color: var(--rlm-accent-color);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.075, getVar('accent'))};
+    background-color: var(--rlm-accent-color);
   }
   svg {
     fill: #ffffff;
@@ -137,12 +139,15 @@ const Primary = styled(Base)<ButtonProps>`
 
 const Secondary = styled(Base)<ButtonProps>`
   color: var(--rlm-text-color);
-  background-color: ${() => darken(0.025, getVar('window'))};
+  background-color: var(--rlm-window-color);
+  filter: brightness(0.975);
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('window'))};
+    background-color: var(--rlm-window-color);
+    filter: brightness(0.965);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.075, getVar('window'))};
+    background-color: var(--rlm-window-color);
+    filter: brightness(0.95);
   }
 `;
 
@@ -177,6 +182,8 @@ const Transparent = styled(Base)<ButtonProps>`
 type TextButtonProps = ButtonProps & { showOnHover?: boolean };
 
 const TextButton = styled(Base)<TextButtonProps>`
+  font-weight: 500;
+  padding: 4px 8px;
   color: ${(props) =>
     props.color
       ? `var(--rlm-${props.color}-color)`
@@ -234,6 +241,10 @@ const IconButton = styled(Base)<IconButtonProps>`
       props.customColor ? props.customColor : 'var(--rlm-icon-color)'};
   }
 `;
+
+// IconButton.defaultProps = {
+//   size: 24
+// }
 
 export const Button = {
   Base,

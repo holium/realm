@@ -102,6 +102,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     width: 100vw;
     margin: 0;
     overflow: hidden; 
+    position: relative;
   }
 
   li {
@@ -116,12 +117,12 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     padding-inline-start: 0px;
   }
 
-  a {
+  /* a {
     text-decoration: none;
     height: fit-content;
     width: fit-content;
     margin: 10px;
-  }
+  } */
 
   fieldset {
     border: 0;

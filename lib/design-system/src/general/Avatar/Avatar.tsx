@@ -78,6 +78,9 @@ type AvatarProps = {
   isLogin?: boolean;
   clickable?: boolean;
   opacity?: number;
+  layoutId?: string;
+  layout?: any;
+  transition?: any;
   borderRadiusOverride?: string;
 } & BoxProps;
 
@@ -88,6 +91,9 @@ export const Avatar = ({
   sigilColor = ['#000000', '#ffffff'],
   simple,
   clickable,
+  layoutId,
+  layout,
+  transition,
   ...rest
 }: AvatarProps) => {
   const [isValid, setIsValid] = useState(false);
@@ -101,7 +107,7 @@ export const Avatar = ({
   }, []);
 
   let innerContent = null;
-  if (avatar && isValid) {
+  if (avatar) {
     innerContent = (
       <AvatarInner
         src={avatar}
@@ -140,6 +146,9 @@ export const Avatar = ({
 
   return (
     <AvatarWrapper
+      layoutId={layoutId}
+      layout={layout}
+      transition={transition}
       borderRadiusOverride={rest.borderRadiusOverride}
       clickable={clickable}
       sigilSize={size}
