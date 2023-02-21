@@ -91,7 +91,7 @@ export const ContextMenu = () => {
                 disabled={option.disabled}
                 icon={option.icon}
                 labelColor={option.labelColor || contextualColors.textColor}
-                iconColor={option.iconColor || contextualColors.textColor}
+                iconColor={option.iconColor}
                 onClick={(e: any) => {
                   if (option.disabled) return;
                   option.onClick(e);

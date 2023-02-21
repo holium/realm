@@ -1,19 +1,15 @@
 import { useMemo, useEffect } from 'react';
-import { isValidPatp } from 'urbit-ob';
 import {
   Row,
-  Avatar,
   Flex,
   Text,
   timelineDate,
   MenuItemProps,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
-import { GroupSigil } from './GroupSigil';
 import { ChatAvatar } from './ChatAvatar';
 
 type ChatRowProps = {
@@ -135,7 +131,13 @@ export const ChatRow = ({
             }}
           >
             {title && type && path && peers && (
-              <ChatAvatar title={title} type={type} path={path} peers={peers} />
+              <ChatAvatar
+                title={title}
+                type={type}
+                path={path}
+                peers={peers}
+                image={metadata?.image}
+              />
             )}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">

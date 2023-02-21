@@ -96,7 +96,7 @@ export const Avatar = ({
   transition,
   ...rest
 }: AvatarProps) => {
-  const [isValid, setIsValid] = useState(false);
+  const [_isValid, setIsValid] = useState(false);
 
   useEffect(() => {
     if (avatar) {

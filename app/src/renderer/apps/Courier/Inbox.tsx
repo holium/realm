@@ -129,7 +129,7 @@ export const InboxPresenter = () => {
           filter={searchFilter}
           rowRenderer={(chat, index) => {
             let title: string = chat.metadata.title;
-            let timestamp = chat.timestamp;
+            let timestamp = chat.createdAt;
             if (!chat.lastMessage) {
               timestamp = parseInt(chat.metadata.timestamp);
             }

@@ -137,7 +137,6 @@ export const TitlebarByType = ({
     CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
-    // console.log('dialogConfig', dialogConfig, onClose);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
