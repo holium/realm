@@ -10,18 +10,20 @@
   +:(del:notifon:sur tbl id)
 ::
 ++  mark-row-unread
-  |=  [r=notif-row:sur]
-  =.  read.r  %.n
+  |=  [r=notif-row:sur t=@da]
+  =.  read.r        %.n
+  =.  updated-at.r  t
   r
 ::
 ++  mark-row-read
-  |=  [r=notif-row:sur =bowl:gall]
-  =.  read-at.r  now.bowl
-  =.  read.r     %.y
+  |=  [r=notif-row:sur now=@da]
+  =.  read-at.r     now
+  =.  updated-at.r  now
+  =.  read.r        %.y
   r
 ::
 ++  mark-app-read
-  |=  [tbl=notifs-table:sur app=@tas =bowl:gall]
+  |=  [tbl=notifs-table:sur app=@tas now=@da]
   =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] =(app app.v)))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
@@ -29,10 +31,10 @@
   |-
   ?:  =(stop index)
     [tbl ids]
-  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) bowl)))
+  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) now)))
 ::
 ++  mark-path-read
-  |=  [tbl=notifs-table:sur app=@tas =path =bowl:gall]
+  |=  [tbl=notifs-table:sur app=@tas =path now=@da]
   =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
@@ -40,7 +42,7 @@
   |-
   ?:  =(stop index)
     [tbl ids]
-  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) bowl)))
+  $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (mark-row-read +:(snag index kvs) now)))
 ::
 ::
 ::  poke actions
@@ -61,6 +63,7 @@
     link.act
     metadata.act
     now.bowl
+    now.bowl
     *@da
     %.n
     *@da
@@ -78,7 +81,7 @@
 ::  :notif-db &ndb-poke [%read-id 0]
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  row  (mark-row-read (got:notifon:sur notifs-table.state id) bowl)
+  =/  row  (mark-row-read (got:notifon:sur notifs-table.state id) now.bowl)
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
   =/  thechange  db-change+!>((limo [[%update-row row] ~]))
   =/  gives  :~
@@ -91,7 +94,7 @@
   |=  [app=@tas state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ::  mark-result is like: [notifs-table ids]
-  =/  mark-result  (mark-app-read notifs-table.state app bowl)
+  =/  mark-result  (mark-app-read notifs-table.state app now.bowl)
   =.  notifs-table.state  -:mark-result
   =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
@@ -104,7 +107,7 @@
   |=  [act=[app=@tas =path] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ::  mark-result is like: [notifs-table ids]
-  =/  mark-result  (mark-path-read notifs-table.state app.act path.act bowl)
+  =/  mark-result  (mark-path-read notifs-table.state app.act path.act now.bowl)
   =.  notifs-table.state  -:mark-result
   =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
@@ -116,7 +119,8 @@
 ::  :notif-db &ndb-poke [%read-all %.y]
   |=  [flag=? state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r bowl) (mark-row-unread r))))
+  =/  t  now.bowl
+  =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r t) (mark-row-unread r t))))
   =/  thechange  db-change+!>((limo [[%update-all flag] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
@@ -129,6 +133,7 @@
   ^-  (quip card state-0)
   =/  row  (got:notifon:sur notifs-table.state id)
   =.  dismissed.row     %.y
+  =.  updated-at.row    now.bowl
   =.  dismissed-at.row  now.bowl
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
   =/  thechange  db-change+!>((limo [[%update-row row] ~]))
@@ -151,6 +156,7 @@
   =.  buttons.row    buttons.create-action.act
   =.  link.row       link.create-action.act
   =.  metadata.row   metadata.create-action.act
+  =.  updated-at.row      now.bowl
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id.act row)
   =/  thechange  db-change+!>([[%update-row row] ~])
   =/  gives  :~
@@ -261,6 +267,7 @@
           link+s+link.notif-row
           metadata+(metadata-to-json metadata.notif-row)
           created-at+(time created-at.notif-row)
+          updated-at+(time updated-at.notif-row)
           read-at+(time read-at.notif-row)
           read+b+read.notif-row
           dismissed-at+(time dismissed-at.notif-row)

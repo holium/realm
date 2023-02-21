@@ -27,6 +27,7 @@
       link=@t      :: the place to redirect to when user clicks on the notification
       =metadata    :: notif-db doesn't care about this either, but could be used to implement "archival" or some other concepts around grouping notifications
       created-at=time
+      updated-at=time
       read-at=time
       read=?       :: %.y if the user has read the notification, automatically set to %.n to start
       dismissed-at=time

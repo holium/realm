@@ -25,6 +25,8 @@
     ==
   ::
   ++  on-poke
+    :: for access-control, we allow pokes to create notifications from
+    :: anywhere, but updating/deleting them can only come from ourselves
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?>  ?=(%ndb-poke mark)
@@ -34,18 +36,25 @@
       %create
         (create:db-lib +.act state bowl)
       %read-id
+        ?>  =(src.bowl our.bowl)
         (read-id:db-lib +.act state bowl)
       %read-app
+        ?>  =(src.bowl our.bowl)
         (read-app:db-lib +.act state bowl)
       %read-path
+        ?>  =(src.bowl our.bowl)
         (read-path:db-lib +.act state bowl)
       %read-all
+        ?>  =(src.bowl our.bowl)
         (read-all:db-lib +.act state bowl)
       %dismiss-id
+        ?>  =(src.bowl our.bowl)
         (dismiss-id:db-lib +.act state bowl)
       %update
+        ?>  =(src.bowl our.bowl)
         (update:db-lib +.act state bowl)
       %delete
+        ?>  =(src.bowl our.bowl)
         (delete:db-lib +.act state bowl)
     ==
     [cards this]
@@ -110,10 +119,19 @@
         ``rows+!>((rows-by-type:core theapp thepath thetype))
     ::
     :: notifs since index
-      [%x %db %since @ ~]
-        =/  index  (slav %ud i.t.t.t.path)
+      [%x %db %since-index @ ~]
+        =/  index=@ud  (ni:dejs:format n+i.t.t.t.path)
         =/  new-rows  
             (turn (tap:notifon:sur (lot:notifon:sur notifs-table.state ~ `index)) val-r:core)
+        ``rows+!>(new-rows)
+    ::
+    :: notifs since index
+      [%x %db %since-ms @ ~]
+        =/  ms=@da  (di:dejs:format n+i.t.t.t.path)
+        =/  new-rows  
+          %+  turn
+            (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] |((gth created-at.v ms) (gth updated-at.v ms))))
+          val-r:core
         ``rows+!>(new-rows)
     ==
   :: notif-db does not subscribe to anything.
