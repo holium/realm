@@ -240,9 +240,9 @@ export class ChatService extends BaseService {
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
-      //  const delPathsRow = dbChange as DelPeersRow;
-      //  this.deletePath(delPathsRow.row);
-      //  this.sendChatUpdate('path-deleted', delPathsRow.row);
+      const delPathsRow = dbChange as DelPeersRow;
+      this.deletePath(delPathsRow.path);
+      this.sendChatUpdate('peer-deleted', delPathsRow);
     }
   }
 
@@ -442,8 +442,8 @@ export class ChatService extends BaseService {
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path LIKE '%realm-chat%'
       ORDER BY
-        (chat_with_messages.created_at IS NULL) DESC,
-        chat_with_messages.created_at DESC;
+          chat_with_messages.created_at DESC,
+          json_extract(json(metadata), '$.timestamp') DESC;
     `);
     const result = query.all(`~${this.core.conduit?.ship}`);
 
