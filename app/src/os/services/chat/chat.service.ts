@@ -13,7 +13,6 @@ import {
   ChatDbOps,
   AddRow,
   DelPathsRow,
-  DelPeersRow,
 } from './chat.types';
 
 type ChatUpdateType =
