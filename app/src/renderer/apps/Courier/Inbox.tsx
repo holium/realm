@@ -6,6 +6,7 @@ import {
   TextInput,
   WindowedList,
   Box,
+  Text,
 } from '@holium/design-system';
 import { useTrayApps } from '../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
@@ -29,6 +30,17 @@ export const InboxPresenter = () => {
         console.log(err);
       });
   }, []);
+
+  // TODO move this to a store
+  // useEffect(() => {
+  //   ChatDBActions.onDbChange((_evt, type, data) => {
+  //     if (type === 'path-deleted') {
+  //       const remIdx = chatList.findIndex((c) => c.path === data);
+  //       const prunedList = chatList.splice(remIdx, 1);
+  //       setChatList(prunedList);
+  //     }
+  //   });
+  // }, [chatList]);
 
   // const lastTimeSent = chatList[0]?.timestamp;
 
@@ -81,48 +93,74 @@ export const InboxPresenter = () => {
           <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-      <WindowedList
-        width={dimensions.width - 26}
-        height={544}
-        rowHeight={52}
-        data={chatList}
-        filter={searchFilter}
-        rowRenderer={(chat, index) => {
-          let title: string = chat.metadata.title;
-          let timestamp = chat.timestamp;
-          if (chat.peers && chat.peers.length === 1) {
-            title = chat.peers[0];
-          }
-          if (!chat.lastMessage) {
-            timestamp = parseInt(chat.metadata.timestamp);
-          }
-          return (
-            <Box height={52} layoutId={`chat-${chat.path}-container`}>
-              <ChatRow
-                key={`dm-${index}-${timestamp}`}
-                path={chat.path}
-                title={title}
-                peers={chat.peers}
-                lastMessage={chat.lastMessage && chat.lastMessage[0]}
-                type={chat.type}
-                timestamp={timestamp}
-                metadata={chat.metadata}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  console.log('chat clicked', chat, timestamp);
-                  setChat(
-                    chat.path,
-                    title,
-                    chat.type,
-                    chat.peers,
-                    chat.metadata
-                  );
-                }}
-              />
-            </Box>
-          );
-        }}
-      />
+      {chatList.length === 0 ? (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={8}
+        >
+          <Text.Custom
+            width={200}
+            fontSize={3}
+            fontWeight={500}
+            textAlign="center"
+            opacity={0.5}
+          >
+            No chats yet.
+          </Text.Custom>
+          <Text.Custom
+            width={200}
+            fontSize={3}
+            textAlign="center"
+            opacity={0.3}
+          >
+            Click the <b>+</b> to start.
+          </Text.Custom>
+        </Flex>
+      ) : (
+        <WindowedList
+          key={`inbox-${chatList.length}`}
+          width={dimensions.width - 26}
+          height={544}
+          rowHeight={52}
+          data={chatList}
+          filter={searchFilter}
+          rowRenderer={(chat, index) => {
+            let title: string = chat.metadata.title;
+            let timestamp = chat.timestamp;
+            if (!chat.lastMessage) {
+              timestamp = parseInt(chat.metadata.timestamp);
+            }
+            return (
+              <Box height={52} layoutId={`chat-${chat.path}-container`}>
+                <ChatRow
+                  key={`dm-${index}-${timestamp}`}
+                  path={chat.path}
+                  title={title}
+                  peers={chat.peers}
+                  lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                  type={chat.type}
+                  timestamp={timestamp}
+                  metadata={chat.metadata}
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                    console.log('chat clicked', chat, timestamp);
+                    setChat(
+                      chat.path,
+                      title,
+                      chat.type,
+                      chat.peers,
+                      chat.metadata
+                    );
+                  }}
+                />
+              </Box>
+            );
+          }}
+        />
+      )}
     </Flex>
   );
 };

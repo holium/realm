@@ -8,6 +8,7 @@ type ChatLogHeaderProps = {
   avatar: React.ReactNode;
   onBack: () => void;
   hasMenu: boolean;
+  rightAction?: React.ReactNode;
 };
 
 export const ChatLogHeader = ({
@@ -16,6 +17,7 @@ export const ChatLogHeader = ({
   subtitle,
   avatar,
   onBack,
+  rightAction,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
   const { setSubroute } = useChatStore();
@@ -85,6 +87,7 @@ export const ChatLogHeader = ({
         </Flex>
       </Flex>
       <Flex>
+        {rightAction}
         {hasMenu && (
           <Menu
             id={`chat-${path}-menu`}

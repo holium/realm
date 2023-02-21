@@ -14,6 +14,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { GroupSigil } from './GroupSigil';
+import { ChatAvatar } from './ChatAvatar';
 
 type ChatRowProps = {
   path: string;
@@ -36,31 +37,8 @@ export const ChatRow = ({
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { friends } = useServices();
   const { setSubroute, setChat } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
-
-  let avatarElement = null;
-  if (type === 'dm' && isValidPatp(title)) {
-    const {
-      patp,
-      avatar,
-      color: sigilColor,
-    } = friends.getContactAvatarMetadata(title);
-    avatarElement = (
-      <Avatar
-        patp={patp}
-        avatar={avatar}
-        size={28}
-        sigilColor={[sigilColor, '#ffffff']}
-        simple
-      />
-    );
-  } else if (type === 'group') {
-    avatarElement = <GroupSigil path={path} patps={peers} />;
-  } else {
-    // TODO space type
-  }
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
 
@@ -156,7 +134,9 @@ export const ChatRow = ({
               duration: 0.1,
             }}
           >
-            {avatarElement}
+            {title && type && path && peers && (
+              <ChatAvatar title={title} type={type} path={path} peers={peers} />
+            )}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom

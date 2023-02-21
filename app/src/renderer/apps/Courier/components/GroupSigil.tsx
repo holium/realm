@@ -6,11 +6,15 @@ import { useServices } from 'renderer/logic/store';
 
 interface GroupSigilProps {
   path: string;
+  size: number;
   patps: Patp[];
 }
 
-export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
-  const { path, patps } = props;
+export const GroupSigil: FC<GroupSigilProps> = ({
+  path,
+  patps,
+  size = 36,
+}: GroupSigilProps) => {
   const { friends } = useServices();
 
   const len = patps.length;
@@ -26,7 +30,7 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
         simple
         clickable={false}
         borderRadiusOverride="2px"
-        size={16}
+        size={size / 2 - 2}
         avatar={avatar}
         patp={patp}
         sigilColor={[sigilColor || '#000000', 'white']}
@@ -52,8 +56,8 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   return (
     <Flex
       gap={2}
-      height={36}
-      width={36}
+      height={size}
+      width={size}
       alignItems="center"
       justifyContent="center"
       flexDirection="column"

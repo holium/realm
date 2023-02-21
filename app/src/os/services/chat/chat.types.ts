@@ -28,11 +28,18 @@ export type DbChangeType =
   | 'del-peers-row'
   | 'del-paths-row'
   | 'del-messages-row'
-  | 'add-row';
+  | 'add-row'
+  | 'update';
 
 export type AddRow = {
   table: ChatTables;
   type: 'add-row';
+  row: PathsRow | MessagesRow | PeersRow;
+};
+
+export type UpdateRow = {
+  table: ChatTables;
+  type: 'update';
   row: PathsRow | MessagesRow | PeersRow;
 };
 
@@ -52,7 +59,12 @@ export type DelMessagesRow = {
   id: string;
 };
 
-export type ChatDbOps = AddRow | DelPeersRow | DelPathsRow | DelMessagesRow;
+export type ChatDbOps =
+  | AddRow
+  | DelPeersRow
+  | DelPathsRow
+  | DelMessagesRow
+  | UpdateRow;
 
 export type ChatDbChangeReactions =
   | AddRow[]

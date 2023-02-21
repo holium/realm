@@ -17,6 +17,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { GroupSigil } from '../components/GroupSigil';
+import { ChatAvatar } from '../components/ChatAvatar';
 
 export const DMLogPresenter = () => {
   const { dimensions } = useTrayApps();
@@ -25,42 +26,10 @@ export const DMLogPresenter = () => {
   const { selectedPath, title, type, peers, metadata, setSubroute } =
     useChatStore();
 
-  console.log('selectedPath', selectedPath);
-
   const { color: sigilColor } = useMemo(
     () => friends.getContactAvatarMetadata(ship!.patp),
     []
   );
-
-  console.log('sigilColor', sigilColor);
-
-  let avatarElement = null;
-  if (type === 'dm' && isValidPatp(title)) {
-    const {
-      patp,
-      avatar,
-      color: sigilColor,
-    } = title
-      ? friends.getContactAvatarMetadata(title)
-      : { patp: title!, color: '#000', avatar: '' };
-    avatarElement = (
-      <Avatar
-        patp={patp}
-        avatar={avatar}
-        size={28}
-        sigilColor={[sigilColor, '#ffffff']}
-        simple
-      />
-    );
-  } else if (type === 'group') {
-    avatarElement = (
-      <GroupSigil path={selectedPath!} patps={peers as string[]} />
-    );
-  } else {
-    // TODO space type
-  }
-
-  console.log('avatarElement', avatarElement);
 
   useEffect(() => {
     if (!selectedPath) return;
@@ -81,7 +50,6 @@ export const DMLogPresenter = () => {
     });
   }, [selectedPath, chats]);
 
-  console.log();
   if (!selectedPath) return null;
 
   const onSend = (fragments: any[]) => {
@@ -96,8 +64,6 @@ export const DMLogPresenter = () => {
       })
     );
   };
-
-  console.log(avatarElement);
 
   return (
     <Flex
@@ -115,7 +81,19 @@ export const DMLogPresenter = () => {
         path={selectedPath}
         onBack={() => setSubroute('inbox')}
         hasMenu
-        avatar={avatarElement}
+        avatar={
+          title &&
+          type &&
+          selectedPath &&
+          peers && (
+            <ChatAvatar
+              title={title}
+              type={type}
+              path={selectedPath}
+              peers={peers}
+            />
+          )
+        }
       />
       <Flex
         initial={{ opacity: 0 }}

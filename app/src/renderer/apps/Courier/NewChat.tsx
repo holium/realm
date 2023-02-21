@@ -43,6 +43,8 @@ export const NewChat = () => {
     }
     ChatDBActions.createChat(Array.from(selectedPatp), chatType, {
       title,
+      description: '',
+      image: '',
       creator: ship!.patp,
       timestamp: Date.now().toString(),
     }).then(() => {

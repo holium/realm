@@ -1,9 +1,18 @@
-import { useState } from 'react';
-import { Flex, Avatar, Text, Box, SectionDivider } from '@holium/design-system';
+import { useEffect, useState } from 'react';
+import {
+  Flex,
+  Avatar,
+  Text,
+  Box,
+  SectionDivider,
+  Button,
+} from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { InlineEdit, PersonRow } from 'renderer/components';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { useChatStore } from '../store';
+import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+import { ChatAvatar } from '../components/ChatAvatar';
 
 // type ChatInfoProps = {
 //   path: string;
@@ -17,17 +26,37 @@ import { useChatStore } from '../store';
 export const ChatInfo = () => {
   // const { dimensions } = useTrayApps();
   // const { friends } = useServices();
-  const { selectedPath, title, setSubroute } = useChatStore();
+  const { selectedPath, metadata, type, updateMetadata, title, setSubroute } =
+    useChatStore();
   const { friends, ship, theme } = useServices();
-  const peers = [ship!.patp, '~hosryc-matbel'];
+  const [peers, setPeers] = useState<string[]>([]);
+  const [image, setImage] = useState(metadata?.image || '');
+  // const peers = [ship!.patp, '~hosryc-matbel'];
 
-  const metadata = title
+  const contactMetadata = title
     ? friends.getContactAvatarMetadata(title)
     : { patp: title!, color: '#000', nickname: '', avatar: '' };
+
   const [editTitle, setEditTitle] = useState(
-    metadata.nickname || metadata.patp
+    metadata?.title || contactMetadata.nickname || contactMetadata.patp
   );
-  const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (!selectedPath) return;
+    ChatDBActions.getChatPeers(selectedPath).then((peers) => {
+      setPeers(peers.sort((a: string) => (a === ship!.patp ? -1 : 1)));
+    });
+  }, [selectedPath]);
+
+  const editMetadata = (editedMetadata: any) => {
+    if (!selectedPath) return;
+    editedMetadata = { ...metadata, ...editedMetadata };
+    console.log(selectedPath, editedMetadata);
+    ChatDBActions.editChat(selectedPath, editedMetadata);
+    updateMetadata(editedMetadata);
+  };
+
+  // const [description, setDescription] = useState('');
   if (!selectedPath || !title) return null;
   return (
     <Flex flexDirection="column">
@@ -37,6 +66,21 @@ export const ChatInfo = () => {
         avatar={<div />}
         onBack={() => setSubroute('chat')}
         hasMenu={false}
+        rightAction={
+          <Button.Minimal
+            py={1}
+            disabled={
+              editTitle.length < 1 ||
+              (editTitle === metadata?.title && image === metadata?.image)
+            }
+            id="save-chat-metadata"
+            onClick={() => {
+              editMetadata({ title: editTitle });
+            }}
+          >
+            Save
+          </Button.Minimal>
+        }
       />
       {/* Chat Info */}
       <Flex flexDirection="column" gap={4} pt={3} pb={4}>
@@ -46,13 +90,16 @@ export const ChatInfo = () => {
           gap={12}
           alignItems="center"
         >
-          <Avatar
-            patp={metadata.patp}
-            avatar={metadata.avatar}
-            size={48}
-            sigilColor={[metadata.color, '#ffffff']}
-            simple
-          />
+          {title && type && selectedPath && peers && (
+            <ChatAvatar
+              title={title}
+              type={type}
+              path={selectedPath}
+              peers={peers}
+              size={40}
+              canEdit
+            />
+          )}
           <Flex flexDirection="column">
             <InlineEdit
               fontWeight={500}
@@ -64,7 +111,7 @@ export const ChatInfo = () => {
                 setEditTitle(evt.target.value);
               }}
             />
-            <InlineEdit
+            {/* <InlineEdit
               fontSize={2}
               textAlign="center"
               width={350}
@@ -73,7 +120,7 @@ export const ChatInfo = () => {
               onChange={(evt: any) => {
                 setDescription(evt.target.value);
               }}
-            />
+            /> */}
           </Flex>
         </Flex>
       </Flex>

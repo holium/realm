@@ -7,8 +7,9 @@ create table if not exists messages
     content_data TEXT    not null,
     reply_to     TEXT,
     metadata     text,
-    timestamp    integer not null,
-    sender       text    not null
+    sender       text    not null,
+    updated_at   integer not null,
+    created_at   integer not null
 );
 
 create unique index if not exists messages_path_msg_id_msg_part_id_uindex
@@ -18,7 +19,9 @@ create table if not exists  paths
 (
     path     TEXT not null,
     type     TEXT not null,
-    metadata TEXT
+    metadata TEXT,
+    updated_at   integer not null,
+    created_at   integer not null
 );
 
 create unique index if not exists paths_path_uindex
@@ -26,9 +29,11 @@ create unique index if not exists paths_path_uindex
 
 create table if not exists  peers
 (
-    role TEXT default 'member' not null,
+    path TEXT                  not null,
     ship text                  not null,
-    path TEXT                  not null
+    role TEXT default 'member' not null,
+    updated_at   integer not null,
+    created_at   integer not null
 );
 
 create unique index if not exists peers_path_ship_uindex

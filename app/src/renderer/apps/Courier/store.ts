@@ -6,9 +6,12 @@ type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 const ChatMetadataModel = types.model({
   title: types.string,
   description: types.maybe(types.string),
+  image: types.maybe(types.string),
   creator: types.string,
   timestamp: types.string,
 });
+
+export type ChatMetadata = Instance<typeof ChatMetadataModel>;
 
 const CourierAppModel = types
   .model('CourierAppModel', {
@@ -46,6 +49,10 @@ const CourierAppModel = types
       self.peers = peers as typeof self.peers;
       self.subroute = 'chat';
       self.metadata = ChatMetadataModel.create(metadata);
+    },
+    updateMetadata(update: ChatMetadata) {
+      // todo flow this
+      self.metadata = ChatMetadataModel.create(update);
     },
   }));
 
