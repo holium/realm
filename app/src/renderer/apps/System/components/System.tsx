@@ -32,7 +32,8 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
 `;
 
 const SystemPanelPresenter = () => {
-  const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
+  const { theme, courier, bazaar, bulletin, friends, spaces, desktop } =
+    useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<{
@@ -98,18 +99,13 @@ const SystemPanelPresenter = () => {
       <Text opacity={0.7} fontSize={3} fontWeight={500}>
         INTERFACE
       </Text>
-      <Card p="20px" width="100%" customBg={cardColor} flexDirection={'column'}>
+      <Card p="20px" width="100%" customBg={cardColor}>
         <CheckBox
-          defaultValue=""
-          mr={16}
-          // TODO default value doesnt work
-          // there appears to be no way to set an initial value to the checkbox component
+          title="Isolation Mode"
+          label="Prevents the native OS from causing edge events and notifications."
+          isChecked={desktop.isIsolationMode}
+          onChange={desktop.toggleIsolationMode}
         />
-        <Text>Isolation Mode</Text>
-        <Text>
-          Prevents the native OS from causing edge events and notifications.
-          This is recommended if you run Realm in fullscreen.
-        </Text>
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>

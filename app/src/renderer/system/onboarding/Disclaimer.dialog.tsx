@@ -42,7 +42,7 @@ const DisclaimerDialogPresenter = (props: BaseDialogProps) => {
       <Flex flexDirection="row" justifyContent="flex-start">
         <CheckBox
           label="I agree"
-          isChecked={props.workflowState.disclaimerAccepted}
+          isChecked={Boolean(props.workflowState.disclaimerAccepted)}
           onChange={toggleChecked}
         />
       </Flex>

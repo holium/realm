@@ -1,58 +1,59 @@
-import { RefObject } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { motion } from 'framer-motion';
-import styled from 'styled-components';
+import { renderToString } from 'react-dom/server';
+import { CheckBoxInput } from './CheckBox.styles';
 import { Flex } from '../../general/Flex/Flex';
 import { Text } from '../../general/Text/Text';
 import { Icon } from '../../general/Icon/Icon';
 
-const blankSvgJsxElement = <Icon name="CheckboxBlank" color="icon" />;
-const blankSvgString = renderToStaticMarkup(blankSvgJsxElement);
-const checkedSvgJsxElement = <Icon name="CheckboxChecked" color="accent" />;
-const checkedSvgString = renderToStaticMarkup(checkedSvgJsxElement);
-
-const CheckBoxInput = styled(motion.input)<{ disabled?: boolean }>`
-  width: 24px;
-  height: 24px;
-  background-color: transparent;
-  outline: none;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,${blankSvgString}');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 18px 18px;
-  opacity: ${({ disabled }) => (disabled ? 0.42 : 1)};
-
-  &:checked {
-    background-image: url('data:image/svg+xml;utf8,${checkedSvgString}');
-  }
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
-
 type Props = {
-  label: string;
+  label?: string;
+  title?: string;
+  isChecked?: boolean;
   disabled?: boolean;
   defaultChecked?: boolean;
-  innerRef?: RefObject<HTMLInputElement>;
+  onChange?: () => void;
 };
 
 export const CheckBox = ({
   label,
+  title,
+  isChecked,
   disabled,
   defaultChecked,
-  innerRef,
-}: Props) => (
-  <Flex alignItems="center" gap={4}>
-    <CheckBoxInput
-      type="checkbox"
-      disabled={disabled}
-      defaultChecked={defaultChecked}
-      ref={innerRef}
-    />
-    <Text.Label display="flex" alignItems="center" color={'text'}>
-      {label}
-    </Text.Label>
-  </Flex>
-);
+  onChange,
+}: Props) => {
+  const blankSvgJsxElement = <Icon name="CheckboxBlank" color="text" />;
+  const checkedSvgJsxElement = <Icon name="CheckboxChecked" color="accent" />;
+  const blankSvgString = renderToString(blankSvgJsxElement);
+  const checkedSvgString = renderToString(checkedSvgJsxElement);
+
+  return (
+    <Flex alignItems="center" gap={12}>
+      <CheckBoxInput
+        type="checkbox"
+        checked={isChecked}
+        defaultChecked={defaultChecked}
+        disabled={disabled}
+        blankSvgString={blankSvgString}
+        checkedSvgString={checkedSvgString}
+        onChange={onChange}
+      />
+      <Flex flexDirection="column">
+        {title && (
+          <Text.Body
+            display="flex"
+            alignItems="center"
+            color="text"
+            fontWeight={600}
+          >
+            {title}
+          </Text.Body>
+        )}
+        {label && (
+          <Text.Label display="flex" alignItems="center" color="text">
+            {label}
+          </Text.Label>
+        )}
+      </Flex>
+    </Flex>
+  );
+};

@@ -78,7 +78,6 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
-    kiosk: isProduction,
     acceptFirstMouse: true,
     webPreferences: {
       nodeIntegration: false,
