@@ -26,10 +26,13 @@ export class LocalPeer extends Peer {
     video: false,
   };
   audioContext: AudioContext | null = null;
+  mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   analyser: AnalyserNode | null = null;
-  bufferLength: number = 16;
-  dataArray: Float32Array | null = null;
+  bufferLength: number = 0;
+  dataArray: Uint8Array | null = null;
   currentFrameId: number = 0;
+  min: number = 0;
+  max: number = 0;
 
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
@@ -134,25 +137,31 @@ export class LocalPeer extends Peer {
       });
   }
 
-  draw() {
+  checkSpeaking(timestamp: DOMHighResTimeStamp) {
     if (
       this.analyser === null ||
       this.dataArray === null ||
       this.bufferLength === 0
     ) {
-      console.log('LocalPeer.draw called with invalid internal state');
+      console.log('LocalPeer.checkSpeaking called with invalid internal state');
       return;
     }
-    this.currentFrameId = requestAnimationFrame(this.draw);
+    this.currentFrameId = requestAnimationFrame(this.checkSpeaking.bind(this));
     //window.cancelAnimationFrame(frameId);
-    this.analyser?.getFloatTimeDomainData(this.dataArray);
+    // this.analyser?.getFloatTimeDomainData(this.dataArray);
+    // this.analyser?.getByteTimeDomainData(this.dataArray);
+    this.analyser?.getByteFrequencyData(this.dataArray);
     let total = 0;
     for (let i = 0; i < this.bufferLength; i++) {
       // let v = dataArray[i] / 128.0;
       total += this.dataArray[i];
     }
-    const avg = total / (this.analyser.fftSize * 1.0);
-    console.log('average decibel => %o', avg);
+    // const avg = total / (this.analyser.fftSize * 1.0);
+    const avg = total / (this.bufferLength * 1.0);
+    if (this.min !== avg) {
+      this.min = avg;
+    }
+    console.log('volume change: average => %o', this.min);
   }
 
   setMedia(stream: MediaStream) {
@@ -167,24 +176,27 @@ export class LocalPeer extends Peer {
         this.emit(PeerEvent.VideoTrackAdded, stream, video);
       });
     }
+    console.log('listening for a speaker...');
     // start listening for talking
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
-    this.audioContext.createMediaStreamSource(this.stream);
     this.analyser = this.audioContext.createAnalyser();
-    this.analyser.minDecibels = -90;
+    this.mediaStreamSource = this.audioContext.createMediaStreamSource(
+      this.stream
+    );
+    this.mediaStreamSource.connect(this.analyser);
+    // this.analyser.connect(this.audioContext.destination);
+    this.analyser.minDecibels = -50;
     this.analyser.maxDecibels = -10;
     this.analyser.smoothingTimeConstant = 0.85;
-    this.analyser.connect(this.audioContext.destination);
+    this.analyser.fftSize = 64;
+    this.bufferLength = this.analyser.frequencyBinCount; // 0.5 of fft
     // analyser.fftSize = 2048;
-    this.bufferLength = this.analyser.fftSize = 16;
+    // smallest this can be is 32 .. any lower throws an exception
     // We can use Float32Array instead of Uint8Array if we want higher precision
     // const dataArray = new Float32Array(bufferLength);
-    this.dataArray = new Float32Array(this.bufferLength);
-    // canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-    // const draw = function () {
-    // };
-    this.draw();
+    this.dataArray = new Uint8Array(this.bufferLength);
+    requestAnimationFrame(this.checkSpeaking.bind(this));
     this.status = PeerConnectionState.Broadcasting;
   }
 
@@ -200,5 +212,9 @@ export class LocalPeer extends Peer {
     });
     this.videoTracks.clear();
     this.stream = null;
+    if (this.currentFrameId !== 0) {
+      cancelAnimationFrame(this.currentFrameId);
+      this.currentFrameId = 0;
+    }
   }
 }

@@ -156,6 +156,17 @@ const SpeakerPresenter = (props: ISpeaker) => {
           {peer?.isMuted && (
             <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
           )}
+          {peer?.isSpeaking && (
+            <Text
+              style={{ pointerEvents: 'none' }}
+              color={textColor}
+              alignItems="center"
+              fontSize={1}
+              fontWeight={400}
+            >
+              speaking
+            </Text>
+          )}
         </Flex>
         {sublabel}
       </Flex>

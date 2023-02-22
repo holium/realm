@@ -77,6 +77,11 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
     });
     this.emit(PeerEvent.Unmuted);
   }
+
+  isSpeakingChanged(speaking: boolean) {
+    this.isSpeaking = speaking;
+    this.emit(PeerEvent.IsSpeakingChanged, speaking);
+  }
 }
 
 export type PeerEventCallbacks = {

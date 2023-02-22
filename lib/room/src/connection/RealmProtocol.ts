@@ -295,6 +295,12 @@ export class RealmProtocol extends BaseProtocol {
         value: { data: false },
       });
     });
+    this.local.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
+      this.sendData({
+        kind: DataPacket_Kind.SPEAKING_CHANGED,
+        value: { data: speaking },
+      });
+    });
   }
 
   async connect(room: RoomType): Promise<Map<Patp, RemotePeer>> {
