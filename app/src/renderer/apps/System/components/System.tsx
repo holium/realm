@@ -6,6 +6,7 @@ import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { OSActions } from 'renderer/logic/actions/os';
+import { CheckBox } from '@holium/design-system';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -97,15 +98,18 @@ const SystemPanelPresenter = () => {
       <Text opacity={0.7} fontSize={3} fontWeight={500}>
         INTERFACE
       </Text>
-      <Card
-        p="20px"
-        width="100%"
-        // minHeight="240px"
-        elevation="none"
-        customBg={cardColor}
-        flexDirection={'column'}
-      >
-        <Text>Coming Soon</Text>
+      <Card p="20px" width="100%" customBg={cardColor} flexDirection={'column'}>
+        <CheckBox
+          defaultValue=""
+          mr={16}
+          // TODO default value doesnt work
+          // there appears to be no way to set an initial value to the checkbox component
+        />
+        <Text>Isolation Mode</Text>
+        <Text>
+          Prevents the native OS from causing edge events and notifications.
+          This is recommended if you run Realm in fullscreen.
+        </Text>
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
