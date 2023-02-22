@@ -5,10 +5,13 @@
 ::
 /-  *versioned-state, sur=chat-db
 |%
+::
+::  random helpers
+::
 ++  fill-out-minimal-fragment
-  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da]
+  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da expires-at=@da]
   ^-  msg-part:sur
-  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at]
+  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at expires-at]
 ::
 ++  get-full-message
   |=  [tbl=messages-table:sur =msg-id:sur]
@@ -22,6 +25,7 @@
 ::
 ++  remove-message-from-table
   |=  [tbl=messages-table:sur =msg-id:sur]
+  ^-  [messages-table:sur (list uniq-id:sur)]
   =/  part-counter=@ud  0
   =/  ids  *(list uniq-id:sur)
   |-
@@ -39,14 +43,14 @@
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
 ++  make-msg-from-minimal-frags
-  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da] 
+  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
   ^-  message:sur
   =/  result        *message:sur
   =/  counter=@ud   0
   |-
   ?:  =(counter (lent fragments.msg-act)) :: stop condition
     result
-  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at)), counter +(counter))
+  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at expires-at.msg-act)), counter +(counter))
 ::
 ++  add-message-to-table
   |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p updated-at=@da]
@@ -54,6 +58,43 @@
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
 ::
+++  expire-old-msgs
+  |=  [state=state-0 now=@da]
+  ^-  state-0
+  =/  old-msgs
+    ^-  (list [k=uniq-id:sur v=msg-part:sur])
+    %+  skim
+      (tap:msgon:sur messages-table.state)
+    |=([k=uniq-id:sur v=msg-part:sur] &(?!(=(*@da expires-at.v)) (gth now expires-at.v)))
+  =/  index=@ud   0
+  =/  len=@ud     (lent old-msgs)
+  =/  tbl         messages-table.state
+  =/  ids         *(list uniq-id:sur)
+  =/  rm-result
+    ^-  [messages-table:sur (list uniq-id:sur)]
+    |-
+    ?:  =(index len)
+      [tbl ids]
+    =/  current-key   k:(snag index old-msgs)
+    $(index +(index), tbl +:(del:msgon:sur tbl current-key), ids (snoc ids current-key))
+
+  =.  messages-table.state  -:rm-result
+  =.  del-log.state         (log-deletes-for-msg-parts state +:rm-result now)
+  state
+::
+++  log-deletes-for-msg-parts
+  |=  [state=state-0 ids=(list uniq-id:sur) now=@da]
+  ^-  del-log:sur
+  =/  change-rows   (turn ids |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  index=@ud     0
+  =/  len=@ud       (lent change-rows)
+  =/  new-log       del-log.state
+  |-
+  ?:  =(index len)
+    new-log
+  ~&  (snag index change-rows)
+                                                    :: adding index to now in order to ensure unique keys
+  $(index +(index), new-log (put:delon:sur new-log `@da`(add now index) (snag index change-rows)))
 ++  messages-start-paths
   |=  [=bowl:gall]
   ^-  (list path)
@@ -170,7 +211,7 @@
   [gives state]
 ::
 ++  insert
-:: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '2'] ~ ~] [[%plain '2'] ~ ~] [[%plain '4'] ~ ~] [[%plain '5'] ~ ~] [[%plain '6'] ~ ~] [[%plain '7'] ~ ~] [[%plain '8'] ~ ~] [[%plain '9'] ~ ~] ~])]
+:: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '1'] ~ ~] [[%plain '3'] ~ ~] ~]) ~2000.1.1]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -197,10 +238,11 @@
   ?>  =(sender.msg-id src.bowl)  :: edit pokes are only valid from the ship which is the original sender
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
+  =/  original-expires-at  expires-at:(got:msgon:sur messages-table.state [msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id now.bowl)
+  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
 
   =/  thechange   db-change+!>(~[[%upd-messages msg-id +.add-result]])
@@ -229,16 +271,7 @@
 
   =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
   =/  thechange     db-change+!>(change-rows)
-  =/  index=@ud     0
-  =/  len=@ud       (lent change-rows)
-  =/  new-log       del-log.state
-  =.  del-log.state 
-    |-
-    ?:  =(index len)
-      new-log
-    ~&  (snag index change-rows)
-                                                      :: adding index to now in order to ensure unique keys
-    $(index +(index), new-log (put:delon:sur new-log `@da`(add now.bowl index) (snag index change-rows)))
+  =.  del-log.state   (log-deletes-for-msg-parts state +.remove-result now.bowl)
 
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
@@ -515,6 +548,7 @@
           metadata+(metadata-to-json metadata.msg-part)
           created-at+(time created-at.msg-part)
           updated-at+(time updated-at.msg-part)
+          expires-at+(time expires-at.msg-part)
       ==
     ++  reply-to-to-json
       |=  =reply-to:sur

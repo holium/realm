@@ -40,7 +40,7 @@
   ==
 ::
 ++  into-insert-message-poke
-  |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db)] ts=@da]
+  |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db) expires-at=@da] ts=@da]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts act])]
 ::
 ++  into-edit-message-poke
@@ -218,8 +218,8 @@
   [cards state]
 ::
 ++  send-message
-::realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] ~])]
-  |=  [act=[=path fragments=(list minimal-fragment:db)] state=state-0 =bowl:gall]
+::realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] ~]) *@da]
+  |=  [act=[=path fragments=(list minimal-fragment:db) expires-at=@da] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
@@ -406,6 +406,7 @@
       :~  
           [%path pa]
           de-frag
+          [%expires-at di]
       ==
     ::
     ++  de-content

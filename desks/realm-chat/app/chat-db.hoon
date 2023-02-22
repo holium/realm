@@ -14,15 +14,24 @@
     ^-  (quip card _this)
     =/  default-state=state-0
       [%0 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
-    `this(state default-state)
+    :_  this(state default-state)
+    [%pass /timer %arvo %b %wait next-hour:core]~
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
     =/  old  !<(versioned-state old-state)
+    =^  cards  state
     ?-  -.old
-      %0  `this(state old)
+      %0  [
+        :: we remove the old timer (if any) and add the new one, so that
+        :: we don't get an increasing number of timers associated with
+        :: this agent every time the agent gets updated
+        [[%pass /timer %arvo %b %rest next-hour:core] [%pass /timer %arvo %b %wait next-hour:core] ~]
+        old
+      ]
     ==
+    [cards this]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -177,10 +186,21 @@
     |=  path
       `this
   ::
+  ::  only used for behn timers
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
-    !!
+    ?+  wire  !!
+      [%timer ~]
+        =.  state  (expire-old-msgs:db-lib state now.bowl)
+        [
+          :: we remove the old timer (if any) and add the new one, so that
+          :: we don't get an increasing number of timers associated with
+          :: this agent every time the agent gets updated
+          [[%pass /timer %arvo %b %rest next-hour:core] [%pass /timer %arvo %b %wait next-hour:core] ~]
+          this
+        ]
+    ==
   ::
   ++  on-fail
     |=  [=term =tang]
@@ -191,6 +211,8 @@
 ::
 ++  this  .
 ++  core  .
+++  next-hour  `@da`(add (mul (div now.bowl ~h1) ~h1) ~h1)
+::++  next-hour  `@da`(add (mul (div now.bowl ~m1) ~m1) ~m1) :: ~m1 for testing the timer on a 1 mintue interval
 ++  all-tables
   [[%paths paths-table.state] [%messages messages-table.state] [%peers peers-table.state] ~]
 --

@@ -45,6 +45,7 @@
       metadata=(map cord cord)
       created-at=@da
       updated-at=@da  :: set to now.bowl when %edit action. means it can be out of sync between ships, but shouldn't matter
+      expires-at=@da  :: *@da is treated as "unset"
   ==
 +$  content
   $%  [%custom name=cord value=cord] :: general data type
@@ -104,7 +105,7 @@
       [%kick-peer =path patp=ship]
   ==
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
-+$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment)]
++$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment) expires-at=@da]
 +$  edit-message-action     [=msg-id =path fragments=(list minimal-fragment)]
 ::
 +$  db-dump
