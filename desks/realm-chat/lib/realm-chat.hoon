@@ -218,7 +218,7 @@
   [cards state]
 ::
 ++  send-message
-::  :realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain 'hello'] ~ ~] ~])]
+::realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] ~])]
   |=  [act=[=path fragments=(list minimal-fragment:db)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
@@ -233,7 +233,7 @@
   [cards state]
 ::
 ++  edit-message
-::  :realm-chat &action [%edit-message [~2023.2.3..16.23.37..72f6 ~zod] /realm-chat/path-id (limo [[[%plain 'edited'] ~ ~] ~])]
+::  :realm-chat &action [%edit-message [~2023.2.22..16.46.28..e019 ~zod] /realm-chat/path-id (limo [[[%plain 'edited'] ~ ~] ~])]
   |=  [act=edit-message-action:db state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: just pass along the edit-message-action to all the peers chat-db

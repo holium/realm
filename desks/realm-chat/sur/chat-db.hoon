@@ -114,6 +114,7 @@
 +$  db-change-type
   $%
     [%add-row =db-row]
+    [%upd-messages =msg-id =message]
     [%upd-paths-row =path-row]
     [%del-paths-row =path]
     [%del-peers-row =path =ship]
@@ -125,4 +126,6 @@
       [%peers =peer-row]
   ==
 +$  db-change  (list db-change-type)
++$  del-log  ((mop time db-change-type) gth)
+++  delon  ((on time db-change-type) gth)
 --

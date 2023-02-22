@@ -161,7 +161,9 @@
   :: for now we are assuming that subscribed clients are intelligent
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
-  =/  thechange  db-change+!>(~[[%del-paths-row path]])
+  =/  change-row      [%del-paths-row path]
+  =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
+  =/  thechange       db-change+!>(~[change-row])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -196,12 +198,12 @@
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
-  =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
   =.  messages-table.state  -.remove-result
 
   =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
-  =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
+
+  =/  thechange   db-change+!>(~[[%upd-messages msg-id +.add-result]])
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -224,7 +226,20 @@
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
-  =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a])))
+
+  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  thechange     db-change+!>(change-rows)
+  =/  index=@ud     0
+  =/  len=@ud       (lent change-rows)
+  =/  new-log       del-log.state
+  =.  del-log.state 
+    |-
+    ?:  =(index len)
+      new-log
+    ~&  (snag index change-rows)
+                                                      :: adding index to now in order to ensure unique keys
+    $(index +(index), new-log (put:delon:sur new-log `@da`(add now.bowl index) (snag index change-rows)))
+
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -261,6 +276,7 @@
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
+::
 ++  kick-peer
 ::  :chat-db &db-action [%kick-peer /a/path/to/a/chat ~bus]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
@@ -283,14 +299,16 @@
   =.  paths-table.state  ?:(our-kicked (~(del by paths-table.state) path.act) paths-table.state)
   =.  messages-table.state  ?:(our-kicked (remove-messages-for-path messages-table.state path.act) messages-table.state)
 
-  =/  thechange
+  =/  change-row
     ?:  our-kicked
       :: for now we are assuming that subscribed clients are intelligent
       :: enough to realize that a %del-paths-row also means remove the
       :: related messages and peers
-      db-change+!>(~[[%del-paths-row path.act]])
+      [%del-paths-row path.act]
     :: else just update the peers table
-    db-change+!>(~[[%del-peers-row path.act patp.act]])
+    [%del-peers-row path.act patp.act]
+  =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
+  =/  thechange   db-change+!>(~[change-row])
 
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
@@ -391,6 +409,18 @@
 ++  encode
   =,  enjs:format
   |%
+    ++  del-log
+      |=  log=del-log:sur
+      ^-  json
+      :-  %a
+      %+  turn  (tap:delon:sur log)
+      |=  [k=@da v=db-change-type:sur]
+      %-  pairs
+      :~
+        ['timestamp' (time k)]
+        ['change' (individual-change v)]
+      ==
+    ::
     ++  all-tables
       |=  =tables:sur
       ^-  json
@@ -428,6 +458,13 @@
       ?-  -.ch
         %add-row
           :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
+        %upd-messages
+          :~
+            ['type' %s %update]
+            ['table' %s %messages]
+            ['msg-id' a+~[s+(scot %da timestamp.msg-id.ch) s+(scot %p sender.msg-id.ch)]]
+            ['message' a+(turn message.ch |=(m=msg-part:sur (messages-row [[msg-id.m msg-part-id.m] m])))]
+          ==
         %upd-paths-row
           :~(['type' %s %update] ['table' %s %paths] ['row' (path-row path-row.ch)])
         %del-paths-row
@@ -453,6 +490,7 @@
         %peers
           (peer-row peer-row.db-row)
       ==
+    ::
     ++  path-row
       |=  =path-row:sur
       ^-  json
@@ -464,6 +502,7 @@
           updated-at+(time updated-at.path-row)
           pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
       ==
+    ::
     ++  messages-row
       |=  [k=uniq-id:sur =msg-part:sur]
       ^-  json

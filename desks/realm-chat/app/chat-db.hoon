@@ -13,7 +13,7 @@
   ++  on-init
     ^-  (quip card _this)
     =/  default-state=state-0
-      [%0 *paths-table:sur *messages-table:sur *peers-table:sur]
+      [%0 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
     `this(state default-state)
   ++  on-save   !>(state)
   ++  on-load
@@ -161,6 +161,10 @@
         =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
         =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.t.path)
         ``db-dump+!>(tables+[messages+(start-lot:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
+    ::
+      [%x %delete-log %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        ``del-log+!>((lot:delon:sur del-log.state ~ `timestamp))
     ==
   :: chat-db does not subscribe to anything.
   :: chat-db does not care
