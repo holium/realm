@@ -73,7 +73,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const editMetadata = (editedMetadata: any) => {
     if (!selectedPath) return;
     editedMetadata = { ...metadata, ...editedMetadata };
-    ChatDBActions.editChat(selectedPath, editedMetadata);
+    // ChatDBActions.editChat(selectedPath, editedMetadata);
     updateMetadata(editedMetadata);
   };
 

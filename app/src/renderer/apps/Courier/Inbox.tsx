@@ -17,7 +17,7 @@ import { observer } from 'mobx-react';
 
 export const InboxPresenter = () => {
   const { dimensions } = useTrayApps();
-  const { setChat, setSubroute } = useChatStore();
+  const { setChat, setSubroute, isChatPinned } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
   const [chatList, setChatList] = useState<ChatRowType[]>([]);
 
@@ -61,6 +61,13 @@ export const InboxPresenter = () => {
     },
     [searchString]
   );
+
+  const pinnedChatList = chatList
+    .filter((c) => isChatPinned(c.path))
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+  const unpinnedChatList = chatList
+    .filter((c) => !isChatPinned(c.path))
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
@@ -120,45 +127,95 @@ export const InboxPresenter = () => {
           </Text.Custom>
         </Flex>
       ) : (
-        <WindowedList
-          // TODO fix this (chats without messages have timestamp in metadata)
-          key={`inbox-${chatList.length}`}
-          width={dimensions.width - 26}
-          height={544}
-          rowHeight={52}
-          data={chatList}
-          filter={searchFilter}
-          rowRenderer={(chat) => {
-            let title: string = chat.metadata.title;
-            let timestamp = chat.createdAt;
-            if (!chat.lastMessage) {
-              timestamp = parseInt(chat.metadata.timestamp);
-            }
-            return (
-              <Box height={52} layoutId={`chat-${chat.path}-container`}>
-                <ChatRow
-                  path={chat.path}
-                  title={title}
-                  peers={chat.peers}
-                  lastMessage={chat.lastMessage && chat.lastMessage[0]}
-                  type={chat.type}
-                  timestamp={timestamp}
-                  metadata={chat.metadata}
-                  onClick={(evt) => {
-                    evt.stopPropagation();
-                    setChat(
-                      chat.path,
-                      title,
-                      chat.type,
-                      chat.peers,
-                      chat.metadata
-                    );
-                  }}
-                />
-              </Box>
-            );
-          }}
-        />
+        <>
+          <Flex
+            style={{
+              background: 'rgba(0,0,0,0.03)',
+            }}
+            flexDirection="column"
+            borderRadius={6}
+          >
+            {pinnedChatList.map((chat) => {
+              let title: string = chat.metadata.title;
+              let timestamp = chat.createdAt;
+              if (!chat.lastMessage) {
+                timestamp = parseInt(chat.metadata.timestamp);
+              }
+
+              return (
+                <Box
+                  key={`pinned-${chat.path}`}
+                  height={52}
+                  layoutId={`chat-${chat.path}-container`}
+                >
+                  <ChatRow
+                    path={chat.path}
+                    title={title}
+                    peers={chat.peers}
+                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                    type={chat.type}
+                    timestamp={timestamp}
+                    metadata={chat.metadata}
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      setChat(
+                        chat.path,
+                        title,
+                        chat.type,
+                        chat.peers,
+                        chat.metadata
+                      );
+                    }}
+                  />
+                </Box>
+              );
+            })}
+          </Flex>
+          <WindowedList
+            // TODO fix this (chats without messages have timestamp in metadata)
+            key={`inbox-${unpinnedChatList.length}`}
+            width={dimensions.width - 26}
+            height={544 - pinnedChatList.length * 52}
+            rowHeight={52}
+            data={unpinnedChatList}
+            filter={searchFilter}
+            rowRenderer={(chat) => {
+              let title: string = chat.metadata.title;
+              let timestamp = chat.createdAt;
+              if (!chat.lastMessage) {
+                timestamp = parseInt(chat.metadata.timestamp);
+              }
+
+              return (
+                <Box
+                  key={`unpinned-${chat.path}`}
+                  height={52}
+                  layoutId={`chat-${chat.path}-container`}
+                >
+                  <ChatRow
+                    path={chat.path}
+                    title={title}
+                    peers={chat.peers}
+                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                    type={chat.type}
+                    timestamp={timestamp}
+                    metadata={chat.metadata}
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      setChat(
+                        chat.path,
+                        title,
+                        chat.type,
+                        chat.peers,
+                        chat.metadata
+                      );
+                    }}
+                  />
+                </Box>
+              );
+            }}
+          />
+        </>
       )}
     </Flex>
   );

@@ -103,7 +103,7 @@ export const ChatLogHeader = ({
                 id: 'pin-chat',
                 icon: 'Pin',
                 label: 'Pin',
-                disabled: true,
+                disabled: false,
                 onClick: (evt) => {
                   evt.stopPropagation();
                 },

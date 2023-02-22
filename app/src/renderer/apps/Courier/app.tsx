@@ -6,9 +6,13 @@ import { ChatProvider, chatStore } from './store';
 import { ChatInfo } from './views/ChatInfo';
 import { DMLog } from './views/DMLog';
 import { useStorage } from 'renderer/logic/lib/useStorage';
+import { useEffect } from 'react';
 
 export const CourierAppPresenter = () => {
   const storage = useStorage();
+  useEffect(() => {
+    chatStore.init();
+  }, []);
 
   return (
     <ChatProvider value={chatStore}>

@@ -1,5 +1,6 @@
-import { Instance, types } from 'mobx-state-tree';
+import { flow, Instance, types } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
+import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -19,13 +20,40 @@ const CourierAppModel = types
       types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
       'inbox'
     ),
+    pinnedChats: types.array(types.string),
     selectedPath: types.maybe(types.string),
     title: types.maybe(types.string),
     peers: types.maybe(types.array(types.string)),
     type: types.maybe(types.enumeration(['dm', 'group', 'space'])),
     metadata: types.maybe(ChatMetadataModel),
   })
+  .views((self) => ({
+    get selectedChat() {
+      if (!self.selectedPath) return undefined;
+      return {
+        path: self.selectedPath,
+        title: self.title,
+        type: self.type,
+        peers: self.peers,
+        metadata: self.metadata,
+      };
+    },
+    isChatPinned(path: string) {
+      return self.pinnedChats.includes(path);
+    },
+  }))
   .actions((self) => ({
+    init: flow(function* () {
+      try {
+        const pinnedChats = yield ChatDBActions.fetchPinnedChats();
+        console.log('loading pinned chats', pinnedChats);
+        self.pinnedChats = pinnedChats;
+        return self.pinnedChats;
+      } catch (error) {
+        console.error(error);
+        return self.pinnedChats;
+      }
+    }),
     setSubroute(subroute: Subroutes) {
       if (subroute === 'inbox') {
         self.selectedPath = undefined;
@@ -50,10 +78,37 @@ const CourierAppModel = types
       self.subroute = 'chat';
       self.metadata = ChatMetadataModel.create(metadata);
     },
-    updateMetadata(update: ChatMetadata) {
-      // todo flow this
-      self.metadata = ChatMetadataModel.create(update);
-    },
+
+    togglePinned: flow(function* (path: string, pinned: boolean) {
+      try {
+        if (pinned) {
+          self.pinnedChats.push(path);
+        } else {
+          self.pinnedChats.remove(path);
+        }
+        yield ChatDBActions.togglePinnedChat(path, pinned);
+        return self.pinnedChats;
+      } catch (error) {
+        console.error(error);
+        self.pinnedChats.remove(path);
+        return self.pinnedChats;
+      }
+    }),
+    updateMetadata: flow(function* (update: ChatMetadata) {
+      if (!self.selectedPath) throw new Error('No chat selected');
+      if (!self.metadata) throw new Error('No selected metadata');
+      const oldMetadata = self.metadata;
+      try {
+        self.metadata = ChatMetadataModel.create(update);
+        yield ChatDBActions.editChat(self.selectedPath, update);
+        return self.metadata;
+      } catch (error) {
+        console.error(error);
+        self.metadata = oldMetadata;
+        // TODO find a way to pass error to UI
+        return oldMetadata;
+      }
+    }),
   }));
 
 export const chatStore = CourierAppModel.create({

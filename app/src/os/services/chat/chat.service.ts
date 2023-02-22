@@ -27,8 +27,8 @@ type ChatUpdateType =
 
 type ChatPathMetadata = {
   title: string;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
   creator: string;
   timestamp: string;
 };
@@ -52,6 +52,9 @@ export class ChatService extends BaseService {
     // 'realm.chat.read-chat': this.readChat,
     'realm.chat.create-chat': this.createChat,
     'realm.chat.edit-chat': this.editChatMetadata,
+    'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
+    'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
+    'realm.chat.toggle-pinned-message': this.togglePinnedMessage,
     'realm.chat.add-peer': this.addPeerToChat,
     'realm.chat.remove-peer': this.removePeerFromChat,
     'realm.chat.leave-chat': this.leaveChat,
@@ -84,6 +87,16 @@ export class ChatService extends BaseService {
       ipcRenderer.invoke('realm.chat.add-peer', path, peer),
     removePeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.remove-peer', path, peer),
+    fetchPinnedChats: () => ipcRenderer.invoke('realm.chat.fetch-pinned-chats'),
+    togglePinnedChat: (path: string, pinned: boolean) =>
+      ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
+    togglePinnedMessage: (path: string, msgId: string, pinned: boolean) =>
+      ipcRenderer.invoke(
+        'realm.chat.toggle-pinned-message',
+        path,
+        msgId,
+        pinned
+      ),
     // readChat: (path: string) =>
     //   ipcRenderer.invoke('realm.chat.read-chat', path),
     leaveChat: (path: string) =>
@@ -604,6 +617,33 @@ export class ChatService extends BaseService {
     };
   }
 
+  async togglePinnedMessage(
+    _evt: any,
+    path: string,
+    msgId: any,
+    pinned: boolean
+  ) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'pin-message': {
+          'msg-id': ['~2023.2.21..23.38.04..652d', '~zod'],
+          path: '/realm-chat/0v4.njr03.drflg.3p6vv.l7ubg.je568',
+          pin: true,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to pin chat');
+    }
+  }
+
   editMessage(path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     // this.core.conduit.editChat(path, metadata);
@@ -664,6 +704,36 @@ export class ChatService extends BaseService {
   //   if (!this.core.conduit) throw new Error('No conduit connection');
   //   // this.core.conduit.readChat(path);
   // }
+
+  async fetchPinnedChats() {
+    const response = await this.core.conduit!.scry({
+      app: 'realm-chat',
+      path: '/pins',
+    });
+    console.log('fetchhhh', response);
+    return response;
+  }
+
+  async togglePinnedChat(_evt: any, path: string, pinned: boolean) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'pin-chat': {
+          path,
+          pin: pinned,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to pin chat');
+    }
+  }
 
   async editChatMetadata(_evt: any, path: string, metadata: ChatPathMetadata) {
     if (!this.core.conduit) throw new Error('No conduit connection');

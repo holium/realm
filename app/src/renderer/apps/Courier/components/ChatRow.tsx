@@ -34,21 +34,23 @@ export const ChatRowPresenter = ({
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { setSubroute, setChat } = useChatStore();
+  const { setSubroute, setChat, isChatPinned, togglePinned } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
+  const isPinned = isChatPinned(path);
+  const isMuted = false; // TODO
 
   const contextMenuOptions = useMemo(() => {
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
-      icon: 'Pin',
-      label: 'Pin',
+      icon: isPinned ? 'Unpin' : 'Pin',
+      label: isPinned ? 'Unpin' : 'Pin',
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        // TODO poke pin / unpin
+        togglePinned(path, !isPinned);
       },
     });
     // menu.push({
@@ -98,7 +100,7 @@ export const ChatRowPresenter = ({
       },
     });
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [path]);
+  }, [path, isPinned, isMuted]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(chatRowId)) {
@@ -124,7 +126,7 @@ export const ChatRowPresenter = ({
       ),
     [title, path, type, peers, metadata.image]
   );
-  console.log('chatRowId', chatRowId);
+
   return (
     <Row
       id={chatRowId}
