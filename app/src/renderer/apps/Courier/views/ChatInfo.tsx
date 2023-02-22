@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import {
   Flex,
   Text,
@@ -54,8 +54,17 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     if (!selectedPath) return;
     ChatDBActions.getChatPeers(selectedPath).then((peers: PeerType[]) => {
       setPeers(
-        peers.sort((a: PeerType) =>
-          a.role === 'host' ? -1 : a.peer === ship!.patp ? -1 : 1
+        peers.sort((a: PeerType, b: PeerType) =>
+          // sort host to top, then self, then others
+          a.role === 'host'
+            ? -1
+            : b.role === 'host'
+            ? 1
+            : a.peer === ship!.patp
+            ? -1
+            : b.peer === ship!.patp
+            ? 1
+            : 0
         )
       );
     });
@@ -88,6 +97,39 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     peers.find((peer) => peer.peer === ship!.patp)?.role === 'host';
 
   const patps = peers.map((peer) => peer.peer);
+
+  const chatAvatarEl = useMemo(
+    () =>
+      title &&
+      type &&
+      selectedPath &&
+      peers && (
+        <ChatAvatar
+          title={title}
+          type={type}
+          path={selectedPath}
+          peers={patps}
+          size={48}
+          image={image}
+          canEdit={amHost && canUpload}
+          onUpload={() => {
+            if (!containerRef.current) return;
+            promptUpload(containerRef.current)
+              .then((file: File) => {
+                const params: FileUploadParams = {
+                  source: 'file',
+                  content: file.path,
+                  contentType: file.type,
+                };
+                uploadFile(params);
+              })
+              .catch((e) => console.error(e));
+          }}
+        />
+      ),
+    [title, selectedPath, type, peers, image, amHost, canUpload, containerRef]
+  );
+
   if (!selectedPath || !title) return null;
   return (
     <Flex flexDirection="column">
@@ -122,31 +164,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           alignItems="center"
         >
           <div ref={containerRef} style={{ display: 'none' }}></div>
-
-          {title && type && selectedPath && peers && (
-            <ChatAvatar
-              title={title}
-              type={type}
-              path={selectedPath}
-              peers={patps}
-              size={48}
-              image={image}
-              canEdit={canUpload}
-              onUpload={() => {
-                if (!containerRef.current) return;
-                promptUpload(containerRef.current)
-                  .then((file: File) => {
-                    const params: FileUploadParams = {
-                      source: 'file',
-                      content: file.path,
-                      contentType: file.type,
-                    };
-                    uploadFile(params);
-                  })
-                  .catch((e) => console.error(e));
-              }}
-            />
-          )}
+          {chatAvatarEl}
           {uploadError && (
             <Text.Custom color="intent-alert" fontSize={1}>
               {uploadError}

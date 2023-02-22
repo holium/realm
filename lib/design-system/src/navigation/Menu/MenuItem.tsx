@@ -37,8 +37,9 @@ export const MenuItem = ({
 }: MenuItemProps) => {
   return (
     <Row
-      height={34}
       id={id}
+      key={id}
+      height={34}
       disabled={disabled}
       onClick={(evt) => !disabled && onClick(evt)}
     >

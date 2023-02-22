@@ -128,7 +128,7 @@ export const InboxPresenter = () => {
           rowHeight={52}
           data={chatList}
           filter={searchFilter}
-          rowRenderer={(chat, index) => {
+          rowRenderer={(chat) => {
             let title: string = chat.metadata.title;
             let timestamp = chat.createdAt;
             if (!chat.lastMessage) {
@@ -137,7 +137,6 @@ export const InboxPresenter = () => {
             return (
               <Box height={52} layoutId={`chat-${chat.path}-container`}>
                 <ChatRow
-                  key={`dm-${index}-${timestamp}`}
                   path={chat.path}
                   title={title}
                   peers={chat.peers}
@@ -147,7 +146,6 @@ export const InboxPresenter = () => {
                   metadata={chat.metadata}
                   onClick={(evt) => {
                     evt.stopPropagation();
-                    console.log('chat clicked', chat, timestamp);
                     setChat(
                       chat.path,
                       title,

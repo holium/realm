@@ -39,14 +39,11 @@ export const Toggle = ({
         <input
           type="checkbox"
           checked={checked}
-          onChange={
-            !disabled
-              ? (evt) => {
-                  setChecked(evt.currentTarget.checked);
-                  onChange(evt.currentTarget.checked);
-                }
-              : undefined
-          }
+          onChange={(evt) => {
+            if (disabled) return;
+            setChecked(evt.currentTarget.checked);
+            onChange(evt.currentTarget.checked);
+          }}
         />
         <span className="toggle-slider round"></span>
       </label>

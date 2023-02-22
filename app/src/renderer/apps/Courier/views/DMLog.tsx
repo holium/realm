@@ -9,9 +9,13 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
+import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
-export const DMLogPresenter = () => {
+type ChatLogProps = {
+  storage: IuseStorage;
+};
+export const DMLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { friends, ship } = useServices();
   const [chats, setChats] = useState<any[]>([]);
@@ -42,6 +46,24 @@ export const DMLogPresenter = () => {
     });
   }, [selectedPath, chats]);
 
+  const chatAvatarEl = useMemo(
+    () =>
+      title &&
+      type &&
+      selectedPath &&
+      peers && (
+        <ChatAvatar
+          title={title}
+          type={type}
+          path={selectedPath}
+          peers={peers}
+          image={metadata?.image}
+          canEdit={false}
+        />
+      ),
+    [title, selectedPath, type, peers, metadata?.image]
+  );
+
   if (!selectedPath) return null;
 
   const onSend = (fragments: any[]) => {
@@ -63,31 +85,13 @@ export const DMLogPresenter = () => {
       layout="preserve-aspect"
       layoutId={`chat-${selectedPath}-container`}
       flexDirection="column"
-      // initial={{ height: 54 }}
-      // // height={dimensions.height - 24}
-      // animate={{ height: dimensions.height - 24 }}
-      // exit={{ height: 54 }}
-      // height={dimensions.height - 24}
     >
       <ChatLogHeader
         title={metadata ? metadata.title : ''}
         path={selectedPath}
         onBack={() => setSubroute('inbox')}
         hasMenu
-        avatar={
-          title &&
-          type &&
-          selectedPath &&
-          peers && (
-            <ChatAvatar
-              title={title}
-              type={type}
-              path={selectedPath}
-              peers={peers}
-              image={metadata?.image}
-            />
-          )
-        }
+        avatar={chatAvatarEl}
       />
       <Flex
         initial={{ opacity: 0 }}

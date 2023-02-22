@@ -16,6 +16,7 @@ export const GroupSigil: FC<GroupSigilProps> = ({
   size = 36,
 }: GroupSigilProps) => {
   const { friends } = useServices();
+  console.log('rendering group sigil');
 
   const len = patps.length;
   const renderSigil = (data: any, index: number) => {
@@ -26,7 +27,7 @@ export const GroupSigil: FC<GroupSigilProps> = ({
     } = friends.getContactAvatarMetadata(data);
     return (
       <Avatar
-        key={`${path}-sigil-${index}`}
+        key={`${path}-sigil-${index}-${patp}`}
         simple
         clickable={false}
         borderRadiusOverride="2px"
@@ -55,6 +56,7 @@ export const GroupSigil: FC<GroupSigilProps> = ({
   }
   return (
     <Flex
+      id={`${path}-group-sigil`}
       gap={2}
       height={size}
       width={size}

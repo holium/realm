@@ -14,7 +14,7 @@ export const CourierAppPresenter = () => {
     <ChatProvider value={chatStore}>
       <LayoutGroup>
         {chatStore.subroute === 'inbox' && <Inbox />}
-        {chatStore.subroute === 'chat' && <DMLog />}
+        {chatStore.subroute === 'chat' && <DMLog storage={storage} />}
         {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
         {chatStore.subroute === 'new' && <NewChat />}
       </LayoutGroup>

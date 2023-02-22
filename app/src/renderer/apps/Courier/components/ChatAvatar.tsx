@@ -60,9 +60,9 @@ export const ChatAvatar = ({
     );
   }
   if (!image && type === 'space') {
+    // todo: add space sigil
   }
   if (image) {
-    // TODO: add image support
     avatarElement = (
       <ImageCrest height={size} width={size} borderRadius={4} src={image} />
     );

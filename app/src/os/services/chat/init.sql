@@ -9,7 +9,8 @@ create table if not exists messages
     metadata     text,
     sender       text    not null,
     updated_at   integer not null,
-    created_at   integer not null
+    created_at   integer not null,
+    expires_at   integer
 );
 
 create unique index if not exists messages_path_msg_id_msg_part_id_uindex
@@ -21,7 +22,8 @@ create table if not exists  paths
     type     TEXT not null,
     metadata TEXT,
     updated_at   integer not null,
-    created_at   integer not null
+    created_at   integer not null,
+    pins     TEXT
 );
 
 create unique index if not exists paths_path_uindex

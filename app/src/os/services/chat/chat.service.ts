@@ -315,8 +315,9 @@ export class ChatService extends BaseService {
           type, 
           metadata, 
           created_at, 
-          updated_at
-        ) VALUES (@path, @type, @metadata, @created_at, @updated_at)`
+          updated_at,
+          pins
+        ) VALUES (@path, @type, @metadata, @created_at, @updated_at, @pins)`
     );
     const insertMany = this.db.transaction((paths) => {
       for (const path of paths)
@@ -326,6 +327,7 @@ export class ChatService extends BaseService {
           metadata: JSON.stringify(path.metadata),
           created_at: path['created-at'],
           updated_at: path['updated-at'],
+          pins: JSON.stringify(path['pins']),
         });
     });
     insertMany(paths);

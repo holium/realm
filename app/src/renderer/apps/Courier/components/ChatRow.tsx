@@ -11,6 +11,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
+import { observer } from 'mobx-react';
 
 type ChatRowProps = {
   path: string;
@@ -23,7 +24,7 @@ type ChatRowProps = {
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
-export const ChatRow = ({
+export const ChatRowPresenter = ({
   path,
   title,
   peers,
@@ -44,7 +45,7 @@ export const ChatRow = ({
       id: `${chatRowId}-pin-chat`,
       icon: 'Pin',
       label: 'Pin',
-      disabled: true,
+      disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
         // TODO poke pin / unpin
@@ -106,7 +107,24 @@ export const ChatRow = ({
   }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-
+  const chatAvatarEl = useMemo(
+    () =>
+      title &&
+      type &&
+      path &&
+      peers && (
+        <ChatAvatar
+          title={title}
+          type={type}
+          path={path}
+          peers={peers}
+          image={metadata?.image}
+          canEdit={false}
+        />
+      ),
+    [title, path, type, peers, metadata.image]
+  );
+  console.log('chatRowId', chatRowId);
   return (
     <Row
       id={chatRowId}
@@ -131,15 +149,7 @@ export const ChatRow = ({
               duration: 0.1,
             }}
           >
-            {title && type && path && peers && (
-              <ChatAvatar
-                title={title}
-                type={type}
-                path={path}
-                peers={peers}
-                image={metadata?.image}
-              />
-            )}
+            {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
@@ -183,3 +193,5 @@ export const ChatRow = ({
     </Row>
   );
 };
+
+export const ChatRow = observer(ChatRowPresenter);
