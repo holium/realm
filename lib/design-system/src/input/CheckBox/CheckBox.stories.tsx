@@ -16,3 +16,7 @@ export const DefaultChecked: ComponentStory<typeof CheckBox> = () => (
 export const Disabled: ComponentStory<typeof CheckBox> = () => (
   <CheckBox label="Look at me, I am the label now" disabled />
 );
+
+export const DisabledChecked: ComponentStory<typeof CheckBox> = () => (
+  <CheckBox label="Look at me, I am the label now" disabled defaultChecked />
+);

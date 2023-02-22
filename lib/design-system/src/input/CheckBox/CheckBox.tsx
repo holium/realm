@@ -2,16 +2,16 @@ import { RefObject } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { Flex } from 'general/Flex/Flex';
-import { Text } from 'general/Text/Text';
-import { Icon } from 'general/Icon/Icon';
+import { Flex } from '../../general/Flex/Flex';
+import { Text } from '../../general/Text/Text';
+import { Icon } from '../../general/Icon/Icon';
 
 const blankSvgJsxElement = <Icon name="CheckboxBlank" color="icon" />;
 const blankSvgString = renderToStaticMarkup(blankSvgJsxElement);
 const checkedSvgJsxElement = <Icon name="CheckboxChecked" color="accent" />;
 const checkedSvgString = renderToStaticMarkup(checkedSvgJsxElement);
 
-const CheckBoxInput = styled(motion.input)`
+const CheckBoxInput = styled(motion.input)<{ disabled?: boolean }>`
   width: 24px;
   height: 24px;
   background-color: transparent;
@@ -21,9 +21,13 @@ const CheckBoxInput = styled(motion.input)`
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
+  opacity: ${({ disabled }) => (disabled ? 0.42 : 1)};
 
   &:checked {
     background-image: url('data:image/svg+xml;utf8,${checkedSvgString}');
+  }
+  &:disabled {
+    cursor: not-allowed;
   }
 `;
 
