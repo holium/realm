@@ -130,7 +130,9 @@ export const TitlebarByType = ({
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     noTitlebar = dialogConfig.noTitlebar!;
-    const onCloseDialog = dialogConfig.hasCloseButton ? onClose : undefined;
+    const onCloseDialog = dialogConfig.hasCloseButton
+      ? dialogConfig.onClose
+      : undefined;
     const onOpenDialog = dialogConfig.onOpen;
     CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
