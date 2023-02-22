@@ -1,23 +1,16 @@
-import { useState } from 'react';
-import { Grid, Text, Flex, Anchor, Checkbox } from 'renderer/components';
+import { Grid, Text, Flex, Anchor } from 'renderer/components';
+import { CheckBox } from '@holium/design-system';
 import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const DisclaimerDialogPresenter = (props: BaseDialogProps) => {
-  const [checked, setChecked] = useState(
-    props.workflowState?.disclaimerAccepted || false
-  );
-
-  function toggleChecked(): void {
-    const toggledValue = !checked;
-    props.setState &&
-      props.setState({
-        ...props.workflowState,
-        disclaimerAccepted: toggledValue,
-      });
-    setChecked(toggledValue);
-  }
+  const toggleChecked = () => {
+    props.setState?.({
+      ...props.workflowState,
+      disclaimerAccepted: props.workflowState.disclaimerAccepted ? false : true,
+    });
+  };
 
   return (
     <Grid.Column noGutter lg={12} xl={12} px={16} pt={12}>
@@ -47,10 +40,11 @@ const DisclaimerDialogPresenter = (props: BaseDialogProps) => {
       </Text>
       <br />
       <Flex flexDirection="row" justifyContent="flex-start">
-        <Checkbox id="disclaimer" onClick={toggleChecked} />
-        <Text ml={16} fontSize={2}>
-          I agree
-        </Text>
+        <CheckBox
+          label="I agree"
+          isChecked={props.workflowState.disclaimerAccepted}
+          onChange={toggleChecked}
+        />
       </Flex>
     </Grid.Column>
   );
