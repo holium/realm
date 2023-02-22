@@ -317,7 +317,7 @@ export const Input = ({
       </LeftIcon>
     )}
     {leftLabel && leftLabel !== 'none' && (
-      <Text color="#639DF6" fontWeight="500" marginRight={2}>
+      <Text color="#639DF6" fontWeight={500} marginRight={2}>
         {leftLabel}
       </Text>
     )}
