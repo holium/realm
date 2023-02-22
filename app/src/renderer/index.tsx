@@ -14,8 +14,12 @@ if (sentryDsn) {
     dsn: process.env.SENTRY_DSN,
     integrations: [new BrowserTracing()],
     tracesSampleRate: 1,
-    // Remove when we've done the window system refactor and are no longer using webviews.
-    ignoreErrors: ['GUEST_VIEW_MANAGER_CALL'],
+    ignoreErrors: [
+      // Remove when we've done the window system refactor and are no longer using webviews.
+      'GUEST_VIEW_MANAGER_CALL',
+      // False alarm caused by react-dom/server renderToString.
+      'useLayoutEffect',
+    ],
   });
 } else {
   console.warn('Environment variable for Sentry is undefined.');
