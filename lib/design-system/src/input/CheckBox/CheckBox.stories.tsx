@@ -9,6 +9,10 @@ export const Default: ComponentStory<typeof CheckBox> = () => (
   <CheckBox label="Look at me, I am the label now" />
 );
 
-export const Error: ComponentStory<typeof CheckBox> = () => (
-  <CheckBox label="Look at me, I am the label now" isError />
+export const DefaultChecked: ComponentStory<typeof CheckBox> = () => (
+  <CheckBox label="Look at me, I am the label now" defaultChecked />
+);
+
+export const Disabled: ComponentStory<typeof CheckBox> = () => (
+  <CheckBox label="Look at me, I am the label now" disabled />
 );
