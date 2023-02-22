@@ -8,6 +8,8 @@ import {
   Row,
   Avatar,
   MenuItemProps,
+  Toggle,
+  Icon,
 } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { InlineEdit, useContextMenu } from 'renderer/components';
@@ -20,6 +22,7 @@ import { FileUploadParams } from 'os/services/ship/models/ship';
 import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { observer } from 'mobx-react-lite';
 
 type PeerType = {
   peer: string;
@@ -29,7 +32,7 @@ type PeerType = {
 type ChatInfoProps = {
   storage: IuseStorage;
 };
-export const ChatInfo = ({ storage }: ChatInfoProps) => {
+export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { selectedPath, metadata, type, updateMetadata, title, setSubroute } =
     useChatStore();
   const { friends, ship } = useServices();
@@ -50,7 +53,11 @@ export const ChatInfo = ({ storage }: ChatInfoProps) => {
   useEffect(() => {
     if (!selectedPath) return;
     ChatDBActions.getChatPeers(selectedPath).then((peers: PeerType[]) => {
-      setPeers(peers.sort((a: PeerType) => (a.peer === ship!.patp ? -1 : 1)));
+      setPeers(
+        peers.sort((a: PeerType) =>
+          a.role === 'host' ? -1 : a.peer === ship!.patp ? -1 : 1
+        )
+      );
     });
   }, [selectedPath]);
 
@@ -67,7 +74,7 @@ export const ChatInfo = ({ storage }: ChatInfoProps) => {
     setIsUploading(true);
     setUploadError('');
     ShipActions.uploadFile(params)
-      .then((url) => {
+      .then((url: string) => {
         setImage(url);
         editMetadata({ image: url });
       })
@@ -77,7 +84,9 @@ export const ChatInfo = ({ storage }: ChatInfoProps) => {
       .finally(() => setIsUploading(false));
   };
 
-  // const [description, setDescription] = useState('');
+  const amHost =
+    peers.find((peer) => peer.peer === ship!.patp)?.role === 'host';
+
   const patps = peers.map((peer) => peer.peer);
   if (!selectedPath || !title) return null;
   return (
@@ -150,6 +159,7 @@ export const ChatInfo = ({ storage }: ChatInfoProps) => {
               textAlign="center"
               width={350}
               value={editTitle}
+              editable={amHost}
               onChange={(evt: any) => {
                 setEditTitle(evt.target.value);
               }}
@@ -168,33 +178,123 @@ export const ChatInfo = ({ storage }: ChatInfoProps) => {
         </Flex>
       </Flex>
       {/* Settings */}
-      <Flex flexDirection="column">
-        <Box mb={100}>
+      <Flex my={2} flexDirection="column">
+        <Box mb={2}>
           <SectionDivider label="Settings" alignment="left" />
         </Box>
-
-        {/* <Text.Custom mt={3} mb={5} fontSize={2}>
-          Settings go here
-        </Text.Custom> */}
+        <Flex flexDirection="column">
+          {/* <Flex
+            width="100%"
+            px={2}
+            py={1}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text.Custom fontWeight={400} fontSize={2}>
+              Access
+            </Text.Custom>
+            <RadioGroup
+              customBg="transparent"
+              textColor="inherit"
+              options={[
+                { label: 'Public', value: 'public' },
+                { label: 'Private', value: 'private' },
+              ]}
+              onClick={(value) => {
+                console.log(value);
+              }}
+            />
+          </Flex> */}
+        </Flex>
+        <Flex flexDirection="column">
+          <Flex
+            width="100%"
+            px={2}
+            py={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Flex alignItems="center">
+              <Icon name="ChatReactionSetting" size={24} mr={2} />
+              <Text.Custom fontWeight={400} fontSize="14px">
+                Reactions
+              </Text.Custom>
+            </Flex>
+            <Toggle
+              disabled={!amHost}
+              initialChecked={true}
+              onChange={(isChecked) => {
+                // TODO - update settings in db
+                console.log('isChecked', isChecked);
+              }}
+            />
+          </Flex>
+          <Flex
+            width="100%"
+            px={2}
+            py={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Flex alignItems="center">
+              <Icon name="ChatHistorySetting" size={24} mr={2} />
+              <Text.Custom alignItems="center" fontWeight={400} fontSize="14px">
+                Chat history for new members
+              </Text.Custom>
+            </Flex>
+            <Toggle
+              disabled={!amHost}
+              initialChecked={false}
+              onChange={(isChecked) => {
+                // TODO - update settings in db
+                console.log('isChecked', isChecked);
+              }}
+            />
+          </Flex>
+        </Flex>
       </Flex>
       {/* Members */}
-      <Flex flexDirection="column">
+      <Flex my={2} flexDirection="column">
         <Box mb={1}>
           <SectionDivider label={`${peers.length} members`} alignment="left" />
         </Box>
-
         {peers.map((peer) => {
           const id = `${selectedPath}-peer-${peer.peer}`;
           const options = [];
-          if (peer.role !== 'host') {
+          if (peer.peer !== ship?.patp) {
+            // TODO check if peer is friend
+            options.push({
+              id: `${id}-add-friend`,
+              label: 'Add as friend',
+              onClick: (_evt: any) => {
+                // TODO - add as friend
+                console.log('adding friend', peer.peer);
+              },
+            });
+          }
+          if (peer.role !== 'host' && amHost) {
             options.push({
               id: `${id}-remove`,
               label: 'Remove',
               onClick: (_evt: any) => {
-                // ShipActions.removeFriend(friend.patp);
+                ChatDBActions.removePeer(selectedPath, peer.peer)
+                  .then(() => {
+                    console.log('removed peer');
+                  })
+                  .catch((e) => {
+                    console.error(e);
+                  });
               },
             });
           }
+          // options.push({
+          //   id: `${id}-profile`,
+          //   label: 'View Profile',
+          //   onClick: (_evt: any) => {
+          //     console.log('view profile');
+          //   },
+          // });
+
           return (
             <PeerRow
               key={id}
@@ -273,3 +373,5 @@ const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
     </Row>
   );
 };
+
+export const ChatInfo = observer(ChatInfoPresenter);
