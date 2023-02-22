@@ -51,6 +51,7 @@ const AirliftManagerPresenter = () => {
   // console.log('nodes', nodes);
   const nodes = Array.from(airlift.flowStore.nodes.values());
 
+  // const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(
     (params: any) => setEdges((es) => es.concat(params)),

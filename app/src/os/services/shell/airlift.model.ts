@@ -1,4 +1,4 @@
-import { Instance, types, castToSnapshot, getSnapshot } from 'mobx-state-tree';
+import { Instance, types, cast, getSnapshot } from 'mobx-state-tree';
 import { Node, NodeChange, applyNodeChanges } from 'reactflow';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -242,20 +242,20 @@ export const FlowStore = types
       self.nodes = cast(applyNodeChanges(changes, newNodes));
     },
     dropAirlift: (airlift: Node) => {
-      // self.nodes = types.array(NodeType).create(self.nodes.concat(airlift));
-      self.nodes = castToSnapshot(self.nodes.concat(airlift));
+      // self.nodes = types.array(nodetype).create(self.nodes.concat(airlift));
+      self.nodes = cast(self.nodes.concat(airlift));
     },
   }));
 
 export const AirliftStore = types
   .model('AirliftStore', {
-    // model: AirliftModel,
+    // model: airliftmodel,
     airlifts: types.map(types.map(AirliftModel)),
     flowStore: FlowStore,
   })
   .views((self) => ({
     initial(agents: any) {
-      /*      self.model = AirliftModel.create({
+      /*      self.model = airliftmodel.create({
       })
       const btcWallets = wallets.bitcoin;
       Object.entries(btcWallets).forEach(([key, wallet]) => {

@@ -78,7 +78,7 @@ const Services = types
         incoming: {},
         outgoing: {},
       });
-      self.airlift = castToSnapshot({});
+      self.airlift = castToSnapshot({ flowStore: {} });
     },
   }));
 

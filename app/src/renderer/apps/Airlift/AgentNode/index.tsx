@@ -1,4 +1,5 @@
 import { Flex } from '@holium/design-system';
+import { AirliftAgent } from './AirliftAgent';
 
 const handleStyle = { left: 10 };
 
@@ -26,6 +27,7 @@ export function AgentNode({ data, isConnectable }) {
         id="b"
         isConnectable={isConnectable}
   />*/}
+      <AirliftAgent desk="asdf" agent="asdf" />
     </Flex>
   );
 }

@@ -3,7 +3,6 @@ import { Flex, IconButton, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { Icon } from '@holium/design-system';
-import { AirliftActions } from 'renderer/logic/actions/airlift';
 
 const ICON_SIZE = 28;
 
@@ -13,20 +12,15 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
-  /*const onButtonDragStart = useCallback(
-    (evt: any) => {
-      evt.preventDefault();
-      window.addEventListener('mouseup', onButtonDragEnd);
-      const iconEvent = new CustomEvent('icon', {
-        detail: 'Airlift',
-      });
-      window.dispatchEvent(iconEvent);
-    },
-    []
-  );*/
   const onButtonDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+    event.preventDefault();
+    window.addEventListener('mouseup', onButtonDragEnd);
+    const iconEvent = new CustomEvent('icon', {
+      detail: 'Airlift',
+    });
+    window.dispatchEvent(iconEvent);
   };
 
   const onButtonDragEnd = useCallback(
@@ -37,8 +31,7 @@ export const AirliftCommandPalette: FC = observer(() => {
       });
       window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
-      // DesktopActions.openAppWindow(nativeApps['airlift'] as AppType);
-      AirliftActions.dropAirlift(spaces.selected!.path, 'agent');
+      // AirliftActions.dropAirlift(spaces.selected!.path, 'agent');
     },
     []
     /*[activeApp, anchorOffset, position, dimensions]*/

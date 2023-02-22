@@ -6,14 +6,12 @@ import { AirliftArm } from './AirliftArm';
 export type AirliftAgentProps = {
   desk: string;
   agent: string;
-  arms: any;
-  onDragStart: () => void;
-  onDragStop: () => void;
+  //  arms: any;
 };
 
 export const AirliftAgent: FC<AirliftAgentProps> = observer(
   (props: AirliftAgentProps) => {
-    const { desk, agent, arms } = props;
+    const { desk, agent } = props;
 
     return (
       <div>
@@ -26,14 +24,14 @@ export const AirliftAgent: FC<AirliftAgentProps> = observer(
         <AirliftArm desk={desk} agent={agent} arm="on-poke" />
         <AirliftArm desk={desk} agent={agent} arm="on-poke" />
         <AirliftArm desk={desk} agent={agent} arm="on-poke" />
-        {arms &&
+        {/*arms &&
           Object.entries(arms).map((arm: any) => {
             return (
               <div>
                 <AirliftArm desk={desk} agent={agent} arm={arm} />
               </div>
             );
-          })}
+          })*/}
       </div>
     );
   }
