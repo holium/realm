@@ -5,6 +5,7 @@ import { Peer, PeerConfig } from './Peer';
 import { RemotePeer } from './RemotePeer';
 import { PeerConnectionState, TrackKind } from './types';
 import { action, makeObservable, observable } from 'mobx';
+import { IAudioAnalyser, SpeakingDetectionAnalyser } from '../analysers';
 
 export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
@@ -25,14 +26,7 @@ export class LocalPeer extends Peer {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
   };
-  audioContext: AudioContext | null = null;
-  mediaStreamSource: MediaStreamAudioSourceNode | null = null;
-  analyser: AnalyserNode | null = null;
-  bufferLength: number = 0;
-  dataArray: Uint8Array | null = null;
-  currentFrameId: number = 0;
-  min: number = 0;
-  max: number = 0;
+  analysers: IAudioAnalyser[] = [];
 
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
@@ -137,33 +131,6 @@ export class LocalPeer extends Peer {
       });
   }
 
-  checkSpeaking(timestamp: DOMHighResTimeStamp) {
-    if (
-      this.analyser === null ||
-      this.dataArray === null ||
-      this.bufferLength === 0
-    ) {
-      console.log('LocalPeer.checkSpeaking called with invalid internal state');
-      return;
-    }
-    this.currentFrameId = requestAnimationFrame(this.checkSpeaking.bind(this));
-    //window.cancelAnimationFrame(frameId);
-    // this.analyser?.getFloatTimeDomainData(this.dataArray);
-    // this.analyser?.getByteTimeDomainData(this.dataArray);
-    this.analyser?.getByteFrequencyData(this.dataArray);
-    let total = 0;
-    for (let i = 0; i < this.bufferLength; i++) {
-      // let v = dataArray[i] / 128.0;
-      total += this.dataArray[i];
-    }
-    // const avg = total / (this.analyser.fftSize * 1.0);
-    const avg = total / (this.bufferLength * 1.0);
-    if (this.min !== avg) {
-      this.min = avg;
-    }
-    console.log('volume change: average => %o', this.min);
-  }
-
   setMedia(stream: MediaStream) {
     this.stream = stream;
     this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
@@ -176,27 +143,8 @@ export class LocalPeer extends Peer {
         this.emit(PeerEvent.VideoTrackAdded, stream, video);
       });
     }
-    console.log('listening for a speaker...');
-    // start listening for talking
-    this.audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    this.analyser = this.audioContext.createAnalyser();
-    this.mediaStreamSource = this.audioContext.createMediaStreamSource(
-      this.stream
-    );
-    this.mediaStreamSource.connect(this.analyser);
-    // this.analyser.connect(this.audioContext.destination);
-    this.analyser.minDecibels = -50;
-    this.analyser.maxDecibels = -10;
-    this.analyser.smoothingTimeConstant = 0.85;
-    this.analyser.fftSize = 64;
-    this.bufferLength = this.analyser.frequencyBinCount; // 0.5 of fft
-    // analyser.fftSize = 2048;
-    // smallest this can be is 32 .. any lower throws an exception
-    // We can use Float32Array instead of Uint8Array if we want higher precision
-    // const dataArray = new Float32Array(bufferLength);
-    this.dataArray = new Uint8Array(this.bufferLength);
-    requestAnimationFrame(this.checkSpeaking.bind(this));
+    // initialize the speaking detection analyser
+    this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
     this.status = PeerConnectionState.Broadcasting;
   }
 
@@ -211,10 +159,9 @@ export class LocalPeer extends Peer {
       this.emit(PeerEvent.VideoTrackRemoved, track);
     });
     this.videoTracks.clear();
+    this.analysers.forEach((analyser: IAudioAnalyser) => {
+      analyser.detach();
+    });
     this.stream = null;
-    if (this.currentFrameId !== 0) {
-      cancelAnimationFrame(this.currentFrameId);
-      this.currentFrameId = 0;
-    }
   }
 }
