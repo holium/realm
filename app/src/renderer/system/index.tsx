@@ -49,10 +49,11 @@ const ShellPresenter = () => {
   const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
 
   useEffect(() => {
+    // Sync Electron with MobX state.
     if (desktop.isIsolationMode) {
-      DesktopActions.disableIsolationMode();
-    } else {
       DesktopActions.enableIsolationMode();
+    } else {
+      DesktopActions.disableIsolationMode();
     }
   }, [desktop.isIsolationMode]);
 
