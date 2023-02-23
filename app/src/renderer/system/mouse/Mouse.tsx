@@ -11,6 +11,7 @@ export const Mouse = () => {
   const visible = useToggle(false);
   const mouseLayerTracking = useToggle(false);
   const disabled = useToggle(false);
+  const [icon, setIcon] = useState<'Airlift' | undefined>(undefined);
 
   useEffect(() => {
     window.electron.app.onMouseOver(visible.toggleOn);
@@ -34,6 +35,7 @@ export const Mouse = () => {
 
     window.electron.app.onMouseDown(active.toggleOn);
     window.electron.app.onMouseUp(active.toggleOff);
+    window.electron.app.onMouseIcon(setIcon);
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!active.isOn) setCoords({ x: e.clientX, y: e.clientY });
@@ -60,6 +62,7 @@ export const Mouse = () => {
       isActive={active.isOn}
       isVisible={visible.isOn}
       color={mouseColor}
+      icon={icon}
     />
   );
 };

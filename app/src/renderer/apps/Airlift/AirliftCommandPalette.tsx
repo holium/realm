@@ -25,12 +25,18 @@ export const AirliftCommandPalette: FC = observer(() => {
 
   const onButtonDragEnd = useCallback(
     (evt: any) => {
-      evt.preventDefault();
+      // evt.preventDefault();
       const iconEvent = new CustomEvent('icon', {
         detail: null,
       });
       window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
+      const onDropEvent = new MouseEvent('drop', {
+        clientX: evt.clientX,
+        clientY: evt.clientY,
+      });
+      console.log('dispatching drop event');
+      window.dispatchEvent(onDropEvent);
       // AirliftActions.dropAirlift(spaces.selected!.path, 'agent');
     },
     []

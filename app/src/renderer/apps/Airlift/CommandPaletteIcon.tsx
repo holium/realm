@@ -19,9 +19,7 @@ export const CommandPaletteIcon: FC<CommandPaletteIconProps> = observer(
       (evt: any) => {
         evt.preventDefault();
         window.addEventListener('mouseup', onButtonDragEnd);
-        const iconEvent = new CustomEvent('icon', {
-          detail: 'Airlift',
-        });
+        const iconEvent = new CustomEvent('icon');
         window.dispatchEvent(iconEvent);
       },
       []

@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect, Fragment } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
 import { IsDevice } from './isDevice';
+import { Icon } from '@holium/design-system';
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 
@@ -23,7 +24,10 @@ interface AnimatedCursorProps {
   isActiveClickable?: boolean;
   isVisible: boolean;
   initialRender?: boolean;
+  icon?: 'Airlift';
 }
+
+const ICON_SIZE = 28;
 
 /**
  * @param {string} color - rgb color value
@@ -47,9 +51,11 @@ const CursorCore = ({
   isActive,
   isActiveClickable,
   isVisible = true,
+  icon,
 }: AnimatedCursorProps) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
   const cursorInnerRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
   const previousTimeRef = useRef<number>();
   const endX = useRef(0);
@@ -100,12 +106,19 @@ const CursorCore = ({
     if (!cursorInnerRef.current || !cursorOuterRef.current) return;
     cursorInnerRef.current.style.top = `${coords.y}px`;
     cursorInnerRef.current.style.left = `${coords.x}px`;
+    if (iconRef.current) {
+      iconRef.current.style.top = `${coords.y - ICON_SIZE / 2}px`;
+      iconRef.current.style.left = `${coords.x - ICON_SIZE / 2}px`;
+    }
     if (cursorInnerRef.current.style.transform === 'none') {
       // if for some reason the transform isnt set yet.
       cursorInnerRef.current.style.transform =
         'translate(-50%, -50%) scale(1.0)';
       cursorOuterRef.current.style.transform =
         'translate(-50%, -50%) scale(1.0)';
+      if (iconRef.current) {
+        iconRef.current.style.transform = 'translate(-50%, -50%) scale(1.0)';
+      }
     }
     endX.current = coords.x;
     endY.current = coords.y;
@@ -178,7 +191,7 @@ const CursorCore = ({
       width: innerSize,
       height: innerSize,
       borderRadius: '50%',
-      visibility: isVisible ? 'visible' : 'hidden',
+      visibility: !icon && isVisible ? 'visible' : 'hidden',
     },
     resize: {
       width: innerSize,
@@ -190,6 +203,11 @@ const CursorCore = ({
 
   return (
     <Fragment>
+      {icon && (
+        <motion.div ref={iconRef} style={{ position: 'absolute' }}>
+          <Icon name={icon} size={ICON_SIZE} />
+        </motion.div>
+      )}
       <motion.div
         ref={cursorOuterRef}
         animate={{
@@ -198,7 +216,7 @@ const CursorCore = ({
         transition={{ opacity: 0.05 }}
         style={{
           ...styles.cursorOuter,
-          visibility: isVisible ? 'visible' : 'hidden',
+          visibility: !icon && isVisible ? 'visible' : 'hidden',
         }}
       />
       <motion.div

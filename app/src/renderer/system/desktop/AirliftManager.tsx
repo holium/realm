@@ -60,6 +60,7 @@ const AirliftManagerPresenter = () => {
 
   const onDragOver = useCallback((event: any) => {
     event.preventDefault();
+    console.log('dragging over');
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
@@ -72,6 +73,7 @@ const AirliftManagerPresenter = () => {
 
   const onDrop = useCallback(
     (event: any) => {
+      console.log('ondrop success');
       event.preventDefault();
 
       const reactFlowBounds = reactFlowWrapper.current!.getBoundingClientRect();
@@ -157,6 +159,8 @@ const AirliftManagerPresenter = () => {
             }}
             onDrop={onDrop}
             onDragOver={onDragOver}
+            onDragEnter={() => console.log('drag enter')}
+            onClick={() => console.log('click')}
           />
         </div>
       </ReactFlowProvider>

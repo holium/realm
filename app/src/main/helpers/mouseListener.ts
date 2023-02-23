@@ -12,10 +12,26 @@ ipcRenderer.on('add-mouse-listeners', () => {
   const handleMouseUp = () => ipcRenderer.invoke('mouse-up');
   const handleMouseOver = () => ipcRenderer.invoke('mouse-over');
   const handleMouseOut = () => ipcRenderer.invoke('mouse-out');
+  const handleMouseIcon = (event: any) => {
+    console.log('mouse icon event', event);
+    ipcRenderer.invoke('icon', event.detail);
+  };
+  const handleDrop = (event: any) => {
+    console.log('mouse drop event', event);
+    ipcRenderer.invoke('drop');
+  };
 
   window.addEventListener('mouseover', handleMouseOver);
   window.addEventListener('mouseout', handleMouseOut);
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mousedown', handleMouseDown);
-  window.addEventListener('mouseup', handleMouseUp);
+  window.addEventListener('mouseup', () => {
+    console.log('mouse up');
+    handleMouseUp();
+  });
+  window.addEventListener('icon', (event) => handleMouseIcon(event));
+  window.addEventListener('ondrop', (event) => {
+    console.log('got drop on mouse listener');
+    handleDrop(event);
+  });
 });
