@@ -1,0 +1,1 @@
+export { SpeakingDetectionAnalyser } from './SpeakingDetectionAnalyser';

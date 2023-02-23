@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { Flex, Icons, Text, FlexProps } from 'renderer/components';
+import { Flex, Text, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
@@ -11,7 +11,8 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Icon } from '@holium/design-system';
+import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
   person: string;
@@ -122,16 +123,23 @@ const SpeakerPresenter = (props: ISpeaker) => {
         alignItems="center"
         gap={10}
       >
-        <Avatar
-          clickable={false}
-          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          borderRadiusOverride="6px"
-          simple
-          size={36}
-          avatar={metadata && metadata.avatar}
-          patp={person}
-          sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
-        />
+        <Flex
+          style={{ pointerEvents: 'none' }}
+          flexDirection="column"
+          alignItems="center"
+          gap={0}
+        >
+          <Avatar
+            clickable={false}
+            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+            borderRadiusOverride="6px"
+            simple
+            size={36}
+            avatar={metadata && metadata.avatar}
+            patp={person}
+            sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
+          />
+        </Flex>
         <Text
           style={{ pointerEvents: 'none' }}
           opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
@@ -145,19 +153,41 @@ const SpeakerPresenter = (props: ISpeaker) => {
         </Text>
       </Flex>
       <Flex
+        position="relative"
         opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-        gap={4}
         flexDirection="row"
         justifyContent="center"
         alignItems="center"
         style={{ pointerEvents: 'none' }}
       >
-        <Flex style={{ height: 15, pointerEvents: 'none' }}>
+        <Flex height={26} mt="1px">
+          {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
+        </Flex>
+
+        <Flex position="absolute" style={{ height: 18, pointerEvents: 'none' }}>
           {peer?.isMuted && (
-            <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
+            <Icon
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              name="MicOff"
+              size={18}
+              opacity={0.5}
+            />
           )}
         </Flex>
-        {sublabel}
+        {!peer?.isMuted && !peer?.isSpeaking && (
+          <Flex
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            position="absolute"
+          >
+            {sublabel}
+          </Flex>
+        )}
       </Flex>
     </SpeakerWrapper>
   );
