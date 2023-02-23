@@ -11,7 +11,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Icon } from '@holium/design-system';
 import { AudioWave } from 'renderer/components/Icons/audioviz';
 
 interface ISpeaker {
@@ -129,7 +129,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
           alignItems="center"
           gap={0}
         >
-          <AudioWave speaking={peer?.isSpeaking} />
           <Avatar
             clickable={false}
             opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
@@ -154,19 +153,46 @@ const SpeakerPresenter = (props: ISpeaker) => {
         </Text>
       </Flex>
       <Flex
+        position="relative"
         opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-        gap={4}
         flexDirection="row"
         justifyContent="center"
         alignItems="center"
         style={{ pointerEvents: 'none' }}
       >
-        <Flex style={{ height: 15, pointerEvents: 'none' }}>
+        <Flex height={26} mt={1}>
+          {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
+        </Flex>
+
+        <Flex
+          mb={1}
+          position="absolute"
+          style={{ height: 18, pointerEvents: 'none' }}
+        >
           {peer?.isMuted && (
-            <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
+            <Icon
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              name="MicOff"
+              size={18}
+              opacity={0.5}
+            />
           )}
         </Flex>
-        {sublabel}
+        {!peer?.isMuted && !peer?.isSpeaking && (
+          <Flex
+            mb={1}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            position="absolute"
+          >
+            {sublabel}
+          </Flex>
+        )}
       </Flex>
     </SpeakerWrapper>
   );
