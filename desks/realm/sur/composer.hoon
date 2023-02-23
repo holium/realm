@@ -3,7 +3,7 @@
 +$  space-path  path:pth
 +$  stack-id    @t
 ::
-+$  dimensions
++$  bounds
   $:  x=@ud       :: [1.0 - 10.0]
       y=@ud       :: [1.0 - 10.0]
       height=@ud  :: [1.0 - 10.0]
