@@ -46,6 +46,7 @@ const SvgComponent = forwardRef<
       width={width || '1em'}
       height={height || '1em'}
       fill={
+        // Fill color must be in rgb or it won't always work.
         color ? `rgb(${rgbToString(hexToRgb(getVar(color)))})` : 'currentcolor'
       }
       ref={svgRef}
