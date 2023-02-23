@@ -1,4 +1,4 @@
-import { LocalPeer } from 'peer/LocalPeer';
+import { LocalPeer } from '../peer/LocalPeer';
 
 export interface IAudioAnalyser {
   attach: (peer: LocalPeer) => void;

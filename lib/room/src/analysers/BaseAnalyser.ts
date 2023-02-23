@@ -1,4 +1,4 @@
-import { LocalPeer } from 'peer/LocalPeer';
+import { LocalPeer } from '../peer/LocalPeer';
 import { IAudioAnalyser } from './types';
 
 export class BaseAnalyser implements IAudioAnalyser {
