@@ -142,7 +142,7 @@ const InstallAgentPresenter = () => {
               });
           }}
         >
-          {loading ? <Spinner size={0} color="#FFF" /> : 'Next'}
+          {loading ? <Spinner size={0} /> : 'Next'}
         </Button.TextButton>
       </Box>
     </Flex>
