@@ -1,20 +1,10 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-
-import {
-  Grid,
-  Text,
-  Flex,
-  ActionButton,
-  Icons,
-  Spinner,
-  Box,
-  TextButton,
-} from 'renderer/components';
+import { ActionButton, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Flex, Text, Button, Box, Icon } from '@holium/design-system';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
@@ -41,12 +31,12 @@ const InstallAgentPresenter = () => {
   };
 
   return (
-    <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
-      <Text fontSize={4} mb={1} variant="body">
+    <Flex flexDirection="column" width="100%">
+      <Text.Custom fontSize={4} mb={1}>
         Installation
-      </Text>
+      </Text.Custom>
 
-      <Text
+      <Text.Custom
         fontSize={2}
         fontWeight={200}
         lineHeight="20px"
@@ -56,7 +46,7 @@ const InstallAgentPresenter = () => {
       >
         We need to install Realm and other agents on your Urbit server. These
         handle core OS functionality.
-      </Text>
+      </Text.Custom>
       <Flex flexDirection="column" alignItems="center" justifyContent="center">
         <Avatar
           simple={false}
@@ -76,11 +66,16 @@ const InstallAgentPresenter = () => {
           flexDirection="column"
         >
           {shipNick && (
-            <Text position="absolute" fontWeight={500}>
+            <Text.Custom
+              textAlign="center"
+              position="absolute"
+              fontWeight={500}
+            >
               {shipNick}
-            </Text>
+            </Text.Custom>
           )}
-          <Text
+          <Text.Custom
+            textAlign="center"
             transition={{ duration: 0, y: { duration: 0 } }}
             animate={{
               opacity: shipNick ? 0.5 : 1,
@@ -88,7 +83,7 @@ const InstallAgentPresenter = () => {
             }}
           >
             {shipName}
-          </Text>
+          </Text.Custom>
         </Flex>
         <Flex flexDirection="column" alignItems="center">
           <ActionButton
@@ -100,59 +95,57 @@ const InstallAgentPresenter = () => {
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
               ) : isInstalled ? (
-                <Icons ml={2} size={1} name="CheckCircle" />
+                <Icon ml={2} size={20} name="CheckCircle" />
               ) : (
-                <Icons ml={2} size={1} name="DownloadCircle" />
+                <Icon ml={2} size={20} name="DownloadCircle" />
               )
             }
             onClick={installRealm}
           >
             Install Realm
           </ActionButton>
-          <Text
+          <Text.Custom
             fontSize={2}
             lineHeight="20px"
             variant="body"
             opacity={0.6}
             mt={3}
             fontWeight={isError ? 500 : 200}
-            color={isError ? 'red' : ''}
+            color={isError ? 'intent-alert' : undefined}
           >
             {isError && onboarding.installer.errorMessage}
             {!isInstalled && !isError && 'This will just take a minute'}
             {isInstalled &&
               !isError &&
               'Congrats! You are ready to enter a new world.'}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
-      <Box position="absolute" height={40} bottom={20} right={24}>
-        <Flex
-          mt={5}
-          width="100%"
+      <Box position="absolute" bottom={24} right={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          justifyContent="center"
           alignItems="center"
-          justifyContent="space-between"
+          fontWeight={500}
+          style={{ minWidth: 45 }}
+          disabled={!isInstalled || installing}
+          onClick={async (_evt: any) => {
+            setLoading(true);
+            OnboardingActions.completeOnboarding()
+              .then(() => {
+                setLoading(false);
+              })
+              .catch((err) => {
+                console.error(err);
+                setLoading(false);
+              });
+          }}
         >
-          <TextButton
-            disabled={!onboarding.installer.isLoaded || installing}
-            style={{ minWidth: 45 }}
-            onClick={async (_evt: any) => {
-              setLoading(true);
-              OnboardingActions.completeOnboarding()
-                .then(() => {
-                  setLoading(false);
-                })
-                .catch((err) => {
-                  console.error(err);
-                  setLoading(false);
-                });
-            }}
-          >
-            {loading ? <Spinner size={0} /> : 'Next'}
-          </TextButton>
-        </Flex>
+          {loading ? <Spinner size={0} color="#FFF" /> : 'Next'}
+        </Button.TextButton>
       </Box>
-    </Grid.Column>
+    </Flex>
   );
 };
 
