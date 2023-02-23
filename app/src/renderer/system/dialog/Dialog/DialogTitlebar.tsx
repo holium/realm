@@ -18,7 +18,6 @@ export interface DialogTitlebarProps {
   onDragStop: any;
   zIndex: number;
   showDevToolsToggle: boolean;
-  windowColor: string;
   onClose?: () => void;
 }
 
@@ -27,7 +26,6 @@ export const DialogTitlebar = ({
   onDragStop,
   onDragStart,
   zIndex,
-  windowColor,
   onClose,
 }: DialogTitlebarProps) => {
   const { theme } = useServices();
@@ -67,5 +65,5 @@ export const DialogTitlebar = ({
         )}
       </ToolbarContainer>
     );
-  }, [zIndex, iconColor, windowColor]);
+  }, [dragControls, iconColor, onClose, onDragStart, onDragStop, zIndex]);
 };

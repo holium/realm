@@ -234,7 +234,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           shell={shell}
           dragControls={dragControls}
           currentTheme={theme.currentTheme}
-          windowColor={windowColor}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
