@@ -28,12 +28,6 @@ const InstallAgentPresenter = () => {
       if (!onboarding.ship) {
         throw new Error('Ship not set, please restart onboarding.');
       }
-      // ShipActions.saveMyContact({
-      //   patp: onboarding.ship.patp,
-      //   color: onboarding.ship.color,
-      //   nickname: onboarding.ship.nickname,
-      //   avatar: onboarding.ship.avatar,
-      // });
       setIsError(onboarding.installer.state === 'error');
       setIsInstalled(onboarding.installer.state === 'loaded');
     });
