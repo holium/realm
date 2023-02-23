@@ -66,7 +66,7 @@ const SpacesTrayAppPresenter = () => {
         justifyContent="space-between"
       >
         <Text.Custom
-          fontWeight="600"
+          fontWeight={500}
           textTransform="uppercase"
           pl={1}
           opacity={0.7}

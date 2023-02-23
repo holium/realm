@@ -37,8 +37,8 @@ const initialOnboardingDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: false,
     component: (props: BaseDialogProps) => <DisclaimerDialog {...props} />,
-    isValidated: (state: any) => {
-      return state && state.disclaimerAccepted;
+    isValidated: (state) => {
+      return state?.disclaimerAccepted;
     },
     onOpen: () => {
       ShellActions.setBlur(true);
