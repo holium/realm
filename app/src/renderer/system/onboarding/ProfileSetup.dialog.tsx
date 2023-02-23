@@ -5,13 +5,7 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-import {
-  Text,
-  Label,
-  FormControl,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { FormControl, TextButton, Spinner } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
@@ -21,6 +15,7 @@ import {
   AvatarInput,
   Box,
   Flex,
+  Text,
   TextInput,
 } from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -161,19 +156,12 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
 
   return (
     <Flex flex={1} flexDirection="column">
-      <Text fontSize={4} mb={1} variant="body">
+      <Text.Body fontSize={4} fontWeight={600} mb={4}>
         Profile
-      </Text>
-      <Text
-        fontSize={2}
-        fontWeight={200}
-        lineHeight="20px"
-        variant="body"
-        opacity={0.6}
-        mb={4}
-      >
+      </Text.Body>
+      <Text.Body fontSize={2} lineHeight="20px" opacity={0.6} mb={4}>
         We’ve loaded the profile from your ship. Feel free to edit it here.
-      </Text>
+      </Text.Body>
       <Flex flex={1} flexDirection="row" gap={24} alignItems="center">
         {profileLoading ? (
           <Flex flex={1} alignItems="center" justifyContent="center">
@@ -202,11 +190,11 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                 flexDirection="column"
               >
                 {nickname.state.value && (
-                  <Text position="absolute" fontWeight={500}>
+                  <Text.Body position="absolute" fontWeight={500}>
                     {nickname.state.value}
-                  </Text>
+                  </Text.Body>
                 )}
-                <Text
+                <Text.Body
                   transition={{
                     opacity: {
                       duration: nickname.computed.isDirty ? 0.15 : 0,
@@ -219,13 +207,13 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   }}
                 >
                   {shipName}
-                </Text>
+                </Text.Body>
               </Flex>
             </Flex>
             <Flex flex={1} justifyContent="center">
               <FormControl.FieldSet>
                 <FormControl.Field>
-                  <Label>Sigil Color</Label>
+                  <Text.Label>Sigil Color</Text.Label>
                   <Flex flex={1} alignItems="flex-start" position="relative">
                     <ColorTile
                       id="signup-color-tile"
@@ -264,7 +252,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   </Flex>
                 </FormControl.Field>
                 <FormControl.Field>
-                  <Label>Avatar</Label>
+                  <Text.Label>Avatar</Text.Label>
                   <AvatarInput
                     id="profile-setup-avatar-input"
                     tabIndex={3}
@@ -275,7 +263,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   />
                 </FormControl.Field>
                 <FormControl.Field>
-                  <Label>Nickname</Label>
+                  <Text.Label>Nickname</Text.Label>
                   <TextInput
                     id="onboarding-nickname"
                     name="nickname"
