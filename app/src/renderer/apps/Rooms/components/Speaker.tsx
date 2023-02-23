@@ -160,15 +160,11 @@ const SpeakerPresenter = (props: ISpeaker) => {
         alignItems="center"
         style={{ pointerEvents: 'none' }}
       >
-        <Flex height={26} mt={1}>
+        <Flex height={26} mt="1px">
           {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
         </Flex>
 
-        <Flex
-          mb={1}
-          position="absolute"
-          style={{ height: 18, pointerEvents: 'none' }}
-        >
+        <Flex position="absolute" style={{ height: 18, pointerEvents: 'none' }}>
           {peer?.isMuted && (
             <Icon
               initial={{ opacity: 0 }}
@@ -183,7 +179,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
         </Flex>
         {!peer?.isMuted && !peer?.isSpeaking && (
           <Flex
-            mb={1}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

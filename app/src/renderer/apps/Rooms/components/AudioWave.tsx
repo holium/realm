@@ -20,32 +20,29 @@ export type IconProps = SVGProps<SVGSVGElement> &
 
 const lines = [
   {
-    path: ' M43,13.411428451538086 C43,13.411428451538086 43,24.588571548461914 43,24.588571548461914',
+    path: 'M76 77V43',
     delay: 0.3,
+    scaleY: 0.5,
   },
   {
-    path: ' M37,15.588571548461914 C37,15.588571548461914 37,22.411428451538086 37,22.411428451538086',
+    path: 'M92 69L92 51',
     delay: 0.2,
+    scaleY: 1,
   },
   {
-    path: ' M31,9.177143096923828 C31,9.177143096923828 31,28.822856903076172 31,28.822856903076172',
+    path: 'M28 69L28 51',
     delay: 0.1,
+    scaleY: 1,
   },
   {
-    path: ' M25,4.82285737991333 C25,4.82285737991333 25,33.17714309692383 25,33.17714309692383',
-    delay: 0,
-  },
-  {
-    path: ' M19,12.693714141845703 C19,12.693714141845703 19,25.26178741455078 19,25.26178741455078',
-    delay: 0.1,
-  },
-  {
-    path: ' M13,15.588571548461914 C13,15.588571548461914 13,22.411428451538086 13,22.411428451538086',
+    path: 'M60 92V28',
     delay: 0.2,
+    scaleY: 1,
   },
   {
-    path: ' M7,9.177143096923828 C7,9.177143096923828 7,28.822856903076172 7,28.822856903076172',
+    path: 'M44 77V43',
     delay: 0.3,
+    scaleY: 0.5,
   },
 ];
 
@@ -61,14 +58,14 @@ export const AudioWave = ({ speaking }: any) => {
         repeat: Infinity,
         repeatType: 'reverse',
         delay: delay,
-        duration: 0.25,
+        duration: 0.3,
       },
     }),
     hushed: {
-      stroke: '#b0d4ff',
+      stroke: '#9ecaff',
       scaleY: 0,
       transition: {
-        duration: 0.15,
+        duration: 0.2,
       },
     },
   };
@@ -84,7 +81,7 @@ export const AudioWave = ({ speaking }: any) => {
   return (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 50 50"
+      viewBox="0 0 120 120"
       width="26"
       height="26"
     >
@@ -97,12 +94,12 @@ export const AudioWave = ({ speaking }: any) => {
           custom={value.delay}
           strokeLinecap={'round'}
           strokeLinejoin={'miter'}
-          strokeMiterlimit={10}
-          pathLength={value.pathLength || undefined}
+          scale={value.scaleY}
+          // strokeMiterlimit={10}
           fillOpacity={0}
           stroke={defaultStrokeColor}
           strokeOpacity={1}
-          strokeWidth={4}
+          strokeWidth={10}
           d={value.path}
         ></motion.path>
       ))}

@@ -160,7 +160,6 @@ export class RemotePeer extends Peer {
   }
 
   _onData(data: any) {
-    console.log(`_onData => %o`, data);
     this.emit(PeerEvent.ReceivedData, JSON.parse(data));
   }
 
@@ -172,7 +171,6 @@ export class RemotePeer extends Peer {
     if (this.status !== PeerConnectionState.Connected) {
       console.warn("can't send data unless connected, still trying");
     }
-    console.log(`sendData to remote peers => %o`, data);
     this.peer?.send(JSON.stringify(data));
   }
 
