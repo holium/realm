@@ -22,27 +22,22 @@ const lines = [
   {
     path: 'M76 77V43',
     delay: 0.3,
-    scaleY: 0.5,
   },
   {
     path: 'M92 69L92 51',
     delay: 0.2,
-    scaleY: 1,
   },
   {
     path: 'M28 69L28 51',
     delay: 0.1,
-    scaleY: 1,
   },
   {
     path: 'M60 92V28',
     delay: 0.2,
-    scaleY: 1,
   },
   {
     path: 'M44 77V43',
     delay: 0.3,
-    scaleY: 0.5,
   },
 ];
 
@@ -94,7 +89,6 @@ export const AudioWave = ({ speaking }: any) => {
           custom={value.delay}
           strokeLinecap={'round'}
           strokeLinejoin={'miter'}
-          scale={value.scaleY}
           // strokeMiterlimit={10}
           fillOpacity={0}
           stroke={defaultStrokeColor}
