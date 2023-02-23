@@ -733,7 +733,6 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
-    // save the profile data if realm is installed
     await this.closeConduit();
     this.state.endRealmInstall('success');
     this.state.setRealmInstalled();
