@@ -5,22 +5,19 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-
-import {
-  Grid,
-  Text,
-  Label,
-  FormControl,
-  Box,
-  Flex,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
-import { observer, Observer } from 'mobx-react';
+import { FormControl, TextButton, Spinner } from 'renderer/components';
+import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { Avatar, AvatarInput, TextInput } from '@holium/design-system';
+import {
+  Avatar,
+  AvatarInput,
+  Box,
+  Flex,
+  Text,
+  TextInput,
+} from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface ColorTileProps {
@@ -120,7 +117,6 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
         profileForm.fields.nickname.actions.onChange(profile.nickname);
         profileForm.fields.color.actions.onChange(profile.color);
         setAvatarImg(profile.avatar);
-        //  || '');
         setProfileLoading(false);
       })
       .catch((err) => {
@@ -159,35 +155,21 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
   };
 
   return (
-    <Grid.Column pl={12} noGutter lg={12} xl={12}>
-      <Text fontSize={4} mb={1} variant="body">
+    <Flex flex={1} flexDirection="column">
+      <Text.Body fontSize={4} fontWeight={600} mb={4}>
         Profile
-      </Text>
-      <Text
-        fontSize={2}
-        fontWeight={200}
-        lineHeight="20px"
-        variant="body"
-        opacity={0.6}
-        mb={4}
-      >
+      </Text.Body>
+      <Text.Body fontSize={2} lineHeight="20px" opacity={0.6} mb={4}>
         We’ve loaded the profile from your ship. Feel free to edit it here.
-      </Text>
-      <Grid.Row noGutter>
+      </Text.Body>
+      <Flex flex={1} flexDirection="row" gap={24} alignItems="center">
         {profileLoading ? (
           <Flex flex={1} alignItems="center" justifyContent="center">
             <Spinner size={3} />
           </Flex>
         ) : (
           <>
-            <Grid.Column
-              noGutter
-              align="center"
-              justify="center"
-              lg={6}
-              xl={6}
-              pr={6}
-            >
+            <Flex flex={1} flexDirection="column" alignItems="center">
               <Avatar
                 simple={false}
                 size={52}
@@ -196,46 +178,42 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                 borderRadiusOverride="6px"
                 sigilColor={[sigilColor.state.value, 'white']}
               />
-              <Observer>
-                {() => (
-                  <Flex
-                    style={{ width: 210 }}
-                    transition={{
-                      duration: nickname.computed.isDirty ? 0.15 : 0,
-                    }}
-                    animate={{ marginBottom: nickname.state.value ? 24 : 0 }}
-                    position="relative"
-                    mt={3}
-                    alignItems="center"
-                    flexDirection="column"
-                  >
-                    {nickname.state.value && (
-                      <Text position="absolute" fontWeight={500}>
-                        {nickname.state.value}
-                      </Text>
-                    )}
-                    <Text
-                      transition={{
-                        opacity: {
-                          duration: nickname.computed.isDirty ? 0.15 : 0,
-                        },
-                        y: { duration: nickname.computed.isDirty ? 0.15 : 0 },
-                      }}
-                      animate={{
-                        opacity: nickname.state.value ? 0.5 : 1,
-                        y: nickname.state.value ? 22 : 0,
-                      }}
-                    >
-                      {shipName}
-                    </Text>
-                  </Flex>
+              <Flex
+                mt={3}
+                width={210}
+                transition={{
+                  duration: nickname.computed.isDirty ? 0.15 : 0,
+                }}
+                animate={{ marginBottom: nickname.state.value ? 24 : 0 }}
+                position="relative"
+                alignItems="center"
+                flexDirection="column"
+              >
+                {nickname.state.value && (
+                  <Text.Body position="absolute" fontWeight={500}>
+                    {nickname.state.value}
+                  </Text.Body>
                 )}
-              </Observer>
-            </Grid.Column>
-            <Grid.Column noGutter justify="center" lg={6} xl={6}>
+                <Text.Body
+                  transition={{
+                    opacity: {
+                      duration: nickname.computed.isDirty ? 0.15 : 0,
+                    },
+                    y: { duration: nickname.computed.isDirty ? 0.15 : 0 },
+                  }}
+                  animate={{
+                    opacity: nickname.state.value ? 0.5 : 1,
+                    y: nickname.state.value ? 22 : 0,
+                  }}
+                >
+                  {shipName}
+                </Text.Body>
+              </Flex>
+            </Flex>
+            <Flex flex={1} justifyContent="center">
               <FormControl.FieldSet>
                 <FormControl.Field>
-                  <Label>Sigil Color</Label>
+                  <Text.Label>Sigil Color</Text.Label>
                   <Flex flex={1} alignItems="flex-start" position="relative">
                     <ColorTile
                       id="signup-color-tile"
@@ -274,7 +252,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   </Flex>
                 </FormControl.Field>
                 <FormControl.Field>
-                  <Label>Avatar</Label>
+                  <Text.Label>Avatar</Text.Label>
                   <AvatarInput
                     id="profile-setup-avatar-input"
                     tabIndex={3}
@@ -285,7 +263,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   />
                 </FormControl.Field>
                 <FormControl.Field>
-                  <Label>Nickname</Label>
+                  <Text.Label>Nickname</Text.Label>
                   <TextInput
                     id="onboarding-nickname"
                     name="nickname"
@@ -303,10 +281,10 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   />
                 </FormControl.Field>
               </FormControl.FieldSet>
-            </Grid.Column>
+            </Flex>
           </>
         )}
-      </Grid.Row>
+      </Flex>
       <Box position="absolute" height={40} bottom={20} right={24}>
         <Flex
           mt={5}
@@ -319,7 +297,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
           </TextButton>
         </Flex>
       </Box>
-    </Grid.Column>
+    </Flex>
   );
 };
 
