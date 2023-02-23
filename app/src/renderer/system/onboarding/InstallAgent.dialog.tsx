@@ -25,9 +25,6 @@ const InstallAgentPresenter = () => {
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => {
       setInstalling(false);
-      if (!onboarding.ship) {
-        throw new Error('Ship not set, please restart onboarding.');
-      }
       setIsError(onboarding.installer.state === 'error');
       setIsInstalled(onboarding.installer.state === 'loaded');
     });
