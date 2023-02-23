@@ -6,20 +6,23 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
 import {
-  Grid,
   Text,
   Label,
   FormControl,
-  Box,
-  Flex,
   TextButton,
   Spinner,
 } from 'renderer/components';
-import { observer, Observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { Avatar, AvatarInput, TextInput } from '@holium/design-system';
+import {
+  Avatar,
+  AvatarInput,
+  Box,
+  Flex,
+  TextInput,
+} from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface ColorTileProps {
@@ -157,7 +160,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
   };
 
   return (
-    <Grid.Column pl={12} lg={12} xl={12}>
+    <Flex flex={1} flexDirection="column">
       <Text fontSize={4} mb={1} variant="body">
         Profile
       </Text>
@@ -178,7 +181,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
           </Flex>
         ) : (
           <>
-            <Grid.Column noGutter align="center" justify="center" lg={6} xl={6}>
+            <Flex flex={1} flexDirection="column" alignItems="center">
               <Avatar
                 simple={false}
                 size={52}
@@ -187,43 +190,39 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                 borderRadiusOverride="6px"
                 sigilColor={[sigilColor.state.value, 'white']}
               />
-              <Observer>
-                {() => (
-                  <Flex
-                    style={{ width: 210 }}
-                    transition={{
-                      duration: nickname.computed.isDirty ? 0.15 : 0,
-                    }}
-                    animate={{ marginBottom: nickname.state.value ? 24 : 0 }}
-                    position="relative"
-                    mt={3}
-                    alignItems="center"
-                    flexDirection="column"
-                  >
-                    {nickname.state.value && (
-                      <Text position="absolute" fontWeight={500}>
-                        {nickname.state.value}
-                      </Text>
-                    )}
-                    <Text
-                      transition={{
-                        opacity: {
-                          duration: nickname.computed.isDirty ? 0.15 : 0,
-                        },
-                        y: { duration: nickname.computed.isDirty ? 0.15 : 0 },
-                      }}
-                      animate={{
-                        opacity: nickname.state.value ? 0.5 : 1,
-                        y: nickname.state.value ? 22 : 0,
-                      }}
-                    >
-                      {shipName}
-                    </Text>
-                  </Flex>
+              <Flex
+                mt={3}
+                width={210}
+                transition={{
+                  duration: nickname.computed.isDirty ? 0.15 : 0,
+                }}
+                animate={{ marginBottom: nickname.state.value ? 24 : 0 }}
+                position="relative"
+                alignItems="center"
+                flexDirection="column"
+              >
+                {nickname.state.value && (
+                  <Text position="absolute" fontWeight={500}>
+                    {nickname.state.value}
+                  </Text>
                 )}
-              </Observer>
-            </Grid.Column>
-            <Grid.Column noGutter justify="center" lg={6} xl={6}>
+                <Text
+                  transition={{
+                    opacity: {
+                      duration: nickname.computed.isDirty ? 0.15 : 0,
+                    },
+                    y: { duration: nickname.computed.isDirty ? 0.15 : 0 },
+                  }}
+                  animate={{
+                    opacity: nickname.state.value ? 0.5 : 1,
+                    y: nickname.state.value ? 22 : 0,
+                  }}
+                >
+                  {shipName}
+                </Text>
+              </Flex>
+            </Flex>
+            <Flex flex={1} justifyContent="center">
               <FormControl.FieldSet>
                 <FormControl.Field>
                   <Label>Sigil Color</Label>
@@ -294,7 +293,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   />
                 </FormControl.Field>
               </FormControl.FieldSet>
-            </Grid.Column>
+            </Flex>
           </>
         )}
       </Flex>
@@ -310,7 +309,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
           </TextButton>
         </Flex>
       </Box>
-    </Grid.Column>
+    </Flex>
   );
 };
 
