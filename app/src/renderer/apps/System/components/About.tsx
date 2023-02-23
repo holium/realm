@@ -6,7 +6,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AboutPanelPresenter = () => {
-  const { theme, desktop } = useServices();
+  const { theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 

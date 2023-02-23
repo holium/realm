@@ -15,10 +15,6 @@ export function getReleaseChannel() {
   if (fs.existsSync(settingsFilename)) {
     var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
     releaseChannel = settings.releaseChannel || releaseChannel;
-  } else {
-    if (releaseChannel === 'alpha') {
-      fs.writeFileSync(settingsFilename, JSON.stringify({ releaseChannel }));
-    }
   }
   return releaseChannel;
 }
