@@ -237,5 +237,3 @@ export class HoliumAPI {
     }
   }
 }
-
-export default HoliumAPI;

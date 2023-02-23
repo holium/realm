@@ -1,7 +1,14 @@
 import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Sigil, Anchor, Spinner } from 'renderer/components';
-import { TextInput, Flex, Text, Button, Icon } from '@holium/design-system';
+import { Anchor, Spinner } from 'renderer/components';
+import {
+  Avatar,
+  TextInput,
+  Flex,
+  Text,
+  Button,
+  Icon,
+} from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -144,8 +151,8 @@ const TransactionDetailPresenter = () => {
           {!transaction.theirPatp ? (
             <Icon name="Spy" size={18} opacity={0.5} />
           ) : (
-            <Sigil
-              color={
+            <Avatar
+              sigilColor={
                 theme.currentTheme.mode === 'light'
                   ? ['black', 'white']
                   : ['white', 'black']

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Sigil, RadioList } from 'renderer/components';
+import { Flex, Text, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
+import { Avatar } from '@holium/design-system';
 
 type SystemPanelType =
   | 'system'
@@ -25,46 +26,45 @@ const SystemAppPresenter = () => {
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>('theme');
 
   return (
-    <Flex height={'100%'}>
-      <Flex gap={0} flexDirection="row" flex={5} overflowX="hidden">
-        {/* left hand side, list selector view */}
-        <Flex gap={12} flexDirection="column" p="12px">
+    <Flex flex={1} minHeight={0}>
+      {/* left hand side, list selector view */}
+      <Flex flex={1} gap={12} flexDirection="column" p={3}>
+        <Flex
+          flexDirection="row"
+          alignItems="center"
+          gap={8}
+          maxWidth={'220px'}
+        >
+          {/* sig and patp */}
+          <Avatar
+            // borderColor={backgroundColor}
+            borderRadiusOverride="4px"
+            simple
+            size={55}
+            avatar={ship!.avatar}
+            patp={person}
+            sigilColor={[ship!.color || '#000000', 'white']}
+          />
           <Flex
-            flexDirection="row"
-            alignItems="center"
-            gap={8}
-            maxWidth={'220px'}
+            flexDirection="column"
+            ml={2}
+            overflowX={'hidden'}
+            style={{
+              overflowWrap: 'break-word',
+            }}
           >
-            {/* sig and patp */}
-            <Sigil
-              // borderColor={backgroundColor}
-              borderRadiusOverride="4px"
-              simple
-              size={55}
-              avatar={ship!.avatar}
-              patp={person}
-              color={[ship!.color || '#000000', 'white']}
-            />
-            <Flex
-              flexDirection="column"
-              ml={2}
-              overflowX={'hidden'}
-              style={{
-                overflowWrap: 'break-word',
-              }}
-            >
-              {ship!.nickname && (
-                <Text fontWeight={500} fontSize={2}>
-                  {ship!.nickname}
-                </Text>
-              )}
-              <Text fontWeight={300} fontSize={2}>
-                {ship!.patp}
+            {ship!.nickname && (
+              <Text fontWeight={500} fontSize={2}>
+                {ship!.nickname}
               </Text>
-            </Flex>
+            )}
+            <Text fontWeight={300} fontSize={2}>
+              {ship!.patp}
+            </Text>
           </Flex>
+        </Flex>
 
-          {/* <Flex width={'100%'}>
+        {/* <Flex width={'100%'}>
             <Input
             className="realm-cursor-text-cursor"
             type="text"
@@ -84,58 +84,57 @@ const SystemAppPresenter = () => {
             />
           </Flex> */}
 
-          <Flex overflowY="auto" flexDirection="row" flex={4}>
-            {/* menu / list  */}
-            <RadioList
-              customBg={windowColor}
-              textColor={theme.currentTheme.textColor}
-              selected={systemPanel}
-              options={[
-                {
-                  icon: 'System',
-                  label: 'System',
-                  value: 'system',
-                  sublabel: 'Display, sounds, notifications',
-                },
-                {
-                  icon: 'Palette',
-                  label: 'Theme',
-                  value: 'theme',
-                  sublabel: 'Colors, wallpaper, customization',
-                },
-                {
-                  icon: 'AccountSettings',
-                  label: 'Account',
-                  value: 'account',
-                  sublabel: 'Profile, hosting info',
-                },
-                {
-                  icon: 'Holium',
-                  label: 'About',
-                  value: 'about',
-                  sublabel: 'Build number, IDs, etc.',
-                },
-                {
-                  icon: 'QuestionCircle',
-                  label: 'Help',
-                  value: 'help',
-                  sublabel: 'Support and Documentation',
-                },
-              ]}
-              onClick={(value: SystemPanelType) => {
-                setSystemPanelType(value);
-              }}
-            />
-          </Flex>
+        <Flex flex={1} overflowY="auto">
+          {/* menu / list  */}
+          <RadioList
+            customBg={windowColor}
+            textColor={theme.currentTheme.textColor}
+            selected={systemPanel}
+            options={[
+              {
+                icon: 'System',
+                label: 'System',
+                value: 'system',
+                sublabel: 'Display, sounds, notifications',
+              },
+              {
+                icon: 'Palette',
+                label: 'Theme',
+                value: 'theme',
+                sublabel: 'Colors, wallpaper, customization',
+              },
+              {
+                icon: 'AccountSettings',
+                label: 'Account',
+                value: 'account',
+                sublabel: 'Profile, hosting info',
+              },
+              {
+                icon: 'Holium',
+                label: 'About',
+                value: 'about',
+                sublabel: 'Build number, IDs, etc.',
+              },
+              {
+                icon: 'QuestionCircle',
+                label: 'Help',
+                value: 'help',
+                sublabel: 'Support and Documentation',
+              },
+            ]}
+            onClick={(value: SystemPanelType) => {
+              setSystemPanelType(value);
+            }}
+          />
         </Flex>
+      </Flex>
 
-        <Flex maxHeight={'100%'} overflowY="auto" width={'75%'}>
-          {systemPanel === 'system' && <SystemPanel />}
-          {systemPanel === 'theme' && <ThemePanel />}
-          {systemPanel === 'account' && <AccountPanel />}
-          {systemPanel === 'about' && <AboutPanel />}
-          {systemPanel === 'help' && <HelpPanel />}
-        </Flex>
+      <Flex flex={3} overflowX="hidden">
+        {systemPanel === 'system' && <SystemPanel />}
+        {systemPanel === 'theme' && <ThemePanel />}
+        {systemPanel === 'account' && <AccountPanel />}
+        {systemPanel === 'about' && <AboutPanel />}
+        {systemPanel === 'help' && <HelpPanel />}
       </Flex>
     </Flex>
   );

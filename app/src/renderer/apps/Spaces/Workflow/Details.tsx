@@ -18,7 +18,6 @@ import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { observer } from 'mobx-react';
 import { TwitterPicker } from 'react-color';
-
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
@@ -56,7 +55,7 @@ export const createSpaceForm = ({
   const colorField = createField({
     id: 'color',
     form: spaceForm,
-    initialValue: color,
+    initialValue: color || '#000000',
     validationSchema: yup
       .string()
       .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
@@ -134,10 +133,18 @@ const SpacesCreateFormPresenter = ({
       if (workflowState.image) {
         setCrestOption('image');
         setWorkspaceState({ crestOption });
+      } else {
+        setWorkspaceState({ crestOption });
       }
     } else {
       setWorkspaceState({
         access: 'public',
+      });
+    }
+    if (!workflowState.color) {
+      setWorkspaceState({
+        crestOption: 'color',
+        color: '#000000',
       });
     }
     if (edit) {
@@ -164,7 +171,7 @@ const SpacesCreateFormPresenter = ({
       }
     }
 
-    () => {
+    return () => {
       document.removeEventListener('click', handleClickOutside, true);
     };
   }, []);
@@ -172,8 +179,8 @@ const SpacesCreateFormPresenter = ({
   const { nameField, descriptionField, pictureField, colorField } =
     useMemo(() => {
       if (edit) {
-        const space = spaces.spaces.get(edit.space)!;
-        return createSpaceForm(space);
+        const space = spaces.spaces.get(edit.space);
+        if (space) return createSpaceForm(space);
       } else if (workflowState.type === 'group') {
         return createSpaceForm({
           name: workflowState.title,
@@ -181,14 +188,14 @@ const SpacesCreateFormPresenter = ({
           color: workflowState.color,
           picture: workflowState.image,
         });
-      } else {
-        return createSpaceForm({
-          name: '',
-          description: '',
-          color: workflowState.color,
-          picture: '',
-        });
       }
+
+      return createSpaceForm({
+        name: '',
+        description: '',
+        color: workflowState.color,
+        picture: '',
+      });
     }, []);
 
   return (
@@ -301,16 +308,17 @@ const SpacesCreateFormPresenter = ({
                   borderRadius: 6,
                   paddingRight: 0,
                 }}
-                value={colorField.state.value.replace('#', '')}
+                value={colorField.state.value}
                 error={colorField.computed.ifWasEverBlurredThenError}
                 onChange={(e: any) => {
-                  if (isValidHexColor(`#${e.target.value}`)) {
+                  const color = e.target.value.replace('#', '');
+                  if (isValidHexColor(`#${color}`)) {
                     setWorkspaceState({
-                      color: `#${e.target.value}`,
+                      color: `#${color}`,
                       crestOption: 'color',
                     });
                   }
-                  colorField.actions.onChange(e.target.value);
+                  colorField.actions.onChange(color);
                 }}
                 onFocus={colorField.actions.onFocus}
                 onBlur={colorField.actions.onBlur}

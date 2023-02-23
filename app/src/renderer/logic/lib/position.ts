@@ -1,3 +1,5 @@
+import { Dimensions } from 'os/types';
+
 export const calculateAnchorPoint = (
   event: any,
   anchorOffset: any,
@@ -75,7 +77,7 @@ export const calculateAnchorPointById = (
 export const calculatePopoverAnchorById = (
   popoverId: string,
   config: {
-    dimensions?: { width: number; height: number };
+    dimensions?: Dimensions;
     anchorOffset: { x?: number; y?: number };
     centered?: boolean;
   }

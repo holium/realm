@@ -16,13 +16,20 @@ const Roles = types.enumeration([
   'owner',
   'moderator',
 ]);
+export type RolesType = Instance<typeof Roles>;
 const Status = types.enumeration(['invited', 'joined', 'host']);
 
-export const MembersModel = types.model({
-  roles: types.array(Roles),
-  alias: types.maybe(types.string),
-  status: Status,
-});
+export const MembersModel = types
+  .model({
+    roles: types.array(Roles),
+    alias: types.maybe(types.string),
+    status: Status,
+  })
+  .actions((self) => ({
+    setRoles(roles: RolesType[]) {
+      self.roles = cast(roles);
+    },
+  }));
 
 export type MemberType = Instance<typeof MembersModel>;
 
@@ -91,6 +98,9 @@ export const MembershipStore = types
     setSpace(path: SpacePath) {
       const members = self.spaces.get(path);
       if (members) self.selected = members;
+    },
+    editMember(path: SpacePath, patp: Patp, roles: RolesType[]) {
+      self.spaces.get(path)!.get(patp)!.setRoles(roles);
     },
   }));
 

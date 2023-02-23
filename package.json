@@ -7,10 +7,10 @@
     "lib/multiplayer",
     "lib/conduit",
     "lib/room",
-    "lib/room/test-ui"
+    "lib/room/test-ui-vite"
   ],
   "scripts": {
-    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-multiplayer tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-multiplayer tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui-vite tsc",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
@@ -27,22 +27,27 @@
     "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
     "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
     "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
-    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
+    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win",
+    "build-storybook": "build-storybook",
+    "storybook": "start-storybook -p 6006"
   },
   "dependencies": {
+    "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
-    "bitcore-lib": "^8.25.40",
-    "eth-block-tracker": "^6.0.0",
-    "eth-json-rpc-infura": "^5.1.0",
-    "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
-    "memoize-one": "^6.0.0",
-    "non-fungible-token-abi": "^1.0.1",
     "qrcode.react": "^3.1.0",
     "socket.io-client": "^4.5.4"
   },
   "version": "0.1.11-alpha",
   "devDependencies": {
+    "@storybook/addon-actions": "^6.5.13",
+    "@storybook/addon-essentials": "^6.5.13",
+    "@storybook/addon-interactions": "^6.5.13",
+    "@storybook/addon-links": "^6.5.13",
+    "@storybook/builder-webpack5": "^6.5.13",
+    "@storybook/manager-webpack5": "^6.5.13",
+    "@storybook/react": "^6.5.13",
+    "@storybook/testing-library": "^0.0.13",
     "@typescript-eslint/parser": "^5.49.0",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
@@ -50,6 +55,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.8.3",
+    "storybook-addon-state": "^1.0.3",
     "typescript": "^4.9.4"
   },
   "preconstruct": {

@@ -1,7 +1,7 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
 
@@ -25,8 +25,8 @@ export class ShellService extends BaseService {
         checkDouble
       );
     },
-    setDesktopDimensions: async (width: number, height: number) => {
-      return await ipcRenderer.invoke(
+    setDesktopDimensions: (width: number, height: number) => {
+      return ipcRenderer.invoke(
         'realm.shell.set-desktop-dimensions',
         width,
         height

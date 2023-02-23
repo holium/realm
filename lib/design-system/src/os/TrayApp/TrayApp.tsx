@@ -94,8 +94,9 @@ export const TrayApp = ({
           animate={{
             x: coords.x,
             y: coords.y,
+            height: coords.height,
+            width: coords.width,
             opacity: isOpen ? 1 : 0,
-
             display: 'block',
           }}
           exit={{

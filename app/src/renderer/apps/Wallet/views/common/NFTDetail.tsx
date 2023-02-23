@@ -1,11 +1,10 @@
 import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
-import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 
-export const NFTDetail: FC = () => {
+export const NFTDetail = () => {
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
@@ -44,5 +43,3 @@ export const NFTDetail: FC = () => {
     </Flex>
   );
 };
-
-export default NFTDetail;

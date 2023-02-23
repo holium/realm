@@ -21,7 +21,8 @@ type Params<T> = {
   // Callback to invoke if the scroll position should be recalculated
   updateScrollOffsetForScrollToIndex: () => void;
 };
-export default function calculateSizeAndPositionDataAndUpdateScrollOffset({
+
+export function calculateSizeAndPositionDataAndUpdateScrollOffset({
   cellCount,
   cellSize,
   computeMetadataCallback,

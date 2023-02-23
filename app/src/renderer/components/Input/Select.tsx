@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { RadioOption, Text, Icons, Flex } from '../';
 import { ThemeType } from 'renderer/theme';
-import MenuItemStyle from '../MenuItem/MenuItem.styles';
+import { MenuItemStyle } from '../MenuItem/MenuItem.styles';
 
 interface SelectWrapperStyle {
   customBg?: string;

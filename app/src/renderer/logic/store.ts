@@ -19,7 +19,6 @@ import { MembershipStore } from 'os/services/spaces/models/members';
 import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
-import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
@@ -51,7 +50,6 @@ const Services = types
     visas: VisaModel,
     // docket: DocketStore,
     courier: CourierStore,
-    contacts: ContactStore,
     friends: FriendsStore,
     beacon: NotificationStore,
     bulletin: BulletinStore,
@@ -72,10 +70,6 @@ const Services = types
       self.bazaar = castToSnapshot({});
       self.membership = castToSnapshot({});
       self.courier = castToSnapshot({});
-      self.contacts = castToSnapshot({
-        ourPatp: '',
-        rolodex: {},
-      });
       self.friends = castToSnapshot({});
       self.beacon = castToSnapshot({});
       self.visas = castToSnapshot({
@@ -130,7 +124,6 @@ const services = Services.create({
     outgoing: {},
   },
   courier: {},
-  contacts: { ourPatp: '' },
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
@@ -232,12 +225,6 @@ OSActions.onBoot((_event: any, response: any) => {
   });
 
   if (response.models && response.ship) {
-    if (response.models.contacts) {
-      applySnapshot(
-        servicesStore.contacts,
-        castToSnapshot(response.models.contacts!)
-      );
-    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(response.models.friends)
@@ -340,12 +327,6 @@ OSActions.onConnected(
         castToSnapshot(initials.models.courier)
       );
     }
-    if (initials.models.contacts) {
-      applySnapshot(
-        servicesStore.contacts,
-        castToSnapshot(initials.models.contacts)
-      );
-    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
@@ -408,9 +389,6 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'visas') {
       applyPatch(servicesStore.visas, value.patch);
-    }
-    if (value.resource === 'contacts') {
-      applyPatch(servicesStore.contacts, value.patch);
     }
     if (value.resource === 'courier') {
       applyPatch(servicesStore.courier, value.patch);

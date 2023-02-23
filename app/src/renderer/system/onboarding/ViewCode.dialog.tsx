@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Sigil,
   Grid,
   Text,
   Flex,
@@ -11,10 +10,10 @@ import {
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { Button, Icon, TextInput } from '@holium/design-system';
+import { Avatar, Button, Icon, TextInput } from '@holium/design-system';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 
-const ViewCode = observer(function Component() {
+const ViewCodePresenter = () => {
   const { theme } = useServices();
   const [accessCode, setAccessCode] = useState('');
   const { onboarding } = useServices();
@@ -49,8 +48,8 @@ const ViewCode = observer(function Component() {
           alignItems="center"
         >
           <Box height={48} width={48} mb={12}>
-            <Sigil
-              color={sigilColors}
+            <Avatar
+              sigilColor={sigilColors}
               simple={false}
               size={48}
               patp={planet?.patp ?? ''}
@@ -98,6 +97,6 @@ const ViewCode = observer(function Component() {
       </Flex>
     </Grid.Column>
   );
-});
+};
 
-export default ViewCode;
+export const ViewCode = observer(ViewCodePresenter);

@@ -5,7 +5,6 @@ import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Box,
-  Sigil,
   Text,
   Input,
   IconButton,
@@ -20,10 +19,12 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import Portal from 'renderer/system/dialog/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 interface LoginProps {
   addShip: () => void;
@@ -37,8 +38,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
-
-  const [incorrectPassword, setIncorrectPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Setting up options menu
   const menuWidth = 180;
@@ -74,15 +74,30 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   }, [pendingShip]);
 
   const login = async () => {
-    const loggedIn = await AuthActions.login(
+    const status = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
     );
-    if (!loggedIn) {
-      // @ts-expect-error
-      submitRef.current.blur();
-      setIncorrectPassword(true);
+    if (status && status.startsWith('error:')) {
+      if (submitRef.current) {
+        // @ts-ignore
+        submitRef.current.blur();
+      }
+      const parts = status.split(':');
+      // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+      //  assume 400 means they may have changed ship code. ask them to enter the new one.
+      if (parts.length > 1 && parseInt(parts[1]) === 400) {
+        setLoginError('missing');
+        ShellActions.openDialogWithStringProps('reset-code-dialog', {
+          ship: pendingShip!.patp,
+          // @ts-ignore
+          password: passwordRef.current?.value,
+        });
+      } else {
+        // assume all others are incorrect passwords
+        setLoginError('password');
+      }
     }
     trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
@@ -124,14 +139,14 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               gap={24}
             >
               <Box>
-                <Sigil
+                <Avatar
                   isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
                   avatar={pendingShip.avatar}
                   patp={pendingShip.patp}
-                  color={[pendingShip.color || '#000000', 'white']}
+                  sigilColor={[pendingShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -195,7 +210,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     name="password"
                     type="password"
                     rightInteractive
-                    error={hasFailed || incorrectPassword}
+                    error={hasFailed || loginError !== ''}
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex gap={4} justifyContent="center" alignItems="center">
@@ -269,13 +284,19 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     }
                   />
 
-                  <FormControl.Error
-                    style={{ height: 15, fontSize: 14 }}
-                    textShadow="0.5px 0.5px #080000"
-                  >
-                    {hasFailed && 'Connection to your ship has been refused.'}
-                    {incorrectPassword && 'Incorrect password.'}
-                  </FormControl.Error>
+                  {(['password', 'missing', 'code'].indexOf(loginError) !==
+                    -1 ||
+                    hasFailed) && (
+                    <FormControl.Error
+                      style={{ height: 15, fontSize: 14 }}
+                      textShadow="0.5px 0.5px #080000"
+                    >
+                      {hasFailed && 'Connection to your ship has been refused.'}
+                      {loginError === 'password' && 'Incorrect password.'}
+                      {loginError === 'missing' && 'Unable to connect to ship.'}
+                      {loginError === 'code' && 'Error saving new ship code'}
+                    </FormControl.Error>
+                  )}
                 </Flex>
               </Flex>
             </Flex>

@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 
 import {
   Grid,
-  Sigil,
   Text,
   Flex,
   ActionButton,
@@ -15,33 +14,38 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
+import { Avatar } from '@holium/design-system';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
-  const shipName = onboarding.ship!.patp;
-  const shipNick = onboarding.ship!.nickname;
-  const shipColor = onboarding.ship!.color!;
-  const avatar = onboarding.ship!.avatar;
+  if (!onboarding.ship) return null;
+
+  const shipName = onboarding.ship.patp;
+  const shipNick = onboarding.ship.nickname;
+  const shipColor = onboarding.ship.color!;
+  const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => {
       setInstalling(false);
+      setIsError(onboarding.installer.state === 'error');
+      setIsInstalled(onboarding.installer.state === 'loaded');
     });
   };
-
-  const isError = onboarding.installer.state === 'error';
-  const isInstalled = onboarding.installer.state === 'loaded';
 
   return (
     <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
       <Text fontSize={4} mb={1} variant="body">
         Installation
       </Text>
+
       <Text
         fontSize={2}
         fontWeight={200}
@@ -54,13 +58,13 @@ const InstallAgentPresenter = () => {
         handle core OS functionality.
       </Text>
       <Flex flexDirection="column" alignItems="center" justifyContent="center">
-        <Sigil
+        <Avatar
           simple={false}
           size={52}
           avatar={avatar}
           patp={shipName}
           borderRadiusOverride="6px"
-          color={[shipColor, 'white']}
+          sigilColor={[shipColor, 'white']}
         />
         <Flex
           style={{ width: 210 }}
@@ -95,7 +99,7 @@ const InstallAgentPresenter = () => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : onboarding.installer.isLoaded ? (
+              ) : isInstalled ? (
                 <Icons ml={2} size={1} name="CheckCircle" />
               ) : (
                 <Icons ml={2} size={1} name="DownloadCircle" />
@@ -152,6 +156,4 @@ const InstallAgentPresenter = () => {
   );
 };
 
-const InstallAgent = observer(InstallAgentPresenter);
-
-export default InstallAgent;
+export const InstallAgent = observer(InstallAgentPresenter);

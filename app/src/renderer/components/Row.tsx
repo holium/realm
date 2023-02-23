@@ -43,5 +43,3 @@ export const Row = ({ gutter, children, ...props }: RowProps) => {
     </Flex>
   );
 };
-
-export default { Row };

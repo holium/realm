@@ -101,5 +101,3 @@ Menu.defaultProps = {
   id: Math.random(),
   preventDefault: true,
 };
-
-export default Menu;

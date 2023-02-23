@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { TextInput } from './TextInput';
-import Icon from '../../general/Icon/Icon';
+import { Icon } from '../../general/Icon/Icon';
 import { Button } from '../../general/Button/Button';
 
 export default {

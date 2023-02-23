@@ -1,6 +1,6 @@
 import { MouseEventHandler } from 'react';
 import { MenuWrapper } from '../Menu';
-import Portal from 'renderer/system/dialog/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { MenuItem } from '../MenuItem';
 
@@ -108,5 +108,3 @@ export const ContextMenu = () => {
     </Portal>
   );
 };
-
-export default ContextMenu;
