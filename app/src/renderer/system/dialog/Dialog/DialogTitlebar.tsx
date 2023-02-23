@@ -67,5 +67,5 @@ export const DialogTitlebar = ({
         )}
       </ToolbarContainer>
     );
-  }, [zIndex, iconColor, windowColor]);
+  }, [dragControls, iconColor, onClose, onDragStart, onDragStop, zIndex]);
 };
