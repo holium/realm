@@ -16,8 +16,8 @@ ipcRenderer.on('add-mouse-listeners', () => {
     console.log('mouse icon event', event);
     ipcRenderer.invoke('icon', event.detail);
   };
-  const handleDrop = (event: any) => {
-    console.log('mouse drop event', event);
+  const handleDrop = () => {
+    console.log('mouse drop event');
     ipcRenderer.invoke('drop');
   };
 
@@ -30,8 +30,8 @@ ipcRenderer.on('add-mouse-listeners', () => {
     handleMouseUp();
   });
   window.addEventListener('icon', (event) => handleMouseIcon(event));
-  window.addEventListener('ondrop', (event) => {
+  window.addEventListener('drop', () => {
     console.log('got drop on mouse listener');
-    handleDrop(event);
+    handleDrop();
   });
 });

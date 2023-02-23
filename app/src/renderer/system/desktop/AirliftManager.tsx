@@ -158,9 +158,6 @@ const AirliftManagerPresenter = () => {
               dispatchEvent(new MouseEvent('mouseup'));
             }}
             onDrop={onDrop}
-            onDragOver={onDragOver}
-            onDragEnter={() => console.log('drag enter')}
-            onClick={() => console.log('click')}
           />
         </div>
       </ReactFlowProvider>

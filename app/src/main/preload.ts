@@ -92,10 +92,7 @@ const appPreload = {
     });
   },
   onDrop(callback: () => void) {
-    ipcRenderer.on('drop', (_) => {
-      console.log('ondrop callback');
-      callback();
-    });
+    ipcRenderer.on('drop', callback);
   },
 };
 

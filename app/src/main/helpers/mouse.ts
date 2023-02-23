@@ -43,7 +43,7 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
     mouseWindow.webContents.send('icon', icon);
   });
 
-  ipcMain.handle('drop', (_) => {
+  ipcMain.handle('drop', () => {
     console.log('drop event');
     mouseWindow.webContents.send('drop');
   });
