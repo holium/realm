@@ -17,7 +17,7 @@ export class SpeakingDetectionAnalyser extends BaseAnalyser {
     analyser.attach(peer);
     return analyser;
   }
-  private detect(timestamp: DOMHighResTimeStamp) {
+  private detect(_timestamp: DOMHighResTimeStamp) {
     this.currentFrameId = requestAnimationFrame(this.detect.bind(this));
     this.analyser?.getByteFrequencyData(this.dataArray!);
     let total = 0;
@@ -29,14 +29,12 @@ export class SpeakingDetectionAnalyser extends BaseAnalyser {
       this.lo = 0;
       this.hi++;
       if (!this.peer?.isSpeaking && this.hi > 24) {
-        console.log('you are speaking');
         this.peer?.isSpeakingChanged(true);
       }
     } else {
       this.lo++;
       this.hi = 0;
       if (this.peer?.isSpeaking && this.lo > 64) {
-        console.log('you are not speaking');
         this.peer?.isSpeakingChanged(false);
       }
     }

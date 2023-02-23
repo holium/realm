@@ -12,7 +12,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { Avatar, Icon } from '@holium/design-system';
-import { AudioWave } from 'renderer/components/Icons/audioviz';
+import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
   person: string;
