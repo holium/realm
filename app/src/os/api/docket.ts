@@ -123,7 +123,7 @@ export const DocketApi = {
                 `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
               );
               reject(`timeout forming alliance with ${ship}`);
-            }, 60000);
+            }, 300000);
 
             conduit.poke(allyShip(ship)).catch((e) => {
               console.log(e);
@@ -173,7 +173,7 @@ export const DocketApi = {
               await conduit.unsubscribe(subscriptionId);
               console.log(`timeout deleting ally ${ship}`);
               reject(`timeout deleting ally ${ship}`);
-            }, 60000);
+            }, 300000);
             conduit
               .poke({
                 app: 'treaty',

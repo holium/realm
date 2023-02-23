@@ -20,6 +20,8 @@ const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   if (!onboarding.ship) return null;
 
@@ -33,17 +35,17 @@ const InstallAgentPresenter = () => {
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => {
       setInstalling(false);
+      setIsError(onboarding.installer.state === 'error');
+      setIsInstalled(onboarding.installer.state === 'loaded');
     });
   };
-
-  const isError = onboarding.installer.state === 'error';
-  const isInstalled = onboarding.installer.state === 'loaded';
 
   return (
     <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
       <Text fontSize={4} mb={1} variant="body">
         Installation
       </Text>
+
       <Text
         fontSize={2}
         fontWeight={200}
@@ -97,7 +99,7 @@ const InstallAgentPresenter = () => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : onboarding.installer.isLoaded ? (
+              ) : isInstalled ? (
                 <Icons ml={2} size={1} name="CheckCircle" />
               ) : (
                 <Icons ml={2} size={1} name="DownloadCircle" />

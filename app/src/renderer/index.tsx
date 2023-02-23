@@ -24,7 +24,7 @@ if (sentryDsn) {
     ignoreErrors: ['GUEST_VIEW_MANAGER_CALL'],
   });
 } else {
-  console.error('Environment variable for Sentry is undefined.');
+  console.warn('Environment variable for Sentry is undefined.');
 }
 const amplitudeApiKey = isProd
   ? process.env.AMPLITUDE_API_KEY
@@ -36,7 +36,7 @@ if (amplitudeApiKey) {
     },
   });
 } else {
-  console.error('Environment variable for Amplitude is undefined.');
+  console.warn('Environment variable for Amplitude is undefined.');
 }
 
 const container = document.getElementById('root')!;
