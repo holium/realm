@@ -201,20 +201,27 @@ const AccountPanelPresenter = () => {
             </Flex>
           </Flex>
 
-          {!isLoading && (
-            <TextButton
-              style={{ fontWeight: 400 }}
-              showBackground
-              textColor={accentColor}
-              highlightColor={accentColor}
-              disabled={!profileForm.computed.isValid}
-              onClick={profileForm.actions.submit}
-            >
-              Save
-            </TextButton>
-          )}
-
-          {isLoading && <Spinner size={1} />}
+          <Flex
+            height="24px"
+            width="100%"
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            {isLoading ? (
+              <Spinner size={1} />
+            ) : (
+              <TextButton
+                style={{ fontWeight: 400 }}
+                showBackground
+                textColor={accentColor}
+                highlightColor={accentColor}
+                disabled={!profileForm.computed.isValid}
+                onClick={profileForm.actions.submit}
+              >
+                Save
+              </TextButton>
+            )}
+          </Flex>
         </Flex>
       </Card>
       <Text opacity={0.7} fontSize={3} fontWeight={500}>
