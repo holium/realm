@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { Flex, Icons, Text, FlexProps } from 'renderer/components';
+import { Flex, Text, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
@@ -12,6 +12,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { Avatar } from '@holium/design-system';
+import { AudioWave } from 'renderer/components/Icons/audioviz';
 
 interface ISpeaker {
   person: string;
@@ -122,16 +123,24 @@ const SpeakerPresenter = (props: ISpeaker) => {
         alignItems="center"
         gap={10}
       >
-        <Avatar
-          clickable={false}
-          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          borderRadiusOverride="6px"
-          simple
-          size={36}
-          avatar={metadata && metadata.avatar}
-          patp={person}
-          sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
-        />
+        <Flex
+          style={{ pointerEvents: 'none' }}
+          flexDirection="column"
+          alignItems="center"
+          gap={0}
+        >
+          <AudioWave speaking={peer?.isSpeaking} />
+          <Avatar
+            clickable={false}
+            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+            borderRadiusOverride="6px"
+            simple
+            size={36}
+            avatar={metadata && metadata.avatar}
+            patp={person}
+            sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
+          />
+        </Flex>
         <Text
           style={{ pointerEvents: 'none' }}
           opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
@@ -155,17 +164,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
         <Flex style={{ height: 15, pointerEvents: 'none' }}>
           {peer?.isMuted && (
             <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
-          )}
-          {peer?.isSpeaking && (
-            <Text
-              style={{ pointerEvents: 'none' }}
-              color={textColor}
-              alignItems="center"
-              fontSize={1}
-              fontWeight={400}
-            >
-              speaking
-            </Text>
           )}
         </Flex>
         {sublabel}
