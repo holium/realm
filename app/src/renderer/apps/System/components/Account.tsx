@@ -96,7 +96,7 @@ const AccountPanelPresenter = () => {
   });
 
   return (
-    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Text fontSize={7} fontWeight={600} mb={6}>
         Account
       </Text>
@@ -106,14 +106,10 @@ const AccountPanelPresenter = () => {
       </Text>
       <Card
         p="20px"
-        width="100%"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
-        height={'80%'}
         mb={2}
-        overflowX={'hidden'}
-        overflowY={'visible'}
       >
         <Flex gap={20} flexDirection={'column'} mt={2}>
           <Flex
@@ -127,7 +123,6 @@ const AccountPanelPresenter = () => {
             </Text>
             <Text flex={3} mx={4}>
               {ship!.patp}
-              {/* ~sampel-palnet-sampel-palnet */}
             </Text>
           </Flex>
 

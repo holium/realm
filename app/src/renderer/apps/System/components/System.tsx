@@ -91,7 +91,7 @@ const SystemPanelPresenter = () => {
   const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
 
   return (
-    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Text fontSize={7} fontWeight={600} mb={6}>
         System
       </Text>
