@@ -5,7 +5,8 @@ import { Peer, PeerConfig } from './Peer';
 import { RemotePeer } from './RemotePeer';
 import { PeerConnectionState, TrackKind } from './types';
 import { action, makeObservable, observable } from 'mobx';
-import { IAudioAnalyser, SpeakingDetectionAnalyser } from '../analysers';
+import { SpeakingDetectionAnalyser } from '../analysers';
+import { IAudioAnalyser } from '../analysers/types';
 
 export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
