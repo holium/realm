@@ -3,8 +3,8 @@ import { MouseState } from './AnimatedCursor';
 const isTextElement = (element: Element): boolean =>
   element instanceof HTMLTextAreaElement ||
   (element instanceof HTMLInputElement &&
-    element.type === 'text' &&
-    !element.readOnly);
+    element.type !== 'checkbox' &&
+    element.type !== 'radio');
 
 const isResizeHandler = (element: Element): boolean =>
   element.classList.contains('app-window-resize');
