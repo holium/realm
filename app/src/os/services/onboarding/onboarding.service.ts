@@ -22,6 +22,7 @@ import { DocketApi } from '../../api/docket';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
+import { RealmInstallationStatus } from '../../types';
 
 export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance
@@ -52,6 +53,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setProfile': this.setProfile,
     'realm.onboarding.setPassword': this.setPassword,
     'realm.onboarding.installRealm': this.installRealm,
+    'realm.onboarding.is-realm-fully-installed': this.isRealmFullyInstalled,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
     'realm.onboarding.exit': this.exit,
     'realm.onboarding.closeConduit': this.closeConduit,
@@ -188,6 +190,10 @@ export class OnboardingService extends BaseService {
 
     async setPassword(password: string) {
       return await ipcRenderer.invoke('realm.onboarding.setPassword', password);
+    },
+
+    async isRealmFullyInstalled() {
+      return await ipcRenderer.invoke('realm.onboarding.isRealmFullyInstalled');
     },
 
     async installRealm() {
@@ -634,6 +640,63 @@ export class OnboardingService extends BaseService {
     this.state.setEncryptedPassword(encryptedPassword);
   }
 
+  /**
+   * This function will loop thru all configured (INSTALL_MOON environment variable)
+   *   desks and determine the installed status of each.
+   *
+   * @param _event
+   * @returns
+   */
+  async isRealmFullyInstalled(_event: any): Promise<RealmInstallationStatus> {
+    let status: RealmInstallationStatus = {
+      desks: undefined,
+      installedDesks: undefined,
+      result: 'success',
+      errorMessage: undefined,
+    };
+    try {
+      // if either INSTALL_MOON is undefined or set to 'bypass', ignore installation
+      if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
+        console.error(
+          "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
+        );
+        status.errorMessage = `INSTALL_MOON not found or set to 'bypass'`;
+        return status;
+      }
+      const parts: string[] = process.env.INSTALL_MOON.split(':');
+      status.desks = parts[1].split(',');
+      const { url, patp } = this.state.ship!;
+      const { cookie, code } = this.core.getSession();
+      const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+      for (let idx = 0; idx < status.desks.length; idx++) {
+        const desk = status.desks[idx];
+        // check if the desk is already installed; if it is first unininstall it before
+        const deskStatus = await DocketApi.getDeskStatus(
+          tempConduit,
+          patp,
+          desk
+        );
+        // for now, if the app is currently installed; continue
+        if (deskStatus === 'installed') {
+          if (status.installedDesks === undefined) {
+            status.installedDesks = [];
+          }
+          status.installedDesks.push(desk);
+        }
+      }
+      if (status.desks.length === status.installedDesks?.length) {
+        status.result = 'success';
+      } else {
+        status.result = 'partial';
+      }
+      await this.closeConduit();
+    } catch (e) {
+      status.result = 'error';
+      status.errorMessage = `an error occurred determining Realm's installation status`;
+    }
+    return status;
+  }
+
   async installRealm(_event: any) {
     // if either INSTALL_MOON is undefined or set to 'bypass', ignore installation
     if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
@@ -643,6 +706,9 @@ export class OnboardingService extends BaseService {
       this.state.setRealmInstalled();
       return;
     }
+
+    // force this back to initial; otherwise the UI will still think Realm is installed
+    this.state.installer.set('initial');
 
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
     // example: INSTALL_MOON=~hostyv:realm,courier

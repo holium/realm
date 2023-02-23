@@ -1,20 +1,12 @@
 import { KeyboardEventHandler } from 'react';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
-import {
-  Grid,
-  Text,
-  Label,
-  FormControl,
-  Box,
-  Flex,
-  TextButton,
-} from 'renderer/components';
+import { Label, FormControl, Box } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { Avatar, TextInput } from '@holium/design-system';
+import { Flex, Text, Avatar, TextInput, Button } from '@holium/design-system';
 import { OnboardingStoreType } from '../../../os/services/onboarding/onboarding.model';
 
 type SetPasswordPresenterViewProps = {
@@ -71,20 +63,19 @@ const SetPasswordPresenterView = ({
   };
 
   return (
-    <Grid.Column pl={12} noGutter lg={12} xl={12}>
-      <Text fontSize={4} mb={1} variant="body">
+    <Flex flexDirection="column" width="100%">
+      <Text.Custom fontSize={4} mb={1}>
         Security
-      </Text>
-      <Text
+      </Text.Custom>
+      <Text.Custom
         fontSize={2}
         fontWeight={200}
         lineHeight="20px"
-        variant="body"
         opacity={0.6}
         mb={4}
       >
         Your password will encrypt your local data. It is only needed for Realm.
-      </Text>
+      </Text.Custom>
       <Flex
         width="100%"
         height="100%"
@@ -92,7 +83,7 @@ const SetPasswordPresenterView = ({
         alignItems="center"
       >
         <Flex
-          flex={1}
+          flexBasis={210}
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
@@ -115,11 +106,11 @@ const SetPasswordPresenterView = ({
             flexDirection="column"
           >
             {shipNick && (
-              <Text position="absolute" fontWeight={500}>
+              <Text.Custom position="absolute" fontWeight={500}>
                 {shipNick}
-              </Text>
+              </Text.Custom>
             )}
-            <Text
+            <Text.Custom
               transition={{ duration: 0, y: { duration: 0 } }}
               animate={{
                 opacity: shipNick ? 0.5 : 1,
@@ -127,20 +118,21 @@ const SetPasswordPresenterView = ({
               }}
             >
               {shipName}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
         <Flex
-          flex={3}
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
+          width="100%"
         >
           <FormControl.FieldSet width="100%">
             <FormControl.Field>
               <Label>Password</Label>
               <TextInput
                 mt={1}
+                height={36}
                 tabIndex={1}
                 id="onboarding-password-1"
                 name="password"
@@ -163,6 +155,7 @@ const SetPasswordPresenterView = ({
               <Label>Confirm password</Label>
               <TextInput
                 mt={1}
+                height={36}
                 id="onboarding-password-2"
                 tabIndex={2}
                 name="confirm-password"
@@ -186,24 +179,23 @@ const SetPasswordPresenterView = ({
           </FormControl.FieldSet>
         </Flex>
       </Flex>
-      <Box position="absolute" height={40} bottom={20} right={24}>
-        <Flex
-          mt={5}
-          width="100%"
-          alignItems="center"
-          justifyContent="space-between"
+      <Box position="absolute" bottom={24} right={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
+          onClick={passwordForm.actions.submit}
+          disabled={passwordForm.computed.isError}
+          style={{ minWidth: 45 }}
         >
-          <TextButton
-            onClick={passwordForm.actions.submit}
-            disabled={passwordForm.computed.isError}
-          >
-            Next
-          </TextButton>
-        </Flex>
+          Next
+        </Button.TextButton>
       </Box>
-    </Grid.Column>
+    </Flex>
   );
 };
+
+const SetPasswordView = observer(SetPasswordPresenterView);
 
 const SetPasswordPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();
@@ -216,7 +208,7 @@ const SetPasswordPresenter = (props: BaseDialogProps) => {
   const avatar = onboarding.ship.avatar;
 
   return (
-    <SetPasswordPresenterView
+    <SetPasswordView
       shipName={shipName}
       shipNick={shipNick}
       shipColor={shipColor}

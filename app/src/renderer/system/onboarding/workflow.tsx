@@ -246,6 +246,7 @@ const completeProfileDialogs: DialogRenderers = {
   [OnboardingStep.PROFILE_SETUP]: {
     workflow: true,
     hasCloseButton: false,
+    hasPrevious: () => true,
     customNext: true,
     component: (props: BaseDialogProps) => <ProfileSetup {...props} />,
     onPrevious: async () =>

@@ -1,26 +1,19 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import {
-  Grid,
-  Text,
-  Flex,
-  ActionButton,
-  Icons,
-  Spinner,
-  Box,
-  TextButton,
-} from 'renderer/components';
+import { ActionButton, Icons, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Flex, Text, Button, Box, Icon } from '@holium/design-system';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   if (!onboarding.ship) return null;
 
@@ -34,23 +27,27 @@ const InstallAgentPresenter = () => {
     setInstalling(true);
     OnboardingActions.installRealm().finally(() => {
       setInstalling(false);
+      if (!onboarding.ship) {
+        throw new Error('Ship not set, please restart onboarding.');
+      }
       ShipActions.saveMyContact({
-        color: onboarding.ship!.color,
-        nickname: onboarding.ship!.nickname,
-        avatar: onboarding.ship!.avatar,
+        patp: onboarding.ship.patp,
+        color: onboarding.ship.color,
+        nickname: onboarding.ship.nickname,
+        avatar: onboarding.ship.avatar,
       });
+      setIsError(onboarding.installer.state === 'error');
+      setIsInstalled(onboarding.installer.state === 'loaded');
     });
   };
 
-  const isError = onboarding.installer.state === 'error';
-  const isInstalled = onboarding.installer.state === 'loaded';
-
   return (
-    <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
-      <Text fontSize={4} mb={1} variant="body">
+    <Flex flexDirection="column" width="100%">
+      <Text.Custom fontSize={4} mb={1}>
         Installation
-      </Text>
-      <Text
+      </Text.Custom>
+
+      <Text.Custom
         fontSize={2}
         fontWeight={200}
         lineHeight="20px"
@@ -60,7 +57,7 @@ const InstallAgentPresenter = () => {
       >
         We need to install Realm and other agents on your Urbit server. These
         handle core OS functionality.
-      </Text>
+      </Text.Custom>
       <Flex flexDirection="column" alignItems="center" justifyContent="center">
         <Avatar
           simple={false}
@@ -80,11 +77,11 @@ const InstallAgentPresenter = () => {
           flexDirection="column"
         >
           {shipNick && (
-            <Text position="absolute" fontWeight={500}>
+            <Text.Custom position="absolute" fontWeight={500}>
               {shipNick}
-            </Text>
+            </Text.Custom>
           )}
-          <Text
+          <Text.Custom
             transition={{ duration: 0, y: { duration: 0 } }}
             animate={{
               opacity: shipNick ? 0.5 : 1,
@@ -92,7 +89,7 @@ const InstallAgentPresenter = () => {
             }}
           >
             {shipName}
-          </Text>
+          </Text.Custom>
         </Flex>
         <Flex flexDirection="column" alignItems="center">
           <ActionButton
@@ -103,60 +100,56 @@ const InstallAgentPresenter = () => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : onboarding.installer.isLoaded ? (
-                <Icons ml={2} size={1} name="CheckCircle" />
+              ) : isInstalled ? (
+                <Icon ml={2} size={20} name="CheckCircle" />
               ) : (
-                <Icons ml={2} size={1} name="DownloadCircle" />
+                <Icon ml={2} size={20} name="DownloadCircle" />
               )
             }
             onClick={installRealm}
           >
             Install Realm
           </ActionButton>
-          <Text
+          <Text.Custom
             fontSize={2}
             lineHeight="20px"
             variant="body"
             opacity={0.6}
             mt={3}
             fontWeight={isError ? 500 : 200}
-            color={isError ? 'red' : ''}
+            color={isError ? 'intent-alert' : undefined}
           >
             {isError && onboarding.installer.errorMessage}
             {!isInstalled && !isError && 'This will just take a minute'}
             {isInstalled &&
               !isError &&
               'Congrats! You are ready to enter a new world.'}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
-      <Box position="absolute" height={40} bottom={20} right={24}>
-        <Flex
-          mt={5}
-          width="100%"
-          alignItems="center"
-          justifyContent="space-between"
+      <Box position="absolute" bottom={24} right={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
+          style={{ minWidth: 45 }}
+          disabled={!isInstalled || installing}
+          onClick={async (_evt: any) => {
+            setLoading(true);
+            OnboardingActions.completeOnboarding()
+              .then(() => {
+                setLoading(false);
+              })
+              .catch((err) => {
+                console.error(err);
+                setLoading(false);
+              });
+          }}
         >
-          <TextButton
-            disabled={!onboarding.installer.isLoaded || installing}
-            style={{ minWidth: 45 }}
-            onClick={async (_evt: any) => {
-              setLoading(true);
-              OnboardingActions.completeOnboarding()
-                .then(() => {
-                  setLoading(false);
-                })
-                .catch((err) => {
-                  console.error(err);
-                  setLoading(false);
-                });
-            }}
-          >
-            {loading ? <Spinner size={0} /> : 'Next'}
-          </TextButton>
-        </Flex>
+          {loading ? <Spinner size={0} /> : 'Next'}
+        </Button.TextButton>
       </Box>
-    </Grid.Column>
+    </Flex>
   );
 };
 
