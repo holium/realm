@@ -84,6 +84,7 @@ const SetPasswordPresenterView = ({
       >
         <Flex
           flexBasis={210}
+          mr={4}
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
@@ -106,11 +107,16 @@ const SetPasswordPresenterView = ({
             flexDirection="column"
           >
             {shipNick && (
-              <Text.Custom position="absolute" fontWeight={500}>
+              <Text.Custom
+                textAlign="center"
+                position="absolute"
+                fontWeight={500}
+              >
                 {shipNick}
               </Text.Custom>
             )}
             <Text.Custom
+              textAlign="center"
               transition={{ duration: 0, y: { duration: 0 } }}
               animate={{
                 opacity: shipNick ? 0.5 : 1,

@@ -325,7 +325,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                Add Ship <Icons size={22} name="AddCircleLine" />
+                <Icons size={22} name="AddCircleLine" />
+                Add Urbit ID
               </Flex>
             </TextButton>
           </Flex>

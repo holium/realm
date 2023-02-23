@@ -704,6 +704,7 @@ export class OnboardingService extends BaseService {
         "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
       );
       this.state.setRealmInstalled();
+      // save the profile data this is development
       return;
     }
 
@@ -718,6 +719,7 @@ export class OnboardingService extends BaseService {
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
       const response: string = await DocketApi.installDesk(
@@ -731,7 +733,7 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
-
+    // save the profile data if realm is installed
     await this.closeConduit();
     this.state.endRealmInstall('success');
     this.state.setRealmInstalled();
@@ -754,6 +756,18 @@ export class OnboardingService extends BaseService {
       passwordHash,
     });
 
+    const { url, patp, nickname, color, avatar } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+
+    const profileData = {
+      nickname,
+      color,
+      avatar,
+    };
+
+    await FriendsApi.saveContact(tempConduit, patp, profileData);
+
     // force cookie to null to ensure user must login once onboarding is complete
     const session = this.core.getSession();
     this.core.saveSession({ ...session, cookie: null });
@@ -769,9 +783,10 @@ export class OnboardingService extends BaseService {
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setEmail(this.state.email!);
     this.core.services.identity.auth.setFirstTime();
+
     this.core.services.ship.storeNewShip(authShip);
     this.core.services.shell.closeDialog(null);
-
+    this.state.cleanup();
     await this.exit();
   }
 

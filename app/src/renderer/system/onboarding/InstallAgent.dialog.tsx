@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-
-import { ActionButton, Icons, Spinner } from 'renderer/components';
+import { ActionButton, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { Avatar, Flex, Text, Button, Box, Icon } from '@holium/design-system';
-import { ShipActions } from 'renderer/logic/actions/ship';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
@@ -30,12 +28,12 @@ const InstallAgentPresenter = () => {
       if (!onboarding.ship) {
         throw new Error('Ship not set, please restart onboarding.');
       }
-      ShipActions.saveMyContact({
-        patp: onboarding.ship.patp,
-        color: onboarding.ship.color,
-        nickname: onboarding.ship.nickname,
-        avatar: onboarding.ship.avatar,
-      });
+      // ShipActions.saveMyContact({
+      //   patp: onboarding.ship.patp,
+      //   color: onboarding.ship.color,
+      //   nickname: onboarding.ship.nickname,
+      //   avatar: onboarding.ship.avatar,
+      // });
       setIsError(onboarding.installer.state === 'error');
       setIsInstalled(onboarding.installer.state === 'loaded');
     });
@@ -77,11 +75,16 @@ const InstallAgentPresenter = () => {
           flexDirection="column"
         >
           {shipNick && (
-            <Text.Custom position="absolute" fontWeight={500}>
+            <Text.Custom
+              textAlign="center"
+              position="absolute"
+              fontWeight={500}
+            >
               {shipNick}
             </Text.Custom>
           )}
           <Text.Custom
+            textAlign="center"
             transition={{ duration: 0, y: { duration: 0 } }}
             animate={{
               opacity: shipNick ? 0.5 : 1,
@@ -131,6 +134,8 @@ const InstallAgentPresenter = () => {
         <Button.TextButton
           py={1}
           showOnHover
+          justifyContent="center"
+          alignItems="center"
           fontWeight={500}
           style={{ minWidth: 45 }}
           disabled={!isInstalled || installing}
@@ -146,7 +151,7 @@ const InstallAgentPresenter = () => {
               });
           }}
         >
-          {loading ? <Spinner size={0} /> : 'Next'}
+          {loading ? <Spinner size={0} color="#FFF" /> : 'Next'}
         </Button.TextButton>
       </Box>
     </Flex>

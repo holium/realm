@@ -180,7 +180,12 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
           </Flex>
         ) : (
           <>
-            <Flex flexBasis={210} flexDirection="column" alignItems="center">
+            <Flex
+              flexBasis={210}
+              mr={4}
+              flexDirection="column"
+              alignItems="center"
+            >
               <Avatar
                 simple={false}
                 size={52}
@@ -201,11 +206,16 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                 flexDirection="column"
               >
                 {nickname.state.value && (
-                  <Text.Custom position="absolute" fontWeight={500}>
+                  <Text.Custom
+                    textAlign="center"
+                    position="absolute"
+                    fontWeight={500}
+                  >
                     {nickname.state.value}
                   </Text.Custom>
                 )}
                 <Text.Custom
+                  textAlign="center"
                   transition={{
                     opacity: {
                       duration: nickname.computed.isDirty ? 0.15 : 0,
