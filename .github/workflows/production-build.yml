@@ -184,7 +184,7 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
+          # mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
