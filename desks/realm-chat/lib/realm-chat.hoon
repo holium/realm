@@ -60,9 +60,9 @@
   ==
 ::
 ++  create-path-db-poke
-  |=  [=ship row=path-row:db]
+  |=  [=ship row=path-row:db ships=(list ship)]
   ^-  card
-  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%create-path row])]
+  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%create-path row ships])]
 ::
 ++  into-add-peer-pokes
   |=  [s=ship peers=(list ship) =path t=@da]
@@ -107,7 +107,7 @@
 ::  poke actions
 ::
 ++  create-chat
-::  :realm-chat &action [%create-chat ~ %chat (limo [~fes ~bus ~dev ~])]
+::realm-chat &action [%create-chat ~ %chat (limo [~fes ~bus ~dev ~]) %host]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ?>  =(type.act %chat)  :: for now only support %chat type paths
@@ -116,29 +116,12 @@
   ::=/  chat-path  /realm-chat/path-id
   =/  all-peers  [our.bowl peers.act]
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~] :: final item is `pins` which always starts null
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act]
 
-  =/  cards  
-    :: for each "initial" peer they passed in, we poke ourselves with %add-ship-to-chat
-    %+  weld
-      ^-  (list card)
-      %+  weld
-        ^-  (list card)
-        %:  turn
-          all-peers
-          |=(s=ship (create-path-db-poke s pathrow))
-        ==
-      ^-  (list card)
-      %-  zing
-      %:  turn
-        peers.act
-        |=(s=ship (into-add-peer-pokes s peers.act chat-path t))
-      ==
-    ^-  (list card)
+  =/  cards=(list card)  
     %+  turn
-      peers.act
-    |=(s=ship [%pass /dbpoke %agent [our.bowl %chat-db] %poke %db-action !>([%add-peer chat-path s t])])
-
+      all-peers
+    |=(s=ship (create-path-db-poke s pathrow peers.act))
   [cards state]
 ::
 ++  edit-chat
@@ -187,7 +170,7 @@
     :-  
       ::  we poke the newly-added ship's db with a create-path,
       ::  since that will automatically handle them joining as a member
-      [%pass /dbpoke %agent [ship.act %chat-db] %poke %db-action !>([%create-path pathrow])]
+      [%pass /dbpoke %agent [ship.act %chat-db] %poke %db-action !>([%create-path pathrow (turn pathpeers |=(p=peer-row:db patp.p))])]
 
       :: we poke all peers/members' db with add-peer (including ourselves)
       %:  turn
@@ -350,6 +333,7 @@
       :~  [%metadata (om so)]
           [%type (se %tas)]
           [%peers (ar de-ship)]
+          [%invites (se %tas)]
       ==
     ::
     ++  edit-chat

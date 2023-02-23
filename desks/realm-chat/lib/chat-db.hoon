@@ -95,6 +95,7 @@
   ~&  (snag index change-rows)
                                                     :: adding index to now in order to ensure unique keys
   $(index +(index), new-log (put:delon:sur new-log `@da`(add now index) (snag index change-rows)))
+::
 ++  messages-start-paths
   |=  [=bowl:gall]
   ^-  (list path)
@@ -105,40 +106,41 @@
 ::  poke actions
 ::
 ++  create-path
-::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~]
-  |=  [row=path-row:sur state=state-0 =bowl:gall]
+::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host ~]
+  |=  [[row=path-row:sur ships=(list ship)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =.  paths-table.state  (~(put by paths-table.state) path.row row)
+  
+  :: WARN the ordering of this matters
+  :: ensure our.bowl is in the list of ships
+  =.  ships
+    ?~  (find ~[our.bowl] ships)
+      (snoc ships our.bowl)
+    ships
+  :: ensure src.bowl is NOT in the list of ships
+  =.  ships  (skip ships |=(s=ship =(s src.bowl)))
 
-  :: if this poke comes from ourselves, we are the host, but if it
-  :: comes from elsewhere, we are being invited, and they are the host
+  =/  host=peer-row:sur   [
+    path.row
+    src.bowl
+    %host
+    created-at.row
+    updated-at.row
+  ]
+  :: now thepeers is the list of all ships in the chat, with the host as
+  :: %host and everyone else as %member
   =/  thepeers
-    ?:  =(src.bowl our.bowl)
-      =/  peer=peer-row:sur   [
-        path.row
-        our.bowl
-        %host
-        created-at.row
-        updated-at.row
-      ]
-      [peer ~]
-
-    :: else, poke came from not-us
-    =/  us=peer-row:sur    [
+    :-  host
+    %+  turn
+      ships
+    |=  s=ship
+    [
       path.row
-      our.bowl
+      s
       %member
       created-at.row
       updated-at.row
     ]
-    =/  them=peer-row:sur  [
-      path.row
-      src.bowl
-      %host
-      created-at.row
-      updated-at.row
-    ]
-    [them us ~]
 
   =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
   =/  thechange  db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
@@ -290,10 +292,14 @@
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
-  :: add-peer pokes are only valid from the ship which is the
-  :: %host of the path
-  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
-  ?>  =(patp.host-peer-row src.bowl)
+  =/  pathrow         (~(got by paths-table.state) path.act)
+  ::  this line will crash (intentionally) if the src.bowl is not in the peers list
+  =/  src-peer         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(patp.p src.bowl))))
+  :: add-peer pokes are only valid from:
+  :: any ship if set to %anyone
+  :: OR a ship whose role matches the path-row `invites` setting
+  :: OR whose role is the %host
+  ?>  |(=(invites.pathrow %anyone) =(role.src-peer invites.pathrow) =(role.src-peer %host))
 
   =/  row=peer-row:sur   [
     path.act

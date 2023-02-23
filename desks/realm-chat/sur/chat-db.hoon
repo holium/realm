@@ -28,6 +28,7 @@
       created-at=time
       updated-at=time  :: updated when %edit-path-medatata is hit
       =pins
+      invites=@tas  :: must either match `peer-role` type or be keyword %anyone, or else no one will be able to invite
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -71,11 +72,12 @@
 +$  uniq-id  [=msg-id =msg-part-id]
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
 ++  msgon  ((on uniq-id msg-part) idx-sort)
++$  peer-role  ?(%member %host %admin)
 ::
 +$  peer-row
   $:  =path
       patp=ship
-      role=?(%member %host)
+      role=peer-role
       created-at=time
       updated-at=time  :: not used really yet, but if we implement a way to change peers role, then this would be needed
   ==
@@ -94,7 +96,7 @@
 ::
 +$  action
   $%  
-      [%create-path =path-row]
+      [%create-path =path-row ships=(list ship)]
       [%edit-path-metadata =path metadata=(map cord cord)]
       [%edit-path-pins =path =pins]
       [%leave-path =path]
