@@ -62,7 +62,6 @@ const Default = styled(Box)<TextProps>`
   line-height: normal;
   margin-top: 0px;
   margin-bottom: 0px;
-  white-space: nowrap;
   ${customStyling}
 `;
 
