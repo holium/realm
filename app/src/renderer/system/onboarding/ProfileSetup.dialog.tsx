@@ -5,7 +5,6 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-
 import {
   Grid,
   Text,
@@ -120,7 +119,6 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
         profileForm.fields.nickname.actions.onChange(profile.nickname);
         profileForm.fields.color.actions.onChange(profile.color);
         setAvatarImg(profile.avatar);
-        //  || '');
         setProfileLoading(false);
       })
       .catch((err) => {
@@ -159,7 +157,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
   };
 
   return (
-    <Grid.Column pl={12} noGutter lg={12} xl={12}>
+    <Grid.Column pl={12} lg={12} xl={12}>
       <Text fontSize={4} mb={1} variant="body">
         Profile
       </Text>
@@ -173,21 +171,14 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
       >
         We’ve loaded the profile from your ship. Feel free to edit it here.
       </Text>
-      <Grid.Row noGutter>
+      <Flex flex={1} flexDirection="row" gap={24} alignItems="center">
         {profileLoading ? (
           <Flex flex={1} alignItems="center" justifyContent="center">
             <Spinner size={3} />
           </Flex>
         ) : (
           <>
-            <Grid.Column
-              noGutter
-              align="center"
-              justify="center"
-              lg={6}
-              xl={6}
-              pr={6}
-            >
+            <Grid.Column noGutter align="center" justify="center" lg={6} xl={6}>
               <Avatar
                 simple={false}
                 size={52}
@@ -306,7 +297,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
             </Grid.Column>
           </>
         )}
-      </Grid.Row>
+      </Flex>
       <Box position="absolute" height={40} bottom={20} right={24}>
         <Flex
           mt={5}
