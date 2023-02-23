@@ -1,4 +1,4 @@
-import { useState, ReactNode, useEffect } from 'react';
+import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -20,35 +20,36 @@ const DialogManagerPresenter = ({
   dialogProps,
 }: DialogManagerProps) => {
   const { shell } = useServices();
+  const [dialogConfig, setDialogConfig] = useState<DialogConfig | null>(null);
   const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
-  let dialogConfig: DialogConfig;
-  const isOpen = dialogId !== undefined;
+  const isOpen = useMemo(() => Boolean(dialogId), [dialogId]);
 
-  // clear dialog on escape pressed if closable
-  useHotkeys(
-    'esc',
-    () => {
-      const notOnboardingDialog = !Object.values(OnboardingStep).includes(
-        dialogId as any
-      );
-      if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
-        ShellActions.closeDialog();
-        if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
-      }
-    },
-    { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
-  );
+  const onEsc = useCallback(() => {
+    const notOnboardingDialog = !Object.values(OnboardingStep).includes(
+      dialogId as any
+    );
+    if (isOpen && notOnboardingDialog && dialogConfig?.hasCloseButton) {
+      ShellActions.closeDialog();
+      if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
+    }
+  }, [dialogId, dialogConfig, isOpen]);
+
+  // Clear dialog on escape press, if closable.
+  useHotkeys('esc', onEsc, { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] });
 
   useEffect(() => {
     const openDialogWindow = async (did: string) => {
       const dialogRenderer = dialogRenderers[did];
-      dialogConfig =
+
+      const newDialogConfig =
         dialogRenderer instanceof Function
           ? dialogRenderer(dialogProps.toJSON())
           : dialogRenderer;
+      setDialogConfig(newDialogConfig);
+
       const appWindow = await DesktopActions.openDialog(
-        dialogConfig.getWindowProps(shell.desktopDimensions)
+        newDialogConfig.getWindowProps(shell.desktopDimensions)
       );
 
       setDialogWindow(
