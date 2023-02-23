@@ -55,7 +55,7 @@ export const NFTBadge: FC<BadgeProps> = (props: BadgeProps) => {
       baseColor={color}
       mode={mode}
     >
-      <Text fontStyle="italic" fontWeight="bolder" fontSize={3}>
+      <Text fontStyle="italic" fontWeight={600} fontSize={3}>
         NFT
       </Text>
     </BadgeStyle>

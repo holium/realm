@@ -1,6 +1,6 @@
 import { safeStorage } from 'electron';
 
-export default class PasswordStore {
+export class PasswordStore {
   private readonly passwords;
 
   constructor() {

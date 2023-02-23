@@ -32,7 +32,7 @@ const RoomsPresenter = () => {
       >
         <Flex justifyContent="center" alignItems="center">
           <Icon opacity={0.8} name="Connect" size={24} mr={3} />
-          <Text.Custom fontWeight="600" textTransform="uppercase" opacity={0.7}>
+          <Text.Custom fontWeight={600} textTransform="uppercase" opacity={0.7}>
             Rooms
           </Text.Custom>
         </Flex>

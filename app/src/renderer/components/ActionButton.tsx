@@ -81,7 +81,6 @@ const StyledButton = styled.button`
     align-items: center;
     border-radius: 6px;
     border-color: transparent;
-    cursor: none;
     box-shadow: none;
     text-align: left;
     font-size: 16px;
@@ -120,5 +119,3 @@ ActionButton.displayName = 'ActionButton';
 ActionButton.defaultProps = {
   rightContent: null,
 };
-
-export default ActionButton;

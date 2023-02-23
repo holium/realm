@@ -107,6 +107,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
       >
         {selectedSpace.picture ? (
           <img
+            alt={selectedSpace.name}
             style={{ borderRadius: 4 }}
             height="28px"
             width="28px"

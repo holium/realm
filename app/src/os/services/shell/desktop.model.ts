@@ -3,8 +3,9 @@ import { Dimensions } from 'os/types';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { toJS } from 'mobx';
 import {
-  getFullscreenBounds,
+  getMaximizedBounds,
   getInitialWindowBounds,
+  isMaximizedBounds,
 } from './lib/window-manager';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -40,10 +41,10 @@ const AppWindowModel = types
      * Needed for returning from maximized/fullscreen state.
      */
     prevBounds: types.optional(BoundsModel, {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
+      x: 1,
+      y: 1,
+      width: 5,
+      height: 5,
     }),
     /**
      * The ative window has a titlebar with full contrast.
@@ -53,7 +54,7 @@ const AppWindowModel = types
      * The visual state of the window.
      */
     state: types.optional(
-      types.enumeration(['normal', 'minimized', 'maximized', 'fullscreen']),
+      types.enumeration(['normal', 'minimized', 'fullscreen']),
       'normal'
     ),
   })
@@ -68,13 +69,12 @@ const AppWindowModel = types
       self.state = 'minimized';
     },
     maximize(desktopDimensions: Dimensions) {
-      if (self.state === 'maximized') {
-        self.state = 'normal';
+      const isMaximized = isMaximizedBounds(self.bounds, desktopDimensions);
+      if (isMaximized) {
         self.bounds = { ...self.prevBounds };
       } else {
-        self.state = 'maximized';
         self.prevBounds = { ...self.bounds };
-        self.bounds = getFullscreenBounds(desktopDimensions);
+        self.bounds = getMaximizedBounds(desktopDimensions);
       }
     },
     setIsActive(isActive: boolean) {
@@ -95,6 +95,7 @@ export const DesktopStore = types
     windows: types.map(AppWindowModel),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
+    isolationMode: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -105,6 +106,9 @@ export const DesktopStore = types
     },
     get isHomePaneOpen() {
       return self.homePaneOpen;
+    },
+    get isIsolationMode() {
+      return self.isolationMode;
     },
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
@@ -119,6 +123,9 @@ export const DesktopStore = types
     },
     closeHomePane() {
       self.homePaneOpen = false;
+    },
+    toggleIsolationMode() {
+      self.isolationMode = !self.isolationMode;
     },
     setActive(appId: string) {
       self.windows.forEach((win) => {

@@ -69,5 +69,3 @@ export const MenuItemStyle = styled.li<MenuItemStyleProps>`
       }
     `} // Cast as react component
 `;
-
-export default MenuItemStyle;

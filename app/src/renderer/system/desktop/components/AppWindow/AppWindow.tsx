@@ -3,11 +3,8 @@ import { useMotionValue, useDragControls, PanInfo } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
-import {
-  AppWindowContainer,
-  LeftDragHandle,
-  RightDragHandle,
-} from './AppWindow.styles';
+import { AppWindowContainer } from './AppWindow.styles';
+import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -18,6 +15,9 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
+
+const MIN_WIDTH = 500;
+const MIN_HEIGHT = 400;
 
 type Props = {
   appWindow: AppWindowType;
@@ -65,24 +65,31 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     }
   }, [appWindow.zIndex]);
 
-  const resizeRightX = useMotionValue(0);
-  const resizeRightY = useMotionValue(0);
+  const resizeBottomRightX = useMotionValue(0);
+  const resizeBottomRightY = useMotionValue(0);
+  const resizeBottomLeftX = useMotionValue(0);
+  const resizeBottomLefty = useMotionValue(0);
 
   const handleBottomRightCornerResize = useCallback(
     (event: MouseEvent, info: PanInfo) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeRightX.set(resizeRightX.get() - info.offset.x);
-      resizeRightY.set(resizeRightY.get() - info.offset.y);
-      // if we are greater than the minimum or are moving in the postive direction
-      if (motionWidth.get() >= 400 || info.delta.x > 0) {
-        motionWidth.set(motionWidth.get() + info.delta.x);
+      resizeBottomRightX.set(resizeBottomRightX.get() - info.offset.x);
+      resizeBottomRightY.set(resizeBottomRightY.get() - info.offset.y);
+
+      const newWidth = info.point.x - motionX.get();
+      const newHeight = info.point.y - motionY.get();
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionWidth.set(newWidth);
       }
-      if (motionHeight.get() >= 400 || info.delta.y > 0) {
-        motionHeight.set(motionHeight.get() + info.delta.y);
+      if (shouldUpdateHeight) {
+        motionHeight.set(newHeight);
       }
 
-      updateWindowBounds();
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
     []
   );
@@ -91,19 +98,23 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     (event: MouseEvent, info: PanInfo) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeRightX.set(resizeRightX.get() - info.offset.x);
-      resizeRightY.set(resizeRightY.get() - info.offset.y);
+      resizeBottomLeftX.set(resizeBottomLeftX.get() - info.offset.x);
+      resizeBottomLefty.set(resizeBottomLefty.get() - info.offset.y);
 
-      // if we are greater than the minimum or are moving in the postive direction
-      if (motionWidth.get() >= 400 || info.delta.x < 0) {
-        motionWidth.set(motionWidth.get() - info.delta.x);
-        motionX.set(motionX.get() + info.delta.x);
+      const newWidth = motionX.get() + motionWidth.get() - info.point.x;
+      const newHeight = info.point.y - motionY.get();
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionX.set(info.point.x);
+        motionWidth.set(newWidth);
       }
-      if (motionHeight.get() >= 400 || info.delta.y > 0) {
-        motionHeight.set(motionHeight.get() + info.delta.y);
+      if (shouldUpdateHeight) {
+        motionHeight.set(newHeight);
       }
 
-      updateWindowBounds();
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
     []
   );
@@ -223,7 +234,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           shell={shell}
           dragControls={dragControls}
           currentTheme={theme.currentTheme}
-          windowColor={windowColor}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
@@ -236,43 +246,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           isDragging={isDragging}
           appWindow={appWindow}
         />
-        <LeftDragHandle
-          className="app-window-resize app-window-resize-lr"
-          drag
-          style={{
-            x: resizeRightX,
-            y: resizeRightY,
+        <AppWindowResizeHandles
+          bottomLeft={{
+            x: resizeBottomLeftX,
+            y: resizeBottomLefty,
           }}
-          onDrag={handleBottomLeftCornerResize}
-          onPointerDown={() => {
-            setIsResizing(true);
+          bottomRight={{
+            x: resizeBottomRightX,
+            y: resizeBottomRightY,
           }}
-          onPointerUp={() => {
-            setIsResizing(false);
-            updateWindowBounds();
-          }}
-          onPanEnd={() => setIsResizing(false)}
-          onTap={() => setIsResizing(false)}
-          dragMomentum={false}
-        />
-        <RightDragHandle
-          className="app-window-resize app-window-resize-br"
-          drag
-          style={{
-            x: resizeRightX,
-            y: resizeRightY,
-          }}
-          onDrag={handleBottomRightCornerResize}
-          onPointerDown={() => {
-            setIsResizing(true);
-          }}
-          onPointerUp={() => {
-            setIsResizing(false);
-            updateWindowBounds();
-          }}
-          onPanEnd={() => setIsResizing(false)}
-          onTap={() => setIsResizing(false)}
-          dragMomentum={false}
+          setIsResizing={setIsResizing}
+          onDragBottomLeft={handleBottomLeftCornerResize}
+          onDragBottomRight={handleBottomRightCornerResize}
         />
       </Flex>
     </AppWindowContainer>

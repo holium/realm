@@ -126,12 +126,25 @@ export const OnboardingStore = types
       self.encryptedPassword = passwordHash;
     },
 
-    setShip: flow(function* (shipInfo: { patp: string; url: string }) {
+    setShip(shipInfo: { patp: string; url: string }) {
       self.ship = OnboardingShipModel.create({
         ...shipInfo,
         id: `onboarding${shipInfo.patp}`,
       });
-    }),
+    },
+
+    cleanup() {
+      self.ship = undefined;
+      self.accessCode = undefined;
+      self.installer.set('initial');
+      self.versionLoader.set('initial');
+      self.checkoutComplete = false;
+      self.planetWasTaken = false;
+      self.versionVerified = false;
+      self.inviteCode = undefined;
+      self.encryptedPassword = undefined;
+      self.email = undefined;
+    },
 
     setCheckoutComplete() {
       self.checkoutComplete = true;
@@ -169,10 +182,8 @@ export const OnboardingStore = types
         const apps = yield DocketApi.getApps(conduit);
         if (!('groups' in apps)) throw new Error('groups 2 not installed');
         const ver = apps['groups'].version;
-        console.log(ver);
         const parts = ver.split('.');
         // change version if needed . this is latest groups based on my latest ship OTA
-        console.log(parts);
         if (
           !(
             Number.parseInt(parts[0]) >= 2 &&

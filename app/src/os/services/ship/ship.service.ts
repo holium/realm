@@ -3,11 +3,11 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 import { Content } from '@urbit/api';
-import S3Client, { StorageAcl } from '../../s3/S3Client';
+import { S3Client, StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
-import Realm from '../..';
+import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import EncryptedStore from '../../lib/encryptedStore';
+import { EncryptedStore } from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { Patp } from '../../types';
 import { DmApi } from '../../api/dms';
@@ -428,7 +428,7 @@ export class ShipService extends BaseService {
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await FriendsApi.saveContact(
       this.core.conduit!,
-      this.state!.patp,
+      profileData.patp || this.state!.patp,
       profileData
     );
 

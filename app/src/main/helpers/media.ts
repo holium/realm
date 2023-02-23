@@ -1,6 +1,7 @@
 import { ipcMain, systemPreferences } from 'electron';
+import { isMac, isWindows } from './env';
 
-export const registerListeners = () => {
+const registerListeners = () => {
   ipcMain.handle('ask-for-mic', async (_event) => {
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');
@@ -11,6 +12,13 @@ export const registerListeners = () => {
   });
 
   ipcMain.handle('get-media-status', async (_event) => {
+    if (!isMac && !isWindows) {
+      return {
+        camera: 'unknown',
+        mic: 'unknown',
+      };
+    }
+
     const camera = systemPreferences.getMediaAccessStatus('camera');
     const mic = systemPreferences.getMediaAccessStatus('microphone');
 
@@ -34,4 +42,4 @@ export const registerListeners = () => {
   // );
 };
 
-export default { registerListeners };
+export const MediaHelper = { registerListeners };

@@ -6,6 +6,11 @@ on:
       - closed
     branches:
       - master
+#
+env:
+  GH_PROXY: ${{ secrets.GH_PROXY }}
+  GH_PROXY_STAGING: ${{ secrets.GH_PROXY_STAGING }}
+#
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
@@ -138,6 +143,54 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
+  build-linux:
+    if: github.event.pull_request.merged == true
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-linux
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging-build.yml', 'linux', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build linux version
+        run: |
+          sudo apt-get install --no-install-recommends -y libopenjp2-tools
+          GH_TOKEN=$GH_TOKEN npx yarn package:prerelease:linux
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+          mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+  #
   build-windows:
     if: github.event.pull_request.merged == true
     needs: [pre-deploy]
@@ -208,7 +261,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-windows]
+    needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -288,7 +341,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, build-windows, deploy-desks]
+    needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -319,6 +372,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      # #
+      # - name: Install sentry-cli
+      #   run: |
+      #     npm install @sentry/cli
+      #     ./node_modules/.bin/sentry-cli
+      #     ./node_modules/.bin/sentry-cli login --auth-token $SENTRY_API_KEY
+      #     ./node_modules/.bin/sentry-cli releases files "$BUILD_VERSION" upload-sourcemaps ./dist
+      #   env:
+      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      #     SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
+      #
+      # remove for now. will need to offload this to a test build pipeline until
+      #   can get this correct
+      # - name: Create Sentry release
+      #   uses: getsentry/action-release@v1
+      #   env:
+      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      #     SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      #     SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+      #     # SENTRY_URL: https://sentry.io/
+      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      #   with:
+      #     environment: staging
+      #     sourcemaps: './dist'
+      #     version: $BUILD_VERSION
+
+  #
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:

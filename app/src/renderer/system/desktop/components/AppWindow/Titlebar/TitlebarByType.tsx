@@ -1,5 +1,4 @@
 import { FC, useEffect } from 'react';
-import { darken } from 'polished';
 import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
@@ -21,7 +20,6 @@ type Props = {
   shell: ShellStoreType;
   dragControls: DragControls;
   currentTheme: ThemeType;
-  windowColor: string;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
@@ -36,7 +34,6 @@ export const TitlebarByType = ({
   shell,
   dragControls,
   currentTheme,
-  windowColor,
   onDevTools,
   onDragStart,
   onDragStop,
@@ -87,7 +84,6 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
           onDragStart={onDragStart}
@@ -130,11 +126,14 @@ export const TitlebarByType = ({
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     noTitlebar = dialogConfig.noTitlebar!;
-    const onCloseDialog = dialogConfig.onClose;
+    const onCloseDialog = dialogConfig.hasCloseButton
+      ? dialogConfig.onClose
+      : undefined;
     const onOpenDialog = dialogConfig.onOpen;
-    CustomTitlebar = DialogTitlebar;
+    CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
+    // console.log('dialogConfig', dialogConfig, onClose);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
@@ -146,12 +145,9 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
-          onClose={onCloseDialog ?? onClose}
-          onMinimize={onMinimize}
-          onMaximize={onMaximize}
+          onClose={onCloseDialog}
           onDragStart={onDragStart}
           onDragStop={onDragStop}
         />

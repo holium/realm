@@ -9,18 +9,17 @@ export const StepList = types.enumeration([
   'completed',
 ]);
 
+const LoaderStates = types.enumeration('LoaderState', [
+  'initial',
+  'loading',
+  'error',
+  'loaded',
+]);
+
 export const LoaderModel = types
   .model({
     errorMessage: types.optional(types.string, ''),
-    state: types.optional(
-      types.enumeration('LoaderState', [
-        'initial',
-        'loading',
-        'error',
-        'loaded',
-      ]),
-      'initial'
-    ),
+    state: types.optional(LoaderStates, 'initial'),
   })
   .views((self) => ({
     get isLoading() {
@@ -47,6 +46,7 @@ export const LoaderModel = types
   }));
 
 export type LoaderModelType = Instance<typeof LoaderModel>;
+export type LoaderStateType = Instance<typeof LoaderStates>;
 
 export const SubscriptionModel = types
   .model({

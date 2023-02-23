@@ -83,7 +83,7 @@
         ?>  =(our.bowl src.bowl)
         =;  cage
           [%give %fact ~[/all] cage]~
-        friends-reaction+!>([%friends (non-contacts:core friends)])
+        friends-reaction+!>([%friends friends])
       ==
     [cards this]
   ::
@@ -93,11 +93,11 @@
     ?+    path  (on-peek:def path)
         [%x %all ~] :: ~/scry/friends/all.json
       ?>  (team:title our.bowl src.bowl)
-      ``noun+!>((view:enjs:lib [%friends (non-contacts:core friends)]))
+      ``noun+!>((view:enjs:lib [%friends friends]))
       ::
         [%x %ships ~]
       ?>  =(our.bowl src.bowl)
-      ``noun+!>(~(key by (non-contacts:core friends)))
+      ``noun+!>(~(key by friends))
       ::
         [%x %contact @ ~]
       ?>  =(our.bowl src.bowl)

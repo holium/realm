@@ -10,17 +10,11 @@ const AboutPanelPresenter = () => {
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   return (
-    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+    <Flex flex={1} gap={12} flexDirection="column" p={3}>
       <Text fontSize={7} fontWeight={600} mb={6}>
         About
       </Text>
-      <Card
-        p="20px"
-        width="100%"
-        elevation="none"
-        customBg={cardColor}
-        flexDirection={'column'}
-      >
+      <Card p="20px" elevation="none" customBg={cardColor}>
         <Text>Coming Soon</Text>
       </Card>
     </Flex>

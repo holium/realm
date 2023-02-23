@@ -26,7 +26,7 @@ type Props = {
  * Cached-content is not be re-measured.
  */
 
-export default class CellMeasurer extends React.PureComponent<Props> {
+export class CellMeasurer extends React.PureComponent<Props> {
   static __internalCellMeasurerFlag = false;
   _child: Element | null | undefined;
 
