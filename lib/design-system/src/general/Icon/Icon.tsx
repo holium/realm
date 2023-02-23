@@ -19,8 +19,7 @@ import {
 import { IconPathsType, paths } from './icons';
 import { BoxProps } from '../Box/Box';
 import { ColorVariants, getVar } from '../../util/colors';
-
-const hexToSvgFriendly = (hex: string) => hex.replace('#', '%23');
+import { hexToRgb, rgbToString } from '../../../../../app/src/os/lib/color';
 
 export type IconProps = BoxProps &
   SpaceProps &
@@ -46,7 +45,9 @@ const SvgComponent = forwardRef<
       viewBox="0 0 24 24"
       width={width || '1em'}
       height={height || '1em'}
-      fill={color ? hexToSvgFriendly(getVar(color)) : 'currentcolor'}
+      fill={
+        color ? `rgb(${rgbToString(hexToRgb(getVar(color)))})` : 'currentcolor'
+      }
       ref={svgRef}
       aria-labelledby={titleId}
       pointerEvents="none"
