@@ -9,6 +9,9 @@ import { useServices } from 'renderer/logic/store';
 const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();
 
+  const isChecking =
+    ['initial', 'loading'].indexOf(onboarding.versionLoader.state) !== -1;
+
   useEffect(() => {
     onboarding.versionLoader.set('initial');
     OnboardingActions.preInstallSysCheck();
@@ -35,7 +38,7 @@ const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
       <Text.Custom fontSize={4} mb={20}>
         Checking System Version
       </Text.Custom>
-      {['initial', 'loading'].indexOf(onboarding.versionLoader.state) !== -1 ? (
+      {isChecking ? (
         <Spinner size={1} />
       ) : onboarding.versionLoader.state === 'loaded' ? (
         <Icon ml={2} size={24} name="CheckCircle" color="intent-success" />
@@ -44,7 +47,7 @@ const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
           <Icon ml={2} size={24} name="Error" color="intent-alert" />
         )
       )}
-      {['initial', 'loading'].indexOf(onboarding.versionLoader.state) !== -1 ? (
+      {isChecking ? (
         <Text.Custom fontSize={2} fontWeight={200} opacity={0.6} mt={20}>
           Please wait while we determine the state of your ship...
         </Text.Custom>

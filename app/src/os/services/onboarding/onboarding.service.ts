@@ -704,7 +704,6 @@ export class OnboardingService extends BaseService {
         "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
       );
       this.state.setRealmInstalled();
-      // save the profile data this is development
       return;
     }
 
