@@ -27,6 +27,7 @@
       host=ship
       type=?(%singleplayer %multiplayer)
       windows=(set window)
+      metadata=(map cord cord)
   ==
 ::
 +$  composer
