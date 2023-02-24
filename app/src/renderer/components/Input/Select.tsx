@@ -1,14 +1,14 @@
-import { FC, useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { RadioOption, Text, Icons, Flex } from '../';
 import { ThemeType } from 'renderer/theme';
 import { MenuItemStyle } from '../MenuItem/MenuItem.styles';
 
-interface SelectWrapperStyle {
-  customBg?: string;
+type SelectWrapperStyle = {
   theme: ThemeType;
-}
+  customBg?: string;
+};
 
 const SelectWrapper = styled(Flex)<{ disabled?: boolean }>`
   width: ${(props) => (props.width ? props.width : '100%')};
@@ -32,16 +32,6 @@ const SelectWrapper = styled(Flex)<{ disabled?: boolean }>`
       opacity: 0.5;
     }
   }
-  /* &:focus,
-  &:focus-within,
-  &:active {
-    transition: var(--transition);
-    outline: none;
-    border-color: var(--rlm-accent-color);
-    &::placeholder {
-      color: transparent;
-    }
-  } */
   ${(props) =>
     props.disabled &&
     css`
@@ -59,25 +49,43 @@ const SelectWrapper = styled(Flex)<{ disabled?: boolean }>`
       }
     `}
 `;
-// const SelectItem = styled(MenuItemStyle)``;
 
 const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   z-index: 20;
   top: 32px;
   left: 0px;
-  /* right: 0px; */
   padding: 4px;
   position: absolute;
   border-radius: 6px;
   gap: 2px;
   box-sizing: border-box;
-  border: 1px solid
-    ${(props: SelectWrapperStyle) => props.theme.colors.ui.borderColor};
-  background-color: ${(props: SelectWrapperStyle) => props.customBg};
-  box-shadow: ${(props: SelectWrapperStyle) => props.theme.elevations.one};
+  border: 1px solid ${(props) => props.theme.colors.ui.borderColor};
+  background-color: ${(props) => props.customBg};
+  box-shadow: ${(props) => props.theme.elevations.one};
 `;
 
-interface ISelectInput {
+const showMenu: Variants = {
+  enter: {
+    opacity: 1,
+    y: 4,
+    display: 'block',
+    transition: {
+      duration: 0.3,
+    },
+  },
+  exit: {
+    y: -5,
+    opacity: 0,
+    transition: {
+      duration: 0.3,
+    },
+    transitionEnd: {
+      display: 'none',
+    },
+  },
+};
+
+type Props = {
   id: string;
   disabled?: boolean;
   placeholder?: string;
@@ -90,40 +98,39 @@ interface ISelectInput {
   height?: number;
   inputColor?: string;
   onClick: (value: any) => void;
-}
+};
 
-export const Select: FC<ISelectInput> = (props: ISelectInput) => {
-  const {
-    id = 'select-input',
-    height,
-    options,
-    placeholder,
-    selected,
-    customBg,
-    textColor,
-    iconColor,
-    disabled,
-    onClick,
-  } = props;
-
+export const Select = ({
+  id = 'select-input',
+  height,
+  options,
+  placeholder = 'Select one',
+  selected,
+  customBg,
+  textColor,
+  iconColor,
+  disabled,
+  onClick,
+}: Props) => {
   const [open, setOpen] = useState(false);
 
-  const handleClickOutside = (event: any) => {
+  const handleClickOutside = (event: MouseEvent) => {
     const domNode = document.getElementById(id);
     const dropdownNode = document.getElementById(`${id}-dropdown`);
     const isVisible = dropdownNode
       ? dropdownNode.getAttribute('data-is-open') === 'true'
       : false; // get if the picker is visible currently
-    if (!domNode || !domNode.contains(event.target)) {
-      if (event.target.id === id) {
-        return;
-      }
+
+    if (!domNode || !domNode.contains(event.target as HTMLElement)) {
+      if ((event.target as HTMLElement).id === id) return;
+
       // You are clicking outside
       if (isVisible) {
         setOpen(false);
       }
     }
   };
+
   useEffect(() => {
     document.addEventListener('click', handleClickOutside, true);
 
@@ -132,29 +139,14 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
     };
   }, []);
 
-  const showMenu = {
-    enter: {
-      opacity: 1,
-      y: 4,
-      display: 'block',
-      transition: {
-        duration: 0.3,
-      },
-    },
-    exit: {
-      y: -5,
-      opacity: 0,
-      transition: {
-        duration: 0.3,
-      },
-      transitionEnd: {
-        display: 'none',
-      },
-    },
-  };
+  const selectedOption = useMemo(
+    () => options.find((option: RadioOption) => option.value === selected),
+    [options, selected]
+  );
 
-  const selectedOption = options.find(
-    (option: RadioOption) => option.value === selected
+  const visibleOptions = useMemo(
+    () => options.filter((option: RadioOption) => !option.hidden),
+    [options]
   );
 
   return (
@@ -186,30 +178,20 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
         data-is-open={open}
         initial="exit"
         animate={open ? 'enter' : 'exit'}
-        customBg={props.customBg}
+        customBg={customBg}
       >
-        {options
-          .filter((option: RadioOption) => !option.hidden)
-          .map((option: RadioOption) => {
-            return (
-              <MenuItemStyle
-                customBg={customBg}
-                color={textColor}
-                disabled={selected === option.value}
-                key={option.value}
-                onClick={() => {
-                  !disabled && onClick(option.value);
-                }}
-              >
-                {option.label}
-              </MenuItemStyle>
-            );
-          })}
+        {visibleOptions.map((option, index) => (
+          <MenuItemStyle
+            key={`${option.value}-${index}`}
+            color={textColor}
+            customBg={customBg}
+            disabled={option.disabled}
+            onClick={() => !option.disabled && onClick(option.value)}
+          >
+            {option.label}
+          </MenuItemStyle>
+        ))}
       </SelectDropdown>
     </SelectWrapper>
   );
-};
-
-Select.defaultProps = {
-  placeholder: 'Select one',
 };
