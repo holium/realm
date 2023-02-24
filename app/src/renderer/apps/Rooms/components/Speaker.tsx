@@ -95,11 +95,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
-  useEffect(() => {
-    return () => {
-      console.log('unmounting speaker');
-    };
-  }, []);
 
   return (
     <SpeakerWrapper
@@ -156,9 +151,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
         style={{ pointerEvents: 'none' }}
       >
         <Flex height={26} mt="1px">
-          {!peer?.isMuted && (
-            <AudioWave peer={peer?.patp} speaking={peer?.isSpeaking} />
-          )}
+          {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
         </Flex>
 
         <Flex position="absolute" style={{ height: 18, pointerEvents: 'none' }}>

@@ -5,7 +5,7 @@ import {
   useAnimationControls,
   Variants,
 } from 'framer-motion';
-import { SVGProps, useEffect } from 'react';
+import { SVGProps, useEffect, useState } from 'react';
 import {
   WidthProps,
   HeightProps,
@@ -47,12 +47,13 @@ const lines = [
 ];
 
 type AudioWaveProps = {
-  peer?: string;
   speaking?: boolean;
 };
 
-export const AudioWave = ({ peer, speaking }: AudioWaveProps) => {
+export const AudioWave = ({ speaking }: AudioWaveProps) => {
   const controls = useAnimationControls();
+
+  const [show, setShow] = useState(false);
 
   const defaultStrokeColor = getVar('accent') || '#4e9efd';
   const variants: Variants = {
@@ -78,8 +79,13 @@ export const AudioWave = ({ peer, speaking }: AudioWaveProps) => {
   };
 
   useEffect(() => {
+    // delay the animation to prevent it from distorting on mount
+    setTimeout(() => {
+      setShow(true);
+    }, 100);
+
     return () => {
-      console.log('unmounting audio wave');
+      setShow(false);
     };
   }, []);
 
@@ -89,40 +95,41 @@ export const AudioWave = ({ peer, speaking }: AudioWaveProps) => {
     } else {
       controls.start('hushed');
     }
-  }, [speaking]);
+  }, [speaking, show]);
 
   return (
     <AnimatePresence>
-      <motion.svg
-        layout
-        layoutId={`audio-wave-${peer}`}
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 120 120"
-        width="26"
-        height="26"
-        initial={{ y: 0 }}
-        animate={{ y: 0, display: speaking ? 'block' : 'none' }}
-        exit={{ y: 0 }}
-      >
-        {lines.map((value: any, idx: number) => (
-          <motion.path
-            key={`path-${idx}`}
-            initial={'hushed'}
-            exit={'hushed'}
-            animate={controls}
-            variants={variants}
-            custom={value.delay}
-            strokeLinecap={'round'}
-            strokeLinejoin={'miter'}
-            strokeMiterlimit={10}
-            fillOpacity={0}
-            stroke={defaultStrokeColor}
-            strokeOpacity={1}
-            strokeWidth={10}
-            d={value.path}
-          ></motion.path>
-        ))}
-      </motion.svg>
+      {speaking && show && (
+        <motion.svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 120 120"
+          width="26"
+          height="26"
+          exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ exit: { duration: 0.15 } }}
+        >
+          {lines.map((value: any, idx: number) => (
+            <motion.path
+              key={`path-${idx}`}
+              initial={'hushed'}
+              exit={'hushed'}
+              animate={controls}
+              variants={variants}
+              custom={value.delay}
+              strokeLinecap={'round'}
+              strokeLinejoin={'miter'}
+              strokeMiterlimit={10}
+              fillOpacity={0}
+              stroke={defaultStrokeColor}
+              strokeOpacity={1}
+              strokeWidth={10}
+              d={value.path}
+            ></motion.path>
+          ))}
+        </motion.svg>
+      )}
     </AnimatePresence>
   );
 };
