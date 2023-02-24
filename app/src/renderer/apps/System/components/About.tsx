@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, Select } from 'renderer/components';
+import { Flex, Text } from '@holium/design-system';
+import { Card, Select } from 'renderer/components';
 import { lighten, darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -29,16 +30,20 @@ const AboutPanelPresenter = () => {
 
   return (
     <Flex flex={1} gap={12} flexDirection="column" p={3}>
-      <Text fontSize={7} fontWeight={600} mb={6}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={6}>
         About
-      </Text>
-      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+      </Text.Custom>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
         RELEASE CHANNEL
-      </Text>
-      <Card p="20px" width="100%" customBg={cardColor}>
+      </Text.Custom>
+      <Card p="20px" flexDirection="column" gap={16} customBg={cardColor}>
+        <Text.Body>
+          The release channel determines which Realm updates you receive.
+        </Text.Body>
         <Select
           id="about-release-channel-setting"
           height={32}
+          maxWidth={200}
           textColor={textColor}
           iconColor={iconColor}
           inputColor={secondaryInputColor}
