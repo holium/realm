@@ -140,49 +140,58 @@ enum Position {
 }
 const PositionEnum = types.enumeration<Position>(Object.values(Position));
 
-const NodeType = types.model('NodeType', {
-  id: types.string,
-  position: types.model({
-    x: types.number,
-    y: types.number,
-  }),
-  data: types.optional(types.frozen(), {}), // You can replace "frozen" with the appropriate type for your "data" property.
-  type: types.optional(types.string, ''),
-  style: types.maybe(types.frozen()),
-  className: types.maybe(types.string),
-  sourcePosition: types.maybe(PositionEnum),
-  targetPosition: types.maybe(PositionEnum),
-  hidden: types.maybe(types.boolean),
-  selected: types.maybe(types.boolean),
-  dragging: types.maybe(types.boolean),
-  draggable: types.maybe(types.boolean),
-  selectable: types.maybe(types.boolean),
-  connectable: types.maybe(types.boolean),
-  deletable: types.maybe(types.boolean),
-  dragHandle: types.maybe(types.string),
-  width: types.maybeNull(types.number),
-  height: types.maybeNull(types.number),
-  parentNode: types.maybe(types.string),
-  zIndex: types.maybe(types.number),
-  extent: types.maybe(types.frozen()),
-  expandParent: types.maybe(types.boolean),
-  positionAbsolute: types.maybe(
-    types.model({
+const NodeType = types
+  .model('NodeType', {
+    id: types.string,
+    position: types.model({
       x: types.number,
       y: types.number,
-    })
-  ),
-  ariaLabel: types.maybe(types.string),
-  focusable: types.maybe(types.boolean),
-  resizing: types.maybe(types.boolean),
-  /*internalsSymbol: types.maybe(
+    }),
+    data: types.optional(types.frozen(), {}), // You can replace "frozen" with the appropriate type for your "data" property.
+    type: types.optional(types.string, ''),
+    style: types.maybe(types.frozen()),
+    className: types.maybe(types.string),
+    sourcePosition: types.maybe(PositionEnum),
+    targetPosition: types.maybe(PositionEnum),
+    hidden: types.maybe(types.boolean),
+    selected: types.maybe(types.boolean),
+    dragging: types.maybe(types.boolean),
+    draggable: types.maybe(types.boolean),
+    selectable: types.maybe(types.boolean),
+    connectable: types.maybe(types.boolean),
+    deletable: types.maybe(types.boolean),
+    dragHandle: types.maybe(types.string),
+    width: types.maybeNull(types.number),
+    height: types.maybeNull(types.number),
+    parentNode: types.maybe(types.string),
+    zIndex: types.maybe(types.number),
+    extent: types.maybe(types.frozen()),
+    expandParent: types.maybe(types.boolean),
+    positionAbsolute: types.maybe(
+      types.model({
+        x: types.number,
+        y: types.number,
+      })
+    ),
+    ariaLabel: types.maybe(types.string),
+    focusable: types.maybe(types.boolean),
+    resizing: types.maybe(types.boolean),
+    /*internalsSymbol: types.maybe(
     types.model({
       z: types.maybe(types.number),
       handleBounds: types.maybe(NodeHandleBounds),
       isParent: types.maybe(types.boolean),
     })
   ),*/
-});
+  })
+  .actions((self) => ({
+    hideAirlift() {
+      self.hidden = true;
+    },
+    showAirlift() {
+      self.hidden = false;
+    },
+  }));
 
 function handleParentExpand(res: any[], updateItem: any) {
   const parent = res.find((e) => e.id === updateItem.parentNode);
@@ -289,6 +298,13 @@ export const AirliftStore = types
     },
     removeAirlift(space: string, airliftId: string) {
       self.airlifts.get(space)!.delete(airliftId);
+    },
+    hideAirlift(airliftId: string) {
+      // console.log(self.flowStore.nodes);
+      const node = self.flowStore.nodes.filter((node) => node.id === airliftId);
+      console.log('got node');
+      node[0].hideAirlift();
+      console.log(node[0].hidden);
     },
   }));
 

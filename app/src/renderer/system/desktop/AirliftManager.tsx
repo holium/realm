@@ -112,7 +112,7 @@ const AirliftManagerPresenter = () => {
   const handleMouseDown = (event: any) => {
     window.addEventListener('mouseup', handleMouseUp);
     const element = event.target as HTMLDivElement;
-    const draggedNode = element.closest('.react-flow__node') as HTMLElement;
+    const draggedNode = element.closest('.react-flow__node') as HTMLDivElement;
     const clonedNodeElement = draggedNode.cloneNode(true) as HTMLDivElement;
     document.body.appendChild(clonedNodeElement);
     html2canvas(clonedNodeElement, {
@@ -121,7 +121,8 @@ const AirliftManagerPresenter = () => {
     }).then((canvas) => {
       const serializedNode = canvas.toDataURL();
       console.log(clonedNodeElement);
-      // AirliftActions.hideAirlift(clonedNodeElement['data-id']);
+      console.log(clonedNodeElement.getAttribute('data-id'));
+      AirliftActions.hideAirlift(clonedNodeElement.getAttribute('data-id')!);
       dispatchEvent(
         new CustomEvent('airlift', {
           detail: serializedNode,

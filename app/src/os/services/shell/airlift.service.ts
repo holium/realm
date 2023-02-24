@@ -163,10 +163,7 @@ export class AirliftService extends BaseService {
   }
 
   async hideAirlift(_event: IpcMainInvokeEvent, airliftId: string) {
-    const node = this.state!.flowStore.nodes.filter(
-      (node) => node.id === airliftId
-    );
-    node[0].hidden = true;
+    this.state!.hideAirlift(airliftId);
   }
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
     this.state!.flowStore.onEdgesChange(changes);
