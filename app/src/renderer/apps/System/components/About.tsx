@@ -7,22 +7,24 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AboutPanelPresenter = () => {
   const { theme } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { windowColor, inputColor, mode, textColor, iconColor } =
+    theme.currentTheme;
+
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
-  const [selectedChannel, setSelectedChannel] = useState('');
-
-  const { inputColor, mode } = theme.currentTheme;
   const secondaryInputColor = useMemo(() => {
     return mode === 'light' ? darken(0.015, inputColor) : inputColor;
   }, [inputColor, mode]);
 
+  const [selectedChannel, setSelectedChannel] = useState('');
+
   useEffect(() => {
-    (async function () {
+    const getAndSetSelectedChannel = async () => {
       const releaseChannel = await DesktopActions.getReleaseChannel();
       console.log('releaseChannel => %o', releaseChannel);
       setSelectedChannel(releaseChannel);
-    })();
+    };
+
+    getAndSetSelectedChannel();
   }, []);
 
   return (
@@ -37,18 +39,18 @@ const AboutPanelPresenter = () => {
         <Select
           id="about-release-channel-setting"
           height={32}
-          textColor={theme.currentTheme.textColor}
-          iconColor={theme.currentTheme.iconColor}
+          textColor={textColor}
+          iconColor={iconColor}
           inputColor={secondaryInputColor}
-          customBg={theme.currentTheme.inputColor}
+          customBg={inputColor}
           options={[
             { label: 'alpha', value: 'alpha', disabled: true },
             { label: 'latest', value: 'latest' },
           ]}
           selected={selectedChannel}
-          onClick={async (channel: string) => {
+          onClick={(channel: string) => {
             setSelectedChannel(channel);
-            await DesktopActions.setReleaseChannel(channel);
+            DesktopActions.setReleaseChannel(channel);
           }}
         />
       </Card>
