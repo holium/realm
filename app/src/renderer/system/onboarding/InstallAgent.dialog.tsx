@@ -1,19 +1,20 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { ActionButton, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { Avatar, Flex, Text, Button, Box, Icon } from '@holium/design-system';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
-  const [loading, setLoading] = useState(false);
-  const [installing, setInstalling] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
 
-  if (!onboarding.ship) return null;
+  const loading = useToggle(false);
+  const installing = useToggle(false);
+  const error = useToggle(false);
+  const installed = useToggle(false);
+
+  if (!onboarding.ship || !onboarding.installer) return null;
 
   const shipName = onboarding.ship.patp;
   const shipNick = onboarding.ship.nickname;
@@ -21,13 +22,41 @@ const InstallAgentPresenter = () => {
   const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {
+    installing.toggleOn();
+    error.toggleOff();
     trackEvent('CLICK_INSTALL_REALM', 'ONBOARDING_SCREEN');
-    setInstalling(true);
-    OnboardingActions.installRealm().finally(() => {
-      setInstalling(false);
-      setIsError(onboarding.installer.state === 'error');
-      setIsInstalled(onboarding.installer.state === 'loaded');
-    });
+
+    OnboardingActions.installRealm()
+      .catch(error.toggleOn)
+      .finally(() => {
+        if (onboarding.installer.state === 'error') {
+          error.toggleOn();
+        } else if (onboarding.installer.state === 'loaded') {
+          installed.toggleOn();
+        }
+
+        installing.toggleOff();
+      });
+  };
+
+  const getBody = () => {
+    if (error.isOn) {
+      return onboarding.installer.errorMessage ?? 'Something went wrong';
+    } else {
+      if (installed.isOn) {
+        return 'Congrats! You are ready to enter a new world.';
+      } else {
+        return 'This will take a minute.';
+      }
+    }
+  };
+
+  const onClickNext = () => {
+    loading.toggleOn();
+
+    OnboardingActions.completeOnboarding()
+      .catch(console.error)
+      .finally(loading.toggleOff);
   };
 
   return (
@@ -94,7 +123,7 @@ const InstallAgentPresenter = () => {
             rightContent={
               onboarding.installer.isLoading ? (
                 <Spinner size={0} />
-              ) : isInstalled ? (
+              ) : installed.isOn ? (
                 <Icon ml={2} size={20} name="CheckCircle" />
               ) : (
                 <Icon ml={2} size={20} name="DownloadCircle" />
@@ -110,14 +139,10 @@ const InstallAgentPresenter = () => {
             variant="body"
             opacity={0.6}
             mt={3}
-            fontWeight={isError ? 500 : 200}
-            color={isError ? 'intent-alert' : undefined}
+            fontWeight={error.isOn ? 500 : 400}
+            color={error.isOn ? 'intent-alert' : undefined}
           >
-            {isError && onboarding.installer.errorMessage}
-            {!isInstalled && !isError && 'This will just take a minute'}
-            {isInstalled &&
-              !isError &&
-              'Congrats! You are ready to enter a new world.'}
+            {getBody()}
           </Text.Custom>
         </Flex>
       </Flex>
@@ -129,20 +154,12 @@ const InstallAgentPresenter = () => {
           alignItems="center"
           fontWeight={500}
           style={{ minWidth: 45 }}
-          disabled={!isInstalled || installing}
-          onClick={async (_evt: any) => {
-            setLoading(true);
-            OnboardingActions.completeOnboarding()
-              .then(() => {
-                setLoading(false);
-              })
-              .catch((err) => {
-                console.error(err);
-                setLoading(false);
-              });
-          }}
+          disabled={
+            loading.isOn || error.isOn || installing.isOn || !installed.isOn
+          }
+          onClick={onClickNext}
         >
-          {loading ? <Spinner size={0} /> : 'Next'}
+          {loading.isOn ? <Spinner size={0} /> : 'Next'}
         </Button.TextButton>
       </Box>
     </Flex>
