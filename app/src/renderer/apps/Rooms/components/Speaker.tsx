@@ -2,7 +2,6 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { Flex, Text, FlexProps } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
@@ -11,7 +10,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Avatar, Icon } from '@holium/design-system';
+import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
 import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
@@ -71,18 +70,10 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
-  const textColor =
-    peer?.status !== PeerConnectionState.Failed
-      ? theme.currentTheme.textColor
-      : '#FD4E4E';
 
-  const textProps = {
-    color: textColor,
-  };
-
-  let sublabel = <Sublabel {...textProps}>{speakerType[type]}</Sublabel>;
+  let sublabel = <Sublabel>{speakerType[type]}</Sublabel>;
   if (peerState === PeerConnectionState.Failed)
-    sublabel = <Sublabel {...textProps}>Failed</Sublabel>;
+    sublabel = <Sublabel color="intent-alert">Failed</Sublabel>;
   if (
     peerState === PeerConnectionState.New ||
     peerState === PeerConnectionState.Connecting
@@ -90,10 +81,10 @@ const SpeakerPresenter = (props: ISpeaker) => {
     sublabel = <BeatLoader size={6} speedMultiplier={0.65} />;
 
   if (peerState === PeerConnectionState.Disconnected)
-    sublabel = <Sublabel {...textProps}>Disconnected</Sublabel>;
+    sublabel = <Sublabel>Disconnected</Sublabel>;
 
   if (peerState === PeerConnectionState.Closed) {
-    sublabel = <Sublabel {...textProps}>Away</Sublabel>;
+    sublabel = <Sublabel>Away</Sublabel>;
   }
 
   useEffect(() => {
@@ -104,6 +95,11 @@ const SpeakerPresenter = (props: ISpeaker) => {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
+  useEffect(() => {
+    return () => {
+      console.log('unmounting speaker');
+    };
+  }, []);
 
   return (
     <SpeakerWrapper
@@ -140,17 +136,16 @@ const SpeakerPresenter = (props: ISpeaker) => {
             sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
           />
         </Flex>
-        <Text
+        <Text.Custom
           style={{ pointerEvents: 'none' }}
           opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          color={textColor}
           alignItems="center"
           // height={20}
           fontSize={2}
           fontWeight={500}
         >
           {name}
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex
         position="relative"
@@ -161,7 +156,9 @@ const SpeakerPresenter = (props: ISpeaker) => {
         style={{ pointerEvents: 'none' }}
       >
         <Flex height={26} mt="1px">
-          {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
+          {!peer?.isMuted && (
+            <AudioWave peer={peer?.patp} speaking={peer?.isSpeaking} />
+          )}
         </Flex>
 
         <Flex position="absolute" style={{ height: 18, pointerEvents: 'none' }}>
@@ -207,7 +204,7 @@ const SpeakerWrapper = styled(Flex)<SpeakerStyle>`
   }
 `;
 
-const Sublabel = styled(Text)`
+const Sublabel = styled(Text.Custom)`
   font-size: 12px;
   font-weight: 400;
   opacity: 0.5;
