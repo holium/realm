@@ -218,6 +218,33 @@ export class DesktopService extends BaseService {
   }
 
   setReleaseChannel(_event: IpcRendererEvent, channel: string) {
+    let ship = undefined;
+    let desks = undefined;
+    // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
+    // example: INSTALL_MOON=~hostyv:realm,courier
+    if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
+      const parts: string[] = process.env.INSTALL_MOON.split(':');
+      ship = parts[0];
+      desks = parts[1].split(',');
+    } else {
+      ship = channel === 'latest' ? '~hostyv' : 'nimwyd-ramwyl-dozzod-hostyv';
+      desks = ['realm', 'courier'];
+    }
+    for (let i = 0; i < desks.length; i++) {
+      const desk = desks[i];
+      this.core.conduit!.poke({
+        app: 'hood',
+        mark: 'kiln-install',
+        json: {
+          ship: ship,
+          desk: desk,
+          local: desk,
+        },
+        onError: (e: any) => {
+          console.error(e);
+        },
+      });
+    }
     setReleaseChannel(channel);
   }
 }
