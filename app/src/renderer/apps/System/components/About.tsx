@@ -49,8 +49,8 @@ const AboutPanelPresenter = () => {
           inputColor={secondaryInputColor}
           customBg={inputColor}
           options={[
-            { label: 'alpha', value: 'alpha', disabled: true },
-            { label: 'latest', value: 'latest' },
+            { label: 'prerelease', value: 'alpha', disabled: true },
+            { label: 'production', value: 'latest' },
           ]}
           selected={selectedChannel}
           onClick={(channel: string) => {
