@@ -124,6 +124,7 @@
           %poke-ack
             ?~  p.sign  `this
             ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
+            ~&  >>>  p.sign
             `this
         ==
       [%selfpoke ~]

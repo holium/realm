@@ -29,6 +29,7 @@
       updated-at=time  :: updated when %edit-path-medatata is hit
       =pins
       invites=@tas  :: must either match `peer-role` type or be keyword %anyone, or else no one will be able to invite
+      peers-get-backlog=?
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -72,12 +73,11 @@
 +$  uniq-id  [=msg-id =msg-part-id]
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
 ++  msgon  ((on uniq-id msg-part) idx-sort)
-+$  peer-role  ?(%member %host %admin)
 ::
 +$  peer-row
   $:  =path
       patp=ship
-      role=peer-role
+      role=@tas
       created-at=time
       updated-at=time  :: not used really yet, but if we implement a way to change peers role, then this would be needed
   ==
@@ -94,16 +94,18 @@
 ::
 ::  agent details
 ::
++$  ship-roles  (list [s=@p role=@tas])
 +$  action
   $%  
-      [%create-path =path-row ships=(list ship)]
-      [%edit-path-metadata =path metadata=(map cord cord)]
+      [%create-path =path-row peers=ship-roles]
+      [%edit-path =path metadata=(map cord cord) peers-get-backlog=?]
       [%edit-path-pins =path =pins]
       [%leave-path =path]
       [%insert =insert-message-action]
+      [%insert-backlog =msg-part]
       [%edit =edit-message-action]
       [%delete =msg-id]
-      [%add-peer =path patp=ship timestamp=time]
+      [%add-peer =path patp=ship]
       [%kick-peer =path patp=ship]
   ==
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]

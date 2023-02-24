@@ -9,6 +9,22 @@
 ::
 :: helpers
 ::
+++  scry-messages-for-path
+  |=  [=path =bowl:gall]
+  ^-  (list [k=uniq-id:db v=msg-part:db])
+  =/  paths  (weld /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/messages-for-path path)
+  =/  tbls
+    .^
+      db-dump:db
+      %gx
+      (weld paths /noun)
+    ==
+  =/  tbl  `table:db`(snag 0 tables.tbls)
+  ?+  -.tbl  !!
+    %messages
+      (tap:msgon:db messages-table.tbl)
+  ==
+::
 ++  scry-path-row
   |=  [=path =bowl:gall]
   ^-  path-row:db
@@ -39,6 +55,10 @@
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
 ::
+++  into-backlog-msg-poke
+  |=  [m=msg-part:db =ship]
+  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%insert-backlog m])]
+::
 ++  into-insert-message-poke
   |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db) expires-at=@da] ts=@da]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts act])]
@@ -54,25 +74,28 @@
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
   ^-  (list card)
-  %:  turn
+  %+  turn
     peers
-    |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%kick-peer path.p kickee])])
-  ==
+  |=(p=peer-row:db (into-kick-peer-poke patp.p kickee path.p))
+::
+++  into-kick-peer-poke
+  |=  [target=ship kickee=ship =path]
+  ^-  card
+  [%pass /dbpoke %agent [target %chat-db] %poke %db-action !>([%kick-peer path kickee])]
 ::
 ++  create-path-db-poke
-  |=  [=ship row=path-row:db ships=(list ship)]
+  |=  [=ship row=path-row:db peers=ship-roles:db]
   ^-  card
-  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%create-path row ships])]
+  [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%create-path row peers])]
 ::
 ++  into-add-peer-pokes
-  |=  [s=ship peers=(list ship) =path t=@da]
+  |=  [s=ship peers=(list ship) =path]
   ^-  (list card)
-  %:  turn
+  %+  turn
     %+  skip
       peers
     |=(p=ship =(p s)) :: skip the peer who matches the root-ship that we are poking
-    |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %db-action !>([%add-peer path peer t])])
-  ==
+  |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
   |=  [=bowl:gall state=state-0 chat-path=path subtitle=@t content=@t]
@@ -107,35 +130,38 @@
 ::  poke actions
 ::
 ++  create-chat
-::realm-chat &action [%create-chat ~ %chat (limo [~fes ~bus ~dev ~]) %host]
+::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  :: ?>  =(type.act %chat)  :: for now only support %chat type paths
-  :: TODO COMMENT/UNCOMMENT THIS TO USE REAL paths or TESTING paths
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
-  ::=/  chat-path  /realm-chat/path-id
-  =/  all-peers  [our.bowl peers.act]
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n]
+  =/  all-ships
+    ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
+    [our.bowl peers.act]
+  =/  all-peers=ship-roles:db  (turn all-ships |=(s=ship [s ?:(=(s our.bowl) %host %member)]))
 
-  =/  cards=(list card)  
+  =/  cards=(list card)
     %+  turn
       all-peers
-    |=(s=ship (create-path-db-poke s pathrow peers.act))
+    |=  [s=ship role=@tas]
+    (create-path-db-poke s pathrow all-peers)
+  ~&  >>>  all-peers
+  ~&  >>>  (turn cards |=(c=card -:-:+:+:+:c))
   [cards state]
 ::
 ++  edit-chat
-::  :realm-chat &action [%edit-chat /realm-chat/path-id ~]
-  |=  [act=[=path metadata=(map cord cord)] state=state-0 =bowl:gall]
+::  :realm-chat &action [%edit-chat /realm-chat/path-id ~ %.n]
+  |=  [act=[=path metadata=(map cord cord) peers-get-backlog=?] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  pathpeers  (scry-peers path.act bowl)
 
   =/  cards  
-    :: we poke all peers/members' db with edit-path-metadata (including ourselves)
+    :: we poke all peers/members' db with edit-path (including ourselves)
     %:  turn
       pathpeers
-      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-metadata path.act metadata.act])])
+      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path act])])
     ==
   [cards state]
 ::
@@ -165,18 +191,26 @@
   ^-  (quip card state-0)
   =/  pathrow  (scry-path-row path.act bowl)
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  t=@da  now.bowl
+  =/  all-peers=ship-roles:db
+    %+  snoc
+      (turn pathpeers |=(p=peer-row:db [patp.p role.p]))
+    [ship.act %member]
+
+  =/  backlog-poke-cards
+    ?.  peers-get-backlog.pathrow  ~
+    (turn (scry-messages-for-path path.act bowl) |=([k=uniq-id:db v=msg-part:db] (into-backlog-msg-poke v ship.act)))
+
   =/  cards
-    :-  
+    %+  weld
+      %+  snoc
+        :: we poke all original peers db with add-peer (including ourselves)
+        %+  turn
+          pathpeers
+        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%add-peer path.act ship.act])])
       ::  we poke the newly-added ship's db with a create-path,
       ::  since that will automatically handle them joining as a member
-      [%pass /dbpoke %agent [ship.act %chat-db] %poke %db-action !>([%create-path pathrow (turn pathpeers |=(p=peer-row:db patp.p))])]
-
-      :: we poke all peers/members' db with add-peer (including ourselves)
-      %:  turn
-        pathpeers
-        |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%add-peer path.act ship.act t])])
-      ==
+      [%pass /dbpoke %agent [ship.act %chat-db] %poke %db-action !>([%create-path pathrow all-peers])]
+    backlog-poke-cards
   [cards state]
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
@@ -184,24 +218,22 @@
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  members  (skim pathpeers |=(p=peer-row:db =(role.p %member)))
+  =/  members  (skim pathpeers |=(p=peer-row:db ?!(=(role.p %host)))) :: everyone who's NOT the host
   =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
   =/  cards
     ?:  =(ship.act patp.host)
       :: if src.bowl is %host, we have to leave-path for the host
-      :: and then send kick-peer for all the member-peers
+      :: and then send kick-peer of themselves to all members
       :-  [%pass /dbpoke %agent [patp.host %chat-db] %poke %db-action !>([%leave-path path.act])]
-      %-  zing
-      %:  turn
+      %+  turn
         members
-        |=(p=peer-row:db (into-all-peers-kick-pokes patp.p pathpeers))
-      ==
+      |=(p=peer-row:db (into-kick-peer-poke patp.p patp.p path.p))
     :: otherwise we just send kick-peer to all the peers (db will ensure permissions)
     (into-all-peers-kick-pokes ship.act pathpeers)
   [cards state]
 ::
 ++  send-message
-::realm-chat &action [%send-message /realm-chat/path-id (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] ~]) *@da]
+::realm-chat &action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] *@da]
   |=  [act=[=path fragments=(list minimal-fragment:db) expires-at=@da] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
@@ -340,6 +372,7 @@
       %-  ot
       :~  [%path pa]
           [%metadata (om so)]
+          [%peers-get-backlog bo]
       ==
     ::
     ++  de-ship  (su ;~(pfix sig fed:ag))

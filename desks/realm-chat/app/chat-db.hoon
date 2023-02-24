@@ -44,8 +44,8 @@
       :: paths-table pokes
       %create-path 
         (create-path:db-lib +.act state bowl)
-      %edit-path-metadata
-        (edit-path-metadata:db-lib +.act state bowl)
+      %edit-path
+        (edit-path:db-lib +.act state bowl)
       %edit-path-pins
         (edit-path-pins:db-lib +.act state bowl)
       %leave-path 
@@ -53,6 +53,8 @@
       :: messages-table pokes
       %insert
         (insert:db-lib +.act state bowl)
+      %insert-backlog
+        (insert-backlog:db-lib +.act state bowl)
       %edit
         (edit:db-lib +.act state bowl)
       %delete
@@ -115,6 +117,11 @@
         =/  thepath  t.t.t.path
         =/  thepeers  (~(got by peers-table.state) thepath)
         ``db-dump+!>([%tables [[%peers (malt (limo ~[[thepath thepeers]]))] ~]])
+    ::
+      [%x %db %messages-for-path *]
+        =/  thepath  t.t.t.path
+        =/  msgs=messages-table:sur  (path-msgs:from:db-lib messages-table.state thepath)
+        ``db-dump+!>(tables+[messages+msgs ~])
     ::
       [%x %db %messages ~]
         ``db-dump+!>(tables+[messages+messages-table.state ~])
