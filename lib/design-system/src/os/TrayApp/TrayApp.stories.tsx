@@ -47,7 +47,7 @@ export const Default: ComponentStory<typeof TrayApp> = () => {
             mb={2}
           >
             <Text.Custom
-              fontWeight="600"
+              fontWeight={600}
               textTransform="uppercase"
               pl={1}
               opacity={0.7}

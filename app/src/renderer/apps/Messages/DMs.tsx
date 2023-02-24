@@ -144,7 +144,7 @@ const DMsPresenter = (props: IProps) => {
       >
         <Flex justifyContent="center" alignItems="center">
           <Icon opacity={0.8} name="Messages" size={24} mr={3} />
-          <Text.Custom fontWeight="600" textTransform="uppercase" opacity={0.7}>
+          <Text.Custom fontWeight={600} textTransform="uppercase" opacity={0.7}>
             DMs
           </Text.Custom>
         </Flex>

@@ -1,5 +1,4 @@
 import { FC, useEffect } from 'react';
-import { darken } from 'polished';
 import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
@@ -20,7 +19,6 @@ type Props = {
   shell: ShellStoreType;
   dragControls: DragControls;
   currentTheme: ThemeType;
-  windowColor: string;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
@@ -35,7 +33,6 @@ export const TitlebarByType = ({
   shell,
   dragControls,
   currentTheme,
-  windowColor,
   onDevTools,
   onDragStart,
   onDragStop,
@@ -86,7 +83,6 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
           onDragStart={onDragStart}
@@ -149,7 +145,6 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
           dragControls={dragControls}
           onClose={onCloseDialog}

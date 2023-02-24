@@ -295,6 +295,12 @@ export class RealmProtocol extends BaseProtocol {
         value: { data: false },
       });
     });
+    this.local.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
+      this.sendData({
+        kind: DataPacket_Kind.SPEAKING_CHANGED,
+        value: { data: speaking },
+      });
+    });
   }
 
   async connect(room: RoomType): Promise<Map<Patp, RemotePeer>> {
@@ -477,6 +483,9 @@ export class RealmProtocol extends BaseProtocol {
         } else {
           remotePeer.unmute();
         }
+      } else if (data.kind === DataPacket_Kind.SPEAKING_CHANGED) {
+        const payload = data.value as DataPayload;
+        remotePeer.isSpeakingChanged(payload.data);
       } else {
         this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
       }

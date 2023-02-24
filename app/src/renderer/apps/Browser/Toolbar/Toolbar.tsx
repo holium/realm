@@ -19,7 +19,6 @@ const ToolbarContainer = styled(TitlebarContainer)`
 
 export type BrowserToolbarProps = {
   zIndex: number;
-  windowColor: string;
   showDevToolsToggle: boolean;
   dragControls: ReturnType<typeof useDragControls>;
   innerRef?: RefObject<HTMLDivElement>;
