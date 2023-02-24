@@ -11,7 +11,6 @@ import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
 import { getReleaseChannel } from '../os/lib/settings';
-const fs = require('fs');
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')

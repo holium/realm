@@ -1,5 +1,5 @@
 import { ThemeModelType } from './../theme.model';
-import { app, ipcMain, session, ipcRenderer } from 'electron';
+import { ipcMain, session, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import { Realm } from '../../index';
