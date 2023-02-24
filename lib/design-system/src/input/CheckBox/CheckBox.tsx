@@ -53,7 +53,12 @@ export const CheckBox = ({
           </Text.Body>
         )}
         {label && (
-          <Text.Label display="flex" alignItems="center" color="text">
+          <Text.Label
+            display="flex"
+            alignItems="center"
+            color="text"
+            fontWeight={400}
+          >
             {label}
           </Text.Label>
         )}
