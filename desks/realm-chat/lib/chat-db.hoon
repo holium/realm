@@ -515,6 +515,7 @@
       |=  ch=db-change:sur
       ^-  json
       [%a (turn ch individual-change)]
+    ::
     ++  individual-change
       |=  ch=db-change-type:sur
       %-  pairs
@@ -542,6 +543,7 @@
             ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
           ==
       ==
+    ::
     ++  any-row
       |=  =db-row:sur
       ^-  json
@@ -564,6 +566,8 @@
           created-at+(time created-at.path-row)
           updated-at+(time updated-at.path-row)
           pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
+          invites+s+invites.path-row
+          peers-get-backlog+b+peers-get-backlog.path-row
       ==
     ::
     ++  messages-row
@@ -580,6 +584,7 @@
           updated-at+(time updated-at.msg-part)
           expires-at+(time expires-at.msg-part)
       ==
+    ::
     ++  reply-to-to-json
       |=  =reply-to:sur
       ^-  json
