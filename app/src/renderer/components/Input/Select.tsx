@@ -54,6 +54,7 @@ const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   z-index: 20;
   top: 32px;
   left: 0px;
+  width: 100%;
   padding: 4px;
   position: absolute;
   border-radius: 6px;
@@ -96,6 +97,7 @@ type Props = {
   options: RadioOption[];
   selected?: string;
   height?: number;
+  maxWidth?: number;
   inputColor?: string;
   onClick: (value: any) => void;
 };
@@ -103,6 +105,7 @@ type Props = {
 export const Select = ({
   id = 'select-input',
   height,
+  maxWidth,
   options,
   placeholder = 'Select one',
   selected,
@@ -154,7 +157,8 @@ export const Select = ({
       id={id}
       disabled={disabled}
       minHeight={30}
-      height={height || 'min-content'}
+      height={height ?? 'min-content'}
+      maxWidth={maxWidth}
       position="relative"
       flexDirection="row"
       justifyContent="space-between"
