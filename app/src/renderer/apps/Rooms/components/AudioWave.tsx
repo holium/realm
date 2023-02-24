@@ -41,7 +41,6 @@ const lines = [
   },
 ];
 
-// TODO fix tray open animation breaking the audio wave animation
 export const AudioWave = ({ speaking }: any) => {
   const controls = useAnimationControls();
 
