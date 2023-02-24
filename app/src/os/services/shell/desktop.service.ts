@@ -227,7 +227,7 @@ export class DesktopService extends BaseService {
       ship = parts[0];
       desks = parts[1].split(',');
     } else {
-      ship = channel === 'latest' ? '~hostyv' : 'nimwyd-ramwyl-dozzod-hostyv';
+      ship = channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv';
       desks = ['realm', 'courier'];
     }
     for (let i = 0; i < desks.length; i++) {
