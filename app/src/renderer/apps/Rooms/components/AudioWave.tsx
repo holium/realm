@@ -51,7 +51,6 @@ type AudioWaveProps = {
 };
 
 export const AudioWave = ({ speaking }: AudioWaveProps) => {
-
   const controls = useAnimationControls();
   const [show, setShow] = useState(false);
 
