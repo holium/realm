@@ -278,11 +278,11 @@ export class AppUpdater implements IAppUpdater {
       this.autoUpdater.checkForUpdates().catch((error) => {
         console.log(error);
         // this is bad. just show the error without a fancy screen and move on...
-        dialog.showErrorBox(
-          'Auto Update Error',
-          // @ts-ignore
-          error == null ? 'unknown' : (error.stack || error).toString()
-        );
+        // dialog.showErrorBox(
+        //   'Auto Update Error',
+        //   // @ts-ignore
+        //   error == null ? 'unknown' : (error.stack || error).toString()
+        // );
         // close all the updater windows and continue
         this.done();
       });

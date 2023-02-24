@@ -75,6 +75,13 @@ export function hexToRgb(hex: string) {
 export function rgbToString(rgb: { r: number; g: number; b: number } | null) {
   return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : rgb;
 }
+
+export function rgbToStringFull(
+  rgb: { r: number; g: number; b: number } | null
+) {
+  return rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : 'rgb(0, 0, 0)';
+}
+
 // ---------
 
 // function dropWhile<T>(arr: T[], pred: (x: T) => boolean): T[] {
