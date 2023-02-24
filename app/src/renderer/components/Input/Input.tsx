@@ -64,7 +64,7 @@ export const InputWrapper = styled(Flex)<BaseInputProps>`
   transition: ${(props) => props.theme.transition};
   /* background-color: ${(props) => props.theme.colors.ui.tertiary}; */
   border: 1px solid
-    ${(props: InputProps) =>
+    ${(props) =>
       props.error
         ? props.theme.colors.ui.intent.alert
         : props.theme.colors.ui.input.borderColor};
@@ -317,7 +317,7 @@ export const Input = ({
       </LeftIcon>
     )}
     {leftLabel && leftLabel !== 'none' && (
-      <Text color="#639DF6" fontWeight="500" marginRight={2}>
+      <Text color="#639DF6" fontWeight={500} marginRight={2}>
         {leftLabel}
       </Text>
     )}

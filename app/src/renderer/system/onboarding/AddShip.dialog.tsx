@@ -19,7 +19,7 @@ import { useToggle } from 'renderer/logic/lib/useToggle';
 import { Button, Icon, TextInput } from '@holium/design-system';
 
 const AddShipPresenter = (props: BaseDialogProps) => {
-  const { theme } = useServices();
+  const { theme, onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { identity } = useServices();
@@ -58,7 +58,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const urbitId = useField({
     id: 'patp',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.patp || '',
     validate: (patp: string) => {
       if (identity.auth.addedShips.includes(patp)) {
         return { error: 'Already added', parsed: undefined };
@@ -75,7 +75,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const shipUrl = useField({
     id: 'url',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.url || '',
     validationSchema: yup
       .string()
       .matches(
@@ -87,7 +87,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const accessKey = useField({
     id: 'code',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.code || '',
     validationSchema: yup
       .string()
       .matches(

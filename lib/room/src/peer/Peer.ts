@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from '../types';
-import { action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import { PeerConnectionState } from './types';
 import { PeerEvent } from './events';
 
@@ -76,6 +76,13 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
       track.enabled = true;
     });
     this.emit(PeerEvent.Unmuted);
+  }
+
+  isSpeakingChanged(speaking: boolean) {
+    runInAction(() => {
+      this.isSpeaking = speaking;
+      this.emit(PeerEvent.IsSpeakingChanged, speaking);
+    });
   }
 }
 

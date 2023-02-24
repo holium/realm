@@ -37,8 +37,8 @@ const initialOnboardingDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: false,
     component: (props: BaseDialogProps) => <DisclaimerDialog {...props} />,
-    isValidated: (state: any) => {
-      return state && state.disclaimerAccepted;
+    isValidated: (state) => {
+      return state?.disclaimerAccepted;
     },
     onOpen: () => {
       ShellActions.setBlur(true);
@@ -213,7 +213,11 @@ const completeProfileDialogs: DialogRenderers = {
   [OnboardingStep.PRE_INSTALLATION_CHECK]: {
     workflow: true,
     firstStep: false,
-    hasCloseButton: false,
+    hasCloseButton: true,
+    hasPrevious: () => true,
+    onPrevious: () => {
+      OnboardingActions.setStep(OnboardingStep.ADD_SHIP);
+    },
     customNext: false,
     component: (props: BaseDialogProps) => (
       <CheckInstallationDialog {...props} />
@@ -236,8 +240,8 @@ const completeProfileDialogs: DialogRenderers = {
         {
           x: 0,
           y: 0,
-          width: 520,
-          height: 490,
+          width: 460,
+          height: 400,
         },
         desktopDimensions
       ),
@@ -246,6 +250,7 @@ const completeProfileDialogs: DialogRenderers = {
   [OnboardingStep.PROFILE_SETUP]: {
     workflow: true,
     hasCloseButton: false,
+    hasPrevious: () => true,
     customNext: true,
     component: (props: BaseDialogProps) => <ProfileSetup {...props} />,
     onPrevious: async () =>
