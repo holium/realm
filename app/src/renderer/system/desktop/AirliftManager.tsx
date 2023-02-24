@@ -11,16 +11,17 @@ import { AgentNode } from 'renderer/apps/Airlift/AgentNode';
 import 'renderer/apps/Airlift/AgentNode/index.css';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
+import html2canvas from 'html2canvas';
 
 const AirliftManagerPresenter = () => {
   // const { getOptions, setOptions } = useContextMenu();
-  const { shell, airlift, desktop, spaces } = useServices();
+  const { shell, airlift, desktop } = useServices();
   const id = 'airlift-fill';
 
-  const airlifts = Array.from(
+  /*const airlifts = Array.from(
     (spaces.selected && airlift.airlifts.get(spaces.selected.path)?.values()) ||
       []
-  );
+  );*/
 
   /*const initialNodes = [
     {
@@ -60,7 +61,6 @@ const AirliftManagerPresenter = () => {
 
   const onDragOver = useCallback((event: any) => {
     event.preventDefault();
-    console.log('dragging over');
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
@@ -73,9 +73,10 @@ const AirliftManagerPresenter = () => {
 
   const onDrop = useCallback(
     (event: any) => {
-      console.log('ondrop success');
+      console.log('ondrop success', event);
       event.preventDefault();
 
+      // @ts-ignore
       const reactFlowBounds = reactFlowWrapper.current!.getBoundingClientRect();
       const type = event.dataTransfer.getData('application/reactflow');
 
@@ -92,9 +93,9 @@ const AirliftManagerPresenter = () => {
         id: getId(type),
         type,
         position,
-        data: { label: `${type} node`, value: 123 },
+        data: { label: `${type} node`, value: 123, agent: 'asdf' },
+        draggable: false,
       };
-      console.log(newNode);
 
       /*AirliftActions.dropAirlift(
         spaces.selected!.path,
@@ -107,6 +108,37 @@ const AirliftManagerPresenter = () => {
     },
     [reactFlowInstance]
   );
+
+  const handleMouseDown = (event: any) => {
+    window.addEventListener('mouseup', handleMouseUp);
+    const element = event.target as HTMLDivElement;
+    const draggedNode = element.closest('.react-flow__node') as HTMLElement;
+    const clonedNodeElement = draggedNode.cloneNode(true) as HTMLDivElement;
+    document.body.appendChild(clonedNodeElement);
+    html2canvas(clonedNodeElement, {
+      backgroundColor: null,
+      height: clonedNodeElement.scrollHeight,
+    }).then((canvas) => {
+      const serializedNode = canvas.toDataURL();
+      console.log(clonedNodeElement);
+      // AirliftActions.hideAirlift(clonedNodeElement['data-id']);
+      dispatchEvent(
+        new CustomEvent('airlift', {
+          detail: serializedNode,
+        })
+      );
+      document.body.removeChild(clonedNodeElement);
+    });
+  };
+  const handleMouseUp = () => {
+    window.removeEventListener('mouseup', handleMouseUp);
+    // dispatchEvent(new MouseEvent('mouseup'));
+    dispatchEvent(
+      new CustomEvent('airlift', {
+        detail: undefined,
+      })
+    );
+  };
 
   return (
     <motion.div
@@ -128,9 +160,10 @@ const AirliftManagerPresenter = () => {
       <ReactFlowProvider>
         <div style={{ flexGrow: 1, height: '100%' }} ref={reactFlowWrapper}>
           <ReactFlow
+            id="airlift-manager"
             nodes={nodes}
             edges={edges}
-            onNodesChange={AirliftActions.onNodesChange}
+            // onNodesChange={AirliftActions.onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onInit={setReactFlowInstance}
@@ -140,8 +173,39 @@ const AirliftManagerPresenter = () => {
             zoomOnDoubleClick={false}
             zoomOnPinch={false}
             zoomOnScroll={false}
-            onMouseDownCapture={() => {
-              dispatchEvent(new MouseEvent('mousedown'));
+            onMouseDownCapture={(event) => {
+              // dispatchEvent(new MouseEvent('mousedown'));
+              handleMouseDown(event);
+            }}
+            /*onNodeDragStart={(event) => {
+              const draggedNode = event.currentTarget;
+              const clonedNodeElement = draggedNode.cloneNode(
+                true
+              ) as HTMLDivElement;
+              // clonedNodeElement.style.overflow = 'auto';
+              document.body.appendChild(clonedNodeElement);
+              var w = 1000;
+              var h = 1000;
+              var canvas = document.createElement('canvas');
+              canvas.width = w * 2;
+              canvas.height = h * 2;
+              canvas.style.width = w + 'px';
+              canvas.style.height = h + 'px';
+              var context = canvas.getContext('2d')!;
+              context.scale(2, 2);
+              html2canvas(clonedNodeElement, {
+                backgroundColor: null,
+                height: clonedNodeElement.scrollHeight,
+                canvas,
+              }).then((canvas) => {
+                const serializedNode = canvas.toDataURL();
+                dispatchEvent(
+                  new CustomEvent('airlift', {
+                    detail: serializedNode,
+                  })
+                );
+                document.body.removeChild(clonedNodeElement);
+              });
             }}
             onNodeDrag={(event) => {
               const mouseEventInit: MouseEventInit = {
@@ -155,9 +219,21 @@ const AirliftManagerPresenter = () => {
               dispatchEvent(new MouseEvent('mousemove', mouseEventInit));
             }}
             onNodeDragStop={() => {
+              dispatchEvent(
+                new CustomEvent('airlift', {
+                  detail: undefined,
+                })
+              );
               dispatchEvent(new MouseEvent('mouseup'));
-            }}
+            }}*/
+            onDragOver={onDragOver}
             onDrop={onDrop}
+            onDragEnter={(event) => {
+              event.preventDefault();
+            }}
+            onDragLeave={(event) => {
+              event.preventDefault();
+            }}
           />
         </div>
       </ReactFlowProvider>

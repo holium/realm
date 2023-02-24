@@ -177,7 +177,10 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       : webView.openDevTools();
   }, [webViewId]);
 
-  const onMouseDown = () => DesktopActions.setActive(appWindow.appId);
+  const onMouseDown = () => {
+    console.log('app window mouse down');
+    DesktopActions.setActive(appWindow.appId);
+  };
 
   return (
     <AppWindowContainer
@@ -219,6 +222,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       color={textColor}
       customBg={rgba(windowColor, 0.9)}
       onMouseDown={onMouseDown}
+      onDragEnter={() => console.log('drag enter')}
+      onDrag={() => console.log('drag')}
+      onDragOver={(event: any) => {
+        event.preventDefault();
+        console.log('drag over');
+      }}
     >
       <Flex
         flexDirection="column"

@@ -27,7 +27,7 @@ export function AgentNode({ data, isConnectable }) {
         id="b"
         isConnectable={isConnectable}
   />*/}
-      <AirliftAgent desk="asdf" agent="asdf" />
+      <AirliftAgent desk="asdf" agent={data.agent} />
     </Flex>
   );
 }

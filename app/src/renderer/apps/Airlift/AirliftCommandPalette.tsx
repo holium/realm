@@ -12,32 +12,36 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
-  const onButtonDragStart = (event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    event.dataTransfer.effectAllowed = 'move';
-    event.preventDefault();
+  const onButtonDragStart = (event: DragEvent, nodeType) => {
     window.addEventListener('mouseup', onButtonDragEnd);
     const iconEvent = new CustomEvent('icon', {
       detail: 'Airlift',
     });
     window.dispatchEvent(iconEvent);
+    event.preventDefault();
   };
 
   const onButtonDragEnd = useCallback(
-    (evt: any) => {
-      // evt.preventDefault();
+    (event: any) => {
+      event.preventDefault();
       const iconEvent = new CustomEvent('icon', {
         detail: null,
       });
       window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
-      const onDropEvent = new MouseEvent('drop', {
-        clientX: evt.clientX,
-        clientY: evt.clientY,
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData('application/reactflow', 'agent');
+      let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+      console.log(elemBelow);
+      const dropEvent = new DragEvent('drop', {
+        bubbles: true,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
       });
-      console.log('dispatching drop event');
-      window.dispatchEvent(onDropEvent);
-      // AirliftActions.dropAirlift(spaces.selected!.path, 'agent');
+      Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+      document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
     },
     []
     /*[activeApp, anchorOffset, position, dimensions]*/

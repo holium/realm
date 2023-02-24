@@ -13,12 +13,10 @@ ipcRenderer.on('add-mouse-listeners', () => {
   const handleMouseOver = () => ipcRenderer.invoke('mouse-over');
   const handleMouseOut = () => ipcRenderer.invoke('mouse-out');
   const handleMouseIcon = (event: any) => {
-    console.log('mouse icon event', event);
     ipcRenderer.invoke('icon', event.detail);
   };
-  const handleDrop = () => {
-    console.log('mouse drop event');
-    ipcRenderer.invoke('drop');
+  const handleAirlift = (event: any) => {
+    ipcRenderer.invoke('airlift', event.detail);
   };
 
   window.addEventListener('mouseover', handleMouseOver);
@@ -26,12 +24,8 @@ ipcRenderer.on('add-mouse-listeners', () => {
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mousedown', handleMouseDown);
   window.addEventListener('mouseup', () => {
-    console.log('mouse up');
     handleMouseUp();
   });
-  window.addEventListener('icon', (event) => handleMouseIcon(event));
-  window.addEventListener('drop', () => {
-    console.log('got drop on mouse listener');
-    handleDrop();
-  });
+  window.addEventListener('icon', handleMouseIcon);
+  window.addEventListener('airlift', handleAirlift);
 });

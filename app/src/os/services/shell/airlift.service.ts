@@ -19,6 +19,7 @@ export class AirliftService extends BaseService {
     'realm.airlift.drop-airlift': this.dropAirlift,
     'realm.airlift.remove-airlift': this.removeAirlift,
     'realm.airlift.on-nodes-change': this.onNodesChange,
+    'realm.airlift.hide-airlift': this.hideAirlift,
     /*'realm.airlift.on-edges-change': this.onEdgesChange,
     'realm.airlift.on-connect': this.onConnect,*/
   };
@@ -53,6 +54,9 @@ export class AirliftService extends BaseService {
     },
     onNodesChange: (changes: NodeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
+    },
+    hideAirlift: (airliftId: string) => {
+      return ipcRenderer.invoke('realm.airlift.hide-airlift', airliftId);
     },
     /*onEdgesChange: (changes: EdgeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-edges-change', changes);
@@ -156,6 +160,13 @@ export class AirliftService extends BaseService {
 
   async onNodesChange(_event: IpcMainInvokeEvent, changes: NodeChange[]) {
     this.state!.flowStore.onNodesChange(changes);
+  }
+
+  async hideAirlift(_event: IpcMainInvokeEvent, airliftId: string) {
+    const node = this.state!.flowStore.nodes.filter(
+      (node) => node.id === airliftId
+    );
+    node[0].hidden = true;
   }
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
     this.state!.flowStore.onEdgesChange(changes);

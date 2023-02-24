@@ -78,7 +78,10 @@ const appPreload = {
     ipcRenderer.on('mouse-down', callback);
   },
   onMouseUp(callback: () => void) {
-    ipcRenderer.on('mouse-up', callback);
+    ipcRenderer.on('mouse-up', () => {
+      console.log('got mouse up main');
+      callback();
+    });
   },
   onMouseColorChange(callback: (hex: string) => void) {
     ipcRenderer.on('mouse-color', (_, hex: string) => {
@@ -91,8 +94,11 @@ const appPreload = {
       callback(icon);
     });
   },
-  onDrop(callback: () => void) {
-    ipcRenderer.on('drop', callback);
+  onAirlift(callback: (blah: any) => void) {
+    ipcRenderer.on('airlift', (_, blah: any) => {
+      console.log('airlift icon change');
+      callback(blah);
+    });
   },
 };
 

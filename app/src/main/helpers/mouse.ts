@@ -38,14 +38,11 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
   });
 
   ipcMain.handle('icon', (_, icon: string) => {
-    console.log('ipcMain event');
-    console.log(icon);
     mouseWindow.webContents.send('icon', icon);
   });
 
-  ipcMain.handle('drop', () => {
-    console.log('drop event');
-    mouseWindow.webContents.send('drop');
+  ipcMain.handle('airlift', (_, airlift: any) => {
+    mouseWindow.webContents.send('airlift', airlift);
   });
 };
 
