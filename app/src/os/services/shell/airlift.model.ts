@@ -96,8 +96,7 @@ const AirliftAgent = types
       code += '--';
       return code;
     },
-  }))
-  .actions((self) => ({}));
+  }));
 
 export const AirliftDesk = types.model('AirliftDesk', {
   agents: types.map(AirliftAgent),
@@ -142,7 +141,7 @@ const PositionEnum = types.enumeration<Position>(Object.values(Position));
 
 const NodeType = types
   .model('NodeType', {
-    id: types.string,
+    id: types.identifier,
     position: types.model({
       x: types.number,
       y: types.number,
@@ -193,53 +192,6 @@ const NodeType = types
     },
   }));
 
-function handleParentExpand(res: any[], updateItem: any) {
-  const parent = res.find((e) => e.id === updateItem.parentNode);
-
-  if (parent) {
-    const extendWidth = updateItem.position.x + updateItem.width - parent.width;
-    const extendHeight =
-      updateItem.position.y + updateItem.height - parent.height;
-
-    if (
-      extendWidth > 0 ||
-      extendHeight > 0 ||
-      updateItem.position.x < 0 ||
-      updateItem.position.y < 0
-    ) {
-      parent.style = { ...parent.style } || {};
-
-      parent.style.width = parent.style.width ?? parent.width;
-      parent.style.height = parent.style.height ?? parent.height;
-
-      if (extendWidth > 0) {
-        parent.style.width += extendWidth;
-      }
-
-      if (extendHeight > 0) {
-        parent.style.height += extendHeight;
-      }
-
-      if (updateItem.position.x < 0) {
-        const xDiff = Math.abs(updateItem.position.x);
-        parent.position.x = parent.position.x - xDiff;
-        parent.style.width += xDiff;
-        updateItem.position.x = 0;
-      }
-
-      if (updateItem.position.y < 0) {
-        const yDiff = Math.abs(updateItem.position.y);
-        parent.position.y = parent.position.y - yDiff;
-        parent.style.height += yDiff;
-        updateItem.position.y = 0;
-      }
-
-      parent.width = parent.style.width;
-      parent.height = parent.style.height;
-    }
-  }
-}
-
 export const FlowStore = types
   .model('FlowStore', {
     nodes: types.array(NodeType),
@@ -262,24 +214,6 @@ export const AirliftStore = types
     airlifts: types.map(types.map(AirliftModel)),
     flowStore: FlowStore,
   })
-  .views((self) => ({
-    initial(agents: any) {
-      /*      self.model = airliftmodel.create({
-      })
-      const btcWallets = wallets.bitcoin;
-      Object.entries(btcWallets).forEach(([key, wallet]) => {
-        btcWallets[key] = {
-          network: 'bitcoin',
-          path: (wallet as any).path,
-          nickname: (wallet as any).nickname,
-          balance: (wallet as any).balance.toString(),
-          address: (wallet as any).address,
-          contracts: {}
-        }
-      })
-      applySnapshot(self.wallets, btcWallets);*/
-    },
-  }))
   .actions((self) => ({
     //dropAirlift(space: string, type: string, airliftId: string, location: any) {
     dropAirlift(airlift: Node) {

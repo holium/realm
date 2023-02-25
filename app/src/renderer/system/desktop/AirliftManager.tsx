@@ -11,36 +11,10 @@ import { AgentNode } from 'renderer/apps/Airlift/AgentNode';
 import 'renderer/apps/Airlift/AgentNode/index.css';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
-import html2canvas from 'html2canvas';
 
 const AirliftManagerPresenter = () => {
-  // const { getOptions, setOptions } = useContextMenu();
   const { shell, airlift, desktop } = useServices();
   const id = 'airlift-fill';
-
-  /*const airlifts = Array.from(
-    (spaces.selected && airlift.airlifts.get(spaces.selected.path)?.values()) ||
-      []
-  );*/
-
-  /*const initialNodes = [
-    {
-      id: '2',
-      data: { value: 123 },
-      position: { x: 100, y: 100 },
-      type: 'agent',
-    },
-  ];*/
-
-  /*const initialNodes = airlifts.map((airlift) => {
-    return {
-      id: airlift.airliftId,
-      data: { value: 123 },
-      // position: { x: 100, y: 100 },
-      position: airlift.bounds,
-      type: 'agent',
-    };
-  });*/
 
   const nodeTypes = useMemo(() => {
     return {
@@ -48,11 +22,13 @@ const AirliftManagerPresenter = () => {
     };
   }, []);
 
-  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  // console.log('nodes', nodes);
-  const nodes = Array.from(airlift.flowStore.nodes.values());
+  airlift.flowStore.nodes.map((node) => node.position.x + node.position.y);
+  const nodes = useMemo(() => {
+    return Array.from(airlift.flowStore.nodes.slice().values());
+  }, [
+    airlift.flowStore.nodes.map((node) => [node.position.x, node.position.y]),
+  ]);
 
-  // const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(
     (params: any) => setEdges((es) => es.concat(params)),
@@ -94,52 +70,12 @@ const AirliftManagerPresenter = () => {
         type,
         position,
         data: { label: `${type} node`, value: 123, agent: 'asdf' },
-        draggable: false,
       };
 
-      /*AirliftActions.dropAirlift(
-        spaces.selected!.path,
-        type,
-        getId(type),
-        position
-      );*/
       AirliftActions.dropAirlift(newNode);
-      // setNodes((nds) => nds.concat(newNode));
     },
     [reactFlowInstance]
   );
-
-  const handleMouseDown = (event: any) => {
-    window.addEventListener('mouseup', handleMouseUp);
-    const element = event.target as HTMLDivElement;
-    const draggedNode = element.closest('.react-flow__node') as HTMLDivElement;
-    const clonedNodeElement = draggedNode.cloneNode(true) as HTMLDivElement;
-    document.body.appendChild(clonedNodeElement);
-    html2canvas(clonedNodeElement, {
-      backgroundColor: null,
-      height: clonedNodeElement.scrollHeight,
-    }).then((canvas) => {
-      const serializedNode = canvas.toDataURL();
-      console.log(clonedNodeElement);
-      console.log(clonedNodeElement.getAttribute('data-id'));
-      AirliftActions.hideAirlift(clonedNodeElement.getAttribute('data-id')!);
-      dispatchEvent(
-        new CustomEvent('airlift', {
-          detail: serializedNode,
-        })
-      );
-      document.body.removeChild(clonedNodeElement);
-    });
-  };
-  const handleMouseUp = () => {
-    window.removeEventListener('mouseup', handleMouseUp);
-    // dispatchEvent(new MouseEvent('mouseup'));
-    dispatchEvent(
-      new CustomEvent('airlift', {
-        detail: undefined,
-      })
-    );
-  };
 
   return (
     <motion.div
@@ -164,7 +100,7 @@ const AirliftManagerPresenter = () => {
             id="airlift-manager"
             nodes={nodes}
             edges={edges}
-            // onNodesChange={AirliftActions.onNodesChange}
+            onNodesChange={AirliftActions.onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onInit={setReactFlowInstance}
@@ -174,9 +110,8 @@ const AirliftManagerPresenter = () => {
             zoomOnDoubleClick={false}
             zoomOnPinch={false}
             zoomOnScroll={false}
-            onMouseDownCapture={(event) => {
-              // dispatchEvent(new MouseEvent('mousedown'));
-              handleMouseDown(event);
+            onMouseDownCapture={() => {
+              dispatchEvent(new MouseEvent('mousedown'));
             }}
             /*onNodeDragStart={(event) => {
               const draggedNode = event.currentTarget;
@@ -207,7 +142,7 @@ const AirliftManagerPresenter = () => {
                 );
                 document.body.removeChild(clonedNodeElement);
               });
-            }}
+            }}*/
             onNodeDrag={(event) => {
               const mouseEventInit: MouseEventInit = {
                 clientX: event.clientX,
@@ -220,13 +155,8 @@ const AirliftManagerPresenter = () => {
               dispatchEvent(new MouseEvent('mousemove', mouseEventInit));
             }}
             onNodeDragStop={() => {
-              dispatchEvent(
-                new CustomEvent('airlift', {
-                  detail: undefined,
-                })
-              );
               dispatchEvent(new MouseEvent('mouseup'));
-            }}*/
+            }}
             onDragOver={onDragOver}
             onDrop={onDrop}
             onDragEnter={(event) => {
