@@ -236,7 +236,6 @@ export const AirliftStore = types
     hideAirlift(airliftId: string) {
       // console.log(self.flowStore.nodes);
       const node = self.flowStore.nodes.filter((node) => node.id === airliftId);
-      console.log('got node');
       node[0].hideAirlift();
       console.log(node[0].hidden);
     },

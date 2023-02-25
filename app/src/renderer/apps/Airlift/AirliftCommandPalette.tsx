@@ -32,7 +32,6 @@ export const AirliftCommandPalette: FC = observer(() => {
       const dataTransfer = new DataTransfer();
       dataTransfer.setData('application/reactflow', 'agent');
       let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
-      console.log(elemBelow);
       const dropEvent = new DragEvent('drop', {
         bubbles: true,
         clientX: event.clientX,
