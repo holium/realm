@@ -6,6 +6,7 @@ import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { OSActions } from 'renderer/logic/actions/os';
+import { CheckBox } from '@holium/design-system';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -31,7 +32,8 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
 `;
 
 const SystemPanelPresenter = () => {
-  const { theme, courier, bazaar, bulletin, friends, spaces } = useServices();
+  const { theme, courier, bazaar, bulletin, friends, spaces, desktop } =
+    useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<{
@@ -89,7 +91,7 @@ const SystemPanelPresenter = () => {
   const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
 
   return (
-    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Text fontSize={7} fontWeight={600} mb={6}>
         System
       </Text>
@@ -97,15 +99,13 @@ const SystemPanelPresenter = () => {
       <Text opacity={0.7} fontSize={3} fontWeight={500}>
         INTERFACE
       </Text>
-      <Card
-        p="20px"
-        width="100%"
-        // minHeight="240px"
-        elevation="none"
-        customBg={cardColor}
-        flexDirection={'column'}
-      >
-        <Text>Coming Soon</Text>
+      <Card p="20px" width="100%" customBg={cardColor}>
+        <CheckBox
+          title="Isolation Mode"
+          label="Prevents the native OS from causing edge events and notifications."
+          isChecked={desktop.isIsolationMode}
+          onChange={desktop.toggleIsolationMode}
+        />
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>

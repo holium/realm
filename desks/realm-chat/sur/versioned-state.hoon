@@ -9,5 +9,6 @@
       =paths-table
       =messages-table
       =peers-table
+      =del-log
   ==
 --

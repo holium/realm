@@ -182,7 +182,7 @@ const createMouseOverlayWindow = () => {
     }
   };
 
-  mainWindow.on('focus', mouseSetup);
+  newMouseWindow.on('ready-to-show', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();

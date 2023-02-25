@@ -20,6 +20,8 @@ import { IconPathsType, paths } from './icons';
 import { BoxProps } from '../Box/Box';
 import { ColorVariants, getVar } from '../../util/colors';
 
+const hexToSvgSafeColor = (hex: string) => hex.replace('#', '%23');
+
 export type IconProps = BoxProps &
   SpaceProps &
   Omit<ColorProps, 'color'> &
@@ -35,29 +37,41 @@ const SvgComponent = forwardRef<
     title?: string;
     color?: ColorVariants;
     iconColor?: string;
+    /* SVGs as CSS background-images don't support the #hex format. */
+    isBackgroundImage?: boolean;
   }
->(({ title, name, width, height, color, iconColor, ...rest }, svgRef) => {
-  const [titleId] = useState(() => (title ? uuid() : undefined));
+>(
+  (
+    { title, name, width, height, color, iconColor, isBackgroundImage, ...rest },
+    svgRef
+  ) => {
+    const [titleId] = useState(() => (title ? uuid() : undefined));
 
-  let fillColor = iconColor || (color && getVar(color)) || 'currentcolor';
-  return (
-    <motion.svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={width || '1em'}
-      height={height || '1em'}
-      fill={fillColor}
-      ref={svgRef}
-      aria-labelledby={titleId}
-      pointerEvents="none"
-      {...rest}
-    >
-      {title ? <title id={titleId}>{title}</title> : null}
+    const svgSafeColor = iconColor || (color
+      ? isBackgroundImage
+        ? hexToSvgSafeColor(getVar(color))
+        : getVar(color)
+      : 'currentcolor');
+
+    return (
+      <motion.svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width={width || '1em'}
+        height={height || '1em'}
+        fill={svgSafeColor}
+        ref={svgRef}
+        aria-labelledby={titleId}
+        pointerEvents="none"
+        {...rest}
+      >
+        {title ? <title id={titleId}>{title}</title> : null}
       {/* @ts-expect-error */}
-      {paths[name]}
-    </motion.svg>
-  );
-});
+        {paths[name]}
+      </motion.svg>
+    );
+  }
+);
 
 SvgComponent.displayName = 'SvgComponent';
 

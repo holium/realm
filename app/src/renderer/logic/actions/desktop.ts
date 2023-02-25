@@ -59,8 +59,20 @@ export const DesktopActions = {
   closeAppWindow: (appId: string) => {
     return window.electron.os.desktop.closeAppWindow(appId);
   },
-  toggleDevTools: async () => {
-    return await window.electron.app.toggleDevTools();
+  toggleDevTools: () => {
+    return window.electron.app.toggleDevTools();
+  },
+  enableIsolationMode: () => {
+    return window.electron.app.enableIsolationMode();
+  },
+  disableIsolationMode: () => {
+    return window.electron.app.disableIsolationMode();
+  },
+  getReleaseChannel: (): Promise<string> => {
+    return window.electron.os.desktop.getReleaseChannel();
+  },
+  setReleaseChannel: (channel: string) => {
+    return window.electron.os.desktop.setReleaseChannel(channel);
   },
 };
 

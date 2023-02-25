@@ -5,10 +5,25 @@
 ::
 /-  *versioned-state, sur=chat-db
 |%
+::
+::  random helpers
+::
+++  is-valid-inviter
+  |=  [=path-row:sur peers=(list peer-row:sur) src=ship]
+  ^-  ?
+  :: add-peer pokes are only valid from:
+  :: a ship within the peers list
+  =/  src-peer  (snag 0 (skim peers |=(p=peer-row:sur =(patp.p src)))) :: will crash if src not in list
+  :: AND
+  :: any peer-ship if set to %anyone
+  :: OR a ship whose role matches the path-row `invites` setting
+  :: OR whose role is the %host
+  |(=(invites.path-row %anyone) =(role.src-peer invites.path-row) =(role.src-peer %host))
+::
 ++  fill-out-minimal-fragment
-  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da]
+  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da expires-at=@da]
   ^-  msg-part:sur
-  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at]
+  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at expires-at]
 ::
 ++  get-full-message
   |=  [tbl=messages-table:sur =msg-id:sur]
@@ -22,6 +37,7 @@
 ::
 ++  remove-message-from-table
   |=  [tbl=messages-table:sur =msg-id:sur]
+  ^-  [messages-table:sur (list uniq-id:sur)]
   =/  part-counter=@ud  0
   =/  ids  *(list uniq-id:sur)
   |-
@@ -39,20 +55,58 @@
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
 ++  make-msg-from-minimal-frags
-  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da] 
+  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
   ^-  message:sur
   =/  result        *message:sur
   =/  counter=@ud   0
   |-
   ?:  =(counter (lent fragments.msg-act)) :: stop condition
     result
-  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at)), counter +(counter))
+  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at expires-at.msg-act)), counter +(counter))
 ::
 ++  add-message-to-table
   |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p updated-at=@da]
   =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender] updated-at)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
+::
+++  expire-old-msgs
+  |=  [state=state-0 now=@da]
+  ^-  state-0
+  =/  old-msgs
+    ^-  (list [k=uniq-id:sur v=msg-part:sur])
+    %+  skim
+      (tap:msgon:sur messages-table.state)
+    |=([k=uniq-id:sur v=msg-part:sur] &(?!(=(*@da expires-at.v)) (gth now expires-at.v)))
+  =/  index=@ud   0
+  =/  len=@ud     (lent old-msgs)
+  =/  tbl         messages-table.state
+  =/  ids         *(list uniq-id:sur)
+  =/  rm-result
+    ^-  [messages-table:sur (list uniq-id:sur)]
+    |-
+    ?:  =(index len)
+      [tbl ids]
+    =/  current-key   k:(snag index old-msgs)
+    $(index +(index), tbl +:(del:msgon:sur tbl current-key), ids (snoc ids current-key))
+
+  =.  messages-table.state  -:rm-result
+  =.  del-log.state         (log-deletes-for-msg-parts state +:rm-result now)
+  state
+::
+++  log-deletes-for-msg-parts
+  |=  [state=state-0 ids=(list uniq-id:sur) now=@da]
+  ^-  del-log:sur
+  =/  change-rows   (turn ids |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  index=@ud     0
+  =/  len=@ud       (lent change-rows)
+  =/  new-log       del-log.state
+  |-
+  ?:  =(index len)
+    new-log
+  ~&  (snag index change-rows)
+                                                    :: adding index to now in order to ensure unique keys
+  $(index +(index), new-log (put:delon:sur new-log `@da`(add now index) (snag index change-rows)))
 ::
 ++  messages-start-paths
   |=  [=bowl:gall]
@@ -63,41 +117,18 @@
 ::
 ::  poke actions
 ::
+:: MUST EXPLICITLY INCLUDE SELF, this function will not add self into peers list
 ++  create-path
-::  :chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~]
-  |=  [row=path-row:sur state=state-0 =bowl:gall]
+::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host ~[[~zod %host] [~bus %member]]]
+  |=  [[row=path-row:sur peers=ship-roles:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+
   =.  paths-table.state  (~(put by paths-table.state) path.row row)
 
-  :: if this poke comes from ourselves, we are the host, but if it
-  :: comes from elsewhere, we are being invited, and they are the host
-  =/  thepeers
-    ?:  =(src.bowl our.bowl)
-      =/  peer=peer-row:sur   [
-        path.row
-        our.bowl
-        %host
-        created-at.row
-        updated-at.row
-      ]
-      [peer ~]
-
-    :: else, poke came from not-us
-    =/  us=peer-row:sur    [
-      path.row
-      our.bowl
-      %member
-      created-at.row
-      updated-at.row
-    ]
-    =/  them=peer-row:sur  [
-      path.row
-      src.bowl
-      %host
-      created-at.row
-      updated-at.row
-    ]
-    [them us ~]
+  =/  thepeers=(list peer-row:sur)
+    %+  turn
+      peers
+    |=([s=@p role=@tas] [path.row s role now.bowl now.bowl])
 
   =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
   =/  thechange  db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
@@ -106,9 +137,9 @@
   ==
   [gives state]
 ::
-++  edit-path-metadata
-::  :chat-db &db-action [%edit-path-metadata /a/path/to/a/chat ~]
-  |=  [[=path metadata=(map cord cord)] state=state-0 =bowl:gall]
+++  edit-path
+::  :chat-db &db-action [%edit-path /a/path/to/a/chat ~ %.n]
+  |=  [[=path metadata=(map cord cord) peers-get-backlog=?] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path)
@@ -117,9 +148,11 @@
   =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
   ?>  =(patp.host-peer-row src.bowl)
 
-  =/  row=path-row:sur   (~(got by paths-table.state) path)
-  =.  metadata.row       metadata
-  =.  updated-at.row     now.bowl
+  =/  row=path-row:sur        (~(got by paths-table.state) path)
+  =.  metadata.row            metadata
+  =.  updated-at.row          now.bowl
+  =.  peers-get-backlog.row   peers-get-backlog
+
   =.  paths-table.state  (~(put by paths-table.state) path row)
 
   =/  thechange  db-change+!>(~[[%upd-paths-row row]])
@@ -161,14 +194,16 @@
   :: for now we are assuming that subscribed clients are intelligent
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
-  =/  thechange  db-change+!>(~[[%del-paths-row path]])
+  =/  change-row      [%del-paths-row path]
+  =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
+  =/  thechange       db-change+!>(~[change-row])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
   [gives state]
 ::
 ++  insert
-:: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '2'] ~ ~] [[%plain '2'] ~ ~] [[%plain '4'] ~ ~] [[%plain '5'] ~ ~] [[%plain '6'] ~ ~] [[%plain '7'] ~ ~] [[%plain '8'] ~ ~] [[%plain '9'] ~ ~] ~])]
+:: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '1'] ~ ~] [[%plain '3'] ~ ~] ~]) ~2000.1.1]
   |=  [msg-act=insert-message-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -187,6 +222,39 @@
   ==
   [gives state]
 ::
+:: no notifications generated from this
+++  insert-backlog
+:: :chat-db &db-action [%insert-backlog some msg-part]
+  |=  [msg=msg-part:sur state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  ::
+  :: backlog-pokes are only allowed if all the following are true:
+  ::
+  :: we already have that path in our table, and the associated peers
+  =/  pathrow   (~(got by paths-table.state) path.msg)
+  =/  peers     (~(got by peers-table.state) path.msg)
+  :: the created-at of our peer-row for the path is gth
+  :: created-at.msg (because the message was from *before* we
+  :: joined the chat)
+  =/  us-peer   (snag 0 (skim peers |=(p=peer-row:sur =(patp.p our.bowl))))
+  ?>  (gth created-at.us-peer created-at.msg)
+  :: has to be from a ship that has invite-potential in the path
+  ?>  (is-valid-inviter pathrow peers src.bowl)
+  :: the path has to be %.y on peers-get-backlog
+  ?>  peers-get-backlog.pathrow
+
+  =.  messages-table.state  (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg)
+
+  =/  thechange  db-change+!>([%add-row %messages msg]~)
+  :: message-paths is all the sup.bowl paths that start with
+  :: /db/messages/start since every new message will need to go out to
+  :: those subscriptions
+  =/  message-paths  (messages-start-paths bowl)
+  =/  gives  :~
+    [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg) ~])) thechange]
+  ==
+  [gives state]
+::
 ++  edit
 ::  :chat-db &db-action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
   |=  [[=msg-id:sur p=path fragments=(list minimal-fragment:sur)] state=state-0 =bowl:gall]
@@ -195,13 +263,14 @@
   ?>  =(sender.msg-id src.bowl)  :: edit pokes are only valid from the ship which is the original sender
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
+  =/  original-expires-at  expires-at:(got:msgon:sur messages-table.state [msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
-  =/  changes=db-change:sur  (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
   =.  messages-table.state  -.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments] sender.msg-id now.bowl)
+  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
-  =/  thechange   db-change+!>((weld changes `db-change:sur`(turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]]))))
+
+  =/  thechange   db-change+!>(~[[%upd-messages msg-id +.add-result]])
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -224,7 +293,11 @@
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
-  =/  thechange   db-change+!>((turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a])))
+
+  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  thechange     db-change+!>(change-rows)
+  =.  del-log.state   (log-deletes-for-msg-parts state +.remove-result now.bowl)
+
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -238,29 +311,28 @@
 ::
 ++  add-peer
 ::  :chat-db &db-action [%add-peer [/a/path/to/a/chat ~bus]]
-  |=  [act=[=path patp=ship timestamp=time] state=state-0 =bowl:gall]
+  |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
-  :: add-peer pokes are only valid from the ship which is the
-  :: %host of the path
-  =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
-  ?>  =(patp.host-peer-row src.bowl)
+  =/  pathrow               (~(got by paths-table.state) path.act)
+  ?>  (is-valid-inviter pathrow original-peers-list src.bowl)
 
   =/  row=peer-row:sur   [
     path.act
     patp.act
     %member
-    timestamp.act
-    timestamp.act
+    now.bowl
+    now.bowl
   ]
-  =/  peers  (snoc (~(got by peers-table.state) path.act) row)
+  =/  peers  (snoc original-peers-list row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
   =/  thechange  db-change+!>(~[[%add-row [%peers row]]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
   [gives state]
+::
 ++  kick-peer
 ::  :chat-db &db-action [%kick-peer /a/path/to/a/chat ~bus]
   |=  [act=[=path patp=ship] state=state-0 =bowl:gall]
@@ -283,14 +355,16 @@
   =.  paths-table.state  ?:(our-kicked (~(del by paths-table.state) path.act) paths-table.state)
   =.  messages-table.state  ?:(our-kicked (remove-messages-for-path messages-table.state path.act) messages-table.state)
 
-  =/  thechange
+  =/  change-row
     ?:  our-kicked
       :: for now we are assuming that subscribed clients are intelligent
       :: enough to realize that a %del-paths-row also means remove the
       :: related messages and peers
-      db-change+!>(~[[%del-paths-row path.act]])
+      [%del-paths-row path.act]
     :: else just update the peers table
-    db-change+!>(~[[%del-peers-row path.act patp.act]])
+    [%del-peers-row path.act patp.act]
+  =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
+  =/  thechange   db-change+!>(~[change-row])
 
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
@@ -308,19 +382,25 @@
     ^-  messages-table:sur
     =/  start=uniq-id:sur  [msg-id 0]
     (lot:msgon:sur tbl ~ `start)
+  ::
   ++  start
     |=  [t=time tbl=messages-table:sur]
     ^-  messages-table:sur
-    :: this is very efficient, but does not capture the updated-at rows
-    :: so we will go the long way around until efficiency becomes
-    :: necessary
-    ::=/  start=uniq-id:sur  [msg-id 0]
-    ::(lot:msgon:sur tbl ~ `start)
     %+  gas:msgon:sur
       *messages-table:sur
     %+  skim
       (tap:msgon:sur tbl)
     |=([k=uniq-id:sur v=msg-part:sur] |((gth created-at.v t) (gth updated-at.v t)))
+  ::
+  ++  path-msgs
+    |=  [tbl=messages-table:sur =path]
+    ^-  messages-table:sur
+    %+  gas:msgon:sur
+      *messages-table:sur
+    %+  skim
+      (tap:msgon:sur tbl)
+    |=([k=uniq-id:sur v=msg-part:sur] =(path.v path))
+  ::
   ++  path-start
     |=  [t=time tbl=paths-table:sur]
     ^-  paths-table:sur
@@ -328,6 +408,7 @@
     %+  skim
       ~(tap by tbl)
     |=([k=path v=path-row:sur] |((gth created-at.v t) (gth updated-at.v t)))
+  ::
   ++  peer-start
     |=  [t=time tbl=peers-table:sur]
     ^-  peers-table:sur
@@ -391,6 +472,18 @@
 ++  encode
   =,  enjs:format
   |%
+    ++  del-log
+      |=  log=del-log:sur
+      ^-  json
+      :-  %a
+      %+  turn  (tap:delon:sur log)
+      |=  [k=@da v=db-change-type:sur]
+      %-  pairs
+      :~
+        ['timestamp' (time k)]
+        ['change' (individual-change v)]
+      ==
+    ::
     ++  all-tables
       |=  =tables:sur
       ^-  json
@@ -422,12 +515,20 @@
       |=  ch=db-change:sur
       ^-  json
       [%a (turn ch individual-change)]
+    ::
     ++  individual-change
       |=  ch=db-change-type:sur
       %-  pairs
       ?-  -.ch
         %add-row
           :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
+        %upd-messages
+          :~
+            ['type' %s %update]
+            ['table' %s %messages]
+            ['msg-id' a+~[s+(scot %da timestamp.msg-id.ch) s+(scot %p sender.msg-id.ch)]]
+            ['message' a+(turn message.ch |=(m=msg-part:sur (messages-row [[msg-id.m msg-part-id.m] m])))]
+          ==
         %upd-paths-row
           :~(['type' %s %update] ['table' %s %paths] ['row' (path-row path-row.ch)])
         %del-paths-row
@@ -442,6 +543,7 @@
             ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
           ==
       ==
+    ::
     ++  any-row
       |=  =db-row:sur
       ^-  json
@@ -453,6 +555,7 @@
         %peers
           (peer-row peer-row.db-row)
       ==
+    ::
     ++  path-row
       |=  =path-row:sur
       ^-  json
@@ -463,7 +566,10 @@
           created-at+(time created-at.path-row)
           updated-at+(time updated-at.path-row)
           pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
+          invites+s+invites.path-row
+          peers-get-backlog+b+peers-get-backlog.path-row
       ==
+    ::
     ++  messages-row
       |=  [k=uniq-id:sur =msg-part:sur]
       ^-  json
@@ -476,7 +582,9 @@
           metadata+(metadata-to-json metadata.msg-part)
           created-at+(time created-at.msg-part)
           updated-at+(time updated-at.msg-part)
+          expires-at+(time expires-at.msg-part)
       ==
+    ::
     ++  reply-to-to-json
       |=  =reply-to:sur
       ^-  json

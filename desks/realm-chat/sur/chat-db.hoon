@@ -28,6 +28,8 @@
       created-at=time
       updated-at=time  :: updated when %edit-path-medatata is hit
       =pins
+      invites=@tas  :: must either match `peer-role` type or be keyword %anyone, or else no one will be able to invite
+      peers-get-backlog=?
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -45,6 +47,7 @@
       metadata=(map cord cord)
       created-at=@da
       updated-at=@da  :: set to now.bowl when %edit action. means it can be out of sync between ships, but shouldn't matter
+      expires-at=@da  :: *@da is treated as "unset"
   ==
 +$  content
   $%  [%custom name=cord value=cord] :: general data type
@@ -74,7 +77,7 @@
 +$  peer-row
   $:  =path
       patp=ship
-      role=?(%member %host)
+      role=@tas
       created-at=time
       updated-at=time  :: not used really yet, but if we implement a way to change peers role, then this would be needed
   ==
@@ -91,20 +94,22 @@
 ::
 ::  agent details
 ::
++$  ship-roles  (list [s=@p role=@tas])
 +$  action
   $%  
-      [%create-path =path-row]
-      [%edit-path-metadata =path metadata=(map cord cord)]
+      [%create-path =path-row peers=ship-roles]
+      [%edit-path =path metadata=(map cord cord) peers-get-backlog=?]
       [%edit-path-pins =path =pins]
       [%leave-path =path]
       [%insert =insert-message-action]
+      [%insert-backlog =msg-part]
       [%edit =edit-message-action]
       [%delete =msg-id]
-      [%add-peer =path patp=ship timestamp=time]
+      [%add-peer =path patp=ship]
       [%kick-peer =path patp=ship]
   ==
 +$  minimal-fragment        [=content =reply-to metadata=(map cord cord)]
-+$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment)]
++$  insert-message-action   [timestamp=@da =path fragments=(list minimal-fragment) expires-at=@da]
 +$  edit-message-action     [=msg-id =path fragments=(list minimal-fragment)]
 ::
 +$  db-dump
@@ -114,6 +119,7 @@
 +$  db-change-type
   $%
     [%add-row =db-row]
+    [%upd-messages =msg-id =message]
     [%upd-paths-row =path-row]
     [%del-paths-row =path]
     [%del-peers-row =path =ship]
@@ -125,4 +131,6 @@
       [%peers =peer-row]
   ==
 +$  db-change  (list db-change-type)
++$  del-log  ((mop time db-change-type) gth)
+++  delon  ((on time db-change-type) gth)
 --

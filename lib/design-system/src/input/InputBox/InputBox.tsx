@@ -155,7 +155,7 @@ export const InputBox = ({
         ml="2px"
         color="accent"
         display="flex"
-        fontWeight="500"
+        fontWeight={500}
         mr={1}
         alignItems="center"
         mb={inlineLabelDirection === 'column' ? 1 : 0}

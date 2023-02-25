@@ -134,13 +134,7 @@ const ThemePanelPresenterView = ({
   });
 
   return (
-    <Flex
-      gap={12}
-      flexDirection="column"
-      p="12px"
-      width="100%"
-      overflowX={'auto'}
-    >
+    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
         <Text fontSize={7} fontWeight={600}>
           Theme

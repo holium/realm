@@ -133,6 +133,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
               {!customNext && onNext && (
                 <Button.TextButton
                   showOnHover
+                  py={1}
                   fontWeight={500}
                   disabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {

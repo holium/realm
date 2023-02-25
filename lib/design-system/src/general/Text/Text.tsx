@@ -17,60 +17,52 @@ export const fontByName = {
 };
 
 export type TextProps = {
+  fontWeight?: number;
   fontByName?: keyof typeof fontByName;
   fontByType?: keyof typeof fontByType;
   fontSize?: string | number;
   truncate?: boolean;
   noSelection?: boolean;
-  variant?:
-    | 'body'
-    | 'caption'
-    | 'hint'
-    | 'label'
-    | 'patp'
-    | 'h1'
-    | 'h2'
-    | 'h3'
-    | 'h4'
-    | 'h5'
-    | 'h6'
-    | 'inherit';
 } & BoxProps;
 
-const BaseText = styled(Box)<TextProps>`
-  ${(props) =>
-    props.fontByName &&
-    css`
-      font-family: ${fontByName[props.fontByName]};
-    `};
-  ${(props) =>
-    props.fontByType &&
-    css`
-      font-family: ${fontByType[props.fontByType]};
-    `}
+const customStyling = css<TextProps>`
+  && {
+    ${(props) =>
+      props.fontByName &&
+      css`
+        font-family: ${fontByName[props.fontByName]};
+      `};
+    ${(props) =>
+      props.fontByType &&
+      css`
+        font-family: ${fontByType[props.fontByType]};
+      `}
 
-  ${(props) =>
-    props.truncate &&
-    css`
-      position: relative;
-      white-space: nowrap;
-      overflow: hidden !important;
-      text-overflow: ellipsis;
-    `}
+    ${(props) =>
+      props.truncate &&
+      css`
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+      `}
+  ${(props) => props.fontWeight && `font-weight: ${props.fontWeight};`}
   ${(props) => props.noSelection && 'user-select: none;'}
   &:disabled {
-    color: var(--rlm-text-disabled);
+      color: var(--rlm-text-disabled);
+    }
   }
 `;
 
-const Default = styled(BaseText)<TextProps>`
+const Default = styled(Box)<TextProps>`
+  color: var(--rlm-text-color);
   font-family: var(--rlm-font);
   font-weight: 400;
   font-size: 0.889rem;
   line-height: normal;
   margin-top: 0px;
   margin-bottom: 0px;
-  white-space: nowrap;
+  ${customStyling}
 `;
 
 const H1 = styled(Default)<TextProps>`
@@ -133,8 +125,8 @@ const Label = styled(Default)<TextProps>`
   font-size: 0.8rem;
 `;
 
-const Custom = styled(BaseText)<TextProps>`
-  height: initial;
+const Custom = styled(Box)<TextProps>`
+  ${customStyling}
 `;
 
 const Patp = styled(motion.p)<TextProps>`
