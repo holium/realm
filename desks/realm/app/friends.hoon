@@ -92,7 +92,7 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
         [%x %all ~] :: ~/scry/friends/all.json
-      ?>  (team:title our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       ``noun+!>((view:enjs:lib [%friends friends]))
       ::
         [%x %ships ~]

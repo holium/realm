@@ -283,7 +283,7 @@
     ++  handle-add
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
-      ?>  (team:title our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
       ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
         [~ state]
