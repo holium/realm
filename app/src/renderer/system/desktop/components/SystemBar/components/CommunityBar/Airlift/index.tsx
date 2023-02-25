@@ -4,8 +4,7 @@ import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
-import { Icon } from '@holium/design-system';
-import { motion } from 'framer-motion';
+import { Flex, Icon } from '@holium/design-system';
 import { getSnapshot } from 'mobx-state-tree';
 
 const ICON_SIZE = 28;
@@ -29,6 +28,7 @@ export const AirliftTray: FC = observer(() => {
 
   const onButtonClick = useCallback(
     (evt: any) => {
+      console.log('got button click');
       if (activeApp === 'airlift-tray') {
         setActiveApp(null);
         evt.stopPropagation();
@@ -54,36 +54,33 @@ export const AirliftTray: FC = observer(() => {
   );
 
   return (
-    <motion.div
+    <Flex
       id="airlift-tray-icon"
-      className="realm-cursor-hover"
-      style={{
-        position: 'relative',
-        display: 'flex',
-        justifyItems: 'center',
-        alignContent: 'center',
-      }}
       whileTap={{ scale: 0.95 }}
       transition={{ scale: 0.2 }}
       onClick={onButtonClick}
+      opacity={1}
     >
       {isDragging ? (
         <Icon
+          id="trash-bin-icon"
           name="TrashBin"
           stroke={'red'}
           strokeWidth={1.5}
           size={ICON_SIZE}
           pointerEvents="none"
           overflow={'visible'}
+          mr={-1}
         />
       ) : (
         <Icon
+          id="airlift-icon"
           name="Airlift"
           size={ICON_SIZE}
           pointerEvents="none"
           opacity={1}
         />
       )}
-    </motion.div>
+    </Flex>
   );
 });
