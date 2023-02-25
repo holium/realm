@@ -504,7 +504,7 @@ export const paths: Record<string, JSX.Element> = {
         x2="13.4906"
         y2="-0.5"
         transform="matrix(0.983186 0.182607 -0.199452 0.979908 0 2.37114)"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
       <rect
         x="0.391867"
@@ -513,7 +513,7 @@ export const paths: Record<string, JSX.Element> = {
         height="2"
         rx="0.5"
         transform="matrix(0.983186 0.182607 -0.199452 0.979908 4.72088 -0.0598788)"
-        stroke-linejoin="round"
+        strokeLinejoin="round"
       />
     </g>
   ),

@@ -12,6 +12,7 @@ import 'renderer/apps/Airlift/AgentNode/index.css';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { getSnapshot } from 'mobx-state-tree';
+import { WalletNode } from 'renderer/apps/Airlift/WalletNode';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -20,6 +21,7 @@ const AirliftManagerPresenter = () => {
   const nodeTypes = useMemo(() => {
     return {
       agent: AgentNode,
+      wallet: WalletNode,
     };
   }, []);
 

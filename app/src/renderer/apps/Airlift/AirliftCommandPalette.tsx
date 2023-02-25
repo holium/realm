@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react';
+import { FC } from 'react';
 import { Flex, IconButton, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
@@ -12,8 +12,11 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
-  const onButtonDragStart = (event: DragEvent, nodeType) => {
-    window.addEventListener('mouseup', onButtonDragEnd);
+  const onButtonDragStart = (event: Event, nodeType: string) => {
+    console.log('nodeType', nodeType);
+    window.addEventListener('mouseup', (event) =>
+      onButtonDragEnd(event, nodeType)
+    );
     const iconEvent = new CustomEvent('icon', {
       detail: 'Airlift',
     });
@@ -21,30 +24,29 @@ export const AirliftCommandPalette: FC = observer(() => {
     event.preventDefault();
   };
 
-  const onButtonDragEnd = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const iconEvent = new CustomEvent('icon', {
-        detail: null,
-      });
-      window.dispatchEvent(iconEvent);
-      window.removeEventListener('mouseup', onButtonDragEnd);
-      const dataTransfer = new DataTransfer();
-      dataTransfer.setData('application/reactflow', 'agent');
-      let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
-      const dropEvent = new DragEvent('drop', {
-        bubbles: true,
-        clientX: event.clientX,
-        clientY: event.clientY,
-        screenX: event.screenX,
-        screenY: event.screenY,
-      });
-      Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
-      document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
-    },
-    []
-    /*[activeApp, anchorOffset, position, dimensions]*/
-  );
+  const onButtonDragEnd = (event: any, nodeType: string) => {
+    event.preventDefault();
+    const iconEvent = new CustomEvent('icon', {
+      detail: null,
+    });
+    window.dispatchEvent(iconEvent);
+    window.removeEventListener('mouseup', (event) =>
+      onButtonDragEnd(event, nodeType)
+    );
+    const dataTransfer = new DataTransfer();
+    console.log('dropping ', nodeType);
+    dataTransfer.setData('application/reactflow', nodeType);
+    let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+    const dropEvent = new DragEvent('drop', {
+      bubbles: true,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      screenX: event.screenX,
+      screenY: event.screenY,
+    });
+    Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+    document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
+  };
 
   return (
     <Flex flexDirection="column" gap="15">
@@ -58,7 +60,6 @@ export const AirliftCommandPalette: FC = observer(() => {
         <Flex flexDirection="column" gap={10} flexGrow={1}>
           <Text>Code</Text>
           <IconButton
-            id="airlift-tray-icon"
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
@@ -72,11 +73,10 @@ export const AirliftCommandPalette: FC = observer(() => {
         <Flex flexDirection="column" gap={10} flexGrow={1}>
           <Text>Realm Primitives</Text>
           <IconButton
-            id="airlift-tray-icon"
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
-            onDragStart={(event) => onButtonDragStart(event, 'agent')}
+            onDragStart={(event) => onButtonDragStart(event, 'wallet')}
             color={textColor}
             // mb="-2px"
           >
