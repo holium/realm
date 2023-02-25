@@ -1,5 +1,4 @@
-:~
-    title+'Courier'
+:~  title+'Courier'
     info+'A Realm dependency'
     color+0xce.bef0
     version+[0 1 2]
