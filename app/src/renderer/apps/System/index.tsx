@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, RadioList } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
-import { Avatar } from '@holium/design-system';
+import { Avatar, RadioList } from '@holium/design-system';
 
 type SystemPanelType =
   | 'system'
@@ -18,8 +18,7 @@ type SystemPanelType =
   | undefined;
 
 const SystemAppPresenter = () => {
-  const { theme, ship } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { ship } = useServices();
 
   const person = ship!.patp;
 
@@ -87,8 +86,6 @@ const SystemAppPresenter = () => {
         <Flex flex={1} overflowY="auto">
           {/* menu / list  */}
           <RadioList
-            customBg={windowColor}
-            textColor={theme.currentTheme.textColor}
             selected={systemPanel}
             options={[
               {

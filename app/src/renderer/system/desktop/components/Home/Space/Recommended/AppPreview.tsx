@@ -2,15 +2,8 @@ import { FC } from 'react';
 import { rgba, darken, desaturate, lighten } from 'polished';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import {
-  Flex,
-  Text,
-  AppTile,
-  Icons,
-  IconButton,
-  Button,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
+import { Text, AppTile, Icons, IconButton, Button } from 'renderer/components';
 import {
   AppType,
   InstallStatus,

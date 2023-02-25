@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
+import { Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
-  Flex,
   Label,
   ShipSearch,
   Input,
   Icons,
   Crest,
-  Box,
   IconButton,
-  Select,
   Skeleton,
   Grid,
 } from 'renderer/components';
@@ -26,7 +24,6 @@ import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { Avatar } from '@holium/design-system';
 
-type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
   customBg: string;
   height?: any;
@@ -78,8 +75,7 @@ export const createPeopleForm = (
 
 const InviteMembersPresenter = (props: BaseDialogProps) => {
   const { theme, ship, friends } = useServices();
-  const { inputColor, iconColor, textColor, windowColor, mode } =
-    theme.currentTheme;
+  const { inputColor, iconColor, windowColor, mode } = theme.currentTheme;
   const { workflowState, setState } = props;
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -234,9 +230,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           <Select
             id="select-role"
             placeholder="Select role"
-            customBg={windowColor}
-            textColor={textColor}
-            iconColor={iconColor}
+            backgroundColor={windowColor}
             selected={permissionMap[patp].primaryRole}
             disabled={isOur}
             options={[
@@ -246,11 +240,11 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
               // { label: 'Host', value: 'host' }, TODO elect a data host
               { label: 'Owner', value: 'owner', hidden: true },
             ]}
-            onClick={(selected: Roles) => {
+            onClick={(selected) => {
               setPermissionMap({
                 ...permissionMap,
                 [patp]: {
-                  primaryRole: selected,
+                  primaryRole: selected as MemberRole,
                   roles: [selected],
                   alias: '',
                   status: 'invited',

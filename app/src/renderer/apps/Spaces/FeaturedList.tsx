@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-
-import { Flex, Text, Spinner, TextButton } from 'renderer/components';
+import { Text, TextButton } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
-
 import { useServices } from 'renderer/logic/store';
-import { WindowedList } from '@holium/design-system';
+import { Flex, Spinner, WindowedList } from '@holium/design-system';
 import { EmptyGroup } from './SpaceRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 

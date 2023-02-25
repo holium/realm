@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Spinner } from 'renderer/components';
-import { Text, Flex, Icon } from '@holium/design-system';
+import { Text, Flex, Icon, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
