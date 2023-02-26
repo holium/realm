@@ -13,39 +13,34 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { textColor } = theme.currentTheme;
 
   const onButtonDragStart = (event: Event, nodeType: string) => {
-    console.log('nodeType', nodeType);
-    window.addEventListener('mouseup', (event) =>
-      onButtonDragEnd(event, nodeType)
-    );
+    const onButtonDragEnd = (event: any) => {
+      event.preventDefault();
+      const iconEvent = new CustomEvent('icon', {
+        detail: null,
+      });
+      window.dispatchEvent(iconEvent);
+      window.removeEventListener('mouseup', onButtonDragEnd);
+      const dataTransfer = new DataTransfer();
+      console.log('dropping ', nodeType);
+      dataTransfer.setData('application/reactflow', nodeType);
+      let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+      const dropEvent = new DragEvent('drop', {
+        bubbles: true,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+      });
+      Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+      document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
+    };
+    // window.onmouseup = (event) => onButtonDragEnd(event, nodeType);
+    window.addEventListener('mouseup', onButtonDragEnd);
     const iconEvent = new CustomEvent('icon', {
       detail: 'Airlift',
     });
     window.dispatchEvent(iconEvent);
     event.preventDefault();
-  };
-
-  const onButtonDragEnd = (event: any, nodeType: string) => {
-    event.preventDefault();
-    const iconEvent = new CustomEvent('icon', {
-      detail: null,
-    });
-    window.dispatchEvent(iconEvent);
-    window.removeEventListener('mouseup', (event) =>
-      onButtonDragEnd(event, nodeType)
-    );
-    const dataTransfer = new DataTransfer();
-    console.log('dropping ', nodeType);
-    dataTransfer.setData('application/reactflow', nodeType);
-    let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
-    const dropEvent = new DragEvent('drop', {
-      bubbles: true,
-      clientX: event.clientX,
-      clientY: event.clientY,
-      screenX: event.screenX,
-      screenY: event.screenY,
-    });
-    Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
-    document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
   };
 
   return (
