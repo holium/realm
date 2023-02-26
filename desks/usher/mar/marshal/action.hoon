@@ -1,16 +1,16 @@
+/-  *marshal
 /+  *marshal
 ::
-|_  act=action
-++  grad  %noun
+|_  act=marshal-action
 ++  grow
   |%
   ++  noun  act
-  :: ++  json  (action:enjs act)
   --
 ::
 ++  grab
   |%
-  ++  noun  action
-  ++  json  action:dejs
+  ++  noun  marshal-action
+  ++  json  marshal-action:dejs
   --
+++  grad  %noun
 --

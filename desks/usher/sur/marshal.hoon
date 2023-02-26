@@ -1,7 +1,6 @@
 |%
 ::
-+$  action
-  $%
-      [%commit mount-point=@tas]
++$  marshal-action
+  $%  [%commit mount-point=@tas]
   ==
 --
