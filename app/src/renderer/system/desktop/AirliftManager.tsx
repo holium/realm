@@ -13,7 +13,6 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { getSnapshot } from 'mobx-state-tree';
 import { WalletNode } from 'renderer/apps/Airlift/WalletNode';
-import { AirliftNodeType } from 'os/services/shell/airlift.model';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -66,11 +65,11 @@ const AirliftManagerPresenter = () => {
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
-      const newNode: AirliftNodeType = {
+      const newNode = {
         id: getId(type),
         type,
         position,
-        data: { promptDelete: false },
+        data: { showDelete: false },
       };
 
       AirliftActions.dropAirlift(newNode);
@@ -113,7 +112,7 @@ const AirliftManagerPresenter = () => {
             onMouseDownCapture={() => {
               dispatchEvent(new MouseEvent('mousedown'));
             }}
-            onNodeDrag={(event) => {
+            onNodeDrag={(event, node) => {
               const mouseEventInit: MouseEventInit = {
                 clientX: event.clientX,
                 clientY: event.clientY,
@@ -125,8 +124,10 @@ const AirliftManagerPresenter = () => {
               dispatchEvent(new MouseEvent('mousemove', mouseEventInit));
               const dropZone = document.getElementById('trash-bin-icon');
               if (dropZone) {
-                const draggedElement = event.target as HTMLElement;
-                const draggedRect = draggedElement.getBoundingClientRect();
+                const draggedNode = document.querySelector(
+                  `[data-id='${node.id}']`
+                ) as HTMLDivElement;
+                const draggedRect = draggedNode.getBoundingClientRect();
                 const dropZoneRect = dropZone.getBoundingClientRect();
                 const overlap = !(
                   draggedRect.right < dropZoneRect.left ||
@@ -135,19 +136,23 @@ const AirliftManagerPresenter = () => {
                   draggedRect.top > dropZoneRect.bottom
                 );
                 if (overlap) {
-                  AirliftActions.promptDelete(draggedElement.getAttribute(id)!);
+                  AirliftActions.promptDelete(
+                    draggedNode.getAttribute('data-id')!
+                  );
                 } else {
                   AirliftActions.unpromptDelete(
-                    draggedElement.getAttribute(id)!
+                    draggedNode.getAttribute('data-id')!
                   );
                 }
               }
             }}
-            onNodeDragStop={(event) => {
+            onNodeDragStop={(_, node) => {
               dispatchEvent(new MouseEvent('mouseup'));
-              const draggedElement = event.target as HTMLElement;
+              const draggedNode = document.querySelector(
+                `[data-id='${node.id}']`
+              ) as HTMLDivElement;
               const dropZone = document.getElementById('trash-bin-icon')!;
-              const draggedRect = draggedElement.getBoundingClientRect();
+              const draggedRect = draggedNode.getBoundingClientRect();
               const dropZoneRect = dropZone.getBoundingClientRect();
               const overlap = !(
                 draggedRect.right < dropZoneRect.left ||
@@ -155,15 +160,10 @@ const AirliftManagerPresenter = () => {
                 draggedRect.bottom < dropZoneRect.top ||
                 draggedRect.top > dropZoneRect.bottom
               );
-              console.log('test for removal');
               if (overlap) {
-                console.log('removing');
-                console.log('dragged', draggedElement);
-                console.log(draggedElement.getAttribute(id));
-                const draggedNode = airlift.flowStore.nodes.find(
-                  (node) => node.dragging
-                )!;
-                AirliftActions.removeAirlift(draggedNode.id);
+                AirliftActions.removeAirlift(
+                  draggedNode.getAttribute('data-id')!
+                );
               }
             }}
             onDragOver={onDragOver}

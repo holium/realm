@@ -2,7 +2,10 @@ import { Flex } from '@holium/design-system';
 
 export function WalletNode({ data, isConnectable }) {
   return (
-    <Flex className="text-updater-node">
+    <Flex
+      className="text-updater-node"
+      border={data.showDelete ? '2px solid red' : 'none'}
+    >
       {/*<Handle
         type="target"
         position={Position.Top}

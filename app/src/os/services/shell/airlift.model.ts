@@ -139,18 +139,20 @@ enum Position {
 }
 const PositionEnum = types.enumeration<Position>(Object.values(Position));
 
-const AirliftData = types
+export const AirliftData = types
   .model('AirliftData', {
-    promptDelete: types.boolean,
+    showDelete: types.boolean,
   })
   .actions((self) => ({
     promptDelete() {
-      self.promptDelete = true;
+      self.showDelete = true;
     },
     unpromptDelete() {
-      self.promptDelete = false;
+      self.showDelete = false;
     },
   }));
+
+export type AirliftDataType = Instance<typeof AirliftData>;
 
 const NodeType = types.model('NodeType', {
   id: types.identifier,

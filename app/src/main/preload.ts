@@ -100,10 +100,9 @@ const appPreload = {
       callback(icon);
     });
   },
-  onAirlift(callback: (blah: any) => void) {
-    ipcRenderer.on('airlift', (_, blah: any) => {
-      console.log('airlift icon change');
-      callback(blah);
+  onAirlift(callback: (icon: any) => void) {
+    ipcRenderer.on('airlift', (_, icon: any) => {
+      callback(icon);
     });
   },
 };
