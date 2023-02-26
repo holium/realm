@@ -139,58 +139,64 @@ enum Position {
 }
 const PositionEnum = types.enumeration<Position>(Object.values(Position));
 
-const NodeType = types
-  .model('NodeType', {
-    id: types.identifier,
-    position: types.model({
+const AirliftData = types
+  .model('AirliftData', {
+    promptDelete: types.boolean,
+  })
+  .actions((self) => ({
+    promptDelete() {
+      self.promptDelete = true;
+    },
+    unpromptDelete() {
+      self.promptDelete = false;
+    },
+  }));
+
+const NodeType = types.model('NodeType', {
+  id: types.identifier,
+  position: types.model({
+    x: types.number,
+    y: types.number,
+  }),
+  data: AirliftData, // You can replace "frozen" with the appropriate type for your "data" property.
+  type: types.optional(types.string, ''),
+  style: types.maybe(types.frozen()),
+  className: types.maybe(types.string),
+  sourcePosition: types.maybe(PositionEnum),
+  targetPosition: types.maybe(PositionEnum),
+  hidden: types.maybe(types.boolean),
+  selected: types.maybe(types.boolean),
+  dragging: types.maybe(types.boolean),
+  draggable: types.maybe(types.boolean),
+  selectable: types.maybe(types.boolean),
+  connectable: types.maybe(types.boolean),
+  deletable: types.maybe(types.boolean),
+  dragHandle: types.maybe(types.string),
+  width: types.maybeNull(types.number),
+  height: types.maybeNull(types.number),
+  parentNode: types.maybe(types.string),
+  zIndex: types.maybe(types.number),
+  extent: types.maybe(types.frozen()),
+  expandParent: types.maybe(types.boolean),
+  positionAbsolute: types.maybe(
+    types.model({
       x: types.number,
       y: types.number,
-    }),
-    data: types.optional(types.frozen(), {}), // You can replace "frozen" with the appropriate type for your "data" property.
-    type: types.optional(types.string, ''),
-    style: types.maybe(types.frozen()),
-    className: types.maybe(types.string),
-    sourcePosition: types.maybe(PositionEnum),
-    targetPosition: types.maybe(PositionEnum),
-    hidden: types.maybe(types.boolean),
-    selected: types.maybe(types.boolean),
-    dragging: types.maybe(types.boolean),
-    draggable: types.maybe(types.boolean),
-    selectable: types.maybe(types.boolean),
-    connectable: types.maybe(types.boolean),
-    deletable: types.maybe(types.boolean),
-    dragHandle: types.maybe(types.string),
-    width: types.maybeNull(types.number),
-    height: types.maybeNull(types.number),
-    parentNode: types.maybe(types.string),
-    zIndex: types.maybe(types.number),
-    extent: types.maybe(types.frozen()),
-    expandParent: types.maybe(types.boolean),
-    positionAbsolute: types.maybe(
-      types.model({
-        x: types.number,
-        y: types.number,
-      })
-    ),
-    ariaLabel: types.maybe(types.string),
-    focusable: types.maybe(types.boolean),
-    resizing: types.maybe(types.boolean),
-    /*internalsSymbol: types.maybe(
+    })
+  ),
+  ariaLabel: types.maybe(types.string),
+  focusable: types.maybe(types.boolean),
+  resizing: types.maybe(types.boolean),
+  /*internalsSymbol: types.maybe(
     types.model({
       z: types.maybe(types.number),
       handleBounds: types.maybe(NodeHandleBounds),
       isParent: types.maybe(types.boolean),
     })
   ),*/
-  })
-  .actions((self) => ({
-    hideAirlift() {
-      self.hidden = true;
-    },
-    showAirlift() {
-      self.hidden = false;
-    },
-  }));
+});
+
+export type AirliftNodeType = Instance<typeof NodeType>;
 
 export const FlowStore = types
   .model('FlowStore', {
@@ -230,14 +236,20 @@ export const AirliftStore = types
       self.airlifts.get(space)!.set(airliftId, newAirlift);
       console.log('success');*/
     },
-    removeAirlift(space: string, airliftId: string) {
-      self.airlifts.get(space)!.delete(airliftId);
+    removeAirlift(airliftId: string) {
+      self.flowStore.nodes.remove(
+        self.flowStore.nodes.find((node) => node.id === airliftId)!
+      );
     },
-    hideAirlift(airliftId: string) {
-      // console.log(self.flowStore.nodes);
-      const node = self.flowStore.nodes.filter((node) => node.id === airliftId);
-      node[0].hideAirlift();
-      console.log(node[0].hidden);
+    promptDelete(airliftId: string) {
+      self.flowStore.nodes
+        .find((node) => node.id === airliftId)!
+        .data.promptDelete();
+    },
+    unpromptDelete(airliftId: string) {
+      self.flowStore.nodes
+        .find((node) => node.id === airliftId)!
+        .data.unpromptDelete();
     },
   }));
 

@@ -19,7 +19,8 @@ export class AirliftService extends BaseService {
     'realm.airlift.drop-airlift': this.dropAirlift,
     'realm.airlift.remove-airlift': this.removeAirlift,
     'realm.airlift.on-nodes-change': this.onNodesChange,
-    'realm.airlift.hide-airlift': this.hideAirlift,
+    'realm.airlift.prompt-delete': this.promptDelete,
+    'realm.airlift.unprompt-delete': this.unpromptDelete,
     /*'realm.airlift.on-edges-change': this.onEdgesChange,
     'realm.airlift.on-connect': this.onConnect,*/
   };
@@ -42,12 +43,8 @@ export class AirliftService extends BaseService {
     dropAirlift: (airlift: any) => {
       return ipcRenderer.invoke('realm.airlift.drop-airlift', airlift);
     },
-    removeAirlift: (spacePath: string, airliftId: string) => {
-      return ipcRenderer.invoke(
-        'realm.airlift.remove-airlift',
-        spacePath,
-        airliftId
-      );
+    removeAirlift: (airliftId: string) => {
+      return ipcRenderer.invoke('realm.airlift.remove-airlift', airliftId);
     },
     expandArm: (desk: string, agent: string, arm: string) => {
       return ipcRenderer.invoke('realm.airlift.expand-arm', desk, agent, arm);
@@ -55,8 +52,11 @@ export class AirliftService extends BaseService {
     onNodesChange: (changes: NodeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
     },
-    hideAirlift: (airliftId: string) => {
-      return ipcRenderer.invoke('realm.airlift.hide-airlift', airliftId);
+    promptDelete: (airliftId: string) => {
+      return ipcRenderer.invoke('realm.airlift.prompt-delete', airliftId);
+    },
+    unpromptDelete: (airliftId: string) => {
+      return ipcRenderer.invoke('realm.airlift.unprompt-delete', airliftId);
     },
     /*onEdgesChange: (changes: EdgeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-edges-change', changes);
@@ -79,92 +79,41 @@ export class AirliftService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  /*get modelSnapshots() {
-    return {
-      membership: getSnapshot(this.models.membership),
-      bazaar: getSnapshot(this.models.bazaar),
-      visas: getSnapshot(this.models.visas),
-    };
-  }*/
-
   async load(patp: string) {
     const secretKey: string | null = this.core.passwords.getPassword(patp);
-    /*const arm = AirliftArm.create({
-      name: 'hello',
-      body: 'hello',
-      expanded: false,
-      view: 'options',
-    });*/
-    /*const model = AirliftModel.create({
-      desks: {},
-    });*/
     this.db = new DiskStore('airlift', patp, secretKey!, AirliftStore, {
       flowStore: {},
     });
     this.state = this.db.model as AirliftStoreType;
     this.db.initialUpdate(this.core.onEffect);
     this.db.registerPatches(this.core.onEffect);
-    /*this.db = AirliftStore.create({
-      /*model: AirliftModel.create({
-        desks: {
-          '0': {
-            agents: {
-                '%test': {
-                  arms: {
-                    name: 'TEST',
-                    body: 'asdf',
-                    cards: 'asdf',
-                    expanded: '',
-                    view: 'options'
-                  }
-                }
-            }
-          }
-        }
-      },
-      model: {},
-      airlifts: {},
-    });*/
   }
 
   // ***********************************************************
   // ************************ AIRLIFT ***************************
   // ***********************************************************
-  async expandArm(_event: any, desk: string, agent: string, arm: string) {
-    /* this.state!.model.desks.get(desk)!
-      .agents.get(agent)!
-      .arms.get(arm)!
-      .expand();*/
-  }
+  async expandArm(_event: any, desk: string, agent: string, arm: string) {}
 
-  /*async dropAirlift(
-    _event: IpcMainInvokeEvent,
-    space: string,
-    type: string,
-    airliftId: string,
-    location: any
-  ) {
-    this.state!.dropAirlift(space, type, airliftId, location);
-  }*/
   async dropAirlift(_event: IpcMainInvokeEvent, newAirlift: any) {
     this.state!.dropAirlift(newAirlift);
   }
 
-  async removeAirlift(
-    _event: IpcMainInvokeEvent,
-    space: string,
-    airliftId: string
-  ) {
-    this.state!.removeAirlift(space, airliftId);
+  async removeAirlift(_event: IpcMainInvokeEvent, airliftId: string) {
+    this.state!.removeAirlift(airliftId);
   }
 
   async onNodesChange(_event: IpcMainInvokeEvent, changes: NodeChange[]) {
     this.state!.flowStore.onNodesChange(changes);
   }
 
-  async hideAirlift(_event: IpcMainInvokeEvent, airliftId: string) {
-    this.state!.hideAirlift(airliftId);
+  async promptDelete(_event: IpcMainInvokeEvent, airliftId: string) {
+    this.state!.promptDelete(airliftId);
   }
+
+  async unpromptDelete(_event: IpcMainInvokeEvent, airliftId: string) {
+    this.state!.unpromptDelete(airliftId);
+  }
+
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
     this.state!.flowStore.onEdgesChange(changes);
   }

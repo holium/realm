@@ -28,7 +28,6 @@ export const AirliftTray: FC = observer(() => {
 
   const onButtonClick = useCallback(
     (evt: any) => {
-      console.log('got button click');
       if (activeApp === 'airlift-tray') {
         setActiveApp(null);
         evt.stopPropagation();
@@ -71,6 +70,9 @@ export const AirliftTray: FC = observer(() => {
           pointerEvents="none"
           overflow={'visible'}
           mr={-1}
+          onDragOver={() => {
+            console.log('got dragover');
+          }}
         />
       ) : (
         <Icon

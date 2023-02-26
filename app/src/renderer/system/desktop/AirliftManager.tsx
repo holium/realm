@@ -13,6 +13,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { getSnapshot } from 'mobx-state-tree';
 import { WalletNode } from 'renderer/apps/Airlift/WalletNode';
+import { AirliftNodeType } from 'os/services/shell/airlift.model';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -65,11 +66,11 @@ const AirliftManagerPresenter = () => {
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
-      const newNode = {
+      const newNode: AirliftNodeType = {
         id: getId(type),
         type,
         position,
-        data: { label: `${type} node`, value: 123, agent: 'asdf' },
+        data: { promptDelete: false },
       };
 
       AirliftActions.dropAirlift(newNode);
@@ -122,9 +123,48 @@ const AirliftManagerPresenter = () => {
                 cancelable: true,
               };
               dispatchEvent(new MouseEvent('mousemove', mouseEventInit));
+              const dropZone = document.getElementById('trash-bin-icon');
+              if (dropZone) {
+                const draggedElement = event.target as HTMLElement;
+                const draggedRect = draggedElement.getBoundingClientRect();
+                const dropZoneRect = dropZone.getBoundingClientRect();
+                const overlap = !(
+                  draggedRect.right < dropZoneRect.left ||
+                  draggedRect.left > dropZoneRect.right ||
+                  draggedRect.bottom < dropZoneRect.top ||
+                  draggedRect.top > dropZoneRect.bottom
+                );
+                if (overlap) {
+                  AirliftActions.promptDelete(draggedElement.getAttribute(id)!);
+                } else {
+                  AirliftActions.unpromptDelete(
+                    draggedElement.getAttribute(id)!
+                  );
+                }
+              }
             }}
-            onNodeDragStop={() => {
+            onNodeDragStop={(event) => {
               dispatchEvent(new MouseEvent('mouseup'));
+              const draggedElement = event.target as HTMLElement;
+              const dropZone = document.getElementById('trash-bin-icon')!;
+              const draggedRect = draggedElement.getBoundingClientRect();
+              const dropZoneRect = dropZone.getBoundingClientRect();
+              const overlap = !(
+                draggedRect.right < dropZoneRect.left ||
+                draggedRect.left > dropZoneRect.right ||
+                draggedRect.bottom < dropZoneRect.top ||
+                draggedRect.top > dropZoneRect.bottom
+              );
+              console.log('test for removal');
+              if (overlap) {
+                console.log('removing');
+                console.log('dragged', draggedElement);
+                console.log(draggedElement.getAttribute(id));
+                const draggedNode = airlift.flowStore.nodes.find(
+                  (node) => node.dragging
+                )!;
+                AirliftActions.removeAirlift(draggedNode.id);
+              }
             }}
             onDragOver={onDragOver}
             onDrop={onDrop}
