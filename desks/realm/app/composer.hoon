@@ -56,43 +56,68 @@
 ++  action
   |=  act=action:store
   ^-  (quip card _state)
-  `state
-::  ?-  -.act
-::    %add-space  (handle-add-space +.act)
-::    %remove-space  (handle-remove-space +.act)
-::    %add-stack  (handle-add-stack +.act)
-::    %remove-stack  (handle-remove-stack +.act)
-::    %set-current-stack  (handle-set-current-stack +.act)
-::    %set-window  (handle-set-window +.act)
-::    %remove-window  (handle-remove-window +.act)
-::  ==
+  ?-  -.act
+    %add-space  (handle-add-space +.act)
+    %remove-space  (handle-remove-space +.act)
+    %add-stack  (handle-add-stack +.act)
+    %remove-stack  (handle-remove-stack +.act)
+    %set-current-stack  (handle-set-current-stack +.act)
+    %set-window  (handle-set-window +.act)
+    %remove-window  (handle-remove-window +.act)
+  ==
 ::
 ++  handle-add-space
   |=  =space-path:store
+  =.  compositions  (~(put by compositions) [space-path *composer:store])
   `state
 ::
 ++  handle-remove-space
   |=  =space-path:store
+  =.  compositions  (~(del by compositions) [space-path *composer:store])
   `state
 ::
 ++  handle-add-stack
   |=  [=space-path:store =stack:store]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =.  stacks.composer  (~(put in stacks.composer) stack)
+    (~(put by compositions) [space-path composer])
   `state
 ::
 ++  handle-remove-stack
   |=  [=space-path:store =stack-id:store]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =.  stacks.composer  (~(del in stacks.composer) stack-id)
+    (~(put by compositions) [space-path composer])
   `state
 ::
 ++  handle-set-current-stack
   |=  [=space-path:store =stack-id:store]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =.  current.composer  stack-id
+    (~(put by compositions) [space-path composer])
   `state
 ::
 ++  handle-set-window
   |=  [=space-path:store =stack-id:store =window:store]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =/  stack  (~(got by stacks.composer) stack-id)
+    =.  windows.stack  (~(put in windows.stack) window)
+    =.  current.composer  stack-id
+    (~(put by compositions) [space-path composer])
   `state
 ::
 ++  handle-remove-window
   |=  [=space-path:store =stack-id:store window-id=@t]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =/  stack  (~(got by stacks.composer) stack-id)
+    =.  windows.stack  (~(del in windows.stack) window-id)
+    =.  current.composer  stack-id
+    (~(put by compositions) [space-path composer])
   `state
 ::
 --

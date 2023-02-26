@@ -19,7 +19,7 @@
       type=?(%urbit %web %native)
       metadata=(map cord cord)
       z-index=@   ::  11
-      =dimensions ::  [x=1.0 y=1.0 height=8.0 width=6.5]
+      =bounds     ::  [x=1.0 y=1.0 height=8.0 width=6.5]
   ==
 ::
 +$  stack
