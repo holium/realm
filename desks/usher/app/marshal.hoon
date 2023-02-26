@@ -111,47 +111,44 @@
 ++  poke
   |=  [mar=mark vaz=vase]
   ^+  dat
-  =^  cards  state
-    ?+    mar            (on-poke:def mar vaz)
-        %marshal-action  
-      =/  act  !<(marshal-action vaz)
-      ?+    -.act  ~|(['bad-marshal-action' -.act] !!)
-          %commit
-        %-  (slog leaf+"{<dap.bowl>}: on-commit called. committing {<mount-point>}..." ~)
-        dat(caz [[%pass /commit %arvo %c [%dirk mount-point]] caz])
-      ::
-      ==
+  ?+    mar  ~|(bad-marshal-mark/mar !!)
+      %marshal-action  
+    =/  act  !<(marshal-action vaz)
+    ?-    -.act
+        %commit
+      =/  mount-point  +.act
+      %-  (slog leaf+"{<dap.bol>}: on-commit called. committing {<mount-point>}..." ~)
+      dat(caz [[%pass /commit %arvo %c [%dirk mount-point]] caz])
     ::
     ==
-  (emil cards)
+  ::
+  ==
 ::  +dude: handle on-agent
 ::
 ++  dude
   |=  [wir=wire sig=sign:agent:gall]
   ^+  dat
-  =^  cards  state
-    ?-    -.sign
-        :: Print error if poke failed
-        ::
-        %poke-ack
-      %-  (slog leaf+"{<dap.bowl>}: %poke-ack on wire {<wir>} => {<sig>}" ~)
-      `state
-        :: Print error if subscription failed
-        ::
-        %watch-ack
-      %-  (slog leaf+"{<dap.bowl>}: %watch-ack on wire {<wir>} => {<sig>}" ~)
-      `state
-        :: Do nothing if unsubscribed
-        ::
-        %kick
-      %-  (slog leaf+"{<dap.bowl>}: %kick on wire {<wir>} => {<sig>}" ~)
-      `state
-        :: Update remote counter when we get a subscription update
-        ::
-        %fact
-      %-  (slog leaf+"{<dap.bowl>}: %fact on wire {<wir>} => {<sig>}" ~)
-      `state
-    ::
-    ==
-  (emil cards)
+  ?-    -.sig
+      :: Print error if poke failed
+      ::
+      %poke-ack
+    %-  (slog leaf+"{<dap.bol>}: %poke-ack on wire {<wir>} => {<sig>}" ~)
+    dat
+      :: Print error if subscription failed
+      ::
+      %watch-ack
+    %-  (slog leaf+"{<dap.bol>}: %watch-ack on wire {<wir>} => {<sig>}" ~)
+    dat
+      :: Do nothing if unsubscribed
+      ::
+      %kick
+    %-  (slog leaf+"{<dap.bol>}: %kick on wire {<wir>} => {<sig>}" ~)
+    dat
+      :: Update remote counter when we get a subscription update
+      ::
+      %fact
+    %-  (slog leaf+"{<dap.bol>}: %fact on wire {<wir>} => {<sig>}" ~)
+    dat
+  ::
+  ==
 --
