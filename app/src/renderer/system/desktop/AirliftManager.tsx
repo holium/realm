@@ -65,11 +65,12 @@ const AirliftManagerPresenter = () => {
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
+      const airliftId = getId(type);
       const newNode = {
-        id: getId(type),
+        id: airliftId,
         type,
         position,
-        data: { showDelete: false },
+        data: { id: airliftId, showDelete: false },
       };
 
       AirliftActions.dropAirlift(newNode);
@@ -148,22 +149,24 @@ const AirliftManagerPresenter = () => {
             }}
             onNodeDragStop={(_, node) => {
               dispatchEvent(new MouseEvent('mouseup'));
-              const draggedNode = document.querySelector(
-                `[data-id='${node.id}']`
-              ) as HTMLDivElement;
-              const dropZone = document.getElementById('trash-bin-icon')!;
-              const draggedRect = draggedNode.getBoundingClientRect();
-              const dropZoneRect = dropZone.getBoundingClientRect();
-              const overlap = !(
-                draggedRect.right < dropZoneRect.left ||
-                draggedRect.left > dropZoneRect.right ||
-                draggedRect.bottom < dropZoneRect.top ||
-                draggedRect.top > dropZoneRect.bottom
-              );
-              if (overlap) {
-                AirliftActions.removeAirlift(
-                  draggedNode.getAttribute('data-id')!
+              const dropZone = document.getElementById('trash-bin-icon');
+              if (dropZone) {
+                const draggedNode = document.querySelector(
+                  `[data-id='${node.id}']`
+                ) as HTMLDivElement;
+                const draggedRect = draggedNode.getBoundingClientRect();
+                const dropZoneRect = dropZone.getBoundingClientRect();
+                const overlap = !(
+                  draggedRect.right < dropZoneRect.left ||
+                  draggedRect.left > dropZoneRect.right ||
+                  draggedRect.bottom < dropZoneRect.top ||
+                  draggedRect.top > dropZoneRect.bottom
                 );
+                if (overlap) {
+                  AirliftActions.removeAirlift(
+                    draggedNode.getAttribute('data-id')!
+                  );
+                }
               }
             }}
             onDragOver={onDragOver}

@@ -21,6 +21,7 @@ export class AirliftService extends BaseService {
     'realm.airlift.on-nodes-change': this.onNodesChange,
     'realm.airlift.prompt-delete': this.promptDelete,
     'realm.airlift.unprompt-delete': this.unpromptDelete,
+    'realm.airlift.set-agent-name': this.setAgentName,
     /*'realm.airlift.on-edges-change': this.onEdgesChange,
     'realm.airlift.on-connect': this.onConnect,*/
   };
@@ -57,6 +58,13 @@ export class AirliftService extends BaseService {
     },
     unpromptDelete: (airliftId: string) => {
       return ipcRenderer.invoke('realm.airlift.unprompt-delete', airliftId);
+    },
+    setAgentName: (airliftId: string, name: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.set-agent-name',
+        airliftId,
+        name
+      );
     },
     /*onEdgesChange: (changes: EdgeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-edges-change', changes);
@@ -112,6 +120,16 @@ export class AirliftService extends BaseService {
 
   async unpromptDelete(_event: IpcMainInvokeEvent, airliftId: string) {
     this.state!.unpromptDelete(airliftId);
+  }
+
+  async setAgentName(
+    _event: IpcMainInvokeEvent,
+    airliftId: string,
+    name: string
+  ) {
+    this.state!.flowStore.nodes.find(
+      (node) => node.id === airliftId
+    )!.data.setName(name);
   }
 
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {

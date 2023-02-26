@@ -59,7 +59,6 @@ export const AirliftCommandPalette: FC = observer(() => {
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'agent')}
             color={textColor}
-            // mb="-2px"
           >
             <Icon name="Airlift" />
           </IconButton>
@@ -67,25 +66,40 @@ export const AirliftCommandPalette: FC = observer(() => {
         <Flex flexDirection="column" gap={10} flexGrow={1}>
           <Text>Realm Primitives</Text>
           <IconButton
+            size={ICON_SIZE - 3}
+            mt="2px"
+            draggable={true}
+            onDragStart={(event) => onButtonDragStart(event, 'portal')}
+            color={textColor}
+          >
+            <Icon name="Holium" size={ICON_SIZE} filter={'grayscale(100%)'} />
+          </IconButton>
+          <IconButton
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'wallet')}
             color={textColor}
-            // mb="-2px"
           >
             <Icon name="Wallet" size={ICON_SIZE} />
           </IconButton>
-          <Icon name="QRCode" size={ICON_SIZE} />
+          <IconButton
+            size={ICON_SIZE}
+            mt="2px"
+            draggable={true}
+            onDragStart={(event) => onButtonDragStart(event, 'relic')}
+            color={textColor}
+          >
+            <Icon
+              name="AppIconCompass"
+              size={ICON_SIZE + 3}
+              filter={'grayscale(100%) brightness(70%) contrast(150%)'}
+            />
+          </IconButton>
         </Flex>
       </Flex>
-      <Flex
-        // style={{ marginTop: 54, maxHeight: '100%' }}
-        gap={8}
-        flex={1}
-        overflowY={'scroll'}
-      >
-        <Text fontSize={1}>
+      <Flex gap={8} flex={1}>
+        <Text fontSize={1} mb={3}>
           To drop an Airlift, drag an icon from the Command Palette into the
           current Space.
         </Text>

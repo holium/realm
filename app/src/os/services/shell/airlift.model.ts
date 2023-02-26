@@ -141,9 +141,14 @@ const PositionEnum = types.enumeration<Position>(Object.values(Position));
 
 export const AirliftData = types
   .model('AirliftData', {
+    id: types.identifier,
+    name: types.maybe(types.string),
     showDelete: types.boolean,
   })
   .actions((self) => ({
+    setName(name: string) {
+      self.name = name;
+    },
     promptDelete() {
       self.showDelete = true;
     },
