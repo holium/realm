@@ -117,8 +117,6 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'alpha';
         break;
       case 'hotfix':
-        ci.channel = 'hotfix';
-        break;
       case 'release':
         ci.channel = 'latest';
         break;

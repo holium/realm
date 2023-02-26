@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-import { FormControl, TextButton, Spinner } from 'renderer/components';
+import { FormControl, Spinner } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
@@ -17,6 +17,7 @@ import {
   Flex,
   Text,
   TextInput,
+  Button,
 } from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
@@ -119,8 +120,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
         setAvatarImg(profile.avatar);
         setProfileLoading(false);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         setProfileLoading(false);
       });
   }, []);
@@ -155,21 +155,37 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
   };
 
   return (
-    <Flex flex={1} flexDirection="column">
-      <Text.Body fontSize={4} fontWeight={600} mb={4}>
+    <Flex flex={1} flexDirection="column" width="100%">
+      <Text.Custom fontSize={4} mb={1}>
         Profile
-      </Text.Body>
-      <Text.Body fontSize={2} lineHeight="20px" opacity={0.6} mb={4}>
+      </Text.Custom>
+      <Text.Custom
+        fontSize={2}
+        lineHeight="20px"
+        fontWeight={200}
+        opacity={0.6}
+        mb={4}
+      >
         We’ve loaded the profile from your ship. Feel free to edit it here.
-      </Text.Body>
-      <Flex flex={1} flexDirection="row" gap={24} alignItems="center">
+      </Text.Custom>
+      <Flex
+        width="100%"
+        height="100%"
+        justifyContent="center"
+        alignItems="center"
+      >
         {profileLoading ? (
           <Flex flex={1} alignItems="center" justifyContent="center">
             <Spinner size={3} />
           </Flex>
         ) : (
           <>
-            <Flex flex={1} flexDirection="column" alignItems="center">
+            <Flex
+              flexBasis={210}
+              mr={4}
+              flexDirection="column"
+              alignItems="center"
+            >
               <Avatar
                 simple={false}
                 size={52}
@@ -190,11 +206,16 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                 flexDirection="column"
               >
                 {nickname.state.value && (
-                  <Text.Body position="absolute" fontWeight={500}>
+                  <Text.Custom
+                    textAlign="center"
+                    position="absolute"
+                    fontWeight={500}
+                  >
                     {nickname.state.value}
-                  </Text.Body>
+                  </Text.Custom>
                 )}
-                <Text.Body
+                <Text.Custom
+                  textAlign="center"
                   transition={{
                     opacity: {
                       duration: nickname.computed.isDirty ? 0.15 : 0,
@@ -207,11 +228,16 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   }}
                 >
                   {shipName}
-                </Text.Body>
+                </Text.Custom>
               </Flex>
             </Flex>
-            <Flex flex={1} justifyContent="center">
-              <FormControl.FieldSet>
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              width="100%"
+            >
+              <FormControl.FieldSet width="100%">
                 <FormControl.Field>
                   <Text.Label>Sigil Color</Text.Label>
                   <Flex flex={1} alignItems="flex-start" position="relative">
@@ -258,7 +284,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                     tabIndex={3}
                     initialValue={avatarImg}
                     onSave={(url) => setAvatarImg(url)}
-                    height={35}
+                    height={36}
                     onKeyDown={onKeyDown}
                   />
                 </FormControl.Field>
@@ -270,6 +296,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                     className="realm-cursor-text-cursor"
                     width="100%"
                     type="text"
+                    height={36}
                     placeholder="optional"
                     value={nickname.state.value || ''}
                     onChange={(e: any) =>
@@ -285,17 +312,16 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
           </>
         )}
       </Flex>
-      <Box position="absolute" height={40} bottom={20} right={24}>
-        <Flex
-          mt={5}
-          width="100%"
-          alignItems="center"
-          justifyContent="space-between"
+      <Box position="absolute" bottom={24} right={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
+          onClick={profileForm.actions.submit}
+          style={{ minWidth: 45 }}
         >
-          <TextButton onClick={profileForm.actions.submit}>
-            {loading ? <Spinner size={0} /> : 'Next'}
-          </TextButton>
-        </Flex>
+          {loading ? <Spinner size={0} /> : 'Next'}
+        </Button.TextButton>
       </Box>
     </Flex>
   );

@@ -6,6 +6,7 @@ export enum DataPacket_Kind {
   CURSOR = 1,
   TRACK_META = 2,
   MUTE_STATUS = 3,
+  SPEAKING_CHANGED = 4,
   UNRECOGNIZED = -1,
 }
 

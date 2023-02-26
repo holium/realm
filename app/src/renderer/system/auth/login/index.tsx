@@ -241,14 +241,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                                 onClose={() => setShow(false)}
                               >
                                 <MenuItem
-                                  data-prevent-context-close={false}
-                                  label="Reset password"
-                                  customBg={theme.currentTheme.windowColor}
-                                  onClick={() => {
-                                    console.log('do reset form');
-                                  }}
-                                />
-                                <MenuItem
                                   label="Remove ship"
                                   customBg={theme.currentTheme.windowColor}
                                   onClick={() => {
@@ -325,7 +317,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                Add Ship <Icons size={22} name="AddCircleLine" />
+                <Icons size={22} name="AddCircleLine" />
+                Add Urbit ID
               </Flex>
             </TextButton>
           </Flex>

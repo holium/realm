@@ -68,6 +68,12 @@ export const DesktopActions = {
   disableIsolationMode: () => {
     return window.electron.app.disableIsolationMode();
   },
+  getReleaseChannel: (): Promise<string> => {
+    return window.electron.os.desktop.getReleaseChannel();
+  },
+  setReleaseChannel: (channel: string) => {
+    return window.electron.os.desktop.setReleaseChannel(channel);
+  },
 };
 
 // TODO

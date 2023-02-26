@@ -5,6 +5,8 @@ import { Peer, PeerConfig } from './Peer';
 import { RemotePeer } from './RemotePeer';
 import { PeerConnectionState, TrackKind } from './types';
 import { action, makeObservable, observable } from 'mobx';
+import { SpeakingDetectionAnalyser } from '../analysers';
+import { IAudioAnalyser } from '../analysers/types';
 
 export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
@@ -25,6 +27,7 @@ export class LocalPeer extends Peer {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
   };
+  analysers: IAudioAnalyser[] = [];
 
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
@@ -141,6 +144,8 @@ export class LocalPeer extends Peer {
         this.emit(PeerEvent.VideoTrackAdded, stream, video);
       });
     }
+    // initialize the speaking detection analyser
+    this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
     this.status = PeerConnectionState.Broadcasting;
   }
 
@@ -155,6 +160,9 @@ export class LocalPeer extends Peer {
       this.emit(PeerEvent.VideoTrackRemoved, track);
     });
     this.videoTracks.clear();
+    this.analysers.forEach((analyser: IAudioAnalyser) => {
+      analyser.detach();
+    });
     this.stream = null;
   }
 }

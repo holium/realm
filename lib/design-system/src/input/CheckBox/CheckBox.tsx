@@ -21,8 +21,12 @@ export const CheckBox = ({
   defaultChecked,
   onChange,
 }: Props) => {
-  const blankSvgJsxElement = <Icon name="CheckboxBlank" color="text" />;
-  const checkedSvgJsxElement = <Icon name="CheckboxChecked" color="accent" />;
+  const blankSvgJsxElement = (
+    <Icon name="CheckboxBlank" color="text" isBackgroundImage />
+  );
+  const checkedSvgJsxElement = (
+    <Icon name="CheckboxChecked" color="accent" isBackgroundImage />
+  );
   const blankSvgString = renderToString(blankSvgJsxElement);
   const checkedSvgString = renderToString(checkedSvgJsxElement);
 
@@ -49,7 +53,12 @@ export const CheckBox = ({
           </Text.Body>
         )}
         {label && (
-          <Text.Label display="flex" alignItems="center" color="text">
+          <Text.Label
+            display="flex"
+            alignItems="center"
+            color="text"
+            fontWeight={400}
+          >
             {label}
           </Text.Label>
         )}

@@ -14,6 +14,8 @@ import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
 import { Bounds } from 'os/types';
 
+import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
+
 /**
  * DesktopService
  *
@@ -45,6 +47,8 @@ export class DesktopService extends BaseService {
     'realm.desktop.toggle-minimized': this.toggleMinimized,
     'realm.desktop.toggle-maximized': this.toggleMaximized,
     'realm.desktop.close-app-window': this.closeAppWindow,
+    'realm.desktop.get-release-channel': this.getReleaseChannel,
+    'realm.desktop.set-release-channel': this.setReleaseChannel,
   };
 
   static preload = {
@@ -88,6 +92,12 @@ export class DesktopService extends BaseService {
     },
     closeAppWindow: (appId: string) => {
       return ipcRenderer.invoke('realm.desktop.close-app-window', appId);
+    },
+    getReleaseChannel: (): Promise<string> => {
+      return ipcRenderer.invoke('realm.desktop.get-release-channel');
+    },
+    setReleaseChannel: (channel: string) => {
+      return ipcRenderer.invoke('realm.desktop.set-release-channel', channel);
     },
   };
 
@@ -201,5 +211,40 @@ export class DesktopService extends BaseService {
 
   closeAppWindow(_event: IpcRendererEvent, appId: string) {
     this.state.closeWindow(appId);
+  }
+
+  async getReleaseChannel(_event: IpcRendererEvent): Promise<string> {
+    return getReleaseChannel();
+  }
+
+  setReleaseChannel(_event: IpcRendererEvent, channel: string) {
+    let ship = undefined;
+    let desks = undefined;
+    // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
+    // example: INSTALL_MOON=~hostyv:realm,courier
+    if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
+      const parts: string[] = process.env.INSTALL_MOON.split(':');
+      ship = parts[0];
+      desks = parts[1].split(',');
+    } else {
+      ship = channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv';
+      desks = ['realm', 'courier'];
+    }
+    for (let i = 0; i < desks.length; i++) {
+      const desk = desks[i];
+      this.core.conduit!.poke({
+        app: 'hood',
+        mark: 'kiln-install',
+        json: {
+          ship: ship,
+          desk: desk,
+          local: desk,
+        },
+        onError: (e: any) => {
+          console.error(e);
+        },
+      });
+    }
+    setReleaseChannel(channel);
   }
 }
