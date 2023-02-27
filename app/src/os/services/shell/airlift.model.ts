@@ -127,10 +127,6 @@ export function fakeDefault<T>() {
   return undefined as any as T;
 }
 
-export const NodeData = types.model('NodeData', {
-  value: types.number,
-});
-
 enum Position {
   Left = 'left',
   Top = 'top',
@@ -144,6 +140,7 @@ export const AirliftData = types
     id: types.identifier,
     name: types.maybe(types.string),
     showDelete: types.boolean,
+    agent: AirliftAgent,
   })
   .actions((self) => ({
     setName(name: string) {

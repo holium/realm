@@ -1,9 +1,15 @@
-import { TextInput, Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system';
 import { KeyboardEventHandler, useState } from 'react';
-import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { observer } from 'mobx-react';
+import { AirliftArm } from './AirliftArm';
+import { AirliftDataType } from 'os/services/shell/airlift.model';
 
-export const AgentNode = observer(({ data, isConnectable }) => {
+interface AgentNodeProps {
+  data: AirliftDataType;
+  isConnectable: boolean;
+}
+
+export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
   const [created, setCreated] = useState(false);
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === 'Enter') {
@@ -13,7 +19,7 @@ export const AgentNode = observer(({ data, isConnectable }) => {
   };
   return (
     <Flex border={data.showDelete ? '2px solid red' : 'none'}>
-      <TextInput
+      {/* name view <TextInput
         id={`${data.id}-name`}
         name={`${data.id}-name`}
         type="text"
@@ -28,7 +34,10 @@ export const AgentNode = observer(({ data, isConnectable }) => {
         }}
         onKeyDown={onKeyDown}
         disabled={created}
-      />
+      />*/}
+      {Array.from(data.agent.arms).map((arm) => {
+        return <AirliftArm desk="asdf" agent="asdf" arm="asdf" />;
+      })}
     </Flex>
   );
 });

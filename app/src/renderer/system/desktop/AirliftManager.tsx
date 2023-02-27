@@ -70,7 +70,20 @@ const AirliftManagerPresenter = () => {
         id: airliftId,
         type,
         position,
-        data: { id: airliftId, showDelete: false },
+        data: {
+          id: airliftId,
+          showDelete: false,
+          agent: {
+            arms: {
+              'on-poke': {
+                name: 'on-poke',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+            },
+          },
+        },
       };
 
       AirliftActions.dropAirlift(newNode);

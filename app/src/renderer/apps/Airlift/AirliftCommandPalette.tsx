@@ -21,7 +21,6 @@ export const AirliftCommandPalette: FC = observer(() => {
       window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
       const dataTransfer = new DataTransfer();
-      console.log('dropping ', nodeType);
       dataTransfer.setData('application/reactflow', nodeType);
       const dropEvent = new DragEvent('drop', {
         bubbles: true,
