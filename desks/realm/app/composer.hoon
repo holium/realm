@@ -1,5 +1,5 @@
 /-  store=composer
-/+  default-agent, dbug
+/+  default-agent, dbug, lib=composer
 |%
 +$  versioned-state
   $%  state-0
@@ -45,7 +45,15 @@
     ==
   ++  on-watch  on-watch:def
   ++  on-leave  on-leave:def
-  ++  on-peek   on-peek:def
+  ++  on-peek
+    |=  =path
+    ^-  (unit (unit cage))
+    ?+    path  (on-peek:def path)
+        [%x %all ~] :: ~/scry/composer/all.json
+      ?>  (team:title our.bowl src.bowl)
+      ``noun+!>((view:enjs:lib [%compositions compositions]))
+      ::
+    ==
   ++  on-agent  on-agent:def
   ++  on-arvo   on-arvo:def
   ++  on-fail   on-fail:def
@@ -80,7 +88,7 @@
   |=  [=space-path:store =stack:store]
   =.  compositions
     =/  composer  (~(got by compositions) space-path)
-    =.  stacks.composer  (~(put in stacks.composer) stack)
+    =.  stacks.composer  (~(put by stacks.composer) [id.stack stack])
     (~(put by compositions) [space-path composer])
   `state
 ::
@@ -88,7 +96,7 @@
   |=  [=space-path:store =stack-id:store]
   =.  compositions
     =/  composer  (~(got by compositions) space-path)
-    =.  stacks.composer  (~(del in stacks.composer) stack-id)
+    =.  stacks.composer  (~(del by stacks.composer) stack-id)
     (~(put by compositions) [space-path composer])
   `state
 ::
@@ -105,7 +113,7 @@
   =.  compositions
     =/  composer  (~(got by compositions) space-path)
     =/  stack  (~(got by stacks.composer) stack-id)
-    =.  windows.stack  (~(put in windows.stack) window)
+    =.  windows.stack  (~(put by windows.stack) [id.window window])
     =.  current.composer  stack-id
     (~(put by compositions) [space-path composer])
   `state
@@ -115,7 +123,7 @@
   =.  compositions
     =/  composer  (~(got by compositions) space-path)
     =/  stack  (~(got by stacks.composer) stack-id)
-    =.  windows.stack  (~(del in windows.stack) window-id)
+    =.  windows.stack  (~(del by windows.stack) window-id)
     =.  current.composer  stack-id
     (~(put by compositions) [space-path composer])
   `state

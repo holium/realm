@@ -2,6 +2,7 @@
 |%
 +$  space-path  path:pth
 +$  stack-id    @t
++$  window-id    @t
 ::
 +$  bounds
   $:  x=@ud       :: [1.0 - 10.0]
@@ -26,7 +27,7 @@
   $:  id=@t
       host=ship
       type=?(%singleplayer %multiplayer)
-      windows=(set window)
+      windows=(map window-id window)
       metadata=(map cord cord)
   ==
 ::
@@ -34,7 +35,7 @@
   $:  space=space-path
       current=stack-id
       our=stack
-      stacks=(set stack)
+      stacks=(map stack-id stack)
   ==
 ::
 +$  compositions  (map space-path composer)
@@ -48,8 +49,9 @@
       [%set-window =space-path =stack-id =window]
       [%remove-window =space-path =stack-id window-id=@t]
   ==
-+$  reaction
-  $%  [%tbd ~]
+::
++$  view
+  $%  [%compositions =compositions]
   ==
 ::
 --
