@@ -11,4 +11,5 @@ export { Favicon } from './Favicon/Favicon';
 export { SectionDivider } from './SectionDivider/SectionDivider';
 export { Spinner } from './Spinner/Spinner';
 export { ProgressBar } from './ProgressBar/ProgressBar';
-export { MenuItem, MenuItemProps } from './MenuItem/MenuItem';
+export { MenuItem } from './MenuItem/MenuItem';
+export type { MenuItemProps } from './MenuItem/MenuItem';
