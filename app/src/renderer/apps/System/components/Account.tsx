@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
+  AvatarInput,
+  Button,
+  Icon,
   Flex,
+  RadioGroup,
+  Spinner,
+  TextInput,
+} from '@holium/design-system';
+import {
   Text,
   Card,
-  RadioGroup,
   TextButton,
-  Spinner,
   Anchor,
   CopyButton,
 } from 'renderer/components';
@@ -158,16 +163,12 @@ const AccountPanelPresenter = () => {
               gap={8}
             >
               <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={avatarOption}
                 options={[
                   { label: 'Color', value: 'color' },
                   { label: 'Image', value: 'image' },
                 ]}
-                onClick={(value: avatarOptionType) => {
-                  setAvatarOption(value);
-                }}
+                onClick={(value) => setAvatarOption(value as avatarOptionType)}
               />
 
               <Flex height={30}>
@@ -230,7 +231,6 @@ const AccountPanelPresenter = () => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
@@ -241,7 +241,7 @@ const AccountPanelPresenter = () => {
             Email
           </Text>
           <Flex justifyContent="space-between" flex={3}>
-            <Text color={textColor}> {email} </Text>
+            <Text color={textColor}>{email}</Text>
             <TextButton
               style={{ fontWeight: 400 }}
               showBackground

@@ -1,6 +1,6 @@
 import { KeyboardEventHandler, useState } from 'react';
-import { Label, Spinner } from 'renderer/components';
-import { TextInput, Button, Text, Flex } from '@holium/design-system';
+import { Label } from 'renderer/components';
+import { TextInput, Text, Button, Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';

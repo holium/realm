@@ -77,8 +77,6 @@ export const WalletHeader = ({
             </Text.Custom>
           </Flex>
           {/* <RadioGroup
-            customBg={windowColor}
-            textColor={textColor}
             selected={network}
             options={[
               // {

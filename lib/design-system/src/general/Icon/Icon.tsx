@@ -83,7 +83,7 @@ export const Icon = styled(SvgComponent)<IconProps>`
 
 let lastId = 0;
 
-export function uuid() {
+function uuid() {
   lastId++;
   return `icon-${lastId}`;
 }

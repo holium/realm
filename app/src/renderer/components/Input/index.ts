@@ -3,8 +3,4 @@ export * from './Label';
 export * from './FormControl';
 export * from './FileUpload';
 export * from './InlineEdit';
-export * from './RadioGroup';
-export * from './RadioImages';
-export * from './RadioList';
-export * from './Select';
 export * from './BigInput';

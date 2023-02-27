@@ -1,12 +1,7 @@
 import { Patp } from 'os/types';
 import { useState } from 'react';
-import {
-  Text,
-  TextButton,
-  Flex,
-  IconTypes,
-  Spinner,
-} from 'renderer/components';
+import { Text, TextButton, Flex, IconTypes } from 'renderer/components';
+import { Spinner } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 

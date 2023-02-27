@@ -2,8 +2,15 @@ import { KeyboardEventHandler, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
-import { Label, TextButton, Spinner } from 'renderer/components';
-import { Flex, Button, Text, TextInput, Icon } from '@holium/design-system';
+import { Label, TextButton } from 'renderer/components';
+import {
+  Flex,
+  Button,
+  Text,
+  TextInput,
+  Icon,
+  Spinner,
+} from '@holium/design-system';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
@@ -240,13 +247,7 @@ function ResendCodeButton(props: { theme: ThemeType }) {
           >
             send another code
           </TextButton>
-          {state === 'loading' && (
-            <Spinner
-              ml={1}
-              size="8px"
-              color={props.theme.colors.brand.secondary}
-            />
-          )}
+          {state === 'loading' && <Spinner ml={1} size="8px" />}
         </>
       ) : (
         <Text.Custom fontSize={1} color="intent-success">
