@@ -29,6 +29,7 @@
       [%send-message =path fragments=(list minimal-fragment:db) expires-at=@da]
       [%edit-message =edit-message-action:db]
       [%delete-message =path =msg-id:db]
+      [%delete-backlog =path]
 
       :: internal %realm-chat state updaters
       [%enable-push ~]

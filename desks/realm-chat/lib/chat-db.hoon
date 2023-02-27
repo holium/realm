@@ -54,6 +54,22 @@
   =/  current  (snag 0 badkvs)
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
+++  remove-messages-for-path-before
+  |=  [tbl=messages-table:sur =path before=time]
+  ^-  tbl-and-ids:sur
+  =/  start=uniq-id:sur  [[before ~zod] 0]
+  =/  badkeys=(list uniq-id:sur)
+    %+  turn
+      %+  skim
+        (tap:msgon:sur (lot:msgon:sur tbl `start ~))
+      |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path))
+    |=(kv=[k=uniq-id:sur v=msg-part:sur] k.kv)
+  =/  index=@ud  0
+  |-
+  ?:  =(index (lent badkeys))
+    [tbl badkeys]
+  $(tbl +:(del:msgon:sur tbl (snag index badkeys)), index +(index))
+::
 ++  make-msg-from-minimal-frags
   |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
   ^-  message:sur
@@ -316,6 +332,28 @@
   =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path.msg-part) ~]) message-paths) thechange]
+  ==
+  [gives state]
+::
+++  delete-backlog
+:: deletes all messages from all users before a certain time for a path
+::chat-db &db-action [%delete-backlog path=/a/path/to/a/chat before=~2023.2.2..23.11.10..234a]
+  |=  [[=path before=time] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  peers     (~(got by peers-table.state) path)
+  =/  host-peer  (snag 0 (skim peers |=(p=peer-row:sur =(%host role.p))))
+  ?>  =(patp.host-peer src.bowl)  :: delete-backlog pokes are only valid from the host ship
+
+  =/  remove-result=tbl-and-ids:sur  (remove-messages-for-path-before messages-table.state path before)
+  =.  messages-table.state  tbl.remove-result
+
+  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  thechange     db-change+!>(change-rows)
+  =.  del-log.state   (log-deletes-for-msg-parts state ids.remove-result now.bowl)
+
+  =/  gives  :~
+    [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) thechange]
   ==
   [gives state]
 ::
