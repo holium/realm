@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { DragControls } from 'framer-motion';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
+import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import {
   DialogTitlebar,
