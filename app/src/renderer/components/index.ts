@@ -11,7 +11,7 @@ export * from './Text';
 export * from './Grid/index';
 export * from './ActionButton';
 export * from './Icons';
-export { IconPathsType as IconTypes } from './Icons/icons';
+export type { IconPathsType as IconTypes } from './Icons/icons';
 export * from './Input';
 export * from './Button';
 export * from './Sigil';
