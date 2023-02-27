@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Input, Spinner } from 'renderer/components';
-import { Text, Flex, Button, Icon } from '@holium/design-system';
+import { Input } from 'renderer/components';
+import { Text, Flex, Button, Icon, Spinner } from '@holium/design-system';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';

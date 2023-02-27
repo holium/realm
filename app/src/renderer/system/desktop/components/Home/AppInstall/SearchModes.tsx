@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import { rgba } from 'polished';
-
-import { Flex, Text, Button, Spinner, NoScrollBar } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
+import { Text, Button, NoScrollBar } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';

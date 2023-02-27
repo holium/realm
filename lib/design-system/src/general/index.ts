@@ -9,4 +9,6 @@ export * from './WindowedList/WindowedList';
 export { Row } from './Row/Row';
 export { Favicon } from './Favicon/Favicon';
 export { SectionDivider } from './SectionDivider/SectionDivider';
+export { Spinner } from './Spinner/Spinner';
 export { ProgressBar } from './ProgressBar/ProgressBar';
+export { MenuItem, MenuItemProps } from './MenuItem/MenuItem';

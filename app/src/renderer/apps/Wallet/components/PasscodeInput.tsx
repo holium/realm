@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box, Spinner, Text } from 'renderer/components';
+import { Flex, Box, Spinner } from '@holium/design-system';
+import { Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';

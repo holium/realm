@@ -1,4 +1,5 @@
-import { Flex, Spinner, Icons } from 'renderer/components';
+import { Spinner } from '@holium/design-system';
+import { Flex, Icons } from 'renderer/components';
 
 type Props = {
   loading: boolean;

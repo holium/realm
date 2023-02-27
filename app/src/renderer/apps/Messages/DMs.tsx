@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Spinner } from 'renderer/components';
 import {
   Icon,
   Text,
@@ -9,6 +8,7 @@ import {
   Box,
   TextInput,
   Skeleton,
+  Spinner,
   WindowedList,
 } from '@holium/design-system';
 import { ContactRow } from './components/ContactRow';

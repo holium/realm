@@ -22,7 +22,8 @@ import {
   SpaceProps,
   ColorProps,
 } from 'styled-system';
-import { Spinner, Flex, IconButton, BoxProps } from '..';
+import { IconButton, BoxProps } from '..';
+import { Spinner, Flex } from '@holium/design-system';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &
@@ -256,7 +257,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             bottom={0}
             left={0}
             size={0}
-            // color="brand.secondary"
           />
         )}
         <Flex
