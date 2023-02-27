@@ -139,6 +139,7 @@
   |=  [[row=path-row:sur peers=ship-roles:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
+  ?>  ?!((~(has by paths-table.state) path.row))  :: ensure the path doesn't already exist!!!
   =.  paths-table.state  (~(put by paths-table.state) path.row row)
 
   =/  thepeers=(list peer-row:sur)
