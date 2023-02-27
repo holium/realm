@@ -625,6 +625,7 @@
       ^-  json
       %-  pairs
       :~  path+s+(spat path.msg-part)
+          sender+s+(scot %p sender.msg-id.msg-part)
           msg-id+(msg-id-to-json msg-id.msg-part)
           msg-part-id+(numb msg-part-id.msg-part)
           content+(content-to-json content.msg-part)
