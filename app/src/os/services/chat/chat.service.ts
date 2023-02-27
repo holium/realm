@@ -27,10 +27,19 @@ type ChatUpdateType =
 
 type ChatPathMetadata = {
   title: string;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
   creator: string;
   timestamp: string;
+  reactions?: string;
+};
+
+const parseMetadata = (metadata: string) => {
+  const mtd = JSON.parse(metadata);
+  return {
+    ...mtd,
+    reactions: mtd.reactions === 'true',
+  };
 };
 
 export type ChatPathType = 'dm' | 'group' | 'space';
@@ -78,8 +87,17 @@ export class ChatService extends BaseService {
       type: ChatPathType,
       metadata: ChatPathMetadata
     ) => ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
-    editChat: (path: string, metadata: ChatPathMetadata) =>
-      ipcRenderer.invoke('realm.chat.edit-chat', path, metadata),
+    editChat: (
+      path: string,
+      metadata: ChatPathMetadata,
+      peersGetBacklog: boolean
+    ) =>
+      ipcRenderer.invoke(
+        'realm.chat.edit-chat',
+        path,
+        metadata,
+        peersGetBacklog
+      ),
     addPeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.add-peer', path, peer),
     removePeer: (path: string, peer: string) =>
@@ -314,9 +332,10 @@ export class ChatService extends BaseService {
           path, 
           type, 
           metadata, 
+          peers_get_backlog,
           created_at, 
           updated_at
-        ) VALUES (@path, @type, @metadata, @created_at, @updated_at)`
+        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
       for (const path of paths)
@@ -324,6 +343,7 @@ export class ChatService extends BaseService {
           path: path.path,
           type: path.type,
           metadata: JSON.stringify(path.metadata),
+          peers_get_backlog: path['peers-get-backlog'] === true ? 1 : 0,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
         });
@@ -434,6 +454,7 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
+        paths.peers_get_backlog peersGetBacklog, 
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
@@ -450,8 +471,9 @@ export class ChatService extends BaseService {
     return result.map((row) => {
       return {
         ...row,
+        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
         peers: row.peers ? JSON.parse(row.peers) : null,
-        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+        metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage
           ? JSON.parse(row.lastMessage).map(
               (message: any) => message && JSON.parse(message)
@@ -513,7 +535,7 @@ export class ChatService extends BaseService {
       return {
         ...row,
         peers: row.peers ? JSON.parse(row.peers) : null,
-        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+        metadata: row.metadata ? parseMetadata(row.metadata) : null,
         content: row.contents
           ? JSON.parse(row.contents).map((fragment: any) =>
               JSON.parse(fragment)
@@ -647,6 +669,7 @@ export class ChatService extends BaseService {
           type,
           metadata,
           peers,
+          invites: 'anyone',
         },
       },
     };
@@ -663,7 +686,12 @@ export class ChatService extends BaseService {
   //   // this.core.conduit.readChat(path);
   // }
 
-  async editChatMetadata(_evt: any, path: string, metadata: ChatPathMetadata) {
+  async editChatMetadata(
+    _evt: any,
+    path: string,
+    metadata: ChatPathMetadata,
+    peersGetBacklog: boolean
+  ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
@@ -673,6 +701,7 @@ export class ChatService extends BaseService {
         'edit-chat': {
           path,
           metadata,
+          'peers-get-backlog': peersGetBacklog,
         },
       },
     };
@@ -753,7 +782,7 @@ export class ChatService extends BaseService {
       await this.core.conduit.poke(payload);
     } catch (err) {
       console.error(err);
-      throw new Error('Failed to create chat');
+      throw new Error('Failed to leave chat');
     }
   }
 }

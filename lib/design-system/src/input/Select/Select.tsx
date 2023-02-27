@@ -36,6 +36,7 @@ type Props = {
   options: RadioOption[];
   selected?: string;
   maxWidth?: number;
+  width?: number;
   backgroundColor?: string;
   onClick: (value: string) => void;
 };
@@ -48,6 +49,7 @@ export const Select = ({
   placeholder = 'Select one',
   disabled,
   backgroundColor,
+  width,
   onClick,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -88,6 +90,7 @@ export const Select = ({
   return (
     <SelectWrapper
       id={id}
+      width={width}
       disabled={disabled}
       maxWidth={maxWidth}
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}

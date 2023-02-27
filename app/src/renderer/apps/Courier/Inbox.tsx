@@ -145,6 +145,7 @@ export const InboxPresenter = () => {
                   type={chat.type}
                   timestamp={timestamp}
                   metadata={chat.metadata}
+                  peersGetBacklog={chat.peersGetBacklog}
                   onClick={(evt) => {
                     evt.stopPropagation();
                     console.log('chat clicked', chat, timestamp);
@@ -153,7 +154,8 @@ export const InboxPresenter = () => {
                       title,
                       chat.type,
                       chat.peers,
-                      chat.metadata
+                      chat.metadata,
+                      chat.peersGetBacklog
                     );
                   }}
                 />

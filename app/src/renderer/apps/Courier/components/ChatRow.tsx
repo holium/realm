@@ -20,6 +20,7 @@ type ChatRowProps = {
   metadata: any;
   timestamp: number;
   type: ChatPathType;
+  peersGetBacklog: boolean;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
@@ -31,6 +32,7 @@ export const ChatRow = ({
   timestamp,
   type,
   metadata,
+  peersGetBacklog,
   onClick,
 }: ChatRowProps) => {
   const { setSubroute, setChat } = useChatStore();
@@ -67,7 +69,7 @@ export const ChatRow = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        setChat(path, title, type, peers, metadata);
+        setChat(path, title, type, peers, metadata, peersGetBacklog);
         setSubroute('chat-info');
       },
     });

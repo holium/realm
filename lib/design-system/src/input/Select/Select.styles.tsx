@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 type SelectWrapperProps = {
   maxWidth?: number;
+  width?: number;
   disabled?: boolean;
 };
 
@@ -13,6 +14,7 @@ export const SelectWrapper = styled(motion.div)<SelectWrapperProps>`
   justify-content: space-between;
   position: relative;
   height: 32px;
+  width: ${({ width }) => (width ? `${width}px` : '100%')};
   max-width: ${({ maxWidth }) => (maxWidth ? `${maxWidth}px` : '100%')};
   min-height: 32px;
   padding: 4px 8px;
