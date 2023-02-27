@@ -130,12 +130,12 @@
 ::  poke actions
 ::
 ++  create-chat
-::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host]
+::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-duration.act]
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
@@ -146,8 +146,6 @@
       all-peers
     |=  [s=ship role=@tas]
     (create-path-db-poke s pathrow all-peers)
-  ~&  >>>  all-peers
-  ~&  >>>  (turn cards |=(c=card -:-:+:+:+:c))
   [cards state]
 ::
 ++  edit-chat
@@ -366,6 +364,7 @@
           [%type (se %tas)]
           [%peers (ar de-ship)]
           [%invites (se %tas)]
+          [%max-duration (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)]  :: specify in integer milliseconds
       ==
     ::
     ++  edit-chat

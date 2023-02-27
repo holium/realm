@@ -119,7 +119,7 @@
 ::
 :: MUST EXPLICITLY INCLUDE SELF, this function will not add self into peers list
 ++  create-path
-::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host ~[[~zod %host] [~bus %member]]]
+::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host *@dr ~[[~zod %host] [~bus %member]]]
   |=  [[row=path-row:sur peers=ship-roles:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
@@ -209,6 +209,17 @@
 
   =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
+  
+  :: logic to force-set expires-at on messages when the path has a
+  :: max-duration specified
+  =/  thepath   (~(got by paths-table.state) path.msg-act)
+  =/  max-exp   (add max-duration.thepath now.bowl)
+  =.  expires-at.msg-act
+    ?:  =(max-duration.thepath *@dr)  expires-at.msg-act  :: allow any expires-at if the max-duration is "null"
+    ?:  =(expires-at.msg-act *@da)  max-exp               :: otherwise, if the expires-at is "unset" set it to the max expiration
+    ?:  (lth expires-at.msg-act now.bowl)  max-exp        :: otherwise, if the expires-at is in the past, set to max-expiration
+    ?:  (lte expires-at.msg-act max-exp)  expires-at.msg-act :: otherwise, ensure the expires-at is less than the max-expiration
+    max-exp  :: else, set it to the max-expiration based on the max-duration defined in thepath
 
   =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
   =.  messages-table.state  -.add-result
@@ -222,7 +233,6 @@
   ==
   [gives state]
 ::
-:: no notifications generated from this
 ++  insert-backlog
 :: :chat-db &db-action [%insert-backlog some msg-part]
   |=  [msg=msg-part:sur state=state-0 =bowl:gall]
@@ -568,6 +578,8 @@
           pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
           invites+s+invites.path-row
           peers-get-backlog+b+peers-get-backlog.path-row
+          :: return as integer millisecond duration
+          max-duration+(numb (|=(t=@dr ^-(@ud (mul (div t ~s1) 1.000))) max-duration.path-row))
       ==
     ::
     ++  messages-row
@@ -594,6 +606,7 @@
       :~  path+[%s (spat -.+.reply-to)]
           msg-id+(msg-id-to-json +.+.reply-to)
       ==
+    ::
     ++  content-to-json
       |=  =content:sur
       ^-  json

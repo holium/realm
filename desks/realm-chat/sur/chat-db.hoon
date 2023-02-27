@@ -30,6 +30,7 @@
       =pins
       invites=@tas  :: must either match `peer-role` type or be keyword %anyone, or else no one will be able to invite
       peers-get-backlog=?
+      max-duration=@dr  :: optional chat-wide enforced expires-at on messages. 0 or *@dr means "not set"
   ==
 ::
 +$  paths-table  (map path path-row)
