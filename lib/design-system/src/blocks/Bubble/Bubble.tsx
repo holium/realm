@@ -1,4 +1,5 @@
 import { Flex, Text, BoxProps } from '../..';
+import styled from 'styled-components';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
@@ -10,7 +11,17 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
+const LineBreak = styled.div`
+  display: block;
+  content: '';
+  width: 100%;
+  height: 0;
+  margin: 0;
+  padding: 0;
+`;
+
 export type BubbleProps = {
+  id: string;
   author: string;
   authorColor?: string;
   sentAt: string;
@@ -67,9 +78,9 @@ export const Bubble = (props: BubbleProps) => {
             // TODO somehow pass in the onReplyClick function
 
             return (
-              <span key={`${id}-index-${index}`}>
-                {lineBreak && <br />}
-                {renderFragment(fragment, index, author, onLoaded)}
+              <span id={id} key={`${id}-index-${index}`}>
+                {lineBreak && <LineBreak />}
+                {renderFragment(id, fragment, index, author, onLoaded)}
               </span>
             );
           })}

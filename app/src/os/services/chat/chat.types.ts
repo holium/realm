@@ -16,26 +16,8 @@ export type MessagesRow = {
   metadata: any;
   'created-at': number;
   'updated-at': number;
-  'expires-at': number;
+  'expires-in': number | null;
 };
-
-// {
-//     "metadata": {},
-//     "reply-to": null,
-//     "updated-at": 1677600965248,
-//     "msg-part-id": 0,
-//     "created-at": 1677600965248,
-//     "path": "/realm-chat/0v4.jv13r.4ltb5.dhk4d.dm84n.et8ie",
-//     "expires-at": 0,
-//     "sender": "~novdus-fidlys-dozzod-hostyv",
-//     "content": {
-//         "plain": "come on"
-//     },
-//     "msg-id": [
-//         "~2023.2.28..16.16.05..3f5f",
-//         "~novdus-fidlys-dozzod-hostyv"
-//     ]
-// }
 
 export type PeersRow = {
   path: string;

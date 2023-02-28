@@ -186,6 +186,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
 `;
 
 export const renderFragment = (
+  id: string,
   fragment: FragmentType,
   index: number,
   author: string,
@@ -195,63 +196,63 @@ export const renderFragment = (
   switch (key) {
     case 'plain':
       return (
-        <FragmentPlain key={index}>
+        <FragmentPlain id={id} key={index}>
           {(fragment as FragmentPlainType).plain}
         </FragmentPlain>
       );
     case 'bold':
       return (
-        <FragmentBold key={index}>
+        <FragmentBold id={id} key={index}>
           {(fragment as FragmentBoldType).bold}
         </FragmentBold>
       );
     case 'italics':
       return (
-        <FragmentItalic key={index}>
+        <FragmentItalic id={id} key={index}>
           {(fragment as FragmentItalicsType).italics}
         </FragmentItalic>
       );
     case 'strike':
       return (
-        <FragmentStrike key={index}>
+        <FragmentStrike id={id} key={index}>
           {(fragment as FragmentStrikeType).strike}
         </FragmentStrike>
       );
     case 'bold-italics':
       return (
-        <FragmentBoldItalic key={index}>
+        <FragmentBoldItalic id={id} key={index}>
           {(fragment as FragmentBoldItalicsType)['bold-italics']}
         </FragmentBoldItalic>
       );
 
     case 'bold-strike':
       return (
-        <FragmentBoldStrike key={index}>
+        <FragmentBoldStrike id={id} key={index}>
           {(fragment as FragmentBoldStrikeType)['bold-strike']}
         </FragmentBoldStrike>
       );
     case 'bold-italics-strike':
       return (
-        <FragmentBoldItalicsStrike key={index}>
+        <FragmentBoldItalicsStrike id={id} key={index}>
           {(fragment as FragmentBoldItalicsStrikeType)['bold-italics-strike']}
         </FragmentBoldItalicsStrike>
       );
 
     case 'blockquote':
       return (
-        <FragmentBlockquote key={index}>
+        <FragmentBlockquote id={id} key={index}>
           {(fragment as FragmentBlockquoteType).blockquote}
         </FragmentBlockquote>
       );
     case 'inline-code':
       return (
-        <FragmentInlineCode key={index}>
+        <FragmentInlineCode id={id} key={index}>
           {(fragment as FragmentInlineCodeType)['inline-code']}
         </FragmentInlineCode>
       );
     case 'ship':
       return (
-        <FragmentShip key={index}>
+        <FragmentShip id={id} key={index}>
           {(fragment as FragmentShipType).ship}
         </FragmentShip>
       );
@@ -259,7 +260,7 @@ export const renderFragment = (
     case 'code':
       return (
         <CodeWrapper py={1}>
-          <FragmentCodeBlock key={index}>
+          <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
           </FragmentCodeBlock>
         </CodeWrapper>
@@ -307,13 +308,15 @@ export const renderFragment = (
         fragmentType !== 'reply'
       ) {
         replyContent = (
-          <FragmentPlain>{capitalizeFirstLetter(fragmentType)}</FragmentPlain>
+          <FragmentPlain id={id}>
+            {capitalizeFirstLetter(fragmentType)}
+          </FragmentPlain>
         );
       } else {
-        replyContent = renderFragment(msg, index, replyAuthor);
+        replyContent = renderFragment(id, msg, index, replyAuthor);
       }
       return (
-        <FragmentBlockquote>
+        <FragmentBlockquote id={id}>
           <Flex flexDirection="column" className="fragment-reply">
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
             {replyContent}

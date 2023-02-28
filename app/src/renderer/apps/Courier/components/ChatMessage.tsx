@@ -22,7 +22,10 @@ export const ChatMessage = ({
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
 
-  const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
+  const messageRowId = useMemo(
+    () => `message-row-${message.msg_id}`,
+    [message.msg_id]
+  );
   // const isPinned = isMessagePinned(message.id);
   const isPinned = false;
   const contextMenuOptions = useMemo(() => {
@@ -69,7 +72,7 @@ export const ChatMessage = ({
       });
     }
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [message.id, isPinned]);
+  }, [messageRowId, isPinned]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(messageRowId)) {
@@ -80,7 +83,7 @@ export const ChatMessage = ({
   return (
     <Bubble
       id={messageRowId}
-      isOur={message.sender === ship?.patp}
+      isOur={isOur}
       author={message.sender}
       authorColor={authorColor}
       message={message.content}
