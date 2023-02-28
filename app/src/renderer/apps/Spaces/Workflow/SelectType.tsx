@@ -16,14 +16,20 @@ export const Wrapper = styled(motion.div)`
 
 export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { theme } = useServices();
+    const { theme, spaces } = useServices();
     const { windowColor } = theme.currentTheme;
     const { setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
+      const groupSpaces = Array.from(spaces.spaces.values())
+        .filter((space) => space.type === 'group')
+        .map((space) => space.path);
       ShipActions.getOurGroups().then((ourGroups) => {
-        setGroups(ourGroups);
+        const nonSpaceGroups = ourGroups.filter(
+          (group: any) => !groupSpaces.includes(group.path)
+        );
+        setGroups(nonSpaceGroups);
         setLoading(false);
       });
     }, []);
