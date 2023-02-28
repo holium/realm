@@ -1,5 +1,6 @@
-import { flow, Instance, types } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
+import { toJS } from 'mobx';
+import { flow, Instance, types } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
@@ -10,9 +11,17 @@ const ChatMetadataModel = types.model({
   image: types.maybe(types.string),
   creator: types.string,
   timestamp: types.string,
+  reactions: types.optional(types.boolean, true),
 });
 
 export type ChatMetadata = Instance<typeof ChatMetadataModel>;
+
+const stringifyMetadata = (metadata: ChatMetadata) => {
+  return {
+    ...toJS(metadata),
+    reactions: metadata.reactions.toString(),
+  };
+};
 
 const CourierAppModel = types
   .model('CourierAppModel', {
@@ -24,6 +33,7 @@ const CourierAppModel = types
     selectedPath: types.maybe(types.string),
     title: types.maybe(types.string),
     peers: types.maybe(types.array(types.string)),
+    peersGetBacklog: types.boolean,
     type: types.maybe(types.enumeration(['dm', 'group', 'space'])),
     metadata: types.maybe(ChatMetadataModel),
   })
@@ -69,13 +79,15 @@ const CourierAppModel = types
       title: string,
       type: 'dm' | 'group' | 'space',
       peers: string[],
-      metadata: any
+      metadata: any,
+      peersGetBacklog: boolean
     ) {
       self.selectedPath = path;
       self.title = title;
       self.type = type;
       self.peers = peers as typeof self.peers;
       self.subroute = 'chat';
+      self.peersGetBacklog = peersGetBacklog;
       self.metadata = ChatMetadataModel.create(metadata);
     },
 
@@ -94,19 +106,56 @@ const CourierAppModel = types
         return self.pinnedChats;
       }
     }),
+    createChat: flow(function* (
+      title: string,
+      creator: string,
+      type: 'dm' | 'group' | 'space',
+      peers: string[]
+    ) {
+      try {
+        yield ChatDBActions.createChat(peers, type, {
+          title,
+          description: '',
+          image: '',
+          creator: creator,
+          timestamp: Date.now().toString(),
+          reactions: 'true',
+        });
+      } catch (e) {
+        throw new Error('Failed to create chat');
+      }
+    }),
     updateMetadata: flow(function* (update: ChatMetadata) {
-      if (!self.selectedPath) throw new Error('No chat selected');
+      if (!self.selectedPath) return;
       if (!self.metadata) throw new Error('No selected metadata');
       const oldMetadata = self.metadata;
+      self.metadata = ChatMetadataModel.create(update);
       try {
-        self.metadata = ChatMetadataModel.create(update);
-        yield ChatDBActions.editChat(self.selectedPath, update);
+        yield ChatDBActions.editChat(
+          self.selectedPath,
+          stringifyMetadata(update),
+          self.peersGetBacklog
+        );
         return self.metadata;
-      } catch (error) {
-        console.error(error);
+      } catch (e) {
+        console.error(e);
         self.metadata = oldMetadata;
-        // TODO find a way to pass error to UI
-        return oldMetadata;
+        return self.metadata;
+      }
+    }),
+    updatePeersGetBacklog: flow(function* (peersGetBacklog: boolean) {
+      if (!self.selectedPath || !self.metadata) return;
+      const oldPeerGetBacklog = self.peersGetBacklog;
+      self.peersGetBacklog = peersGetBacklog;
+      try {
+        yield ChatDBActions.editChat(
+          self.selectedPath,
+          stringifyMetadata(self.metadata),
+          peersGetBacklog
+        );
+      } catch (e) {
+        console.error(e);
+        self.peersGetBacklog = oldPeerGetBacklog;
       }
     }),
   }));
@@ -114,6 +163,7 @@ const CourierAppModel = types
 export const chatStore = CourierAppModel.create({
   subroute: 'inbox',
   selectedPath: undefined,
+  peersGetBacklog: true,
 });
 
 // -------------------------------

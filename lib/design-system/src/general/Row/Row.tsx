@@ -4,6 +4,7 @@ import { Box, BoxProps } from '..';
 
 type RowProps = {
   as?: any;
+  gap?: string;
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
@@ -23,9 +24,8 @@ export const Row = styled(Box)<RowProps>`
   background-color: transparent;
   box-sizing: border-box;
   appearance: none;
-
   flex-basis: initial;
-  gap: 6px;
+  gap: ${(props: RowProps) => props.gap || '6px'};
   color: var(--rlm-text-color);
   transition: var(--transition);
 

@@ -39,6 +39,7 @@ export const Toggle = ({
         <input
           type="checkbox"
           checked={checked}
+          disabled={disabled}
           onChange={(evt) => {
             if (disabled) return;
             setChecked(evt.currentTarget.checked);

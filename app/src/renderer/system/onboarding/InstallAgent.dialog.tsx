@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
-import { ActionButton, Spinner } from 'renderer/components';
+import { Spinner } from '@holium/design-system';
+import { ActionButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';

@@ -31,6 +31,37 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
 
   const iconColor = rgba(textColor, 0.7);
   const buttonColor = darken(0.1, windowColor);
+<<<<<<< Updated upstream
+=======
+
+  let activeRole = 'initiate';
+
+  if (roles) {
+    if (roles.includes('admin')) activeRole = 'admin';
+    else if (roles.includes('member')) activeRole = 'member';
+    else if (roles.includes('initiate')) {
+      activeRole = 'initiate';
+    }
+  }
+  const activeRoleText =
+    activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
+
+  const setNewRole = (role: Roles) => {
+    const newRoles = roles
+      ? [...roles.filter((role) => role !== activeRole), role]
+      : [role];
+    console.log('old', roles);
+    console.log('new', newRoles);
+    SpacesActions.setRoles(patp, newRoles);
+  };
+  console.log('roles', roles);
+  const isAdmin = roles!.includes('admin');
+  const isOwner = roles!.includes('owner');
+  const ourAdmin = ourRoles.includes('admin');
+  const ourOwner = ourRoles.includes('owner');
+  const allowRoleChange = (ourOwner || (ourAdmin && !isAdmin)) && !isOwner;
+
+>>>>>>> Stashed changes
   return (
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">

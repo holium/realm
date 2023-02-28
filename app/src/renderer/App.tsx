@@ -34,9 +34,7 @@ const AppPresenter = () => {
             height: '100vh',
             background: theme.currentTheme.backgroundColor,
           }}
-        >
-          {/* <Spinner size={4} /> */}
-        </div>
+        />
       ),
     [booted, theme.currentTheme.backgroundColor]
   );

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 import { darken, desaturate } from 'polished';
-import { Flex, Box, Text, Spinner } from 'renderer/components';
+import { Box, Flex, Spinner } from '@holium/design-system';
+import { Text } from 'renderer/components';
 import {
   AppType,
   InstallStatus,
@@ -289,7 +290,7 @@ const AppTilePresenter = ({
           }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={tileBg}
+          background={tileBg}
         >
           <img
             alt={app.title}
@@ -340,7 +341,7 @@ const AppTilePresenter = ({
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={tileBg}
+          background={tileBg}
         >
           {/* @ts-ignore */}
           <Icons name={app.icon} height={iconSize} width={iconSize} />
@@ -382,7 +383,7 @@ const AppTilePresenter = ({
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           key={app.title}
-          backgroundColor={tileBg}
+          background={tileBg}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
         >
@@ -421,7 +422,7 @@ const AppTilePresenter = ({
               right={0}
               bottom={0}
             >
-              <Spinner color="#FFF" size={loaderSizes[tileSize]} />
+              <Spinner size={loaderSizes[tileSize]} color="#FFF" />
             </Flex>
           )}
           {graphic}

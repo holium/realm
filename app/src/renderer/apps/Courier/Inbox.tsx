@@ -156,6 +156,7 @@ export const InboxPresenter = () => {
                     type={chat.type}
                     timestamp={timestamp}
                     metadata={chat.metadata}
+                    peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {
                       evt.stopPropagation();
                       setChat(
@@ -163,7 +164,8 @@ export const InboxPresenter = () => {
                         title,
                         chat.type,
                         chat.peers,
-                        chat.metadata
+                        chat.metadata,
+                        chat.peersGetBacklog
                       );
                     }}
                   />
@@ -200,6 +202,7 @@ export const InboxPresenter = () => {
                     type={chat.type}
                     timestamp={timestamp}
                     metadata={chat.metadata}
+                    peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {
                       evt.stopPropagation();
                       setChat(
@@ -207,7 +210,8 @@ export const InboxPresenter = () => {
                         title,
                         chat.type,
                         chat.peers,
-                        chat.metadata
+                        chat.metadata,
+                        chat.peersGetBacklog
                       );
                     }}
                   />

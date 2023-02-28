@@ -18,12 +18,15 @@ create unique index if not exists messages_path_msg_id_msg_part_id_uindex
 
 create table if not exists  paths
 (
-    path     TEXT not null,
-    type     TEXT not null,
-    metadata TEXT,
-    updated_at   integer not null,
-    created_at   integer not null,
-    pins     TEXT
+    path                TEXT not null,
+    type                TEXT not null,
+    metadata            TEXT,
+    invites             TEXT default 'host' not null,
+    peers_get_backlog   integer default 1 not null,
+    pins                TEXT,
+    expire_duration     TEXT,
+    updated_at          integer not null,
+    created_at          integer not null
 );
 
 create unique index if not exists paths_path_uindex
@@ -31,11 +34,11 @@ create unique index if not exists paths_path_uindex
 
 create table if not exists  peers
 (
-    path TEXT                  not null,
-    ship text                  not null,
-    role TEXT default 'member' not null,
-    updated_at   integer not null,
-    created_at   integer not null
+    path        TEXT not null,
+    ship        text not null,
+    role        TEXT default 'member' not null,
+    updated_at  integer not null,
+    created_at  integer not null
 );
 
 create unique index if not exists peers_path_ship_uindex
