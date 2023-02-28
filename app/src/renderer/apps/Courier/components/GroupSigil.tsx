@@ -16,7 +16,6 @@ export const GroupSigil: FC<GroupSigilProps> = ({
   size = 36,
 }: GroupSigilProps) => {
   const { friends } = useServices();
-  console.log('rendering group sigil');
 
   const len = patps.length;
   const renderSigil = (data: any, index: number) => {

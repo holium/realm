@@ -347,9 +347,10 @@ export class ChatService extends BaseService {
           metadata, 
           peers_get_backlog,
           pins,
+          expire_duration,
           created_at, 
           updated_at
-        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @created_at, @updated_at)`
+        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @expire_duration, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
       for (const path of paths)
@@ -359,6 +360,7 @@ export class ChatService extends BaseService {
           metadata: JSON.stringify(path.metadata),
           peers_get_backlog: path['peers-get-backlog'] === true ? 1 : 0,
           pins: JSON.stringify(path['pins']),
+          expire_duration: path['expire-duration'],
           created_at: path['created-at'],
           updated_at: path['updated-at'],
         });
@@ -712,6 +714,7 @@ export class ChatService extends BaseService {
           metadata,
           peers,
           invites: 'anyone',
+          'max-duration': 0,
         },
       },
     };

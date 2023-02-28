@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useEffect, useRef, useMemo, useState } from 'react';
-=======
 import { useEffect, useMemo, useRef, useState } from 'react';
->>>>>>> fix-merge-realm-chat
 import {
   Flex,
   Text,
@@ -123,10 +119,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const editMetadata = (editedMetadata: any) => {
     if (!selectedPath) return;
     editedMetadata = { ...metadata, ...editedMetadata };
-<<<<<<< HEAD
-    // ChatDBActions.editChat(selectedPath, editedMetadata);
-=======
->>>>>>> fix-merge-realm-chat
     updateMetadata(editedMetadata);
   };
 
