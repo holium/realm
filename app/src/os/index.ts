@@ -6,6 +6,7 @@ import {
   dialog,
   session,
   WebPreferences,
+  app,
 } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -97,6 +98,29 @@ export class Realm extends EventEmitter {
     onConnectionStatus: (callback: any) =>
       ipcRenderer.on('realm.on-connection-status', callback),
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
+
+    onQuit: (callback: any) => ipcRenderer.on('app.before-quit', callback),
+    readyToQuit: () => ipcRenderer.send('realm.app.quit'),
+
+    // 'fake' amalgamation events for any sort of "sleep-like" event
+    onSleep: (callback: any) => {
+      //powerMonitor.on('suspend', callback);
+     // powerMonitor.on('lock-screen', callback);
+     // powerMonitor.on('shutdown', callback);
+    },
+    onWake: (callback: any) => {
+      //powerMonitor.on('resume', callback);
+      //powerMonitor.on('unlock-screen', callback);
+    },
+
+    // the actual electron interface to powerMonitor
+    //onSysSuspend: (callback: any) => powerMonitor.on('suspend', callback),
+    //onSysResume: (callback: any) => powerMonitor.on('resume', callback),
+    //onSysCharging: (callback: any) => powerMonitor.on('on-ac', callback),
+    //onSysBattery: (callback: any) => powerMonitor.on('on-battery', callback),
+    //onSysShutdown: (callback: any) => powerMonitor.on('shutdown', callback),
+    //onSysLockScreen: (callback: any) => powerMonitor.on('lock-screen', callback),
+    //onSysUnLockScreen: (callback: any) => powerMonitor.on('unlock-screen', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {

@@ -93,9 +93,21 @@ export function useRooms(our?: Patp): RoomsManager {
 
   if (!roomsManager && our) {
     roomsManager = createManager(our);
-    OSActions.onLogout(() => {
-      protocol = null;
-      roomsManager = null;
+    const clearProtocolAndManager: () => void = () => {
+      roomsManager.cleanup().then(() =>{
+        protocol = null;
+        roomsManager = null;
+      })
+    }
+    OSActions.onLogout(clearProtocolAndManager);
+    OSActions.onSleep(clearProtocolAndManager);
+    OSActions.onQuit(() => {
+      console.log('yooo we doin work here');
+      //OSActions.readyToQuit();
+    });
+
+    OSActions.onWake(()=> {
+      createManager(our);
     });
   }
   if (!roomsManager) {

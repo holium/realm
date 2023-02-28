@@ -7,7 +7,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session } from 'electron';
+import {
+  app,
+  ipcMain,
+  BrowserWindow,
+  shell,
+  session,
+  powerMonitor,
+} from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
@@ -24,6 +31,7 @@ import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -210,6 +218,19 @@ app.on('window-all-closed', () => {
   // after all windows have been closed
   if (!isMac) app.quit();
 });
+
+let haventQuitYet = true;
+app.on('before-quit', (event) => {
+  if (haventQuitYet) {
+    haventQuitYet = false;
+    event.preventDefault();
+  }
+  console.log('before-quit');
+  mainWindow.webContents.send('app.before-quit');
+});
+ipcMain.on('realm.app.quit', () => {
+  app.quit();
+})
 
 app
   .whenReady()
