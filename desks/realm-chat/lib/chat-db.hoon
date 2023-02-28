@@ -54,6 +54,22 @@
   =/  current  (snag 0 badkvs)
   $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
 ::
+++  remove-messages-for-path-before
+  |=  [tbl=messages-table:sur =path before=time]
+  ^-  tbl-and-ids:sur
+  =/  start=uniq-id:sur  [[before ~zod] 0]
+  =/  badkeys=(list uniq-id:sur)
+    %+  turn
+      %+  skim
+        (tap:msgon:sur (lot:msgon:sur tbl `start ~))
+      |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path))
+    |=(kv=[k=uniq-id:sur v=msg-part:sur] k.kv)
+  =/  index=@ud  0
+  |-
+  ?:  =(index (lent badkeys))
+    [tbl badkeys]
+  $(tbl +:(del:msgon:sur tbl (snag index badkeys)), index +(index))
+::
 ++  make-msg-from-minimal-frags
   |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
   ^-  message:sur
@@ -119,10 +135,11 @@
 ::
 :: MUST EXPLICITLY INCLUDE SELF, this function will not add self into peers list
 ++  create-path
-::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host ~[[~zod %host] [~bus %member]]]
+::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host *@dr ~[[~zod %host] [~bus %member]]]
   |=  [[row=path-row:sur peers=ship-roles:sur] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
+  ?>  ?!((~(has by paths-table.state) path.row))  :: ensure the path doesn't already exist!!!
   =.  paths-table.state  (~(put by paths-table.state) path.row row)
 
   =/  thepeers=(list peer-row:sur)
@@ -209,6 +226,17 @@
 
   =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
+  
+  :: logic to force-set expires-at on messages when the path has a
+  :: max-duration specified
+  =/  thepath   (~(got by paths-table.state) path.msg-act)
+  =/  max-exp   (add max-duration.thepath now.bowl)
+  =.  expires-at.msg-act
+    ?:  =(max-duration.thepath *@dr)  expires-at.msg-act  :: allow any expires-at if the max-duration is "null"
+    ?:  =(expires-at.msg-act *@da)  max-exp               :: otherwise, if the expires-at is "unset" set it to the max expiration
+    ?:  (lth expires-at.msg-act now.bowl)  max-exp        :: otherwise, if the expires-at is in the past, set to max-expiration
+    ?:  (lte expires-at.msg-act max-exp)  expires-at.msg-act :: otherwise, ensure the expires-at is less than the max-expiration
+    max-exp  :: else, set it to the max-expiration based on the max-duration defined in thepath
 
   =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
   =.  messages-table.state  -.add-result
@@ -222,7 +250,6 @@
   ==
   [gives state]
 ::
-:: no notifications generated from this
 ++  insert-backlog
 :: :chat-db &db-action [%insert-backlog some msg-part]
   |=  [msg=msg-part:sur state=state-0 =bowl:gall]
@@ -306,6 +333,28 @@
   =/  message-paths  (skim all-message-paths |=(a=path (gth timestamp.msg-id `@da`(slav %da +>+>-:a))))
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path.msg-part) ~]) message-paths) thechange]
+  ==
+  [gives state]
+::
+++  delete-backlog
+:: deletes all messages from all users before a certain time for a path
+::chat-db &db-action [%delete-backlog path=/a/path/to/a/chat before=~2023.2.2..23.11.10..234a]
+  |=  [[=path before=time] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  peers     (~(got by peers-table.state) path)
+  =/  host-peer  (snag 0 (skim peers |=(p=peer-row:sur =(%host role.p))))
+  ?>  =(patp.host-peer src.bowl)  :: delete-backlog pokes are only valid from the host ship
+
+  =/  remove-result=tbl-and-ids:sur  (remove-messages-for-path-before messages-table.state path before)
+  =.  messages-table.state  tbl.remove-result
+
+  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  thechange     db-change+!>(change-rows)
+  =.  del-log.state   (log-deletes-for-msg-parts state ids.remove-result now.bowl)
+
+  =/  gives  :~
+    [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) thechange]
   ==
   [gives state]
 ::
@@ -568,6 +617,8 @@
           pins+a+(turn ~(tap in pins.path-row) msg-id-to-json)
           invites+s+invites.path-row
           peers-get-backlog+b+peers-get-backlog.path-row
+          :: return as integer millisecond duration
+          max-duration+(numb (|=(t=@dr ^-(@ud (mul (div t ~s1) 1.000))) max-duration.path-row))
       ==
     ::
     ++  messages-row
@@ -575,6 +626,7 @@
       ^-  json
       %-  pairs
       :~  path+s+(spat path.msg-part)
+          sender+s+(scot %p sender.msg-id.msg-part)
           msg-id+(msg-id-to-json msg-id.msg-part)
           msg-part-id+(numb msg-part-id.msg-part)
           content+(content-to-json content.msg-part)
@@ -594,6 +646,7 @@
       :~  path+[%s (spat -.+.reply-to)]
           msg-id+(msg-id-to-json +.+.reply-to)
       ==
+    ::
     ++  content-to-json
       |=  =content:sur
       ^-  json

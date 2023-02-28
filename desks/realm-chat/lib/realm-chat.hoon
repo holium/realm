@@ -67,6 +67,10 @@
   |=  [p=peer-row:db act=edit-message-action:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit act])]
 ::
+++  into-delete-backlog-poke
+  |=  [p=peer-row:db =path now=time]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%delete-backlog path now])]
+::
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%delete msg-id])]
@@ -130,12 +134,12 @@
 ::  poke actions
 ::
 ++  create-chat
-::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host]
+::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-duration.act]
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
@@ -146,8 +150,6 @@
       all-peers
     |=  [s=ship role=@tas]
     (create-path-db-poke s pathrow all-peers)
-  ~&  >>>  all-peers
-  ~&  >>>  (turn cards |=(c=card -:-:+:+:+:c))
   [cards state]
 ::
 ++  edit-chat
@@ -275,6 +277,20 @@
     ==
   [cards state]
 ::
+++  delete-backlog
+::  :realm-chat &action [%delete-backlog /realm-chat/path-id]
+  |=  [act=[=path] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  :: just pass along the delete-backlog to all the peers chat-db
+  :: %chat-db will disallow invalid signals
+  =/  pathpeers  (scry-peers path.act bowl)
+  =/  cards
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db (into-delete-backlog-poke p path.act now.bowl))
+    ==
+  [cards state]
+::
 ++  disable-push
   |=  [state=state-0]
   ^-  (quip card state-0)
@@ -351,6 +367,7 @@
           [%send-message path-and-fragments]
           [%edit-message de-edit-info]
           [%delete-message path-and-msg-id]
+          [%delete-backlog (ot ~[[%path pa]])]
 
           [%enable-push ul]
           [%disable-push ul]
@@ -366,6 +383,7 @@
           [%type (se %tas)]
           [%peers (ar de-ship)]
           [%invites (se %tas)]
+          [%max-duration (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)]  :: specify in integer milliseconds
       ==
     ::
     ++  edit-chat

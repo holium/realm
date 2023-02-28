@@ -59,6 +59,8 @@
         (edit:db-lib +.act state bowl)
       %delete
         (delete:db-lib +.act state bowl)
+      %delete-backlog
+        (delete-backlog:db-lib +.act state bowl)
       :: peers-table pokes
       %add-peer
         (add-peer:db-lib +.act state bowl)

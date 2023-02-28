@@ -30,6 +30,7 @@
       =pins
       invites=@tas  :: must either match `peer-role` type or be keyword %anyone, or else no one will be able to invite
       peers-get-backlog=?
+      max-duration=@dr  :: optional chat-wide enforced expires-at on messages. 0 or *@dr means "not set"
   ==
 ::
 +$  paths-table  (map path path-row)
@@ -73,6 +74,7 @@
 +$  uniq-id  [=msg-id =msg-part-id]
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
 ++  msgon  ((on uniq-id msg-part) idx-sort)
++$  tbl-and-ids  [tbl=messages-table ids=(list uniq-id)]
 ::
 +$  peer-row
   $:  =path
@@ -105,6 +107,7 @@
       [%insert-backlog =msg-part]
       [%edit =edit-message-action]
       [%delete =msg-id]
+      [%delete-backlog =path before=time]
       [%add-peer =path patp=ship]
       [%kick-peer =path patp=ship]
   ==

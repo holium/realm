@@ -77,6 +77,8 @@
         (edit-message:lib +.act state bowl)
       %delete-message
         (delete-message:lib +.act state bowl)
+      %delete-backlog
+        (delete-backlog:lib +.act state bowl)
       :: notification preferences pokes
       %disable-push
         (disable-push:lib state)

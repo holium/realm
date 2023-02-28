@@ -29,6 +29,7 @@
       [%send-message =path fragments=(list minimal-fragment:db) expires-at=@da]
       [%edit-message =edit-message-action:db]
       [%delete-message =path =msg-id:db]
+      [%delete-backlog =path]
 
       :: internal %realm-chat state updaters
       [%enable-push ~]
@@ -38,5 +39,5 @@
       [%mute-chat =path mute=?]  :: toggles the muted-state of the path
       [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
   ==
-+$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas]
++$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas max-duration=@dr]
 --
