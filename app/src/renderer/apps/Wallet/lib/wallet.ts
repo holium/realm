@@ -59,11 +59,15 @@ export class RealmWallet {
     const addr1 = wallets[1].address;
     const addr2 = wallets[2].address;
 
-    return {
-      [addr0!]: wallets[0],
-      [addr1!]: wallets[1],
-      [addr2!]: wallets[2],
-    };
+    if (addr0 && addr1 && addr2) {
+      return {
+        [addr0]: wallets[0],
+        [addr1]: wallets[1],
+        [addr2]: wallets[2],
+      };
+    }
+
+    return {};
   }
 
   async getBalance(xpub: string) {

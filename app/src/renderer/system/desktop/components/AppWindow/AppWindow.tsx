@@ -80,7 +80,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, []);
 
   const windowId = `app-window-${appWindow.appId}`;
-  const webViewId = getWebViewId(appWindow.appId, appWindow.type!);
+  const webViewId = getWebViewId(appWindow.appId, appWindow.type);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -310,9 +310,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       >
         <TitlebarByType
           appWindow={appWindow}
-          appInfo={appInfo}
           shell={shell}
           currentTheme={theme.currentTheme}
+          hideTitlebarBorder={
+            appInfo?.type === 'urbit' && !appInfo.config?.titlebarBorder
+          }
           onDevTools={onDevTools}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}

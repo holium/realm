@@ -10,7 +10,7 @@ import { useRooms } from './useRooms';
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
   const { ship } = useServices();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []

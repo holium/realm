@@ -56,11 +56,14 @@ export class Menu extends React.PureComponent<IProps, IState> {
       }
     } else {
       // You are clicking inside
-      const clickedNode = ReactDOM.findDOMNode(event.target)!;
+      const clickedNode = ReactDOM.findDOMNode(event.target);
       const preventMenuClose = event.target.getAttribute(
         'data-prevent-menu-close'
       );
-      if (clickedNode.nodeName === 'LI' || clickedNode.nodeName === 'BUTTON') {
+      if (
+        clickedNode?.nodeName === 'LI' ||
+        clickedNode?.nodeName === 'BUTTON'
+      ) {
         !preventMenuClose && onClose(event);
       }
     }

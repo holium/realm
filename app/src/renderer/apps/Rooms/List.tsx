@@ -12,14 +12,14 @@ const RoomsPresenter = () => {
   const { ship, spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const ourSpace = spaces.selected?.type === 'our';
 
   const rooms = ourSpace
     ? roomsManager?.rooms
     : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected!.path
+        spaces.selected?.path ?? ''
       );
 
   return (

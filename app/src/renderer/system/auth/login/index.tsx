@@ -30,7 +30,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
-  const passwordRef = useRef(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
@@ -70,10 +70,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   }, [pendingShip]);
 
   const login = async () => {
+    if (!pendingShip) return;
     const status = await AuthActions.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
+      pendingShip.patp ?? '',
+      passwordRef.current?.value ?? ''
     );
     if (status && status.startsWith('error:')) {
       if (submitRef.current) {
@@ -86,7 +86,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       if (parts.length > 1 && parseInt(parts[1]) === 400) {
         setLoginError('missing');
         ShellActions.openDialogWithStringProps('reset-code-dialog', {
-          ship: pendingShip!.patp,
+          ship: pendingShip.patp,
           // @ts-ignore
           password: passwordRef.current?.value,
         });

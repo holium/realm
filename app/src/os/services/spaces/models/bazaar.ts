@@ -205,7 +205,8 @@ export const NewBazaarStore = types
     },
     _removePinned(data: { path: string; id: string }) {
       const dock = self.docks.get(data.path);
-      const removeIndex = dock?.findIndex((id: string) => id === data.id)!;
+      const removeIndex = dock?.findIndex((id: string) => id === data.id);
+      if (!removeIndex) return;
       dock?.splice(removeIndex, 1);
       self.docks.set(data.path, dock);
     },
@@ -331,7 +332,7 @@ export const NewBazaarStore = types
     _removeRecommended(data: { id: string; stalls: any }) {
       const removeIndex = self.recommendations?.findIndex(
         (id: string) => id === data.id
-      )!;
+      );
       self.recommendations.splice(removeIndex, 1);
       applySnapshot(self.stalls, data.stalls);
     },
@@ -613,10 +614,10 @@ export const NewBazaarStore = types
     isRecommended(appId: string) {
       return self.recommendations.includes(appId);
     },
-    getApp(appId: string): AppType {
+    getApp(appId: string) {
       const app = self.catalog.get(appId);
       if (app) return app;
-      return self.devAppMap.get(appId)!;
+      return self.devAppMap.get(appId);
     },
     getDock(path: string): string[] {
       return self.docks.get(path) ?? [];
@@ -653,7 +654,9 @@ export const NewBazaarStore = types
       if (!stall) return suite;
       Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
         (index: string) => {
-          const app = self.catalog.get(stall.suite.get(index)!);
+          const appId = stall.suite.get(index);
+          if (!appId) return;
+          const app = self.catalog.get(appId);
           suite.set(index, app && getSnapshot(app));
         }
       );

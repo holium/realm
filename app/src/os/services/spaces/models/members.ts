@@ -100,7 +100,8 @@ export const MembershipStore = types
       if (members) self.selected = members;
     },
     editMember(path: SpacePath, patp: Patp, roles: RolesType[]) {
-      self.spaces.get(path)!.get(patp)!.setRoles(roles);
+      const members = self.spaces.get(path);
+      members?.get(patp)?.setRoles(roles);
     },
   }));
 

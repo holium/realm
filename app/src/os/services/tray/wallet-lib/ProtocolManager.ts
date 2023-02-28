@@ -21,7 +21,7 @@ export class Wallet {
       this.currentProtocol === ProtocolType.ETH_GORLI
     ) {
       (
-        this.protocols.get(this.currentProtocol)! as EthereumProtocol
+        this.protocols.get(this.currentProtocol) as EthereumProtocol
       ).removeListener();
     }
   }
@@ -33,7 +33,7 @@ export class Wallet {
     ) {
       const lastProtocol = this.protocols.get(
         this.currentProtocol
-      )! as EthereumProtocol;
+      ) as EthereumProtocol;
       lastProtocol?.removeListener();
     }
     this.currentProtocol = walletState.navState.protocol;
@@ -42,12 +42,12 @@ export class Wallet {
       this.currentProtocol === ProtocolType.ETH_GORLI
     ) {
       (
-        this.protocols.get(this.currentProtocol)! as EthereumProtocol
+        this.protocols.get(this.currentProtocol) as EthereumProtocol
       ).watchUpdates(conduit, walletState);
     } else if (this.currentProtocol === ProtocolType.UQBAR) {
       this.protocols
-        .get(this.currentProtocol)!
-        .updateWalletState(conduit, walletState);
+        .get(this.currentProtocol)
+        ?.updateWalletState(conduit, walletState);
     }
   }
 
@@ -60,7 +60,7 @@ export class Wallet {
       (
         this.protocols.get(
           protocol || walletState.navState.protocol
-        )! as EthereumProtocol
+        ) as EthereumProtocol
       ).updateWalletState(conduit, walletState);
     }
   }

@@ -11,8 +11,10 @@ export const NFTDetail = () => {
 
   const wallet = walletApp.currentWallet as EthWalletType;
   const nft = wallet.data
-    .get(walletApp.navState.protocol)!
-    .nfts.get(walletApp.navState.detail!.key)!;
+    .get(walletApp.navState.protocol)
+    ?.nfts.get(walletApp.navState.detail?.key ?? '');
+
+  if (!nft) return null;
 
   return (
     <Flex height="100%" width="100%" flexDirection="column" px={3}>

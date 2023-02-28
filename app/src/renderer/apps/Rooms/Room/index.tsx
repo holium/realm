@@ -16,7 +16,7 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 const RoomPresenter = () => {
   const { ship, theme } = useServices();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
@@ -153,11 +153,11 @@ const RoomPresenter = () => {
               className="realm-cursor-hover"
               size={26}
               customColor={
-                presentRoom.creator === ship!.patp ? '#E56262' : undefined
+                presentRoom.creator === ship?.patp ? '#E56262' : undefined
               }
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === ship!.patp) {
+                if (presentRoom.creator === ship?.patp) {
                   roomsManager?.deleteRoom(rid);
                 } else {
                   roomsManager?.leaveRoom();

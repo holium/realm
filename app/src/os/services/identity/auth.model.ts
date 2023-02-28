@@ -92,13 +92,13 @@ export const AuthStore = types
         })
         .sort((a, b) => self.order.indexOf(b) - self.order.indexOf(a));
     },
-    get addedShips(): any {
+    get addedShips() {
       return Array.from(self.ships.entries()).map((entry: any) => {
         return entry[1].patp;
       });
     },
-    get mnemonic(): any {
-      return self.selected!.mnemonic;
+    get mnemonic() {
+      return self.selected?.mnemonic;
     },
   }))
   .actions((self) => ({
@@ -123,8 +123,8 @@ export const AuthStore = types
     setClientSecret: (secret: string) => {
       self.clientSecret = secret;
     },
-    getPasswordHash(id: string): string {
-      return self.ships.get(id)?.passwordHash!;
+    getPasswordHash(id: string) {
+      return self.ships.get(id)?.passwordHash;
     },
     completeSignup(id: string) {
       self.selected = self.ships.get(id);

@@ -22,7 +22,7 @@ const playgroundPort = process.env.PLAYGROUND_PORT || 3010;
 const port = process.env.PORT || 1212;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const requiredByDLLConfig = module.parent!.filename.includes(
+const requiredByDLLConfig = module.parent?.filename.includes(
   'webpack.config.renderer.dev.dll'
 );
 
@@ -213,7 +213,7 @@ const configuration: webpack.Configuration = {
         shell: true,
         stdio: 'inherit',
       })
-        .on('close', (code: number) => process.exit(code!))
+        .on('close', (code: number) => process.exit(code))
         .on('error', (spawnError) => console.error(spawnError));
 
       console.log('Starting Main Process...');
@@ -223,7 +223,7 @@ const configuration: webpack.Configuration = {
       })
         .on('close', (code: number) => {
           preloadProcess.kill();
-          process.exit(code!);
+          process.exit(code);
         })
         .on('error', (spawnError) => console.error(spawnError));
       return middlewares;

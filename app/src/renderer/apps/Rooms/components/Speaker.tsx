@@ -53,7 +53,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        ship!.patp === roomsManager.live.room!.creator && {
+        ship?.patp === roomsManager.live.room?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 import { Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
@@ -16,21 +16,28 @@ interface IPassport {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  theme?: {
+  theme: {
     textColor: string;
     windowColor: string;
   };
   onClose: any;
 }
 
-export const PassportCard: FC<IPassport> = (props: IPassport) => {
-  const { patp, sigilColor, avatar, nickname, description, onClose } = props;
-  const { textColor, windowColor } = props.theme!;
+const PassportCardPresenter = ({
+  patp,
+  sigilColor,
+  avatar,
+  nickname,
+  description,
+  theme,
+  onClose,
+}: IPassport) => {
   const { courier } = useServices();
   const { setActiveApp, dmApp, walletApp } = useTrayApps();
 
-  const iconColor = rgba(textColor, 0.7);
-  const buttonColor = darken(0.1, windowColor);
+  const iconColor = rgba(theme.textColor, 0.7);
+  const buttonColor = darken(0.1, theme.windowColor);
+
   return (
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">
@@ -94,14 +101,14 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
             data-prevent-menu-close="true"
             onClick={(evt: any) => {
               if (courier.previews.has(`/dm-inbox/${patp}`)) {
-                const dmPreview = courier.previews.get(`/dm-inbox/${patp}`)!;
-                openDMsToChat(dmApp, dmPreview, setActiveApp);
+                const dmPreview = courier.previews.get(`/dm-inbox/${patp}`);
+                if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);
               } else {
                 ShipActions.draftDm(
                   [patp],
                   [{ color: sigilColor, avatar, nickname }]
                 ).then((dmDraft) => {
-                  openDMsToChat(dmApp, dmDraft!, setActiveApp);
+                  openDMsToChat(dmApp, dmDraft, setActiveApp);
                 });
               }
               onClose();
@@ -120,3 +127,5 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
     </Flex>
   );
 };
+
+export const PassportCard = observer(PassportCardPresenter);

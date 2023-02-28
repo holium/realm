@@ -18,26 +18,24 @@ import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ThemeType } from 'renderer/theme';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
-const EmailDialogPresenter = (props: BaseDialogProps) => {
+const EmailDialogPresenter = ({ workflowState, onNext }: BaseDialogProps) => {
   const { onboarding } = useServices();
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
-  const done = () => props.onNext && props.onNext();
 
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       {view === 'initial' ? (
         <InitialScreen
           done={() => setView('verify')}
-          isRecoveringAccount={props.workflowState.isRecoveringAccount}
+          isRecoveringAccount={workflowState.isRecoveringAccount}
         />
       ) : (
         <VerifyScreen
-          verificationCode={onboarding.verificationCode!}
-          done={done}
           theme={baseTheme as ThemeType}
           newAccount={onboarding.newAccount}
+          onNext={onNext}
         />
       )}
     </Flex>
@@ -136,30 +134,31 @@ function InitialScreen(props: { done: any; isRecoveringAccount: boolean }) {
   );
 }
 
-function VerifyScreen(props: {
+type VerifyScreenProps = {
   theme: ThemeType;
-  verificationCode: string;
-  done: any;
   newAccount: boolean;
-}) {
+  onNext: BaseDialogProps['onNext'];
+};
+
+const VerifyScreen = ({ theme, newAccount, onNext }: VerifyScreenProps) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
   const validChars =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   const resendCode = async () => {
-    if (!props.newAccount) {
+    if (!newAccount) {
       await OnboardingActions.resendEmailConfirmation();
     }
   };
 
   useEffect(() => {
     resendCode();
-  }, [props.newAccount]);
+  }, [newAccount]);
 
   const submit = async (code: string) => {
     const wasCorrect = await OnboardingActions.verifyEmail(code);
-    wasCorrect ? props.done() : setError(true);
+    wasCorrect ? onNext?.() : setError(true);
   };
 
   const onChange = async (value: string) => {
@@ -202,7 +201,7 @@ function VerifyScreen(props: {
           />
         </Flex>
         <Flex mt={4} flexDirection="column">
-          <ResendCodeButton theme={props.theme} />
+          <ResendCodeButton theme={theme} />
           <Text.Custom mt={3} fontSize={1} color="intent-alert">
             {error && 'Verification code was incorrect.'}
           </Text.Custom>
@@ -210,7 +209,7 @@ function VerifyScreen(props: {
       </Flex>
     </>
   );
-}
+};
 
 function ResendCodeButton(props: { theme: ThemeType }) {
   const [state, setState] = useState('initial');
