@@ -305,7 +305,8 @@ export class ChatService extends BaseService {
         metadata, 
         sender,
         created_at, 
-        updated_at) 
+        updated_at,
+        expires_at) 
       VALUES (
         @path, 
         @msg_id, 
@@ -316,7 +317,8 @@ export class ChatService extends BaseService {
         @metadata,
         @sender,
         @created_at,
-        @updated_at
+        @updated_at,
+        @expires_at
       )`
     );
     const insertMany = this.db.transaction((messages) => {
@@ -332,6 +334,7 @@ export class ChatService extends BaseService {
           sender: message['msg-id'][1],
           created_at: message['created-at'],
           updated_at: message['updated-at'],
+          expires_at: message['expires-at'],
         });
       }
     });
@@ -630,7 +633,7 @@ export class ChatService extends BaseService {
         'send-message': {
           path: path,
           fragments,
-          'expires-at': 0,
+          'expires-at': null,
         },
       },
     };

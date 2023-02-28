@@ -117,6 +117,7 @@ export const DMLogPresenter = ({ storage }: ChatLogProps) => {
             </Text.Custom>
           </Flex>
         ) : (
+          // TODO: add pinned messages
           <WindowedList
             startAtBottom
             hideScrollbar

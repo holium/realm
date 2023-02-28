@@ -40,7 +40,7 @@ export const ChatMessage = ({
     });
     menu.push({
       id: `${messageRowId}-reply-to`,
-      // icon: 'Reply',
+      icon: 'Reply',
       label: 'Reply',
       disabled: true,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {

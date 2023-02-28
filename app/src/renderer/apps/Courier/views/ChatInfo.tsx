@@ -190,7 +190,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         onBack={() => setSubroute('chat')}
         hasMenu={false}
         rightAction={
-          <Button.Minimal
+          <Button.Secondary
             py={1}
             disabled={
               editTitle.length < 1 ||
@@ -202,7 +202,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             }}
           >
             Save
-          </Button.Minimal>
+          </Button.Secondary>
         }
       />
       {/* Chat Info */}

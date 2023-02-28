@@ -35,6 +35,7 @@ const CourierAppModel = types
     peers: types.maybe(types.array(types.string)),
     peersGetBacklog: types.boolean,
     type: types.maybe(types.enumeration(['dm', 'group', 'space'])),
+    // editing
     metadata: types.maybe(ChatMetadataModel),
   })
   .views((self) => ({
@@ -56,7 +57,6 @@ const CourierAppModel = types
     init: flow(function* () {
       try {
         const pinnedChats = yield ChatDBActions.fetchPinnedChats();
-        console.log('loading pinned chats', pinnedChats);
         self.pinnedChats = pinnedChats;
         return self.pinnedChats;
       } catch (error) {
