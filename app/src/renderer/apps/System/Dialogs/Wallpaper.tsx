@@ -3,13 +3,8 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba } from 'polished';
-import {
-  Flex,
-  FormControl,
-  Input,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { FormControl, Input, TextButton } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
 import * as yup from 'yup';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';

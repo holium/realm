@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
-
 import {
-  Flex,
   Input,
   TextButton,
-  Spinner,
   Text,
   Label,
   BigInput,
   Button,
-  Box,
 } from 'renderer/components';
+import { Box, Flex, Spinner } from '@holium/design-system';
 import { ThemeType } from 'renderer/theme';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ShellActions } from 'renderer/logic/actions/shell';

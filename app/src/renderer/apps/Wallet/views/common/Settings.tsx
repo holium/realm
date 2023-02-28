@@ -2,8 +2,15 @@ import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
-import { Select, NoScrollBar, Spinner } from 'renderer/components';
-import { Flex, Text, Icon, Button } from '@holium/design-system';
+import { NoScrollBar } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Icon,
+  Button,
+  Select,
+  Spinner,
+} from '@holium/design-system';
 import { TextInput } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
@@ -71,17 +78,14 @@ const WalletSettingsPresenter = () => {
   //   }
   // }
 
-  function setCreationMode(newMode: WalletCreationMode) {
-    setState({ ...state, walletCreationMode: newMode });
+  function setCreationMode(newMode: string) {
+    setState({ ...state, walletCreationMode: newMode as WalletCreationMode });
   }
 
-  function setWalletVisibility(
-    sharingMode: SharingMode,
-    defaultIndex?: number
-  ) {
+  function setWalletVisibility(sharingMode: string, defaultIndex?: number) {
     setState({
       ...state,
-      sharingMode,
+      sharingMode: sharingMode as SharingMode,
       defaultIndex: defaultIndex === undefined ? 0 : defaultIndex,
     });
   }
@@ -173,7 +177,7 @@ const WalletSettingsPresenter = () => {
             height={26}
             onClick={saveSettings}
           >
-            {saving ? <Spinner size={0} color={'#FFF'} /> : 'Save'}
+            {saving ? <Spinner size={0} color="#FFF" /> : 'Save'}
           </Button.Primary>
         </Flex>
 
@@ -224,9 +228,7 @@ const WalletSettingsPresenter = () => {
           <Flex width="140px">
             <Select
               id="wallet-creation-mode"
-              customBg={selectBg}
-              textColor={baseTheme.colors.text.primary}
-              iconColor={theme.currentTheme.iconColor}
+              backgroundColor={selectBg}
               options={[
                 { label: 'Default', value: 'default' },
                 { label: 'On-demand', value: 'on-demand' },
@@ -325,7 +327,7 @@ export const WalletSettings = observer(WalletSettingsPresenter);
 interface VisibilitySelectProps {
   theme: any;
   baseTheme: any;
-  onChange: any;
+  onChange: (mode: WalletVisibility | SharingMode, index?: number) => void;
   sharingMode: SharingMode;
   defaultIndex: number;
   walletCreationMode: WalletCreationMode;
@@ -344,10 +346,10 @@ function VisibilitySelect(props: VisibilitySelectProps) {
     value: wallet.index.toString(),
   }));
 
-  function visibilityChange(newVisibility: WalletVisibility) {
+  function visibilityChange(newVisibility: string) {
     ['anyone', 'friends'].includes(newVisibility)
-      ? props.onChange(newVisibility, props.defaultIndex)
-      : props.onChange(newVisibility);
+      ? props.onChange(newVisibility as WalletVisibility, props.defaultIndex)
+      : props.onChange(newVisibility as WalletVisibility);
   }
 
   return (
@@ -355,9 +357,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
       <Flex width="140px">
         <Select
           id="wallet-visibility"
-          customBg={selectBg}
-          textColor={props.baseTheme.colors.text.primary}
-          iconColor={props.theme.currentTheme.iconColor}
+          backgroundColor={selectBg}
           options={visibilityOptions}
           selected={props.sharingMode}
           onClick={visibilityChange}
@@ -368,9 +368,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
           props.walletCreationMode !== WalletCreationMode.ON_DEMAND && (
             <Select
               id="wallet-default"
-              customBg={selectBg}
-              textColor={props.baseTheme.colors.text.primary}
-              iconColor={props.theme.currentTheme.iconColor}
+              backgroundColor={selectBg}
               options={sharedWalletOptions}
               selected={props.defaultIndex.toString() || Number(0).toString()}
               onClick={(newAddress) =>

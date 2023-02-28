@@ -2,8 +2,14 @@ import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { useField, useForm } from 'mobx-easy-form';
 import * as yup from 'yup';
-import { Flex, Text, Button, Icon, TextInput } from '@holium/design-system';
-import { Spinner } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Button,
+  Icon,
+  TextInput,
+  Spinner,
+} from '@holium/design-system';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';

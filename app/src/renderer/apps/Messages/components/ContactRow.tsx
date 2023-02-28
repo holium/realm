@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
-import { Flex, Box, Text, TextButton, Spinner } from 'renderer/components';
+import { Text, TextButton } from 'renderer/components';
 import {
   DMPreviewType,
   PreviewDMType,
@@ -15,7 +15,7 @@ import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Flex, Box, Spinner } from '@holium/design-system';
 
 interface DMContact {
   theme: ThemeModelType;
