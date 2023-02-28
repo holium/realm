@@ -228,15 +228,15 @@
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
   
   :: logic to force-set expires-at on messages when the path has a
-  :: max-duration specified
+  :: max-expires-at-duration specified
   =/  thepath   (~(got by paths-table.state) path.msg-act)
-  =/  max-exp   (add max-duration.thepath now.bowl)
+  =/  max-exp   (add max-expires-at-duration.thepath now.bowl)
   =.  expires-at.msg-act
-    ?:  =(max-duration.thepath *@dr)  expires-at.msg-act  :: allow any expires-at if the max-duration is "null"
+    ?:  =(max-expires-at-duration.thepath *@dr)  expires-at.msg-act  :: allow any expires-at if the max-expires-at-duration is "null"
     ?:  =(expires-at.msg-act *@da)  max-exp               :: otherwise, if the expires-at is "unset" set it to the max expiration
     ?:  (lth expires-at.msg-act now.bowl)  max-exp        :: otherwise, if the expires-at is in the past, set to max-expiration
     ?:  (lte expires-at.msg-act max-exp)  expires-at.msg-act :: otherwise, ensure the expires-at is less than the max-expiration
-    max-exp  :: else, set it to the max-expiration based on the max-duration defined in thepath
+    max-exp  :: else, set it to the max-expiration based on the max-expires-at-duration defined in thepath
 
   =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
   =.  messages-table.state  -.add-result
@@ -618,7 +618,7 @@
           invites+s+invites.path-row
           peers-get-backlog+b+peers-get-backlog.path-row
           :: return as integer millisecond duration
-          max-duration+(numb (|=(t=@dr ^-(@ud (mul (div t ~s1) 1.000))) max-duration.path-row))
+          max-expires-at-duration+(numb (|=(t=@dr ^-(@ud (mul (div t ~s1) 1.000))) max-expires-at-duration.path-row))
       ==
     ::
     ++  messages-row

@@ -139,7 +139,7 @@
   ^-  (quip card state-0)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-duration.act]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-expires-at-duration.act]
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
@@ -383,7 +383,7 @@
           [%type (se %tas)]
           [%peers (ar de-ship)]
           [%invites (se %tas)]
-          [%max-duration (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)]  :: specify in integer milliseconds
+          [%max-expires-at-duration (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)]  :: specify in integer milliseconds
       ==
     ::
     ++  edit-chat
