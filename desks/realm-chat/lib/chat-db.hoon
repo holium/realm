@@ -92,6 +92,8 @@
   =/  old-msgs
     ^-  (list [k=uniq-id:sur v=msg-part:sur])
     %+  skim
+      :: TODO efficiency by lot:msgon:sur from the last del-log time
+      :: since we know we checked then ?
       (tap:msgon:sur messages-table.state)
     |=([k=uniq-id:sur v=msg-part:sur] &(?!(=(*@da expires-at.v)) (gth now expires-at.v)))
   =/  index=@ud   0

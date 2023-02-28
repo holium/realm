@@ -26,7 +26,7 @@
       [%pin-message =path =msg-id:db pin=?]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
-      [%send-message =path fragments=(list minimal-fragment:db) expires-at=@da]
+      [%send-message =path fragments=(list minimal-fragment:db) expires-in=@dr]
       [%edit-message =edit-message-action:db]
       [%delete-message =path =msg-id:db]
       [%delete-backlog =path]
