@@ -60,8 +60,11 @@
   [%pass /dbpoke %agent [ship %chat-db] %poke %db-action !>([%insert-backlog m])]
 ::
 ++  into-insert-message-poke
-  |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db) expires-at=@da] ts=@da]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts act])]
+  |=  [p=peer-row:db act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] ts=@da]
+  =/  exp-at=@da  ?:  =(expires-in.act *@dr)
+    *@da
+  (add ts expires-in.act)
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%insert ts path.act fragments.act exp-at])]
 ::
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
@@ -139,7 +142,7 @@
   ^-  (quip card state-0)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-duration.act]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-expires-at-duration.act]
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
@@ -235,8 +238,8 @@
   [cards state]
 ::
 ++  send-message
-::realm-chat &action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] *@da]
-  |=  [act=[=path fragments=(list minimal-fragment:db) expires-at=@da] state=state-0 =bowl:gall]
+::realm-chat &action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] ~]
+  |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
@@ -383,7 +386,7 @@
           [%type (se %tas)]
           [%peers (ar de-ship)]
           [%invites (se %tas)]
-          [%max-duration (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)]  :: specify in integer milliseconds
+          [%max-expires-at-duration null-or-dri]  :: specify in integer milliseconds, or null for "not set"
       ==
     ::
     ++  edit-chat
@@ -441,7 +444,7 @@
       :~  
           [%path pa]
           de-frag
-          [%expires-at di]
+          [%expires-in null-or-dri]
       ==
     ::
     ++  de-content
@@ -482,6 +485,20 @@
           :: TODO decide if di for millisecond time is easier than (se %da)
           [%msg-id (at ~[(se %da) de-ship])]
           [%pin bo]
+      ==
+    ::
+    ++  dri   :: specify in integer milliseconds, returns a @dr
+      (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)
+    ::
+    ++  null-or-dri   :: specify in integer milliseconds, returns a @dr
+      (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) null-or-ni)
+    ::
+    ++  null-or-ni  :: accepts either a null or a n+'123', and converts nulls to 0, non-null to the appropriate number
+      |=  jon=json
+      ^-  @ud
+      ?+  jon  !!
+        [%n *]  (rash p.jon dem)
+        ~       0
       ==
     --
   --

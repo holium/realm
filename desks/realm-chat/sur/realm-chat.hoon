@@ -26,7 +26,7 @@
       [%pin-message =path =msg-id:db pin=?]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
-      [%send-message =path fragments=(list minimal-fragment:db) expires-at=@da]
+      [%send-message =path fragments=(list minimal-fragment:db) expires-in=@dr]
       [%edit-message =edit-message-action:db]
       [%delete-message =path =msg-id:db]
       [%delete-backlog =path]
@@ -39,5 +39,5 @@
       [%mute-chat =path mute=?]  :: toggles the muted-state of the path
       [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
   ==
-+$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas max-duration=@dr]
++$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas max-expires-at-duration=@dr]
 --
