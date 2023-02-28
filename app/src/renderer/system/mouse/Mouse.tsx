@@ -24,7 +24,7 @@ export const Mouse = () => {
       } else {
         if (isDragging) setCoords(newCoordinates);
       }
-      setState(newState);
+      if (!isDragging) setState(newState);
     });
 
     window.electron.app.onMouseColorChange((hex) => {

@@ -6,7 +6,6 @@ import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { ToolbarControlButtons } from './ToolbarControlButtons';
 import { ToolbarSearchInput } from './ToolbarSearchInput';
-import { useDragControls } from 'framer-motion';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
 import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
@@ -20,21 +19,19 @@ const ToolbarContainer = styled(TitlebarContainer)`
 export type BrowserToolbarProps = {
   zIndex: number;
   showDevToolsToggle: boolean;
-  dragControls: ReturnType<typeof useDragControls>;
   innerRef?: RefObject<HTMLDivElement>;
   onClose: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
-  onDragStop: (e: PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: () => void;
 };
 
 const BrowserToolbarPresenter = ({
   zIndex,
   showDevToolsToggle = true,
-  dragControls,
   innerRef,
-  onDragStop,
+  onDragEnd,
   onDragStart,
   onClose,
   onMinimize,
@@ -54,15 +51,16 @@ const BrowserToolbarPresenter = ({
     e.target === inputRef.current ||
     inputRef.current?.contains(e.target as Node);
 
+  const onClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isInInputField(e)) onDoubleClick();
+  };
+
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isInInputField(e)) {
-      dragControls.start(e);
-      onDragStart(e);
-    }
+    if (!isInInputField(e)) onDragStart(e);
   };
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isInInputField(e)) onDragStop(e);
+    if (!isInInputField(e)) onDragEnd();
   };
 
   const onBack = () => {
@@ -96,7 +94,7 @@ const BrowserToolbarPresenter = ({
       zIndex={zIndex}
       onPointerUp={onPointerUp}
       onPointerDown={onPointerDown}
-      onClick={onDoubleClick}
+      onClick={onClickToolbar}
     >
       <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons
