@@ -17,7 +17,7 @@ export type BubbleProps = {
   isOur?: boolean;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
-  onReaction: (payload: OnReactionPayload) => void;
+  onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
 } & BoxProps;
@@ -49,7 +49,7 @@ export const Bubble = (props: BubbleProps) => {
         {!isOur && (
           <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
         )}
-        <FragmentBlock>
+        <FragmentBlock id={id}>
           {message?.map((fragment, index) => {
             let lineBreak = false;
             // Detect line break between text and block
@@ -74,8 +74,10 @@ export const Bubble = (props: BubbleProps) => {
             );
           })}
         </FragmentBlock>
-        <BubbleFooter>
-          <Reactions reactions={reactions} onReaction={onReaction} />
+        <BubbleFooter id={id}>
+          {onReaction && (
+            <Reactions reactions={reactions} onReaction={onReaction} />
+          )}
           <Text.Custom pointerEvents="none" alignSelf="flex-end" opacity={0.5}>
             {dateDisplay}
           </Text.Custom>

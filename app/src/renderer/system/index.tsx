@@ -60,7 +60,6 @@ const ShellPresenter = () => {
 
   return (
     <ViewPort>
-      <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
@@ -74,6 +73,8 @@ const ShellPresenter = () => {
       <Layer zIndex={20}>
         <ConnectionStatus />
       </Layer>
+      {/* TODO make DragBar work */}
+      <Layer zIndex={21}>{!isFullscreen && <DragBar />}</Layer>
     </ViewPort>
   );
 };

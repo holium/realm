@@ -43,7 +43,6 @@ const AppPresenter = () => {
 
   useEffect(() => {
     return () => {
-      console.log('on dismount');
       ShellActions.closeDialog();
     };
   }, []);

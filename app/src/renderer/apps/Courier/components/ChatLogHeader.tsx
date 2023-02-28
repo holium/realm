@@ -100,15 +100,6 @@ export const ChatLogHeader = ({
             }
             options={[
               {
-                id: 'pin-chat',
-                icon: 'Pin',
-                label: 'Pin',
-                disabled: false,
-                onClick: (evt) => {
-                  evt.stopPropagation();
-                },
-              },
-              {
                 id: 'chat-info',
                 icon: 'Info',
                 label: 'Info',

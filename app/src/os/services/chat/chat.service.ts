@@ -630,6 +630,7 @@ export class ChatService extends BaseService {
         'send-message': {
           path: path,
           fragments,
+          'expires-at': 0,
         },
       },
     };

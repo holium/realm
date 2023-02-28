@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Box, Bubble, Flex, WindowedList, Text } from '@holium/design-system';
+import { Box, Flex, WindowedList, Text } from '@holium/design-system';
 
 import { useServices } from 'renderer/logic/store';
 import { useChatStore } from '../store';
@@ -11,6 +11,7 @@ import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { ChatMessage } from '../components/ChatMessage';
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -130,7 +131,13 @@ export const DMLogPresenter = ({ storage }: ChatLogProps) => {
                   pt={2}
                   pb={index === chats.length - 1 ? 2 : 0}
                 >
-                  <Bubble
+                  <ChatMessage
+                    message={row}
+                    canReact={true}
+                    authorColor={sigilColor}
+                    onLoad={measure}
+                  />
+                  {/* <Bubble
                     id={row.id}
                     isOur={row.sender === ship?.patp}
                     author={row.sender}
@@ -139,7 +146,7 @@ export const DMLogPresenter = ({ storage }: ChatLogProps) => {
                     sentAt={new Date(row.createdAt).toISOString()}
                     onLoad={measure}
                     onReaction={() => {}}
-                  />
+                  /> */}
                 </Box>
               );
             }}

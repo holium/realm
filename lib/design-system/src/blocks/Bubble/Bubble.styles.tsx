@@ -8,6 +8,7 @@ export const BubbleStyle = styled(Box)`
   width: auto;
   /* gap: 2px; */
   padding: 8px;
+  user-select: text;
   /* padding: 6px 8px 6px 8px; */
   font-size: 14px;
   align-self: flex-start;
@@ -58,6 +59,7 @@ export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;
+  user-select: text;
   /* color: ${(props) => props.authorColor ?? 'var(--rlm-text-color)'}; */
 `;
 
@@ -65,6 +67,7 @@ export const BubbleFooter = styled(Box)`
   position: relative;
   display: inline-flex;
   flex-direction: row;
+  user-select: text;
   justify-content: flex-end;
   width: 100%;
   font-size: 12px;

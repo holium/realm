@@ -33,6 +33,7 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
+  user-select: text;
   margin: 0 3px;
 `;
 

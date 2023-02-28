@@ -6,7 +6,7 @@ import { parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 32px;
+  line-height: 36px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;
@@ -17,7 +17,7 @@ type ChatInputProps = {
   disabled?: boolean;
   isFocused?: boolean;
   onSend: (fragments: FragmentType[]) => void;
-  onAttachment?: (file: any) => void;
+  onAttachment?: () => void;
 } & BoxProps;
 
 export const parseStringToFragment = (value: string): FragmentType[] => {
@@ -79,13 +79,7 @@ export const ChatInput = ({
       height={36}
       py="3px"
       leftAdornment={
-        <Button.IconButton
-          ml={1}
-          onClick={() => {
-            // TODO
-            // onAttachment();
-          }}
-        >
+        <Button.IconButton ml={1} onClick={onAttachment}>
           <Icon name="Attachment" size={20} opacity={0.5} />
         </Button.IconButton>
       }
