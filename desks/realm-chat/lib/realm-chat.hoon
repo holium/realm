@@ -195,15 +195,12 @@
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
-  =/  pathrow=path-row:db  (scry-path-row path bowl)
-  =.  pins.pathrow  *pins:db
-
   =/  pathpeers  (scry-peers path bowl)
   =/  cards
     :: we poke all peers/members' db with edit-path-pins (including ourselves)
     %:  turn
       pathpeers
-      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-pins path pins.pathrow])])
+      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-pins path *pins:db])])
     ==
   [cards state]
 ::
