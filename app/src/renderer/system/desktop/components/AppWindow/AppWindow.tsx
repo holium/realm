@@ -1,6 +1,6 @@
 import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { useMotionValue, useDragControls, PanInfo } from 'framer-motion';
+import { useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
@@ -17,6 +17,9 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
+
+const CURSOR_WIDTH = 10;
+const CURSOR_HEIGHT = 10;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -91,17 +94,21 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       event.stopPropagation();
       event.preventDefault();
 
-      const newWidth = motionX.get() + motionWidth.get() - mouseDragX.get();
-      const newHeight = motionY.get() + motionHeight.get() - mouseDragY.get();
+      // 1/4th of the cursor should be inside the window when resizing.
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get() - CURSOR_HEIGHT * 0.25;
+
+      const newWidth = motionX.get() + motionWidth.get() - mouseX;
+      const newHeight = motionY.get() + motionHeight.get() - mouseY;
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
 
       if (shouldUpdateWidth) {
-        motionX.set(mouseDragX.get());
+        motionX.set(mouseX);
         motionWidth.set(newWidth);
       }
       if (shouldUpdateHeight) {
-        motionY.set(mouseDragY.get());
+        motionY.set(mouseY);
         motionHeight.set(newHeight);
       }
 
@@ -115,8 +122,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       event.stopPropagation();
       event.preventDefault();
 
-      const newWidth = mouseDragX.get() - motionX.get();
-      const newHeight = motionY.get() + motionHeight.get() - mouseDragY.get();
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH * 0.75;
+      const mouseY = mouseDragY.get();
+
+      const newWidth = mouseX - motionX.get();
+      const newHeight = motionY.get() + motionHeight.get() - mouseY;
 
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
@@ -125,7 +135,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         motionWidth.set(newWidth);
       }
       if (shouldUpdateHeight) {
-        motionY.set(mouseDragY.get());
+        motionY.set(mouseY);
         motionHeight.set(newHeight);
       }
 
@@ -135,17 +145,20 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   );
 
   const handleBottomLeftCornerResize = useCallback(
-    (event: MouseEvent, info: PanInfo) => {
+    (event: MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
 
-      const newWidth = motionX.get() + motionWidth.get() - info.point.x;
-      const newHeight = info.point.y - motionY.get();
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get();
+
+      const newWidth = motionX.get() + motionWidth.get() - mouseX;
+      const newHeight = mouseY - motionY.get();
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
 
       if (shouldUpdateWidth) {
-        motionX.set(info.point.x);
+        motionX.set(mouseX);
         motionWidth.set(newWidth);
       }
       if (shouldUpdateHeight) {
@@ -162,8 +175,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       event.stopPropagation();
       event.preventDefault();
 
-      const newWidth = mouseDragX.get() - motionX.get();
-      const newHeight = mouseDragY.get() - motionY.get();
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get();
+
+      const newWidth = mouseX - motionX.get();
+      const newHeight = mouseY - motionY.get();
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
 
