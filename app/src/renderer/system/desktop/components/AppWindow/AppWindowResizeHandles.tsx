@@ -23,7 +23,6 @@ type Props = {
   onDragTopRight: DragHandler;
   onDragBottomLeft: DragHandler;
   onDragBottomRight: DragHandler;
-  setIsResizing: (isResizing: boolean) => void;
 };
 
 export const AppWindowResizeHandles = ({
@@ -36,55 +35,38 @@ export const AppWindowResizeHandles = ({
   onDragTopRight,
   onDragBottomLeft,
   onDragBottomRight,
-  setIsResizing,
 }: Props) => (
   <>
     <TopLeftDragHandle
       drag
+      key={`${topLeft.x.get()}-${topLeft.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
-      style={topLeft}
       onDrag={onDragTopLeft}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
     <TopRightDragHandle
       drag
+      key={`${topRight.x.get()}-${topRight.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
-      style={topRight}
       onDrag={onDragTopRight}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
     <BottomLeftDragHandle
       drag
+      key={`${bottomLeft.x.get()}-${bottomLeft.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
-      style={bottomLeft}
       onDrag={onDragBottomLeft}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
     <BottomRightDragHandle
+      drag
+      key={`${bottomRight.x.get()}-${bottomRight.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
-      drag
-      style={bottomRight}
       onDrag={onDragBottomRight}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
   </>

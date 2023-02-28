@@ -1,5 +1,4 @@
-import { FC, useEffect } from 'react';
-import { DragControls } from 'framer-motion';
+import { FC, useEffect, PointerEvent } from 'react';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
@@ -18,25 +17,23 @@ type Props = {
   appWindow: AppWindowType;
   appInfo: AppType;
   shell: ShellStoreType;
-  dragControls: DragControls;
   currentTheme: ThemeType;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
   onDevTools: () => void;
-  onDragStart: () => void;
-  onDragStop: () => void;
+  onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: () => void;
 };
 
 export const TitlebarByType = ({
   appWindow,
   appInfo,
   shell,
-  dragControls,
   currentTheme,
   onDevTools,
   onDragStart,
-  onDragStop,
+  onDragEnd,
   onClose,
   onMaximize,
   onMinimize,
@@ -60,10 +57,9 @@ export const TitlebarByType = ({
       hasBorder={!hideTitlebarBorder}
       showDevToolsToggle={showDevToolsToggle}
       zIndex={appWindow.zIndex}
-      dragControls={dragControls}
       onDevTools={onDevTools}
       onDragStart={onDragStart}
-      onDragStop={onDragStop}
+      onDragEnd={onDragEnd}
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
@@ -85,9 +81,8 @@ export const TitlebarByType = ({
         <CustomTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
-          dragControls={dragControls}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragStart={onDragStart as any}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -104,10 +99,9 @@ export const TitlebarByType = ({
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
           zIndex={appWindow.zIndex}
-          dragControls={dragControls}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -146,10 +140,9 @@ export const TitlebarByType = ({
         <CustomTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
-          dragControls={dragControls}
           onClose={onCloseDialog}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
         />
       );
     }
