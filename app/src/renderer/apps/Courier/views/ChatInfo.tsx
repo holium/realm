@@ -295,7 +295,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               disabled={!amHost}
               initialChecked={peersGetBacklog}
               onChange={(isChecked) => {
-                console.log('isChecked', isChecked);
                 updatePeersGetBacklog(isChecked);
               }}
             />
