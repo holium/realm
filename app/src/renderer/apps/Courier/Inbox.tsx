@@ -136,12 +136,6 @@ export const InboxPresenter = () => {
             borderRadius={6}
           >
             {pinnedChatList.map((chat) => {
-              let title: string = chat.metadata.title;
-              let timestamp = chat.createdAt;
-              if (!chat.lastMessage) {
-                timestamp = parseInt(chat.metadata.timestamp);
-              }
-
               return (
                 <Box
                   key={`pinned-${chat.path}`}
@@ -150,23 +144,18 @@ export const InboxPresenter = () => {
                 >
                   <ChatRow
                     path={chat.path}
-                    title={title}
+                    title={chat.metadata.title}
                     peers={chat.peers}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
-                    timestamp={timestamp}
+                    timestamp={
+                      chat.createdAt || parseInt(chat.metadata.timestamp)
+                    }
                     metadata={chat.metadata}
                     peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {
                       evt.stopPropagation();
-                      setChat(
-                        chat.path,
-                        title,
-                        chat.type,
-                        chat.peers,
-                        chat.metadata,
-                        chat.peersGetBacklog
-                      );
+                      setChat(chat.path);
                     }}
                   />
                 </Box>
@@ -174,7 +163,6 @@ export const InboxPresenter = () => {
             })}
           </Flex>
           <WindowedList
-            // TODO fix this (chats without messages have timestamp in metadata)
             key={`inbox-${unpinnedChatList.length}`}
             width={dimensions.width - 26}
             height={544 - pinnedChatList.length * 52}
@@ -182,12 +170,6 @@ export const InboxPresenter = () => {
             data={unpinnedChatList}
             filter={searchFilter}
             rowRenderer={(chat) => {
-              let title: string = chat.metadata.title;
-              let timestamp = chat.createdAt;
-              if (!chat.lastMessage) {
-                timestamp = parseInt(chat.metadata.timestamp);
-              }
-
               return (
                 <Box
                   key={`unpinned-${chat.path}`}
@@ -196,23 +178,18 @@ export const InboxPresenter = () => {
                 >
                   <ChatRow
                     path={chat.path}
-                    title={title}
+                    title={chat.metadata.title}
                     peers={chat.peers}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
-                    timestamp={timestamp}
+                    timestamp={
+                      chat.createdAt || parseInt(chat.metadata.timestamp)
+                    }
                     metadata={chat.metadata}
                     peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {
                       evt.stopPropagation();
-                      setChat(
-                        chat.path,
-                        title,
-                        chat.type,
-                        chat.peers,
-                        chat.metadata,
-                        chat.peersGetBacklog
-                      );
+                      setChat(chat.path);
                     }}
                   />
                 </Box>

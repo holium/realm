@@ -33,7 +33,6 @@ export const ChatRowPresenter = ({
   timestamp,
   type,
   metadata,
-  peersGetBacklog,
   onClick,
 }: ChatRowProps) => {
   const { setSubroute, setChat, isChatPinned, togglePinned } = useChatStore();
@@ -72,7 +71,7 @@ export const ChatRowPresenter = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        setChat(path, title, type, peers, metadata, peersGetBacklog);
+        setChat(path);
         setSubroute('chat-info');
       },
     });

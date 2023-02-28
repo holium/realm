@@ -25,7 +25,7 @@ type ChatUpdateType =
   | 'peer-added'
   | 'peer-deleted';
 
-type ChatPathMetadata = {
+export type ChatPathMetadata = {
   title: string;
   description?: string;
   image?: string;
@@ -63,7 +63,7 @@ export class ChatService extends BaseService {
     'realm.chat.edit-chat': this.editChatMetadata,
     'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
     'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
-    'realm.chat.toggle-pinned-message': this.togglePinnedMessage,
+    'realm.chat.set-pinned-message': this.setPinnedMessage,
     'realm.chat.add-peer': this.addPeerToChat,
     'realm.chat.remove-peer': this.removePeerFromChat,
     'realm.chat.leave-chat': this.leaveChat,
@@ -108,13 +108,8 @@ export class ChatService extends BaseService {
     fetchPinnedChats: () => ipcRenderer.invoke('realm.chat.fetch-pinned-chats'),
     togglePinnedChat: (path: string, pinned: boolean) =>
       ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
-    togglePinnedMessage: (path: string, msgId: string, pinned: boolean) =>
-      ipcRenderer.invoke(
-        'realm.chat.toggle-pinned-message',
-        path,
-        msgId,
-        pinned
-      ),
+    setPinnedMessage: (path: string, msgId: string) =>
+      ipcRenderer.invoke('realm.chat.set-pinned-message', path, msgId),
     // readChat: (path: string) =>
     //   ipcRenderer.invoke('realm.chat.read-chat', path),
     leaveChat: (path: string) =>
@@ -306,8 +301,8 @@ export class ChatService extends BaseService {
         sender,
         created_at, 
         updated_at,
-        expires_at) 
-      VALUES (
+        expires_at
+      ) VALUES (
         @path, 
         @msg_id, 
         @msg_part_id,
@@ -363,7 +358,7 @@ export class ChatService extends BaseService {
           metadata: JSON.stringify(path.metadata),
           peers_get_backlog: path['peers-get-backlog'] === true ? 1 : 0,
           pins: JSON.stringify(path['pins']),
-          max_expires_at_duration: path['max-expires-at-duration'],
+          max_expires_at_duration: path['max-expires-at-duration'] ?? null,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
         });
@@ -474,11 +469,14 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
-        paths.peers_get_backlog peersGetBacklog, 
+        paths.peers_get_backlog peersGetBacklog,
+        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
+        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessage,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt
+        chat_with_messages.updated_at updatedAt,
+        paths.max_expires_at_duration expiresDuration
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path LIKE '%realm-chat%'
@@ -534,33 +532,23 @@ export class ChatService extends BaseService {
             realm_chat.msg_part_id
       )
       SELECT
-        msg_id,
-        json_group_array(content) as contents,
+        msg_id id,
+        json_group_array(json_extract(content, '$')) as contents,
         sender,
         reply_to,
         metadata,
-        (
-            SELECT json_group_array(ship)
-            FROM peers
-            WHERE peers.path = formed_fragments.path AND ship != ?
-            ) AS peers,
         MAX(formed_fragments.created_at) createdAt,
         MAX(formed_fragments.updated_at) updatedAt
       FROM formed_fragments
       GROUP BY msg_id
       ORDER BY createdAt;
     `);
-    const result = query.all(path, `~${this.core.conduit?.ship}`);
+    const result = query.all(path);
     return result.map((row) => {
       return {
         ...row,
-        peers: row.peers ? JSON.parse(row.peers) : null,
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
-        content: row.contents
-          ? JSON.parse(row.contents).map((fragment: any) =>
-              JSON.parse(fragment)
-            )
-          : null,
+        contents: row.contents ? JSON.parse(row.contents) : null,
       };
     });
   }
@@ -645,21 +633,17 @@ export class ChatService extends BaseService {
     };
   }
 
-  async togglePinnedMessage(
-    _evt: any,
-    path: string,
-    msgId: any,
-    pinned: boolean
-  ) {
+  async setPinnedMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
+    const parts = msgId.split('~');
     const payload = {
       app: 'realm-chat',
       mark: 'action',
       reaction: '',
       json: {
         'pin-message': {
-          'msg-id': ['~2023.2.21..23.38.04..652d', '~zod'],
-          path: '/realm-chat/0v4.njr03.drflg.3p6vv.l7ubg.je568',
+          'msg-id': [`~${parts[1]}`, `~${parts[2]}`],
+          path: path,
           pin: true,
         },
       },
@@ -672,7 +656,7 @@ export class ChatService extends BaseService {
     }
   }
 
-  editMessage(path: string, msgId: string) {
+  editMessage(path: string, msgId: string, fragments: any[]) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     // this.core.conduit.editChat(path, metadata);
   }

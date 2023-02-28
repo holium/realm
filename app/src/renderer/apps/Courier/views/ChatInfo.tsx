@@ -67,38 +67,36 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const {
-    selectedPath,
-    title,
-    metadata,
-    type,
-    peersGetBacklog,
-    updateMetadata,
-    updatePeersGetBacklog,
-    setSubroute,
-  } = useChatStore();
+  const { selectedChat, setSubroute } = useChatStore();
   const { friends, ship } = useServices();
   const [peers, setPeers] = useState<PeerType[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
-  const [image, setImage] = useState(metadata?.image || '');
+  const [image, setImage] = useState(selectedChat?.metadata?.image || '');
   const { person } = useMemo(() => createPeopleForm(), []);
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
 
-  const contactMetadata = title
-    ? friends.getContactAvatarMetadata(title)
-    : { patp: title!, color: '#000', nickname: '', avatar: '' };
+  const contactMetadata =
+    selectedChat?.type === 'dm' && selectedChat?.metadata.title
+      ? friends.getContactAvatarMetadata(selectedChat?.metadata.title)
+      : {
+          patp: selectedChat?.metadata.title,
+          color: '#000',
+          nickname: '',
+          avatar: '',
+        };
 
   const [editTitle, setEditTitle] = useState(
-    metadata?.title || contactMetadata.nickname || contactMetadata.patp
+    selectedChat?.metadata.title ||
+      contactMetadata.nickname ||
+      contactMetadata.patp ||
+      'Error loading title'
   );
 
-  const [disappearDuration, setDisappearDuration] = useState('off');
-
   useEffect(() => {
-    if (!selectedPath) return;
-    ChatDBActions.getChatPeers(selectedPath).then((peers: PeerType[]) => {
+    if (!selectedChat) return;
+    ChatDBActions.getChatPeers(selectedChat.path).then((peers: PeerType[]) => {
       setPeers(
         peers.sort((a: PeerType, b: PeerType) =>
           // sort host to top, then self, then others
@@ -114,15 +112,19 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         )
       );
     });
-  }, [selectedPath]);
+  }, [selectedChat]);
+  const { canUpload, promptUpload } = useFileUpload({ storage });
+  const [disappearDuration, setDisappearDuration] = useState('off');
+
+  if (!selectedChat) return null;
+  const { type, metadata, path, peersGetBacklog, updatePeersGetBacklog } =
+    selectedChat;
+  const title = metadata?.title;
 
   const editMetadata = (editedMetadata: any) => {
-    if (!selectedPath) return;
-    editedMetadata = { ...metadata, ...editedMetadata };
-    updateMetadata(editedMetadata);
+    if (!selectedChat) return;
+    selectedChat.updateMetadata(editedMetadata);
   };
-
-  const { canUpload, promptUpload } = useFileUpload({ storage });
 
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
@@ -143,36 +145,29 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   const patps = peers.map((peer) => peer.peer);
 
-  const chatAvatarEl = useMemo(
-    () =>
-      title &&
-      type &&
-      selectedPath &&
-      peers && (
-        <ChatAvatar
-          title={title}
-          type={type}
-          path={selectedPath}
-          peers={patps}
-          size={48}
-          image={image}
-          canEdit={amHost && canUpload}
-          onUpload={() => {
-            if (!containerRef.current) return;
-            promptUpload(containerRef.current)
-              .then((file: File) => {
-                const params: FileUploadParams = {
-                  source: 'file',
-                  content: file.path,
-                  contentType: file.type,
-                };
-                uploadFile(params);
-              })
-              .catch((e) => console.error(e));
-          }}
-        />
-      ),
-    [title, selectedPath, type, peers, image, amHost, canUpload, containerRef]
+  const chatAvatarEl = (
+    <ChatAvatar
+      title={title}
+      type={type}
+      path={path}
+      peers={patps}
+      size={48}
+      image={image}
+      canEdit={amHost && canUpload}
+      onUpload={() => {
+        if (!containerRef.current) return;
+        promptUpload(containerRef.current)
+          .then((file: File) => {
+            const params: FileUploadParams = {
+              source: 'file',
+              content: file.path,
+              contentType: file.type,
+            };
+            uploadFile(params);
+          })
+          .catch((e) => console.error(e));
+      }}
+    />
   );
 
   const onShipSelected = (contact: [string, string?]) => {
@@ -180,11 +175,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
   };
-  if (!selectedPath || !title) return null;
+
   return (
     <Flex flexDirection="column">
       <ChatLogHeader
-        path={selectedPath}
+        path={path}
         title={'Chat Info'}
         avatar={<div />}
         onBack={() => setSubroute('chat')}
@@ -399,7 +394,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           />
         </Flex>
         {peers.map((peer) => {
-          const id = `${selectedPath}-peer-${peer.peer}`;
+          const id = `${path}-peer-${peer.peer}`;
           const options = [];
           if (peer.peer !== ship?.patp) {
             // TODO check if peer is friend
@@ -417,7 +412,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               id: `${id}-remove`,
               label: 'Remove',
               onClick: (_evt: any) => {
-                ChatDBActions.removePeer(selectedPath, peer.peer)
+                ChatDBActions.removePeer(path, peer.peer)
                   .then(() => {
                     console.log('removed peer');
                   })

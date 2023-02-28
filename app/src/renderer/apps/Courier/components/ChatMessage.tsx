@@ -18,16 +18,12 @@ export const ChatMessage = ({
   onLoad,
 }: ChatMessageProps) => {
   const { ship } = useServices();
-  const { isMessagePinned, toggleMessagePinned } = useChatStore();
+  const { selectedChat } = useChatStore();
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
 
-  const messageRowId = useMemo(
-    () => `message-row-${message.msg_id}`,
-    [message.msg_id]
-  );
-  // const isPinned = isMessagePinned(message.id);
-  const isPinned = false;
+  const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
+  const isPinned = selectedChat?.isMessagePinned(message.id);
   const contextMenuOptions = useMemo(() => {
     const menu = [];
 
@@ -38,7 +34,8 @@ export const ChatMessage = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        // toggleMessagePinned(message.id, !isPinned);
+        if (!selectedChat) return;
+        selectedChat.setPinnedMessage(message.id);
       },
     });
     menu.push({
@@ -86,7 +83,7 @@ export const ChatMessage = ({
       isOur={isOur}
       author={message.sender}
       authorColor={authorColor}
-      message={message.content}
+      message={message.contents}
       sentAt={new Date(message.createdAt).toISOString()}
       onLoad={onLoad}
       onReaction={canReact ? () => {} : undefined}
