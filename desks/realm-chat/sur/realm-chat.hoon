@@ -24,6 +24,7 @@
       [%create-chat =create-chat-data]
       [%edit-chat =path metadata=(map cord cord) peers-get-backlog=?]
       [%pin-message =path =msg-id:db pin=?]
+      [%clear-pinned-messages =path]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
       [%send-message =path fragments=(list minimal-fragment:db) expires-in=@dr]
