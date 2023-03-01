@@ -1,0 +1,39 @@
+env:
+  foo: 'bar' # bouncer doesn't like no environment variables
+script:
+  - create-desks:
+      - cmd: 'new-desk %realm'
+        type: 'urbit:app'
+      - cmd: 'new-desk %courier'
+        type: 'urbit:app'
+      - cmd: 'new-desk %tome'
+        type: 'urbit:app'
+  - mount-desks:
+      - cmd: 'mount %realm'
+        type: 'urbit:app'
+      - cmd: 'mount %courier'
+        type: 'urbit:app'
+      - cmd: 'mount %tome'
+        type: 'urbit:app'
+  - copy-desks:
+      - cmd: 'pwd'
+        type: 'system'
+      - cmd: '../.github/workflows/scripts/bouncer/copy-realm-desks.sh' # run from the /bouncer folder
+        type: 'system'
+  - commit-desks:
+      - cmd: 'commit %realm'
+        type: 'urbit:app'
+      - cmd: 'commit %courier'
+        type: 'urbit:app'
+      - cmd: 'commit %tome'
+        type: 'urbit:app'
+  - install-desks:
+      - cmd: 'install our %realm'
+        type: 'urbit:app'
+      - cmd: 'install our %courier'
+        type: 'urbit:app'
+      - cmd: 'install our %tome'
+        type: 'urbit:app'
+  - kill:
+      - cmd: 'exit'
+        type: 'urbit:app'

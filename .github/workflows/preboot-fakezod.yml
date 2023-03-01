@@ -1,0 +1,30 @@
+name: Build and upload Realm fakezod
+
+on:
+  push:
+    branches: ['production']
+  workflow_dispatch:
+
+jobs:
+  preboot-fakezod:
+    runs-on: ubuntu-20.04 # getting an OpenSSL error with ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@359bebbc29cbe6c87da6bc9ea3bc930432750108
+        with:
+          ruby-version: '3.1'
+
+      - name: boogy
+        run: >
+          curl -L https://urbit.org/install/linux-x86_64/latest
+          | tar xzk --transform='s/.*/urbit/g'
+          && curl -o zod.tar.gz https://fakezod.s3.amazonaws.com/zod.tar.gz
+          && tar xvzf zod.tar.gz
+          && (./urbit -t zod &)
+          && chmod 700 ./.github/workflows/scripts/bouncer/copy-realm-desks.sh
+          && git clone https://github.com/holium/tome-db.git
+          && git clone https://github.com/ajlamarc/bouncer.git
+          && cd ./bouncer
+          && bundle
+          && bin/bounce -p 80 -c ../.github/workflows/scripts/bouncer/bounce-realm-fakezod.yml
