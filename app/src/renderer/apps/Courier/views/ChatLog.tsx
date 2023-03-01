@@ -17,7 +17,7 @@ import { useServices } from 'renderer/logic/store';
 type ChatLogProps = {
   storage?: IuseStorage;
 };
-export const DMLogPresenter = (_props: ChatLogProps) => {
+export const ChatLogPresenter = (_props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, setSubroute } = useChatStore();
   const { ship, friends } = useServices();
@@ -145,4 +145,4 @@ export const DMLogPresenter = (_props: ChatLogProps) => {
   );
 };
 
-export const DMLog = observer(DMLogPresenter);
+export const ChatLog = observer(ChatLogPresenter);

@@ -8,8 +8,8 @@ import {
   Avatar,
   Spinner,
 } from '@holium/design-system';
-import { useTrayApps } from '../store';
-import { useChatStore } from './store';
+import { useTrayApps } from '../../store';
+import { useChatStore } from '../store';
 import { ShipSearch } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';

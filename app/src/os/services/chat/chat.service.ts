@@ -57,6 +57,7 @@ export class ChatService extends BaseService {
     'realm.chat.get-chat-log': this.getChatLog,
     'realm.chat.get-chat-peers': this.getChatPeers,
     'realm.chat.send-message': this.sendMessage,
+    'realm.chat.edit-message': this.editMessage,
     'realm.chat.delete-message': this.deleteMessage,
     // 'realm.chat.read-chat': this.readChat,
     'realm.chat.create-chat': this.createChat,
@@ -64,6 +65,8 @@ export class ChatService extends BaseService {
     'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
     'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
     'realm.chat.set-pinned-message': this.setPinnedMessage,
+    'realm.chat.clear-pinned-message': this.clearPinnedMessage,
+    'realm.chat.clear-chat-backlog': this.clearChatBacklog,
     'realm.chat.add-peer': this.addPeerToChat,
     'realm.chat.remove-peer': this.removePeerFromChat,
     'realm.chat.leave-chat': this.leaveChat,
@@ -83,6 +86,8 @@ export class ChatService extends BaseService {
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
       ipcRenderer.invoke('realm.chat.send-message', path, fragments),
+    editMessage: (path: string, msgId: string, fragments: any[]) =>
+      ipcRenderer.invoke('realm.chat.edit-message', path, msgId, fragments),
     deleteMessage: (path: string, msgId: string) =>
       ipcRenderer.invoke('realm.chat.delete-message', path, msgId),
     createChat: (
@@ -110,6 +115,10 @@ export class ChatService extends BaseService {
       ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
     setPinnedMessage: (path: string, msgId: string) =>
       ipcRenderer.invoke('realm.chat.set-pinned-message', path, msgId),
+    clearPinnedMessage: (path: string) =>
+      ipcRenderer.invoke('realm.chat.clear-pinned-message', path),
+    clearChatBacklog: (path: string) =>
+      ipcRenderer.invoke('realm.chat.clear-chat-backlog', path),
     // readChat: (path: string) =>
     //   ipcRenderer.invoke('realm.chat.read-chat', path),
     leaveChat: (path: string) =>
@@ -640,14 +649,15 @@ export class ChatService extends BaseService {
 
   async setPinnedMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    const parts = msgId.split('~');
+    const splitId = msgId.split('~');
+    const timestamp = splitId[1];
+    const sender = splitId[2];
     const payload = {
       app: 'realm-chat',
       mark: 'action',
-      reaction: '',
       json: {
         'pin-message': {
-          'msg-id': [`~${parts[1]}`, `~${parts[2]}`],
+          'msg-id': [`~${timestamp}`, `~${sender}`],
           path: path,
           pin: true,
         },
@@ -661,12 +671,51 @@ export class ChatService extends BaseService {
     }
   }
 
-  editMessage(path: string, msgId: string, fragments: any[]) {
+  async clearPinnedMessage(_evt: any, path: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    // this.core.conduit.editChat(path, metadata);
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'clear-pinned-messages': {
+          path: path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to unpin chat');
+    }
   }
 
-  async deleteMessage(path: string, msgId: string) {
+  async editMessage(_evt: any, path: string, msgId: string, fragments: any[]) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const splitId = msgId.split('~');
+    const timestamp = splitId[1];
+    const sender = splitId[2];
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'edit-message': {
+          'msg-id': [`~${timestamp}`, `~${sender}`],
+          path,
+          fragments,
+        },
+      },
+    };
+    console.log(payload);
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to edit message');
+    }
+  }
+
+  async deleteMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const splitId = msgId.split('~');
     const timestamp = splitId[1];
@@ -686,7 +735,26 @@ export class ChatService extends BaseService {
       await this.core.conduit.poke(payload);
     } catch (err) {
       console.error(err);
-      throw new Error('Failed to create chat');
+      throw new Error('Failed to delete message');
+    }
+  }
+
+  async clearChatBacklog(_evnt: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'delete-backlog': {
+          path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to delete chat backlog');
     }
   }
 
@@ -729,7 +797,6 @@ export class ChatService extends BaseService {
       app: 'realm-chat',
       path: '/pins',
     });
-    console.log('fetchhhh', response);
     return response;
   }
 

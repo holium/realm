@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Flex, MenuItemProps, PinnedMessage } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
-import { ChatMessageType } from '../store/models';
+import { ChatMessageType } from '../models';
 import { useServices } from 'renderer/logic/store';
 
 type PinnedContainerProps = {
@@ -40,7 +40,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
         disabled: false,
         onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
-          selectedChat.setPinnedMessage(message.id);
+          selectedChat.clearPinnedMessage(message.id);
         },
       });
     }

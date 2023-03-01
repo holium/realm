@@ -28,19 +28,22 @@ export const ChatMessage = ({
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
   const contextMenuOptions = useMemo(() => {
-    const menu = [];
-
-    menu.push({
-      id: `${messageRowId}-pin-message`,
-      icon: isPinned ? 'Unpin' : 'Pin',
-      label: isPinned ? 'Unpin' : 'Pin',
-      disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
-        if (!selectedChat) return;
-        selectedChat.setPinnedMessage(message.id);
-      },
-    });
+    const menu: MenuItemProps[] = [];
+    if (!selectedChat || !ship) return menu;
+    const isAdmin = selectedChat.isHost(ship.patp);
+    if (isAdmin) {
+      menu.push({
+        id: `${messageRowId}-pin-message`,
+        icon: isPinned ? 'Unpin' : 'Pin',
+        label: isPinned ? 'Unpin' : 'Pin',
+        disabled: false,
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          if (!selectedChat) return;
+          selectedChat.setPinnedMessage(message.id);
+        },
+      });
+    }
     menu.push({
       id: `${messageRowId}-reply-to`,
       icon: 'Reply',

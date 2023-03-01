@@ -8,11 +8,11 @@ import {
   Box,
   Text,
 } from '@holium/design-system';
-import { useTrayApps } from '../store';
+import { useTrayApps } from '../../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { ChatRow } from './components/ChatRow';
-import { ChatRowType } from './types';
-import { useChatStore } from './store';
+import { ChatRow } from '../components/ChatRow';
+import { ChatRowType } from '../types';
+import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 
 export const InboxPresenter = () => {
@@ -133,6 +133,7 @@ export const InboxPresenter = () => {
               background: 'rgba(0,0,0,0.03)',
             }}
             flexDirection="column"
+            mb={1}
             borderRadius={6}
           >
             {pinnedChatList.map((chat) => {
@@ -165,7 +166,7 @@ export const InboxPresenter = () => {
           <WindowedList
             key={`inbox-${unpinnedChatList.length}`}
             width={dimensions.width - 26}
-            height={544 - pinnedChatList.length * 52}
+            height={544 - pinnedChatList.length * 56}
             rowHeight={52}
             data={unpinnedChatList}
             filter={searchFilter}

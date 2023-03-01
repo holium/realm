@@ -8,6 +8,7 @@ import {
   MenuItemProps,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
+import { useServices } from 'renderer/logic/store';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -28,10 +29,13 @@ export const ChatLogHeader = ({
   rightAction,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
+  const { ship } = useServices();
   const { selectedChat, setSubroute } = useChatStore();
 
   const contextMenuOptions = useMemo(() => {
-    const menu = [];
+    const menu: MenuItemProps[] = [];
+    if (!selectedChat || !ship) return menu;
+    const isAdmin = selectedChat.isHost(ship.patp);
     menu.push({
       id: 'chat-info',
       icon: 'Info',
@@ -63,16 +67,19 @@ export const ChatLogHeader = ({
         },
       });
     }
-    menu.push({
-      id: 'clear-history',
-      icon: 'ClearHistory',
-      section: 2,
-      label: 'Clear history',
-      disabled: true,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
-      },
-    });
+    if (isAdmin) {
+      menu.push({
+        id: 'clear-history',
+        icon: 'ClearHistory',
+        section: 2,
+        label: 'Clear history',
+        disabled: false,
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          selectedChat.clearChatBacklog();
+        },
+      });
+    }
 
     menu.push({
       id: 'leave-chat',

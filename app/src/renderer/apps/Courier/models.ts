@@ -77,9 +77,7 @@ export const Chat = types
     fetchMessages: flow(function* () {
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
-        console.log('messages', toJS(messages));
         self.messages = messages;
-        console.log('self.isPinLocallyHidden()', self.isPinLocallyHidden());
         self.hidePinned = self.isPinLocallyHidden();
         return self.messages;
       } catch (error) {
@@ -93,12 +91,23 @@ export const Chat = types
     setPinnedMessage: flow(function* (msgId: string) {
       try {
         yield ChatDBActions.setPinnedMessage(self.path, msgId);
-        const msg = self.messages.find((m) => m.id === msgId);
-        self.pinnedMessageId = msg;
+        self.pinnedMessageId = msgId;
         return self.pinnedMessageId;
       } catch (error) {
         console.error(error);
         self.pinnedMessageId = null;
+        return self.pinnedMessageId;
+      }
+    }),
+    clearPinnedMessage: flow(function* (_msgId: string) {
+      const oldId = self.pinnedMessageId;
+      try {
+        yield ChatDBActions.clearPinnedMessage(self.path);
+        self.pinnedMessageId = null;
+        return self.pinnedMessageId;
+      } catch (error) {
+        console.error(error);
+        self.pinnedMessageId = oldId;
         return self.pinnedMessageId;
       }
     }),
@@ -141,6 +150,18 @@ export const Chat = types
       localStorage.setItem(self.path, JSON.stringify({ hidePinned }));
       self.hidePinned = hidePinned;
     },
+    clearChatBacklog: flow(function* () {
+      const oldMessages = self.messages;
+      try {
+        yield ChatDBActions.clearChatBacklog(self.path);
+        self.messages.clear();
+        return self.messages;
+      } catch (error) {
+        console.error(error);
+        self.messages = oldMessages;
+        return self.messages;
+      }
+    }),
     // setPeers(peers: string[]) {},
     // setLastMessage(message: any) {},
     // setLastSender(sender: string) {},
