@@ -337,15 +337,13 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           hidden={props.hideWalletHero}
         >
           {accountDisplay}
-          {props.coin && (
-            <Balance
-              address={props.wallet.address}
-              coin={props.coin}
-              amountDisplay={amountDisplay}
-              amountUsdDisplay={amountUsdDisplay}
-              colors={themeData.colors}
-            />
-          )}
+          <Balance
+            address={props.wallet.address}
+            coin={props.coin || undefined}
+            amountDisplay={amountDisplay}
+            amountUsdDisplay={amountUsdDisplay}
+            colors={themeData.colors}
+          />
         </Box>
         <Flex
           flexDirection="row"
