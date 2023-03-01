@@ -74,6 +74,15 @@ export const AirliftCommandPalette: FC = observer(() => {
           >
             <Icon name="Slider" size={ICON_SIZE} overflow="visible" />
           </IconButton>
+          <IconButton
+            size={ICON_SIZE - 5}
+            mt="2px"
+            draggable={true}
+            onDragStart={(event) => onButtonDragStart(event, 'colorpicker')}
+            color={textColor}
+          >
+            <Icon name="ColorPicker" size={ICON_SIZE} overflow="visible" />
+          </IconButton>
         </Flex>
         <Flex flexDirection="column" gap={10} flexGrow={1}>
           <Text>Widgets</Text>

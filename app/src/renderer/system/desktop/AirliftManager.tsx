@@ -14,6 +14,9 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { getSnapshot } from 'mobx-state-tree';
 import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
+import { MediaNode } from 'renderer/apps/Airlift/nodes/MediaNode';
+import { ImageNode } from 'renderer/apps/Airlift/nodes/ImageNode';
+import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -21,9 +24,23 @@ const AirliftManagerPresenter = () => {
 
   const nodeTypes = useMemo(() => {
     return {
-      agent: AgentNode,
-      wallet: WalletNode,
+      button: ButtonNode,
+      textinput: TextInputNode,
+      slider: SliderNode,
+      colorpicker: ColorPickerNode,
+      text: TextNode,
+      image: ImageNode,
       link: LinkNode,
+      audio: AudioNode,
+      media: MediaNode,
+      '3d': Node3D,
+      agent: AgentNode,
+      gate: Gate,
+      uqbar: UqbarContractNode,
+      portal: Portal,
+      wallet: WalletNode,
+      relic: RelicNode,
+      room: RoomNode,
     };
   }, []);
 
