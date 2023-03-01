@@ -176,8 +176,8 @@
     ::
     ::  USE THIS ONE FOR PRECISE msg-id PINPOINTING
       [%x %db %messages %start @ @ ~]
-        =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
-        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.t.path)
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
+        =/  sender=@p       `@p`(slav %p i.t.t.t.t.t.path)
         ``db-dump+!>(tables+[messages+(start-lot:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
     ::
       [%x %delete-log %start-ms @ ~]

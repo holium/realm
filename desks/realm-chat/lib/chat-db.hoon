@@ -577,7 +577,7 @@
           :~
             ['type' %s %update]
             ['table' %s %messages]
-            ['msg-id' a+~[s+(scot %da timestamp.msg-id.ch) s+(scot %p sender.msg-id.ch)]]
+            ['msg-id' (msg-id-to-json msg-id.ch)]
             ['message' a+(turn message.ch |=(m=msg-part:sur (messages-row [[msg-id.m msg-part-id.m] m])))]
           ==
         %upd-paths-row
@@ -590,7 +590,7 @@
           :~
             ['type' %s -.ch]
             ['table' %s %messages]
-            ['msg-id' a+~[s+(scot %da timestamp.msg-id.uniq-id.ch) s+(scot %p sender.msg-id.uniq-id.ch)]]
+            ['msg-id' (msg-id-to-json msg-id.uniq-id.ch)]
             ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
           ==
       ==
@@ -631,7 +631,8 @@
           sender+s+(scot %p sender.msg-id.msg-part)
           msg-id+(msg-id-to-json msg-id.msg-part)
           msg-part-id+(numb msg-part-id.msg-part)
-          content+(content-to-json content.msg-part)
+          content-type+(content-typeify content.msg-part)
+          content-data+(content-dataify content.msg-part)
           reply-to+(reply-to-to-json reply-to.msg-part)
           metadata+(metadata-to-json metadata.msg-part)
           created-at+(time created-at.msg-part)
@@ -649,32 +650,35 @@
           msg-id+(msg-id-to-json +.+.reply-to)
       ==
     ::
-    ++  content-to-json
+    ++  content-typeify
       |=  =content:sur
       ^-  json
-      %-  pairs
       ?+  -.content
         ::default here
-        :~  [-.content [%s +.content]]
-        ==
-        %ship
-          :~  ship+[%s (scot %p p.content)]
-          ==
-        %break
-          :~  break+~
-          ==
-        %custom
-          :~  custom+a+[[%s -.+.content] [%s +.+.content] ~]
-          ==
+        [%s `@t`-.content]
+        %custom  [%s `@t`-.+.content]
       ==
+    ::
+    ++  content-dataify
+      |=  =content:sur
+      ?+  -.content
+        ::default here
+        [%s +.content]
+        %ship     [%s `@t`(scot %p p.content)]
+        %break    ~
+        %custom   [%s +.+.content]
+      ==
+    ::
     ++  msg-id-to-json
       |=  =msg-id:sur
       ^-  json
-      a+~[s+(scot %da timestamp.msg-id) s+(scot %p sender.msg-id)]
+      s+(spat ~[(scot %da timestamp.msg-id) (scot %p sender.msg-id)])
+    ::
     ++  metadata-to-json
       |=  m=(map cord cord)
       ^-  json
       o+(~(rut by m) |=([k=cord v=cord] s+v))
+    ::
     ++  peer-row
       |=  =peer-row:sur
       ^-  json
