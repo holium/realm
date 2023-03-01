@@ -190,6 +190,20 @@
     ==
   [cards state]
 ::
+++  clear-pinned-messages
+::  :realm-chat &action [%clear-pinned-messages /realm-chat/path-id]
+  |=  [=path state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+
+  =/  pathpeers  (scry-peers path bowl)
+  =/  cards
+    :: we poke all peers/members' db with edit-path-pins (including ourselves)
+    %:  turn
+      pathpeers
+      |=(p=peer-row:db [%pass /dbpoke %agent [patp.p %chat-db] %poke %db-action !>([%edit-path-pins path *pins:db])])
+    ==
+  [cards state]
+::
 ++  add-ship-to-chat
 ::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]

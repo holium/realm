@@ -66,6 +66,8 @@
         (edit-chat:lib +.act state bowl)
       %pin-message
         (pin-message:lib +.act state bowl)
+      %clear-pinned-messages
+        (clear-pinned-messages:lib +.act state bowl)
       %add-ship-to-chat
         (add-ship-to-chat:lib +.act state bowl)
       %remove-ship-from-chat
