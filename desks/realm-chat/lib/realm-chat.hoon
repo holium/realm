@@ -233,7 +233,7 @@
   [cards state]
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
-::  :realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
+::realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathpeers  (scry-peers path.act bowl)
@@ -446,10 +446,20 @@
     ++  de-edit-info
       %-  ot
       :~  
-          [%msg-id (at ~[(se %da) de-ship])]
+          [%msg-id de-msg-id]
           [%path pa]
           de-frag
       ==
+    ::
+    ++  de-msg-id
+      %+  cu
+        path-to-msg-id
+      pa
+    ::
+    ++  path-to-msg-id
+      |=  p=path
+      ^-  msg-id:db
+      [`@da`(slav %da +2:p) `@p`(slav %p +6:p)]
     ::
     ++  de-frag
       [%fragments (ar (ot ~[content+de-content reply-to+(mu path-and-msg-id) metadata+(om so)]))]
@@ -489,16 +499,14 @@
       %-  ot
       :~  
           [%path pa]
-          :: TODO decide if di for millisecond time is easier than (se %da)
-          [%msg-id (at ~[(se %da) de-ship])]
+          [%msg-id de-msg-id]
       ==
     ::
     ++  pin-message
       %-  ot
       :~  
           [%path pa]
-          :: TODO decide if di for millisecond time is easier than (se %da)
-          [%msg-id (at ~[(se %da) de-ship])]
+          [%msg-id de-msg-id]
           [%pin bo]
       ==
     ::
