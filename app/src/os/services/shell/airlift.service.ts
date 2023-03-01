@@ -15,7 +15,8 @@ export class AirliftService extends BaseService {
   private state?: AirliftStoreType; // for state management
 
   handlers = {
-    'realm.airlift.expand-arm': this.expandArm,
+    'realm.airlift.toggle-agent-expand': this.toggleAgentExpand,
+    'realm.airlift.toggle-arm-expand': this.toggleArmExpand,
     'realm.airlift.drop-airlift': this.dropAirlift,
     'realm.airlift.remove-airlift': this.removeAirlift,
     'realm.airlift.on-nodes-change': this.onNodesChange,
@@ -47,8 +48,15 @@ export class AirliftService extends BaseService {
     removeAirlift: (airliftId: string) => {
       return ipcRenderer.invoke('realm.airlift.remove-airlift', airliftId);
     },
-    expandArm: (airliftId: string, arm: string) => {
-      return ipcRenderer.invoke('realm.airlift.expand-arm', airliftId, arm);
+    toggleAgentExpand: (airliftId: string) => {
+      return ipcRenderer.invoke('realm.airlift.toggle-agent-expand', airliftId);
+    },
+    toggleArmExpand: (airliftId: string, arm: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.toggle-arm-expand',
+        airliftId,
+        arm
+      );
     },
     onNodesChange: (changes: NodeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
@@ -100,10 +108,16 @@ export class AirliftService extends BaseService {
   // ***********************************************************
   // ************************ AIRLIFT ***************************
   // ***********************************************************
-  async expandArm(_event: any, airliftId: string, arm: string) {
+  async toggleAgentExpand(_evnet: any, airliftId: string) {
+    this.state!.flowStore.nodes.find(
+      (node) => node.id === airliftId
+    )!.data.agent.toggleExpand();
+  }
+
+  async toggleArmExpand(_event: any, airliftId: string, arm: string) {
     this.state!.flowStore.nodes.find((node) => node.id === airliftId)!
       .data.agent.arms.get(arm)!
-      .expand();
+      .toggleExpand();
   }
 
   async dropAirlift(_event: IpcMainInvokeEvent, newAirlift: any) {

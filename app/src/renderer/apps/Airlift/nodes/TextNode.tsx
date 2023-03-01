@@ -5,8 +5,9 @@ export function TextNode({ data, isConnectable }) {
     <Flex border={data.showDelete ? '2px solid red' : 'none'}>
       <TextBlock
         id={data.id}
-        link={/*data.link*/ 'https://www.google.com/'}
-        by={'by'}
+        by=""
+        text=""
+        reference={{ image: '', link: '' }}
       />
     </Flex>
   );

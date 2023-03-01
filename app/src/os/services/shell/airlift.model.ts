@@ -64,8 +64,8 @@ export const AirliftArm = types
     },
   }))
   .actions((self) => ({
-    expand() {
-      self.expanded = true;
+    toggleExpand() {
+      self.expanded = !self.expanded;
     },
   }));
 
@@ -74,6 +74,7 @@ export type AirliftArmType = Instance<typeof AirliftArm>;
 const AirliftAgent = types
   .model('AirliftAgent', {
     arms: types.map(AirliftArm),
+    expanded: types.boolean,
   })
   .views((self) => ({
     get code() {
@@ -101,6 +102,11 @@ const AirliftAgent = types
       }
       code += '--';
       return code;
+    },
+  }))
+  .actions((self) => ({
+    toggleExpand() {
+      self.expanded = !self.expanded;
     },
   }));
 

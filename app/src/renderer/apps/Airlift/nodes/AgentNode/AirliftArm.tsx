@@ -1,12 +1,13 @@
-import { FC, Fragment } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
-import { BarStyle, Button, Icon } from '@holium/design-system';
+import { Flex, BarStyle, Button, Icon } from '@holium/design-system';
 import { Handle, Position } from 'reactflow';
 
 export type AirliftArmProps = {
   airliftId: string;
   arm: any;
+  index: number;
 };
 
 const BUTTON_SIZE = 30;
@@ -15,21 +16,43 @@ export const AirliftArm: FC<AirliftArmProps> = observer(
   (props: AirliftArmProps) => {
     const { airliftId, arm } = props;
 
-    const onArmExpand = () => {
-      AirliftActions.expandArm(airliftId, arm.name);
+    const toggleArmExpand = () => {
+      AirliftActions.toggleArmExpand(airliftId, arm.name);
     };
+    console.log('hidden', !arm.expanded);
 
     return (
       <>
-        {arm.expanded ? (
+        <Flex
+          id={'flex_' + airliftId + arm.name}
+          flexDirection="row"
+          pl="20px"
+          // flex={1}
+          // overflowX="visible"
+          position="relative"
+        >
+          <Handle
+            id={airliftId + arm.name}
+            type="source"
+            position={Position.Left}
+            style={{
+              bottom: 10,
+              top: 'auto',
+              background: '#555',
+              width: '20px',
+              height: '20px',
+              borderRadius: '3px',
+            }}
+            onConnect={(params) => console.log('handle onConnect', params)}
+            isConnectable={true}
+            hidden={false}
+            onClickCapture={toggleArmExpand}
+          />
           <BarStyle
             flexDirection="row"
-            pl="2px"
-            pr={1}
             flex={1}
             overflowX="visible"
-            width="80px"
-            justifyContent={'space-between'}
+            style={{ display: arm.expanded ? 'flex' : 'none' }}
           >
             <Button.IconButton size={BUTTON_SIZE + 10} style={{ fill: 'none' }}>
               <Icon name="AirliftCode" size={15} overflow="visible" mr={2} />
@@ -37,40 +60,8 @@ export const AirliftArm: FC<AirliftArmProps> = observer(
             <Button.IconButton size={BUTTON_SIZE + 10}>
               <Icon name="AirliftCards" overflow="visible" size={20} />
             </Button.IconButton>
-            <Handle
-              type="source"
-              position={Position.Left}
-              style={{
-                bottom: 10,
-                top: 'auto',
-                background: '#555',
-                width: '20px',
-                height: '20px',
-                borderRadius: '3px',
-              }}
-              onConnect={(params) => console.log('handle onConnect', params)}
-              isConnectable={true}
-            />
           </BarStyle>
-        ) : (
-          <Handle
-            id={airliftId + arm.name}
-            type="source"
-            position={Position.Right}
-            style={{
-              /*bottom: 10,
-              top: 'auto',
-              background: '#555',*/
-              width: '20px',
-              height: '20px',
-              borderRadius: '3px',
-            }}
-            onConnect={(params) => console.log('handle onConnect', params)}
-            isConnectable={true}
-            onClick={onArmExpand}
-            onClickCapture={onArmExpand}
-          />
-        )}
+        </Flex>
       </>
     );
   }

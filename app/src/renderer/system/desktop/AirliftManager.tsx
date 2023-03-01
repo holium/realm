@@ -104,6 +104,7 @@ const AirliftManagerPresenter = () => {
           id: airliftId,
           showDelete: false,
           agent: {
+            expanded: false,
             arms: {
               'on-init': {
                 name: 'on-init',

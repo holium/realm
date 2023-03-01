@@ -1,8 +1,9 @@
-import { Flex } from '@holium/design-system';
+import { Flex, TextInput } from '@holium/design-system';
 import { KeyboardEventHandler, useState } from 'react';
 import { observer } from 'mobx-react';
 import { AirliftArm } from './AirliftArm';
 import { AirliftDataType } from 'os/services/shell/airlift.model';
+import { AirliftActions } from 'renderer/logic/actions/airlift';
 
 interface AgentNodeProps {
   data: AirliftDataType;
@@ -14,16 +15,16 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === 'Enter') {
       setCreated(true);
-      // profileForm.actions.submit();
+      AirliftActions.toggleAgentExpand(data.id);
     }
   };
   return (
     <Flex
       flexDirection="column"
-      gap={10}
+      gap={30}
       border={data.showDelete ? '2px solid red' : 'none'}
     >
-      {/* name view <TextInput
+      <TextInput
         id={`${data.id}-name`}
         name={`${data.id}-name`}
         type="text"
@@ -38,10 +39,17 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
         }}
         onKeyDown={onKeyDown}
         disabled={created}
-      />*/}
-      {Array.from(data.agent.arms.values()).map((arm) => {
-        return <AirliftArm key={arm.name} airliftId={data.id} arm={arm} />;
-      })}
+        onClick={() => AirliftActions.toggleAgentExpand(data.id)}
+      />
+      {data.agent.expanded &&
+        Array.from(data.agent.arms.values()).map((arm, index) => (
+          <AirliftArm
+            key={arm.name}
+            airliftId={data.id}
+            arm={arm}
+            index={index}
+          />
+        ))}
     </Flex>
   );
 });
