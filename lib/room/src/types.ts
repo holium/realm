@@ -45,3 +45,9 @@ export type ChatModelType = {
   timeReceived: number;
   isRightAligned: boolean;
 };
+
+export type ShipConfig = {
+  ship: string;
+  url: string;
+  code: string;
+};
