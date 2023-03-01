@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
-import { MenuItemProps, PinnedMessage } from '@holium/design-system';
+import { useEffect, useMemo, useState } from 'react';
+import { Flex, MenuItemProps, PinnedMessage } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
 import { ChatMessageType } from '../store/models';
+import { useServices } from 'renderer/logic/store';
 
 type PinnedContainerProps = {
   message: ChatMessageType;
@@ -10,25 +11,25 @@ type PinnedContainerProps = {
 
 export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const { selectedChat } = useChatStore();
+  const { ship, friends } = useServices();
   // are we an admin of the chat?
-  const isAdmin = true; //selectedChat?.isAdmin;
   const { getOptions, setOptions } = useContextMenu();
+  const [authorColor, setAuthorColor] = useState<string | undefined>();
 
   const pinnedRowId = useMemo(() => `pinned-${message.id}`, [message.id]);
-  // const isPinned = isMessagePinned(message.id);
-  const isPinned = false;
   const contextMenuOptions = useMemo(() => {
-    const menu = [];
+    const menu: MenuItemProps[] = [];
+    if (!selectedChat || !ship) return menu;
+    const isAdmin = selectedChat.isHost(ship.patp);
 
     menu.push({
       id: `${pinnedRowId}-hide-pinned`,
-      icon: 'Hide',
-      label: 'Hide pinned message',
+      icon: 'EyeOff',
+      label: 'Hide pin',
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        if (!selectedChat) return;
-        // selectedChat.togglePinnedMessage(message.msg_id, isPinned);
+        selectedChat.setHidePinned(true);
       },
     });
     if (isAdmin) {
@@ -39,13 +40,12 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
         disabled: false,
         onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
-          if (!selectedChat) return;
           selectedChat.setPinnedMessage(message.id);
         },
       });
     }
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [pinnedRowId, isPinned]);
+  }, [pinnedRowId]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(pinnedRowId)) {
@@ -53,16 +53,33 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
     }
   }, [contextMenuOptions, getOptions, setOptions, pinnedRowId]);
 
+  useEffect(() => {
+    const contact = friends.getContactAvatarMetadata(message.sender);
+    // NOTE: #000 is the default color, so we want to default to undefined
+    // and use the accent color instead
+    if (contact && contact.color !== '#000') {
+      setAuthorColor(contact.color);
+    }
+  }, [message.sender]);
+
   return (
-    <PinnedMessage
-      id={pinnedRowId}
-      author={message.sender}
-      authorColor={'#FFF'}
-      message={message.contents}
-      sentAt={new Date(message.createdAt).toISOString()}
-      onClick={() => {
-        console.log('clicked pinned message');
-      }}
-    />
+    <Flex
+      width="100%"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <PinnedMessage
+        id={pinnedRowId}
+        author={message.sender}
+        authorColor={authorColor}
+        message={message.contents}
+        sentAt={new Date(message.createdAt).toISOString()}
+        onClick={() => {
+          console.log('clicked pinned message');
+        }}
+      />
+    </Flex>
   );
 };

@@ -1,8 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Box, Flex, WindowedList, Text } from '@holium/design-system';
-
-import { useServices } from 'renderer/logic/store';
 import { useChatStore } from '../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { useTrayApps } from 'renderer/apps/store';
@@ -13,19 +11,21 @@ import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
+import { AnimatePresence } from 'framer-motion';
+import { useServices } from 'renderer/logic/store';
 
 type ChatLogProps = {
   storage?: IuseStorage;
 };
 export const DMLogPresenter = (_props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
-  const { friends, ship } = useServices();
   const { selectedChat, setSubroute } = useChatStore();
+  const { ship, friends } = useServices();
 
-  const { color: sigilColor } = useMemo(
-    () => friends.getContactAvatarMetadata(ship!.patp),
-    []
-  );
+  const { color: ourColor } = useMemo(() => {
+    if (!ship) return { color: '#000' };
+    return friends.getContactAvatarMetadata(ship.patp);
+  }, []);
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -43,6 +43,9 @@ export const DMLogPresenter = (_props: ChatLogProps) => {
 
   if (!selectedChat) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
+
+  const showPin =
+    selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
 
   const chatAvatarEl = (
     <ChatAvatar
@@ -105,19 +108,19 @@ export const DMLogPresenter = (_props: ChatLogProps) => {
             </Text.Custom>
           </Flex>
         ) : (
-          // TODO: add pinned messages
           <Flex flexDirection="column">
-            {selectedChat.pinnedChatMessage && (
-              <PinnedContainer message={selectedChat.pinnedChatMessage} />
+            {showPin && (
+              <AnimatePresence>
+                <PinnedContainer message={selectedChat.pinnedChatMessage} />
+              </AnimatePresence>
             )}
             <WindowedList
               startAtBottom
               hideScrollbar
               width={dimensions.width - 24}
-              height={selectedChat.pinnedChatMessage ? 550 - 50 : 550}
+              height={showPin ? 550 - 50 : 550}
               data={messages}
               rowRenderer={(row, index, measure) => {
-                // TODO add context menu for delete, reply, etc
                 return (
                   <Box
                     key={`${row.id}-${row.createdAt}-${index}`}
@@ -127,7 +130,7 @@ export const DMLogPresenter = (_props: ChatLogProps) => {
                     <ChatMessage
                       message={row}
                       canReact={true}
-                      authorColor={sigilColor}
+                      ourColor={ourColor}
                       onLoad={measure}
                     />
                   </Box>

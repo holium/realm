@@ -469,9 +469,14 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
+        (
+            SELECT ship
+            FROM peers
+            WHERE peers.path = paths.path AND peers.role = 'host'
+        ) AS host,
         paths.peers_get_backlog peersGetBacklog,
         json_extract(json_extract(pins, '$[0]'), '$[0]') ||
-        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessage,
+        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,

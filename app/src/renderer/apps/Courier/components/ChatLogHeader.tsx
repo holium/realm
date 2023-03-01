@@ -1,4 +1,12 @@
-import { Flex, Button, Text, Icon, Menu } from '@holium/design-system';
+import { useMemo } from 'react';
+import {
+  Flex,
+  Button,
+  Text,
+  Icon,
+  Menu,
+  MenuItemProps,
+} from '@holium/design-system';
 import { useChatStore } from '../store';
 
 type ChatLogHeaderProps = {
@@ -20,7 +28,66 @@ export const ChatLogHeader = ({
   rightAction,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
-  const { setSubroute } = useChatStore();
+  const { selectedChat, setSubroute } = useChatStore();
+
+  const contextMenuOptions = useMemo(() => {
+    const menu = [];
+    menu.push({
+      id: 'chat-info',
+      icon: 'Info',
+      label: 'Info',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        setSubroute('chat-info');
+      },
+    });
+    menu.push({
+      id: 'mute-chat',
+      icon: 'NotificationOff',
+      label: 'Mute',
+      disabled: true,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+    if (selectedChat?.hidePinned) {
+      menu.push({
+        id: 'show-hidden-pinned',
+        icon: 'EyeOn',
+        label: 'Show hidden pins',
+        disabled: false,
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          selectedChat.setHidePinned(false);
+        },
+      });
+    }
+    menu.push({
+      id: 'clear-history',
+      icon: 'ClearHistory',
+      section: 2,
+      label: 'Clear history',
+      disabled: true,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+
+    menu.push({
+      id: 'leave-chat',
+      icon: 'Trash',
+      section: 2,
+      iconColor: '#ff6240',
+      labelColor: '#ff6240',
+      label: 'Delete chat',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+    return menu.filter(Boolean) as MenuItemProps[];
+  }, [selectedChat?.hidePinned]);
   return (
     <Flex
       pt="2px"
@@ -98,49 +165,7 @@ export const ChatLogHeader = ({
                 <Icon name="MoreHorizontal" size={22} opacity={0.5} />
               </Button.IconButton>
             }
-            options={[
-              {
-                id: 'chat-info',
-                icon: 'Info',
-                label: 'Info',
-                disabled: false,
-                onClick: (evt) => {
-                  evt.stopPropagation();
-                  setSubroute('chat-info');
-                },
-              },
-              {
-                id: 'mute-chat',
-                icon: 'NotificationOff',
-                label: 'Mute',
-                disabled: true,
-                onClick: (evt) => {
-                  evt.stopPropagation();
-                },
-              },
-              {
-                id: 'clear-history',
-                icon: 'ClearHistory',
-                section: 2,
-                label: 'Clear history',
-                disabled: true,
-                onClick: (evt) => {
-                  evt.stopPropagation();
-                },
-              },
-              {
-                id: 'leave-chat',
-                icon: 'Trash',
-                section: 2,
-                iconColor: '#ff6240',
-                labelColor: '#ff6240',
-                label: 'Delete chat',
-                disabled: false,
-                onClick: (evt) => {
-                  evt.stopPropagation();
-                },
-              },
-            ]}
+            options={contextMenuOptions}
           />
         )}
       </Flex>

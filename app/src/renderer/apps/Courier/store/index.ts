@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+// import { toJS } from 'mobx';
 import { flow, Instance, types, tryReference } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat } from './models';

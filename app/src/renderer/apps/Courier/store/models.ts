@@ -40,9 +40,10 @@ export const Chat = types
     path: types.identifier,
     type: types.enumeration(['dm', 'group', 'space']),
     metadata: ChatMetadataModel,
+    host: types.string,
     peers: types.array(types.string),
     peersGetBacklog: types.boolean,
-    pinnedMessage: types.maybeNull(types.string),
+    pinnedMessageId: types.maybeNull(types.string),
     lastMessage: types.maybeNull(types.array(types.frozen())),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
@@ -51,14 +52,25 @@ export const Chat = types
     messages: types.optional(types.array(types.frozen()), []),
     // ui state
     pending: types.optional(types.boolean, false),
+    hidePinned: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get pinnedChatMessage() {
-      if (!self.pinnedMessage) return null;
-      return self.messages.find((m) => m.id === self.pinnedMessage);
+      if (!self.pinnedMessageId) return null;
+      return self.messages.find((m) => m.id === self.pinnedMessageId);
+    },
+    // Check if the pinned message is hidden locally
+    isPinLocallyHidden() {
+      if (!self.pinnedMessageId) return false;
+      const localSettings = localStorage.getItem(self.path);
+      if (!localSettings) return false;
+      return JSON.parse(localSettings).hidePinned;
     },
     isMessagePinned(msgId: string) {
-      return self.pinnedMessage === msgId;
+      return self.pinnedMessageId === msgId;
+    },
+    isHost(ship: string) {
+      return self.host === ship;
     },
   }))
   .actions((self) => ({
@@ -67,6 +79,8 @@ export const Chat = types
         const messages = yield ChatDBActions.getChatLog(self.path);
         console.log('messages', toJS(messages));
         self.messages = messages;
+        console.log('self.isPinLocallyHidden()', self.isPinLocallyHidden());
+        self.hidePinned = self.isPinLocallyHidden();
         return self.messages;
       } catch (error) {
         console.error(error);
@@ -80,12 +94,12 @@ export const Chat = types
       try {
         yield ChatDBActions.setPinnedMessage(self.path, msgId);
         const msg = self.messages.find((m) => m.id === msgId);
-        self.pinnedMessage = msg;
-        return self.pinnedMessage;
+        self.pinnedMessageId = msg;
+        return self.pinnedMessageId;
       } catch (error) {
         console.error(error);
-        self.pinnedMessage = null;
-        return self.pinnedMessage;
+        self.pinnedMessageId = null;
+        return self.pinnedMessageId;
       }
     }),
     updateMetadata: flow(function* (metadata: Partial<ChatMetadata>) {
@@ -122,6 +136,11 @@ export const Chat = types
         self.peersGetBacklog = oldPeerGetBacklog;
       }
     }),
+    // Store hidePinned in localStorage
+    setHidePinned: (hidePinned: boolean) => {
+      localStorage.setItem(self.path, JSON.stringify({ hidePinned }));
+      self.hidePinned = hidePinned;
+    },
     // setPeers(peers: string[]) {},
     // setLastMessage(message: any) {},
     // setLastSender(sender: string) {},

@@ -7,23 +7,26 @@ import { useChatStore } from '../store';
 type ChatMessageProps = {
   message: any;
   canReact: boolean;
-  authorColor: string;
+  ourColor: string;
   onLoad: () => void;
 };
 
 export const ChatMessage = ({
   message,
-  authorColor,
   canReact,
+  ourColor,
   onLoad,
 }: ChatMessageProps) => {
-  const { ship } = useServices();
+  const { ship, friends } = useServices();
   const { selectedChat } = useChatStore();
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
+  const { color: authorColor } = useMemo(() => {
+    return friends.getContactAvatarMetadata(message.sender);
+  }, []);
   const contextMenuOptions = useMemo(() => {
     const menu = [];
 
@@ -81,6 +84,7 @@ export const ChatMessage = ({
     <Bubble
       id={messageRowId}
       isOur={isOur}
+      ourColor={ourColor}
       author={message.sender}
       authorColor={authorColor}
       message={message.contents}

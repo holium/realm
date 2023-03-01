@@ -39,19 +39,22 @@ export const PinnedMessage = (props: PinnedProps) => {
   }
 
   return (
-    <Flex key={id} display="inline-flex" mx="1px" onClick={onClick}>
+    <Flex id={id} key={id} mx="1px" width="100%" onClick={onClick}>
       <FragmentBlock id={id}>
         <FragmentBlockquote
+          id={id}
           style={{
             paddingTop: 6,
             paddingBottom: 6,
             borderRadius: 4,
+            borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
             background: 'var(--rlm-overlay-hover)',
           }}
-          id={id}
         >
           <Flex flexDirection="column" className="fragment-reply">
-            <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
+            <BubbleAuthor id={id} authorColor={authorColor}>
+              {author}
+            </BubbleAuthor>
             {pinnedContent}
           </Flex>
         </FragmentBlockquote>
