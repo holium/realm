@@ -128,7 +128,9 @@ sync_app_code.sh
 # logs
 app/realmlog.txt
 
-app.dev.json
+# Realm config files
+app/src/app.dev.json
+lib/room/test-ui-vite/src/ship-configs.json
 
 # Storybook
 storybook-static
