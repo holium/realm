@@ -403,6 +403,7 @@ const SpacesCreateFormPresenter = ({
               }}
               onFocus={() => nameField.actions.onFocus()}
               onBlur={nameField.actions.onBlur}
+              disabled={workflowState.type === 'group'}
             />
           </FormControl.Field>
           <FormControl.Field>

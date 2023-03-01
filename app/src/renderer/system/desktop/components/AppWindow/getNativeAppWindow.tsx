@@ -2,7 +2,7 @@ import { BrowserWebview } from 'renderer/apps/Browser/BrowserWebview';
 import {
   BrowserToolbar,
   BrowserToolbarProps,
-} from 'renderer/apps/Browser/Toolbar/Toolbar';
+} from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { SystemApp } from 'renderer/apps/System';
 import { AirliftCommandPalette } from 'renderer/apps/Airlift/AirliftCommandPalette';
 
