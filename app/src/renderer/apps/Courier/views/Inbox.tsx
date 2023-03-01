@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Flex,
   Icon,
@@ -9,7 +9,6 @@ import {
   Text,
 } from '@holium/design-system';
 import { useTrayApps } from '../../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatRow } from '../components/ChatRow';
 import { ChatRowType } from '../types';
 import { useChatStore } from '../store';
@@ -17,31 +16,9 @@ import { observer } from 'mobx-react';
 
 export const InboxPresenter = () => {
   const { dimensions } = useTrayApps();
-  const { setChat, setSubroute, isChatPinned } = useChatStore();
+  const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
+    useChatStore();
   const [searchString, setSearchString] = useState<string>('');
-  const [chatList, setChatList] = useState<ChatRowType[]>([]);
-
-  useEffect(() => {
-    ChatDBActions.getChatList()
-      .then((list) => {
-        setChatList(list);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  // TODO move this to a store
-  // useEffect(() => {
-  //   ChatDBActions.onDbChange((_evt, type, data) => {
-  //     if (type === 'path-deleted') {
-  //       const remIdx = chatList.findIndex((c) => c.path === data);
-  //       const prunedList = chatList.splice(remIdx, 1);
-  //       setChatList(prunedList);
-  //     }
-  //   });
-  // }, [chatList]);
-
   // const lastTimeSent = chatList[0]?.timestamp;
 
   const searchFilter = useCallback(
@@ -61,13 +38,6 @@ export const InboxPresenter = () => {
     },
     [searchString]
   );
-
-  const pinnedChatList = chatList
-    .filter((c) => isChatPinned(c.path))
-    .sort((a, b) => b.updatedAt - a.updatedAt);
-  const unpinnedChatList = chatList
-    .filter((c) => !isChatPinned(c.path))
-    .sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
@@ -100,7 +70,7 @@ export const InboxPresenter = () => {
           <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-      {chatList.length === 0 ? (
+      {inbox.length === 0 ? (
         <Flex
           flex={1}
           flexDirection="column"

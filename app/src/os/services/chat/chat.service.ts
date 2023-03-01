@@ -15,6 +15,7 @@ import {
   DelPathsRow,
   DelPeersRow,
   UpdateRow,
+  DelMessagesRow,
 } from './chat.types';
 
 type ChatUpdateType =
@@ -136,7 +137,8 @@ export class ChatService extends BaseService {
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
     this.sendChatUpdate = this.sendChatUpdate.bind(this);
-    this.deletePath = this.deletePath.bind(this);
+    this.deletePathsRow = this.deletePathsRow.bind(this);
+    this.deleteMessagesRow = this.deleteMessagesRow.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -212,20 +214,20 @@ export class ChatService extends BaseService {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
         case 'messages':
-          // console.log('add-row to messages', addRow.row);
+          console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
-          const msg = this.getChatMessage(
-            message.path,
-            `${message['msg-id'][0]}${message['msg-id'][1]}`
-          );
+          const msg = this.getChatMessage(message.path, message['msg-id']);
           console.log('NEW MESSAGE', msg);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
           console.log('add-row to paths', addRow.row);
-          const paths = [addRow.row] as PathsRow[];
-          this.insertPaths(paths);
+          const path = addRow.row as PathsRow;
+          this.insertPaths([path]);
+          const chat = this.getChat(path.path);
+          this.sendChatUpdate('path-added', chat);
+
           break;
         case 'peers':
           console.log('add-row to peers', addRow.row);
@@ -263,21 +265,21 @@ export class ChatService extends BaseService {
     }
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
-      // const delMessagesRow = dbChange as DelMessagesRow;
-      // this.deleteMessage(delMessagesRow.row);
-      // this.sendChatUpdate('message-deleted', delMessagesRow.row);
+      const delMessagesRow = dbChange as DelMessagesRow;
+      this.deleteMessagesRow(delMessagesRow['msg-id']);
+      this.sendChatUpdate('message-deleted', delMessagesRow['msg-id']);
     }
     if (dbChange.type === 'del-paths-row') {
       console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this.deletePath(delPathsRow.row);
+      this.deletePathsRow(delPathsRow.row);
       this.sendChatUpdate('path-deleted', delPathsRow.row);
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
-      const delPathsRow = dbChange as DelPeersRow;
-      this.deletePath(delPathsRow.path);
-      this.sendChatUpdate('peer-deleted', delPathsRow);
+      // const delPathsRow = dbChange as DelPeersRow;
+      // this.deletePeersRow(delPathsRow.path);
+      // this.sendChatUpdate('peer-deleted', delPathsRow);
     }
   }
 
@@ -329,13 +331,13 @@ export class ChatService extends BaseService {
       for (const message of messages) {
         insert.run({
           path: message.path,
-          msg_id: `${message['msg-id'][0]}${message['msg-id'][1]}`,
+          msg_id: message['msg-id'],
           msg_part_id: message['msg-part-id'],
-          content_type: Object.keys(message.content)[0],
-          content_data: Object.values(message.content)[0],
+          content_type: message['content-type'],
+          content_data: message['content-data'],
           reply_to: message['reply-to'],
           metadata: JSON.stringify(message.metadata),
-          sender: message['msg-id'][1],
+          sender: message.sender,
           created_at: message['created-at'],
           updated_at: message['updated-at'],
           expires_at: message['expires-at'],
@@ -360,6 +362,7 @@ export class ChatService extends BaseService {
         ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
+      console.log(paths);
       for (const path of paths)
         insert.run({
           path: path.path,
@@ -399,7 +402,7 @@ export class ChatService extends BaseService {
     insertMany(peers);
   }
 
-  deletePath(path: string) {
+  deletePathsRow(path: string) {
     if (!this.db) throw new Error('No db connection');
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
     console.log('deleting path', path);
@@ -412,6 +415,14 @@ export class ChatService extends BaseService {
     // delete all peers in that path
     const deletePeers = this.db.prepare('DELETE FROM peers WHERE path = ?');
     deletePeers.run(path);
+  }
+  deleteMessagesRow(msgId: string) {
+    if (!this.db) throw new Error('No db connection');
+    const deleteMessage = this.db.prepare(
+      'DELETE FROM messages WHERE msg_id = ?'
+    );
+    console.log('deleting msgId', msgId);
+    deleteMessage.run(msgId);
   }
   // ----------------------------------------------
   // ----------------- DB queries -----------------
@@ -515,6 +526,104 @@ export class ChatService extends BaseService {
     });
   }
 
+  getChat(path: string) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      WITH formed_messages AS (
+        WITH formed_fragments AS (
+            WITH realm_chat as (
+                SELECT *
+                FROM messages
+                WHERE path LIKE '%realm-chat%'
+                ORDER BY msg_part_id, created_at DESC
+            )
+            SELECT
+                realm_chat.path,
+                realm_chat.msg_id,
+                realm_chat.msg_part_id,
+                json_object(realm_chat.content_type, realm_chat.content_data) content,
+                realm_chat.sender,
+                realm_chat.created_at,
+                realm_chat.updated_at,
+                realm_chat.reply_to,
+                realm_chat.metadata
+            FROM realm_chat
+            ORDER BY
+                realm_chat.created_at DESC,
+                realm_chat.msg_id DESC,
+                realm_chat.msg_part_id
+        )
+        SELECT
+            path,
+            msg_id,
+            msg_part_id,
+            json_group_array(content) as contents,
+            sender,
+            reply_to,
+            metadata,
+            MAX(created_at) m_created_at,
+            MAX(updated_at) m_updated_at
+        FROM formed_fragments
+        GROUP BY msg_id
+        ORDER BY m_created_at DESC,
+                msg_id DESC,
+                msg_part_id DESC
+      ), chat_with_messages AS (
+        SELECT
+            path,
+            contents lastMessage,
+            sender lastSender,
+            m_created_at created_at,
+            m_updated_at updated_at
+        FROM formed_messages
+        GROUP BY formed_messages.path
+      )
+      SELECT
+        paths.path,
+        type,
+        metadata,
+        (
+            SELECT json_group_array(ship)
+            FROM peers
+            WHERE peers.path = paths.path AND ship != ?
+        ) AS peers,
+        (
+            SELECT ship
+            FROM peers
+            WHERE peers.path = paths.path AND peers.role = 'host'
+        ) AS host,
+        paths.peers_get_backlog peersGetBacklog,
+        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
+        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        lastMessage,
+        lastSender,
+        chat_with_messages.created_at createdAt,
+        chat_with_messages.updated_at updatedAt,
+        paths.max_expires_at_duration expiresDuration
+      FROM paths
+      LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
+      WHERE paths.path = ?
+      ORDER BY
+          chat_with_messages.created_at DESC,
+          json_extract(json(metadata), '$.timestamp') DESC;
+    `);
+    const result = query.all(`~${this.core.conduit?.ship}`, path);
+
+    return result.map((row) => {
+      return {
+        ...row,
+        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peers: row.peers ? JSON.parse(row.peers) : null,
+        metadata: row.metadata ? parseMetadata(row.metadata) : null,
+        lastMessage: row.lastMessage
+          ? JSON.parse(row.lastMessage).map(
+              (message: any) => message && JSON.parse(message)
+            )
+          : null,
+      };
+    });
+  }
+
   getChatLog(
     _evt: any,
     path: string,
@@ -546,6 +655,7 @@ export class ChatService extends BaseService {
             realm_chat.msg_part_id
       )
       SELECT
+        path,
         msg_id id,
         json_group_array(json_extract(content, '$')) as contents,
         sender,
@@ -649,15 +759,12 @@ export class ChatService extends BaseService {
 
   async setPinnedMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    const splitId = msgId.split('~');
-    const timestamp = splitId[1];
-    const sender = splitId[2];
     const payload = {
       app: 'realm-chat',
       mark: 'action',
       json: {
         'pin-message': {
-          'msg-id': [`~${timestamp}`, `~${sender}`],
+          'msg-id': msgId,
           path: path,
           pin: true,
         },
@@ -692,15 +799,12 @@ export class ChatService extends BaseService {
 
   async editMessage(_evt: any, path: string, msgId: string, fragments: any[]) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    const splitId = msgId.split('~');
-    const timestamp = splitId[1];
-    const sender = splitId[2];
     const payload = {
       app: 'realm-chat',
       mark: 'action',
       json: {
         'edit-message': {
-          'msg-id': [`~${timestamp}`, `~${sender}`],
+          'msg-id': msgId,
           path,
           fragments,
         },
@@ -717,15 +821,12 @@ export class ChatService extends BaseService {
 
   async deleteMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    const splitId = msgId.split('~');
-    const timestamp = splitId[1];
-    const sender = splitId[2];
     const payload = {
       app: 'realm-chat',
       mark: 'action',
       json: {
         'delete-message': {
-          'msg-id': [`~${timestamp}`, `~${sender}`],
+          'msg-id': msgId,
           path,
         },
       },

@@ -39,7 +39,6 @@ export const ChatMessage = ({
         disabled: false,
         onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
-          if (!selectedChat) return;
           selectedChat.setPinnedMessage(message.id);
         },
       });
@@ -71,6 +70,7 @@ export const ChatMessage = ({
         labelColor: '#ff6240',
         onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
+          selectedChat.deleteMessage(message.id);
         },
       });
     }

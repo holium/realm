@@ -2,17 +2,16 @@ import { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Box, Flex, WindowedList, Text } from '@holium/design-system';
 import { useChatStore } from '../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
-import { SoundActions } from 'renderer/logic/actions/sound';
 import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
+import { ChatMessageType } from '../models';
 
 type ChatLogProps = {
   storage?: IuseStorage;
@@ -32,15 +31,6 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     selectedChat.fetchMessages();
   }, [selectedChat]);
 
-  useEffect(() => {
-    if (!selectedChat) return;
-    ChatDBActions.onDbChange((_evt, type, data) => {
-      if (type === 'message-received' && data.path === selectedChat.path) {
-        selectedChat.addMessage(data);
-      }
-    });
-  }, [selectedChat]);
-
   if (!selectedChat) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
@@ -58,9 +48,9 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     />
   );
 
-  const onSend = (fragments: any[]) => {
-    SoundActions.playDMSend();
-    ChatDBActions.sendMessage(
+  const onMessageSend = (fragments: any[]) => {
+    if (!selectedChat) return;
+    selectedChat.sendMessage(
       path,
       fragments.map((frag) => {
         return {
@@ -71,7 +61,6 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
       })
     );
   };
-
   return (
     <Flex
       layout="preserve-aspect"
@@ -111,7 +100,9 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
           <Flex flexDirection="column">
             {showPin && (
               <AnimatePresence>
-                <PinnedContainer message={selectedChat.pinnedChatMessage} />
+                <PinnedContainer
+                  message={selectedChat.pinnedChatMessage as ChatMessageType}
+                />
               </AnimatePresence>
             )}
             <WindowedList
@@ -140,7 +131,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
           </Flex>
         )}
       </Flex>
-      <ChatInputBox onSend={onSend} />
+      <ChatInputBox onSend={onMessageSend} />
     </Flex>
   );
 };

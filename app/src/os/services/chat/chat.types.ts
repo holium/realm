@@ -7,7 +7,7 @@ export type PathsRow = {
 export type MessagesRow = {
   path: string;
   sender: string;
-  'msg-id': [string, string];
+  'msg-id': string;
   'msg-part-id': number;
   content: {
     [key: string]: string;
@@ -58,7 +58,7 @@ export type DelPathsRow = {
 export type DelMessagesRow = {
   table: ChatTables;
   type: 'del-messages-row';
-  id: string;
+  'msg-id': string;
 };
 
 export type ChatDbOps =

@@ -2,6 +2,7 @@ import { toJS } from 'mobx';
 import { flow, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export const ChatMetadataModel = types.model({
   title: types.string,
@@ -38,7 +39,7 @@ export const ChatMessage = types
     setPending(pending: boolean) {
       self.pending = pending;
     },
-    deleteMessage: flow(function* () {
+    delete: flow(function* () {
       try {
         yield ChatDBActions.deleteMessage(self.path, self.id);
       } catch (error) {
@@ -62,7 +63,7 @@ export const Chat = types
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
     expiresDuration: types.maybeNull(types.number),
-    messages: types.optional(types.array(types.frozen()), []),
+    messages: types.optional(types.array(ChatMessage), []),
     // ui state
     pending: types.optional(types.boolean, false),
     hidePinned: types.optional(types.boolean, false),
@@ -90,6 +91,7 @@ export const Chat = types
     fetchMessages: flow(function* () {
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
+        console.log(toJS(messages));
         self.messages = messages;
         self.hidePinned = self.isPinLocallyHidden();
         return self.messages;
@@ -98,10 +100,33 @@ export const Chat = types
         return [];
       }
     }),
+    sendMessage: flow(function* (path: string, fragments: any[]) {
+      SoundActions.playDMSend();
+
+      try {
+        console.log('sending message', path, fragments);
+        yield ChatDBActions.sendMessage(path, fragments);
+        // self.addMessage(message);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     addMessage(message: ChatMessageType) {
       console.log('adding message', toJS(message));
       self.messages.push(message);
     },
+    deleteMessage: flow(function* (messageId: string) {
+      const oldMessages = self.messages;
+      try {
+        yield ChatDBActions.deleteMessage(self.path, messageId);
+        const message = self.messages.find((m) => m.id === messageId);
+        if (!message) return;
+        self.messages.remove(message);
+      } catch (error) {
+        self.messages = oldMessages;
+        console.error(error);
+      }
+    }),
     setPinnedMessage: flow(function* (msgId: string) {
       try {
         yield ChatDBActions.setPinnedMessage(self.path, msgId);

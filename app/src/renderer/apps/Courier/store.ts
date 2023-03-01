@@ -1,6 +1,12 @@
 import { createContext, useContext } from 'react';
-// import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference } from 'mobx-state-tree';
+import { toJS } from 'mobx';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  resolveIdentifier,
+} from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat } from './models';
 
@@ -19,6 +25,20 @@ const ChatStore = types
   .views((self) => ({
     isChatPinned(path: string) {
       return self.pinnedChats.includes(path);
+    },
+    get pinnedChatList() {
+      return self.inbox
+        .filter((c) => self.pinnedChats.includes(c.path))
+        .sort((a, b) =>
+          b.updatedAt && a.updatedAt ? b.updatedAt - a.updatedAt : 0
+        );
+    },
+    get unpinnedChatList() {
+      return self.inbox
+        .filter((c) => !self.pinnedChats.includes(c.path))
+        .sort((a, b) =>
+          b.updatedAt && a.updatedAt ? b.updatedAt - a.updatedAt : 0
+        );
     },
   }))
   .actions((self) => ({
@@ -43,9 +63,12 @@ const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
+      console.log(self.subroute);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
+      console.log(self.subroute);
+      console.log(toJS(self.selectedChat));
     },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
@@ -83,11 +106,11 @@ const ChatStore = types
     }),
     leaveChat: flow(function* (path: string) {
       try {
-        yield ChatDBActions.leaveChat(path);
         const chat = self.inbox.find((chat) => chat.path === path);
         if (chat) {
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
+          yield ChatDBActions.leaveChat(path);
           return self.inbox;
         } else {
           throw new Error('Chat not found');
@@ -97,6 +120,20 @@ const ChatStore = types
         return self.inbox;
       }
     }),
+    onPathsAdded(path: any) {
+      self.inbox.push(path);
+    },
+    // This is a handler for onDbChange
+    onPathDeleted(path: string) {
+      const chat = self.inbox.find((chat) => chat.path === path);
+      if (chat) {
+        self.inbox.remove(chat);
+        self.pinnedChats.remove(path);
+        return self.inbox;
+      } else {
+        throw new Error('Chat not found');
+      }
+    },
   }));
 
 export const chatStore = ChatStore.create({
@@ -119,3 +156,33 @@ export function useChatStore() {
   }
   return store;
 }
+
+// -------------------------------
+// Listen for changes
+ChatDBActions.onDbChange((_evt, type, data) => {
+  if (type === 'path-added') {
+    console.log('path added', data);
+    chatStore.onPathsAdded(data);
+  }
+  if (type === 'path-deleted') {
+    console.log('path deleted', data);
+    chatStore.onPathDeleted(data);
+  }
+  if (type === 'message-deleted') {
+    console.log('message deleted', data);
+    console.log(resolveIdentifier(ChatStore, chatStore, data));
+    // selectedChat. (data.msgId);
+  }
+  if (type === 'message-received') {
+    console.log('message received', data);
+
+    const selectedChat = chatStore.inbox.find(
+      (chat) => chat.path === data.path
+    );
+    if (!selectedChat) {
+      console.warn('selected chat not found');
+      return;
+    }
+    selectedChat.addMessage(data);
+  }
+});
