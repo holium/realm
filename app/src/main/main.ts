@@ -219,18 +219,48 @@ app.on('window-all-closed', () => {
   if (!isMac) app.quit();
 });
 
-let haventQuitYet = true;
+// quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
+// do our cleanup, and then re-emit and actually quit it
+let lastQuitSignal: number = 0;
 app.on('before-quit', (event) => {
-  if (haventQuitYet) {
-    haventQuitYet = false;
+  if (lastQuitSignal === 0) {
+    lastQuitSignal = (new Date())-1;
     event.preventDefault();
+    mainWindow.webContents.send('app.before-quit');
   }
-  console.log('before-quit');
-  mainWindow.webContents.send('app.before-quit');
 });
 ipcMain.on('realm.app.quit', () => {
   app.quit();
 })
+
+// device-state-change callbacks and listeners
+powerMonitor.on('suspend', (event) => {
+  mainWindow.webContents.send('realm.sys.sleep');
+  mainWindow.webContents.send('realm.sys.suspend');
+});
+powerMonitor.on('resume', (event) => {
+  mainWindow.webContents.send('realm.sys.wake');
+  mainWindow.webContents.send('realm.sys.resume');
+});
+powerMonitor.on('on-ac', (event) => {
+  mainWindow.webContents.send('realm.sys.on-ac');
+});
+powerMonitor.on('on-battery', (event) => {
+  mainWindow.webContents.send('realm.sys.on-battery');
+});
+powerMonitor.on('shutdown', (event) => {
+  mainWindow.webContents.send('realm.sys.sleep');
+  mainWindow.webContents.send('realm.sys.shutdown');
+});
+powerMonitor.on('lock-screen', (event) => {
+  mainWindow.webContents.send('realm.sys.sleep');
+  mainWindow.webContents.send('realm.sys.lock-screen');
+});
+powerMonitor.on('unlock-screen', (event) => {
+  mainWindow.webContents.send('realm.sys.wake');
+  mainWindow.webContents.send('realm.sys.unlock-screen');
+});
+
 
 app
   .whenReady()

@@ -99,28 +99,28 @@ export class Realm extends EventEmitter {
       ipcRenderer.on('realm.on-connection-status', callback),
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
 
-    onQuit: (callback: any) => ipcRenderer.on('app.before-quit', callback),
+    onQuitSignal: (callback: any) => ipcRenderer.on('app.before-quit', callback),
     readyToQuit: () => ipcRenderer.send('realm.app.quit'),
 
     // 'fake' amalgamation events for any sort of "sleep-like" event
-    onSleep: (callback: any) => {
-      //powerMonitor.on('suspend', callback);
-     // powerMonitor.on('lock-screen', callback);
-     // powerMonitor.on('shutdown', callback);
-    },
-    onWake: (callback: any) => {
-      //powerMonitor.on('resume', callback);
-      //powerMonitor.on('unlock-screen', callback);
-    },
+
+    // because a system may fire both 'suspend' and 'lock-screen' in quick succession,
+    // only use callbacks to onSleep that you are okay with being called multiple times quickly
+    // combines 'suspend' 'shutdown' 'lock-screen'
+    onSleep: (callback: any) => ipcRenderer.on('realm.sys.sleep', callback),
+    // because a system may fire both 'resume' and 'unlock-screen' in quick succession,
+    // only use callbacks to onWake that you are okay with being called multiple times quickly
+    // combines 'resume' 'unlock-screen'
+    onWake: (callback: any) => ipcRenderer.on('realm.sys.wake', callback),
 
     // the actual electron interface to powerMonitor
-    //onSysSuspend: (callback: any) => powerMonitor.on('suspend', callback),
-    //onSysResume: (callback: any) => powerMonitor.on('resume', callback),
-    //onSysCharging: (callback: any) => powerMonitor.on('on-ac', callback),
-    //onSysBattery: (callback: any) => powerMonitor.on('on-battery', callback),
-    //onSysShutdown: (callback: any) => powerMonitor.on('shutdown', callback),
-    //onSysLockScreen: (callback: any) => powerMonitor.on('lock-screen', callback),
-    //onSysUnLockScreen: (callback: any) => powerMonitor.on('unlock-screen', callback),
+    onSysSuspend: (callback: any) => ipcRenderer.on('realm.sys.suspend', callback),
+    onSysResume: (callback: any) => ipcRenderer.on('realm.sys.resume', callback),
+    onSysCharging: (callback: any) => ipcRenderer.on('realm.sys.on-ac', callback),
+    onSysBattery: (callback: any) => ipcRenderer.on('realm.sys.on-battery', callback),
+    onSysShutdown: (callback: any) => ipcRenderer.on('realm.sys.shutdown', callback),
+    onSysLockScreen: (callback: any) => ipcRenderer.on('realm.sys.lock-screen', callback),
+    onSysUnLockScreen: (callback: any) => ipcRenderer.on('realm.sys.unlock-screen', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {
