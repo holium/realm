@@ -1,5 +1,5 @@
 /-  *marshal
-/+  *marshal
+/+  *marshal-json
 ::
 |_  act=marshal-action
 ++  grow
