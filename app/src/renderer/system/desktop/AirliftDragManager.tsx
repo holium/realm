@@ -8,6 +8,21 @@ import 'renderer/apps/Airlift/nodes/AgentNode/index.css';
 import { useMemo, useRef } from 'react';
 import { getSnapshot } from 'mobx-state-tree';
 import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
+import { ButtonNode } from 'renderer/apps/Airlift/nodes/ButtonNode';
+import { SliderNode } from 'renderer/apps/Airlift/nodes/SliderNode';
+import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
+import { LinkNode } from 'renderer/apps/Airlift/nodes/LinkNode';
+import { AudioPlayer } from 'renderer/apps/Airlift/nodes/AudioPlayer';
+import { MediaNode } from 'renderer/apps/Airlift/nodes/MediaNode';
+import { Portal } from 'renderer/apps/Airlift/nodes/Portal';
+import { UqbarContractNode } from 'renderer/apps/Airlift/nodes/UqbarContractNode';
+import { ImageNode } from 'renderer/apps/Airlift/nodes/ImageNode';
+import { TextInputNode } from 'renderer/apps/Airlift/nodes/TextInputNode';
+import { RoomNode } from 'renderer/apps/Airlift/nodes/RoomNode';
+import { ColorPickerNode } from 'renderer/apps/Airlift/nodes/ColorPickerNode';
+import { Gate } from 'renderer/apps/Airlift/nodes/Gate';
+import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
+import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
 
 const AirliftDragManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -15,8 +30,23 @@ const AirliftDragManagerPresenter = () => {
 
   const nodeTypes = useMemo(() => {
     return {
+      button: ButtonNode,
+      textinput: TextInputNode,
+      slider: SliderNode,
+      colorpicker: ColorPickerNode,
+      text: TextNode,
+      image: ImageNode,
+      link: LinkNode,
+      audio: AudioPlayer,
+      media: MediaNode,
+      '3d': Node3D,
       agent: AgentNode,
+      gate: Gate,
+      uqbar: UqbarContractNode,
+      portal: Portal,
       wallet: WalletNode,
+      relic: RelicNode,
+      room: RoomNode,
     };
   }, []);
 
