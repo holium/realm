@@ -32,7 +32,6 @@ import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
 
-
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
@@ -224,43 +223,42 @@ app.on('window-all-closed', () => {
 let lastQuitSignal: number = 0;
 app.on('before-quit', (event) => {
   if (lastQuitSignal === 0) {
-    lastQuitSignal = (new Date())-1;
+    lastQuitSignal = new Date().getTime() - 1;
     event.preventDefault();
     mainWindow.webContents.send('app.before-quit');
   }
 });
 ipcMain.on('realm.app.quit', () => {
   app.quit();
-})
+});
 
 // device-state-change callbacks and listeners
-powerMonitor.on('suspend', (event) => {
+powerMonitor.on('suspend', () => {
   mainWindow.webContents.send('realm.sys.sleep');
   mainWindow.webContents.send('realm.sys.suspend');
 });
-powerMonitor.on('resume', (event) => {
+powerMonitor.on('resume', () => {
   mainWindow.webContents.send('realm.sys.wake');
   mainWindow.webContents.send('realm.sys.resume');
 });
-powerMonitor.on('on-ac', (event) => {
+powerMonitor.on('on-ac', () => {
   mainWindow.webContents.send('realm.sys.on-ac');
 });
-powerMonitor.on('on-battery', (event) => {
+powerMonitor.on('on-battery', () => {
   mainWindow.webContents.send('realm.sys.on-battery');
 });
-powerMonitor.on('shutdown', (event) => {
+powerMonitor.on('shutdown', () => {
   mainWindow.webContents.send('realm.sys.sleep');
   mainWindow.webContents.send('realm.sys.shutdown');
 });
-powerMonitor.on('lock-screen', (event) => {
+powerMonitor.on('lock-screen', () => {
   mainWindow.webContents.send('realm.sys.sleep');
   mainWindow.webContents.send('realm.sys.lock-screen');
 });
-powerMonitor.on('unlock-screen', (event) => {
+powerMonitor.on('unlock-screen', () => {
   mainWindow.webContents.send('realm.sys.wake');
   mainWindow.webContents.send('realm.sys.unlock-screen');
 });
-
 
 app
   .whenReady()

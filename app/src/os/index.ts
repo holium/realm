@@ -6,7 +6,6 @@ import {
   dialog,
   session,
   WebPreferences,
-  app,
 } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -99,7 +98,8 @@ export class Realm extends EventEmitter {
       ipcRenderer.on('realm.on-connection-status', callback),
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
 
-    onQuitSignal: (callback: any) => ipcRenderer.on('app.before-quit', callback),
+    onQuitSignal: (callback: any) =>
+      ipcRenderer.on('app.before-quit', callback),
     readyToQuit: () => ipcRenderer.send('realm.app.quit'),
 
     // 'fake' amalgamation events for any sort of "sleep-like" event
@@ -114,13 +114,20 @@ export class Realm extends EventEmitter {
     onWake: (callback: any) => ipcRenderer.on('realm.sys.wake', callback),
 
     // the actual electron interface to powerMonitor
-    onSysSuspend: (callback: any) => ipcRenderer.on('realm.sys.suspend', callback),
-    onSysResume: (callback: any) => ipcRenderer.on('realm.sys.resume', callback),
-    onSysCharging: (callback: any) => ipcRenderer.on('realm.sys.on-ac', callback),
-    onSysBattery: (callback: any) => ipcRenderer.on('realm.sys.on-battery', callback),
-    onSysShutdown: (callback: any) => ipcRenderer.on('realm.sys.shutdown', callback),
-    onSysLockScreen: (callback: any) => ipcRenderer.on('realm.sys.lock-screen', callback),
-    onSysUnLockScreen: (callback: any) => ipcRenderer.on('realm.sys.unlock-screen', callback),
+    onSysSuspend: (callback: any) =>
+      ipcRenderer.on('realm.sys.suspend', callback),
+    onSysResume: (callback: any) =>
+      ipcRenderer.on('realm.sys.resume', callback),
+    onSysCharging: (callback: any) =>
+      ipcRenderer.on('realm.sys.on-ac', callback),
+    onSysBattery: (callback: any) =>
+      ipcRenderer.on('realm.sys.on-battery', callback),
+    onSysShutdown: (callback: any) =>
+      ipcRenderer.on('realm.sys.shutdown', callback),
+    onSysLockScreen: (callback: any) =>
+      ipcRenderer.on('realm.sys.lock-screen', callback),
+    onSysUnLockScreen: (callback: any) =>
+      ipcRenderer.on('realm.sys.unlock-screen', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {
