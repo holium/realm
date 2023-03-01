@@ -12,7 +12,7 @@ import {
   RealmProtocol,
   RoomManagerEvent,
   RoomsManager,
-} from '@holium/realm-room';
+} from '../src/index';
 import { ShipConfig } from './types';
 
 type RealmMultiplayerContextState = {
