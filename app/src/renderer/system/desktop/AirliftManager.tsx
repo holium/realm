@@ -105,8 +105,62 @@ const AirliftManagerPresenter = () => {
           showDelete: false,
           agent: {
             arms: {
+              'on-init': {
+                name: 'on-init',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-save': {
+                name: 'on-save',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-load': {
+                name: 'on-load',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
               'on-poke': {
                 name: 'on-poke',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-watch': {
+                name: 'on-watch',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-leave': {
+                name: 'on-leave',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-peek': {
+                name: 'on-peek',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-agent': {
+                name: 'on-agent',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-arvo': {
+                name: 'on-arvo',
+                body: 'body',
+                expanded: false,
+                view: 'options',
+              },
+              'on-fail': {
+                name: 'on-fail',
                 body: 'body',
                 expanded: false,
                 view: 'options',

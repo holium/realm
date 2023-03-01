@@ -1,4 +1,10 @@
-import { Instance, types, cast, getSnapshot } from 'mobx-state-tree';
+import {
+  Instance,
+  types,
+  cast,
+  castToSnapshot,
+  getSnapshot,
+} from 'mobx-state-tree';
 import { Node, NodeChange, applyNodeChanges } from 'reactflow';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -213,8 +219,7 @@ export const FlowStore = types
       self.nodes = cast(applyNodeChanges(changes, newNodes));
     },
     dropAirlift: (airlift: Node) => {
-      // self.nodes = types.array(nodetype).create(self.nodes.concat(airlift));
-      self.nodes = cast(self.nodes.concat(airlift));
+      self.nodes = castToSnapshot(self.nodes.concat(airlift));
     },
   }));
 

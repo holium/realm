@@ -18,7 +18,11 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
     }
   };
   return (
-    <Flex border={data.showDelete ? '2px solid red' : 'none'}>
+    <Flex
+      flexDirection="column"
+      gap={10}
+      border={data.showDelete ? '2px solid red' : 'none'}
+    >
       {/* name view <TextInput
         id={`${data.id}-name`}
         name={`${data.id}-name`}
@@ -35,8 +39,8 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
         onKeyDown={onKeyDown}
         disabled={created}
       />*/}
-      {Array.from(data.agent.arms).map((arm) => {
-        return <AirliftArm desk="asdf" agent="asdf" arm="asdf" />;
+      {Array.from(data.agent.arms.values()).map((arm) => {
+        return <AirliftArm key={arm.name} airliftId={data.id} arm={arm} />;
       })}
     </Flex>
   );

@@ -47,8 +47,8 @@ export class AirliftService extends BaseService {
     removeAirlift: (airliftId: string) => {
       return ipcRenderer.invoke('realm.airlift.remove-airlift', airliftId);
     },
-    expandArm: (desk: string, agent: string, arm: string) => {
-      return ipcRenderer.invoke('realm.airlift.expand-arm', desk, agent, arm);
+    expandArm: (airliftId: string, arm: string) => {
+      return ipcRenderer.invoke('realm.airlift.expand-arm', airliftId, arm);
     },
     onNodesChange: (changes: NodeChange[]) => {
       return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
@@ -100,7 +100,11 @@ export class AirliftService extends BaseService {
   // ***********************************************************
   // ************************ AIRLIFT ***************************
   // ***********************************************************
-  async expandArm(_event: any, desk: string, agent: string, arm: string) {}
+  async expandArm(_event: any, airliftId: string, arm: string) {
+    this.state!.flowStore.nodes.find((node) => node.id === airliftId)!
+      .data.agent.arms.get(arm)!
+      .expand();
+  }
 
   async dropAirlift(_event: IpcMainInvokeEvent, newAirlift: any) {
     this.state!.dropAirlift(newAirlift);
