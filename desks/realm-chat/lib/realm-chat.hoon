@@ -379,6 +379,7 @@
       :~  [%create-chat create-chat]
           [%edit-chat edit-chat]
           [%pin-message pin-message]
+          [%clear-pinned-messages (ot ~[[%path pa]])]
           [%add-ship-to-chat path-and-ship]
           [%remove-ship-from-chat path-and-ship]
           [%send-message path-and-fragments]
