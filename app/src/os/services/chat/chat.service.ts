@@ -573,7 +573,7 @@ export class ChatService extends BaseService {
       SELECT
         path,
         msg_id id,
-        json_group_array(json_object(content_type, content_data)) content,
+        json_group_array(json_object(content_type, content_data)) contents,
         sender,
         MAX(created_at) as createdAt,
         MAX(updated_at) as updatedAt
@@ -594,7 +594,7 @@ export class ChatService extends BaseService {
     const rows = result.map((row) => {
       return {
         ...row,
-        content: JSON.parse(row.content),
+        contents: JSON.parse(row.contents),
       };
     });
     if (rows.length === 0) return null;

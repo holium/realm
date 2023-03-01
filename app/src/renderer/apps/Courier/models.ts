@@ -21,18 +21,31 @@ const stringifyMetadata = (metadata: ChatMetadata): ChatPathMetadata => {
   };
 };
 
-export const ChatMessage = types.model({
-  path: types.string,
-  id: types.identifier,
-  sender: types.string,
-  contents: types.array(types.frozen()),
-  reactions: types.optional(types.array(types.frozen()), []),
-  reply_to: types.maybeNull(types.string),
-  createdAt: types.number,
-  updatedAt: types.number,
-  // ui state
-  pending: types.optional(types.boolean, false),
-});
+export const ChatMessage = types
+  .model({
+    path: types.string,
+    id: types.identifier,
+    sender: types.string,
+    contents: types.array(types.frozen()),
+    reactions: types.optional(types.array(types.frozen()), []),
+    reply_to: types.maybeNull(types.string),
+    createdAt: types.number,
+    updatedAt: types.number,
+    // ui state
+    pending: types.optional(types.boolean, false),
+  })
+  .actions((self) => ({
+    setPending(pending: boolean) {
+      self.pending = pending;
+    },
+    deleteMessage: flow(function* () {
+      try {
+        yield ChatDBActions.deleteMessage(self.path, self.id);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+  }));
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
 export const Chat = types
@@ -86,6 +99,7 @@ export const Chat = types
       }
     }),
     addMessage(message: ChatMessageType) {
+      console.log('adding message', toJS(message));
       self.messages.push(message);
     },
     setPinnedMessage: flow(function* (msgId: string) {
