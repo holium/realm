@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import ReactFlow, { ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { AgentNode } from 'renderer/apps/Airlift/AgentNode';
-import 'renderer/apps/Airlift/AgentNode/index.css';
+import { AgentNode } from 'renderer/apps/Airlift/nodes/AgentNode';
+import 'renderer/apps/Airlift/nodes/AgentNode/index.css';
 import { useMemo, useRef } from 'react';
 import { getSnapshot } from 'mobx-state-tree';
-import { WalletNode } from 'renderer/apps/Airlift/WalletNode';
+import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
 
 const AirliftDragManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();

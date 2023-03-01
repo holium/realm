@@ -7,12 +7,13 @@ import ReactFlow, {
   useEdgesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { AgentNode } from 'renderer/apps/Airlift/AgentNode';
-import 'renderer/apps/Airlift/AgentNode/index.css';
+import { AgentNode } from 'renderer/apps/Airlift/nodes/AgentNode';
+import { LinkNode } from 'renderer/apps/Airlift/nodes/LinkNode';
+import 'renderer/apps/Airlift/nodes/AgentNode/index.css';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
 import { getSnapshot } from 'mobx-state-tree';
-import { WalletNode } from 'renderer/apps/Airlift/WalletNode';
+import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -22,6 +23,7 @@ const AirliftManagerPresenter = () => {
     return {
       agent: AgentNode,
       wallet: WalletNode,
+      link: LinkNode,
     };
   }, []);
 

@@ -19,7 +19,7 @@ export const AirliftTray: FC = observer(() => {
     useTrayApps();
 
   const dimensions = {
-    height: 180,
+    height: 350,
     width: 380,
   };
 

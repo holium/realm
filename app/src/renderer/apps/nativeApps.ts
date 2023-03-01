@@ -72,8 +72,6 @@ export const nativeApps: AppManifestMap = {
     native: {
       hideTitlebarBorder: true,
     },
-    // titlebar: (props: AirliftToolbarProps) => <AirliftToolbar {...props} />,
-    // component: (props: any) => <Airlift {...props} />,*/
   },
   ...devApps,
 };
