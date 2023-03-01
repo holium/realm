@@ -69,7 +69,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE - 3}
             mt="2px"
             draggable={true}
-            onDragStart={(event) => onButtonDragStart(event, 'textinput')}
+            onDragStart={(event) => onButtonDragStart(event, 'slider')}
             color={textColor}
           >
             <Icon name="Slider" size={ICON_SIZE} overflow="visible" />
@@ -126,7 +126,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE - 3}
             mt="2px"
             draggable={true}
-            onDragStart={(event) => onButtonDragStart(event, 'audio')}
+            onDragStart={(event) => onButtonDragStart(event, 'media')}
             color={textColor}
           >
             <Icon name="Media" size={ICON_SIZE - 5} overflow="visible" ml={1} />
@@ -216,7 +216,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE}
             mt="2px"
             draggable={true}
-            onDragStart={(event) => onButtonDragStart(event, 'rooms')}
+            onDragStart={(event) => onButtonDragStart(event, 'room')}
             color={textColor}
             ml={1}
           >

@@ -17,6 +17,17 @@ import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
 import { MediaNode } from 'renderer/apps/Airlift/nodes/MediaNode';
 import { ImageNode } from 'renderer/apps/Airlift/nodes/ImageNode';
 import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
+import { AudioPlayer } from 'renderer/apps/Airlift/nodes/AudioPlayer';
+import { SliderNode } from 'renderer/apps/Airlift/nodes/SliderNode';
+import { ColorPickerNode } from 'renderer/apps/Airlift/nodes/ColorPickerNode';
+import { ButtonNode } from 'renderer/apps/Airlift/nodes/ButtonNode';
+import { TextInputNode } from 'renderer/apps/Airlift/nodes/TextInputNode';
+import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
+import { Gate } from 'renderer/apps/Airlift/nodes/Gate';
+import { UqbarContractNode } from 'renderer/apps/Airlift/nodes/UqbarContractNode';
+import { Portal } from 'renderer/apps/Airlift/nodes/Portal';
+import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
+import { RoomNode } from 'renderer/apps/Airlift/nodes/RoomNode';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop } = useServices();
@@ -31,7 +42,7 @@ const AirliftManagerPresenter = () => {
       text: TextNode,
       image: ImageNode,
       link: LinkNode,
-      audio: AudioNode,
+      audio: AudioPlayer,
       media: MediaNode,
       '3d': Node3D,
       agent: AgentNode,

@@ -635,18 +635,18 @@ export const paths: Record<string, JSX.Element> = {
         height="16"
         rx="2"
         stroke="black"
-        stroke-width="2"
+        strokeWidth="2"
       />
       <mask id="path-2-inside-1_0_1" fill="white">
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M19 3.25L4.75 0V26L19 22.75V3.25ZM8.3125 14.625C8.96834 14.625 9.5 13.8975 9.5 13C9.5 12.1025 8.96834 11.375 8.3125 11.375C7.65666 11.375 7.125 12.1025 7.125 13C7.125 13.8975 7.65666 14.625 8.3125 14.625Z"
         />
       </mask>
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M19 3.25L4.75 0V26L19 22.75V3.25ZM8.3125 14.625C8.96834 14.625 9.5 13.8975 9.5 13C9.5 12.1025 8.96834 11.375 8.3125 11.375C7.65666 11.375 7.125 12.1025 7.125 13C7.125 13.8975 7.65666 14.625 8.3125 14.625Z"
         fill="black"
       />
@@ -756,14 +756,14 @@ export const paths: Record<string, JSX.Element> = {
         fill="black"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M1.91728 30.3242L5.87056 29.9164C6.92811 29.9559 7.99926 29.5782 8.81599 28.7803L19.8498 18H6.97136L2.52643 22.3428C1.70969 23.1408 1.30724 24.2028 1.32219 25.261L0.822607 29.2037C0.741665 29.8426 1.27676 30.3902 1.91728 30.3242Z"
         fill="black"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M28.1285 9.91161L21.8389 3.4741L23.2695 2.07642C24.8496 0.532588 27.3821 0.562027 28.926 2.14218L29.6248 2.85745C31.1686 4.4376 31.1392 6.97009 29.559 8.51393L28.1285 9.91161Z"
         fill="black"
       />
