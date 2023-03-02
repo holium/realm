@@ -1,21 +1,21 @@
 import React, { FC, useEffect, useState } from 'react';
-import { darken, transparentize } from 'polished';
-import {
-  Box,
-  Grid,
-  Text,
-  Flex,
-  Spinner,
-  TextButton,
-  UrbitSVG,
-} from 'renderer/components';
+import styled, { css } from 'styled-components';
+import { rgba } from 'polished';
+import { Grid, UrbitSVG } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { Avatar } from '@holium/design-system';
+import {
+  Avatar,
+  Button,
+  Box,
+  Flex,
+  Text,
+  Spinner,
+} from '@holium/design-system';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -24,89 +24,84 @@ interface AvailablePlanetProps
   theme: any;
   onClick: React.MouseEventHandler<HTMLDivElement>;
 }
+type PatpOptionProps = {
+  customBg?: string;
+  customBorder?: string;
+};
+const PatpOption = styled(Button.Base)<PatpOptionProps>`
+  border-radius: 6px;
+  width: 180px;
+  height: 40px;
+  padding: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  color: var(--rlm-text-color);
+  transition: var(--transition);
+  border: 1px solid
+    ${(props: PatpOptionProps) =>
+      props.customBorder || 'var(--rlm-border-color)'};
+
+  ${(props: PatpOptionProps) =>
+    props.customBg &&
+    css`
+      background-color: ${props.customBg};
+    `}
+
+  &:hover:not([disabled]) {
+    transition: var(--transition);
+    filter: brightness(0.975);
+    cursor: pointer;
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
+`;
 
 const AvailablePlanet: FC<AvailablePlanetProps> = (
   props: AvailablePlanetProps
 ) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
-  const background = darken(0.01, props.theme.windowColor);
-  const border = `1px solid ${transparentize(
-    0.9,
-    theme.currentTheme.mode === 'light' ? '#000000' : '#ffffff'
-  )}`;
+
   const Unselected = (props: any) => (
-    <Box
-      pl={2}
-      height={40}
-      minWidth={180}
-      border={border}
-      background={background}
-      borderRadius={6}
-      mb={12}
-      mr={12}
-      onClick={props.onClick}
-    >
-      <Flex
-        height="100%"
-        width="100%"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-around"
-      >
-        <Avatar
-          sigilColor={['black', 'white']}
-          size={25}
-          simple
-          patp={props.patp}
-        />
-        <Text fontSize={14} fontWeight={400} pr={2}>
-          {' '}
-          {props.patp}{' '}
-        </Text>
-      </Flex>
-    </Box>
+    <PatpOption onClick={props.onClick}>
+      <Avatar
+        sigilColor={['black', 'white']}
+        size={25}
+        simple
+        patp={props.patp}
+      />
+      <Text.Custom fontSize={14} fontWeight={400} pr={2}>
+        {' '}
+        {props.patp}{' '}
+      </Text.Custom>
+    </PatpOption>
   );
 
-  const selectedBackground = transparentize(
-    0.8,
-    baseTheme.colors.brand.primary
-  );
-  const selectedBorder = `1px solid ${transparentize(
-    0.5,
-    baseTheme.colors.brand.primary
-  )}`;
+  const selectedBackground = rgba(baseTheme.colors.brand.primary, 0.15);
+  const selectedBorder = `${rgba(baseTheme.colors.brand.primary, 0.5)}`;
   const Selected = (props: any) => (
-    <Box
-      pl={2}
-      height={40}
-      minWidth={180}
-      border={selectedBorder}
-      background={selectedBackground}
-      borderRadius={6}
-      mb={12}
-      mr={12}
+    <PatpOption
+      customBg={selectedBackground}
+      customBorder={selectedBorder}
       onClick={props.onClick}
     >
-      <Flex
-        height="100%"
-        width="100%"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-around"
-      >
-        <Avatar
-          sigilColor={['black', 'white']}
-          size={25}
-          simple
-          patp={props.patp}
-        />
-        <Text fontSize={14} fontWeight={400} color="brand.primary" pr={2}>
-          {' '}
-          {props.patp}{' '}
-        </Text>
-      </Flex>
-    </Box>
+      <Avatar
+        sigilColor={['black', 'white']}
+        size={25}
+        simple
+        patp={props.patp}
+      />
+      <Text.Custom fontSize={14} fontWeight={400} color="accent" pr={2}>
+        {' '}
+        {props.patp}{' '}
+      </Text.Custom>
+    </PatpOption>
   );
 
   return props.selected ? (
@@ -118,7 +113,6 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
 
 const SelectPatpPresenter = (props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const [planets, setPlanets] = useState<HostingPlanet[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [error, setError] = useState<boolean>(false);
@@ -203,20 +197,23 @@ const SelectPatpPresenter = (props: BaseDialogProps) => {
           mode={theme.currentTheme.mode as 'light' | 'dark'}
           size={55}
         />
-        <Text
+        <Text.Custom
           textAlign="center"
           mt={2}
           mb={28}
           fontSize={2}
           fontWeight={400}
-          color="text.secondary"
         >
           Choose an Urbit ID
-        </Text>
+        </Text.Custom>
         <Flex
+          mt={2}
+          gap={12}
           width="100%"
+          minHeight={92}
           flexDirection="row"
           justifyContent="center"
+          alignItems="center"
           flexWrap="wrap"
         >
           {loading ? (
@@ -235,35 +232,38 @@ const SelectPatpPresenter = (props: BaseDialogProps) => {
           )}
         </Flex>
         {onboarding.planetWasTaken && (
-          <Text
-            color={baseTheme.colors.text.error}
+          <Text.Custom
+            color="intent-alert"
             fontSize={1}
             textAlign="center"
             mt={3}
           >
             Your planet was taken before you completed checkout, please select
             another one.
-          </Text>
+          </Text.Custom>
         )}
         {error && errorMessage?.length > 0 && (
-          <Text
-            color={baseTheme.colors.text.error}
+          <Text.Custom
+            color="intent-alert"
             fontSize={1}
             textAlign="center"
             mt={3}
           >
-            No available planets found. Please contact Realm support.
-          </Text>
+            {errorMessage}
+          </Text.Custom>
         )}
       </Flex>
-      <Box position="absolute" left={394} bottom={20} onClick={selectPlanet}>
-        <TextButton
+      <Box position="absolute" right={24} bottom={24} onClick={selectPlanet}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
           disabled={
-            !(!loading && !error && planets.length > 0 && selectedIndex >= 0)
+            loading || error || planets.length === 0 || selectedIndex === -1
           }
         >
           Next
-        </TextButton>
+        </Button.TextButton>
       </Box>
     </Grid.Column>
   );

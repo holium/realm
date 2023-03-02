@@ -2,22 +2,21 @@ import { KeyboardEventHandler, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
+import { Label, TextButton } from 'renderer/components';
 import {
   Flex,
-  Input,
-  Label,
-  Text,
-  TextButton,
   Button,
-  Box,
-  BigInput,
+  Text,
+  TextInput,
+  Icon,
   Spinner,
-} from 'renderer/components';
+} from '@holium/design-system';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ThemeType } from 'renderer/theme';
+import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
 const EmailDialogPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();
@@ -27,9 +26,12 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
   const done = () => props.onNext && props.onNext();
 
   return (
-    <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
+    <Flex width="100%" height="100%" flexDirection="column">
       {view === 'initial' ? (
-        <InitialScreen done={() => setView('verify')} />
+        <InitialScreen
+          done={() => setView('verify')}
+          isRecoveringAccount={props.workflowState.isRecoveringAccount}
+        />
       ) : (
         <VerifyScreen
           verificationCode={onboarding.verificationCode!}
@@ -44,9 +46,8 @@ const EmailDialogPresenter = (props: BaseDialogProps) => {
 
 export const EmailDialog = observer(EmailDialogPresenter);
 
-function InitialScreen(props: { done: any }) {
-  const { onboarding, theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
+function InitialScreen(props: { done: any; isRecoveringAccount: boolean }) {
+  const { onboarding } = useServices();
   const [email, setEmail] = useState(onboarding.email || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,7 +55,10 @@ function InitialScreen(props: { done: any }) {
 
   const onClick = async () => {
     setLoading(true);
-    const response = await OnboardingActions.setEmail(email);
+    const response = await OnboardingActions.setEmail(
+      email,
+      props.isRecoveringAccount
+    );
     setLoading(false);
 
     response.success ? props.done() : setError(response.errorMessage);
@@ -65,50 +69,70 @@ function InitialScreen(props: { done: any }) {
   };
 
   return (
-    <>
-      <Flex flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
-          Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
-          We need a contact email for account recovery purposes. We pledge a
-          solemn oath to never share it with anyone or use it for marketing
-          spam.
-        </Text>
-      </Flex>
+    <Flex width="100%" height="100%" flexDirection="column">
+      <Text.Custom fontSize={3} fontWeight={500} mb={20}>
+        Email
+      </Text.Custom>
+      <Text.Custom fontSize={2} lineHeight="1.4">
+        We need a contact email for account recovery purposes. We pledge a
+        solemn oath to never share it with anyone or use it for marketing spam.
+      </Text.Custom>
       <Flex mt={8} flexDirection="column">
-        <Label mb={3} required={true}>
+        <Label mb={1} required={true}>
           Email
         </Label>
-        <Input
+        <TextInput
+          height={36}
+          name="email-recovery"
+          id="email-recovery"
           value={email}
           onChange={onChange}
           onKeyDown={onKeyDown}
           type="email"
           required={true}
         />
-        <Box mt={7} width="100%">
-          <Button
+        <Flex flexDirection="column" mt={8} width="100%">
+          <Button.Primary
             width="100%"
+            py={2}
+            justifyContent="center"
             disabled={!email || !emailValidator.validate(email)}
-            isLoading={loading}
             onClick={onClick}
           >
-            Submit
-          </Button>
+            {loading ? <Spinner size={0} color="#FFF" /> : 'Submit'}
+          </Button.Primary>
           {error && (
-            <Text
+            <Text.Custom
               mt={4}
               fontSize={1}
-              color={baseTheme.colors.text.error}
+              color="intent-alert"
               textAlign="center"
             >
               {error}
-            </Text>
+            </Text.Custom>
           )}
-        </Box>
+        </Flex>
+        {props.isRecoveringAccount && (
+          <Flex
+            position="absolute"
+            left={24}
+            bottom={24}
+            gap={4}
+            flexDirection="row"
+            alignItems="center"
+          >
+            <Button.IconButton
+              size={24}
+              onClick={() => {
+                OnboardingActions.setStep(OnboardingStep.ACCESS_GATE);
+              }}
+            >
+              <Icon name="ArrowLeftLine" size={20} opacity={0.5} />
+            </Button.IconButton>
+          </Flex>
+        )}
       </Flex>
-    </>
+    </Flex>
   );
 }
 
@@ -155,28 +179,33 @@ function VerifyScreen(props: {
   return (
     <>
       <Flex mt={7} mb={5} flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
+        <Text.Custom fontSize={3} fontWeight={500} mb={20}>
           Verify Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="1.4">
           We sent a verification code to your email. Once you receive the code,
           confirm it below.
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex flexDirection="column">
         <Flex mt={5} width="100%" justifyContent="center">
-          <BigInput
+          <TextInput
+            name="verification-code"
+            id="verification-code"
+            fontSize="20px"
             mt={7}
+            height={50}
             placeholder="A1F9C5"
+            textAlign="center"
             value={code}
-            onChange={onChange}
+            onChange={(evt: any) => onChange(evt.target.value)}
           />
         </Flex>
         <Flex mt={4} flexDirection="column">
           <ResendCodeButton theme={props.theme} />
-          <Text mt={3} fontSize={1} color={props.theme.colors.text.error}>
+          <Text.Custom mt={3} fontSize={1} color="intent-alert">
             {error && 'Verification code was incorrect.'}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
     </>
@@ -218,22 +247,12 @@ function ResendCodeButton(props: { theme: ThemeType }) {
           >
             send another code
           </TextButton>
-          {state === 'loading' && (
-            <Spinner
-              ml={1}
-              size="8px"
-              color={props.theme.colors.brand.secondary}
-            />
-          )}
+          {state === 'loading' && <Spinner ml={1} size="8px" />}
         </>
       ) : (
-        <Text
-          variant="body"
-          fontSize={1}
-          color={props.theme.colors.text.success}
-        >
+        <Text.Custom fontSize={1} color="intent-success">
           Another verification code was sent.
-        </Text>
+        </Text.Custom>
       )}
     </Flex>
   );

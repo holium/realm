@@ -35,6 +35,12 @@ const appPreload = {
   toggleDevTools: async () => {
     return await ipcRenderer.invoke('toggle-devtools');
   },
+  enableIsolationMode: () => {
+    return ipcRenderer.invoke('enable-isolation-mode');
+  },
+  disableIsolationMode: () => {
+    return ipcRenderer.invoke('disable-isolation-mode');
+  },
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
@@ -53,6 +59,9 @@ const appPreload = {
    */
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
+  },
+  onDisableCustomMouse(callback: () => void) {
+    ipcRenderer.on('disable-custom-mouse', callback);
   },
   mouseColorChanged(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);

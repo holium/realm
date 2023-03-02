@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Spinner } from 'renderer/components';
 import {
   Icon,
   Text,
@@ -9,6 +8,7 @@ import {
   Box,
   TextInput,
   Skeleton,
+  Spinner,
   WindowedList,
 } from '@holium/design-system';
 import { ContactRow } from './components/ContactRow';
@@ -144,7 +144,7 @@ const DMsPresenter = (props: IProps) => {
       >
         <Flex justifyContent="center" alignItems="center">
           <Icon opacity={0.8} name="Messages" size={24} mr={3} />
-          <Text.Custom fontWeight="600" textTransform="uppercase" opacity={0.7}>
+          <Text.Custom fontWeight={600} textTransform="uppercase" opacity={0.7}>
             DMs
           </Text.Custom>
         </Flex>

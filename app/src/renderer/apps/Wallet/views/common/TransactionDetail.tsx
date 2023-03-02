@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Anchor, Spinner } from 'renderer/components';
+import { Anchor } from 'renderer/components';
 import {
   Avatar,
   TextInput,
@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   Icon,
+  Spinner,
 } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';

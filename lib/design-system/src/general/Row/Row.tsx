@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import { Button } from '..';
 
 interface RowProps {
+  gap?: string;
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
@@ -18,7 +19,7 @@ export const Row = styled(Button.Base)<RowProps>`
   justify-content: flex-start;
   align-items: center;
   background-color: transparent;
-  gap: 6px;
+  gap: ${(props: RowProps) => props.gap || '6px'};
   color: var(--rlm-text-color);
   transition: var(--transition);
 

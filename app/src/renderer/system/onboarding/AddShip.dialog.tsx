@@ -2,16 +2,8 @@ import { KeyboardEventHandler, useEffect, useState } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
-import {
-  Grid,
-  Label,
-  FormControl,
-  Box,
-  Spinner,
-  Flex,
-  TextButton,
-  UrbitSVG,
-} from 'renderer/components';
+import { Grid, Label, FormControl, UrbitSVG } from 'renderer/components';
+import { Spinner, Box, Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -20,7 +12,7 @@ import { useToggle } from 'renderer/logic/lib/useToggle';
 import { Button, Icon, TextInput } from '@holium/design-system';
 
 const AddShipPresenter = (props: BaseDialogProps) => {
-  const { theme } = useServices();
+  const { theme, onboarding } = useServices();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { identity } = useServices();
@@ -59,7 +51,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const urbitId = useField({
     id: 'patp',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.patp || '',
     validate: (patp: string) => {
       if (identity.auth.addedShips.includes(patp)) {
         return { error: 'Already added', parsed: undefined };
@@ -76,7 +68,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const shipUrl = useField({
     id: 'url',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.url || '',
     validationSchema: yup
       .string()
       .matches(
@@ -88,7 +80,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
   const accessKey = useField({
     id: 'code',
     form: shipForm,
-    initialValue: '',
+    initialValue: onboarding.ship?.code || '',
     validationSchema: yup
       .string()
       .matches(
@@ -120,6 +112,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>Urbit ID</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-patp"
                   tabIndex={1}
                   name="patp"
@@ -146,6 +139,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>URL</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-ship-url"
                   tabIndex={2}
                   name="url"
@@ -172,6 +166,7 @@ const AddShipPresenter = (props: BaseDialogProps) => {
                 <Label>Access key</Label>
                 <TextInput
                   mt={1}
+                  height={36}
                   id="onboarding-access-key"
                   tabIndex={3}
                   name="code"
@@ -211,14 +206,17 @@ const AddShipPresenter = (props: BaseDialogProps) => {
           </Flex>
         </Grid.Column>
       </Grid.Column>
-      <Box position="absolute" left={385} bottom={20}>
-        <TextButton
+      <Box position="absolute" right={24} bottom={24}>
+        <Button.TextButton
+          py={1}
+          showOnHover
+          fontWeight={500}
           disabled={!shipForm.computed.isValid || loading}
           onClick={shipForm.actions.submit}
           style={{ minWidth: 45 }}
         >
           {loading ? <Spinner size={0} /> : 'Next'}
-        </TextButton>
+        </Button.TextButton>
       </Box>
     </Grid.Column>
   );

@@ -21,6 +21,10 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --rlm-border-radius-9: 9px;
       --rlm-border-radius-12: 12px;
       --rlm-border-radius-12: 16px;
+      --rlm-box-shadow-1: 0px 0px 4px rgba(0, 0, 0, 0.06);
+      --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
+      --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
+      --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
     `}
   }
 
@@ -56,8 +60,9 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   `}
 
   * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    cursor: none !important;
     font-family: "Rubik", sans-serif;
   }
 

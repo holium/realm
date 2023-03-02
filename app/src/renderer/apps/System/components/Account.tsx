@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { AvatarInput, Button, Icon, TextInput } from '@holium/design-system';
 import {
+  AvatarInput,
+  Button,
+  Icon,
   Flex,
+  RadioGroup,
+  Spinner,
+  TextInput,
+} from '@holium/design-system';
+import {
   Text,
   Card,
-  RadioGroup,
   TextButton,
-  Spinner,
   Anchor,
   CopyButton,
 } from 'renderer/components';
@@ -96,7 +101,7 @@ const AccountPanelPresenter = () => {
   });
 
   return (
-    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Text fontSize={7} fontWeight={600} mb={6}>
         Account
       </Text>
@@ -106,14 +111,10 @@ const AccountPanelPresenter = () => {
       </Text>
       <Card
         p="20px"
-        width="100%"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
-        height={'80%'}
         mb={2}
-        overflowX={'hidden'}
-        overflowY={'visible'}
       >
         <Flex gap={20} flexDirection={'column'} mt={2}>
           <Flex
@@ -127,7 +128,6 @@ const AccountPanelPresenter = () => {
             </Text>
             <Text flex={3} mx={4}>
               {ship!.patp}
-              {/* ~sampel-palnet-sampel-palnet */}
             </Text>
           </Flex>
 
@@ -163,16 +163,12 @@ const AccountPanelPresenter = () => {
               gap={8}
             >
               <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={avatarOption}
                 options={[
                   { label: 'Color', value: 'color' },
                   { label: 'Image', value: 'image' },
                 ]}
-                onClick={(value: avatarOptionType) => {
-                  setAvatarOption(value);
-                }}
+                onClick={(value) => setAvatarOption(value as avatarOptionType)}
               />
 
               <Flex height={30}>
@@ -206,20 +202,27 @@ const AccountPanelPresenter = () => {
             </Flex>
           </Flex>
 
-          {!isLoading && (
-            <TextButton
-              style={{ fontWeight: 400 }}
-              showBackground
-              textColor={accentColor}
-              highlightColor={accentColor}
-              disabled={!profileForm.computed.isValid}
-              onClick={profileForm.actions.submit}
-            >
-              Save
-            </TextButton>
-          )}
-
-          {isLoading && <Spinner size={1} />}
+          <Flex
+            height="24px"
+            width="100%"
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            {isLoading ? (
+              <Spinner size={1} />
+            ) : (
+              <TextButton
+                style={{ fontWeight: 400 }}
+                showBackground
+                textColor={accentColor}
+                highlightColor={accentColor}
+                disabled={!profileForm.computed.isValid}
+                onClick={profileForm.actions.submit}
+              >
+                Save
+              </TextButton>
+            )}
+          </Flex>
         </Flex>
       </Card>
       <Text opacity={0.7} fontSize={3} fontWeight={500}>
@@ -228,7 +231,6 @@ const AccountPanelPresenter = () => {
       <Card
         p="20px"
         width="100%"
-        // minHeight="240px"
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
@@ -239,7 +241,7 @@ const AccountPanelPresenter = () => {
             Email
           </Text>
           <Flex justifyContent="space-between" flex={3}>
-            <Text color={textColor}> {email} </Text>
+            <Text color={textColor}>{email}</Text>
             <TextButton
               style={{ fontWeight: 400 }}
               showBackground

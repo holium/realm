@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, PointerEvent } from 'react';
 import styled from 'styled-components';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
@@ -13,21 +13,17 @@ const ToolbarContainer = styled(TitlebarContainer)`
 `;
 
 export interface DialogTitlebarProps {
-  dragControls: any;
-  onDragStart: any;
-  onDragStop: any;
+  onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: () => void;
   zIndex: number;
   showDevToolsToggle: boolean;
-  windowColor: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const DialogTitlebar = ({
-  dragControls,
-  onDragStop,
+  onDragEnd,
   onDragStart,
   zIndex,
-  windowColor,
   onClose,
 }: DialogTitlebarProps) => {
   const { theme } = useServices();
@@ -38,17 +34,8 @@ export const DialogTitlebar = ({
     return (
       <ToolbarContainer
         hasBlur={false}
-        {...(dragControls
-          ? {
-              onPointerDown: (e) => {
-                dragControls.start(e);
-                onDragStart && onDragStart(e);
-              },
-              onPointerUp: (e) => {
-                onDragStop && onDragStop(e);
-              },
-            }
-          : {})}
+        onPointerDown={onDragStart}
+        onPointerUp={onDragEnd}
         zIndex={zIndex}
         hasBorder
       >
@@ -67,5 +54,5 @@ export const DialogTitlebar = ({
         )}
       </ToolbarContainer>
     );
-  }, [zIndex, iconColor, windowColor]);
+  }, [iconColor, onClose, onDragStart, onDragEnd, zIndex]);
 };

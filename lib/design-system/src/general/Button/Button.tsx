@@ -177,6 +177,8 @@ const Transparent = styled(Base)<ButtonProps>`
 type TextButtonProps = ButtonProps & { showOnHover?: boolean };
 
 const TextButton = styled(Base)<TextButtonProps>`
+  font-weight: 500;
+  padding: 4px 8px;
   color: ${(props) =>
     props.color
       ? `var(--rlm-${props.color}-color)`

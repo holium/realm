@@ -428,7 +428,7 @@ export class ShipService extends BaseService {
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await FriendsApi.saveContact(
       this.core.conduit!,
-      this.state!.patp,
+      profileData.patp || this.state!.patp,
       profileData
     );
 

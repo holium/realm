@@ -8,6 +8,11 @@ on:
     branches:
       - production
       - hotfix
+#
+env:
+  GH_PROXY: ${{ secrets.GH_PROXY }}
+  GH_PROXY_STAGING: ${{ secrets.GH_PROXY_STAGING }}
+#
 jobs:
   pre-deploy:
     if: github.event.pull_request.merged == true
@@ -138,6 +143,54 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
+  build-linux:
+    if: github.event.pull_request.merged == true
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-linux
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'linux', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build linux version
+        run: |
+          sudo apt-get install --no-install-recommends -y libopenjp2-tools
+          RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+  #
   build-windows:
     if: github.event.pull_request.merged == true
     needs: [pre-deploy]
@@ -206,7 +259,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-windows]
+    needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -287,7 +340,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, build-windows, deploy-desks]
+    needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -342,53 +395,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-#
-########### DO NOT REMOVE THESE! ############
-#
-# build-linux-production:
-#   if: github.event.pull_request.merged == true
-#   runs-on: ubuntu-latest
-#   steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v3
-#     - name: Setup node
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: '14'
-#         cache: 'npm'
-#     - name: Install yarn
-#       run: npm install -g yarn
-#     - name: Install app dependencies
-#       run: yarn install
-#     - name: Build and publish
-#       run: |
-#         sudo dpkg --add-architecture i386
-#         sudo mkdir -pm755 /etc/apt/keyrings
-#         sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-#         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-#         sudo apt update
-#         sudo apt install aptitude
-#         sudo aptitude install -y -q winehq-staging
-#         sudo aptitude install -y -q wine-staging
-#         sudo apt update
-#         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:release:linux
-#       env:
-#         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-# #
-# build-windows-production:
-#   if: github.event.pull_request.merged == true
-#   runs-on: ubuntu-latest
-#   container:
-#     image: electronuserland/builder:wine
-#   steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v3
-#     #
-#     - name: Build and install
-#       run: |
-#         apt-get update && apt-get -y install sudo
-#         GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:win
-#       env:
-#         USERNAME: ${{ github.actor }}
-#         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-#

@@ -2,7 +2,7 @@ import { MouseEventHandler } from 'react';
 import { MenuWrapper } from '../Menu';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { MenuItem } from '../MenuItem';
+import { MenuItem } from '@holium/design-system';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;

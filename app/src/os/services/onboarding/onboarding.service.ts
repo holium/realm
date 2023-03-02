@@ -17,10 +17,12 @@ import {
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
+import { FriendsApi } from '../../api/friends';
 import { DocketApi } from '../../api/docket';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
+import { RealmInstallationStatus } from '../../types';
 
 export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance
@@ -51,6 +53,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setProfile': this.setProfile,
     'realm.onboarding.setPassword': this.setPassword,
     'realm.onboarding.installRealm': this.installRealm,
+    'realm.onboarding.is-realm-fully-installed': this.isRealmFullyInstalled,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
     'realm.onboarding.exit': this.exit,
     'realm.onboarding.closeConduit': this.closeConduit,
@@ -76,9 +79,14 @@ export class OnboardingService extends BaseService {
     },
 
     async setEmail(
-      email: string
+      email: string,
+      isRecoveringAccount: boolean
     ): Promise<{ success: boolean; errorMessage: string }> {
-      return await ipcRenderer.invoke('realm.onboarding.setEmail', email);
+      return await ipcRenderer.invoke(
+        'realm.onboarding.setEmail',
+        email,
+        isRecoveringAccount
+      );
     },
 
     async verifyEmail(verificationCode: string) {
@@ -182,6 +190,10 @@ export class OnboardingService extends BaseService {
 
     async setPassword(password: string) {
       return await ipcRenderer.invoke('realm.onboarding.setPassword', password);
+    },
+
+    async isRealmFullyInstalled() {
+      return await ipcRenderer.invoke('realm.onboarding.isRealmFullyInstalled');
     },
 
     async installRealm() {
@@ -324,7 +336,8 @@ export class OnboardingService extends BaseService {
 
   async setEmail(
     _event: any,
-    email: string
+    email: string,
+    isRecoveringAccount: boolean
   ): Promise<{ success: boolean; errorMessage: string }> {
     const { auth } = this.core.services.identity;
     this.state.setEmail(email);
@@ -343,6 +356,13 @@ export class OnboardingService extends BaseService {
       if (account?.id) {
         id = account.id;
         this.state.setNewAccount(false);
+      }
+      // if no account found and we are attempting to recover, this is an error condition
+      else if (isRecoveringAccount) {
+        return {
+          success: false,
+          errorMessage: `Account not found using email address '${email}`,
+        };
       } else {
         const newAccount = await this.core.holiumClient.createAccount(
           email,
@@ -581,7 +601,16 @@ export class OnboardingService extends BaseService {
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
-    const ourProfile = await ContactApi.getContact(tempConduit, patp);
+    let ourProfile;
+    try {
+      ourProfile = await FriendsApi.getContact(tempConduit, patp);
+    } catch (e) {
+      try {
+        ourProfile = await ContactApi.getContact(tempConduit, patp);
+      } catch (e) {
+        ourProfile = { color: '#000' };
+      }
+    }
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;
@@ -597,25 +626,11 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-
-    try {
-      const updatedProfile = await ContactApi.saveContact(
-        tempConduit,
-        patp,
-        profileData
-      );
-
-      this.state.ship.setContactMetadata(updatedProfile);
-
-      return updatedProfile;
-    } catch (err) {
-      console.error(err);
-      throw new Error('Error updating profile');
-    }
+    this.state.ship.setContactMetadata({
+      ...profileData,
+      avatar: profileData.avatar || undefined,
+    });
+    return profileData;
   }
 
   async setPassword(_event: any, password: string) {
@@ -623,6 +638,63 @@ export class OnboardingService extends BaseService {
       .encryptString(password)
       .toString('base64');
     this.state.setEncryptedPassword(encryptedPassword);
+  }
+
+  /**
+   * This function will loop thru all configured (INSTALL_MOON environment variable)
+   *   desks and determine the installed status of each.
+   *
+   * @param _event
+   * @returns
+   */
+  async isRealmFullyInstalled(_event: any): Promise<RealmInstallationStatus> {
+    let status: RealmInstallationStatus = {
+      desks: undefined,
+      installedDesks: undefined,
+      result: 'success',
+      errorMessage: undefined,
+    };
+    try {
+      // if either INSTALL_MOON is undefined or set to 'bypass', ignore installation
+      if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
+        console.error(
+          "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
+        );
+        status.errorMessage = `INSTALL_MOON not found or set to 'bypass'`;
+        return status;
+      }
+      const parts: string[] = process.env.INSTALL_MOON.split(':');
+      status.desks = parts[1].split(',');
+      const { url, patp } = this.state.ship!;
+      const { cookie, code } = this.core.getSession();
+      const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+      for (let idx = 0; idx < status.desks.length; idx++) {
+        const desk = status.desks[idx];
+        // check if the desk is already installed; if it is first unininstall it before
+        const deskStatus = await DocketApi.getDeskStatus(
+          tempConduit,
+          patp,
+          desk
+        );
+        // for now, if the app is currently installed; continue
+        if (deskStatus === 'installed') {
+          if (status.installedDesks === undefined) {
+            status.installedDesks = [];
+          }
+          status.installedDesks.push(desk);
+        }
+      }
+      if (status.desks.length === status.installedDesks?.length) {
+        status.result = 'success';
+      } else {
+        status.result = 'partial';
+      }
+      await this.closeConduit();
+    } catch (e) {
+      status.result = 'error';
+      status.errorMessage = `an error occurred determining Realm's installation status`;
+    }
+    return status;
   }
 
   async installRealm(_event: any) {
@@ -635,6 +707,9 @@ export class OnboardingService extends BaseService {
       return;
     }
 
+    // force this back to initial; otherwise the UI will still think Realm is installed
+    this.state.installer.set('initial');
+
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
     // example: INSTALL_MOON=~hostyv:realm,courier
     const parts: string[] = process.env.INSTALL_MOON.split(':');
@@ -643,6 +718,7 @@ export class OnboardingService extends BaseService {
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
       const response: string = await DocketApi.installDesk(
@@ -656,7 +732,6 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
-
     await this.closeConduit();
     this.state.endRealmInstall('success');
     this.state.setRealmInstalled();
@@ -679,6 +754,18 @@ export class OnboardingService extends BaseService {
       passwordHash,
     });
 
+    const { url, patp, nickname, color, avatar } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+
+    const profileData = {
+      nickname,
+      color,
+      avatar,
+    };
+
+    await FriendsApi.saveContact(tempConduit, patp, profileData);
+
     // force cookie to null to ensure user must login once onboarding is complete
     const session = this.core.getSession();
     this.core.saveSession({ ...session, cookie: null });
@@ -694,9 +781,10 @@ export class OnboardingService extends BaseService {
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setEmail(this.state.email!);
     this.core.services.identity.auth.setFirstTime();
+
     this.core.services.ship.storeNewShip(authShip);
     this.core.services.shell.closeDialog(null);
-
+    this.state.cleanup();
     await this.exit();
   }
 

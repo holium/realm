@@ -144,7 +144,7 @@ export const applyStyleOverrides = (appId: string, theme: ThemeType) => {
           background-color: ${darken(0.02, baseGray)} !important;
         }
 
-        li[style*="cursor: none; background-color: rgb(191, 191, 191);"]:has(a[href*='/apps/groups/profile/edit']) {
+        li[style*="background-color: rgb(191, 191, 191);"]:has(a[href*='/apps/groups/profile/edit']) {
           background-color: ${darken(0.02, baseGray)} !important;
         }
 

@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  Box,
-  Grid,
-  Text,
-  Flex,
-  Spinner,
-  CopyButton,
-} from 'renderer/components';
+import { Grid, Text, CopyButton } from 'renderer/components';
+import { Box, Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';

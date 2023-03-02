@@ -1,9 +1,7 @@
-import { FC, useEffect } from 'react';
-import { darken } from 'polished';
-import { DragControls } from 'framer-motion';
+import { FC, useEffect, PointerEvent } from 'react';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
+import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import {
   DialogTitlebar,
@@ -19,27 +17,23 @@ type Props = {
   appWindow: AppWindowType;
   appInfo: AppType;
   shell: ShellStoreType;
-  dragControls: DragControls;
   currentTheme: ThemeType;
-  windowColor: string;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
   onDevTools: () => void;
-  onDragStart: () => void;
-  onDragStop: () => void;
+  onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: () => void;
 };
 
 export const TitlebarByType = ({
   appWindow,
   appInfo,
   shell,
-  dragControls,
   currentTheme,
-  windowColor,
   onDevTools,
   onDragStart,
-  onDragStop,
+  onDragEnd,
   onClose,
   onMaximize,
   onMinimize,
@@ -63,10 +57,9 @@ export const TitlebarByType = ({
       hasBorder={!hideTitlebarBorder}
       showDevToolsToggle={showDevToolsToggle}
       zIndex={appWindow.zIndex}
-      dragControls={dragControls}
       onDevTools={onDevTools}
       onDragStart={onDragStart}
-      onDragStop={onDragStop}
+      onDragEnd={onDragEnd}
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
@@ -87,11 +80,9 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
-          dragControls={dragControls}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragStart={onDragStart as any}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -108,10 +99,9 @@ export const TitlebarByType = ({
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
           zIndex={appWindow.zIndex}
-          dragControls={dragControls}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -130,11 +120,14 @@ export const TitlebarByType = ({
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
     noTitlebar = dialogConfig.noTitlebar!;
-    const onCloseDialog = dialogConfig.onClose;
+    const onCloseDialog = dialogConfig.hasCloseButton
+      ? dialogConfig.onClose
+      : undefined;
     const onOpenDialog = dialogConfig.onOpen;
-    CustomTitlebar = DialogTitlebar;
+    CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
+    // console.log('dialogConfig', dialogConfig, onClose);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       // trigger onOpen only once
@@ -146,14 +139,10 @@ export const TitlebarByType = ({
       titlebar = (
         <CustomTitlebar
           zIndex={appWindow.zIndex}
-          windowColor={darken(0.002, windowColor)}
           showDevToolsToggle
-          dragControls={dragControls}
-          onClose={onCloseDialog ?? onClose}
-          onMinimize={onMinimize}
-          onMaximize={onMaximize}
+          onClose={onCloseDialog}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
         />
       );
     }

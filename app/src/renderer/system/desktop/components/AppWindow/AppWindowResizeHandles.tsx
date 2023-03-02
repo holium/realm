@@ -2,6 +2,8 @@ import { MotionValue, PanInfo } from 'framer-motion';
 import {
   BottomLeftDragHandle,
   BottomRightDragHandle,
+  TopLeftDragHandle,
+  TopRightDragHandle,
 } from './AppWindow.styles';
 
 type MotionPosition = {
@@ -12,41 +14,59 @@ type MotionPosition = {
 type DragHandler = (event: MouseEvent, info: PanInfo) => void;
 
 type Props = {
+  zIndex: number;
+  topLeft: MotionPosition;
+  topRight: MotionPosition;
   bottomLeft: MotionPosition;
   bottomRight: MotionPosition;
+  onDragTopLeft: DragHandler;
+  onDragTopRight: DragHandler;
   onDragBottomLeft: DragHandler;
   onDragBottomRight: DragHandler;
-  setIsResizing: (isResizing: boolean) => void;
 };
 
 export const AppWindowResizeHandles = ({
+  zIndex,
+  topLeft,
+  topRight,
   bottomLeft,
   bottomRight,
+  onDragTopLeft,
+  onDragTopRight,
   onDragBottomLeft,
   onDragBottomRight,
-  setIsResizing,
 }: Props) => (
   <>
+    <TopLeftDragHandle
+      drag
+      key={`${topLeft.x.get()}-${topLeft.y.get()}`}
+      zIndex={zIndex}
+      className="app-window-resize"
+      onDrag={onDragTopLeft}
+      dragMomentum={false}
+    />
+    <TopRightDragHandle
+      drag
+      key={`${topRight.x.get()}-${topRight.y.get()}`}
+      zIndex={zIndex}
+      className="app-window-resize"
+      onDrag={onDragTopRight}
+      dragMomentum={false}
+    />
     <BottomLeftDragHandle
       drag
+      key={`${bottomLeft.x.get()}-${bottomLeft.y.get()}`}
+      zIndex={zIndex}
       className="app-window-resize"
-      style={bottomLeft}
       onDrag={onDragBottomLeft}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
     <BottomRightDragHandle
-      className="app-window-resize"
       drag
-      style={bottomRight}
+      key={`${bottomRight.x.get()}-${bottomRight.y.get()}`}
+      zIndex={zIndex}
+      className="app-window-resize"
       onDrag={onDragBottomRight}
-      onPointerDown={() => setIsResizing(true)}
-      onPointerUp={() => setIsResizing(false)}
-      onPanEnd={() => setIsResizing(false)}
-      onTap={() => setIsResizing(false)}
       dragMomentum={false}
     />
   </>

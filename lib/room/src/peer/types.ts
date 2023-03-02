@@ -29,3 +29,10 @@ export enum TrackKind {
   Video = 'video',
   Unknown = 'unknown',
 }
+
+declare global {
+  interface Window {
+    webkitAudioContext: () => AudioContext;
+    cancelAnimationFrame: (frameId: number) => undefined;
+  }
+}

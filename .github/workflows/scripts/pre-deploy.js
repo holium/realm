@@ -104,7 +104,9 @@ module.exports = async ({ github, context }, workflowId) => {
       );
     }
     ci.isNewBuild = true;
-    ci.releaseName = buildTitle;
+    ci.releaseName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
+      matches[5]
+    }-${matches[1]}`;
     ci.buildVersion = tagName;
     switch (matches[1]) {
       // test and staging builds produce alphas. the only difference is
@@ -117,8 +119,6 @@ module.exports = async ({ github, context }, workflowId) => {
         ci.channel = 'alpha';
         break;
       case 'hotfix':
-        ci.channel = 'hotfix';
-        break;
       case 'release':
         ci.channel = 'latest';
         break;
@@ -183,9 +183,9 @@ module.exports = async ({ github, context }, workflowId) => {
       matches[3]
     }.${buildNumber}-${ci.channel}`;
     ci.isNewBuild = true;
-    ci.releaseName = `${ci.channel === 'alpha' ? 'staging' : ci.channel}-${
-      matches[1] ? 'v' : ''
-    }${matches[2]}.${matches[3]}.${buildNumber}`;
+    ci.releaseName = `${matches[1] ? 'v' : ''}${matches[2]}.${
+      matches[3]
+    }.${buildNumber}-${ci.channel === 'alpha' ? 'staging' : ci.channel}`;
     ci.version.major = parseInt(matches[2]);
     ci.version.minor = parseInt(matches[3]);
     ci.version.build = buildNumber;

@@ -95,6 +95,7 @@ export const DesktopStore = types
     windows: types.map(AppWindowModel),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
+    isolationMode: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -105,6 +106,9 @@ export const DesktopStore = types
     },
     get isHomePaneOpen() {
       return self.homePaneOpen;
+    },
+    get isIsolationMode() {
+      return self.isolationMode;
     },
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
@@ -119,6 +123,9 @@ export const DesktopStore = types
     },
     closeHomePane() {
       self.homePaneOpen = false;
+    },
+    toggleIsolationMode() {
+      self.isolationMode = !self.isolationMode;
     },
     setActive(appId: string) {
       self.windows.forEach((win) => {

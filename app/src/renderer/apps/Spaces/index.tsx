@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Input, Spinner } from 'renderer/components';
-import { Text, Flex, Button, Icon } from '@holium/design-system';
+import { Input } from 'renderer/components';
+import { Text, Flex, Button, Icon, Spinner } from '@holium/design-system';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
@@ -66,7 +66,7 @@ const SpacesTrayAppPresenter = () => {
         justifyContent="space-between"
       >
         <Text.Custom
-          fontWeight="600"
+          fontWeight={500}
           textTransform="uppercase"
           pl={1}
           opacity={0.7}

@@ -8,14 +8,8 @@ declare global {
       os: OSPreloadType;
     };
     audio: any;
+    ship: string;
   }
 }
 
 export {};
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      webview: Electron.WebviewTag;
-    }
-  }
-}

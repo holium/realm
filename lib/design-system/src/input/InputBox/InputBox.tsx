@@ -36,6 +36,9 @@ const StyledBox = styled(Box)<StyledBoxProps>`
     `}
 
   input {
+    font-size: ${(props) =>
+      `${props.fontSize ? props.fontSize.toString().replace('px', '') : 14}px`};
+    text-align: ${(props) => (props.textAlign ? props.textAlign : 'left')};
     border-radius: var(--rlm-border-radius-4);
     background-color: var(--rlm-input-color);
     color: var(--rlm-text-color);
@@ -131,6 +134,7 @@ export const InputBox = ({
   disabled,
   error,
   children,
+  ...boxProps
 }: InputBoxProps) => (
   <StyledBox
     display="flex"
@@ -142,13 +146,15 @@ export const InputBox = ({
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}
+    fontSize={boxProps.fontSize || '14px'}
+    textAlign={boxProps.textAlign || 'left'}
   >
     {label && label !== 'none' && (
       <Text.Label
         ml="2px"
         color="accent"
         display="flex"
-        fontWeight="500"
+        fontWeight={500}
         mr={1}
         alignItems="center"
         mb={inlineLabelDirection === 'column' ? 1 : 0}

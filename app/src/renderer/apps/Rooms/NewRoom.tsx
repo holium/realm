@@ -78,7 +78,6 @@ const NewRoomPresenter = () => {
           <Button.IconButton
             className="realm-cursor-hover"
             size={26}
-            style={{ cursor: 'none' }}
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomsApp.setView('list');

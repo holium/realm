@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useMotionValue, useDragControls, PanInfo } from 'framer-motion';
+import { debounce } from 'lodash';
+import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
+import { useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
@@ -7,6 +8,7 @@ import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
@@ -15,6 +17,9 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
+
+const CURSOR_WIDTH = 10;
+const CURSOR_HEIGHT = 10;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -28,35 +33,54 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const { textColor, windowColor } = theme.currentTheme;
 
   const dragControls = useDragControls();
-  const [isResizing, setIsResizing] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const resizing = useToggle(false);
+  const dragging = useToggle(false);
 
   const appInfo = bazaar.getApp(appWindow.appId);
-  const activeWindow = appWindow;
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
-  const denormalizedBounds = useMemo(
-    () => denormalizeBounds(activeWindow.bounds, shell.desktopDimensions),
-    [activeWindow.bounds, shell.desktopDimensions]
+  const bounds = useMemo(
+    () => denormalizeBounds(appWindow.bounds, shell.desktopDimensions),
+    [appWindow.bounds, shell.desktopDimensions]
   );
 
-  const motionX = useMotionValue(activeWindow ? denormalizedBounds.x : 20);
-  const motionY = useMotionValue(activeWindow ? denormalizedBounds.y : 20);
-  const motionHeight = useMotionValue(
-    activeWindow ? denormalizedBounds.height : 600
-  );
-  const motionWidth = useMotionValue(
-    activeWindow ? denormalizedBounds.width : 600
-  );
+  const mouseDragX = useMotionValue(0);
+  const mouseDragY = useMotionValue(0);
+
+  const motionX = useMotionValue(bounds.x);
+  const motionY = useMotionValue(bounds.y);
+  const motionWidth = useMotionValue(bounds.width);
+  const motionHeight = useMotionValue(bounds.height);
+
+  const resizeTopLeftX = useMotionValue(bounds.x);
+  const resizeTopLeftY = useMotionValue(bounds.y);
+  const resizeTopRightX = useMotionValue(bounds.x + bounds.width);
+  const resizeTopRightY = useMotionValue(bounds.y);
+  const resizeBottomLeftX = useMotionValue(bounds.x);
+  const resizeBottomLefty = useMotionValue(bounds.y + bounds.height);
+  const resizeBottomRightX = useMotionValue(bounds.x + bounds.width);
+  const resizeBottomRightY = useMotionValue(bounds.y + bounds.height);
 
   useEffect(() => {
-    motionX.set(denormalizedBounds.x);
-    motionY.set(denormalizedBounds.y);
-    motionWidth.set(denormalizedBounds.width);
-    motionHeight.set(denormalizedBounds.height);
-  }, [activeWindow.bounds]);
+    motionX.set(bounds.x);
+    motionY.set(bounds.y);
+    motionWidth.set(bounds.width);
+    motionHeight.set(bounds.height);
+  }, [appWindow.bounds]);
 
-  const windowId = `app-window-${activeWindow.appId}`;
-  const webViewId = getWebViewId(activeWindow.appId, appWindow.type!);
+  useEffect(() => {
+    window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
+      if (isDragging) {
+        resizing.toggleOn();
+        mouseDragX.set(mousePosition.x);
+        mouseDragY.set(mousePosition.y);
+      } else {
+        resizing.toggleOff();
+      }
+    });
+  }, []);
+
+  const windowId = `app-window-${appWindow.appId}`;
+  const webViewId = getWebViewId(appWindow.appId, appWindow.type!);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -65,20 +89,45 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     }
   }, [appWindow.zIndex]);
 
-  const resizeBottomRightX = useMotionValue(0);
-  const resizeBottomRightY = useMotionValue(0);
-  const resizeBottomLeftX = useMotionValue(0);
-  const resizeBottomLefty = useMotionValue(0);
-
-  const handleBottomRightCornerResize = useCallback(
-    (event: MouseEvent, info: PanInfo) => {
+  const handleTopLeftCornerResize = useCallback(
+    (event: MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeBottomRightX.set(resizeBottomRightX.get() - info.offset.x);
-      resizeBottomRightY.set(resizeBottomRightY.get() - info.offset.y);
 
-      const newWidth = info.point.x - motionX.get();
-      const newHeight = info.point.y - motionY.get();
+      // 1/4th of the cursor should be inside the window when resizing.
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get() - CURSOR_HEIGHT * 0.25;
+
+      const newWidth = motionX.get() + motionWidth.get() - mouseX;
+      const newHeight = motionY.get() + motionHeight.get() - mouseY;
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionX.set(mouseX);
+        motionWidth.set(newWidth);
+      }
+      if (shouldUpdateHeight) {
+        motionY.set(mouseY);
+        motionHeight.set(newHeight);
+      }
+
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
+    },
+    [mouseDragX, mouseDragY]
+  );
+
+  const handleTopRightCornerResize = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH * 0.75;
+      const mouseY = mouseDragY.get();
+
+      const newWidth = mouseX - motionX.get();
+      const newHeight = motionY.get() + motionHeight.get() - mouseY;
+
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
 
@@ -86,28 +135,30 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         motionWidth.set(newWidth);
       }
       if (shouldUpdateHeight) {
+        motionY.set(mouseY);
         motionHeight.set(newHeight);
       }
 
       if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
-    []
+    [mouseDragX, mouseDragY]
   );
 
   const handleBottomLeftCornerResize = useCallback(
-    (event: MouseEvent, info: PanInfo) => {
+    (event: MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
-      resizeBottomLeftX.set(resizeBottomLeftX.get() - info.offset.x);
-      resizeBottomLefty.set(resizeBottomLefty.get() - info.offset.y);
 
-      const newWidth = motionX.get() + motionWidth.get() - info.point.x;
-      const newHeight = info.point.y - motionY.get();
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get();
+
+      const newWidth = motionX.get() + motionWidth.get() - mouseX;
+      const newHeight = mouseY - motionY.get();
       const shouldUpdateWidth = newWidth > MIN_WIDTH;
       const shouldUpdateHeight = newHeight > MIN_HEIGHT;
 
       if (shouldUpdateWidth) {
-        motionX.set(info.point.x);
+        motionX.set(mouseX);
         motionWidth.set(newWidth);
       }
       if (shouldUpdateHeight) {
@@ -116,54 +167,84 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
       if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
     },
-    []
+    [mouseDragX, mouseDragY]
   );
 
-  const updateWindowBounds = useCallback(() => {
-    DesktopActions.setWindowBounds(
-      activeWindow.appId,
-      normalizeBounds(
-        {
-          x: motionX.get(),
-          y: motionY.get(),
-          height: motionHeight.get(),
-          width: motionWidth.get(),
-        },
-        shell.desktopDimensions
-      )
-    );
-  }, [
-    activeWindow.appId,
-    motionX,
-    motionY,
-    motionHeight,
-    motionWidth,
-    shell.desktopDimensions,
-  ]);
+  const handleBottomRightCornerResize = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-  const onDragStart = () => setIsDragging(true);
+      const mouseX = mouseDragX.get() - CURSOR_WIDTH;
+      const mouseY = mouseDragY.get();
 
-  const onDragStop = () => {
-    setIsDragging(false);
+      const newWidth = mouseX - motionX.get();
+      const newHeight = mouseY - motionY.get();
+      const shouldUpdateWidth = newWidth > MIN_WIDTH;
+      const shouldUpdateHeight = newHeight > MIN_HEIGHT;
+
+      if (shouldUpdateWidth) {
+        motionWidth.set(newWidth);
+      }
+      if (shouldUpdateHeight) {
+        motionHeight.set(newHeight);
+      }
+
+      if (shouldUpdateWidth || shouldUpdateHeight) updateWindowBounds();
+    },
+    [mouseDragX, mouseDragY]
+  );
+
+  const updateWindowBounds = useCallback(
+    debounce(() => {
+      DesktopActions.setWindowBounds(
+        appWindow.appId,
+        normalizeBounds(
+          {
+            x: motionX.get(),
+            y: motionY.get(),
+            height: motionHeight.get(),
+            width: motionWidth.get(),
+          },
+          shell.desktopDimensions
+        )
+      );
+
+      resizeTopLeftX.set(motionX.get());
+      resizeTopLeftY.set(motionY.get());
+      resizeTopRightX.set(motionX.get() + motionWidth.get());
+      resizeTopRightY.set(motionY.get());
+      resizeBottomLeftX.set(motionX.get());
+      resizeBottomLefty.set(motionY.get() + motionHeight.get());
+      resizeBottomRightX.set(motionX.get() + motionWidth.get());
+      resizeBottomRightY.set(motionY.get() + motionHeight.get());
+    }, 100),
+    [motionX, motionY, motionWidth, motionHeight]
+  );
+
+  const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.toggleOn();
+    dragControls.start(e);
+  };
+
+  const onDragEnd = () => {
+    dragging.toggleOff();
     updateWindowBounds();
   };
 
   const onMaximize = async () => {
-    const newBounds = await DesktopActions.toggleMaximized(activeWindow.appId);
-    const denormalizedBounds = denormalizeBounds(
-      newBounds,
-      shell.desktopDimensions
-    );
-    motionX.set(denormalizedBounds.x);
-    motionY.set(denormalizedBounds.y);
-    motionWidth.set(denormalizedBounds.width);
-    motionHeight.set(denormalizedBounds.height);
+    const mb = await DesktopActions.toggleMaximized(appWindow.appId);
+    const dmb = denormalizeBounds(mb, shell.desktopDimensions);
+    motionX.set(dmb.x);
+    motionY.set(dmb.y);
+    motionWidth.set(dmb.width);
+    motionHeight.set(dmb.height);
   };
 
-  const onMinimize = () => DesktopActions.toggleMinimized(activeWindow.appId);
+  const onMinimize = () => DesktopActions.toggleMinimized(appWindow.appId);
 
   const onClose = () =>
-    activeWindow.isActive && DesktopActions.closeAppWindow(activeWindow.appId);
+    appWindow.isActive && DesktopActions.closeAppWindow(appWindow.appId);
 
   const onDevTools = useCallback(() => {
     const webView = document.getElementById(
@@ -182,11 +263,10 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   return (
     <AppWindowContainer
       id={windowId}
-      dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}
-      drag={!isResizing}
+      drag={dragging.isOn}
       dragControls={dragControls}
       initial={{
         opacity: 0,
@@ -232,22 +312,29 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           appWindow={appWindow}
           appInfo={appInfo}
           shell={shell}
-          dragControls={dragControls}
           currentTheme={theme.currentTheme}
-          windowColor={windowColor}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMaximize={onMaximize}
           onMinimize={onMinimize}
         />
         <AppWindowByType
-          isResizing={isResizing}
-          isDragging={isDragging}
+          isResizing={resizing.isOn}
+          isDragging={dragging.isOn}
           appWindow={appWindow}
         />
         <AppWindowResizeHandles
+          zIndex={appWindow.zIndex + 1}
+          topRight={{
+            x: resizeTopRightX,
+            y: resizeTopRightY,
+          }}
+          topLeft={{
+            x: resizeTopLeftX,
+            y: resizeTopLeftY,
+          }}
           bottomLeft={{
             x: resizeBottomLeftX,
             y: resizeBottomLefty,
@@ -256,7 +343,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
             x: resizeBottomRightX,
             y: resizeBottomRightY,
           }}
-          setIsResizing={setIsResizing}
+          onDragTopLeft={handleTopLeftCornerResize}
+          onDragTopRight={handleTopRightCornerResize}
           onDragBottomLeft={handleBottomLeftCornerResize}
           onDragBottomRight={handleBottomRightCornerResize}
         />

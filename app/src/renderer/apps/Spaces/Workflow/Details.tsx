@@ -2,14 +2,11 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Grid,
   Text,
-  Flex,
   Label,
   Input,
   Icons,
   Crest,
-  RadioGroup,
   FormControl,
-  RadioList,
   isValidHexColor,
   isImgUrl,
   TextButton,
@@ -18,10 +15,10 @@ import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { observer } from 'mobx-react';
 import { TwitterPicker } from 'react-color';
-
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
+import { Flex, RadioGroup, RadioList } from '@holium/design-system';
 
 type CreateSpaceFormProps = {
   name: string;
@@ -56,7 +53,7 @@ export const createSpaceForm = ({
   const colorField = createField({
     id: 'color',
     form: spaceForm,
-    initialValue: color,
+    initialValue: color || '#000000',
     validationSchema: yup
       .string()
       .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
@@ -90,7 +87,7 @@ const SpacesCreateFormPresenter = ({
   setState,
 }: BaseDialogProps) => {
   const { theme, spaces } = useServices();
-  const { inputColor, windowColor, textColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -120,12 +117,10 @@ const SpacesCreateFormPresenter = ({
   };
 
   const setWorkspaceState = (obj: any) => {
-    setState &&
-      setState({
-        ...workflowState,
-        ...obj,
-      });
-    // console.log(workflowState);
+    setState?.({
+      ...workflowState,
+      ...obj,
+    });
   };
 
   useEffect(() => {
@@ -134,10 +129,18 @@ const SpacesCreateFormPresenter = ({
       if (workflowState.image) {
         setCrestOption('image');
         setWorkspaceState({ crestOption });
+      } else {
+        setWorkspaceState({ crestOption });
       }
     } else {
       setWorkspaceState({
         access: 'public',
+      });
+    }
+    if (!workflowState.color) {
+      setWorkspaceState({
+        crestOption: 'color',
+        color: '#000000',
       });
     }
     if (edit) {
@@ -164,7 +167,7 @@ const SpacesCreateFormPresenter = ({
       }
     }
 
-    () => {
+    return () => {
       document.removeEventListener('click', handleClickOutside, true);
     };
   }, []);
@@ -216,15 +219,13 @@ const SpacesCreateFormPresenter = ({
               alignItems="flex-end"
             >
               <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={crestOption}
                 options={[
                   { label: 'Color', value: 'color' },
                   { label: 'Image', value: 'image' },
                 ]}
-                onClick={(value: CrestOptionType) => {
-                  setCrestOption(value);
+                onClick={(value) => {
+                  setCrestOption(value as CrestOptionType);
                   setWorkspaceState({ crestOption: value });
                   setWorkspaceState({ crestOption: value });
                 }}
@@ -301,16 +302,17 @@ const SpacesCreateFormPresenter = ({
                   borderRadius: 6,
                   paddingRight: 0,
                 }}
-                value={colorField.state.value.replace('#', '')}
+                value={colorField.state.value}
                 error={colorField.computed.ifWasEverBlurredThenError}
                 onChange={(e: any) => {
-                  if (isValidHexColor(`#${e.target.value}`)) {
+                  const color = e.target.value.replace('#', '');
+                  if (isValidHexColor(`#${color}`)) {
                     setWorkspaceState({
-                      color: `#${e.target.value}`,
+                      color: `#${color}`,
                       crestOption: 'color',
                     });
                   }
-                  colorField.actions.onChange(e.target.value);
+                  colorField.actions.onChange(color);
                 }}
                 onFocus={colorField.actions.onFocus}
                 onBlur={colorField.actions.onBlur}
@@ -401,6 +403,7 @@ const SpacesCreateFormPresenter = ({
               }}
               onFocus={() => nameField.actions.onFocus()}
               onBlur={nameField.actions.onBlur}
+              disabled={workflowState.type === 'group'}
             />
           </FormControl.Field>
           <FormControl.Field>
@@ -437,8 +440,6 @@ const SpacesCreateFormPresenter = ({
               Access
             </Label>
             <RadioList
-              customBg={windowColor}
-              textColor={textColor}
               selected={accessOption}
               options={[
                 {
@@ -461,8 +462,8 @@ const SpacesCreateFormPresenter = ({
                   sublabel: 'Anyone can join a public holding area.',
                 },
               ]}
-              onClick={(value: AccessOptionType) => {
-                setAccessOption(value);
+              onClick={(value) => {
+                setAccessOption(value as AccessOptionType);
                 setWorkspaceState({
                   access: value,
                 });
