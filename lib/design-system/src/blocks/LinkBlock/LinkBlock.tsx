@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, skeletonStyle, Text, Bookmark } from '../..';
+import { Flex, skeletonStyle, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { isTwitterLink } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
@@ -81,17 +81,23 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
   if (linkType === 'url') {
     return (
       <Block {...rest}>
+        <a href={link} /*target="_blank"*/ rel="noopener noreferrer">
+          {link}
+        </a>
+      </Block>
+    );
+  }
+  /*<Block {...rest}>
         <Bookmark
           url={link}
           title={link}
           width={320}
           onNavigate={(url: string) => {
-            window.open(url, '_blank');
+            window.open(url);
           }}
         />
-      </Block>
-    );
-  }
+      </Block>*/
+
   if (linkType === 'twitter') {
     let width = rest.width || 400;
     if (width < 400) {
@@ -122,10 +128,11 @@ export const LinkBlock = ({ link, by, ...rest }: LinkBlockProps) => {
           fontSize={2}
           fontWeight={500}
           width={rest.width || 'inherit'}
-          onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
+          /*onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
             evt.stopPropagation();
             window.open(openGraph?.ogUrl, '_blank');
-          }}
+          }}*/
+          href={openGraph?.ogUrl}
         >
           {openGraph?.ogTitle}
         </Text.Anchor>

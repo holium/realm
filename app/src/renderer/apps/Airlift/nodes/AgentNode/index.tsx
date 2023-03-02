@@ -21,7 +21,7 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
   return (
     <Flex
       flexDirection="column"
-      gap={30}
+      gap={25}
       border={data.showDelete ? '2px solid red' : 'none'}
     >
       <TextInput
@@ -40,16 +40,19 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
         onKeyDown={onKeyDown}
         disabled={created}
         onClick={() => AirliftActions.toggleAgentExpand(data.id)}
+        style={{ position: 'relative' }}
       />
-      {data.agent.expanded &&
-        Array.from(data.agent.arms.values()).map((arm, index) => (
-          <AirliftArm
-            key={arm.name}
-            airliftId={data.id}
-            arm={arm}
-            index={index}
-          />
-        ))}
+      <Flex flexDirection="column" gap={10}>
+        {data.agent.expanded &&
+          Array.from(data.agent.arms.values()).map((arm, index) => (
+            <AirliftArm
+              key={arm.name}
+              airliftId={data.id}
+              arm={arm}
+              index={index}
+            />
+          ))}
+      </Flex>
     </Flex>
   );
 });

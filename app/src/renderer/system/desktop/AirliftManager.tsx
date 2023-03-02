@@ -25,7 +25,7 @@ import { TextInputNode } from 'renderer/apps/Airlift/nodes/TextInputNode';
 import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
 import { Gate } from 'renderer/apps/Airlift/nodes/Gate';
 import { UqbarContractNode } from 'renderer/apps/Airlift/nodes/UqbarContractNode';
-import { Portal } from 'renderer/apps/Airlift/nodes/Portal';
+import { PortalNode } from 'renderer/apps/Airlift/nodes/PortalNode';
 import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
 import { RoomNode } from 'renderer/apps/Airlift/nodes/RoomNode';
 
@@ -48,7 +48,7 @@ const AirliftManagerPresenter = () => {
       agent: AgentNode,
       gate: Gate,
       uqbar: UqbarContractNode,
-      portal: Portal,
+      portal: PortalNode,
       wallet: WalletNode,
       relic: RelicNode,
       room: RoomNode,
@@ -96,6 +96,7 @@ const AirliftManagerPresenter = () => {
         y: event.clientY - reactFlowBounds.top,
       });
       const airliftId = getId(type);
+      console.log('airliftId', airliftId);
       const newNode = {
         id: airliftId,
         type,
