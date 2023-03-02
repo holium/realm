@@ -339,7 +339,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           {accountDisplay}
           <Balance
             address={props.wallet.address}
-            coin={props.coin || undefined}
+            coin={props.coin}
             amountDisplay={amountDisplay}
             amountUsdDisplay={amountUsdDisplay}
             colors={themeData.colors}
@@ -449,7 +449,7 @@ const SendReceiveButtons = (props: {
 
 interface BalanceInterface {
   address: string;
-  coin?: ERC20Type;
+  coin: ERC20Type | null;
   amountDisplay: string;
   amountUsdDisplay: string;
   colors: any;
