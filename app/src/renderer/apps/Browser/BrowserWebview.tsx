@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
 import { useBrowser } from './store';
@@ -8,20 +8,36 @@ type Props = {
   isDragging: boolean;
   isResizing: boolean;
 };
+const appId = 'os-browser';
+const webviewId = `${appId}-web-webview`;
 
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
+  const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
-  const appId = 'os-browser';
-  const webViewId = `${appId}-web-webview`;
-  const { loader } = currentTab;
+  const loadingState = useMemo(
+    () => currentTab.loader.state,
+    [currentTab.loader.state]
+  );
 
   useEffect(() => {
-    const webView = document.getElementById(
-      webViewId
+    const webview = document.getElementById(
+      webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webView) return;
+    if (!webview) return;
+
+    const onDomReady = () => setReadyWebview(webview);
+
+    webview.addEventListener('dom-ready', onDomReady);
+
+    return () => {
+      webview.removeEventListener('dom-ready', onDomReady);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!readyWebview) return;
 
     const onDidStartLoading = setLoading;
     const onDidStopLoading = setLoaded;
@@ -34,25 +50,28 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
       if (e.errorCode !== -3 && !isLinux) setError();
     };
 
-    webView.addEventListener('did-start-loading', onDidStartLoading);
-    webView.addEventListener('did-stop-loading', onDidStopLoading);
-    webView.addEventListener('did-navigate', onDidNavigate);
-    webView.addEventListener('did-navigate-in-page', onDidNavigateInPage);
-    webView.addEventListener('did-fail-load', onDidFailLoad);
+    readyWebview.addEventListener('did-start-loading', onDidStartLoading);
+    readyWebview.addEventListener('did-stop-loading', onDidStopLoading);
+    readyWebview.addEventListener('did-navigate', onDidNavigate);
+    readyWebview.addEventListener('did-navigate-in-page', onDidNavigateInPage);
+    readyWebview.addEventListener('did-fail-load', onDidFailLoad);
 
     return () => {
-      webView.removeEventListener('did-start-loading', onDidStartLoading);
-      webView.removeEventListener('did-stop-loading', onDidStopLoading);
-      webView.removeEventListener('did-navigate', onDidNavigate);
-      webView.removeEventListener('did-navigate-in-page', onDidNavigateInPage);
-      webView.removeEventListener('did-fail-load', onDidFailLoad);
+      readyWebview.removeEventListener('did-start-loading', onDidStartLoading);
+      readyWebview.removeEventListener('did-stop-loading', onDidStopLoading);
+      readyWebview.removeEventListener('did-navigate', onDidNavigate);
+      readyWebview.removeEventListener(
+        'did-navigate-in-page',
+        onDidNavigateInPage
+      );
+      readyWebview.removeEventListener('did-fail-load', onDidFailLoad);
     };
-  }, [webViewId]);
+  }, []);
 
   return useMemo(
     () => (
       <>
-        {loader.state === 'error' ? (
+        {loadingState === 'error' ? (
           <Text
             style={{
               position: 'absolute',
@@ -68,14 +87,14 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
           </Text>
         ) : (
           <WebView
-            id={webViewId}
+            id={webviewId}
             appId={appId}
             src={currentTab.url}
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
             partition="browser-webview"
-            isLocked={isDragging || isResizing || loader.state === 'loading'}
+            isLocked={isDragging || isResizing || loadingState === 'loading'}
             style={{
               background: 'white',
               width: '100%',
@@ -86,7 +105,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
         )}
       </>
     ),
-    [currentTab.url, isDragging, isResizing, loader.state, webViewId]
+    [currentTab.url, isDragging, isResizing, loadingState]
   );
 };
 
