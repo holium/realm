@@ -18,7 +18,7 @@ Then in respective dojo sessions, run:
 
 Lastly, visit `http://localhost:5173` and `http://localhost:5174` in your browser.
 
-Make sure to create a `ship.configs.json` file in `test-ui/src`. An example config with local ships:
+Make sure to create a `ships.json` configuration file in `test-ui/src`. Here's an example:
 
 ```
 {
