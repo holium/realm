@@ -1,8 +1,7 @@
 import { FC } from 'react';
-import { Flex, IconButton, Text } from 'renderer/components';
+import { Flex, Text, Icon, Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { Icon } from '@holium/design-system';
 
 const ICON_SIZE = 28;
 
@@ -12,7 +11,7 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { windowColor } = theme.currentTheme;
   const { textColor } = theme.currentTheme;
 
-  const onButtonDragStart = (event: Event, nodeType: string) => {
+  const onButtonDragStart = (event: any, nodeType: string) => {
     const onButtonDragEnd = (event: any) => {
       event.preventDefault();
       const iconEvent = new CustomEvent('icon', {
@@ -44,191 +43,230 @@ export const AirliftCommandPalette: FC = observer(() => {
   return (
     <Flex flexDirection="column" gap="15">
       <Flex flexDirection="row" justifyContent="space-around">
-        <Flex flexDirection="column" gap={20} flexGrow={1}>
-          <Text>Inputs</Text>
-          <IconButton
-            size={ICON_SIZE - 3}
+        <Flex
+          flexDirection="column"
+          gap={10}
+          flexGrow={1}
+          alignItems="flex-start"
+        >
+          <Text.Custom>Inputs</Text.Custom>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'button')}
-            color={textColor}
-            height="10px"
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Button" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="Button" overflow="visible" size={ICON_SIZE - 3} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'textinput')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="TextInput" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="TextInput" overflow="visible" size={ICON_SIZE - 5} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'slider')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Slider" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 5}
-            mt="2px"
+            <Icon
+              mt={4}
+              name="Slider"
+              overflow="visible"
+              size={ICON_SIZE - 3}
+            />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'colorpicker')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="ColorPicker" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
+            <Icon name="ColorPicker" overflow="visible" size={ICON_SIZE - 10} />
+          </Button.IconButton>
         </Flex>
         <Flex flexDirection="column" gap={10} flexGrow={1}>
-          <Text>Widgets</Text>
-          <IconButton
-            size={ICON_SIZE}
+          <Text.Custom>Widgets</Text.Custom>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'text')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon name="Text" size={ICON_SIZE} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE}
-            mt="2px"
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'image')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon name="Image" size={ICON_SIZE} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE}
-            mt="2px"
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'link')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon name="Link" size={ICON_SIZE} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'audio')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Audio" size={ICON_SIZE - 5} overflow="visible" ml={1} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="Audio" size={ICON_SIZE - 3} overflow="visible" ml={1} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'media')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Media" size={ICON_SIZE - 5} overflow="visible" ml={1} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="Media" size={ICON_SIZE - 3} overflow="visible" ml={1} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, '3d')}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Icon3D" size={ICON_SIZE} fill="none" stroke="black" />
-          </IconButton>
+            <Icon
+              name="Icon3D"
+              size={ICON_SIZE - 3}
+              fill="none"
+              stroke="black"
+            />
+          </Button.IconButton>
         </Flex>
         <Flex flexDirection="column" gap={10} flexGrow={1}>
-          <Text>Code</Text>
-          <IconButton
-            size={ICON_SIZE}
+          <Text.Custom>Code</Text.Custom>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'agent')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Airlift" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 7}
-            mt="2px"
+            <Icon name="Airlift" size={ICON_SIZE} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'gate')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Gate" overflow="visible" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="Gate" overflow="visible" size={ICON_SIZE - 10} mr={2} />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'uqbar')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Uqbar" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE - 3}
-            mt="2px"
+            <Icon name="Uqbar" size={ICON_SIZE - 5} overflow="visible" />
+          </Button.IconButton>
+          <Button.IconButton
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'uqbar')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon name="Uqbar2" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
+          </Button.IconButton>
         </Flex>
         <Flex flexDirection="column" gap={10} flexGrow={1} ml={4}>
-          <Text>Realm Primitives</Text>
-          <IconButton
-            size={ICON_SIZE - 3}
+          <Text.Custom>Realm Primitives</Text.Custom>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'portal')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Holium" size={ICON_SIZE} filter={'grayscale(100%)'} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE}
+            <Icon name="HoliumOpaque" size={ICON_SIZE - 3} />
+          </Button.IconButton>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'wallet')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon name="WalletTray" size={ICON_SIZE} />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE + 2}
+          </Button.IconButton>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'relic')}
-            color={textColor}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
             <Icon
               name="AppIconCompassNoGradient"
               size={ICON_SIZE}
               filter={'grayscale(100%) brightness(65%) contrast(500%)'}
             />
-          </IconButton>
-          <IconButton
-            size={ICON_SIZE}
+          </Button.IconButton>
+          <Button.IconButton
             mt="2px"
             draggable={true}
             onDragStart={(event) => onButtonDragStart(event, 'room')}
-            color={textColor}
+            customColor={textColor}
             ml={1}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
           >
-            <Icon name="Room" size={ICON_SIZE} overflow="visible" />
-          </IconButton>
+            <Icon name="Room" size={ICON_SIZE - 2} overflow="visible" />
+          </Button.IconButton>
         </Flex>
       </Flex>
       <Flex gap={8} flex={1} justifyContent="flex-end">
-        <Text fontSize={1} mb={3}>
+        <Text.Custom fontSize={1} mt={3} mb={3}>
           To drop an Airlift, drag an icon from the Command Palette into the
-          current Space.
-        </Text>
+          current space.
+        </Text.Custom>
       </Flex>
     </Flex>
   );

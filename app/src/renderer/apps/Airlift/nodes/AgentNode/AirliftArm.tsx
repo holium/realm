@@ -21,7 +21,6 @@ export const AirliftArm: FC<AirliftArmProps> = observer(
     const toggleArmExpand = () => {
       AirliftActions.toggleArmExpand(airliftId, arm.name);
     };
-    console.log('hidden', !arm.expanded);
 
     return (
       <>

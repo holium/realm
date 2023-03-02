@@ -14,7 +14,7 @@ import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
 import { LinkNode } from 'renderer/apps/Airlift/nodes/LinkNode';
 import { AudioPlayer } from 'renderer/apps/Airlift/nodes/AudioPlayer';
 import { MediaNode } from 'renderer/apps/Airlift/nodes/MediaNode';
-import { Portal } from 'renderer/apps/Airlift/nodes/PortalNode';
+import { PortalNode } from 'renderer/apps/Airlift/nodes/PortalNode';
 import { UqbarContractNode } from 'renderer/apps/Airlift/nodes/UqbarContractNode';
 import { ImageNode } from 'renderer/apps/Airlift/nodes/ImageNode';
 import { TextInputNode } from 'renderer/apps/Airlift/nodes/TextInputNode';
@@ -43,7 +43,7 @@ const AirliftDragManagerPresenter = () => {
       agent: AgentNode,
       gate: Gate,
       uqbar: UqbarContractNode,
-      portal: Portal,
+      portal: PortalNode,
       wallet: WalletNode,
       relic: RelicNode,
       room: RoomNode,

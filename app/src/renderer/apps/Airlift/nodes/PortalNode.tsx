@@ -1,4 +1,4 @@
-import { Flex, LinkBlock } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system';
 import styled from 'styled-components';
 
 const PortalBox = styled.div`
@@ -14,11 +14,9 @@ const PortalBox = styled.div`
   padding: 8px;
   gap: 10px;
 
-  position: absolute;
+  position: relative;
   width: 176px;
   height: 134px;
-  left: 1252px;
-  top: 12px;
 
   background: rgba(113, 122, 112, 0.5);
   border: 1px solid rgba(113, 122, 112, 0.4);
@@ -27,21 +25,16 @@ const PortalBox = styled.div`
 
   border-radius: 5px;
 `;
-const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: ${({ isSubscribed }) =>
-    isSubscribed ? '#38CD7C' : '#EA2424'};
-`;
 
 export function PortalNode({ data, isConnectable }) {
   return (
     <Flex border={data.showDelete ? '2px solid red' : 'none'}>
-      <PortalBox />
-      <LinkBlock id={data.id} link={'https://holium.com/'} by={'by'} />
-      <LinkBlock id={data.id} link={'https://holium.com/'} by={'by'} />
-      <StatusIndicator isSubscribed={false} />
+      <PortalBox>
+        <Flex flexDirection="column" ml={5} gap={10}>
+          <Text.H4></Text.H4>
+          <Text.H6 opacity={0.6}>~novned-tidsyl</Text.H6>
+        </Flex>
+      </PortalBox>
     </Flex>
   );
 }
