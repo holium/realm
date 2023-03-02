@@ -541,10 +541,11 @@ export const NewBazaarStore = types
     },
   }))
   .views((self) => ({
-    get installed() {
+    get installed(): AppType[] {
       return Array.from(self.gridIndex.entries())
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-        .map((e) => self.catalog.get(e[1]));
+        .map((e) => self.catalog.get(e[1]))
+        .filter(Boolean) as AppType[];
 
       // return Array.from(Object.values(getSnapshot(self.catalog))).filter(
       //   (app: SnapshotOut<AppType>) => {
