@@ -1,17 +1,37 @@
+import { useEffect, useState } from 'react';
+import { ShipConfig } from '../../src/types';
+import { RoomsManagerProvider } from '../../src/RoomsManagerProvider';
 import './App.css';
-import { RoomsManagerProvider } from '@holium/realm-room';
-import shipConfigs from 'ships.json';
 import { UI } from './UI';
 
 // NOTE: to connect one ship to another, you must manually poke the ship to `set-provider` like:
 // :rooms-v2 &rooms-v2-session-action [%set-provider ~dev]
 //  (^ on the dojo of ~fes if he wanted to connect to a room hosted by ~dev)
 
-const testShip = window.location.href.split('/')[3] || '~zod';
-const shipConfig = shipConfigs[testShip];
+export const App = () => {
+  const [shipConfig, setShipConfig] = useState<ShipConfig>();
 
-export const App = () => (
-  <RoomsManagerProvider ship={shipConfig}>
-    <UI />
-  </RoomsManagerProvider>
-);
+  useEffect(() => {
+    const getAndSetShipConfig = async () => {
+      const testShip = window.location.href.split('/')[3] || '~zod';
+
+      const ships = await fetch('./ships.json');
+      if (!ships.ok) throw new Error('Failed to fetch ships.json');
+      const shipsJson = await ships.json();
+      if (!shipsJson[testShip])
+        throw new Error(`Ship ${testShip} not found in ships.json`);
+
+      setShipConfig(shipsJson[testShip]);
+    };
+
+    getAndSetShipConfig();
+  }, []);
+
+  if (!shipConfig) return <div>Ship config not found.</div>;
+
+  return (
+    <RoomsManagerProvider ship={shipConfig}>
+      <UI />
+    </RoomsManagerProvider>
+  );
+};

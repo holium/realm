@@ -130,7 +130,7 @@ app/realmlog.txt
 
 # Realm config files
 app/src/app.dev.json
-lib/room/test-ui/src/ships.json
+lib/room/test-ui/public/ships.json
 
 # Storybook
 storybook-static
