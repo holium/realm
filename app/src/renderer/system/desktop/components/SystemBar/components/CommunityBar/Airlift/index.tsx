@@ -10,11 +10,17 @@ import { getSnapshot } from 'mobx-state-tree';
 const ICON_SIZE = 28;
 
 export const AirliftTray: FC = observer(() => {
-  const { airlift } = useServices();
+  const { airlift, spaces } = useServices();
 
   const isDragging = useMemo(() => {
-    return airlift.flowStore.nodes.filter((node) => node.dragging).length > 0;
-  }, [getSnapshot(airlift.flowStore.nodes)]);
+    return (
+      (spaces.selected
+        ? airlift.nodes
+            .get(spaces.selected?.path)
+            ?.filter((node) => node.dragging).length || 0
+        : 0) > 0
+    );
+  }, [getSnapshot(airlift.nodes)]);
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
 

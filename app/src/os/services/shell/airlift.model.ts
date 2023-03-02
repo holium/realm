@@ -1,10 +1,4 @@
-import {
-  Instance,
-  types,
-  cast,
-  castToSnapshot,
-  getSnapshot,
-} from 'mobx-state-tree';
+import { Instance, types, cast, getSnapshot } from 'mobx-state-tree';
 import { Node, NodeChange, applyNodeChanges } from 'reactflow';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -214,57 +208,43 @@ const NodeType = types.model('NodeType', {
 
 export type AirliftNodeType = Instance<typeof NodeType>;
 
-export const FlowStore = types
-  .model('FlowStore', {
-    nodes: types.array(NodeType),
-  })
-  .actions((self) => ({
-    onNodesChange: (changes: NodeChange[]) => {
-      // const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
-      const newNodes = getSnapshot(self.nodes);
-      self.nodes = cast(applyNodeChanges(changes, newNodes));
-    },
-    dropAirlift: (airlift: Node) => {
-      self.nodes = castToSnapshot(self.nodes.concat(airlift));
-    },
-  }));
-
 export const AirliftStore = types
   .model('AirliftStore', {
     // model: airliftmodel,
-    airlifts: types.map(types.map(AirliftModel)),
-    flowStore: FlowStore,
+    nodes: types.map(types.array(NodeType)),
   })
   .actions((self) => ({
     //dropAirlift(space: string, type: string, airliftId: string, location: any) {
-    dropAirlift(airlift: Node) {
-      self.flowStore.dropAirlift(airlift);
-      /*const newAirlift = AirliftModel.create({
-        airliftId,
-        zIndex: self.airlifts.size + 1,
-        type,
-        bounds: location, //getInitialWindowBounds(app, desktopDimensions),
-      });
-      if (!self.airlifts.has(space)) {
-        self.airlifts.set(space, {});
-      }
-      self.airlifts.get(space)!.set(airliftId, newAirlift);
-      console.log('success');*/
+    removeAirlift(space: string, airliftId: string) {
+      self.nodes
+        .get(space)!
+        .remove(self.nodes.get(space)!.find((node) => node.id === airliftId)!);
     },
-    removeAirlift(airliftId: string) {
-      self.flowStore.nodes.remove(
-        self.flowStore.nodes.find((node) => node.id === airliftId)!
-      );
-    },
-    promptDelete(airliftId: string) {
-      self.flowStore.nodes
+    promptDelete(space: string, airliftId: string) {
+      self.nodes
+        .get(space)!
         .find((node) => node.id === airliftId)!
         .data.promptDelete();
     },
-    unpromptDelete(airliftId: string) {
-      self.flowStore.nodes
+    unpromptDelete(space: string, airliftId: string) {
+      self.nodes
+        .get(space)!
         .find((node) => node.id === airliftId)!
         .data.unpromptDelete();
+    },
+    onNodesChange: (space: string, changes: NodeChange[]) => {
+      // const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
+      const newNodes = getSnapshot(self.nodes.get(space)!);
+      self.nodes.set(space, cast(applyNodeChanges(changes, newNodes)));
+    },
+    dropAirlift: (space: string, airlift: Node) => {
+      if (!self.nodes.has(space)) {
+        self.nodes.set(space, types.array(NodeType).create([]));
+      }
+      /*self.nodes.set(
+        space,
+        castToSnapshot(self.nodes.get(space)!.concat(airlift))
+      );*/
     },
   }));
 

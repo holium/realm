@@ -78,7 +78,7 @@ const Services = types
         incoming: {},
         outgoing: {},
       });
-      self.airlift = castToSnapshot({ flowStore: {} });
+      self.airlift = castToSnapshot({ nodes: {} });
     },
   }));
 
@@ -130,7 +130,7 @@ const services = Services.create({
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
-  airlift: { flowStore: {} },
+  airlift: { nodes: {} },
 });
 
 export const servicesStore = services;

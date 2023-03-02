@@ -25,7 +25,7 @@ import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
 import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
 
 const AirliftDragManagerPresenter = () => {
-  const { shell, airlift, desktop } = useServices();
+  const { shell, airlift, desktop, spaces } = useServices();
   const id = 'airlift-drag-fill';
 
   const nodeTypes = useMemo(() => {
@@ -50,10 +50,12 @@ const AirliftDragManagerPresenter = () => {
     };
   }, []);
 
-  airlift.flowStore.nodes.map((node) => node.position.x + node.position.y);
   const nodes = useMemo(() => {
-    return Array.from(airlift.flowStore.nodes.filter((node) => node.dragging));
-  }, [getSnapshot(airlift.flowStore.nodes)]);
+    return Array.from(
+      spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
+    );
+  }, [getSnapshot(airlift.nodes)]);
+  console.log('nodes', nodes);
 
   const reactFlowWrapper = useRef(null);
 

@@ -30,7 +30,7 @@ import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
 import { RoomNode } from 'renderer/apps/Airlift/nodes/RoomNode';
 
 const AirliftManagerPresenter = () => {
-  const { shell, airlift, desktop } = useServices();
+  const { shell, airlift, desktop, spaces } = useServices();
   const id = 'airlift-fill';
 
   const nodeTypes = useMemo(() => {
@@ -55,10 +55,11 @@ const AirliftManagerPresenter = () => {
     };
   }, []);
 
-  airlift.flowStore.nodes.map((node) => node.position.x + node.position.y);
   const nodes = useMemo(() => {
-    return Array.from(airlift.flowStore.nodes);
-  }, [getSnapshot(airlift.flowStore.nodes)]);
+    return Array.from(
+      spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
+    );
+  }, [getSnapshot(airlift.nodes)]);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(
@@ -75,8 +76,7 @@ const AirliftManagerPresenter = () => {
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
 
-  const getId = (nodeType: string) =>
-    `airlift_${nodeType}_${airlift.flowStore.nodes.length + 1}`;
+  const getId = (nodeType: string) => `airlift_${nodeType}_${nodes.length + 1}`;
 
   const onDrop = useCallback(
     (event: any) => {

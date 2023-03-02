@@ -98,7 +98,7 @@ export class AirliftService extends BaseService {
   async load(patp: string) {
     const secretKey: string | null = this.core.passwords.getPassword(patp);
     this.db = new DiskStore('airlift', patp, secretKey!, AirliftStore, {
-      flowStore: {},
+      nodes: {},
     });
     this.state = this.db.model as AirliftStoreType;
     this.db.initialUpdate(this.core.onEffect);
@@ -108,46 +108,73 @@ export class AirliftService extends BaseService {
   // ***********************************************************
   // ************************ AIRLIFT ***************************
   // ***********************************************************
-  async toggleAgentExpand(_evnet: any, airliftId: string) {
-    this.state!.flowStore.nodes.find(
-      (node) => node.id === airliftId
-    )!.data.agent.toggleExpand();
+  async toggleAgentExpand(_event: any, space: string, airliftId: string) {
+    this.state!.nodes.get(space)!
+      .find((node) => node.id === airliftId)!
+      .data.agent.toggleExpand();
   }
 
-  async toggleArmExpand(_event: any, airliftId: string, arm: string) {
-    this.state!.flowStore.nodes.find((node) => node.id === airliftId)!
+  async toggleArmExpand(
+    _event: any,
+    space: string,
+    airliftId: string,
+    arm: string
+  ) {
+    this.state!.nodes.get(space)!
+      .find((node) => node.id === airliftId)!
       .data.agent.arms.get(arm)!
       .toggleExpand();
   }
 
-  async dropAirlift(_event: IpcMainInvokeEvent, newAirlift: any) {
-    this.state!.dropAirlift(newAirlift);
+  async dropAirlift(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    newAirlift: any
+  ) {
+    this.state!.dropAirlift(space, newAirlift);
   }
 
-  async removeAirlift(_event: IpcMainInvokeEvent, airliftId: string) {
-    this.state!.removeAirlift(airliftId);
+  async removeAirlift(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    airliftId: string
+  ) {
+    this.state!.removeAirlift(space, airliftId);
   }
 
-  async onNodesChange(_event: IpcMainInvokeEvent, changes: NodeChange[]) {
-    this.state!.flowStore.onNodesChange(changes);
+  async onNodesChange(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    changes: NodeChange[]
+  ) {
+    this.state!.onNodesChange(space, changes);
   }
 
-  async promptDelete(_event: IpcMainInvokeEvent, airliftId: string) {
-    this.state!.promptDelete(airliftId);
+  async promptDelete(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    airliftId: string
+  ) {
+    this.state!.promptDelete(space, airliftId);
   }
 
-  async unpromptDelete(_event: IpcMainInvokeEvent, airliftId: string) {
-    this.state!.unpromptDelete(airliftId);
+  async unpromptDelete(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    airliftId: string
+  ) {
+    this.state!.unpromptDelete(space, airliftId);
   }
 
   async setAgentName(
     _event: IpcMainInvokeEvent,
+    space: string,
     airliftId: string,
     name: string
   ) {
-    this.state!.flowStore.nodes.find(
-      (node) => node.id === airliftId
-    )!.data.setName(name);
+    this.state!.nodes.get(space)!
+      .find((node) => node.id === airliftId)!
+      .data.setName(name);
   }
 
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
