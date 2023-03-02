@@ -23,23 +23,30 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
 
     if (!webView) return;
 
-    webView.addEventListener('did-start-loading', () => {
-      setLoading();
-    });
-    webView.addEventListener('did-stop-loading', () => {
-      setLoaded();
-    });
-    webView.addEventListener('did-navigate', (e) => {
+    const onDidStartLoading = setLoading;
+    const onDidStopLoading = setLoaded;
+    const onDidNavigate = (e: Electron.DidNavigateEvent) => setUrl(e.url);
+    const onDidNavigateInPage = (e: Electron.DidNavigateInPageEvent) =>
       setUrl(e.url);
-    });
-    // Account for SPA navigation.
-    webView.addEventListener('did-navigate-in-page', (e) => {
-      setUrl(e.url);
-    });
-    webView.addEventListener('did-fail-load', (e) => {
+    const onDidFailLoad = (e: Electron.DidFailLoadEvent) => {
       // Error code 3 is a bug and not a terminal error.
-      if (e.errorCode !== -3) setError();
-    });
+      const isLinux = process.platform === 'linux';
+      if (e.errorCode !== -3 && !isLinux) setError();
+    };
+
+    webView.addEventListener('did-start-loading', onDidStartLoading);
+    webView.addEventListener('did-stop-loading', onDidStopLoading);
+    webView.addEventListener('did-navigate', onDidNavigate);
+    webView.addEventListener('did-navigate-in-page', onDidNavigateInPage);
+    webView.addEventListener('did-fail-load', onDidFailLoad);
+
+    return () => {
+      webView.removeEventListener('did-start-loading', onDidStartLoading);
+      webView.removeEventListener('did-stop-loading', onDidStopLoading);
+      webView.removeEventListener('did-navigate', onDidNavigate);
+      webView.removeEventListener('did-navigate-in-page', onDidNavigateInPage);
+      webView.removeEventListener('did-fail-load', onDidFailLoad);
+    };
   }, [webViewId]);
 
   return useMemo(
