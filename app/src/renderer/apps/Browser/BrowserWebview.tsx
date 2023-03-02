@@ -8,6 +8,7 @@ type Props = {
   isDragging: boolean;
   isResizing: boolean;
 };
+
 const appId = 'os-browser';
 
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
