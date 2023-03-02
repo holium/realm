@@ -1,6 +1,6 @@
 import './App.css';
 import { RoomsManagerProvider } from '@holium/realm-room';
-import shipConfigs from 'ship-configs.json';
+import shipConfigs from 'ships.json';
 import { UI } from './UI';
 
 // NOTE: to connect one ship to another, you must manually poke the ship to `set-provider` like:
