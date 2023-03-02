@@ -284,9 +284,12 @@
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
       ?>  (team:title our.bowl src.bowl)
+      =/  new-space-path  [our.bowl slug]
+      =.  slug
+        ?:  (~(has by spaces.state) new-space-path)   :: if the path exists already,
+          (increment-slug slug)                       :: increment the slug so it's unique
+        slug                                          :: otherwise, leave it alone
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
-      ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
-        [~ state]
       =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
       ::  we need to set a host + member value and exclude the host from make-invitations
       =.  members               (~(put by members) [our.bowl [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]])
@@ -309,6 +312,14 @@
         `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
       :-  cards
       state(current path.new-space)
+    ::
+    ++  increment-slug
+      |=  slug=@t
+      ^-  @t
+      =/  last-char  (snag 0 (flop (trip slug)))
+      ?:  &((gte last-char '0') (lte last-char '9')) :: if last-char is a numeric digit
+        (crip (snoc (trip slug) `@t`(add 1 last-char))) :: increment the digit
+      (crip (snoc (trip slug) '1')) :: else append '1' to the slug
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]

@@ -57,7 +57,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: payload.payload.name,
+      space: pathArr[2],
     };
     return await new Promise((resolve, reject) => {
       console.log({
@@ -92,7 +92,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: payload.name,
+      space: pathArr[2],
     };
     return await new Promise((resolve, reject) => {
       conduit.poke({
@@ -120,7 +120,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[0],
-      space: payload.name,
+      space: pathArr[1],
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -148,7 +148,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: payload.name,
+      space: pathArr[2],
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -176,7 +176,7 @@ export const SpacesApi = {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: payload.name,
+      space: pathArr[2],
     };
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -215,7 +215,7 @@ export const SpacesApi = {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: name,
+      space: pathArr[2],
     };
     const response = await conduit.poke({
       app: 'spaces',
@@ -248,7 +248,7 @@ export const SpacesApi = {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: name,
+      space: pathArr[2],
     };
     const response = await conduit.poke({
       app: 'spaces',
@@ -312,7 +312,7 @@ export const SpacesApi = {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: name,
+      space: pathArr[2],
     };
     return await new Promise((resolve, reject) => {
       conduit.poke({
@@ -350,7 +350,7 @@ export const SpacesApi = {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
-      space: name,
+      space: pathArr[2],
     };
 
     const response = await conduit.poke({

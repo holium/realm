@@ -8,6 +8,7 @@ import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
+import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { snakeify } from '../../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
@@ -370,10 +371,11 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
+    const slug = humanFriendlySpaceNameSlug(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
-        slug: body.name,
+        slug,
         payload: snakeify({
           name: body.name,
           description: body.description,
