@@ -8,9 +8,16 @@ import {
   resolveIdentifier,
 } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { Chat } from './models';
+import { Chat, ChatModelType } from './models';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
+
+const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+  return (
+    (b.updatedAt || b.metadata.timestamp) -
+    (a.updatedAt || a.metadata.timestamp)
+  );
+};
 
 const ChatStore = types
   .model('ChatStore', {
@@ -29,16 +36,12 @@ const ChatStore = types
     get pinnedChatList() {
       return self.inbox
         .filter((c) => self.pinnedChats.includes(c.path))
-        .sort((a, b) =>
-          b.updatedAt && a.updatedAt ? b.updatedAt - a.updatedAt : 0
-        );
+        .sort(sortByUpdatedAt);
     },
     get unpinnedChatList() {
       return self.inbox
         .filter((c) => !self.pinnedChats.includes(c.path))
-        .sort((a, b) =>
-          b.updatedAt && a.updatedAt ? b.updatedAt - a.updatedAt : 0
-        );
+        .sort(sortByUpdatedAt);
     },
     getChatTitle(path: string, ship: string) {
       const chat = self.inbox.find((c) => c.path === path);

@@ -95,7 +95,6 @@ export const Chat = types
     fetchMessages: flow(function* () {
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
-        console.log(toJS(messages));
         self.messages = messages;
         self.hidePinned = self.isPinLocallyHidden();
         return self.messages;

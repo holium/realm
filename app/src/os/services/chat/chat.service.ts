@@ -188,10 +188,10 @@ export class ChatService extends BaseService {
   }
 
   async fetchPeers() {
-    // const lastTimestamp = this.getLastTimestamp('peers');
+    const lastTimestamp = this.getLastTimestamp('peers');
     const response = await this.core.conduit!.scry({
       app: 'chat-db',
-      path: `/db/peers`,
+      path: `/db/peers/start-ms/${lastTimestamp}`,
     });
     return response.tables.peers;
   }

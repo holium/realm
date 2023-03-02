@@ -8,6 +8,7 @@ import {
   Box,
   Text,
 } from '@holium/design-system';
+import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';

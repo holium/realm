@@ -142,10 +142,8 @@ export const ChatRowPresenter = ({
   );
 
   const chat = inbox.find((c) => c.path === path);
-  if (!chat) return null;
-  const newLast = chat.lastMessage;
-  if (!newLast) return null;
-  const lastMessageUpdated: { [key: string]: any } = newLast[0];
+  const lastMessageUpdated: { [key: string]: any } =
+    chat && chat.lastMessage && chat.lastMessage[0];
 
   return (
     <Row
