@@ -209,7 +209,6 @@ export const SpacesApi = {
   inviteMember: async (
     conduit: Conduit,
     path: SpacePath,
-    name: string,
     payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
     const pathArr = path.split('/');
@@ -239,12 +238,7 @@ export const SpacesApi = {
    * @param patp
    * @returns
    */
-  kickMember: async (
-    conduit: Conduit,
-    path: SpacePath,
-    name: string,
-    patp: Patp
-  ) => {
+  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -305,7 +299,6 @@ export const SpacesApi = {
   acceptInvite: async (
     conduit: Conduit,
     path: SpacePath,
-    name: string,
     membersState: MembershipType,
     spacesState: SpacesStoreType
   ) => {

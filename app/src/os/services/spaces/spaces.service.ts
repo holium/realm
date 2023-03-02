@@ -487,11 +487,9 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
-    const space = this.state?.getSpaceByPath(path);
     const response = await SpacesApi.inviteMember(
       this.core.conduit!,
       path,
-      space!.name,
       payload
     );
 
@@ -499,13 +497,7 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    const space = this.state?.getSpaceByPath(path);
-    return await SpacesApi.kickMember(
-      this.core.conduit!,
-      path,
-      space!.name,
-      patp
-    );
+    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
   }
 
   async setRoles(_event: IpcMainInvokeEvent, patp: Patp, roles: string[]) {
@@ -536,11 +528,9 @@ export class SpacesService extends BaseService {
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
-    const space = this.state?.getSpaceByPath(path);
     return await SpacesApi.acceptInvite(
       this.core.conduit!,
       path,
-      space!.name,
       this.models.membership,
       this.state!
     );
