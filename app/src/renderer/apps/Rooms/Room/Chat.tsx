@@ -120,7 +120,6 @@ const RoomChatPresenter = () => {
           innerRef={chatInputRef}
           spellCheck={false}
           wrapperStyle={{
-            cursor: 'none',
             borderRadius: 6,
             backgroundColor: theme.inputColor,
           }}

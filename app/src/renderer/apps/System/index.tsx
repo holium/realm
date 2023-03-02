@@ -69,7 +69,6 @@ const SystemAppPresenter = () => {
             type="text"
             placeholder="Search settings..."
             wrapperStyle={{
-              cursor: 'none',
               borderRadius: 9,
               backgroundColor: theme.currentTheme.inputColor,
 

@@ -119,7 +119,6 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             size={28}
             className="realm-cursor-hover"
-            style={{ cursor: 'none' }}
             onClick={async () => {
               await roomsManager.cleanup();
               AuthActions.logout(currentShip.patp);
@@ -132,7 +131,6 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             className="realm-cursor-hover"
             data-close-tray="true"
-            style={{ cursor: 'none' }}
             size={28}
             onClick={() => openSettingsApp()}
           >
