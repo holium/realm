@@ -323,10 +323,22 @@
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
 
-  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
-  =/  thechange     db-change+!>(change-rows)
   =.  del-log.state   (log-deletes-for-msg-parts state +.remove-result now.bowl)
 
+  =/  row=path-row:sur    (~(got by paths-table.state) path.msg-part)
+  =/  pinned              (~(has in pins.row) msg-id)
+  =.  pins.row        ?:(pinned (~(del in pins.row) msg-id) pins.row)
+  =.  updated-at.row  ?:(pinned now.bowl updated-at.row)
+  =.  paths-table.state
+    ?:  pinned
+      (~(put by paths-table.state) path.row row)
+    paths-table.state
+
+  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  thechange
+    ?:  pinned
+      db-change+!>([[%upd-paths-row row] change-rows])
+    db-change+!>(change-rows)
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones

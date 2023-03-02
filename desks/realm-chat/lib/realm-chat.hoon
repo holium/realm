@@ -239,6 +239,10 @@
   =/  pathpeers  (scry-peers path.act bowl)
   =/  members  (skim pathpeers |=(p=peer-row:db ?!(=(role.p %host)))) :: everyone who's NOT the host
   =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+  =.  pins.state  :: if we are removing ourself, we are deleting the path, so we should unpin the chat
+    ?:  =(ship.act patp.host)
+      (~(del in pins.state) path.act)
+    pins.state
   =/  cards
     ?:  =(ship.act patp.host)
       :: if src.bowl is %host, we have to leave-path for the host
