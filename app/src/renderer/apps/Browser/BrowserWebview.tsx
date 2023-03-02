@@ -9,7 +9,6 @@ type Props = {
   isResizing: boolean;
 };
 const appId = 'os-browser';
-const webviewId = `${appId}-web-webview`;
 
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
@@ -22,7 +21,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
 
   useEffect(() => {
     const webview = document.getElementById(
-      webviewId
+      currentTab.id
     ) as Electron.WebviewTag | null;
 
     if (!webview) return;
@@ -34,7 +33,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, []);
+  }, [currentTab.id]);
 
   useEffect(() => {
     if (!readyWebview) return;
@@ -87,7 +86,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
           </Text>
         ) : (
           <WebView
-            id={webviewId}
+            id={currentTab.id}
             appId={appId}
             src={currentTab.url}
             // @ts-expect-error

@@ -1,7 +1,9 @@
+import { RefObject } from 'react';
 import { Flex } from 'renderer/components';
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 
 type Props = {
+  innerRef: RefObject<HTMLDivElement>;
   iconColor: string;
   canGoBack: boolean;
   canGoForward: boolean;
@@ -11,6 +13,7 @@ type Props = {
 };
 
 export const ToolbarNavigationButtons = ({
+  innerRef,
   iconColor,
   canGoBack,
   canGoForward,
@@ -18,7 +21,7 @@ export const ToolbarNavigationButtons = ({
   onForward,
   onRefresh,
 }: Props) => (
-  <Flex flexDirection="row" alignItems="center" gap={4}>
+  <Flex ref={innerRef} flexDirection="row" alignItems="center" gap={4}>
     <AppWindowIcon
       icon="ArrowLeftLine"
       disabled={!canGoBack}

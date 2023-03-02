@@ -43,6 +43,7 @@ const BrowserToolbarPresenter = ({
   const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigationButtonsRef = useRef<HTMLInputElement>(null);
 
   const getWebView = () =>
     document.getElementById(currentTab.id) as Electron.WebviewTag | null;
@@ -51,8 +52,12 @@ const BrowserToolbarPresenter = ({
     e.target === inputRef.current ||
     inputRef.current?.contains(e.target as Node);
 
+  const isInNavigationButtons = (e: PointerEvent<HTMLDivElement>) =>
+    e.target === navigationButtonsRef.current ||
+    navigationButtonsRef.current?.contains(e.target as Node);
+
   const onClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isInInputField(e)) onDoubleClick();
+    if (!isInInputField(e) && !isInNavigationButtons(e)) onDoubleClick();
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -98,6 +103,7 @@ const BrowserToolbarPresenter = ({
     >
       <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons
+        innerRef={navigationButtonsRef}
         iconColor={iconColor}
         canGoBack={getWebView()?.canGoBack() ?? false}
         canGoForward={getWebView()?.canGoForward() ?? false}
