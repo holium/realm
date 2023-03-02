@@ -346,7 +346,7 @@ export const SpacesApi = {
    * @param path
    * @returns
    */
-  declineInvite: async (conduit: Conduit, path: SpacePath, name: string) => {
+  declineInvite: async (conduit: Conduit, path: SpacePath) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],

@@ -547,8 +547,7 @@ export class SpacesService extends BaseService {
   }
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
-    const space = this.state?.getSpaceByPath(path);
-    await SpacesApi.declineInvite(this.core.conduit!, path, space!.name);
+    await SpacesApi.declineInvite(this.core.conduit!, path);
     this.models.visas?.removeIncoming(path);
   }
 
