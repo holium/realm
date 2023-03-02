@@ -85,10 +85,7 @@ export const SpacesApi = {
       });
     });
   },
-  deleteSpace: async (
-    conduit: Conduit,
-    payload: { path: SpacePath; name: string }
-  ) => {
+  deleteSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -113,10 +110,7 @@ export const SpacesApi = {
       });
     });
   },
-  joinSpace: async (
-    conduit: Conduit,
-    payload: { path: SpacePath; name: string }
-  ) => {
+  joinSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[0],
@@ -141,10 +135,7 @@ export const SpacesApi = {
       });
     });
   },
-  leaveSpace: async (
-    conduit: Conduit,
-    payload: { path: SpacePath; name: string }
-  ) => {
+  leaveSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -169,10 +160,7 @@ export const SpacesApi = {
       });
     });
   },
-  setCurrentSpace: async (
-    conduit: Conduit,
-    payload: { path: SpacePath; name: string }
-  ) => {
+  setCurrentSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],

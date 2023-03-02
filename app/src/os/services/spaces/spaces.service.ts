@@ -429,7 +429,6 @@ export class SpacesService extends BaseService {
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
-    const space = this.state?.getSpaceByPath(path);
     // if we have the deleted path already selected
     if (path === this.state?.selected?.path) {
       const selected = this.state?.selectSpace(
@@ -437,34 +436,23 @@ export class SpacesService extends BaseService {
       );
       this.setTheme(selected?.theme);
     }
-    return await SpacesApi.deleteSpace(this.core.conduit!, {
-      path,
-      name: space!.name,
-    });
+    return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
-    const space = this.state?.getSpaceByPath(path);
-    return SpacesApi.joinSpace(this.core.conduit!, { path, name: space!.name });
+    return SpacesApi.joinSpace(this.core.conduit!, { path });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
-    const space = this.state?.getSpaceByPath(path);
-    return await SpacesApi.leaveSpace(this.core.conduit!, {
-      path,
-      name: space!.name,
-    });
+    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
-    const selected = this.state?.selectSpace(path);
     // don't block for responsiveness, what about error handling?
-    SpacesApi.setCurrentSpace(this.core.conduit!, {
-      path,
-      name: selected!.type === 'our' ? 'our' : selected!.name,
-    }).catch((e) => {
+    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
       console.error('Error setting current space', e);
     });
+    const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // setting provider to current space host
     const spaceHost = getHost(selected!.path);
