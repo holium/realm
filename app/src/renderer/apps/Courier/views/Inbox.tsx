@@ -10,21 +10,20 @@ import {
 } from '@holium/design-system';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { ChatRowType } from '../types';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
+import { ChatModelType } from '../models';
 
 export const InboxPresenter = () => {
   const { dimensions } = useTrayApps();
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
     useChatStore();
   const [searchString, setSearchString] = useState<string>('');
-  // const lastTimeSent = chatList[0]?.timestamp;
 
   const searchFilter = useCallback(
-    (preview: ChatRowType) => {
+    (preview: ChatModelType) => {
       if (!searchString || searchString.trim() === '') return true;
-      let sender: string;
+      let title: string;
       // if (preview.type === 'group' || preview.type === 'group-pending') {
       //   const dm = preview as ChatRowType;
       //   to = Array.from(dm.to).join(', ');
@@ -32,12 +31,18 @@ export const InboxPresenter = () => {
       //   const dm = preview as ChatRowType;
       //   to = dm.to;
       // }
-      const dm = preview as ChatRowType;
-      sender = dm.sender;
-      return sender.indexOf(searchString) === 0;
+      const dm = preview as ChatModelType;
+      title = dm.metadata.title;
+      return title.indexOf(searchString) === 0;
     },
     [searchString]
   );
+  // const lastChatUpdatedAt = inbox.slice().sort((a, b) => {
+  //   if (!a.updatedAt || !b.updatedAt) return 0;
+  //   return b.updatedAt - a.updatedAt;
+  // })[0]?.updatedAt;
+
+  // console.log('lastChatUpdatedAt', lastChatUpdatedAt);
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
@@ -119,9 +124,7 @@ export const InboxPresenter = () => {
                     peers={chat.peers}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
-                    timestamp={
-                      chat.createdAt || parseInt(chat.metadata.timestamp)
-                    }
+                    timestamp={chat.createdAt || chat.metadata.timestamp}
                     metadata={chat.metadata}
                     peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {
@@ -153,9 +156,7 @@ export const InboxPresenter = () => {
                     peers={chat.peers}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
-                    timestamp={
-                      chat.createdAt || parseInt(chat.metadata.timestamp)
-                    }
+                    timestamp={chat.createdAt || chat.metadata.timestamp}
                     metadata={chat.metadata}
                     peersGetBacklog={chat.peersGetBacklog}
                     onClick={(evt) => {

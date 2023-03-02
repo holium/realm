@@ -24,7 +24,7 @@ create table if not exists  paths
     invites                     TEXT default 'host' not null,
     peers_get_backlog           integer default 1 not null,
     pins                        TEXT,
-    max_expires_at_duration     TEXT,
+    max_expires_at_duration     integer,
     updated_at                  integer not null,
     created_at                  integer not null
 );

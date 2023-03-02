@@ -95,6 +95,7 @@ export const ChatLogHeader = ({
     });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [selectedChat?.hidePinned]);
+
   return (
     <Flex
       pt="2px"

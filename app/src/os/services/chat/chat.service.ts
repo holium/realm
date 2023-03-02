@@ -39,6 +39,7 @@ const parseMetadata = (metadata: string) => {
   const mtd = JSON.parse(metadata);
   return {
     ...mtd,
+    timestamp: parseInt(mtd.timestamp) || 0,
     reactions: mtd.reactions === 'true',
   };
 };
@@ -218,7 +219,6 @@ export class ChatService extends BaseService {
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
           const msg = this.getChatMessage(message.path, message['msg-id']);
-          console.log('NEW MESSAGE', msg);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
@@ -489,11 +489,7 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
-        (
-            SELECT ship
-            FROM peers
-            WHERE peers.path = paths.path AND peers.role = 'host'
-        ) AS host,
+        json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
         json_extract(json_extract(pins, '$[0]'), '$[0]') ||
         json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
@@ -515,7 +511,7 @@ export class ChatService extends BaseService {
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
-        peers: row.peers ? JSON.parse(row.peers) : null,
+        peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage
           ? JSON.parse(row.lastMessage).map(
@@ -587,11 +583,7 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
-        (
-            SELECT ship
-            FROM peers
-            WHERE peers.path = paths.path AND peers.role = 'host'
-        ) AS host,
+        json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
         json_extract(json_extract(pins, '$[0]'), '$[0]') ||
         json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
@@ -609,11 +601,11 @@ export class ChatService extends BaseService {
     `);
     const result = query.all(`~${this.core.conduit?.ship}`, path);
 
-    return result.map((row) => {
+    const rows = result.map((row) => {
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
-        peers: row.peers ? JSON.parse(row.peers) : null,
+        peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage
           ? JSON.parse(row.lastMessage).map(
@@ -622,6 +614,8 @@ export class ChatService extends BaseService {
           : null,
       };
     });
+    if (rows.length === 0) return null;
+    return rows[0];
   }
 
   getChatLog(
@@ -671,7 +665,7 @@ export class ChatService extends BaseService {
     return result.map((row) => {
       return {
         ...row,
-        metadata: row.metadata ? parseMetadata(row.metadata) : null,
+        metadata: row.metadata ? parseMetadata(row.metadata) : [null],
         contents: row.contents ? JSON.parse(row.contents) : null,
       };
     });

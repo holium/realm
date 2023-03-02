@@ -40,6 +40,15 @@ const ChatStore = types
           b.updatedAt && a.updatedAt ? b.updatedAt - a.updatedAt : 0
         );
     },
+    getChatTitle(path: string, ship: string) {
+      const chat = self.inbox.find((c) => c.path === path);
+      if (!ship || !chat) return 'Error loading title';
+      if (chat.peers.length === 1 && chat.type === 'dm') {
+        return chat.peers.filter((p) => p !== ship)[0];
+      } else {
+        return chat.metadata.title;
+      }
+    },
   }))
   .actions((self) => ({
     init: flow(function* () {
@@ -67,8 +76,6 @@ const ChatStore = types
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-      console.log(self.subroute);
-      console.log(toJS(self.selectedChat));
     },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
@@ -101,7 +108,7 @@ const ChatStore = types
           reactions: 'true',
         });
       } catch (e) {
-        throw new Error('Failed to create chat');
+        console.error('Failed to create chat');
       }
     }),
     leaveChat: flow(function* (path: string) {
@@ -111,16 +118,15 @@ const ChatStore = types
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
           yield ChatDBActions.leaveChat(path);
-          return self.inbox;
         } else {
-          throw new Error('Chat not found');
+          console.info(`chat ${path} not found`);
         }
       } catch (error) {
         console.error(error);
-        return self.inbox;
       }
     }),
     onPathsAdded(path: any) {
+      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
@@ -129,9 +135,6 @@ const ChatStore = types
       if (chat) {
         self.inbox.remove(chat);
         self.pinnedChats.remove(path);
-        return self.inbox;
-      } else {
-        throw new Error('Chat not found');
       }
     },
   }));
@@ -161,20 +164,21 @@ export function useChatStore() {
 // Listen for changes
 ChatDBActions.onDbChange((_evt, type, data) => {
   if (type === 'path-added') {
-    console.log('path added', data);
+    console.log('onPathsAdded', toJS(data));
     chatStore.onPathsAdded(data);
   }
   if (type === 'path-deleted') {
-    console.log('path deleted', data);
+    console.log('onPathDeleted', data);
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
+    console.log('onPathDeleted', data);
     console.log('message deleted', data);
     console.log(resolveIdentifier(ChatStore, chatStore, data));
     // selectedChat. (data.msgId);
   }
   if (type === 'message-received') {
-    console.log('message received', data);
+    console.log('addMessage', data);
 
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path

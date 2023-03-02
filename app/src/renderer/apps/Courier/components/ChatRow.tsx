@@ -12,6 +12,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
+import { useServices } from 'renderer/logic/store';
 
 type ChatRowProps = {
   path: string;
@@ -29,13 +30,20 @@ export const ChatRowPresenter = ({
   path,
   title,
   peers,
-  lastMessage,
   timestamp,
   type,
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { setSubroute, setChat, isChatPinned, togglePinned } = useChatStore();
+  const { ship } = useServices();
+  const {
+    inbox,
+    getChatTitle,
+    setSubroute,
+    setChat,
+    isChatPinned,
+    togglePinned,
+  } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
@@ -110,14 +118,19 @@ export const ChatRowPresenter = ({
   }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
+  const resolvedTitle = useMemo(() => {
+    if (!ship) return 'Error loading title';
+    return getChatTitle(path, ship.patp);
+  }, [path, ship]);
+
   const chatAvatarEl = useMemo(
     () =>
-      title &&
+      resolvedTitle &&
       type &&
       path &&
       peers && (
         <ChatAvatar
-          title={title}
+          title={resolvedTitle}
           type={type}
           path={path}
           peers={peers}
@@ -125,8 +138,14 @@ export const ChatRowPresenter = ({
           canEdit={false}
         />
       ),
-    [title, path, type, peers, metadata.image]
+    [resolvedTitle, path, type, peers, metadata.image]
   );
+
+  const chat = inbox.find((c) => c.path === path);
+  if (!chat) return null;
+  const newLast = chat.lastMessage;
+  if (!newLast) return null;
+  const lastMessageUpdated: { [key: string]: any } = newLast[0];
 
   return (
     <Row
@@ -167,7 +186,7 @@ export const ChatRowPresenter = ({
               fontWeight={500}
               fontSize={3}
             >
-              {title}
+              {resolvedTitle}
             </Text.Custom>
             <Text.Custom
               textAlign="left"
@@ -177,7 +196,9 @@ export const ChatRowPresenter = ({
               fontSize={2}
               opacity={0.5}
             >
-              {lastMessage ? Object.values(lastMessage)[0] : 'No messages yet'}
+              {lastMessageUpdated
+                ? Object.values(lastMessageUpdated)[0]
+                : 'No messages yet'}
             </Text.Custom>
           </Flex>
         </Flex>

@@ -18,7 +18,7 @@ type ChatLogProps = {
 };
 export const ChatLogPresenter = (_props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
-  const { selectedChat, setSubroute } = useChatStore();
+  const { selectedChat, getChatTitle, setSubroute } = useChatStore();
   const { ship, friends } = useServices();
 
   const { color: ourColor } = useMemo(() => {
@@ -31,6 +31,11 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     selectedChat.fetchMessages();
   }, [selectedChat]);
 
+  const resolvedTitle = useMemo(() => {
+    if (!selectedChat || !ship) return 'Error loading title';
+    return getChatTitle(selectedChat.path, ship.patp);
+  }, [selectedChat?.path, ship]);
+
   if (!selectedChat) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
@@ -39,7 +44,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
 
   const chatAvatarEl = (
     <ChatAvatar
-      title={metadata.title}
+      title={resolvedTitle}
       type={type}
       path={path}
       peers={peers}
@@ -68,7 +73,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
       flexDirection="column"
     >
       <ChatLogHeader
-        title={metadata ? metadata.title : ''}
+        title={resolvedTitle}
         path={path}
         onBack={() => setSubroute('inbox')}
         hasMenu

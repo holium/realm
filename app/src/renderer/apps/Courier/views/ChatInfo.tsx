@@ -67,7 +67,7 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute } = useChatStore();
+  const { selectedChat, setSubroute, getChatTitle } = useChatStore();
   const { friends, ship } = useServices();
   const [peers, setPeers] = useState<PeerType[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,18 +77,23 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { person } = useMemo(() => createPeopleForm(), []);
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
 
+  const resolvedTitle = useMemo(() => {
+    if (!selectedChat || !ship) return 'Error loading title';
+    return getChatTitle(selectedChat.path, ship.patp);
+  }, [selectedChat?.path, ship]);
+
   const contactMetadata =
-    selectedChat?.type === 'dm' && selectedChat?.metadata.title
-      ? friends.getContactAvatarMetadata(selectedChat?.metadata.title)
+    selectedChat?.type === 'dm' && resolvedTitle
+      ? friends.getContactAvatarMetadata(resolvedTitle)
       : {
-          patp: selectedChat?.metadata.title,
+          patp: resolvedTitle,
           color: '#000',
           nickname: '',
           avatar: '',
         };
 
   const [editTitle, setEditTitle] = useState(
-    selectedChat?.metadata.title ||
+    resolvedTitle ||
       contactMetadata.nickname ||
       contactMetadata.patp ||
       'Error loading title'
@@ -119,7 +124,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   if (!selectedChat) return null;
   const { type, metadata, path, peersGetBacklog, updatePeersGetBacklog } =
     selectedChat;
-  const title = metadata?.title;
+  // const title = metadata?.title;
 
   const editMetadata = (editedMetadata: any) => {
     if (!selectedChat) return;
@@ -147,7 +152,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   const chatAvatarEl = (
     <ChatAvatar
-      title={title}
+      title={resolvedTitle}
       type={type}
       path={path}
       peers={patps}
@@ -189,7 +194,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             py={1}
             disabled={
               editTitle.length < 1 ||
-              (editTitle === metadata?.title && image === metadata?.image)
+              (editTitle === resolvedTitle && image === metadata?.image)
             }
             id="save-chat-metadata"
             onClick={() => {

@@ -9,7 +9,7 @@ export const ChatMetadataModel = types.model({
   description: types.maybe(types.string),
   image: types.maybe(types.string),
   creator: types.string,
-  timestamp: types.string,
+  timestamp: types.number,
   reactions: types.optional(types.boolean, true),
 });
 
@@ -18,12 +18,13 @@ export type ChatMetadata = Instance<typeof ChatMetadataModel>;
 const stringifyMetadata = (metadata: ChatMetadata): ChatPathMetadata => {
   return {
     ...toJS(metadata),
+    timestamp: metadata.timestamp.toString(),
     reactions: metadata.reactions?.toString() || 'true',
   };
 };
 
 export const ChatMessage = types
-  .model({
+  .model('ChatMessageodel', {
     path: types.string,
     id: types.identifier,
     sender: types.string,
@@ -49,11 +50,13 @@ export const ChatMessage = types
   }));
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
+const ChatTypes = types.enumeration(['dm', 'group', 'space']);
+export type ChatRowType = Instance<typeof ChatTypes>;
+
 export const Chat = types
-  .model({
+  .model('ChatModel', {
     path: types.identifier,
-    type: types.enumeration(['dm', 'group', 'space']),
-    metadata: ChatMetadataModel,
+    type: ChatTypes,
     host: types.string,
     peers: types.array(types.string),
     peersGetBacklog: types.boolean,
@@ -64,6 +67,7 @@ export const Chat = types
     updatedAt: types.maybeNull(types.number),
     expiresDuration: types.maybeNull(types.number),
     messages: types.optional(types.array(ChatMessage), []),
+    metadata: ChatMetadataModel,
     // ui state
     pending: types.optional(types.boolean, false),
     hidePinned: types.optional(types.boolean, false),
@@ -102,7 +106,6 @@ export const Chat = types
     }),
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
-
       try {
         console.log('sending message', path, fragments);
         yield ChatDBActions.sendMessage(path, fragments);
@@ -112,8 +115,9 @@ export const Chat = types
       }
     }),
     addMessage(message: ChatMessageType) {
-      console.log('adding message', toJS(message));
       self.messages.push(message);
+      self.lastSender = message.sender;
+      self.lastMessage = message.contents;
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
@@ -208,3 +212,5 @@ export const Chat = types
     // setPeersGetBacklog(getBacklog: boolean) {},
     // setExpiresDuration(duration: number) {},
   }));
+
+export type ChatModelType = Instance<typeof Chat>;
