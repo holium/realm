@@ -10,14 +10,12 @@ import { useTrayApps } from '../store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { useRooms } from '../Rooms/useRooms';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
   const { ship, beacon } = useServices();
   const { setActiveApp } = useTrayApps();
   const currentShip = ship!;
-  const roomsManager = useRooms(ship!.patp);
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {
@@ -120,7 +118,6 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={async () => {
-              await roomsManager.cleanup();
               AuthActions.logout(currentShip.patp);
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');

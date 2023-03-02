@@ -99,7 +99,7 @@ const clearProtocolAndManager: (callback?: () => void) => void = (
 OSActions.onLogout(() => clearProtocolAndManager());
 OSActions.onSleep(() => clearProtocolAndManager());
 // we have to signal back that we are ready to actually quit with OSActions.readyToQuit
-OSActions.onQuitSignal(() => clearProtocolAndManager(OSActions.readyToQuit));
+OSActions.onQuitSignal(clearProtocolAndManager);
 
 RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
   if (protocol) {

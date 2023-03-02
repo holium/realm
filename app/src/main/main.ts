@@ -7,14 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import {
-  app,
-  ipcMain,
-  BrowserWindow,
-  shell,
-  session,
-  powerMonitor,
-} from 'electron';
+import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
@@ -25,6 +18,7 @@ import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
+import { PowerHelper } from './helpers/power';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
 import { BrowserHelper } from './helpers/browser';
@@ -105,6 +99,7 @@ const createWindow = async () => {
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
+  PowerHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -222,6 +217,7 @@ app.on('window-all-closed', () => {
 // do our cleanup, and then re-emit and actually quit it
 let lastQuitSignal: number = 0;
 app.on('before-quit', (event) => {
+  console.log('before-quit signal', lastQuitSignal);
   if (lastQuitSignal === 0) {
     lastQuitSignal = new Date().getTime() - 1;
     event.preventDefault();
@@ -229,35 +225,8 @@ app.on('before-quit', (event) => {
   }
 });
 ipcMain.on('realm.app.quit', () => {
+  console.log('realm.app.quit sent back');
   app.quit();
-});
-
-// device-state-change callbacks and listeners
-powerMonitor.on('suspend', () => {
-  mainWindow.webContents.send('realm.sys.sleep');
-  mainWindow.webContents.send('realm.sys.suspend');
-});
-powerMonitor.on('resume', () => {
-  mainWindow.webContents.send('realm.sys.wake');
-  mainWindow.webContents.send('realm.sys.resume');
-});
-powerMonitor.on('on-ac', () => {
-  mainWindow.webContents.send('realm.sys.on-ac');
-});
-powerMonitor.on('on-battery', () => {
-  mainWindow.webContents.send('realm.sys.on-battery');
-});
-powerMonitor.on('shutdown', () => {
-  mainWindow.webContents.send('realm.sys.sleep');
-  mainWindow.webContents.send('realm.sys.shutdown');
-});
-powerMonitor.on('lock-screen', () => {
-  mainWindow.webContents.send('realm.sys.sleep');
-  mainWindow.webContents.send('realm.sys.lock-screen');
-});
-powerMonitor.on('unlock-screen', () => {
-  mainWindow.webContents.send('realm.sys.wake');
-  mainWindow.webContents.send('realm.sys.unlock-screen');
 });
 
 app

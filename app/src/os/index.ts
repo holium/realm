@@ -98,36 +98,23 @@ export class Realm extends EventEmitter {
       ipcRenderer.on('realm.on-connection-status', callback),
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
 
-    onQuitSignal: (callback: any) =>
-      ipcRenderer.on('app.before-quit', callback),
-    readyToQuit: () => ipcRenderer.send('realm.app.quit'),
+    onQuitSignal: (callback: (c2?: () => void) => void) =>
+      ipcRenderer.on('app.before-quit', (event) => {
+        callback(() => event.sender.send('realm.app.quit'));
+      }),
 
     // 'fake' amalgamation events for any sort of "sleep-like" event
 
     // because a system may fire both 'suspend' and 'lock-screen' in quick succession,
     // only use callbacks to onSleep that you are okay with being called multiple times quickly
     // combines 'suspend' 'shutdown' 'lock-screen'
-    onSleep: (callback: any) => ipcRenderer.on('realm.sys.sleep', callback),
+    onSleep: (callback: () => void) =>
+      ipcRenderer.on('realm.sys.sleep', callback),
     // because a system may fire both 'resume' and 'unlock-screen' in quick succession,
     // only use callbacks to onWake that you are okay with being called multiple times quickly
     // combines 'resume' 'unlock-screen'
-    onWake: (callback: any) => ipcRenderer.on('realm.sys.wake', callback),
-
-    // the actual electron interface to powerMonitor
-    onSysSuspend: (callback: any) =>
-      ipcRenderer.on('realm.sys.suspend', callback),
-    onSysResume: (callback: any) =>
-      ipcRenderer.on('realm.sys.resume', callback),
-    onSysCharging: (callback: any) =>
-      ipcRenderer.on('realm.sys.on-ac', callback),
-    onSysBattery: (callback: any) =>
-      ipcRenderer.on('realm.sys.on-battery', callback),
-    onSysShutdown: (callback: any) =>
-      ipcRenderer.on('realm.sys.shutdown', callback),
-    onSysLockScreen: (callback: any) =>
-      ipcRenderer.on('realm.sys.lock-screen', callback),
-    onSysUnLockScreen: (callback: any) =>
-      ipcRenderer.on('realm.sys.unlock-screen', callback),
+    onWake: (callback: () => void) =>
+      ipcRenderer.on('realm.sys.wake', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {
