@@ -46,8 +46,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
       setUrl(e.url);
     const onDidFailLoad = (e: Electron.DidFailLoadEvent) => {
       // Error code 3 is a bug and not a terminal error.
-      const isLinux = process.platform === 'linux';
-      if (e.errorCode !== -3 && !isLinux) setError();
+      if (e.errorCode !== -3) setError();
     };
 
     readyWebview.addEventListener('did-start-loading', onDidStartLoading);
