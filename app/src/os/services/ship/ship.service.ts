@@ -199,9 +199,9 @@ export class ShipService extends BaseService {
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    let secretKey = this.core.passwords.getPassword(ship);
-    if (!secretKey) throw new Error('No password found for ship');
+    let secretKey: string | null = this.core.passwords.getPassword(
+      ship
+    ) as string;
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
@@ -283,6 +283,7 @@ export class ShipService extends BaseService {
         console.log('Subscription failed');
       }*/
 
+      if (!this.core.conduit) throw new Error('No conduit found');
       FriendsApi.watchFriends(this.core.conduit, this.models.friends);
 
       FriendsApi.getContact(this.core.conduit, ship).then((value: any) => {

@@ -206,8 +206,7 @@ export const NewBazaarStore = types
     _removePinned(data: { path: string; id: string }) {
       const dock = self.docks.get(data.path);
       const removeIndex = dock?.findIndex((id: string) => id === data.id);
-      if (!removeIndex) return;
-      dock?.splice(removeIndex, 1);
+      if (removeIndex) dock?.splice(removeIndex, 1);
       self.docks.set(data.path, dock);
     },
     _reorderPins(data: { path: string; dock: string[] }) {
