@@ -1,4 +1,5 @@
 export { Bubble } from './Bubble/Bubble';
+export { PinnedMessage } from './Bubble/Pinned';
 export * from './Bubble/Bubble.types';
 export * from './Bubble/Bubble.styles';
 export { Reactions } from './Bubble/Reaction';

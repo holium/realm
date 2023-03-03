@@ -8,6 +8,7 @@ export type ChatRowType = {
   metadata: any;
   type: ChatPathType;
   lastMessage: any[];
+  peersGetBacklog: boolean;
   createdAt: number;
   updatedAt: number;
 };

@@ -1,6 +1,8 @@
 import { MouseEventHandler } from 'react';
-import { Box, Spinner, Text } from '../';
 import { MenuItemStyle } from './MenuItem.styles';
+import { Spinner } from '../Spinner/Spinner';
+import { Box } from '../Box/Box';
+import { Text } from '../Text/Text';
 
 export type MenuItemProps = {
   id?: string;
@@ -36,14 +38,14 @@ export const MenuItem = ({
   } else {
     innerContent = (
       <>
-        {icon && (
-          <Box color="inherit" mr={2}>
-            {icon}
-          </Box>
-        )}
-        <Text style={{ pointerEvents: 'none' }} fontSize={2} fontWeight={400}>
+        {icon && <Box mr={2}>{icon}</Box>}
+        <Text.Custom
+          style={{ pointerEvents: 'none' }}
+          fontSize={2}
+          fontWeight={400}
+        >
           {label}
-        </Text>
+        </Text.Custom>
       </>
     );
   }

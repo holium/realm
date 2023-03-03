@@ -2,9 +2,8 @@ import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
+import { Avatar, Flex, Box, MenuItem, Spinner } from '@holium/design-system';
 import {
-  Flex,
-  Box,
   Text,
   Input,
   IconButton,
@@ -12,8 +11,6 @@ import {
   TextButton,
   useMenu,
   Menu,
-  MenuItem,
-  Spinner,
   FormControl,
 } from 'renderer/components';
 import { ShipSelector } from './ShipSelector';
@@ -23,7 +20,6 @@ import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { Avatar } from '@holium/design-system';
 import { ShellActions } from 'renderer/logic/actions/shell';
 
 interface LoginProps {
@@ -242,7 +238,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                               >
                                 <MenuItem
                                   label="Remove ship"
-                                  customBg={theme.currentTheme.windowColor}
                                   onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}
@@ -252,14 +247,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                           )}
                         </AnimatePresence>
                         {auth.loader.isLoading && !hasFailed ? (
-                          <Flex
-                            justifyContent="center"
-                            alignItems="center"
-                            width={24}
-                            height={24}
-                          >
-                            <Spinner size={0} />
-                          </Flex>
+                          <Spinner size={0} />
                         ) : (
                           <IconButton
                             ref={submitRef}

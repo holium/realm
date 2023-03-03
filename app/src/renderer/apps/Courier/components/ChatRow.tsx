@@ -6,11 +6,13 @@ import {
   timelineDate,
   MenuItemProps,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
+import { useServices } from 'renderer/logic/store';
 
 type ChatRowProps = {
   path: string;
@@ -20,34 +22,44 @@ type ChatRowProps = {
   metadata: any;
   timestamp: number;
   type: ChatPathType;
+  peersGetBacklog: boolean;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
-export const ChatRow = ({
+export const ChatRowPresenter = ({
   path,
   title,
   peers,
-  lastMessage,
   timestamp,
   type,
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { setSubroute, setChat } = useChatStore();
+  const { ship } = useServices();
+  const {
+    inbox,
+    getChatTitle,
+    setSubroute,
+    setChat,
+    isChatPinned,
+    togglePinned,
+  } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
+  const isPinned = isChatPinned(path);
+  const isMuted = false; // TODO
 
   const contextMenuOptions = useMemo(() => {
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
-      icon: 'Pin',
-      label: 'Pin',
-      disabled: true,
+      icon: isPinned ? 'Unpin' : 'Pin',
+      label: isPinned ? 'Unpin' : 'Pin',
+      disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        // TODO poke pin / unpin
+        togglePinned(path, !isPinned);
       },
     });
     // menu.push({
@@ -67,7 +79,7 @@ export const ChatRow = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        setChat(path, title, type, peers, metadata);
+        setChat(path);
         setSubroute('chat-info');
       },
     });
@@ -97,7 +109,7 @@ export const ChatRow = ({
       },
     });
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [path]);
+  }, [path, isPinned, isMuted]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(chatRowId)) {
@@ -106,6 +118,32 @@ export const ChatRow = ({
   }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
+  const resolvedTitle = useMemo(() => {
+    if (!ship) return 'Error loading title';
+    return getChatTitle(path, ship.patp);
+  }, [path, ship]);
+
+  const chatAvatarEl = useMemo(
+    () =>
+      resolvedTitle &&
+      type &&
+      path &&
+      peers && (
+        <ChatAvatar
+          title={resolvedTitle}
+          type={type}
+          path={path}
+          peers={peers}
+          image={metadata?.image}
+          canEdit={false}
+        />
+      ),
+    [resolvedTitle, path, type, peers, metadata.image]
+  );
+
+  const chat = inbox.find((c) => c.path === path);
+  const lastMessageUpdated: { [key: string]: any } =
+    chat && chat.lastMessage && chat.lastMessage[0];
 
   return (
     <Row
@@ -131,15 +169,7 @@ export const ChatRow = ({
               duration: 0.1,
             }}
           >
-            {title && type && path && peers && (
-              <ChatAvatar
-                title={title}
-                type={type}
-                path={path}
-                peers={peers}
-                image={metadata?.image}
-              />
-            )}
+            {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
@@ -154,7 +184,7 @@ export const ChatRow = ({
               fontWeight={500}
               fontSize={3}
             >
-              {title}
+              {resolvedTitle}
             </Text.Custom>
             <Text.Custom
               textAlign="left"
@@ -164,7 +194,9 @@ export const ChatRow = ({
               fontSize={2}
               opacity={0.5}
             >
-              {lastMessage ? Object.values(lastMessage)[0] : 'No messages yet'}
+              {lastMessageUpdated
+                ? Object.values(lastMessageUpdated)[0]
+                : 'No messages yet'}
             </Text.Custom>
           </Flex>
         </Flex>
@@ -183,3 +215,5 @@ export const ChatRow = ({
     </Row>
   );
 };
+
+export const ChatRow = observer(ChatRowPresenter);

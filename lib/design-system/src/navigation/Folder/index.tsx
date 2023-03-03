@@ -5,7 +5,7 @@ type FolderProps = {
   label: string;
   rightContent?: React.ReactNode;
   onToggleChildren?: (
-    evt: React.MouseEvent<HTMLButtonElement>,
+    evt: React.MouseEvent<HTMLDivElement>,
     showChilden: boolean
   ) => void;
 } & BoxProps;
@@ -18,7 +18,7 @@ export const Folder: FC<FolderProps> = (props: FolderProps) => {
   return (
     <Flex gap={2} flexDirection="column" justifyContent="space-between">
       <Row
-        onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           setShowChildren(!showChildren);
           onToggleChildren(evt, !showChildren);

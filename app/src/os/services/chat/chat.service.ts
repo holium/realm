@@ -13,8 +13,9 @@ import {
   ChatDbOps,
   AddRow,
   DelPathsRow,
-  DelPeersRow,
+  // DelPeersRow,
   UpdateRow,
+  DelMessagesRow,
 } from './chat.types';
 
 type ChatUpdateType =
@@ -25,12 +26,22 @@ type ChatUpdateType =
   | 'peer-added'
   | 'peer-deleted';
 
-type ChatPathMetadata = {
+export type ChatPathMetadata = {
   title: string;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
   creator: string;
   timestamp: string;
+  reactions?: string;
+};
+
+const parseMetadata = (metadata: string) => {
+  const mtd = JSON.parse(metadata);
+  return {
+    ...mtd,
+    timestamp: parseInt(mtd.timestamp) || 0,
+    reactions: mtd.reactions === 'true',
+  };
 };
 
 export type ChatPathType = 'dm' | 'group' | 'space';
@@ -48,10 +59,16 @@ export class ChatService extends BaseService {
     'realm.chat.get-chat-log': this.getChatLog,
     'realm.chat.get-chat-peers': this.getChatPeers,
     'realm.chat.send-message': this.sendMessage,
+    'realm.chat.edit-message': this.editMessage,
     'realm.chat.delete-message': this.deleteMessage,
     // 'realm.chat.read-chat': this.readChat,
     'realm.chat.create-chat': this.createChat,
     'realm.chat.edit-chat': this.editChatMetadata,
+    'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
+    'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
+    'realm.chat.set-pinned-message': this.setPinnedMessage,
+    'realm.chat.clear-pinned-message': this.clearPinnedMessage,
+    'realm.chat.clear-chat-backlog': this.clearChatBacklog,
     'realm.chat.add-peer': this.addPeerToChat,
     'realm.chat.remove-peer': this.removePeerFromChat,
     'realm.chat.leave-chat': this.leaveChat,
@@ -71,6 +88,8 @@ export class ChatService extends BaseService {
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
       ipcRenderer.invoke('realm.chat.send-message', path, fragments),
+    editMessage: (path: string, msgId: string, fragments: any[]) =>
+      ipcRenderer.invoke('realm.chat.edit-message', path, msgId, fragments),
     deleteMessage: (path: string, msgId: string) =>
       ipcRenderer.invoke('realm.chat.delete-message', path, msgId),
     createChat: (
@@ -78,12 +97,30 @@ export class ChatService extends BaseService {
       type: ChatPathType,
       metadata: ChatPathMetadata
     ) => ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
-    editChat: (path: string, metadata: ChatPathMetadata) =>
-      ipcRenderer.invoke('realm.chat.edit-chat', path, metadata),
+    editChat: (
+      path: string,
+      metadata: ChatPathMetadata,
+      peersGetBacklog: boolean
+    ) =>
+      ipcRenderer.invoke(
+        'realm.chat.edit-chat',
+        path,
+        metadata,
+        peersGetBacklog
+      ),
     addPeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.add-peer', path, peer),
     removePeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.remove-peer', path, peer),
+    fetchPinnedChats: () => ipcRenderer.invoke('realm.chat.fetch-pinned-chats'),
+    togglePinnedChat: (path: string, pinned: boolean) =>
+      ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
+    setPinnedMessage: (path: string, msgId: string) =>
+      ipcRenderer.invoke('realm.chat.set-pinned-message', path, msgId),
+    clearPinnedMessage: (path: string) =>
+      ipcRenderer.invoke('realm.chat.clear-pinned-message', path),
+    clearChatBacklog: (path: string) =>
+      ipcRenderer.invoke('realm.chat.clear-chat-backlog', path),
     // readChat: (path: string) =>
     //   ipcRenderer.invoke('realm.chat.read-chat', path),
     leaveChat: (path: string) =>
@@ -101,7 +138,8 @@ export class ChatService extends BaseService {
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
     this.sendChatUpdate = this.sendChatUpdate.bind(this);
-    this.deletePath = this.deletePath.bind(this);
+    this.deletePathsRow = this.deletePathsRow.bind(this);
+    this.deleteMessagesRow = this.deleteMessagesRow.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -150,10 +188,10 @@ export class ChatService extends BaseService {
   }
 
   async fetchPeers() {
-    // const lastTimestamp = this.getLastTimestamp('peers');
+    const lastTimestamp = this.getLastTimestamp('peers');
     const response = await this.core.conduit!.scry({
       app: 'chat-db',
-      path: `/db/peers`,
+      path: `/db/peers/start-ms/${lastTimestamp}`,
     });
     return response.tables.peers;
   }
@@ -177,20 +215,19 @@ export class ChatService extends BaseService {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
         case 'messages':
-          // console.log('add-row to messages', addRow.row);
+          console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
-          const msg = this.getChatMessage(
-            message.path,
-            `${message['msg-id'][0]}${message['msg-id'][1]}`
-          );
-          console.log('NEW MESSAGE', msg);
+          const msg = this.getChatMessage(message.path, message['msg-id']);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
           console.log('add-row to paths', addRow.row);
-          const paths = [addRow.row] as PathsRow[];
-          this.insertPaths(paths);
+          const path = addRow.row as PathsRow;
+          this.insertPaths([path]);
+          const chat = this.getChat(path.path);
+          this.sendChatUpdate('path-added', chat);
+
           break;
         case 'peers':
           console.log('add-row to peers', addRow.row);
@@ -228,21 +265,21 @@ export class ChatService extends BaseService {
     }
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
-      // const delMessagesRow = dbChange as DelMessagesRow;
-      // this.deleteMessage(delMessagesRow.row);
-      // this.sendChatUpdate('message-deleted', delMessagesRow.row);
+      const delMessagesRow = dbChange as DelMessagesRow;
+      this.deleteMessagesRow(delMessagesRow['msg-id']);
+      this.sendChatUpdate('message-deleted', delMessagesRow['msg-id']);
     }
     if (dbChange.type === 'del-paths-row') {
       console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this.deletePath(delPathsRow.row);
+      this.deletePathsRow(delPathsRow.row);
       this.sendChatUpdate('path-deleted', delPathsRow.row);
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
-      const delPathsRow = dbChange as DelPeersRow;
-      this.deletePath(delPathsRow.path);
-      this.sendChatUpdate('peer-deleted', delPathsRow);
+      // const delPathsRow = dbChange as DelPeersRow;
+      // this.deletePeersRow(delPathsRow.path);
+      // this.sendChatUpdate('peer-deleted', delPathsRow);
     }
   }
 
@@ -274,8 +311,9 @@ export class ChatService extends BaseService {
         metadata, 
         sender,
         created_at, 
-        updated_at) 
-      VALUES (
+        updated_at,
+        expires_at
+      ) VALUES (
         @path, 
         @msg_id, 
         @msg_part_id,
@@ -285,22 +323,24 @@ export class ChatService extends BaseService {
         @metadata,
         @sender,
         @created_at,
-        @updated_at
+        @updated_at,
+        @expires_at
       )`
     );
     const insertMany = this.db.transaction((messages) => {
       for (const message of messages) {
         insert.run({
           path: message.path,
-          msg_id: `${message['msg-id'][0]}${message['msg-id'][1]}`,
+          msg_id: message['msg-id'],
           msg_part_id: message['msg-part-id'],
-          content_type: Object.keys(message.content)[0],
-          content_data: Object.values(message.content)[0],
+          content_type: message['content-type'],
+          content_data: message['content-data'],
           reply_to: message['reply-to'],
           metadata: JSON.stringify(message.metadata),
-          sender: message['msg-id'][1],
+          sender: message.sender,
           created_at: message['created-at'],
           updated_at: message['updated-at'],
+          expires_at: message['expires-at'],
         });
       }
     });
@@ -314,16 +354,23 @@ export class ChatService extends BaseService {
           path, 
           type, 
           metadata, 
+          peers_get_backlog,
+          pins,
+          max_expires_at_duration,
           created_at, 
           updated_at
-        ) VALUES (@path, @type, @metadata, @created_at, @updated_at)`
+        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
+      console.log(paths);
       for (const path of paths)
         insert.run({
           path: path.path,
           type: path.type,
           metadata: JSON.stringify(path.metadata),
+          peers_get_backlog: path['peers-get-backlog'] === true ? 1 : 0,
+          pins: JSON.stringify(path['pins']),
+          max_expires_at_duration: path['max-expires-at-duration'] ?? null,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
         });
@@ -355,7 +402,7 @@ export class ChatService extends BaseService {
     insertMany(peers);
   }
 
-  deletePath(path: string) {
+  deletePathsRow(path: string) {
     if (!this.db) throw new Error('No db connection');
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
     console.log('deleting path', path);
@@ -368,6 +415,14 @@ export class ChatService extends BaseService {
     // delete all peers in that path
     const deletePeers = this.db.prepare('DELETE FROM peers WHERE path = ?');
     deletePeers.run(path);
+  }
+  deleteMessagesRow(msgId: string) {
+    if (!this.db) throw new Error('No db connection');
+    const deleteMessage = this.db.prepare(
+      'DELETE FROM messages WHERE msg_id = ?'
+    );
+    console.log('deleting msgId', msgId);
+    deleteMessage.run(msgId);
   }
   // ----------------------------------------------
   // ----------------- DB queries -----------------
@@ -434,10 +489,15 @@ export class ChatService extends BaseService {
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
+        json_extract(metadata, '$.creator') AS host,
+        paths.peers_get_backlog peersGetBacklog,
+        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
+        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt
+        chat_with_messages.updated_at updatedAt,
+        paths.max_expires_at_duration expiresDuration
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path LIKE '%realm-chat%'
@@ -450,8 +510,9 @@ export class ChatService extends BaseService {
     return result.map((row) => {
       return {
         ...row,
-        peers: row.peers ? JSON.parse(row.peers) : null,
-        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peers: row.peers ? JSON.parse(row.peers) : [],
+        metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage
           ? JSON.parse(row.lastMessage).map(
               (message: any) => message && JSON.parse(message)
@@ -459,6 +520,102 @@ export class ChatService extends BaseService {
           : null,
       };
     });
+  }
+
+  getChat(path: string) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      WITH formed_messages AS (
+        WITH formed_fragments AS (
+            WITH realm_chat as (
+                SELECT *
+                FROM messages
+                WHERE path LIKE '%realm-chat%'
+                ORDER BY msg_part_id, created_at DESC
+            )
+            SELECT
+                realm_chat.path,
+                realm_chat.msg_id,
+                realm_chat.msg_part_id,
+                json_object(realm_chat.content_type, realm_chat.content_data) content,
+                realm_chat.sender,
+                realm_chat.created_at,
+                realm_chat.updated_at,
+                realm_chat.reply_to,
+                realm_chat.metadata
+            FROM realm_chat
+            ORDER BY
+                realm_chat.created_at DESC,
+                realm_chat.msg_id DESC,
+                realm_chat.msg_part_id
+        )
+        SELECT
+            path,
+            msg_id,
+            msg_part_id,
+            json_group_array(content) as contents,
+            sender,
+            reply_to,
+            metadata,
+            MAX(created_at) m_created_at,
+            MAX(updated_at) m_updated_at
+        FROM formed_fragments
+        GROUP BY msg_id
+        ORDER BY m_created_at DESC,
+                msg_id DESC,
+                msg_part_id DESC
+      ), chat_with_messages AS (
+        SELECT
+            path,
+            contents lastMessage,
+            sender lastSender,
+            m_created_at created_at,
+            m_updated_at updated_at
+        FROM formed_messages
+        GROUP BY formed_messages.path
+      )
+      SELECT
+        paths.path,
+        type,
+        metadata,
+        (
+            SELECT json_group_array(ship)
+            FROM peers
+            WHERE peers.path = paths.path AND ship != ?
+        ) AS peers,
+        json_extract(metadata, '$.creator') AS host,
+        paths.peers_get_backlog peersGetBacklog,
+        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
+        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        lastMessage,
+        lastSender,
+        chat_with_messages.created_at createdAt,
+        chat_with_messages.updated_at updatedAt,
+        paths.max_expires_at_duration expiresDuration
+      FROM paths
+      LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
+      WHERE paths.path = ?
+      ORDER BY
+          chat_with_messages.created_at DESC,
+          json_extract(json(metadata), '$.timestamp') DESC;
+    `);
+    const result = query.all(`~${this.core.conduit?.ship}`, path);
+
+    const rows = result.map((row) => {
+      return {
+        ...row,
+        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peers: row.peers ? JSON.parse(row.peers) : [],
+        metadata: row.metadata ? parseMetadata(row.metadata) : null,
+        lastMessage: row.lastMessage
+          ? JSON.parse(row.lastMessage).map(
+              (message: any) => message && JSON.parse(message)
+            )
+          : null,
+      };
+    });
+    if (rows.length === 0) return null;
+    return rows[0];
   }
 
   getChatLog(
@@ -492,33 +649,24 @@ export class ChatService extends BaseService {
             realm_chat.msg_part_id
       )
       SELECT
-        msg_id,
-        json_group_array(content) as contents,
+        path,
+        msg_id id,
+        json_group_array(json_extract(content, '$')) as contents,
         sender,
         reply_to,
         metadata,
-        (
-            SELECT json_group_array(ship)
-            FROM peers
-            WHERE peers.path = formed_fragments.path AND ship != ?
-            ) AS peers,
         MAX(formed_fragments.created_at) createdAt,
         MAX(formed_fragments.updated_at) updatedAt
       FROM formed_fragments
       GROUP BY msg_id
       ORDER BY createdAt;
     `);
-    const result = query.all(path, `~${this.core.conduit?.ship}`);
+    const result = query.all(path);
     return result.map((row) => {
       return {
         ...row,
-        peers: row.peers ? JSON.parse(row.peers) : null,
-        metadata: row.metadata ? JSON.parse(row.metadata) : null,
-        content: row.contents
-          ? JSON.parse(row.contents).map((fragment: any) =>
-              JSON.parse(fragment)
-            )
-          : null,
+        metadata: row.metadata ? parseMetadata(row.metadata) : [null],
+        contents: row.contents ? JSON.parse(row.contents) : null,
       };
     });
   }
@@ -529,7 +677,7 @@ export class ChatService extends BaseService {
       SELECT
         path,
         msg_id id,
-        json_group_array(json_object(content_type, content_data)) content,
+        json_group_array(json_object(content_type, content_data)) contents,
         sender,
         MAX(created_at) as createdAt,
         MAX(updated_at) as updatedAt
@@ -550,7 +698,7 @@ export class ChatService extends BaseService {
     const rows = result.map((row) => {
       return {
         ...row,
-        content: JSON.parse(row.content),
+        contents: JSON.parse(row.contents),
       };
     });
     if (rows.length === 0) return null;
@@ -591,6 +739,7 @@ export class ChatService extends BaseService {
         'send-message': {
           path: path,
           fragments,
+          'expires-in': null,
         },
       },
     };
@@ -602,22 +751,76 @@ export class ChatService extends BaseService {
     };
   }
 
-  editMessage(path: string, msgId: string) {
+  async setPinnedMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    // this.core.conduit.editChat(path, metadata);
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'pin-message': {
+          'msg-id': msgId,
+          path: path,
+          pin: true,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to pin chat');
+    }
   }
 
-  async deleteMessage(path: string, msgId: string) {
+  async clearPinnedMessage(_evt: any, path: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
-    const splitId = msgId.split('~');
-    const timestamp = splitId[1];
-    const sender = splitId[2];
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'clear-pinned-messages': {
+          path: path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to unpin chat');
+    }
+  }
+
+  async editMessage(_evt: any, path: string, msgId: string, fragments: any[]) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'edit-message': {
+          'msg-id': msgId,
+          path,
+          fragments,
+        },
+      },
+    };
+    console.log(payload);
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to edit message');
+    }
+  }
+
+  async deleteMessage(_evt: any, path: string, msgId: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
       mark: 'action',
       json: {
         'delete-message': {
-          'msg-id': [`~${timestamp}`, `~${sender}`],
+          'msg-id': msgId,
           path,
         },
       },
@@ -627,7 +830,26 @@ export class ChatService extends BaseService {
       await this.core.conduit.poke(payload);
     } catch (err) {
       console.error(err);
-      throw new Error('Failed to create chat');
+      throw new Error('Failed to delete message');
+    }
+  }
+
+  async clearChatBacklog(_evnt: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      json: {
+        'delete-backlog': {
+          path,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to delete chat backlog');
     }
   }
 
@@ -647,6 +869,8 @@ export class ChatService extends BaseService {
           type,
           metadata,
           peers,
+          invites: 'anyone',
+          'max-expires-at-duration': null,
         },
       },
     };
@@ -663,7 +887,41 @@ export class ChatService extends BaseService {
   //   // this.core.conduit.readChat(path);
   // }
 
-  async editChatMetadata(_evt: any, path: string, metadata: ChatPathMetadata) {
+  async fetchPinnedChats() {
+    const response = await this.core.conduit!.scry({
+      app: 'realm-chat',
+      path: '/pins',
+    });
+    return response;
+  }
+
+  async togglePinnedChat(_evt: any, path: string, pinned: boolean) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'action',
+      reaction: '',
+      json: {
+        'pin-chat': {
+          path,
+          pin: pinned,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to pin chat');
+    }
+  }
+
+  async editChatMetadata(
+    _evt: any,
+    path: string,
+    metadata: ChatPathMetadata,
+    peersGetBacklog: boolean
+  ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
@@ -673,6 +931,7 @@ export class ChatService extends BaseService {
         'edit-chat': {
           path,
           metadata,
+          'peers-get-backlog': peersGetBacklog,
         },
       },
     };
@@ -753,7 +1012,7 @@ export class ChatService extends BaseService {
       await this.core.conduit.poke(payload);
     } catch (err) {
       console.error(err);
-      throw new Error('Failed to create chat');
+      throw new Error('Failed to leave chat');
     }
   }
 }

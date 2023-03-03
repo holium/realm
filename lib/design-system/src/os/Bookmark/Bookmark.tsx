@@ -39,7 +39,7 @@ export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
     <BookmarkRow
       id={id}
       width={width}
-      onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         onNavigate(url);
       }}

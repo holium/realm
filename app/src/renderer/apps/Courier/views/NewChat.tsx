@@ -6,20 +6,20 @@ import {
   Button,
   TextInput,
   Avatar,
+  Spinner,
 } from '@holium/design-system';
-import { useTrayApps } from '../store';
-import { useChatStore } from './store';
-import { ShipSearch, Spinner } from 'renderer/components';
+import { useTrayApps } from '../../store';
+import { useChatStore } from '../store';
+import { ShipSearch } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatPathType } from 'os/services/chat/chat.service';
 
 export const NewChat = () => {
   const { ship, friends } = useServices();
   const { dimensions } = useTrayApps();
-  const { setSubroute } = useChatStore();
+  const { setSubroute, createChat } = useChatStore();
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -43,13 +43,7 @@ export const NewChat = () => {
       chatType = 'group';
     }
     setCreating(true);
-    ChatDBActions.createChat(Array.from(selectedPatp), chatType, {
-      title,
-      description: '',
-      image: '',
-      creator: ship!.patp,
-      timestamp: Date.now().toString(),
-    })
+    createChat(title, ship!.patp, chatType, Array.from(selectedPatp))
       .then(() => {
         setSubroute('inbox');
         setCreating(false);

@@ -1,4 +1,4 @@
-import { Spinner, Flex } from './';
+import { Flex, Spinner } from '@holium/design-system';
 
 export const Splash = () => {
   return (

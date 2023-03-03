@@ -13,7 +13,8 @@ import {
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import { Spinner, ConnectionStatus } from 'renderer/components';
+import { Spinner } from '@holium/design-system';
+import { ConnectionStatus } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -59,13 +60,12 @@ const ShellPresenter = () => {
 
   return (
     <ViewPort>
-      <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {resuming && (
           <ResumingOverlay>
-            <Spinner color="#ffffff" size={4} />
+            <Spinner size={4} color="#FFF" />
           </ResumingOverlay>
         )}
         {!resuming && GUI}
@@ -73,6 +73,8 @@ const ShellPresenter = () => {
       <Layer zIndex={20}>
         <ConnectionStatus />
       </Layer>
+      {/* TODO make DragBar work */}
+      <Layer zIndex={21}>{!isFullscreen && <DragBar />}</Layer>
     </ViewPort>
   );
 };

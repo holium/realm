@@ -1,8 +1,8 @@
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useState } from 'react';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from '../../System/Dialogs/Confirm';
+import { useChatStore } from '../store';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;
@@ -16,10 +16,11 @@ const LeaveChatDialogConfigComponent = ({
   ...props
 }: LeaveChatDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
+  const { leaveChat } = useChatStore();
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
-      ChatDBActions.leaveChat(path).then(() => {
+      leaveChat(path).then(() => {
         setLoading(false);
       });
     }

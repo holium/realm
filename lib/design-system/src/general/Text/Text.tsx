@@ -62,6 +62,7 @@ const Default = styled(Box)<TextProps>`
   line-height: normal;
   margin-top: 0px;
   margin-bottom: 0px;
+  user-select: text;
   ${customStyling}
 `;
 
@@ -126,6 +127,7 @@ const Label = styled(Default)<TextProps>`
 `;
 
 const Custom = styled(Box)<TextProps>`
+  user-select: text;
   ${customStyling}
 `;
 
@@ -137,6 +139,7 @@ const Patp = styled(motion.p)<TextProps>`
   color: var(--rlm-text-color);
   margin-top: 0px;
   margin-bottom: 0px;
+  user-select: text;
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 

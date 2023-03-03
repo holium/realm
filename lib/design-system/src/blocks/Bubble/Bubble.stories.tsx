@@ -12,6 +12,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2022-11-26T10:04:38.000Z"
@@ -25,6 +26,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-2'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -37,6 +39,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-3'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -51,6 +54,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-4'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -69,6 +73,7 @@ webpack building...
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-5'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -89,6 +94,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -102,6 +108,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-2'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -123,6 +130,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -141,6 +149,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-2'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -162,6 +171,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -175,6 +185,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-2'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -194,6 +205,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -207,6 +219,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-2'}
         isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -225,6 +238,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
 export const Link: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-25T11:04:38.000Z"
@@ -238,6 +252,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
     />
 
     <Bubble
+      id={'i-2'}
       isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -250,6 +265,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-3'}
       author="~lodlev-migdev"
       sentAt="2023-01-26T11:06:38.000Z"
       message={[
@@ -265,6 +281,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
 export const Image: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -277,6 +294,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-2'}
       isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -312,6 +330,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -325,6 +344,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         onReaction={onReaction}
       />
       <Bubble
+        id={'i-2'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -350,6 +370,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
 export const ReplyTo: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-26T11:00:30.000Z"
@@ -368,6 +389,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-2'}
       author="~lomder-librun"
       isOur
       sentAt="2023-01-26T11:04:38.000Z"
@@ -387,6 +409,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-3'}
       author="~lodlev-migdev"
       authorColor="#428E65"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -410,6 +433,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-4'}
       author="~zod"
       authorColor="#e3a30e"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -437,6 +461,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
 export const RelicTab: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#428E65"
       sentAt="2023-01-26T11:00:30.000Z"

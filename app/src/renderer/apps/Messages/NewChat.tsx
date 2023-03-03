@@ -1,7 +1,14 @@
 import { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
-import { FormControl, Tag, Spinner } from 'renderer/components';
-import { Flex, Text, TextInput, Icon, Button } from '@holium/design-system';
+import { FormControl, Tag } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  TextInput,
+  Icon,
+  Button,
+  Spinner,
+} from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
@@ -180,7 +187,7 @@ const NewChatPresenter = (props: IProps) => {
             mx={2}
             width="100%"
             className="realm-cursor-text-cursor"
-            placeholder="Who would you like to add?"
+            placeholder="Add someone?"
             value={patp}
             onChange={(e: any) => setPatp(e.target.value)}
             // onFocus={() => urbitId.actions.onFocus()}

@@ -64,7 +64,7 @@ export const ContextMenu = () => {
         }}
         exit={{
           opacity: 0,
-          // y: 8,
+          y: 8,
           transition: {
             duration: 0.1,
           },

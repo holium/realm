@@ -10,7 +10,7 @@ import log from 'electron-log';
 import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
-const fs = require('fs');
+import { getReleaseChannel } from '../os/lib/settings';
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')
@@ -47,27 +47,6 @@ log.transports.file.level = 'verbose';
 export interface IAppUpdater {
   checkForUpdates: (mainWindow: BrowserWindow, manualCheck: boolean) => void;
 }
-
-// determine the releaseChannel. if a user downloads an alpha version of the app, we
-//  need to record this for later use. the reason is that 'alpha' channel updates
-//  both when new alpha and release builds are deployed.
-//  since release builds will not have process.env.RELEASE_CHANNEL (which means)
-//   channel will be set to 'latest', we need to "remember" that this is still
-//   an 'alpha' channel user. the rule is:
-//  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
-const determineReleaseChannel = () => {
-  let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
-  const settingsFilename = `${app.getPath('userData')}/settings.json`;
-  if (fs.existsSync(settingsFilename)) {
-    var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
-    releaseChannel = settings.releaseChannel || releaseChannel;
-  } else {
-    if (releaseChannel === 'alpha') {
-      fs.writeFileSync(settingsFilename, JSON.stringify({ releaseChannel }));
-    }
-  }
-  return releaseChannel;
-};
 
 // to properly test auto update in development, see:
 //  https://github.com/SimulatedGREG/electron-vue/issues/375#issuecomment-388873561
@@ -117,7 +96,7 @@ export class AppUpdater implements IAppUpdater {
         provider: 'generic',
         // see the app/src/renderer/system/updater/readme.md for more information
         url: process.env.AUTOUPDATE_FEED_URL,
-        channel: determineReleaseChannel(),
+        channel: getReleaseChannel(),
       });
     }
     // autoUpdater.autoInstallOnAppQuit = true;

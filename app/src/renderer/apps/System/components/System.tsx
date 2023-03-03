@@ -1,12 +1,12 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { Flex, Text, Card, TextButton, Spinner } from 'renderer/components';
+import { Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { OSActions } from 'renderer/logic/actions/os';
-import { CheckBox } from '@holium/design-system';
+import { CheckBox, Flex, Spinner } from '@holium/design-system';
 
 export type MediaAccessStatus =
   | 'not-determined'
@@ -270,8 +270,6 @@ const SystemPanelPresenter = () => {
         </Text>
         <Flex >
             <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={mouseOption}
                 options={[
                   { label: 'System', value: 'system' },

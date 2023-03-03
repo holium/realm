@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Flex, Spinner } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
 import { darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';

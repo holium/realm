@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import { useEffect, useMemo, useState } from 'react';
-import { Label, Select, RadioOption, FormControl } from 'renderer/components';
+import { useEffect, useState } from 'react';
+import { RadioOption, Select } from '@holium/design-system';
+import { Label, FormControl } from 'renderer/components';
 import { Flex, Button, Text, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from '../store';
@@ -9,18 +9,13 @@ import { useRooms } from './useRooms';
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { ship, theme } = useServices();
+  const { ship } = useServices();
   const roomsManager = useRooms(ship!.patp);
 
-  const { inputColor, mode } = theme.currentTheme;
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []
   );
   const [selectedSource, setSelectedSource] = useState('');
-
-  const secondaryInputColor = useMemo(() => {
-    return mode === 'light' ? darken(0.015, inputColor) : inputColor;
-  }, [inputColor, mode]);
 
   useEffect(() => {
     roomsManager?.getAudioInputSources().then((sources: any[]) => {
@@ -69,14 +64,9 @@ const SettingsPresenter = () => {
             <Label>Audio input</Label>
             <Select
               id="rooms-settings-audio-input"
-              height={32}
-              textColor={theme.currentTheme.textColor}
-              iconColor={theme.currentTheme.iconColor}
-              inputColor={secondaryInputColor}
-              customBg={theme.currentTheme.inputColor}
               options={audioSourceOptions}
               selected={selectedSource}
-              onClick={(source: string) => {
+              onClick={(source) => {
                 setSelectedSource(source);
                 roomsManager?.setAudioInput(source);
               }}

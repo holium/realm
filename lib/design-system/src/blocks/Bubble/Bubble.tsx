@@ -1,4 +1,5 @@
 import { Flex, Text, BoxProps } from '../..';
+import styled from 'styled-components';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
@@ -10,14 +11,25 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
+const LineBreak = styled.div`
+  display: block;
+  content: '';
+  width: 100%;
+  height: 0;
+  margin: 0;
+  padding: 0;
+`;
+
 export type BubbleProps = {
+  id: string;
   author: string;
   authorColor?: string;
   sentAt: string;
   isOur?: boolean;
+  ourColor?: string;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
-  onReaction: (payload: OnReactionPayload) => void;
+  onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
 } & BoxProps;
@@ -27,6 +39,7 @@ export const Bubble = (props: BubbleProps) => {
     id,
     author,
     isOur,
+    ourColor,
     sentAt,
     authorColor,
     message,
@@ -45,11 +58,15 @@ export const Bubble = (props: BubbleProps) => {
       mx="1px"
       justifyContent={isOur ? 'flex-end' : 'flex-start'}
     >
-      <BubbleStyle id={id} className={isOur ? 'bubble-our' : ''}>
+      <BubbleStyle
+        id={id}
+        style={isOur ? { background: ourColor } : {}}
+        className={isOur ? 'bubble-our' : ''}
+      >
         {!isOur && (
           <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
         )}
-        <FragmentBlock>
+        <FragmentBlock id={id}>
           {message?.map((fragment, index) => {
             let lineBreak = false;
             // Detect line break between text and block
@@ -67,15 +84,17 @@ export const Bubble = (props: BubbleProps) => {
             // TODO somehow pass in the onReplyClick function
 
             return (
-              <span key={`${id}-index-${index}`}>
-                {lineBreak && <br />}
-                {renderFragment(fragment, index, author, onLoaded)}
+              <span id={id} key={`${id}-index-${index}`}>
+                {lineBreak && <LineBreak />}
+                {renderFragment(id, fragment, index, author, onLoaded)}
               </span>
             );
           })}
         </FragmentBlock>
-        <BubbleFooter>
-          <Reactions reactions={reactions} onReaction={onReaction} />
+        <BubbleFooter id={id}>
+          {onReaction && (
+            <Reactions reactions={reactions} onReaction={onReaction} />
+          )}
           <Text.Custom pointerEvents="none" alignSelf="flex-end" opacity={0.5}>
             {dateDisplay}
           </Text.Custom>

@@ -1,6 +1,6 @@
 import { FC, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Spinner } from 'renderer/components';
+import { Flex, Text, Spinner } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -37,14 +37,13 @@ export const Finalizing: FC<FinalizingProps> = observer(
         alignItems="center"
       >
         <Spinner size={3} />
-        <Text
+        <Text.Custom
           mt={6}
-          variant="h6"
           color={themeData.colors.text.secondary}
           fontSize={3}
         >
           Creating wallet...
-        </Text>
+        </Text.Custom>
       </Flex>
     );
   }
