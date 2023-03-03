@@ -42,16 +42,27 @@ const SvgComponent = forwardRef<
   }
 >(
   (
-    { title, name, width, height, color, iconColor, isBackgroundImage, ...rest },
+    {
+      title,
+      name,
+      width,
+      height,
+      color,
+      iconColor,
+      isBackgroundImage,
+      ...rest
+    },
     svgRef
   ) => {
     const [titleId] = useState(() => (title ? uuid() : undefined));
 
-    const svgSafeColor = iconColor || (color
-      ? isBackgroundImage
-        ? hexToSvgSafeColor(getVar(color))
-        : getVar(color)
-      : 'currentcolor');
+    const svgSafeColor =
+      iconColor ||
+      (color
+        ? isBackgroundImage
+          ? hexToSvgSafeColor(getVar(color))
+          : getVar(color)
+        : 'currentcolor');
 
     return (
       <motion.svg
@@ -66,7 +77,7 @@ const SvgComponent = forwardRef<
         {...rest}
       >
         {title ? <title id={titleId}>{title}</title> : null}
-      {/* @ts-expect-error */}
+        {/* @ts-expect-error */}
         {paths[name]}
       </motion.svg>
     );
