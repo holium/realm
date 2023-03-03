@@ -13,7 +13,7 @@ import {
   ChatDbOps,
   AddRow,
   DelPathsRow,
-  DelPeersRow,
+  // DelPeersRow,
   UpdateRow,
   DelMessagesRow,
 } from './chat.types';

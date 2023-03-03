@@ -4,7 +4,7 @@ import {
   TEXT_TYPES,
 } from '../Bubble/Bubble.types';
 
-const plainRegex = /^[a-zA-Z]+(([\'\,\.\- ][a-zA-Z ])?[a-zA-Z]*)*$/g;
+// const plainRegex = /^[a-zA-Z]+(([\'\,\.\- ][a-zA-Z ])?[a-zA-Z]*)*$/g;
 const boldRegex = /\*\*([^*]+)\*\*/g;
 const italicsRegex = /\*([^*]+)\*/g;
 const strikeRegex = /~~([^*]+)~~/g;
@@ -125,7 +125,7 @@ const parseFragment = (fragment: string): FragmentType[] => {
 };
 
 const addSeperatorReplacer = (
-  match: any,
+  _match: any,
   type: FragmentKeyTypes,
   ...args: any
 ) => {
