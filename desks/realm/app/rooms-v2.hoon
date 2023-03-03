@@ -76,7 +76,7 @@
     ?+  path                  (on-watch:def path)
       ::
       [%lib ~]
-        ?>  (is-host:hol src.bowl)
+        ?>  (is-our:hol src.bowl)
         [%give %fact [/lib ~] rooms-v2-view+!>([%session session.state])]~
       ::
       [%provider-updates @ ~]  ::  subscribe to updates for a specific provider
@@ -343,7 +343,7 @@
         =/  room   (~(got by rooms.provider.state) rid)
         =/  can-delete
           ?|  (is-creator:hol src.bol rid)
-              (is-host:hol src.bol)
+              (is-our:hol src.bol)
           ==
         ?.  can-delete
           ~&  >>>  'cannot delete room - not creator or host'
@@ -440,9 +440,9 @@
         |=  [rid=cord =ship]
         ^-  (quip card _state)
         =/  room                  (~(got by rooms.session.state) rid)
-        ?.  (is-host:hol provider.room)
+        ?.  (is-our:hol provider.room)
           :_  state
-          [%pass / %agent [ship dap.bol] %poke rooms-v2-session-action+!>([%kick rid ship])]~
+          [%pass / %agent [provider.room dap.bol] %poke rooms-v2-session-action+!>([%kick rid ship])]~
         ::
         ?.  =(creator.room src.bol)  `state
         =.  present.room            (~(del in present.room) ship)
@@ -541,12 +541,12 @@
     ++  on-kicked
       |=  [=rid:store =ship]
       ~&  >>  "on-kicked: rid={<rid>} ship={<ship>}"
-      =.  current.session.state  ::  if the left ship is us, update our current
-        ?:  ?&
-              =(our.bol ship)
-              =((some rid) current.session.state)
-            ==
-          ~  current.session.state
+      =?  current.session.state  ::  if the left ship is us, update our current
+          ?&
+            =(our.bol ship)
+            =((some rid) current.session.state)
+          ==
+        ~
       =/  room                  (~(got by rooms.session.state) rid)
       =.  present.room          (~(del in present.room) ship)
       =.  rooms.session.state   (~(put by rooms.session.state) [rid room])
@@ -624,7 +624,7 @@
   ?~  room    %.n
   (~(has in present.u.room) ship)
 ::
-++  is-host
+++  is-our
   |=  [=ship]
   ^-  ?
   =(our.bol ship)
