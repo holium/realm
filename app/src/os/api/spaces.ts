@@ -462,16 +462,6 @@ const handleSpacesReactions = (
         spacesState.addSpace(data['remote-space']);
       }
       break;
-    case 'current':
-      if (spacesState.selected?.path !== data.current.path) {
-        console.log(
-          `%current old=${spacesState.selected?.path} new=${data.current.path}`
-        );
-        spacesState.selectSpace(data.current.path);
-        setTheme(spacesState.getSpaceByPath(data.current.path)?.theme);
-        roomService.setProvider(getHost(data.current.path));
-      }
-      break;
     default:
       // unknown
       break;
