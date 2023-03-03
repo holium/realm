@@ -1,17 +1,20 @@
 import { useEffect, useMemo } from 'react';
+// import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { Bubble, MenuItemProps } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
+import { ChatMessageType } from '../models';
 
 type ChatMessageProps = {
-  message: any;
+  message: ChatMessageType;
   canReact: boolean;
   ourColor: string;
   onLoad: () => void;
 };
 
-export const ChatMessage = ({
+export const ChatMessagePresenter = ({
   message,
   canReact,
   ourColor,
@@ -47,9 +50,10 @@ export const ChatMessage = ({
       id: `${messageRowId}-reply-to`,
       icon: 'Reply',
       label: 'Reply',
-      disabled: true,
+      disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
+        selectedChat.setReplying(message);
       },
     });
     if (isOur) {
@@ -60,6 +64,7 @@ export const ChatMessage = ({
         disabled: false,
         onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
+          selectedChat.setEditing(message);
         },
       });
       menu.push({
@@ -88,6 +93,8 @@ export const ChatMessage = ({
       id={messageRowId}
       isOur={isOur}
       ourColor={ourColor}
+      isEditing={selectedChat?.isEditing(message.id)}
+      isEdited={message.metadata?.edited}
       author={message.sender}
       authorColor={authorColor}
       message={message.contents}
@@ -97,3 +104,5 @@ export const ChatMessage = ({
     />
   );
 };
+
+export const ChatMessage = observer(ChatMessagePresenter);

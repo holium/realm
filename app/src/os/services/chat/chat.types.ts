@@ -39,10 +39,18 @@ export type AddRow = {
   row: PathsRow | MessagesRow | PeersRow;
 };
 
-export type UpdateRow = {
-  table: ChatTables;
+export type UpdateRow =
+  | {
+      table: ChatTables;
+      type: 'update';
+      row: PathsRow | MessagesRow | PeersRow;
+    }
+  | UpdateMessage;
+
+export type UpdateMessage = {
+  table: 'messages';
   type: 'update';
-  row: PathsRow | MessagesRow | PeersRow;
+  message: MessagesRow[];
 };
 
 export type DelPeersRow = {

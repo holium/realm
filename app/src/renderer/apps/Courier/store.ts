@@ -182,7 +182,6 @@ ChatDBActions.onDbChange((_evt, type, data) => {
   }
   if (type === 'message-received') {
     console.log('addMessage', data);
-
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );
@@ -191,5 +190,15 @@ ChatDBActions.onDbChange((_evt, type, data) => {
       return;
     }
     selectedChat.addMessage(data);
+  }
+  if (type === 'message-edited') {
+    const selectedChat = chatStore.inbox.find(
+      (chat) => chat.path === data.path
+    );
+    if (!selectedChat) {
+      console.warn('selected chat not found');
+      return;
+    }
+    selectedChat.replaceMessage(data);
   }
 });

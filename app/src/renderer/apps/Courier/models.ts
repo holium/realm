@@ -31,6 +31,7 @@ export const ChatMessage = types
     contents: types.array(types.frozen()),
     reactions: types.optional(types.array(types.frozen()), []),
     reply_to: types.maybeNull(types.string),
+    metadata: types.optional(types.frozen(), {}),
     createdAt: types.number,
     updatedAt: types.number,
     // ui state
@@ -39,6 +40,11 @@ export const ChatMessage = types
   .actions((self) => ({
     setPending(pending: boolean) {
       self.pending = pending;
+    },
+    updateContents(contents: any, updatedAt: number) {
+      console.log('updateContents', toJS(self.contents), contents);
+      self.contents = contents;
+      self.updatedAt = updatedAt;
     },
     delete: flow(function* () {
       try {
@@ -71,11 +77,16 @@ export const Chat = types
     // ui state
     pending: types.optional(types.boolean, false),
     hidePinned: types.optional(types.boolean, false),
+    editingMsg: types.maybeNull(types.reference(ChatMessage)),
+    replyingMsg: types.maybeNull(types.reference(ChatMessage)),
   })
   .views((self) => ({
     get pinnedChatMessage() {
       if (!self.pinnedMessageId) return null;
       return self.messages.find((m) => m.id === self.pinnedMessageId);
+    },
+    isEditing(msgId: string) {
+      return self.editingMsg?.id === msgId;
     },
     // Check if the pinned message is hidden locally
     isPinLocallyHidden() {
@@ -118,6 +129,17 @@ export const Chat = types
       self.lastSender = message.sender;
       self.lastMessage = message.contents;
     },
+    replaceMessage(message: ChatMessageType) {
+      const msg = self.messages.find((m) => m.id === message.id);
+      if (!msg) {
+        return console.warn(
+          'tried to replace a message that doesnt exist',
+          message.id
+        );
+      }
+      msg.updateContents(message.contents, message.updatedAt);
+      self.messages.replace([...self.messages, msg]);
+    },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
       try {
@@ -153,6 +175,36 @@ export const Chat = types
         return self.pinnedMessageId;
       }
     }),
+    setReplying(message: ChatMessageType) {
+      self.replyingMsg = message;
+    },
+    clearReplying() {
+      self.replyingMsg = null;
+    },
+    setEditing(message: ChatMessageType) {
+      self.editingMsg = message;
+    },
+    saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
+      const oldMessages = self.messages;
+      try {
+        yield ChatDBActions.editMessage(
+          self.path,
+          messageId,
+          contents.map((c) => ({
+            ...c,
+            metadata: { edited: 'true' },
+          }))
+        );
+        // todo intermeidate state?
+        self.editingMsg = null;
+      } catch (error) {
+        self.messages = oldMessages;
+        console.error(error);
+      }
+    }),
+    cancelEditing() {
+      self.editingMsg = null;
+    },
     updateMetadata: flow(function* (metadata: Partial<ChatMetadata>) {
       const oldMetadata = self.metadata;
       const newMetadata = {

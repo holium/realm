@@ -34,7 +34,7 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
-  margin: 0 3px;
+  margin: 0 2px;
 `;
 
 const BlockWrapper = styled(motion.span)`
@@ -44,7 +44,6 @@ const BlockWrapper = styled(motion.span)`
 `;
 
 export const FragmentBlock = styled(motion.span)`
-  /* line-height: 1.4; */
   height: 100%;
   width: 100%;
   blockquote {

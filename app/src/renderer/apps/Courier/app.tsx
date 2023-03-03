@@ -1,4 +1,3 @@
-import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { Inbox } from './views/Inbox';
 import { NewChat } from './views/NewChat';
@@ -16,12 +15,10 @@ export const CourierAppPresenter = () => {
 
   return (
     <ChatProvider value={chatStore}>
-      <LayoutGroup>
-        {chatStore.subroute === 'inbox' && <Inbox />}
-        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
-        {chatStore.subroute === 'new' && <NewChat />}
-      </LayoutGroup>
+      {chatStore.subroute === 'inbox' && <Inbox />}
+      {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
+      {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+      {chatStore.subroute === 'new' && <NewChat />}
     </ChatProvider>
   );
 };

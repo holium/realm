@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Flex,
   Icon,
@@ -38,12 +38,12 @@ export const InboxPresenter = () => {
     },
     [searchString]
   );
-  // const lastChatUpdatedAt = inbox.slice().sort((a, b) => {
-  //   if (!a.updatedAt || !b.updatedAt) return 0;
-  //   return b.updatedAt - a.updatedAt;
-  // })[0]?.updatedAt;
 
-  // console.log('lastChatUpdatedAt', lastChatUpdatedAt);
+  const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
+  const listHeight = useMemo(
+    () => 544 - pinnedChatList.length * 56,
+    [pinnedChatList]
+  );
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
@@ -137,38 +137,41 @@ export const InboxPresenter = () => {
               );
             })}
           </Flex>
-          <WindowedList
-            key={`inbox-${unpinnedChatList.length}`}
-            width={dimensions.width - 26}
-            height={544 - pinnedChatList.length * 56}
-            rowHeight={52}
-            data={unpinnedChatList}
-            filter={searchFilter}
-            rowRenderer={(chat) => {
-              return (
-                <Box
-                  key={`unpinned-${chat.path}`}
-                  height={52}
-                  layoutId={`chat-${chat.path}-container`}
-                >
-                  <ChatRow
-                    path={chat.path}
-                    title={chat.metadata.title}
-                    peers={chat.peers}
-                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
-                    type={chat.type}
-                    timestamp={chat.createdAt || chat.metadata.timestamp}
-                    metadata={chat.metadata}
-                    peersGetBacklog={chat.peersGetBacklog}
-                    onClick={(evt) => {
-                      evt.stopPropagation();
-                      setChat(chat.path);
-                    }}
-                  />
-                </Box>
-              );
-            }}
-          />
+          <Box width={listWidth} height={listHeight}>
+            <WindowedList
+              key={`inbox-${unpinnedChatList.length}`}
+              width={listWidth}
+              height={listHeight}
+              rowHeight={52}
+              data={unpinnedChatList}
+              filter={searchFilter}
+              rowRenderer={(chat) => {
+                return (
+                  <Box
+                    layout="preserve-aspect"
+                    key={`unpinned-${chat.path}`}
+                    height={52}
+                    layoutId={`chat-${chat.path}-container`}
+                  >
+                    <ChatRow
+                      path={chat.path}
+                      title={chat.metadata.title}
+                      peers={chat.peers}
+                      lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                      type={chat.type}
+                      timestamp={chat.createdAt || chat.metadata.timestamp}
+                      metadata={chat.metadata}
+                      peersGetBacklog={chat.peersGetBacklog}
+                      onClick={(evt) => {
+                        evt.stopPropagation();
+                        setChat(chat.path);
+                      }}
+                    />
+                  </Box>
+                );
+              }}
+            />
+          </Box>
         </>
       )}
     </Flex>

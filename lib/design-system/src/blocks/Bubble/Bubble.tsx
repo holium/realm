@@ -24,6 +24,8 @@ export type BubbleProps = {
   id: string;
   author: string;
   authorColor?: string;
+  isEdited?: boolean;
+  isEditing?: boolean;
   sentAt: string;
   isOur?: boolean;
   ourColor?: string;
@@ -43,6 +45,8 @@ export const Bubble = (props: BubbleProps) => {
     sentAt,
     authorColor,
     message,
+    isEdited,
+    isEditing,
     reactions = [],
     onLoaded,
     onReaction,
@@ -56,11 +60,17 @@ export const Bubble = (props: BubbleProps) => {
       key={id}
       display="inline-flex"
       mx="1px"
+      // background={isEditing ? 'var(--rlm-overlay-hover)' : 'transparent'}
       justifyContent={isOur ? 'flex-end' : 'flex-start'}
     >
       <BubbleStyle
         id={id}
         style={isOur ? { background: ourColor } : {}}
+        border={
+          isEditing
+            ? '2px solid var(--rlm-intent-caution-color)'
+            : '2px solid transparent'
+        }
         className={isOur ? 'bubble-our' : ''}
       >
         {!isOur && (
@@ -96,6 +106,8 @@ export const Bubble = (props: BubbleProps) => {
             <Reactions reactions={reactions} onReaction={onReaction} />
           )}
           <Text.Custom pointerEvents="none" alignSelf="flex-end" opacity={0.5}>
+            {isEditing && 'Editing... · '}
+            {isEdited && !isEditing && 'Edited · '}
             {dateDisplay}
           </Text.Custom>
         </BubbleFooter>

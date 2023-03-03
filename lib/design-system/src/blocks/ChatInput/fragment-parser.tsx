@@ -4,6 +4,41 @@ import {
   TEXT_TYPES,
 } from '../Bubble/Bubble.types';
 
+const boldToken = '**';
+const italicsToken = '*';
+const strikeToken = '~~';
+const boldItalicsToken = '***';
+const boldStrikeToken = '**~~';
+const boldItalicsStrikeToken = '***~~';
+const blockquoteToken = '>';
+const inlineCodeToken = '`';
+const codeBlockToken = '```';
+const lineBreakToken = '\n';
+
+export const convertFragmentsToText = (fragments: FragmentType[]): string => {
+  return fragments.map((fragment) => fragmentToText(fragment)).join('');
+};
+
+export const fragmentToText = (fragment: FragmentType): string => {
+  const [type, text] = Object.entries(fragment)[0];
+  if (type === 'plain') return text;
+  if (type === 'bold') return `${boldToken}${text}${boldToken}`;
+  if (type === 'italics') return `${italicsToken}${text}${italicsToken}`;
+  if (type === 'strike') return `${strikeToken}${text}${strikeToken}`;
+  if (type === 'boldItalics')
+    return `${boldItalicsToken}${text}${boldItalicsToken}`;
+  if (type === 'boldStrike')
+    return `${boldStrikeToken}${text}${boldStrikeToken}`;
+  if (type === 'boldItalicsStrike')
+    return `${boldItalicsStrikeToken}${text}${boldItalicsStrikeToken}`;
+  if (type === 'blockquote') return `${blockquoteToken}${text}`;
+  if (type === 'inlineCode')
+    return `${inlineCodeToken}${text}${inlineCodeToken}`;
+  if (type === 'codeBlock') return `${codeBlockToken}${text}${codeBlockToken}`;
+  if (type === 'lineBreak') return lineBreakToken;
+  return text;
+};
+
 // const plainRegex = /^[a-zA-Z]+(([\'\,\.\- ][a-zA-Z ])?[a-zA-Z]*)*$/g;
 const boldRegex = /\*\*([^*]+)\*\*/g;
 const italicsRegex = /\*([^*]+)\*/g;

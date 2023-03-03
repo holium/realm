@@ -18,10 +18,12 @@ import {
   DelMessagesRow,
   DeleteLogRow,
   DelPeersRow,
+  UpdateMessage,
 } from './chat.types';
 
 type ChatUpdateType =
   | 'message-received'
+  | 'message-edited'
   | 'message-deleted'
   | 'path-added'
   | 'path-deleted'
@@ -238,7 +240,7 @@ export class ChatService extends BaseService {
           console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
-          const msg = this.getChatMessage(message.path, message['msg-id']);
+          const msg = this.getChatMessage(message['msg-id']);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
@@ -260,15 +262,12 @@ export class ChatService extends BaseService {
       const update = dbChange as UpdateRow;
       switch (update.table) {
         case 'messages':
-          // console.log('update messages', update.row);
-          // const message = update.row as MessagesRow;
-          // this.insertMessages([message]);
-          // const msg = this.getChatMessage(
-          //   message.path,
-          //   `${message['msg-id'][0]}${message['msg-id'][1]}`
-          // );
-          // console.log('UPDATED MESSAGE', msg);
-          // this.sendChatUpdate('message-updated', msg);
+          const message = update as UpdateMessage;
+          console.log('update messages', message.message);
+          const msgId = message.message[0]['msg-id'];
+          this.insertMessages(message.message);
+          const msg = this.getChatMessage(msgId);
+          this.sendChatUpdate('message-edited', msg);
           break;
         case 'paths':
           console.log('update paths', update.row);
@@ -735,7 +734,7 @@ export class ChatService extends BaseService {
     });
   }
 
-  getChatMessage(path: string, msgId: string) {
+  getChatMessage(msgId: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT
@@ -753,7 +752,7 @@ export class ChatService extends BaseService {
                   created_at,
                   updated_at
             FROM messages
-            WHERE path = ? AND msg_id = ?
+            WHERE msg_id = ?
             ORDER BY msg_id, msg_part_id)
       GROUP BY msg_id
       ORDER BY created_at;
