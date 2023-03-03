@@ -1,4 +1,10 @@
-import { Instance, types, cast, getSnapshot } from 'mobx-state-tree';
+import {
+  Instance,
+  types,
+  cast,
+  getSnapshot,
+  castToSnapshot,
+} from 'mobx-state-tree';
 import { Node, NodeChange, applyNodeChanges } from 'reactflow';
 
 // Bounds are using the realm.config 1-10 scale.
@@ -233,18 +239,28 @@ export const AirliftStore = types
         .data.unpromptDelete();
     },
     onNodesChange: (space: string, changes: NodeChange[]) => {
+      console.log('asdf');
       // const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
+      console.log('space', space);
+      console.log('nodes' /*self.nodes*/);
       const newNodes = getSnapshot(self.nodes.get(space)!);
+      console.log('newNodes' /*newNodes*/);
+      const oldNodes = getSnapshot(self.nodes.get(space)!);
       self.nodes.set(space, cast(applyNodeChanges(changes, newNodes)));
+      const myNewNodes = getSnapshot(self.nodes.get(space)!);
+      console.log(oldNodes === myNewNodes);
+      console.log('applied changes');
     },
     dropAirlift: (space: string, airlift: Node) => {
+      console.log('space', space);
+      console.log('airlift', airlift);
       if (!self.nodes.has(space)) {
-        self.nodes.set(space, types.array(NodeType).create([]));
+        self.nodes.set(space, []);
       }
-      /*self.nodes.set(
+      self.nodes.set(
         space,
         castToSnapshot(self.nodes.get(space)!.concat(airlift))
-      );*/
+      );
     },
   }));
 

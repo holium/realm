@@ -63,7 +63,7 @@ const AirliftManagerPresenter = () => {
 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(
-    (params: any) => setEdges((es) => es.concat(params)),
+    (params: any) => setEdges((es: any) => es.concat(params)),
     []
   );
 
@@ -171,8 +171,8 @@ const AirliftManagerPresenter = () => {
           },
         },
       };
-
-      AirliftActions.dropAirlift(newNode);
+      if (spaces.selected)
+        AirliftActions.dropAirlift(spaces.selected.path, newNode);
     },
     [reactFlowInstance]
   );
@@ -200,7 +200,10 @@ const AirliftManagerPresenter = () => {
             id="airlift-manager"
             nodes={nodes}
             edges={edges}
-            onNodesChange={AirliftActions.onNodesChange}
+            onNodesChange={() => {
+              console.log('trying to do it');
+              AirliftActions.onNodesChange;
+            }}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onInit={setReactFlowInstance}
@@ -212,7 +215,7 @@ const AirliftManagerPresenter = () => {
             onMouseDownCapture={() => {
               dispatchEvent(new MouseEvent('mousedown'));
             }}
-            onNodeDrag={(event, node) => {
+            onNodeDrag={(event: any, node: any) => {
               const mouseEventInit: MouseEventInit = {
                 clientX: event.clientX,
                 clientY: event.clientY,
@@ -235,18 +238,21 @@ const AirliftManagerPresenter = () => {
                   draggedRect.bottom < dropZoneRect.top ||
                   draggedRect.top > dropZoneRect.bottom
                 );
-                if (overlap) {
+                if (overlap && spaces.selected) {
                   AirliftActions.promptDelete(
+                    spaces.selected.path,
                     draggedNode.getAttribute('data-id')!
                   );
                 } else {
-                  AirliftActions.unpromptDelete(
-                    draggedNode.getAttribute('data-id')!
-                  );
+                  if (spaces.selected)
+                    AirliftActions.unpromptDelete(
+                      spaces.selected.path,
+                      draggedNode.getAttribute('data-id')!
+                    );
                 }
               }
             }}
-            onNodeDragStop={(_, node) => {
+            onNodeDragStop={(_: any, node: any) => {
               dispatchEvent(new MouseEvent('mouseup'));
               const dropZone = document.getElementById('trash-bin-icon');
               if (dropZone) {
@@ -261,8 +267,9 @@ const AirliftManagerPresenter = () => {
                   draggedRect.bottom < dropZoneRect.top ||
                   draggedRect.top > dropZoneRect.bottom
                 );
-                if (overlap) {
+                if (overlap && spaces.selected) {
                   AirliftActions.removeAirlift(
+                    spaces.selected.path,
                     draggedNode.getAttribute('data-id')!
                   );
                 }
@@ -270,10 +277,10 @@ const AirliftManagerPresenter = () => {
             }}
             onDragOver={onDragOver}
             onDrop={onDrop}
-            onDragEnter={(event) => {
+            onDragEnter={(event: any) => {
               event.preventDefault();
             }}
-            onDragLeave={(event) => {
+            onDragLeave={(event: any) => {
               event.preventDefault();
             }}
             fitViewOptions={{ minZoom: 1, maxZoom: 1 }}

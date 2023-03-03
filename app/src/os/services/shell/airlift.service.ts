@@ -42,34 +42,56 @@ export class AirliftService extends BaseService {
         position
       );
     },*/
-    dropAirlift: (airlift: any) => {
-      return ipcRenderer.invoke('realm.airlift.drop-airlift', airlift);
+    dropAirlift: (space: string, airlift: any) => {
+      return ipcRenderer.invoke('realm.airlift.drop-airlift', space, airlift);
     },
-    removeAirlift: (airliftId: string) => {
-      return ipcRenderer.invoke('realm.airlift.remove-airlift', airliftId);
+    removeAirlift: (space: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.remove-airlift',
+        space,
+        airliftId
+      );
     },
-    toggleAgentExpand: (airliftId: string) => {
-      return ipcRenderer.invoke('realm.airlift.toggle-agent-expand', airliftId);
+    toggleAgentExpand: (space: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.toggle-agent-expand',
+        space,
+        airliftId
+      );
     },
-    toggleArmExpand: (airliftId: string, arm: string) => {
+    toggleArmExpand: (space: string, airliftId: string, arm: string) => {
       return ipcRenderer.invoke(
         'realm.airlift.toggle-arm-expand',
+        space,
         airliftId,
         arm
       );
     },
-    onNodesChange: (changes: NodeChange[]) => {
-      return ipcRenderer.invoke('realm.airlift.on-nodes-change', changes);
+    onNodesChange: (/*space: string, */ changes: NodeChange[]) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.on-nodes-change',
+        /*space,*/
+        changes
+      );
     },
-    promptDelete: (airliftId: string) => {
-      return ipcRenderer.invoke('realm.airlift.prompt-delete', airliftId);
+    promptDelete: (space: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.prompt-delete',
+        space,
+        airliftId
+      );
     },
-    unpromptDelete: (airliftId: string) => {
-      return ipcRenderer.invoke('realm.airlift.unprompt-delete', airliftId);
+    unpromptDelete: (space: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.unprompt-delete',
+        space,
+        airliftId
+      );
     },
-    setAgentName: (airliftId: string, name: string) => {
+    setAgentName: (space: string, airliftId: string, name: string) => {
       return ipcRenderer.invoke(
         'realm.airlift.set-agent-name',
+        space,
         airliftId,
         name
       );
@@ -144,10 +166,12 @@ export class AirliftService extends BaseService {
 
   async onNodesChange(
     _event: IpcMainInvokeEvent,
-    space: string,
+    /*space: string,*/
     changes: NodeChange[]
   ) {
-    this.state!.onNodesChange(space, changes);
+    console.log('trying to change');
+    console.log(changes);
+    this.state!.onNodesChange('/~zod/our', changes);
   }
 
   async promptDelete(
@@ -172,9 +196,11 @@ export class AirliftService extends BaseService {
     airliftId: string,
     name: string
   ) {
-    this.state!.nodes.get(space)!
-      .find((node) => node.id === airliftId)!
-      .data.setName(name);
+    const spaceNodes = this.state!.nodes.get(space);
+    console.log(this.state!.nodes);
+    if (spaceNodes) {
+      spaceNodes.find((node) => node.id === airliftId)!.data.setName(name);
+    }
   }
 
   /*async onEdgesChange(_event: IpcMainInvokeEvent, changes: EdgeChange[]) {
