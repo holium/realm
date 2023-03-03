@@ -1,7 +1,14 @@
 import { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
-import { FormControl, Tag, Spinner } from 'renderer/components';
-import { Flex, Text, TextInput, Icon, Button } from '@holium/design-system';
+import { FormControl, Tag } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  TextInput,
+  Icon,
+  Button,
+  Spinner,
+} from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';

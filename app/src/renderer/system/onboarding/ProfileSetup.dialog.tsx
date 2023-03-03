@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-import { FormControl, Spinner } from 'renderer/components';
+import { FormControl } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
@@ -18,6 +18,7 @@ import {
   Text,
   TextInput,
   Button,
+  Spinner,
 } from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 

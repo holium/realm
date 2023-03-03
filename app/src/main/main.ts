@@ -202,7 +202,7 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {

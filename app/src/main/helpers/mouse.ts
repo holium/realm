@@ -1,7 +1,10 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 import { MouseState } from 'renderer/system/mouse/AnimatedCursor';
 
-const registerListeners = (mouseWindow: BrowserWindow) => {
+const registerListeners = (
+  mainWindow: BrowserWindow,
+  mouseWindow: BrowserWindow
+) => {
   ipcMain.handle('mouse-over', () => {
     mouseWindow.webContents.send('mouse-over');
   });
@@ -18,6 +21,12 @@ const registerListeners = (mouseWindow: BrowserWindow) => {
       y: screenPosition.y - mouseWindowPosition[1],
     };
     mouseWindow.webContents.send(
+      'mouse-move',
+      webContentsPosition,
+      state,
+      isDragging
+    );
+    mainWindow.webContents.send(
       'mouse-move',
       webContentsPosition,
       state,

@@ -32,6 +32,6 @@
     { "path": "./lib/design-system" },
     { "path": "./lib/multiplayer" },
     { "path": "./lib/room" },
-    { "path": "./lib/room/test-ui-vite" }
+    { "path": "./lib/room/test-ui" }
   ]
 }
