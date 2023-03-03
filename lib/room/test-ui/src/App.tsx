@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import { UI } from './UI';
 import { RoomsManagerProvider, ShipConfig } from '@holium/realm-room';
+import { testProtocolConfig } from '../../src/connection/TestProtocol';
 
 (window as any).global = window;
 (window as any).process = process;
@@ -34,7 +35,7 @@ export const App = () => {
   if (!shipConfig) return <div>Ship config not found.</div>;
 
   return (
-    <RoomsManagerProvider ship={shipConfig}>
+    <RoomsManagerProvider ship={shipConfig} protocolConfig={testProtocolConfig}>
       <UI />
     </RoomsManagerProvider>
   );

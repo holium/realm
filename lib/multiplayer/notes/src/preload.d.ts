@@ -1,4 +1,4 @@
-import { ShipConfig } from '@holium/realm-room';
+import { ShipConfig, ProtocolConfig } from '@holium/realm-room';
 
 (window as any).global = window;
 (window as any).process = process;
@@ -7,6 +7,8 @@ import { ShipConfig } from '@holium/realm-room';
 declare global {
   interface Window {
     shipConfig: ShipConfig;
+    protocolConfig: ProtocolConfig;
+    rid: string;
   }
 }
 

@@ -7,9 +7,12 @@ import { observer } from 'mobx-react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { ShipModelType } from 'os/services/ship/models/ship';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { ProtocolConfig, RoomsManager } from '@holium/realm-room';
 
-const sendShipConfigToWebview = async (
+const sendMultiplayerDataToWebview = async (
   ship: ShipModelType,
+  roomsManager: RoomsManager,
   webview: Electron.WebviewTag
 ) => {
   const code = await AuthActions.getCode();
@@ -19,12 +22,16 @@ const sendShipConfigToWebview = async (
     url: ship?.url ?? '',
     code,
   };
+  const protocolConfig: ProtocolConfig = { rtc: roomsManager.protocol.rtc };
+  const rid = roomsManager.presentRoom?.rid;
 
-  console.log('Sending ship config to webview', shipConfig);
+  console.log('Sending multiplayer data to webview.');
 
   // Set ship config on the webview's window object.
   webview.executeJavaScript(`
     window.shipConfig = ${JSON.stringify(shipConfig)};
+    window.protocolConfig = ${JSON.stringify(protocolConfig)};
+    window.rid = ${JSON.stringify(rid)};
   `);
 };
 
@@ -34,6 +41,7 @@ type Props = {
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
+  const roomsManager = useRooms();
   const { theme, ship } = useServices();
 
   const loading = useToggle(false);
@@ -87,7 +95,9 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      if (ship) sendShipConfigToWebview(ship, webview);
+      if (ship && roomsManager) {
+        sendMultiplayerDataToWebview(ship, roomsManager, webview);
+      }
     };
 
     webview.addEventListener('dom-ready', onDomReady);

@@ -6,14 +6,9 @@ import {
   useContext,
 } from 'react';
 import Urbit from '@urbit/http-api';
-import {
-  APIHandlers,
-  RealmProtocol,
-  RoomManagerEvent,
-  RoomsManager,
-} from '../src/index';
+import { APIHandlers, RealmProtocol, RoomsManager } from '../src/index';
 import { ShipConfig } from './types';
-import { protocolConfig } from './connection/TestProtocol';
+import { ProtocolConfig } from './connection/BaseProtocol';
 
 type RealmMultiplayerContextState = {
   ship: ShipConfig;
@@ -26,10 +21,17 @@ const RealmMultiplayerContext = createContext<RealmMultiplayerContextState>(
 
 type Props = {
   ship: ShipConfig;
+  protocolConfig: ProtocolConfig;
+  rid?: string;
   children: ReactNode;
 };
 
-export const RoomsManagerProvider = ({ ship, children }: Props) => {
+export const RoomsManagerProvider = ({
+  ship,
+  protocolConfig,
+  rid,
+  children,
+}: Props) => {
   const [roomsManager, setRoomsManager] = useState<RoomsManager | null>(null);
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
         protocolConfig,
         handlers
       );
+
       const newroomsManager = new RoomsManager(protocol);
       setRoomsManager(newroomsManager);
 
@@ -57,13 +60,6 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
           (newroomsManager.protocol as RealmProtocol).onSignal(data, mark);
         },
       });
-
-      newroomsManager.on(
-        RoomManagerEvent.OnDataChannel,
-        (_rid: string, _peer: string, data: any) => {
-          console.log('peer data', data);
-        }
-      );
     });
 
     return () => {

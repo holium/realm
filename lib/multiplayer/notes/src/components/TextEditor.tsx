@@ -9,9 +9,10 @@ const TextEditorPresenter = () => {
 
   const { ship, roomsManager } = useRoomsManager();
 
-  if (!roomsManager) return <Loader />;
+  if (!roomsManager) return <Loader text="Loading %rooms-v2" />;
 
-  // const rooms = roomsManager.rooms;
+  const rooms = roomsManager.rooms;
+  const presentRoom = roomsManager.presentRoom;
   const peers = Array.from(roomsManager.protocol.peers.keys())
     .map((patp) => roomsManager.protocol.peers.get(patp))
     .filter(Boolean) as RemotePeer[];
@@ -55,6 +56,8 @@ const TextEditorPresenter = () => {
         <Text.H1>
           In this room: {ship.ship}, {peers.length} peers
         </Text.H1>
+        <Text.H2>Rooms: {rooms.length}</Text.H2>
+        <Text.H2>Present room: {presentRoom?.path}</Text.H2>
         <TextArea
           value={content}
           onChange={(e) => setContent(e.target.value)}
