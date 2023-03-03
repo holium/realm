@@ -8,10 +8,7 @@ import { useServices } from 'renderer/logic/store';
 import { TrayManager } from './TrayManager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
-import {
-  normalizePosition,
-  denormalizePosition,
-} from '../../../os/services/shell/lib/window-manager';
+import { normalizePosition } from '../../../os/services/shell/lib/window-manager';
 import {
   CursorDownPayload,
   CursorEvent,
@@ -23,14 +20,14 @@ import {
 
 const DesktopPresenter = () => {
   const { ship, desktop, shell } = useServices();
-  const roomsManager = useRooms(ship?.patp); // creates first instance of roomsManager
+  const roomsManager = useRooms(ship?.patp);
 
   useEffect(() => {
     if (!ship) return;
 
     window.electron.app.onMouseOut(() => {
       const cursorOutPayload: CursorOutPayload = {
-        id: ship.patp,
+        patp: ship.patp,
         event: CursorEvent.Out,
       };
       roomsManager.sendData({
@@ -39,9 +36,10 @@ const DesktopPresenter = () => {
       });
     });
 
-    window.electron.app.onMouseDown((position) => {
+    window.electron.app.onMouseDown((position, elementId) => {
       const cursorDownPayload: CursorDownPayload = {
-        id: ship.patp,
+        patp: ship.patp,
+        elementId,
         event: CursorEvent.Down,
         position: normalizePosition(position, shell.desktopDimensions),
       };
@@ -55,7 +53,7 @@ const DesktopPresenter = () => {
 
     window.electron.app.onMouseUp(() => {
       const cursorUpPayload: CursorUpPayload = {
-        id: ship.patp,
+        patp: ship.patp,
         event: CursorEvent.Up,
       };
       roomsManager.sendData({
@@ -66,7 +64,7 @@ const DesktopPresenter = () => {
 
     window.electron.app.onMouseMove((position, state) => {
       const cursorMovePayload: CursorMovePayload = {
-        id: ship.patp,
+        patp: ship.patp,
         event: CursorEvent.Move,
         position: normalizePosition(position, shell.desktopDimensions),
         state,
@@ -78,9 +76,22 @@ const DesktopPresenter = () => {
       });
     });
 
+    window.electron.app.onMultiplayerClickFromApp((patp, elementId) => {
+      const cursorDownPayload: CursorDownPayload = {
+        patp,
+        elementId,
+        event: CursorEvent.Down,
+        position: { x: 0, y: 0 },
+      };
+      roomsManager.sendData({
+        kind: DataPacket_Kind.DATA,
+        value: { cursor: cursorDownPayload },
+      });
+    });
+
     roomsManager.on(RoomManagerEvent.LeftRoom, (_, patp) => {
       const cursorOutPayload: CursorOutPayload = {
-        id: patp,
+        patp,
         event: CursorEvent.Out,
       };
       roomsManager.sendData({
@@ -99,63 +110,64 @@ const DesktopPresenter = () => {
         const { event } = cursorPayload;
 
         if (event === CursorEvent.Move) {
-          const { id, position, state, hexColor } =
+          const { patp, position, state, hexColor } =
             cursorPayload as CursorMovePayload;
           window.electron.app.multiplayerMouseMove(
-            id,
+            patp,
             position,
             state,
             hexColor
           );
         } else if (event === CursorEvent.Out) {
-          const { id } = cursorPayload as CursorOutPayload;
-          window.electron.app.multiplayerMouseOut(id);
+          const { patp } = cursorPayload as CursorOutPayload;
+          window.electron.app.multiplayerMouseOut(patp);
         } else if (event === CursorEvent.Down) {
-          const { id, position } = cursorPayload as CursorDownPayload;
-          window.electron.app.multiplayerMouseDown(id);
-
-          const absolutePosition = denormalizePosition(
-            position,
-            shell.desktopDimensions
-          );
-          const element = document.elementFromPoint(
-            absolutePosition.x,
-            absolutePosition.y
-          );
-          const isMultiplayerWindow = element?.closest('.multiplayer-window');
-
-          if (element && isMultiplayerWindow) {
-            const isWebView = element.tagName === 'WEBVIEW';
-
-            if (isWebView) {
-              /* This is unreliable, let's not do it for now. */
-              // const webview = element as Electron.WebviewTag;
-              // const relativePosition = {
-              //   x: absolutePosition.x - webview.offsetLeft,
-              //   y: absolutePosition.y - webview.offsetTop,
-              // };
-              // try {
-              //   await webview?.executeJavaScript(`
-              //     const el = document.elementFromPoint(${relativePosition.x}, ${relativePosition.y});
-              //     el?.dispatchEvent(new MouseEvent('click', {
-              //       bubbles: true,
-              //       cancelable: true,
-              //     }));
-              //   `);
-              // } catch (error) {
-              //   console.error('error', error);
-              // }
-            } else {
-              const clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-              });
-              element.dispatchEvent(clickEvent);
-            }
-          }
+          const { patp, elementId } = cursorPayload as CursorDownPayload;
+          window.electron.app.multiplayerMouseDown(patp, elementId);
+          /**
+           * We should not use dispatch if we can use @holium/realm-multiplayer (more reliable).
+           * Althought we might need to dispatch for the browser where we can't use realm-multiplayer.
+           */
+          // const absolutePosition = denormalizePosition(
+          //   position,
+          //   shell.desktopDimensions
+          // );
+          // const element = document.elementFromPoint(
+          //   absolutePosition.x,
+          //   absolutePosition.y
+          // );
+          // const isMultiplayerWindow = element?.closest('.multiplayer-window');
+          // if (element && isMultiplayerWindow) {
+          //   const isWebView = element.tagName === 'WEBVIEW';
+          //   if (isWebView) {
+          //     /* This is unreliable, let's not do it for now. */
+          //     // const webview = element as Electron.WebviewTag;
+          //     // const relativePosition = {
+          //     //   x: absolutePosition.x - webview.offsetLeft,
+          //     //   y: absolutePosition.y - webview.offsetTop,
+          //     // };
+          //     // try {
+          //     //   await webview?.executeJavaScript(`
+          //     //     const el = document.elementFromPoint(${relativePosition.x}, ${relativePosition.y});
+          //     //     el?.dispatchEvent(new MouseEvent('click', {
+          //     //       bubbles: true,
+          //     //       cancelable: true,
+          //     //     }));
+          //     //   `);
+          //     // } catch (error) {
+          //     //   console.error('error', error);
+          //     // }
+          //   } else {
+          //     const clickEvent = new MouseEvent('click', {
+          //       bubbles: true,
+          //       cancelable: true,
+          //     });
+          //     element.dispatchEvent(clickEvent);
+          //   }
+          // }
         } else if (event === CursorEvent.Up) {
-          const { id } = cursorPayload as CursorUpPayload;
-          window.electron.app.multiplayerMouseUp(id);
+          const { patp } = cursorPayload as CursorUpPayload;
+          window.electron.app.multiplayerMouseUp(patp);
         }
       }
     );

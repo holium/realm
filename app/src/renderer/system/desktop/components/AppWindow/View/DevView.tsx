@@ -5,33 +5,39 @@ import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { ShipModelType } from 'os/services/ship/models/ship';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { ProtocolConfig, RoomsManager } from '@holium/realm-room';
+import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
+import {
+  CursorDownPayload,
+  CursorEvent,
+  CursorPayload,
+} from '@holium/realm-multiplayer';
 
-const sendMultiplayerDataToWebview = async (
-  ship: ShipModelType,
+const setUpMultiplayerStreaming = async (
+  ship: string,
   roomsManager: RoomsManager,
   webview: Electron.WebviewTag
 ) => {
-  const code = await AuthActions.getCode();
+  console.log('Streaming multiplayer data to webview.');
 
-  const shipConfig = {
-    ship: ship?.patp.replace('~', '') ?? '',
-    url: ship?.url ?? '',
-    code,
-  };
-  const protocolConfig: ProtocolConfig = { rtc: roomsManager.protocol.rtc };
-  const rid = roomsManager.presentRoom?.rid;
+  roomsManager.on(
+    RoomManagerEvent.OnDataChannel,
+    async (_rid: string, _peer: string, data) => {
+      const cursorPayload = data.value.cursor as CursorPayload | undefined;
 
-  console.log('Sending multiplayer data to webview.');
+      if (!cursorPayload) return;
 
-  // Set ship config on the webview's window object.
+      const { event } = cursorPayload;
+
+      if (event === CursorEvent.Down) {
+        const { patp, elementId } = cursorPayload as CursorDownPayload;
+        webview.send('multiplayer-mouse-down', patp, elementId);
+      }
+    }
+  );
+
   webview.executeJavaScript(`
-    window.shipConfig = ${JSON.stringify(shipConfig)};
-    window.protocolConfig = ${JSON.stringify(protocolConfig)};
-    window.rid = ${JSON.stringify(rid)};
+    window.ship = '${ship}';
   `);
 };
 
@@ -91,13 +97,11 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview) return;
+    if (!webview || !ship || !roomsManager) return;
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      if (ship && roomsManager) {
-        sendMultiplayerDataToWebview(ship, roomsManager, webview);
-      }
+      setUpMultiplayerStreaming(ship.patp, roomsManager, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);
@@ -105,7 +109,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId, ship]);
+  }, [appWindow.appId, ship, roomsManager]);
 
   useEffect(() => {
     if (!readyWebview) return;

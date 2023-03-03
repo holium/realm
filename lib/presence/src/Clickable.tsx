@@ -1,12 +1,11 @@
-import { isValidElement, MouseEvent, ReactNode } from 'react';
+import { MouseEvent, ReactNode, useEffect } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
 type Props = {
   id: string;
   children: ReactNode;
-  asChild?: boolean;
-  onOtherClick?: (patp: string) => void;
-  onClick?: (event: MouseEvent) => void;
+  onClick: (event: MouseEvent) => void;
+  onOtherClick: (patp: string) => void;
   onOtherOver?: (patp: string) => void;
   onMouseOver?: (event: MouseEvent) => void;
   onOtherUp?: (patp: string) => void;
@@ -17,22 +16,22 @@ type Props = {
   onMouseOut?: (event: MouseEvent) => void;
 };
 
-export const Clickable = ({
-  id,
-  children,
-  asChild,
-}: // onOtherClick,
-// onClick,
-// onOtherOver,
-// onMouseOver,
-// onOtherUp,
-// onMouseUp,
-// onOtherDown,
-// onMouseDown,
-// onOtherOut,
-// onMouseOut,
-Props) => {
-  const Component = asChild && isValidElement(children) ? Slot : 'button';
+export const Clickable = ({ id, children, onClick, onOtherClick }: Props) => {
+  useEffect(() => {
+    window.electron.app.onMultiplayerMouseDown((patp, elementId) => {
+      console.log('multiplayer mouse down', patp, elementId);
+      if (elementId === id) onOtherClick(patp);
+    });
+  }, []);
 
-  return <Component data-multi-click-id={id} />;
+  const handleOnClick = (event: MouseEvent) => {
+    window.electron.app.multiplayerClickFromApp(window.ship, id);
+    onClick(event);
+  };
+
+  return (
+    <Slot data-multi-click-id={id} onClick={handleOnClick}>
+      {children}
+    </Slot>
+  );
 };

@@ -3,8 +3,8 @@ type Position = { x: number; y: number };
 export type MouseState = 'text' | 'resize' | 'pointer';
 
 interface BaseRealmPayload {
+  patp: string;
   event: string;
-  id: string; // ID of the current app session
 }
 
 export enum CursorEvent {
@@ -29,6 +29,7 @@ export interface CursorMovePayload extends BaseCursorPayload {
 export interface CursorDownPayload extends BaseCursorPayload {
   event: CursorEvent.Down;
   position: Position;
+  elementId: string;
 }
 
 export interface CursorUpPayload extends BaseCursorPayload {

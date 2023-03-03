@@ -69,8 +69,10 @@ const appPreload = {
       }
     );
   },
-  onMouseDown(callback: (position: Position) => void) {
-    ipcRenderer.on('mouse-down', (_, position: Position) => callback(position));
+  onMouseDown(callback: (position: Position, elementId: string) => void) {
+    ipcRenderer.on('mouse-down', (_, position: Position, elementId: string) =>
+      callback(position, elementId)
+    );
   },
   onMouseUp(callback: () => void) {
     ipcRenderer.on('mouse-up', callback);
@@ -97,11 +99,14 @@ const appPreload = {
       hexColor
     );
   },
-  multiplayerMouseDown(patp: string) {
-    ipcRenderer.invoke('multiplayer-mouse-down', patp);
+  multiplayerMouseDown(patp: string, elementId: string) {
+    ipcRenderer.invoke('multiplayer-mouse-down', patp, elementId);
   },
   multiplayerMouseUp(patp: string) {
     ipcRenderer.invoke('multiplayer-mouse-up', patp);
+  },
+  multiplayerClickFromApp(patp: string, elementId: string) {
+    ipcRenderer.invoke('multiplayer-click-from-app', patp, elementId);
   },
   onMultiplayerMouseMove(
     callback: (
@@ -129,15 +134,25 @@ const appPreload = {
       callback(patp);
     });
   },
-  onMultiplayerMouseDown(callback: (patp: string) => void) {
-    ipcRenderer.on('multiplayer-mouse-down', (_, patp: string) => {
-      callback(patp);
+  onMultiplayerMouseDown(callback: (patp: string, elementId: string) => void) {
+    ipcRenderer.on('multiplayer-mouse-down', (_, patp: string, elementId) => {
+      callback(patp, elementId);
     });
   },
   onMultiplayerMouseUp(callback: (patp: string) => void) {
     ipcRenderer.on('multiplayer-mouse-up', (_, patp: string) => {
       callback(patp);
     });
+  },
+  onMultiplayerClickFromApp(
+    callback: (patp: string, elementId: string) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer-click-from-app',
+      (_, patp: string, elementId) => {
+        callback(patp, elementId);
+      }
+    );
   },
 };
 

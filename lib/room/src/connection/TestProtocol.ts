@@ -8,12 +8,6 @@ import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket } from '../helpers/data';
 
-export const testProtocolConfig: ProtocolConfig = {
-  rtc: {
-    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-    iceTransportPolicy: 'relay',
-  },
-};
 /**
  * TODO update this to use the new protocol interface
  */

@@ -6,9 +6,20 @@ import {
   useContext,
 } from 'react';
 import Urbit from '@urbit/http-api';
-import { APIHandlers, RealmProtocol, RoomsManager } from '../src/index';
-import { ShipConfig } from './types';
-import { ProtocolConfig } from './connection/BaseProtocol';
+import {
+  APIHandlers,
+  ProtocolConfig,
+  RealmProtocol,
+  RoomsManager,
+  ShipConfig,
+} from '@holium/realm-room';
+
+const testProtocolConfig: ProtocolConfig = {
+  rtc: {
+    iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+    iceTransportPolicy: 'relay',
+  },
+};
 
 type RealmMultiplayerContextState = {
   ship: ShipConfig;
@@ -21,17 +32,10 @@ const RealmMultiplayerContext = createContext<RealmMultiplayerContextState>(
 
 type Props = {
   ship: ShipConfig;
-  protocolConfig: ProtocolConfig;
-  rid?: string;
   children: ReactNode;
 };
 
-export const RoomsManagerProvider = ({
-  ship,
-  protocolConfig,
-  rid,
-  children,
-}: Props) => {
+export const RoomsManagerProvider = ({ ship, children }: Props) => {
   const [roomsManager, setRoomsManager] = useState<RoomsManager | null>(null);
 
   useEffect(() => {
@@ -46,7 +50,7 @@ export const RoomsManagerProvider = ({
       };
       const protocol = new RealmProtocol(
         `~${ship.ship}`,
-        protocolConfig,
+        testProtocolConfig,
         handlers
       );
 

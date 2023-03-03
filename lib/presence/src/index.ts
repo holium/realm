@@ -7,3 +7,4 @@ export type {
   MouseState,
 } from './types';
 export { CursorEvent } from './types';
+export { Clickable } from './Clickable';

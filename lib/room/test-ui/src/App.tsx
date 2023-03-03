@@ -2,8 +2,8 @@ import * as process from 'process';
 import { useEffect, useState } from 'react';
 import './App.css';
 import { UI } from './UI';
-import { RoomsManagerProvider, ShipConfig } from '@holium/realm-room';
-import { testProtocolConfig } from '../../src/connection/TestProtocol';
+import { ShipConfig } from '@holium/realm-room';
+import { RoomsManagerProvider } from './components/RoomsManagerProvider';
 
 (window as any).global = window;
 (window as any).process = process;
@@ -35,7 +35,7 @@ export const App = () => {
   if (!shipConfig) return <div>Ship config not found.</div>;
 
   return (
-    <RoomsManagerProvider ship={shipConfig} protocolConfig={testProtocolConfig}>
+    <RoomsManagerProvider ship={shipConfig}>
       <UI />
     </RoomsManagerProvider>
   );

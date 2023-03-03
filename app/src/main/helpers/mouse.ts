@@ -88,13 +88,27 @@ const registerListeners = (
     }
   );
 
-  ipcMain.handle('multiplayer-mouse-down', (_, patp: string) => {
-    mouseWindow.webContents.send('multiplayer-mouse-down', patp);
-  });
+  ipcMain.handle(
+    'multiplayer-mouse-down',
+    (_, patp: string, elementId: string) => {
+      mouseWindow.webContents.send('multiplayer-mouse-down', patp, elementId);
+    }
+  );
 
   ipcMain.handle('multiplayer-mouse-up', (_, patp: string) => {
     mouseWindow.webContents.send('multiplayer-mouse-up', patp);
   });
+
+  ipcMain.handle(
+    'multiplayer-click-from-app',
+    (_, patp: string, elementId: string) => {
+      mainWindow.webContents.send(
+        'multiplayer-click-from-app',
+        patp,
+        elementId
+      );
+    }
+  );
 };
 
 export const MouseHelper = { registerListeners };
