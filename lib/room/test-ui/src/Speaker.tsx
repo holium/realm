@@ -1,5 +1,5 @@
-import { useRoomsManager } from '@holium/realm-room';
-import { RemotePeer } from '../../src';
+import { observer } from 'mobx-react';
+import { RemotePeer, useRoomsManager } from '@holium/realm-room';
 
 type ISpeaker = {
   our: boolean;
@@ -9,14 +9,16 @@ type ISpeaker = {
   type: 'host' | 'speaker' | 'listener';
 };
 
-export const Speaker = ({ our, patp }: ISpeaker) => {
+const SpeakerPresenter = ({ our, patp }: ISpeaker) => {
   const { roomsManager } = useRoomsManager();
 
   if (!roomsManager) return null;
 
   return (
     <div className="speaker-container">
-      <p style={{ margin: 0 }}>{patp}</p>
+      <p style={{ margin: 0 }}>
+        <b>{patp}</b>
+      </p>
       <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
         {our}
       </p>
@@ -42,3 +44,5 @@ export const Speaker = ({ our, patp }: ISpeaker) => {
     </div>
   );
 };
+
+export const Speaker = observer(SpeakerPresenter);
