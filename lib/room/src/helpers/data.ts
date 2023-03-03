@@ -12,7 +12,7 @@ export enum DataPacket_Kind {
 
 export interface DataPayload {
   app?: string;
-  data: any;
+  data?: any;
 }
 
 export interface TrackMetaPayload {
@@ -28,8 +28,8 @@ export interface TrackMetaPayload {
 export interface DataPacket {
   from: Patp;
   kind: DataPacket_Kind;
-  value:
-    | { cursor: CursorPayload }
-    | DataPayload
-    | { trackMeta: TrackMetaPayload };
+  value: {
+    cursor?: CursorPayload;
+    trackMeta?: TrackMetaPayload;
+  } & DataPayload;
 }

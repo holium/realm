@@ -54,7 +54,7 @@ const UIPresenter = () => {
                   if (isPresent) {
                     roomsManager.leaveRoom();
                   } else {
-                    roomsManager.enterRoom(room.rid);
+                    roomsManager.joinRoom(room.rid);
                   }
                 }}
               >

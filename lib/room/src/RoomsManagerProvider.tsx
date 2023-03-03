@@ -8,12 +8,12 @@ import {
 import Urbit from '@urbit/http-api';
 import {
   APIHandlers,
-  ProtocolConfig,
   RealmProtocol,
   RoomManagerEvent,
   RoomsManager,
 } from '../src/index';
 import { ShipConfig } from './types';
+import { protocolConfig } from './connection/TestProtocol';
 
 type RealmMultiplayerContextState = {
   ship: ShipConfig;
@@ -42,12 +42,6 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
         poke: newApi.poke.bind(newApi),
         scry: newApi.scry.bind(newApi),
       };
-      const protocolConfig: ProtocolConfig = {
-        rtc: {
-          iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
-        },
-      };
-
       const protocol = new RealmProtocol(
         `~${ship.ship}`,
         protocolConfig,
@@ -55,6 +49,7 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
       );
       const newroomsManager = new RoomsManager(protocol);
       setRoomsManager(newroomsManager);
+
       newApi.subscribe({
         app: 'rooms-v2',
         path: '/lib',
@@ -62,6 +57,7 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
           (newroomsManager.protocol as RealmProtocol).onSignal(data, mark);
         },
       });
+
       newroomsManager.on(
         RoomManagerEvent.OnDataChannel,
         (_rid: string, _peer: string, data: any) => {

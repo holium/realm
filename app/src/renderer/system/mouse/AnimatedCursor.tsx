@@ -1,52 +1,28 @@
-import { useRef, useCallback, useEffect, Fragment } from 'react';
+import { useRef, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
 import { IsDevice } from './isDevice';
+import { Position } from '../../../os/types';
+import { MouseState } from '@holium/realm-multiplayer';
 
-export type MouseState = 'text' | 'resize' | 'pointer';
-
-export type Vec2 = {
-  x: number;
-  y: number;
+type AnimatedCursorProps = {
+  color: string;
+  state: MouseState;
+  position: Position;
+  isActive: boolean;
+  isVisible: boolean;
 };
 
-interface AnimatedCursorProps {
-  color: string | null;
-  outerAlpha?: number;
-  innerSize?: number;
-  outerSize?: number;
-  outerScale?: number;
-  innerScale?: number;
-  trailingSpeed?: number;
-  coords: Vec2;
-  state: MouseState;
-  isActive: boolean;
-  isActiveClickable?: boolean;
-  isVisible: boolean;
-  initialRender?: boolean;
-}
+const innerSize = 10;
+const outerSize = 12;
+const outerScale = 2;
+const innerScale = 0.9;
 
-/**
- * @param {string} color - rgb color value
- * @param {number} outerAlpha - level of alpha transparency for color
- * @param {number} innerSize - inner cursor size in px
- * @param {number} innerScale - inner cursor scale amount
- * @param {number} outerSize - outer cursor size in px
- * @param {number} outerScale - outer cursor scale amount
- * @param {array}  clickables - array of clickable selectors
- */
-const CursorCore = ({
+const AnimatedCursorView = ({
   color,
-  outerAlpha = 0.2,
-  innerSize = 10,
-  outerSize = 12,
-  outerScale = 2,
-  innerScale = 0.9,
-  trailingSpeed = 1,
-  coords,
   state,
+  position,
   isActive,
-  isActiveClickable,
-  isVisible = true,
+  isVisible,
 }: AnimatedCursorProps) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
   const cursorInnerRef = useRef<HTMLDivElement>(null);
@@ -55,15 +31,14 @@ const CursorCore = ({
   const endX = useRef(0);
   const endY = useRef(0);
 
-  // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(
     (time: number) => {
       if (!cursorOuterRef.current) return;
       if (previousTimeRef.current !== undefined) {
-        coords.x += (endX.current - coords.x) / trailingSpeed;
-        coords.y += (endY.current - coords.y) / trailingSpeed;
-        cursorOuterRef.current.style.top = `${coords.y}px`;
-        cursorOuterRef.current.style.left = `${coords.x}px`;
+        position.x += endX.current - position.x;
+        position.y += endY.current - position.y;
+        cursorOuterRef.current.style.top = `${position.y}px`;
+        cursorOuterRef.current.style.left = `${position.x}px`;
       }
       previousTimeRef.current = time;
       requestRef.current = requestAnimationFrame(animateOuterCursor);
@@ -98,8 +73,8 @@ const CursorCore = ({
   // Update cursor coordinates
   useEffect(() => {
     if (!cursorInnerRef.current || !cursorOuterRef.current) return;
-    cursorInnerRef.current.style.top = `${coords.y}px`;
-    cursorInnerRef.current.style.left = `${coords.x}px`;
+    cursorInnerRef.current.style.top = `${position.y}px`;
+    cursorInnerRef.current.style.left = `${position.x}px`;
     if (cursorInnerRef.current.style.transform === 'none') {
       // if for some reason the transform isnt set yet.
       cursorInnerRef.current.style.transform =
@@ -107,9 +82,9 @@ const CursorCore = ({
       cursorOuterRef.current.style.transform =
         'translate(-50%, -50%) scale(1.0)';
     }
-    endX.current = coords.x;
-    endY.current = coords.y;
-  }, [coords]);
+    endX.current = position.x;
+    endY.current = position.y;
+  }, [position]);
 
   // Cursors Hover/Active State
   useEffect(() => {
@@ -125,68 +100,61 @@ const CursorCore = ({
     }
   }, [innerScale, outerScale, isActive]);
 
-  // Cursors Click States
-  useEffect(() => {
-    if (!cursorInnerRef.current || !cursorOuterRef.current) return;
-    if (isActiveClickable) {
-      cursorInnerRef.current.style.transform = `translate(-50%, -50%) scale(${
-        innerScale * 1.2
-      })`;
-      cursorOuterRef.current.style.transform = `translate(-50%, -50%) scale(${
-        outerScale * 1.2
-      })`;
-    }
-  }, [innerScale, outerScale, isActiveClickable]);
-
   // Cursor Styles
-  const styles: Record<string, MotionStyle> = {
-    cursorInner: {
-      zIndex: 100000,
-      display: 'block',
-      position: 'absolute',
-      width: innerSize,
-      height: innerSize,
-      pointerEvents: 'none',
-      border: '1px solid white',
-      boxSizing: 'content-box',
-      backgroundColor: `rgba(${color}, 1)`,
-      transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
-    },
-    cursorOuter: {
-      boxSizing: 'content-box',
-      zIndex: 100000,
-      display: 'block',
-      position: 'absolute',
-      borderRadius: '50%',
-      pointerEvents: 'none',
-      width: outerSize,
-      height: outerSize,
-      backgroundColor: `rgba(${color}, ${outerAlpha})`,
-      transition: 'transform 0.15s ease-in-out',
-      willChange: 'transform',
-    },
-  };
+  const styles: Record<string, MotionStyle> = useMemo(
+    () => ({
+      cursorInner: {
+        zIndex: 100000,
+        display: 'block',
+        position: 'absolute',
+        width: innerSize,
+        height: innerSize,
+        pointerEvents: 'none',
+        border: '1px solid white',
+        boxSizing: 'content-box',
+        backgroundColor: `rgba(${color}, 1)`,
+        transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
+      },
+      cursorOuter: {
+        boxSizing: 'content-box',
+        zIndex: 100000,
+        display: 'block',
+        position: 'absolute',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+        width: outerSize,
+        height: outerSize,
+        backgroundColor: `rgba(${color}, 0.2)`,
+        transition: 'transform 0.15s ease-in-out',
+        willChange: 'transform',
+      },
+    }),
+    [color, innerSize, outerSize]
+  );
 
-  const cursorVariants: Record<MouseState, Variant> = {
-    text: {
-      width: 2.5,
-      height: 18,
-      borderRadius: '2%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-    pointer: {
-      width: innerSize,
-      height: innerSize,
-      borderRadius: '50%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-    resize: {
-      width: innerSize,
-      height: innerSize,
-      borderRadius: '2%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-  };
+  const cursorVariants: Record<MouseState, Variant> = useMemo(
+    () => ({
+      text: {
+        width: 2.5,
+        height: 18,
+        borderRadius: '2%',
+        visibility: isVisible ? 'visible' : 'hidden',
+      },
+      pointer: {
+        width: innerSize,
+        height: innerSize,
+        borderRadius: '50%',
+        visibility: isVisible ? 'visible' : 'hidden',
+      },
+      resize: {
+        width: innerSize,
+        height: innerSize,
+        borderRadius: '2%',
+        visibility: isVisible ? 'visible' : 'hidden',
+      },
+    }),
+    [innerSize, isVisible]
+  );
 
   return (
     <Fragment>
@@ -211,21 +179,16 @@ const CursorCore = ({
           borderRadius: 0.15,
           visibility: 0.1,
         }}
-        style={{
-          ...styles.cursorInner,
-        }}
+        style={styles.cursorInner}
       />
     </Fragment>
   );
 };
 
-/**
- * Calls and passes props to CursorCore if not a touch/mobile device.
- */
 export const AnimatedCursor = ({ ...props }: AnimatedCursorProps) => {
-  if (typeof navigator !== 'undefined' && IsDevice?.any()) {
-    return <Fragment></Fragment>;
-  }
+  const isTouchDevice = typeof navigator !== 'undefined' && IsDevice?.any();
 
-  return <CursorCore {...props} />;
+  if (isTouchDevice) return null;
+
+  return <AnimatedCursorView {...props} />;
 };

@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import { AnimatedCursor, MouseState } from './AnimatedCursor';
+import { MouseState } from '@holium/realm-multiplayer';
+import { AnimatedCursor } from './AnimatedCursor';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { getMouseState } from './getMouseState';
 
-const useMouseListeners = (containerId: string) => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [state, setState] = useState<MouseState>('pointer');
-  const visible = useToggle(false);
+const useMouseState = (containerId: string) => {
   const active = useToggle(false);
+  const visible = useToggle(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [state, setState] = useState<MouseState>('pointer');
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setCoords({ x: e.clientX, y: e.clientY });
+      setPosition({ x: e.clientX, y: e.clientY });
 
       setState(getMouseState(e));
     };
@@ -30,10 +31,12 @@ const useMouseListeners = (containerId: string) => {
       container.removeEventListener('mouseenter', visible.toggleOn);
       container.removeEventListener('mouseleave', visible.toggleOff);
       container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mousedown', active.toggleOn);
+      container.removeEventListener('mouseup', active.toggleOff);
     };
   }, []);
 
-  return { state, coords, isVisible: visible.isOn, isActive: active.isOn };
+  return { state, position, isVisible: visible.isOn, isActive: active.isOn };
 };
 
 type Props = {
@@ -46,15 +49,15 @@ type Props = {
  * Used by AppUpdater and Storybook.
  */
 export const StandAloneMouse = ({ containerId, color = '0, 0, 0' }: Props) => {
-  const { state, coords, isActive, isVisible } = useMouseListeners(containerId);
+  const { state, position, isActive, isVisible } = useMouseState(containerId);
 
   return (
     <AnimatedCursor
+      color={color}
       state={state}
-      coords={coords}
+      position={position}
       isActive={isActive}
       isVisible={isVisible}
-      color={color}
     />
   );
 };

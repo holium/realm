@@ -55,6 +55,7 @@ body {
   padding: 8px 8px;
   background: #fff;
   border: 1px solid #00000020;
+  overflow: hidden;
 }
 
 .room-row:hover {

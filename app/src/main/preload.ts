@@ -1,15 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
-import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
+import { MouseState } from '@holium/realm-multiplayer';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
+import { Position } from 'os/types';
 
 const appPreload = {
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
-  },
-  setMouseColor(callback: any) {
-    ipcRenderer.on('mouse-color', callback);
   },
   openApp: (app: any, partition: string) => {
     return ipcRenderer.invoke('open-app', app, partition);
@@ -41,9 +39,6 @@ const appPreload = {
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  onMouseOver(callback: () => void) {
-    ipcRenderer.on('mouse-over', callback);
-  },
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
@@ -57,25 +52,25 @@ const appPreload = {
   onDisableCustomMouse(callback: () => void) {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
-  mouseColorChanged(hex: string) {
+  setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },
   onMouseMove(
     callback: (
-      coordinates: Vec2,
+      position: Position,
       state: MouseState,
       isDragging: boolean
     ) => void
   ) {
     ipcRenderer.on(
       'mouse-move',
-      (_, coordinates: Vec2, state: MouseState, isDragging: boolean) => {
-        callback(coordinates, state, isDragging);
+      (_, position: Position, state: MouseState, isDragging: boolean) => {
+        callback(position, state, isDragging);
       }
     );
   },
-  onMouseDown(callback: () => void) {
-    ipcRenderer.on('mouse-down', callback);
+  onMouseDown(callback: (position: Position) => void) {
+    ipcRenderer.on('mouse-down', (_, position: Position) => callback(position));
   },
   onMouseUp(callback: () => void) {
     ipcRenderer.on('mouse-up', callback);
@@ -83,6 +78,65 @@ const appPreload = {
   onMouseColorChange(callback: (hex: string) => void) {
     ipcRenderer.on('mouse-color', (_, hex: string) => {
       callback(hex);
+    });
+  },
+  multiplayerMouseOut(patp: string) {
+    ipcRenderer.invoke('multiplayer-mouse-out', patp);
+  },
+  multiplayerMouseMove(
+    patp: string,
+    normalizedPosition: Position,
+    state: MouseState,
+    hexColor: string
+  ) {
+    ipcRenderer.invoke(
+      'multiplayer-mouse-move',
+      patp,
+      normalizedPosition,
+      state,
+      hexColor
+    );
+  },
+  multiplayerMouseDown(patp: string) {
+    ipcRenderer.invoke('multiplayer-mouse-down', patp);
+  },
+  multiplayerMouseUp(patp: string) {
+    ipcRenderer.invoke('multiplayer-mouse-up', patp);
+  },
+  onMultiplayerMouseMove(
+    callback: (
+      patp: string,
+      position: Position,
+      state: MouseState,
+      hexColor: string
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer-mouse-move',
+      (
+        _,
+        patp: string,
+        position: Position,
+        state: MouseState,
+        hexColor: string
+      ) => {
+        callback(patp, position, state, hexColor);
+      }
+    );
+  },
+  onMultiplayerMouseOut(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer-mouse-out', (_, patp: string) => {
+      callback(patp);
+    });
+  },
+  onMultiplayerMouseDown(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer-mouse-down', (_, patp: string) => {
+      callback(patp);
+    });
+  },
+  onMultiplayerMouseUp(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer-mouse-up', (_, patp: string) => {
+      callback(patp);
     });
   },
 };

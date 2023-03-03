@@ -5,6 +5,28 @@ import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
+import { AuthActions } from 'renderer/logic/actions/auth';
+import { ShipModelType } from 'os/services/ship/models/ship';
+
+const sendShipConfigToWebview = async (
+  ship: ShipModelType,
+  webview: Electron.WebviewTag
+) => {
+  const code = await AuthActions.getCode();
+
+  const shipConfig = {
+    ship: ship?.patp.replace('~', '') ?? '',
+    url: ship?.url ?? '',
+    code,
+  };
+
+  console.log('Sending ship config to webview', shipConfig);
+
+  // Set ship config on the webview's window object.
+  webview.executeJavaScript(`
+    window.shipConfig = ${JSON.stringify(shipConfig)};
+  `);
+};
 
 type Props = {
   appWindow: AppWindowType;
@@ -12,7 +34,7 @@ type Props = {
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const { theme } = useServices();
+  const { theme, ship } = useServices();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
@@ -63,14 +85,17 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
 
     if (!webview) return;
 
-    const onDomReady = () => setReadyWebview(webview);
+    const onDomReady = () => {
+      setReadyWebview(webview);
+      if (ship) sendShipConfigToWebview(ship, webview);
+    };
 
     webview.addEventListener('dom-ready', onDomReady);
 
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId]);
+  }, [appWindow.appId, ship]);
 
   useEffect(() => {
     if (!readyWebview) return;
@@ -94,7 +119,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       readyWebview.removeEventListener('did-stop-loading', loading.toggleOff);
       readyWebview.removeEventListener('close', readyWebview.closeDevTools);
     };
-  }, [appWindow.appId]);
+  }, [readyWebview, themeCss, ship, loading]);
 
   return useMemo(
     () => (
@@ -110,7 +135,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           id={webviewId}
           appId={appWindow.appId}
           src={appWindow.href?.site}
-          partition={'persist:dev-webview'}
+          partition="persist:dev-webview"
           webpreferences="sandbox=false"
           isLocked={isResizing || loading.isOn}
           style={{

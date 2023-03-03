@@ -121,7 +121,7 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={async () => {
-              await roomsManager.cleanup();
+              roomsManager.cleanup();
               AuthActions.logout(ship.patp);
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');

@@ -5,6 +5,7 @@
     "app",
     "lib/design-system",
     "lib/presence",
+    "lib/presence/notes",
     "lib/conduit",
     "lib/room",
     "lib/room/test-ui"

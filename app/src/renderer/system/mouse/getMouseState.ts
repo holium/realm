@@ -1,4 +1,4 @@
-import { MouseState } from './AnimatedCursor';
+import { MouseState } from '@holium/realm-multiplayer';
 
 const isTextElement = (element: Element): boolean =>
   element instanceof HTMLTextAreaElement ||

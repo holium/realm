@@ -1,30 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { hexToRgb, rgbToString } from 'os/lib/color';
-import { AnimatedCursor, MouseState } from './AnimatedCursor';
+import { MouseState } from '@holium/realm-multiplayer';
+import { AnimatedCursor } from './AnimatedCursor';
 
 export const Mouse = () => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [state, setState] = useState<MouseState>('pointer');
-  const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const active = useToggle(false);
   const visible = useToggle(false);
-  const mouseLayerTracking = useToggle(false);
   const disabled = useToggle(false);
+  const mouseLayerTracking = useToggle(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [state, setState] = useState<MouseState>('pointer');
+  const [mouseColor, setMouseColor] = useState('0, 0, 0');
+  const mouseOutTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    window.electron.app.onMouseOver(visible.toggleOn);
-    window.electron.app.onMouseOut(visible.toggleOff);
+    window.electron.app.onMouseOut(() => {
+      // We don't want to hide the cursor immediately because
+      // mouseout can be called when moving between contexts (e.g. webviews).
+      mouseOutTimeoutRef.current = setTimeout(() => {
+        visible.toggleOff();
+      }, 100);
+    });
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
       // We only use the IPC'd coordinates if
       // A) mouse layer tracking is disabled, or
       // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
       if (!mouseLayerTracking.isOn) {
-        setCoords(newCoordinates);
+        setPosition(newCoordinates);
       } else {
-        if (isDragging) setCoords(newCoordinates);
+        if (isDragging) setPosition(newCoordinates);
       }
       if (!isDragging) setState(newState);
+      if (!visible.isOn) visible.toggleOn();
+      if (mouseOutTimeoutRef.current) clearTimeout(mouseOutTimeoutRef.current);
     });
 
     window.electron.app.onMouseColorChange((hex) => {
@@ -36,7 +45,7 @@ export const Mouse = () => {
     window.electron.app.onMouseUp(active.toggleOff);
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!active.isOn) setCoords({ x: e.clientX, y: e.clientY });
+      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
     };
 
     window.electron.app.onEnableMouseLayerTracking(() => {
@@ -47,7 +56,9 @@ export const Mouse = () => {
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseLayerTracking.isOn) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
     };
   }, []);
 
@@ -56,10 +67,10 @@ export const Mouse = () => {
   return (
     <AnimatedCursor
       state={state}
-      coords={coords}
+      color={mouseColor}
+      position={position}
       isActive={active.isOn}
       isVisible={visible.isOn}
-      color={mouseColor}
     />
   );
 };

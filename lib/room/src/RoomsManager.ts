@@ -53,7 +53,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
       // When we create a room, we should enter it instantly
       if (room.creator === this.our) {
-        this.enterRoom(room.rid);
+        this.joinRoom(room.rid);
       }
     });
 
@@ -109,7 +109,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       live: observable,
       createRoom: action.bound,
       deleteRoom: action.bound,
-      enterRoom: action.bound,
+      joinRoom: action.bound,
       leaveRoom: action.bound,
       sendChat: action.bound,
       updateRoom: action.bound,
@@ -119,14 +119,16 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     });
   }
 
-  async cleanup() {
+  cleanup() {
     if (this.live.room) {
       if (this.live.room.creator === this.our) {
-        await this.deleteRoom(this.live.room.rid);
+        return this.deleteRoom(this.live.room.rid);
       } else {
-        await this.leaveRoom();
+        return this.leaveRoom();
       }
     }
+
+    return Promise.resolve();
   }
 
   /**
@@ -202,7 +204,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.setProvider(provider);
   }
 
-  enterRoom(rid: string) {
+  joinRoom(rid: string) {
     if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
       throw new Error('Room not found');
     }
@@ -210,6 +212,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       return;
     }
     this.connectRoom(rid);
+    this.emit(RoomManagerEvent.JoinedRoom, rid, this.our);
   }
 
   connectRoom(rid: string) {
@@ -235,7 +238,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   async leaveRoom() {
     if (this.presentRoom) {
-      this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid);
+      this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid, this.our);
       await this.protocol.leave(this.presentRoom.rid);
     }
     this.clearLiveRoom();
@@ -256,7 +259,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     await this.protocol.deleteRoom(rid);
   }
 
-  sendData(data: any) {
+  sendData(data: Omit<DataPacket, 'from'>) {
     this.protocol.sendData({ from: this.our, ...data });
   }
 
@@ -307,8 +310,8 @@ export type RoomsManagerEventCallbacks = {
   connected: () => void;
   createdRoom: (room: RoomType) => void;
   deletedRoom: (rid: string) => void;
-  joinedRoom: (rid: string) => void;
-  leftRoom: (rid: string) => void;
+  joinedRoom: (rid: string, patp: Patp) => void;
+  leftRoom: (rid: string, patp: Patp) => void;
   setNewProvider: (provider: Patp, rooms: RoomType[]) => void;
   onDataChannel: (rid: string, peer: Patp, data: DataPacket) => void;
 };

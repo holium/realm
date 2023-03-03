@@ -525,8 +525,8 @@ export const NewBazaarStore = types
         throw error;
       }
     }),
-    loadDevApps(devApps: any) {
-      Object.values(devApps).forEach((app: any) => {
+    loadDevApps(devApps: Record<string, DevAppType>) {
+      Object.values(devApps).forEach((app) => {
         self.devAppMap.set(app.id, DevAppModel.create(app));
       });
     },
