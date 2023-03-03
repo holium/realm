@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { Badge } from 'renderer/components';
-import { Flex, Button, Icon, Text } from '@holium/design-system';
+import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { CommButton } from '../components/CommButton';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
@@ -153,7 +152,7 @@ const RoomPresenter = () => {
               customColor={
                 presentRoom.creator === ship?.patp ? '#E56262' : undefined
               }
-              onClick={(evt: any) => {
+              onClick={(evt) => {
                 evt.stopPropagation();
                 if (presentRoom.creator === ship?.patp) {
                   roomsManager?.deleteRoom(rid);
