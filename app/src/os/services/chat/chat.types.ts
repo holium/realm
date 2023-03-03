@@ -49,6 +49,7 @@ export type DelPeersRow = {
   table: ChatTables;
   type: 'del-peers-row';
   path: string;
+  ship: string;
 };
 export type DelPathsRow = {
   table: ChatTables;
@@ -67,6 +68,11 @@ export type ChatDbOps =
   | DelPathsRow
   | DelMessagesRow
   | UpdateRow;
+
+export type DeleteLogRow = {
+  change: DelPeersRow | DelPathsRow | DelMessagesRow;
+  timestamp: number;
+};
 
 export type ChatDbChangeReactions =
   | AddRow[]

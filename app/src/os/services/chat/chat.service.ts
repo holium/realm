@@ -16,6 +16,8 @@ import {
   // DelPeersRow,
   UpdateRow,
   DelMessagesRow,
+  DeleteLogRow,
+  DelPeersRow,
 } from './chat.types';
 
 type ChatUpdateType =
@@ -140,6 +142,9 @@ export class ChatService extends BaseService {
     this.sendChatUpdate = this.sendChatUpdate.bind(this);
     this.deletePathsRow = this.deletePathsRow.bind(this);
     this.deleteMessagesRow = this.deleteMessagesRow.bind(this);
+    this.deletePeersRow = this.deletePeersRow.bind(this);
+    this.applyDeleteLogs = this.applyDeleteLogs.bind(this);
+    this.insertDeleteLogs = this.insertDeleteLogs.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -164,9 +169,15 @@ export class ChatService extends BaseService {
     const paths = await this.fetchPaths();
     const peers = await this.fetchPeers();
     const messages = await this.fetchMessages();
+    const deleteLogs = await this.fetchDeleteLogs();
     this.insertMessages(messages);
     this.insertPaths(paths);
     this.insertPeers(peers);
+    // Missed delete events must be applied after inserts
+    this.applyDeleteLogs(deleteLogs).then(() => {
+      // and after applying successfully, insert them into the db
+      this.insertDeleteLogs(deleteLogs);
+    });
   }
 
   async fetchMessages() {
@@ -194,6 +205,15 @@ export class ChatService extends BaseService {
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
     return response.tables.peers;
+  }
+
+  async fetchDeleteLogs() {
+    const lastTimestamp = this.getLastTimestamp('delete_logs');
+    const response = await this.core.conduit!.scry({
+      app: 'chat-db',
+      path: `/delete-log/start-ms/${lastTimestamp}`,
+    });
+    return response;
   }
 
   onDbUpdate(data: ChatDbReactions, _id?: number) {
@@ -263,8 +283,18 @@ export class ChatService extends BaseService {
           break;
       }
     }
+    if (
+      dbChange.type === 'del-messages-row' ||
+      dbChange.type === 'del-paths-row' ||
+      dbChange.type === 'del-peers-row'
+    ) {
+      this.handleDeletes(dbChange);
+    }
+  }
+
+  handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
     if (dbChange.type === 'del-messages-row') {
-      // console.log('del-messages-row', dbChange);
+      console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
       this.deleteMessagesRow(delMessagesRow['msg-id']);
       this.sendChatUpdate('message-deleted', delMessagesRow['msg-id']);
@@ -277,9 +307,9 @@ export class ChatService extends BaseService {
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
-      // const delPathsRow = dbChange as DelPeersRow;
-      // this.deletePeersRow(delPathsRow.path);
-      // this.sendChatUpdate('peer-deleted', delPathsRow);
+      const delPeersRow = dbChange as DelPeersRow;
+      this.deletePeersRow(delPeersRow.path, delPeersRow.ship);
+      this.sendChatUpdate('peer-deleted', delPeersRow);
     }
   }
 
@@ -402,6 +432,30 @@ export class ChatService extends BaseService {
     insertMany(peers);
   }
 
+  async applyDeleteLogs(deleteLogs: DeleteLogRow[]) {
+    deleteLogs.forEach((deleteLog) => {
+      this.handleDeletes(deleteLog.change);
+    });
+  }
+
+  insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
+    if (!this.db) throw new Error('No db connection');
+    const insert = this.db.prepare(
+      `REPLACE INTO delete_logs (
+          change, 
+          timestamp
+        ) VALUES (@change, @timestamp)`
+    );
+    const insertMany = this.db.transaction((deleteLogs) => {
+      for (const deleteLog of deleteLogs)
+        insert.run({
+          change: JSON.stringify(deleteLog.change),
+          timestamp: deleteLog.timestamp,
+        });
+    });
+    insertMany(deleteLogs);
+  }
+
   deletePathsRow(path: string) {
     if (!this.db) throw new Error('No db connection');
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
@@ -416,6 +470,16 @@ export class ChatService extends BaseService {
     const deletePeers = this.db.prepare('DELETE FROM peers WHERE path = ?');
     deletePeers.run(path);
   }
+
+  deletePeersRow(path: string, peer: string) {
+    if (!this.db) throw new Error('No db connection');
+    const deletePath = this.db.prepare(
+      'DELETE FROM peers WHERE path = ? AND ship = ?'
+    );
+    console.log(`deleting peer ${peer} on ${path}`);
+    deletePath.run(path, peer);
+  }
+
   deleteMessagesRow(msgId: string) {
     if (!this.db) throw new Error('No db connection');
     const deleteMessage = this.db.prepare(
@@ -705,14 +769,18 @@ export class ChatService extends BaseService {
     return rows[0];
   }
 
-  getLastTimestamp(table: 'paths' | 'messages' | 'peers'): number {
+  getLastTimestamp(
+    table: 'paths' | 'messages' | 'peers' | 'delete_logs'
+  ): number {
     if (!this.db) throw new Error('No db connection');
+    const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
     const query = this.db.prepare(`
-      SELECT max(updated_at) as lastTimestamp
+      SELECT max(${column}) as lastTimestamp
       FROM ${table};
     `);
     const result = query.all();
-    return result[0].lastTimestamp || 0;
+    // add 1 to avoid getting same timestamp again
+    return result[0].lastTimestamp + 1 || 0;
   }
 
   getChatPeers(_evt: any, path: string) {
