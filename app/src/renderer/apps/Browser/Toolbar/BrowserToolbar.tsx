@@ -1,4 +1,11 @@
-import { PointerEvent, RefObject, useRef } from 'react';
+import {
+  PointerEvent,
+  RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 import { Icons } from 'renderer/components';
@@ -39,20 +46,62 @@ const BrowserToolbarPresenter = ({
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
   const { theme } = useServices();
-  const { iconColor } = theme.currentTheme;
+  const iconColor = useMemo(
+    () => theme.currentTheme.iconColor,
+    [theme.currentTheme.iconColor]
+  );
   const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigationButtonsRef = useRef<HTMLInputElement>(null);
 
-  const getWebView = () =>
-    document.getElementById(currentTab.id) as Electron.WebviewTag | null;
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [canGoForward, setCanGoForward] = useState(false);
+  const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
+
+  useEffect(() => {
+    const webview = document.getElementById(currentTab.id) as
+      | Electron.WebviewTag
+      | undefined;
+
+    if (!webview) return;
+
+    const onDomReady = () => setReadyWebview(webview);
+
+    webview.addEventListener('dom-ready', onDomReady);
+
+    return () => {
+      webview.removeEventListener('dom-ready', onDomReady);
+    };
+  }, [currentTab.id]);
+
+  useEffect(() => {
+    if (!readyWebview) return;
+
+    const onDidNavigate = () => {
+      setCanGoBack(readyWebview.canGoBack());
+      setCanGoForward(readyWebview.canGoForward());
+    };
+
+    readyWebview.addEventListener('did-navigate', onDidNavigate);
+    readyWebview.addEventListener('did-navigate-in-page', onDidNavigate);
+
+    return () => {
+      readyWebview.removeEventListener('did-navigate', onDidNavigate);
+      readyWebview.removeEventListener('did-navigate-in-page', onDidNavigate);
+    };
+  }, [readyWebview]);
 
   const isInInputField = (e: PointerEvent<HTMLDivElement>) =>
     e.target === inputRef.current ||
     inputRef.current?.contains(e.target as Node);
 
-  const onClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isInInputField(e)) onDoubleClick();
+  const isInNavigationButtons = (e: PointerEvent<HTMLDivElement>) =>
+    e.target === navigationButtonsRef.current ||
+    navigationButtonsRef.current?.contains(e.target as Node);
+
+  const onDoubleClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isInInputField(e) && !isInNavigationButtons(e)) onDoubleClick();
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -63,27 +112,17 @@ const BrowserToolbarPresenter = ({
     if (!isInInputField(e)) onDragEnd();
   };
 
-  const onBack = () => {
-    const webView = getWebView();
-    if (webView) webView.goBack();
-  };
+  const onBack = () => readyWebview?.goBack();
 
-  const onForward = () => {
-    const webView = getWebView();
-    if (webView) webView.goForward();
-  };
+  const onForward = () => readyWebview?.goForward();
 
-  const onRefresh = () => {
-    const webView = getWebView();
-    if (webView) webView.reload();
-  };
+  const onRefresh = () => readyWebview?.reload();
 
   const toggleDevTools = () => {
-    const webView = getWebView();
-    if (webView)
-      webView.isDevToolsOpened()
-        ? webView.closeDevTools()
-        : webView.openDevTools();
+    if (readyWebview)
+      readyWebview.isDevToolsOpened()
+        ? readyWebview.closeDevTools()
+        : readyWebview.openDevTools();
   };
 
   return (
@@ -94,18 +133,19 @@ const BrowserToolbarPresenter = ({
       zIndex={zIndex}
       onPointerUp={onPointerUp}
       onPointerDown={onPointerDown}
-      onClick={onClickToolbar}
+      onClick={onDoubleClickToolbar}
     >
       <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons
+        innerRef={navigationButtonsRef}
         iconColor={iconColor}
-        canGoBack={getWebView()?.canGoBack() ?? false}
-        canGoForward={getWebView()?.canGoForward() ?? false}
+        canGoBack={canGoBack}
+        canGoForward={canGoForward}
         onBack={onBack}
         onForward={onForward}
         onRefresh={onRefresh}
       />
-      <ToolbarSearchInput innerRef={inputRef} />
+      <ToolbarSearchInput innerRef={inputRef} readyWebview={readyWebview} />
       <ToolbarControlButtons
         iconColor={iconColor}
         showDevToolsToggle={showDevToolsToggle}
