@@ -7,8 +7,7 @@ const ICON_SIZE = 28;
 
 export const AirliftCommandPalette: FC = observer(() => {
   // const { dimensions } = props;
-  const { theme, spaces } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { theme } = useServices();
   const { textColor } = theme.currentTheme;
 
   const onButtonDragStart = (event: any, nodeType: string) => {

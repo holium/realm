@@ -156,6 +156,7 @@ export const AirliftData = types
   })
   .actions((self) => ({
     setName(name: string) {
+      console.log('model setting name');
       self.name = name;
     },
     promptDelete() {

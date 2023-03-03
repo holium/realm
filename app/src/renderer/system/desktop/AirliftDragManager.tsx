@@ -55,7 +55,6 @@ const AirliftDragManagerPresenter = () => {
       spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
     );
   }, [getSnapshot(airlift.nodes)]);
-  console.log('nodes', nodes);
 
   const reactFlowWrapper = useRef(null);
 

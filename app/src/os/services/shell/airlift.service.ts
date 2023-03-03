@@ -196,8 +196,10 @@ export class AirliftService extends BaseService {
     airliftId: string,
     name: string
   ) {
+    console.log('space', space);
+    console.log('airliftId', airliftId);
+    console.log('setting name', name);
     const spaceNodes = this.state!.nodes.get(space);
-    console.log(this.state!.nodes);
     if (spaceNodes) {
       spaceNodes.find((node) => node.id === airliftId)!.data.setName(name);
     }

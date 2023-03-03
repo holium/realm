@@ -16,10 +16,15 @@ const BUTTON_SIZE = 30;
 export const AirliftArm: FC<AirliftArmProps> = observer(
   (props: AirliftArmProps) => {
     const { airliftId, arm } = props;
-    const { theme } = useServices();
+    const { theme, spaces } = useServices();
 
     const toggleArmExpand = () => {
-      AirliftActions.toggleArmExpand(airliftId, arm.name);
+      if (spaces.selected)
+        AirliftActions.toggleArmExpand(
+          spaces.selected.path,
+          airliftId,
+          arm.name
+        );
     };
 
     return (
@@ -32,7 +37,7 @@ export const AirliftArm: FC<AirliftArmProps> = observer(
         >
           <Handle
             id={airliftId + arm.name}
-            // type="target"
+            type="target"
             position={Position.Left}
             style={{
               background: theme.currentTheme.backgroundColor,

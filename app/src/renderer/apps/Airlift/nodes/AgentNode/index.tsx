@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { AirliftArm } from './AirliftArm';
 import { AirliftDataType } from 'os/services/shell/airlift.model';
 import { AirliftActions } from 'renderer/logic/actions/airlift';
+import { useServices } from 'renderer/logic/store';
 
 interface AgentNodeProps {
   data: AirliftDataType;
@@ -11,11 +12,12 @@ interface AgentNodeProps {
 }
 
 export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
+  const { spaces } = useServices();
   const [created, setCreated] = useState(false);
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && spaces.selected) {
       setCreated(true);
-      AirliftActions.toggleAgentExpand(data.id);
+      AirliftActions.toggleAgentExpand(spaces.selected.path, data.id);
     }
   };
   return (
@@ -33,13 +35,16 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
         onChange={(event: any) => {
           event.preventDefault();
           const name = event.target.value;
-          if (name.at(0) === '%') {
-            AirliftActions.setAgentName(data.id, name);
+          if (name.at(0) === '%' && spaces.selected) {
+            AirliftActions.setAgentName(spaces.selected.path, data.id, name);
           }
         }}
         onKeyDown={onKeyDown}
         disabled={created}
-        onClick={() => AirliftActions.toggleAgentExpand(data.id)}
+        onClick={() =>
+          spaces.selected &&
+          AirliftActions.toggleAgentExpand(spaces.selected.path, data.id)
+        }
         style={{ position: 'relative' }}
       />
       <Flex flexDirection="column" gap={10}>
