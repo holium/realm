@@ -43,3 +43,12 @@ create table if not exists  peers
 
 create unique index if not exists peers_path_ship_uindex
     on peers (path, ship);
+
+create table if not exists delete_logs
+(
+    change        TEXT not null,
+    timestamp  integer not null
+);
+
+create unique index if not exists delete_log_change_uindex
+    on delete_logs (timestamp, change);
