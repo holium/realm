@@ -1,6 +1,6 @@
-# multiplayer/notes
+# @holium/realm-multiplayer-notes
 
-Collaborative test UI for the multiplayer primitive.
+Showcase UI for the multiplayer JS lib.
 
 To be published as its own app.
 

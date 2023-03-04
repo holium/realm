@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { DataPacket_Kind, RemotePeer } from '@holium/realm-room';
-import { Speaker } from './Speaker';
 import { useRoomsManager } from './components/RoomsManagerProvider';
+import { Speaker } from './Speaker';
 
 const UIPresenter = () => {
   const { ship, roomsManager } = useRoomsManager();

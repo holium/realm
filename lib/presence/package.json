@@ -32,7 +32,7 @@
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "babel-loader": "^8.2.5",
-    "@radix-ui/react-slot": "^0.1.2"
+    "@radix-ui/react-slot": "^0.1.2",
+    "babel-loader": "^8.2.5"
   }
 }

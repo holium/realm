@@ -1,5 +1,5 @@
-import { OSPreloadType } from 'os/preload';
 import { AppPreloadType } from 'main/preload';
+import { OSPreloadType } from 'os/preload';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 
 declare global {

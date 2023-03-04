@@ -176,6 +176,10 @@ const createMouseOverlayWindow = () => {
     if (isMac) {
       hideCursor(newMouseWindow.webContents);
       newMouseWindow.setWindowButtonVisibility(false);
+      /**
+       * For macOS we enable mouse layer tracking for a smoother experience.
+       * It is not supported for Windows or Linux.
+       */
       newMouseWindow.webContents.send('enable-mouse-layer-tracking');
     } else if (isWindows) {
       hideCursor(newMouseWindow.webContents);

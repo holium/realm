@@ -23,7 +23,7 @@ export const Presences = () => {
   const [cursors, setCursors] = useState<CursorState>({});
 
   useEffect(() => {
-    window.electron.multiplayer.onPlayerMouseOut((patp) => {
+    window.electron.app.onPlayerMouseOut((patp) => {
       // We don't want to hide the cursor immediately because
       // mouseout can be called when moving between contexts (e.g. webviews).
       const timeOutRef = setTimeout(() => {
@@ -45,28 +45,26 @@ export const Presences = () => {
       }));
     });
 
-    window.electron.multiplayer.onPlayerMouseMove(
-      (patp, position, state, hexColor) => {
-        const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
-        setCursors((prev) => {
-          if (prev[patp]?.mouseOutTimeoutRef) {
-            clearTimeout(prev[patp].mouseOutTimeoutRef);
-          }
+    window.electron.app.onPlayerMouseMove((patp, position, state, hexColor) => {
+      const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
+      setCursors((prev) => {
+        if (prev[patp]?.mouseOutTimeoutRef) {
+          clearTimeout(prev[patp].mouseOutTimeoutRef);
+        }
 
-          return {
-            ...prev,
-            [patp]: {
-              ...prev[patp],
-              isVisible: true,
-              state,
-              position,
-              color,
-            },
-          };
-        });
-      }
-    );
-    window.electron.multiplayer.onPlayerMouseDown((patp) => {
+        return {
+          ...prev,
+          [patp]: {
+            ...prev[patp],
+            isVisible: true,
+            state,
+            position,
+            color,
+          },
+        };
+      });
+    });
+    window.electron.app.onPlayerMouseDown((patp) => {
       setCursors((prev) => ({
         ...prev,
         [patp]: {
@@ -75,7 +73,7 @@ export const Presences = () => {
         },
       }));
     });
-    window.electron.multiplayer.onPlayerMouseUp((patp) => {
+    window.electron.app.onPlayerMouseUp((patp) => {
       setCursors((prev) => ({
         ...prev,
         [patp]: {

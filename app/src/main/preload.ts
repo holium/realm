@@ -1,10 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
 import { MouseState } from '@holium/realm-multiplayer';
-import { MediaAccess, MediaAccessStatus } from '../os/types';
-import { Position } from 'os/types';
-import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -43,10 +41,6 @@ const appPreload = {
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
-  /**
-   * For macOS we enable mouse layer tracking for a smoother experience.
-   * It is not supported for Windows or Linux.
-   */
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
@@ -81,11 +75,97 @@ const appPreload = {
       callback(hex);
     });
   },
+  playerMouseOut(patp: string) {
+    ipcRenderer.invoke('multiplayer.mouse-out', patp);
+  },
+  playerMouseMove(
+    patp: string,
+    normalizedPosition: Position,
+    state: MouseState,
+    hexColor: string
+  ) {
+    ipcRenderer.invoke(
+      'multiplayer.mouse-move',
+      patp,
+      normalizedPosition,
+      state,
+      hexColor
+    );
+  },
+  playerMouseDownRealmToMouseLayer(patp: string, elementId: string) {
+    ipcRenderer.invoke(
+      'multiplayer.mouse-down.realm-to-mouse-layer',
+      patp,
+      elementId
+    );
+  },
+  playerMouseDownRealmToAppLayer(patp: string, elementId: string) {
+    ipcRenderer.invoke(
+      'multiplayer.mouse-down.realm-to-app-layer',
+      patp,
+      elementId
+    );
+  },
+  playerMouseUp(patp: string) {
+    ipcRenderer.invoke('multiplayer.mouse-up', patp);
+  },
+  playerMouseDownAppToRealm(patp: string, elementId: string) {
+    ipcRenderer.invoke('multiplayer.mouse-down.app-to-realm', patp, elementId);
+  },
+  onPlayerMouseMove(
+    callback: (
+      patp: string,
+      position: Position,
+      state: MouseState,
+      hexColor: string
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer.mouse-move',
+      (
+        _,
+        patp: string,
+        position: Position,
+        state: MouseState,
+        hexColor: string
+      ) => {
+        callback(patp, position, state, hexColor);
+      }
+    );
+  },
+  onPlayerMouseOut(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer.mouse-out', (_, patp: string) => {
+      callback(patp);
+    });
+  },
+  onPlayerMouseDown(callback: (patp: string, elementId: string) => void) {
+    ipcRenderer.on(
+      'multiplayer.mouse-down.app-to-realm',
+      (_, patp: string, elementId) => {
+        callback(patp, elementId);
+      }
+    );
+  },
+  onPlayerMouseUp(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer.mouse-up', (_, patp: string) => {
+      callback(patp);
+    });
+  },
+  onPlayerMouseDownAppToRealm(
+    callback: (patp: string, elementId: string) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer.mouse-down.app-to-realm',
+      (_, patp: string, elementId: string) => {
+        callback(patp, elementId);
+      }
+    );
+  },
 };
+
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   os: osPreload,
   app: appPreload,
-  multiplayer: multiplayerPreload,
 });
