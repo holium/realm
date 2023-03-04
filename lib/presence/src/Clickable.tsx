@@ -18,13 +18,13 @@ type Props = {
 
 export const Clickable = ({ id, children, onClick, onOtherClick }: Props) => {
   useEffect(() => {
-    window.electron.app.onPlayerMouseDown((patp, elementId) => {
+    window.electron.multiplayer.onPlayerMouseDown((patp, elementId) => {
       if (elementId === id) onOtherClick(patp);
     });
   }, []);
 
   const handleOnClick = (event: MouseEvent) => {
-    window.electron.app.playerMouseDownAppToRealm(window.ship, id);
+    window.electron.multiplayer.playerMouseDownAppToRealm(window.ship, id);
     onClick(event);
   };
 

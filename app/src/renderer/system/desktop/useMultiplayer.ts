@@ -69,17 +69,19 @@ export const useMultiplayer = () => {
       });
     });
 
-    window.electron.app.onPlayerMouseDownAppToRealm((patp, elementId) => {
-      const cursorDownPayload: CursorDownPayload = {
-        patp,
-        elementId,
-        event: CursorEvent.Down,
-      };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
-        value: { cursor: cursorDownPayload },
-      });
-    });
+    window.electron.multiplayer.onPlayerMouseDownAppToRealm(
+      (patp, elementId) => {
+        const cursorDownPayload: CursorDownPayload = {
+          patp,
+          elementId,
+          event: CursorEvent.Down,
+        };
+        roomsManager.sendData({
+          kind: DataPacket_Kind.DATA,
+          value: { cursor: cursorDownPayload },
+        });
+      }
+    );
 
     roomsManager.on(RoomManagerEvent.LeftRoom, (_, patp) => {
       const cursorOutPayload: CursorOutPayload = {
@@ -103,17 +105,28 @@ export const useMultiplayer = () => {
         if (event === CursorEvent.Move) {
           const { patp, position, state, hexColor } =
             cursorPayload as CursorMovePayload;
-          window.electron.app.playerMouseMove(patp, position, state, hexColor);
+          window.electron.multiplayer.playerMouseMove(
+            patp,
+            position,
+            state,
+            hexColor
+          );
         } else if (event === CursorEvent.Out) {
           const { patp } = cursorPayload as CursorOutPayload;
-          window.electron.app.playerMouseOut(patp);
+          window.electron.multiplayer.playerMouseOut(patp);
         } else if (event === CursorEvent.Down) {
           const { patp, elementId } = cursorPayload as CursorDownPayload;
-          window.electron.app.playerMouseDownRealmToMouseLayer(patp, elementId);
-          window.electron.app.playerMouseDownRealmToAppLayer(patp, elementId);
+          window.electron.multiplayer.playerMouseDownRealmToMouseLayer(
+            patp,
+            elementId
+          );
+          window.electron.multiplayer.playerMouseDownRealmToAppLayer(
+            patp,
+            elementId
+          );
         } else if (event === CursorEvent.Up) {
           const { patp } = cursorPayload as CursorUpPayload;
-          window.electron.app.playerMouseUp(patp);
+          window.electron.multiplayer.playerMouseUp(patp);
         }
       }
     );

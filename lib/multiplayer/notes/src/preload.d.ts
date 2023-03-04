@@ -1,13 +1,10 @@
+import { MultiplayerPreloadType } from '../../../../app/src/main/preload.multiplayer';
+
 declare global {
   interface Window {
     ship: string;
     electron: {
-      app: {
-        playerMouseDownAppToRealm: (patp: string, elementId: string) => void;
-        onPlayerMouseDown: (
-          callback: (patp: string, elementId: string) => void
-        ) => void;
-      };
+      multiplayer: MultiplayerPreloadType;
     };
   }
 }
