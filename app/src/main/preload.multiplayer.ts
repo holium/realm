@@ -2,12 +2,11 @@ import { ipcRenderer } from 'electron';
 import { MouseState } from '@holium/realm-multiplayer';
 import { Position } from '../os/types';
 
-/** EVENT FORMAT: 'multiplayer.mouse-event.from-to' */
 export const multiplayerPreload = {
-  playerMouseOut(patp: string) {
+  mouseOut(patp: string) {
     ipcRenderer.invoke('multiplayer.mouse-out', patp);
   },
-  playerMouseMove(
+  mouseMove(
     patp: string,
     normalizedPosition: Position,
     state: MouseState,
@@ -21,30 +20,19 @@ export const multiplayerPreload = {
       hexColor
     );
   },
-  playerMouseDownRealmToMouseLayer(patp: string, elementId: string) {
-    ipcRenderer.invoke(
-      'multiplayer.mouse-down.realm-to-mouse-layer',
-      patp,
-      elementId
-    );
+  mouseDown(patp: string) {
+    ipcRenderer.invoke('multiplayer.mouse-down', patp);
   },
-  playerMouseDownRealmToAppLayer(patp: string, elementId: string) {
-    ipcRenderer.invoke(
-      'multiplayer.mouse-down.realm-to-app-layer',
-      patp,
-      elementId
-    );
-  },
-  playerMouseDownAppToRealm(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer.mouse-down.app-to-realm', patp, elementId);
-  },
-  playerMouseUp(patp: string) {
+  mouseUp(patp: string) {
     ipcRenderer.invoke('multiplayer.mouse-up', patp);
   },
-  multiplayerClickAppToRealm(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer.click-app-to-realm', patp, elementId);
+  appToRealmMouseClick(patp: string, elementId: string) {
+    ipcRenderer.invoke('multiplayer.app-to-realm-mouse-click', patp, elementId);
   },
-  onPlayerMouseMove(
+  realmToAppMouseClick(patp: string, elementId: string) {
+    ipcRenderer.invoke('multiplayer.realm-to-app-mouse-click', patp, elementId);
+  },
+  onMouseMove(
     callback: (
       patp: string,
       position: Position,
@@ -65,27 +53,33 @@ export const multiplayerPreload = {
       }
     );
   },
-  onPlayerMouseOut(callback: (patp: string) => void) {
+  onMouseOut(callback: (patp: string) => void) {
     ipcRenderer.on('multiplayer.mouse-out', (_, patp: string) => {
       callback(patp);
     });
   },
-  onPlayerMouseDown(callback: (patp: string, elementId: string) => void) {
-    ipcRenderer.on('multiplayer.mouse-down', (_, patp: string, elementId) => {
-      callback(patp, elementId);
+  onMouseDown(callback: (patp: string) => void) {
+    ipcRenderer.on('multiplayer.mouse-down', (_, patp: string) => {
+      callback(patp);
     });
   },
-  onPlayerMouseUp(callback: (patp: string) => void) {
+  onMouseUp(callback: (patp: string) => void) {
     ipcRenderer.on('multiplayer.mouse-up', (_, patp: string) => {
       callback(patp);
     });
   },
-  onPlayerMouseDownAppToRealm(
-    callback: (patp: string, elementId: string) => void
-  ) {
+  onAppToRealmMouseClick(callback: (patp: string, elementId: string) => void) {
     ipcRenderer.on(
-      'multiplayer.mouse-down.app-to-realm',
-      (_, patp: string, elementId: string) => {
+      'multiplayer.app-to-realm-mouse-click',
+      (_, patp: string, elementId) => {
+        callback(patp, elementId);
+      }
+    );
+  },
+  onRealmToAppMouseClick(callback: (patp: string, elementId: string) => void) {
+    ipcRenderer.on(
+      'multiplayer.realm-to-app-mouse-click',
+      (_, patp: string, elementId) => {
         callback(patp, elementId);
       }
     );

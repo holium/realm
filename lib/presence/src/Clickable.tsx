@@ -17,16 +17,16 @@ type Props = {
 };
 
 export const Clickable = ({ id, children, onClick, onOtherClick }: Props) => {
+  const handleOnClick = (event: MouseEvent) => {
+    window.electron.multiplayer.appToRealmMouseClick(window.ship, id);
+    onClick(event);
+  };
+
   useEffect(() => {
-    window.electron.multiplayer.onPlayerMouseDown((patp, elementId) => {
+    window.electron.multiplayer.onRealmToAppMouseClick((patp, elementId) => {
       if (elementId === id) onOtherClick(patp);
     });
   }, []);
-
-  const handleOnClick = (event: MouseEvent) => {
-    window.electron.multiplayer.playerMouseDownAppToRealm(window.ship, id);
-    onClick(event);
-  };
 
   return (
     <Slot data-multi-click-id={id} onClick={handleOnClick}>

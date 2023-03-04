@@ -14,7 +14,6 @@ export const App = () => {
   useEffect(() => {
     // Poll until window.ship is set.
     const interval = setInterval(() => {
-      // @ts-ignore
       if (window.ship) {
         clearInterval(interval);
         setIsReady(true);

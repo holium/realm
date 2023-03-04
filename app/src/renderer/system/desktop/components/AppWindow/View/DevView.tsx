@@ -8,7 +8,7 @@ import { useToggle } from 'renderer/logic/lib/useToggle';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
 import {
-  CursorDownPayload,
+  CursorClickPayload,
   CursorEvent,
   CursorPayload,
 } from '@holium/realm-multiplayer';
@@ -29,9 +29,9 @@ const setUpMultiplayerStreaming = async (
 
       const { event } = cursorPayload;
 
-      if (event === CursorEvent.Down) {
-        const { patp, elementId } = cursorPayload as CursorDownPayload;
-        webview.send('multiplayer.mouse-down', patp, elementId);
+      if (event === CursorEvent.Click) {
+        const { patp, elementId } = cursorPayload as CursorClickPayload;
+        webview.send('multiplayer.realm-to-app-mouse-click', patp, elementId);
       }
     }
   );

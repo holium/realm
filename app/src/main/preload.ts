@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { osPreload } from '../os/preload';
+import './helpers/mouseListener';
 import { MouseState } from '@holium/realm-multiplayer';
+import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
@@ -64,11 +65,11 @@ const appPreload = {
       }
     );
   },
-  onMouseDown(callback: (elementId: string) => void) {
-    ipcRenderer.on('mouse-down', (_, elementId: string) => callback(elementId));
+  onMouseDown(callback: () => void) {
+    ipcRenderer.on('mouse-down', callback);
   },
-  onMouseUp(callback: (elementId: string) => void) {
-    ipcRenderer.on('mouse-up', (_, elementId: string) => callback(elementId));
+  onMouseUp(callback: () => void) {
+    ipcRenderer.on('mouse-up', callback);
   },
   onMouseColorChange(callback: (hex: string) => void) {
     ipcRenderer.on('mouse-color', (_, hex: string) => {
@@ -80,7 +81,7 @@ const appPreload = {
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
-  os: osPreload,
   app: appPreload,
+  os: osPreload,
   multiplayer: multiplayerPreload,
 });

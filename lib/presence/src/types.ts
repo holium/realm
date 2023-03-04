@@ -11,6 +11,7 @@ export enum CursorEvent {
   Move = 'cursor-move',
   Down = 'cursor-down',
   Up = 'cursor-up',
+  Click = 'cursor-click',
   Over = 'cursor-over',
   Out = 'cursor-out',
 }
@@ -28,11 +29,14 @@ export interface CursorMovePayload extends BaseCursorPayload {
 
 export interface CursorDownPayload extends BaseCursorPayload {
   event: CursorEvent.Down;
-  elementId: string;
 }
 
 export interface CursorUpPayload extends BaseCursorPayload {
   event: CursorEvent.Up;
+}
+
+export interface CursorClickPayload extends BaseCursorPayload {
+  event: CursorEvent.Click;
   elementId: string;
 }
 

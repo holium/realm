@@ -25,7 +25,7 @@ export const Mouse = () => {
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
       // We only use the IPC'd coordinates if
       // A) mouse layer tracking is disabled, or
-      // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
+      // B) the mouse is dragging, since position freezes on click.
       if (!mouseLayerTracking.isOn) {
         setPosition(newCoordinates);
       } else {

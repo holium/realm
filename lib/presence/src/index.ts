@@ -1,4 +1,5 @@
 export type {
+  CursorClickPayload,
   CursorDownPayload,
   CursorMovePayload,
   CursorOutPayload,

@@ -5,6 +5,7 @@ import {
   CursorDownPayload,
   CursorUpPayload,
   CursorMovePayload,
+  CursorClickPayload,
 } from '@holium/realm-multiplayer';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
@@ -29,10 +30,9 @@ export const useMultiplayer = () => {
       });
     });
 
-    window.electron.app.onMouseDown((elementId) => {
+    window.electron.app.onMouseDown(() => {
       const cursorDownPayload: CursorDownPayload = {
         patp: ship.patp,
-        elementId,
         event: CursorEvent.Down,
       };
       roomsManager.sendData({
@@ -43,10 +43,9 @@ export const useMultiplayer = () => {
       });
     });
 
-    window.electron.app.onMouseUp((elementId) => {
+    window.electron.app.onMouseUp(() => {
       const cursorUpPayload: CursorUpPayload = {
         patp: ship.patp,
-        elementId,
         event: CursorEvent.Up,
       };
       roomsManager.sendData({
@@ -69,19 +68,17 @@ export const useMultiplayer = () => {
       });
     });
 
-    window.electron.multiplayer.onPlayerMouseDownAppToRealm(
-      (patp, elementId) => {
-        const cursorDownPayload: CursorDownPayload = {
-          patp,
-          elementId,
-          event: CursorEvent.Down,
-        };
-        roomsManager.sendData({
-          kind: DataPacket_Kind.DATA,
-          value: { cursor: cursorDownPayload },
-        });
-      }
-    );
+    window.electron.multiplayer.onAppToRealmMouseClick((patp, elementId) => {
+      const cursorClickPayload: CursorClickPayload = {
+        patp,
+        elementId,
+        event: CursorEvent.Click,
+      };
+      roomsManager.sendData({
+        kind: DataPacket_Kind.DATA,
+        value: { cursor: cursorClickPayload },
+      });
+    });
 
     roomsManager.on(RoomManagerEvent.LeftRoom, (_, patp) => {
       const cursorOutPayload: CursorOutPayload = {
@@ -105,7 +102,7 @@ export const useMultiplayer = () => {
         if (event === CursorEvent.Move) {
           const { patp, position, state, hexColor } =
             cursorPayload as CursorMovePayload;
-          window.electron.multiplayer.playerMouseMove(
+          window.electron.multiplayer.mouseMove(
             patp,
             position,
             state,
@@ -113,20 +110,16 @@ export const useMultiplayer = () => {
           );
         } else if (event === CursorEvent.Out) {
           const { patp } = cursorPayload as CursorOutPayload;
-          window.electron.multiplayer.playerMouseOut(patp);
+          window.electron.multiplayer.mouseOut(patp);
         } else if (event === CursorEvent.Down) {
-          const { patp, elementId } = cursorPayload as CursorDownPayload;
-          window.electron.multiplayer.playerMouseDownRealmToMouseLayer(
-            patp,
-            elementId
-          );
-          window.electron.multiplayer.playerMouseDownRealmToAppLayer(
-            patp,
-            elementId
-          );
+          const { patp } = cursorPayload as CursorDownPayload;
+          window.electron.multiplayer.mouseDown(patp);
         } else if (event === CursorEvent.Up) {
           const { patp } = cursorPayload as CursorUpPayload;
-          window.electron.multiplayer.playerMouseUp(patp);
+          window.electron.multiplayer.mouseUp(patp);
+        } else if (event === CursorEvent.Click) {
+          const { patp, elementId } = cursorPayload as CursorClickPayload;
+          window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
         }
       }
     );
