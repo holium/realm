@@ -372,31 +372,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-      # #
-      # - name: Install sentry-cli
-      #   run: |
-      #     npm install @sentry/cli
-      #     ./node_modules/.bin/sentry-cli
-      #     ./node_modules/.bin/sentry-cli login --auth-token $SENTRY_API_KEY
-      #     ./node_modules/.bin/sentry-cli releases files "$BUILD_VERSION" upload-sourcemaps ./dist
-      #   env:
-      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-      #     SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
       #
-      # remove for now. will need to offload this to a test build pipeline until
-      #   can get this correct
-      # - name: Create Sentry release
-      #   uses: getsentry/action-release@v1
-      #   env:
-      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      #     SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-      #     SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-      #     # SENTRY_URL: https://sentry.io/
-      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-      #   with:
-      #     environment: staging
-      #     sourcemaps: './dist'
-      #     version: $BUILD_VERSION
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          # SENTRY_URL: https://sentry.io/
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+        with:
+          environment: staging
+          sourcemaps: './app/release/app/dist'
+          version: $BUILD_VERSION
 
   #
   # this will run even if the build is canceled or fails
