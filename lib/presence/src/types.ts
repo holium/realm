@@ -28,12 +28,12 @@ export interface CursorMovePayload extends BaseCursorPayload {
 
 export interface CursorDownPayload extends BaseCursorPayload {
   event: CursorEvent.Down;
-  position: Position;
   elementId: string;
 }
 
 export interface CursorUpPayload extends BaseCursorPayload {
   event: CursorEvent.Up;
+  elementId: string;
 }
 
 export interface CursorOutPayload extends BaseCursorPayload {

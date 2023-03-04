@@ -61,12 +61,12 @@ const registerListeners = (
   });
 
   /* Multiplayer mouse events */
-  ipcMain.handle('multiplayer-mouse-out', (_, patp: string) => {
-    mouseWindow.webContents.send('multiplayer-mouse-out', patp);
+  ipcMain.handle('multiplayer.mouse-out', (_, patp: string) => {
+    mouseWindow.webContents.send('multiplayer.mouse-out', patp);
   });
 
   ipcMain.handle(
-    'multiplayer-mouse-move',
+    'multiplayer.mouse-move',
     (
       _,
       patp: string,
@@ -79,7 +79,7 @@ const registerListeners = (
         mainWindow.getBounds()
       );
       mouseWindow.webContents.send(
-        'multiplayer-mouse-move',
+        'multiplayer.mouse-move',
         patp,
         denormalizedPosition,
         state,
@@ -89,21 +89,21 @@ const registerListeners = (
   );
 
   ipcMain.handle(
-    'multiplayer-mouse-down',
+    'multiplayer.mouse-down',
     (_, patp: string, elementId: string) => {
-      mouseWindow.webContents.send('multiplayer-mouse-down', patp, elementId);
+      mouseWindow.webContents.send('multiplayer.mouse-down', patp, elementId);
     }
   );
 
-  ipcMain.handle('multiplayer-mouse-up', (_, patp: string) => {
-    mouseWindow.webContents.send('multiplayer-mouse-up', patp);
+  ipcMain.handle('multiplayer.mouse-up', (_, patp: string) => {
+    mouseWindow.webContents.send('multiplayer.mouse-up', patp);
   });
 
   ipcMain.handle(
-    'multiplayer-click-from-app',
+    'multiplayer.click-from-app',
     (_, patp: string, elementId: string) => {
       mainWindow.webContents.send(
-        'multiplayer-click-from-app',
+        'multiplayer.click-from-app',
         patp,
         elementId
       );

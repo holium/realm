@@ -23,7 +23,7 @@ export const Presences = () => {
   const [cursors, setCursors] = useState<CursorState>({});
 
   useEffect(() => {
-    window.electron.app.onMultiplayerMouseOut((patp) => {
+    window.electron.multiplayer.onPlayerMouseOut((patp) => {
       // We don't want to hide the cursor immediately because
       // mouseout can be called when moving between contexts (e.g. webviews).
       const timeOutRef = setTimeout(() => {
@@ -45,7 +45,7 @@ export const Presences = () => {
       }));
     });
 
-    window.electron.app.onMultiplayerMouseMove(
+    window.electron.multiplayer.onPlayerMouseMove(
       (patp, position, state, hexColor) => {
         const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
         setCursors((prev) => {
@@ -66,7 +66,7 @@ export const Presences = () => {
         });
       }
     );
-    window.electron.app.onMultiplayerMouseDown((patp) => {
+    window.electron.multiplayer.onPlayerMouseDown((patp) => {
       setCursors((prev) => ({
         ...prev,
         [patp]: {
@@ -75,7 +75,7 @@ export const Presences = () => {
         },
       }));
     });
-    window.electron.app.onMultiplayerMouseUp((patp) => {
+    window.electron.multiplayer.onPlayerMouseUp((patp) => {
       setCursors((prev) => ({
         ...prev,
         [patp]: {

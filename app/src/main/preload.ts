@@ -4,6 +4,7 @@ import './helpers/mouseListener';
 import { MouseState } from '@holium/realm-multiplayer';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { Position } from 'os/types';
+import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -69,96 +70,22 @@ const appPreload = {
       }
     );
   },
-  onMouseDown(callback: (position: Position, elementId: string) => void) {
-    ipcRenderer.on('mouse-down', (_, position: Position, elementId: string) =>
-      callback(position, elementId)
-    );
+  onMouseDown(callback: (elementId: string) => void) {
+    ipcRenderer.on('mouse-down', (_, elementId: string) => callback(elementId));
   },
-  onMouseUp(callback: () => void) {
-    ipcRenderer.on('mouse-up', callback);
+  onMouseUp(callback: (elementId: string) => void) {
+    ipcRenderer.on('mouse-up', (_, elementId: string) => callback(elementId));
   },
   onMouseColorChange(callback: (hex: string) => void) {
     ipcRenderer.on('mouse-color', (_, hex: string) => {
       callback(hex);
     });
   },
-  multiplayerMouseOut(patp: string) {
-    ipcRenderer.invoke('multiplayer-mouse-out', patp);
-  },
-  multiplayerMouseMove(
-    patp: string,
-    normalizedPosition: Position,
-    state: MouseState,
-    hexColor: string
-  ) {
-    ipcRenderer.invoke(
-      'multiplayer-mouse-move',
-      patp,
-      normalizedPosition,
-      state,
-      hexColor
-    );
-  },
-  multiplayerMouseDown(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer-mouse-down', patp, elementId);
-  },
-  multiplayerMouseUp(patp: string) {
-    ipcRenderer.invoke('multiplayer-mouse-up', patp);
-  },
-  multiplayerClickFromApp(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer-click-from-app', patp, elementId);
-  },
-  onMultiplayerMouseMove(
-    callback: (
-      patp: string,
-      position: Position,
-      state: MouseState,
-      hexColor: string
-    ) => void
-  ) {
-    ipcRenderer.on(
-      'multiplayer-mouse-move',
-      (
-        _,
-        patp: string,
-        position: Position,
-        state: MouseState,
-        hexColor: string
-      ) => {
-        callback(patp, position, state, hexColor);
-      }
-    );
-  },
-  onMultiplayerMouseOut(callback: (patp: string) => void) {
-    ipcRenderer.on('multiplayer-mouse-out', (_, patp: string) => {
-      callback(patp);
-    });
-  },
-  onMultiplayerMouseDown(callback: (patp: string, elementId: string) => void) {
-    ipcRenderer.on('multiplayer-mouse-down', (_, patp: string, elementId) => {
-      callback(patp, elementId);
-    });
-  },
-  onMultiplayerMouseUp(callback: (patp: string) => void) {
-    ipcRenderer.on('multiplayer-mouse-up', (_, patp: string) => {
-      callback(patp);
-    });
-  },
-  onMultiplayerClickFromApp(
-    callback: (patp: string, elementId: string) => void
-  ) {
-    ipcRenderer.on(
-      'multiplayer-click-from-app',
-      (_, patp: string, elementId) => {
-        callback(patp, elementId);
-      }
-    );
-  },
 };
-
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
-  app: appPreload,
   os: osPreload,
+  app: appPreload,
+  multiplayer: multiplayerPreload,
 });

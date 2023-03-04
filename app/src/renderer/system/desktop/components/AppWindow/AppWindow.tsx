@@ -265,7 +265,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       id={windowId}
       // TODO: Use composer to determine if a window is part
       // of the singleplayer or multiplayer stack.
-      className="multiplayer-window"
+      // className="multiplayer-window"
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}

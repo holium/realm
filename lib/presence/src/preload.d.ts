@@ -1,10 +1,10 @@
-import { AppPreloadType } from '../../../app/src/main/preload';
+import { MultiplayerPreloadType } from '../../../app/src/main/preload.multiplayer';
 
 declare global {
   interface Window {
     ship: string;
     electron: {
-      app: AppPreloadType;
+      multiplayer: MultiplayerPreloadType;
     };
   }
 }

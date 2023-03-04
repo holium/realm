@@ -31,7 +31,7 @@ const setUpMultiplayerStreaming = async (
 
       if (event === CursorEvent.Down) {
         const { patp, elementId } = cursorPayload as CursorDownPayload;
-        webview.send('multiplayer-mouse-down', patp, elementId);
+        webview.send('multiplayer.mouse-down', patp, elementId);
       }
     }
   );
