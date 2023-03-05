@@ -78,10 +78,10 @@ const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      console.log('selected', path);
-      // if (self.subroute === 'inbox') {
-      //   self.subroute = 'chat';
-      // }
+      console.log(self.subroute);
+      if (self.subroute === 'inbox') {
+        self.subroute = 'chat';
+      }
     },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {

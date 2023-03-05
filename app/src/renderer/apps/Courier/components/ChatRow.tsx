@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect } from 'react';
 import {
   Row,
   Flex,
@@ -13,7 +13,6 @@ import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
 
 type ChatRowProps = {
   path: string;
@@ -26,13 +25,6 @@ type ChatRowProps = {
   peersGetBacklog: boolean;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
-
-// const ChatRowStyle = styled(Row)`
-//   &.chat-row-open {
-//     height: 100%;
-//     width: 100%;
-//   }
-// `;
 
 export const ChatRowPresenter = ({
   path,
@@ -53,8 +45,7 @@ export const ChatRowPresenter = ({
     togglePinned,
   } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
-  const { dimensions } = useTrayApps();
-  const cardRef = useRef(null);
+
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
   const isMuted = false; // TODO
@@ -156,7 +147,6 @@ export const ChatRowPresenter = ({
 
   return (
     <Row
-      ref={cardRef}
       id={chatRowId}
       onClick={(evt: any) => {
         if (!contextMenuButtonIds.includes(evt.target.id)) {

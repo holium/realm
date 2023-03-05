@@ -11,23 +11,14 @@ import {
 // import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { Chat } from '../components/Chat';
-
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
 
 export const InboxPresenter = () => {
   const { dimensions } = useTrayApps();
-  const {
-    selectedChat,
-    inbox,
-    pinnedChatList,
-    unpinnedChatList,
-    isChatSelected,
-    setChat,
-    setSubroute,
-  } = useChatStore();
+  const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
+    useChatStore();
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
@@ -55,20 +46,8 @@ export const InboxPresenter = () => {
   );
 
   return (
-    <Flex
-      position="absolute"
-      height={dimensions.height - 24}
-      flexDirection="column"
-    >
-      <Flex
-        position="relative"
-        animate={{ opacity: selectedChat ? 0 : 1 }}
-        zIndex={0}
-        mb={2}
-        ml={1}
-        flexDirection="row"
-        alignItems="center"
-      >
+    <Flex height={dimensions.height - 24} flexDirection="column">
+      <Flex mb={2} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -138,6 +117,7 @@ export const InboxPresenter = () => {
                 <Box
                   key={`pinned-${chat.path}`}
                   height={52}
+                  alignItems="center"
                   layoutId={`chat-${chat.path}-container`}
                 >
                   <ChatRow
@@ -158,43 +138,40 @@ export const InboxPresenter = () => {
               );
             })}
           </Flex>
-          <Box width={listWidth} height={listHeight}>
-            <WindowedList
-              key={`inbox-${unpinnedChatList.length}-${selectedChat?.path}`}
-              width={listWidth}
-              height={listHeight}
-              rowHeight={52}
-              data={unpinnedChatList}
-              filter={searchFilter}
-              rowRenderer={(chat) => {
-                const isSelected = isChatSelected(chat.path);
-                return (
-                  <Box
-                    layout="preserve-aspect"
-                    key={`unpinned-${chat.path}`}
-                    height={52}
-                    layoutId={`chat-${chat.path}-container`}
-                  >
-                    <Chat
-                      path={chat.path}
-                      title={chat.metadata.title}
-                      peers={chat.peers}
-                      lastMessage={chat.lastMessage && chat.lastMessage[0]}
-                      type={chat.type}
-                      timestamp={chat.createdAt || chat.metadata.timestamp}
-                      metadata={chat.metadata}
-                      isSelected={isSelected}
-                      peersGetBacklog={chat.peersGetBacklog}
-                      onClick={(evt) => {
-                        evt.stopPropagation();
-                        setChat(chat.path);
-                      }}
-                    />
-                  </Box>
-                );
-              }}
-            />
-          </Box>
+          <WindowedList
+            key={`inbox-${unpinnedChatList.length}`}
+            width={listWidth}
+            height={listHeight}
+            rowHeight={52}
+            data={unpinnedChatList}
+            filter={searchFilter}
+            rowRenderer={(chat) => {
+              return (
+                <Box
+                  layout="preserve-aspect"
+                  key={`unpinned-${chat.path}`}
+                  alignItems="center"
+                  height={52}
+                  layoutId={`chat-${chat.path}-container`}
+                >
+                  <ChatRow
+                    path={chat.path}
+                    title={chat.metadata.title}
+                    peers={chat.peers}
+                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
+                    type={chat.type}
+                    timestamp={chat.createdAt || chat.metadata.timestamp}
+                    metadata={chat.metadata}
+                    peersGetBacklog={chat.peersGetBacklog}
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      setChat(chat.path);
+                    }}
+                  />
+                </Box>
+              );
+            }}
+          />
         </>
       )}
     </Flex>

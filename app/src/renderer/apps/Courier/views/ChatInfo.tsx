@@ -179,6 +179,13 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     const patp = contact[0];
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
+    ChatDBActions.addPeer(path, patp)
+      .then(() => {
+        console.log('adding peer', patp);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   };
 
   return (
@@ -406,8 +413,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             options.push({
               id: `${id}-add-friend`,
               label: 'Add as friend',
-              onClick: (_evt: any) => {
-                // TODO - add as friend
+              onClick: (evt: any) => {
+                evt.stopPropagation();
                 console.log('adding friend', peer.peer);
               },
             });
@@ -416,7 +423,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             options.push({
               id: `${id}-remove`,
               label: 'Remove',
-              onClick: (_evt: any) => {
+              onClick: (evt: any) => {
+                evt.stopPropagation();
                 ChatDBActions.removePeer(path, peer.peer)
                   .then(() => {
                     console.log('removed peer');

@@ -307,7 +307,7 @@ export class ChatService extends BaseService {
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this.deletePeersRow(delPeersRow.path, delPeersRow.ship);
+      this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
       this.sendChatUpdate('peer-deleted', delPeersRow);
     }
   }
@@ -1016,7 +1016,7 @@ export class ChatService extends BaseService {
       mark: 'action',
       reaction: '',
       json: {
-        'add-ship-from-chat': {
+        'add-ship-to-chat': {
           ship,
           path,
         },

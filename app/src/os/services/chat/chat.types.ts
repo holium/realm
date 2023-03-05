@@ -56,7 +56,7 @@ export type UpdateMessage = {
 export type DelPeersRow = {
   table: ChatTables;
   type: 'del-peers-row';
-  path: string;
+  row: string;
   ship: string;
 };
 export type DelPathsRow = {
