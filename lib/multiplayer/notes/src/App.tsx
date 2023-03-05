@@ -17,9 +17,8 @@ export const App = () => {
 
   const onFill = () => setTitle(defaultTitle);
 
-  useEffect(() => {
-    const place = document.getElementById('editor');
-    if (!place) return;
+  const onEditorRef = (ref: HTMLDivElement) => {
+    if (!ref) return;
 
     const authority = new Authority(
       schema.node(
@@ -29,8 +28,8 @@ export const App = () => {
       )
     );
 
-    collabEditor(authority, place);
-  }, []);
+    collabEditor(authority, ref);
+  };
 
   useEffect(() => {
     // Poll until window.ship is set.
@@ -74,7 +73,7 @@ export const App = () => {
           </Flex>
         </Flex>
         <div
-          id="editor"
+          ref={onEditorRef}
           style={{
             padding: '8px',
             border: '1px solid #000',
