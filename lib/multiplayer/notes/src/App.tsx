@@ -1,16 +1,36 @@
 import { useEffect, useState } from 'react';
-import { Button, Flex, Text, TextArea, Box } from '@holium/design-system';
+import { schema } from 'prosemirror-schema-basic';
+import { Button, Flex, Text, Box } from '@holium/design-system';
 import { Clickable, useShips } from '@holium/realm-presence';
 import { Loader } from './components/Loader';
+import { Authority } from './components/Authority';
+import { collabEditor } from './components/CollabEditor';
+
+const defaultTitle = 'Real-time notetaking, in 3 lines of JS';
 
 export const App = () => {
   const [isReady, setIsReady] = useState(false);
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState(defaultTitle);
   const ships = useShips();
 
-  const onClear = () => setContent('');
+  const onClear = () => setTitle('');
 
-  const onFill = () => setContent('Urbit is an OS for the 21st century.');
+  const onFill = () => setTitle(defaultTitle);
+
+  useEffect(() => {
+    const place = document.getElementById('editor');
+    if (!place) return;
+
+    const authority = new Authority(
+      schema.node(
+        'doc',
+        null,
+        schema.node('paragraph', null, schema.text('Hello world!'))
+      )
+    );
+
+    collabEditor(authority, place);
+  }, []);
 
   useEffect(() => {
     // Poll until window.ship is set.
@@ -40,7 +60,7 @@ export const App = () => {
           justifyContent="space-between"
           borderBottom="1px solid #000"
         >
-          <Text.H3>Real-time notetaking, in 3 lines of JS</Text.H3>
+          <Text.H3>{title}</Text.H3>
           <Flex gap={8}>
             {ships.map((ship) => (
               <Box
@@ -53,13 +73,10 @@ export const App = () => {
             ))}
           </Flex>
         </Flex>
-        <TextArea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+        <div
+          id="editor"
           style={{
-            fontSize: '16px',
             padding: '8px',
-            minHeight: '200px',
             border: '1px solid #000',
           }}
         />
@@ -69,7 +86,7 @@ export const App = () => {
               Clear
             </Button.Secondary>
           </Clickable>
-          <Clickable id="fill" onOtherClick={onFill} onClick={onFill}>
+          <Clickable id="fill" onClick={onFill} onOtherClick={onFill}>
             <Button.Primary height={32} px={2} fontSize="16px">
               Fill
             </Button.Primary>
