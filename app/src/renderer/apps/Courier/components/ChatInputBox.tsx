@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { ChatMessageType } from '../models';
 
 type CourierInputProps = {
-  replyTo?: ChatMessageType;
   editMessage?: ChatMessageType | null;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
   onSend: (fragments: any[]) => void;
@@ -11,7 +10,6 @@ type CourierInputProps = {
 };
 
 export const ChatInputBox = ({
-  replyTo,
   editMessage,
   onEditConfirm,
   onCancelEdit,
@@ -21,7 +19,6 @@ export const ChatInputBox = ({
   return (
     <Box
       width="100%"
-      height={replyTo ? 60 : 40}
       initial={{
         opacity: 0,
       }}

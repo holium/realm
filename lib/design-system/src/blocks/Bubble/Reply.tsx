@@ -1,3 +1,4 @@
+import styled from 'styled-components';
 import { Flex, BoxProps, capitalizeFirstLetter, Button, Icon } from '../..';
 import { BubbleAuthor } from './Bubble.styles';
 import {
@@ -7,6 +8,15 @@ import {
   renderFragment,
 } from './fragment-lib';
 import { FragmentType, TEXT_TYPES } from './Bubble.types';
+
+const ReplyContainer = styled(Flex)`
+  flex-direction: column;
+  justify-content: flex-end;
+  blockquote {
+    margin: 0px 0px;
+  }
+  width: 100%;
+`;
 
 export type ReplyProps = {
   id: string;
@@ -46,14 +56,33 @@ export const Reply = (props: ReplyProps) => {
   }
 
   return (
-    <Flex id={id} key={id} mx="1px" width="100%" onClick={onClick}>
-      <FragmentBlock id={id}>
+    <ReplyContainer
+      id={id}
+      key={id}
+      initial={{ opacity: 0, height: 25 }}
+      animate={{ opacity: 1, height: 46 }}
+      exit={{ opacity: 0, height: 25 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClick}
+    >
+      <FragmentBlock
+        id={id}
+        style={{
+          display: 'inline-flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          width: '100%',
+          gap: 8,
+        }}
+      >
+        <Icon name="Reply" size={22} color="accent" />
         <FragmentBlockquote
           id={id}
           style={{
             paddingTop: 6,
             paddingBottom: 6,
             borderRadius: 4,
+            width: '100%',
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -80,6 +109,6 @@ export const Reply = (props: ReplyProps) => {
           )}
         </FragmentBlockquote>
       </FragmentBlock>
-    </Flex>
+    </ReplyContainer>
   );
 };

@@ -554,8 +554,7 @@ export class ChatService extends BaseService {
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
-        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
-        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,

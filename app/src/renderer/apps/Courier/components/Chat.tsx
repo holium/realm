@@ -5,6 +5,9 @@ import {
   Text,
   timelineDate,
   MenuItemProps,
+  Menu,
+  Button,
+  Icon,
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
@@ -23,29 +26,25 @@ type ChatRowProps = {
   metadata: any;
   timestamp: number;
   type: ChatPathType;
+  isSelected: boolean;
   peersGetBacklog: boolean;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
-// const ChatRowStyle = styled(Row)`
-//   &.chat-row-open {
-//     height: 100%;
-//     width: 100%;
-//   }
-// `;
-
-export const ChatRowPresenter = ({
+export const ChatPresenter = ({
   path,
   title,
   peers,
   timestamp,
   type,
   metadata,
+  isSelected,
   onClick,
 }: ChatRowProps) => {
   const { ship } = useServices();
   const {
     inbox,
+    selectedChat,
     getChatTitle,
     setSubroute,
     setChat,
@@ -53,7 +52,6 @@ export const ChatRowPresenter = ({
     togglePinned,
   } = useChatStore();
   const { getOptions, setOptions } = useContextMenu();
-  const { dimensions } = useTrayApps();
   const cardRef = useRef(null);
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
@@ -126,6 +124,70 @@ export const ChatRowPresenter = ({
     }
   }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
 
+  const chatContextMenuOptions = useMemo(() => {
+    const menu: MenuItemProps[] = [];
+    if (!selectedChat || !ship) return menu;
+    const isAdmin = selectedChat.isHost(ship.patp);
+    menu.push({
+      id: 'chat-info',
+      icon: 'Info',
+      label: 'Info',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        setSubroute('chat-info');
+      },
+    });
+    menu.push({
+      id: 'mute-chat',
+      icon: 'NotificationOff',
+      label: 'Mute',
+      disabled: true,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+    if (selectedChat?.hidePinned) {
+      menu.push({
+        id: 'show-hidden-pinned',
+        icon: 'EyeOn',
+        label: 'Show hidden pins',
+        disabled: false,
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          selectedChat.setHidePinned(false);
+        },
+      });
+    }
+    if (isAdmin) {
+      menu.push({
+        id: 'clear-history',
+        icon: 'ClearHistory',
+        section: 2,
+        label: 'Clear history',
+        disabled: false,
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          selectedChat.clearChatBacklog();
+        },
+      });
+    }
+
+    menu.push({
+      id: 'leave-chat',
+      icon: 'Trash',
+      section: 2,
+      iconColor: '#ff6240',
+      labelColor: '#ff6240',
+      label: 'Delete chat',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+      },
+    });
+    return menu.filter(Boolean) as MenuItemProps[];
+  }, [selectedChat?.hidePinned, isSelected]);
+
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
   const resolvedTitle = useMemo(() => {
     if (!ship) return 'Error loading title';
@@ -155,7 +217,7 @@ export const ChatRowPresenter = ({
     chat && chat.lastMessage && chat.lastMessage[0];
 
   return (
-    <Row
+    <Flex
       ref={cardRef}
       id={chatRowId}
       onClick={(evt: any) => {
@@ -164,22 +226,29 @@ export const ChatRowPresenter = ({
         }
       }}
     >
-      <Flex
-        pointerEvents="none"
-        flexDirection="row"
-        gap={12}
-        alignItems="center"
-        width="100%"
-      >
+      <Flex flexDirection="row" gap={12} alignItems="center" width="100%">
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
-          <Flex
-            layoutId={`chat-${path}-avatar`}
-            layout="position"
-            transition={{
-              duration: 0.1,
-            }}
-          >
-            {chatAvatarEl}
+          <Flex>
+            {isSelected && (
+              <Button.IconButton
+                size={26}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  setSubroute('inbox');
+                }}
+              >
+                <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
+              </Button.IconButton>
+            )}
+            <Flex
+              layoutId={`chat-${path}-avatar`}
+              layout="position"
+              transition={{
+                duration: 0.1,
+              }}
+            >
+              {chatAvatarEl}
+            </Flex>
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
@@ -210,20 +279,36 @@ export const ChatRowPresenter = ({
             </Text.Custom>
           </Flex>
         </Flex>
-        <Flex alignItems="flex-end" flexDirection="column">
-          <Text.Custom
-            style={{ wordBreak: 'keep-all' }}
-            fontWeight={400}
-            fontSize={2}
-            opacity={0.3}
-          >
-            {timelineDate(new Date(timestamp))}
-          </Text.Custom>
-          <Flex height={14}>{/* unread count */}</Flex>
-        </Flex>
+        {isSelected ? (
+          <Flex>
+            <Menu
+              id={`chat-${path}-menu`}
+              orientation="bottom-left"
+              offset={{ x: 2, y: 2 }}
+              triggerEl={
+                <Button.IconButton size={26}>
+                  <Icon name="MoreHorizontal" size={22} opacity={0.5} />
+                </Button.IconButton>
+              }
+              options={contextMenuOptions}
+            />
+          </Flex>
+        ) : (
+          <Flex alignItems="flex-end" flexDirection="column">
+            <Text.Custom
+              style={{ wordBreak: 'keep-all' }}
+              fontWeight={400}
+              fontSize={2}
+              opacity={0.3}
+            >
+              {timelineDate(new Date(timestamp))}
+            </Text.Custom>
+            <Flex height={14}>{/* unread count */}</Flex>
+          </Flex>
+        )}
       </Flex>
-    </Row>
+    </Flex>
   );
 };
 
-export const ChatRow = observer(ChatRowPresenter);
+export const Chat = observer(ChatPresenter);

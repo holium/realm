@@ -33,6 +33,9 @@ const ChatStore = types
     isChatPinned(path: string) {
       return self.pinnedChats.includes(path);
     },
+    isChatSelected(path: string) {
+      return self.selectedChat?.path === path;
+    },
     get pinnedChatList() {
       return self.inbox
         .filter((c) => self.pinnedChats.includes(c.path))
@@ -75,10 +78,10 @@ const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      console.log(self.subroute);
-      if (self.subroute === 'inbox') {
-        self.subroute = 'chat';
-      }
+      console.log('selected', path);
+      // if (self.subroute === 'inbox') {
+      //   self.subroute = 'chat';
+      // }
     },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {

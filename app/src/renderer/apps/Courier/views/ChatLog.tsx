@@ -17,6 +17,9 @@ import { ChatMessageType, ChatModelType } from '../models';
 type ChatLogProps = {
   storage?: IuseStorage;
 };
+
+const replyHeight = 46;
+const pinHeight = 46;
 export const ChatLogPresenter = (_props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, getChatTitle, setSubroute } = useChatStore();
@@ -84,10 +87,10 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
   let height = 544;
 
   if (showPin) {
-    height = height - 50;
+    height = height - pinHeight;
   }
   if (selectedChat.replyingMsg) {
-    height = height - 50;
+    height = height - replyHeight;
   }
 
   return (
@@ -114,7 +117,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             justifyContent="center"
             alignItems="center"
             width={dimensions.width - 24}
-            height={dimensions.height - 100}
+            height={dimensions.height - 100 - 40}
           >
             <Text.Custom
               textAlign="center"
@@ -161,7 +164,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
           </Flex>
         )}
       </Flex>
-      <Flex position="relative" flexDirection="column" zIndex={16}>
+      <Flex position="relative" flexDirection="column" zIndex={16} mb={1}>
         {selectedChat.replyingMsg && (
           <ReplySection
             selectedChat={selectedChat}
@@ -173,6 +176,18 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             onCancel={() => selectedChat.clearReplying()}
           />
         )}
+      </Flex>
+      <Flex
+        initial={{
+          opacity: 0,
+        }}
+        animate={{ opacity: 1 }}
+        transition={{
+          delay: 0.2,
+          duration: 0.1,
+        }}
+        height={40}
+      >
         <ChatInputBox
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
@@ -205,7 +220,12 @@ const ReplySection = ({ selectedChat, onCancel }: ReplySectionProps) => {
     replyTo.sender
   );
   return (
-    <Flex height={50} flexDirection="column" alignItems="center">
+    <Flex
+      height={replyHeight}
+      flexDirection="column"
+      justifyContent="flex-end"
+      alignItems="center"
+    >
       <Reply
         id={replyTo.id}
         author={replyTo.sender}
