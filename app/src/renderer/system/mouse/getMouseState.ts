@@ -4,7 +4,8 @@ const isTextElement = (element: Element): boolean =>
   element instanceof HTMLTextAreaElement ||
   (element instanceof HTMLInputElement &&
     element.type !== 'checkbox' &&
-    element.type !== 'radio');
+    element.type !== 'radio') ||
+  element.classList.contains('Prosemirror');
 
 const isResizeHandler = (element: Element): boolean =>
   element.classList.contains('app-window-resize');

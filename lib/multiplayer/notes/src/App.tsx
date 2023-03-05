@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { schema } from 'prosemirror-schema-basic';
 import { Button, Flex, Text, Box } from '@holium/design-system';
 import { Clickable, useShips } from '@holium/realm-presence';
@@ -6,16 +7,42 @@ import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
 import { collabEditor } from './components/CollabEditor';
 
-const defaultTitle = 'Real-time notetaking, in 3 lines of JS';
+const Header = styled(Flex)`
+  width: 100%;
+  padding: 16px;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.06);
+`;
+
+const Paper = styled.div`
+  height: auto;
+  padding: 38px 32px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.06);
+  .ProseMirror {
+    outline: none;
+  }
+`;
+
+const Footer = styled(Flex)`
+  width: 100%;
+  padding: 16px;
+  gap: 16px;
+  justify-content: flex-end;
+`;
+
+const initialBody = '\n\n\n\n\n\n\n\n\n\n\n\n';
 
 export const App = () => {
   const [isReady, setIsReady] = useState(false);
-  const [title, setTitle] = useState(defaultTitle);
   const ships = useShips();
 
-  const onClear = () => setTitle('');
+  const onClear = () => {};
 
-  const onFill = () => setTitle(defaultTitle);
+  const onSave = () => {};
 
   const onEditorRef = (ref: HTMLDivElement) => {
     if (!ref) return;
@@ -24,7 +51,7 @@ export const App = () => {
       schema.node(
         'doc',
         null,
-        schema.node('paragraph', null, schema.text('Hello world!'))
+        schema.node('paragraph', null, schema.text(initialBody))
       )
     );
 
@@ -47,51 +74,46 @@ export const App = () => {
     <Flex
       height="100%"
       flexDirection="column"
+      justifyContent="space-between"
       alignItems="center"
-      justifyContent="center"
-      padding="12px"
+      background="#f5f5f5"
     >
-      <Flex flexDirection="column" width="100%" maxWidth="600px" gap="24px">
-        <Flex
-          width="100%"
-          py="8px"
-          alignItems="center"
-          justifyContent="space-between"
-          borderBottom="1px solid #000"
-        >
-          <Text.H3>{title}</Text.H3>
-          <Flex gap={8}>
-            {ships.map((ship) => (
-              <Box
-                key={ship}
-                width={24}
-                height={24}
-                borderRadius="50%"
-                background="yellow"
-              />
-            ))}
-          </Flex>
+      <Header>
+        <Text.H5 fontWeight={600}>Writing with the boys</Text.H5>
+        <Flex gap={8}>
+          {ships.map((ship) => (
+            <Box
+              key={ship}
+              width={24}
+              height={24}
+              borderRadius="50%"
+              background="yellow"
+            />
+          ))}
         </Flex>
-        <div
-          ref={onEditorRef}
-          style={{
-            padding: '8px',
-            border: '1px solid #000',
-          }}
-        />
-        <Flex gap="16px" justifyContent="flex-end">
-          <Clickable id="clear" onClick={onClear} onOtherClick={onClear}>
-            <Button.Secondary height={32} px={2} fontSize="16px">
-              Clear
-            </Button.Secondary>
-          </Clickable>
-          <Clickable id="fill" onClick={onFill} onOtherClick={onFill}>
-            <Button.Primary height={32} px={2} fontSize="16px">
-              Fill
-            </Button.Primary>
-          </Clickable>
-        </Flex>
+      </Header>
+      <Flex
+        flexDirection="column"
+        width="100%"
+        maxWidth="600px"
+        gap="24px"
+        padding="16px"
+        overflowY="auto"
+      >
+        <Paper ref={onEditorRef} />
       </Flex>
+      <Footer>
+        <Clickable id="clear" onClick={onClear} onOtherClick={onClear}>
+          <Button.Secondary height={32} px={2} fontSize="16px">
+            Clear
+          </Button.Secondary>
+        </Clickable>
+        <Clickable id="fill" onClick={onSave} onOtherClick={onSave}>
+          <Button.Primary height={32} px={2} fontSize="16px">
+            Save
+          </Button.Primary>
+        </Clickable>
+      </Footer>
     </Flex>
   );
 };
