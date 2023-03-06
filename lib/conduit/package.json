@@ -25,9 +25,8 @@
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "@types/eventsource": "^1.1.11",
     "axios": "^0.27.2",
     "babel-loader": "^8.2.5",
-    "eventsource": "^2.0.2"
+    "eventsource": "https://github.com/leowini/eventsource.git#master"
   }
 }
