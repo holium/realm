@@ -13,6 +13,7 @@ import {
   Icon,
   TextInput,
 } from '@holium/design-system';
+// import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
@@ -27,6 +28,8 @@ import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { observer } from 'mobx-react-lite';
+import { InvitePermissionType, PeerModelType } from '../models';
+import { ExpiresValue, millisecondsToExpires } from '../types';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -57,11 +60,6 @@ export const createPeopleForm = (
   };
 };
 
-type PeerType = {
-  peer: string;
-  role: string;
-};
-
 type ChatInfoProps = {
   storage: IuseStorage;
 };
@@ -69,7 +67,6 @@ type ChatInfoProps = {
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { selectedChat, setSubroute, getChatTitle } = useChatStore();
   const { friends, ship } = useServices();
-  const [peers, setPeers] = useState<PeerType[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -100,36 +97,33 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   );
 
   useEffect(() => {
-    if (!selectedChat) return;
-    ChatDBActions.getChatPeers(selectedChat.path).then((peers: PeerType[]) => {
-      setPeers(
-        peers.sort((a: PeerType, b: PeerType) =>
-          // sort host to top, then self, then others
-          a.role === 'host'
-            ? -1
-            : b.role === 'host'
-            ? 1
-            : a.peer === ship!.patp
-            ? -1
-            : b.peer === ship!.patp
-            ? 1
-            : 0
-        )
-      );
-    });
+    if (!selectedChat || !ship) return;
+    selectedChat.fetchPeers(ship.patp);
   }, [selectedChat]);
+
   const { canUpload, promptUpload } = useFileUpload({ storage });
-  const [disappearDuration, setDisappearDuration] = useState('off');
 
   if (!selectedChat) return null;
-  const { type, metadata, path, peersGetBacklog, updatePeersGetBacklog } =
-    selectedChat;
+  const {
+    sortedPeers,
+    type,
+    metadata,
+    path,
+    peersGetBacklog,
+    invites,
+    expiresDuration,
+    updatePeersGetBacklog,
+    updateInvitePermissions,
+    updateExpiresDuration,
+  } = selectedChat;
   // const title = metadata?.title;
 
   const editMetadata = (editedMetadata: any) => {
     if (!selectedChat) return;
     selectedChat.updateMetadata(editedMetadata);
   };
+
+  // const setInvote
 
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
@@ -146,9 +140,9 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    peers.find((peer) => peer.peer === ship!.patp)?.role === 'host';
+    sortedPeers.find((peer) => peer.ship === ship!.patp)?.role === 'host';
 
-  const patps = peers.map((peer) => peer.peer);
+  const patps = sortedPeers.map((peer) => peer.ship);
 
   const chatAvatarEl = (
     <ChatAvatar
@@ -327,6 +321,35 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           <Flex
             width="100%"
             px={2}
+            pt={1}
+            // py={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Flex alignItems="center">
+              <Icon name="ChatInvitePermission" size={24} mr={2} />
+              <Text.Custom alignItems="center" fontWeight={400} fontSize="14px">
+                Invites
+              </Text.Custom>
+            </Flex>
+            <Select
+              disabled={!amHost}
+              id="select-invite-permission"
+              width={120}
+              options={[
+                { label: 'Host only', value: 'host' },
+                { label: 'Anyone', value: 'anyone' },
+              ]}
+              selected={invites}
+              onClick={(value: string) => {
+                updateInvitePermissions(value as InvitePermissionType);
+              }}
+            />
+          </Flex>
+
+          <Flex
+            width="100%"
+            px={2}
             py={2}
             justifyContent="space-between"
             alignItems="center"
@@ -343,16 +366,18 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               width={120}
               options={[
                 { label: 'Off', value: 'off' },
-                { label: '4 weeks', value: '4-week' },
+                { label: '1 month', value: '1-month' },
                 { label: '1 week', value: '1-week' },
                 { label: '1 day', value: '1-day' },
                 { label: '12 hours', value: '12-hours' },
                 { label: '1 hour', value: '1-hour' },
                 { label: '10 minutes', value: '10-mins' },
               ]}
-              selected={disappearDuration}
+              selected={
+                expiresDuration ? millisecondsToExpires(expiresDuration) : 'off'
+              }
               onClick={(value: string) => {
-                setDisappearDuration(value);
+                updateExpiresDuration(value as ExpiresValue);
               }}
             />
           </Flex>
@@ -361,7 +386,10 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       {/* Members */}
       <Flex my={2} flexDirection="column">
         <Box mb={1}>
-          <SectionDivider label={`${peers.length} members`} alignment="left" />
+          <SectionDivider
+            label={`${sortedPeers.length} members`}
+            alignment="left"
+          />
         </Box>
         <Flex py={1} width="100%" px={1}>
           <TextInput
@@ -405,17 +433,17 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             }}
           />
         </Flex>
-        {peers.map((peer) => {
-          const id = `${path}-peer-${peer.peer}`;
+        {sortedPeers.map((peer: PeerModelType) => {
+          const id = `${path}-peer-${peer.ship}`;
           const options = [];
-          if (peer.peer !== ship?.patp) {
+          if (peer.ship !== ship?.patp) {
             // TODO check if peer is friend
             options.push({
               id: `${id}-add-friend`,
               label: 'Add as friend',
               onClick: (evt: any) => {
                 evt.stopPropagation();
-                console.log('adding friend', peer.peer);
+                console.log('adding friend', peer.ship);
               },
             });
           }
@@ -425,7 +453,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               label: 'Remove',
               onClick: (evt: any) => {
                 evt.stopPropagation();
-                ChatDBActions.removePeer(path, peer.peer)
+                ChatDBActions.removePeer(path, peer.ship)
                   .then(() => {
                     console.log('removed peer');
                   })
@@ -442,12 +470,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           //     console.log('view profile');
           //   },
           // });
-
           return (
             <PeerRow
               key={id}
               id={id}
-              peer={peer.peer}
+              peer={peer.ship}
               role={peer.role}
               options={options}
             />

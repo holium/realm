@@ -1,7 +1,15 @@
+import { InvitePermissionType } from 'renderer/apps/Courier/models';
+
 export type PathsRow = {
   path: string;
   type: string;
   metadata: any;
+  invites: InvitePermissionType;
+  pins: string[];
+  'max-expires-at-duration': number;
+  'peers-get-backlog': boolean;
+  'created-at': number;
+  'updated-at': number;
 };
 
 export type MessagesRow = {

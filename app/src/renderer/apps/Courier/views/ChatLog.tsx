@@ -51,7 +51,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
       title={resolvedTitle}
       type={type}
       path={path}
-      peers={peers}
+      peers={peers.map((p) => p.ship)}
       image={metadata?.image}
       canEdit={false}
     />

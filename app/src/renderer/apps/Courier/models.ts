@@ -3,6 +3,16 @@ import { flow, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { expiresInMap, ExpiresValue } from './types';
+
+const InvitePermission = types.enumeration(['host', 'anyone']);
+export type InvitePermissionType = Instance<typeof InvitePermission>;
+
+const PeerModel = types.model('PeerModel', {
+  role: types.enumeration(['host', 'member']),
+  ship: types.string,
+});
+export type PeerModelType = Instance<typeof PeerModel>;
 
 export const ChatMetadataModel = types.model({
   title: types.string,
@@ -42,7 +52,6 @@ export const ChatMessage = types
       self.pending = pending;
     },
     updateContents(contents: any, updatedAt: number) {
-      console.log('updateContents', toJS(self.contents), contents);
       self.contents = contents;
       self.updatedAt = updatedAt;
     },
@@ -64,7 +73,8 @@ export const Chat = types
     path: types.identifier,
     type: ChatTypes,
     host: types.string,
-    peers: types.array(types.string),
+    peers: types.array(PeerModel),
+    // peerRows: types.array(PeerModel),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
     lastMessage: types.maybeNull(types.array(types.frozen())),
@@ -73,17 +83,33 @@ export const Chat = types
     updatedAt: types.maybeNull(types.number),
     expiresDuration: types.maybeNull(types.number),
     messages: types.optional(types.array(ChatMessage), []),
+    invites: InvitePermission,
     metadata: ChatMetadataModel,
     // ui state
     pending: types.optional(types.boolean, false),
     hidePinned: types.optional(types.boolean, false),
     editingMsg: types.maybeNull(types.reference(ChatMessage)),
     replyingMsg: types.maybeNull(types.reference(ChatMessage)),
+    our: types.maybe(types.string),
   })
   .views((self) => ({
     get pinnedChatMessage() {
       if (!self.pinnedMessageId) return null;
       return self.messages.find((m) => m.id === self.pinnedMessageId);
+    },
+    get sortedPeers() {
+      return self.peers.slice().sort((a: PeerModelType, b: PeerModelType) =>
+        // sort host to top, then self, then others
+        a.role === 'host'
+          ? -1
+          : b.role === 'host'
+          ? 1
+          : a.ship === self.our
+          ? -1
+          : b.ship === self.our
+          ? 1
+          : 0
+      );
     },
     isEditing(msgId: string) {
       return self.editingMsg?.id === msgId;
@@ -112,6 +138,17 @@ export const Chat = types
       } catch (error) {
         console.error(error);
         return [];
+      }
+    }),
+    fetchPeers: flow(function* (our: string) {
+      try {
+        self.our = our;
+        const peers = yield ChatDBActions.getChatPeers(self.path);
+        self.peers = peers.map((p: PeerModelType) =>
+          PeerModel.create({ ship: p.ship, role: p.role })
+        );
+      } catch (error) {
+        console.error(error);
       }
     }),
     sendMessage: flow(function* (path: string, fragments: any[]) {
@@ -216,7 +253,9 @@ export const Chat = types
         yield ChatDBActions.editChat(
           self.path,
           stringifyMetadata(self.metadata),
-          self.peersGetBacklog
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
         );
         return self.metadata;
       } catch (e) {
@@ -232,11 +271,47 @@ export const Chat = types
         yield ChatDBActions.editChat(
           self.path,
           stringifyMetadata(self.metadata),
-          peersGetBacklog
+          self.invites,
+          peersGetBacklog,
+          self.expiresDuration
         );
       } catch (e) {
         console.error(e);
         self.peersGetBacklog = oldPeerGetBacklog;
+      }
+    }),
+    updateInvitePermissions: flow(function* (
+      invitePermission: InvitePermissionType
+    ) {
+      const oldInvitePermission = self.invites;
+      self.invites = invitePermission;
+      try {
+        yield ChatDBActions.editChat(
+          self.path,
+          stringifyMetadata(self.metadata),
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
+        );
+      } catch (e) {
+        console.error(e);
+        self.invites = oldInvitePermission;
+      }
+    }),
+    updateExpiresDuration: flow(function* (expiresValue: ExpiresValue) {
+      const oldExpiresDuration = self.expiresDuration;
+      self.expiresDuration = expiresInMap[expiresValue] || null;
+      try {
+        yield ChatDBActions.editChat(
+          self.path,
+          stringifyMetadata(self.metadata),
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
+        );
+      } catch (e) {
+        console.error(e);
+        self.expiresDuration = oldExpiresDuration;
       }
     }),
     // Store hidePinned in localStorage
@@ -256,6 +331,14 @@ export const Chat = types
         return self.messages;
       }
     }),
+    onPeerAdded(ship: string, role: string) {
+      self.peers.push(PeerModel.create({ ship, role }));
+    },
+    onPeerDeleted(ship: string) {
+      const peer = self.peers.find((p) => p.ship === ship);
+      if (!peer) return;
+      self.peers.remove(peer);
+    },
     // setPeers(peers: string[]) {},
     // setLastMessage(message: any) {},
     // setLastSender(sender: string) {},

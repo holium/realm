@@ -50,7 +50,7 @@ const ChatStore = types
       const chat = self.inbox.find((c) => c.path === path);
       if (!ship || !chat) return 'Error loading title';
       if (chat.peers.length === 1 && chat.type === 'dm') {
-        return chat.peers.filter((p) => p !== ship)[0];
+        return chat.peers.filter((p) => p.ship !== ship)[0].ship;
       } else {
         return chat.metadata.title;
       }
@@ -188,20 +188,28 @@ ChatDBActions.onDbChange((_evt, type, data) => {
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );
-    if (!selectedChat) {
-      console.warn('selected chat not found');
-      return;
-    }
+    if (!selectedChat) return;
     selectedChat.addMessage(data);
   }
   if (type === 'message-edited') {
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );
-    if (!selectedChat) {
-      console.warn('selected chat not found');
-      return;
-    }
+    if (!selectedChat) return;
     selectedChat.replaceMessage(data);
+  }
+  if (type === 'peer-added') {
+    const selectedChat = chatStore.inbox.find(
+      (chat) => chat.path === data.path
+    );
+    if (!selectedChat) return;
+    console.log('onPeerAdded', toJS(data));
+    selectedChat.onPeerAdded(data.ship, data.role);
+  }
+  if (type === 'peer-deleted') {
+    const selectedChat = chatStore.inbox.find((chat) => chat.path === data.row);
+    if (!selectedChat) return;
+    console.log('onPeerDeleted', toJS(data));
+    selectedChat.onPeerDeleted(data.ship);
   }
 });
