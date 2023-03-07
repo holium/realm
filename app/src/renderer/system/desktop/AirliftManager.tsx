@@ -76,8 +76,6 @@ const AirliftManagerPresenter = () => {
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
 
-  const getId = (nodeType: string) => `airlift_${nodeType}_${nodes.length + 1}`;
-
   const onDrop = useCallback(
     (event: any) => {
       event.preventDefault();
@@ -95,8 +93,11 @@ const AirliftManagerPresenter = () => {
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
-      const airliftId = getId(type);
-      console.log('airliftId', airliftId);
+      // const airliftId = getId(type);
+      const airliftCount = spaces.selected
+        ? airlift.nodes.get(spaces.selected?.path)?.length || 0
+        : 0;
+      const airliftId = `airlift_${type}_${airliftCount + 1}`;
       const newNode = {
         id: airliftId,
         type,

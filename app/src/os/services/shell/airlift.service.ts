@@ -169,8 +169,6 @@ export class AirliftService extends BaseService {
     /*space: string,*/
     changes: NodeChange[]
   ) {
-    console.log('trying to change');
-    console.log(changes);
     this.state!.onNodesChange('/~zod/our', changes);
   }
 
@@ -196,9 +194,6 @@ export class AirliftService extends BaseService {
     airliftId: string,
     name: string
   ) {
-    console.log('space', space);
-    console.log('airliftId', airliftId);
-    console.log('setting name', name);
     const spaceNodes = this.state!.nodes.get(space);
     if (spaceNodes) {
       spaceNodes.find((node: any) => node.id === airliftId)!.data.setName(name);

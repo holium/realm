@@ -240,14 +240,9 @@ export const AirliftStore = types
     },
     onNodesChange: (space: string, changes: NodeChange[]) => {
       const newNodes = getSnapshot(self.nodes.get(space)!);
-      const oldNodes = getSnapshot(self.nodes.get(space)!);
       self.nodes.set(space, cast(applyNodeChanges(changes, newNodes)));
-      const myNewNodes = getSnapshot(self.nodes.get(space)!);
-      console.log(oldNodes === myNewNodes);
     },
     dropAirlift: (space: string, airlift: Node) => {
-      console.log('space', space);
-      console.log('airlift', airlift);
       if (!self.nodes.has(space)) {
         self.nodes.set(space, []);
       }

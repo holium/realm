@@ -30,8 +30,7 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
         id={`${data.id}-name`}
         name={`${data.id}-name`}
         type="text"
-        defaultValue="%"
-        value={data.name}
+        value={data.name || '%'}
         onChange={(event: any) => {
           event.preventDefault();
           const name = event.target.value;
