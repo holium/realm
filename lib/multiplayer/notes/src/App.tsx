@@ -22,18 +22,35 @@ const Header = styled(Flex)`
   padding: 16px;
   align-items: center;
   justify-content: space-between;
-  background-color: white;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  * {
+    color: #8b949e;
+  }
 `;
 
-const Paper = styled.div`
+const Editor = styled.div`
+  width: 100%;
+  max-width: 600px;
   height: auto;
-  padding: 38px 32px;
-  background-color: white;
+  flex: 1;
+  padding: 24px 0;
+  color: #c8d1d9;
+  border: 1px solid #30363c;
+  background-color: #0e1117;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace;
+  font-size: 12px;
   border-radius: 4px;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
   .ProseMirror {
     outline: none;
+    line-height: 1.5em;
+  }
+  p {
+    padding: 0 20px;
+  }
+  .current-element {
+    background-color: #30363c;
   }
 `;
 
@@ -129,34 +146,24 @@ export const App = () => {
       flexDirection="column"
       justifyContent="space-between"
       alignItems="center"
-      background="#f5f5f5"
+      background="#161B22"
     >
       <Header>
-        <Text.H5 fontWeight={600}>Writing with the boys</Text.H5>
+        <Text.H5 fontWeight={600}>desks/courier/app/app.hoon</Text.H5>
         <Flex gap={8}>
           {ships.map((ship) => (
             <Avatar
+              key={ship}
               simple={false}
               size={24}
-              // avatar={avatar}
               patp={ship}
               // sigilColor={[sigilColor || '#000000', 'white']}
               sigilColor={['#000000', 'white']}
-              borderRadiusOverride="6px"
             />
           ))}
         </Flex>
       </Header>
-      <Flex
-        flexDirection="column"
-        width="100%"
-        maxWidth="600px"
-        gap="24px"
-        padding="16px"
-        overflowY="auto"
-      >
-        <Paper ref={onEditorRef} />
-      </Flex>
+      <Editor ref={onEditorRef} />
       <Footer>
         <Clickable id="clear" onClick={onClear} onOtherClick={onClear}>
           <Button.Secondary height={32} px={2} fontSize="16px">

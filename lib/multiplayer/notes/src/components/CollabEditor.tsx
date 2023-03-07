@@ -1,5 +1,5 @@
-import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, Transaction, Plugin } from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { undo, redo, history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap } from 'prosemirror-commands';
@@ -28,9 +28,28 @@ export const collabEditor = (
       doc: authority.doc,
       plugins: [
         history(),
-        keymap({ 'Mod-z': undo, 'Mod-y': redo }),
+        keymap({
+          'Mod-z': undo,
+          'Mod-y': redo,
+        }),
         keymap(baseKeymap),
         collab({ version: authority.steps.length }),
+        new Plugin({
+          props: {
+            decorations(state) {
+              const selection = state.selection;
+              const resolved = state.doc.resolve(selection.from);
+              const decoration = Decoration.node(
+                resolved.before(),
+                resolved.after(),
+                { class: 'current-element' }
+              );
+              // This is equivalent to:
+              // const decoration = Decoration.node(resolved.start() - 1, resolved.end() + 1, {class: 'current-element'});
+              return DecorationSet.create(state.doc, [decoration]);
+            },
+          },
+        }),
       ],
     }),
     dispatchTransaction(transaction) {

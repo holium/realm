@@ -13,12 +13,12 @@ import {
   TransactionPayload,
 } from '@holium/realm-multiplayer';
 
-const setUpMultiplayerStreaming = async (
+const connectWebviewToMultiplayer = async (
   ship: string,
   roomsManager: RoomsManager,
   webview: Electron.WebviewTag
 ) => {
-  console.log('Streaming multiplayer data to webview.');
+  console.log('Connecting webview to multiplayer.');
 
   roomsManager.on(
     RoomManagerEvent.OnDataChannel,
@@ -110,7 +110,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      setUpMultiplayerStreaming(ship.patp, roomsManager, webview);
+      connectWebviewToMultiplayer(ship.patp, roomsManager, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);
