@@ -3,19 +3,12 @@ import styled from 'styled-components';
 import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
-import { Button, Flex, Text, Avatar } from '@holium/design-system';
-import {
-  Clickable,
-  useShips,
-  useTransactions,
-} from '@holium/realm-presence';
+import { Flex, Text, Avatar } from '@holium/design-system';
+import { useShips, useTransactions } from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
-import {
-  applyAndSendTransaction,
-  collabEditor,
-} from './components/CollabEditor';
+import { collabEditor } from './components/CollabEditor';
 
 const Header = styled(Flex)`
   width: 100%;
@@ -32,7 +25,6 @@ const EditorContainer = styled(Flex)`
   flex: 1;
   flex-direction: column;
   width: 100%;
-  padding: 24px 0;
   color: #c8d1d9;
   border: 1px solid #30363c;
   background-color: #0e1117;
@@ -45,31 +37,21 @@ const EditorContainer = styled(Flex)`
     outline: none;
     line-height: 1.5em;
   }
-  p {
-    padding: 0 20px;
-  }
   p::before {
     counter-increment: line-counter;
     content: counter(line-counter);
     display: inline-block;
-    width: 1.5em;
-    margin-right: 0.5em;
-    text-align: right;
+    width: 60px;
+    text-align: center;
     color: #8b949e;
+    border-right: 1px solid #30363c;
   }
   .current-element {
-    background-color: #30363c;
+    background-color: rgba(48, 54, 60, 0.5);
     &::before {
       color: #fff;
     }
   }
-`;
-
-const Footer = styled(Flex)`
-  width: 100%;
-  padding: 16px;
-  gap: 16px;
-  justify-content: flex-end;
 `;
 
 export const App = () => {
@@ -92,36 +74,6 @@ export const App = () => {
 
   const ships = useShips();
   const { sendTransaction } = useTransactions({ onTransaction });
-
-  const helloWorld = () => {
-    if (!editorView || !authority) return;
-
-    const transaction: Transaction =
-      editorView.state.tr.insertText('Hello world!');
-
-    applyAndSendTransaction(
-      editorView,
-      authority,
-      transaction,
-      sendTransaction
-    );
-  };
-
-  const onClear = () => {
-    if (!editorView || !authority) return;
-
-    const transaction: Transaction = editorView.state.tr.delete(
-      0,
-      editorView.state.doc.nodeSize - 2
-    );
-
-    applyAndSendTransaction(
-      editorView,
-      authority,
-      transaction,
-      sendTransaction
-    );
-  };
 
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;
@@ -192,18 +144,6 @@ export const App = () => {
         <div ref={onEditorRef} />
         <Flex flex={1} onClick={moveToEnd} />
       </EditorContainer>
-      <Footer>
-        <Clickable id="clear" onClick={onClear} onOtherClick={onClear}>
-          <Button.Secondary height={32} px={2} fontSize="16px">
-            Clear
-          </Button.Secondary>
-        </Clickable>
-        <Clickable id="fill" onClick={helloWorld} onOtherClick={helloWorld}>
-          <Button.Primary height={32} px={2} fontSize="16px">
-            Save
-          </Button.Primary>
-        </Clickable>
-      </Footer>
     </Flex>
   );
 };
