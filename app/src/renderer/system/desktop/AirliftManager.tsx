@@ -56,12 +56,10 @@ const AirliftManagerPresenter = () => {
   }, []);
 
   const nodes = useMemo(() => {
-    console.log('nodes changed');
     return Array.from(
       spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
     );
   }, [getSnapshot(airlift.nodes)]);
-  console.log('nodes', nodes);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(

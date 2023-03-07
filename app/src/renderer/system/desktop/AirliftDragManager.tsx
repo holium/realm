@@ -52,7 +52,11 @@ const AirliftDragManagerPresenter = () => {
 
   const nodes = useMemo(() => {
     return Array.from(
-      spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
+      spaces.selected
+        ? airlift.nodes
+            .get(spaces.selected?.path)
+            ?.filter((node) => node.dragging) || []
+        : []
     );
   }, [getSnapshot(airlift.nodes)]);
 
