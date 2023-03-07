@@ -156,8 +156,8 @@
   [cards state]
 ::
 ++  edit-chat
-::  :realm-chat &action [%edit-chat /realm-chat/path-id ~ %.n]
-  |=  [act=[=path metadata=(map cord cord) peers-get-backlog=?] state=state-0 =bowl:gall]
+::  :realm-chat &action [%edit-chat /realm-chat/path-id ~ %.n %host *@dr]
+  |=  [act=[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  pathpeers  (scry-peers path.act bowl)
@@ -413,6 +413,8 @@
       :~  [%path pa]
           [%metadata (om so)]
           [%peers-get-backlog bo]
+          [%invites (se %tas)]
+          [%max-expires-at-duration null-or-dri]  :: specify in integer milliseconds, or null for "not set"
       ==
     ::
     ++  de-ship  (su ;~(pfix sig fed:ag))
