@@ -91,6 +91,7 @@ export const Chat = types
     editingMsg: types.maybeNull(types.reference(ChatMessage)),
     replyingMsg: types.maybeNull(types.reference(ChatMessage)),
     our: types.maybe(types.string),
+    isReacting: types.maybe(types.string),
   })
   .views((self) => ({
     get pinnedChatMessage() {
@@ -218,9 +219,16 @@ export const Chat = types
     clearReplying() {
       self.replyingMsg = null;
     },
+    setReacting(msgId: string) {
+      self.isReacting = msgId;
+    },
+    clearReacting() {
+      self.isReacting = undefined;
+    },
     setEditing(message: ChatMessageType) {
       self.editingMsg = message;
     },
+
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
       const oldMessages = self.messages;
       try {

@@ -47,6 +47,16 @@ export const ChatMessagePresenter = ({
       });
     }
     menu.push({
+      id: `${messageRowId}-react-to`,
+      icon: 'Emoji',
+      label: 'React',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        selectedChat.setReacting(message.id);
+      },
+    });
+    menu.push({
       id: `${messageRowId}-reply-to`,
       icon: 'Reply',
       label: 'Reply',

@@ -12,12 +12,13 @@ import { AnimatePresence } from 'framer-motion';
 import { lighten } from 'polished';
 import { getVar } from '../../util/colors';
 
-const WIDTH = 350;
+const WIDTH = 300;
+const HEIGHT = 350;
 const ship = window.ship ?? 'zod';
 
 const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
   const menuWidth = WIDTH;
-  const menuHeight = 450;
+  const menuHeight = HEIGHT;
 
   const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
   const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
@@ -135,6 +136,7 @@ export type OnReactionPayload = {
 
 type ReactionProps = {
   variant?: 'overlay' | 'inline';
+  defaultIsOpen: boolean;
   reactions: FragmentReactionType[];
   size?: keyof typeof ReactionSizes;
   onReaction: (payload: OnReactionPayload) => void;
@@ -144,10 +146,11 @@ export const Reactions = (props: ReactionProps) => {
   const {
     variant = 'overlay',
     size = 'medium',
+    defaultIsOpen = false,
     reactions = [],
     onReaction,
   } = props;
-  const [isReacting, setIsReacting] = useState<boolean>(false);
+  const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
   const [anchorPoint, setAnchorPoint] = useState<{
     x: number;
     y: number;
@@ -273,6 +276,8 @@ export const Reactions = (props: ReactionProps) => {
             >
               <EmojiPicker
                 emojiVersion="0.6"
+                height={HEIGHT}
+                width={WIDTH}
                 previewConfig={{
                   showPreview: false,
                 }}
@@ -288,5 +293,45 @@ export const Reactions = (props: ReactionProps) => {
         </AnimatePresence>
       </Flex>
     </ReactionRow>
+  );
+};
+
+type ReactionPickerProps = {
+  isReacting: boolean;
+  anchorPoint: { x: number; y: number } | null;
+  onClick: (emoji: string) => void;
+};
+
+export const ReactionPicker = ({
+  isReacting,
+  anchorPoint,
+  onClick,
+}: ReactionPickerProps) => {
+  return (
+    <Flex
+      id="emoji-picker"
+      data-is-open={isReacting.toString()}
+      position="absolute"
+      zIndex={4}
+      initial={{ x: anchorPoint?.x, y: anchorPoint?.y, opacity: 0 }}
+      animate={{ x: anchorPoint?.x, y: anchorPoint?.y, opacity: 1 }}
+      exit={{ x: anchorPoint?.x, y: anchorPoint?.y, opacity: 0 }}
+      transition={{ duration: 0.15 }}
+    >
+      <EmojiPicker
+        emojiVersion="0.6"
+        height={HEIGHT}
+        width={WIDTH}
+        previewConfig={{
+          showPreview: false,
+        }}
+        defaultSkinTone={SkinTones.NEUTRAL}
+        onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
+          evt.stopPropagation();
+          onClick(emojiData.unified);
+        }}
+        autoFocusSearch={false}
+      />
+    </Flex>
   );
 };
