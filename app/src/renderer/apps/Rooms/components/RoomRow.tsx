@@ -42,7 +42,7 @@ const RoomRowPresenter = ({
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
   const isLiveColor = useMemo(() => darken(0.02, bgColor), [bgColor]);
 
-  const presentCount = roomsManager.protocol.peers.size + 1; // to include self
+  let presentCount = present?.length ?? 0;
   let peopleText = 'people';
   if (presentCount === 1) {
     peopleText = 'person';
