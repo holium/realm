@@ -1,5 +1,5 @@
 import { Flex, TextInput } from '@holium/design-system';
-import { KeyboardEventHandler, useState } from 'react';
+import { KeyboardEventHandler } from 'react';
 import { observer } from 'mobx-react';
 import { AirliftArm } from './AirliftArm';
 import { AirliftDataType } from 'os/services/shell/airlift.model';
@@ -13,10 +13,9 @@ interface AgentNodeProps {
 
 export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
   const { spaces } = useServices();
-  const [created, setCreated] = useState(false);
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === 'Enter' && spaces.selected) {
-      setCreated(true);
+      AirliftActions.setAgentCreated(spaces.selected.path, data.id);
       AirliftActions.toggleAgentExpand(spaces.selected.path, data.id);
     }
   };
@@ -39,7 +38,7 @@ export const AgentNode = observer(({ data, isConnectable }: AgentNodeProps) => {
           }
         }}
         onKeyDown={onKeyDown}
-        disabled={created}
+        disabled={data.created}
         onClick={() =>
           spaces.selected &&
           AirliftActions.toggleAgentExpand(spaces.selected.path, data.id)

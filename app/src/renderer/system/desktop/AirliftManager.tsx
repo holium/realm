@@ -59,7 +59,7 @@ const AirliftManagerPresenter = () => {
     return Array.from(
       spaces.selected ? airlift.nodes.get(spaces.selected?.path) || [] : []
     );
-  }, [getSnapshot(airlift.nodes)]);
+  }, [getSnapshot(airlift.nodes), spaces.selected]);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect = useCallback(
@@ -105,6 +105,7 @@ const AirliftManagerPresenter = () => {
         data: {
           id: airliftId,
           showDelete: false,
+          created: false,
           agent: {
             expanded: false,
             arms: {

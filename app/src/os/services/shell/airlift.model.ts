@@ -153,10 +153,14 @@ export const AirliftData = types
     name: types.maybe(types.string),
     showDelete: types.boolean,
     agent: AirliftAgent,
+    created: types.boolean,
   })
   .actions((self) => ({
     setName(name: string) {
       self.name = name;
+    },
+    setCreated() {
+      self.created = true;
     },
     promptDelete() {
       self.showDelete = true;

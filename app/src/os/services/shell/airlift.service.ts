@@ -23,6 +23,7 @@ export class AirliftService extends BaseService {
     'realm.airlift.prompt-delete': this.promptDelete,
     'realm.airlift.unprompt-delete': this.unpromptDelete,
     'realm.airlift.set-agent-name': this.setAgentName,
+    'realm.airlift.set-agent-created': this.setAgentCreated,
     /*'realm.airlift.on-edges-change': this.onEdgesChange,
     'realm.airlift.on-connect': this.onConnect,*/
   };
@@ -94,6 +95,13 @@ export class AirliftService extends BaseService {
         space,
         airliftId,
         name
+      );
+    },
+    setAgentCreated: (space: string, airliftId: string) => {
+      return ipcRenderer.invoke(
+        'realm.airlift.set-agent-created',
+        space,
+        airliftId
       );
     },
     /*onEdgesChange: (changes: EdgeChange[]) => {
@@ -197,6 +205,17 @@ export class AirliftService extends BaseService {
     const spaceNodes = this.state!.nodes.get(space);
     if (spaceNodes) {
       spaceNodes.find((node: any) => node.id === airliftId)!.data.setName(name);
+    }
+  }
+
+  async setAgentCreated(
+    _event: IpcMainInvokeEvent,
+    space: string,
+    airliftId: string
+  ) {
+    const spaceNodes = this.state!.nodes.get(space);
+    if (spaceNodes) {
+      spaceNodes.find((node: any) => node.id === airliftId)!.data.setCreated();
     }
   }
 
