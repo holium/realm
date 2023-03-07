@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
-import { OnReactionPayload, Reactions, ReactionPicker } from './Reaction';
+import {
+  OnReactionPayload,
+  Reactions,
+  ReactionPicker,
+  ReactionPickerStyle,
+} from './Reaction';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
-import styled from 'styled-components';
 
 export default {
   component: Reactions,
@@ -36,35 +40,6 @@ export const Default: ComponentStory<typeof Reactions> = () => {
     </Flex>
   );
 };
-
-const ReactionPickerStyle = styled.div`
-  .EmojiPickerReact {
-    --epr-category-label-height: 30px;
-    --epr-category-navigation-button-size: 24px;
-    --epr-emoji-size: 24px;
-    --epr-search-input-height: 34px;
-    font-size: 14px;
-  }
-  .epr-header-overlay {
-    padding: 8px !important;
-  }
-  .epr-skin-tones {
-    padding-left: 0px !important;
-    padding-right: 2px !important;
-  }
-  .epr-category-nav {
-    padding: 0px 8px !important;
-    padding-bottom: 4px !important;
-    --epr-category-navigation-button-size: 24px;
-  }
-  .ul.epr-emoji-list {
-    padding-bottom: 8px !important;
-  }
-
-  /* .epr-category-nav {
-
-  } */
-`;
 
 export const Picker: ComponentStory<typeof ReactionPicker> = () => {
   return (

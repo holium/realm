@@ -3,7 +3,7 @@ export { PinnedMessage } from './Bubble/Pinned';
 export { Reply } from './Bubble/Reply';
 export * from './Bubble/Bubble.types';
 export * from './Bubble/Bubble.styles';
-export { Reactions } from './Bubble/Reaction';
+export { Reactions, ReactionPicker } from './Bubble/Reaction';
 export { Block, BlockStyle } from './Block/Block';
 export type { BlockProps } from './Block/Block';
 export * from './ImageBlock/ImageBlock';

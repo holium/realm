@@ -48,6 +48,101 @@ export const getAnchorPoint = (
 
   return { x, y };
 };
+// TODO refactor this to use the new getAnchorPoint function
+export const getAnchorPointByElement = (
+  el: HTMLElement,
+  dimensions: Dimensions,
+  orientation: Orientation,
+  offset: {
+    x: number;
+    y: number;
+  } = { x: 0, y: 0 },
+  position: 'above' | 'below' = 'below'
+) => {
+  let x: number;
+  let y: number;
+  let menuWidth = dimensions.width;
+  let menuHeight = dimensions.height;
+  const {
+    left: clickX,
+    top: clickY,
+    width: targetElementWidth,
+    height: targetElementHeight,
+  } = el.getBoundingClientRect();
+  const offsetX = el.offsetLeft;
+  const offsetY = el.offsetHeight;
+
+  switch (orientation) {
+    case 'right':
+      return {
+        x: el.offsetLeft + el.clientLeft + offset.x,
+        y: el.offsetTop,
+      };
+    case 'left':
+      x = clickX - offsetX;
+      y = clickY - offsetY;
+      if (menuWidth) {
+        x = x - menuWidth;
+      }
+      return {
+        x: x - offset.x,
+        y: y - offset.y,
+      };
+    case 'bottom-left':
+      x = clickX - offsetX - menuWidth + targetElementWidth;
+      y = clickY + (targetElementHeight - offsetY);
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+    case 'bottom-right':
+      x = clickX - offsetX;
+      y = clickY + (targetElementHeight - offsetY);
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+
+    case 'top':
+      x = clickX - offsetX - menuWidth / 2 + targetElementWidth / 2;
+      y = clickY - offsetY - menuHeight;
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+
+    case 'top-left':
+      x = clickX - offsetX - menuWidth + targetElementWidth;
+      y = clickY - offsetY - menuHeight;
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+    case 'top-right':
+      x = clickX - offsetX;
+      y = clickY - offsetY - menuHeight;
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+
+    case 'bottom':
+      x = clickX - offsetX - menuWidth / 2 + targetElementWidth / 2;
+      y = clickY + (targetElementHeight - offsetY);
+      return {
+        x: x + offset.x,
+        y: y + offset.y,
+      };
+
+    default:
+      let pointerY = el.clientTop;
+      if (position === 'above') {
+        pointerY = pointerY - menuHeight!;
+      }
+      // pointer or default
+      return { x: offsetX + offset.x, y: pointerY + offset.y };
+  }
+};
 
 export const getAnchorPointByTarget = (
   event: MouseEvent,

@@ -3,6 +3,7 @@ import { Card, Box, BoxProps } from '../../';
 import styled from 'styled-components';
 import {
   getAnchorPointByTarget,
+  getAnchorPointByElement,
   getMenuHeight,
   Position,
   Orientation,
@@ -30,7 +31,9 @@ type MenuType = 'custom' | 'options';
 export type MenuProps = {
   id: string;
   orientation: Orientation;
-  triggerEl: React.ReactNode;
+  anchorRef?: React.RefObject<HTMLElement>;
+  triggerEl?: React.ReactNode;
+  controlledIsOpen?: boolean;
   children?: React.ReactNode;
   dimensions?: Dimensions;
   offset?: Position;
@@ -146,55 +149,161 @@ export const Menu = ({
 
   return (
     <>
-      <Box
-        id={`${id}-trigger`}
-        display="inline"
-        position="relative"
-        onClick={(evt) => {
-          evt.preventDefault();
-          evt.stopPropagation();
-          onTriggerClick(evt);
-        }}
-      >
-        {triggerEl}
-      </Box>
+      {triggerEl && (
+        <Box
+          id={`${id}-trigger`}
+          display="inline"
+          position="relative"
+          onClick={(evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            onTriggerClick(evt);
+          }}
+        >
+          {triggerEl}
+        </Box>
+      )}
       <MenuPortal id={`${id}-portal`} isOpen={isOpen}>
         <AnimatePresence>
-          {isOpen && anchorPoint && (
-            <Card
-              p={1}
-              elevation={2}
-              position="absolute"
-              id={id}
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-                transition: {
-                  duration: 0.1,
-                },
-              }}
-              exit={{
-                opacity: 0,
-                transition: {
-                  duration: 0.1,
-                },
-              }}
-              gap={type === 'options' ? 2 : 0}
-              style={{
-                y: anchorPoint.y,
-                x: anchorPoint.x,
-                width: WIDTH,
-                maxHeight: MAX_HEIGHT,
-                overflowY: 'auto',
-              }}
-            >
-              {innerContent}
-            </Card>
-          )}
+          <>
+            {isOpen && anchorPoint && type === 'options' && (
+              <Card
+                p={1}
+                elevation={2}
+                position="absolute"
+                id={id}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                gap={type === 'options' ? 2 : 0}
+                style={{
+                  y: anchorPoint.y,
+                  x: anchorPoint.x,
+                  width: WIDTH,
+                  maxHeight: MAX_HEIGHT,
+                  overflowY: 'auto',
+                }}
+              >
+                {innerContent}
+              </Card>
+            )}
+            {type === 'custom' && isOpen && anchorPoint && (
+              <Card
+                p={0}
+                id={id}
+                position="absolute"
+                style={{
+                  y: anchorPoint.y,
+                  x: anchorPoint.x,
+                  overflowY: 'auto',
+                }}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+              >
+                {innerContent}
+              </Card>
+            )}
+          </>
         </AnimatePresence>
       </MenuPortal>
     </>
+  );
+};
+
+export type CustomMenuProps = {
+  id: string;
+  orientation: Orientation;
+  anchorRef?: React.RefObject<HTMLElement>;
+  children?: React.ReactNode;
+  dimensions?: Dimensions;
+  offset?: Position;
+} & BoxProps;
+
+export const CustomMenu = ({
+  anchorRef,
+  id,
+  children,
+  dimensions,
+  orientation,
+  offset,
+}: CustomMenuProps) => {
+  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
+  useEffect(() => {
+    const el = anchorRef?.current;
+    console.log('CustomMenu', el);
+    if (el) {
+      const height = el.offsetHeight;
+      setAnchorPoint(
+        getAnchorPointByElement(
+          el,
+          {
+            width: dimensions?.width || WIDTH,
+            height: dimensions?.height || height,
+          },
+          orientation,
+          offset
+        )
+      );
+    }
+  }, [anchorRef]);
+  console.log('CustomMenu achnor', anchorPoint);
+  if (!anchorPoint) return null;
+  return (
+    <MenuPortal id={`${id}-portal`} isOpen={true}>
+      <Card
+        p={0}
+        id={id}
+        position="absolute"
+        style={{
+          y: anchorPoint.y,
+          x: anchorPoint.x,
+          height: dimensions?.height,
+          width: dimensions?.width,
+          overflowY: 'auto',
+        }}
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+        exit={{
+          opacity: 0,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+      >
+        {children}
+      </Card>
+    </MenuPortal>
   );
 };
