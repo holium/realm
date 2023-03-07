@@ -27,10 +27,38 @@ export const multiplayerPreload = {
     ipcRenderer.invoke('multiplayer.mouse-up', patp);
   },
   appToRealmMouseClick(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer.app-to-realm-mouse-click', patp, elementId);
+    ipcRenderer.invoke('multiplayer.app-to-realm.mouse-click', patp, elementId);
   },
   realmToAppMouseClick(patp: string, elementId: string) {
-    ipcRenderer.invoke('multiplayer.realm-to-app-mouse-click', patp, elementId);
+    ipcRenderer.invoke('multiplayer.realm-to-app.mouse-click', patp, elementId);
+  },
+  appToRealmSendTransaction(
+    patp: string,
+    version: number,
+    steps: any,
+    clientID: string | number
+  ) {
+    ipcRenderer.invoke(
+      'multiplayer.app-to-realm.send-transaction',
+      patp,
+      version,
+      steps,
+      clientID
+    );
+  },
+  realmToAppSendTransaction(
+    patp: string,
+    version: number,
+    steps: any,
+    clientID: string | number
+  ) {
+    ipcRenderer.invoke(
+      'multiplayer.realm-to-app.send-transaction',
+      patp,
+      version,
+      steps,
+      clientID
+    );
   },
   onMouseMove(
     callback: (
@@ -70,7 +98,7 @@ export const multiplayerPreload = {
   },
   onAppToRealmMouseClick(callback: (patp: string, elementId: string) => void) {
     ipcRenderer.on(
-      'multiplayer.app-to-realm-mouse-click',
+      'multiplayer.app-to-realm.mouse-click',
       (_, patp: string, elementId) => {
         callback(patp, elementId);
       }
@@ -78,9 +106,45 @@ export const multiplayerPreload = {
   },
   onRealmToAppMouseClick(callback: (patp: string, elementId: string) => void) {
     ipcRenderer.on(
-      'multiplayer.realm-to-app-mouse-click',
+      'multiplayer.realm-to-app.mouse-click',
       (_, patp: string, elementId) => {
         callback(patp, elementId);
+      }
+    );
+  },
+  onAppToRealmSendTransaction(
+    callback: (
+      patp: string,
+      version: number,
+      steps: any,
+      clientID: string | number
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer.app-to-realm.send-transaction',
+      (_, patp: string, version: number, steps: string, clientID: string) => {
+        callback(patp, version, steps, clientID);
+      }
+    );
+  },
+  onRealmToAppSendTransaction(
+    callback: (
+      patp: string,
+      version: number,
+      steps: any,
+      clientID: string | number
+    ) => void
+  ) {
+    ipcRenderer.on(
+      'multiplayer.realm-to-app.send-transaction',
+      (
+        _,
+        patp: string,
+        version: number,
+        steps: any,
+        clientID: string | number
+      ) => {
+        callback(patp, version, steps, clientID);
       }
     );
   },

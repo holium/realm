@@ -90,10 +90,10 @@ const registerListeners = (
   });
 
   ipcMain.handle(
-    'multiplayer.app-to-realm-mouse-click',
+    'multiplayer.app-to-realm.mouse-click',
     (_, patp: string, elementId: string) => {
       mainWindow.webContents.send(
-        'multiplayer.app-to-realm-mouse-click',
+        'multiplayer.app-to-realm.mouse-click',
         patp,
         elementId
       );
@@ -101,12 +101,50 @@ const registerListeners = (
   );
 
   ipcMain.handle(
-    'multiplayer.realm-to-app-mouse-click',
+    'multiplayer.realm-to-app.mouse-click',
     (_, patp: string, elementId: string) => {
       mainWindow.webContents.send(
-        'multiplayer.realm-to-app-mouse-click',
+        'multiplayer.realm-to-app.mouse-click',
         patp,
         elementId
+      );
+    }
+  );
+
+  ipcMain.handle(
+    'multiplayer.app-to-realm.send-transaction',
+    (
+      _,
+      patp: string,
+      version: number,
+      steps: any,
+      clientID: string | number
+    ) => {
+      mainWindow.webContents.send(
+        'multiplayer.app-to-realm.send-transaction',
+        patp,
+        version,
+        steps,
+        clientID
+      );
+    }
+  );
+
+  ipcMain.handle(
+    'multiplayer.realm-to-app.send-transaction',
+    (
+      _,
+      patp: string,
+      version: number,
+      steps: any,
+      clientID: string | number
+    ) => {
+      mainWindow.webContents.send(
+        'multiplayer.realm-to-app.send-transaction',
+        patp,
+        version,
+        steps,
+        clientID
       );
     }
   );

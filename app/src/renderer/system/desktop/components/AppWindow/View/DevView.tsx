@@ -10,7 +10,7 @@ import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
 import {
   CursorClickPayload,
   CursorEvent,
-  CursorPayload,
+  TransactionPayload,
 } from '@holium/realm-multiplayer';
 
 const setUpMultiplayerStreaming = async (
@@ -22,16 +22,25 @@ const setUpMultiplayerStreaming = async (
 
   roomsManager.on(
     RoomManagerEvent.OnDataChannel,
-    async (_rid: string, _peer: string, data) => {
-      const cursorPayload = data.value.cursor as CursorPayload | undefined;
+    async (_rid: string, _peer: string, { value }) => {
+      if (!value) return;
 
-      if (!cursorPayload) return;
-
-      const { event } = cursorPayload;
-
-      if (event === CursorEvent.Click) {
-        const { patp, elementId } = cursorPayload as CursorClickPayload;
-        webview.send('multiplayer.realm-to-app-mouse-click', patp, elementId);
+      if (value.cursor && value.cursor.event === CursorEvent.Click) {
+        const { patp, elementId } = value.cursor as CursorClickPayload;
+        webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
+      } else if (
+        value.transaction &&
+        value.transaction.event === CursorEvent.Transaction
+      ) {
+        const { patp, version, steps, clientID } =
+          value.transaction as TransactionPayload;
+        webview.send(
+          'multiplayer.realm-to-app.send-transaction',
+          patp,
+          version,
+          steps,
+          clientID
+        );
       }
     }
   );

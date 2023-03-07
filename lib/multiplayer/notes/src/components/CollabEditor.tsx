@@ -1,4 +1,4 @@
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { undo, redo, history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
@@ -11,7 +11,18 @@ import {
 } from 'prosemirror-collab';
 import { Authority } from './Authority';
 
-export const collabEditor = (authority: Authority, place: HTMLElement) => {
+type SendTransaction = (
+  patp: string,
+  version: number,
+  steps: any,
+  clientID: string | number
+) => void;
+
+export const collabEditor = (
+  authority: Authority,
+  place: HTMLElement,
+  sendTransaction: SendTransaction
+) => {
   let view = new EditorView(place, {
     state: EditorState.create({
       doc: authority.doc,
@@ -26,12 +37,21 @@ export const collabEditor = (authority: Authority, place: HTMLElement) => {
       let newState = view.state.apply(transaction);
       view.updateState(newState);
       let sendable = sendableSteps(newState);
-      if (sendable)
+      if (sendable) {
         authority.receiveSteps(
           sendable.version,
           sendable.steps,
           sendable.clientID
         );
+
+        const serializedSteps = sendable.steps.map((s) => s.toJSON());
+        sendTransaction(
+          window.ship,
+          sendable.version,
+          serializedSteps,
+          sendable.clientID
+        );
+      }
     },
   });
 
@@ -43,4 +63,39 @@ export const collabEditor = (authority: Authority, place: HTMLElement) => {
   });
 
   return view;
+};
+
+export const applyTransaction = (
+  view: EditorView,
+  authority: Authority,
+  transaction: Transaction
+) => {
+  const newState = view.state.apply(transaction);
+  view.updateState(newState);
+  const sendable = sendableSteps(newState);
+  if (sendable) {
+    authority.receiveSteps(sendable.version, sendable.steps, sendable.clientID);
+  }
+};
+
+export const applyAndSendTransaction = (
+  view: EditorView,
+  authority: Authority,
+  transaction: Transaction,
+  sendTransaction: SendTransaction
+) => {
+  const newState = view.state.apply(transaction);
+  view.updateState(newState);
+  const sendable = sendableSteps(newState);
+  if (sendable) {
+    authority.receiveSteps(sendable.version, sendable.steps, sendable.clientID);
+
+    const serializedSteps = sendable.steps.map((s) => s.toJSON());
+    sendTransaction(
+      window.ship,
+      sendable.version,
+      serializedSteps,
+      sendable.clientID
+    );
+  }
 };
