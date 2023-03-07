@@ -202,10 +202,7 @@ const AirliftManagerPresenter = () => {
             id="airlift-manager"
             nodes={nodes}
             edges={edges}
-            onNodesChange={() => {
-              console.log('trying to do it');
-              AirliftActions.onNodesChange;
-            }}
+            onNodesChange={AirliftActions.onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onInit={setReactFlowInstance}

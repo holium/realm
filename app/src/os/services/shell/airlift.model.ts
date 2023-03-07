@@ -240,17 +240,11 @@ export const AirliftStore = types
         .data.unpromptDelete();
     },
     onNodesChange: (space: string, changes: NodeChange[]) => {
-      console.log('asdf');
-      // const newNodes = self.nodes.map((node) => getSnapshot(node)); // create a new copy of each node
-      console.log('space', space);
-      console.log('nodes' /*self.nodes*/);
       const newNodes = getSnapshot(self.nodes.get(space)!);
-      console.log('newNodes' /*newNodes*/);
       const oldNodes = getSnapshot(self.nodes.get(space)!);
       self.nodes.set(space, cast(applyNodeChanges(changes, newNodes)));
       const myNewNodes = getSnapshot(self.nodes.get(space)!);
       console.log(oldNodes === myNewNodes);
-      console.log('applied changes');
     },
     dropAirlift: (space: string, airlift: Node) => {
       console.log('space', space);
