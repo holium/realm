@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { schema } from 'prosemirror-schema-basic';
 import { EditorView } from 'prosemirror-view';
 import { Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
@@ -10,6 +9,7 @@ import {
   useShips,
   useTransactions,
 } from '@holium/realm-presence';
+import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
 import {
@@ -30,7 +30,6 @@ const Header = styled(Flex)`
 
 const Editor = styled.div`
   width: 100%;
-  max-width: 600px;
   height: auto;
   flex: 1;
   padding: 24px 0;
@@ -40,14 +39,23 @@ const Editor = styled.div`
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace;
   font-size: 12px;
-  border-radius: 4px;
   overflow-y: auto;
+  counter-reset: line-counter;
   .ProseMirror {
     outline: none;
     line-height: 1.5em;
   }
   p {
     padding: 0 20px;
+  }
+  p::before {
+    counter-increment: line-counter;
+    content: counter(line-counter);
+    display: inline-block;
+    width: 1.5em;
+    margin-right: 0.5em;
+    text-align: right;
+    color: #8b949e;
   }
   .current-element {
     background-color: #30363c;
@@ -119,7 +127,7 @@ export const App = () => {
       schema.node(
         'doc',
         null,
-        schema.node('paragraph', null, schema.text('Ha'))
+        schema.node('paragraph', null, schema.text('|hi ~bus'))
       )
     );
     const newEditor = collabEditor(newAuthority, ref, sendTransaction);
