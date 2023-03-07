@@ -37,16 +37,23 @@ export const collabEditor = (
         new Plugin({
           props: {
             decorations(state) {
-              const selection = state.selection;
-              const resolved = state.doc.resolve(selection.from);
-              const decoration = Decoration.node(
-                resolved.before(),
-                resolved.after(),
-                { class: 'current-element' }
-              );
-              // This is equivalent to:
-              // const decoration = Decoration.node(resolved.start() - 1, resolved.end() + 1, {class: 'current-element'});
-              return DecorationSet.create(state.doc, [decoration]);
+              const decorations: Decoration[] = [];
+              const { doc, selection } = state;
+              const { from, to } = selection;
+              doc.descendants((node, pos) => {
+                if (node.type.name === 'paragraph') {
+                  const isCurrent = from >= pos && to <= pos + node.nodeSize;
+                  const className = isCurrent
+                    ? 'text-cursor current-element'
+                    : 'text-cursor';
+                  decorations.push(
+                    Decoration.node(pos, pos + node.nodeSize, {
+                      class: className,
+                    })
+                  );
+                }
+              });
+              return DecorationSet.create(doc, decorations);
             },
           },
         }),

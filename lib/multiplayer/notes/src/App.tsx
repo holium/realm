@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EditorView } from 'prosemirror-view';
-import { Transaction } from 'prosemirror-state';
+import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { Button, Flex, Text, Avatar } from '@holium/design-system';
 import {
@@ -28,10 +28,10 @@ const Header = styled(Flex)`
   }
 `;
 
-const Editor = styled.div`
-  width: 100%;
-  height: auto;
+const EditorContainer = styled(Flex)`
   flex: 1;
+  flex-direction: column;
+  width: 100%;
   padding: 24px 0;
   color: #c8d1d9;
   border: 1px solid #30363c;
@@ -59,6 +59,9 @@ const Editor = styled.div`
   }
   .current-element {
     background-color: #30363c;
+    &::before {
+      color: #fff;
+    }
   }
 `;
 
@@ -136,6 +139,20 @@ export const App = () => {
     setAuthority(newAuthority);
   }, []);
 
+  const moveToEnd = () => {
+    // Focus the editor.
+    if (!editorView) return;
+    editorView.focus();
+
+    // Move the cursor to the end of the doc and line.
+    const transaction: Transaction = editorView.state.tr.setSelection(
+      new TextSelection(
+        editorView.state.doc.resolve(editorView.state.doc.nodeSize - 2)
+      )
+    );
+    editorView.dispatch(transaction);
+  };
+
   useEffect(() => {
     // Poll until window.ship is set.
     const interval = setInterval(() => {
@@ -171,7 +188,10 @@ export const App = () => {
           ))}
         </Flex>
       </Header>
-      <Editor ref={onEditorRef} />
+      <EditorContainer>
+        <div ref={onEditorRef} />
+        <Flex flex={1} onClick={moveToEnd} />
+      </EditorContainer>
       <Footer>
         <Clickable id="clear" onClick={onClear} onOtherClick={onClear}>
           <Button.Secondary height={32} px={2} fontSize="16px">

@@ -5,7 +5,7 @@ const isTextElement = (element: Element): boolean =>
   (element instanceof HTMLInputElement &&
     element.type !== 'checkbox' &&
     element.type !== 'radio') ||
-  element.classList.contains('Prosemirror');
+  element.classList.contains('text-cursor');
 
 const isResizeHandler = (element: Element): boolean =>
   element.classList.contains('app-window-resize');
