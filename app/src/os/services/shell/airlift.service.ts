@@ -68,10 +68,10 @@ export class AirliftService extends BaseService {
         arm
       );
     },
-    onNodesChange: (/*space: string, */ changes: NodeChange[]) => {
+    onNodesChange: (space: string, changes: NodeChange[]) => {
       return ipcRenderer.invoke(
         'realm.airlift.on-nodes-change',
-        /*space,*/
+        space,
         changes
       );
     },
@@ -142,7 +142,7 @@ export class AirliftService extends BaseService {
   async toggleAgentExpand(_event: any, space: string, airliftId: string) {
     this.state!.nodes.get(space)!
       .find((node) => node.id === airliftId)!
-      .data.agent.toggleExpand();
+      .data.agent!.toggleExpand();
   }
 
   async toggleArmExpand(
@@ -153,7 +153,7 @@ export class AirliftService extends BaseService {
   ) {
     this.state!.nodes.get(space)!
       .find((node) => node.id === airliftId)!
-      .data.agent.arms.get(arm)!
+      .data.agent!.arms.get(arm)!
       .toggleExpand();
   }
 

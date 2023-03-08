@@ -269,7 +269,10 @@ const AirliftManagerPresenter = () => {
             id="airlift-manager"
             nodes={nodes}
             edges={edges}
-            onNodesChange={AirliftActions.onNodesChange}
+            onNodesChange={(changes: any) =>
+              spaces.selected &&
+              AirliftActions.onNodesChange(spaces.selected.path, changes)
+            }
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onInit={setReactFlowInstance}
