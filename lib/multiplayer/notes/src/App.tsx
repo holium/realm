@@ -9,6 +9,7 @@ import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
 import { collabEditor } from './components/CollabEditor';
+import { hoonDoc } from './hoonExample';
 
 const Header = styled(Flex)`
   width: 100%;
@@ -66,7 +67,7 @@ export const App = () => {
     clientID: string | number
   ) => {
     if (!editorView || !authority) return;
-    const parsedSteps = serializedSteps.map((s: any) =>
+    const parsedSteps = serializedSteps.map((s: Object) =>
       Step.fromJSON(schema, s)
     );
     authority.receiveSteps(version, parsedSteps, clientID);
@@ -78,13 +79,7 @@ export const App = () => {
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;
 
-    const newAuthority = new Authority(
-      schema.node(
-        'doc',
-        null,
-        schema.node('paragraph', null, schema.text('|hi ~bus'))
-      )
-    );
+    const newAuthority = new Authority(hoonDoc);
     const newEditor = collabEditor(newAuthority, ref, sendTransaction);
 
     setEditorView(newEditor);
@@ -134,7 +129,6 @@ export const App = () => {
               simple={false}
               size={24}
               patp={ship}
-              // sigilColor={[sigilColor || '#000000', 'white']}
               sigilColor={['#000000', 'white']}
             />
           ))}
