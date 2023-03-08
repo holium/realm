@@ -165,6 +165,9 @@
         [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
+      ~&  'received signal'
+      ~&  provider-state
+      ~&  session-state
       [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
     ::
     --
