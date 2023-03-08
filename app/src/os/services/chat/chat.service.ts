@@ -63,6 +63,7 @@ export class ChatService extends BaseService {
   handlers = {
     'realm.chat.get-chat-list': this.getChatList,
     'realm.chat.get-chat-log': this.getChatLog,
+    'realm.chat.get-chat-reactions': this.getChatReactions,
     'realm.chat.get-chat-peers': this.getChatPeers,
     'realm.chat.send-message': this.sendMessage,
     'realm.chat.edit-message': this.editMessage,
@@ -90,6 +91,8 @@ export class ChatService extends BaseService {
       path: string,
       params?: { start: number; amount: number }
     ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
+    getChatReactions: async (path: string, msgId: string) =>
+      ipcRenderer.invoke('realm.chat.get-chat-reactions', path, msgId),
     getChatPeers: async (path: string) =>
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
@@ -702,7 +705,7 @@ export class ChatService extends BaseService {
         WITH realm_chat as (
             SELECT *
             FROM messages
-            WHERE path = ?
+            WHERE path = ? AND content_type != 'react'
             ORDER BY msg_part_id, created_at DESC
         )
         SELECT
@@ -726,7 +729,8 @@ export class ChatService extends BaseService {
         msg_id id,
         json_group_array(json_extract(content, '$')) as contents,
         sender,
-        reply_to,
+        json_extract(reply_to, '$."path"') replyToMsgPath,
+        json_extract(reply_to, '$."msg-id"') replyToMsgId,
         metadata,
         MAX(formed_fragments.created_at) createdAt,
         MAX(formed_fragments.updated_at) updatedAt
@@ -744,6 +748,24 @@ export class ChatService extends BaseService {
     });
   }
 
+  getChatReactions(_evt: any, path: string, replyId: string) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      SELECT
+        json_group_array(json_object('by', sender, 'emoji', content_data)) reactions
+      FROM messages
+      WHERE path = ?
+        AND json_extract(reply_to, '$."msg-id"') = ?
+        AND content_type = 'react'
+    `);
+    const result = query.all(path, replyId);
+    const rows = result.map((row) => {
+      return JSON.parse(row.reactions);
+    });
+    if (rows.length === 0) return [];
+    return rows[0];
+  }
+
   getChatMessage(msgId: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
@@ -752,12 +774,15 @@ export class ChatService extends BaseService {
         msg_id id,
         json_group_array(json_object(content_type, content_data)) contents,
         sender,
+        json_extract(reply_to, '$."path"') replyToMsgPath,
+        json_extract(reply_to, '$."msg-id"') replyToMsgId,
         MAX(created_at) as createdAt,
         MAX(updated_at) as updatedAt
       FROM (SELECT path,
                   msg_id,
                   content_type,
                   content_data,
+                  reply_to,
                   sender,
                   created_at,
                   updated_at

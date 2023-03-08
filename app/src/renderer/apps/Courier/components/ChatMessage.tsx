@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -29,12 +29,38 @@ export const ChatMessagePresenter = ({
   const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
+  useEffect(() => {
+    if (!ship) return;
+    window.ship = ship.patp;
+  }, []);
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
   const { color: authorColor } = useMemo(() => {
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
+  const [reactions, setReactions] = useState([]);
+  const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
+  useEffect(() => {
+    const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
+    if (!msgModel) return;
+    msgModel.fetchReactions().then((reacts: any) => {
+      setReactions(reacts);
+    });
+  }, [msgModel?.reactions.length]);
+
+  const onReaction = useCallback(
+    (payload: OnReactionPayload) => {
+      console.log('onReaction', payload);
+      if (payload.action === 'add') {
+        selectedChat?.sendReaction(message.id, payload.emoji);
+      } else {
+        selectedChat?.deleteReaction(message.id, payload.emoji);
+      }
+    },
+    [selectedChat, message.id]
+  );
+
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !ship) return menu;
@@ -108,6 +134,7 @@ export const ChatMessagePresenter = ({
       ref={messageRef}
       id={messageRowId}
       isOur={isOur}
+      ourShip={ship?.patp}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
       isEdited={message.metadata?.edited}
@@ -116,14 +143,8 @@ export const ChatMessagePresenter = ({
       message={message.contents}
       sentAt={new Date(message.createdAt).toISOString()}
       onLoad={onLoad}
-      onReaction={
-        canReact
-          ? (payload: OnReactionPayload) => {
-              //
-              console.log(payload);
-            }
-          : undefined
-      }
+      reactions={reactions}
+      onReaction={canReact ? onReaction : undefined}
     />
   );
 };

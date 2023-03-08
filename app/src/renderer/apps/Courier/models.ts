@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types } from 'mobx-state-tree';
+import { flow, applySnapshot, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -33,17 +33,24 @@ const stringifyMetadata = (metadata: ChatMetadata): ChatPathMetadata => {
   };
 };
 
+const ReactionModel = types.model('ReactionModel', {
+  by: types.string,
+  emoji: types.string,
+});
+export type ReactionModelType = Instance<typeof ReactionModel>;
+
 export const ChatMessage = types
   .model('ChatMessageodel', {
     path: types.string,
     id: types.identifier,
     sender: types.string,
     contents: types.array(types.frozen()),
-    reactions: types.optional(types.array(types.frozen()), []),
-    reply_to: types.maybeNull(types.string),
+    replyToPath: types.maybeNull(types.string),
+    replyToMsgId: types.maybeNull(types.string),
     metadata: types.optional(types.frozen(), {}),
     createdAt: types.number,
     updatedAt: types.number,
+    reactions: types.optional(types.array(ReactionModel), []),
     // ui state
     pending: types.optional(types.boolean, false),
   })
@@ -54,6 +61,22 @@ export const ChatMessage = types
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
       self.updatedAt = updatedAt;
+    },
+    fetchReactions: flow(function* () {
+      try {
+        const reactions = yield ChatDBActions.getChatReactions(
+          self.path,
+          self.id
+        );
+        applySnapshot(self.reactions, reactions);
+        return self.reactions;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }),
+    insertReaction(react: ReactionModelType) {
+      self.reactions.push(react);
     },
     delete: flow(function* () {
       try {
@@ -152,6 +175,7 @@ export const Chat = types
         console.error(error);
       }
     }),
+
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
@@ -163,6 +187,11 @@ export const Chat = types
       }
     }),
     addMessage(message: ChatMessageType) {
+      if (Object.keys(message.contents[0])[0] === 'react') {
+        const msg = self.messages.find((m) => m.id === message.replyToMsgId);
+        if (msg) msg.fetchReactions();
+        return;
+      }
       self.messages.push(message);
       self.lastSender = message.sender;
       self.lastMessage = message.contents;
@@ -222,13 +251,28 @@ export const Chat = types
     setReacting(msgId: string) {
       self.isReacting = msgId;
     },
+    sendReaction: flow(function* (msgId: string, emoji: string) {
+      yield ChatDBActions.sendMessage(self.path, [
+        {
+          content: { react: emoji },
+          'reply-to': {
+            path: self.path,
+            'msg-id': msgId,
+          },
+          metadata: {},
+        },
+      ]);
+      self.isReacting = undefined;
+    }),
+    deleteReaction: flow(function* (msgId: string, reaction: string) {
+      // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
+    }),
     clearReacting() {
       self.isReacting = undefined;
     },
     setEditing(message: ChatMessageType) {
       self.editingMsg = message;
     },
-
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
       const oldMessages = self.messages;
       try {

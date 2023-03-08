@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-// import { toJS } from 'mobx';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Box, Flex, WindowedList, Text, Reply } from '@holium/design-system';
 import { useChatStore } from '../store';
@@ -64,7 +64,10 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
-            ? {path: selectedChat.path, 'msg-id':selectedChat.replyingMsg?.id}
+            ? {
+                path: selectedChat.path,
+                'msg-id': selectedChat.replyingMsg?.id,
+              }
             : null,
           metadata: {},
         };
@@ -146,9 +149,13 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
               data={messages}
               rowRenderer={(row, index, measure) => {
                 const isLast = index === messages.length - 1;
+                const msgModel = selectedChat.messages.find(
+                  (m) => row.id === m.id
+                );
+                const reactionLength = msgModel?.reactions.length || 0;
                 return (
                   <Box
-                    key={`${row.id}-${row.updatedAt}-${index}-last=${isLast}`}
+                    key={`${row.id}-${row.updatedAt}-${index}-last=${isLast}-${reactionLength}`}
                     pt={2}
                     pb={isLast ? 2 : 0}
                   >
