@@ -15,6 +15,7 @@ export enum CursorEvent {
   Over = 'cursor-over',
   Out = 'cursor-out',
   Transaction = 'transaction',
+  Caret = 'caret',
 }
 
 interface BaseCursorPayload extends BaseRealmPayload {
@@ -50,6 +51,11 @@ export interface TransactionPayload extends BaseCursorPayload {
   steps: any;
   clientID: string | number;
   event: CursorEvent.Transaction;
+}
+
+export interface CaretPayload extends BaseCursorPayload {
+  event: CursorEvent.Caret;
+  position: Position;
 }
 
 export type CursorPayload =

@@ -148,6 +148,28 @@ const registerListeners = (
       );
     }
   );
+
+  ipcMain.handle(
+    'multiplayer.app-to-realm.send-caret',
+    (_, patp: string, position: Position) => {
+      mainWindow.webContents.send(
+        'multiplayer.app-to-realm.send-caret',
+        patp,
+        position
+      );
+    }
+  );
+
+  ipcMain.handle(
+    'multiplayer.realm-to-app.send-caret',
+    (_, patp: string, position: Position) => {
+      mainWindow.webContents.send(
+        'multiplayer.realm-to-app.send-caret',
+        patp,
+        position
+      );
+    }
+  );
 };
 
 export const MouseHelper = { registerListeners };

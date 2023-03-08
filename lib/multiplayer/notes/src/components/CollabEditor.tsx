@@ -11,18 +11,13 @@ import {
 } from 'prosemirror-collab';
 import { Authority } from './Authority';
 import { caretPlugin } from './Caret';
-
-type SendTransaction = (
-  patp: string,
-  version: number,
-  steps: any,
-  clientID: string | number
-) => void;
+import { SendCaret, SendTransaction } from '@holium/realm-multiplayer';
 
 export const collabEditor = (
   authority: Authority,
   place: HTMLElement,
-  sendTransaction: SendTransaction
+  sendTransaction: SendTransaction,
+  sendCaret: SendCaret
 ) => {
   let view = new EditorView(place, {
     state: EditorState.create({
@@ -35,7 +30,9 @@ export const collabEditor = (
         }),
         keymap(baseKeymap),
         collab({ version: authority.steps.length }),
-        caretPlugin,
+        caretPlugin((position: { x: number; y: number }) =>
+          sendCaret(window.ship, position)
+        ),
         new Plugin({
           props: {
             decorations(state) {

@@ -13,7 +13,6 @@ export const Header = styled(Flex)`
 `;
 
 export const EditorContainer = styled(Flex)`
-  position: relative;
   flex: 1;
   flex-direction: column;
   width: 100%;

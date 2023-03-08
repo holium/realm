@@ -8,6 +8,7 @@ import { useToggle } from 'renderer/logic/lib/useToggle';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
 import {
+  CaretPayload,
   CursorClickPayload,
   CursorEvent,
   TransactionPayload,
@@ -41,6 +42,9 @@ const connectWebviewToMultiplayer = async (
           steps,
           clientID
         );
+      } else if (value.caret && value.caret.event === CursorEvent.Caret) {
+        const { patp, position } = value.caret as CaretPayload;
+        webview.send('multiplayer.realm-to-app.send-caret', patp, position);
       }
     }
   );

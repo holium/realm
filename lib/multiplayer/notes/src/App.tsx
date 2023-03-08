@@ -3,7 +3,11 @@ import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { Flex, Avatar } from '@holium/design-system';
-import { useShips, useTransactions } from '@holium/realm-presence';
+import {
+  useCarets,
+  useShips,
+  useTransactions,
+} from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
@@ -11,12 +15,15 @@ import { collabEditor } from './components/CollabEditor';
 import { hoonDoc } from './hoonExample';
 import { Header, EditorContainer } from './App.styles';
 
+type Carets = Record<string, { x: number; y: number }>;
+
 const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
 
 export const App = () => {
   const [editorView, setEditorView] = useState<EditorView>();
   const [authority, setAuthority] = useState<Authority>();
   const [isReady, setIsReady] = useState(false);
+  const [carets, setCarets] = useState<Carets>({});
 
   const onTransaction = (
     _patp: string,
@@ -31,14 +38,24 @@ export const App = () => {
     authority.receiveSteps(version, parsedSteps, clientID);
   };
 
+  const onCaret = (patp: string, position: { x: number; y: number }) => {
+    setCarets((prevCarets) => ({ ...prevCarets, [patp]: position }));
+  };
+
   const ships = useShips();
   const { sendTransaction } = useTransactions({ onTransaction });
+  const { sendCaret } = useCarets({ onCaret });
 
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;
 
     const newAuthority = new Authority(hoonDoc);
-    const newEditor = collabEditor(newAuthority, ref, sendTransaction);
+    const newEditor = collabEditor(
+      newAuthority,
+      ref,
+      sendTransaction,
+      sendCaret
+    );
 
     setEditorView(newEditor);
     setAuthority(newAuthority);
@@ -93,7 +110,21 @@ export const App = () => {
         </Flex>
       </Header>
       <EditorContainer>
-        <div ref={onEditorRef} />
+        <div ref={onEditorRef}>
+          {Object.entries(carets).map(([patp, position]) => (
+            <div
+              key={patp}
+              style={{
+                position: 'absolute',
+                top: position.y,
+                left: position.x,
+                width: 2,
+                height: 18,
+                background: 'white',
+              }}
+            />
+          ))}
+        </div>
         <Flex flex={1} onClick={moveToEnd} />
       </EditorContainer>
     </Flex>

@@ -60,6 +60,12 @@ export const multiplayerPreload = {
       clientID
     );
   },
+  appToRealmSendCaret(patp: string, position: Position) {
+    ipcRenderer.invoke('multiplayer.app-to-realm.send-caret', patp, position);
+  },
+  realmToAppSendCaret(patp: string, position: Position) {
+    ipcRenderer.invoke('multiplayer.realm-to-app.send-caret', patp, position);
+  },
   onMouseMove(
     callback: (
       patp: string,
@@ -145,6 +151,22 @@ export const multiplayerPreload = {
         clientID: string | number
       ) => {
         callback(patp, version, steps, clientID);
+      }
+    );
+  },
+  onAppToRealmSendCaret(callback: (patp: string, position: Position) => void) {
+    ipcRenderer.on(
+      'multiplayer.app-to-realm.send-caret',
+      (_, patp: string, position: Position) => {
+        callback(patp, position);
+      }
+    );
+  },
+  onRealmToAppSendCaret(callback: (patp: string, position: Position) => void) {
+    ipcRenderer.on(
+      'multiplayer.realm-to-app.send-caret',
+      (_, patp: string, position: Position) => {
+        callback(patp, position);
       }
     );
   },

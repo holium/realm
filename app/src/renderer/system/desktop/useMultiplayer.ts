@@ -7,6 +7,7 @@ import {
   CursorMovePayload,
   CursorClickPayload,
   TransactionPayload,
+  CaretPayload,
 } from '@holium/realm-multiplayer';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
@@ -96,6 +97,18 @@ export const useMultiplayer = () => {
         });
       }
     );
+
+    window.electron.multiplayer.onAppToRealmSendCaret((patp, position) => {
+      const caretPayload: CaretPayload = {
+        patp,
+        position,
+        event: CursorEvent.Caret,
+      };
+      roomsManager.sendData({
+        kind: DataPacket_Kind.DATA,
+        value: { caret: caretPayload },
+      });
+    });
 
     roomsManager.on(RoomManagerEvent.LeftRoom, (_, patp) => {
       const cursorOutPayload: CursorOutPayload = {

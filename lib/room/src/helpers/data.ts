@@ -1,4 +1,8 @@
-import { CursorPayload, TransactionPayload } from '@holium/realm-presence';
+import {
+  CaretPayload,
+  CursorPayload,
+  TransactionPayload,
+} from '@holium/realm-presence';
 import { Patp } from '../types';
 
 export enum DataPacket_Kind {
@@ -32,5 +36,6 @@ export interface DataPacket {
     cursor?: CursorPayload;
     trackMeta?: TrackMetaPayload;
     transaction?: TransactionPayload;
+    caret?: CaretPayload;
   } & DataPayload;
 }

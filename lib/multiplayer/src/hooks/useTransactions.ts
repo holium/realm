@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 
-const sendTransaction = (
+export type SendTransaction = (
   patp: string,
   version: number,
   steps: any,
   clientID: string | number
-) => {
+) => void;
+
+const sendTransaction: SendTransaction = (patp, version, steps, clientID) => {
   window.electron.multiplayer.appToRealmSendTransaction(
     patp,
     version,
