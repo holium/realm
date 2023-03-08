@@ -372,7 +372,7 @@ export class ChatService extends BaseService {
           msg_part_id: message['msg-part-id'],
           content_type: message['content-type'],
           content_data: message['content-data'],
-          reply_to: message['reply-to'],
+          reply_to: JSON.stringify(message['reply-to']),
           metadata: JSON.stringify(message.metadata),
           sender: message.sender,
           created_at: message['created-at'],

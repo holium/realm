@@ -64,7 +64,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
-            ? [selectedChat.path, selectedChat.replyingMsg?.id]
+            ? {path: selectedChat.path, 'msg-id':selectedChat.replyingMsg?.id}
             : null,
           metadata: {},
         };
