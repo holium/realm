@@ -16,6 +16,9 @@ export type FragmentBoldItalicsType = {
 export type FragmentBoldStrikeType = {
   'bold-strike': string;
 };
+export type FragmentItalicsStrikeType = {
+  'italics-strike': string;
+};
 export type FragmentBoldItalicsStrikeType = {
   'bold-italics-strike': string;
 };
@@ -59,6 +62,7 @@ export type FragmentType =
   | FragmentStrikeType
   | FragmentBoldItalicsType
   | FragmentBoldStrikeType
+  | FragmentItalicsStrikeType
   | FragmentBoldItalicsStrikeType
   | FragmentBlockquoteType
   | FragmentInlineCodeType
@@ -110,6 +114,7 @@ export const TEXT_TYPES = [
   'strike',
   'bold-italics',
   'bold-strike',
+  'italics-strike',
   'bold-italics-strike',
   'inline-code',
   'ship',
@@ -122,6 +127,7 @@ export type FragmentKeyTypes =
   | 'strike'
   | 'bold-italics'
   | 'bold-strike'
+  | 'italics-strike'
   | 'bold-italics-strike'
   | 'inline-code'
   | 'ship'

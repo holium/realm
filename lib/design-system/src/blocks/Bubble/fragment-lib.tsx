@@ -4,6 +4,7 @@ import {
   FragmentBoldType,
   FragmentBoldItalicsType,
   FragmentBoldItalicsStrikeType,
+  FragmentItalicsStrikeType,
   FragmentBoldStrikeType,
   FragmentCodeType,
   FragmentImageType,
@@ -57,7 +58,7 @@ export const FragmentPlain = styled(FragmentBase)`
 `;
 
 export const FragmentBold = styled(FragmentBase)`
-  font-weight: 500;
+  font-weight: 800;
 `;
 export const FragmentItalic = styled(FragmentBase)`
   font-style: italic;
@@ -67,17 +68,22 @@ export const FragmentStrike = styled(FragmentBase)`
 `;
 
 export const FragmentBoldItalic = styled(FragmentBase)`
-  font-weight: 500;
+  font-weight: 800;
   font-style: italic;
 `;
 
 export const FragmentBoldStrike = styled(FragmentBase)`
-  font-weight: 500;
+  font-weight: 800;
+  text-decoration: line-through;
+`;
+
+export const FragmentItalicsStrike = styled(FragmentBase)`
+  font-style: italic;
   text-decoration: line-through;
 `;
 
 export const FragmentBoldItalicsStrike = styled(FragmentBase)`
-  font-weight: 500;
+  font-weight: 800;
   font-style: italic;
   text-decoration: line-through;
 `;
@@ -229,6 +235,12 @@ export const renderFragment = (
         <FragmentBoldStrike id={id} key={index}>
           {(fragment as FragmentBoldStrikeType)['bold-strike']}
         </FragmentBoldStrike>
+      );
+    case 'italics-strike':
+      return (
+        <FragmentItalicsStrike id={id} key={index}>
+          {(fragment as FragmentItalicsStrikeType)['italics-strike']}
+        </FragmentItalicsStrike>
       );
     case 'bold-italics-strike':
       return (
