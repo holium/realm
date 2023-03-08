@@ -10,6 +10,7 @@ import {
   sendableSteps,
 } from 'prosemirror-collab';
 import { Authority } from './Authority';
+import { caretPlugin } from './Caret';
 
 type SendTransaction = (
   patp: string,
@@ -34,6 +35,7 @@ export const collabEditor = (
         }),
         keymap(baseKeymap),
         collab({ version: authority.steps.length }),
+        caretPlugin,
         new Plugin({
           props: {
             decorations(state) {
