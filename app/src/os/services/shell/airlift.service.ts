@@ -175,10 +175,10 @@ export class AirliftService extends BaseService {
 
   async onNodesChange(
     _event: IpcMainInvokeEvent,
-    /*space: string,*/
+    space: string,
     changes: NodeChange[]
   ) {
-    this.state!.onNodesChange('/~zod/our', changes);
+    this.state!.onNodesChange(space, changes);
   }
 
   async promptDelete(

@@ -66,10 +66,6 @@ export const IconDragManager = () => {
   };
 
   const handleDragStart = (event: any) => {
-    console.log(event.dataTransfer.getData('text/plain'));
-    console.log(event);
-    /*setInitialOffsetX(event.screenX);
-    setInitialOffsetY(event.offsetY);*/
     setDraggedItemPosition({
       x: event.clientX - DIV_SIZE / 2,
       y: event.clientY - DIV_SIZE / 2,

@@ -1,5 +1,6 @@
 import { Flex, Text, Icon } from '@holium/design-system';
 import styled from 'styled-components';
+import { Expand } from '../Expand';
 
 const PortalBox = styled.div`
   /* Frame 1353 */
@@ -28,12 +29,18 @@ const PortalBox = styled.div`
 
 export function PortalNode({ data, isConnectable }) {
   return (
-    <Flex border={data.showDelete ? '2px solid red' : 'none'}>
+    <Flex
+      position="relative"
+      border={data.showDelete ? '2px solid red' : 'none'}
+    >
       <PortalBox>
         <Flex flexDirection="column" ml={5} gap={10}>
           <Text.H4>Realm Forerunners</Text.H4>
           <Text.H6 opacity={0.6}>~novned-tidsyl</Text.H6>
           <Icon name="Lock" size={30} />
+        </Flex>
+        <Flex>
+          <Expand />
         </Flex>
       </PortalBox>
     </Flex>
