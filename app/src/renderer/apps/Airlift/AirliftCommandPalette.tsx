@@ -11,12 +11,24 @@ export const AirliftCommandPalette: FC = observer(() => {
   const { textColor } = theme.currentTheme;
 
   const onButtonDragStart = (event: any, nodeType: string) => {
+    const onButtonDrag = (event: any) => {
+      const dragEvent = new DragEvent('drag', {
+        bubbles: true,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+      });
+      document.getElementById('icon-drag-manager')!.dispatchEvent(dragEvent);
+    };
+    window.addEventListener('mousemove', onButtonDrag);
     const onButtonDragEnd = (event: any) => {
       event.preventDefault();
       const iconEvent = new CustomEvent('icon', {
         detail: null,
       });
       window.dispatchEvent(iconEvent);
+      window.removeEventListener('mousemove', onButtonDrag);
       window.removeEventListener('mouseup', onButtonDragEnd);
       const dataTransfer = new DataTransfer();
       dataTransfer.setData('application/reactflow', nodeType);
@@ -28,14 +40,28 @@ export const AirliftCommandPalette: FC = observer(() => {
         screenY: event.screenY,
       });
       Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+      document.getElementById('icon-drag-manager')!.dispatchEvent(dropEvent);
       document.getElementById('airlift-manager')!.dispatchEvent(dropEvent);
     };
-    // window.onmouseup = (event) => onButtonDragEnd(event, nodeType);
     window.addEventListener('mouseup', onButtonDragEnd);
-    const iconEvent = new CustomEvent('icon', {
-      detail: 'Airlift',
+    interface CustomDragEventInit extends DragEventInit {
+      offsetX?: number;
+      offsetY?: number;
+    }
+
+    console.log('event', event);
+    const iconEvent = new DragEvent('dragstart', {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer: new DataTransfer(),
+      clientX: event.clientX,
+      clientY: event.clientY,
+      screenX: event.offsetX,
+      screenY: event.offsetY,
     });
-    window.dispatchEvent(iconEvent);
+    iconEvent.dataTransfer &&
+      iconEvent.dataTransfer.setData('text/plain', nodeType);
+    document.getElementById('icon-drag-manager')!.dispatchEvent(iconEvent);
     event.preventDefault();
   };
 
@@ -59,6 +85,17 @@ export const AirliftCommandPalette: FC = observer(() => {
             size={ICON_SIZE + 5}
           >
             <Icon name="Button" overflow="visible" size={ICON_SIZE - 3} />
+          </Button.IconButton>
+          <Button.IconButton
+            mt="2px"
+            draggable={true}
+            onDragStart={(event) => onButtonDragStart(event, 'toggle')}
+            customColor={textColor}
+            justifyContent="center"
+            alignItems="center"
+            size={ICON_SIZE + 5}
+          >
+            <Icon name="Toggle" overflow="visible" size={ICON_SIZE - 4} />
           </Button.IconButton>
           <Button.IconButton
             draggable={true}

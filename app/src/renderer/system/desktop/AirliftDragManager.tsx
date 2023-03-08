@@ -8,7 +8,6 @@ import 'renderer/apps/Airlift/nodes/AgentNode/index.css';
 import { useMemo, useRef } from 'react';
 import { getSnapshot } from 'mobx-state-tree';
 import { WalletNode } from 'renderer/apps/Airlift/nodes/WalletNode';
-import { ButtonNode } from 'renderer/apps/Airlift/nodes/ButtonNode';
 import { SliderNode } from 'renderer/apps/Airlift/nodes/SliderNode';
 import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
 import { LinkNode } from 'renderer/apps/Airlift/nodes/LinkNode';
@@ -23,6 +22,7 @@ import { ColorPickerNode } from 'renderer/apps/Airlift/nodes/ColorPickerNode';
 import { Gate } from 'renderer/apps/Airlift/nodes/Gate';
 import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
 import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
+import { ToggleNode } from 'renderer/apps/Airlift/nodes/ToggleNode';
 
 const AirliftDragManagerPresenter = () => {
   const { shell, airlift, desktop, spaces } = useServices();
@@ -30,7 +30,8 @@ const AirliftDragManagerPresenter = () => {
 
   const nodeTypes = useMemo(() => {
     return {
-      button: ButtonNode,
+      button: ToggleNode,
+      toggle: ToggleNode,
       textinput: TextInputNode,
       slider: SliderNode,
       colorpicker: ColorPickerNode,

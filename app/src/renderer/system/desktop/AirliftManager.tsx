@@ -20,7 +20,6 @@ import { TextNode } from 'renderer/apps/Airlift/nodes/TextNode';
 import { AudioPlayer } from 'renderer/apps/Airlift/nodes/AudioPlayer';
 import { SliderNode } from 'renderer/apps/Airlift/nodes/SliderNode';
 import { ColorPickerNode } from 'renderer/apps/Airlift/nodes/ColorPickerNode';
-import { ButtonNode } from 'renderer/apps/Airlift/nodes/ButtonNode';
 import { TextInputNode } from 'renderer/apps/Airlift/nodes/TextInputNode';
 import { Node3D } from 'renderer/apps/Airlift/nodes/Node3D';
 import { Gate } from 'renderer/apps/Airlift/nodes/Gate';
@@ -28,6 +27,7 @@ import { UqbarContractNode } from 'renderer/apps/Airlift/nodes/UqbarContractNode
 import { PortalNode } from 'renderer/apps/Airlift/nodes/PortalNode';
 import { RelicNode } from 'renderer/apps/Airlift/nodes/RelicNode';
 import { RoomNode } from 'renderer/apps/Airlift/nodes/RoomNode';
+import { ToggleNode } from 'renderer/apps/Airlift/nodes/ToggleNode';
 
 const AirliftManagerPresenter = () => {
   const { shell, airlift, desktop, spaces } = useServices();
@@ -35,7 +35,8 @@ const AirliftManagerPresenter = () => {
 
   const nodeTypes = useMemo(() => {
     return {
-      button: ButtonNode,
+      button: ToggleNode,
+      toggle: ToggleNode,
       textinput: TextInputNode,
       slider: SliderNode,
       colorpicker: ColorPickerNode,
@@ -90,15 +91,15 @@ const AirliftManagerPresenter = () => {
       }
 
       const position = reactFlowInstance!.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
+        x: event.clientX - reactFlowBounds.left - 15,
+        y: event.clientY - reactFlowBounds.top - 15,
       });
       // const airliftId = getId(type);
       const airliftCount = spaces.selected
         ? airlift.nodes.get(spaces.selected?.path)?.length || 0
         : 0;
       const airliftId = `airlift_${type}_${airliftCount + 1}`;
-      const newNode = {
+      const newNode: any = {
         id: airliftId,
         type,
         position,
@@ -106,7 +107,7 @@ const AirliftManagerPresenter = () => {
           id: airliftId,
           showDelete: false,
           created: false,
-          agent: {
+          /*agent: {
             expanded: false,
             arms: {
               'on-init': {
@@ -167,12 +168,78 @@ const AirliftManagerPresenter = () => {
                 name: 'on-fail',
                 body: 'body',
                 expanded: false,
-                view: 'options',
-              },
+                view: 'options', },
             },
-          },
+          },*/
         },
       };
+      if (type === 'agent') {
+        newNode.data.agent = {
+          expanded: false,
+          arms: {
+            'on-init': {
+              name: 'on-init',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-save': {
+              name: 'on-save',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-load': {
+              name: 'on-load',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-poke': {
+              name: 'on-poke',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-watch': {
+              name: 'on-watch',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-leave': {
+              name: 'on-leave',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-peek': {
+              name: 'on-peek',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-agent': {
+              name: 'on-agent',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-arvo': {
+              name: 'on-arvo',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+            'on-fail': {
+              name: 'on-fail',
+              body: 'body',
+              expanded: false,
+              view: 'options',
+            },
+          },
+        };
+      }
       if (spaces.selected)
         AirliftActions.dropAirlift(spaces.selected.path, newNode);
     },

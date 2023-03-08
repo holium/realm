@@ -152,7 +152,7 @@ export const AirliftData = types
     id: types.identifier,
     name: types.maybe(types.string),
     showDelete: types.boolean,
-    agent: AirliftAgent,
+    agent: types.maybe(AirliftAgent),
     created: types.boolean,
   })
   .actions((self) => ({

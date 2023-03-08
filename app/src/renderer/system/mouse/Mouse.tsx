@@ -36,12 +36,6 @@ export const Mouse = () => {
 
     window.electron.app.onMouseDown(active.toggleOn);
     window.electron.app.onMouseUp(active.toggleOff);
-    window.electron.app.onMouseIcon(setIcon);
-    window.electron.app.onAirlift((blah: any) => {
-      /*const image = new Image();
-      image.src = blah;*/
-      setAirlift(blah);
-    });
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!active.isOn) setCoords({ x: e.clientX, y: e.clientY });
