@@ -1,94 +1,100 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
+import { observer } from 'mobx-react';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
-interface Props {
+type Props = {
   appWindow: AppWindowType;
-  isResizing?: boolean;
-}
+  isResizing: boolean;
+};
 
-export const DevView = ({ appWindow, isResizing }: Props) => {
-  const [ready, setReady] = useState(false);
+const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
+  const { theme } = useServices();
 
-  const { ship, theme } = useServices();
-  const webViewRef = useRef<any>(null);
-  const elementRef = useRef(null);
+  const loading = useToggle(false);
+  const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
-  const [loading, setLoading] = useState(false);
-
-  const onStartLoading = () => {
-    setLoading(true);
-  };
-
-  const onStopLoading = () => {
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    const webview: any = document.getElementById(
-      `${appWindow.appId}-web-webview`
-    );
-    webview?.addEventListener('did-start-loading', onStartLoading);
-    webview?.addEventListener('did-stop-loading', onStopLoading);
-
-    webview?.addEventListener('close', webview?.closeDevTools);
-  }, []);
-
-  // Sync ship model info into app window
-  useEffect(() => {
-    webViewRef.current?.addEventListener('dom-ready', () => {
-      webViewRef.current?.send('load-ship', JSON.stringify(ship));
-      webViewRef.current?.send('load-appWindow-id', appWindow.appId);
-      setReady(true);
-    });
-  }, [ship, appWindow.appId]);
-
-  useEffect(() => {
-    const css = `
+  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
+  const webviewId = useMemo(
+    () => `${appWindow.appId}-web-webview`,
+    [appWindow.appId]
+  );
+  const themeCss = useMemo(
+    () => `
       :root {
         --rlm-font: 'Rubik', sans-serif;
-        --rlm-base-color: ${theme.currentTheme.backgroundColor};
-        --rlm-accent-color: ${theme.currentTheme.accentColor};
-        --rlm-input-color: ${theme.currentTheme.inputColor};
+        --rlm-base-color: ${currentTheme.backgroundColor};
+        --rlm-accent-color: ${currentTheme.accentColor};
+        --rlm-input-color: ${currentTheme.inputColor};
         --rlm-border-color: ${
-          theme.currentTheme.mode === 'light'
-            ? darken(0.1, theme.currentTheme.windowColor)
-            : darken(0.075, theme.currentTheme.windowColor)
+          currentTheme.mode === 'light'
+            ? darken(0.1, currentTheme.windowColor)
+            : darken(0.075, currentTheme.windowColor)
         };
-        --rlm-window-color: ${theme.currentTheme.windowColor};
+        --rlm-window-color: ${currentTheme.windowColor};
         --rlm-card-color: ${
-          theme.currentTheme.mode === 'light'
-            ? lighten(0.05, theme.currentTheme.windowColor)
-            : darken(0.025, theme.currentTheme.windowColor)
+          currentTheme.mode === 'light'
+            ? lighten(0.05, currentTheme.windowColor)
+            : darken(0.025, currentTheme.windowColor)
         };
-        --rlm-theme-mode: ${theme.currentTheme.mode};
-        --rlm-text-color: ${theme.currentTheme.textColor};
-        --rlm-icon-color: ${theme.currentTheme.iconColor};
+        --rlm-theme-mode: ${currentTheme.mode};
+        --rlm-text-color: ${currentTheme.textColor};
+        --rlm-icon-color: ${currentTheme.iconColor};
       }
       div[data-radix-portal] {
         z-index: 2000 !important;
       }
-   
+
       #rlm-cursor {
         position: absolute;
         z-index: 2147483646 !important;
       }
+    `,
+    [currentTheme]
+  );
 
-      
-    `;
+  useEffect(() => {
+    const webview = document.getElementById(
+      webviewId
+    ) as Electron.WebviewTag | null;
 
-    if (ready) {
-      const webview = document.getElementById(
-        `${appWindow.appId}-web-webview`
-      ) as Electron.WebviewTag | null;
-      webview?.insertCSS(css);
-      webview?.addEventListener('did-frame-finish-load', () => {
-        webview?.insertCSS(css);
-      });
-    }
-  }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
+    if (!webview) return;
+
+    const onDomReady = () => setReadyWebview(webview);
+
+    webview.addEventListener('dom-ready', onDomReady);
+
+    return () => {
+      webview.removeEventListener('dom-ready', onDomReady);
+    };
+  }, [appWindow.appId]);
+
+  useEffect(() => {
+    if (!readyWebview) return;
+
+    const onDidFrameFinishLoad = () => readyWebview.insertCSS(themeCss);
+
+    readyWebview.addEventListener(
+      'did-frame-finish-load',
+      onDidFrameFinishLoad
+    );
+    readyWebview.addEventListener('did-start-loading', loading.toggleOn);
+    readyWebview.addEventListener('did-stop-loading', loading.toggleOff);
+    readyWebview.addEventListener('close', readyWebview.closeDevTools);
+
+    return () => {
+      readyWebview.removeEventListener(
+        'did-frame-finish-load',
+        onDidFrameFinishLoad
+      );
+      readyWebview.removeEventListener('did-start-loading', loading.toggleOn);
+      readyWebview.removeEventListener('did-stop-loading', loading.toggleOff);
+      readyWebview.removeEventListener('close', readyWebview.closeDevTools);
+    };
+  }, [appWindow.appId]);
 
   return useMemo(
     () => (
@@ -99,18 +105,16 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
           width: 'inherit',
           height: 'inherit',
         }}
-        ref={elementRef}
       >
         <WebView
-          ref={webViewRef}
-          id={`${appWindow.appId}-web-webview`}
+          id={webviewId}
           appId={appWindow.appId}
           src={appWindow.href?.site}
           partition={'persist:dev-webview'}
           webpreferences="sandbox=false"
-          isLocked={isResizing || loading}
+          isLocked={isResizing || loading.isOn}
           style={{
-            background: lighten(0.04, theme.currentTheme.windowColor),
+            background: lighten(0.04, currentTheme.windowColor),
             width: 'inherit',
             height: '100%',
             position: 'relative',
@@ -118,6 +122,14 @@ export const DevView = ({ appWindow, isResizing }: Props) => {
         />
       </div>
     ),
-    [appWindow.href?.site, isResizing, loading, theme.currentTheme.windowColor]
+    [
+      appWindow.appId,
+      appWindow.href?.site,
+      isResizing,
+      loading.isOn,
+      currentTheme.windowColor,
+    ]
   );
 };
+
+export const DevView = observer(DevViewPresenter);
