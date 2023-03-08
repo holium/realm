@@ -107,7 +107,11 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           </FragmentBlock>
           <BubbleFooter id={id}>
             {onReaction && (
-              <Reactions reactions={reactions} onReaction={onReaction} />
+              <Reactions
+                id={`${id}-reactions`}
+                reactions={reactions}
+                onReaction={onReaction}
+              />
             )}
             <Text.Custom
               pointerEvents="none"

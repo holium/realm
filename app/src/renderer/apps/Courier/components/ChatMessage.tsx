@@ -1,8 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { Bubble, MenuItemProps } from '@holium/design-system';
+import {
+  Bubble,
+  MenuItemProps,
+  OnReactionPayload,
+} from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
@@ -22,6 +26,7 @@ export const ChatMessagePresenter = ({
 }: ChatMessageProps) => {
   const { ship, friends } = useServices();
   const { selectedChat } = useChatStore();
+  const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
 
@@ -100,6 +105,7 @@ export const ChatMessagePresenter = ({
 
   return (
     <Bubble
+      ref={messageRef}
       id={messageRowId}
       isOur={isOur}
       ourColor={ourColor}
@@ -110,7 +116,14 @@ export const ChatMessagePresenter = ({
       message={message.contents}
       sentAt={new Date(message.createdAt).toISOString()}
       onLoad={onLoad}
-      onReaction={canReact ? () => {} : undefined}
+      onReaction={
+        canReact
+          ? (payload: OnReactionPayload) => {
+              //
+              console.log(payload);
+            }
+          : undefined
+      }
     />
   );
 };

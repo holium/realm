@@ -123,7 +123,7 @@ export const InboxPresenter = () => {
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
-                    peers={chat.peers}
+                    peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}
@@ -157,7 +157,7 @@ export const InboxPresenter = () => {
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
-                    peers={chat.peers}
+                    peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}

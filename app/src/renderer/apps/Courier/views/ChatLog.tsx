@@ -45,7 +45,6 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
 
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
-
   const chatAvatarEl = (
     <ChatAvatar
       title={resolvedTitle}
@@ -64,7 +63,9 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
       fragments.map((frag) => {
         return {
           content: frag,
-          'reply-to': [selectedChat.path, selectedChat.replyingMsg?.id] || null,
+          'reply-to': selectedChat.replyingMsg
+            ? [selectedChat.path, selectedChat.replyingMsg?.id]
+            : null,
           metadata: {},
         };
       })

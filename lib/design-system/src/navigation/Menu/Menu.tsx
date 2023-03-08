@@ -34,6 +34,7 @@ export type MenuProps = {
   anchorRef?: React.RefObject<HTMLElement>;
   triggerEl?: React.ReactNode;
   controlledIsOpen?: boolean;
+  clickPreventClass?: string;
   children?: React.ReactNode;
   dimensions?: Dimensions;
   offset?: Position;
@@ -48,6 +49,8 @@ export const Menu = ({
   orientation = 'bottom-left',
   offset = { x: 0, y: 2 },
   options,
+  clickPreventClass,
+  ...rest
 }: MenuProps) => {
   const root = document.getElementById('root');
   let innerContent: React.ReactNode;
@@ -59,9 +62,13 @@ export const Menu = ({
     (e: MouseEvent) => {
       const menu = document.getElementById(id);
       const trigger = document.getElementById(`${id}-trigger`);
+      const clickEl =
+        clickPreventClass &&
+        document.getElementsByClassName(clickPreventClass)[0];
       if (
         (menu && menu.contains(e.target as Node)) ||
-        (trigger && trigger.contains(e.target as Node))
+        (trigger && trigger.contains(e.target as Node)) ||
+        (clickEl && clickEl.contains(e.target as Node))
       )
         return;
       setIsOpen(false);
@@ -147,6 +154,8 @@ export const Menu = ({
     }
   };
 
+  const isCustom = type === 'custom';
+
   return (
     <>
       {triggerEl && (
@@ -165,70 +174,43 @@ export const Menu = ({
       )}
       <MenuPortal id={`${id}-portal`} isOpen={isOpen}>
         <AnimatePresence>
-          <>
-            {isOpen && anchorPoint && type === 'options' && (
-              <Card
-                p={1}
-                elevation={2}
-                position="absolute"
-                id={id}
-                initial={{
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  transition: {
-                    duration: 0.1,
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: {
-                    duration: 0.1,
-                  },
-                }}
-                gap={type === 'options' ? 2 : 0}
-                style={{
-                  y: anchorPoint.y,
-                  x: anchorPoint.x,
-                  width: WIDTH,
-                  maxHeight: MAX_HEIGHT,
-                  overflowY: 'auto',
-                }}
-              >
-                {innerContent}
-              </Card>
-            )}
-            {type === 'custom' && isOpen && anchorPoint && (
-              <Card
-                p={0}
-                id={id}
-                position="absolute"
-                style={{
-                  y: anchorPoint.y,
-                  x: anchorPoint.x,
-                  overflowY: 'auto',
-                }}
-                initial={{
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  transition: {
-                    duration: 0.1,
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: {
-                    duration: 0.1,
-                  },
-                }}
-              >
-                {innerContent}
-              </Card>
-            )}
-          </>
+          {isOpen && anchorPoint && (
+            <Card
+              p={type === 'custom' ? 0 : 1}
+              elevation={2}
+              position="absolute"
+              className={rest.className}
+              id={id}
+              zIndex={100}
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  duration: 0.1,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.1,
+                },
+              }}
+              gap={type === 'options' ? 2 : 0}
+              style={{
+                y: anchorPoint.y,
+                x: anchorPoint.x,
+                border: isCustom ? 'none' : '1px solid var(--rlm-border-color)',
+                width: dimensions?.width || WIDTH,
+                height: dimensions?.height || 'auto',
+                maxHeight: dimensions?.height || MAX_HEIGHT,
+                overflowY: isCustom ? 'hidden' : 'auto',
+              }}
+            >
+              {innerContent}
+            </Card>
+          )}
         </AnimatePresence>
       </MenuPortal>
     </>

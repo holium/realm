@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Box, Icon, Text } from '../..';
+import { Flex, Box, Icon, Text, Menu } from '../..';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
@@ -8,7 +8,6 @@ import EmojiPicker, {
   SkinTones,
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
-import { AnimatePresence } from 'framer-motion';
 import { lighten } from 'polished';
 import { getVar } from '../../util/colors';
 
@@ -16,25 +15,33 @@ const WIDTH = 300;
 const HEIGHT = 350;
 const ship = window.ship ?? 'zod';
 
-const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
-  const menuWidth = WIDTH;
-  const menuHeight = HEIGHT;
+// const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
+//   const menuWidth = WIDTH;
+//   const menuHeight = HEIGHT;
 
-  const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
-  const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
+//   const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
+//   const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
 
-  const offset = 3;
-  const x = willGoOffScreenHorizontally ? 0 - menuWidth - offset : 0 + offset;
-  const y = willGoOffScreenVertically ? 0 - menuHeight - offset : 0 + offset;
+//   const offset = 3;
+//   const x = willGoOffScreenHorizontally ? 0 - menuWidth - offset : 0 + offset;
+//   const y = willGoOffScreenVertically ? 0 - menuHeight - offset : 0 + offset;
 
-  return { x, y };
-};
+//   return { x, y };
+// };
 
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
   position: relative;
   flex-direction: row;
   gap: 4px;
+  .emoji-picker-menu {
+    &:hover {
+      .bubble-reactions {
+        transition: var(--transition);
+        opacity: 1;
+      }
+    }
+  }
   ${({ variant }) =>
     variant === 'overlay'
       ? css`
@@ -135,6 +142,7 @@ export type OnReactionPayload = {
 };
 
 type ReactionProps = {
+  id?: string;
   variant?: 'overlay' | 'inline';
   defaultIsOpen?: boolean;
   reactions: FragmentReactionType[];
@@ -144,6 +152,7 @@ type ReactionProps = {
 
 export const Reactions = (props: ReactionProps) => {
   const {
+    id = 'reaction-menu',
     variant = 'overlay',
     size = 'medium',
     defaultIsOpen = false,
@@ -151,10 +160,6 @@ export const Reactions = (props: ReactionProps) => {
     onReaction,
   } = props;
   const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
-  const [anchorPoint, setAnchorPoint] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   const reactionsAggregated = useMemo(
     () =>
@@ -227,7 +232,12 @@ export const Reactions = (props: ReactionProps) => {
   }, [root, isReacting]);
 
   return (
-    <ReactionRow variant={variant}>
+    <ReactionRow
+      variant={variant}
+      onClick={(evt) => {
+        evt.stopPropagation();
+      }}
+    >
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
         return (
           <ReactionButton
@@ -249,49 +259,41 @@ export const Reactions = (props: ReactionProps) => {
           </ReactionButton>
         );
       })}
-      <Flex className="bubble-reactions">
-        <ReactionButton
-          id="reaction-add-button"
-          size={size}
-          onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
-            evt.stopPropagation();
-            const { x, y } = getAnchorPoint(evt);
-            setAnchorPoint({ x, y });
-            setIsReacting(!isReacting);
-          }}
-        >
-          <Icon size={18} opacity={0.5} name="Reaction" pointerEvents="none" />
-        </ReactionButton>
-        <AnimatePresence>
-          {isReacting && anchorPoint && (
-            <Flex
-              id="emoji-picker"
-              data-is-open={isReacting.toString()}
-              position="absolute"
-              zIndex={4}
-              initial={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 0 }}
-              animate={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 1 }}
-              exit={{ x: anchorPoint?.x, y: anchorPoint.y, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <EmojiPicker
-                emojiVersion="0.6"
-                height={HEIGHT}
-                width={WIDTH}
-                previewConfig={{
-                  showPreview: false,
-                }}
-                defaultSkinTone={SkinTones.NEUTRAL}
-                onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
-                  evt.stopPropagation();
-                  onClick(emojiData.unified);
-                }}
-                autoFocusSearch={false}
-              />
-            </Flex>
-          )}
-        </AnimatePresence>
-      </Flex>
+      <Menu
+        id={id}
+        orientation="top-left"
+        clickPreventClass="epr-category-nav"
+        className="emoji-picker-menu"
+        dimensions={{ width: WIDTH, height: HEIGHT }}
+        offset={{ x: 2, y: 2 }}
+        triggerEl={
+          <ReactionButton size={size} className="bubble-reactions">
+            <Icon
+              pointerEvents="none"
+              size={18}
+              opacity={0.5}
+              name="Reaction"
+            />
+          </ReactionButton>
+        }
+      >
+        <ReactionPickerStyle zIndex={20} transition={{ duration: 0.15 }}>
+          <EmojiPicker
+            emojiVersion="0.6"
+            height={HEIGHT}
+            width={WIDTH}
+            previewConfig={{
+              showPreview: false,
+            }}
+            defaultSkinTone={SkinTones.NEUTRAL}
+            onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
+              evt.stopPropagation();
+              onClick(emojiData.unified);
+            }}
+            autoFocusSearch={false}
+          />
+        </ReactionPickerStyle>
+      </Menu>
     </ReactionRow>
   );
 };

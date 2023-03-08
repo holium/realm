@@ -33,6 +33,7 @@ export const ChatAvatar = ({
   let avatarElement = null;
 
   if (!image && type === 'dm' && isValidPatp(title)) {
+    console.log(title);
     const {
       patp,
       avatar,
