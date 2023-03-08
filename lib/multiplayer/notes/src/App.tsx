@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
-import { Flex, Text, Avatar } from '@holium/design-system';
+import { Flex, Avatar } from '@holium/design-system';
 import { useShips, useTransactions } from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
@@ -54,6 +54,8 @@ const EditorContainer = styled(Flex)`
     }
   }
 `;
+
+const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
 
 export const App = () => {
   const [editorView, setEditorView] = useState<EditorView>();
@@ -121,7 +123,7 @@ export const App = () => {
       background="#161B22"
     >
       <Header>
-        <Text.H5 fontWeight={600}>desks/courier/app/app.hoon</Text.H5>
+        <p>{filePath}</p>
         <Flex gap={8}>
           {ships.map((ship) => (
             <Avatar
