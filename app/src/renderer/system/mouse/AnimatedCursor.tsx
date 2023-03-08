@@ -1,7 +1,6 @@
 import { useRef, useCallback, useEffect, Fragment } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
 import { IsDevice } from './isDevice';
-import { Icon } from '@holium/design-system';
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 
@@ -24,11 +23,7 @@ interface AnimatedCursorProps {
   isActiveClickable?: boolean;
   isVisible: boolean;
   initialRender?: boolean;
-  icon?: 'Airlift';
-  airlift?: string;
 }
-
-const ICON_SIZE = 28;
 
 /**
  * @param {string} color - rgb color value
@@ -52,13 +47,9 @@ const CursorCore = ({
   isActive,
   isActiveClickable,
   isVisible = true,
-  icon,
-  airlift,
 }: AnimatedCursorProps) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
   const cursorInnerRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<HTMLDivElement>(null);
-  const airliftRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
   const previousTimeRef = useRef<number>();
   const endX = useRef(0);
@@ -109,23 +100,12 @@ const CursorCore = ({
     if (!cursorInnerRef.current || !cursorOuterRef.current) return;
     cursorInnerRef.current.style.top = `${coords.y}px`;
     cursorInnerRef.current.style.left = `${coords.x}px`;
-    if (iconRef.current) {
-      iconRef.current.style.top = `${coords.y - ICON_SIZE / 2}px`;
-      iconRef.current.style.left = `${coords.x - ICON_SIZE / 2}px`;
-    }
-    if (airliftRef.current) {
-      airliftRef.current!.style.top = `${coords.y - ICON_SIZE / 2}px`;
-      airliftRef.current!.style.left = `${coords.x - ICON_SIZE / 2}px`;
-    }
     if (cursorInnerRef.current.style.transform === 'none') {
       // if for some reason the transform isnt set yet.
       cursorInnerRef.current.style.transform =
         'translate(-50%, -50%) scale(1.0)';
       cursorOuterRef.current.style.transform =
         'translate(-50%, -50%) scale(1.0)';
-      if (iconRef.current) {
-        iconRef.current.style.transform = 'translate(-50%, -50%) scale(1.0)';
-      }
     }
     endX.current = coords.x;
     endY.current = coords.y;
@@ -198,7 +178,7 @@ const CursorCore = ({
       width: innerSize,
       height: innerSize,
       borderRadius: '50%',
-      visibility: !icon && !airlift && isVisible ? 'visible' : 'hidden',
+      visibility: isVisible ? 'visible' : 'hidden',
     },
     resize: {
       width: innerSize,
@@ -210,30 +190,6 @@ const CursorCore = ({
 
   return (
     <Fragment>
-      <div
-        ref={airliftRef}
-        style={{
-          position: 'absolute',
-          width: '750px',
-          height: '750px',
-          visibility: airlift ? 'visible' : 'hidden',
-        }}
-      >
-        <img
-          src={airlift}
-          alt="airlift"
-          style={{ maxWidth: '100%', maxHeight: '100%', height: 'auto' }}
-        />
-      </div>
-      <div
-        ref={iconRef}
-        style={{
-          position: 'absolute',
-          visibility: icon ? 'visible' : 'hidden',
-        }}
-      >
-        {icon && <Icon name={icon} size={ICON_SIZE} />}
-      </div>
       <motion.div
         ref={cursorOuterRef}
         animate={{
@@ -242,7 +198,7 @@ const CursorCore = ({
         transition={{ opacity: 0.05 }}
         style={{
           ...styles.cursorOuter,
-          visibility: !icon && !airlift && isVisible ? 'visible' : 'hidden',
+          visibility: isVisible ? 'visible' : 'hidden',
         }}
       />
       <motion.div

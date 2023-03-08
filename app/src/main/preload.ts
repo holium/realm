@@ -94,17 +94,6 @@ const appPreload = {
       callback(hex);
     });
   },
-  onMouseIcon(callback: (icon: 'Airlift' | undefined) => void) {
-    ipcRenderer.on('icon', (_, icon: 'Airlift' | undefined) => {
-      console.log('mouse icon change');
-      callback(icon);
-    });
-  },
-  onAirlift(callback: (icon: any) => void) {
-    ipcRenderer.on('airlift', (_, icon: any) => {
-      callback(icon);
-    });
-  },
 };
 
 export type AppPreloadType = typeof appPreload;

@@ -8,6 +8,7 @@ import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { AirliftManager } from './AirliftManager';
 import { AppWindowManager } from './AppWindowManager';
 import { AirliftDragManager } from './AirliftDragManager';
+import { IconDragManager } from './IconDragManager';
 
 const DesktopPresenter = () => {
   const { ship, desktop } = useServices();
@@ -22,6 +23,7 @@ const DesktopPresenter = () => {
         <AirliftManager />
         <AppWindowManager />
         <AirliftDragManager />
+        <IconDragManager />
       </Layer>
       <Layer zIndex={1}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>

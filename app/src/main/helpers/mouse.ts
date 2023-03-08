@@ -45,14 +45,6 @@ const registerListeners = (
   ipcMain.handle('mouse-color', (_, color: string) => {
     mouseWindow.webContents.send('mouse-color', color);
   });
-
-  ipcMain.handle('icon', (_, icon: string) => {
-    mouseWindow.webContents.send('icon', icon);
-  });
-
-  ipcMain.handle('airlift', (_, airlift: any) => {
-    mouseWindow.webContents.send('airlift', airlift);
-  });
 };
 
 export const MouseHelper = { registerListeners };
