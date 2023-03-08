@@ -10,7 +10,7 @@ import {
   sendableSteps,
 } from 'prosemirror-collab';
 import { Authority } from './Authority';
-import { caretPlugin } from './Caret';
+import { streamCaretPlugin } from './Caret';
 import { SendCaret, SendTransaction } from '@holium/realm-multiplayer';
 
 export const collabEditor = (
@@ -30,7 +30,7 @@ export const collabEditor = (
         }),
         keymap(baseKeymap),
         collab({ version: authority.steps.length }),
-        caretPlugin((position: { x: number; y: number }) =>
+        streamCaretPlugin((position: { x: number; y: number }) =>
           sendCaret(window.ship, position)
         ),
         new Plugin({

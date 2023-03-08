@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { MouseState } from '@holium/realm-presence';
 import { Position } from 'os/types';
 import { AnimatedCursor } from './AnimatedCursor';
 import { bgIsLightOrDark, hexToRgb, rgbToString } from 'os/lib/color';
+import { MouseState } from '@holium/realm-presence';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 type CursorState = Record<
   string,
@@ -20,6 +21,7 @@ type CursorState = Record<
 
 // Manage websocket connection within realm or an individual app
 export const Presences = () => {
+  const enabled = useToggle(true);
   const [cursors, setCursors] = useState<CursorState>({});
 
   useEffect(() => {
@@ -44,7 +46,6 @@ export const Presences = () => {
         },
       }));
     });
-
     window.electron.multiplayer.onMouseMove(
       (patp, position, state, hexColor) => {
         const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
@@ -84,6 +85,7 @@ export const Presences = () => {
         },
       }));
     });
+    window.electron.multiplayer.onToggleMultiplayer(enabled.toggle);
   }, []);
 
   const visibleCursors = Object.entries(cursors).filter(
@@ -91,6 +93,8 @@ export const Presences = () => {
   );
 
   if (visibleCursors.length < 1) return null;
+
+  if (!enabled.isOn) return null;
 
   return (
     <>

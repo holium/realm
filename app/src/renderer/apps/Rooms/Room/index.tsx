@@ -9,6 +9,7 @@ import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { useRooms } from '../useRooms';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
@@ -16,10 +17,13 @@ const RoomPresenter = () => {
   const { ship, theme } = useServices();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
+  const multiplayer = useToggle();
 
   const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const muted = roomsManager?.protocol.local?.isMuted;
+  const isMuted = roomsManager?.protocol.local?.isMuted;
+  const commButtonBg =
+    mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
   const presentRoom = useMemo(() => {
     if (!roomsManager?.live.room) return;
@@ -166,28 +170,26 @@ const RoomPresenter = () => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
-              icon={muted ? 'MicOff' : 'MicOn'}
-              customBg={
-                mode === 'light'
-                  ? darken(0.04, dockColor)
-                  : darken(0.01, dockColor)
-              }
-              onClick={(evt: any) => {
+              icon={isMuted ? 'MicOff' : 'MicOn'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
                 evt.stopPropagation();
-                if (muted) {
+                if (isMuted) {
                   roomsManager?.unmute();
                 } else {
                   roomsManager?.mute();
                 }
               }}
             />
-            {/* <CommButton
-              icon="CursorOn"
-              customBg={dockColor}
-              onClick={(evt: any) => {
+            <CommButton
+              icon={multiplayer.isOn ? 'MouseOff' : 'MouseOn'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
                 evt.stopPropagation();
+                window.electron.multiplayer.toggleMultiplayer();
+                multiplayer.toggle();
               }}
-            /> */}
+            />
             {/* <CommButton
               icon="HeadphoneLine"
               customBg={dockColor}

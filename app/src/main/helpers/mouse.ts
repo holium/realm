@@ -89,6 +89,10 @@ const registerListeners = (
     mouseWindow.webContents.send('multiplayer.mouse-up', patp);
   });
 
+  ipcMain.handle('multiplayer.toggle', () => {
+    mouseWindow.webContents.send('multiplayer.toggle');
+  });
+
   ipcMain.handle(
     'multiplayer.app-to-realm.mouse-click',
     (_, patp: string, elementId: string) => {
