@@ -14,6 +14,7 @@ import { Authority } from './components/Authority';
 import { collabEditor } from './components/CollabEditor';
 import { hoonDoc } from './hoonExample';
 import { Header, EditorContainer } from './App.styles';
+import { CustomCaret } from './components/CustomCaret';
 
 type Carets = Record<string, { x: number; y: number }>;
 
@@ -112,17 +113,7 @@ export const App = () => {
       <EditorContainer>
         <div ref={onEditorRef}>
           {Object.entries(carets).map(([patp, position]) => (
-            <div
-              key={patp}
-              style={{
-                position: 'absolute',
-                top: position.y,
-                left: position.x,
-                width: 2,
-                height: 18,
-                background: 'white',
-              }}
-            />
+            <CustomCaret key={patp} top={position.y} left={position.x} />
           ))}
         </div>
         <Flex flex={1} onClick={moveToEnd} />
