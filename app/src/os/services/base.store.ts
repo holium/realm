@@ -65,7 +65,7 @@ export class DiskStore {
   initialUpdate(onEffect: (patch: any) => void) {
     const patchEffect = {
       model: getSnapshot(this.model),
-      resource: 'wallet',
+      resource: this.name,
       response: 'initial',
     };
 
