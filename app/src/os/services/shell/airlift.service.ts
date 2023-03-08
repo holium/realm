@@ -138,6 +138,7 @@ export class AirliftService extends BaseService {
   // ***********************************************************
   // ************************ AIRLIFT ***************************
   // ***********************************************************
+
   async toggleAgentExpand(_event: any, space: string, airliftId: string) {
     this.state!.nodes.get(space)!
       .find((node) => node.id === airliftId)!

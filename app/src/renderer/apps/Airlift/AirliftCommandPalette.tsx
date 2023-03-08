@@ -195,17 +195,7 @@ export const AirliftCommandPalette: FC = observer(() => {
             alignItems="center"
             size={ICON_SIZE + 5}
           >
-            <Icon name="Uqbar" size={ICON_SIZE - 5} overflow="visible" />
-          </Button.IconButton>
-          <Button.IconButton
-            draggable={true}
-            onDragStart={(event) => onButtonDragStart(event, 'uqbar')}
-            customColor={textColor}
-            justifyContent="center"
-            alignItems="center"
-            size={ICON_SIZE + 5}
-          >
-            <Icon name="Uqbar2" size={ICON_SIZE} overflow="visible" />
+            <Icon name="Uqbar" size={ICON_SIZE - 7} overflow="visible" mr={1} />
           </Button.IconButton>
         </Flex>
         <Flex flexDirection="column" gap={10} flexGrow={1} ml={4}>
