@@ -19,10 +19,10 @@ export const Default: ComponentStory<typeof Reactions> = () => {
   window.ship = isOurPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: isOurPatp, emoji: payload.emoji }]);
+      setReacts([...reacts, { by: isOurPatp, emoji: payload.emoji }]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === isOurPatp
+        (r) => r.emoji === payload.emoji && r.by === isOurPatp
       );
       if (removeIdx === -1) {
         return;

@@ -67,7 +67,7 @@ export const NewChat = () => {
   };
 
   return (
-    <Flex gap={8} height={dimensions.height - 14} flexDirection="column">
+    <Flex gap={4} height={dimensions.height - 14} flexDirection="column">
       <Flex minHeight={32} height={36} flexDirection="row" alignItems="center">
         <Flex width={120}>
           <Button.IconButton

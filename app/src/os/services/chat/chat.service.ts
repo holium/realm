@@ -283,7 +283,8 @@ export class ChatService extends BaseService {
           console.log('update paths', update.row);
           const path = update.row as PathsRow;
           this.insertPaths([path]);
-          this.sendChatUpdate('path-updated', path);
+          const chat = this.getChat(path.path);
+          this.sendChatUpdate('path-updated', chat);
           break;
         case 'peers':
           console.log('update peers', update.row);
@@ -512,7 +513,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -606,7 +607,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -667,7 +668,8 @@ export class ChatService extends BaseService {
         lastSender,
         chat_with_messages.created_at createdAt,
         chat_with_messages.updated_at updatedAt,
-        paths.max_expires_at_duration expiresDuration
+        paths.max_expires_at_duration expiresDuration,
+        paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path = ?

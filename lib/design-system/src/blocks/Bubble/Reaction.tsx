@@ -13,7 +13,7 @@ import { getVar } from '../../util/colors';
 
 const WIDTH = 300;
 const HEIGHT = 350;
-const ship = window.ship ?? 'zod';
+const defaultShip = window.ship ?? 'zod';
 
 // const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
 //   const menuWidth = WIDTH;
@@ -143,6 +143,7 @@ export type OnReactionPayload = {
 
 type ReactionProps = {
   id?: string;
+  ourShip?: string;
   variant?: 'overlay' | 'inline';
   defaultIsOpen?: boolean;
   reactions: FragmentReactionType[];
@@ -155,6 +156,7 @@ export const Reactions = (props: ReactionProps) => {
     id = 'reaction-menu',
     variant = 'overlay',
     size = 'medium',
+    ourShip = defaultShip,
     defaultIsOpen = false,
     reactions = [],
     onReaction,
@@ -166,11 +168,11 @@ export const Reactions = (props: ReactionProps) => {
       Object.values<ReactionAggregateType>(
         reactions.reduce((acc, reaction) => {
           if (acc[reaction.emoji]) {
-            acc[reaction.emoji].by.push(reaction.author);
+            acc[reaction.emoji].by.push(reaction.by);
             acc[reaction.emoji].count++;
           } else {
             acc[reaction.emoji] = {
-              by: [reaction.author],
+              by: [reaction.by],
               emoji: reaction.emoji,
               count: 1,
             };
@@ -185,7 +187,7 @@ export const Reactions = (props: ReactionProps) => {
     const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
       const reaction = reactionsAggregated[index];
-      if (reaction.by.includes(ship)) {
+      if (reaction.by.includes(ourShip)) {
         return true;
       }
     }
@@ -195,9 +197,9 @@ export const Reactions = (props: ReactionProps) => {
   const onClick = (emoji: string) => {
     setIsReacting(false);
     if (checkDupe(emoji)) {
-      onReaction({ emoji, action: 'remove', by: ship });
+      onReaction({ emoji, action: 'remove', by: ourShip });
     } else {
-      onReaction({ emoji, action: 'add', by: ship });
+      onReaction({ emoji, action: 'add', by: ourShip });
     }
   };
 
@@ -248,7 +250,7 @@ export const Reactions = (props: ReactionProps) => {
               evt.stopPropagation();
               onClick(reaction.emoji);
             }}
-            selected={reaction.by.includes(ship)}
+            selected={reaction.by.includes(ourShip)}
           >
             <Emoji
               unified={reaction.emoji}

@@ -115,6 +115,7 @@ export const Chat = types
     replyingMsg: types.maybeNull(types.reference(ChatMessage)),
     our: types.maybe(types.string),
     isReacting: types.maybe(types.string),
+    lastFetch: types.maybeNull(types.number),
   })
   .views((self) => ({
     get pinnedChatMessage() {
@@ -158,6 +159,7 @@ export const Chat = types
         const messages = yield ChatDBActions.getChatLog(self.path);
         self.messages = messages;
         self.hidePinned = self.isPinLocallyHidden();
+        self.lastFetch = new Date().getTime();
         return self.messages;
       } catch (error) {
         console.error(error);

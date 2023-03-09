@@ -151,6 +151,7 @@ export const ChatLogHeader = ({
                 delay: 0.1,
                 duration: 0.1,
               }}
+              lineHeight="0.95"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               opacity={0.5}

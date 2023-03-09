@@ -82,7 +82,7 @@ export type FragmentReplyType = {
 };
 
 export type FragmentReactionType = {
-  author: string;
+  by: string;
   emoji: string; // emoji.unified -> see emoji-picker-react
 };
 

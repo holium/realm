@@ -10,7 +10,12 @@ import { useEffect } from 'react';
 export const CourierAppPresenter = () => {
   const storage = useStorage();
   useEffect(() => {
-    chatStore.init();
+    if (chatStore.subroute === 'inbox') {
+      chatStore.init();
+    } else {
+      console.log('chat log', chatStore.selectedChat?.path);
+      chatStore.selectedChat?.fetchMessages();
+    }
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { toJS } from 'mobx';
+// import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Box, Flex, WindowedList, Text, Reply } from '@holium/design-system';
 import { useChatStore } from '../store';
@@ -20,6 +20,7 @@ type ChatLogProps = {
 
 const replyHeight = 46;
 const pinHeight = 46;
+
 export const ChatLogPresenter = (_props: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, getChatTitle, setSubroute } = useChatStore();
@@ -109,6 +110,11 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         onBack={() => setSubroute('inbox')}
         hasMenu
         avatar={chatAvatarEl}
+        subtitle={
+          selectedChat.peers.length > 1
+            ? `${selectedChat.peers.length} members`
+            : undefined
+        }
       />
       <Flex
         initial={{ opacity: 0 }}
@@ -121,7 +127,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             justifyContent="center"
             alignItems="center"
             width={dimensions.width - 24}
-            height={dimensions.height - 100 - 40}
+            height={height}
           >
             <Text.Custom
               textAlign="center"
@@ -142,6 +148,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
               </AnimatePresence>
             )}
             <WindowedList
+              key={`last-${selectedChat.lastFetch}`}
               startAtBottom
               hideScrollbar
               width={dimensions.width - 24}

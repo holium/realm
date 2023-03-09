@@ -28,6 +28,7 @@ const ChatStore = types
     pinnedChats: types.array(types.string),
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
+    isOpen: types.boolean,
   })
   .views((self) => ({
     isChatPinned(path: string) {
@@ -68,6 +69,12 @@ const ChatStore = types
         return self.pinnedChats;
       }
     }),
+    setOpened() {
+      self.isOpen = true;
+    },
+    setClosed() {
+      self.isOpen = false;
+    },
     setSubroute(subroute: Subroutes) {
       if (subroute === 'inbox') {
         self.selectedChat = undefined;
@@ -147,6 +154,7 @@ const ChatStore = types
 
 export const chatStore = ChatStore.create({
   subroute: 'inbox',
+  isOpen: false,
 });
 
 // -------------------------------

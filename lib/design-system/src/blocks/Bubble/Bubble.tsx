@@ -30,6 +30,7 @@ export type BubbleProps = {
   isEditing?: boolean;
   sentAt: string;
   isOur?: boolean;
+  ourShip?: string;
   ourColor?: string;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
@@ -45,6 +46,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       author,
       isOur,
       ourColor,
+      ourShip,
       sentAt,
       authorColor,
       message,
@@ -109,6 +111,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             {onReaction && (
               <Reactions
                 id={`${id}-reactions`}
+                ourShip={ourShip}
                 reactions={reactions}
                 onReaction={onReaction}
               />

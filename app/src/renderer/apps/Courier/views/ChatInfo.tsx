@@ -190,21 +190,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         avatar={<div />}
         onBack={() => setSubroute('chat')}
         hasMenu={false}
-        rightAction={
-          <Button.Secondary
-            py={1}
-            disabled={
-              editTitle.length < 1 ||
-              (editTitle === resolvedTitle && image === metadata?.image)
-            }
-            id="save-chat-metadata"
-            onClick={() => {
-              editMetadata({ title: editTitle });
-            }}
-          >
-            Save
-          </Button.Secondary>
-        }
       />
       {/* Chat Info */}
       <Flex flexDirection="column" gap={4} pt={3} pb={4}>
@@ -229,6 +214,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               width={350}
               value={editTitle}
               editable={amHost}
+              onBlur={() => {
+                if (editTitle.length > 1) {
+                  editMetadata({ title: editTitle });
+                }
+              }}
               onChange={(evt: any) => {
                 setEditTitle(evt.target.value);
               }}
