@@ -124,11 +124,12 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
     );
   }
 
+  const ogHasURL = (openGraph && openGraph.ogUrl);
   return (
     <Block {...rest}>
       <LinkImage
-        isSkeleton={!openGraph || !imgLoaded}
-        src={openGraph?.ogImage.url}
+        isSkeleton={!ogHasURL || !imgLoaded}
+        src={openGraph?.ogImage?.url}
         alt={openGraph?.ogTitle}
         onError={() => {
           // onLoaded && onLoaded();
@@ -140,7 +141,7 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
       />
       <Flex mb="0.25rem" width="100%" flexDirection="column">
         <LinkTitle
-          isSkeleton={!openGraph}
+          isSkeleton={!ogHasURL}
           mb="0.25rem"
           fontSize={2}
           fontWeight={500}
@@ -153,7 +154,7 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
           {openGraph?.ogTitle}
         </LinkTitle>
         <LinkDescription
-          isSkeleton={!openGraph}
+          isSkeleton={!ogHasURL}
           fontSize={1}
           opacity={0.7}
           width={rest.width || 'calc(100% - 16px)'}
@@ -175,19 +176,19 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
           width="50%"
         >
           <Text.Anchor
-            isSkeleton={!openGraph}
+            isSkeleton={!ogHasURL}
             fontSize={0}
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              if (openGraph?.ogUrl) {
+              if (ogHasURL) {
                 const origin = new URL(openGraph.ogUrl).origin;
                 window.open(origin, '_blank');
               }
             }}
           >
             {openGraph?.ogSiteName ||
-              (openGraph && new URL(openGraph.ogUrl).hostname)}
+              (ogHasURL && new URL(openGraph.ogUrl).hostname)}
           </Text.Anchor>
         </Flex>
 

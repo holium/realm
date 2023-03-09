@@ -1,3 +1,4 @@
+import { isValidPatp } from 'urbit-ob'
 import {
   FragmentType,
   FragmentKeyTypes,
@@ -41,18 +42,35 @@ const parserRules = {
     recurse: false,
     priority: 2,
   },
+  ship: {
+    regex: /~([a-z\-])+/i,
+    filter: isValidPatp,
+    recurse: false,
+    priority: 2.5,
+  },
+  image: {
+    regex: /(https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_\+.~#&//=]*)?/i,
+    recurse: false,
+    priority: 3,
+  },
+  link: {
+    //regex: /\[[^\]]+\]\(([^)]+)\)/,
+    regex: /(https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/i,
+    recurse: false,
+    priority: 3.5,
+  },
   'bold-italics-strike': {
     token: '***~~',
     ender: '~~***',
     tokenLength: 5,
     recurse: false,
-    priority: 3,
+    priority: 4,
   },
   break: {
     token: '\n',
     tokenLength: 1,
     recurse: false,
-    priority: 4,
+    priority: 5,
   },
 
 };
@@ -70,6 +88,8 @@ plain
 ** bold ~~in-strike~~ **
 ** bold ~~in-strike *italics* b-s~~ bold **
 * ital ~~i-s **BIS** i-s~~ ital **b-i** * **b**
+ **bold** plain www.example.com plain
+plain https://i.stack.imgur.com/58jhk.jpg?s=128&g=1&g&s=32 plain
  */
 
 // takes a string and a specialType key (like 'blockquote' or 'italics-strike') and 
@@ -80,31 +100,43 @@ const eatSpecialType = (raw: string, type: string): {frag: FragmentType | null; 
   let pre = raw;
   let post = '';
 
-  let startIndex = raw.indexOf(parserRules[type].token);
-  if (typeof parserRules[type].token !== 'string') { // handle regex (for italics since * is a subset of bold's **)
-    startIndex = raw.match(parserRules[type].token);
-    startIndex = startIndex ? startIndex.index : -1;
-  }
-  if (startIndex >= 0) { // we matched
-    if (type === 'break') {
+  if (parserRules[type].regex) {
+    const match = raw.match(parserRules[type].regex);
+    if (match) {
+      const startIndex = match.index;
+      const matchingText = match[0];
+      const endIndex = startIndex + matchingText.length;
       pre = raw.substr(0, startIndex);
-      post = raw.substr(startIndex + 1);
-      frag = { break: null } as FragmentBreakType;
-    } else {
-      // see if we find an exit match
-      const offset = startIndex + parserRules[type].tokenLength;
-      const endToken = parserRules[type].ender || parserRules[type].token;
-      let endTokenLength = parserRules[type].enderLength || parserRules[type].tokenLength;
-      let stopIndex = raw.substr(offset).indexOf(endToken);
-      if (typeof endToken !== 'string') { // handle regex (for italics since * is a subset of bold's **)
-        stopIndex = raw.substr(offset).match(endToken);
-        stopIndex = stopIndex ? stopIndex.index : -1;
-      }
-      if (stopIndex >= 0) { // there is an exit match
-        let parsedIndex = offset + stopIndex + endTokenLength;
+      post = raw.substr(endIndex);
+      frag = { [type]: matchingText } as FragmentType;
+    }
+  } else {
+    let startIndex = raw.indexOf(parserRules[type].token);
+    if (typeof parserRules[type].token !== 'string') { // handle regex (for italics since * is a subset of bold's **)
+      startIndex = raw.match(parserRules[type].token);
+      startIndex = startIndex ? startIndex.index : -1;
+    }
+    if (startIndex >= 0) { // we matched
+      if (type === 'break') {
         pre = raw.substr(0, startIndex);
-        post = raw.substr(parsedIndex);
-        frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
+        post = raw.substr(startIndex + 1);
+        frag = { break: null } as FragmentBreakType;
+      } else {
+        // see if we find an exit match
+        const offset = startIndex + parserRules[type].tokenLength;
+        const endToken = parserRules[type].ender || parserRules[type].token;
+        let endTokenLength = parserRules[type].enderLength || parserRules[type].tokenLength;
+        let stopIndex = raw.substr(offset).indexOf(endToken);
+        if (typeof endToken !== 'string') { // handle regex (for italics since * is a subset of bold's **)
+          stopIndex = raw.substr(offset).match(endToken);
+          stopIndex = stopIndex ? stopIndex.index : -1;
+        }
+        if (stopIndex >= 0) { // there is an exit match
+          let parsedIndex = offset + stopIndex + endTokenLength;
+          pre = raw.substr(0, startIndex);
+          post = raw.substr(parsedIndex);
+          frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
+        }
       }
     }
   }
