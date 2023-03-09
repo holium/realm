@@ -111,7 +111,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             {onReaction && (
               <Reactions
                 id={`${id}-reactions`}
+                isOur={isOur}
                 ourShip={ourShip}
+                ourColor={ourColor}
                 reactions={reactions}
                 onReaction={onReaction}
               />

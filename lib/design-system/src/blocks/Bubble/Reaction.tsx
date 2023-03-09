@@ -8,7 +8,7 @@ import EmojiPicker, {
   SkinTones,
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
-import { lighten } from 'polished';
+import { lighten, darken } from 'polished';
 import { getVar } from '../../util/colors';
 
 const WIDTH = 300;
@@ -33,7 +33,8 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
   position: relative;
   flex-direction: row;
-  gap: 4px;
+  gap: 2px;
+  z-index: 15;
   .emoji-picker-menu {
     &:hover {
       .bubble-reactions {
@@ -47,7 +48,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
       ? css`
           position: absolute;
           left: -4px;
-          bottom: -14px;
+          bottom: -16px;
         `
       : css`
           flex-direction: row;
@@ -74,38 +75,54 @@ const FontSizes: { [key: string]: number } = {
 
 type ReactionButtonProps = {
   hasCount?: boolean;
+  isOur?: boolean;
   size?: keyof typeof ReactionSizes;
+  ourColor?: string;
   selected?: boolean;
 };
 
-const ReactionButton = styled(Box)<ReactionButtonProps>`
+export const ReactionButton = styled(Box)<ReactionButtonProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   background: ${({ selected }) =>
     selected ? () => lighten(0.3, getVar('accent')) : 'var(--rlm-input-color)'};
+
   border: ${({ selected }) =>
     selected
       ? '1px solid var(--rlm-accent-color)'
       : '1px solid var(--rlm-window-color)'};
-
   border-radius: 16px;
   transition: var(--transition);
-  ${({ size, selected }) =>
+  ${({ size, selected, ourColor }) =>
     size
       ? css`
           min-width: ${ReactionSizes[size]}px;
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && 'color: var(--rlm-accent-color);'}
+            ${selected && !ourColor && 'color: var(--rlm-accent-color);'}
+            ${selected && ourColor && 'color: #FFF'}
           }
         `
       : css`
           min-width: 24px;
           height: 24px;
         `}
+
+  ${({ isOur, ourColor, selected }) =>
+    isOur &&
+    ourColor &&
+    css`
+      background: ${darken(selected ? 0.25 : 0.1, ourColor)};
+      border-color: ${darken(0.3, ourColor)};
+      transition: var(--transition);
+      &:hover {
+        transition: var(--transition);
+        background: ${darken(selected ? 0.35 : 0.125, ourColor)};
+      }
+    `}
   width: auto;
   img {
     user-select: none;
@@ -143,6 +160,8 @@ export type OnReactionPayload = {
 
 type ReactionProps = {
   id?: string;
+  isOur?: boolean;
+  ourColor?: string;
   ourShip?: string;
   variant?: 'overlay' | 'inline';
   defaultIsOpen?: boolean;
@@ -156,7 +175,9 @@ export const Reactions = (props: ReactionProps) => {
     id = 'reaction-menu',
     variant = 'overlay',
     size = 'medium',
+    isOur = false,
     ourShip = defaultShip,
+    ourColor,
     defaultIsOpen = false,
     reactions = [],
     onReaction,
@@ -243,6 +264,8 @@ export const Reactions = (props: ReactionProps) => {
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
         return (
           <ReactionButton
+            isOur={isOur}
+            ourColor={ourColor}
             size={size}
             key={`${reaction.emoji}-${index}`}
             hasCount={reaction.count > 1}
@@ -269,7 +292,12 @@ export const Reactions = (props: ReactionProps) => {
         dimensions={{ width: WIDTH, height: HEIGHT }}
         offset={{ x: 2, y: 2 }}
         triggerEl={
-          <ReactionButton size={size} className="bubble-reactions">
+          <ReactionButton
+            isOur={isOur}
+            ourColor={ourColor}
+            size={size}
+            className="bubble-reactions"
+          >
             <Icon
               pointerEvents="none"
               size={18}
