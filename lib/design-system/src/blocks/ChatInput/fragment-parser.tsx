@@ -88,8 +88,8 @@ plain
 ** bold ~~in-strike~~ **
 ** bold ~~in-strike *italics* b-s~~ bold **
 * ital ~~i-s **BIS** i-s~~ ital **b-i** * **b**
- **bold** plain www.example.com plain
-plain https://i.stack.imgur.com/58jhk.jpg?s=128&g=1&g&s=32 plain
+ **bold** plain www.example.com plain ~tolwer-mogmer ~not-valid stuff
+plain ~zod ~fed ~hostyv https://i.stack.imgur.com/58jhk.jpg?s=128&g=1&g&s=32 plain 
  */
 
 // takes a string and a specialType key (like 'blockquote' or 'italics-strike') and 
@@ -106,9 +106,11 @@ const eatSpecialType = (raw: string, type: string): {frag: FragmentType | null; 
       const startIndex = match.index;
       const matchingText = match[0];
       const endIndex = startIndex + matchingText.length;
-      pre = raw.substr(0, startIndex);
-      post = raw.substr(endIndex);
-      frag = { [type]: matchingText } as FragmentType;
+      if (!parserRules[type].filter || parserRules[type].filter(matchingText)) {
+        pre = raw.substr(0, startIndex);
+        post = raw.substr(endIndex);
+        frag = { [type]: matchingText } as FragmentType;
+      }
     }
   } else {
     let startIndex = raw.indexOf(parserRules[type].token);
