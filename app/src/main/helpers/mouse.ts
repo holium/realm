@@ -53,6 +53,18 @@ const registerListeners = (
     mouseWindow.webContents.send('mouse-color', color);
   });
 
+  ipcMain.handle('toggle-ephemeral-chat', (_, message: string) => {
+    mouseWindow.webContents.send('toggle-ephemeral-chat', message);
+  });
+
+  ipcMain.handle('app.realm-to-app.ephemeral-chat', (_, patp, message) => {
+    mouseWindow.webContents.send(
+      'app.realm-to-app.ephemeral-chat',
+      patp,
+      message
+    );
+  });
+
   /* Multiplayer mouse events */
   ipcMain.handle('multiplayer.mouse-out', (_, patp: string) => {
     mouseWindow.webContents.send('multiplayer.mouse-out', patp);
@@ -171,6 +183,18 @@ const registerListeners = (
         'multiplayer.realm-to-app.send-caret',
         patp,
         position
+      );
+    }
+  );
+
+  ipcMain.handle(
+    'multiplayer.realm-to-app.send-chat',
+    (_, patp: string, message: string) => {
+      mainWindow.webContents.send('multiplayer.realm-to-app.send-chat', patp);
+      mouseWindow.webContents.send(
+        'multiplayer.realm-to-app.send-chat',
+        patp,
+        message
       );
     }
   );

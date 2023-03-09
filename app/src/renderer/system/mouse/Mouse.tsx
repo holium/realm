@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { useToggle } from 'renderer/logic/lib/useToggle';
-import { hexToRgb, rgbToString } from 'os/lib/color';
+import styled from 'styled-components';
 import { MouseState } from '@holium/realm-multiplayer';
+import { useToggle } from 'renderer/logic/lib/useToggle';
+import { bgIsLightOrDark, hexToRgb, rgbToString } from 'os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
+import { Position } from 'os/types';
 
 export const Mouse = () => {
   const active = useToggle(false);
@@ -13,6 +15,8 @@ export const Mouse = () => {
   const [state, setState] = useState<MouseState>('pointer');
   const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const mouseOutTimeoutRef = useRef<NodeJS.Timeout>();
+  const ephemeralChat = useToggle(false);
+  const [chat, setChat] = useState('');
 
   useEffect(() => {
     window.electron.app.onMouseOut(() => {
@@ -35,12 +39,10 @@ export const Mouse = () => {
       if (!visible.isOn) visible.toggleOn();
       if (mouseOutTimeoutRef.current) clearTimeout(mouseOutTimeoutRef.current);
     });
-
     window.electron.app.onMouseColorChange((hex) => {
       const rgbString = rgbToString(hexToRgb(hex));
       if (rgbString) setMouseColor(rgbString);
     });
-
     window.electron.app.onMouseDown(active.toggleOn);
     window.electron.app.onMouseUp(active.toggleOff);
 
@@ -55,6 +57,12 @@ export const Mouse = () => {
 
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
 
+    window.electron.app.onToggleEphemeralChat(ephemeralChat.toggle);
+
+    window.electron.app.onRealmToAppEphemeralChat((_, c) => {
+      setChat(c);
+    });
+
     return () => {
       if (mouseLayerTracking.isOn) {
         window.removeEventListener('mousemove', handleMouseMove);
@@ -65,12 +73,32 @@ export const Mouse = () => {
   if (disabled.isOn) return null;
 
   return (
-    <AnimatedCursor
-      state={state}
-      color={mouseColor}
-      position={position}
-      isActive={active.isOn}
-      isVisible={visible.isOn}
-    />
+    <>
+      <AnimatedCursor
+        state={state}
+        color={mouseColor}
+        position={position}
+        isActive={active.isOn}
+        isVisible={visible.isOn}
+      />
+      {ephemeralChat.isOn && (
+        <EphemeralChat position={position} color={mouseColor}>
+          {chat}
+        </EphemeralChat>
+      )}
+    </>
   );
 };
+
+export const EphemeralChat = styled.div<{ position: Position; color: string }>`
+  position: absolute;
+  top: ${({ position }) => position.y}px;
+  left: ${({ position }) => position.x}px;
+  padding: 16px;
+  border-radius: 0 999px 999px 999px;
+  color: ${({ color }) =>
+    bgIsLightOrDark(color) === 'dark' ? 'white' : 'black'};
+  background-color: ${({ color }) => `rgba(${color}, 0.5)`};
+  border: 1px solid ${({ color }) => `rgba(${color}, 0.5)`};
+  font-family: 'Rubik', sans-serif;
+`;

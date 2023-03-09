@@ -1,5 +1,6 @@
 import {
   CaretPayload,
+  ChatPayload,
   CursorPayload,
   TransactionPayload,
 } from '@holium/realm-presence';
@@ -37,5 +38,6 @@ export interface DataPacket {
     trackMeta?: TrackMetaPayload;
     transaction?: TransactionPayload;
     caret?: CaretPayload;
+    chat?: ChatPayload;
   } & DataPayload;
 }

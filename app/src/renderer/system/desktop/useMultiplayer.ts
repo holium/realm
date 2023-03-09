@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CursorOutPayload,
   CursorEvent,
@@ -8,15 +8,71 @@ import {
   CursorClickPayload,
   TransactionPayload,
   CaretPayload,
+  ChatPayload,
 } from '@holium/realm-multiplayer';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useServices } from 'renderer/logic/store';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useToggle } from 'renderer/logic/lib/useToggle';
 
 export const useMultiplayer = () => {
   const { ship, shell } = useServices();
   const roomsManager = useRooms(ship?.patp);
+  const ephemeralChat = useToggle(false);
+  const [chat, setChat] = useState('');
+
+  useHotkeys('/', () => {
+    window.electron.app.toggleEphemeralChat();
+    ephemeralChat.toggle();
+  });
+
+  useEffect(() => {
+    if (!ship) return;
+
+    const broadcastChat = (message: string) => {
+      const chatPayload: ChatPayload = {
+        patp: ship.patp,
+        message,
+        event: CursorEvent.Chat,
+      };
+      roomsManager.sendData({
+        kind: DataPacket_Kind.DATA,
+        value: { chat: chatPayload },
+      });
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Backspace') {
+        setChat((prev) => {
+          const newChat = prev.slice(0, -1);
+          window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
+          broadcastChat(newChat);
+          return newChat;
+        });
+      } else if (e.key === '/') {
+        setChat(() => {
+          window.electron.app.realmToAppEphemeralChat(ship.patp, '');
+          broadcastChat('');
+          return '';
+        });
+      } else {
+        setChat((prev) => {
+          const newChat = prev + e.key;
+          window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
+          broadcastChat(newChat);
+          return newChat;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [ephemeralChat.isOn, chat, ship]);
 
   useEffect(() => {
     if (!ship) return;
@@ -124,6 +180,14 @@ export const useMultiplayer = () => {
     roomsManager.on(
       RoomManagerEvent.OnDataChannel,
       async (_rid: string, _peer: string, data) => {
+        const chatPayload = data.value.chat;
+        if (chatPayload) {
+          if (chatPayload.event === CursorEvent.Chat) {
+            const { patp, message } = chatPayload as ChatPayload;
+            window.electron.multiplayer.realmToAppSendChat(patp, message);
+          }
+        }
+
         const cursorPayload = data.value.cursor;
         if (!cursorPayload) return;
 

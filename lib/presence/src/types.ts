@@ -16,6 +16,7 @@ export enum CursorEvent {
   Out = 'cursor-out',
   Transaction = 'transaction',
   Caret = 'caret',
+  Chat = 'chat',
 }
 
 interface BaseCursorPayload extends BaseRealmPayload {
@@ -56,6 +57,11 @@ export interface TransactionPayload extends BaseCursorPayload {
 export interface CaretPayload extends BaseCursorPayload {
   event: CursorEvent.Caret;
   position: Position;
+}
+
+export interface ChatPayload extends BaseRealmPayload {
+  event: CursorEvent.Chat;
+  message: string;
 }
 
 export type CursorPayload =

@@ -1,8 +1,8 @@
 import { useRef, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
-import { IsDevice } from './isDevice';
-import { Position } from '../../../os/types';
 import { MouseState } from '@holium/realm-multiplayer';
+import { Position } from 'os/types';
+import { IsDevice } from './isDevice';
 
 type AnimatedCursorProps = {
   color: string;

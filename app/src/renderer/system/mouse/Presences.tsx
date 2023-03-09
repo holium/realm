@@ -6,6 +6,7 @@ import { AnimatedCursor } from './AnimatedCursor';
 import { bgIsLightOrDark, hexToRgb, rgbToString } from 'os/lib/color';
 import { MouseState } from '@holium/realm-presence';
 import { useToggle } from 'renderer/logic/lib/useToggle';
+import { EphemeralChat } from './Mouse';
 
 type CursorState = Record<
   string,
@@ -16,6 +17,7 @@ type CursorState = Record<
     isActive: boolean;
     isVisible: boolean;
     mouseOutTimeoutRef: NodeJS.Timeout;
+    chat?: string;
   }
 >;
 
@@ -86,6 +88,15 @@ export const Presences = () => {
       }));
     });
     window.electron.multiplayer.onToggleMultiplayer(enabled.toggle);
+    window.electron.multiplayer.onRealmToAppSendChat((patp, message) => {
+      setCursors((prev) => ({
+        ...prev,
+        [patp]: {
+          ...prev[patp],
+          chat: message,
+        },
+      }));
+    });
   }, []);
 
   const visibleCursors = Object.entries(cursors).filter(
@@ -99,7 +110,7 @@ export const Presences = () => {
   return (
     <>
       {visibleCursors.map(
-        ([patp, { state, position, isActive, isVisible, color }]) => (
+        ([patp, { state, position, isActive, isVisible, color, chat }]) => (
           <div key={`${patp}-cursor`}>
             <AnimatedCursor
               color={color}
@@ -108,9 +119,15 @@ export const Presences = () => {
               isActive={isActive}
               isVisible={isVisible}
             />
-            <CursorLabel color={color} position={position}>
-              {patp}
-            </CursorLabel>
+            {chat ? (
+              <EphemeralChat position={position} color={color}>
+                {chat}
+              </EphemeralChat>
+            ) : (
+              <CursorLabel color={color} position={position}>
+                {patp}
+              </CursorLabel>
+            )}
           </div>
         )
       )}

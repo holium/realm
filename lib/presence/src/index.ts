@@ -8,6 +8,7 @@ export type {
   MouseState,
   TransactionPayload,
   CaretPayload,
+  ChatPayload,
 } from './types';
 export { CursorEvent } from './types';
 export { Clickable } from './components/Clickable';

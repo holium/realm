@@ -176,6 +176,17 @@ export const multiplayerPreload = {
       }
     );
   },
+  onRealmToAppSendChat(callback: (patp: string, message: string) => void) {
+    ipcRenderer.on(
+      'multiplayer.realm-to-app.send-chat',
+      (_, patp: string, message: string) => {
+        callback(patp, message);
+      }
+    );
+  },
+  realmToAppSendChat(patp: string, message: string) {
+    ipcRenderer.invoke('multiplayer.realm-to-app.send-chat', patp, message);
+  },
 };
 
 export type MultiplayerPreloadType = typeof multiplayerPreload;
