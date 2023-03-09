@@ -166,8 +166,8 @@
       ::  Receiving a signal from another ship
       :_  state
       ~&  'received signal'
-      ~&  provider-state
-      ~&  session-state
+      ~&  provider
+      ~&  session
       [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
     ::
     --
