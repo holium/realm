@@ -754,7 +754,7 @@ export class ChatService extends BaseService {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT
-        json_group_array(json_object('by', sender, 'emoji', content_data)) reactions
+        json_group_array(json_object('msgId', msg_id, 'by', sender, 'emoji', content_data)) reactions
       FROM messages
       WHERE path = ?
         AND json_extract(reply_to, '$."msg-id"') = ?

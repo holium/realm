@@ -39,6 +39,7 @@ export const ChatMessagePresenter = ({
   const { color: authorColor } = useMemo(() => {
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
+
   const [reactions, setReactions] = useState([]);
   const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
   useEffect(() => {
@@ -55,7 +56,7 @@ export const ChatMessagePresenter = ({
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
       } else {
-        selectedChat?.deleteReaction(message.id, payload.emoji);
+        selectedChat?.deleteReaction(message.id);
       }
     },
     [selectedChat, message.id]

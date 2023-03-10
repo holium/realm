@@ -85,7 +85,6 @@ const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      console.log(self.subroute);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }

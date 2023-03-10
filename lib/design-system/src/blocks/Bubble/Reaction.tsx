@@ -115,8 +115,8 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     isOur &&
     ourColor &&
     css`
-      background: ${darken(selected ? 0.25 : 0.1, ourColor)};
-      border-color: ${darken(0.3, ourColor)};
+      background: ${darken(selected ? 0.15 : 0.1, ourColor)};
+      border-color: ${darken(0.2, ourColor)};
       transition: var(--transition);
       &:hover {
         transition: var(--transition);
@@ -312,6 +312,7 @@ export const Reactions = (props: ReactionProps) => {
             emojiVersion="0.6"
             height={HEIGHT}
             width={WIDTH}
+            lazyLoadEmojis
             previewConfig={{
               showPreview: false,
             }}

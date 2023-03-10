@@ -34,6 +34,7 @@ const stringifyMetadata = (metadata: ChatMetadata): ChatPathMetadata => {
 };
 
 const ReactionModel = types.model('ReactionModel', {
+  msgId: types.string,
   by: types.string,
   emoji: types.string,
 });
@@ -266,7 +267,8 @@ export const Chat = types
       ]);
       self.isReacting = undefined;
     }),
-    deleteReaction: flow(function* (msgId: string, reaction: string) {
+    deleteReaction: flow(function* (msgId: string) {
+      // yield ChatDBActions.deleteMessage(self.path, msgId);
       // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
     }),
     clearReacting() {
