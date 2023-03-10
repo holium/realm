@@ -33,11 +33,13 @@ import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
+import { ComposerStore } from 'os/services/shell/composer.model';
 
 const Services = types
   .model('ServicesStore', {
     desktop: DesktopStore,
     shell: ShellStore,
+    composer: ComposerStore,
     identity: types.model('identity', {
       auth: AuthStore,
     }),
@@ -84,6 +86,7 @@ const Services = types
 
 const services = Services.create({
   desktop: {},
+  composer: {},
   theme: {
     currentTheme: 'default',
     themes: {
@@ -384,6 +387,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applyPatch(servicesStore.shell, value.patch);
     }
+    if (value.resource === 'composer') {
+      applyPatch(servicesStore.composer, value.patch);
+    }
     if (value.resource === 'membership') {
       applyPatch(servicesStore.membership, value.patch);
     }
@@ -404,6 +410,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
+    }
+    if (value.resource === 'composer') {
+      applySnapshot(servicesStore.composer, value.model);
     }
     // if (value.resource === 'courier') {
     //   applySnapshot(servicesStore.courier, value.model);

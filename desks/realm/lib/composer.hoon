@@ -15,7 +15,7 @@
           [%add-stack (ot ~[space-path+space-path stack+stack])]
           [%remove-stack (ot ~[space-path+space-path stack-id+so])]
           [%set-current-stack (ot ~[space-path+space-path stack-id+so])]
-          [%set-window (ot ~[space-path+space-path stack-id+so window+window])]
+          [%add-window (ot ~[space-path+space-path stack-id+so window+window])]
           [%remove-window (ot ~[space-path+space-path stack-id+so window-id+so])]
       ==
     ++  space-path

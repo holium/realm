@@ -46,7 +46,7 @@
       [%add-stack =space-path =stack]
       [%remove-stack =space-path =stack-id]
       [%set-current-stack =space-path =stack-id]
-      [%set-window =space-path =stack-id =window]
+      [%add-window =space-path =stack-id =window]
       [%remove-window =space-path =stack-id window-id=@t]
   ==
 ::

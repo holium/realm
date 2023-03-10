@@ -1,25 +1,7 @@
 import { Conduit } from '@holium/conduit';
-import { cleanNounColor, removeHash } from '../../os/lib/color';
 
-export const FriendsApi = {
-  getContact: async (conduit: Conduit, ship: string) => {
-    const contact = await conduit.scry({
-      app: 'friends',
-      path: `/contact/${ship}`,
-    });
-    return {
-      ...contact,
-      color: contact.color && cleanNounColor(contact.color),
-    };
-  },
+export const ComposerApi = {
   addSpace: async (conduit: Conduit, spacePath: string) => {
-    const preparedData = {
-      nickname: data.nickname,
-      color: removeHash(data.color),
-      avatar: data.avatar,
-      bio: data.bio || null,
-      cover: data.cover || null,
-    };
     const payload = {
       app: 'composer',
       mark: 'composer-action',
@@ -86,7 +68,7 @@ export const FriendsApi = {
     };
     return conduit.poke(payload);
   },
-  setWindow: async (
+  addWindow: async (
     conduit: Conduit,
     spacePath: string,
     stackId: string,
@@ -96,7 +78,7 @@ export const FriendsApi = {
       app: 'composer',
       mark: 'composer-action',
       json: {
-        'set-window': {
+        'add-window': {
           'space-path': spacePath,
           'stack-id': stackId,
           window,

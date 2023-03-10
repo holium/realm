@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 
 const Bounds = types.model('Bounds', {
   x: types.number,
@@ -35,6 +35,8 @@ const Composition = types.model('Composition', {
   stacks: types.map(Stack),
 });
 
-export const ComposerModel = types.model('ComposerModel', {
+export const ComposerStore = types.model('ComposerStore', {
   compositions: types.map(Composition),
 });
+
+export type ComposerStoreType = Instance<typeof ComposerStore>;

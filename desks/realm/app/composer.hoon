@@ -71,7 +71,7 @@
     %add-stack  (handle-add-stack +.act)
     %remove-stack  (handle-remove-stack +.act)
     %set-current-stack  (handle-set-current-stack +.act)
-    %set-window  (handle-set-window +.act)
+    %add-window  (handle-add-window +.act)
     %remove-window  (handle-remove-window +.act)
   ==
 ::
@@ -109,7 +109,7 @@
     (~(put by compositions) [space-path composer])
   `state
 ::
-++  handle-set-window
+++  handle-add-window
   |=  [=space-path:store =stack-id:store =window:store]
   =.  compositions
     =/  composer  (~(got by compositions) space-path)
