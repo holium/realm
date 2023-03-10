@@ -38,9 +38,6 @@ export const DesktopActions = {
   setWindowBounds: (appId: string, bounds: Bounds) => {
     window.electron.os.desktop.setWindowBounds(appId, bounds);
   },
-  setPartitionCookies: async (partition: string, cookies: any) => {
-    return await window.electron.app.setPartitionCookies(partition, cookies);
-  },
   openAppWindow: async (app: AppType) => {
     const result = await window.electron.os.desktop.openAppWindow(app);
     // dont add recent apps unitl they are open

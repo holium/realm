@@ -44,9 +44,7 @@ const SystemPanelPresenter = () => {
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   useEffect(() => {
-    RealmActions.getMediaStatus().then((status) => {
-      setMediaStatus(status);
-    });
+    RealmActions.getMediaStatus().then(setMediaStatus);
   }, []);
 
   const apps = [
