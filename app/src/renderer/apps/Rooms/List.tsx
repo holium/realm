@@ -6,8 +6,6 @@ import { ProviderSelector } from './components/ProviderSelector';
 import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
-import { useEffect } from 'react';
-import { RealmActions } from 'renderer/logic/actions/main';
 
 const RoomsPresenter = () => {
   const { ship, spaces, theme } = useServices();
@@ -22,10 +20,6 @@ const RoomsPresenter = () => {
     : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
         spaces.selected?.path ?? ''
       );
-
-  useEffect(() => {
-    RealmActions.askForMicrophone();
-  }, []);
 
   return (
     <>

@@ -78,7 +78,7 @@ interface TooltipStyleProps {
   placement: MenuOrientation;
 }
 
-export const TooltipStyle = styled(
+const TooltipStyle = styled(
   styled.div<TooltipStyleProps>`
     // position: absolute;
     display: inline-flex;
@@ -86,8 +86,8 @@ export const TooltipStyle = styled(
     width: max-content;
     height: max-content;
     overflow: hidden;
-    color: ${(props) => props.theme.colors.text.primary};
-    box-shadow: ${(props) => props.theme.elevations.one};
+    color: var(--rlm-text-color);
+    box-shadow: var(--rlm-box-shadow-1);
     ${(props) => placementMaps[props.placement]};
   `
 )(compose(space, color, typography));
@@ -101,7 +101,7 @@ const Wrapper = styled(motion.div)<{ coords: any }>`
   position: absolute;
 `;
 
-export const TooltipWrapper = styled(styled.div<Partial<TooltipProps>>`
+const TooltipWrapper = styled(styled.div<Partial<TooltipProps>>`
   position: relative;
   z-index: 4;
 
@@ -155,15 +155,14 @@ export const Tooltip = ({
   const [coords, setCoords] = useState({ left: 0, top: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
-  let body = content;
-
-  if (typeof content === 'string') {
-    body = (
+  const body =
+    typeof content === 'string' ? (
       <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px">
         {content}
       </Card>
+    ) : (
+      content
     );
-  }
 
   return (
     <TooltipWrapper delay={delay} ref={tooltipRef} style={style}>

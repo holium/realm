@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
 import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -16,13 +17,13 @@ const appPreload = {
   closeApp: (app: any) => {
     return ipcRenderer.invoke('close-app', app);
   },
-  askForMicrophone: () => {
+  askForMicrophone: (): Promise<MediaAccessStatus> => {
     return ipcRenderer.invoke('ask-for-mic');
   },
-  askForCamera: () => {
+  askForCamera: (): Promise<MediaAccessStatus> => {
     return ipcRenderer.invoke('ask-for-camera');
   },
-  getMediaStatus: () => {
+  getMediaStatus: (): Promise<MediaAccess> => {
     return ipcRenderer.invoke('get-media-status');
   },
   toggleDevTools: () => {

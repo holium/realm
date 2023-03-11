@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
@@ -7,10 +7,21 @@ import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { RoomsDock } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
+import { useToggle } from 'renderer/logic/lib/useToggle';
+import { RealmActions } from 'renderer/logic/actions/main';
 
 const RoomTrayPresenter = () => {
   const { ship, friends, spaces } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
+
+  const micpermissions = useToggle(true);
+
+  useEffect(() => {
+    RealmActions.askForMicrophone().then((status) => {
+      if (status === 'denied') micpermissions.toggleOff();
+      else micpermissions.toggleOn();
+    });
+  }, []);
 
   const {
     activeApp,
@@ -76,6 +87,7 @@ const RoomTrayPresenter = () => {
         console.log('create room');
       }}
       isMuted={muted}
+      hasMicPermissions={micpermissions.isOn}
       onOpen={onButtonClick}
       onMute={() => {
         if (muted) {
@@ -88,51 +100,6 @@ const RoomTrayPresenter = () => {
       onLeave={() => {}}
     />
   );
-  // return (
-
-  //   <motion.div
-  //     id="rooms-tray-icon"
-  //     className="realm-cursor-hover"
-  //     whileTap={{ scale: 0.975 }}
-  //     onClick={onButtonClick}
-  //   >
-  //     {presentRoom ? (
-  //       <Flex style={{ pointerEvents: 'none' }}>
-  //         <RoomRow
-  //           tray={true}
-  //           rid={presentRoom.rid}
-  //           title={presentRoom.title}
-  //           present={presentRoom.present}
-  //           creator={presentRoom.creator}
-  //           provider={presentRoom.provider}
-  //           rightChildren={
-  //             <IconButton
-  //               size={iconSize}
-  //               ref={roomsButtonRef}
-  //               customBg={iconHoverColor}
-  //               style={{ pointerEvents: 'none' }}
-  //               color={textColor}
-  //             >
-  //               {IconBadge}
-  //             </IconButton>
-  //           }
-  //         />
-  //       </Flex>
-  //     ) : (
-  //       <Flex padding="2px">
-  //         <IconButton
-  //           id="rooms-tray-icon"
-  //           ref={roomsButtonRef}
-  //           size={iconSize}
-  //           customBg={iconHoverColor}
-  //           color={textColor}
-  //         >
-  //           {IconBadge}
-  //         </IconButton>
-  //       </Flex>
-  //     )}
-  //   </motion.div>
-  // );
 };
 
 export const RoomTray = observer(RoomTrayPresenter);

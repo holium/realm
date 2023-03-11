@@ -1,17 +1,21 @@
 import { ipcMain, systemPreferences } from 'electron';
+import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
 
 const registerListeners = () => {
-  ipcMain.handle('ask-for-mic', async (_event) => {
+  ipcMain.handle('ask-for-mic', async (_event): Promise<MediaAccessStatus> => {
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');
   });
-  ipcMain.handle('ask-for-camera', async (_event) => {
-    await systemPreferences.askForMediaAccess('camera');
-    return systemPreferences.getMediaAccessStatus('camera');
-  });
+  ipcMain.handle(
+    'ask-for-camera',
+    async (_event): Promise<MediaAccessStatus> => {
+      await systemPreferences.askForMediaAccess('camera');
+      return systemPreferences.getMediaAccessStatus('camera');
+    }
+  );
 
-  ipcMain.handle('get-media-status', async (_event) => {
+  ipcMain.handle('get-media-status', (_event): MediaAccess => {
     if (!isMac && !isWindows) {
       return {
         camera: 'unknown',

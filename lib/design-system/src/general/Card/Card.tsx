@@ -10,7 +10,7 @@ export type CardProps = {
   ShadowProps;
 
 export const Card = styled(Flex)<CardProps>`
-  background: ${(props) => props.customBg || '#FBFBFB'};
+  background: ${(props) => props.customBg || 'var(--rlm-card-color)'};
   border: 1px solid var(--rlm-border-color);
   transition: var(--transition);
   box-sizing: border-box;
