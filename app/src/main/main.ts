@@ -222,6 +222,7 @@ app.on('before-quit', (event) => {
     lastQuitSignal = new Date().getTime() - 1;
     event.preventDefault();
     mainWindow.webContents.send('app.before-quit');
+    setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
   }
 });
 ipcMain.on('realm.app.quit', () => {
