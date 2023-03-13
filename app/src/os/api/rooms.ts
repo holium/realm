@@ -132,7 +132,7 @@ export const RoomsApi = {
       onSuccess: () => {
         console.log('rooms-leave-success');
         state.unsetLiveRoom();
-        state.removeSelf(roomId, `~${conduit.ship!}`);
+        state.removeSelf(roomId, `~${conduit.ship}`);
       },
       onError: (err) => {
         console.error('rooms-leave', err);
@@ -216,12 +216,12 @@ export const RoomsApi = {
           //   state.leaveRoom()
           const roomId = update.kicked.id;
           const room = toJS(state.knownRooms.get(roomId));
-          const diff = { exit: `~${conduit.ship!}` };
+          const diff = { exit: `~${conduit.ship}` };
           if (room) {
             onDiff(diff, room);
           }
 
-          state.kickRoom(`~${conduit.ship!}`, roomId);
+          state.kickRoom(`~${conduit.ship}`, roomId);
           //   state.requestAllRooms();
 
           // TODO

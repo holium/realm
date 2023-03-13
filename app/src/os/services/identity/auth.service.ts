@@ -154,9 +154,9 @@ export class AuthService extends BaseService {
     this.state.setEmail(email);
   }
 
-  async getCode(): Promise<string> {
+  async getCode() {
     const session = this.core.getSession();
-    return session.code;
+    return session?.code;
   }
 
   async changeEmail(
@@ -208,8 +208,8 @@ export class AuthService extends BaseService {
       this.state.accountId,
       verificationCode
     );
-    if (result.success) {
-      this.state.setEmail(result.email!);
+    if (result.success && result.email) {
+      this.state.setEmail(result.email);
     }
 
     return result.success;
@@ -244,7 +244,7 @@ export class AuthService extends BaseService {
     patp: string,
     profile: { color: string; nickname: string; avatar: string }
   ) {
-    const ship = this.state.ships.get(`auth${patp}`)!;
+    const ship = this.state.ships.get(`auth${patp}`);
     if (!ship) return;
     this.state.setShipProfile(
       ship.id,
@@ -289,7 +289,7 @@ export class AuthService extends BaseService {
   ): Promise<string> {
     let result = '';
     try {
-      const ship = this.state.ships.get(`auth${patp}`)!;
+      const ship = this.state.ships.get(`auth${patp}`);
       if (!ship) {
         throw new Error('ship not found');
       }
@@ -330,7 +330,7 @@ export class AuthService extends BaseService {
           ship: ship.patp,
           url: ship.url,
           code,
-          cookie: cookie,
+          cookie: cookie ?? '',
         },
         connectConduit
       );
@@ -348,7 +348,7 @@ export class AuthService extends BaseService {
       const shipId = `auth${patp}`;
       this.state.setLoader('loading');
 
-      const ship = this.state.ships.get(`auth${patp}`)!;
+      const ship = this.state.ships.get(`auth${patp}`);
       if (!ship) {
         throw new Error('ship not found');
       }
@@ -380,7 +380,7 @@ export class AuthService extends BaseService {
         ship: ship.patp,
         url: ship.url,
         code: credentials.code,
-        cookie,
+        cookie: cookie ?? '',
       });
       return 'continue';
     } catch (e: any) {
@@ -418,7 +418,7 @@ export class AuthService extends BaseService {
 
   async setSelected(_event: any, ship: string): Promise<void> {
     const selectedShip = this.state.ships.get(`auth${ship}`);
-    this.state.setSelected(selectedShip!);
+    if (selectedShip) this.state.setSelected(selectedShip);
   }
 
   async setOrder(_event: any, order: any[]): Promise<void> {
@@ -434,8 +434,8 @@ export class AuthService extends BaseService {
     const id = `auth${ship}`;
 
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(
-      cookie.toString()
-    )!;
+      (cookie ?? '').toString()
+    );
 
     const newAuthShip = AuthShip.create({
       id,
@@ -451,8 +451,8 @@ export class AuthService extends BaseService {
     return {
       url,
       cookie,
-      patp: parts[1],
-      value: parts[2],
+      patp: parts?.[1],
+      value: parts?.[2],
     };
   }
 

@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
 import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -10,30 +11,23 @@ const appPreload = {
   setMouseColor(callback: any) {
     ipcRenderer.on('mouse-color', callback);
   },
-  openApp: async (app: any, partition: string) => {
-    return await ipcRenderer.invoke('open-app', app, partition);
+  openApp: (app: any, partition: string) => {
+    return ipcRenderer.invoke('open-app', app, partition);
   },
-  setPartitionCookies: async (partition: any, cookies: any) => {
-    return await ipcRenderer.invoke(
-      'set-partition-cookies',
-      partition,
-      cookies
-    );
+  closeApp: (app: any) => {
+    return ipcRenderer.invoke('close-app', app);
   },
-  closeApp: async (app: any) => {
-    return await ipcRenderer.invoke('close-app', app);
+  askForMicrophone: (): Promise<MediaAccessStatus> => {
+    return ipcRenderer.invoke('ask-for-mic');
   },
-  askForMicrophone: async () => {
-    return await ipcRenderer.invoke('ask-for-mic');
+  askForCamera: (): Promise<MediaAccessStatus> => {
+    return ipcRenderer.invoke('ask-for-camera');
   },
-  askForCamera: async () => {
-    return await ipcRenderer.invoke('ask-for-camera');
+  getMediaStatus: (): Promise<MediaAccess> => {
+    return ipcRenderer.invoke('get-media-status');
   },
-  getMediaStatus: async () => {
-    return await ipcRenderer.invoke('get-media-status');
-  },
-  toggleDevTools: async () => {
-    return await ipcRenderer.invoke('toggle-devtools');
+  toggleDevTools: () => {
+    return ipcRenderer.invoke('toggle-devtools');
   },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');

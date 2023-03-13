@@ -80,9 +80,10 @@ const WallpaperDialogPresenter = () => {
   );
 
   const onChange = () => {
+    if (!spaces.selected?.path) return;
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
-    theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
+    theme.setWallpaper(spaces.selected.path, formData.imageUrl).then(() => {
       ShellActions.closeDialog();
       ShellActions.setBlur(false);
       setLoading(false);

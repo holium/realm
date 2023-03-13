@@ -89,13 +89,13 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             ? `${formatZigAmount(
                 (props.wallet as EthWalletType).data.get(
                   walletApp.navState.protocol
-                )!.balance
+                )?.balance ?? ''
               )} zigs`
             : `${
                 formatEthAmount(
                   (props.wallet as EthWalletType).data.get(
                     walletApp.navState.protocol
-                  )!.balance
+                  )?.balance ?? ''
                 ).eth
               } ETH`
           : `${
@@ -114,7 +114,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                 formatEthAmount(
                   (props.wallet as EthWalletType).data.get(
                     walletApp.navState.protocol
-                  )!.balance
+                  )?.balance ?? ''
                 ),
                 walletApp.ethereum.conversions.usd
               )}`
@@ -197,24 +197,26 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         if (walletApp.navState.network === NetworkType.ETHEREUM) {
           if (walletApp.navState.protocol === ProtocolType.UQBAR) {
             await WalletActions.submitUqbarTransaction(
-              walletApp.currentWallet!.index.toString(),
+              walletApp.currentWallet?.index.toString() ?? '',
               passcode
             );
           } else {
             props.coin
               ? await WalletActions.sendERC20Transaction(
-                  walletApp.currentWallet!.index.toString(),
-                  transactionRecipient.address ||
-                    transactionRecipient.patpAddress!,
+                  walletApp.currentWallet?.index.toString() ?? '',
+                  transactionRecipient.address ??
+                    transactionRecipient.patpAddress ??
+                    '',
                   transactionAmount.toString(),
                   props.coin.address,
                   passcode,
                   transactionRecipient.patp
                 )
               : await WalletActions.sendEthereumTransaction(
-                  walletApp.currentWallet!.index.toString(),
+                  walletApp.currentWallet?.index.toString() ?? '',
                   transactionRecipient.address ||
-                    transactionRecipient.patpAddress!,
+                    transactionRecipient.patpAddress ||
+                    '',
                   transactionAmount.toString(),
                   passcode,
                   transactionRecipient.patp
@@ -337,7 +339,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           {accountDisplay}
           <Balance
             address={props.wallet.address}
-            coin={props.coin!}
+            coin={props.coin}
             amountDisplay={amountDisplay}
             amountUsdDisplay={amountUsdDisplay}
             colors={themeData.colors}
@@ -447,7 +449,7 @@ const SendReceiveButtons = (props: {
 
 interface BalanceInterface {
   address: string;
-  coin?: ERC20Type;
+  coin: ERC20Type | null;
   amountDisplay: string;
   amountUsdDisplay: string;
   colors: any;

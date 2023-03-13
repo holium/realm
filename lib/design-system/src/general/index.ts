@@ -13,3 +13,5 @@ export { Spinner } from './Spinner/Spinner';
 export { ProgressBar } from './ProgressBar/ProgressBar';
 export { MenuItem } from './MenuItem/MenuItem';
 export type { MenuItemProps } from './MenuItem/MenuItem';
+export { Tooltip } from './Tooltip/Tooltip';
+export { Portal } from './Portal/Portal';

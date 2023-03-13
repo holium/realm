@@ -40,7 +40,7 @@ export const handleInstallation = (
       return;
     case InstallStatus.uninstalled:
     case InstallStatus.desktop:
-      SpacesActions.installApp(host!, desk);
+      if (host) SpacesActions.installApp(host, desk);
       return;
     case InstallStatus.started:
       SpacesActions.uninstallApp(desk);

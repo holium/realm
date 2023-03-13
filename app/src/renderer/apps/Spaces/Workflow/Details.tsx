@@ -144,7 +144,8 @@ const SpacesCreateFormPresenter = ({
       });
     }
     if (edit) {
-      const space = spaces.spaces.get(edit.space)!;
+      const space = spaces.spaces.get(edit.space);
+      if (!space) return;
       setWorkspaceState({
         ...space,
         description: space.description,
