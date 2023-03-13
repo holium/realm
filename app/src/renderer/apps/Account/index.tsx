@@ -1,3 +1,4 @@
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useEffect } from 'react';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
@@ -10,7 +11,6 @@ import { useTrayApps } from '../store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { useRooms } from '../Rooms/useRooms';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {

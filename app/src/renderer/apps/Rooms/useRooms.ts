@@ -80,6 +80,27 @@ export const createManager = (our: Patp) => {
 
 let roomsManager: null | RoomsManager;
 
+let clearingProtocolAndManager: boolean = false; // switch to ensure we only have one clear() running at a time and the "duplicates" no-op
+const clearProtocolAndManager: (callback?: () => void) => void = (
+  callback?: () => void
+) => {
+  if (roomsManager && !clearingProtocolAndManager) {
+    clearingProtocolAndManager = true;
+    roomsManager.cleanup().then(() => {
+      protocol = null;
+      roomsManager = null;
+      clearingProtocolAndManager = false;
+      if (callback) {
+        callback();
+      }
+    });
+  }
+};
+OSActions.onLogout(() => clearProtocolAndManager());
+OSActions.onSleep(() => clearProtocolAndManager());
+// we have to signal back that we are ready to actually quit with OSActions.readyToQuit
+OSActions.onQuitSignal(clearProtocolAndManager);
+
 RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
   if (protocol) {
     protocol.onSignal(data, mark);
@@ -93,10 +114,6 @@ export function useRooms(our?: Patp): RoomsManager {
 
   if (!roomsManager && our) {
     roomsManager = createManager(our);
-    OSActions.onLogout(() => {
-      protocol = null;
-      roomsManager = null;
-    });
   }
   if (!roomsManager) {
     throw new Error('roomsManager not initialized');
@@ -104,29 +121,3 @@ export function useRooms(our?: Patp): RoomsManager {
 
   return roomsManager;
 }
-
-// export function useRooms(our?: Patp) {
-//   let roomsManager = useContext(RoomsContext);
-//   console.log('useRooms roomsManager', roomsManager?.local.patp);
-//   if (roomsManager === null && our) {
-//     const manager = createManager(our);
-//     RoomsContext = createContext<null | RoomsManager>(manager);
-//     roomsManager = manager;
-
-// OSActions.onLogout(() => {
-//   console.log('on logout');
-//   RoomsContext = createContext<null | RoomsManager>(null);
-//   RoomsProvider = RoomsContext.Provider;
-//   roomsManager = null;
-// });
-// window.addEventListener('beforeunload', () => {
-//   RoomsContext = createContext<null | RoomsManager>(null);
-//   RoomsProvider = RoomsContext.Provider;
-//   roomsManager = null;
-// });
-//   } else if (roomsManager === null) {
-//     throw new Error('roomsManager not initialized');
-//   }
-
-//   return roomsManager;
-// }
