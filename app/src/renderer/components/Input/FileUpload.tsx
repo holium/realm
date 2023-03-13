@@ -120,7 +120,7 @@ export const FileUpload: FC<IProps> = ({
 
   // const handleUploadBtnClick = () => {
   //   // @ts-expect-error
-  //   fileInputField.current!.click();
+  //   fileInputField.current.click();
   // };
 
   const addNewFiles = (newFiles: any) => {

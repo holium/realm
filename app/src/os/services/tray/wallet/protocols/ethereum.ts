@@ -72,12 +72,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
         network: Network.ETH_GOERLI,
       };
     }
-    this.ethProvider!.removeAllListeners();
+    this.ethProvider.removeAllListeners();
     this.alchemy = new Alchemy(alchemySettings);
   }
 
   removeListener() {
-    this.ethProvider!.removeAllListeners();
+    this.ethProvider.removeAllListeners();
     clearInterval(this.interval);
     this.interval = null;
   }
@@ -123,81 +123,96 @@ export class EthereumProtocol implements BaseBlockProtocol {
         currentBlock = await this.getBlockNumber();
       }
       for (const walletKey of walletStore.currentStore?.wallets.keys()) {
-        const wallet = walletStore.ethereum.wallets.get(walletKey)!;
-        this.getAccountBalance(wallet.address).then((balance: string) => {
+        const wallet = walletStore.ethereum.wallets.get(walletKey);
+        const walletAddress = wallet?.address;
+        if (!walletAddress) {
+          continue;
+        }
+        this.getAccountBalance(walletAddress).then((balance: string) => {
           if (balance !== '-1') {
             wallet.setBalance(this.protocol, balance);
           }
         });
         this.getAccountTransactions(
-          wallet.address,
-          (wallet as EthWalletType).data.get(this.protocol)!.block || 0,
+          walletAddress,
+          (wallet as EthWalletType).data.get(this.protocol)?.block ?? 0,
           currentBlock
         ).then((response: any[]) => {
           if (response.length > 0) {
             (wallet as EthWalletType).data
-              .get(this.protocol)!
-              .transactionList.applyChainTransactions(
+              .get(this.protocol)
+              ?.transactionList.applyChainTransactions(
                 conduit,
                 this.protocol,
                 wallet.index,
                 wallet.address,
                 response
               );
-            (wallet as EthWalletType).data
-              .get(this.protocol)!
-              .setBlock(currentBlock!);
+            if (currentBlock) {
+              (wallet as EthWalletType).data
+                .get(this.protocol)
+                ?.setBlock(currentBlock);
+            }
           }
         });
         if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
-          const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
-          this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
+          const ethWallet = walletStore.ethereum.wallets.get(walletKey);
+          const ethWalletAddress = wallet?.address;
+          if (!ethWalletAddress) {
+            continue;
+          }
+          this.getAccountAssets(ethWalletAddress).then((assets: Asset[]) => {
             for (const asset of assets) {
               if (asset.type === 'coin') {
-                this.getAsset(asset.addr, ethWallet.address, 'coin').then(
+                this.getAsset(asset.addr, ethWalletAddress, 'coin').then(
                   (coin: Asset | null) => {
                     if (coin) {
-                      ethWallet.setCoin(this.protocol, coin);
+                      ethWallet?.setCoin(this.protocol, coin);
                     }
                   }
                 );
-                this.getAssetTransfers(
-                  asset.addr,
-                  ethWallet.address,
-                  ethWallet.data.get(this.protocol)!.coins.get(asset.addr)
-                    ?.block || 0,
-                  currentBlock!
-                ).then((transfers: any) => {
-                  if (
-                    ethWallet.data.get(this.protocol)!.coins.has(asset.addr) &&
-                    transfers.length > 0
-                  ) {
-                    ethWallet.data
-                      .get(this.protocol)!
-                      .coins.get(asset.addr)!
-                      .transactionList.applyChainTransactions(
-                        conduit,
-                        this.protocol,
-                        ethWallet.index,
-                        ethWallet.address,
-                        transfers
-                      );
-                    ethWallet.data
-                      .get(this.protocol)!
-                      .coins.get(asset.addr)!
-                      .setBlock(currentBlock!);
-                  }
-                });
+
+                if (currentBlock) {
+                  this.getAssetTransfers(
+                    asset.addr,
+                    ethWalletAddress,
+                    ethWallet?.data.get(this.protocol)?.coins.get(asset.addr)
+                      ?.block || 0,
+                    currentBlock
+                  ).then((transfers: any) => {
+                    if (
+                      ethWallet?.data
+                        .get(this.protocol)
+                        ?.coins.has(asset.addr) &&
+                      transfers.length > 0
+                    ) {
+                      ethWallet?.data
+                        .get(this.protocol)
+                        ?.coins.get(asset.addr)
+                        ?.transactionList.applyChainTransactions(
+                          conduit,
+                          this.protocol,
+                          ethWallet.index,
+                          ethWallet.address,
+                          transfers
+                        );
+                      ethWallet.data
+                        .get(this.protocol)
+                        ?.coins.get(asset.addr)
+                        ?.setBlock(currentBlock as number);
+                    }
+                  });
+                }
               }
               if (asset.type === 'nft') {
                 this.getAsset(
                   asset.addr,
-                  ethWallet.address,
+                  ethWalletAddress,
                   'nft',
                   (asset.data as NFTAsset).tokenId
                 ).then((nft: Asset | null) => {
                   if (nft) {
-                    ethWallet.updateNft(this.protocol, nft);
+                    ethWallet?.updateNft(this.protocol, nft);
                   }
                 });
                 /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
@@ -216,7 +231,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
   async getAccountBalance(addr: string): Promise<string> {
     try {
-      return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
+      return ethers.utils.formatEther(await this.ethProvider.getBalance(addr));
     } catch (error) {
       console.log('getAccountBalance error');
       console.error(error);
@@ -265,7 +280,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           }
         }
       }
-      const from = fromTransfers!.data.result.transfers;
+      const from = fromTransfers.data.result.transfers;
       let toTransfers: any;
       retries = 3;
       for (let i = 0; i < retries; i++) {
@@ -342,7 +357,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
   }
   async sendTransaction(signedTx: string): Promise<any> {
-    return (await this.ethProvider!.sendTransaction(signedTx)).hash;
+    return (await this.ethProvider.sendTransaction(signedTx)).hash;
   }
   async populateERC20(
     contractAddress: string,
@@ -370,7 +385,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
         const ethContract = new ethers.Contract(
           contract,
           abi,
-          this.ethProvider!
+          this.ethProvider
         );
         const balance = (await ethContract.balanceOf(addr)).toString();
         const data: CoinAsset = {
@@ -389,13 +404,13 @@ export class EthereumProtocol implements BaseBlockProtocol {
       } else {
         const nft = await this.alchemy.nft.getNftMetadata(
           contract,
-          ethers.BigNumber.from(tokenId!)
+          ethers.BigNumber.from(tokenId)
         );
         const data: NFTAsset = {
           name: nft.title,
           description: nft.description,
           image: nft.rawMetadata?.image || '',
-          tokenId: tokenId!,
+          tokenId: tokenId ?? '',
           transferable: true,
           properties: {},
         };
@@ -454,7 +469,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
           }
         }
       }
-      const from = fromTransfers!.data.result.transfers;
+      const from = fromTransfers.data.result.transfers;
       let toTransfers: any;
       retries = 3;
       for (let i = 0; i < retries; i++) {
@@ -504,12 +519,12 @@ export class EthereumProtocol implements BaseBlockProtocol {
     toAddr: string,
     amountOrTokenId: string | number
   ): Promise<void> {
-    const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
+    const ethContract = new ethers.Contract(contract, abi, this.ethProvider);
     return (await ethContract.transfer(toAddr, amountOrTokenId)).hash;
   }
 
   async getFeePrice(): Promise<any> {
-    return await this.ethProvider!.getGasPrice();
+    return await this.ethProvider.getGasPrice();
   }
 
   async getFeeEstimate(tx: any): Promise<any> {
@@ -522,7 +537,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
 
   async getChainId() {
-    return (await this.ethProvider!.getNetwork()).chainId;
+    return (await this.ethProvider.getNetwork()).chainId;
   }
 
   async getBlockNumber(): Promise<number> {

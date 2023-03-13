@@ -49,6 +49,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
   if (!selectedSpace) return null;
 
   if (selectedSpace.type === 'our') {
+    if (!ship) return null;
     innerContent = (
       <Flex
         style={{ pointerEvents: 'none' }}
@@ -60,9 +61,9 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
         <Avatar
           simple
           size={28}
-          avatar={ship!.avatar}
-          patp={ship!.patp}
-          sigilColor={[ship!.color || '#000000', 'white']}
+          avatar={ship.avatar}
+          patp={ship.patp}
+          sigilColor={[ship.color || '#000000', 'white']}
         />
 
         <Flex

@@ -51,7 +51,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
-    return dialogConfig.component!;
+    return dialogConfig.component;
   }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[appWindow.appId];

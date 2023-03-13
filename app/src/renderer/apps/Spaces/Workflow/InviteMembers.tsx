@@ -92,7 +92,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       status: MemberStatus;
     };
   }>({
-    [ship!.patp]: {
+    [ship?.patp ?? '']: {
       primaryRole: 'owner',
       roles: ['owner'],
       alias: '',
@@ -107,7 +107,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   // Setting up options menu
   useEffect(() => {
     /*      if (props.edit) {
-        const editMembers = membership.getSpaceMembers(workflowState.path)!.toJSON();
+        const editMembers = membership.getSpaceMembers(workflowState.path).toJSON();
         let members: any = {}
         for (var member of Object.keys(editMembers)) {
           const memberVal = editMembers[member]
@@ -124,17 +124,18 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
         setPermissionMap(members);
         setWorkspaceState({members});
       }*/
+    if (!ship) return;
     if (workflowState.type === 'group') {
       setLoading(true);
       ShipActions.getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
           console.log(groupMembers);
-          groupMembers[ship!.patp].roles = ['owner'];
-          groupMembers[ship!.patp].status = 'host';
-          groupMembers[ship!.patp].primaryRole = 'owner';
-          selectedPatp.add(ship!.patp);
-          setNicknameMap({ ...nicknameMap, [ship!.patp]: '' });
+          groupMembers[ship.patp].roles = ['owner'];
+          groupMembers[ship.patp].status = 'host';
+          groupMembers[ship.patp].primaryRole = 'owner';
+          selectedPatp.add(ship.patp);
+          setNicknameMap({ ...nicknameMap, [ship.patp]: '' });
           const newMembers: any = {
             ...groupMembers,
           };
@@ -143,7 +144,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             ...workflowState,
             members: newMembers,
           });
-          delete groupMembers[ship!.patp];
+          delete groupMembers[ship.patp];
           for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
@@ -155,7 +156,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       setWorkspaceState({
         ...workflowState,
         members: {
-          [ship!.patp]: {
+          [ship.patp]: {
             roles: ['owner'],
             alias: '',
             status: 'host',
@@ -163,7 +164,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           },
         },
       });
-      selectedPatp.add(ship!.patp);
+      selectedPatp.add(ship.patp);
     }
   }, []);
 
@@ -191,7 +192,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
 
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
-    const isOur = patp === ship!.patp;
+    const isOur = patp === ship?.patp;
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (

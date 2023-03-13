@@ -41,13 +41,13 @@ const WalletSettingsPresenter = () => {
   const walletStore =
     network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
   const settings = walletStore.settings;
-  const wallets = walletStore.list.map(
-    (wallet) => walletStore.wallets.get(wallet.key)!
-  )!;
+  const wallets = walletStore.list
+    .map((wallet) => walletStore.wallets.get(wallet.key))
+    .filter(Boolean);
 
   const [state, setState] = useState<UISettingsType>({
     ...settings,
-    provider: settings.provider!,
+    provider: settings.provider ?? '',
     blocked: [...walletApp.blacklist],
   });
 
@@ -254,7 +254,7 @@ const WalletSettingsPresenter = () => {
           <VisibilitySelect
             theme={theme}
             baseTheme={baseTheme}
-            wallets={wallets}
+            wallets={wallets as Wallets}
             sharingMode={state.sharingMode}
             defaultIndex={state.defaultIndex}
             walletCreationMode={state.walletCreationMode}
@@ -324,6 +324,8 @@ const WalletSettingsPresenter = () => {
 
 export const WalletSettings = observer(WalletSettingsPresenter);
 
+type Wallets = { nickname: string; index: number }[];
+
 interface VisibilitySelectProps {
   theme: any;
   baseTheme: any;
@@ -331,7 +333,7 @@ interface VisibilitySelectProps {
   sharingMode: SharingMode;
   defaultIndex: number;
   walletCreationMode: WalletCreationMode;
-  wallets: Array<{ nickname: string; index: number }>;
+  wallets: Wallets;
 }
 function VisibilitySelect(props: VisibilitySelectProps) {
   const selectBg = darken(0.025, props.theme.currentTheme.windowColor);

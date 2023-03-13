@@ -100,6 +100,8 @@ const StripePaymentViewPresenter = (props: StripePaymentProps) => {
     setLoading(false);
   }
 
+  if (!onboarding.planet) return null;
+
   return (
     <Flex width="100%" height="100%" flexDirection="row">
       <Box flex={2} display="flex" flexDirection="column">
@@ -120,12 +122,12 @@ const StripePaymentViewPresenter = (props: StripePaymentProps) => {
               sigilColor={['black', 'white']}
               simple={false}
               size={48}
-              patp={onboarding.planet!.patp}
+              patp={onboarding.planet.patp ?? ''}
             />
             <Box>
               <Text mt={3} flex={1}>
                 {' '}
-                {onboarding.planet!.patp}{' '}
+                {onboarding.planet.patp}{' '}
               </Text>
             </Box>
           </Flex>

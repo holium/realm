@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 export const Portal = ({ children }: { children: React.ReactNode }) => {
   const mount = document.getElementById('portal-root');
-  const el = document.createElement('div')!;
+  const el = document.createElement('div');
 
   useEffect(() => {
     mount && mount.appendChild(el);

@@ -118,7 +118,7 @@ export const UqbarApi = {
           from,
           hash,
           gas: { rate, bud },
-          'eth-hash': addDots(ethHash!),
+          'eth-hash': addDots(ethHash),
           sig: {
             v: sig.v,
             r: addDots(sig.r),
@@ -222,15 +222,15 @@ const handleBookReactions = (data: any, walletState: WalletStoreType) => {
         const formattedAddress = address.replaceAll('.', '');
         for (const key of walletState.ethereum.wallets.keys()) {
           if (
-            walletState.ethereum.wallets.get(key)!.address === formattedAddress
+            walletState.ethereum.wallets.get(key)?.address === formattedAddress
           ) {
             const balance = data[address][contract].data.balance;
             walletState.ethereum.wallets
-              .get(key)!
-              .setBalance(ProtocolType.UQBAR, balance);
+              .get(key)
+              ?.setBalance(ProtocolType.UQBAR, balance);
             walletState.ethereum.wallets
-              .get(key)!
-              .setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
+              .get(key)
+              ?.setUqbarTokenId(ProtocolType.UQBAR, data[address][contract].id);
           }
         }
       } else {

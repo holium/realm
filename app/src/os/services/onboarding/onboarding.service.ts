@@ -275,7 +275,7 @@ export class OnboardingService extends BaseService {
       await this.closeConduit();
     }
     this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie!, code);
+    await this.conduit.init(url, patp.substring(1), cookie, code);
     return this.conduit;
   }
 
@@ -439,9 +439,14 @@ export class OnboardingService extends BaseService {
   }
 
   async preInstallSysCheck(_event: any) {
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    const ship = this.state.ship;
+    if (!ship) throw new Error('ship not set');
+    const { url, patp } = ship;
+    const session = this.core.getSession();
+    if (!session) throw new Error('session not set');
+    const { cookie, code } = session;
+    if (!cookie) throw new Error('cookie not set');
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
     this.state.preInstallSysCheck(tempConduit);
   }
 
@@ -451,8 +456,8 @@ export class OnboardingService extends BaseService {
 
     const { auth } = this.core.services.identity;
     const { clientSecret } = await this.core.holiumClient.prepareCheckout(
-      auth.accountId!,
-      this.state.planet!.patp,
+      auth.accountId ?? '',
+      this.state.planet?.patp ?? '',
       billingPeriod
     );
     auth.setClientSecret(clientSecret);
@@ -463,12 +468,12 @@ export class OnboardingService extends BaseService {
     this.state.setAccessCode(accessCode);
   }
 
-  async getShipCode(_event: any): Promise<string> {
+  async getShipCode(_event: any) {
     if (this.state.currentStep !== OnboardingStep.VIEW_CODE) {
       throw new Error('Cannot access code outside of view step.');
     }
     const session = this.core.getSession();
-    return session.code;
+    return session?.code;
   }
 
   async getStripeKey(_event: any): Promise<string> {
@@ -481,9 +486,9 @@ export class OnboardingService extends BaseService {
     }
 
     const { auth } = this.core.services.identity;
-    const patp = this.state.planet!.patp;
+    const patp = this.state.planet.patp;
     const stillAvailable = await this.core.holiumClient.confirmPlanetAvailable(
-      auth.accountId!,
+      auth.accountId ?? '',
       patp
     );
 
@@ -500,8 +505,8 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     const { success, errorCode } =
       await this.core.holiumClient.completeCheckout(
-        auth.accountId!,
-        this.state.planet!.patp
+        auth.accountId ?? '',
+        this.state.planet?.patp ?? ''
       );
 
     if (!success) {
@@ -529,8 +534,8 @@ export class OnboardingService extends BaseService {
 
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
-    const ships = await this.core.holiumClient.getShips(auth.accountId!);
-    const ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
+    const ships = await this.core.holiumClient.getShips(auth.accountId ?? '');
+    const ship = ships.find((ship) => ship.patp === this.state.planet?.patp);
 
     if (!ship || !ship.code) return false;
 
@@ -544,7 +549,7 @@ export class OnboardingService extends BaseService {
 
     const addShipResult = await this.addShip('_event', {
       patp: ship.patp,
-      url: ship.link!,
+      url: ship.link ?? '',
       code: ship.code,
     });
 
@@ -566,6 +571,7 @@ export class OnboardingService extends BaseService {
     try {
       const { patp, url, code } = shipData;
       const cookie = await getCookie({ patp, url, code });
+      if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
 
       if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
@@ -592,11 +598,16 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
+    const ship = this.state.ship;
+    if (!ship) throw new Error('Ship not set, cannot get profile.');
+    const { url, patp } = ship;
+    const session = this.core.getSession();
+    if (!session) throw new Error('Session not set, cannot get profile.');
+    const { cookie, code } = session;
+    if (!cookie) throw new Error('Cookie not set, cannot get profile.');
 
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-    // await this.tempConduit.init(url, patp.substring(1), cookie!);
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
+    // await this.tempConduit.init(url, patp.substring(1), cookie);
 
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
@@ -665,9 +676,15 @@ export class OnboardingService extends BaseService {
       }
       const parts: string[] = process.env.INSTALL_MOON.split(':');
       status.desks = parts[1].split(',');
-      const { url, patp } = this.state.ship!;
-      const { cookie, code } = this.core.getSession();
-      const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+
+      const ship = this.state.ship;
+      if (!ship) throw new Error('Ship not set.');
+      const { url, patp } = ship;
+      const session = this.core.getSession();
+      if (!session) throw new Error('Session not set.');
+      const { cookie, code } = session;
+      if (!cookie) throw new Error('Cookie not set.');
+      const tempConduit = await this.tempConduit(url, patp, cookie, code);
       for (let idx = 0; idx < status.desks.length; idx++) {
         const desk = status.desks[idx];
         // check if the desk is already installed; if it is first unininstall it before
@@ -715,9 +732,14 @@ export class OnboardingService extends BaseService {
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    const ship = this.state.ship;
+    if (!ship) throw new Error('Ship not set.');
+    const { url, patp } = ship;
+    const session = this.core.getSession();
+    if (!session) throw new Error('Session not set.');
+    const { cookie, code } = session;
+    if (!cookie) throw new Error('Cookie not set.');
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
 
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
@@ -742,7 +764,7 @@ export class OnboardingService extends BaseService {
       throw new Error('Cannot complete onboarding, ship not set.');
 
     const decryptedPassword = safeStorage.decryptString(
-      Buffer.from(this.state.encryptedPassword!, 'base64')
+      Buffer.from(this.state.encryptedPassword ?? '', 'base64')
     );
     this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
     const passwordHash = await bcrypt.hash(decryptedPassword, 12);
@@ -754,9 +776,12 @@ export class OnboardingService extends BaseService {
       passwordHash,
     });
 
-    const { url, patp, nickname, color, avatar } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    const { url, patp, nickname, color, avatar } = this.state.ship;
+    const session = this.core.getSession();
+    if (!session) throw new Error('Session not set.');
+    const { cookie, code } = session;
+    if (!cookie) throw new Error('Cookie not set.');
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
 
     const profileData = {
       nickname,
@@ -766,8 +791,6 @@ export class OnboardingService extends BaseService {
 
     await FriendsApi.saveContact(tempConduit, patp, profileData);
 
-    // force cookie to null to ensure user must login once onboarding is complete
-    const session = this.core.getSession();
     this.core.saveSession({ ...session, cookie: null });
 
     this.core.services.identity.auth.storeCredentials(
@@ -779,7 +802,7 @@ export class OnboardingService extends BaseService {
     );
 
     this.core.services.identity.auth.storeNewShip(authShip);
-    this.core.services.identity.auth.setEmail(this.state.email!);
+    this.core.services.identity.auth.setEmail(this.state.email ?? '');
     this.core.services.identity.auth.setFirstTime();
 
     this.core.services.ship.storeNewShip(authShip);

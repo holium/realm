@@ -62,10 +62,10 @@ const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
 const ProfileSetupPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();
   const colorPickerRef = useRef(null);
-  const shipName = onboarding.ship!.patp;
+  const shipName = onboarding.ship?.patp ?? '';
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar!);
+  const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar ?? '');
 
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
@@ -145,7 +145,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside, true);
-    sigilColor.actions.onChange(onboarding.ship!.color || '#000000');
+    sigilColor.actions.onChange(onboarding.ship?.color ?? '#000000');
     () => {
       document.removeEventListener('click', handleClickOutside, true);
     };

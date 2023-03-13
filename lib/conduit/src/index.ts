@@ -28,8 +28,8 @@ export class Conduit extends EventEmitter {
   private url: string = '';
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
-  cookie!: string;
-  ship!: string | null;
+  cookie: string | null = null;
+  ship: string | null = null;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
   idleWatches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -99,8 +99,7 @@ export class Conduit extends EventEmitter {
         let cookie: string | undefined = undefined;
         try {
           this.updateStatus(ConduitState.Refreshing);
-          cookie = await Conduit.fetchCookie(this.url, this.code!);
-          // console.log(cookie);
+          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
           if (cookie) {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {
@@ -110,7 +109,12 @@ export class Conduit extends EventEmitter {
               code: this.code,
             });
             if (err.originator === 'sse') {
-              await this.init(this.url, this.ship!, this.cookie, this.code);
+              await this.init(
+                this.url,
+                this.ship ?? '',
+                this.cookie,
+                this.code
+              );
               resolve(undefined);
               return;
             }
@@ -207,7 +211,7 @@ export class Conduit extends EventEmitter {
 
       // console.log(`EventSource => ['${channelUrl}', '${this.cookie}']`);
       this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie.split('; ')[0] },
+        headers: { Cookie: this.cookie?.split('; ')[0] },
       });
       // this.sse = new EventSource(channelUrl);
 
@@ -241,7 +245,7 @@ export class Conduit extends EventEmitter {
                 handler.onSuccess();
               } else if (parsedData.err && handler) {
                 // @ts-expect-error
-                handler.onError!(parsedData.err);
+                handler.onError(parsedData.err);
               } else {
                 console.error(new Error('poke sse error'));
               }
@@ -253,7 +257,7 @@ export class Conduit extends EventEmitter {
             if (parsedData.err) {
               const watchHandler = this.watches.get(eventId);
               if (watchHandler) {
-                watchHandler.onError!(eventId, parsedData.err);
+                watchHandler.onError?.(eventId, parsedData.err);
               } else {
                 console.error(new Error('watch sse error'));
               }
@@ -261,7 +265,7 @@ export class Conduit extends EventEmitter {
             } else {
               const watchHandler = this.watches.get(eventId);
               if (watchHandler) {
-                watchHandler.onSubscribed!(eventId);
+                watchHandler.onSubscribed?.(eventId);
               }
             }
             break;
@@ -270,12 +274,12 @@ export class Conduit extends EventEmitter {
             const json = parsedData.json;
             const mark = parsedData.mark;
             if (this.watches.has(eventId)) {
-              this.watches.get(eventId)!.onEvent!(json, eventId, mark);
+              this.watches.get(eventId)?.onEvent?.(json, eventId, mark);
             }
             const reaction = Object.keys(json)[0];
             const maybeReactionPath = `${mark}.${reaction}`;
             if (this.reactions.has(maybeReactionPath)) {
-              this.reactions.get(maybeReactionPath)!(parsedData.json, mark);
+              this.reactions.get(maybeReactionPath)?.(parsedData.json, mark);
               this.reactions.delete(maybeReactionPath);
             }
             break;
@@ -340,7 +344,7 @@ export class Conduit extends EventEmitter {
     const message: Message = {
       id: this.nextMsgId,
       action: Action.Poke,
-      ship: this.ship!,
+      ship: this.ship ?? '',
       app: params.app,
       mark: params.mark,
       json: params.json,
@@ -354,11 +358,11 @@ export class Conduit extends EventEmitter {
       new Promise((resolve, reject) => {
         this.pokes.set(message.id, {
           onSuccess: () => {
-            handlers.onSuccess!(message.id);
+            handlers.onSuccess?.(message.id);
             resolve(message.id);
           },
           onError: (err) => {
-            handlers.onError!(message.id, err);
+            handlers.onError?.(message.id, err);
             reject(err);
           },
           ...params,
@@ -386,7 +390,7 @@ export class Conduit extends EventEmitter {
     const message: Message = {
       id: this.nextMsgId,
       action: Action.Subscribe,
-      ship: this.ship!,
+      ship: this.ship ?? '',
       app: params.app,
       path: params.path,
     };
@@ -460,10 +464,15 @@ export class Conduit extends EventEmitter {
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
     try {
+      if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
+
       const response = await axios.get(
         `${this.url}/~/scry/${app}${path}.json`,
         {
-          headers: this.headers,
+          headers: {
+            ...this.headers,
+            Cookie: this.headers.Cookie,
+          },
         }
       );
       return response.data;
@@ -519,7 +528,7 @@ export class Conduit extends EventEmitter {
   private get headers() {
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie.split('; ')[0],
+      Cookie: this.cookie?.split('; ')[0],
     };
   }
 
@@ -592,8 +601,13 @@ export class Conduit extends EventEmitter {
    */
   private async postToChannel(body: Message): Promise<boolean> {
     try {
+      if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
+
       const response = await axios.put(this.channelUrl(this.uid), [body], {
-        headers: this.headers,
+        headers: {
+          ...this.headers,
+          Cookie: this.headers.Cookie,
+        },
         signal: this.abort.signal,
       });
       if (response) {
@@ -686,7 +700,7 @@ export class Conduit extends EventEmitter {
           'Content-Type': 'text/plain',
         },
       });
-      cookie = response.headers['set-cookie']![0];
+      cookie = response.headers?.['set-cookie']?.[0];
     } catch (err: any) {
       console.log(err);
     }

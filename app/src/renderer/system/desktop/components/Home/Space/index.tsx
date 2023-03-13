@@ -23,8 +23,6 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
 
-  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp);
-
   const sidebarComponent = useMemo(() => {
     return (
       <AnimatePresence>
@@ -48,10 +46,13 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
     );
   }, [sidebar]);
 
+  if (!ship) return null;
   if (!currentSpace) return null;
 
   const membersCount = membership.getMemberCount(currentSpace.path);
   const maxWidth = 880;
+
+  const isAdmin = membership.isAdmin(currentSpace.path, ship.patp);
 
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
@@ -189,7 +190,7 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite patp={ship!.patp} isAdmin={isAdmin as boolean} />
+              <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
               <RecommendedApps />
               {/* <RecentActivity /> */}
             </Flex>
