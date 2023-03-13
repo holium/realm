@@ -1,26 +1,22 @@
-## room/test-ui
+# room/test-ui
 
 This is a test UI for the rooms primitive.
 
-### Running
+## Running
 
-Run `yarn dev` in two different terminals, and boot two fake ships.
+Run `yarn dev`, and boot two fake ships.
 
 Then in respective dojo sessions, run:
 
-```
-|pass [%e [%approve-origin 'http://localhost:5173']]
-```
-
-```
+```hoon
 |pass [%e [%approve-origin 'http://localhost:5174']]
 ```
 
-Lastly, visit `http://localhost:5173` and `http://localhost:5174` in your browser.
+Then visit `http://localhost:5174/~zod` and `http://localhost:5174/~bus` in your browser.
 
 Make sure to create a `ships.json` configuration file in `test-ui/public`. Here's an example:
 
-```
+```json
 {
   "~zod": {
     "ship": "zod",
@@ -48,4 +44,10 @@ Make sure to create a `ships.json` configuration file in `test-ui/public`. Here'
     "code": "parsyr-dibwyt-livpen-hatsym"
   }
 }
+```
+
+Lastly, to connect `~bus` to a room hosted by `~zod`, you must manually poke. In the dojo of `~bus`, run:
+
+```hoon
+:rooms-v2 &rooms-v2-session-action [%set-provider ~zod]
 ```

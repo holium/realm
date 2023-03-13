@@ -53,6 +53,7 @@ export const Titlebar = ({
   onDragStart,
 }: Props) => {
   const onDoubleClick = useDoubleClick(onMaximize);
+  const iconColor = theme.iconColor ?? '#333333';
 
   return (
     <TitlebarContainer
@@ -63,7 +64,7 @@ export const Titlebar = ({
       transition={{
         background: { duration: 0.25 },
       }}
-      hasBorder={hasBorder!}
+      hasBorder={hasBorder}
       isAppWindow={isAppWindow}
     >
       {appWindow && !noTitlebar && (
@@ -86,14 +87,14 @@ export const Titlebar = ({
         <Flex ml="2px" zIndex={zIndex + 1} gap={4} alignItems="center">
           {shareable && (
             <SharedAvatars
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               backgroundColor={theme.windowColor}
             />
           )}
           {showDevToolsToggle && (
             <AppWindowIcon
               icon="DevBox"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -105,13 +106,13 @@ export const Titlebar = ({
             <>
               <AppWindowIcon
                 icon="ArrowLeftLine"
-                iconColor={theme.iconColor!}
+                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
               <AppWindowIcon
                 icon="ArrowRightLine"
-                iconColor={theme.iconColor!}
+                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
@@ -127,7 +128,7 @@ export const Titlebar = ({
           {minimizeButton && (
             <AppWindowIcon
               icon="Minimize"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -138,7 +139,7 @@ export const Titlebar = ({
           {maximizeButton && (
             <AppWindowIcon
               icon="Expand"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -149,7 +150,7 @@ export const Titlebar = ({
           {closeButton && (
             <AppWindowIcon
               icon="Close"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#FF6240"
               fillWithBg
               onClick={(evt) => {

@@ -25,7 +25,6 @@ const RoomRowPresenter = ({
   provider,
   present,
   creator,
-  // cursors,
   onClick,
   rightChildren,
 }: RoomRowProps) => {
@@ -47,18 +46,18 @@ const RoomRowPresenter = ({
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  const peopleNoHost = present!.filter(
+  const peopleNoHost = present?.filter(
     (person: string) => person !== ship?.patp
   );
   let titleText = title;
-  if (titleText!.length > 16 && tray) {
-    titleText = titleText!.substring(0, 16) + '...';
+  if (titleText && titleText.length > 16 && tray) {
+    titleText = titleText.substring(0, 16) + '...';
   }
   const isLive = roomsManager.presentRoom?.rid === rid;
 
   const contextMenuOptions = useMemo(
     () =>
-      ship!.patp === provider
+      ship?.patp === provider
         ? [
             {
               id: `room-delete-${rid}`,
@@ -127,9 +126,9 @@ const RoomRowPresenter = ({
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
                 {presentCount} {peopleText}{' '}
-                {/* {present!.includes(ship!.patp) && ` - (You)`} */}
+                {/* {present.includes(ship.patp) && ` - (You)`} */}
               </Text>
-              {creator === ship!.patp && (
+              {creator === ship?.patp && (
                 <>
                   <Text mx="6px" fontSize={2} fontWeight={200} opacity={0.5}>
                     •
@@ -144,18 +143,18 @@ const RoomRowPresenter = ({
         </Flex>
 
         <AvatarRow
-          people={peopleNoHost}
+          people={peopleNoHost ?? []}
           backgroundColor={tray ? dockColor : windowColor}
         />
       </Flex>
       {/* room deletion button */}
-      {/* {tray !== true && (creator === ship!.patp || provider === ship!.patp) && (
+      {/* {tray !== true && (creator === ship.patp || provider === ship.patp) && (
         <IconButton
           size={26}
           customBg={bgColor}
           onClick={(evt: any) => {
             evt.stopPropagation();
-            // RoomsActions.deleteRoom(id!);
+            // RoomsActions.deleteRoom(id);
             // if (roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
             //   LiveRoom.leave();
             // }

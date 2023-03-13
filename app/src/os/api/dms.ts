@@ -42,7 +42,7 @@ export const DmApi = {
               // console.log('accept', response);
               // const chat = chatStore.dms.get(acceptedContact);
               // chat?.setDm(
-              //   conduit.ship!,
+              //   conduit.ship,
               //   response['graph-update']['add-graph']['graph']
               // );
               break;
@@ -72,7 +72,7 @@ export const DmApi = {
   //         // if (resource.name === 'dm-inbox') {
   //         //   const { post } = Object.values<{ post: PostType }>(nodes)[0];
   //         //   const chatModel = chatStore.dms.get(post.author);
-  //         //   chatModel?.setDm(conduit.ship!, post);
+  //         //   chatModel?.setDm(conduit.ship, post);
   //         //   return;
   //         // }
   //       }

@@ -1,29 +1,53 @@
-import { useRoomsManager } from '@holium/realm-room';
+import { observer } from 'mobx-react';
+import {
+  useRoomsManager,
+  DataPacket_Kind,
+  RemotePeer,
+} from '@holium/realm-room';
 import { Speaker } from './Speaker';
 
-export const UI = () => {
+const UIPresenter = () => {
   const { ship, roomsManager } = useRoomsManager();
 
   if (!roomsManager) return null;
 
-  console.log('roomsManager.rooms', roomsManager.rooms);
+  const rooms = roomsManager.rooms;
+  const peers = Array.from(roomsManager.protocol.peers.keys())
+    .map((patp) => roomsManager.protocol.peers.get(patp))
+    .filter(Boolean) as RemotePeer[];
+
+  const onClickCreateRoom = () => {
+    roomsManager.createRoom(
+      'TESTING NEW BUILD DONT JOIN',
+      'public',
+      '/~lomder-librun/realm-forerunners'
+    );
+  };
+
+  const onClickSendDataToRoom = () => {
+    roomsManager.sendData({
+      kind: DataPacket_Kind.DATA,
+      value: {
+        app: 'rooms',
+        data: {
+          test: 'test',
+        },
+      },
+    });
+  };
+
   return (
-    <div
-      className="room-page"
-      key={roomsManager.rooms.map((r) => r.rid).join('-')}
-    >
+    <div className="room-page">
       <div className="room-sidebar">
         <div className="room-sidebar-header">
           <b>Rooms</b> {ship.ship}
         </div>
         <div className="room-list">
-          {roomsManager.rooms.map((room: any) => {
+          {rooms.map((room) => {
             const isPresent = roomsManager.live.room?.rid === room.rid;
             return (
               <div
-                className={
-                  isPresent ? 'room-row room-row-selected' : 'room-row'
-                }
+                className={`room-row ${isPresent && 'room-row-selected'}`}
                 key={room.rid}
                 onClick={(evt) => {
                   evt.stopPropagation();
@@ -35,45 +59,18 @@ export const UI = () => {
                 }}
               >
                 {room.rid}
-                <div>
-                  {roomsManager.live.room?.rid === room.rid ? 'Present' : ''}
-                </div>
               </div>
             );
           })}
         </div>
         <div className="room-sidebar-footer">
-          <button
-            onClick={() =>
-              roomsManager.createRoom(
-                'TESTING NEW BUILD DONT JOIN',
-                'public',
-                '/~lomder-librun/realm-forerunners'
-              )
-            }
-          >
-            Create Room
-          </button>
+          <button onClick={onClickCreateRoom}>Create Room</button>
         </div>
       </div>
 
       <div className="room-pane">
         <div className="room-control-bar">
-          <button
-            onClick={() =>
-              roomsManager.sendData({
-                kind: 0,
-                value: {
-                  app: 'rooms',
-                  data: {
-                    test: 'test',
-                  },
-                },
-              })
-            }
-          >
-            Send data to room
-          </button>
+          <button onClick={onClickSendDataToRoom}>Send data to room</button>
         </div>
         <div className="speaker-grid">
           {roomsManager.live.room && (
@@ -83,37 +80,23 @@ export const UI = () => {
               type={roomsManager.local.host ? 'host' : 'speaker'}
             />
           )}
-          {Array.from(roomsManager.protocol.peers.keys()).map((patp) => {
-            let peer = roomsManager.protocol.peers.get(patp);
+          {peers.map((peer) => (
+            <div key={peer.patp} className="speaker-container">
+              <p style={{ margin: 0 }}>
+                <b>{peer.patp}</b>
+              </p>
 
-            if (!peer) return null;
-
-            return (
-              <div key={patp} className="speaker-container">
-                <p style={{ margin: 0 }}>{patp}</p>
-                <p
-                  style={{
-                    marginTop: 6,
-                    marginBottom: 12,
-                    opacity: 0.5,
-                    fontSize: 12,
-                  }}
-                >
-                  {peer?.patpId}
-                </p>
-                <div
-                  style={{ display: 'flex', gap: 8, flexDirection: 'row' }}
-                ></div>
-
-                <div>
-                  <p>Status: {peer.status}</p>
-                  <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
-                </div>
+              <div>
+                <p>Status: {peer.status}</p>
+                <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
+                <p>Muted: {peer.isMuted.toString()}</p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
+
+export const UI = observer(UIPresenter);

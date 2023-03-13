@@ -80,7 +80,7 @@ const MembersListPresenter = (props: IMembersList) => {
   const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
     const contact = friends.getContactAvatarMetadata(member.patp);
 
-    const roles = Array.from(member.roles!);
+    const roles = Array.from(member.roles);
     let activeRole = 'initiate';
     if (roles) {
       if (roles.includes('admin')) activeRole = 'admin';
@@ -96,6 +96,9 @@ const MembersListPresenter = (props: IMembersList) => {
       SpacesActions.setRoles(member.patp, newRoles);
     };
 
+    if (!ship) return null;
+    if (!spaces.selected) return null;
+
     return (
       <PersonRow
         key={`${member.patp}-member`}
@@ -108,7 +111,7 @@ const MembersListPresenter = (props: IMembersList) => {
         rowBg={rowBg}
         theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship!.patp) && member.patp !== ship!.patp
+          membership.isAdmin(path, ship.patp) && member.patp !== ship.patp
             ? [
                 activeRole === 'admin'
                   ? {
@@ -127,8 +130,8 @@ const MembersListPresenter = (props: IMembersList) => {
                   label: 'Kick',
                   onClick: () => {
                     SpacesActions.kickMember(
-                      spaces.selected!.path,
-                      member!.patp
+                      spaces.selected?.path ?? '',
+                      member.patp
                     );
                   },
                 },

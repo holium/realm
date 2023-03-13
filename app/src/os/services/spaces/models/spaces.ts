@@ -77,7 +77,7 @@ export const SpacesStore = types
       )[0];
     },
     getSpaceByPath(spacePath: string) {
-      // if (spacePath === self.our!.path) {
+      // if (spacePath === self.our.path) {
       //   return self.our;
       // } else {
       return self.spaces.get(spacePath);
@@ -173,7 +173,7 @@ export const SpacesStore = types
       if (!self.selected) self.selected = ourSpace;
     },
     selectSpace(spacePath: string) {
-      self.selected = self.spaces.get(spacePath)!;
+      self.selected = self.spaces.get(spacePath);
       return self.selected;
     },
     setSubscriptionStatus: (

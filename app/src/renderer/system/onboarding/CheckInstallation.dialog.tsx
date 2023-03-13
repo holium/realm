@@ -20,8 +20,8 @@ const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
   }, []);
 
   useEffect(() => {
-    props.setState!({
-      ...props.workflowState!,
+    props.setState?.({
+      ...props.workflowState,
       versionVerified: onboarding.versionVerified,
     });
   }, [onboarding.versionVerified]);

@@ -9,12 +9,12 @@ export interface ShipConnectionData {
 
 const httpAgent = new http.Agent({ family: 4 });
 
-export async function getCookie(ship: ShipConnectionData): Promise<string> {
+export async function getCookie(ship: ShipConnectionData) {
   const response = await axios.post(
     `${ship.url}/~/login`,
     `password=${ship.code.trim()}`,
     { withCredentials: true, httpAgent }
   );
-  const cookie = response.headers['set-cookie']![0];
+  const cookie = response.headers['set-cookie']?.[0];
   return cookie;
 }

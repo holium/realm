@@ -75,7 +75,7 @@ export const DocketStore = types
         .forEach((app: DocketAppType) => {
           let id = app.title;
           if (app.href.glob) {
-            id = app.href.glob.base!;
+            id = app.href.glob.base;
           }
           const appTile = DocketApp.create({
             title: app.title,

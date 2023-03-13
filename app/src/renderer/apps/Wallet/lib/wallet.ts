@@ -55,14 +55,14 @@ export class RealmWallet {
     const wallets = await Promise.all(
       addrs.map(async (addr: string) => await this.getWalletMetadata(addr))
     );
-    const addr0 = wallets[0].address;
-    const addr1 = wallets[1].address;
-    const addr2 = wallets[2].address;
+    const addr0 = wallets[0].address ?? '';
+    const addr1 = wallets[1].address ?? '';
+    const addr2 = wallets[2].address ?? '';
 
     return {
-      [addr0!]: wallets[0],
-      [addr1!]: wallets[1],
-      [addr2!]: wallets[2],
+      [addr0]: wallets[0],
+      [addr1]: wallets[1],
+      [addr2]: wallets[2],
     };
   }
 

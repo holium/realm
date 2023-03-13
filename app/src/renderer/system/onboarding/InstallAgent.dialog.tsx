@@ -19,7 +19,7 @@ const InstallAgentPresenter = () => {
 
   const shipName = onboarding.ship.patp;
   const shipNick = onboarding.ship.nickname;
-  const shipColor = onboarding.ship.color!;
+  const shipColor = onboarding.ship.color ?? '#000000';
   const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {

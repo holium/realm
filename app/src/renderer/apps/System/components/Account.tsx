@@ -30,7 +30,7 @@ import { useToggle } from 'renderer/logic/lib/useToggle';
 const AccountPanelPresenter = () => {
   const { theme, ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
-  const [avatarImg, setAvatarImg] = useState(ship!.avatar || '');
+  const [avatarImg, setAvatarImg] = useState(ship?.avatar ?? '');
   const showAccessKey = useToggle(false);
 
   const { windowColor, textColor, accentColor } = theme.currentTheme;
@@ -39,8 +39,8 @@ const AccountPanelPresenter = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const url = identity.auth.currentShip!.url;
-  const isHostedShip = url.includes('holium.network');
+  const url = identity.auth.currentShip?.url;
+  const isHostedShip = url?.includes('holium.network');
   const email = identity.auth.email;
   const [code, setCode] = useState('');
 
@@ -55,7 +55,7 @@ const AccountPanelPresenter = () => {
   type avatarOptionType = 'color' | 'image';
 
   const [avatarOption, setAvatarOption] = useState<avatarOptionType>(
-    ship!.avatar ? 'image' : 'color'
+    ship?.avatar ? 'image' : 'color'
   );
 
   const profileForm = useForm({
@@ -74,7 +74,7 @@ const AccountPanelPresenter = () => {
 
       await ShipActions.saveMyContact(profileData);
       await DesktopActions.setMouseColor(values.avatarColor);
-      await AuthActions.setShipProfile(ship!.patp, profileData);
+      await AuthActions.setShipProfile(ship?.patp ?? '', profileData);
 
       setIsLoading(false);
     },
@@ -83,13 +83,13 @@ const AccountPanelPresenter = () => {
   const avatarColorField = useField({
     id: 'avatarColor',
     form: profileForm,
-    initialValue: ship!.color!,
+    initialValue: ship?.color ?? '#000',
   });
 
   const nicknameField = useField({
     id: 'nickname',
     form: profileForm,
-    initialValue: ship!.nickname ? ship!.nickname : '',
+    initialValue: ship?.nickname ?? '',
     validate: (nickname: string) => {
       if (nickname.length > 40) {
         return { error: 'too long', parsed: undefined };
@@ -99,6 +99,8 @@ const AccountPanelPresenter = () => {
       return { error: undefined, parsed: nickname };
     },
   });
+
+  if (!ship) return null;
 
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
@@ -127,7 +129,7 @@ const AccountPanelPresenter = () => {
               Urbit ID
             </Text>
             <Text flex={3} mx={4}>
-              {ship!.patp}
+              {ship.patp}
             </Text>
           </Flex>
 
@@ -174,7 +176,7 @@ const AccountPanelPresenter = () => {
               <Flex height={30}>
                 {avatarOption === 'color' && (
                   <ColorPicker
-                    initialColor={ship!.color!}
+                    initialColor={ship.color ?? '#000'}
                     swatches={[
                       '#4E9EFD',
                       '#FFFF00',
@@ -194,7 +196,7 @@ const AccountPanelPresenter = () => {
                   <AvatarInput
                     id="system-account-avatar-input"
                     width="100%"
-                    initialValue={ship!.avatar! || ''}
+                    initialValue={ship.avatar ?? ''}
                     onSave={(url) => setAvatarImg(url)}
                   />
                 )}

@@ -90,7 +90,7 @@ export const calculateAnchorPoint = (
       default:
         let pointerY = event.clientY;
         if (position === 'above') {
-          pointerY = pointerY - menuHeight!;
+          pointerY = pointerY - (menuHeight ?? 0);
         }
         // pointer or default
         return { x: event.clientX + padding, y: pointerY + padding };
