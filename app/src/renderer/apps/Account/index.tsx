@@ -1,3 +1,4 @@
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useEffect } from 'react';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
