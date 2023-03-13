@@ -15,7 +15,6 @@ export type { IconPathsType as IconTypes } from './Icons/icons';
 export * from './Input';
 export * from './Button';
 export * from './Sigil';
-export * from './Tooltip';
 export * from './Menu';
 export * from './ContextMenu';
 export * from './Divider';
