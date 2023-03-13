@@ -7,19 +7,16 @@ import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { RoomsDock } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 import { RealmActions } from 'renderer/logic/actions/main';
 
 const RoomTrayPresenter = () => {
-  const { ship, friends, spaces } = useServices();
+  const { ship, friends, spaces, desktop } = useServices();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
-  const micpermissions = useToggle(true);
-
   useEffect(() => {
-    RealmActions.askForMicrophone().then((status) => {
-      if (status === 'denied') micpermissions.toggleOff();
-      else micpermissions.toggleOn();
+    RealmActions.getMediaStatus().then((status) => {
+      if (status.mic === 'denied') desktop.setMicAllowed(false);
+      else desktop.setMicAllowed(true);
     });
   }, []);
 
@@ -87,7 +84,7 @@ const RoomTrayPresenter = () => {
         console.log('create room');
       }}
       isMuted={muted}
-      hasMicPermissions={micpermissions.isOn}
+      hasMicPermissions={desktop.micAllowed}
       onOpen={onButtonClick}
       onMute={() => {
         if (muted) {

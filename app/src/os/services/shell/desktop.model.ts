@@ -96,6 +96,7 @@ export const DesktopStore = types
     mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
     isolationMode: types.optional(types.boolean, false),
+    micAllowed: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -217,6 +218,9 @@ export const DesktopStore = types
         }
       }
       self.windows.delete(appId);
+    },
+    setMicAllowed(isAllowed: boolean) {
+      self.micAllowed = isAllowed;
     },
   }));
 
