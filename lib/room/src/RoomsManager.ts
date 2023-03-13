@@ -212,7 +212,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       return;
     }
     this.connectRoom(rid);
-    this.emit(RoomManagerEvent.JoinedRoom, rid, this.our);
   }
 
   connectRoom(rid: string) {

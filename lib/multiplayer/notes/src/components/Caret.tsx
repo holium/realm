@@ -5,14 +5,9 @@ type SendCaretPosition = (position: { x: number; y: number }) => void;
 
 class StreamCaret {
   sendCaretPosition: SendCaretPosition;
-  tooltip: HTMLElement;
 
   constructor(view: EditorView, sendCaretPosition: SendCaretPosition) {
     this.sendCaretPosition = sendCaretPosition;
-    this.tooltip = document.createElement('div', {});
-    this.tooltip.className = 'tooltip';
-    view.dom.parentNode?.appendChild(this.tooltip);
-
     this.update(view, null);
   }
 
@@ -33,17 +28,14 @@ class StreamCaret {
 
     this.sendCaretPosition({ x, y });
   }
-
-  destroy() {
-    this.tooltip.remove();
-  }
 }
 
 export const streamCaretPlugin = (
   sendCaretPosition: (position: { x: number; y: number }) => void
-) =>
-  new Plugin({
+) => {
+  return new Plugin({
     view(editorView) {
       return new StreamCaret(editorView, sendCaretPosition);
     },
   });
+};

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 export type SendTransaction = (
   patp: string,
   version: number,
-  steps: any,
+  steps: string[],
   clientID: string | number
 ) => void;
 
@@ -20,7 +20,7 @@ type Props = {
   onTransaction: (
     patp: string,
     version: number,
-    steps: any,
+    steps: string,
     clientID: string | number
   ) => void;
 };

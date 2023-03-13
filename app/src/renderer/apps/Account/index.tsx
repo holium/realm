@@ -120,7 +120,7 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             size={28}
             className="realm-cursor-hover"
-            onClick={async () => {
+            onClick={() => {
               roomsManager.cleanup();
               AuthActions.logout(ship.patp);
               setActiveApp(null);

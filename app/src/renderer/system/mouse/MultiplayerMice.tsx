@@ -1,12 +1,10 @@
-import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { Position } from 'os/types';
 import { AnimatedCursor } from './AnimatedCursor';
-import { bgIsLightOrDark, hexToRgb, rgbToString } from 'os/lib/color';
+import { hexToRgb, rgbToString } from 'os/lib/color';
 import { MouseState } from '@holium/realm-presence';
 import { useToggle } from 'renderer/logic/lib/useToggle';
-import { EphemeralChat } from './Mouse';
+import { CursorLabel, EphemeralChat } from './Mouse.styles';
 
 type CursorState = Record<
   string,
@@ -22,7 +20,7 @@ type CursorState = Record<
 >;
 
 // Manage websocket connection within realm or an individual app
-export const Presences = () => {
+export const MultiplayerMice = () => {
   const enabled = useToggle(true);
   const [cursors, setCursors] = useState<CursorState>({});
 
@@ -134,21 +132,3 @@ export const Presences = () => {
     </>
   );
 };
-
-type CursorLabelProps = {
-  position: Position;
-  color: string;
-  children: string;
-};
-
-const CursorLabel = styled(motion.div)<CursorLabelProps>`
-  position: absolute;
-  top: ${(props) => props.position.y}px;
-  left: ${(props) => props.position.x}px;
-  color: ${(props) => bgIsLightOrDark(props.color) === 'dark' && 'white'};
-  background-color: ${(props) => `rgba(${props.color}, 0.5)`};
-  border-radius: 6px;
-  padding: 2px 4px;
-  pointer-events: none;
-  font-family: 'Rubik', sans-serif;
-`;

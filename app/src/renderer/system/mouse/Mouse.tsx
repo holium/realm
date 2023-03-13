@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import styled from 'styled-components';
 import { MouseState } from '@holium/realm-multiplayer';
 import { useToggle } from 'renderer/logic/lib/useToggle';
-import { bgIsLightOrDark, hexToRgb, rgbToString } from 'os/lib/color';
+import { hexToRgb, rgbToString } from 'os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
-import { Position } from 'os/types';
+import { EphemeralChat } from './Mouse.styles';
 
 export const Mouse = () => {
   const active = useToggle(false);
@@ -89,16 +88,3 @@ export const Mouse = () => {
     </>
   );
 };
-
-export const EphemeralChat = styled.div<{ position: Position; color: string }>`
-  position: absolute;
-  top: ${({ position }) => position.y}px;
-  left: ${({ position }) => position.x}px;
-  padding: 16px;
-  border-radius: 0 999px 999px 999px;
-  color: ${({ color }) =>
-    bgIsLightOrDark(color) === 'dark' ? 'white' : 'black'};
-  background-color: ${({ color }) => `rgba(${color}, 0.5)`};
-  border: 1px solid ${({ color }) => `rgba(${color}, 0.5)`};
-  font-family: 'Rubik', sans-serif;
-`;

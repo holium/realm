@@ -4,7 +4,12 @@ import { MouseState } from '@holium/realm-multiplayer';
 import { Position } from 'os/types';
 import { IsDevice } from './isDevice';
 
-type AnimatedCursorProps = {
+const innerSize = 10;
+const outerSize = 12;
+const outerScale = 2;
+const innerScale = 0.9;
+
+type Props = {
   color: string;
   state: MouseState;
   position: Position;
@@ -12,18 +17,13 @@ type AnimatedCursorProps = {
   isVisible: boolean;
 };
 
-const innerSize = 10;
-const outerSize = 12;
-const outerScale = 2;
-const innerScale = 0.9;
-
 const AnimatedCursorView = ({
   color,
   state,
   position,
   isActive,
   isVisible,
-}: AnimatedCursorProps) => {
+}: Props) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
   const cursorInnerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
@@ -185,7 +185,7 @@ const AnimatedCursorView = ({
   );
 };
 
-export const AnimatedCursor = ({ ...props }: AnimatedCursorProps) => {
+export const AnimatedCursor = ({ ...props }: Props) => {
   const isTouchDevice = typeof navigator !== 'undefined' && IsDevice?.any();
 
   if (isTouchDevice) return null;

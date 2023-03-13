@@ -17,7 +17,7 @@ const registerListeners = (
   mouseWindow: BrowserWindow
 ) => {
   // We send mouse events to the mouse window to move the cursor,
-  // – as well as the main window to update multiplayer cursors via %rooms-v2.
+  // as well as the main window to update multiplayer cursors via %rooms-v2.
   ipcMain.handle('mouse-out', () => {
     mouseWindow.webContents.send('mouse-out');
     mainWindow.webContents.send('mouse-out');
@@ -53,8 +53,8 @@ const registerListeners = (
     mouseWindow.webContents.send('mouse-color', color);
   });
 
-  ipcMain.handle('toggle-ephemeral-chat', (_, message: string) => {
-    mouseWindow.webContents.send('toggle-ephemeral-chat', message);
+  ipcMain.handle('app.toggle-ephemeral-chat', (_, message: string) => {
+    mouseWindow.webContents.send('app.toggle-ephemeral-chat', message);
   });
 
   ipcMain.handle('app.realm-to-app.ephemeral-chat', (_, patp, message) => {

@@ -1,6 +1,6 @@
 # @holium/realm-presence
 
-The JS lib for developers to use in order to leverage Realm's shared cursor feature set.
+The JS lib for developers to use Realm's shared cursor feature set.
 
 ## Example usage
 

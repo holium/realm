@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
-import { Flex, Avatar } from '@holium/design-system';
+import { Text, Flex, Avatar } from '@holium/design-system';
 import {
   useCarets,
   useShips,
@@ -97,7 +97,7 @@ export const App = () => {
       background="#161B22"
     >
       <Header>
-        <p>{filePath}</p>
+        <Text.Label>{filePath}</Text.Label>
         <Flex gap={8}>
           {ships.map((ship) => (
             <Avatar

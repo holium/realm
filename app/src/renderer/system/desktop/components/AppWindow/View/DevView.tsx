@@ -60,8 +60,8 @@ type Props = {
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const roomsManager = useRooms();
   const { theme, ship } = useServices();
+  const roomsManager = useRooms();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();

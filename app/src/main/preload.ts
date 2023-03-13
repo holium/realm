@@ -49,10 +49,10 @@ const appPreload = {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
   toggleEphemeralChat() {
-    ipcRenderer.invoke('toggle-ephemeral-chat');
+    ipcRenderer.invoke('app.toggle-ephemeral-chat');
   },
   onToggleEphemeralChat(callback: () => void) {
-    ipcRenderer.on('toggle-ephemeral-chat', () => {
+    ipcRenderer.on('app.toggle-ephemeral-chat', () => {
       callback();
     });
   },
