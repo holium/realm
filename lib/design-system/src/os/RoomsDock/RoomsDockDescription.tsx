@@ -1,4 +1,4 @@
-import { Flex, Icon, Text, pluralize } from '@holium/design-system';
+import { Flex, Icon, Text, pluralize } from '../../index';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 type Props = {
