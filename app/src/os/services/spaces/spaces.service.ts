@@ -451,6 +451,7 @@ export class SpacesService extends BaseService {
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
     if (!this.core.conduit) throw new Error('No conduit found');
     return await SpacesApi.leaveSpace(this.core.conduit, { path });
+    ``;
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
@@ -462,12 +463,7 @@ export class SpacesService extends BaseService {
     const selected = this.state?.selectSpace(path);
     if (selected?.theme) this.setTheme(selected.theme);
     // setting provider to current space host
-<<<<<<< HEAD
-    console.log('selected', selected, path);
-    const spaceHost = getHost(selected!.path);
-=======
     const spaceHost = getHost(selected?.path ?? '');
->>>>>>> master
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 

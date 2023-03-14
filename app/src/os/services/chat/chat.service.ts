@@ -170,7 +170,7 @@ export class ChatService extends BaseService {
       // verbose: console.log,
     });
     this.db.exec(this.initSql);
-    await this.core.conduit!.watch({
+    await this.core.conduit?.watch({
       app: 'chat-db',
       path: '/db',
       onEvent: this.onDbUpdate,
@@ -193,7 +193,7 @@ export class ChatService extends BaseService {
 
   async fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/messages/start-ms/${lastTimestamp}`,
     });
@@ -202,7 +202,7 @@ export class ChatService extends BaseService {
 
   async fetchPaths() {
     const lastTimestamp = this.getLastTimestamp('paths');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
@@ -211,7 +211,7 @@ export class ChatService extends BaseService {
 
   async fetchPeers() {
     const lastTimestamp = this.getLastTimestamp('peers');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
@@ -220,7 +220,7 @@ export class ChatService extends BaseService {
 
   async fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });

@@ -272,18 +272,11 @@ export class OnboardingService extends BaseService {
         await this.closeConduit();
       }
       this.conduit = new Conduit();
-      await this.conduit.init(url, patp.substring(1), cookie!, code);
-
+      await this.conduit.init(url, patp.substring(1), cookie, code);
       return this.conduit;
     } catch (e) {
       throw new Error('Failed to connect to ship.');
     }
-<<<<<<< HEAD
-=======
-    this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie, code);
-    return this.conduit;
->>>>>>> master
   }
 
   reset() {
@@ -444,17 +437,6 @@ export class OnboardingService extends BaseService {
     return { invalid: !accessCode, accessCode };
   }
 
-<<<<<<< HEAD
-  async preInstallSysCheck(_event: IpcRendererEvent) {
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-    console.log('preInstallSysCheck', url, patp, cookie, code);
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-    console.log('about to check');
-    const isChecked = await this.state.preInstallSysCheck(tempConduit);
-    console.log('isChecked', isChecked);
-    return isChecked;
-=======
   async preInstallSysCheck(_event: any) {
     const ship = this.state.ship;
     if (!ship) throw new Error('ship not set');
@@ -465,7 +447,6 @@ export class OnboardingService extends BaseService {
     if (!cookie) throw new Error('cookie not set');
     const tempConduit = await this.tempConduit(url, patp, cookie, code);
     this.state.preInstallSysCheck(tempConduit);
->>>>>>> master
   }
 
   async prepareCheckout(_event: any, billingPeriod: string) {
@@ -622,13 +603,6 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-<<<<<<< HEAD
-    const { url, patp } = this.state.ship!;
-    const { cookie, code } = this.core.getSession();
-    //
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
-    await tempConduit.init(url, patp.substring(1), cookie!);
-=======
     const ship = this.state.ship;
     if (!ship) throw new Error('Ship not set, cannot get profile.');
     const { url, patp } = ship;
@@ -638,9 +612,6 @@ export class OnboardingService extends BaseService {
     if (!cookie) throw new Error('Cookie not set, cannot get profile.');
 
     const tempConduit = await this.tempConduit(url, patp, cookie, code);
-    // await this.tempConduit.init(url, patp.substring(1), cookie);
->>>>>>> master
-
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 

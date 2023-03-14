@@ -1,7 +1,5 @@
-import { MouseEventHandler } from 'react';
-import { MenuWrapper } from '../Menu';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { Portal, MenuItem } from '@holium/design-system';
+import { Portal, MenuItem, MenuItemProps, Card } from '@holium/design-system';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;
