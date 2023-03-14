@@ -118,7 +118,9 @@ jobs:
           java-version: '17'
       #
       - name: Sign windows binaries
-        run: ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+        run: |
+          chmod +x ./signer/CodeSignTool.sh
+          ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
