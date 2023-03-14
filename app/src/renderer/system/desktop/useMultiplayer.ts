@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
 import {
   CursorOutPayload,
@@ -23,6 +23,11 @@ export const useMultiplayer = () => {
 
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
+
+  const isInRoom = useMemo(
+    () => Boolean(roomsManager.presentRoom),
+    [roomsManager.presentRoom]
+  );
 
   const broadcastChat = (patp: string, message: string) => {
     const chatPayload: ChatPayload = {
@@ -51,6 +56,8 @@ export const useMultiplayer = () => {
 
     // Translate keypresses into chat messages.
     const onKeyDown = (e: KeyboardEvent) => {
+      if (!isInRoom) return;
+
       closeEphemeralChat(); // Refresh the 5s timer.
 
       if (e.key === '/') {
@@ -90,7 +97,7 @@ export const useMultiplayer = () => {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ephemeralChat.isOn, closeEphemeralChat, ship]);
+  }, [ephemeralChat.isOn, closeEphemeralChat, ship, isInRoom]);
 
   useEffect(() => {
     if (!ship) return;
