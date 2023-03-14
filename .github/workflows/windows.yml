@@ -137,7 +137,7 @@ jobs:
           mv -f ./app/release/build/latest.yml ./app/release/build/draft.yml
           # move the signed version of the exe into the main build folder
           rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
-          mv ./app/release/build/sign/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
+          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
           ls ./app/release/build
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
