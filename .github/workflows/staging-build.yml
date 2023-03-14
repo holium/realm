@@ -254,14 +254,20 @@ jobs:
       - name: Download and install code signing tool
         run: |
           mkdir signer
-          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar -xvf - -C ./signer
+          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar --strip-components=1 -xvf - -C ./signer
       #
-      - name: Sign Windows binaries
+      - name: Download and install java runtime
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '17'
-        run: ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+          java-version: '19'
+          java-package: 'jre'
+      #
+      - name: Sign windows binaries
+        run: |
+          chmod +x ./signer/CodeSignTool.sh
+          mkdir -p ./app/release/build/signed
+          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
@@ -275,9 +281,8 @@ jobs:
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
           # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe
-          mv ./app/release/build/sign/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
+          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
