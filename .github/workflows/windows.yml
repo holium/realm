@@ -122,7 +122,7 @@ jobs:
         run: |
           cd ./signer
           chmod +x ./CodeSignTool.sh
-          ./CodeSignTool.sh sign -username="$USERNAME" -password="$PASSWORD" -totp_secret="$SSLCOM_SIGNING_SECRET" -output_dir_path=./app/release/build/signed -input_file_path="./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe"
+          CODE_SIGN_TOOL_PATH=./ ./CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
