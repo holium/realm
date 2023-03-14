@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { debounce } from 'lodash';
 import {
   CursorOutPayload,
   CursorEvent,
@@ -14,49 +15,60 @@ import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useServices } from 'renderer/logic/store';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 
 export const useMultiplayer = () => {
   const { ship, shell } = useServices();
   const roomsManager = useRooms(ship?.patp);
-  const ephemeralChat = useToggle(false);
-  const [chat, setChat] = useState('');
 
-  useHotkeys('/', () => {
-    window.electron.app.toggleEphemeralChat();
-    ephemeralChat.toggle();
-  });
+  const chat = useRef('');
+  const ephemeralChat = useToggle(false);
+
+  const broadcastChat = (patp: string, message: string) => {
+    const chatPayload: ChatPayload = {
+      patp,
+      message,
+      event: CursorEvent.Chat,
+    };
+    roomsManager.sendData({
+      kind: DataPacket_Kind.DATA,
+      value: { chat: chatPayload },
+    });
+  };
+
+  const closeEphemeralChat = useCallback(
+    debounce(() => {
+      chat.current = '';
+      ship && broadcastChat(ship.patp, '');
+      ephemeralChat.toggleOff();
+      window.electron.app.toggleOffEphemeralChat();
+    }, 5000),
+    []
+  );
 
   useEffect(() => {
     if (!ship) return;
 
-    const broadcastChat = (message: string) => {
-      const chatPayload: ChatPayload = {
-        patp: ship.patp,
-        message,
-        event: CursorEvent.Chat,
-      };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
-        value: { chat: chatPayload },
-      });
-    };
-
+    // Translate keypresses into chat messages.
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Backspace') {
-        setChat((prev) => {
-          const newChat = prev.slice(0, -1);
-          window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
-          broadcastChat(newChat);
-          return newChat;
-        });
-      } else if (e.key === '/') {
-        setChat(() => {
-          window.electron.app.realmToAppEphemeralChat(ship.patp, '');
-          broadcastChat('');
-          return '';
-        });
+      closeEphemeralChat(); // Refresh the 5s timer.
+
+      if (e.key === '/') {
+        chat.current = '';
+        window.electron.app.realmToAppEphemeralChat(ship.patp, '');
+        broadcastChat(ship.patp, '');
+        if (ephemeralChat.isOn) {
+          ephemeralChat.toggleOff();
+          window.electron.app.toggleOffEphemeralChat();
+        } else {
+          ephemeralChat.toggleOn();
+          window.electron.app.toggleOnEphemeralChat();
+        }
+      } else if (e.key === 'Backspace') {
+        const newChat = chat.current.slice(0, -1);
+        chat.current = newChat;
+        window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
+        broadcastChat(ship.patp, newChat);
       } else {
         let newKey = e.key;
         // If the key is not a regular character, ignore it
@@ -66,12 +78,10 @@ export const useMultiplayer = () => {
           newKey = newKey.toUpperCase();
         }
 
-        setChat((prev) => {
-          const newChat = prev + newKey;
-          window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
-          broadcastChat(newChat);
-          return newChat;
-        });
+        const newChat = chat.current + newKey;
+        chat.current = newChat;
+        window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
+        broadcastChat(ship.patp, newChat);
       }
     };
 
@@ -80,7 +90,7 @@ export const useMultiplayer = () => {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [ephemeralChat.isOn, chat, ship]);
+  }, [ephemeralChat.isOn, closeEphemeralChat, ship]);
 
   useEffect(() => {
     if (!ship) return;

@@ -56,11 +56,10 @@ export const Mouse = () => {
 
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
 
-    window.electron.app.onToggleEphemeralChat(ephemeralChat.toggle);
+    window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
+    window.electron.app.onToggleOffEphemeralChat(ephemeralChat.toggleOff);
 
-    window.electron.app.onRealmToAppEphemeralChat((_, c) => {
-      setChat(c);
-    });
+    window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 
     return () => {
       if (mouseLayerTracking.isOn) {

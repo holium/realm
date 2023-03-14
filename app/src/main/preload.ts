@@ -33,6 +33,15 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
+  setMouseColor(hex: string) {
+    ipcRenderer.invoke('mouse-color', hex);
+  },
+  toggleOnEphemeralChat() {
+    ipcRenderer.invoke('realm.toggle-on-ephemeral-chat');
+  },
+  toggleOffEphemeralChat() {
+    ipcRenderer.invoke('realm.toggle-off-ephemeral-chat');
+  },
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
@@ -48,16 +57,15 @@ const appPreload = {
   onDisableCustomMouse(callback: () => void) {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
-  toggleEphemeralChat() {
-    ipcRenderer.invoke('realm.toggle-ephemeral-chat');
-  },
-  onToggleEphemeralChat(callback: () => void) {
-    ipcRenderer.on('realm.toggle-ephemeral-chat', () => {
+  onToggleOnEphemeralChat(callback: () => void) {
+    ipcRenderer.on('realm.toggle-on-ephemeral-chat', () => {
       callback();
     });
   },
-  setMouseColor(hex: string) {
-    ipcRenderer.invoke('mouse-color', hex);
+  onToggleOffEphemeralChat(callback: () => void) {
+    ipcRenderer.on('realm.toggle-off-ephemeral-chat', () => {
+      callback();
+    });
   },
   onMouseMove(
     callback: (
