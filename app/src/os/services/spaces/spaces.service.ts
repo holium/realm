@@ -264,35 +264,37 @@ export class SpacesService extends BaseService {
   }
 
   async load(patp: string, isReconnecting: boolean) {
-    const secretKey: string | null = this.core.passwords.getPassword(patp);
-    this.db = new DiskStore('spaces', patp, secretKey!, SpacesStore);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    const secretKey = this.core.passwords.getPassword(patp);
+    if (!secretKey) throw new Error('No password found for this ship');
+    this.db = new DiskStore('spaces', patp, secretKey, SpacesStore);
     this.state = this.db.model as SpacesStoreType;
     if (!isReconnecting) this.state.setLoader('loading');
     // Load sub-models
     const membershipStore = new DiskStore(
       'membership',
       patp,
-      secretKey!,
+      secretKey,
       MembershipStore
     );
     const bazaarStore = new DiskStore(
       'bazaar',
       patp,
-      secretKey!,
+      secretKey,
       NewBazaarStore,
       {}
     );
     const beaconStore = new DiskStore(
       'beacon',
       patp,
-      secretKey!,
+      secretKey,
       NotificationStore,
       {}
     );
     const bulletinStore = new DiskStore(
       'bulletin',
       patp,
-      secretKey!,
+      secretKey,
       BulletinStore,
       {}
     );
@@ -303,7 +305,7 @@ export class SpacesService extends BaseService {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core!.conduit!);
+    this.models.beacon.load(this.core.conduit);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -314,7 +316,7 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    SpacesApi.getInvitations(this.core.conduit!).then((visas: any) => {
+    SpacesApi.getInvitations(this.core.conduit).then((visas: any) => {
       this.models.visas.initialIncoming(visas);
     });
 
@@ -351,7 +353,7 @@ export class SpacesService extends BaseService {
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
-      this.core.conduit!,
+      this.core.conduit,
       this.state,
       this.models.membership,
       this.models.bazaar,
@@ -360,20 +362,21 @@ export class SpacesService extends BaseService {
       this.setTheme
     );
 
-    BulletinApi.watchUpdates(this.core.conduit!, this.models.bulletin);
+    BulletinApi.watchUpdates(this.core.conduit, this.models.bulletin);
 
-    BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
-    BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
+    BazaarSubscriptions.updates(this.core.conduit, this.models.bazaar);
+    BeaconApi.watchUpdates(this.core.conduit, this.models.beacon);
   }
 
   // ***********************************************************
   // ************************ SPACES ***************************
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const members = body.members;
     const id = spaceToSnake(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
-      this.core.conduit!,
+      this.core.conduit,
       {
         slug: id,
         payload: snakeify({
@@ -395,9 +398,9 @@ export class SpacesService extends BaseService {
   }
 
   async updateSpace(_event: IpcMainInvokeEvent, path: any, body: any) {
-    // const members = body.members;
+    if (!this.core.conduit) throw new Error('No conduit found');
     SpacesApi.updateSpace(
-      this.core.conduit!,
+      this.core.conduit,
       {
         payload: {
           name: body.name,
@@ -424,39 +427,47 @@ export class SpacesService extends BaseService {
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     const selected = this.state?.selectSpace(path);
-    this.setTheme({ ...selected!.theme!, id: selected!.path });
+    if (selected) this.setTheme({ ...selected.theme, id: selected.path });
     return path;
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     // if we have the deleted path already selected
     if (path === this.state?.selected?.path) {
       const selected = this.state?.selectSpace(
         `/~${this.core.conduit?.ship}/our`
       );
-      this.setTheme(selected?.theme);
+      if (selected?.theme) this.setTheme(selected?.theme);
     }
-    return await SpacesApi.deleteSpace(this.core.conduit!, { path });
+    return await SpacesApi.deleteSpace(this.core.conduit, { path });
   }
 
   async joinSpace(_event: IpcMainInvokeEvent, path: string) {
-    return SpacesApi.joinSpace(this.core.conduit!, { path });
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return SpacesApi.joinSpace(this.core.conduit, { path });
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await SpacesApi.leaveSpace(this.core.conduit, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     // don't block for responsiveness, what about error handling?
-    SpacesApi.setCurrentSpace(this.core.conduit!, { path }).catch((e) => {
+    SpacesApi.setCurrentSpace(this.core.conduit, { path }).catch((e) => {
       console.error('Error setting current space', e);
     });
     const selected = this.state?.selectSpace(path);
-    this.setTheme(selected?.theme!);
+    if (selected?.theme) this.setTheme(selected.theme);
     // setting provider to current space host
+<<<<<<< HEAD
     console.log('selected', selected, path);
     const spaceHost = getHost(selected!.path);
+=======
+    const spaceHost = getHost(selected?.path ?? '');
+>>>>>>> master
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
@@ -464,7 +475,8 @@ export class SpacesService extends BaseService {
   // *********************** MEMBERS ***************************
   // ***********************************************************
   async getMembers(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.getMembers(this.core.conduit!, path);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await SpacesApi.getMembers(this.core.conduit, path);
   }
 
   async inviteMember(
@@ -476,8 +488,9 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const response = await SpacesApi.inviteMember(
-      this.core.conduit!,
+      this.core.conduit,
       path,
       payload
     );
@@ -486,47 +499,53 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await SpacesApi.kickMember(this.core.conduit, path, patp);
   }
 
   async setRoles(_event: IpcMainInvokeEvent, patp: Patp, roles: string[]) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     return await SpacesApi.setRoles(
-      this.core.conduit!,
-      this.state!.selected!.path,
+      this.core.conduit,
+      this.state?.selected?.path ?? '',
       patp,
       roles
     );
   }
 
   async getInvitations(_event: IpcMainInvokeEvent) {
-    return await SpacesApi.getInvitations(this.core.conduit!);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await SpacesApi.getInvitations(this.core.conduit);
   }
 
   async setLoader(
     _event: IpcMainInvokeEvent,
     status: 'initial' | 'loading' | 'error' | 'loaded'
   ) {
-    this.state!.setLoader(status);
+    this.state?.setLoader(status);
   }
 
   async setJoin(
     _event: IpcMainInvokeEvent,
     status: 'initial' | 'loading' | 'error' | 'loaded'
   ) {
-    this.state!.setJoin(status);
+    this.state?.setJoin(status);
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
+    if (!this.state) throw new Error('No state found');
+    if (!this.core.conduit) throw new Error('No conduit found');
     return await SpacesApi.acceptInvite(
-      this.core.conduit!,
+      this.core.conduit,
       path,
       this.models.membership,
-      this.state!
+      this.state
     );
   }
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
-    await SpacesApi.declineInvite(this.core.conduit!, path);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    await SpacesApi.declineInvite(this.core.conduit, path);
     this.models.visas?.removeIncoming(path);
   }
 
@@ -537,11 +556,11 @@ export class SpacesService extends BaseService {
   // // *********************** FRIENDS ***************************
   // // ***********************************************************
   // async getFriends(_event: IpcMainInvokeEvent) {
-  //   return await FriendsApi.getFriends(this.core.conduit!);
+  //   return await FriendsApi.getFriends(this.core.conduit);
   // }
   // //
   // async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-  //   return await FriendsApi.addFriend(this.core.conduit!, patp);
+  //   return await FriendsApi.addFriend(this.core.conduit, patp);
   // }
   // //
   // async editFriend(
@@ -549,10 +568,10 @@ export class SpacesService extends BaseService {
   //   patp: Patp,
   //   payload: { pinned: boolean; tags: string[] }
   // ) {
-  //   return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+  //   return await FriendsApi.editFriend(this.core.conduit, patp, payload);
   // }
   // async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-  //   return await FriendsApi.removeFriend(this.core.conduit!, patp);
+  //   return await FriendsApi.removeFriend(this.core.conduit, patp);
   // }
   //
 
@@ -561,15 +580,18 @@ export class SpacesService extends BaseService {
   // ***********************************************************
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
-    return BazaarApi.getApps(this.core.conduit!, path, tag);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return BazaarApi.getApps(this.core.conduit, path, tag);
   }
 
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
-    return BazaarApi.getAllies(this.core.conduit!, path);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return BazaarApi.getAllies(this.core.conduit, path);
   }
 
   async getTreaties(_event: IpcMainInvokeEvent, patp: string) {
-    return BazaarApi.getTreaties(this.core.conduit!, patp);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return BazaarApi.getTreaties(this.core.conduit, patp);
   }
 
   async addRecentApp(_event: IpcMainInvokeEvent, appId: string) {
@@ -586,7 +608,8 @@ export class SpacesService extends BaseService {
     appId: string,
     index: number | null
   ) {
-    return await this.models.bazaar.pinApp(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.pinApp(this.core.conduit, {
       path: formPathObj(path),
       'app-id': appId,
       index,
@@ -594,30 +617,36 @@ export class SpacesService extends BaseService {
   }
 
   async unpinApp(_event: IpcMainInvokeEvent, path: SpacePath, appId: string) {
-    return await this.models.bazaar.unpinApp(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.unpinApp(this.core.conduit, {
       path: formPathObj(path),
       'app-id': appId,
     });
   }
 
   async recommendApp(_event: IpcMainInvokeEvent, appId: string) {
-    return await this.models.bazaar.recommendApp(this.core.conduit!, appId);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.recommendApp(this.core.conduit, appId);
   }
 
   async unrecommendApp(_event: IpcMainInvokeEvent, appId: string) {
-    return await this.models.bazaar.unrecommendApp(this.core.conduit!, appId);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.unrecommendApp(this.core.conduit, appId);
   }
 
   async scryHash(_event: IpcMainInvokeEvent, app: string) {
-    return await this.models.bazaar.scryHash(this.core.conduit!, app);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.scryHash(this.core.conduit, app);
   }
 
   async scryTreaties(_event: IpcMainInvokeEvent, ship: Patp) {
-    return await this.models.bazaar.scryTreaties(this.core.conduit!, ship);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.scryTreaties(this.core.conduit, ship);
   }
 
   async scryAllies(_event: IpcMainInvokeEvent) {
-    return await this.models.bazaar.scryAllies(this.core.conduit!);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.scryAllies(this.core.conduit);
   }
 
   async addToSuite(
@@ -626,7 +655,8 @@ export class SpacesService extends BaseService {
     appId: string,
     index: number
   ) {
-    return await this.models.bazaar.addToSuite(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.addToSuite(this.core.conduit, {
       path: formPathObj(path),
       'app-id': appId,
       index,
@@ -638,19 +668,20 @@ export class SpacesService extends BaseService {
     path: SpacePath,
     index: number
   ) {
-    return await this.models.bazaar.removeFromSuite(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.removeFromSuite(this.core.conduit, {
       path: formPathObj(path),
       index,
     });
   }
 
   async installDesk(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
-    // return await BazaarApi.installDesk(this.core.conduit!, ship, desk);
+    // return await BazaarApi.installDesk(this.core.conduit, ship, desk);
   }
 
   async newInstaller(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
     // return await BazaarApi.newInstaller(
-    //   this.core.conduit!,
+    //   this.core.conduit,
     //   ship,
     //   desk,
     //   this.models.bazaar
@@ -662,64 +693,76 @@ export class SpacesService extends BaseService {
     ship: string,
     desk: string
   ) {
-    return await this.models.bazaar.installAppDirect(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.installAppDirect(this.core.conduit, {
       ship,
       desk,
     });
   }
 
   async installApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
-    return await this.models.bazaar.installApp(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.installApp(this.core.conduit, {
       ship,
       desk,
     });
   }
 
   async uninstallApp(_event: IpcMainInvokeEvent, desk: string) {
-    return await this.models.bazaar.uninstallApp(this.core.conduit!, { desk });
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.uninstallApp(this.core.conduit, { desk });
   }
   async suspendApp(_event: IpcMainInvokeEvent, desk: string) {
-    return await this.models.bazaar.suspendApp(this.core.conduit!, desk);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.suspendApp(this.core.conduit, desk);
   }
   async reviveApp(_event: IpcMainInvokeEvent, desk: string) {
-    return await this.models.bazaar.reviveApp(this.core.conduit!, desk);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.reviveApp(this.core.conduit, desk);
   }
   async addAlly(_event: IpcMainInvokeEvent, ship: Patp) {
-    return await this.models.bazaar.addAlly(this.core.conduit!, ship);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.bazaar.addAlly(this.core.conduit, ship);
   }
 
   async addApp(_event: IpcMainInvokeEvent, _ship: string, _desk: string) {
-    // return await BazaarApi.addApp(this.core.conduit!, ship, desk);
+    // return await BazaarApi.addApp(this.core.conduit, ship, desk);
   }
 
   async removeApp(_event: IpcMainInvokeEvent, _appId: string) {
-    // return await BazaarApi.removeApp(this.core.conduit!, appId);
+    // return await BazaarApi.removeApp(this.core.conduit, appId);
   }
 
   setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: string[]) {
-    this.models.bazaar.reorderPinnedApps(this.core.conduit!, {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    this.models.bazaar.reorderPinnedApps(this.core.conduit, {
       path: formPathObj(path),
       dock: order,
     });
   }
 
   async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     return await this.models.beacon.notes
       ?.get(noteId)
-      ?.markSeen(this.core.conduit!);
-    // return await BeaconApi.sawNote(this.core.conduit!, noteId);
+      ?.markSeen(this.core.conduit);
+    // return await BeaconApi.sawNote(this.core.conduit, noteId);
   }
   async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {
-    return await this.models.beacon.sawInbox(this.core.conduit!, inbox);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await this.models.beacon.sawInbox(this.core.conduit, inbox);
   }
 
   setSpaceWallpaper(spacePath: string, theme: any) {
-    const space = this.state!.getSpaceByPath(spacePath)!;
+    if (!this.core.conduit) throw new Error('No conduit found');
+    const space = this.state?.getSpaceByPath(spacePath);
+
+    if (!space) throw new Error(`Space ${spacePath} not found`);
 
     space.theme.setTheme(theme);
 
     delete theme.id;
-    SpacesApi.updateSpace(this.core.conduit!, {
+    SpacesApi.updateSpace(this.core.conduit, {
       path: space.path,
       payload: {
         name: space.name,

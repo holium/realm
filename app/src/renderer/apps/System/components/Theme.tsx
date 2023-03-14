@@ -274,7 +274,6 @@ const ThemePanelPresenterView = ({
           type="text"
           placeholder="Paste url here"
           wrapperStyle={{
-            cursor: 'none',
             borderRadius: 9,
             backgroundColor: inputColor,
           }}

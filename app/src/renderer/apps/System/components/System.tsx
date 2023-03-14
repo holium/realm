@@ -7,13 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { OSActions } from 'renderer/logic/actions/os';
 import { CheckBox, Flex, Spinner } from '@holium/design-system';
-
-export type MediaAccessStatus =
-  | 'not-determined'
-  | 'granted'
-  | 'denied'
-  | 'restricted'
-  | 'unknown';
+import { MediaAccess, MediaAccessStatus } from 'os/types';
 
 const colorMap: Record<MediaAccessStatus, string> = {
   granted: '#39a839',
@@ -36,17 +30,15 @@ const SystemPanelPresenter = () => {
     useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
-  const [mediaStatus, setMediaStatus] = useState<{
-    camera: MediaAccessStatus;
-    mic: MediaAccessStatus;
-  }>({ camera: 'unknown', mic: 'unknown' });
+  const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
+    camera: 'unknown',
+    mic: 'unknown',
+  });
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   useEffect(() => {
-    RealmActions.getMediaStatus().then((status) => {
-      setMediaStatus(status);
-    });
+    RealmActions.getMediaStatus().then(setMediaStatus);
   }, []);
 
   const apps = [
@@ -142,11 +134,9 @@ const SystemPanelPresenter = () => {
                   highlightColor={accentColor}
                   disabled={mediaStatus.mic === 'granted'}
                   onClick={() => {
-                    RealmActions.askForMicrophone().then(
-                      (status: MediaAccessStatus) => {
-                        setMediaStatus({ ...mediaStatus, mic: status });
-                      }
-                    );
+                    RealmActions.askForMicrophone().then((status) => {
+                      setMediaStatus({ ...mediaStatus, mic: status });
+                    });
                   }}
                 >
                   Grant
@@ -182,11 +172,9 @@ const SystemPanelPresenter = () => {
                   highlightColor={accentColor}
                   // disabled={mediaStatus.camera === 'granted'}
                   onClick={() => {
-                    RealmActions.askForCamera().then(
-                      (status: MediaAccessStatus) => {
-                        setMediaStatus({ ...mediaStatus, camera: status });
-                      }
-                    );
+                    RealmActions.askForCamera().then((status) => {
+                      setMediaStatus({ ...mediaStatus, camera: status });
+                    });
                   }}
                 >
                   Grant

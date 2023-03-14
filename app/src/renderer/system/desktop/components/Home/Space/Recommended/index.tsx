@@ -7,7 +7,8 @@ const RecommendedAppsPresenter = () => {
   const { spaces, bazaar } = useServices();
 
   const currentSpace = spaces.selected;
-  const apps = bazaar.getRecommendedApps(currentSpace!.path);
+  if (!currentSpace) return null;
+  const apps = bazaar.getRecommendedApps(currentSpace.path);
 
   return (
     <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>

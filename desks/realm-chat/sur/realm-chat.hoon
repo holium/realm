@@ -22,7 +22,7 @@
   $%
       :: interface to %chat-db
       [%create-chat =create-chat-data]
-      [%edit-chat =path metadata=(map cord cord) peers-get-backlog=?]
+      [%edit-chat =path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr]
       [%pin-message =path =msg-id:db pin=?]
       [%clear-pinned-messages =path]
       [%add-ship-to-chat =path =ship]

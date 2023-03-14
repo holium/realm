@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
-import { Tooltip } from 'renderer/components';
-import { Flex, Text, Button, Icon } from '@holium/design-system';
+import { Flex, Text, Button, Icon, Tooltip } from '@holium/design-system';
 import { RoomRow } from './components/RoomRow';
 import { useServices } from 'renderer/logic/store';
 import { ProviderSelector } from './components/ProviderSelector';
@@ -12,14 +11,14 @@ const RoomsPresenter = () => {
   const { ship, spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const ourSpace = spaces.selected?.type === 'our';
 
   const rooms = ourSpace
     ? roomsManager?.rooms
     : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected!.path
+        spaces.selected?.path ?? ''
       );
 
   return (

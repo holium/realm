@@ -36,7 +36,7 @@ interface ProviderSelectorProps {
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
   const { ship, theme } = useServices();
   const { windowColor, textColor } = theme.currentTheme;
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   return (
     <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>

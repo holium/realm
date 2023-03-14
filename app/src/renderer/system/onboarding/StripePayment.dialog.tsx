@@ -19,7 +19,7 @@ const StripePaymentPresenter = (props: StripePaymentProps) => {
   const [loading, setLoading] = useState(true);
   const [stripePromise, setStripePromise] = useState<any>();
   const baseTheme = getBaseTheme(theme.currentTheme);
-  const clientSecret = identity.auth.clientSecret!;
+  const clientSecret = identity.auth.clientSecret;
   const appearance = {
     variables: {
       fontFamily: '"Rubik", sans-serif',
@@ -33,7 +33,7 @@ const StripePaymentPresenter = (props: StripePaymentProps) => {
   useEffect(() => {
     async function getStripeKey() {
       const key = await OnboardingActions.getStripeKey();
-      setStripePromise(loadStripe(key!));
+      setStripePromise(loadStripe(key));
       setLoading(false);
     }
     getStripeKey();

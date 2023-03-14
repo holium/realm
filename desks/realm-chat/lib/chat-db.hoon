@@ -157,8 +157,8 @@
   [gives state]
 ::
 ++  edit-path
-::  :chat-db &db-action [%edit-path /a/path/to/a/chat ~ %.n]
-  |=  [[=path metadata=(map cord cord) peers-get-backlog=?] state=state-0 =bowl:gall]
+::  :chat-db &db-action [%edit-path /a/path/to/a/chat ~ %.n %host *@dr]
+  |=  [[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
 
   =/  original-peers-list   (~(got by peers-table.state) path)
@@ -168,9 +168,11 @@
   ?>  =(patp.host-peer-row src.bowl)
 
   =/  row=path-row:sur        (~(got by paths-table.state) path)
-  =.  metadata.row            metadata
   =.  updated-at.row          now.bowl
+  =.  metadata.row            metadata
   =.  peers-get-backlog.row   peers-get-backlog
+  =.  invites.row             invites
+  =.  max-expires-at-duration.row   max-expires-at-duration
 
   =.  paths-table.state  (~(put by paths-table.state) path row)
 

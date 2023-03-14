@@ -40,19 +40,19 @@ export const WalletCard: FC<WalletCardProps> = ({
   const { walletApp } = useTrayApps();
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
-  const wallet = walletApp.currentStore.wallets.get(walletKey)!;
+  const wallet = walletApp.currentStore.wallets.get(walletKey);
 
   let coins: any = null;
   if (walletApp.navState.network === NetworkType.ETHEREUM) {
-    coins = getCoins(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-    );
+    const ethWallet = wallet as EthWalletType;
+    const coinMap = ethWallet.data.get(walletApp.navState.protocol)?.coins;
+    if (coinMap) coins = getCoins(coinMap);
   }
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-          .transactionList.transactions
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+          ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
   const transactions = getTransactions(walletTransactions || new Map());
@@ -61,13 +61,13 @@ export const WalletCard: FC<WalletCardProps> = ({
     walletApp.navState.network === NetworkType.ETHEREUM
       ? walletApp.navState.protocol === ProtocolType.UQBAR
         ? `${formatZigAmount(
-            (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-              .balance
+            (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+              ?.balance ?? ''
           )} zigs`
         : `${
             formatEthAmount(
-              (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-                .balance
+              (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+                ?.balance ?? ''
             ).eth
           } ETH`
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
@@ -77,7 +77,7 @@ export const WalletCard: FC<WalletCardProps> = ({
       <WalletCardStyle
         layout="size"
         elevation="none"
-        layoutId={`wallet-card-${wallet.address}`}
+        layoutId={`wallet-card-${wallet?.address}`}
         justifyContent="flex-start"
         transition={walletCardStyleTransition}
         customBg={lighten(0.04, theme.currentTheme.windowColor)}
@@ -91,18 +91,18 @@ export const WalletCard: FC<WalletCardProps> = ({
         onClick={onSelect}
       >
         <Text
-          layoutId={`wallet-name-${wallet.address}`}
+          layoutId={`wallet-name-${wallet?.address}`}
           layout="position"
           transition={{ duration: 0.1 }}
           fontWeight={600}
           color={rgba(theme.currentTheme.textColor, 0.4)}
           style={{ textTransform: 'uppercase' }}
         >
-          {wallet.nickname}
+          {wallet?.nickname}
         </Text>
         <Text
           mt={1}
-          layoutId={`wallet-balance-${wallet.address}`}
+          layoutId={`wallet-balance-${wallet?.address}`}
           transition={{ duration: 0.1 }}
           fontWeight={600}
           fontSize={7}

@@ -100,7 +100,7 @@
 +$  action
   $%  
       [%create-path =path-row peers=ship-roles]
-      [%edit-path =path metadata=(map cord cord) peers-get-backlog=?]
+      [%edit-path =path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr]
       [%edit-path-pins =path =pins]
       [%leave-path =path]
       [%insert =insert-message-action]

@@ -1,5 +1,4 @@
-import { ReactNode } from 'react';
-import { DragControls } from 'framer-motion';
+import { ReactNode, PointerEvent } from 'react';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { AppWindowIcon } from '../AppWindowIcon';
@@ -13,7 +12,6 @@ type Props = {
   zIndex: number;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;
-  dragControls?: DragControls;
   navigationButtons?: boolean;
   closeButton?: boolean;
   maximizeButton?: boolean;
@@ -28,8 +26,8 @@ type Props = {
   onMinimize: () => void;
   onMaximize: () => void;
   onDevTools: () => void;
-  onDragStop: (e: any) => void;
-  onDragStart: (e: any) => void;
+  onDragEnd: () => void;
+  onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
 };
 
 export const Titlebar = ({
@@ -41,7 +39,6 @@ export const Titlebar = ({
   zIndex = 2,
   noTitlebar,
   isAppWindow,
-  dragControls,
   maximizeButton,
   minimizeButton,
   navigationButtons,
@@ -52,30 +49,22 @@ export const Titlebar = ({
   onMaximize,
   onMinimize,
   onDevTools,
-  onDragStop,
+  onDragEnd,
   onDragStart,
 }: Props) => {
   const onDoubleClick = useDoubleClick(onMaximize);
+  const iconColor = theme.iconColor ?? '#333333';
 
   return (
     <TitlebarContainer
       hasBlur={hasBlur}
-      {...(dragControls
-        ? {
-            onPointerDown: (e) => {
-              dragControls.start(e);
-              onDragStart && onDragStart(e);
-            },
-            onPointerUp: (e) => {
-              onDragStop && onDragStop(e);
-            },
-          }
-        : {})}
+      onPointerDown={onDragStart}
+      onPointerUp={onDragEnd}
       zIndex={zIndex}
       transition={{
         background: { duration: 0.25 },
       }}
-      hasBorder={hasBorder!}
+      hasBorder={hasBorder}
       isAppWindow={isAppWindow}
     >
       {appWindow && !noTitlebar && (
@@ -98,14 +87,14 @@ export const Titlebar = ({
         <Flex ml="2px" zIndex={zIndex + 1} gap={4} alignItems="center">
           {shareable && (
             <SharedAvatars
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               backgroundColor={theme.windowColor}
             />
           )}
           {showDevToolsToggle && (
             <AppWindowIcon
               icon="DevBox"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -117,13 +106,13 @@ export const Titlebar = ({
             <>
               <AppWindowIcon
                 icon="ArrowLeftLine"
-                iconColor={theme.iconColor!}
+                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
               <AppWindowIcon
                 icon="ArrowRightLine"
-                iconColor={theme.iconColor!}
+                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
@@ -139,7 +128,7 @@ export const Titlebar = ({
           {minimizeButton && (
             <AppWindowIcon
               icon="Minimize"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -150,7 +139,7 @@ export const Titlebar = ({
           {maximizeButton && (
             <AppWindowIcon
               icon="Expand"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -161,7 +150,7 @@ export const Titlebar = ({
           {closeButton && (
             <AppWindowIcon
               icon="Close"
-              iconColor={theme.iconColor!}
+              iconColor={iconColor}
               bg="#FF6240"
               fillWithBg
               onClick={(evt) => {
