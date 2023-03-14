@@ -21,6 +21,7 @@ import { DevHelper } from './helpers/dev';
 import { PowerHelper } from './helpers/power';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
+import { KeyHelper } from './helpers/key';
 import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
@@ -100,6 +101,7 @@ const createWindow = async () => {
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
   PowerHelper.registerListeners(mainWindow);
+  KeyHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -107,6 +109,7 @@ const createWindow = async () => {
     // We use the default cursor for Linux.
     if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners');
+    mainWindow.webContents.send('add-key-listeners');
   });
 
   // TODO why is this rendering multiple times?

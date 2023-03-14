@@ -1,11 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { osPreload } from '../os/preload';
 import './helpers/mouseListener';
+import './helpers/keyListener';
 import { MouseState } from '@holium/realm-presences';
 import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
+  /* Senders */
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
   },
@@ -42,6 +44,10 @@ const appPreload = {
   toggleOffEphemeralChat() {
     ipcRenderer.invoke('realm.toggle-off-ephemeral-chat');
   },
+  realmToAppEphemeralChat(patp: string, message: string) {
+    ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
+  },
+  /* Receivers */
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
@@ -92,8 +98,15 @@ const appPreload = {
       callback(hex);
     });
   },
-  realmToAppEphemeralChat(patp: string, message: string) {
-    ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
+  onKeyDown(
+    callback: (key: string, isShift: boolean, isCapsLock: boolean) => void
+  ) {
+    ipcRenderer.on(
+      'key-down',
+      (_, key: string, isShift: boolean, isCapsLock: boolean) => {
+        callback(key, isShift, isCapsLock);
+      }
+    );
   },
   onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {
     ipcRenderer.on(
@@ -102,6 +115,10 @@ const appPreload = {
         callback(patp, message);
       }
     );
+  },
+  /* Removers */
+  removeOnKeyDown() {
+    ipcRenderer.removeAllListeners('key-down');
   },
 };
 

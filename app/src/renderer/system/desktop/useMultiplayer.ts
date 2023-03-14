@@ -51,16 +51,14 @@ export const useMultiplayer = () => {
     []
   );
 
-  useEffect(() => {
-    if (!ship) return;
-
-    // Translate keypresses into chat messages.
-    const onKeyDown = (e: KeyboardEvent) => {
+  const onKeyDown = useCallback(
+    (key: string, isShift: boolean, isCapsLock: boolean) => {
+      if (!ship) return;
       if (!isInRoom) return;
 
       closeEphemeralChat(); // Refresh the 5s timer.
 
-      if (e.key === '/') {
+      if (key === '/') {
         chat.current = '';
         window.electron.app.realmToAppEphemeralChat(ship.patp, '');
         broadcastChat(ship.patp, '');
@@ -71,17 +69,17 @@ export const useMultiplayer = () => {
           ephemeralChat.toggleOn();
           window.electron.app.toggleOnEphemeralChat();
         }
-      } else if (e.key === 'Backspace') {
+      } else if (key === 'Backspace') {
         const newChat = chat.current.slice(0, -1);
         chat.current = newChat;
         window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
         broadcastChat(ship.patp, newChat);
       } else {
-        let newKey = e.key;
+        let newKey = key;
         // If the key is not a regular character, ignore it
         if (newKey.length > 1) return;
         // Handle caps lock and shift.
-        if (e.getModifierState('CapsLock') || e.shiftKey) {
+        if (isCapsLock || isShift) {
           newKey = newKey.toUpperCase();
         }
 
@@ -90,14 +88,17 @@ export const useMultiplayer = () => {
         window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
         broadcastChat(ship.patp, newChat);
       }
-    };
+    },
+    [ephemeralChat.isOn, closeEphemeralChat, ship, isInRoom]
+  );
 
-    window.addEventListener('keydown', onKeyDown);
+  useEffect(() => {
+    window.electron.app.onKeyDown(onKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
+      window.electron.app.removeOnKeyDown();
     };
-  }, [ephemeralChat.isOn, closeEphemeralChat, ship, isInRoom]);
+  });
 
   useEffect(() => {
     if (!ship) return;
