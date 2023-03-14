@@ -49,10 +49,10 @@ const appPreload = {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
   toggleEphemeralChat() {
-    ipcRenderer.invoke('app.toggle-ephemeral-chat');
+    ipcRenderer.invoke('realm.toggle-ephemeral-chat');
   },
   onToggleEphemeralChat(callback: () => void) {
-    ipcRenderer.on('app.toggle-ephemeral-chat', () => {
+    ipcRenderer.on('realm.toggle-ephemeral-chat', () => {
       callback();
     });
   },
@@ -85,11 +85,11 @@ const appPreload = {
     });
   },
   realmToAppEphemeralChat(patp: string, message: string) {
-    ipcRenderer.invoke('app.realm-to-app.ephemeral-chat', patp, message);
+    ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {
     ipcRenderer.on(
-      'app.realm-to-app.ephemeral-chat',
+      'realm-to-app.ephemeral-chat',
       (_, patp: string, message: string) => {
         callback(patp, message);
       }

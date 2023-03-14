@@ -53,16 +53,12 @@ const registerListeners = (
     mouseWindow.webContents.send('mouse-color', color);
   });
 
-  ipcMain.handle('app.toggle-ephemeral-chat', (_, message: string) => {
-    mouseWindow.webContents.send('app.toggle-ephemeral-chat', message);
+  ipcMain.handle('realm.toggle-ephemeral-chat', (_, message: string) => {
+    mouseWindow.webContents.send('realm.toggle-ephemeral-chat', message);
   });
 
-  ipcMain.handle('app.realm-to-app.ephemeral-chat', (_, patp, message) => {
-    mouseWindow.webContents.send(
-      'app.realm-to-app.ephemeral-chat',
-      patp,
-      message
-    );
+  ipcMain.handle('realm-to-app.ephemeral-chat', (_, patp, message) => {
+    mouseWindow.webContents.send('realm-to-app.ephemeral-chat', patp, message);
   });
 
   /* Multiplayer mouse events */

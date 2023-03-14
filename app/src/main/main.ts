@@ -224,7 +224,7 @@ app.on('before-quit', (event) => {
   if (lastQuitSignal === 0) {
     lastQuitSignal = new Date().getTime() - 1;
     event.preventDefault();
-    mainWindow.webContents.send('app.before-quit');
+    mainWindow.webContents.send('realm.before-quit');
     setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
   }
 });

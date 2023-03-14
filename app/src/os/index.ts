@@ -99,7 +99,7 @@ export class Realm extends EventEmitter {
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
 
     onQuitSignal: (callback: (c2?: () => void) => void) =>
-      ipcRenderer.on('app.before-quit', (event) => {
+      ipcRenderer.on('realm.before-quit', (event) => {
         callback(() => event.sender.send('realm.app.quit'));
       }),
 
