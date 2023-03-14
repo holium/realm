@@ -283,6 +283,7 @@ jobs:
           # move the signed version of the exe into the main build folder
           rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
           mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
