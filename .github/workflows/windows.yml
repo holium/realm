@@ -109,7 +109,7 @@ jobs:
       - name: Download and install code signing tool
         run: |
           mkdir signer
-          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar -xvf - -C ./signer
+          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar --strip-components=1 -xvf - -C ./signer
       #
       - name: Download and install java runtime
         uses: actions/setup-java@v3
