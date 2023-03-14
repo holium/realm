@@ -73,6 +73,8 @@
     %set-current-stack  (handle-set-current-stack +.act)
     %add-window  (handle-add-window +.act)
     %remove-window  (handle-remove-window +.act)
+    %set-window-bounds  (handle-set-window-bounds +.act)
+    %set-window-layer  (handle-set-window-layer +.act)
   ==
 ::
 ++  handle-add-space
@@ -115,7 +117,7 @@
     =/  composer  (~(got by compositions) space-path)
     =/  stack  (~(got by stacks.composer) stack-id)
     =.  windows.stack  (~(put by windows.stack) [id.window window])
-    =.  current.composer  stack-id
+    =.  stacks.composer  (~(put by stacks.composer) [stack-id stack])
     (~(put by compositions) [space-path composer])
   `state
 ::
@@ -125,7 +127,34 @@
     =/  composer  (~(got by compositions) space-path)
     =/  stack  (~(got by stacks.composer) stack-id)
     =.  windows.stack  (~(del by windows.stack) window-id)
-    =.  current.composer  stack-id
+    =.  stacks.composer  (~(put by stacks.composer) [stack-id stack])
+    (~(put by compositions) [space-path composer])
+  `state
+++  handle-set-window-bounds
+  |=  [=space-path:store =stack-id:store window-id=@t =bounds:store]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =/  stack  (~(got by stacks.composer) stack-id)
+    =/  window  (~(got by windows.stack) window-id)
+    =.  bounds.window  bounds
+    =.  windows.stack  (~(put by windows.stack) [window-id window])
+    =.  stacks.composer  (~(put by stacks.composer) [stack-id stack])
+    (~(put by compositions) [space-path composer])
+  `state
+::
+++  handle-set-window-layer
+  |=  [=space-path:store =stack-id:store window-id=@t z-index=@ud]
+  =.  compositions
+    =/  composer  (~(got by compositions) space-path)
+    =/  stack  (~(got by stacks.composer) stack-id)
+    =/  window  (~(got by windows.stack) window-id)
+    =.  z-index.window  z-index
+    =.  windows.stack  (~(put by windows.stack) [window-id window])
+    =.  windows.stack
+      %-  ~(run by windows.stack)
+      |=  =window:store
+      window(z-index (dec z-index.window))
+    =.  stacks.composer  (~(put by stacks.composer) [stack-id stack])
     (~(put by compositions) [space-path composer])
   `state
 ::

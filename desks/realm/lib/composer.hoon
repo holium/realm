@@ -17,6 +17,8 @@
           [%set-current-stack (ot ~[space-path+space-path stack-id+so])]
           [%add-window (ot ~[space-path+space-path stack-id+so window+window])]
           [%remove-window (ot ~[space-path+space-path stack-id+so window-id+so])]
+          [%set-window-bounds (ot ~[space-path+space-path stack-id+so window-id+so bounds+bounds])]
+          [%set-window-layer (ot ~[space-path+space-path stack-id+so window-id+so z-index+ni])]
       ==
     ++  space-path
       %-  ot
@@ -42,6 +44,13 @@
           [%metadata (om so)]
           [%z-index so]
           [%bounds (ot ~[x+nu y+nu height+nu width+nu])]
+      ==
+    ++  bounds
+      %-  ot
+      :~  [%x ni]
+          [%y ni]
+          [%height ni]
+          [%width ni]
       ==
     --
   --

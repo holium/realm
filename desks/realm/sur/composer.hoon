@@ -48,6 +48,8 @@
       [%set-current-stack =space-path =stack-id]
       [%add-window =space-path =stack-id =window]
       [%remove-window =space-path =stack-id window-id=@t]
+      [%set-window-bounds =space-path =stack-id window-id=@t =bounds]
+      [%set-window-layer =space-path =stack-id window-id=@t z-index=@ud]
   ==
 ::
 +$  view

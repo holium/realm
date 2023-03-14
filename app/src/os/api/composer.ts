@@ -11,7 +11,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   removeSpace: async (conduit: Conduit, spacePath: string) => {
     const payload = {
@@ -23,7 +23,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   addStack: async (conduit: Conduit, spacePath: string, stack: any) => {
     const payload = {
@@ -36,7 +36,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   removeStack: async (conduit: Conduit, spacePath: string, stackId: string) => {
     const payload = {
@@ -49,7 +49,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   setCurrentStack: async (
     conduit: Conduit,
@@ -66,7 +66,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   addWindow: async (
     conduit: Conduit,
@@ -85,7 +85,7 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
   },
   removeWindow: async (
     conduit: Conduit,
@@ -104,7 +104,49 @@ export const ComposerApi = {
         },
       },
     };
-    return conduit.poke(payload);
+    conduit.poke(payload);
+  },
+  setWindowBounds: (
+    conduit: Conduit,
+    spacePath: string,
+    stackId: string,
+    windowId: string,
+    bounds: any
+  ) => {
+    const payload = {
+      app: 'composer',
+      mark: 'composer-action',
+      json: {
+        'set-window-bounds': {
+          'space-path': spacePath,
+          'stack-id': stackId,
+          'window-id': windowId,
+          bounds,
+        },
+      },
+    };
+    conduit.poke(payload);
+  },
+  setWindowLayer: (
+    conduit: Conduit,
+    spacePath: string,
+    stackId: string,
+    windowId: string,
+    zIndex: number
+  ) => {
+    const payload = {
+      app: 'composer',
+      mark: 'composer-action',
+      json: {
+        'set-window-layer': {
+          'space-path': spacePath,
+          'stack-id': stackId,
+          'window-id': windowId,
+          'z-index': zIndex,
+        },
+      },
+    };
+    conduit.poke(payload);
   },
   getAll: async (conduit: Conduit) => {
     return await conduit.scry({

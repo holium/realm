@@ -22,6 +22,8 @@ export class ComposerService extends BaseService {
     'realm.composer.set-current-stack': this.setCurrentStack,
     'realm.composer.add-window': this.addWindow,
     'realm.composer.remove-window': this.removeWindow,
+    'realm.composer.set-window-bounds': this.setWindowBounds,
+    'realm.composer.set-window-layer': this.setWindowLayer,
   };
 
   static preload = {
@@ -62,6 +64,34 @@ export class ComposerService extends BaseService {
         spacePath,
         stackId,
         windowId
+      );
+    },
+    setWindowBounds(
+      spacePath: string,
+      stackId: string,
+      windowId: string,
+      bounds: any
+    ) {
+      return ipcRenderer.invoke(
+        'realm.composer.set-window-bounds',
+        spacePath,
+        stackId,
+        windowId,
+        bounds
+      );
+    },
+    setWindowLayer(
+      spacePath: string,
+      stackId: string,
+      windowId: string,
+      layer: number
+    ) {
+      return ipcRenderer.invoke(
+        'realm.composer.set-window-layer',
+        spacePath,
+        stackId,
+        windowId,
+        layer
       );
     },
   };
@@ -135,5 +165,37 @@ export class ComposerService extends BaseService {
     windowId: string
   ) {
     ComposerApi.removeWindow(this.core.conduit!, spacepath, stackId, windowId);
+  }
+
+  setWindowBounds(
+    _event: IpcMainInvokeEvent,
+    spacepath: string,
+    stackId: string,
+    windowId: string,
+    bounds: any
+  ) {
+    ComposerApi.setWindowBounds(
+      this.core.conduit!,
+      spacepath,
+      stackId,
+      windowId,
+      bounds
+    );
+  }
+
+  setWindowLayer(
+    _event: IpcMainInvokeEvent,
+    spacepath: string,
+    stackId: string,
+    windowId: string,
+    layer: number
+  ) {
+    ComposerApi.setWindowLayer(
+      this.core.conduit!,
+      spacepath,
+      stackId,
+      windowId,
+      layer
+    );
   }
 }
