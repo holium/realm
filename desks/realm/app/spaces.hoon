@@ -321,11 +321,7 @@
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
       ?>  (team:title our.bowl src.bowl)
-      =/  new-space-path  [our.bowl slug]
-      =.  slug
-        ?:  (~(has by spaces.state) new-space-path)   :: if the path exists already,
-          (increment-slug slug)                       :: increment the slug so it's unique
-        slug                                          :: otherwise, leave it alone
+      =.  slug  (find-available-path [our.bowl slug] spaces.state)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
       =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
       ::  we need to set a host + member value and exclude the host from make-invitations
@@ -350,12 +346,20 @@
       :-  cards
       state(current path.new-space)
     ::
+    ++  find-available-path
+      |=  [spath=[=ship slug=@t] =spaces:store]
+      ^-  @t
+      |-
+        ?.  (~(has by spaces) spath)   :: if the path is empty, return the valid slug
+          slug.spath
+        $(spath [ship.spath (increment-slug slug.spath)])  :: if the slug was already taken, try incrementing
+    ::
     ++  increment-slug
       |=  slug=@t
       ^-  @t
       =/  last-char  (snag 0 (flop (trip slug)))
       ?:  &((gte last-char '0') (lte last-char '9')) :: if last-char is a numeric digit
-        (crip (snoc (trip slug) `@t`(add 1 last-char))) :: increment the digit
+        (crip (snoc (snip (trip slug)) `@t`(add 1 last-char))) :: increment the digit
       (crip (snoc (trip slug) '1')) :: else append '1' to the slug
     ::
     ++  handle-update
