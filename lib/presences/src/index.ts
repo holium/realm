@@ -1,16 +1,15 @@
 export type {
-  CursorClickPayload,
-  CursorDownPayload,
-  CursorMovePayload,
-  CursorOutPayload,
-  CursorPayload,
-  CursorUpPayload,
+  MultiplayerClick,
+  MultiplayerDown,
+  MultiplayerMove,
+  MultiplayerOut,
+  MultiplayerPayload,
+  MultiplayerUp,
   MouseState,
-  TransactionPayload,
-  CaretPayload,
-  ChatPayload,
+  PresenceTransaction,
+  PresenceCaret,
+  PresenceChat,
 } from './types';
-export { CursorEvent } from './types';
 export { Clickable } from './components/Clickable';
 export { useShips } from './hooks/useShips';
 export { useTransactions } from './hooks/useTransactions';

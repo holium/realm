@@ -1,8 +1,8 @@
 import {
-  CaretPayload,
-  ChatPayload,
-  CursorPayload,
-  TransactionPayload,
+  PresenceCaret,
+  PresenceChat,
+  MultiplayerPayload,
+  PresenceTransaction,
 } from '@holium/realm-presence';
 import { Patp } from '../types';
 
@@ -20,24 +20,13 @@ export interface DataPayload {
   data?: any;
 }
 
-export interface TrackMetaPayload {
-  peer: Patp;
-  isMuted: boolean;
-  isCursorSharing: boolean;
-  isScreenSharing: boolean;
-  isSpeaking: boolean;
-  audioLevel: number; // 0 - 10
-  lastSpokeAt: number; // unix timestamp
-}
-
 export interface DataPacket {
   from: Patp;
   kind: DataPacket_Kind;
   value: {
-    cursor?: CursorPayload;
-    trackMeta?: TrackMetaPayload;
-    transaction?: TransactionPayload;
-    caret?: CaretPayload;
-    chat?: ChatPayload;
+    cursor?: MultiplayerPayload;
+    transaction?: PresenceTransaction;
+    caret?: PresenceCaret;
+    chat?: PresenceChat;
   } & DataPayload;
 }

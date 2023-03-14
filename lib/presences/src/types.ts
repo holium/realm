@@ -2,71 +2,75 @@ type Position = { x: number; y: number };
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 
-interface BaseRealmPayload {
+type MultiplayerEvent =
+  | 'mouse-move'
+  | 'mouse-down'
+  | 'mouse-up'
+  | 'mouse-click'
+  | 'mouse-over'
+  | 'mouse-out';
+
+type PresenceEvent = 'transaction' | 'caret' | 'chat';
+
+interface MultiplayerPayloadBase {
   patp: string;
-  event: string;
+  event: MultiplayerEvent;
 }
 
-export enum CursorEvent {
-  Move = 'cursor-move',
-  Down = 'cursor-down',
-  Up = 'cursor-up',
-  Click = 'cursor-click',
-  Over = 'cursor-over',
-  Out = 'cursor-out',
-  Transaction = 'transaction',
-  Caret = 'caret',
-  Chat = 'chat',
+interface PresencePayloadBase {
+  patp: string;
+  event: PresenceEvent;
 }
 
-interface BaseCursorPayload extends BaseRealmPayload {
-  event: CursorEvent;
-}
-
-export interface CursorMovePayload extends BaseCursorPayload {
-  event: CursorEvent.Move;
+export interface MultiplayerMove extends MultiplayerPayloadBase {
+  event: 'mouse-move';
   position: Position;
   state: MouseState;
   hexColor: string;
 }
 
-export interface CursorDownPayload extends BaseCursorPayload {
-  event: CursorEvent.Down;
+export interface MultiplayerDown extends MultiplayerPayloadBase {
+  event: 'mouse-down';
 }
 
-export interface CursorUpPayload extends BaseCursorPayload {
-  event: CursorEvent.Up;
+export interface MultiplayerUp extends MultiplayerPayloadBase {
+  event: 'mouse-up';
 }
 
-export interface CursorClickPayload extends BaseCursorPayload {
-  event: CursorEvent.Click;
+export interface MultiplayerClick extends MultiplayerPayloadBase {
+  event: 'mouse-click';
   elementId: string;
 }
 
-export interface CursorOutPayload extends BaseCursorPayload {
-  event: CursorEvent.Out;
+export interface MultiplayerOut extends MultiplayerPayloadBase {
+  event: 'mouse-out';
 }
 
-export interface TransactionPayload extends BaseCursorPayload {
+export interface PresenceTransaction extends PresencePayloadBase {
   version: number;
   steps: any;
   clientID: string | number;
-  event: CursorEvent.Transaction;
+  event: 'transaction';
 }
 
-export interface CaretPayload extends BaseCursorPayload {
-  event: CursorEvent.Caret;
+export interface PresenceCaret extends PresencePayloadBase {
+  event: 'caret';
   position: Position;
 }
 
-export interface ChatPayload extends BaseRealmPayload {
-  event: CursorEvent.Chat;
+export interface PresenceChat extends PresencePayloadBase {
+  event: 'chat';
   message: string;
 }
 
-export type CursorPayload =
-  | BaseRealmPayload
-  | CursorMovePayload
-  | CursorDownPayload
-  | CursorUpPayload
-  | CursorOutPayload;
+export type MultiplayerPayload =
+  | MultiplayerMove
+  | MultiplayerDown
+  | MultiplayerUp
+  | MultiplayerClick
+  | MultiplayerOut;
+
+export type PresencePayload =
+  | PresenceTransaction
+  | PresenceCaret
+  | PresenceChat;

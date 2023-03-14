@@ -7,12 +7,6 @@ import { observer } from 'mobx-react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
-import {
-  CaretPayload,
-  CursorClickPayload,
-  CursorEvent,
-  TransactionPayload,
-} from '@holium/realm-presences';
 
 const connectWebviewToMultiplayer = async (
   ship: string,
@@ -26,15 +20,11 @@ const connectWebviewToMultiplayer = async (
     async (_rid: string, _peer: string, { value }) => {
       if (!value) return;
 
-      if (value.cursor && value.cursor.event === CursorEvent.Click) {
-        const { patp, elementId } = value.cursor as CursorClickPayload;
+      if (value.cursor && value.cursor.event === 'mouse-click') {
+        const { patp, elementId } = value.cursor;
         webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
-      } else if (
-        value.transaction &&
-        value.transaction.event === CursorEvent.Transaction
-      ) {
-        const { patp, version, steps, clientID } =
-          value.transaction as TransactionPayload;
+      } else if (value.transaction) {
+        const { patp, version, steps, clientID } = value.transaction;
         webview.send(
           'multiplayer.realm-to-app.send-transaction',
           patp,
@@ -42,8 +32,8 @@ const connectWebviewToMultiplayer = async (
           steps,
           clientID
         );
-      } else if (value.caret && value.caret.event === CursorEvent.Caret) {
-        const { patp, position } = value.caret as CaretPayload;
+      } else if (value.caret) {
+        const { patp, position } = value.caret;
         webview.send('multiplayer.realm-to-app.send-caret', patp, position);
       }
     }
