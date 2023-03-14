@@ -35,7 +35,7 @@ export interface ConnectParams {
 }
 
 export class Realm extends EventEmitter {
-  conduit?: Conduit;
+  conduit: Conduit | null = null;
   private isResuming: boolean = false;
   private isReconnecting: boolean = false;
   readonly mainWindow: BrowserWindow;
@@ -99,6 +99,24 @@ export class Realm extends EventEmitter {
     onConnectionStatus: (callback: any) =>
       ipcRenderer.on('realm.on-connection-status', callback),
     onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
+
+    onQuitSignal: (callback: (c2?: () => void) => void) =>
+      ipcRenderer.on('app.before-quit', (event) => {
+        callback(() => event.sender.send('realm.app.quit'));
+      }),
+
+    // 'fake' amalgamation events for any sort of "sleep-like" event
+
+    // because a system may fire both 'suspend' and 'lock-screen' in quick succession,
+    // only use callbacks to onSleep that you are okay with being called multiple times quickly
+    // combines 'suspend' 'shutdown' 'lock-screen'
+    onSleep: (callback: () => void) =>
+      ipcRenderer.on('realm.sys.sleep', callback),
+    // because a system may fire both 'resume' and 'unlock-screen' in quick succession,
+    // only use callbacks to onWake that you are okay with being called multiple times quickly
+    // combines 'resume' 'unlock-screen'
+    onWake: (callback: () => void) =>
+      ipcRenderer.on('realm.sys.wake', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -166,7 +184,7 @@ export class Realm extends EventEmitter {
     this.mainWindow.on('close', () => {
       this.conduit?.closeChannel();
       this.services.shell.closeDialog(null);
-      this.conduit = undefined;
+      this.conduit = null;
     });
 
     this.mainWindow.webContents.on(
@@ -231,7 +249,7 @@ export class Realm extends EventEmitter {
       loggedIn: !!this.session,
     };
     // if (spaces?.selected) {
-    //   this.setTheme({ ...spaces!.selected!.theme, id: spaces?.selected.path });
+    //   this.setTheme({ ...spaces.selected.theme, id: spaces?.selected.path });
     // }
     // Send boot payload to any listeners
     this.onBoot(bootPayload);
@@ -247,7 +265,7 @@ export class Realm extends EventEmitter {
   async disconnect() {
     this.conduit?.closeChannel();
     this.isResuming = true;
-    this.conduit = undefined;
+    this.conduit = null;
   }
 
   async refresh() {
@@ -278,7 +296,7 @@ export class Realm extends EventEmitter {
 
   async reconnect() {
     this.conduit?.closeChannel();
-    this.conduit = undefined;
+    this.conduit = null;
 
     if (this.session) {
       this.isReconnecting = true;
@@ -313,7 +331,7 @@ export class Realm extends EventEmitter {
       await this.conduit.init(
         session.url,
         session.ship.substring(1),
-        session.cookie!,
+        session.cookie ?? '',
         session.code
       );
       // this.sendLog('after conduit init');
@@ -345,14 +363,14 @@ export class Realm extends EventEmitter {
     this.db.set(session);
   }
 
-  getSession(): ISession {
-    return this.session!;
+  getSession() {
+    return this.session;
   }
 
   async clearSession(): Promise<void> {
     // this.conduit?.cleanup();
     await this.conduit?.closeChannel();
-    this.conduit = undefined;
+    this.conduit = null;
     this.db.clear();
     this.session = undefined;
   }
@@ -399,12 +417,12 @@ export class Realm extends EventEmitter {
         await session.fromPartition(`urbit-webview`).cookies.set({
           url: `${this.session.url}${appPath}`,
           name: `urbauth-${ship}`,
-          value: cookie.split('=')[1].split('; ')[0],
+          value: cookie?.split('=')[1].split('; ')[0],
           // value: cookie,
         });
         this.saveSession({
           ...this.session,
-          cookie,
+          cookie: cookie ?? '',
         });
         // console.log('navigating to => %o', newUrl);
         // webContents.loadURL(newUrl);
@@ -423,8 +441,8 @@ export class Realm extends EventEmitter {
 
   async onConduit(params: ConnectParams) {
     // this.sendConnectionStatus(this.conduit?.status);
-    const sessionPatp = this.session?.ship!;
-    // this.sendLog(`before ship subscribe ${this.session?.ship!}`);
+    const sessionPatp = this.session?.ship ?? '';
+    // this.sendLog(`before ship subscribe ${this.session?.ship}`);
     await this.services.ship.subscribe(sessionPatp, this.session);
     // this.sendLog('after ship subscribe');
     await this.services.spaces.load(sessionPatp, params.reconnecting);

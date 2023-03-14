@@ -90,12 +90,8 @@ const dimensions = {
   width: 550,
 };
 
-const AppSuitePresenter = (props: AppSuiteProps) => {
-  const { isAdmin } = props;
+const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
   const { theme, bazaar, spaces } = useServices();
-  const space = spaces.selected!;
-  const suite = bazaar.getSuite(space.path);
-  const apps = bazaar.installed;
 
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
@@ -110,6 +106,10 @@ const AppSuitePresenter = (props: AppSuiteProps) => {
         : darken(0.1, theme.currentTheme.windowColor),
     [theme.currentTheme]
   );
+
+  const space = spaces.selected;
+  const suite = bazaar.getSuite(space?.path ?? '');
+  const apps = bazaar.installed;
 
   const popoverId = `app-suite-${suiteIndex}`;
   const popover = useMemo(
@@ -152,8 +152,8 @@ const AppSuitePresenter = (props: AppSuiteProps) => {
                         setSearchMode('none');
                         setSuiteIndex(-1);
                         SpacesActions.addToSuite(
-                          space.path,
-                          item!.id,
+                          space?.path ?? '',
+                          item?.id ?? '',
                           suiteIndex
                         );
                       }}
@@ -175,11 +175,13 @@ const AppSuitePresenter = (props: AppSuiteProps) => {
       coords,
       isOpen,
       popoverId,
-      space.path,
+      space?.path ?? '',
       suiteIndex,
       textColor,
     ]
   );
+
+  if (!space) return null;
 
   const AppTile = ({ app, index }: { app: any | null; index: number }) => {
     if (app) {

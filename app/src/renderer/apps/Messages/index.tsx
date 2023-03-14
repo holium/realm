@@ -72,7 +72,7 @@ const MessagesTrayAppPresenter = () => {
           height={dimensions.height}
           theme={theme.currentTheme as any}
           storage={storage}
-          selectedChat={dmApp.selectedChat!}
+          selectedChat={dmApp.selectedChat as DMPreviewType}
         />
       );
       break;

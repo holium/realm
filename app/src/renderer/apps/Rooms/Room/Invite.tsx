@@ -37,7 +37,7 @@ export const RoomInvite = observer(() => {
 
       // RoomsActions.invite(room.id, innerInvite).then(() => {
       //   setLoading(false);
-      //   // chatInputRef.current!.value = '';
+      //   // chatInputRef.current.value = '';
       //   invitePatp.actions.onChange('');
       //   setInvited((prevInvited) => [...prevInvited, innerInvite]);
       // });
@@ -53,7 +53,7 @@ export const RoomInvite = observer(() => {
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (patp === ship!.patp) {
+      if (patp === ship?.patp) {
         return { error: "You can't invite yourself!", parsed: undefined };
       }
 
@@ -77,7 +77,6 @@ export const RoomInvite = observer(() => {
           innerRef={inviteInputRef}
           spellCheck={false}
           wrapperStyle={{
-            cursor: 'none',
             borderRadius: 6,
             backgroundColor: theme.inputColor,
           }}

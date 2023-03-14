@@ -48,8 +48,10 @@ export const IconButton = styled(motion.button)<IProps>`
   svg {
     fill: ${(props: IProps) => props.color || props.theme.colors.icon.app};
     pointer-events: none;
-    height: ${(props: IProps) => `${props.size! - props.theme.space[1]}px`};
-    width: ${(props: IProps) => `${props.size! - props.theme.space[1]}px`};
+    height: ${(props: IProps) =>
+      `${(props.size ?? 0) - props.theme.space[1]}px`};
+    width: ${(props: IProps) =>
+      `${(props.size ?? 0) - props.theme.space[1]}px`};
   }
   /* border: 1px solid transparent; */
   border-radius: ${(props) => props.theme.containers.innerBorderRadius}px;

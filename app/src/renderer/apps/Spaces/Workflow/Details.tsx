@@ -144,7 +144,8 @@ const SpacesCreateFormPresenter = ({
       });
     }
     if (edit) {
-      const space = spaces.spaces.get(edit.space)!;
+      const space = spaces.spaces.get(edit.space);
+      if (!space) return;
       setWorkspaceState({
         ...space,
         description: space.description,
@@ -403,6 +404,7 @@ const SpacesCreateFormPresenter = ({
               }}
               onFocus={() => nameField.actions.onFocus()}
               onBlur={nameField.actions.onBlur}
+              disabled={workflowState.type === 'group'}
             />
           </FormControl.Field>
           <FormControl.Field>

@@ -88,3 +88,15 @@ export type RealmInstallationStatus = {
   installedDesks: string[] | undefined;
   errorMessage: string | undefined;
 };
+
+export type MediaAccessStatus =
+  | 'not-determined'
+  | 'granted'
+  | 'denied'
+  | 'restricted'
+  | 'unknown';
+
+export type MediaAccess = {
+  camera: MediaAccessStatus;
+  mic: MediaAccessStatus;
+};

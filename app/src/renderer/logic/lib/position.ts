@@ -1,4 +1,4 @@
-import { Dimensions } from 'os/types';
+import { Dimensions, Position } from 'os/types';
 
 export const calculateAnchorPoint = (
   event: any,
@@ -38,20 +38,26 @@ export const calculateAnchorPoint = (
   return style;
 };
 
+type LeftBottom = {
+  left: number;
+  bottom: number;
+};
+
 export const calculateAnchorPointById = (
   appId: string,
-  anchorOffset: any,
-  position: any,
-  dimensions: any
-) => {
-  const el = document.getElementById(`${appId}-icon`)!;
+  anchorOffset: Position,
+  position: string,
+  dimensions: Dimensions
+): LeftBottom => {
+  const el = document.getElementById(`${appId}-icon`) as HTMLElement;
+
   const {
     left: buttonLeft,
     width: buttonWidth,
     height,
-  } = el?.getBoundingClientRect();
+  } = el.getBoundingClientRect();
   const buttonTop = el.offsetHeight + height;
-  let style: any = {};
+  let style = {};
 
   let left = null;
   if (position.includes('-left')) {
@@ -71,7 +77,8 @@ export const calculateAnchorPointById = (
   }
   const bottom = Math.round(buttonTop - height + anchorOffset.y);
   style = { ...style, bottom };
-  return style;
+
+  return style as LeftBottom;
 };
 
 export const calculatePopoverAnchorById = (
@@ -82,7 +89,8 @@ export const calculatePopoverAnchorById = (
     centered?: boolean;
   }
 ) => {
-  const el = document.getElementById(popoverId)!;
+  const el = document.getElementById(popoverId) as HTMLElement;
+
   const { centered, dimensions, anchorOffset } = config;
   const divTop = el.offsetHeight;
 
@@ -90,7 +98,7 @@ export const calculatePopoverAnchorById = (
     left: divLeft,
     width: divWidth,
     height: divHeight,
-  } = el?.getBoundingClientRect();
+  } = el.getBoundingClientRect();
 
   const offsetX = anchorOffset.x ?? 0;
   const offsetY = anchorOffset.y ?? 0;
