@@ -58,8 +58,16 @@ export const useMultiplayer = () => {
           return '';
         });
       } else {
+        let newKey = e.key;
+        // If the key is not a regular character, ignore it
+        if (newKey.length > 1) return;
+        // Handle caps lock and shift.
+        if (e.getModifierState('CapsLock') || e.shiftKey) {
+          newKey = newKey.toUpperCase();
+        }
+
         setChat((prev) => {
-          const newChat = prev + e.key;
+          const newChat = prev + newKey;
           window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
           broadcastChat(newChat);
           return newChat;
