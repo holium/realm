@@ -14,6 +14,7 @@ env:
 #
 jobs:
   pre-deploy:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
@@ -41,7 +42,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'windows.yml')
+            const result = script({github, context}, 'staging-build.yml')
             console.log(result)
             return result
         env:
@@ -106,19 +107,36 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
-      - name: Deploy binaries and other artifacts
-        # create annotated tag for this branch. this will become basis for the release
+      - name: Download and install code signing tool
         run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          # rename the latest.yml (windows) file to name based on channel
-          mv -f ./app/release/build/latest.yml ./app/release/build/$RELEASE_CHANNEL.yml
-          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
-          git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME" --draft --latest=false --verify-tag --notes "$CHANGELOG"
+          mkdir signer
+          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar -xvf - -C ./signer
+      #
+      - name: Sign Windows binaries
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+        run: ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+        env:
+          USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
+          PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
+          SSLCOM_SIGNING_SECRET: ${{ secrets.SSLCOM_SIGNING_SECRET }}
+          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
+          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
+          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          # move the signed version of the exe into the main build folder
+          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe
+          mv ./app/release/build/sign/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe.exe
+          ls ./app/release/build
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          CHANGELOG: ${{ github.event.pull_request.body }}
-          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
+          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
+          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
