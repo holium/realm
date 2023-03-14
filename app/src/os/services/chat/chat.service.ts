@@ -992,7 +992,7 @@ export class ChatService extends BaseService {
   // }
 
   async fetchPinnedChats() {
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'realm-chat',
       path: '/pins',
     });
