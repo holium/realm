@@ -217,7 +217,6 @@ app.on('window-all-closed', () => {
 // do our cleanup, and then re-emit and actually quit it
 let lastQuitSignal: number = 0;
 app.on('before-quit', (event) => {
-  console.log('before-quit signal', lastQuitSignal);
   if (lastQuitSignal === 0) {
     lastQuitSignal = new Date().getTime() - 1;
     event.preventDefault();
@@ -225,10 +224,7 @@ app.on('before-quit', (event) => {
     setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
   }
 });
-ipcMain.on('realm.app.quit', () => {
-  console.log('realm.app.quit sent back');
-  app.quit();
-});
+ipcMain.on('realm.app.quit', app.quit);
 
 app
   .whenReady()
