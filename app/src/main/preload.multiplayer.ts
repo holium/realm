@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { MouseState } from '@holium/realm-multiplayer';
+import { MouseState } from '@holium/realm-presences';
 import { Position } from '../os/types';
 
 export const multiplayerPreload = {

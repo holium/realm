@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
-import { MouseState } from '@holium/realm-multiplayer';
+import { MouseState } from '@holium/realm-presences';
 import { Position } from '../../os/types';
 import { denormalizePosition } from '../../os/services/shell/lib/window-manager';
 

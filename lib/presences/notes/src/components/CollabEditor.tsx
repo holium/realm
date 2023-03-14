@@ -11,7 +11,7 @@ import {
 } from 'prosemirror-collab';
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
-import { SendCaret, SendTransaction } from '@holium/realm-multiplayer';
+import { SendCaret, SendTransaction } from '@holium/realm-presences';
 
 export const collabEditor = (
   authority: Authority,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MouseState } from '@holium/realm-multiplayer';
+import { MouseState } from '@holium/realm-presences';
 import { AnimatedCursor } from './AnimatedCursor';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { getMouseState } from './getMouseState';

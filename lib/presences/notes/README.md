@@ -1,4 +1,4 @@
-# @holium/realm-multiplayer-notes
+# @holium/realm-presences-notes
 
 Showcase UI for the multiplayer JS lib.
 

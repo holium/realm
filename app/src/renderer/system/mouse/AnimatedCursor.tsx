@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { MotionStyle, motion, Variant } from 'framer-motion';
-import { MouseState } from '@holium/realm-multiplayer';
+import { MouseState } from '@holium/realm-presences';
 import { Position } from 'os/types';
 import { IsDevice } from './isDevice';
 

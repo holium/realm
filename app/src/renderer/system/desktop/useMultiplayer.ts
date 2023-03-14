@@ -9,7 +9,7 @@ import {
   TransactionPayload,
   CaretPayload,
   ChatPayload,
-} from '@holium/realm-multiplayer';
+} from '@holium/realm-presences';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
@@ -221,8 +221,8 @@ export const useMultiplayer = () => {
 };
 
 /**
- * We should not use dispatch if we can use @holium/realm-multiplayer (more reliable).
- * We might need to dispatch for the browser where we can't use realm-multiplayer though.
+ * We should not use dispatch if we can use @holium/realm-presences (more reliable).
+ * We might need to dispatch for the browser where we can't use realm-presences though.
  */
 // const dispatchClickEvent = async (
 //   position: Position,

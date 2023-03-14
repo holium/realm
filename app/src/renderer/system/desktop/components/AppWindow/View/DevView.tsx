@@ -12,7 +12,7 @@ import {
   CursorClickPayload,
   CursorEvent,
   TransactionPayload,
-} from '@holium/realm-multiplayer';
+} from '@holium/realm-presences';
 
 const connectWebviewToMultiplayer = async (
   ship: string,

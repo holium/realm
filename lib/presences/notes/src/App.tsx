@@ -3,11 +3,7 @@ import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { Text, Flex, Avatar } from '@holium/design-system';
-import {
-  useCarets,
-  useShips,
-  useTransactions,
-} from '@holium/realm-presence';
+import { useCarets, useShips, useTransactions } from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
