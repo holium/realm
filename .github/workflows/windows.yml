@@ -123,7 +123,7 @@ jobs:
           cd ./signer
           chmod +x ./CodeSignTool.sh
           mkdir -p ./app/release/build/signed
-          CODE_SIGN_TOOL_PATH=./ ./CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+          CODE_SIGN_TOOL_PATH=./ ./CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
@@ -135,10 +135,10 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
-          mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          mv -f ./app/release/build/latest.yml ./app/release/build/draft.yml
           # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
-          mv ./app/release/build/sign/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
+          mv ./app/release/build/sign/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-draft.exe
           ls ./app/release/build
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
