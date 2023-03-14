@@ -14,7 +14,6 @@ env:
 #
 jobs:
   pre-deploy:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
