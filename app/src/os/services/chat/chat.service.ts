@@ -19,6 +19,7 @@ import {
   DeleteLogRow,
   DelPeersRow,
   UpdateMessage,
+  NotificationsRow,
 } from './chat.types';
 import { InvitePermissionType } from 'renderer/apps/Courier/models';
 
@@ -189,6 +190,18 @@ export class ChatService extends BaseService {
       // and after applying successfully, insert them into the db
       this.insertDeleteLogs(deleteLogs);
     });
+
+    const notifications = await this.fetchNotifications();
+    this.insertNotifications(notifications);
+  }
+
+  async fetchNotifications() {
+    const lastTimestamp = this.getLastTimestamp('notifications');
+    const response = await this.core.conduit?.scry({
+      app: 'notif-db',
+      path: `/db/since-ms/${lastTimestamp}`,
+    });
+    return response;
   }
 
   async fetchMessages() {
@@ -337,6 +350,70 @@ export class ChatService extends BaseService {
   }
   onError(err: any) {
     console.log('err!', err);
+  }
+
+  insertNotifications(notifications: NotificationsRow[]) {
+    if (!this.db) throw new Error('No db connection');
+    const insert = this.db.prepare(
+      `REPLACE INTO notifications (
+        id,
+        app,
+        path,
+        type,
+        title,
+        content,
+        image,
+        buttons,
+        link,
+        metadata,
+        created_at,
+        updated_at,
+        read_at,
+        read,
+        dismissed_at,
+        dismissed
+      ) VALUES (
+        @id,
+        @app,
+        @path,
+        @type,
+        @title,
+        @content,
+        @image,
+        @buttons,
+        @link,
+        @metadata,
+        @created_at,
+        @updated_at,
+        @read_at,
+        @read,
+        @dismissed_at,
+        @dismissed
+      )`
+    );
+    const insertMany = this.db.transaction((notifications) => {
+      for (const notif of notifications) {
+        insert.run({
+          id: notif.id,
+          app: notif.app,
+          path: notif.path,
+          type: notif.type,
+          title: notif.title,
+          content: notif.content,
+          image: notif.image,
+          buttons: JSON.stringify(notif.buttons),
+          link: notif.link,
+          metadata: JSON.stringify(notif.metadata),
+          created_at: notif['created-at'],
+          updated_at: notif['updated-at'],
+          read_at: notif['read-at'],
+          read: notif.read ? 1 : 0,
+          dismissed_at: notif['dismissed-at'],
+          dismissed: notif.dismissed ? 1 : 0,
+        });
+      }
+    });
+    insertMany(notifications);
   }
 
   insertMessages(messages: MessagesRow[]) {
@@ -806,7 +883,7 @@ export class ChatService extends BaseService {
   }
 
   getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs'
+    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
   ): number {
     if (!this.db) throw new Error('No db connection');
     const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';

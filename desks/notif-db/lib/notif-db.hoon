@@ -268,11 +268,18 @@
           metadata+(metadata-to-json metadata.notif-row)
           created-at+(time created-at.notif-row)
           updated-at+(time updated-at.notif-row)
-          read-at+(time read-at.notif-row)
+          read-at+(time-or-null read-at.notif-row)
           read+b+read.notif-row
-          dismissed-at+(time dismissed-at.notif-row)
+          dismissed-at+(time-or-null dismissed-at.notif-row)
           dismissed+b+dismissed.notif-row
       ==
+    ::
+    ++  time-or-null
+      |=  t=@da
+      ^-  json
+      ?:  =(t *@da)
+        ~
+      (time t)
     ::
     ++  changes
       |=  ch=db-change:sur
