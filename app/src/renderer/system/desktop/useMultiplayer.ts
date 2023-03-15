@@ -6,9 +6,9 @@ import {
   MultiplayerUp,
   MultiplayerMove,
   MultiplayerClick,
-  PresenceTransaction,
-  PresenceCaret,
   PresenceChat,
+  PresenceBroadcast,
+  PresenceTransaction,
 } from '@holium/realm-presences';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
@@ -179,15 +179,14 @@ export const useMultiplayer = () => {
       }
     );
 
-    window.electron.multiplayer.onAppToRealmSendCaret((patp, position) => {
-      const PresenceCaret: PresenceCaret = {
-        patp,
-        position,
-        event: 'caret',
+    window.electron.multiplayer.onAppToRealmBroadcast((data) => {
+      const broadcast: PresenceBroadcast = {
+        event: 'broadcast',
+        data,
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { caret: PresenceCaret },
+        value: { broadcast },
       });
     });
 

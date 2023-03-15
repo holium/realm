@@ -10,7 +10,7 @@ type MultiplayerEvent =
   | 'mouse-over'
   | 'mouse-out';
 
-type PresenceEvent = 'transaction' | 'caret' | 'chat';
+type PresenceEvent = 'transaction' | 'broadcast' | 'chat';
 
 interface MultiplayerPayloadBase {
   patp: string;
@@ -18,7 +18,6 @@ interface MultiplayerPayloadBase {
 }
 
 interface PresencePayloadBase {
-  patp: string;
   event: PresenceEvent;
 }
 
@@ -47,18 +46,20 @@ export interface MultiplayerOut extends MultiplayerPayloadBase {
 }
 
 export interface PresenceTransaction extends PresencePayloadBase {
+  patp: string;
   version: number;
   steps: any;
   clientID: string | number;
   event: 'transaction';
 }
 
-export interface PresenceCaret extends PresencePayloadBase {
-  event: 'caret';
-  position: Position;
+export interface PresenceBroadcast extends PresencePayloadBase {
+  event: 'broadcast';
+  data: any;
 }
 
 export interface PresenceChat extends PresencePayloadBase {
+  patp: string;
   event: 'chat';
   message: string;
 }
@@ -72,5 +73,5 @@ export type MultiplayerPayload =
 
 export type PresencePayload =
   | PresenceTransaction
-  | PresenceCaret
+  | PresenceBroadcast
   | PresenceChat;

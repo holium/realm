@@ -1,8 +1,8 @@
 import {
-  PresenceCaret,
   PresenceChat,
   MultiplayerPayload,
   PresenceTransaction,
+  PresenceBroadcast,
 } from '@holium/realm-presence';
 import { Patp } from '../types';
 
@@ -26,7 +26,7 @@ export interface DataPacket {
   value: {
     cursor?: MultiplayerPayload;
     transaction?: PresenceTransaction;
-    caret?: PresenceCaret;
+    broadcast?: PresenceBroadcast;
     chat?: PresenceChat;
   } & DataPayload;
 }

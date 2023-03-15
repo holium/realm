@@ -17,12 +17,7 @@ const sendTransaction: SendTransaction = (patp, version, steps, clientID) => {
 };
 
 type Props = {
-  onTransaction: (
-    patp: string,
-    version: number,
-    steps: string,
-    clientID: string | number
-  ) => void;
+  onTransaction: SendTransaction;
 };
 
 export const useTransactions = ({ onTransaction }: Props) => {

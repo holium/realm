@@ -3,7 +3,11 @@ import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { Text, Flex, Avatar } from '@holium/design-system';
-import { useCarets, useShips, useTransactions } from '@holium/realm-presence';
+import {
+  useBroadcast,
+  useShips,
+  useTransactions,
+} from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
@@ -13,6 +17,8 @@ import { Header, EditorContainer } from './App.styles';
 import { CustomCaret } from './components/CustomCaret';
 
 type Carets = Record<string, { x: number; y: number }>;
+
+export type SendCaret = (patp: string, x: number, y: number) => void;
 
 const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
 
@@ -35,13 +41,13 @@ export const App = () => {
     authority.receiveSteps(version, parsedSteps, clientID);
   };
 
-  const onCaret = (patp: string, position: { x: number; y: number }) => {
-    setCarets((prevCarets) => ({ ...prevCarets, [patp]: position }));
+  const onBroadcast: SendCaret = (patp, x, y) => {
+    setCarets((prevCarets) => ({ ...prevCarets, [patp]: { x, y } }));
   };
 
   const ships = useShips();
   const { sendTransaction } = useTransactions({ onTransaction });
-  const { sendCaret } = useCarets({ onCaret });
+  const { broadcast } = useBroadcast({ onBroadcast });
 
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;
@@ -51,7 +57,7 @@ export const App = () => {
       newAuthority,
       ref,
       sendTransaction,
-      sendCaret
+      broadcast
     );
 
     setEditorView(newEditor);

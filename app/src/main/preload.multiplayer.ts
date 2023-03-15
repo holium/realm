@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { MouseState } from '@holium/realm-presences';
+import { PresenceArg, MouseState } from '@holium/realm-presences';
 import { Position } from '../os/types';
 
 export const multiplayerPreload = {
@@ -63,11 +63,11 @@ export const multiplayerPreload = {
       clientID
     );
   },
-  appToRealmSendCaret(patp: string, position: Position) {
-    ipcRenderer.invoke('multiplayer.app-to-realm.send-caret', patp, position);
+  appToRealmBroadcast<T extends PresenceArg[]>(...data: T) {
+    ipcRenderer.invoke('presences.app-to-realm.broadcast', ...data);
   },
-  realmToAppSendCaret(patp: string, position: Position) {
-    ipcRenderer.invoke('multiplayer.realm-to-app.send-caret', patp, position);
+  realmToAppBroadcast<T extends PresenceArg[]>(...data: T) {
+    ipcRenderer.invoke('presences.realm-to-app.broadcast', ...data);
   },
   onMouseMove(
     callback: (
@@ -160,21 +160,19 @@ export const multiplayerPreload = {
       }
     );
   },
-  onAppToRealmSendCaret(callback: (patp: string, position: Position) => void) {
-    ipcRenderer.on(
-      'multiplayer.app-to-realm.send-caret',
-      (_, patp: string, position: Position) => {
-        callback(patp, position);
-      }
-    );
+  onAppToRealmBroadcast<T extends PresenceArg[]>(
+    callback: (...data: T) => void
+  ) {
+    ipcRenderer.on('presences.app-to-realm.broadcast', (_, ...data) => {
+      callback(...(data as T));
+    });
   },
-  onRealmToAppSendCaret(callback: (patp: string, position: Position) => void) {
-    ipcRenderer.on(
-      'multiplayer.realm-to-app.send-caret',
-      (_, patp: string, position: Position) => {
-        callback(patp, position);
-      }
-    );
+  onRealmToAppBroadcast<T extends PresenceArg[]>(
+    callback: (...data: T) => void
+  ) {
+    ipcRenderer.on('presences.realm-to-app.broadcast', (_, ...data) => {
+      callback(...(data as T));
+    });
   },
   onRealmToAppSendChat(callback: (patp: string, message: string) => void) {
     ipcRenderer.on(

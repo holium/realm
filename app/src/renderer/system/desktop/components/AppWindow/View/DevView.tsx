@@ -13,7 +13,7 @@ const connectWebviewToMultiplayer = async (
   roomsManager: RoomsManager,
   webview: Electron.WebviewTag
 ) => {
-  console.log('Connecting webview to multiplayer.');
+  console.log('Connecting webview to presences.');
 
   roomsManager.on(
     RoomManagerEvent.OnDataChannel,
@@ -32,9 +32,11 @@ const connectWebviewToMultiplayer = async (
           steps,
           clientID
         );
-      } else if (value.caret) {
-        const { patp, position } = value.caret;
-        webview.send('multiplayer.realm-to-app.send-caret', patp, position);
+      } else if (value.broadcast) {
+        webview.send(
+          'multiplayer.realm-to-app.send-caret',
+          value.broadcast.data
+        );
       }
     }
   );

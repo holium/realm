@@ -9,9 +9,10 @@ import {
   receiveTransaction,
   sendableSteps,
 } from 'prosemirror-collab';
+import { SendTransaction } from '@holium/realm-presences';
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
-import { SendCaret, SendTransaction } from '@holium/realm-presences';
+import { SendCaret } from '../App';
 
 export const collabEditor = (
   authority: Authority,
@@ -30,9 +31,7 @@ export const collabEditor = (
         }),
         keymap(baseKeymap),
         collab({ version: authority.steps.length }),
-        streamCaretPlugin((position: { x: number; y: number }) =>
-          sendCaret(window.ship, position)
-        ),
+        streamCaretPlugin((x, y) => sendCaret(window.ship, x, y)),
         new Plugin({
           props: {
             decorations(state) {

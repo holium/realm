@@ -1,7 +1,7 @@
 import { EditorView } from 'prosemirror-view';
 import { Plugin } from 'prosemirror-state';
 
-type SendCaretPosition = (position: { x: number; y: number }) => void;
+type SendCaretPosition = (x: number, y: number) => void;
 
 class StreamCaret {
   sendCaretPosition: SendCaretPosition;
@@ -26,12 +26,12 @@ class StreamCaret {
     const y = view.coordsAtPos(from).top;
     const x = view.coordsAtPos(to).left - 1;
 
-    this.sendCaretPosition({ x, y });
+    this.sendCaretPosition(x, y);
   }
 }
 
 export const streamCaretPlugin = (
-  sendCaretPosition: (position: { x: number; y: number }) => void
+  sendCaretPosition: (x: number, y: number) => void
 ) => {
   return new Plugin({
     view(editorView) {
