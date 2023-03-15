@@ -1,4 +1,4 @@
-import { CursorPayload } from '@holium/realm-multiplayer';
+import { CursorPayload } from '@holium/realm-presence';
 import { Patp } from '../types';
 
 export enum DataPacket_Kind {

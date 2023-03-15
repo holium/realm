@@ -13,7 +13,7 @@ import {
   RealmEvent,
   PresenceStateSyncPayload,
   Ship,
-} from '@holium/realm-multiplayer';
+} from '@holium/realm-presence';
 import { hexToRgb, rgbToString } from '../../../../os/lib/color';
 import { AnimatedCursor } from '../AnimatedCursor';
 

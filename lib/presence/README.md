@@ -1,4 +1,4 @@
-# @holium/realm/multiplayer
+# @holium/realm-presence
 
 The JS lib for developers to use in order to leverage the shared cursor feature set.
 
