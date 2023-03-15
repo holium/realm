@@ -1,4 +1,4 @@
-import { MouseState } from '@holium/realm-presences';
+import { MouseState } from '@holium/realm-presence';
 
 const isTextElement = (element: Element): boolean =>
   element instanceof HTMLTextAreaElement ||

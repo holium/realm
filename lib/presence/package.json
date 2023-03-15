@@ -1,22 +1,12 @@
 {
-<<<<<<<< HEAD:lib/presence/package.json
   "name": "@holium/realm-presence",
-========
-  "name": "@holium/realm-presences",
->>>>>>>> ad5ea19f (Rename multiplayer to presences):lib/presences/package.json
   "version": "0.1.0",
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A lib for developers to leverage shared cursors in their apps.",
-<<<<<<<< HEAD:lib/presence/package.json
   "main": "dist/holium-realm-presence.cjs.js",
   "module": "dist/holium-realm-presence.esm.js",
   "typings": "dist/holium-realm-presence.cjs.d.ts",
-========
-  "main": "dist/holium-realm-presences.cjs.js",
-  "module": "dist/holium-realm-presences.esm.js",
-  "typings": "dist/holium-realm-presences.cjs.d.ts",
->>>>>>>> ad5ea19f (Rename multiplayer to presences):lib/presences/package.json
   "scripts": {
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",

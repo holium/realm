@@ -9,7 +9,7 @@ import {
   receiveTransaction,
   sendableSteps,
 } from 'prosemirror-collab';
-import { SendTransaction } from '@holium/realm-presences';
+import { SendTransaction } from '@holium/realm-presence';
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
 import { SendCaret } from '../App';

@@ -13,7 +13,7 @@ const connectWebviewToMultiplayer = async (
   roomsManager: RoomsManager,
   webview: Electron.WebviewTag
 ) => {
-  console.log('Connecting webview to presences.');
+  console.log('Connecting webview to presence.');
 
   roomsManager.on(
     RoomManagerEvent.OnDataChannel,
@@ -34,7 +34,7 @@ const connectWebviewToMultiplayer = async (
         );
       } else if (value.broadcast) {
         webview.send(
-          'presences.realm-to-app.broadcast',
+          'presence.realm-to-app.broadcast',
           ...value.broadcast.data
         );
       }

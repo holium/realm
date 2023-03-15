@@ -9,7 +9,7 @@ import {
   PresenceChat,
   PresenceBroadcast,
   PresenceTransaction,
-} from '@holium/realm-presences';
+} from '@holium/realm-presence';
 import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
@@ -244,8 +244,8 @@ export const useMultiplayer = () => {
 };
 
 /**
- * We should not use dispatch if we can use @holium/realm-presences (more reliable).
- * We might need to dispatch for the browser where we can't use realm-presences though.
+ * We should not use dispatch if we can use @holium/realm-presence (more reliable).
+ * We might need to dispatch for the browser where we can't use realm-presence though.
  */
 // const dispatchClickEvent = async (
 //   position: Position,

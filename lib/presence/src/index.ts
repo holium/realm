@@ -1,19 +1,18 @@
 export type {
-  CursorClickPayload,
-  CursorDownPayload,
-  CursorMovePayload,
-  CursorOutPayload,
-  CursorPayload,
-  CursorUpPayload,
+  MultiplayerClick,
+  MultiplayerDown,
+  MultiplayerMove,
+  MultiplayerOut,
+  MultiplayerPayload,
+  MultiplayerUp,
   MouseState,
-  TransactionPayload,
-  CaretPayload,
-  ChatPayload,
+  PresenceTransaction,
+  PresenceBroadcast,
+  PresenceChat,
 } from './types';
-export { CursorEvent } from './types';
-export { Clickable } from './components/Clickable';
+export { Interactive } from './components/Interactive';
 export { useShips } from './hooks/useShips';
 export { useTransactions } from './hooks/useTransactions';
 export type { SendTransaction } from './hooks/useTransactions';
-export { useCarets } from './hooks/useCarets';
-export type { SendCaret } from './hooks/useCarets';
+export { useBroadcast } from './hooks/useBroadcast';
+export type { PresenceArg } from './hooks/useBroadcast';

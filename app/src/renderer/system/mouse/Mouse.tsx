@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MouseState } from '@holium/realm-presences';
+import { MouseState } from '@holium/realm-presence';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { hexToRgb, rgbToString } from 'os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';

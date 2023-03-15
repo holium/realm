@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { PresenceArg, MouseState } from '@holium/realm-presences';
+import { PresenceArg, MouseState } from '@holium/realm-presence';
 import { Position } from '../os/types';
 
 export const multiplayerPreload = {
@@ -64,10 +64,10 @@ export const multiplayerPreload = {
     );
   },
   appToRealmBroadcast<T extends PresenceArg[]>(...data: T) {
-    ipcRenderer.invoke('presences.app-to-realm.broadcast', ...data);
+    ipcRenderer.invoke('presence.app-to-realm.broadcast', ...data);
   },
   realmToAppBroadcast<T extends PresenceArg[]>(...data: T) {
-    ipcRenderer.invoke('presences.realm-to-app.broadcast', ...data);
+    ipcRenderer.invoke('presence.realm-to-app.broadcast', ...data);
   },
   onMouseMove(
     callback: (
@@ -163,14 +163,14 @@ export const multiplayerPreload = {
   onAppToRealmBroadcast<T extends PresenceArg[]>(
     callback: (...data: T) => void
   ) {
-    ipcRenderer.on('presences.app-to-realm.broadcast', (_, ...data) => {
+    ipcRenderer.on('presence.app-to-realm.broadcast', (_, ...data) => {
       callback(...(data as T));
     });
   },
   onRealmToAppBroadcast<T extends PresenceArg[]>(
     callback: (...data: T) => void
   ) {
-    ipcRenderer.on('presences.realm-to-app.broadcast', (_, ...data) => {
+    ipcRenderer.on('presence.realm-to-app.broadcast', (_, ...data) => {
       callback(...(data as T));
     });
   },
