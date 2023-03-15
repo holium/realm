@@ -3,11 +3,7 @@ import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { Text, Flex, Avatar } from '@holium/design-system';
-import {
-  useBroadcast,
-  useShips,
-  useTransactions,
-} from '@holium/realm-presence';
+import { useBroadcast, useShips } from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
@@ -41,13 +37,15 @@ export const App = () => {
     authority.receiveSteps(version, parsedSteps, clientID);
   };
 
-  const onBroadcast: SendCaret = (patp, x, y) => {
+  const onCaret: SendCaret = (patp, x, y) => {
     setCarets((prevCarets) => ({ ...prevCarets, [patp]: { x, y } }));
   };
 
   const ships = useShips();
-  const { sendTransaction } = useTransactions({ onTransaction });
-  const { broadcast } = useBroadcast({ onBroadcast });
+  const { broadcast: sendTransaction } = useBroadcast({
+    onBroadcast: onTransaction,
+  });
+  const { broadcast: sendCaret } = useBroadcast({ onBroadcast: onCaret });
 
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;
@@ -57,7 +55,7 @@ export const App = () => {
       newAuthority,
       ref,
       sendTransaction,
-      broadcast
+      sendCaret
     );
 
     setEditorView(newEditor);
