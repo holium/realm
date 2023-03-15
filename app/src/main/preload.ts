@@ -98,15 +98,10 @@ const appPreload = {
       callback(hex);
     });
   },
-  onKeyDown(
-    callback: (key: string, isShift: boolean, isCapsLock: boolean) => void
-  ) {
-    ipcRenderer.on(
-      'key-down',
-      (_, key: string, isShift: boolean, isCapsLock: boolean) => {
-        callback(key, isShift, isCapsLock);
-      }
-    );
+  onKeyDown(callback: (key: string) => void) {
+    ipcRenderer.on('key-down', (_, key: string) => {
+      callback(key);
+    });
   },
   onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {
     ipcRenderer.on(

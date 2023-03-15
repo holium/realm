@@ -51,7 +51,7 @@ export const useMultiplayer = () => {
   );
 
   const onKeyDown = useCallback(
-    (key: string, isShift: boolean, isCapsLock: boolean) => {
+    (key: string) => {
       if (!ship) return;
       if (!isInRoom) return;
 
@@ -77,10 +77,6 @@ export const useMultiplayer = () => {
         let newKey = key;
         // If the key is not a regular character, ignore it
         if (newKey.length > 1) return;
-        // Handle caps lock and shift.
-        if (isCapsLock || isShift) {
-          newKey = newKey.toUpperCase();
-        }
 
         const newChat = chat.current + newKey;
         chat.current = newChat;
