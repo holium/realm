@@ -31,7 +31,7 @@
     { "path": "./lib/conduit" },
     { "path": "./lib/design-system" },
     { "path": "./lib/presence" },
-    { "path": "./lib/presence/notes" },
+    { "path": "./lib/presence/code" },
     { "path": "./lib/room" },
     { "path": "./lib/room/test-ui" }
   ]
