@@ -390,6 +390,7 @@ jobs:
           environment: staging
           sourcemaps: './app/release/app/dist'
           version: $BUILD_VERSION
+          SENTRY_LOG_LEVEL: debug
 
   #
   # this will run even if the build is canceled or fails
