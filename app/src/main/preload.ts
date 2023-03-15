@@ -115,6 +115,18 @@ const appPreload = {
   removeOnKeyDown() {
     ipcRenderer.removeAllListeners('key-down');
   },
+  removeOnMouseOut() {
+    ipcRenderer.removeAllListeners('mouse-out');
+  },
+  removeOnMouseDown() {
+    ipcRenderer.removeAllListeners('mouse-down');
+  },
+  removeOnMouseUp() {
+    ipcRenderer.removeAllListeners('mouse-up');
+  },
+  removeOnMouseMove() {
+    ipcRenderer.removeAllListeners('mouse-move');
+  },
 };
 
 export type AppPreloadType = typeof appPreload;

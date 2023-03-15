@@ -26,9 +26,6 @@ export const multiplayerPreload = {
   mouseUp(patp: string) {
     ipcRenderer.invoke('multiplayer.mouse-up', patp);
   },
-  toggleMultiplayer() {
-    ipcRenderer.invoke('multiplayer.toggle');
-  },
   appToRealmMouseClick(patp: string, elementId: string) {
     ipcRenderer.invoke('multiplayer.app-to-realm.mouse-click', patp, elementId);
   },
@@ -104,9 +101,6 @@ export const multiplayerPreload = {
     ipcRenderer.on('multiplayer.mouse-up', (_, patp: string) => {
       callback(patp);
     });
-  },
-  onToggleMultiplayer(callback: () => void) {
-    ipcRenderer.on('multiplayer.toggle', callback);
   },
   onAppToRealmMouseClick(callback: (patp: string, elementId: string) => void) {
     ipcRenderer.on(
@@ -184,6 +178,13 @@ export const multiplayerPreload = {
   },
   realmToAppSendChat(patp: string, message: string) {
     ipcRenderer.invoke('multiplayer.realm-to-app.send-chat', patp, message);
+  },
+  /* Removers */
+  removeOnAppToRealmMouseClick() {
+    ipcRenderer.removeAllListeners('multiplayer.app-to-realm.mouse-click');
+  },
+  removeOnAppToRealmBroadcast() {
+    ipcRenderer.removeAllListeners('multiplayer.app-to-realm.broadcast');
   },
 };
 

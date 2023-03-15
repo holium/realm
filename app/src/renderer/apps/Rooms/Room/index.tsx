@@ -9,15 +9,13 @@ import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { useRooms } from '../useRooms';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { ship, theme } = useServices();
+  const { ship, theme, desktop } = useServices();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
-  const multiplayer = useToggle();
 
   const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
@@ -182,13 +180,9 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
-              icon={multiplayer.isOn ? 'MouseOff' : 'MouseOn'}
+              icon={desktop.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               customBg={commButtonBg}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                window.electron.multiplayer.toggleMultiplayer();
-                multiplayer.toggle();
-              }}
+              onClick={desktop.toggleMultiplayer}
             />
             {/* <CommButton
               icon="HeadphoneLine"

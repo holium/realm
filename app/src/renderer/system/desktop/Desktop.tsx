@@ -5,11 +5,19 @@ import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
 import { useServices } from 'renderer/logic/store';
 import { TrayManager } from './TrayManager';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
-  const { desktop } = useServices();
-  useMultiplayer();
+  const { ship, shell, desktop } = useServices();
+  const roomsManager = useRooms(ship?.patp);
+  useMultiplayer({
+    patp: ship?.patp,
+    shipColor: ship?.color ?? '#000000',
+    desktopDimensions: shell.desktopDimensions,
+    isMultiplayerEnabled: desktop.multiplayerEnabled,
+    roomsManager,
+  });
 
   return (
     <Fill>

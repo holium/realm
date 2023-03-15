@@ -6,7 +6,6 @@ export type {
   MultiplayerPayload,
   MultiplayerUp,
   MouseState,
-  PresenceTransaction,
   PresenceBroadcast,
   PresenceChat,
 } from './types';

@@ -3,7 +3,6 @@ import { Position } from 'os/types';
 import { AnimatedCursor } from './AnimatedCursor';
 import { hexToRgb, rgbToString } from 'os/lib/color';
 import { MouseState } from '@holium/realm-presence';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 import { CursorLabel, EphemeralChat } from './Mouse.styles';
 
 type CursorState = Record<
@@ -19,9 +18,7 @@ type CursorState = Record<
   }
 >;
 
-// Manage websocket connection within realm or an individual app
 export const MultiplayerMice = () => {
-  const enabled = useToggle(true);
   const [cursors, setCursors] = useState<CursorState>({});
 
   useEffect(() => {
@@ -85,7 +82,6 @@ export const MultiplayerMice = () => {
         },
       }));
     });
-    window.electron.multiplayer.onToggleMultiplayer(enabled.toggle);
     window.electron.multiplayer.onRealmToAppSendChat((patp, message) => {
       setCursors((prev) => ({
         ...prev,
@@ -102,8 +98,6 @@ export const MultiplayerMice = () => {
   );
 
   if (visibleCursors.length < 1) return null;
-
-  if (!enabled.isOn) return null;
 
   return (
     <>

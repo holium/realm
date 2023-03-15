@@ -16,6 +16,13 @@ type Carets = Record<string, { x: number; y: number }>;
 
 export type SendCaret = (patp: string, x: number, y: number) => void;
 
+export type SendTransaction = (
+  patp: string,
+  version: number,
+  serializedSteps: any,
+  clientID: string | number
+) => void;
+
 const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
 
 export const App = () => {
@@ -24,11 +31,11 @@ export const App = () => {
   const [isReady, setIsReady] = useState(false);
   const [carets, setCarets] = useState<Carets>({});
 
-  const onTransaction = (
-    _patp: string,
-    version: number,
-    serializedSteps: any,
-    clientID: string | number
+  const onTransaction: SendTransaction = (
+    _patp,
+    version,
+    serializedSteps,
+    clientID
   ) => {
     if (!editorView || !authority) return;
     const parsedSteps = serializedSteps.map((s: Object) =>

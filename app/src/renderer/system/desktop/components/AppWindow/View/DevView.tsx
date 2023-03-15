@@ -23,15 +23,6 @@ const connectWebviewToMultiplayer = async (
       if (value.cursor && value.cursor.event === 'mouse-click') {
         const { patp, elementId } = value.cursor;
         webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
-      } else if (value.transaction) {
-        const { patp, version, steps, clientID } = value.transaction;
-        webview.send(
-          'multiplayer.realm-to-app.send-transaction',
-          patp,
-          version,
-          steps,
-          clientID
-        );
       } else if (value.broadcast) {
         webview.send(
           'presence.realm-to-app.broadcast',

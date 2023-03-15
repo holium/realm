@@ -47,14 +47,6 @@ export interface MultiplayerOut extends MultiplayerPayloadBase {
   event: 'mouse-out';
 }
 
-export interface PresenceTransaction extends PresencePayloadBase {
-  patp: string;
-  version: number;
-  steps: any;
-  clientID: string | number;
-  event: 'transaction';
-}
-
 export interface PresenceBroadcast extends PresencePayloadBase {
   event: 'broadcast';
   data: PresenceArg[];
@@ -73,7 +65,4 @@ export type MultiplayerPayload =
   | MultiplayerClick
   | MultiplayerOut;
 
-export type PresencePayload =
-  | PresenceTransaction
-  | PresenceBroadcast
-  | PresenceChat;
+export type PresencePayload = PresenceBroadcast | PresenceChat;

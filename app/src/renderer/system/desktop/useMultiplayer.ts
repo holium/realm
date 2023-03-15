@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import {
   MultiplayerOut,
   MultiplayerDown,
@@ -8,18 +8,32 @@ import {
   MultiplayerClick,
   PresenceChat,
   PresenceBroadcast,
-  PresenceTransaction,
 } from '@holium/realm-presence';
-import { DataPacket_Kind, RoomManagerEvent } from '@holium/realm-room';
+import {
+  DataPacket,
+  DataPacket_Kind,
+  RoomManagerEvent,
+  RoomsManager,
+} from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { useServices } from 'renderer/logic/store';
 import { useToggle } from 'renderer/logic/lib/useToggle';
+import { Dimensions } from 'os/types';
 
-export const useMultiplayer = () => {
-  const { ship, shell } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+type Props = {
+  patp: string | undefined;
+  shipColor: string;
+  desktopDimensions: Dimensions;
+  isMultiplayerEnabled: boolean;
+  roomsManager: RoomsManager;
+};
 
+export const useMultiplayer = ({
+  patp,
+  shipColor,
+  desktopDimensions,
+  isMultiplayerEnabled,
+  roomsManager,
+}: Props) => {
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
 
@@ -43,24 +57,25 @@ export const useMultiplayer = () => {
   const closeEphemeralChat = useCallback(
     debounce(() => {
       chat.current = '';
-      ship && broadcastChat(ship.patp, '');
+      patp && broadcastChat(patp, '');
       ephemeralChat.toggleOff();
       window.electron.app.toggleOffEphemeralChat();
     }, 5000),
-    []
+    [patp]
   );
 
   const onKeyDown = useCallback(
     (key: string) => {
-      if (!ship) return;
+      if (!patp) return;
       if (!isInRoom) return;
+      if (!isMultiplayerEnabled) return;
 
-      closeEphemeralChat(); // Refresh the 5s timer.
+      closeEphemeralChat(); // Refresh the 5s timeout.
 
       if (key === '/') {
         chat.current = '';
-        window.electron.app.realmToAppEphemeralChat(ship.patp, '');
-        broadcastChat(ship.patp, '');
+        window.electron.app.realmToAppEphemeralChat(patp, '');
+        broadcastChat(patp, '');
         if (ephemeralChat.isOn) {
           ephemeralChat.toggleOff();
           window.electron.app.toggleOffEphemeralChat();
@@ -71,20 +86,21 @@ export const useMultiplayer = () => {
       } else if (key === 'Backspace') {
         const newChat = chat.current.slice(0, -1);
         chat.current = newChat;
-        window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
-        broadcastChat(ship.patp, newChat);
+        window.electron.app.realmToAppEphemeralChat(patp, newChat);
+        broadcastChat(patp, newChat);
       } else {
         let newKey = key;
-        // If the key is not a regular character, ignore it
+        // If the key is not a regular character, ignore it.
         if (newKey.length > 1) return;
 
         const newChat = chat.current + newKey;
         chat.current = newChat;
-        window.electron.app.realmToAppEphemeralChat(ship.patp, newChat);
-        broadcastChat(ship.patp, newChat);
+
+        window.electron.app.realmToAppEphemeralChat(patp, newChat);
+        broadcastChat(patp, newChat);
       }
     },
-    [ephemeralChat.isOn, closeEphemeralChat, ship, isInRoom]
+    [patp, isInRoom, ephemeralChat.isOn, isMultiplayerEnabled]
   );
 
   useEffect(() => {
@@ -96,86 +112,93 @@ export const useMultiplayer = () => {
   });
 
   useEffect(() => {
-    if (!ship) return;
+    if (!patp) return;
 
-    window.electron.app.onMouseOut(() => {
-      const MultiplayerOut: MultiplayerOut = {
-        patp: ship.patp,
+    if (!isMultiplayerEnabled) {
+      // Remove player's cursor when they stop sharing.
+      const multiplayerOut: MultiplayerOut = {
+        patp,
         event: 'mouse-out',
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: MultiplayerOut },
+        value: { cursor: multiplayerOut },
+      });
+    }
+  }, [patp, isMultiplayerEnabled]);
+
+  useEffect(() => {
+    if (!patp) return;
+
+    window.electron.app.onMouseOut(() => {
+      if (!isMultiplayerEnabled) return;
+      const multiplayerOut: MultiplayerOut = {
+        patp,
+        event: 'mouse-out',
+      };
+      roomsManager.sendData({
+        kind: DataPacket_Kind.DATA,
+        value: { cursor: multiplayerOut },
       });
     });
 
     window.electron.app.onMouseDown(() => {
-      const MultiplayerDown: MultiplayerDown = {
-        patp: ship.patp,
+      if (!isMultiplayerEnabled) return;
+      const multiplayerDown: MultiplayerDown = {
+        patp,
         event: 'mouse-down',
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
         value: {
-          cursor: MultiplayerDown,
+          cursor: multiplayerDown,
         },
       });
     });
 
     window.electron.app.onMouseUp(() => {
-      const MultiplayerUp: MultiplayerUp = {
-        patp: ship.patp,
+      if (!isMultiplayerEnabled) return;
+      const multiplayerUp: MultiplayerUp = {
+        patp,
         event: 'mouse-up',
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: MultiplayerUp },
+        value: { cursor: multiplayerUp },
       });
     });
 
     window.electron.app.onMouseMove((position, state) => {
-      const MultiplayerMove: MultiplayerMove = {
-        patp: ship.patp,
+      if (!isMultiplayerEnabled) return;
+      console.log('mouse move', isMultiplayerEnabled, patp);
+      const multiplayerMove: MultiplayerMove = {
+        patp,
         event: 'mouse-move',
-        position: normalizePosition(position, shell.desktopDimensions),
+        position: normalizePosition(position, desktopDimensions),
         state,
-        hexColor: ship.color ?? '#000000',
+        hexColor: shipColor,
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: MultiplayerMove },
+        value: { cursor: multiplayerMove },
       });
     });
 
     window.electron.multiplayer.onAppToRealmMouseClick((patp, elementId) => {
-      const MultiplayerClick: MultiplayerClick = {
+      if (!isMultiplayerEnabled) return;
+      const multiplayerClick: MultiplayerClick = {
         patp,
         elementId,
         event: 'mouse-click',
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: MultiplayerClick },
+        value: { cursor: multiplayerClick },
       });
     });
 
-    window.electron.multiplayer.onAppToRealmSendTransaction(
-      (patp, version, steps, clientID) => {
-        const PresenceTransaction: PresenceTransaction = {
-          patp,
-          version,
-          steps,
-          clientID,
-          event: 'transaction',
-        };
-        roomsManager.sendData({
-          kind: DataPacket_Kind.DATA,
-          value: { transaction: PresenceTransaction },
-        });
-      }
-    );
-
     window.electron.multiplayer.onAppToRealmBroadcast((...data) => {
+      if (!isMultiplayerEnabled) return;
       const broadcast: PresenceBroadcast = {
         event: 'broadcast',
         data: [...data],
@@ -186,57 +209,72 @@ export const useMultiplayer = () => {
       });
     });
 
-    roomsManager.on(RoomManagerEvent.LeftRoom, (_, patp) => {
-      const MultiplayerOut: MultiplayerOut = {
+    const onLeftRoom = (_rid: string, patp: string) => {
+      const multiplayerOut: MultiplayerOut = {
         patp,
         event: 'mouse-out',
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: MultiplayerOut },
+        value: { cursor: multiplayerOut },
       });
-    });
+    };
 
-    roomsManager.on(
-      RoomManagerEvent.OnDataChannel,
-      async (_rid: string, _peer: string, data) => {
-        const PresenceChat = data.value.chat;
-        if (PresenceChat) {
-          if (PresenceChat.event === 'chat') {
-            const { patp, message } = PresenceChat as PresenceChat;
-            window.electron.multiplayer.realmToAppSendChat(patp, message);
-          }
-        }
-
-        const cursorPayload = data.value.cursor;
-        if (!cursorPayload) return;
-
-        const { event } = cursorPayload;
-
-        if (event === 'mouse-move') {
-          const { patp, position, state, hexColor } = cursorPayload;
-          window.electron.multiplayer.mouseMove(
-            patp,
-            position,
-            state,
-            hexColor
-          );
-        } else if (event === 'mouse-out') {
-          const { patp } = cursorPayload;
-          window.electron.multiplayer.mouseOut(patp);
-        } else if (event === 'mouse-down') {
-          const { patp } = cursorPayload;
-          window.electron.multiplayer.mouseDown(patp);
-        } else if (event === 'mouse-up') {
-          const { patp } = cursorPayload;
-          window.electron.multiplayer.mouseUp(patp);
-        } else {
-          const { patp, elementId } = cursorPayload;
-          window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
+    const onDataChannel = async (
+      _rid: string,
+      _peer: string,
+      data: DataPacket
+    ) => {
+      const PresenceChat = data.value.chat;
+      if (PresenceChat) {
+        if (PresenceChat.event === 'chat') {
+          const { patp, message } = PresenceChat as PresenceChat;
+          window.electron.multiplayer.realmToAppSendChat(patp, message);
         }
       }
-    );
-  }, [ship?.color, ship?.patp]);
+
+      const cursorPayload = data.value.cursor;
+      if (!cursorPayload) return;
+
+      const { event } = cursorPayload;
+
+      if (event === 'mouse-move') {
+        const { patp, position, state, hexColor } = cursorPayload;
+        window.electron.multiplayer.mouseMove(patp, position, state, hexColor);
+      } else if (event === 'mouse-out') {
+        const { patp } = cursorPayload;
+        window.electron.multiplayer.mouseOut(patp);
+      } else if (event === 'mouse-down') {
+        const { patp } = cursorPayload;
+        window.electron.multiplayer.mouseDown(patp);
+      } else if (event === 'mouse-up') {
+        const { patp } = cursorPayload;
+        window.electron.multiplayer.mouseUp(patp);
+      } else {
+        const { patp, elementId } = cursorPayload;
+        window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
+      }
+    };
+
+    roomsManager.on(RoomManagerEvent.LeftRoom, onLeftRoom);
+    roomsManager.on(RoomManagerEvent.OnDataChannel, onDataChannel);
+
+    return () => {
+      console.log('cleanup');
+      window.electron.app.removeOnMouseOut();
+      window.electron.app.removeOnMouseDown();
+      window.electron.app.removeOnMouseUp();
+      window.electron.app.removeOnMouseMove();
+      window.electron.multiplayer.removeOnAppToRealmMouseClick();
+      window.electron.multiplayer.removeOnAppToRealmBroadcast();
+
+      roomsManager.removeListener(RoomManagerEvent.LeftRoom, onLeftRoom);
+      roomsManager.removeListener(
+        RoomManagerEvent.OnDataChannel,
+        onDataChannel
+      );
+    };
+  }, [shipColor, patp, isMultiplayerEnabled, desktopDimensions]);
 };
 
 /**
