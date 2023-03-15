@@ -160,6 +160,19 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                   (m) => row.id === m.id
                 );
                 const reactionLength = msgModel?.reactions.length || 0;
+                let replyToObj: any | undefined;
+                if (row.replyToMsgId) {
+                  const originalMsg = selectedChat.messages.find(
+                    (m) => m.id === row.replyToMsgId
+                  );
+                  replyToObj = originalMsg && {
+                    reply: {
+                      msgId: originalMsg.id,
+                      author: originalMsg.sender,
+                      message: [originalMsg.contents[0]],
+                    },
+                  };
+                }
                 return (
                   <Box
                     key={`${row.id}-${row.updatedAt}-${index}-last=${isLast}-${reactionLength}`}
@@ -167,6 +180,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                     pb={isLast ? 2 : 0}
                   >
                     <ChatMessage
+                      replyTo={replyToObj}
                       message={row as ChatMessageType}
                       canReact={true}
                       ourColor={ourColor}
@@ -179,8 +193,8 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
           </Flex>
         )}
       </Flex>
-      <Flex position="relative" flexDirection="column" zIndex={16} mb={1}>
-        {selectedChat.replyingMsg && (
+      {selectedChat.replyingMsg && (
+        <Flex position="relative" flexDirection="column" zIndex={16} mb={1}>
           <ReplySection
             selectedChat={selectedChat}
             onClick={(msgId) => {
@@ -190,8 +204,8 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             }}
             onCancel={() => selectedChat.clearReplying()}
           />
-        )}
-      </Flex>
+        </Flex>
+      )}
       <Flex
         initial={{
           opacity: 0,

@@ -41,7 +41,7 @@ const ReactionModel = types.model('ReactionModel', {
 export type ReactionModelType = Instance<typeof ReactionModel>;
 
 export const ChatMessage = types
-  .model('ChatMessageodel', {
+  .model('ChatMessageModel', {
     path: types.string,
     id: types.identifier,
     sender: types.string,
@@ -62,6 +62,22 @@ export const ChatMessage = types
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
       self.updatedAt = updatedAt;
+    },
+    addOriginalReplyToContents: (replyContent: any) => {
+      // {
+      //   reply: {
+      //     msgId: '123',
+      //     author: '~lomder-librun',
+      //     message: [{ plain: 'Yo what the hell you talkin bout?' }],
+      //   },
+      // }
+      const oldContents = self.contents.slice();
+      console.log('addOriginalReplyToContents', [replyContent, ...oldContents]);
+      self.contents.replace([replyContent, ...oldContents]);
+    },
+    getReplyTo: () => {
+      if (!self.replyToPath || !self.replyToMsgId) return null;
+      return ChatDBActions.getChatReplyTo(self.replyToMsgId);
     },
     fetchReactions: flow(function* () {
       try {
@@ -184,6 +200,8 @@ export const Chat = types
       try {
         console.log('sending message', path, fragments);
         yield ChatDBActions.sendMessage(path, fragments);
+        self.replyingMsg = null;
+        // TODO naive send, should add to local store and update on ack
         // self.addMessage(message);
       } catch (error) {
         console.error(error);
@@ -208,7 +226,7 @@ export const Chat = types
         );
       }
       msg.updateContents(message.contents, message.updatedAt);
-      self.messages.replace([...self.messages, msg]);
+      // self.messages.replace([...self.messages, msg]);
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;

@@ -25,13 +25,6 @@ export const InboxPresenter = () => {
     (preview: ChatModelType) => {
       if (!searchString || searchString.trim() === '') return true;
       let title: string;
-      // if (preview.type === 'group' || preview.type === 'group-pending') {
-      //   const dm = preview as ChatRowType;
-      //   to = Array.from(dm.to).join(', ');
-      // } else {
-      //   const dm = preview as ChatRowType;
-      //   to = dm.to;
-      // }
       const dm = preview as ChatModelType;
       title = dm.metadata.title;
       return title.indexOf(searchString) === 0;
@@ -47,7 +40,7 @@ export const InboxPresenter = () => {
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
-      <Flex mb={2} ml={1} flexDirection="row" alignItems="center">
+      <Flex mb={1} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>

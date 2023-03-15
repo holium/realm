@@ -267,35 +267,14 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
 
     try {
-      /*
-      // TODO rewrite the contact store logic
-      try {
-        this.core.conduit.watch({
-          app: 'contact-store',
-          path: '/all',
-          onEvent: (data: any) => {
-            this.models.friends.setInitial(data);
-          },
-          onError: () => console.log('Subscription rejected'),
-          onQuit: () => console.log('Kicked from subscription'),
-        });
-      } catch {
-        console.log('Subscription failed');
-      }*/
-
       if (!this.core.conduit) throw new Error('No conduit found');
       FriendsApi.watchFriends(this.core.conduit, this.models.friends);
 
       FriendsApi.getContact(this.core.conduit, ship).then((value: any) => {
         this.state?.setOurMetadata(value);
       });
-
-      MetadataApi.syncGraphMetadata(this.core.conduit, this.metadataStore);
-
       // register dm update handler
       if (!this.models.courier) throw new Error('No courier found');
-      DmApi.updates(this.core.conduit, this.models.courier);
-      CourierApi.dmUpdates(this.core.conduit, this.models.courier);
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
