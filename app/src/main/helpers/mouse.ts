@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
-import { MouseState } from '@holium/realm-presences';
+import { MouseState, PresenceArg } from '@holium/realm-presences';
 import { Position } from '../../os/types';
 import { denormalizePosition } from '../../os/services/shell/lib/window-manager';
 
@@ -166,24 +166,16 @@ const registerListeners = (
   );
 
   ipcMain.handle(
-    'multiplayer.app-to-realm.send-caret',
-    (_, patp: string, position: Position) => {
-      mainWindow.webContents.send(
-        'multiplayer.app-to-realm.send-caret',
-        patp,
-        position
-      );
+    'presences.app-to-realm.broadcast',
+    <T extends PresenceArg[]>(_: any, ...arg: T) => {
+      mainWindow.webContents.send('presences.app-to-realm.broadcast', ...arg);
     }
   );
 
   ipcMain.handle(
-    'multiplayer.realm-to-app.send-caret',
-    (_, patp: string, position: Position) => {
-      mainWindow.webContents.send(
-        'multiplayer.realm-to-app.send-caret',
-        patp,
-        position
-      );
+    'presences.realm-to-app.broadcast',
+    <T extends PresenceArg[]>(_: any, ...arg: T) => {
+      mainWindow.webContents.send('presences.realm-to-app.broadcast', ...arg);
     }
   );
 

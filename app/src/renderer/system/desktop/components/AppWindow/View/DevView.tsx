@@ -34,8 +34,8 @@ const connectWebviewToMultiplayer = async (
         );
       } else if (value.broadcast) {
         webview.send(
-          'multiplayer.realm-to-app.send-caret',
-          value.broadcast.data
+          'presences.realm-to-app.broadcast',
+          ...value.broadcast.data
         );
       }
     }

@@ -1,3 +1,5 @@
+import { PresenceArg } from './hooks/useBroadcast';
+
 type Position = { x: number; y: number };
 
 export type MouseState = 'text' | 'resize' | 'pointer';
@@ -55,7 +57,7 @@ export interface PresenceTransaction extends PresencePayloadBase {
 
 export interface PresenceBroadcast extends PresencePayloadBase {
   event: 'broadcast';
-  data: any;
+  data: PresenceArg[];
 }
 
 export interface PresenceChat extends PresencePayloadBase {

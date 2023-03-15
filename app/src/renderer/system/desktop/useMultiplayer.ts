@@ -179,10 +179,10 @@ export const useMultiplayer = () => {
       }
     );
 
-    window.electron.multiplayer.onAppToRealmBroadcast((data) => {
+    window.electron.multiplayer.onAppToRealmBroadcast((...data) => {
       const broadcast: PresenceBroadcast = {
         event: 'broadcast',
-        data,
+        data: [...data],
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
