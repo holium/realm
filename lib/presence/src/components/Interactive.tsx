@@ -4,19 +4,24 @@ import { Slot } from '@radix-ui/react-slot';
 type Props = {
   id: string;
   children: ReactNode;
-  onClick: (event: MouseEvent) => void;
-  onOtherClick: (patp: string) => void;
+  onClick?: (event: MouseEvent) => void;
+  onPlayerClick?: (patp: string) => void;
 };
 
-export const Interactive = ({ id, children, onClick, onOtherClick }: Props) => {
+export const Interactive = ({
+  id,
+  children,
+  onClick,
+  onPlayerClick,
+}: Props) => {
   const handleOnClick = (event: MouseEvent) => {
     window.electron.multiplayer.appToRealmMouseClick(window.ship, id);
-    onClick(event);
+    onClick?.(event);
   };
 
   useEffect(() => {
     window.electron.multiplayer.onRealmToAppMouseClick((patp, elementId) => {
-      if (elementId === id) onOtherClick(patp);
+      if (elementId === id) onPlayerClick?.(patp);
     });
   }, []);
 

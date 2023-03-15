@@ -6,7 +6,7 @@ export const useShips = () => {
 
   useEffect(() => {
     // window.electron.multiplayer.onMouseMove((patp, elementId) => {
-    //   if (elementId === id) onOtherClick(patp);
+    //   if (elementId === id) onPlayerClick(patp);
     // });
   }, []);
 

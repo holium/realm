@@ -14,17 +14,12 @@ If you want to make an element in your app interactable by other Realm users, yo
 import { Interactive } from '@holium/realm-presence';
 
 export const App = () => {
-  const onClick = (_: React.MouseEvent) => {
-    console.log('Protagonist clicked the button');
-  };
-
-  const onOtherClick = (patp: string) => {
-    console.log(patp, 'clicked the button!');
-  };
+  const onDrag = () => console.log('Drag by protagonist');
+  const onPlayerDrag = (patp: string) => console.log('Drag by player', patp);
 
   return (
-    <Interactive id="unique-id" onClick={onClick} onOtherClick={onOtherClick}>
-      <button>Submit</button>
+    <Interactive id="cta" onDrag={onDrag} onPlayerDrag={onPlayerDrag}>
+      <button>Touch grass</button>
     </Interactive>
   );
 };
