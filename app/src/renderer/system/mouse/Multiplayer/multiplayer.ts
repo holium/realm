@@ -7,7 +7,7 @@ import {
   RealmEvent,
   PresenceStateSyncPayload,
   MultiplayerShipType,
-} from '@holium/realm-multiplayer';
+} from '@holium/realm-presence';
 
 let socket: WebSocket | undefined;
 

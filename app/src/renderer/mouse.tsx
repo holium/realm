@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { Mouse } from './system/mouse/Mouse';
 import './mouse.css';
-// import * as RealmMultiplayer from '@holium/realm-multiplayer';
+// import * as RealmMultiplayer from '@holium/realm-presence';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
 

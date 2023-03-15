@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Vec2 } from '@holium/realm-multiplayer';
+import { Vec2 } from '@holium/realm-presence';
 import { ShipModelType } from '../../../os/services/ship/models/ship';
 import { rgbToString, hexToRgb } from '../../../os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
