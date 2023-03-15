@@ -8,7 +8,7 @@ type Props = {
   onOtherClick: (patp: string) => void;
 };
 
-export const Clickable = ({ id, children, onClick, onOtherClick }: Props) => {
+export const Interactive = ({ id, children, onClick, onOtherClick }: Props) => {
   const handleOnClick = (event: MouseEvent) => {
     window.electron.multiplayer.appToRealmMouseClick(window.ship, id);
     onClick(event);
