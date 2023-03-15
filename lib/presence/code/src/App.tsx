@@ -50,9 +50,13 @@ export const App = () => {
 
   const ships = useShips();
   const { broadcast: sendTransaction } = useBroadcast({
+    channelId: 'transactions',
     onBroadcast: onTransaction,
   });
-  const { broadcast: sendCaret } = useBroadcast({ onBroadcast: onCaret });
+  const { broadcast: sendCaret } = useBroadcast({
+    channelId: 'carets',
+    onBroadcast: onCaret,
+  });
 
   const onEditorRef = useCallback((ref: HTMLDivElement) => {
     if (!ref) return;

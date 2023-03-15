@@ -3,6 +3,7 @@ import { PresenceArg, MouseState } from '@holium/realm-presence';
 import { Position } from '../os/types';
 
 export const multiplayerPreload = {
+  /* Senders */
   mouseOut(patp: string) {
     ipcRenderer.invoke('multiplayer.mouse-out', patp);
   },
@@ -60,12 +61,16 @@ export const multiplayerPreload = {
       clientID
     );
   },
-  appToRealmBroadcast<T extends PresenceArg[]>(...data: T) {
-    ipcRenderer.invoke('presence.app-to-realm.broadcast', ...data);
+  appToRealmBroadcast<T extends PresenceArg[]>(channelId: string, ...data: T) {
+    ipcRenderer.invoke('presence.app-to-realm.broadcast', channelId, ...data);
   },
-  realmToAppBroadcast<T extends PresenceArg[]>(...data: T) {
-    ipcRenderer.invoke('presence.realm-to-app.broadcast', ...data);
+  realmToAppBroadcast<T extends PresenceArg[]>(channelId: string, ...data: T) {
+    ipcRenderer.invoke('presence.realm-to-app.broadcast', channelId, ...data);
   },
+  realmToAppSendChat(patp: string, message: string) {
+    ipcRenderer.invoke('multiplayer.realm-to-app.send-chat', patp, message);
+  },
+  /* Receivers */
   onMouseMove(
     callback: (
       patp: string,
@@ -155,18 +160,24 @@ export const multiplayerPreload = {
     );
   },
   onAppToRealmBroadcast<T extends PresenceArg[]>(
-    callback: (...data: T) => void
+    callback: (channelId: string, ...data: T) => void
   ) {
-    ipcRenderer.on('presence.app-to-realm.broadcast', (_, ...data) => {
-      callback(...(data as T));
-    });
+    ipcRenderer.on(
+      'presence.app-to-realm.broadcast',
+      (_, channelId: string, ...data) => {
+        callback(channelId, ...(data as T));
+      }
+    );
   },
   onRealmToAppBroadcast<T extends PresenceArg[]>(
-    callback: (...data: T) => void
+    callback: (channelId: string, ...data: T) => void
   ) {
-    ipcRenderer.on('presence.realm-to-app.broadcast', (_, ...data) => {
-      callback(...(data as T));
-    });
+    ipcRenderer.on(
+      'presence.realm-to-app.broadcast',
+      (_, channelId: string, ...data) => {
+        callback(channelId, ...(data as T));
+      }
+    );
   },
   onRealmToAppSendChat(callback: (patp: string, message: string) => void) {
     ipcRenderer.on(
@@ -175,9 +186,6 @@ export const multiplayerPreload = {
         callback(patp, message);
       }
     );
-  },
-  realmToAppSendChat(patp: string, message: string) {
-    ipcRenderer.invoke('multiplayer.realm-to-app.send-chat', patp, message);
   },
   /* Removers */
   removeOnAppToRealmMouseClick() {

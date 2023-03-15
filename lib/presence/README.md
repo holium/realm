@@ -4,7 +4,7 @@ The JS lib for developers to use Realm's shared cursor feature set.
 
 ## Example usage #1
 
-If you want to make an element in your app interactable by other users, you can wrap it with the `Interactive` component (it will merge its props into its first child, following the Radix Slot pattern).
+If you want to make an element in your app interactable by other Realm users, you can wrap it with the `Interactive` component (it will merge its props into its first child, following the Radix Slot pattern).
 
 ```tsx
 import { Interactive } from '@holium/realm-presence';
@@ -26,7 +26,7 @@ export const App = () => {
 
 ## Example usage #2
 
-If you want to broadcast an type of data to other users, you can use the `useBroadcast` hook. Pass the hook an `onBroadcast` callback to handle incoming broadcasts, and it will return a typed `broadcast` function that you can use to send data to other users.
+If you want to broadcast any arbitrary type of data to other Realm users, you can use the `useBroadcast` hook. Pass the hook a unique `channelId` and an `onBroadcast` callback to handle incoming broadcasts, and it will return a typed `broadcast` function that you can use to send data to other users.
 
 ```tsx
 import { useBroadcast } from '@holium/realm-presence';
@@ -40,7 +40,10 @@ export const App = () => {
     broadcast('zod', 'input', e.target.value);
   };
 
-  const { broadcast } = useBroadcast({ onBroadcast });
+  const { broadcast } = useBroadcast({
+    channelId: 'my-channel',
+    onBroadcast
+  });
 
   return <input onChange={onChange} />;
 };
