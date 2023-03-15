@@ -26,7 +26,7 @@ export const App = () => {
 
 ## Example usage #2
 
-If you want to broadcast an type of data to other users, you can use the `useBroadcast` hook.
+If you want to broadcast an type of data to other users, you can use the `useBroadcast` hook. Pass the hook an `onBroadcast` callback to handle incoming broadcasts, and it will return a typed `broadcast` function that you can use to send data to other users.
 
 ```tsx
 import { useBroadcast } from '@holium/realm-presence';
