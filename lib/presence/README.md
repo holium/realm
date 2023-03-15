@@ -23,7 +23,7 @@ export const App = () => {
   };
 
   return (
-    <Interactive id="fill" onClick={onClick} onOtherClick={onOtherClick}>
+    <Interactive id="unique-id" onClick={onClick} onOtherClick={onOtherClick}>
       <button>Submit</button>
     </Interactive>
   );
