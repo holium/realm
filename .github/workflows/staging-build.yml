@@ -13,7 +13,7 @@ env:
 #
 jobs:
   pre-deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
@@ -66,7 +66,7 @@ jobs:
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-mac:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: macos-latest
     steps:
@@ -144,7 +144,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   build-linux:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     steps:
@@ -192,7 +192,7 @@ jobs:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-windows:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     container:
@@ -251,38 +251,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
-      - name: Download and install code signing tool
-        run: |
-          mkdir signer
-          curl -L https://www.ssl.com/download/codesigntool-for-linux-and-macos/ | bsdtar --strip-components=1 -xvf - -C ./signer
-      #
-      - name: Download and install java runtime
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '19'
-          java-package: 'jre'
-      #
-      - name: Sign windows binaries
-        run: |
-          chmod +x ./signer/CodeSignTool.sh
-          mkdir -p ./app/release/build/signed
-          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
-        env:
-          USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
-          PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
-          SSLCOM_SIGNING_SECRET: ${{ secrets.SSLCOM_SIGNING_SECRET }}
-          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
-          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
-          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
-      #
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-          # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
-          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD-alpha.exe
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -292,6 +264,7 @@ jobs:
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   deploy-desks:
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
@@ -372,6 +345,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
@@ -421,7 +395,7 @@ jobs:
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:
-    if: always()
+    if: always() && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, post-deploy]
     runs-on: ubuntu-latest
     steps:
