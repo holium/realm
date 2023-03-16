@@ -39,7 +39,7 @@ export const FragmentBase = styled(Text.Custom)<TextProps>`
 `;
 
 const BlockWrapper = styled(motion.span)`
-  padding: 8px 0px;
+  padding: 4px 0px;
   display: inline-block;
   height: 100%;
 `;
@@ -48,7 +48,7 @@ export const FragmentBlock = styled(motion.span)`
   height: 100%;
   width: 100%;
   blockquote {
-    margin: 4px 4px;
+    margin-bottom: 4px;
   }
 `;
 
@@ -163,11 +163,15 @@ const TabWrapper = styled(Flex)<FlexProps>`
 export const FragmentBlockquote = styled(motion.blockquote)`
   font-style: italic;
   border-left: 2px solid var(--rlm-accent-color);
-  padding-left: 8px;
+  padding-left: 6px;
   padding-right: 8px;
-  border-radius: 0px 3px 3px 0px;
+  border-radius: 3px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: rgba(0, 0, 0, 0.12);
   .fragment-reply {
     border-radius: 4px;
+    gap: 2px;
     ${FragmentBase} {
       font-size: 0.86em;
     }
@@ -179,13 +183,9 @@ export const FragmentBlockquote = styled(motion.blockquote)`
       height: 40px;
     }
   }
-  &:active:not([disabled]) {
-    transition: var(--transition);
-    background-color: var(--rlm-overlay-active);
-  }
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-hover);
+    /* background-color: rgba(0, 0, 0, 0.12); */
     cursor: pointer;
   }
 `;

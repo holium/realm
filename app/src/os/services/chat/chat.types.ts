@@ -75,6 +75,7 @@ export type DelPathsRow = {
 export type DelMessagesRow = {
   table: ChatTables;
   type: 'del-messages-row';
+  path: string;
   'msg-id': string;
 };
 

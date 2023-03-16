@@ -1,12 +1,6 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
-import {
-  flow,
-  Instance,
-  types,
-  tryReference,
-  resolveIdentifier,
-} from 'mobx-state-tree';
+import { flow, Instance, types, tryReference } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
 
@@ -185,13 +179,15 @@ ChatDBActions.onDbChange((_evt, type, data) => {
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
-    console.log('onPathDeleted', data);
     console.log('message deleted', data);
-    console.log(resolveIdentifier(ChatStore, chatStore, data));
-    // selectedChat. (data.msgId);
+    const selectedChat = chatStore.inbox.find(
+      (chat) => chat.path === data.path
+    );
+    if (!selectedChat) return;
+    selectedChat.removeMessage(data['msg-id']);
   }
   if (type === 'message-received') {
-    console.log('addMessage', data);
+    // console.log('addMessage', data);
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );

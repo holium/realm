@@ -3,7 +3,7 @@ create table if not exists messages
     path         TEXT    not null,
     msg_id       TEXT    not null,
     msg_part_id  integer not null,
-    content_type TEXT    not null,
+    content_type TEXT,
     content_data TEXT    not null,
     reply_to     TEXT,
     metadata     text,

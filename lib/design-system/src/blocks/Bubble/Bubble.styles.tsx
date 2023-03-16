@@ -9,14 +9,15 @@ export const BubbleStyle = styled(Box)`
   gap: 2px;
   padding: 8px;
   user-select: text;
-  /* padding: 6px 8px 6px 8px; */
   font-size: 14px;
   align-self: flex-start;
   box-sizing: border-box;
   min-width: 150px;
+  max-width: 100%;
   color: var(--rlm-text-color);
   background: var(--rlm-input-color);
   border-radius: 9px 9px 9px 0px;
+  transition: width 1s ease-in-out;
   &.bubble-our {
     background: var(--rlm-intent-caution-color);
     border-radius: 12px 12px 0px 12px !important;
@@ -69,8 +70,10 @@ export const BubbleFooter = styled(Box)`
   display: inline-flex;
   flex-direction: row;
   user-select: text;
-  justify-content: flex-end;
+  justify-content: space-between;
   width: 100%;
+  max-width: 100%;
   font-size: 12px;
+  margin-top: 4px;
   margin-bottom: -2px;
 `;

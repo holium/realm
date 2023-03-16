@@ -4,7 +4,6 @@ import {
   Text,
   Box,
   SectionDivider,
-  Button,
   Row,
   Avatar,
   MenuItemProps,

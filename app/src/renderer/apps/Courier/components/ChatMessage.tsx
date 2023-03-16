@@ -1,5 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
-// import { toJS } from 'mobx';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -42,25 +41,24 @@ export const ChatMessagePresenter = ({
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
 
-  const [reactions, setReactions] = useState([]);
   const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
-  useEffect(() => {
-    const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
-    if (!msgModel) return;
-    msgModel.fetchReactions().then((reacts: any) => {
-      setReactions(reacts);
-    });
-  }, [msgModel?.reactions.length]);
 
   const onReaction = useCallback(
     (payload: OnReactionPayload) => {
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
+        if (message.reactions.length === 0) {
+          onLoad();
+        }
       } else {
-        selectedChat?.deleteReaction(message.id);
+        if (!payload.reactId) {
+          console.warn('No reactId', payload);
+          return;
+        }
+        selectedChat?.deleteReaction(message.id, payload.reactId);
       }
     },
-    [selectedChat, message.id]
+    [selectedChat, message, onLoad]
   );
 
   const contextMenuOptions = useMemo(() => {
@@ -121,6 +119,20 @@ export const ChatMessagePresenter = ({
     }
   }, [contextMenuOptions, getOptions, setOptions, messageRowId]);
 
+  const sentAt = useMemo(
+    () => new Date(message.createdAt).toISOString(),
+    [message.createdAt]
+  );
+
+  const reactionList = useMemo(
+    () => msgModel?.reactions,
+    [
+      msgModel?.reactions,
+      msgModel?.reactions.length,
+      msgModel?.reactions.length === 0,
+    ]
+  );
+
   return (
     <Bubble
       ref={messageRef}
@@ -133,9 +145,9 @@ export const ChatMessagePresenter = ({
       author={message.sender}
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}
-      sentAt={new Date(message.createdAt).toISOString()}
+      sentAt={sentAt}
       onLoad={onLoad}
-      reactions={reactions}
+      reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
     />
   );

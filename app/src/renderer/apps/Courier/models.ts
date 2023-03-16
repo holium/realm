@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, applySnapshot, Instance, types } from 'mobx-state-tree';
+import { flow, applySnapshot, Instance, types, cast } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -55,6 +55,11 @@ export const ChatMessage = types
     // ui state
     pending: types.optional(types.boolean, false),
   })
+  .views((self) => ({
+    get reactionsList() {
+      return self.reactions;
+    },
+  }))
   .actions((self) => ({
     setPending(pending: boolean) {
       self.pending = pending;
@@ -62,18 +67,6 @@ export const ChatMessage = types
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
       self.updatedAt = updatedAt;
-    },
-    addOriginalReplyToContents: (replyContent: any) => {
-      // {
-      //   reply: {
-      //     msgId: '123',
-      //     author: '~lomder-librun',
-      //     message: [{ plain: 'Yo what the hell you talkin bout?' }],
-      //   },
-      // }
-      const oldContents = self.contents.slice();
-      console.log('addOriginalReplyToContents', [replyContent, ...oldContents]);
-      self.contents.replace([replyContent, ...oldContents]);
     },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
@@ -92,8 +85,31 @@ export const ChatMessage = types
         return [];
       }
     }),
+    insertTempReaction(react: ReactionModelType) {
+      self.reactions.push({
+        emoji: react.emoji,
+        by: react.by,
+        msgId: `${react.emoji}-${react.by}`,
+      });
+    },
     insertReaction(react: ReactionModelType) {
-      self.reactions.push(react);
+      const replaceIdx = self.reactions.findIndex(
+        (react) => react.msgId === `${react.emoji}-${react.by}`
+      );
+      if (replaceIdx !== -1) {
+        self.reactions[replaceIdx] = react;
+      } else {
+        self.reactions.push(react);
+      }
+    },
+    removeReaction(msgId: string) {
+      const reactionIdx = self.reactions.findIndex(
+        (react) => react.msgId === msgId
+      );
+      if (reactionIdx === -1) return;
+      const reactions = self.reactions.slice();
+      reactions.splice(reactionIdx, 1);
+      self.reactions = cast(reactions);
     },
     delete: flow(function* () {
       try {
@@ -210,7 +226,12 @@ export const Chat = types
     addMessage(message: ChatMessageType) {
       if (Object.keys(message.contents[0])[0] === 'react') {
         const msg = self.messages.find((m) => m.id === message.replyToMsgId);
-        if (msg) msg.fetchReactions();
+        if (msg)
+          msg.insertReaction({
+            msgId: message.id,
+            emoji: message.contents[0].react,
+            by: message.sender,
+          });
         return;
       }
       self.messages.push(message);
@@ -240,6 +261,11 @@ export const Chat = types
         console.error(error);
       }
     }),
+    removeMessage(messageId: string) {
+      const message = self.messages.find((m) => m.id === messageId);
+      if (!message) return;
+      self.messages.remove(message);
+    },
     setPinnedMessage: flow(function* (msgId: string) {
       try {
         yield ChatDBActions.setPinnedMessage(self.path, msgId);
@@ -273,21 +299,33 @@ export const Chat = types
       self.isReacting = msgId;
     },
     sendReaction: flow(function* (msgId: string, emoji: string) {
-      yield ChatDBActions.sendMessage(self.path, [
-        {
-          content: { react: emoji },
-          'reply-to': {
-            path: self.path,
-            'msg-id': msgId,
+      const chatMsg = self.messages.find((m) => m.id === msgId);
+      try {
+        if (chatMsg && self.our)
+          chatMsg.insertTempReaction({ msgId, emoji, by: self.our });
+        yield ChatDBActions.sendMessage(self.path, [
+          {
+            content: { react: emoji },
+            'reply-to': {
+              path: self.path,
+              'msg-id': msgId,
+            },
+            metadata: {},
           },
-          metadata: {},
-        },
-      ]);
-      self.isReacting = undefined;
+        ]);
+        self.isReacting = undefined;
+      } catch (err) {
+        console.error(err);
+      }
     }),
-    deleteReaction: flow(function* (msgId: string) {
-      // yield ChatDBActions.deleteMessage(self.path, msgId);
-      // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
+    deleteReaction: flow(function* (messageId: string, reactionId: string) {
+      const chatMsg = self.messages.find((m) => m.id === messageId);
+      try {
+        if (chatMsg) chatMsg.removeReaction(reactionId);
+        yield ChatDBActions.deleteMessage(self.path, reactionId);
+      } catch (err) {
+        console.error(err);
+      }
     }),
     clearReacting() {
       self.isReacting = undefined;

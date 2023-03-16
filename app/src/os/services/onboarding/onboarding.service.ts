@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, IpcRendererEvent, safeStorage } from 'electron';
+import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
