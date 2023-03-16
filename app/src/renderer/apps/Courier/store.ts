@@ -1,12 +1,6 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
-import {
-  flow,
-  Instance,
-  types,
-  tryReference,
-  resolveIdentifier,
-} from 'mobx-state-tree';
+import { flow, Instance, types, tryReference } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
 
@@ -160,8 +154,9 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext =
-  createContext<null | ChatStoreInstance>(chatStore);
+export const ChatStoreContext = createContext<null | ChatStoreInstance>(
+  chatStore
+);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {

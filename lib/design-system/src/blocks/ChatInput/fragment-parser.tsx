@@ -41,7 +41,7 @@ const parserRules: ParserRules = {
   },
   italics: {
     printToken: '*',
-    token: /(?<!\*)\*(?!\*)/,
+    token: /(((?<!\*)\*(?!\*))|(^\*(?!\*)))/,
     tokenLength: 1,
     recurse: true,
   },
@@ -86,7 +86,7 @@ const parserRules: ParserRules = {
   link: {
     //regex: /\[[^\]]+\]\(([^)]+)\)/,
     regex:
-      /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/i,
+      /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}(\b|(\/([-a-zA-Z0-9()@:%_+.~#?&//=]*)+))/i,
     recurse: false,
     priority: 3.5,
   },
@@ -156,7 +156,9 @@ const eatSpecialType = (
       // handle regex (for italics since * is a subset of bold's **)
       let possibleMatch = raw.match(startToken);
       startIndex =
-        possibleMatch && possibleMatch.index ? possibleMatch.index : -1;
+        possibleMatch && possibleMatch.index !== undefined
+          ? possibleMatch.index
+          : -1;
     } else {
       throw new Error('should not be possible to reach this');
     }
@@ -180,7 +182,9 @@ const eatSpecialType = (
           // handle regex (for italics since * is a subset of bold's **)
           let interimMatch = raw.substr(offset).match(endToken);
           stopIndex =
-            interimMatch && interimMatch.index ? interimMatch.index : -1;
+            interimMatch && interimMatch.index !== undefined
+              ? interimMatch.index
+              : -1;
         }
         if (stopIndex >= 0) {
           // there is an exit match
@@ -249,14 +253,14 @@ export const parseChatInput = (input: string): FragmentType[] => {
     if (!matched) {
       let eats: any = {};
       for (let ki = 0; ki < recursiveKeys.length; ki++) {
-        let key: ParserKey = nonRecursiveKeys[ki];
+        let key: ParserKey = recursiveKeys[ki];
         eats[key] = eatSpecialType(snippet, key);
       }
       // find the one that starts earliest in the snippet
       let smallest = 10000000;
       let smallestKey = null;
       for (let ki = 0; ki < recursiveKeys.length; ki++) {
-        let key = nonRecursiveKeys[ki];
+        let key = recursiveKeys[ki];
         if (eats[key].frag && eats[key].pre.length < smallest) {
           smallest = eats[key].pre.length;
           smallestKey = key;
