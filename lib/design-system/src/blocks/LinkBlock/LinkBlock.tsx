@@ -124,7 +124,7 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
     );
   }
 
-  const ogHasURL = (openGraph && openGraph.ogUrl);
+  const ogHasURL = openGraph && openGraph.ogUrl;
   return (
     <Block {...rest}>
       <LinkImage

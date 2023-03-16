@@ -39,21 +39,21 @@ const parserRules = {
     priority: 2,
   },
   ship: {
-    regex: /~([a-z\-])+/i,
+    regex: /~([a-z-])+/i,
     filter: isValidPatp,
     recurse: false,
     priority: 2.5,
   },
   image: {
     regex:
-      /(https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_\+.~#&//=]*)?/i,
+      /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_+.~#&//=]*)?/i,
     recurse: false,
     priority: 3,
   },
   link: {
     //regex: /\[[^\]]+\]\(([^)]+)\)/,
     regex:
-      /(https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/i,
+      /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/i,
     recurse: false,
     priority: 3.5,
   },
@@ -70,41 +70,6 @@ const parserRules = {
     recurse: false,
     priority: 5,
   },
-};
-
-const boldToken = '**';
-const italicsToken = '*';
-const strikeToken = '~~';
-const boldItalicsToken = '***';
-const boldStrikeToken = '**~~';
-const boldItalicsStrikeToken = '***~~';
-const blockquoteToken = '>';
-const inlineCodeToken = '`';
-const codeBlockToken = '```';
-const lineBreakToken = '\n';
-
-export const convertFragmentsToText = (fragments: FragmentType[]): string => {
-  return fragments.map((fragment) => fragmentToText(fragment)).join('');
-};
-
-export const fragmentToText = (fragment: FragmentType): string => {
-  const [type, text] = Object.entries(fragment)[0];
-  if (type === 'plain') return text;
-  if (type === 'bold') return `${boldToken}${text}${boldToken}`;
-  if (type === 'italics') return `${italicsToken}${text}${italicsToken}`;
-  if (type === 'strike') return `${strikeToken}${text}${strikeToken}`;
-  if (type === 'boldItalics')
-    return `${boldItalicsToken}${text}${boldItalicsToken}`;
-  if (type === 'boldStrike')
-    return `${boldStrikeToken}${text}${boldStrikeToken}`;
-  if (type === 'boldItalicsStrike')
-    return `${boldItalicsStrikeToken}${text}${boldItalicsStrikeToken}`;
-  if (type === 'blockquote') return `${blockquoteToken}${text}`;
-  if (type === 'inlineCode')
-    return `${inlineCodeToken}${text}${inlineCodeToken}`;
-  if (type === 'codeBlock') return `${codeBlockToken}${text}${codeBlockToken}`;
-  if (type === 'lineBreak') return lineBreakToken;
-  return text;
 };
 
 /* TEST STRING
@@ -221,7 +186,8 @@ export const parseChatInput = (input: string): FragmentType[] => {
     snippet = results[snippetIndex];
     let matched = false;
     // handle the non-recursive types
-    nonRecursiveKeys.forEach((key) => {
+    for (let ki = 0; ki < nonRecursiveKeys.length; ki++) {
+      let key = nonRecursiveKeys[ki];
       if (!matched) {
         let eaten = eatSpecialType(snippet, key);
         if (eaten.frag) {
@@ -229,23 +195,25 @@ export const parseChatInput = (input: string): FragmentType[] => {
           matched = true;
         }
       }
-    });
+    }
     // handle the recursive types
     // important that this happens AFTER the non-recursive types
     if (!matched) {
       let eats = {};
-      recursiveKeys.forEach((key) => {
+      for (let ki = 0; ki < recursiveKeys.length; ki++) {
+        let key = nonRecursiveKeys[ki];
         eats[key] = eatSpecialType(snippet, key);
-      });
+      }
       // find the one that starts earliest in the snippet
       let smallest = 10000000;
       let smallestKey = null;
-      recursiveKeys.forEach((key) => {
+      for (let ki = 0; ki < recursiveKeys.length; ki++) {
+        let key = nonRecursiveKeys[ki];
         if (eats[key].frag && eats[key].pre.length < smallest) {
           smallest = eats[key].pre.length;
           smallestKey = key;
         }
-      });
+      }
       if (smallestKey) {
         matched = true;
         // RECURSION HAPPENS HERE
@@ -292,9 +260,13 @@ export const parseChatInput = (input: string): FragmentType[] => {
         let arrPost = results.slice(snippetIndex + 1);
         results = arrPre;
         results.push(eats[smallestKey].pre);
-        innerFrags.forEach((inner) => results.push(inner));
+        for (let inneri = 0; inneri < innerFrags.length; inneri++) {
+          results.push(innerFrags[inneri]);
+        }
         results.push(eats[smallestKey].post);
-        arrPost.forEach((i) => results.push(i));
+        for (let arri = 0; arri < arrPost.length; arri++) {
+          results.push(arrPost[arri]);
+        }
       }
     }
     // fall-back to plain if nothing else matched

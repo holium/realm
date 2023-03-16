@@ -10,8 +10,6 @@ import { BaseService } from '../base.service';
 import { EncryptedStore } from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { Patp } from '../../types';
-import { DmApi } from '../../api/dms';
-import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
