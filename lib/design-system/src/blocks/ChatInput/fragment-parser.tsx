@@ -1,13 +1,46 @@
 import { isValidPatp } from 'urbit-ob';
-import { FragmentPlainType, FragmentType } from '../Bubble/Bubble.types';
+import {
+  FragmentType,
+  FragmentPlainType,
+  FragmentBreakType,
+} from '../Bubble/Bubble.types';
 
-const parserRules = {
+type ParserKey =
+  | 'bold'
+  | 'italics'
+  | 'strike'
+  | 'code'
+  | 'blockquote'
+  | 'inline-code'
+  | 'ship'
+  | 'image'
+  | 'link'
+  | 'bold-italics-strike'
+  | 'break';
+
+type ParserRule = {
+  recurse: boolean;
+  token?: string | RegExp;
+  tokenLength?: number;
+  ender?: string | RegExp;
+  enderLength?: number;
+  priority?: number;
+  regex?: RegExp;
+  filter?: (s: string) => boolean;
+  printToken?: string;
+};
+type ParserRules = {
+  [K in ParserKey]: ParserRule;
+};
+
+const parserRules: ParserRules = {
   bold: {
     token: '**',
     tokenLength: 2,
     recurse: true,
   },
   italics: {
+    printToken: '*',
     token: /(?<!\*)\*(?!\*)/,
     tokenLength: 1,
     recurse: true,
@@ -93,19 +126,21 @@ plain ~zod ~fed ~hostyv https://i.stack.imgur.com/58jhk.jpg?s=128&g=1&g&s=32 pla
 // parses it into an object of the fragment (if found) and the pre- and post- text surrounding that fragment from the initial string
 const eatSpecialType = (
   raw: string,
-  type: string
+  type: ParserKey
 ): { frag: FragmentType | null; pre: string; post: string } => {
   // default result when no enter and exit match is found in the string, is {frag:null, pre: raw, post: ''};
   let frag = null;
   let pre = raw;
   let post = '';
 
-  if (parserRules[type].regex) {
-    const match = raw.match(parserRules[type].regex);
-    if (match) {
+  const reg = parserRules[type].regex;
+  if (reg !== undefined) {
+    const match = raw.match(reg);
+    if (match && match.index !== undefined) {
       const startIndex = match.index;
       const matchingText = match[0];
       const endIndex = startIndex + matchingText.length;
+      //@ts-ignore-error
       if (!parserRules[type].filter || parserRules[type].filter(matchingText)) {
         pre = raw.substr(0, startIndex);
         post = raw.substr(endIndex);
@@ -113,11 +148,17 @@ const eatSpecialType = (
       }
     }
   } else {
-    let startIndex = raw.indexOf(parserRules[type].token);
-    if (typeof parserRules[type].token !== 'string') {
+    let startIndex: number;
+    const startToken = parserRules[type].token;
+    if (typeof startToken === 'string') {
+      startIndex = raw.indexOf(startToken);
+    } else if (typeof startToken === 'object') {
       // handle regex (for italics since * is a subset of bold's **)
-      startIndex = raw.match(parserRules[type].token);
-      startIndex = startIndex ? startIndex.index : -1;
+      let possibleMatch = raw.match(startToken);
+      startIndex =
+        possibleMatch && possibleMatch.index ? possibleMatch.index : -1;
+    } else {
+      throw new Error('should not be possible to reach this');
     }
     if (startIndex >= 0) {
       // we matched
@@ -127,15 +168,19 @@ const eatSpecialType = (
         frag = { break: null } as FragmentBreakType;
       } else {
         // see if we find an exit match
-        const offset = startIndex + parserRules[type].tokenLength;
-        const endToken = parserRules[type].ender || parserRules[type].token;
-        let endTokenLength =
-          parserRules[type].enderLength || parserRules[type].tokenLength;
-        let stopIndex = raw.substr(offset).indexOf(endToken);
-        if (typeof endToken !== 'string') {
+        const offset =
+          startIndex + (parserRules[type].tokenLength as unknown as number);
+        const endToken = parserRules[type].ender || startToken;
+        let endTokenLength = (parserRules[type].enderLength ||
+          parserRules[type].tokenLength) as unknown as number;
+        let stopIndex: number;
+        if (typeof endToken === 'string') {
+          stopIndex = raw.substr(offset).indexOf(endToken);
+        } else {
           // handle regex (for italics since * is a subset of bold's **)
-          stopIndex = raw.substr(offset).match(endToken);
-          stopIndex = stopIndex ? stopIndex.index : -1;
+          let interimMatch = raw.substr(offset).match(endToken);
+          stopIndex =
+            interimMatch && interimMatch.index ? interimMatch.index : -1;
         }
         if (stopIndex >= 0) {
           // there is an exit match
@@ -154,7 +199,7 @@ const eatSpecialType = (
 // just a little helper to deal with interpolating the eaten fragment into the results array-of-strings-and-fragments
 const updateResults = (
   results: any[],
-  snippetIndex,
+  snippetIndex: number,
   eaten: { frag: FragmentType | null; pre: string; post: string }
 ): any[] => {
   let arrPre = results.slice(0, snippetIndex);
@@ -170,24 +215,27 @@ const updateResults = (
 // master function to parse a string into rich-text fragments
 // basic strategy is to iteratively pull out things we know are good from the original string, whittling down strings into typed fragments
 export const parseChatInput = (input: string): FragmentType[] => {
-  let results = [input];
+  //@ts-ignore-error
+  let results: FragmentType[] = [input];
 
-  const recursiveKeys = Object.keys(parserRules).filter(
+  const recursiveKeys = (Object.keys(parserRules) as ParserKey[]).filter(
     (k) => parserRules[k].recurse
   );
-  const nonRecursiveKeys = Object.keys(parserRules)
+  const nonRecursiveKeys = (Object.keys(parserRules) as ParserKey[])
     .filter((k) => !parserRules[k].recurse)
-    .sort((a, b) => parserRules[a].priority - parserRules[b].priority);
+    .sort(
+      (a, b) => (parserRules[a].priority || 0) - (parserRules[b].priority || 0)
+    );
 
   let snippet = input;
   let snippetIndex = 0;
   while (results.find((e) => typeof e === 'string')) {
     snippetIndex = results.findIndex((e) => typeof e === 'string');
-    snippet = results[snippetIndex];
+    snippet = results[snippetIndex] as unknown as string;
     let matched = false;
     // handle the non-recursive types
     for (let ki = 0; ki < nonRecursiveKeys.length; ki++) {
-      let key = nonRecursiveKeys[ki];
+      let key: ParserKey = nonRecursiveKeys[ki];
       if (!matched) {
         let eaten = eatSpecialType(snippet, key);
         if (eaten.frag) {
@@ -199,9 +247,9 @@ export const parseChatInput = (input: string): FragmentType[] => {
     // handle the recursive types
     // important that this happens AFTER the non-recursive types
     if (!matched) {
-      let eats = {};
+      let eats: any = {};
       for (let ki = 0; ki < recursiveKeys.length; ki++) {
-        let key = nonRecursiveKeys[ki];
+        let key: ParserKey = nonRecursiveKeys[ki];
         eats[key] = eatSpecialType(snippet, key);
       }
       // find the one that starts earliest in the snippet
@@ -217,7 +265,9 @@ export const parseChatInput = (input: string): FragmentType[] => {
       if (smallestKey) {
         matched = true;
         // RECURSION HAPPENS HERE
-        let innerFrags = parseChatInput(eats[smallestKey].frag[smallestKey]);
+        let innerFrags: any[] = parseChatInput(
+          eats[smallestKey].frag[smallestKey]
+        );
         for (let i = 0; i < innerFrags.length; i++) {
           if (innerFrags[i].plain) {
             innerFrags[i] = { [smallestKey]: innerFrags[i].plain };
@@ -273,7 +323,35 @@ export const parseChatInput = (input: string): FragmentType[] => {
     if (!matched) {
       results[snippetIndex] = { plain: snippet } as FragmentPlainType;
     }
+    //@ts-ignore
     results = results.filter((i) => i !== '');
   }
+  //@ts-ignore
   return results;
+};
+
+export const convertFragmentsToText = (fragments: FragmentType[]): string => {
+  return fragments.map((fragment) => fragmentToText(fragment)).join('');
+};
+
+export const fragmentToText = (fragment: FragmentType): string => {
+  const [type, text] = Object.entries(fragment)[0];
+  if (type === 'plain') return text;
+  if (type === 'bold')
+    return `${parserRules.bold.token}${text}${parserRules.bold.token}`;
+  if (type === 'italics')
+    return `${parserRules.italics.printToken}${text}${parserRules.italics.printToken}`;
+  if (type === 'strike')
+    return `${parserRules.strike.token}${text}${parserRules.strike.token}`;
+  if (type === 'bold-italics') return `***${text}***`;
+  if (type === 'bold-strike') return `**~~${text}~~**`;
+  if (type === 'italics-strike') return `*~~${text}~~*`;
+  if (type === 'bold-italics-strike') return `***~~${text}~~***`;
+  if (type === 'blockquote') return `${parserRules.blockquote.token}${text}`;
+  if (type === 'inline-code')
+    return `${parserRules['inline-code'].token}${text}${parserRules['inline-code'].token}`;
+  if (type === 'code')
+    return `${parserRules.code.token}\n${text}\n${parserRules.code.token}`;
+  if (type === 'break') return '\n';
+  return text;
 };
