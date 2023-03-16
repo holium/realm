@@ -13,7 +13,6 @@ type CursorState = Record<
     position: Position;
     isActive: boolean;
     isVisible: boolean;
-    mouseOutTimeoutRef: NodeJS.Timeout;
     chat?: string;
   }
 >;
@@ -23,45 +22,26 @@ export const MultiplayerMice = () => {
 
   useEffect(() => {
     window.electron.multiplayer.onMouseOut((patp) => {
-      // We don't want to hide the cursor immediately because
-      // mouseout can be called when moving between contexts (e.g. webviews).
-      const timeOutRef = setTimeout(() => {
-        setCursors((prev) => ({
-          ...prev,
-          [patp]: {
-            ...prev[patp],
-            isVisible: false,
-          },
-        }));
-      }, 100);
-
       setCursors((prev) => ({
         ...prev,
         [patp]: {
           ...prev[patp],
-          mouseOutTimeoutRef: timeOutRef,
         },
       }));
     });
     window.electron.multiplayer.onMouseMove(
       (patp, position, state, hexColor) => {
         const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
-        setCursors((prev) => {
-          if (prev[patp]?.mouseOutTimeoutRef) {
-            clearTimeout(prev[patp].mouseOutTimeoutRef);
-          }
-
-          return {
-            ...prev,
-            [patp]: {
-              ...prev[patp],
-              isVisible: true,
-              state,
-              position,
-              color,
-            },
-          };
-        });
+        setCursors((prev) => ({
+          ...prev,
+          [patp]: {
+            ...prev[patp],
+            isVisible: true,
+            state,
+            position,
+            color,
+          },
+        }));
       }
     );
     window.electron.multiplayer.onMouseDown((patp) => {

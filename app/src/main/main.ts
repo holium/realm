@@ -108,7 +108,7 @@ const createWindow = async () => {
   mainWindow.webContents.on('dom-ready', () => {
     // We use the default cursor for Linux.
     if (isMac || isWindows) hideCursor(mainWindow.webContents);
-    mainWindow.webContents.send('add-mouse-listeners');
+    mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
 

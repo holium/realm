@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MouseState } from '@holium/realm-presence';
 import { useToggle } from 'renderer/logic/lib/useToggle';
 import { hexToRgb, rgbToString } from 'os/lib/color';
@@ -13,18 +13,11 @@ export const Mouse = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
   const [mouseColor, setMouseColor] = useState('0, 0, 0');
-  const mouseOutTimeoutRef = useRef<NodeJS.Timeout>();
   const ephemeralChat = useToggle(false);
   const [chat, setChat] = useState('');
 
   useEffect(() => {
-    window.electron.app.onMouseOut(() => {
-      // We don't want to hide the cursor immediately because
-      // mouseout can be called when moving between contexts (e.g. webviews).
-      mouseOutTimeoutRef.current = setTimeout(() => {
-        visible.toggleOff();
-      }, 100);
-    });
+    window.electron.app.onMouseOut(visible.toggleOff);
 
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
       // We only use the IPC'd coordinates if
@@ -37,7 +30,6 @@ export const Mouse = () => {
       }
       if (!isDragging) setState(newState);
       if (!visible.isOn) visible.toggleOn();
-      if (mouseOutTimeoutRef.current) clearTimeout(mouseOutTimeoutRef.current);
     });
 
     window.electron.app.onMouseDown(active.toggleOn);
