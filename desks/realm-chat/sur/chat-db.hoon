@@ -126,7 +126,7 @@
     [%upd-paths-row =path-row]
     [%del-paths-row =path]
     [%del-peers-row =path =ship]
-    [%del-messages-row =uniq-id]
+    [%del-messages-row =path =uniq-id]
   ==
 +$  db-row
   $%  [%paths =path-row]

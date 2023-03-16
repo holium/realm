@@ -66,6 +66,7 @@ export class ChatService extends BaseService {
     'realm.chat.get-chat-log': this.getChatLog,
     'realm.chat.get-chat-reactions': this.getChatReactions,
     'realm.chat.get-chat-peers': this.getChatPeers,
+    'realm.chat.get-reply-to': this.getReplyToMessage,
     'realm.chat.send-message': this.sendMessage,
     'realm.chat.edit-message': this.editMessage,
     'realm.chat.delete-message': this.deleteMessage,
@@ -94,6 +95,8 @@ export class ChatService extends BaseService {
     ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
     getChatReactions: async (path: string, msgId: string) =>
       ipcRenderer.invoke('realm.chat.get-chat-reactions', path, msgId),
+    getChatReplyTo: async (msgId: string) =>
+      ipcRenderer.invoke('realm.chat.get-reply-to', msgId),
     getChatPeers: async (path: string) =>
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
@@ -739,8 +742,7 @@ export class ChatService extends BaseService {
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
-        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
-        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
@@ -843,6 +845,10 @@ export class ChatService extends BaseService {
     });
     if (rows.length === 0) return [];
     return rows[0];
+  }
+
+  getReplyToMessage(_evt: any, replyId: string) {
+    return this.getChatMessage(replyId);
   }
 
   getChatMessage(msgId: string) {

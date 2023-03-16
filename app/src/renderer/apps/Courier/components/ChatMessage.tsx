@@ -12,6 +12,7 @@ import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 
 type ChatMessageProps = {
+  replyTo?: ChatMessageType;
   message: ChatMessageType;
   canReact: boolean;
   ourColor: string;
@@ -19,6 +20,7 @@ type ChatMessageProps = {
 };
 
 export const ChatMessagePresenter = ({
+  replyTo,
   message,
   canReact,
   ourColor,
@@ -52,7 +54,6 @@ export const ChatMessagePresenter = ({
 
   const onReaction = useCallback(
     (payload: OnReactionPayload) => {
-      console.log('onReaction', payload);
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
       } else {
@@ -131,7 +132,7 @@ export const ChatMessagePresenter = ({
       isEdited={message.metadata?.edited}
       author={message.sender}
       authorColor={authorColor}
-      message={message.contents}
+      message={replyTo ? [replyTo, ...message.contents] : message.contents}
       sentAt={new Date(message.createdAt).toISOString()}
       onLoad={onLoad}
       reactions={reactions}
