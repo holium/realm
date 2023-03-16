@@ -29,7 +29,8 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
-        new Date(a.initiatedAt!).getTime() - new Date(b.initiatedAt!).getTime()
+        new Date(a.initiatedAt ?? 0).getTime() -
+        new Date(b.initiatedAt ?? 0).getTime()
     );
 
   return pendingTransactions.length ? (
@@ -81,9 +82,9 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
           ? 'zigs'
           : 'ETH'
         : walletApp.ethereum.wallets
-            .get(props.transaction.walletIndex.toString())!
-            .data.get(walletApp.navState.protocol)!
-            .coins.get(props.transaction.ethType!)!.name;
+            ?.get(props.transaction.walletIndex.toString())
+            ?.data.get(walletApp.navState.protocol)
+            ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
 
   const bgColor = useMemo(

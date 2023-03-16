@@ -103,7 +103,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               : Number(
                   (props.wallet as EthWalletType).data.get(
                     walletApp.navState.protocol
-                  )!.balance
+                  )?.balance
                 )
           }
           onScreenChange={props.onScreenChange}

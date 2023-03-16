@@ -25,10 +25,12 @@ interface AppGridProps {
 
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
-  const currentSpace = spaces.selected!;
+  const currentSpace = spaces.selected;
   const apps = [...bazaar.installed, ...bazaar.devApps] as
     | AppType[]
     | WebAppType[];
+
+  if (!currentSpace) return null;
 
   return (
     <>
@@ -91,8 +93,8 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   isAppPinned
-                    ? SpacesActions.unpinApp(currentSpace?.path, app.id)
-                    : SpacesActions.pinApp(currentSpace?.path, app.id);
+                    ? SpacesActions.unpinApp(currentSpace.path, app.id)
+                    : SpacesActions.pinApp(currentSpace.path, app.id);
                 },
               },
               {

@@ -161,12 +161,12 @@ export const ThemeStore = types
       yield DesktopActions.changeWallpaper(id, toJS(theme));
       return self.currentTheme;
       //   // if (config.patp) {
-      //   //   self.ships.set(themeId!, theme);
-      //   //   self.currentTheme = self.ships.get(themeId!);
+      //   //   self.ships.set(themeId, theme);
+      //   //   self.currentTheme = self.ships.get(themeId);
       //   // }
       //   // if (config.spaceId) {
-      //   //   self.spaces.set(themeId!, theme);
-      //   //   self.currentTheme = self.ships.get(themeId!);
+      //   //   self.spaces.set(themeId, theme);
+      //   //   self.currentTheme = self.ships.get(themeId);
       //   // }
     }),
   }));

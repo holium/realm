@@ -15,24 +15,29 @@ import { ToolbarSearchIcon } from './ToolbarSearchIcon';
 
 type Props = {
   innerRef: RefObject<HTMLDivElement>;
+  readyWebview: Electron.WebviewTag | undefined;
 };
 
-const ToolbarSearchInputPresenter = ({ innerRef }: Props) => {
-  const { currentTab, setUrl } = useBrowser();
+const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
   const { theme } = useServices();
-  const [input, setInput] = useState(currentTab.url || '');
+  const { currentTab, setUrl } = useBrowser();
+  const [input, setInput] = useState(currentTab.url ?? '');
 
   useEffect(() => {
-    const webView = document.getElementById(
-      currentTab.id
-    ) as Electron.WebviewTag;
+    if (!readyWebview) return;
 
-    if (!webView) return;
+    readyWebview.addEventListener('did-navigate', (e) => setInput(e.url));
+    readyWebview.addEventListener('did-navigate-in-page', (e) =>
+      setInput(e.url)
+    );
 
-    webView.addEventListener('did-navigate', (e) => {
-      setInput(e.url);
-    });
-  }, [currentTab.url, currentTab.id]);
+    return () => {
+      readyWebview.removeEventListener('did-navigate', (e) => setInput(e.url));
+      readyWebview.removeEventListener('did-navigate-in-page', (e) =>
+        setInput(e.url)
+      );
+    };
+  }, [readyWebview, readyWebview]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setInput(e.target.value);

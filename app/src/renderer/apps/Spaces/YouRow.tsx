@@ -25,7 +25,8 @@ interface SpaceRowProps {
 export const YouRow = (props: SpaceRowProps) => {
   const { selected, onSelect } = props;
   const { ship } = useServices();
-  const currentShip = ship!;
+
+  if (!ship) return null;
 
   return (
     <Wrapper>
@@ -35,7 +36,7 @@ export const YouRow = (props: SpaceRowProps) => {
         className="realm-cursor-hover"
         selected={selected}
         onClick={() => {
-          onSelect(`/${ship!.patp}/our`);
+          onSelect(`/${ship.patp}/our`);
         }}
       >
         <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
@@ -43,13 +44,13 @@ export const YouRow = (props: SpaceRowProps) => {
             simple
             borderRadiusOverride="6px"
             size={32}
-            avatar={currentShip.avatar}
-            patp={currentShip.patp}
-            sigilColor={[currentShip.color || '#000000', 'white']}
+            avatar={ship.avatar}
+            patp={ship.patp}
+            sigilColor={[ship.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom fontSize={3} fontWeight={500}>
-              {currentShip.nickname || currentShip.patp}
+              {ship.nickname || ship.patp}
             </Text.Custom>
           </Flex>
         </Flex>

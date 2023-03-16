@@ -42,6 +42,7 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
             ]);
           }}
           onAttachment={() => {}}
+          onEditConfirm={() => {}}
         />
       </Box>
     </Flex>

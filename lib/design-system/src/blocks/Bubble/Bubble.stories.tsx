@@ -345,8 +345,9 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
       />
       <Bubble
         id={'i-2'}
-        author="~fasnut-famden"
-        authorColor="#FF0000"
+        isOur
+        ourColor="#9664FF"
+        ourShip="~fasnut-famden"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
@@ -355,11 +356,11 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         reactions={[
-          { author: '~lodlev-migdev', emoji: '1f44d' },
-          { author: '~fasnut-famden', emoji: '1f44d' },
-          { author: '~zod', emoji: '1f525' },
-          { author: '~dev', emoji: '1f525' },
-          { author: '~fes', emoji: '1f525' },
+          { by: '~lodlev-migdev', emoji: '1f44d' },
+          { by: '~fasnut-famden', emoji: '1f44d' },
+          { by: '~zod', emoji: '1f525' },
+          { by: '~dev', emoji: '1f525' },
+          { by: '~fes', emoji: '1f525' },
         ]}
         onReaction={() => {}}
       />

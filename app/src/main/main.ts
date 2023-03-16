@@ -7,7 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session } from 'electron';
+import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
@@ -18,6 +18,7 @@ import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
+import { PowerHelper } from './helpers/power';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
 import { BrowserHelper } from './helpers/browser';
@@ -98,6 +99,7 @@ const createWindow = async () => {
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
+  PowerHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -202,13 +204,30 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (!isMac) app.quit();
+});
+
+// quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
+// do our cleanup, and then re-emit and actually quit it
+let lastQuitSignal: number = 0;
+app.on('before-quit', (event) => {
+  console.log('before-quit signal', lastQuitSignal);
+  if (lastQuitSignal === 0) {
+    lastQuitSignal = new Date().getTime() - 1;
+    event.preventDefault();
+    mainWindow.webContents.send('app.before-quit');
+    setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+  }
+});
+ipcMain.on('realm.app.quit', () => {
+  console.log('realm.app.quit sent back');
+  app.quit();
 });
 
 app

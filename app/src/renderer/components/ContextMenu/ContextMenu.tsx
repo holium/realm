@@ -1,6 +1,5 @@
-import { Portal } from 'renderer/system/dialog/Portal';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { Card, MenuItem, MenuItemProps } from '@holium/design-system';
+import { Portal, MenuItem, MenuItemProps, Card } from '@holium/design-system';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;

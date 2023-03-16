@@ -1,24 +1,36 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import * as React from 'react';
+import { CSSProperties, useRef, useState, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
-import { Card, Box, MenuOrientation } from '.';
-import { Portal } from 'renderer/system/dialog/Portal';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Box } from '../Box/Box';
+import { Card } from '../Card/Card';
+import { Portal } from '../Portal/Portal';
+
+type MenuOrientation =
+  | 'right'
+  | 'left'
+  | 'top'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom'
+  | 'pointer'
+  | 'bottom-left'
+  | 'bottom-right';
 
 export interface TooltipProps {
   id: string;
-  delay?: number; // 0.5
-  style?: any;
-  placement: MenuOrientation;
-  content?: React.ReactNode | string;
-  children: React.ReactNode;
+  delay?: number;
+  style?: CSSProperties;
+  placement?: MenuOrientation;
+  content?: ReactNode | string;
+  children: ReactNode;
   position?: any;
   show?: boolean;
 }
 
 const margin = 2;
 
-const placementMaps = {
+const placementMaps: Record<MenuOrientation, any> = {
   bottom: css`
     margin-top: ${margin}px;
     top: 100%;
@@ -59,13 +71,14 @@ const placementMaps = {
     left: 100%;
     transform: translate(0, 50%);
   `,
+  pointer: css``,
 };
 
 interface TooltipStyleProps {
   placement: MenuOrientation;
 }
 
-export const TooltipStyle = styled(
+const TooltipStyle = styled(
   styled.div<TooltipStyleProps>`
     // position: absolute;
     display: inline-flex;
@@ -73,11 +86,9 @@ export const TooltipStyle = styled(
     width: max-content;
     height: max-content;
     overflow: hidden;
-    color: ${(props) => props.theme.colors.text.primary};
-    box-shadow: ${(props) => props.theme.elevations.one};
-    ${(
-      props: TooltipStyleProps // @ts-expect-error types
-    ) => placementMaps[props.placement]};
+    color: var(--rlm-text-color);
+    box-shadow: var(--rlm-box-shadow-1);
+    ${(props) => placementMaps[props.placement]};
   `
 )(compose(space, color, typography));
 
@@ -89,8 +100,8 @@ const Wrapper = styled(motion.div)<{ coords: any }>`
   box-sizing: border-box;
   position: absolute;
 `;
-// // Parent wrapper
-export const TooltipWrapper = styled(styled.div<Partial<TooltipProps>>`
+
+const TooltipWrapper = styled(styled.div<Partial<TooltipProps>>`
   position: relative;
   z-index: 4;
 
@@ -130,37 +141,41 @@ const baseMotionProps = {
   exit: 'inactive',
 };
 
-export const Tooltip = (props: TooltipProps) => {
-  const { id, style, content, placement, children, show } = props;
-  const tooltipRef = React.useRef(null);
-  const [coords, setCoords] = React.useState({ left: 0, top: 0 });
-  const [isVisible, setIsVisible] = React.useState(false);
-  let body = content;
+export const Tooltip = ({
+  id,
+  style,
+  content,
+  delay = 0,
+  placement = 'bottom-right',
+  children,
+  show = true,
+  ...rest
+}: TooltipProps) => {
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState({ left: 0, top: 0 });
+  const [isVisible, setIsVisible] = useState(false);
 
-  if (typeof content === 'string') {
-    body = (
+  const body =
+    typeof content === 'string' ? (
       <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px">
         {content}
       </Card>
+    ) : (
+      content
     );
-  }
+
   return (
-    // @ts-ignore
-    <TooltipWrapper ref={tooltipRef} style={style}>
+    <TooltipWrapper delay={delay} ref={tooltipRef} style={style}>
       <Portal>
         {isVisible && (
           <AnimatePresence>
             <Wrapper
               key={`${id}-tooltip`}
               coords={coords}
-              {...props}
+              {...rest}
               {...baseMotionProps}
             >
-              {/* @ts-ignore */}
-              <TooltipStyle
-                style={{ left: coords.left, top: coords.top }}
-                placement={placement}
-              >
+              <TooltipStyle style={coords} placement={placement}>
                 {body}
               </TooltipStyle>
             </Wrapper>
@@ -168,15 +183,12 @@ export const Tooltip = (props: TooltipProps) => {
         )}
       </Portal>
       <Box
-        // onClick={() => {
-        //   setIsVisible(false);
-        // }}
-        onMouseDown={(evt: any) => {
+        onMouseDown={(evt) => {
           setIsVisible(false);
           evt.stopPropagation();
         }}
-        onMouseEnter={(evt: any) => {
-          const rect = evt.target.getBoundingClientRect();
+        onMouseEnter={(evt) => {
+          const rect = (evt.target as HTMLElement).getBoundingClientRect();
           setCoords({
             left: rect.x,
             top: rect.top - rect.height,
@@ -184,18 +196,10 @@ export const Tooltip = (props: TooltipProps) => {
           evt.stopPropagation();
           show && setIsVisible(true);
         }}
-        onMouseLeave={() => {
-          // evt.stopPropagation();
-          setIsVisible(false);
-        }}
+        onMouseLeave={() => setIsVisible(false)}
       >
         {children}
       </Box>
     </TooltipWrapper>
   );
-};
-
-Tooltip.defaultProps = {
-  placement: 'bottom-right',
-  delay: 0.5,
 };

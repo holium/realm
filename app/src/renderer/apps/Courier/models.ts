@@ -1,8 +1,18 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types } from 'mobx-state-tree';
+import { flow, applySnapshot, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { expiresInMap, ExpiresValue } from './types';
+
+const InvitePermission = types.enumeration(['host', 'anyone']);
+export type InvitePermissionType = Instance<typeof InvitePermission>;
+
+const PeerModel = types.model('PeerModel', {
+  role: types.enumeration(['host', 'member']),
+  ship: types.string,
+});
+export type PeerModelType = Instance<typeof PeerModel>;
 
 export const ChatMetadataModel = types.model({
   title: types.string,
@@ -23,22 +33,67 @@ const stringifyMetadata = (metadata: ChatMetadata): ChatPathMetadata => {
   };
 };
 
+const ReactionModel = types.model('ReactionModel', {
+  msgId: types.string,
+  by: types.string,
+  emoji: types.string,
+});
+export type ReactionModelType = Instance<typeof ReactionModel>;
+
 export const ChatMessage = types
-  .model('ChatMessageodel', {
+  .model('ChatMessageModel', {
     path: types.string,
     id: types.identifier,
     sender: types.string,
     contents: types.array(types.frozen()),
-    reactions: types.optional(types.array(types.frozen()), []),
-    reply_to: types.maybeNull(types.string),
+    replyToPath: types.maybeNull(types.string),
+    replyToMsgId: types.maybeNull(types.string),
+    metadata: types.optional(types.frozen(), {}),
     createdAt: types.number,
     updatedAt: types.number,
+    reactions: types.optional(types.array(ReactionModel), []),
     // ui state
     pending: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     setPending(pending: boolean) {
       self.pending = pending;
+    },
+    updateContents(contents: any, updatedAt: number) {
+      self.contents = contents;
+      self.updatedAt = updatedAt;
+    },
+    addOriginalReplyToContents: (replyContent: any) => {
+      // {
+      //   reply: {
+      //     msgId: '123',
+      //     author: '~lomder-librun',
+      //     message: [{ plain: 'Yo what the hell you talkin bout?' }],
+      //   },
+      // }
+      const oldContents = self.contents.slice();
+      console.log('addOriginalReplyToContents', [replyContent, ...oldContents]);
+      self.contents.replace([replyContent, ...oldContents]);
+    },
+    getReplyTo: () => {
+      if (!self.replyToPath || !self.replyToMsgId) return null;
+      return ChatDBActions.getChatReplyTo(self.replyToMsgId);
+    },
+    fetchReactions: flow(function* () {
+      try {
+        const reactions = yield ChatDBActions.getChatReactions(
+          self.path,
+          self.id
+        );
+        applySnapshot(self.reactions, reactions);
+        return self.reactions;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }),
+    insertReaction(react: ReactionModelType) {
+      self.reactions.push(react);
     },
     delete: flow(function* () {
       try {
@@ -58,7 +113,8 @@ export const Chat = types
     path: types.identifier,
     type: ChatTypes,
     host: types.string,
-    peers: types.array(types.string),
+    peers: types.array(PeerModel),
+    // peerRows: types.array(PeerModel),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
     lastMessage: types.maybeNull(types.array(types.frozen())),
@@ -67,15 +123,38 @@ export const Chat = types
     updatedAt: types.maybeNull(types.number),
     expiresDuration: types.maybeNull(types.number),
     messages: types.optional(types.array(ChatMessage), []),
+    invites: InvitePermission,
     metadata: ChatMetadataModel,
     // ui state
     pending: types.optional(types.boolean, false),
     hidePinned: types.optional(types.boolean, false),
+    editingMsg: types.maybeNull(types.reference(ChatMessage)),
+    replyingMsg: types.maybeNull(types.reference(ChatMessage)),
+    our: types.maybe(types.string),
+    isReacting: types.maybe(types.string),
+    lastFetch: types.maybeNull(types.number),
   })
   .views((self) => ({
     get pinnedChatMessage() {
       if (!self.pinnedMessageId) return null;
       return self.messages.find((m) => m.id === self.pinnedMessageId);
+    },
+    get sortedPeers() {
+      return self.peers.slice().sort((a: PeerModelType, b: PeerModelType) =>
+        // sort host to top, then self, then others
+        a.role === 'host'
+          ? -1
+          : b.role === 'host'
+          ? 1
+          : a.ship === self.our
+          ? -1
+          : b.ship === self.our
+          ? 1
+          : 0
+      );
+    },
+    isEditing(msgId: string) {
+      return self.editingMsg?.id === msgId;
     },
     // Check if the pinned message is hidden locally
     isPinLocallyHidden() {
@@ -97,26 +176,57 @@ export const Chat = types
         const messages = yield ChatDBActions.getChatLog(self.path);
         self.messages = messages;
         self.hidePinned = self.isPinLocallyHidden();
+        self.lastFetch = new Date().getTime();
         return self.messages;
       } catch (error) {
         console.error(error);
         return [];
       }
     }),
+    fetchPeers: flow(function* (our: string) {
+      try {
+        self.our = our;
+        const peers = yield ChatDBActions.getChatPeers(self.path);
+        self.peers = peers.map((p: PeerModelType) =>
+          PeerModel.create({ ship: p.ship, role: p.role })
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
         console.log('sending message', path, fragments);
         yield ChatDBActions.sendMessage(path, fragments);
+        self.replyingMsg = null;
+        // TODO naive send, should add to local store and update on ack
         // self.addMessage(message);
       } catch (error) {
         console.error(error);
       }
     }),
     addMessage(message: ChatMessageType) {
+      if (Object.keys(message.contents[0])[0] === 'react') {
+        const msg = self.messages.find((m) => m.id === message.replyToMsgId);
+        if (msg) msg.fetchReactions();
+        return;
+      }
       self.messages.push(message);
       self.lastSender = message.sender;
       self.lastMessage = message.contents;
+    },
+    replaceMessage(message: ChatMessageType) {
+      const msg = self.messages.find((m) => m.id === message.id);
+      if (!msg) {
+        return console.warn(
+          'tried to replace a message that doesnt exist',
+          message.id
+        );
+      }
+      msg.updateContents(message.contents, message.updatedAt);
+      // self.messages.replace([...self.messages, msg]);
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
@@ -153,6 +263,59 @@ export const Chat = types
         return self.pinnedMessageId;
       }
     }),
+    setReplying(message: ChatMessageType) {
+      self.replyingMsg = message;
+    },
+    clearReplying() {
+      self.replyingMsg = null;
+    },
+    setReacting(msgId: string) {
+      self.isReacting = msgId;
+    },
+    sendReaction: flow(function* (msgId: string, emoji: string) {
+      yield ChatDBActions.sendMessage(self.path, [
+        {
+          content: { react: emoji },
+          'reply-to': {
+            path: self.path,
+            'msg-id': msgId,
+          },
+          metadata: {},
+        },
+      ]);
+      self.isReacting = undefined;
+    }),
+    deleteReaction: flow(function* (msgId: string) {
+      // yield ChatDBActions.deleteMessage(self.path, msgId);
+      // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
+    }),
+    clearReacting() {
+      self.isReacting = undefined;
+    },
+    setEditing(message: ChatMessageType) {
+      self.editingMsg = message;
+    },
+    saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
+      const oldMessages = self.messages;
+      try {
+        yield ChatDBActions.editMessage(
+          self.path,
+          messageId,
+          contents.map((c) => ({
+            ...c,
+            metadata: { edited: 'true' },
+          }))
+        );
+        // todo intermeidate state?
+        self.editingMsg = null;
+      } catch (error) {
+        self.messages = oldMessages;
+        console.error(error);
+      }
+    }),
+    cancelEditing() {
+      self.editingMsg = null;
+    },
     updateMetadata: flow(function* (metadata: Partial<ChatMetadata>) {
       const oldMetadata = self.metadata;
       const newMetadata = {
@@ -164,7 +327,9 @@ export const Chat = types
         yield ChatDBActions.editChat(
           self.path,
           stringifyMetadata(self.metadata),
-          self.peersGetBacklog
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
         );
         return self.metadata;
       } catch (e) {
@@ -180,11 +345,47 @@ export const Chat = types
         yield ChatDBActions.editChat(
           self.path,
           stringifyMetadata(self.metadata),
-          peersGetBacklog
+          self.invites,
+          peersGetBacklog,
+          self.expiresDuration
         );
       } catch (e) {
         console.error(e);
         self.peersGetBacklog = oldPeerGetBacklog;
+      }
+    }),
+    updateInvitePermissions: flow(function* (
+      invitePermission: InvitePermissionType
+    ) {
+      const oldInvitePermission = self.invites;
+      self.invites = invitePermission;
+      try {
+        yield ChatDBActions.editChat(
+          self.path,
+          stringifyMetadata(self.metadata),
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
+        );
+      } catch (e) {
+        console.error(e);
+        self.invites = oldInvitePermission;
+      }
+    }),
+    updateExpiresDuration: flow(function* (expiresValue: ExpiresValue) {
+      const oldExpiresDuration = self.expiresDuration;
+      self.expiresDuration = expiresInMap[expiresValue] || null;
+      try {
+        yield ChatDBActions.editChat(
+          self.path,
+          stringifyMetadata(self.metadata),
+          self.invites,
+          self.peersGetBacklog,
+          self.expiresDuration
+        );
+      } catch (e) {
+        console.error(e);
+        self.expiresDuration = oldExpiresDuration;
       }
     }),
     // Store hidePinned in localStorage
@@ -204,6 +405,14 @@ export const Chat = types
         return self.messages;
       }
     }),
+    onPeerAdded(ship: string, role: string) {
+      self.peers.push(PeerModel.create({ ship, role }));
+    },
+    onPeerDeleted(ship: string) {
+      const peer = self.peers.find((p) => p.ship === ship);
+      if (!peer) return;
+      self.peers.remove(peer);
+    },
     // setPeers(peers: string[]) {},
     // setLastMessage(message: any) {},
     // setLastSender(sender: string) {},

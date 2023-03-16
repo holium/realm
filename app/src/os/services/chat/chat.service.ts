@@ -18,12 +18,16 @@ import {
   DelMessagesRow,
   DeleteLogRow,
   DelPeersRow,
+  UpdateMessage,
 } from './chat.types';
+import { InvitePermissionType } from 'renderer/apps/Courier/models';
 
 type ChatUpdateType =
   | 'message-received'
+  | 'message-edited'
   | 'message-deleted'
   | 'path-added'
+  | 'path-updated'
   | 'path-deleted'
   | 'peer-added'
   | 'peer-deleted';
@@ -59,7 +63,9 @@ export class ChatService extends BaseService {
   handlers = {
     'realm.chat.get-chat-list': this.getChatList,
     'realm.chat.get-chat-log': this.getChatLog,
+    'realm.chat.get-chat-reactions': this.getChatReactions,
     'realm.chat.get-chat-peers': this.getChatPeers,
+    'realm.chat.get-reply-to': this.getReplyToMessage,
     'realm.chat.send-message': this.sendMessage,
     'realm.chat.edit-message': this.editMessage,
     'realm.chat.delete-message': this.deleteMessage,
@@ -86,6 +92,10 @@ export class ChatService extends BaseService {
       path: string,
       params?: { start: number; amount: number }
     ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
+    getChatReactions: async (path: string, msgId: string) =>
+      ipcRenderer.invoke('realm.chat.get-chat-reactions', path, msgId),
+    getChatReplyTo: async (msgId: string) =>
+      ipcRenderer.invoke('realm.chat.get-reply-to', msgId),
     getChatPeers: async (path: string) =>
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
@@ -102,13 +112,17 @@ export class ChatService extends BaseService {
     editChat: (
       path: string,
       metadata: ChatPathMetadata,
-      peersGetBacklog: boolean
+      invites: InvitePermissionType,
+      peersGetBacklog: boolean,
+      expiresDuration: number | null
     ) =>
       ipcRenderer.invoke(
         'realm.chat.edit-chat',
         path,
         metadata,
-        peersGetBacklog
+        invites,
+        peersGetBacklog,
+        expiresDuration
       ),
     addPeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.add-peer', path, peer),
@@ -159,7 +173,7 @@ export class ChatService extends BaseService {
       // verbose: console.log,
     });
     this.db.exec(this.initSql);
-    await this.core.conduit!.watch({
+    await this.core.conduit?.watch({
       app: 'chat-db',
       path: '/db',
       onEvent: this.onDbUpdate,
@@ -182,7 +196,7 @@ export class ChatService extends BaseService {
 
   async fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/messages/start-ms/${lastTimestamp}`,
     });
@@ -191,7 +205,7 @@ export class ChatService extends BaseService {
 
   async fetchPaths() {
     const lastTimestamp = this.getLastTimestamp('paths');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
@@ -200,7 +214,7 @@ export class ChatService extends BaseService {
 
   async fetchPeers() {
     const lastTimestamp = this.getLastTimestamp('peers');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
@@ -209,7 +223,7 @@ export class ChatService extends BaseService {
 
   async fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });
@@ -238,7 +252,7 @@ export class ChatService extends BaseService {
           console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
-          const msg = this.getChatMessage(message.path, message['msg-id']);
+          const msg = this.getChatMessage(message['msg-id']);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
@@ -251,8 +265,9 @@ export class ChatService extends BaseService {
           break;
         case 'peers':
           console.log('add-row to peers', addRow.row);
-          const peers = [addRow.row] as PeersRow[];
-          this.insertPeers(peers);
+          const peers = addRow.row as PeersRow;
+          this.insertPeers([peers]);
+          this.sendChatUpdate('peer-added', peers);
           break;
       }
     }
@@ -260,21 +275,19 @@ export class ChatService extends BaseService {
       const update = dbChange as UpdateRow;
       switch (update.table) {
         case 'messages':
-          // console.log('update messages', update.row);
-          // const message = update.row as MessagesRow;
-          // this.insertMessages([message]);
-          // const msg = this.getChatMessage(
-          //   message.path,
-          //   `${message['msg-id'][0]}${message['msg-id'][1]}`
-          // );
-          // console.log('UPDATED MESSAGE', msg);
-          // this.sendChatUpdate('message-updated', msg);
+          const message = update as UpdateMessage;
+          console.log('update messages', message.message);
+          const msgId = message.message[0]['msg-id'];
+          this.insertMessages(message.message);
+          const msg = this.getChatMessage(msgId);
+          this.sendChatUpdate('message-edited', msg);
           break;
         case 'paths':
           console.log('update paths', update.row);
           const path = update.row as PathsRow;
           this.insertPaths([path]);
-          // this.sendChatUpdate('path-updated', path.path);
+          const chat = this.getChat(path.path);
+          this.sendChatUpdate('path-updated', chat);
           break;
         case 'peers':
           console.log('update peers', update.row);
@@ -293,6 +306,7 @@ export class ChatService extends BaseService {
   }
 
   handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
+    // insert into delete_logs
     if (dbChange.type === 'del-messages-row') {
       console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
@@ -308,7 +322,7 @@ export class ChatService extends BaseService {
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this.deletePeersRow(delPeersRow.path, delPeersRow.ship);
+      this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
       this.sendChatUpdate('peer-deleted', delPeersRow);
     }
   }
@@ -365,7 +379,7 @@ export class ChatService extends BaseService {
           msg_part_id: message['msg-part-id'],
           content_type: message['content-type'],
           content_data: message['content-data'],
-          reply_to: message['reply-to'],
+          reply_to: JSON.stringify(message['reply-to']),
           metadata: JSON.stringify(message.metadata),
           sender: message.sender,
           created_at: message['created-at'],
@@ -387,9 +401,10 @@ export class ChatService extends BaseService {
           peers_get_backlog,
           pins,
           max_expires_at_duration,
+          invites,
           created_at, 
           updated_at
-        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @created_at, @updated_at)`
+        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @invites, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
       console.log(paths);
@@ -400,6 +415,7 @@ export class ChatService extends BaseService {
           metadata: JSON.stringify(path.metadata),
           peers_get_backlog: path['peers-get-backlog'] === true ? 1 : 0,
           pins: JSON.stringify(path['pins']),
+          invites: path.invites,
           max_expires_at_duration: path['max-expires-at-duration'] ?? null,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
@@ -500,7 +516,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -549,19 +565,19 @@ export class ChatService extends BaseService {
         type,
         metadata,
         (
-            SELECT json_group_array(ship)
+            SELECT json_group_array(json_object('ship', ship, 'role', role))
             FROM peers
-            WHERE peers.path = paths.path AND ship != ?
+            WHERE peers.path = paths.path
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
-        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
-        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
         chat_with_messages.updated_at updatedAt,
-        paths.max_expires_at_duration expiresDuration
+        paths.max_expires_at_duration expiresDuration,
+        paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path LIKE '%realm-chat%'
@@ -569,7 +585,7 @@ export class ChatService extends BaseService {
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
-    const result = query.all(`~${this.core.conduit?.ship}`);
+    const result = query.all();
 
     return result.map((row) => {
       return {
@@ -594,7 +610,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -643,19 +659,19 @@ export class ChatService extends BaseService {
         type,
         metadata,
         (
-            SELECT json_group_array(ship)
+            SELECT json_group_array(json_object('ship', ship, 'role', role))
             FROM peers
             WHERE peers.path = paths.path AND ship != ?
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
         paths.peers_get_backlog peersGetBacklog,
-        json_extract(json_extract(pins, '$[0]'), '$[0]') ||
-        json_extract(json_extract(pins, '$[0]'), '$[1]') pinnedMessageId,
+        json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         chat_with_messages.created_at createdAt,
         chat_with_messages.updated_at updatedAt,
-        paths.max_expires_at_duration expiresDuration
+        paths.max_expires_at_duration expiresDuration,
+        paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
       WHERE paths.path = ?
@@ -693,7 +709,7 @@ export class ChatService extends BaseService {
         WITH realm_chat as (
             SELECT *
             FROM messages
-            WHERE path = ?
+            WHERE path = ? AND content_type != 'react'
             ORDER BY msg_part_id, created_at DESC
         )
         SELECT
@@ -717,7 +733,8 @@ export class ChatService extends BaseService {
         msg_id id,
         json_group_array(json_extract(content, '$')) as contents,
         sender,
-        reply_to,
+        json_extract(reply_to, '$."path"') replyToMsgPath,
+        json_extract(reply_to, '$."msg-id"') replyToMsgId,
         metadata,
         MAX(formed_fragments.created_at) createdAt,
         MAX(formed_fragments.updated_at) updatedAt
@@ -735,7 +752,29 @@ export class ChatService extends BaseService {
     });
   }
 
-  getChatMessage(path: string, msgId: string) {
+  getChatReactions(_evt: any, path: string, replyId: string) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      SELECT
+        json_group_array(json_object('msgId', msg_id, 'by', sender, 'emoji', content_data)) reactions
+      FROM messages
+      WHERE path = ?
+        AND json_extract(reply_to, '$."msg-id"') = ?
+        AND content_type = 'react'
+    `);
+    const result = query.all(path, replyId);
+    const rows = result.map((row) => {
+      return JSON.parse(row.reactions);
+    });
+    if (rows.length === 0) return [];
+    return rows[0];
+  }
+
+  getReplyToMessage(_evt: any, replyId: string) {
+    return this.getChatMessage(replyId);
+  }
+
+  getChatMessage(msgId: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT
@@ -743,17 +782,20 @@ export class ChatService extends BaseService {
         msg_id id,
         json_group_array(json_object(content_type, content_data)) contents,
         sender,
+        json_extract(reply_to, '$."path"') replyToMsgPath,
+        json_extract(reply_to, '$."msg-id"') replyToMsgId,
         MAX(created_at) as createdAt,
         MAX(updated_at) as updatedAt
       FROM (SELECT path,
                   msg_id,
                   content_type,
                   content_data,
+                  reply_to,
                   sender,
                   created_at,
                   updated_at
             FROM messages
-            WHERE path = ? AND msg_id = ?
+            WHERE msg_id = ?
             ORDER BY msg_id, msg_part_id)
       GROUP BY msg_id
       ORDER BY created_at;
@@ -786,7 +828,7 @@ export class ChatService extends BaseService {
   getChatPeers(_evt: any, path: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
-      SELECT ship AS peer, role
+      SELECT ship, role
       FROM peers
       WHERE path = ?;
     `);
@@ -956,7 +998,7 @@ export class ChatService extends BaseService {
   // }
 
   async fetchPinnedChats() {
-    const response = await this.core.conduit!.scry({
+    const response = await this.core.conduit?.scry({
       app: 'realm-chat',
       path: '/pins',
     });
@@ -988,9 +1030,12 @@ export class ChatService extends BaseService {
     _evt: any,
     path: string,
     metadata: ChatPathMetadata,
-    peersGetBacklog: boolean
+    invites: InvitePermissionType,
+    peersGetBacklog: boolean,
+    expiresDuration: number
   ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
+    console.log('editChatMetadata', path, invites, peersGetBacklog);
     const payload = {
       app: 'realm-chat',
       mark: 'action',
@@ -999,7 +1044,9 @@ export class ChatService extends BaseService {
         'edit-chat': {
           path,
           metadata,
+          invites,
           'peers-get-backlog': peersGetBacklog,
+          'max-expires-at-duration': expiresDuration,
         },
       },
     };
@@ -1018,7 +1065,7 @@ export class ChatService extends BaseService {
       mark: 'action',
       reaction: '',
       json: {
-        'add-ship-from-chat': {
+        'add-ship-to-chat': {
           ship,
           path,
         },

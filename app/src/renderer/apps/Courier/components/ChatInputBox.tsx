@@ -1,11 +1,20 @@
 import { Box, ChatInput } from '@holium/design-system';
 import { useState } from 'react';
+import { ChatMessageType } from '../models';
 
 type CourierInputProps = {
+  editMessage?: ChatMessageType | null;
+  onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
   onSend: (fragments: any[]) => void;
+  onEditConfirm: (fragments: any[]) => void;
 };
 
-export const ChatInputBox = ({ onSend }: CourierInputProps) => {
+export const ChatInputBox = ({
+  editMessage,
+  onEditConfirm,
+  onCancelEdit,
+  onSend,
+}: CourierInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
   return (
     <Box
@@ -27,6 +36,9 @@ export const ChatInputBox = ({ onSend }: CourierInputProps) => {
         isFocused={isFocused}
         onSend={onSend}
         onAttachment={() => {}}
+        editingMessage={editMessage?.contents}
+        onEditConfirm={onEditConfirm}
+        onCancelEdit={onCancelEdit}
       />
     </Box>
   );

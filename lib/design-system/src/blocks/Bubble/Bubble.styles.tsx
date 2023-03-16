@@ -6,18 +6,19 @@ export const BubbleStyle = styled(Box)`
   display: inline-flex;
   flex-direction: column;
   width: auto;
-  /* gap: 2px; */
+  gap: 2px;
   padding: 8px;
   user-select: text;
   /* padding: 6px 8px 6px 8px; */
   font-size: 14px;
   align-self: flex-start;
+  box-sizing: border-box;
   min-width: 150px;
   color: var(--rlm-text-color);
   background: var(--rlm-input-color);
   border-radius: 9px 9px 9px 0px;
   &.bubble-our {
-    background: var(--rlm-accent-color);
+    background: var(--rlm-intent-caution-color);
     border-radius: 12px 12px 0px 12px !important;
     ${Text.Custom} {
       color: #ffffff;

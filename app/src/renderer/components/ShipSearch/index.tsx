@@ -60,9 +60,9 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
     );
 
     const RowRenderer = (contact: (typeof results)[number]) => {
-      const nickname = contact[1].nickname!;
-      const sigilColor = contact[1].color!;
-      const avatar = contact[1].avatar!;
+      const nickname = contact[1].nickname ?? '';
+      const sigilColor = contact[1].color ?? '#000000';
+      const avatar = contact[1].avatar;
       return (
         <Row
           key={contact[0]}

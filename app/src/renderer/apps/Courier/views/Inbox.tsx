@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Flex,
   Icon,
@@ -25,29 +25,22 @@ export const InboxPresenter = () => {
     (preview: ChatModelType) => {
       if (!searchString || searchString.trim() === '') return true;
       let title: string;
-      // if (preview.type === 'group' || preview.type === 'group-pending') {
-      //   const dm = preview as ChatRowType;
-      //   to = Array.from(dm.to).join(', ');
-      // } else {
-      //   const dm = preview as ChatRowType;
-      //   to = dm.to;
-      // }
       const dm = preview as ChatModelType;
       title = dm.metadata.title;
       return title.indexOf(searchString) === 0;
     },
     [searchString]
   );
-  // const lastChatUpdatedAt = inbox.slice().sort((a, b) => {
-  //   if (!a.updatedAt || !b.updatedAt) return 0;
-  //   return b.updatedAt - a.updatedAt;
-  // })[0]?.updatedAt;
 
-  // console.log('lastChatUpdatedAt', lastChatUpdatedAt);
+  const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
+  const listHeight = useMemo(
+    () => 544 - pinnedChatList.length * 56,
+    [pinnedChatList]
+  );
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
-      <Flex mb={2} ml={1} flexDirection="row" alignItems="center">
+      <Flex mb={1} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -117,12 +110,13 @@ export const InboxPresenter = () => {
                 <Box
                   key={`pinned-${chat.path}`}
                   height={52}
+                  alignItems="center"
                   layoutId={`chat-${chat.path}-container`}
                 >
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
-                    peers={chat.peers}
+                    peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}
@@ -139,22 +133,24 @@ export const InboxPresenter = () => {
           </Flex>
           <WindowedList
             key={`inbox-${unpinnedChatList.length}`}
-            width={dimensions.width - 26}
-            height={544 - pinnedChatList.length * 56}
+            width={listWidth}
+            height={listHeight}
             rowHeight={52}
             data={unpinnedChatList}
             filter={searchFilter}
             rowRenderer={(chat) => {
               return (
                 <Box
+                  layout="preserve-aspect"
                   key={`unpinned-${chat.path}`}
+                  alignItems="center"
                   height={52}
                   layoutId={`chat-${chat.path}-container`}
                 >
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
-                    peers={chat.peers}
+                    peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}

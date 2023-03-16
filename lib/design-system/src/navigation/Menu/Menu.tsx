@@ -3,6 +3,7 @@ import { Card, Box, BoxProps } from '../../';
 import styled from 'styled-components';
 import {
   getAnchorPointByTarget,
+  getAnchorPointByElement,
   getMenuHeight,
   Position,
   Orientation,
@@ -30,7 +31,10 @@ type MenuType = 'custom' | 'options';
 export type MenuProps = {
   id: string;
   orientation: Orientation;
-  triggerEl: React.ReactNode;
+  anchorRef?: React.RefObject<HTMLElement>;
+  triggerEl?: React.ReactNode;
+  controlledIsOpen?: boolean;
+  clickPreventClass?: string;
   children?: React.ReactNode;
   dimensions?: Dimensions;
   offset?: Position;
@@ -45,6 +49,8 @@ export const Menu = ({
   orientation = 'bottom-left',
   offset = { x: 0, y: 2 },
   options,
+  clickPreventClass,
+  ...rest
 }: MenuProps) => {
   const root = document.getElementById('root');
   let innerContent: React.ReactNode;
@@ -56,9 +62,13 @@ export const Menu = ({
     (e: MouseEvent) => {
       const menu = document.getElementById(id);
       const trigger = document.getElementById(`${id}-trigger`);
+      const clickEl =
+        clickPreventClass &&
+        document.getElementsByClassName(clickPreventClass)[0];
       if (
         (menu && menu.contains(e.target as Node)) ||
-        (trigger && trigger.contains(e.target as Node))
+        (trigger && trigger.contains(e.target as Node)) ||
+        (clickEl && clickEl.contains(e.target as Node))
       )
         return;
       setIsOpen(false);
@@ -144,28 +154,34 @@ export const Menu = ({
     }
   };
 
+  const isCustom = type === 'custom';
+
   return (
     <>
-      <Box
-        id={`${id}-trigger`}
-        display="inline"
-        position="relative"
-        onClick={(evt) => {
-          evt.preventDefault();
-          evt.stopPropagation();
-          onTriggerClick(evt);
-        }}
-      >
-        {triggerEl}
-      </Box>
+      {triggerEl && (
+        <Box
+          id={`${id}-trigger`}
+          display="inline"
+          position="relative"
+          onClick={(evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            onTriggerClick(evt);
+          }}
+        >
+          {triggerEl}
+        </Box>
+      )}
       <MenuPortal id={`${id}-portal`} isOpen={isOpen}>
         <AnimatePresence>
           {isOpen && anchorPoint && (
             <Card
-              p={1}
+              p={type === 'custom' ? 0 : 1}
               elevation={2}
               position="absolute"
+              className={rest.className}
               id={id}
+              zIndex={100}
               initial={{
                 opacity: 0,
               }}
@@ -185,9 +201,11 @@ export const Menu = ({
               style={{
                 y: anchorPoint.y,
                 x: anchorPoint.x,
-                width: WIDTH,
-                maxHeight: MAX_HEIGHT,
-                overflowY: 'auto',
+                border: isCustom ? 'none' : '1px solid var(--rlm-border-color)',
+                width: dimensions?.width || WIDTH,
+                height: dimensions?.height || 'auto',
+                maxHeight: dimensions?.height || MAX_HEIGHT,
+                overflowY: isCustom ? 'hidden' : 'auto',
               }}
             >
               {innerContent}
@@ -196,5 +214,78 @@ export const Menu = ({
         </AnimatePresence>
       </MenuPortal>
     </>
+  );
+};
+
+export type CustomMenuProps = {
+  id: string;
+  orientation: Orientation;
+  anchorRef?: React.RefObject<HTMLElement>;
+  children?: React.ReactNode;
+  dimensions?: Dimensions;
+  offset?: Position;
+} & BoxProps;
+
+export const CustomMenu = ({
+  anchorRef,
+  id,
+  children,
+  dimensions,
+  orientation,
+  offset,
+}: CustomMenuProps) => {
+  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
+  useEffect(() => {
+    const el = anchorRef?.current;
+    console.log('CustomMenu', el);
+    if (el) {
+      const height = el.offsetHeight;
+      setAnchorPoint(
+        getAnchorPointByElement(
+          el,
+          {
+            width: dimensions?.width || WIDTH,
+            height: dimensions?.height || height,
+          },
+          orientation,
+          offset
+        )
+      );
+    }
+  }, [anchorRef]);
+  console.log('CustomMenu achnor', anchorPoint);
+  if (!anchorPoint) return null;
+  return (
+    <MenuPortal id={`${id}-portal`} isOpen={true}>
+      <Card
+        p={0}
+        id={id}
+        position="absolute"
+        style={{
+          y: anchorPoint.y,
+          x: anchorPoint.x,
+          height: dimensions?.height,
+          width: dimensions?.width,
+          overflowY: 'auto',
+        }}
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+        exit={{
+          opacity: 0,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+      >
+        {children}
+      </Card>
+    </MenuPortal>
   );
 };

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Icon, Button, InputBox, BoxProps, TextArea, Flex } from '../..';
 import { FragmentType } from '../Bubble/Bubble.types';
-import { parseChatInput } from './fragment-parser';
+import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
@@ -16,8 +16,11 @@ type ChatInputProps = {
   id: string;
   disabled?: boolean;
   isFocused?: boolean;
+  editingMessage?: FragmentType[];
   onSend: (fragments: FragmentType[]) => void;
+  onEditConfirm: (fragments: FragmentType[]) => void;
   onAttachment?: () => void;
+  onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
 } & BoxProps;
 
 export const parseStringToFragment = (value: string): FragmentType[] => {
@@ -32,8 +35,11 @@ export const ChatInput = ({
   tabIndex,
   disabled,
   isFocused,
+  editingMessage,
   onSend,
+  onEditConfirm,
   onAttachment,
+  onCancelEdit,
   ...chatInputProps
 }: ChatInputProps) => {
   const [value, setValue] = useState('');
@@ -46,6 +52,18 @@ export const ChatInput = ({
       inputRef.current?.blur();
     }
   }, [isFocused, inputRef]);
+
+  useEffect(() => {
+    if (editingMessage) {
+      const parsedFragments = convertFragmentsToText(editingMessage);
+      setValue(parsedFragments);
+      if (inputRef.current && isFocused) {
+        inputRef.current.focus();
+      } else {
+        inputRef.current?.blur();
+      }
+    }
+  }, [editingMessage]);
 
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = evt.target;
@@ -68,7 +86,11 @@ export const ChatInput = ({
       if (value.length === 0) return;
       const parsedFragments = parseChatInput(value);
       setValue('');
-      onSend(parsedFragments);
+      if (editingMessage) {
+        onEditConfirm(parsedFragments);
+      } else {
+        onSend(parsedFragments);
+      }
     }
   };
 
@@ -85,16 +107,36 @@ export const ChatInput = ({
       }
       rightAdornment={
         <Flex>
+          {editingMessage && (
+            <Button.IconButton
+              mr={1}
+              disabled={value.length === 0}
+              onClick={(evt) => {
+                setValue('');
+                if (onCancelEdit) onCancelEdit(evt);
+              }}
+            >
+              <Icon name="Close" size={20} opacity={0.5} />
+            </Button.IconButton>
+          )}
           <Button.IconButton
             mr={1}
             disabled={value.length === 0}
             onClick={() => {
               const parsedFragments = parseChatInput(value);
               setValue('');
-              onSend(parsedFragments);
+              if (editingMessage) {
+                onEditConfirm(parsedFragments);
+              } else {
+                onSend(parsedFragments);
+              }
             }}
           >
-            <Icon name="ArrowRightLine" size={20} opacity={0.5} />
+            <Icon
+              name={editingMessage ? 'Check' : 'ArrowRightLine'}
+              size={20}
+              opacity={0.5}
+            />
           </Button.IconButton>
         </Flex>
       }

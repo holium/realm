@@ -1,7 +1,15 @@
+import { InvitePermissionType } from 'renderer/apps/Courier/models';
+
 export type PathsRow = {
   path: string;
   type: string;
   metadata: any;
+  invites: InvitePermissionType;
+  pins: string[];
+  'max-expires-at-duration': number;
+  'peers-get-backlog': boolean;
+  'created-at': number;
+  'updated-at': number;
 };
 
 export type MessagesRow = {
@@ -39,16 +47,24 @@ export type AddRow = {
   row: PathsRow | MessagesRow | PeersRow;
 };
 
-export type UpdateRow = {
-  table: ChatTables;
+export type UpdateRow =
+  | {
+      table: ChatTables;
+      type: 'update';
+      row: PathsRow | MessagesRow | PeersRow;
+    }
+  | UpdateMessage;
+
+export type UpdateMessage = {
+  table: 'messages';
   type: 'update';
-  row: PathsRow | MessagesRow | PeersRow;
+  message: MessagesRow[];
 };
 
 export type DelPeersRow = {
   table: ChatTables;
   type: 'del-peers-row';
-  path: string;
+  row: string;
   ship: string;
 };
 export type DelPathsRow = {

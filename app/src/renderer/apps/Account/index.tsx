@@ -1,3 +1,4 @@
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useEffect } from 'react';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
@@ -10,14 +11,12 @@ import { useTrayApps } from '../store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { useRooms } from '../Rooms/useRooms';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
   const { ship, beacon } = useServices();
   const { setActiveApp } = useTrayApps();
-  const currentShip = ship!;
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   useEffect(() => {
     // navigator.getBattery().then((battery: any) => {
@@ -39,11 +38,13 @@ const AccountTrayAppPresenter = () => {
     DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
   };
 
+  if (!ship) return null;
+
   let subtitle;
-  if (currentShip.nickname) {
+  if (ship.nickname) {
     subtitle = (
       <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
-        {currentShip.patp}
+        {ship.patp}
       </Text.Custom>
     );
   }
@@ -95,9 +96,9 @@ const AccountTrayAppPresenter = () => {
             simple
             borderRadiusOverride="4px"
             size={32}
-            avatar={currentShip.avatar}
-            patp={currentShip.patp}
-            sigilColor={[currentShip.color || '#000000', 'white']}
+            avatar={ship.avatar}
+            patp={ship.patp}
+            sigilColor={[ship.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom
@@ -110,7 +111,7 @@ const AccountTrayAppPresenter = () => {
               fontWeight={500}
               variant="body"
             >
-              {currentShip.nickname || currentShip.patp}
+              {ship.nickname || ship.patp}
             </Text.Custom>
             {subtitle}
           </Flex>
@@ -119,10 +120,9 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             size={28}
             className="realm-cursor-hover"
-            style={{ cursor: 'none' }}
             onClick={async () => {
               await roomsManager.cleanup();
-              AuthActions.logout(currentShip.patp);
+              AuthActions.logout(ship.patp);
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
@@ -132,7 +132,6 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             className="realm-cursor-hover"
             data-close-tray="true"
-            style={{ cursor: 'none' }}
             size={28}
             onClick={() => openSettingsApp()}
           >

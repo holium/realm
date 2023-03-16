@@ -5,6 +5,7 @@ import { Text } from 'renderer/components';
 import { Box, Flex, Skeleton } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { ChatLogView } from './ChatLogView';
+import { ShipModelType } from 'os/services/ship/models/ship';
 
 interface ChatLogProps {
   loading: boolean;
@@ -61,7 +62,7 @@ const ChatLogPresenter = (props: ChatLogProps) => {
       key={`${lastMessage?.index}-${lastMessage?.pending}`}
       messages={messages}
       isGroup={isGroup}
-      ship={ship!}
+      ship={ship as ShipModelType}
       height={dimensions.height - 60}
       currentTheme={theme.currentTheme as any}
     />

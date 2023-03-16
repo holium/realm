@@ -108,14 +108,21 @@
     =/  current-key   k:(snag index old-msgs)
     $(index +(index), tbl +:(del:msgon:sur tbl current-key), ids (snoc ids current-key))
 
+  =.  del-log.state         (log-deletes-for-msg-parts state ~ +:rm-result now)
   =.  messages-table.state  -:rm-result
-  =.  del-log.state         (log-deletes-for-msg-parts state +:rm-result now)
   state
 ::
 ++  log-deletes-for-msg-parts
-  |=  [state=state-0 ids=(list uniq-id:sur) now=@da]
+  |=  [state=state-0 p=(unit path) ids=(list uniq-id:sur) now=@da]
   ^-  del-log:sur
-  =/  change-rows   (turn ids |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  change-rows   
+    %+  turn
+      ids
+    |=  a=uniq-id:sur
+    =/  pat
+      ?~  p  path:(got:msgon:sur messages-table.state a)
+      (need p)
+    [%del-messages-row pat a]
   =/  index=@ud     0
   =/  len=@ud       (lent change-rows)
   =/  new-log       del-log.state
@@ -132,6 +139,24 @@
   =/  len-three  (skim ~(val by sup.bowl) |=(a=[p=ship q=path] (gte (lent q.a) 3)))
   =/  matching  (skim len-three |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start)))
   (turn matching |=(a=[p=ship q=path] q.a))
+++  delete-logs-for-path :: used for clearing del-log when the path itself is deleted, to keep things clean
+  |=  [state=state-0 =path]
+  ^-  del-log:sur
+  =/  removables
+    %+  skim :: get all the [k v] pairs of logs we can remove
+      (tap:delon:sur del-log.state)
+    |=  [k=time v=db-change-type:sur]
+    ?+  -.v  %.n :: only possibly remove messages and peers row since we don't want to remove the log that we removed the whole path
+      %del-messages-row   =(path path.v)
+      %del-peers-row      =(path path.v)
+    ==
+  =/  index=@ud     0
+  =/  len=@ud       (lent removables)
+  =/  new-log       del-log.state
+  |-
+  ?:  =(index len)
+    new-log
+  $(index +(index), new-log +:(del:delon:sur new-log -:(snag index removables)))
 ::
 ::  poke actions
 ::
@@ -216,6 +241,7 @@
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
   =/  change-row      [%del-paths-row path]
+  =.  del-log.state   (delete-logs-for-path state path)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange       db-change+!>(~[change-row])
   =/  gives  :~
@@ -325,7 +351,7 @@
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
 
-  =.  del-log.state   (log-deletes-for-msg-parts state +.remove-result now.bowl)
+  =.  del-log.state   (log-deletes-for-msg-parts state `path.msg-part +.remove-result now.bowl)
 
   =/  row=path-row:sur    (~(got by paths-table.state) path.msg-part)
   =/  pinned              (~(has in pins.row) msg-id)
@@ -336,7 +362,7 @@
       (~(put by paths-table.state) path.row row)
     paths-table.state
 
-  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row path.row a]))
   =/  thechange
     ?:  pinned
       db-change+!>([[%upd-paths-row row] change-rows])
@@ -365,9 +391,9 @@
   =/  remove-result=tbl-and-ids:sur  (remove-messages-for-path-before messages-table.state path before)
   =.  messages-table.state  tbl.remove-result
 
-  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row a]))
+  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a]))
   =/  thechange     db-change+!>(change-rows)
-  =.  del-log.state   (log-deletes-for-msg-parts state ids.remove-result now.bowl)
+  =.  del-log.state   (log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
 
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) thechange]
@@ -428,6 +454,7 @@
       [%del-paths-row path.act]
     :: else just update the peers table
     [%del-peers-row path.act patp.act]
+  =.  del-log.state   ?:(our-kicked (delete-logs-for-path state path.act) del-log.state)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange   db-change+!>(~[change-row])
 
@@ -604,6 +631,7 @@
           :~
             ['type' %s -.ch]
             ['table' %s %messages]
+            ['path' s+(spat path.ch)]
             ['msg-id' (msg-id-to-json msg-id.uniq-id.ch)]
             ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
           ==

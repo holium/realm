@@ -1,4 +1,3 @@
-import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { Inbox } from './views/Inbox';
 import { NewChat } from './views/NewChat';
@@ -11,17 +10,20 @@ import { useEffect } from 'react';
 export const CourierAppPresenter = () => {
   const storage = useStorage();
   useEffect(() => {
-    chatStore.init();
+    if (chatStore.subroute === 'inbox') {
+      chatStore.init();
+    } else {
+      console.log('chat log', chatStore.selectedChat?.path);
+      chatStore.selectedChat?.fetchMessages();
+    }
   }, []);
 
   return (
     <ChatProvider value={chatStore}>
-      <LayoutGroup>
-        {chatStore.subroute === 'inbox' && <Inbox />}
-        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
-        {chatStore.subroute === 'new' && <NewChat />}
-      </LayoutGroup>
+      {chatStore.subroute === 'inbox' && <Inbox />}
+      {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
+      {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+      {chatStore.subroute === 'new' && <NewChat />}
     </ChatProvider>
   );
 };

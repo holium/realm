@@ -199,8 +199,9 @@ export class ShipService extends BaseService {
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    //
-    let secretKey: string | null = this.core.passwords.getPassword(ship);
+    let secretKey: string | null = this.core.passwords.getPassword(
+      ship
+    ) as string;
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
@@ -231,14 +232,14 @@ export class ShipService extends BaseService {
     const courierStore = new DiskStore(
       'courier',
       ship,
-      secretKey!,
+      secretKey,
       CourierStore
     );
     this.models.courier = courierStore.model;
     const friendsStore = new DiskStore(
       'friends',
       ship,
-      secretKey!,
+      secretKey,
       FriendsStore,
       { all: {} }
     );
@@ -257,7 +258,7 @@ export class ShipService extends BaseService {
     });
     // 1. Send initial snapshot
     const syncEffect = {
-      model: getSnapshot(this.state!),
+      model: getSnapshot(this.state),
       resource: 'ship',
       key: ship,
       response: 'initial',
@@ -266,33 +267,14 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
 
     try {
-      /*
-      // TODO rewrite the contact store logic
-      try {
-        this.core.conduit!.watch({
-          app: 'contact-store',
-          path: '/all',
-          onEvent: (data: any) => {
-            this.models.friends!.setInitial(data);
-          },
-          onError: () => console.log('Subscription rejected'),
-          onQuit: () => console.log('Kicked from subscription'),
-        });
-      } catch {
-        console.log('Subscription failed');
-      }*/
+      if (!this.core.conduit) throw new Error('No conduit found');
+      FriendsApi.watchFriends(this.core.conduit, this.models.friends);
 
-      FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
-
-      FriendsApi.getContact(this.core.conduit!, ship).then((value: any) => {
-        this.state!.setOurMetadata(value);
+      FriendsApi.getContact(this.core.conduit, ship).then((value: any) => {
+        this.state?.setOurMetadata(value);
       });
-
-      MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
-
       // register dm update handler
-      DmApi.updates(this.core.conduit!, this.models.courier!);
-      CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
+      if (!this.models.courier) throw new Error('No courier found');
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
@@ -323,8 +305,9 @@ export class ShipService extends BaseService {
   }
 
   async init(ship: string) {
+    if (!this.state) throw new Error('No state found');
     const syncEffect = {
-      model: getSnapshot(this.state!),
+      model: getSnapshot(this.state),
       resource: 'ship',
       key: ship,
       response: 'initial',
@@ -354,7 +337,7 @@ export class ShipService extends BaseService {
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship.patp}`,
-      secretKey: this.core.passwords.getPassword(ship.patp)!,
+      secretKey: this.core.passwords.getPassword(ship.patp),
       accessPropertiesByDotNotation: true,
     };
 
@@ -382,13 +365,16 @@ export class ShipService extends BaseService {
   }
 
   async getOurGroups(_event: any): Promise<any> {
-    return await GroupsApi.getOur(this.core.conduit!);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await GroupsApi.getOur(this.core.conduit);
   }
   async getGroup(_event: any, path: string): Promise<any> {
-    return await GroupsApi.getGroup(this.core.conduit!, path);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await GroupsApi.getGroup(this.core.conduit, path);
   }
   async getGroupMembers(_event: any, path: string): Promise<any> {
-    return await GroupsApi.getGroupMembers(this.core.conduit!, path);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await GroupsApi.getGroupMembers(this.core.conduit, path);
   }
 
   // ------------------------------------------
@@ -396,12 +382,14 @@ export class ShipService extends BaseService {
   // ------------------------------------------
   //
   async getFriends(_event: IpcMainInvokeEvent) {
-    return await FriendsApi.getFriends(this.core.conduit!);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await FriendsApi.getFriends(this.core.conduit);
   }
 
   //
   async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-    return await FriendsApi.addFriend(this.core.conduit!, patp);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await FriendsApi.addFriend(this.core.conduit, patp);
   }
 
   //
@@ -410,11 +398,13 @@ export class ShipService extends BaseService {
     patp: Patp,
     payload: { pinned: boolean; tags: string[] }
   ) {
-    return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await FriendsApi.editFriend(this.core.conduit, patp, payload);
   }
 
   async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-    return await FriendsApi.removeFriend(this.core.conduit!, patp);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await FriendsApi.removeFriend(this.core.conduit, patp);
   }
 
   // ---
@@ -426,9 +416,10 @@ export class ShipService extends BaseService {
 
   //
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     await FriendsApi.saveContact(
-      this.core.conduit!,
-      profileData.patp || this.state!.patp,
+      this.core.conduit,
+      profileData.patp || this.state?.patp,
       profileData
     );
 
@@ -444,7 +435,7 @@ export class ShipService extends BaseService {
   //     ship,
   //     desk,
   //     this.models.bazaar,
-  //     this.core.conduit!,
+  //     this.core.conduit,
   //     this.metadataStore
   //   );
   // }
@@ -457,19 +448,20 @@ export class ShipService extends BaseService {
   }
 
   async getDmLog(_event: any, ship: Patp) {
-    const dmLog = await CourierApi.getDmLog(this.core.conduit!, ship);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    const dmLog = await CourierApi.getDmLog(this.core.conduit, ship);
     this.models.courier?.setDmLog(dmLog);
     return dmLog;
   }
 
   async acceptDm(_event: any, toShip: string) {
-    console.log('acceptingDM', toShip);
-    return await CourierApi.acceptDm(this.core.conduit!, toShip);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await CourierApi.acceptDm(this.core.conduit, toShip);
   }
 
   async declineDm(_event: any, toShip: string) {
-    console.log('rejectingDM', toShip);
-    return await CourierApi.declineDm(this.core.conduit!, toShip);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    return await CourierApi.declineDm(this.core.conduit, toShip);
   }
 
   /**
@@ -480,7 +472,8 @@ export class ShipService extends BaseService {
    * @returns
    */
   async readDm(_event: any, toShip: string) {
-    CourierApi.readDm(this.core.conduit!, toShip);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    CourierApi.readDm(this.core.conduit, toShip);
   }
 
   /**
@@ -491,34 +484,38 @@ export class ShipService extends BaseService {
    * @returns
    */
   async readGroupDm(_event: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const split = path.split('/');
     const host = split[0];
     const timestamp = split[1];
-    return await CourierApi.readGroupDm(this.core.conduit!, host, timestamp);
+    return await CourierApi.readGroupDm(this.core.conduit, host, timestamp);
   }
 
   async acceptGroupDm(_event: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const inviteId = this.models.courier?.previews.get(path)?.inviteId;
     console.log('acceptingDM', path, inviteId);
     if (inviteId) {
-      return await CourierApi.acceptGroupDm(this.core.conduit!, inviteId);
+      return await CourierApi.acceptGroupDm(this.core.conduit, inviteId);
     }
   }
 
   async declineGroupDm(_event: any, path: string) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const inviteId = this.models.courier?.previews.get(path)?.inviteId;
     console.log('rejectingDM', path, inviteId);
     if (inviteId) {
-      await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+      await CourierApi.declineGroupDm(this.core.conduit, inviteId);
       return this.models.courier?.declineDm(path);
     }
   }
 
   async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
-    let draft: any;
+    if (!this.core.conduit) throw new Error('No conduit found');
+    let draft;
     if (patps.length > 1) {
       const reaction: any = await CourierApi.createGroupDm(
-        this.core.conduit!,
+        this.core.conduit,
         patps
       );
       draft = this.models.courier?.draftGroupDm(
@@ -532,21 +529,24 @@ export class ShipService extends BaseService {
   }
 
   async sendDm(_event: any, path: string, contents: Content[]) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const dmLog = this.models.courier?.dms.get(path);
     if (!dmLog) throw new Error('DM log not found, check path');
+    if (!this.state?.patp) throw new Error('No patp found');
 
-    return dmLog.sendDm(this.core.conduit!, this.state!.patp, path, contents);
+    return dmLog.sendDm(this.core.conduit, this.state.patp, path, contents);
   }
 
   async removeDm(_event: any, toShip: string, removeIndex: any) {
-    const ourShip = this.state?.patp!;
+    const ourShip = this.state?.patp;
     console.log('removingDM', ourShip, toShip, removeIndex);
   }
 
   async getS3Bucket(_event: any = undefined) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     const [credentials, configuration] = await Promise.all([
-      S3Api.getCredentials(this.core.conduit!),
-      S3Api.getConfiguration(this.core.conduit!),
+      S3Api.getCredentials(this.core.conduit),
+      S3Api.getConfiguration(this.core.conduit),
     ]);
 
     return {
@@ -585,7 +585,7 @@ export class ShipService extends BaseService {
           const params = {
             Bucket: response.configuration.currentBucket,
             Key: `${
-              this.state!.patp
+              this.state?.patp
             }/${moment().unix()}-${fileName}.${fileExtension}`,
             Body: fileContent,
             ACL: StorageAcl.PublicRead,

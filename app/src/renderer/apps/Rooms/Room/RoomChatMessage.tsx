@@ -3,7 +3,8 @@ import { ChatModelType } from '@holium/realm-room';
 import { lighten, darken } from 'polished';
 import { useEffect, useState } from 'react';
 import { Bubble } from 'renderer/apps/Messages/components/Bubble';
-import { Flex, Text, Tooltip } from 'renderer/components';
+import { Flex, Tooltip } from '@holium/design-system';
+import { Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
 interface RoomChatMessageProps {

@@ -3,6 +3,7 @@ module.exports = {
   plugins: ['unused-imports'],
   parser: '@typescript-eslint/parser',
   root: true,
+  parserOptions: { project: './tsconfig.json' },
   rules: {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'off', // many cases where we need other variables in the deps
@@ -19,6 +20,8 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
+    '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'error',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
   },
