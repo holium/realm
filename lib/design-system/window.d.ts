@@ -4,3 +4,5 @@ declare global {
     ship: string;
   }
 }
+
+declare module 'urbit-ob';

@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
-import { Flex, Text, BoxProps } from '../..';
+import { forwardRef, useMemo } from 'react';
+import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
 import styled from 'styled-components';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
@@ -59,6 +59,12 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     } = props;
 
     const dateDisplay = chatDate(new Date(sentAt));
+    const authorColorDisplay = useMemo(
+      () =>
+        (authorColor && convertDarkText(authorColor)) ||
+        'var(--rlm-text-color)',
+      [authorColor]
+    );
 
     return (
       <Flex
@@ -66,7 +72,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
         key={id}
         display="inline-flex"
         mx="1px"
-        // background={isEditing ? 'var(--rlm-overlay-hover)' : 'transparent'}
         justifyContent={isOur ? 'flex-end' : 'flex-start'}
       >
         <BubbleStyle
@@ -80,7 +85,14 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           className={isOur ? 'bubble-our' : ''}
         >
           {!isOur && (
-            <BubbleAuthor authorColor={authorColor}>{author}</BubbleAuthor>
+            <BubbleAuthor
+              style={{
+                color: authorColorDisplay,
+              }}
+              authorColor={authorColor}
+            >
+              {author}
+            </BubbleAuthor>
           )}
           <FragmentBlock id={id}>
             {message?.map((fragment, index) => {
@@ -108,19 +120,28 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             })}
           </FragmentBlock>
           <BubbleFooter id={id}>
-            {onReaction && (
-              <Reactions
-                id={`${id}-reactions`}
-                isOur={isOur}
-                ourShip={ourShip}
-                ourColor={ourColor}
-                reactions={reactions}
-                onReaction={onReaction}
-              />
-            )}
+            <Box width="70%">
+              {onReaction && (
+                <Reactions
+                  id={`${id}-reactions`}
+                  isOur={isOur}
+                  ourShip={ourShip}
+                  ourColor={ourColor}
+                  reactions={reactions}
+                  onReaction={onReaction}
+                />
+              )}
+            </Box>
             <Text.Custom
+              width="30%"
+              style={{ whiteSpace: 'nowrap' }}
               pointerEvents="none"
-              alignSelf="flex-end"
+              textAlign="right"
+              display="inline-flex"
+              alignItems="flex-end"
+              justifyContent="flex-end"
+              minWidth="114px"
+              flexBasis="114px"
               opacity={0.5}
             >
               {isEditing && 'Editing... · '}

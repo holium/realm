@@ -148,7 +148,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
               </AnimatePresence>
             )}
             <WindowedList
-              key={`last-${selectedChat.lastFetch}`}
+              key={`last-${selectedChat.lastFetch}-${selectedChat.messages.length}`}
               startAtBottom
               hideScrollbar
               width={dimensions.width - 24}

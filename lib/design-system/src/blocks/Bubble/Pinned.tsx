@@ -39,7 +39,7 @@ export const PinnedMessage = (props: PinnedProps) => {
   }
 
   return (
-    <Flex id={id} key={id} mx="1px" width="100%" onClick={onClick}>
+    <Flex id={id} key={id} width="100%" onClick={onClick}>
       <FragmentBlock id={id}>
         <FragmentBlockquote
           id={id}
@@ -47,6 +47,8 @@ export const PinnedMessage = (props: PinnedProps) => {
             paddingTop: 6,
             paddingBottom: 6,
             borderRadius: 4,
+            marginLeft: 0,
+            marginRight: 0,
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
             background: 'var(--rlm-overlay-hover)',
           }}

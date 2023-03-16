@@ -316,10 +316,13 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
   window.ship = isOurPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: isOurPatp, emoji: payload.emoji }]);
+      setReacts([
+        ...reacts,
+        { msgId: '0', by: isOurPatp, emoji: payload.emoji },
+      ]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === isOurPatp
+        (r) => r.emoji === payload.emoji && r.by === isOurPatp
       );
       if (removeIdx === -1) {
         return;
@@ -328,12 +331,15 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
     }
   };
   return (
-    <Flex gap={12} flexDirection="column" width={500}>
+    <Flex ml={400} mt={50} gap={12} flexDirection="column" width={500}>
       <Bubble
         id={'i-1'}
+        ourColor="#FF0000"
+        ourShip="~fasnut-famden"
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
+        isEdited
         message={[
           {
             image:
@@ -348,6 +354,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         isOur
         ourColor="#9664FF"
         ourShip="~fasnut-famden"
+        author="~fasnut-famden"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
@@ -356,11 +363,11 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         reactions={[
-          { by: '~lodlev-migdev', emoji: '1f44d' },
-          { by: '~fasnut-famden', emoji: '1f44d' },
-          { by: '~zod', emoji: '1f525' },
-          { by: '~dev', emoji: '1f525' },
-          { by: '~fes', emoji: '1f525' },
+          { msgId: '1', by: '~lodlev-migdev', emoji: '1f44d' },
+          { msgId: '2', by: '~fasnut-famden', emoji: '1f44d' },
+          { msgId: '3', by: '~zod', emoji: '1f525' },
+          { msgId: '4', by: '~dev', emoji: '1f525' },
+          { msgId: '5', by: '~fes', emoji: '1f525' },
         ]}
         onReaction={() => {}}
       />
