@@ -5,41 +5,8 @@ import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
-import {
-  ChatDbReactions,
-  MessagesRow,
-  PathsRow,
-  PeersRow,
-  ChatDbOps,
-  AddRow,
-  DelPathsRow,
-  // DelPeersRow,
-  UpdateRow,
-  DelMessagesRow,
-  DeleteLogRow,
-  DelPeersRow,
-  UpdateMessage,
-} from './chat.types';
+import * from './notification.types';
 import { InvitePermissionType } from 'renderer/apps/Courier/models';
-
-type ChatUpdateType =
-  | 'message-received'
-  | 'message-edited'
-  | 'message-deleted'
-  | 'path-added'
-  | 'path-updated'
-  | 'path-deleted'
-  | 'peer-added'
-  | 'peer-deleted';
-
-export type ChatPathMetadata = {
-  title: string;
-  description?: string;
-  image?: string;
-  creator: string;
-  timestamp: string;
-  reactions?: string;
-};
 
 const parseMetadata = (metadata: string) => {
   const mtd = JSON.parse(metadata);
@@ -50,9 +17,7 @@ const parseMetadata = (metadata: string) => {
   };
 };
 
-export type ChatPathType = 'dm' | 'group' | 'space';
-
-export class ChatService extends BaseService {
+export class NotificationService extends BaseService {
   db: Database.Database | null = null;
   initSql = fs.readFileSync(`${path.resolve(__dirname)}/init.sql`, 'utf8');
   lastTimestamp = 0;
@@ -61,89 +26,20 @@ export class ChatService extends BaseService {
    * Handlers for the ipcRenderer invoked functions
    **/
   handlers = {
-    'realm.chat.get-chat-list': this.getChatList,
-    'realm.chat.get-chat-log': this.getChatLog,
-    'realm.chat.get-chat-reactions': this.getChatReactions,
-    'realm.chat.get-chat-peers': this.getChatPeers,
-    'realm.chat.get-reply-to': this.getReplyToMessage,
-    'realm.chat.send-message': this.sendMessage,
-    'realm.chat.edit-message': this.editMessage,
-    'realm.chat.delete-message': this.deleteMessage,
-    // 'realm.chat.read-chat': this.readChat,
-    'realm.chat.create-chat': this.createChat,
-    'realm.chat.edit-chat': this.editChatMetadata,
-    'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
-    'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
-    'realm.chat.set-pinned-message': this.setPinnedMessage,
-    'realm.chat.clear-pinned-message': this.clearPinnedMessage,
-    'realm.chat.clear-chat-backlog': this.clearChatBacklog,
-    'realm.chat.add-peer': this.addPeerToChat,
-    'realm.chat.remove-peer': this.removePeerFromChat,
-    'realm.chat.leave-chat': this.leaveChat,
+    'realm.notification.get-log': this.getLog,
   };
 
   /**
    * Preload functions to register with the renderer
    */
   static preload = {
-    getChatList: async () =>
-      await ipcRenderer.invoke('realm.chat.get-chat-list'),
-    getChatLog: async (
+    getLog: async (
       path: string,
       params?: { start: number; amount: number }
-    ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
-    getChatReactions: async (path: string, msgId: string) =>
-      ipcRenderer.invoke('realm.chat.get-chat-reactions', path, msgId),
-    getChatReplyTo: async (msgId: string) =>
-      ipcRenderer.invoke('realm.chat.get-reply-to', msgId),
-    getChatPeers: async (path: string) =>
-      await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
-    sendMessage: (path: string, fragments: any[]) =>
-      ipcRenderer.invoke('realm.chat.send-message', path, fragments),
-    editMessage: (path: string, msgId: string, fragments: any[]) =>
-      ipcRenderer.invoke('realm.chat.edit-message', path, msgId, fragments),
-    deleteMessage: (path: string, msgId: string) =>
-      ipcRenderer.invoke('realm.chat.delete-message', path, msgId),
-    createChat: (
-      peers: string[],
-      type: ChatPathType,
-      metadata: ChatPathMetadata
-    ) => ipcRenderer.invoke('realm.chat.create-chat', peers, type, metadata),
-    editChat: (
-      path: string,
-      metadata: ChatPathMetadata,
-      invites: InvitePermissionType,
-      peersGetBacklog: boolean,
-      expiresDuration: number | null
-    ) =>
-      ipcRenderer.invoke(
-        'realm.chat.edit-chat',
-        path,
-        metadata,
-        invites,
-        peersGetBacklog,
-        expiresDuration
-      ),
-    addPeer: (path: string, peer: string) =>
-      ipcRenderer.invoke('realm.chat.add-peer', path, peer),
-    removePeer: (path: string, peer: string) =>
-      ipcRenderer.invoke('realm.chat.remove-peer', path, peer),
-    fetchPinnedChats: () => ipcRenderer.invoke('realm.chat.fetch-pinned-chats'),
-    togglePinnedChat: (path: string, pinned: boolean) =>
-      ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
-    setPinnedMessage: (path: string, msgId: string) =>
-      ipcRenderer.invoke('realm.chat.set-pinned-message', path, msgId),
-    clearPinnedMessage: (path: string) =>
-      ipcRenderer.invoke('realm.chat.clear-pinned-message', path),
-    clearChatBacklog: (path: string) =>
-      ipcRenderer.invoke('realm.chat.clear-chat-backlog', path),
-    // readChat: (path: string) =>
-    //   ipcRenderer.invoke('realm.chat.read-chat', path),
-    leaveChat: (path: string) =>
-      ipcRenderer.invoke('realm.chat.leave-chat', path),
+    ) => await ipcRenderer.invoke('realm.notification.get-log', path, params),
     onDbChange: (
       callback: (evt: IpcRendererEvent, type: ChatUpdateType, data: any) => void
-    ) => ipcRenderer.on('realm.chat.on-db-change', callback),
+    ) => ipcRenderer.on('realm.notification.on-db-change', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -153,12 +49,6 @@ export class ChatService extends BaseService {
 
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
-    this.sendChatUpdate = this.sendChatUpdate.bind(this);
-    this.deletePathsRow = this.deletePathsRow.bind(this);
-    this.deleteMessagesRow = this.deleteMessagesRow.bind(this);
-    this.deletePeersRow = this.deletePeersRow.bind(this);
-    this.applyDeleteLogs = this.applyDeleteLogs.bind(this);
-    this.insertDeleteLogs = this.insertDeleteLogs.bind(this);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -174,69 +64,28 @@ export class ChatService extends BaseService {
     });
     this.db.exec(this.initSql);
     await this.core.conduit?.watch({
-      app: 'chat-db',
+      app: 'notif-db',
       path: '/db',
       onEvent: this.onDbUpdate,
       onQuit: this.onQuit,
       onError: this.onError,
     });
-    const paths = await this.fetchPaths();
-    const peers = await this.fetchPeers();
-    const messages = await this.fetchMessages();
-    const deleteLogs = await this.fetchDeleteLogs();
-    this.insertMessages(messages);
-    this.insertPaths(paths);
-    this.insertPeers(peers);
-    // Missed delete events must be applied after inserts
-    this.applyDeleteLogs(deleteLogs).then(() => {
-      // and after applying successfully, insert them into the db
-      this.insertDeleteLogs(deleteLogs);
-    });
+
+    const notifications = await this.fetchNotifications();
+    this.insertNotifications(notifications);
   }
 
-  async fetchMessages() {
-    const lastTimestamp = this.getLastTimestamp('messages');
+  async fetchNotifications() {
+    const lastTimestamp = this.getLastTimestamp('notifications');
     const response = await this.core.conduit?.scry({
-      app: 'chat-db',
-      path: `/db/messages/start-ms/${lastTimestamp}`,
-    });
-    return response.tables.messages;
-  }
-
-  async fetchPaths() {
-    const lastTimestamp = this.getLastTimestamp('paths');
-    const response = await this.core.conduit?.scry({
-      app: 'chat-db',
-      path: `/db/paths/start-ms/${lastTimestamp}`,
-    });
-    return response.tables.paths;
-  }
-
-  async fetchPeers() {
-    const lastTimestamp = this.getLastTimestamp('peers');
-    const response = await this.core.conduit?.scry({
-      app: 'chat-db',
-      path: `/db/peers/start-ms/${lastTimestamp}`,
-    });
-    return response.tables.peers;
-  }
-
-  async fetchDeleteLogs() {
-    const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = await this.core.conduit?.scry({
-      app: 'chat-db',
-      path: `/delete-log/start-ms/${lastTimestamp}`,
+      app: 'notif-db',
+      path: `/db/since-ms/${lastTimestamp}`,
     });
     return response;
   }
 
-  onDbUpdate(data: ChatDbReactions, _id?: number) {
-    if ('tables' in data) {
-      console.log('db update', data.tables.messages);
-      this.insertMessages(data.tables.messages);
-      this.insertPaths(data.tables.paths);
-      this.insertPeers(data.tables.peers);
-    } else if (Array.isArray(data)) {
+  onDbUpdate(data: NotifDbChangeReactions, _id?: number) {
+    if (Array.isArray(data)) {
       console.log('db update', data);
       data.forEach(this.handleDBChange);
     } else {
@@ -244,63 +93,26 @@ export class ChatService extends BaseService {
     }
   }
 
-  handleDBChange(dbChange: ChatDbOps) {
+  handleDBChange(dbChange: NotifDbOps) {
     if (dbChange.type === 'add-row') {
       const addRow = dbChange as AddRow;
-      switch (addRow.table) {
-        case 'messages':
-          console.log('add-row to messages', addRow.row);
-          const message = addRow.row as MessagesRow;
-          this.insertMessages([message]);
-          const msg = this.getChatMessage(message['msg-id']);
-          this.sendChatUpdate('message-received', msg);
-          break;
-        case 'paths':
-          console.log('add-row to paths', addRow.row);
-          const path = addRow.row as PathsRow;
-          this.insertPaths([path]);
-          const chat = this.getChat(path.path);
-          this.sendChatUpdate('path-added', chat);
-
-          break;
-        case 'peers':
-          console.log('add-row to peers', addRow.row);
-          const peers = addRow.row as PeersRow;
-          this.insertPeers([peers]);
-          this.sendChatUpdate('peer-added', peers);
-          break;
-      }
+      console.log('add-row to notifications', addRow.row);
+      const notif = addRow.row as NotificationsRow;
+      this.insertNotifications([notif]);
+      break;
     }
-    if (dbChange.type === 'update') {
+    if (dbChange.type === 'update-all') {
+      console.log('TODO implement updating all rows read column');
+      break;
+    }
+    if (dbChange.type === 'update-row') {
       const update = dbChange as UpdateRow;
-      switch (update.table) {
-        case 'messages':
-          const message = update as UpdateMessage;
-          console.log('update messages', message.message);
-          const msgId = message.message[0]['msg-id'];
-          this.insertMessages(message.message);
-          const msg = this.getChatMessage(msgId);
-          this.sendChatUpdate('message-edited', msg);
-          break;
-        case 'paths':
-          console.log('update paths', update.row);
-          const path = update.row as PathsRow;
-          this.insertPaths([path]);
-          const chat = this.getChat(path.path);
-          this.sendChatUpdate('path-updated', chat);
-          break;
-        case 'peers':
-          console.log('update peers', update.row);
-          const peers = update.row as PeersRow;
-          this.insertPeers([peers]);
-          break;
-      }
+      const notif = addRow.row as NotificationsRow;
+      console.log('update-row', notif);
+      this.insertMessages(message.message);
+      break;
     }
-    if (
-      dbChange.type === 'del-messages-row' ||
-      dbChange.type === 'del-paths-row' ||
-      dbChange.type === 'del-peers-row'
-    ) {
+    if (dbChange.type === 'del-row') {
       this.handleDeletes(dbChange);
     }
   }
@@ -340,6 +152,70 @@ export class ChatService extends BaseService {
   }
   onError(err: any) {
     console.log('err!', err);
+  }
+
+  insertNotifications(notifications: NotificationsRow[]) {
+    if (!this.db) throw new Error('No db connection');
+    const insert = this.db.prepare(
+      `REPLACE INTO notifications (
+        id,
+        app,
+        path,
+        type,
+        title,
+        content,
+        image,
+        buttons,
+        link,
+        metadata,
+        created_at,
+        updated_at,
+        read_at,
+        read,
+        dismissed_at,
+        dismissed
+      ) VALUES (
+        @id,
+        @app,
+        @path,
+        @type,
+        @title,
+        @content,
+        @image,
+        @buttons,
+        @link,
+        @metadata,
+        @created_at,
+        @updated_at,
+        @read_at,
+        @read,
+        @dismissed_at,
+        @dismissed
+      )`
+    );
+    const insertMany = this.db.transaction((notifications) => {
+      for (const notif of notifications) {
+        insert.run({
+          id: notif.id,
+          app: notif.app,
+          path: notif.path,
+          type: notif.type,
+          title: notif.title,
+          content: notif.content,
+          image: notif.image,
+          buttons: JSON.stringify(notif.buttons),
+          link: notif.link,
+          metadata: JSON.stringify(notif.metadata),
+          created_at: notif['created-at'],
+          updated_at: notif['updated-at'],
+          read_at: notif['read-at'],
+          read: notif.read ? 1 : 0,
+          dismissed_at: notif['dismissed-at'],
+          dismissed: notif.dismissed ? 1 : 0,
+        });
+      }
+    });
+    insertMany(notifications);
   }
 
   insertMessages(messages: MessagesRow[]) {
