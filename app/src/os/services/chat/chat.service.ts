@@ -728,18 +728,29 @@ export class ChatService extends BaseService {
             realm_chat.msg_id DESC,
             realm_chat.msg_part_id
       )
-      SELECT
-        path,
-        msg_id id,
+           SELECT
+        formed_fragments.path,
+        formed_fragments.msg_id id,
         json_group_array(json_extract(content, '$')) as contents,
-        sender,
-        json_extract(reply_to, '$."path"') replyToMsgPath,
-        json_extract(reply_to, '$."msg-id"') replyToMsgId,
-        metadata,
+        formed_fragments.sender,
+        json_extract(formed_fragments.reply_to, '$."path"') replyToMsgPath,
+        json_extract(formed_fragments.reply_to, '$."msg-id"') replyToMsgId,
+        formed_fragments.metadata,
+        CASE
+            WHEN messages.sender IS NOT NULL THEN json_group_array(
+                json_object(
+                    'msgId', messages.msg_id, 
+                    'by', messages.sender, 
+                    'emoji', messages.content_data
+                    )
+                )
+            WHEN messages.sender IS NULL THEN NULL
+        END reactions,
         MAX(formed_fragments.created_at) createdAt,
         MAX(formed_fragments.updated_at) updatedAt
       FROM formed_fragments
-      GROUP BY msg_id
+      LEFT OUTER JOIN messages ON json_extract(messages.reply_to, '$."msg-id"') = formed_fragments.msg_id AND content_type = 'react'
+      GROUP BY formed_fragments.msg_id
       ORDER BY createdAt;
     `);
     const result = query.all(path);
@@ -748,6 +759,7 @@ export class ChatService extends BaseService {
         ...row,
         metadata: row.metadata ? parseMetadata(row.metadata) : [null],
         contents: row.contents ? JSON.parse(row.contents) : null,
+        reactions: row.reactions ? JSON.parse(row.reactions) : [],
       };
     });
   }

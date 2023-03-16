@@ -55,6 +55,11 @@ export const ChatMessage = types
     // ui state
     pending: types.optional(types.boolean, false),
   })
+  .views((self) => ({
+    get reactionsList() {
+      return self.reactions;
+    },
+  }))
   .actions((self) => ({
     setPending(pending: boolean) {
       self.pending = pending;
@@ -62,18 +67,6 @@ export const ChatMessage = types
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
       self.updatedAt = updatedAt;
-    },
-    addOriginalReplyToContents: (replyContent: any) => {
-      // {
-      //   reply: {
-      //     msgId: '123',
-      //     author: '~lomder-librun',
-      //     message: [{ plain: 'Yo what the hell you talkin bout?' }],
-      //   },
-      // }
-      const oldContents = self.contents.slice();
-      console.log('addOriginalReplyToContents', [replyContent, ...oldContents]);
-      self.contents.replace([replyContent, ...oldContents]);
     },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
@@ -94,6 +87,15 @@ export const ChatMessage = types
     }),
     insertReaction(react: ReactionModelType) {
       self.reactions.push(react);
+    },
+    removeReaction(msgId: string) {
+      const reactionToDelete = self.reactions.find(
+        (react) => (react.msgId = msgId)
+      );
+      if (!reactionToDelete) return;
+      self.reactions.remove(reactionToDelete);
+      console.log(toJS(self.reactions));
+
     },
     delete: flow(function* () {
       try {
@@ -210,7 +212,12 @@ export const Chat = types
     addMessage(message: ChatMessageType) {
       if (Object.keys(message.contents[0])[0] === 'react') {
         const msg = self.messages.find((m) => m.id === message.replyToMsgId);
-        if (msg) msg.fetchReactions();
+        if (msg)
+          msg.insertReaction({
+            msgId: message.id,
+            emoji: message.contents[0].react,
+            by: message.sender,
+          });
         return;
       }
       self.messages.push(message);
@@ -285,8 +292,14 @@ export const Chat = types
       ]);
       self.isReacting = undefined;
     }),
-    deleteReaction: flow(function* (msgId: string) {
-      // yield ChatDBActions.deleteMessage(self.path, msgId);
+    deleteReaction: flow(function* (messageId: string, reactionId: string) {
+      const chatMsg = self.messages.find((m) => m.id === messageId);
+      try {
+        if (chatMsg) chatMsg.removeReaction(reactionId);
+        yield ChatDBActions.deleteMessage(self.path, reactionId);
+      } catch (err) {
+        console.error(err);
+      }
       // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
     }),
     clearReacting() {

@@ -8,31 +8,21 @@ import EmojiPicker, {
   SkinTones,
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
-import { lighten, darken } from 'polished';
+import { rgba, darken } from 'polished';
 import { getVar } from '../../util/colors';
 
 const WIDTH = 300;
 const HEIGHT = 350;
 const defaultShip = window.ship ?? 'zod';
 
-// const getAnchorPoint = (e: React.MouseEvent<HTMLDivElement>) => {
-//   const menuWidth = WIDTH;
-//   const menuHeight = HEIGHT;
-
-//   const willGoOffScreenHorizontally = e.pageX + menuWidth > window.innerWidth;
-//   const willGoOffScreenVertically = e.pageY + menuHeight > window.innerHeight;
-
-//   const offset = 3;
-//   const x = willGoOffScreenHorizontally ? 0 - menuWidth - offset : 0 + offset;
-//   const y = willGoOffScreenVertically ? 0 - menuHeight - offset : 0 + offset;
-
-//   return { x, y };
-// };
-
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
   position: relative;
   flex-direction: row;
+  width: 100%;
+  max-width: ${WIDTH}px;
+  flex-wrap: wrap;
+  margin-bottom: -2px;
   gap: 2px;
   z-index: 15;
   .emoji-picker-menu {
@@ -48,7 +38,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
       ? css`
           position: absolute;
           left: -4px;
-          bottom: -16px;
+          bottom: -12px;
         `
       : css`
           flex-direction: row;
@@ -86,24 +76,25 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background: ${({ selected }) =>
-    selected ? () => lighten(0.3, getVar('accent')) : 'var(--rlm-input-color)'};
-
+  background: ${({ selected, ourColor }) =>
+    selected
+      ? () => (ourColor ? rgba(ourColor, 0.3) : getVar('accent'))
+      : 'rgba(0, 0, 0, 0.08)'};
   border: ${({ selected }) =>
     selected
-      ? '1px solid var(--rlm-accent-color)'
-      : '1px solid var(--rlm-window-color)'};
+      ? '1px solid rgba(0, 0, 0, 0.04)'
+      : '1px solid rgba(0, 0, 0, 0.08)'};
   border-radius: 16px;
   transition: var(--transition);
-  ${({ size, selected, ourColor }) =>
+  ${({ size, selected, isOur }) =>
     size
       ? css`
           min-width: ${ReactionSizes[size]}px;
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && !ourColor && 'color: var(--rlm-accent-color);'}
-            ${selected && ourColor && 'color: #FFF'}
+            ${selected && !isOur && 'color: var(--rlm-text-color);'}
+            ${selected && isOur && 'color: #FFF;'}
           }
         `
       : css`
@@ -132,9 +123,12 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     user-select: none;
     pointer-events: none;
   }
-  ${({ hasCount }: ReactionButtonProps) =>
+  ${({ hasCount, size }: ReactionButtonProps) =>
     hasCount &&
+    size &&
     css`
+      min-width: ${ReactionSizes[size]}px;
+      transition: 0.01s ease-in-out;
       padding: 0 6px 0 4px;
       gap: 4px;
     `}
@@ -153,6 +147,7 @@ export type ReactionAggregateType = {
 };
 
 export type OnReactionPayload = {
+  reactId?: string;
   emoji: string;
   action: 'remove' | 'add';
   by: string;
@@ -201,9 +196,8 @@ export const Reactions = (props: ReactionProps) => {
           return acc;
         }, {} as Record<string, ReactionAggregateType>)
       ).sort((a, b) => b.count - a.count),
-    [reactions.length]
+    [reactions, reactions.length]
   );
-
   const checkDupe = (emoji: string) => {
     const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
@@ -218,7 +212,17 @@ export const Reactions = (props: ReactionProps) => {
   const onClick = (emoji: string) => {
     setIsReacting(false);
     if (checkDupe(emoji)) {
-      onReaction({ emoji, action: 'remove', by: ourShip });
+      const reactToRemove = reactions.find(
+        (r) => r.by === ourShip && r.emoji === emoji
+      );
+      if (!reactToRemove) return;
+      console.log(reactToRemove);
+      onReaction({
+        reactId: reactToRemove.msgId,
+        emoji,
+        action: 'remove',
+        by: ourShip,
+      });
     } else {
       onReaction({ emoji, action: 'add', by: ourShip });
     }
@@ -230,6 +234,7 @@ export const Reactions = (props: ReactionProps) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isReacting) {
         const addButton = document.getElementById('reaction-add-button');
+
         const dropdownNode = document.getElementById('emoji-picker');
         const isVisible = dropdownNode
           ? dropdownNode.getAttribute('data-is-open') === 'true'
@@ -254,20 +259,31 @@ export const Reactions = (props: ReactionProps) => {
     };
   }, [root, isReacting]);
 
+  // if we have reactions, and we're in overlay mode, switch to inline
+  const variantAuto = useMemo(
+    () =>
+      reactions.length > 0 && variant === 'overlay' ? 'inline' : 'overlay',
+    [reactions.length, variant]
+  );
+
   return (
     <ReactionRow
-      variant={variant}
+      style={{
+        width: 'max-content',
+      }}
+      variant={variantAuto}
       onClick={(evt) => {
         evt.stopPropagation();
       }}
     >
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
+        console.log(reaction.emoji);
         return (
           <ReactionButton
+            key={`${reaction.emoji}-by-${reaction.by}-${index}`}
             isOur={isOur}
             ourColor={ourColor}
             size={size}
-            key={`${reaction.emoji}-${index}`}
             hasCount={reaction.count > 1}
             onClick={(evt) => {
               evt.stopPropagation();
@@ -276,6 +292,7 @@ export const Reactions = (props: ReactionProps) => {
             selected={reaction.by.includes(ourShip)}
           >
             <Emoji
+              key={`${reaction.emoji}-emoji`}
               unified={reaction.emoji}
               emojiStyle={EmojiStyle.APPLE}
               size={EmojiSizes[size]}
