@@ -17,6 +17,7 @@ export const BubbleStyle = styled(Box)`
   color: var(--rlm-text-color);
   background: var(--rlm-input-color);
   border-radius: 9px 9px 9px 0px;
+  transition: width 1s ease-in-out;
   &.bubble-our {
     background: var(--rlm-intent-caution-color);
     border-radius: 12px 12px 0px 12px !important;

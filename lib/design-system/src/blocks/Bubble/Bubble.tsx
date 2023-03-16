@@ -134,12 +134,13 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             </Box>
             <Text.Custom
               width="30%"
+              style={{ whiteSpace: 'nowrap' }}
               pointerEvents="none"
               textAlign="right"
               display="inline-flex"
               alignItems="flex-end"
               justifyContent="flex-end"
-              min-width="114px"
+              minWidth="114px"
               flexBasis="114px"
               opacity={0.5}
             >

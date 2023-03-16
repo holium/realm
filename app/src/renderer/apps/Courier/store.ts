@@ -160,9 +160,8 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
+export const ChatStoreContext =
+  createContext<null | ChatStoreInstance>(chatStore);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {
@@ -185,13 +184,15 @@ ChatDBActions.onDbChange((_evt, type, data) => {
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
-    console.log('onPathDeleted', data);
     console.log('message deleted', data);
-    console.log(resolveIdentifier(ChatStore, chatStore, data));
-    // selectedChat. (data.msgId);
+    const selectedChat = chatStore.inbox.find(
+      (chat) => chat.path === data.path
+    );
+    if (!selectedChat) return;
+    selectedChat.removeMessage(data['msg-id']);
   }
   if (type === 'message-received') {
-    console.log('addMessage', data);
+    // console.log('addMessage', data);
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );

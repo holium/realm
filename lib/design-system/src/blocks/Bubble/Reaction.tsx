@@ -13,6 +13,7 @@ import { getVar } from '../../util/colors';
 
 const WIDTH = 300;
 const HEIGHT = 350;
+// @ts-ignore
 const defaultShip = window.ship ?? 'zod';
 
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
@@ -178,26 +179,29 @@ export const Reactions = (props: ReactionProps) => {
     onReaction,
   } = props;
   const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
+  const reactIds = reactions.map((r) => r.msgId);
 
-  const reactionsAggregated = useMemo(
-    () =>
-      Object.values<ReactionAggregateType>(
-        reactions.reduce((acc, reaction) => {
-          if (acc[reaction.emoji]) {
-            acc[reaction.emoji].by.push(reaction.by);
-            acc[reaction.emoji].count++;
-          } else {
-            acc[reaction.emoji] = {
-              by: [reaction.by],
-              emoji: reaction.emoji,
-              count: 1,
-            };
-          }
-          return acc;
-        }, {} as Record<string, ReactionAggregateType>)
-      ).sort((a, b) => b.count - a.count),
-    [reactions, reactions.length]
-  );
+  const reactionsAggregated = useMemo(() => {
+    if (reactions.length === 0) {
+      return [];
+    }
+    return Object.values<ReactionAggregateType>(
+      reactions.reduce((acc, reaction) => {
+        if (acc[reaction.emoji]) {
+          acc[reaction.emoji].by.push(reaction.by);
+          acc[reaction.emoji].count++;
+        } else {
+          acc[reaction.emoji] = {
+            by: [reaction.by],
+            emoji: reaction.emoji,
+            count: 1,
+          };
+        }
+        return acc;
+      }, {} as Record<string, ReactionAggregateType>)
+    ).sort((a, b) => b.count - a.count);
+  }, [reactIds, reactions.length]);
+
   const checkDupe = (emoji: string) => {
     const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
     if (index > -1) {
@@ -216,7 +220,6 @@ export const Reactions = (props: ReactionProps) => {
         (r) => r.by === ourShip && r.emoji === emoji
       );
       if (!reactToRemove) return;
-      console.log(reactToRemove);
       onReaction({
         reactId: reactToRemove.msgId,
         emoji,
@@ -234,12 +237,10 @@ export const Reactions = (props: ReactionProps) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isReacting) {
         const addButton = document.getElementById('reaction-add-button');
-
         const dropdownNode = document.getElementById('emoji-picker');
         const isVisible = dropdownNode
           ? dropdownNode.getAttribute('data-is-open') === 'true'
           : false; // get if the picker is visible currently
-
         if (
           addButton?.contains(event.target as Node) ||
           dropdownNode?.contains(event.target as Node) ||
@@ -277,7 +278,6 @@ export const Reactions = (props: ReactionProps) => {
       }}
     >
       {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
-        console.log(reaction.emoji);
         return (
           <ReactionButton
             key={`${reaction.emoji}-by-${reaction.by}-${index}`}

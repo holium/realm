@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, applySnapshot, Instance, types } from 'mobx-state-tree';
+import { flow, applySnapshot, Instance, types, cast } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -85,17 +85,31 @@ export const ChatMessage = types
         return [];
       }
     }),
+    insertTempReaction(react: ReactionModelType) {
+      self.reactions.push({
+        emoji: react.emoji,
+        by: react.by,
+        msgId: `${react.emoji}-${react.by}`,
+      });
+    },
     insertReaction(react: ReactionModelType) {
-      self.reactions.push(react);
+      const replaceIdx = self.reactions.findIndex(
+        (react) => react.msgId === `${react.emoji}-${react.by}`
+      );
+      if (replaceIdx !== -1) {
+        self.reactions[replaceIdx] = react;
+      } else {
+        self.reactions.push(react);
+      }
     },
     removeReaction(msgId: string) {
-      const reactionToDelete = self.reactions.find(
-        (react) => (react.msgId = msgId)
+      const reactionIdx = self.reactions.findIndex(
+        (react) => react.msgId === msgId
       );
-      if (!reactionToDelete) return;
-      self.reactions.remove(reactionToDelete);
-      console.log(toJS(self.reactions));
-
+      if (reactionIdx === -1) return;
+      const reactions = self.reactions.slice();
+      reactions.splice(reactionIdx, 1);
+      self.reactions = cast(reactions);
     },
     delete: flow(function* () {
       try {
@@ -247,6 +261,11 @@ export const Chat = types
         console.error(error);
       }
     }),
+    removeMessage(messageId: string) {
+      const message = self.messages.find((m) => m.id === messageId);
+      if (!message) return;
+      self.messages.remove(message);
+    },
     setPinnedMessage: flow(function* (msgId: string) {
       try {
         yield ChatDBActions.setPinnedMessage(self.path, msgId);
@@ -280,17 +299,24 @@ export const Chat = types
       self.isReacting = msgId;
     },
     sendReaction: flow(function* (msgId: string, emoji: string) {
-      yield ChatDBActions.sendMessage(self.path, [
-        {
-          content: { react: emoji },
-          'reply-to': {
-            path: self.path,
-            'msg-id': msgId,
+      const chatMsg = self.messages.find((m) => m.id === msgId);
+      try {
+        if (chatMsg && self.our)
+          chatMsg.insertTempReaction({ msgId, emoji, by: self.our });
+        yield ChatDBActions.sendMessage(self.path, [
+          {
+            content: { react: emoji },
+            'reply-to': {
+              path: self.path,
+              'msg-id': msgId,
+            },
+            metadata: {},
           },
-          metadata: {},
-        },
-      ]);
-      self.isReacting = undefined;
+        ]);
+        self.isReacting = undefined;
+      } catch (err) {
+        console.error(err);
+      }
     }),
     deleteReaction: flow(function* (messageId: string, reactionId: string) {
       const chatMsg = self.messages.find((m) => m.id === messageId);
@@ -300,7 +326,6 @@ export const Chat = types
       } catch (err) {
         console.error(err);
       }
-      // yield ChatDBActions.deleteReaction(self.path, msgId, reaction);
     }),
     clearReacting() {
       self.isReacting = undefined;

@@ -311,7 +311,8 @@ export class ChatService extends BaseService {
       console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
       this.deleteMessagesRow(delMessagesRow['msg-id']);
-      this.sendChatUpdate('message-deleted', delMessagesRow['msg-id']);
+      // this.deleteDeleteLog(delMessagesRow['msg-id']);
+      this.sendChatUpdate('message-deleted', delMessagesRow);
     }
     if (dbChange.type === 'del-paths-row') {
       console.log('del-paths-row', dbChange);

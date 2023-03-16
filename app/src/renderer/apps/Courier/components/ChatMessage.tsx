@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
-// import { toJS } from 'mobx';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -48,6 +48,9 @@ export const ChatMessagePresenter = ({
     (payload: OnReactionPayload) => {
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
+        if (message.reactions.length === 0) {
+          onLoad();
+        }
       } else {
         if (!payload.reactId) {
           console.warn('No reactId', payload);
@@ -56,7 +59,7 @@ export const ChatMessagePresenter = ({
         selectedChat?.deleteReaction(message.id, payload.reactId);
       }
     },
-    [selectedChat, message.id]
+    [selectedChat, message, onLoad]
   );
 
   const contextMenuOptions = useMemo(() => {
@@ -124,7 +127,11 @@ export const ChatMessagePresenter = ({
 
   const reactionList = useMemo(
     () => msgModel?.reactions,
-    [msgModel?.reactions, msgModel?.reactions.length]
+    [
+      msgModel?.reactions,
+      msgModel?.reactions.length,
+      msgModel?.reactions.length === 0,
+    ]
   );
 
   return (
