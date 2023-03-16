@@ -139,6 +139,24 @@
   =/  len-three  (skim ~(val by sup.bowl) |=(a=[p=ship q=path] (gte (lent q.a) 3)))
   =/  matching  (skim len-three |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start)))
   (turn matching |=(a=[p=ship q=path] q.a))
+++  delete-logs-for-path :: used for clearing del-log when the path itself is deleted, to keep things clean
+  |=  [state=state-0 =path]
+  ^-  del-log:sur
+  =/  removables
+    %+  skim :: get all the [k v] pairs of logs we can remove
+      (tap:delon:sur del-log.state)
+    |=  [k=time v=db-change-type:sur]
+    ?+  -.v  %.n :: only possibly remove messages and peers row since we don't want to remove the log that we removed the whole path
+      %del-messages-row   =(path path.v)
+      %del-peers-row      =(path path.v)
+    ==
+  =/  index=@ud     0
+  =/  len=@ud       (lent removables)
+  =/  new-log       del-log.state
+  |-
+  ?:  =(index len)
+    new-log
+  $(index +(index), new-log +:(del:delon:sur new-log -:(snag index removables)))
 ::
 ::  poke actions
 ::
@@ -223,6 +241,7 @@
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
   =/  change-row      [%del-paths-row path]
+  =.  del-log.state   (delete-logs-for-path state path)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange       db-change+!>(~[change-row])
   =/  gives  :~
@@ -435,6 +454,7 @@
       [%del-paths-row path.act]
     :: else just update the peers table
     [%del-peers-row path.act patp.act]
+  =.  del-log.state   ?:(our-kicked (delete-logs-for-path state path.act) del-log.state)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange   db-change+!>(~[change-row])
 
