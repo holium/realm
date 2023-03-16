@@ -16,6 +16,22 @@ export const Mouse = () => {
   const [chat, setChat] = useState('');
 
   useEffect(() => {
+    const handleMouseLayerMouseMove = (e: MouseEvent) => {
+      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    if (window.mouseLayerTracking) {
+      window.addEventListener('mousemove', handleMouseLayerMouseMove);
+    }
+
+    return () => {
+      if (window.mouseLayerTracking) {
+        window.removeEventListener('mousemove', handleMouseLayerMouseMove);
+      }
+    };
+  });
+
+  useEffect(() => {
     window.electron.app.onMouseOut(visible.toggleOff);
 
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
@@ -29,14 +45,6 @@ export const Mouse = () => {
       if (!isDragging) setState(newState);
       if (!visible.isOn) visible.toggleOn();
     });
-
-    const handleMouseLayerMouseMove = (e: MouseEvent) => {
-      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    if (window.mouseLayerTracking) {
-      window.addEventListener('mousemove', handleMouseLayerMouseMove);
-    }
 
     window.electron.app.onMouseDown(active.toggleOn);
 
@@ -56,10 +64,6 @@ export const Mouse = () => {
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 
     return () => {
-      if (window.mouseLayerTracking) {
-        window.removeEventListener('mousemove', handleMouseLayerMouseMove);
-      }
-
       window.electron.app.removeOnMouseOut();
       window.electron.app.removeOnMouseMove();
       window.electron.app.removeOnMouseDown();
@@ -70,7 +74,7 @@ export const Mouse = () => {
       window.electron.app.removeOnToggleOffEphemeralChat();
       window.electron.app.removeOnRealmToAppEphemeralChat();
     };
-  }, [active.isOn, visible.isOn, window.mouseLayerTracking]);
+  }, [active.isOn, visible.isOn]);
 
   if (disabled.isOn) return null;
 

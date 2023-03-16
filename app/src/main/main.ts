@@ -166,7 +166,7 @@ const createMouseOverlayWindow = () => {
     roundedCorners: false,
     webPreferences: {
       sandbox: false,
-      devTools: true,
+      devTools: false,
       contextIsolation: true,
       nodeIntegration: false,
       preload: getPreloadPath(),
@@ -174,7 +174,6 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
-  newMouseWindow.webContents.openDevTools({ mode: 'detach' });
 
   const mouseSetup = () => {
     if (isMac) {
