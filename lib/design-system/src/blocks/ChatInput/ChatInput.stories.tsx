@@ -20,9 +20,14 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
           hideScrollbar
           height={600}
           data={messages}
-          rowRenderer={(row: ChatMessageType, index) => (
-            <Box pt={2} width="100%">
-              <Bubble id={`i-${index}`} {...row} onReaction={() => {}} />
+          rowRenderer={(row: ChatMessageType, index, measure) => (
+            <Box key={`index-${row.author}-${index}`} pt={2} width="100%">
+              <Bubble
+                id={`i-${index}`}
+                {...row}
+                onReaction={() => {}}
+                onLoad={measure}
+              />
             </Box>
           )}
         />

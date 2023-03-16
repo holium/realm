@@ -12,15 +12,6 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
-const LineBreak = styled.div`
-  display: block;
-  content: '';
-  width: 100%;
-  height: 0;
-  margin: 0;
-  padding: 0;
-`;
-
 export type BubbleProps = {
   ref: any;
   id: string;
@@ -34,6 +25,7 @@ export type BubbleProps = {
   ourColor?: string;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
+  containerWidth?: number;
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
@@ -52,6 +44,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       message,
       isEdited,
       isEditing,
+      containerWidth,
       reactions = [],
       onLoaded,
       onReaction,
@@ -66,6 +59,18 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       [authorColor]
     );
 
+    const innerWidth = useMemo(
+      () => (containerWidth ? containerWidth - 16 : undefined),
+      [containerWidth]
+    );
+
+    const footerHeight = useMemo(() => {
+      if (reactions.length > 0) {
+        return '1.7rem';
+      }
+      return '1.25rem';
+    }, [reactions.length]);
+
     return (
       <Flex
         ref={ref}
@@ -76,11 +81,15 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       >
         <BubbleStyle
           id={id}
-          style={isOur ? { background: ourColor } : {}}
-          border={
-            isEditing
-              ? '2px solid var(--rlm-intent-caution-color)'
-              : '2px solid transparent'
+          style={
+            isOur
+              ? {
+                  background: ourColor,
+                  boxShadow: isEditing
+                    ? 'inset 0px 0px 0px 2px var(--rlm-intent-caution-color)'
+                    : 'none',
+                }
+              : {}
           }
           className={isOur ? 'bubble-our' : ''}
         >
@@ -96,30 +105,22 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           )}
           <FragmentBlock id={id}>
             {message?.map((fragment, index) => {
-              let lineBreak = false;
-              // Detect line break between text and block
-              if (index > 0) {
-                const lastFragmentType = Object.keys(message[index - 1])[0];
-                const currentFragmentType = Object.keys(fragment)[0];
-                if (
-                  TEXT_TYPES.includes(lastFragmentType) &&
-                  BLOCK_TYPES.includes(currentFragmentType)
-                ) {
-                  lineBreak = true;
-                }
-              }
-
               // TODO somehow pass in the onReplyClick function
-
               return (
                 <span id={id} key={`${id}-index-${index}`}>
-                  {lineBreak && <LineBreak />}
-                  {renderFragment(id, fragment, index, author, onLoaded)}
+                  {renderFragment(
+                    id,
+                    fragment,
+                    index,
+                    author,
+                    innerWidth,
+                    onLoaded
+                  )}
                 </span>
               );
             })}
           </FragmentBlock>
-          <BubbleFooter id={id}>
+          <BubbleFooter id={id} height={footerHeight}>
             <Box width="70%">
               {onReaction && (
                 <Reactions

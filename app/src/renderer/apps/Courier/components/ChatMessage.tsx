@@ -12,6 +12,7 @@ import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 
 type ChatMessageProps = {
+  containerWidth: number;
   replyTo?: ChatMessageType;
   message: ChatMessageType;
   canReact: boolean;
@@ -20,6 +21,7 @@ type ChatMessageProps = {
 };
 
 export const ChatMessagePresenter = ({
+  containerWidth,
   replyTo,
   message,
   canReact,
@@ -138,6 +140,7 @@ export const ChatMessagePresenter = ({
     <Bubble
       ref={messageRef}
       id={messageRowId}
+      containerWidth={containerWidth}
       isOur={isOur}
       ourShip={ship?.patp}
       ourColor={ourColor}

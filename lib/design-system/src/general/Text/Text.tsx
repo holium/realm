@@ -156,6 +156,14 @@ const Anchor = styled(motion.a)<TextProps>`
     `};
   ${boxStyles}
   ${colorStyle}
+  ${(props) =>
+    props.truncate &&
+    css`
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
+    `}
 `;
 
 export const Text = {

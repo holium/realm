@@ -35,11 +35,11 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
-  margin: 0 2px;
+  margin: 0px 2px;
 `;
 
-const BlockWrapper = styled(motion.span)`
-  padding: 4px 0px;
+export const BlockWrapper = styled(motion.span)`
+  padding: 0px;
   display: inline-block;
   height: 100%;
 `;
@@ -55,6 +55,7 @@ export const FragmentBlock = styled(motion.span)`
 export const FragmentPlain = styled(FragmentBase)`
   font-weight: 400;
   margin: 0 0;
+  line-height: 1.1rem;
 `;
 
 export const FragmentBold = styled(FragmentBase)`
@@ -190,11 +191,19 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   }
 `;
 
+const LineBreak = styled.div`
+  width: 100%;
+  height: 6px;
+  margin: 0;
+  padding: 0;
+`;
+
 export const renderFragment = (
   id: string,
   fragment: FragmentType,
   index: number,
   author: string,
+  containerWidth?: number,
   onLoaded?: () => void // used in the case where async data is loaded
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
@@ -283,10 +292,11 @@ export const renderFragment = (
             draggable={false}
             key={index}
             mode="embed"
+            containerWidth={containerWidth}
             link={(fragment as FragmentLinkType).link}
             id={author + index}
             by={author}
-            onLoaded={onLoaded}
+            onLinkLoaded={onLoaded}
             minWidth={320}
           />
         </BlockWrapper>
@@ -324,7 +334,13 @@ export const renderFragment = (
           </FragmentPlain>
         );
       } else {
-        replyContent = renderFragment(id, msg, index, replyAuthor);
+        replyContent = renderFragment(
+          id,
+          msg,
+          index,
+          replyAuthor,
+          containerWidth
+        );
       }
       return (
         <FragmentBlockquote id={id}>
@@ -353,7 +369,7 @@ export const renderFragment = (
     case 'ur-link':
       return `<${(fragment as FragmentUrLinkType)['ur-link']}>`;
     case 'break':
-      return <br />;
+      return <LineBreak />;
     default:
       // return fragment[key].data;
       return '';

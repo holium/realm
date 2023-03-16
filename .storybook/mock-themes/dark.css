@@ -26,8 +26,10 @@
   --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
   --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
   --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
-  --rlm-overlay-hover: rgba(255, 255, 255, 0.05);
-  --rlm-overlay-active: rgba(255, 255, 255, 0.09);
+  --rlm-overlay-hover: rgba(0, 0, 0, 0.05);
+  --rlm-overlay-active: rgba(0, 0, 0, 0.09);
+  --rlm-background-darker: rgba(0, 0, 0, 0.09);
+  --rlm-background-darkest: rgba(0, 0, 0, 0.16);
 }
 
 html {

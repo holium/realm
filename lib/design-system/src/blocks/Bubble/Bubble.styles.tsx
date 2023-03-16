@@ -1,12 +1,11 @@
 import styled from 'styled-components';
-import { Text, Box } from '../..';
-import { FragmentBlockquote, FragmentShip } from './fragment-lib';
+import { Text, Box, BlockStyle } from '../..';
+import { FragmentBlockquote, FragmentShip, BlockWrapper } from './fragment-lib';
 
 export const BubbleStyle = styled(Box)`
   display: inline-flex;
   flex-direction: column;
   width: auto;
-  gap: 2px;
   padding: 8px;
   user-select: text;
   font-size: 14px;
@@ -22,7 +21,7 @@ export const BubbleStyle = styled(Box)`
     background: var(--rlm-intent-caution-color);
     border-radius: 12px 12px 0px 12px !important;
     ${Text.Custom} {
-      color: #ffffff;
+      color: #ffffff !important;
     }
     ${FragmentBlockquote} {
       color: #ffffff;
@@ -32,6 +31,20 @@ export const BubbleStyle = styled(Box)`
       background: #ffffff30;
       &:hover {
         background: #ffffff45;
+      }
+    }
+    ${BlockWrapper} {
+      a {
+        color: #ffffff !important;
+      }
+    }
+    ${BlockStyle} {
+      backdrop-filter: brightness(80%) blur(6px);
+      transition: var(--transition);
+
+      &:hover {
+        transition: var(--transition);
+        background: var(--rlm-overlay-active);
       }
     }
   }
@@ -57,8 +70,9 @@ export const BubbleStyle = styled(Box)`
 `;
 
 export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
+  display: inline-block;
   margin-top: -2px;
-  display: inline-flex;
+  line-height: 1.2rem;
   font-size: 12px;
   font-weight: 500;
   user-select: text;
@@ -71,9 +85,8 @@ export const BubbleFooter = styled(Box)`
   flex-direction: row;
   user-select: text;
   justify-content: space-between;
+  align-items: flex-end;
   width: 100%;
   max-width: 100%;
   font-size: 12px;
-  margin-top: 4px;
-  margin-bottom: -2px;
 `;

@@ -32,10 +32,11 @@ const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
 
 type TweetBlockProps = {
   link: string;
+  onTweetLoad?: () => void;
 } & BlockProps;
 
 export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
-  const { id, link, onLoaded, ...rest } = props;
+  const { id, link, onTweetLoad, ...rest } = props;
   let tweetEmbed: any = null;
   const [tweetLoaded, setTweetLoaded] = useState(false);
   const themeMode = getVar('theme-mode') || 'light';
@@ -45,8 +46,8 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
       tweetEmbed = (
         <TwitterTweetEmbed
           onLoad={() => {
-            onLoaded && onLoaded();
             setTweetLoaded(true);
+            onTweetLoad && onTweetLoad();
           }}
           tweetId={tweetId}
           options={{

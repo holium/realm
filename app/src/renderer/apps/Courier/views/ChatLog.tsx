@@ -98,6 +98,11 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     height = height - replyHeight;
   }
 
+  const containerWidth = useMemo(
+    () => dimensions.width - 24,
+    [dimensions.width]
+  );
+
   return (
     <Flex
       layout="preserve-aspect"
@@ -126,7 +131,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            width={dimensions.width - 24}
+            width={containerWidth}
             height={height}
           >
             <Text.Custom
@@ -151,7 +156,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
               key={`last-${selectedChat.lastFetch}-${selectedChat.messages.length}`}
               startAtBottom
               hideScrollbar
-              width={dimensions.width - 24}
+              width={containerWidth}
               height={height}
               data={messages}
               rowRenderer={(row, index, measure) => {
@@ -180,6 +185,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                     pb={isLast ? 2 : 0}
                   >
                     <ChatMessage
+                      containerWidth={containerWidth}
                       replyTo={replyToObj}
                       message={row as ChatMessageType}
                       canReact={true}
