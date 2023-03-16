@@ -5,6 +5,8 @@ import './helpers/keyListener';
 import { MouseState } from '@holium/realm-presence';
 import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
+import Urbit from "@urbit/http-api";
+import { TomeOptions } from '../tome/pkg';
 
 const appPreload = {
   /* Senders */
@@ -147,10 +149,18 @@ const appPreload = {
   },
 };
 
+const tomePreload = {
+  /* Senders */
+  initTome: (api?: Urbit, app?: string, options: TomeOptions = {}) => { 
+    return ipcRenderer.invoke('init-tome', api, app, options);
+  },
+};
+
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
   os: osPreload,
   multiplayer: multiplayerPreload,
+  tome: tomePreload,
 });
