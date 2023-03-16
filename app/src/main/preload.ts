@@ -57,9 +57,6 @@ const appPreload = {
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
-  onEnableMouseLayerTracking(callback: () => void) {
-    ipcRenderer.on('enable-mouse-layer-tracking', callback);
-  },
   onDisableCustomMouse(callback: () => void) {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
@@ -129,9 +126,6 @@ const appPreload = {
   },
   removeOnMouseColorChange() {
     ipcRenderer.removeAllListeners('mouse-color');
-  },
-  removeOnEnableMouseLayerTracking() {
-    ipcRenderer.removeAllListeners('enable-mouse-layer-tracking');
   },
   removeOnDisableCustomMouse() {
     ipcRenderer.removeAllListeners('disable-custom-mouse');

@@ -166,7 +166,7 @@ const createMouseOverlayWindow = () => {
     roundedCorners: false,
     webPreferences: {
       sandbox: false,
-      devTools: false,
+      devTools: true,
       contextIsolation: true,
       nodeIntegration: false,
       preload: getPreloadPath(),
@@ -174,6 +174,7 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
+  newMouseWindow.webContents.openDevTools({ mode: 'detach' });
 
   const mouseSetup = () => {
     if (isMac) {
@@ -183,7 +184,9 @@ const createMouseOverlayWindow = () => {
        * For macOS we enable mouse layer tracking for a smoother experience.
        * It is not supported for Windows or Linux.
        */
-      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
+      newMouseWindow.webContents.executeJavaScript(
+        `window.mouseLayerTracking = true;`
+      );
     } else if (isWindows) {
       hideCursor(newMouseWindow.webContents);
     } else {
@@ -191,7 +194,7 @@ const createMouseOverlayWindow = () => {
     }
   };
 
-  newMouseWindow.on('ready-to-show', mouseSetup);
+  newMouseWindow.webContents.on('dom-ready', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
