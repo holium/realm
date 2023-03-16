@@ -5,8 +5,7 @@ import './helpers/keyListener';
 import { MouseState } from '@holium/realm-presence';
 import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
-import Urbit from "@urbit/http-api";
-import { TomeOptions } from '../tome/pkg';
+import { tomePreload } from '../tome/preload';
 
 const appPreload = {
   /* Senders */
@@ -146,13 +145,6 @@ const appPreload = {
   },
   removeOnRealmToAppEphemeralChat() {
     ipcRenderer.removeAllListeners('realm-to-app.ephemeral-chat');
-  },
-};
-
-const tomePreload = {
-  /* Senders */
-  initTome: (api?: Urbit, app?: string, options: TomeOptions = {}) => { 
-    return ipcRenderer.invoke('init-tome', api, app, options);
   },
 };
 
