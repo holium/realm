@@ -170,7 +170,6 @@ export const useMultiplayer = ({
 
     window.electron.app.onMouseMove((position, state) => {
       if (!isMultiplayerEnabled) return;
-      console.log('mouse move', isMultiplayerEnabled, patp);
       const multiplayerMove: MultiplayerMove = {
         patp,
         event: 'mouse-move',
@@ -260,7 +259,6 @@ export const useMultiplayer = ({
     roomsManager.on(RoomManagerEvent.OnDataChannel, onDataChannel);
 
     return () => {
-      console.log('cleanup');
       window.electron.app.removeOnMouseOut();
       window.electron.app.removeOnMouseDown();
       window.electron.app.removeOnMouseUp();

@@ -25,6 +25,7 @@ export const Mouse = () => {
         visible.toggleOff();
       }, 100);
     });
+
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
       // We only use the IPC'd coordinates if
       // A) mouse layer tracking is disabled, or
@@ -38,12 +39,15 @@ export const Mouse = () => {
       if (!visible.isOn) visible.toggleOn();
       if (mouseOutTimeoutRef.current) clearTimeout(mouseOutTimeoutRef.current);
     });
+
+    window.electron.app.onMouseDown(active.toggleOn);
+
+    window.electron.app.onMouseUp(active.toggleOff);
+
     window.electron.app.onMouseColorChange((hex) => {
       const rgbString = rgbToString(hexToRgb(hex));
       if (rgbString) setMouseColor(rgbString);
     });
-    window.electron.app.onMouseDown(active.toggleOn);
-    window.electron.app.onMouseUp(active.toggleOff);
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
@@ -57,6 +61,7 @@ export const Mouse = () => {
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
+
     window.electron.app.onToggleOffEphemeralChat(ephemeralChat.toggleOff);
 
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
@@ -65,8 +70,19 @@ export const Mouse = () => {
       if (mouseLayerTracking.isOn) {
         window.removeEventListener('mousemove', handleMouseMove);
       }
+
+      window.electron.app.removeOnMouseOut();
+      window.electron.app.removeOnMouseMove();
+      window.electron.app.removeOnMouseDown();
+      window.electron.app.removeOnMouseUp();
+      window.electron.app.removeOnMouseColorChange();
+      window.electron.app.removeOnEnableMouseLayerTracking();
+      window.electron.app.removeOnDisableCustomMouse();
+      window.electron.app.removeOnToggleOnEphemeralChat();
+      window.electron.app.removeOnToggleOffEphemeralChat();
+      window.electron.app.removeOnRealmToAppEphemeralChat();
     };
-  }, []);
+  }, [active.isOn, visible.isOn, mouseLayerTracking.isOn]);
 
   if (disabled.isOn) return null;
 

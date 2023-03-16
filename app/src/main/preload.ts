@@ -127,6 +127,24 @@ const appPreload = {
   removeOnMouseMove() {
     ipcRenderer.removeAllListeners('mouse-move');
   },
+  removeOnMouseColorChange() {
+    ipcRenderer.removeAllListeners('mouse-color');
+  },
+  removeOnEnableMouseLayerTracking() {
+    ipcRenderer.removeAllListeners('enable-mouse-layer-tracking');
+  },
+  removeOnDisableCustomMouse() {
+    ipcRenderer.removeAllListeners('disable-custom-mouse');
+  },
+  removeOnToggleOnEphemeralChat() {
+    ipcRenderer.removeAllListeners('realm.toggle-on-ephemeral-chat');
+  },
+  removeOnToggleOffEphemeralChat() {
+    ipcRenderer.removeAllListeners('realm.toggle-off-ephemeral-chat');
+  },
+  removeOnRealmToAppEphemeralChat() {
+    ipcRenderer.removeAllListeners('realm-to-app.ephemeral-chat');
+  },
 };
 
 export type AppPreloadType = typeof appPreload;
