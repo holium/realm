@@ -6,13 +6,13 @@ ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {
     const mouseState = getMouseState(e);
     const isDragging = e.buttons === 1;
 
-    ipcRenderer.invoke('mouse-move', mouseState, isDragging);
+    ipcRenderer.invoke('main.mouse-move', mouseState, isDragging);
   };
-  const handleMouseDown = () => ipcRenderer.invoke('mouse-down');
-  const handleMouseUp = () => ipcRenderer.invoke('mouse-up');
+  const handleMouseDown = () => ipcRenderer.invoke('main.mouse-down');
+  const handleMouseUp = () => ipcRenderer.invoke('main.mouse-up');
   const handleMouseOut = (e: MouseEvent) => {
     // Make sure the mouse is leaving a window and not just moving between elements.
-    if (e.relatedTarget === null) ipcRenderer.invoke('mouse-out');
+    if (e.relatedTarget === null) ipcRenderer.invoke('main.mouse-out');
   };
 
   // Mouseout should not be triggered when leaving a webview.

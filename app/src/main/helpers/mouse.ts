@@ -18,33 +18,36 @@ const registerListeners = (
 ) => {
   // We send mouse events to the mouse window to move the cursor,
   // as well as the main window to update multiplayer cursors via %rooms-v2.
-  ipcMain.handle('mouse-out', () => {
+  ipcMain.handle('main.mouse-out', () => {
     mouseWindow.webContents.send('mouse-out');
     mainWindow.webContents.send('mouse-out');
   });
 
-  ipcMain.handle('mouse-move', (_, state: MouseState, isDragging: boolean) => {
-    const webContentsPosition = getWebContentsPosition(mainWindow);
-    mouseWindow.webContents.send(
-      'mouse-move',
-      webContentsPosition,
-      state,
-      isDragging
-    );
-    mainWindow.webContents.send(
-      'mouse-move',
-      webContentsPosition,
-      state,
-      isDragging
-    );
-  });
+  ipcMain.handle(
+    'main.mouse-move',
+    (_, state: MouseState, isDragging: boolean) => {
+      const webContentsPosition = getWebContentsPosition(mainWindow);
+      mouseWindow.webContents.send(
+        'mouse-move',
+        webContentsPosition,
+        state,
+        isDragging
+      );
+      mainWindow.webContents.send(
+        'mouse-move',
+        webContentsPosition,
+        state,
+        isDragging
+      );
+    }
+  );
 
-  ipcMain.handle('mouse-down', () => {
+  ipcMain.handle('main.mouse-down', () => {
     mouseWindow.webContents.send('mouse-down');
     mainWindow.webContents.send('mouse-down');
   });
 
-  ipcMain.handle('mouse-up', () => {
+  ipcMain.handle('main.mouse-up', () => {
     mouseWindow.webContents.send('mouse-up');
     mainWindow.webContents.send('mouse-up');
   });
