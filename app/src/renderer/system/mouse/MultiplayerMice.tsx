@@ -26,6 +26,7 @@ export const MultiplayerMice = () => {
         ...prev,
         [patp]: {
           ...prev[patp],
+          isVisible: false,
         },
       }));
     });
