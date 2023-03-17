@@ -49,7 +49,7 @@ interface SpaceModels {
  * SpacesService
  */
 export class SpacesService extends BaseService {
-  private db?: DiskStore; // for persistance
+  private db?: DiskStore; // for persistence
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
     membership: MembershipStore.create({}),

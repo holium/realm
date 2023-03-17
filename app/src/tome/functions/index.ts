@@ -1,1 +1,0 @@
-export { initTome } from './initTome';

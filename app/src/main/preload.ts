@@ -5,7 +5,6 @@ import './helpers/keyListener';
 import { MouseState } from '@holium/realm-presence';
 import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
-import { tomePreload } from '../tome/preload';
 
 const appPreload = {
   /* Senders */
@@ -154,5 +153,4 @@ contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
   os: osPreload,
   multiplayer: multiplayerPreload,
-  tome: tomePreload,
 });

@@ -1,4 +1,4 @@
-import { TomeOptions } from '../../../app/src/tome/types';
+import { TomeOptions } from '../../../app/src/os/services/tome/models/types';
 
 /* TODO add docstring */
 export const initTome = async (
@@ -6,5 +6,5 @@ export const initTome = async (
   app?: string,
   options: TomeOptions = {}
 ) => {
-  return await window.electron.tome.initTome(urbit, app, options);
+  return await window.electron.os.tome.initTome(urbit, app, options);
 };

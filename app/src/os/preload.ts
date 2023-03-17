@@ -6,6 +6,7 @@ import { ShellService } from './services/shell/shell.service';
 import { ShipService } from './services/ship/ship.service';
 import { SlipService } from './services/slip.service';
 import { SpacesService } from './services/spaces/spaces.service';
+import { TomeService } from './services/tome/tome.service';
 import { RoomsService } from './services/tray/rooms.service';
 import { WalletService } from './services/tray/wallet.service';
 
@@ -14,6 +15,7 @@ export const osPreload = {
   auth: AuthService.preload,
   ship: ShipService.preload,
   spaces: SpacesService.preload,
+  tome: TomeService.preload,
   desktop: DesktopService.preload,
   shell: ShellService.preload,
   onboarding: OnboardingService.preload,
