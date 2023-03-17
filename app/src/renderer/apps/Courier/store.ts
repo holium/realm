@@ -44,7 +44,7 @@ const ChatStore = types
     getChatTitle(path: string, ship: string) {
       const chat = self.inbox.find((c) => c.path === path);
       if (!ship || !chat) return 'Error loading title';
-      if (chat.peers.length === 1 && chat.type === 'dm') {
+      if (chat.type === 'dm') {
         return chat.peers.filter((p) => p.ship !== ship)[0].ship;
       } else {
         return chat.metadata.title;
@@ -154,9 +154,8 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
+export const ChatStoreContext =
+  createContext<null | ChatStoreInstance>(chatStore);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {
@@ -179,7 +178,6 @@ ChatDBActions.onDbChange((_evt, type, data) => {
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
-    console.log('message deleted', data);
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );

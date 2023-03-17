@@ -19,6 +19,7 @@ type ChatRowProps = {
   path: string;
   title: string;
   peers: string[];
+  isAdmin: boolean;
   lastMessage: string;
   metadata: any;
   timestamp: number;
@@ -32,6 +33,7 @@ export const ChatRowPresenter = ({
   title,
   peers,
   timestamp,
+  isAdmin,
   type,
   metadata,
   onClick,
@@ -96,8 +98,8 @@ export const ChatRowPresenter = ({
     });
     menu.push({
       id: `${chatRowId}-leave-chat`,
-      label: 'Delete chat',
-      icon: 'Trash',
+      label: isAdmin ? 'Delete chat' : 'Leave chat',
+      icon: isAdmin ? 'Trash' : 'Logout',
       iconColor: '#ff6240',
       labelColor: '#ff6240',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {

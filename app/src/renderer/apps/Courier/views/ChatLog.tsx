@@ -41,7 +41,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     return getChatTitle(selectedChat.path, ship.patp);
   }, [selectedChat?.path, ship]);
 
-  if (!selectedChat) return null;
+  if (!selectedChat || !ship) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
   const showPin =

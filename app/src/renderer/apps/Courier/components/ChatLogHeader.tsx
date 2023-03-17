@@ -83,11 +83,11 @@ export const ChatLogHeader = ({
 
     menu.push({
       id: 'leave-chat',
-      icon: 'Trash',
+      icon: isAdmin ? 'Trash' : 'Logout',
       section: 2,
       iconColor: '#ff6240',
       labelColor: '#ff6240',
-      label: 'Delete chat',
+      label: isAdmin ? 'Delete chat' : 'Leave chat',
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();

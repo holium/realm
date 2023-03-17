@@ -469,7 +469,7 @@ type PeerRowProps = {
 };
 
 const LabelMap = {
-  host: 'owner',
+  host: 'host',
   admin: 'admin',
 };
 const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {

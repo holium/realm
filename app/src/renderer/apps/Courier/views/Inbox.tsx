@@ -14,8 +14,10 @@ import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
+import { useServices } from 'renderer/logic/store';
 
 export const InboxPresenter = () => {
+  const { ship } = useServices();
   const { dimensions } = useTrayApps();
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
     useChatStore();
@@ -106,6 +108,7 @@ export const InboxPresenter = () => {
             borderRadius={6}
           >
             {pinnedChatList.map((chat) => {
+              const isAdmin = ship ? chat.isHost(ship.patp) : false;
               return (
                 <Box
                   zIndex={2}
@@ -117,6 +120,7 @@ export const InboxPresenter = () => {
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
+                    isAdmin={isAdmin}
                     peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
@@ -140,6 +144,7 @@ export const InboxPresenter = () => {
             data={unpinnedChatList}
             filter={searchFilter}
             rowRenderer={(chat) => {
+              const isAdmin = ship ? chat.isHost(ship.patp) : false;
               return (
                 <Box
                   zIndex={2}
@@ -153,6 +158,7 @@ export const InboxPresenter = () => {
                     path={chat.path}
                     title={chat.metadata.title}
                     peers={chat.peers.map((peer) => peer.ship)}
+                    isAdmin={isAdmin}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}
