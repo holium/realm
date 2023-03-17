@@ -343,8 +343,6 @@ OSActions.onConnected(
 
 // Auth events
 OSActions.onLogout((_event: any) => {
-  // RoomsActions.exitRoom();
-  // LiveRoom.leave();
   SoundActions.playLogout();
   servicesStore.clearAll();
   servicesStore.clearShip();

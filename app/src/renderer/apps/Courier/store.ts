@@ -1,8 +1,16 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference } from 'mobx-state-tree';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  applySnapshot,
+  destroy,
+} from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
+import { OSActions } from 'renderer/logic/actions/os';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -143,6 +151,14 @@ const ChatStore = types
         self.pinnedChats.remove(path);
       }
     },
+    reset() {
+      self.subroute = 'inbox';
+      self.pinnedChats.clear();
+      self.inbox.forEach((chat) => destroy(chat));
+      self.inbox.clear();
+      self.selectedChat = undefined;
+      self.isOpen = false;
+    },
   }));
 
 export const chatStore = ChatStore.create({
@@ -166,6 +182,10 @@ export function useChatStore() {
   return store;
 }
 
+OSActions.onLogout((_event: any) => {
+  console.log('resetting chatStore on logout');
+  chatStore.reset();
+});
 // -------------------------------
 // Listen for changes
 ChatDBActions.onDbChange((_evt, type, data) => {

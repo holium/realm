@@ -38,7 +38,12 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
 
   const resolvedTitle = useMemo(() => {
     if (!selectedChat || !ship) return 'Error loading title';
-    return getChatTitle(selectedChat.path, ship.patp);
+    let title = getChatTitle(selectedChat.path, ship.patp);
+    if (selectedChat.type === 'dm') {
+      const { nickname } = friends.getContactAvatarMetadata(title);
+      if (nickname) title = nickname;
+    }
+    return title;
   }, [selectedChat?.path, ship]);
 
   if (!selectedChat || !ship) return null;

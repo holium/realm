@@ -112,7 +112,7 @@ export const InboxPresenter = () => {
               return (
                 <Box
                   zIndex={2}
-                  key={`pinned-${chat.path}`}
+                  key={`${ship?.patp}-pinned-${chat.path}`}
                   height={52}
                   alignItems="center"
                   layoutId={`chat-${chat.path}-container`}
@@ -137,7 +137,7 @@ export const InboxPresenter = () => {
             })}
           </Flex>
           <WindowedList
-            key={`inbox-${unpinnedChatList.length}`}
+            key={`${ship?.patp}-inbox-${unpinnedChatList.length}`}
             width={listWidth}
             height={listHeight}
             rowHeight={52}
@@ -149,7 +149,7 @@ export const InboxPresenter = () => {
                 <Box
                   zIndex={2}
                   layout="preserve-aspect"
-                  key={`unpinned-${chat.path}`}
+                  key={`${ship?.patp}-unpinned-${chat.path}`}
                   alignItems="center"
                   height={52}
                   layoutId={`chat-${chat.path}-container`}

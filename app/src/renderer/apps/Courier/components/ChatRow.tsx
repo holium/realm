@@ -38,7 +38,7 @@ export const ChatRowPresenter = ({
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { ship, friends } = useServices();
   const {
     inbox,
     getChatTitle,
@@ -123,7 +123,12 @@ export const ChatRowPresenter = ({
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
   const resolvedTitle = useMemo(() => {
     if (!ship) return 'Error loading title';
-    return getChatTitle(path, ship.patp);
+    let title = getChatTitle(path, ship.patp);
+    if (type === 'dm') {
+      const { nickname } = friends.getContactAvatarMetadata(title);
+      if (nickname) title = nickname;
+    }
+    return title;
   }, [path, ship]);
 
   const chatAvatarEl = useMemo(
@@ -141,7 +146,7 @@ export const ChatRowPresenter = ({
           canEdit={false}
         />
       ),
-    [resolvedTitle, path, type, peers, metadata.image]
+    [resolvedTitle, path, type, peers, metadata.image, ship?.patp]
   );
 
   const chat = inbox.find((c) => c.path === path);

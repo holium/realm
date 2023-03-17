@@ -75,9 +75,22 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   const isDMType = selectedChat?.type === 'dm';
 
-  const resolvedTitle = useMemo(() => {
-    if (!selectedChat || !ship) return 'Error loading title';
-    return getChatTitle(selectedChat.path, ship.patp);
+  // TODO consolidate this
+  const { resolvedTitle, subtitle } = useMemo(() => {
+    if (!selectedChat || !ship)
+      return { resolvedTitle: 'Error loading title', subtitle: '' };
+    let title = getChatTitle(selectedChat.path, ship.patp);
+    let subtitle = '';
+    if (selectedChat.type === 'dm') {
+      const { patp, nickname } = friends.getContactAvatarMetadata(title);
+      if (nickname) {
+        title = nickname;
+        subtitle = patp;
+      } else {
+        title = patp;
+      }
+    }
+    return { resolvedTitle: title, subtitle };
   }, [selectedChat?.path, ship]);
 
   const contactMetadata =
@@ -228,6 +241,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 setEditTitle(evt.target.value);
               }}
             />
+            {subtitle && (
+              <Text.Custom textAlign="center" fontSize={2} opacity={0.5}>
+                {subtitle}
+              </Text.Custom>
+            )}
           </Flex>
         </Flex>
       </Flex>

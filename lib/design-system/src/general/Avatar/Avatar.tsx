@@ -104,7 +104,7 @@ export const Avatar = ({
         setIsValid(valid);
       });
     }
-  }, []);
+  }, [avatar]);
 
   let innerContent = null;
   if (avatar) {
