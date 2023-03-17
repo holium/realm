@@ -1,6 +1,5 @@
 import { useMemo, useEffect, useRef } from 'react';
 import {
-  Row,
   Flex,
   Text,
   timelineDate,
@@ -16,7 +15,6 @@ import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
 
 type ChatRowProps = {
   path: string;
