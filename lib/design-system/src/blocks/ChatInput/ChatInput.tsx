@@ -85,7 +85,6 @@ export const ChatInput = ({
       evt.preventDefault();
       if (value.length === 0) return;
       const parsedFragments = parseChatInput(value);
-      console.log('parsedFragments', parsedFragments);
       setValue('');
       if (editingMessage) {
         onEditConfirm(parsedFragments);

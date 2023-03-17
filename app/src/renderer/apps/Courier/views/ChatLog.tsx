@@ -127,7 +127,6 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         }
       />
       <Flex
-        zIndex={16}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.2 }}
@@ -176,13 +175,18 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                   const originalMsg = selectedChat.messages.find(
                     (m) => m.id === row.replyToMsgId
                   );
-                  replyToObj = originalMsg && {
-                    reply: {
-                      msgId: originalMsg.id,
-                      author: originalMsg.sender,
-                      message: [originalMsg.contents[0]],
-                    },
-                  };
+                  if (originalMsg) {
+                    let { nickname } = friends.getContactAvatarMetadata(
+                      originalMsg?.sender
+                    );
+                    replyToObj = originalMsg && {
+                      reply: {
+                        msgId: originalMsg.id,
+                        author: nickname || originalMsg.sender,
+                        message: [originalMsg.contents[0]],
+                      },
+                    };
+                  }
                 }
                 return (
                   <Box

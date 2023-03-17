@@ -48,7 +48,6 @@ export const DialogTitlebar = ({
             fillWithBg
             onClick={(evt: any) => {
               evt.stopPropagation();
-              console.log('onClose', onClose);
               onClose && onClose();
             }}
           />

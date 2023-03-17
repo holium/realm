@@ -214,7 +214,6 @@ export const Chat = types
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
-        console.log('sending message', path, fragments);
         yield ChatDBActions.sendMessage(path, fragments);
         self.replyingMsg = null;
         // TODO naive send, should add to local store and update on ack
