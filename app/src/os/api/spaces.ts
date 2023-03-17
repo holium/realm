@@ -185,6 +185,15 @@ export const SpacesApi = {
       });
     });
   },
+  getCurrentSpace: async (
+    conduit: Conduit
+  ): Promise<{ space: string; path: SpacePath }> => {
+    const response = await conduit.scry({
+      app: 'spaces',
+      path: '/current',
+    });
+    return response.current;
+  },
   /**
    * inviteMember: invite a member to a space
    *
