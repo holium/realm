@@ -34,6 +34,9 @@
     ~&  >  (crip "%notif-db {<-.act>}")
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
+      :: permission-wise, basically others can %create notifs for us,
+      :: but only we can manipulate them once created
+      :: maybe we will need to allow them to update them...
       %create
         (create:db-lib +.act state bowl)
       %read-id
@@ -51,6 +54,12 @@
       %dismiss-id
         ?>  =(src.bowl our.bowl)
         (dismiss-id:db-lib +.act state bowl)
+      %dismiss-app
+        ?>  =(src.bowl our.bowl)
+        (dismiss-app:db-lib +.act state bowl)
+      %dismiss-path
+        ?>  =(src.bowl our.bowl)
+        (dismiss-path:db-lib +.act state bowl)
       %update
         ?>  =(src.bowl our.bowl)
         (update:db-lib +.act state bowl)

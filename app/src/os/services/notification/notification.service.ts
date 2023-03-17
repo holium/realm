@@ -5,16 +5,26 @@ import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
-import * from './notification.types';
-import { InvitePermissionType } from 'renderer/apps/Courier/models';
+import {
+  DbChangeType,
+  AddRow,
+  UpdateRow,
+  UpdateAll,
+  DelRow,
+  NotifDbOps,
+  NotifDbChangeReactions,
+  NotifDbReactions,
+  NotificationsRow,
+} from './notification.types';
 
-const parseMetadata = (metadata: string) => {
-  const mtd = JSON.parse(metadata);
-  return {
-    ...mtd,
-    timestamp: parseInt(mtd.timestamp) || 0,
-    reactions: mtd.reactions === 'true',
-  };
+const pokeHelper = async (core: any, payload: any, errMsg: string) => {
+  if (!core.conduit) throw new Error('No conduit connection');
+  try {
+    await core.conduit.poke(payload);
+  } catch (err) {
+    console.error(err);
+    throw new Error(errMsg);
+  }
 };
 
 export class NotificationService extends BaseService {
@@ -26,20 +36,22 @@ export class NotificationService extends BaseService {
    * Handlers for the ipcRenderer invoked functions
    **/
   handlers = {
-    'realm.notification.get-log': this.getLog,
+    'realm.notification.mark-read': this.readNotification,
+    'realm.notification.dismiss': this.dismissNotification,
   };
 
   /**
    * Preload functions to register with the renderer
    */
   static preload = {
-    getLog: async (
-      path: string,
-      params?: { start: number; amount: number }
-    ) => await ipcRenderer.invoke('realm.notification.get-log', path, params),
-    onDbChange: (
-      callback: (evt: IpcRendererEvent, type: ChatUpdateType, data: any) => void
-    ) => ipcRenderer.on('realm.notification.on-db-change', callback),
+    readNotification: (
+      appTag: string,
+      path?: string,
+    ) => ipcRenderer.invoke('realm.notification.mark-read', appTag, path),
+    dismissNotification: (
+      appTag: string,
+      path?: string,
+    ) => ipcRenderer.invoke('realm.notification.dismiss', appTag, path),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -55,6 +67,7 @@ export class NotificationService extends BaseService {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }
+
   // ----------------------------------------------
   // ----------------- DB setup -------------------
   // ----------------------------------------------
@@ -73,10 +86,13 @@ export class NotificationService extends BaseService {
 
     const notifications = await this.fetchNotifications();
     this.insertNotifications(notifications);
+    //console.log('realm-chat unreads', await this.getUnreads(null, 'realm-chat'));
+    //console.log(await this.getUnreads(null, 'realm-chat', '/new-messages'));
+    //console.log(await this.readNotification(null,'realm-chat', '/new-messages'));
   }
 
   async fetchNotifications() {
-    const lastTimestamp = this.getLastTimestamp('notifications');
+    const lastTimestamp = this.getLastTimestamp();
     const response = await this.core.conduit?.scry({
       app: 'notif-db',
       path: `/db/since-ms/${lastTimestamp}`,
@@ -99,20 +115,14 @@ export class NotificationService extends BaseService {
       console.log('add-row to notifications', addRow.row);
       const notif = addRow.row as NotificationsRow;
       this.insertNotifications([notif]);
-      break;
-    }
-    if (dbChange.type === 'update-all') {
+    } else if (dbChange.type === 'update-all') {
       console.log('TODO implement updating all rows read column');
-      break;
-    }
-    if (dbChange.type === 'update-row') {
+    } else if (dbChange.type === 'update-row') {
       const update = dbChange as UpdateRow;
-      const notif = addRow.row as NotificationsRow;
+      const notif = update.row as NotificationsRow;
       console.log('update-row', notif);
       this.insertNotifications([notif]);
-      break;
-    }
-    if (dbChange.type === 'del-row') {
+    } else if (dbChange.type === 'del-row') {
       console.log('del-row', dbChange);
       const del = dbChange as DelRow;
       this.deleteNotificationsRow(del.id);
@@ -208,55 +218,100 @@ export class NotificationService extends BaseService {
     console.log('deleting notif id', id);
     deleteQuery.run(id);
   }
+
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
 
-  getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
-  ): number {
+  getLastTimestamp(): number {
     if (!this.db) throw new Error('No db connection');
-    const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
     const query = this.db.prepare(`
-      SELECT max(${column}) as lastTimestamp
-      FROM ${table};
+      SELECT max(updated_at) as lastTimestamp
+      FROM notifications;
     `);
     const result = query.all();
     // add 1 to avoid getting same timestamp again
     return result[0].lastTimestamp + 1 || 0;
   }
 
+  getUnreads(_evt: any, appTag: string, path?: string) {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(`
+      SELECT *
+      FROM notifications
+      WHERE app = ? ${path ? 'AND path = ?' : ''};
+    `);
+    let result: any;
+    if (path) {
+      result = query.all(appTag, path);
+    } else {
+      result = query.all(appTag);
+    }
+    return result.map((row) => {
+      return {
+        ...row,
+        buttons: row.buttons ? JSON.parse(row.buttons) : null,
+        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+      }
+    });
+  }
+
+
   // ------------------------------
   // ---------- Actions -----------
   // ------------------------------
 
-  async createChat(
+  async readNotification(
     _evt: any,
-    peers: string[],
-    type: ChatPathType,
-    metadata: ChatPathMetadata
+    appTag: string, // if just app is passed in, will mark all notifs from app as "read"
+    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
   ) {
-    if (!this.core.conduit) throw new Error('No conduit connection');
-    const payload = {
-      app: 'realm-chat',
-      mark: 'action',
-      reaction: '',
-      json: {
-        'create-chat': {
-          type,
-          metadata,
-          peers,
-          invites: 'anyone',
-          'max-expires-at-duration': null,
-        },
-      },
+    // default assume only app
+    let pokeJson = {
+      "read-app": appTag
     };
-    try {
-      await this.core.conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to create chat');
+    if (path) {
+      pokeJson = {
+        "read-path": {
+          app: appTag,
+          path
+        }
+      }
     }
+    const payload = {
+      app: 'notif-db',
+      mark: 'ndb-poke',
+      reaction: '',
+      json: pokeJson,
+    };
+
+    await pokeHelper(this.core, payload, `Failed to mark notifications read for ${appTag}`);
   }
 
+  async dismissNotification(
+    _evt: any,
+    appTag: string, // if just app is passed in, will mark all notifs from app as "read"
+    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
+  ) {
+    // default assume only app
+    let pokeJson = {
+      "dismiss-app": appTag
+    };
+    if (path) {
+      pokeJson = {
+        "dismiss-path": {
+          app: appTag,
+          path
+        }
+      }
+    }
+    const payload = {
+      app: 'notif-db',
+      mark: 'ndb-poke',
+      reaction: '',
+      json: pokeJson,
+    };
+
+    await pokeHelper(this.core, payload, `Failed to dismiss notifications for ${appTag}`);
+  }
 }

@@ -48,6 +48,8 @@
       [%read-path app=@tas =path]
       [%read-all read=?]
       [%dismiss-id =id]
+      [%dismiss-app app=@tas]
+      [%dismiss-path app=@tas =path]
       [%update =id =create-action]
       [%delete =id]
   ==
@@ -71,9 +73,5 @@
     [%del-row =id]
   ==
 +$  db-change  (list db-change-type)
-::
-+$  reaction
-  $%  
-      [%example =ship]
-  ==
+
 --
