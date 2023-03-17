@@ -32,14 +32,14 @@ export const ChatAvatar = ({
   const [showEdit, setShowEdit] = useState(false);
   let avatarElement = null;
 
-  if (!image && type === 'dm' && isValidPatp(title)) {
-    const {
-      patp,
-      avatar,
-      color: sigilColor,
-    } = title
-      ? friends.getContactAvatarMetadata(title)
-      : { patp: title!, color: '#000', avatar: '' };
+  if (type === 'dm') {
+    // 1-1 chat
+    const patp = peers.map((p) => p).find((p) => p !== window.ship);
+    if (!patp) return null;
+
+    const { avatar, color: sigilColor } = title
+      ? friends.getContactAvatarMetadata(patp)
+      : { color: '#000', avatar: '' };
     avatarElement = (
       <Avatar
         patp={patp}

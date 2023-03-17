@@ -89,7 +89,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     );
   };
 
-  let height = 544;
+  let height = dimensions.height - 106;
 
   if (showPin) {
     height = height - pinHeight;
@@ -116,12 +116,13 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         hasMenu
         avatar={chatAvatarEl}
         subtitle={
-          selectedChat.peers.length > 1
+          selectedChat.peers.length > 1 && selectedChat.type !== 'dm'
             ? `${selectedChat.peers.length} members`
             : undefined
         }
       />
       <Flex
+        zIndex={16}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.2 }}

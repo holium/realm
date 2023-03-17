@@ -13,7 +13,7 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
 
   return (
-    <Flex position="relative" height={670} width={400}>
+    <Flex position="relative" height={660} width={400}>
       <Box height={600} width="inherit" overflow="hidden">
         <WindowedList
           startAtBottom

@@ -13,7 +13,6 @@ export const CourierAppPresenter = () => {
     if (chatStore.subroute === 'inbox') {
       chatStore.init();
     } else {
-      console.log('chat log', chatStore.selectedChat?.path);
       chatStore.selectedChat?.fetchMessages();
     }
   }, []);

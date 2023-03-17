@@ -108,10 +108,10 @@ export const ChatLogHeader = ({
       alignItems="center"
     >
       <Flex
-        gap={8}
         flexDirection="row"
         justifyContent="space-between"
         alignItems="center"
+        gap={8}
       >
         <Button.IconButton
           size={26}
@@ -122,44 +122,48 @@ export const ChatLogHeader = ({
         >
           <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
         </Button.IconButton>
-        <Flex
-          layoutId={`chat-${path}-avatar`}
-          layout="position"
-          transition={{
-            duration: 0.1,
-          }}
-        >
-          {avatar}
-        </Flex>
-        <Flex alignItems="flex-start" flexDirection="column">
-          <Text.Custom
-            truncate
-            width={255}
-            layoutId={`chat-${path}-name`}
-            layout="position"
+        <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+          <Flex
+            layoutId={`chat-${path}-avatar`}
+            layout="preserve-aspect"
             transition={{
-              duration: 0.1,
+              duration: 0.15,
             }}
-            fontWeight={500}
-            fontSize={3}
           >
-            {title}
-          </Text.Custom>
-          {subtitle && (
+            {avatar}
+          </Flex>
+          <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
+              truncate
+              width={255}
+              layoutId={`chat-${path}-name`}
+              layout="preserve-aspect"
+              textAlign="left"
               transition={{
-                delay: 0.1,
-                duration: 0.1,
+                duration: 0.15,
               }}
-              lineHeight="0.95"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              opacity={0.5}
-              fontSize={2}
+              fontWeight={500}
+              fontSize={3}
             >
-              {subtitle}
+              {title}
             </Text.Custom>
-          )}
+            {subtitle && (
+              <Text.Custom
+                textAlign="left"
+                layoutId={`chat-${path}-subtitle`}
+                layout="preserve-aspect"
+                transition={{
+                  duration: 0.15,
+                }}
+                width={210}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5, lineHeight: '1' }}
+                fontSize={2}
+              >
+                {subtitle}
+              </Text.Custom>
+            )}
+          </Flex>
         </Flex>
       </Flex>
       <Flex>

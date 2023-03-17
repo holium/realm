@@ -1,15 +1,9 @@
 import { forwardRef, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
-import styled from 'styled-components';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
-import {
-  FragmentReactionType,
-  FragmentType,
-  TEXT_TYPES,
-  BLOCK_TYPES,
-} from './Bubble.types';
+import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { chatDate } from '../../util/date';
 
 export type BubbleProps = {
@@ -71,6 +65,16 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       return '1.25rem';
     }, [reactions.length]);
 
+    const fragments = useMemo(() => {
+      return message?.map((fragment, index) => {
+        return (
+          <span id={id} key={`${id}-index-${index}`}>
+            {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
+          </span>
+        );
+      });
+    }, [message]);
+
     return (
       <Flex
         ref={ref}
@@ -103,23 +107,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               {author}
             </BubbleAuthor>
           )}
-          <FragmentBlock id={id}>
-            {message?.map((fragment, index) => {
-              // TODO somehow pass in the onReplyClick function
-              return (
-                <span id={id} key={`${id}-index-${index}`}>
-                  {renderFragment(
-                    id,
-                    fragment,
-                    index,
-                    author,
-                    innerWidth,
-                    onLoaded
-                  )}
-                </span>
-              );
-            })}
-          </FragmentBlock>
+          <FragmentBlock id={id}>{fragments}</FragmentBlock>
           <BubbleFooter id={id} height={footerHeight}>
             <Box width="70%">
               {onReaction && (
@@ -135,7 +123,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             </Box>
             <Text.Custom
               width="30%"
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
               pointerEvents="none"
               textAlign="right"
               display="inline-flex"

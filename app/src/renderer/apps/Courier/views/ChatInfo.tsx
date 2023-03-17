@@ -73,13 +73,15 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { person } = useMemo(() => createPeopleForm(), []);
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
 
+  const isDMType = selectedChat?.type === 'dm';
+
   const resolvedTitle = useMemo(() => {
     if (!selectedChat || !ship) return 'Error loading title';
     return getChatTitle(selectedChat.path, ship.patp);
   }, [selectedChat?.path, ship]);
 
   const contactMetadata =
-    selectedChat?.type === 'dm' && resolvedTitle
+    isDMType && resolvedTitle
       ? friends.getContactAvatarMetadata(resolvedTitle)
       : {
           patp: resolvedTitle,
@@ -197,6 +199,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           justifyContent="center"
           gap={4}
           alignItems="center"
+          pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
         >
           <div ref={containerRef} style={{ display: 'none' }}></div>
           {chatAvatarEl}
@@ -205,7 +208,10 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               {uploadError}
             </Text.Custom>
           )}
-          <Flex flexDirection="column">
+          <Flex
+            flexDirection="column"
+            pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
+          >
             <InlineEdit
               fontWeight={500}
               fontSize={3}
@@ -222,16 +228,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 setEditTitle(evt.target.value);
               }}
             />
-            {/* <InlineEdit
-              fontSize={2}
-              textAlign="center"
-              width={350}
-              placeholder="Add a description"
-              value={description}
-              onChange={(evt: any) => {
-                setDescription(evt.target.value);
-              }}
-            /> */}
           </Flex>
         </Flex>
       </Flex>
@@ -240,30 +236,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         <Box mb={2}>
           <SectionDivider label="Settings" alignment="left" />
         </Box>
-        <Flex flexDirection="column">
-          {/* <Flex
-            width="100%"
-            px={2}
-            py={1}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text.Custom fontWeight={400} fontSize={2}>
-              Access
-            </Text.Custom>
-            <RadioGroup
-              customBg="transparent"
-              textColor="inherit"
-              options={[
-                { label: 'Public', value: 'public' },
-                { label: 'Private', value: 'private' },
-              ]}
-              onClick={(value) => {
-                console.log(value);
-              }}
-            />
-          </Flex> */}
-        </Flex>
         <Flex flexDirection="column">
           <Flex
             width="100%"
@@ -286,60 +258,71 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               }}
             />
           </Flex>
-          <Flex
-            width="100%"
-            px={2}
-            py={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Flex alignItems="center">
-              <Icon name="ChatHistorySetting" size={24} mr={2} />
-              <Text.Custom alignItems="center" fontWeight={400} fontSize="14px">
-                Chat history for new members
-              </Text.Custom>
-            </Flex>
-            <Toggle
-              disabled={!amHost}
-              initialChecked={peersGetBacklog}
-              onChange={(isChecked) => {
-                updatePeersGetBacklog(isChecked);
-              }}
-            />
-          </Flex>
-          <Flex
-            width="100%"
-            px={2}
-            pt={1}
-            // py={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Flex alignItems="center">
-              <Icon name="ChatInvitePermission" size={24} mr={2} />
-              <Text.Custom alignItems="center" fontWeight={400} fontSize="14px">
-                Invites
-              </Text.Custom>
-            </Flex>
-            <Select
-              disabled={!amHost}
-              id="select-invite-permission"
-              width={120}
-              options={[
-                { label: 'Host only', value: 'host' },
-                { label: 'Anyone', value: 'anyone' },
-              ]}
-              selected={invites}
-              onClick={(value: string) => {
-                updateInvitePermissions(value as InvitePermissionType);
-              }}
-            />
-          </Flex>
+          {!isDMType && (
+            <>
+              <Flex
+                width="100%"
+                px={2}
+                py={2}
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Flex alignItems="center">
+                  <Icon name="ChatHistorySetting" size={24} mr={2} />
+                  <Text.Custom
+                    alignItems="center"
+                    fontWeight={400}
+                    fontSize="14px"
+                  >
+                    Chat history for new members
+                  </Text.Custom>
+                </Flex>
+                <Toggle
+                  disabled={!amHost}
+                  initialChecked={peersGetBacklog}
+                  onChange={(isChecked) => {
+                    updatePeersGetBacklog(isChecked);
+                  }}
+                />
+              </Flex>
+              <Flex
+                width="100%"
+                px={2}
+                pt={1}
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Flex alignItems="center">
+                  <Icon name="ChatInvitePermission" size={24} mr={2} />
+                  <Text.Custom
+                    alignItems="center"
+                    fontWeight={400}
+                    fontSize="14px"
+                  >
+                    Invites
+                  </Text.Custom>
+                </Flex>
+                <Select
+                  disabled={!amHost}
+                  id="select-invite-permission"
+                  width={120}
+                  options={[
+                    { label: 'Host only', value: 'host' },
+                    { label: 'Anyone', value: 'anyone' },
+                  ]}
+                  selected={invites}
+                  onClick={(value: string) => {
+                    updateInvitePermissions(value as InvitePermissionType);
+                  }}
+                />
+              </Flex>
+            </>
+          )}
 
           <Flex
             width="100%"
             px={2}
-            py={2}
+            {...(isDMType ? { pt: 1 } : { py: 2 })}
             justifyContent="space-between"
             alignItems="center"
           >
@@ -380,48 +363,52 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             alignment="left"
           />
         </Box>
-        <Flex py={1} width="100%" px={1}>
-          <TextInput
-            id="new-chat-patp-search"
-            name="new-chat-patp-search"
-            tabIndex={1}
-            mx={2}
-            width="100%"
-            className="realm-cursor-text-cursor"
-            placeholder="Add someone?"
-            value={person.state.value}
-            height={34}
-            onKeyDown={(evt: any) => {
-              if (evt.key === 'Enter' && person.computed.parsed) {
-                onShipSelected([person.computed.parsed, '']);
-                person.actions.onChange('');
-              }
-            }}
-            onChange={(e: any) => {
-              person.actions.onChange(e.target.value);
-            }}
-            onFocus={() => {
-              person.actions.onFocus();
-            }}
-            onBlur={() => {
-              person.actions.onBlur();
-            }}
-            // onFocus={() => urbitId.actions.onFocus()}
-            // onBlur={() => urbitId.actions.onBlur()}
-            // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
-          />
-        </Flex>
-        <Flex px={3}>
-          <ShipSearch
-            isDropdown
-            search={person.state.value}
-            selected={selectedPatp}
-            onSelected={(contact: any) => {
-              onShipSelected(contact);
-              person.actions.onChange('');
-            }}
-          />
-        </Flex>
+        {!isDMType && (
+          <>
+            <Flex py={1} width="100%" px={1}>
+              <TextInput
+                id="new-chat-patp-search"
+                name="new-chat-patp-search"
+                tabIndex={1}
+                mx={2}
+                width="100%"
+                className="realm-cursor-text-cursor"
+                placeholder="Add someone?"
+                value={person.state.value}
+                height={34}
+                onKeyDown={(evt: any) => {
+                  if (evt.key === 'Enter' && person.computed.parsed) {
+                    onShipSelected([person.computed.parsed, '']);
+                    person.actions.onChange('');
+                  }
+                }}
+                onChange={(e: any) => {
+                  person.actions.onChange(e.target.value);
+                }}
+                onFocus={() => {
+                  person.actions.onFocus();
+                }}
+                onBlur={() => {
+                  person.actions.onBlur();
+                }}
+                // onFocus={() => urbitId.actions.onFocus()}
+                // onBlur={() => urbitId.actions.onBlur()}
+                // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
+              />
+            </Flex>
+            <Flex px={3}>
+              <ShipSearch
+                isDropdown
+                search={person.state.value}
+                selected={selectedPatp}
+                onSelected={(contact: any) => {
+                  onShipSelected(contact);
+                  person.actions.onChange('');
+                }}
+              />
+            </Flex>
+          </>
+        )}
         {sortedPeers.map((peer: PeerModelType) => {
           const id = `${path}-peer-${peer.ship}`;
           const options = [];

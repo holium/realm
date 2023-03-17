@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, skeletonStyle, Text, Bookmark } from '../..';
+import { Flex, skeletonStyle, Text, Bookmark, MediaBlock } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { isTwitterLink } from '../../util/links';
+import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
 
 const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
@@ -57,7 +57,9 @@ type LinkBlockProps = {
   onLinkLoaded?: () => void;
 } & BlockProps;
 
-type LinkType = 'opengraph' | 'url' | 'twitter';
+type LinkType = 'opengraph' | 'url';
+type MediaType = 'twitter' | 'media' | 'image';
+type LinkBlockType = LinkType | MediaType;
 
 export const LinkBlock = ({
   link,
@@ -68,34 +70,36 @@ export const LinkBlock = ({
 }: LinkBlockProps) => {
   const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [linkType, setLinkType] = useState<LinkType>('opengraph');
+  const [linkBlockType, setLinkBlockType] =
+    useState<LinkBlockType>('opengraph');
 
   useEffect(() => {
-    if (isTwitterLink(link)) {
-      setLinkType('twitter');
+    const { linkType } = parseMediaType(link);
+    if (linkType !== 'link') {
+      setLinkBlockType(linkType);
     }
-    if (!openGraph && linkType === 'opengraph') {
+    if (!openGraph && linkBlockType === 'opengraph') {
       fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
         .then(async (res) => {
           if (res.status === 200) {
             const data = await res.json();
-            if (!data || data.error) setLinkType('url');
+            if (!data || data.error) setLinkBlockType('url');
             setOpenGraph(data);
             onLinkLoaded && onLinkLoaded();
           } else {
-            setLinkType('url');
+            setLinkBlockType('url');
           }
         })
         .catch((err) => {
           console.error(err);
-          setLinkType('url');
+          setLinkBlockType('url');
         });
     }
   }, []);
 
   let description = openGraph?.ogDescription || '';
 
-  if (linkType === 'url') {
+  if (linkBlockType === 'url') {
     return (
       <Block {...rest}>
         <Bookmark
@@ -109,7 +113,7 @@ export const LinkBlock = ({
       </Block>
     );
   }
-  if (linkType === 'twitter') {
+  if (linkBlockType === 'twitter') {
     let width = rest.width || 320;
     if (width < 400) {
       width = 320;
@@ -121,6 +125,27 @@ export const LinkBlock = ({
         {...rest}
         width={width}
         onTweetLoad={onLinkLoaded}
+      />
+    );
+  }
+
+  if (linkBlockType === 'media') {
+    if (typeof rest.height === 'string') {
+      // strip out non-numeric characters
+      if (rest.height.includes('px')) {
+        rest.height = parseInt(rest.height.replace('px', ''));
+      }
+      // convert rem to px
+      else rest.height = parseInt(rest.height.replace('rem', '')) * 16;
+    }
+    return (
+      <MediaBlock
+        id="vid-1"
+        mode="embed"
+        url={link}
+        width={rest.width as number}
+        height={rest.height as number}
+        onLoaded={onLinkLoaded}
       />
     );
   }

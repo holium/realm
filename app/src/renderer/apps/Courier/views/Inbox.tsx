@@ -40,7 +40,7 @@ export const InboxPresenter = () => {
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
-      <Flex mb={1} ml={1} flexDirection="row" alignItems="center">
+      <Flex zIndex={1} mb={1} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -108,6 +108,7 @@ export const InboxPresenter = () => {
             {pinnedChatList.map((chat) => {
               return (
                 <Box
+                  zIndex={2}
                   key={`pinned-${chat.path}`}
                   height={52}
                   alignItems="center"
@@ -141,6 +142,7 @@ export const InboxPresenter = () => {
             rowRenderer={(chat) => {
               return (
                 <Box
+                  zIndex={2}
                   layout="preserve-aspect"
                   key={`unpinned-${chat.path}`}
                   alignItems="center"

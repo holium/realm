@@ -287,10 +287,9 @@ export const renderFragment = (
       );
     case 'link':
       return (
-        <BlockWrapper>
+        <BlockWrapper key={author + index}>
           <LinkBlock
             draggable={false}
-            key={index}
             mode="embed"
             containerWidth={containerWidth}
             link={(fragment as FragmentLinkType).link}
@@ -304,12 +303,11 @@ export const renderFragment = (
 
     case 'image':
       return (
-        <BlockWrapper>
+        <BlockWrapper key={author + index}>
           <ImageBlock
             draggable={false}
             mode="embed"
             variant="content"
-            key={index}
             id={author + index}
             image={(fragment as FragmentImageType).image}
             by={author}

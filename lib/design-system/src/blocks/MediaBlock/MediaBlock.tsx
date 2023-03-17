@@ -1,13 +1,24 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import Spotify from 'react-spotify-embed';
-import ReactPlayer from 'react-player';
+import ReactPlayer from 'react-player/lazy';
 import { Flex, Icon, isSpotifyLink, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import styled from 'styled-components';
 
 const MediaWrapper = styled(Flex)`
   position: relative;
+  height: fit-content;
   width: 100%;
+  .react-player-hide-cursor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    cursor: none !important;
+    z-index: 100;
+    pointer-events: auto;
+  }
 `;
 
 type MediaBlockProps = {
@@ -16,13 +27,31 @@ type MediaBlockProps = {
 } & BlockProps;
 
 export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
-  const { url, height = 300, ...rest } = props;
-  // TODO if error, render as basic link
+  const { url, height = 230, onLoaded, ...rest } = props;
+
   const [isError, setIsError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  if (isSpotifyLink(url)) {
-    return <Spotify link={url} wide />;
+  const isSpotify = useMemo(() => isSpotifyLink(url), [url]);
+  let heightOverride = height;
+
+  if (isSpotify) {
+    heightOverride = 80;
+    const width = 300;
+    return (
+      <MediaWrapper
+        {...rest}
+        height={heightOverride + 12}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ opacity: 0.2 }}
+        onAnimationComplete={() => {
+          onLoaded && onLoaded();
+        }}
+      >
+        <Spotify link={url} width={width} height={heightOverride} />
+      </MediaWrapper>
+    );
   }
   return (
     <Block {...rest}>
@@ -43,7 +72,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            height={`${height}px`}
+            height={heightOverride}
             width="100%"
           >
             <Icon name="Error" size={30} opacity={0.5} />
@@ -55,17 +84,20 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
           <ReactPlayer
             url={url}
             controls
+            className={'react-player-iframe'}
             onReady={() => {
               setIsReady(true);
+              onLoaded && onLoaded();
             }}
             width="100%"
-            height={`${height}px`}
+            height={heightOverride}
             onError={() => {
               setIsError(true);
             }}
             style={{
               borderRadius: '4px',
               overflow: 'hidden',
+              cursor: 'none',
             }}
             config={{
               youtube: {
@@ -74,6 +106,9 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
             }}
           />
         )}
+        {/* <div
+          className="react-player-hide-cursor"
+        ></div> */}
       </MediaWrapper>
     </Block>
   );

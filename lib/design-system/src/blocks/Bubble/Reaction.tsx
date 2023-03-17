@@ -37,7 +37,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
     variant === 'overlay'
       ? css`
           position: absolute;
-          left: -4px;
+          left: 0px;
           bottom: -12px;
         `
       : css`
@@ -103,18 +103,6 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: 24px;
         `}
 
-  ${({ isOur, ourColor, selected }) =>
-    isOur &&
-    ourColor &&
-    css`
-      background: ${darken(selected ? 0.15 : 0.1, ourColor)};
-      border-color: ${darken(0.2, ourColor)};
-      transition: var(--transition);
-      &:hover {
-        transition: var(--transition);
-        background: ${darken(selected ? 0.35 : 0.125, ourColor)};
-      }
-    `}
   width: auto;
   img {
     user-select: none;
@@ -139,6 +127,18 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     cursor: pointer;
     filter: brightness(0.96);
   }
+  ${({ isOur, ourColor, selected }) =>
+    isOur &&
+    ourColor &&
+    css`
+      background: ${darken(selected ? 0.2 : 0.1, ourColor)};
+      border-color: var(--rlm-accent-color);
+      transition: var(--transition);
+      &:hover {
+        transition: var(--transition);
+        background: ${darken(selected ? 0.225 : 0.125, ourColor)};
+      }
+    `}
 `;
 
 export type ReactionAggregateType = {

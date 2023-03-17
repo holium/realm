@@ -40,12 +40,12 @@ export const BubbleStyle = styled(Box)`
       }
     }
     ${BlockStyle} {
-      backdrop-filter: brightness(80%) blur(6px);
+      backdrop-filter: brightness(75%) blur(6px);
       transition: var(--transition);
 
       &:hover {
         transition: var(--transition);
-        background: var(--rlm-overlay-active);
+        background: rgba(0, 0, 0, 0.1);
       }
     }
   }
