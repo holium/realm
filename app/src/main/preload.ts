@@ -1,10 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { osPreload } from '../os/preload';
-import './helpers/mouseListener';
-import './helpers/keyListener';
 import { MouseState } from '@holium/realm-presence';
+import { osPreload } from '../os/preload';
 import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
+import './helpers/mouseListener';
+import './helpers/keyListener';
 
 const appPreload = {
   /* Senders */
@@ -98,9 +98,9 @@ const appPreload = {
       callback(hex);
     });
   },
-  onKeyDown(callback: (key: string) => void) {
-    ipcRenderer.on('key-down', (_, key: string) => {
-      callback(key);
+  onKeyDown(callback: (key: string, isFocused: boolean) => void) {
+    ipcRenderer.on('key-down', (_, key: string, isFocused: boolean) => {
+      callback(key, isFocused);
     });
   },
   onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {

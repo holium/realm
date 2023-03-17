@@ -54,23 +54,31 @@ export const useMultiplayer = ({
     });
   };
 
-  const closeEphemeralChat = useCallback(
-    debounce(() => {
-      chat.current = '';
-      patp && broadcastChat(patp, '');
-      ephemeralChat.toggleOff();
-      window.electron.app.toggleOffEphemeralChat();
-    }, 5000),
+  const closeEphemeralChat = () => {
+    chat.current = '';
+    patp && broadcastChat(patp, '');
+    ephemeralChat.toggleOff();
+    window.electron.app.toggleOffEphemeralChat();
+  };
+
+  const closeEphemeralChatDebounced = useCallback(
+    debounce(closeEphemeralChat, 5000),
     [patp]
   );
 
   const onKeyDown = useCallback(
-    (key: string) => {
+    (key: string, isFocused: boolean) => {
       if (!patp) return;
       if (!isInRoom) return;
       if (!isMultiplayerEnabled) return;
 
-      closeEphemeralChat(); // Refresh the 5s timeout.
+      if (isFocused) {
+        // Don't trigger ephemeral chat if the user is typing in a text field.
+        closeEphemeralChat();
+        return;
+      }
+
+      closeEphemeralChatDebounced(); // Refresh the 5s countdown.
 
       if (key === '/') {
         chat.current = '';

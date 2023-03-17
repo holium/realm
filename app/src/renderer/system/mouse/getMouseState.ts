@@ -1,6 +1,6 @@
 import { MouseState } from '@holium/realm-presence';
 
-const isTextElement = (element: Element): boolean =>
+export const isTextElement = (element: Element): boolean =>
   element instanceof HTMLTextAreaElement ||
   (element instanceof HTMLInputElement &&
     element.type !== 'checkbox' &&
