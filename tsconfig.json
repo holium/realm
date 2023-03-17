@@ -5,6 +5,7 @@
     "app",
     "lib/conduit",
     "lib/design-system",
+    "lib/presence/code",
     "lib/presence",
     "lib/room/test-ui",
     "lib/room"

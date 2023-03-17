@@ -32,7 +32,7 @@ export const DesktopActions = {
     return await window.electron.os.desktop.closeHomePane();
   },
   setMouseColor: async (mouseColor: string) => {
-    window.electron.app.mouseColorChanged(mouseColor);
+    window.electron.app.setMouseColor(mouseColor);
     await window.electron.os.desktop.setMouseColor(mouseColor);
   },
   setWindowBounds: (appId: string, bounds: Bounds) => {

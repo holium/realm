@@ -5,6 +5,37 @@ import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
 import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
+
+const connectWebviewToMultiplayer = async (
+  ship: string,
+  roomsManager: RoomsManager,
+  webview: Electron.WebviewTag
+) => {
+  console.log('Connecting webview to presence.');
+
+  roomsManager.on(
+    RoomManagerEvent.OnDataChannel,
+    async (_rid: string, _peer: string, { value }) => {
+      if (!value) return;
+
+      if (value.multiplayer && value.multiplayer.event === 'mouse-click') {
+        const { patp, elementId } = value.multiplayer;
+        webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
+      } else if (value.broadcast) {
+        webview.send(
+          'presence.realm-to-app.broadcast',
+          ...value.broadcast.data
+        );
+      }
+    }
+  );
+
+  webview.executeJavaScript(`
+    window.ship = '${ship}';
+  `);
+};
 
 type Props = {
   appWindow: AppWindowType;
@@ -12,7 +43,8 @@ type Props = {
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const { theme } = useServices();
+  const { theme, ship } = useServices();
+  const roomsManager = useRooms();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
@@ -61,16 +93,19 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview) return;
+    if (!webview || !ship || !roomsManager) return;
 
-    const onDomReady = () => setReadyWebview(webview);
+    const onDomReady = () => {
+      setReadyWebview(webview);
+      connectWebviewToMultiplayer(ship.patp, roomsManager, webview);
+    };
 
     webview.addEventListener('dom-ready', onDomReady);
 
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId]);
+  }, [appWindow.appId, ship, roomsManager]);
 
   useEffect(() => {
     if (!readyWebview) return;
@@ -94,7 +129,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       readyWebview.removeEventListener('did-stop-loading', loading.toggleOff);
       readyWebview.removeEventListener('close', readyWebview.closeDevTools);
     };
-  }, [appWindow.appId]);
+  }, [readyWebview, themeCss, ship, loading]);
 
   return useMemo(
     () => (
@@ -110,7 +145,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           id={webviewId}
           appId={appWindow.appId}
           src={appWindow.href?.site}
-          partition={'persist:dev-webview'}
+          partition="persist:dev-webview"
           webpreferences="sandbox=false"
           isLocked={isResizing || loading.isOn}
           style={{

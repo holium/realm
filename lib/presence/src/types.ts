@@ -1,145 +1,67 @@
-export interface Vec2 {
-  x: number;
-  y: number;
-}
+import { PresenceArg } from './hooks/useBroadcast';
 
-export type SendPartial<T> = Omit<T, 'id'>;
+type Position = { x: number; y: number };
 
-export interface MultiplayerShipType {
+export type MouseState = 'text' | 'resize' | 'pointer';
+
+type MultiplayerEvent =
+  | 'mouse-move'
+  | 'mouse-down'
+  | 'mouse-up'
+  | 'mouse-click'
+  | 'mouse-over'
+  | 'mouse-out';
+
+type PresenceEvent = 'transaction' | 'broadcast' | 'chat';
+
+interface MultiplayerPayloadBase {
   patp: string;
-  nickname: string | null;
-  color: string | null;
-  avatar: string | null;
+  event: MultiplayerEvent;
 }
 
-export enum RealmEvent {
-  Join = 'join',
-  UpdatePresenceState = 'update-presence-state',
-  SyncPresenceState = 'sync-presence-state',
+interface PresencePayloadBase {
+  event: PresenceEvent;
 }
 
-export interface Ship {
-  color: string;
+export interface MultiplayerMove extends MultiplayerPayloadBase {
+  event: 'mouse-move';
+  position: Position;
+  state: MouseState;
+  hexColor: string;
+}
+
+export interface MultiplayerDown extends MultiplayerPayloadBase {
+  event: 'mouse-down';
+}
+
+export interface MultiplayerUp extends MultiplayerPayloadBase {
+  event: 'mouse-up';
+}
+
+export interface MultiplayerClick extends MultiplayerPayloadBase {
+  event: 'mouse-click';
+  elementId: string;
+}
+
+export interface MultiplayerOut extends MultiplayerPayloadBase {
+  event: 'mouse-out';
+}
+
+export interface MultiplayerChat extends PresencePayloadBase {
   patp: string;
+  event: 'chat';
+  message: string;
 }
 
-export interface BaseRealmPayload {
-  event: string;
-  id: string; // ID of the current app session
+export interface PresenceBroadcast extends PresencePayloadBase {
+  event: 'broadcast';
+  data: PresenceArg[];
 }
 
-export interface JoinPayload extends BaseRealmPayload {
-  event: RealmEvent.Join;
-}
-
-export interface PresenceStatePayload extends BaseRealmPayload {
-  event: RealmEvent.UpdatePresenceState;
-  key: string;
-  value: any;
-}
-
-export interface PresenceStateSyncPayload extends BaseRealmPayload {
-  event: RealmEvent.SyncPresenceState;
-  states: Record<string, any>;
-}
-
-export enum CursorEvent {
-  Move = 'cursor-move',
-  Over = 'cursor-over',
-  Down = 'cursor-down',
-  Up = 'cursor-up',
-  Out = 'cursor-out',
-  Click = 'cursor-click',
-  Leave = 'cursor-leave',
-}
-export interface BaseCursorPayload extends BaseRealmPayload {
-  event: CursorEvent;
-}
-
-export interface CursorMovePayload extends BaseCursorPayload {
-  event: CursorEvent.Move;
-  position: Vec2;
-}
-
-export interface CursorOverPayload extends BaseCursorPayload {
-  event: CursorEvent.Over;
-  target: string; // unique data-multi-click id
-}
-
-export interface CursorDownPayload extends BaseCursorPayload {
-  event: CursorEvent.Down;
-  target: string; // unique data-multi-click id
-}
-
-export interface CursorUpPayload extends BaseCursorPayload {
-  event: CursorEvent.Up;
-  target: string; // unique data-multi-click id
-}
-
-export interface CursorClickPayload extends BaseCursorPayload {
-  event: CursorEvent.Click;
-  target: string; // unique data-multi-click id
-}
-
-export interface CursorOutPayload extends BaseCursorPayload {
-  event: CursorEvent.Out;
-  target: string; // unique data-multi-click id
-}
-
-export interface CursorLeavePayload extends BaseCursorPayload {
-  event: CursorEvent.Leave;
-}
-
-export type CursorPayload =
-  | BaseRealmPayload
-  | CursorMovePayload
-  | CursorClickPayload
-  | CursorLeavePayload
-  | CursorOverPayload
-  | CursorDownPayload
-  | CursorUpPayload
-  | CursorOutPayload;
-
-export type StatePayload =
-  | JoinPayload
-  | PresenceStatePayload
-  | PresenceStateSyncPayload;
-
-export type AnyPayload =
-  | JoinPayload
-  | CursorMovePayload
-  | CursorClickPayload
-  | CursorLeavePayload
-  | CursorOverPayload
-  | CursorDownPayload
-  | CursorUpPayload
-  | CursorOutPayload
-  | PresenceStatePayload
-  | PresenceStateSyncPayload;
-
-export interface RealmMultiplayerInterface {
-  init: ({
-    roomId,
-    ship,
-  }: {
-    roomId: string;
-    ship: MultiplayerShipType;
-  }) => void;
-  join: (roomId: string) => void;
-  leave: (roomId: string) => void;
-  send: <T extends SendPartial<BaseRealmPayload>>(payload: T) => void;
-  getPresenceState: (key: string) => Record<string, any>;
-  subscribe: <T extends BaseRealmPayload>(
-    event: string,
-    handler: (payload: T) => void
-  ) => () => void;
-  // eslint-disable-next-line no-restricted-globals
-  close: typeof close;
-}
-
-declare global {
-  var multiplayer: {
-    id: string;
-    ship: MultiplayerShipType;
-  };
-}
+export type MultiplayerPayload =
+  | MultiplayerMove
+  | MultiplayerDown
+  | MultiplayerUp
+  | MultiplayerClick
+  | MultiplayerOut
+  | MultiplayerChat;

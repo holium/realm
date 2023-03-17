@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
-import { RemotePeer, useRoomsManager } from '@holium/realm-room';
+import { RemotePeer } from '@holium/realm-room';
+import { useRoomsManager } from 'components/RoomsManagerProvider';
 
 type ISpeaker = {
   our: boolean;

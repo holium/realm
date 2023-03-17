@@ -97,6 +97,7 @@ export const DesktopStore = types
     homePaneOpen: types.optional(types.boolean, false),
     isolationMode: types.optional(types.boolean, false),
     micAllowed: types.optional(types.boolean, false),
+    multiplayerEnabled: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -221,6 +222,9 @@ export const DesktopStore = types
     },
     setMicAllowed(isAllowed: boolean) {
       self.micAllowed = isAllowed;
+    },
+    toggleMultiplayer() {
+      self.multiplayerEnabled = !self.multiplayerEnabled;
     },
   }));
 
