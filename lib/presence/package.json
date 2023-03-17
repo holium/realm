@@ -1,6 +1,6 @@
 {
   "name": "@holium/realm-presence",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A lib for developers to leverage shared cursors in their apps.",
