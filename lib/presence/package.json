@@ -1,6 +1,6 @@
 {
   "name": "@holium/realm-presence",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A lib for developers to leverage shared cursors in their apps.",
@@ -34,5 +34,13 @@
   "dependencies": {
     "@radix-ui/react-slot": "^0.1.2",
     "babel-loader": "^8.2.5"
-  }
+  },
+  "keywords": [
+    "holium",
+    "realm",
+    "react",
+    "presence",
+    "shared",
+    "cursor"
+  ]
 }
