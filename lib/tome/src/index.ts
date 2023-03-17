@@ -1,2 +1,3 @@
-export * from '../../../app/src/tome/pkg/types';
-export * from './functions';
+// TODO probably don't export this type directly?
+export * from '../../../app/src/tome/types';
+export * from './tome';
