@@ -103,10 +103,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     height = height - replyHeight;
   }
 
-  const containerWidth = useMemo(
-    () => dimensions.width - 24,
-    [dimensions.width]
-  );
+  const containerWidth = dimensions.width - 24;
 
   return (
     <Flex
@@ -196,7 +193,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                       message={row as ChatMessageType}
                       canReact={true}
                       ourColor={ourColor}
-                      onLoad={measure}
+                      measure={measure}
                     />
                   </Box>
                 );

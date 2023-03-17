@@ -13,7 +13,6 @@ import { getVar } from '../../util/colors';
 
 const WIDTH = 300;
 const HEIGHT = 350;
-// @ts-ignore
 const defaultShip = window.ship ?? 'zod';
 
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`

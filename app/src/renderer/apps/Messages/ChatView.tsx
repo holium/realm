@@ -12,9 +12,17 @@ import {
 import { lighten, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { Content } from '@urbit/api';
-import { Spinner, Tooltip } from '@holium/design-system';
 import { Input } from 'renderer/components';
-import { Avatar, Button, Icon, Text, Box, Flex } from '@holium/design-system';
+import {
+  Avatar,
+  Button,
+  Icon,
+  Text,
+  Box,
+  Flex,
+  Spinner,
+  Tooltip,
+} from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { createDmForm } from './forms/chatForm';
 import { useServices } from 'renderer/logic/store';
