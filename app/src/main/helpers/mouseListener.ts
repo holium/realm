@@ -16,8 +16,8 @@ ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {
   };
 
   // Mouseout should not be triggered when leaving a webview.
-  if (isMainWindow) window.addEventListener('mouseout', handleMouseOut);
-  window.addEventListener('mousemove', handleMouseMove);
-  window.addEventListener('mousedown', handleMouseDown);
-  window.addEventListener('mouseup', handleMouseUp);
+  if (isMainWindow) window.addEventListener('pointerout', handleMouseOut);
+  window.addEventListener('pointermove', handleMouseMove);
+  window.addEventListener('pointerdown', handleMouseDown);
+  window.addEventListener('pointerup', handleMouseUp);
 });
