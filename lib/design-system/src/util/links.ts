@@ -36,23 +36,27 @@ const VIDEO_REGEX = [
   /(?:https?:\/\/)?(?:www\.)?(?:dailymotion\.com\/)(video\/)(\w+)/,
 ];
 
-// const MEDIA_TYPE = {
-//   IMAGE: /(\.jpg|\.jpeg|\.png|\.gif|\.svg)$/,
-//   VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
-//   AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
-//   DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
-//   LINK: /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
-// };
+const MEDIA_TYPE = {
+  IMAGE: /(\.jpg|\.jpeg|\.png|\.gif|\.svg)$/,
+  VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
+  AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
+  DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
+  LINK: /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
+};
 
-// type MediaTypes = 'image' | 'video' | 'audio' | 'document' | 'link';
-// type LinkTypes = 'music' | 'twitter' | 'media' | 'link';
+type MediaTypes = 'image' | 'video' | 'audio' | 'document' | 'link';
+type LinkTypes = 'twitter' | 'media' | 'link' | 'image';
+
+export const isImageLink = (link: string) => {
+  return link.match(MEDIA_TYPE.IMAGE);
+};
 
 export const isMusicLink = (link: string) => {
   return Object.values(MUSIC_LINKS).some((regex) => link.match(regex));
 };
 
 export const isMediaBlock = (link: string) => {
-  return VIDEO_REGEX.some((regex) => link.match(regex));
+  return VIDEO_REGEX.some((regex) => link.match(regex)) || isMusicLink(link);
 };
 
 export const isTwitterLink = (link: string) => {
@@ -62,34 +66,22 @@ export const isTwitterLink = (link: string) => {
 export const isSpotifyLink = (link: string) => {
   return link.match(SPOTIFY_REGEX);
 };
-// TODO flesh out when test ui is built
-// export const parseMediaType = (url: string) => {
-//   let mediaType: MediaTypes = 'link';
-//   let linkType: LinkTypes = 'link';
-//   if (url.match(MEDIA_TYPE.IMAGE)) {
-//     mediaType = 'image';
-//   }
-//   if (url.match(MEDIA_TYPE.VIDEO)) {
-//     mediaType = 'video';
-//   }
-//   if (url.match(MEDIA_TYPE.AUDIO)) {
-//     mediaType = 'audio';
-//   }
-//   if (url.match(MEDIA_TYPE.DOCUMENT)) {
-//     mediaType = 'document';
-//   }
 
-//   if (url.match(MEDIA_TYPE.LINK)) {
-//     mediaType = 'link';
-//     if (isMusicLink(url)) {
-//       linkType = 'music';
-//     }
-//     if (isTwitterLink(url)) {
-//       linkType = 'twitter';
-//     }
-//     if (isMediaBlock(url)) {
-//       linkType = 'media';
-//     }
-//   }
-//   return { mediaType, linkType };
-// };
+export const parseMediaType = (url: string) => {
+  let mediaType: MediaTypes = 'link';
+  let linkType: LinkTypes = 'link';
+
+  if (url.match(MEDIA_TYPE.LINK)) {
+    mediaType = 'link';
+    if (isTwitterLink(url)) {
+      linkType = 'twitter';
+    }
+    if (isMediaBlock(url)) {
+      linkType = 'media';
+    }
+    if (isImageLink(url)) {
+      linkType = 'image';
+    }
+  }
+  return { mediaType, linkType };
+};

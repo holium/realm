@@ -38,10 +38,15 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
 
   const resolvedTitle = useMemo(() => {
     if (!selectedChat || !ship) return 'Error loading title';
-    return getChatTitle(selectedChat.path, ship.patp);
+    let title = getChatTitle(selectedChat.path, ship.patp);
+    if (selectedChat.type === 'dm') {
+      const { nickname } = friends.getContactAvatarMetadata(title);
+      if (nickname) title = nickname;
+    }
+    return title;
   }, [selectedChat?.path, ship]);
 
-  if (!selectedChat) return null;
+  if (!selectedChat || !ship) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
   const showPin =
@@ -89,7 +94,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
     );
   };
 
-  let height = 544;
+  let height = dimensions.height - 106;
 
   if (showPin) {
     height = height - pinHeight;
@@ -97,6 +102,11 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
   if (selectedChat.replyingMsg) {
     height = height - replyHeight;
   }
+
+  const containerWidth = useMemo(
+    () => dimensions.width - 24,
+    [dimensions.width]
+  );
 
   return (
     <Flex
@@ -111,12 +121,13 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
         hasMenu
         avatar={chatAvatarEl}
         subtitle={
-          selectedChat.peers.length > 1
+          selectedChat.peers.length > 1 && selectedChat.type !== 'dm'
             ? `${selectedChat.peers.length} members`
             : undefined
         }
       />
       <Flex
+        zIndex={16}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.2 }}
@@ -126,7 +137,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            width={dimensions.width - 24}
+            width={containerWidth}
             height={height}
           >
             <Text.Custom
@@ -151,7 +162,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
               key={`last-${selectedChat.lastFetch}-${selectedChat.messages.length}`}
               startAtBottom
               hideScrollbar
-              width={dimensions.width - 24}
+              width={containerWidth}
               height={height}
               data={messages}
               rowRenderer={(row, index, measure) => {
@@ -180,6 +191,7 @@ export const ChatLogPresenter = (_props: ChatLogProps) => {
                     pb={isLast ? 2 : 0}
                   >
                     <ChatMessage
+                      containerWidth={containerWidth}
                       replyTo={replyToObj}
                       message={row as ChatMessageType}
                       canReact={true}

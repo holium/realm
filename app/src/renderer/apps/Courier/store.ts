@@ -1,8 +1,16 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference } from 'mobx-state-tree';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  applySnapshot,
+  destroy,
+} from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
+import { OSActions } from 'renderer/logic/actions/os';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -44,7 +52,7 @@ const ChatStore = types
     getChatTitle(path: string, ship: string) {
       const chat = self.inbox.find((c) => c.path === path);
       if (!ship || !chat) return 'Error loading title';
-      if (chat.peers.length === 1 && chat.type === 'dm') {
+      if (chat.type === 'dm') {
         return chat.peers.filter((p) => p.ship !== ship)[0].ship;
       } else {
         return chat.metadata.title;
@@ -143,6 +151,14 @@ const ChatStore = types
         self.pinnedChats.remove(path);
       }
     },
+    reset() {
+      self.subroute = 'inbox';
+      self.pinnedChats.clear();
+      self.inbox.forEach((chat) => destroy(chat));
+      self.inbox.clear();
+      self.selectedChat = undefined;
+      self.isOpen = false;
+    },
   }));
 
 export const chatStore = ChatStore.create({
@@ -154,9 +170,8 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
+export const ChatStoreContext =
+  createContext<null | ChatStoreInstance>(chatStore);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {
@@ -167,6 +182,10 @@ export function useChatStore() {
   return store;
 }
 
+OSActions.onLogout((_event: any) => {
+  console.log('resetting chatStore on logout');
+  chatStore.reset();
+});
 // -------------------------------
 // Listen for changes
 ChatDBActions.onDbChange((_evt, type, data) => {
@@ -179,7 +198,6 @@ ChatDBActions.onDbChange((_evt, type, data) => {
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
-    console.log('message deleted', data);
     const selectedChat = chatStore.inbox.find(
       (chat) => chat.path === data.path
     );

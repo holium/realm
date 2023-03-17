@@ -1,25 +1,10 @@
 import { forwardRef, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
-import styled from 'styled-components';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
-import {
-  FragmentReactionType,
-  FragmentType,
-  TEXT_TYPES,
-  BLOCK_TYPES,
-} from './Bubble.types';
+import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { chatDate } from '../../util/date';
-
-const LineBreak = styled.div`
-  display: block;
-  content: '';
-  width: 100%;
-  height: 0;
-  margin: 0;
-  padding: 0;
-`;
 
 export type BubbleProps = {
   ref: any;
@@ -34,6 +19,7 @@ export type BubbleProps = {
   ourColor?: string;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
+  containerWidth?: number;
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
@@ -52,6 +38,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       message,
       isEdited,
       isEditing,
+      containerWidth,
       reactions = [],
       onLoaded,
       onReaction,
@@ -66,6 +53,28 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       [authorColor]
     );
 
+    const innerWidth = useMemo(
+      () => (containerWidth ? containerWidth - 16 : undefined),
+      [containerWidth]
+    );
+
+    const footerHeight = useMemo(() => {
+      if (reactions.length > 0) {
+        return '1.7rem';
+      }
+      return '1.25rem';
+    }, [reactions.length]);
+
+    const fragments = useMemo(() => {
+      return message?.map((fragment, index) => {
+        return (
+          <span id={id} key={`${id}-index-${index}`}>
+            {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
+          </span>
+        );
+      });
+    }, [message]);
+
     return (
       <Flex
         ref={ref}
@@ -76,11 +85,15 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       >
         <BubbleStyle
           id={id}
-          style={isOur ? { background: ourColor } : {}}
-          border={
-            isEditing
-              ? '2px solid var(--rlm-intent-caution-color)'
-              : '2px solid transparent'
+          style={
+            isOur
+              ? {
+                  background: ourColor,
+                  boxShadow: isEditing
+                    ? 'inset 0px 0px 0px 2px var(--rlm-intent-caution-color)'
+                    : 'none',
+                }
+              : {}
           }
           className={isOur ? 'bubble-our' : ''}
         >
@@ -94,32 +107,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               {author}
             </BubbleAuthor>
           )}
-          <FragmentBlock id={id}>
-            {message?.map((fragment, index) => {
-              let lineBreak = false;
-              // Detect line break between text and block
-              if (index > 0) {
-                const lastFragmentType = Object.keys(message[index - 1])[0];
-                const currentFragmentType = Object.keys(fragment)[0];
-                if (
-                  TEXT_TYPES.includes(lastFragmentType) &&
-                  BLOCK_TYPES.includes(currentFragmentType)
-                ) {
-                  lineBreak = true;
-                }
-              }
-
-              // TODO somehow pass in the onReplyClick function
-
-              return (
-                <span id={id} key={`${id}-index-${index}`}>
-                  {lineBreak && <LineBreak />}
-                  {renderFragment(id, fragment, index, author, onLoaded)}
-                </span>
-              );
-            })}
-          </FragmentBlock>
-          <BubbleFooter id={id}>
+          <FragmentBlock id={id}>{fragments}</FragmentBlock>
+          <BubbleFooter id={id} height={footerHeight}>
             <Box width="70%">
               {onReaction && (
                 <Reactions
@@ -134,7 +123,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             </Box>
             <Text.Custom
               width="30%"
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
               pointerEvents="none"
               textAlign="right"
               display="inline-flex"

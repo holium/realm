@@ -13,16 +13,21 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
 
   return (
-    <Flex position="relative" height={670} width={400}>
+    <Flex position="relative" height={660} width={400}>
       <Box height={600} width="inherit" overflow="hidden">
         <WindowedList
           startAtBottom
           hideScrollbar
           height={600}
           data={messages}
-          rowRenderer={(row: ChatMessageType, index) => (
-            <Box pt={2} width="100%">
-              <Bubble id={`i-${index}`} {...row} onReaction={() => {}} />
+          rowRenderer={(row: ChatMessageType, index, measure) => (
+            <Box key={`index-${row.author}-${index}`} pt={2} width="100%">
+              <Bubble
+                id={`i-${index}`}
+                {...row}
+                onReaction={() => {}}
+                onLoad={measure}
+              />
             </Box>
           )}
         />

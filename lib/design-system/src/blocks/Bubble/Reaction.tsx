@@ -23,7 +23,6 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   width: 100%;
   max-width: ${WIDTH}px;
   flex-wrap: wrap;
-  margin-bottom: -2px;
   gap: 2px;
   z-index: 15;
   .emoji-picker-menu {
@@ -38,7 +37,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
     variant === 'overlay'
       ? css`
           position: absolute;
-          left: -4px;
+          left: 0px;
           bottom: -12px;
         `
       : css`
@@ -77,14 +76,15 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  color: var(--rlm-text-color);
   background: ${({ selected, ourColor }) =>
     selected
       ? () => (ourColor ? rgba(ourColor, 0.3) : getVar('accent'))
       : 'rgba(0, 0, 0, 0.08)'};
-  border: ${({ selected }) =>
+  box-shadow: ${({ selected }) =>
     selected
-      ? '1px solid rgba(0, 0, 0, 0.04)'
-      : '1px solid rgba(0, 0, 0, 0.08)'};
+      ? 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.1)'
+      : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
   border-radius: 16px;
   transition: var(--transition);
   ${({ size, selected, isOur }) =>
@@ -103,18 +103,6 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: 24px;
         `}
 
-  ${({ isOur, ourColor, selected }) =>
-    isOur &&
-    ourColor &&
-    css`
-      background: ${darken(selected ? 0.15 : 0.1, ourColor)};
-      border-color: ${darken(0.2, ourColor)};
-      transition: var(--transition);
-      &:hover {
-        transition: var(--transition);
-        background: ${darken(selected ? 0.35 : 0.125, ourColor)};
-      }
-    `}
   width: auto;
   img {
     user-select: none;
@@ -139,6 +127,18 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     cursor: pointer;
     filter: brightness(0.96);
   }
+  ${({ isOur, ourColor, selected }) =>
+    isOur &&
+    ourColor &&
+    css`
+      background: ${darken(selected ? 0.2 : 0.1, ourColor)};
+      border-color: var(--rlm-accent-color);
+      transition: var(--transition);
+      &:hover {
+        transition: var(--transition);
+        background: ${darken(selected ? 0.225 : 0.125, ourColor)};
+      }
+    `}
 `;
 
 export type ReactionAggregateType = {
@@ -297,7 +297,14 @@ export const Reactions = (props: ReactionProps) => {
               emojiStyle={EmojiStyle.APPLE}
               size={EmojiSizes[size]}
             />
-            {reaction.count > 1 && <Text.Hint>{reaction.count}</Text.Hint>}
+            {reaction.count > 1 && (
+              <Text.Hint
+                opacity={0.9}
+                style={{ color: isOur ? '#ffffff' : 'var(--rlm-text-color)' }}
+              >
+                {reaction.count}
+              </Text.Hint>
+            )}
           </ReactionButton>
         );
       })}
