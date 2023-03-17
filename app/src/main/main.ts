@@ -183,9 +183,7 @@ const createMouseOverlayWindow = () => {
        * For macOS we enable mouse layer tracking for a smoother experience.
        * It is not supported for Windows or Linux.
        */
-      newMouseWindow.webContents.executeJavaScript(
-        `window.mouseLayerTracking = true;`
-      );
+      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
     } else if (isWindows) {
       hideCursor(newMouseWindow.webContents);
     } else {

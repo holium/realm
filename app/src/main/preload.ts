@@ -57,6 +57,9 @@ const appPreload = {
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
+  onEnableMouseLayerTracking(callback: () => void) {
+    ipcRenderer.on('enable-mouse-layer-tracking', callback);
+  },
   onDisableCustomMouse(callback: () => void) {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
@@ -123,21 +126,6 @@ const appPreload = {
   },
   removeOnMouseMove() {
     ipcRenderer.removeAllListeners('mouse-move');
-  },
-  removeOnMouseColorChange() {
-    ipcRenderer.removeAllListeners('mouse-color');
-  },
-  removeOnDisableCustomMouse() {
-    ipcRenderer.removeAllListeners('disable-custom-mouse');
-  },
-  removeOnToggleOnEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm.toggle-on-ephemeral-chat');
-  },
-  removeOnToggleOffEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm.toggle-off-ephemeral-chat');
-  },
-  removeOnRealmToAppEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm-to-app.ephemeral-chat');
   },
 };
 

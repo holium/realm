@@ -11,7 +11,6 @@ declare global {
     };
     audio: any;
     ship: string;
-    mouseLayerTracking: boolean;
   }
 }
 

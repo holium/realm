@@ -9,27 +9,12 @@ export const Mouse = () => {
   const active = useToggle(false);
   const visible = useToggle(false);
   const disabled = useToggle(false);
+  const mouseLayerTracking = useToggle(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
   const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const ephemeralChat = useToggle(false);
   const [chat, setChat] = useState('');
-
-  useEffect(() => {
-    const handleMouseLayerMouseMove = (e: MouseEvent) => {
-      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    if (window.mouseLayerTracking) {
-      window.addEventListener('mousemove', handleMouseLayerMouseMove);
-    }
-
-    return () => {
-      if (window.mouseLayerTracking) {
-        window.removeEventListener('mousemove', handleMouseLayerMouseMove);
-      }
-    };
-  });
 
   useEffect(() => {
     window.electron.app.onMouseOut(visible.toggleOff);
@@ -38,12 +23,21 @@ export const Mouse = () => {
       // We only use the IPC'd coordinates if
       // A) mouse layer tracking is disabled (Win & Linux), or
       // B) the mouse is dragging, since the mouse layer can't record position on drag.
-      if (!window.mouseLayerTracking || isDragging) {
+      if (!mouseLayerTracking.isOn || isDragging) {
         setPosition(newCoordinates);
       }
 
       if (!isDragging) setState(newState);
       if (!visible.isOn) visible.toggleOn();
+    });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.electron.app.onEnableMouseLayerTracking(() => {
+      mouseLayerTracking.toggleOn();
+      window.addEventListener('mousemove', handleMouseMove);
     });
 
     window.electron.app.onMouseDown(active.toggleOn);
@@ -64,17 +58,11 @@ export const Mouse = () => {
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 
     return () => {
-      window.electron.app.removeOnMouseOut();
-      window.electron.app.removeOnMouseMove();
-      window.electron.app.removeOnMouseDown();
-      window.electron.app.removeOnMouseUp();
-      window.electron.app.removeOnMouseColorChange();
-      window.electron.app.removeOnDisableCustomMouse();
-      window.electron.app.removeOnToggleOnEphemeralChat();
-      window.electron.app.removeOnToggleOffEphemeralChat();
-      window.electron.app.removeOnRealmToAppEphemeralChat();
+      if (mouseLayerTracking.isOn) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
     };
-  }, [active.isOn, visible.isOn]);
+  }, []);
 
   if (disabled.isOn) return null;
 
