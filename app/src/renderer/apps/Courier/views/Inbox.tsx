@@ -14,8 +14,10 @@ import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
+import { useServices } from 'renderer/logic/store';
 
 export const InboxPresenter = () => {
+  const { ship } = useServices();
   const { dimensions } = useTrayApps();
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
     useChatStore();
@@ -40,7 +42,7 @@ export const InboxPresenter = () => {
 
   return (
     <Flex height={dimensions.height - 24} flexDirection="column">
-      <Flex mb={1} ml={1} flexDirection="row" alignItems="center">
+      <Flex zIndex={1} mb={1} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -106,9 +108,11 @@ export const InboxPresenter = () => {
             borderRadius={6}
           >
             {pinnedChatList.map((chat) => {
+              const isAdmin = ship ? chat.isHost(ship.patp) : false;
               return (
                 <Box
-                  key={`pinned-${chat.path}`}
+                  zIndex={2}
+                  key={`${ship?.patp}-pinned-${chat.path}`}
                   height={52}
                   alignItems="center"
                   layoutId={`chat-${chat.path}-container`}
@@ -116,6 +120,7 @@ export const InboxPresenter = () => {
                   <ChatRow
                     path={chat.path}
                     title={chat.metadata.title}
+                    isAdmin={isAdmin}
                     peers={chat.peers.map((peer) => peer.ship)}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
@@ -132,17 +137,19 @@ export const InboxPresenter = () => {
             })}
           </Flex>
           <WindowedList
-            key={`inbox-${unpinnedChatList.length}`}
+            key={`${ship?.patp}-inbox-${unpinnedChatList.length}`}
             width={listWidth}
             height={listHeight}
             rowHeight={52}
             data={unpinnedChatList}
             filter={searchFilter}
             rowRenderer={(chat) => {
+              const isAdmin = ship ? chat.isHost(ship.patp) : false;
               return (
                 <Box
+                  zIndex={2}
                   layout="preserve-aspect"
-                  key={`unpinned-${chat.path}`}
+                  key={`${ship?.patp}-unpinned-${chat.path}`}
                   alignItems="center"
                   height={52}
                   layoutId={`chat-${chat.path}-container`}
@@ -151,6 +158,7 @@ export const InboxPresenter = () => {
                     path={chat.path}
                     title={chat.metadata.title}
                     peers={chat.peers.map((peer) => peer.ship)}
+                    isAdmin={isAdmin}
                     lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}

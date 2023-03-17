@@ -6,6 +6,7 @@ import {
   timelineDate,
   MenuItemProps,
 } from '@holium/design-system';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -18,6 +19,7 @@ type ChatRowProps = {
   path: string;
   title: string;
   peers: string[];
+  isAdmin: boolean;
   lastMessage: string;
   metadata: any;
   timestamp: number;
@@ -31,11 +33,12 @@ export const ChatRowPresenter = ({
   title,
   peers,
   timestamp,
+  isAdmin,
   type,
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { ship, friends } = useServices();
   const {
     inbox,
     getChatTitle,
@@ -95,8 +98,8 @@ export const ChatRowPresenter = ({
     });
     menu.push({
       id: `${chatRowId}-leave-chat`,
-      label: 'Delete chat',
-      icon: 'Trash',
+      label: isAdmin ? 'Delete chat' : 'Leave chat',
+      icon: isAdmin ? 'Trash' : 'Logout',
       iconColor: '#ff6240',
       labelColor: '#ff6240',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -120,7 +123,12 @@ export const ChatRowPresenter = ({
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
   const resolvedTitle = useMemo(() => {
     if (!ship) return 'Error loading title';
-    return getChatTitle(path, ship.patp);
+    let title = getChatTitle(path, ship.patp);
+    if (type === 'dm') {
+      const { nickname } = friends.getContactAvatarMetadata(title);
+      if (nickname) title = nickname;
+    }
+    return title;
   }, [path, ship]);
 
   const chatAvatarEl = useMemo(
@@ -138,7 +146,7 @@ export const ChatRowPresenter = ({
           canEdit={false}
         />
       ),
-    [resolvedTitle, path, type, peers, metadata.image]
+    [resolvedTitle, path, type, peers, metadata.image, ship?.patp]
   );
 
   const chat = inbox.find((c) => c.path === path);
@@ -164,9 +172,9 @@ export const ChatRowPresenter = ({
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
             layoutId={`chat-${path}-avatar`}
-            layout="position"
+            layout="preserve-aspect"
             transition={{
-              duration: 0.1,
+              duration: 0.15,
             }}
           >
             {chatAvatarEl}
@@ -174,12 +182,12 @@ export const ChatRowPresenter = ({
           <Flex alignItems="flex-start" flexDirection="column">
             <Text.Custom
               layoutId={`chat-${path}-name`}
-              layout="position"
+              layout="preserve-aspect"
               truncate
               textAlign="left"
               width={210}
               transition={{
-                duration: 0.1,
+                duration: 0.15,
               }}
               fontWeight={500}
               fontSize={3}
@@ -188,11 +196,17 @@ export const ChatRowPresenter = ({
             </Text.Custom>
             <Text.Custom
               textAlign="left"
+              layoutId={`chat-${path}-subtitle`}
+              layout="preserve-aspect"
               truncate
               width={210}
               fontWeight={400}
+              transition={{
+                duration: 0.1,
+              }}
+              animate={{ opacity: 0.5, lineHeight: '1.2' }}
+              exit={{ opacity: 0 }}
               fontSize={2}
-              opacity={0.5}
             >
               {lastMessageUpdated
                 ? Object.values(lastMessageUpdated)[0]

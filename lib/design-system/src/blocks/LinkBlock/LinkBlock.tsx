@@ -1,24 +1,20 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, skeletonStyle, Text, Bookmark } from '../..';
+import { Flex, skeletonStyle, Text, Bookmark, MediaBlock } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { isTwitterLink } from '../../util/links';
+import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
 
 const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
 
 const LinkTitle = styled(Text.Anchor)`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
   overflow: hidden;
+  line-height: 1.7rem;
+  height: 1.6rem;
 `;
 
 const LinkDescription = styled(Text.Custom)`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
   overflow: hidden;
   height: 1rem;
 `;
@@ -28,7 +24,6 @@ const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   height: 170px;
   object-fit: cover;
   border-radius: 4px;
-  margin-bottom: 0.25rem;
   background: var(--rlm-window-color);
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
@@ -58,44 +53,53 @@ type LinkBlockProps = {
   link: string;
   by: string;
   metadata?: any;
+  containerWidth?: number;
+  onLinkLoaded?: () => void;
 } & BlockProps;
 
-type LinkType = 'opengraph' | 'url' | 'twitter';
+type LinkType = 'opengraph' | 'url';
+type MediaType = 'twitter' | 'media' | 'image';
+type LinkBlockType = LinkType | MediaType;
 
-export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
+export const LinkBlock = ({
+  link,
+  by,
+  containerWidth,
+  onLinkLoaded,
+  ...rest
+}: LinkBlockProps) => {
   const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [linkType, setLinkType] = useState<LinkType>('opengraph');
+  const [linkBlockType, setLinkBlockType] =
+    useState<LinkBlockType>('opengraph');
 
   useEffect(() => {
-    if (isTwitterLink(link)) {
-      setLinkType('twitter');
+    const { linkType } = parseMediaType(link);
+    if (linkType !== 'link') {
+      setLinkBlockType(linkType);
     }
-    if (!openGraph && linkType === 'opengraph') {
+    if (!openGraph && linkBlockType === 'opengraph') {
       fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
         .then(async (res) => {
           if (res.status === 200) {
             const data = await res.json();
-            if (!data || data.error) setLinkType('url');
+            if (!data || data.error) setLinkBlockType('url');
             setOpenGraph(data);
-            onLoaded && onLoaded();
+            onLinkLoaded && onLinkLoaded();
           } else {
-            setLinkType('url');
+            setLinkBlockType('url');
           }
         })
         .catch((err) => {
           console.error(err);
-          setLinkType('url');
+          setLinkBlockType('url');
         });
     }
   }, []);
 
   let description = openGraph?.ogDescription || '';
-  if (description.length > 99) {
-    description = description.substring(0, 100) + '...';
-  }
 
-  if (linkType === 'url') {
+  if (linkBlockType === 'url') {
     return (
       <Block {...rest}>
         <Bookmark
@@ -109,10 +113,10 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
       </Block>
     );
   }
-  if (linkType === 'twitter') {
-    let width = rest.width || 400;
+  if (linkBlockType === 'twitter') {
+    let width = rest.width || 320;
     if (width < 400) {
-      width = 400;
+      width = 320;
     }
     return (
       <TweetBlock
@@ -120,6 +124,28 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
         link={link}
         {...rest}
         width={width}
+        onTweetLoad={onLinkLoaded}
+      />
+    );
+  }
+
+  if (linkBlockType === 'media') {
+    if (typeof rest.height === 'string') {
+      // strip out non-numeric characters
+      if (rest.height.includes('px')) {
+        rest.height = parseInt(rest.height.replace('px', ''));
+      }
+      // convert rem to px
+      else rest.height = parseInt(rest.height.replace('rem', '')) * 16;
+    }
+    return (
+      <MediaBlock
+        id="vid-1"
+        mode="embed"
+        url={link}
+        width={rest.width as number}
+        height={rest.height as number}
+        onLoaded={onLinkLoaded}
       />
     );
   }
@@ -141,11 +167,11 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
       />
       <Flex mb="0.25rem" width="100%" flexDirection="column">
         <LinkTitle
+          truncate
           isSkeleton={!ogHasURL}
-          mb="0.25rem"
           fontSize={2}
           fontWeight={500}
-          width={rest.width || 'inherit'}
+          width={containerWidth ? containerWidth - 20 : 'inherit'}
           onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
             evt.stopPropagation();
             window.open(openGraph?.ogUrl, '_blank');
@@ -154,10 +180,11 @@ export const LinkBlock = ({ link, by, onLoaded, ...rest }: LinkBlockProps) => {
           {openGraph?.ogTitle}
         </LinkTitle>
         <LinkDescription
+          truncate
           isSkeleton={!ogHasURL}
           fontSize={1}
           opacity={0.7}
-          width={rest.width || 'calc(100% - 16px)'}
+          width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
         >
           {description}
         </LinkDescription>

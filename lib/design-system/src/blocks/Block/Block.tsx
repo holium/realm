@@ -53,14 +53,12 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   box-sizing: content-box;
   align-items: flex-start;
   padding: 6px;
-  background: var(--rlm-card-color);
+  backdrop-filter: brightness(95%) blur(6px);
   color: var(--rlm-text-color) !important;
   ${Text.Custom} {
     color: var(--rlm-text-color) !important;
   }
-  backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
-  border: 1px solid transparent;
   width: ${(props) => (props.width ? `${props.width}px` : 'initial')};
   ${(props) =>
     props.mode === 'display' &&
@@ -83,7 +81,6 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
     (props.variant === 'overlay' || props.variant === 'content') &&
     css`
       padding: 0px;
-      border: 0px solid transparent;
       background: transparent;
       position: relative;
       .block-footer {
