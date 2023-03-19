@@ -29,6 +29,7 @@ import {
 } from './models/courier';
 import { toJS } from 'mobx';
 import { DiskStore } from '../base.store';
+import { CampfireService } from '../apps/campfire.service';
 
 // upload support
 const fs = require('fs');
@@ -58,6 +59,7 @@ export class ShipService extends BaseService {
   private readonly services: { slip?: SlipService } = {};
   rooms: RoomsService;
   wallet: WalletService;
+  campfire: CampfireService;
 
   handlers = {
     'realm.ship.get-dms': this.getDMs,
@@ -185,6 +187,7 @@ export class ShipService extends BaseService {
     this.services.slip = new SlipService(core);
     this.rooms = new RoomsService(core);
     this.wallet = new WalletService(core);
+    this.campfire = new CampfireService(core);
   }
 
   get modelSnapshots() {
@@ -300,6 +303,7 @@ export class ShipService extends BaseService {
 
       this.rooms?.watch();
       this.wallet?.onLogin(ship);
+      this.campfire?.onLogin(ship);
 
       // return ship state
     } catch (err) {
@@ -319,10 +323,6 @@ export class ShipService extends BaseService {
     });
 
     return { ship: this.state, models: this.modelSnapshots };
-  }
-
-  get walletSnapshot() {
-    return this.wallet?.snapshot;
   }
 
   async init(ship: string) {

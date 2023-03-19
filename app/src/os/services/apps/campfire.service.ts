@@ -36,7 +36,7 @@ export class CampfireService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async load(patp: string) {
+  async onLogin(patp: string) {
     const secretKey: string | null = this.core.passwords.getPassword(patp);
     if (!secretKey) throw new Error('No password found for this ship');
     this.db = new DiskStore('campfire', patp, secretKey, CampfireStore, {});
