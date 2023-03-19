@@ -123,15 +123,18 @@ export class ComposerService extends BaseService {
   // ***********************************************************
 
   async addSpace(_event: IpcMainInvokeEvent, spacepath: string) {
-    ComposerApi.addSpace(this.core.conduit!, spacepath);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.addSpace(this.core.conduit, spacepath);
   }
 
   async removeSpace(_event: IpcMainInvokeEvent, spacepath: string) {
-    ComposerApi.removeSpace(this.core.conduit!, spacepath);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.removeSpace(this.core.conduit, spacepath);
   }
 
   async addStack(_event: IpcMainInvokeEvent, spacepath: string, stack: any) {
-    ComposerApi.addStack(this.core.conduit!, spacepath, stack);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.addStack(this.core.conduit, spacepath, stack);
   }
 
   async removeStack(
@@ -139,7 +142,8 @@ export class ComposerService extends BaseService {
     spacepath: string,
     stackId: string
   ) {
-    ComposerApi.removeStack(this.core.conduit!, spacepath, stackId);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.removeStack(this.core.conduit, spacepath, stackId);
   }
 
   async setCurrentStack(
@@ -147,7 +151,8 @@ export class ComposerService extends BaseService {
     spacepath: string,
     stackId: string
   ) {
-    ComposerApi.setCurrentStack(this.core.conduit!, spacepath, stackId);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.setCurrentStack(this.core.conduit, spacepath, stackId);
   }
 
   async addWindow(
@@ -156,7 +161,8 @@ export class ComposerService extends BaseService {
     stackId: string,
     window: any
   ) {
-    ComposerApi.addWindow(this.core.conduit!, spacepath, stackId, window);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.addWindow(this.core.conduit, spacepath, stackId, window);
   }
 
   async removeWindow(
@@ -165,7 +171,8 @@ export class ComposerService extends BaseService {
     stackId: string,
     windowId: string
   ) {
-    ComposerApi.removeWindow(this.core.conduit!, spacepath, stackId, windowId);
+    if (!this.core.conduit) throw new Error('No conduit found');
+    ComposerApi.removeWindow(this.core.conduit, spacepath, stackId, windowId);
   }
 
   setWindowBounds(
@@ -175,8 +182,9 @@ export class ComposerService extends BaseService {
     windowId: string,
     bounds: any
   ) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     ComposerApi.setWindowBounds(
-      this.core.conduit!,
+      this.core.conduit,
       spacepath,
       stackId,
       windowId,
@@ -191,8 +199,9 @@ export class ComposerService extends BaseService {
     windowId: string,
     layer: number
   ) {
+    if (!this.core.conduit) throw new Error('No conduit found');
     ComposerApi.setWindowLayer(
-      this.core.conduit!,
+      this.core.conduit,
       spacepath,
       stackId,
       windowId,
