@@ -33,6 +33,7 @@ import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
+import { CampfireStore } from 'os/services/apps/campfire.model';
 
 const Services = types
   .model('ServicesStore', {
@@ -128,6 +129,7 @@ const services = Services.create({
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
+  campfire: {},
 });
 
 export const servicesStore = services;
