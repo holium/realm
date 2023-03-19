@@ -63,5 +63,15 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  'os-campfire': {
+    id: 'os-campfire',
+    title: 'Campfire',
+    color: '#F9D492',
+    icon: 'AppIconSettings',
+    type: 'native',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
   ...devApps,
 };

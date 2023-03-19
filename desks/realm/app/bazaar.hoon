@@ -1004,6 +1004,13 @@
         =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-settings grid-index.init)
+      =|  =native-app:store
+        =.  title.native-app            'Campfire'
+        =.  color.native-app            '#F9D492'
+        =.  icon.native-app             'AppIconSettings'
+        =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
+      =.  catalog.init                  (~(put by catalog.init) %os-campfire [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-campfire grid-index.init)
       init
     ::
     ++  get-stall-apps

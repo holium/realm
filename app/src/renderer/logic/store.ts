@@ -53,6 +53,7 @@ const Services = types
     friends: FriendsStore,
     beacon: NotificationStore,
     bulletin: BulletinStore,
+    campfire: CampfireStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
