@@ -21,6 +21,7 @@ import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
+import { ComposerService } from './services/shell/composer.service';
 
 export interface ISession {
   ship: string;
@@ -49,6 +50,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
+    composer: ComposerService;
   };
 
   readonly holiumClient: HoliumAPI;
@@ -147,6 +149,7 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
+      composer: new ComposerService(this),
     };
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
