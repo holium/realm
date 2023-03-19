@@ -21,6 +21,7 @@ import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
+import { CampfireService } from './services/apps/campfire.service';
 
 export interface ISession {
   ship: string;
@@ -49,6 +50,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
+    campfire: CampfireService;
   };
 
   readonly holiumClient: HoliumAPI;
@@ -147,6 +149,7 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
+      campfire: new CampfireService(this),
     };
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
@@ -203,6 +206,7 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
+    let campfire = null;
     const desktop = this.services.desktop.snapshot;
     const shell = this.services.shell.snapshot;
     let membership = null;
@@ -217,6 +221,7 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
+      campfire = this.services.campfire.snapshot;
       wallet = this.services.ship.walletSnapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       beacon = this.services.spaces.modelSnapshots.beacon;
@@ -234,6 +239,7 @@ export class Realm extends EventEmitter {
       onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
+      campfire,
       desktop,
       shell,
       bazaar,

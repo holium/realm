@@ -1,4 +1,5 @@
 import { Realm } from './index';
+import { CampfireService } from './services/apps/campfire.service';
 import { AuthService } from './services/identity/auth.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { DesktopService } from './services/shell/desktop.service';
@@ -22,6 +23,7 @@ export const osPreload = {
     wallet: WalletService.preload,
   },
   slip: SlipService.preload,
+  campfire: CampfireService.preload,
 };
 
 export type OSPreloadType = typeof osPreload;

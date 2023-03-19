@@ -265,6 +265,9 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.theme.setCurrentTheme(bootTheme);
     }
   }
+  if (response.campfire) {
+    applySnapshot(servicesStore.campfire, response.campfire);
+  }
   if (response.bulletin) {
     applySnapshot(servicesStore.bulletin, response.bulletin);
   }
@@ -374,6 +377,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'spaces') {
       applyPatch(servicesStore.spaces, value.patch);
     }
+    if (value.resource === 'campfire') {
+      applyPatch(servicesStore.campfire, value.patch);
+    }
     if (value.resource === 'ship') {
       applyPatch(servicesStore.ship, value.patch);
     }
@@ -422,6 +428,9 @@ OSActions.onEffect((_event: any, value: any) => {
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
+    }
+    if (value.resource === 'campfire') {
+      applySnapshot(servicesStore.campfire, value.model);
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);

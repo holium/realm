@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import { getSnapshot } from 'mobx-state-tree';
 import { Realm } from '../../';
 
@@ -13,9 +13,15 @@ export class CampfireService extends BaseService {
   private db?: DiskStore; // for persistance
   private state?: CampfireStoreType; // for state management
 
-  handlers = {};
+  handlers = {
+    'realm.campfire.set-view': this.setView,
+  };
 
-  static preload = {};
+  static preload = {
+    setView: async (view: string) => {
+      return await ipcRenderer.invoke('realm.campfire.set-view', view);
+    },
+  };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
@@ -42,4 +48,8 @@ export class CampfireService extends BaseService {
   // ***********************************************************
   // ************************ CAMPFIRE ***************************
   // ***********************************************************
+
+  setView(view: string) {
+    this.state?.setView(view);
+  }
 }
