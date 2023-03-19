@@ -186,6 +186,43 @@
                 %group-update-0
               =/  groups-update  q:!<(update:g q.cage.sign)
               ?+  -.groups-update  `this
+                  %cordon
+                ?-  +<.groups-update
+                    %shut
+                  ?-  +>-.groups-update
+                      %add-ships
+                    ?+  +>+<.groups-update  `this
+                        %pending
+                      =^  cards  state
+                        %^  spin  ~(tap in `(set ship)`+>+>.groups-update)
+                          state
+                        |=  [=ship =_state]
+                        ^-  [(list card) _state]
+                        =/  join-action
+                          ^-  action:vstore
+                          :*  %send-invite
+                              ^-  space-path:store
+                              :-  (slav %p (snag 1 `(list knot)`wire))
+                              (snag 2 `(list knot)`wire)
+                              ship
+                              role=%member
+                              message='Join the space for the group'
+                          ==
+                        %-  action:visas:core
+                        join-action
+                      =/  cards  (zing cards)
+                      [cards this] 
+                    ==
+                      %del-ships
+                    `this
+                  ==
+                    %open
+                  :: TODO: sync bans
+                  `this
+                    %swap
+                  :: TODO: sync entry policy
+                  `this
+                ==
                   %fleet
                 ?+  -.q.groups-update  `this
                     %add

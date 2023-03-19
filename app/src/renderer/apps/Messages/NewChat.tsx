@@ -1,7 +1,14 @@
 import { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
-import { FormControl, Tag, Spinner } from 'renderer/components';
-import { Flex, Text, TextInput, Icon, Button } from '@holium/design-system';
+import { FormControl, Tag } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  TextInput,
+  Icon,
+  Button,
+  Spinner,
+} from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
@@ -61,7 +68,7 @@ const NewChatPresenter = (props: IProps) => {
 
   const onShipRemove = (contact: [string, string?]) => {
     selectedPatp.delete(contact[0]);
-    selectedNickname.delete(contact[1]!);
+    if (contact[1]) selectedNickname.delete(contact[1]);
     setSelected(new Set(selectedPatp));
     setSelectedNickname(new Set(selectedNickname));
   };

@@ -2,14 +2,11 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Grid,
   Text,
-  Flex,
   Label,
   Input,
   Icons,
   Crest,
-  RadioGroup,
   FormControl,
-  RadioList,
   isValidHexColor,
   isImgUrl,
   TextButton,
@@ -21,6 +18,7 @@ import { TwitterPicker } from 'react-color';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
+import { Flex, RadioGroup, RadioList } from '@holium/design-system';
 
 type CreateSpaceFormProps = {
   name: string;
@@ -89,7 +87,7 @@ const SpacesCreateFormPresenter = ({
   setState,
 }: BaseDialogProps) => {
   const { theme, spaces } = useServices();
-  const { inputColor, windowColor, textColor } = theme.currentTheme;
+  const { inputColor } = theme.currentTheme;
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -119,12 +117,10 @@ const SpacesCreateFormPresenter = ({
   };
 
   const setWorkspaceState = (obj: any) => {
-    setState &&
-      setState({
-        ...workflowState,
-        ...obj,
-      });
-    // console.log(workflowState);
+    setState?.({
+      ...workflowState,
+      ...obj,
+    });
   };
 
   useEffect(() => {
@@ -148,7 +144,8 @@ const SpacesCreateFormPresenter = ({
       });
     }
     if (edit) {
-      const space = spaces.spaces.get(edit.space)!;
+      const space = spaces.spaces.get(edit.space);
+      if (!space) return;
       setWorkspaceState({
         ...space,
         description: space.description,
@@ -223,15 +220,13 @@ const SpacesCreateFormPresenter = ({
               alignItems="flex-end"
             >
               <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={crestOption}
                 options={[
                   { label: 'Color', value: 'color' },
                   { label: 'Image', value: 'image' },
                 ]}
-                onClick={(value: CrestOptionType) => {
-                  setCrestOption(value);
+                onClick={(value) => {
+                  setCrestOption(value as CrestOptionType);
                   setWorkspaceState({ crestOption: value });
                   setWorkspaceState({ crestOption: value });
                 }}
@@ -409,6 +404,7 @@ const SpacesCreateFormPresenter = ({
               }}
               onFocus={() => nameField.actions.onFocus()}
               onBlur={nameField.actions.onBlur}
+              disabled={workflowState.type === 'group'}
             />
           </FormControl.Field>
           <FormControl.Field>
@@ -445,8 +441,6 @@ const SpacesCreateFormPresenter = ({
               Access
             </Label>
             <RadioList
-              customBg={windowColor}
-              textColor={textColor}
               selected={accessOption}
               options={[
                 {
@@ -469,8 +463,8 @@ const SpacesCreateFormPresenter = ({
                   sublabel: 'Anyone can join a public holding area.',
                 },
               ]}
-              onClick={(value: AccessOptionType) => {
-                setAccessOption(value);
+              onClick={(value) => {
+                setAccessOption(value as AccessOptionType);
                 setWorkspaceState({
                   access: value,
                 });

@@ -41,7 +41,8 @@
     }
   },
   "peerDependencies": {
-    "mobx": "^6.5.0"
+    "mobx": "^6.5.0",
+    "react": "^18.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",

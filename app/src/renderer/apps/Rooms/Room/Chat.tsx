@@ -37,7 +37,7 @@ const RoomChatPresenter = () => {
   const listHeight = getTrayAppHeight() - 164;
   const { theme: themeStore, ship } = useServices();
 
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const theme = themeStore.currentTheme;
 
@@ -120,7 +120,6 @@ const RoomChatPresenter = () => {
           innerRef={chatInputRef}
           spellCheck={false}
           wrapperStyle={{
-            cursor: 'none',
             borderRadius: 6,
             backgroundColor: theme.inputColor,
           }}

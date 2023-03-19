@@ -41,7 +41,7 @@ export class SlipService extends EventEmitter {
   }
 
   async subscribe() {
-    await this.core.conduit!.watch({
+    await this.core.conduit?.watch({
       app: 'slip',
       path: '/slip/local',
       onEvent: this.handleSlip,
@@ -51,7 +51,7 @@ export class SlipService extends EventEmitter {
   }
 
   // async unsubscribe() {
-  //   this.core.conduit.unsubscribe(this.slipId!);
+  //   this.core.conduit.unsubscribe(this.slipId);
   //   this.core.conduit.delete();
   //   this.slipId = null;
   // }
@@ -66,7 +66,7 @@ export class SlipService extends EventEmitter {
     // if (!this.slipId) await this.subscribe();
     const now = Date.now();
     // Poke slip
-    this.core.conduit!.poke({
+    this.core.conduit?.poke({
       app: 'slip',
       mark: 'slip-action',
       json: {

@@ -1,13 +1,6 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Flex,
-  Text,
-  Card,
-  RadioImages,
-  TextButton,
-  Input,
-} from 'renderer/components';
+import { Text, Card, TextButton, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { lighten } from 'polished';
 
@@ -19,6 +12,7 @@ import { ShipModelType } from 'os/services/ship/models/ship';
 import { MembershipType } from 'os/services/spaces/models/members';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeStoreType } from 'renderer/logic/theme';
+import { Flex, RadioImages } from '@holium/design-system';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -173,8 +167,6 @@ const ThemePanelPresenterView = ({
 
         <Flex>
             <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
                 selected={appearance}
                 options={[
                   { label: 'Dynamic', value: 'dynamic' },
@@ -258,8 +250,8 @@ const ThemePanelPresenterView = ({
         </Text>
 
         <RadioImages
-          customBg={windowColor}
-          accentColor={accentColor}
+          // customBg={windowColor}
+          // accentColor={accentColor}
           selected={wpOption}
           options={wpGalleryKeys.map((key: string) => ({
             imageSrc: wpGallery[key],
@@ -282,7 +274,6 @@ const ThemePanelPresenterView = ({
           type="text"
           placeholder="Paste url here"
           wrapperStyle={{
-            cursor: 'none',
             borderRadius: 9,
             backgroundColor: inputColor,
           }}

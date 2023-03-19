@@ -1,6 +1,7 @@
 import { FC, useMemo } from 'react';
 import { darken, lighten } from 'polished';
-import { Flex, Icons, Text, Spinner, IconButton } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
+import { Icons, Text, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -28,7 +29,8 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
-        new Date(a.initiatedAt!).getTime() - new Date(b.initiatedAt!).getTime()
+        new Date(a.initiatedAt ?? 0).getTime() -
+        new Date(b.initiatedAt ?? 0).getTime()
     );
 
   return pendingTransactions.length ? (
@@ -80,9 +82,9 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
           ? 'zigs'
           : 'ETH'
         : walletApp.ethereum.wallets
-            .get(props.transaction.walletIndex.toString())!
-            .data.get(walletApp.navState.protocol)!
-            .coins.get(props.transaction.ethType!)!.name;
+            ?.get(props.transaction.walletIndex.toString())
+            ?.data.get(walletApp.navState.protocol)
+            ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
 
   const bgColor = useMemo(

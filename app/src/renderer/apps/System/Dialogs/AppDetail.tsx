@@ -54,11 +54,16 @@ interface AppDetailProps {
 interface KPIProps {
   title: string;
   value: string | React.ReactNode;
+  hover?: string;
 }
 const KPI: FC<KPIProps> = (props: KPIProps) => {
   let valueContent: React.ReactNode;
   if (typeof props.value === 'string') {
-    valueContent = <Text flex={3}>{props.value}</Text>;
+    valueContent = (
+      <Text flex={3} title={props.hover}>
+        {props.value}
+      </Text>
+    );
   } else {
     valueContent = <Flex flex={3}>{props.value}</Flex>;
   }
@@ -100,30 +105,29 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   let app: AppType | null = null;
   let onClose: any = ShellActions.closeDialog;
   if (type === 'app-install') {
-    onClose = () => {
-      setSearchMode('none');
-    };
-    const catalogEntry = bazaar.getApp(selectedApp!.id.split('/')[1]);
+    if (!selectedApp) return null;
+    onClose = () => setSearchMode('none');
+    const catalogEntry = bazaar.getApp(selectedApp.id.split('/')[1]);
     app = getSnapshot(
       UrbitApp.create({
-        ...selectedApp!,
-        title: selectedApp?.title || selectedApp!.id.split('/')[1],
+        ...selectedApp,
+        title: selectedApp?.title || selectedApp.id.split('/')[1],
         type: AppTypes.Urbit,
-        href: getSnapshot(selectedApp!.href),
+        href: getSnapshot(selectedApp.href),
         config: {
           size: [10, 10],
           showTitlebar: true,
           titlebarBorder: true,
         },
-        id: selectedApp!.id.split('/')[1]!,
-        host: selectedApp!.id.split('/')[0],
+        id: selectedApp.id.split('/')[1],
+        host: selectedApp.id.split('/')[0],
         installStatus:
           (catalogEntry && catalogEntry.installStatus) ||
           InstallStatus.uninstalled,
       })
     ) as AppType;
   } else if (appId) {
-    app = bazaar.getApp(appId)! as AppType;
+    app = bazaar.getApp(appId) as AppType;
   } else {
     return null;
   }
@@ -160,7 +164,15 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
         {app.href && app.href.glob && app.href.glob['glob-reference'] && (
           <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
         )}
-        {isInstalled && deskHash && <KPI title="Desk Hash" value={deskHash} />}
+        {isInstalled && deskHash && (
+          <KPI
+            title="Desk Hash"
+            hover={deskHash}
+            value={`${deskHash.split('.')[0]}...${
+              deskHash.split('.')[deskHash.split('.').length - 1]
+            }`}
+          />
+        )}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
@@ -263,12 +275,10 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
-                  !isInstalled &&
-                    app &&
-                    SpacesActions.installApp(
-                      (app as UrbitAppType).host!,
-                      app.id
-                    );
+                  const a = app as UrbitAppType;
+                  if (!isInstalled && a && a.host) {
+                    SpacesActions.installApp(a.host, a.id);
+                  }
                   // TODO should we close on install?
                   onClose();
                 }}

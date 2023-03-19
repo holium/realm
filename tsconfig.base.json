@@ -30,8 +30,9 @@
     { "path": "./app" },
     { "path": "./lib/conduit" },
     { "path": "./lib/design-system" },
-    { "path": "./lib/multiplayer" },
+    { "path": "./lib/presence" },
+    { "path": "./lib/presence/code" },
     { "path": "./lib/room" },
-    { "path": "./lib/room/test-ui-vite" }
+    { "path": "./lib/room/test-ui" }
   ]
 }

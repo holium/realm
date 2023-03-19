@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
-import { Grid, Flex, Spinner } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
+import { Grid } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
@@ -71,7 +72,7 @@ const MessagesTrayAppPresenter = () => {
           height={dimensions.height}
           theme={theme.currentTheme as any}
           storage={storage}
-          selectedChat={dmApp.selectedChat!}
+          selectedChat={dmApp.selectedChat as DMPreviewType}
         />
       );
       break;

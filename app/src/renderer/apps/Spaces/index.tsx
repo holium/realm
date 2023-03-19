@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Input, Spinner } from 'renderer/components';
-import { Text, Flex, Button, Icon } from '@holium/design-system';
+import { Input } from 'renderer/components';
+import { Text, Flex, Button, Icon, Spinner } from '@holium/design-system';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
@@ -12,6 +12,8 @@ import { isValidPatp } from 'urbit-ob';
 import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
 import { FeaturedList } from './FeaturedList';
+
+const bottomHeight = 54;
 
 const SpacesTrayAppPresenter = () => {
   const { ship, theme, spaces } = useServices();
@@ -35,8 +37,6 @@ const SpacesTrayAppPresenter = () => {
       mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
     [inputColor, mode]
   );
-
-  const bottomHeight = 54;
 
   const [searchVisible, setSearchVisible] = useState(false);
 
@@ -206,9 +206,7 @@ const SpacesTrayAppPresenter = () => {
             }}
             selected={spaces.selected}
             spaces={spaces.spacesList}
-            onSelect={async (path: string) =>
-              await SpacesActions.selectSpace(path)
-            }
+            onSelect={SpacesActions.selectSpace}
           />
         </Flex>
       )}
@@ -221,14 +219,14 @@ const SpacesTrayAppPresenter = () => {
         flex={1}
         height={bottomHeight}
       >
-        <YouRow
-          colorTheme={windowColor}
-          selected={`/${ship?.patp}/our` === spaces.selected?.path}
-          ship={ship!}
-          onSelect={async (path: string) =>
-            await SpacesActions.selectSpace(path)
-          }
-        />
+        {ship && (
+          <YouRow
+            colorTheme={windowColor}
+            selected={`/${ship.patp}/our` === spaces.selected?.path}
+            ship={ship}
+            onSelect={SpacesActions.selectSpace}
+          />
+        )}
       </Flex>
     </Flex>
   );

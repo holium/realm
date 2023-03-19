@@ -19,10 +19,23 @@ export const AppWindowContainer = styled(motion.div)<AppWindowStyleProps>`
   background-color: ${(props) => props.customBg};
 `;
 
-const DragHandle = styled(motion.div)`
+const DragHandle = styled(motion.div)<{ zIndex: number }>`
   position: absolute;
   height: 10px;
   width: 10px;
+  z-index: ${(props) => props.zIndex};
+`;
+
+export const TopLeftDragHandle = styled(DragHandle)`
+  left: 0px;
+  top: 0px;
+  cursor: nw-resize;
+`;
+
+export const TopRightDragHandle = styled(DragHandle)`
+  right: 0px;
+  top: 0px;
+  cursor: ne-resize;
 `;
 
 export const BottomLeftDragHandle = styled(DragHandle)`

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, RadioList } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
-import { Avatar } from '@holium/design-system';
+import { Avatar, RadioList } from '@holium/design-system';
 
 type SystemPanelType =
   | 'system'
@@ -18,12 +18,11 @@ type SystemPanelType =
   | undefined;
 
 const SystemAppPresenter = () => {
-  const { theme, ship } = useServices();
-  const { windowColor } = theme.currentTheme;
-
-  const person = ship!.patp;
+  const { ship } = useServices();
 
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>('theme');
+
+  if (!ship) return null;
 
   return (
     <Flex flex={1} minHeight={0}>
@@ -41,9 +40,9 @@ const SystemAppPresenter = () => {
             borderRadiusOverride="4px"
             simple
             size={55}
-            avatar={ship!.avatar}
-            patp={person}
-            sigilColor={[ship!.color || '#000000', 'white']}
+            avatar={ship.avatar}
+            patp={ship.patp}
+            sigilColor={[ship.color || '#000000', 'white']}
           />
           <Flex
             flexDirection="column"
@@ -53,13 +52,13 @@ const SystemAppPresenter = () => {
               overflowWrap: 'break-word',
             }}
           >
-            {ship!.nickname && (
+            {ship.nickname && (
               <Text fontWeight={500} fontSize={2}>
-                {ship!.nickname}
+                {ship.nickname}
               </Text>
             )}
             <Text fontWeight={300} fontSize={2}>
-              {ship!.patp}
+              {ship.patp}
             </Text>
           </Flex>
         </Flex>
@@ -70,7 +69,6 @@ const SystemAppPresenter = () => {
             type="text"
             placeholder="Search settings..."
             wrapperStyle={{
-              cursor: 'none',
               borderRadius: 9,
               backgroundColor: theme.currentTheme.inputColor,
 
@@ -87,8 +85,6 @@ const SystemAppPresenter = () => {
         <Flex flex={1} overflowY="auto">
           {/* menu / list  */}
           <RadioList
-            customBg={windowColor}
-            textColor={theme.currentTheme.textColor}
             selected={systemPanel}
             options={[
               {

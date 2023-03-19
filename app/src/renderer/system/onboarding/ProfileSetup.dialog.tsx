@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-import { FormControl, Spinner } from 'renderer/components';
+import { FormControl } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
@@ -18,6 +18,7 @@ import {
   Text,
   TextInput,
   Button,
+  Spinner,
 } from '@holium/design-system';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
@@ -61,10 +62,10 @@ const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
 const ProfileSetupPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();
   const colorPickerRef = useRef(null);
-  const shipName = onboarding.ship!.patp;
+  const shipName = onboarding.ship?.patp ?? '';
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar!);
+  const [avatarImg, setAvatarImg] = useState(onboarding.ship?.avatar ?? '');
 
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
@@ -144,7 +145,7 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside, true);
-    sigilColor.actions.onChange(onboarding.ship!.color || '#000000');
+    sigilColor.actions.onChange(onboarding.ship?.color ?? '#000000');
     () => {
       document.removeEventListener('click', handleClickOutside, true);
     };

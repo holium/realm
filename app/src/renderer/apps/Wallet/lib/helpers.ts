@@ -100,7 +100,7 @@ export function formatEthAmount(amount: string): EthAmount {
       ethAmount = ethAmount.replaceAll('.', '');
     }
   }
-  const wei = utils.parseEther(ethAmount)!;
+  const wei = utils.parseEther(ethAmount);
   return {
     eth: utils.formatUnits(wei, 'ether').slice(0, 6),
     gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),
@@ -159,7 +159,7 @@ export function formatBtcAmount(amount: string): BtcAmount {
       ethAmount = ethAmount.replaceAll('.', '');
     }
   }
-  const wei = utils.parseEther(ethAmount)!;
+  const wei = utils.parseEther(ethAmount);
   return {
     btc: utils.formatUnits(wei, 'ether').slice(0, 6),
     sats: 'placeholder',

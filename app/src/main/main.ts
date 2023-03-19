@@ -7,7 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session } from 'electron';
+import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
@@ -18,8 +18,10 @@ import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
+import { PowerHelper } from './helpers/power';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
+import { KeyHelper } from './helpers/key';
 import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
@@ -98,13 +100,16 @@ const createWindow = async () => {
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
+  PowerHelper.registerListeners(mainWindow);
+  KeyHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.webContents.on('dom-ready', () => {
     // We use the default cursor for Linux.
     if (isMac || isWindows) hideCursor(mainWindow.webContents);
-    mainWindow.webContents.send('add-mouse-listeners');
+    mainWindow.webContents.send('add-mouse-listeners', true);
+    mainWindow.webContents.send('add-key-listeners');
   });
 
   // TODO why is this rendering multiple times?
@@ -174,6 +179,10 @@ const createMouseOverlayWindow = () => {
     if (isMac) {
       hideCursor(newMouseWindow.webContents);
       newMouseWindow.setWindowButtonVisibility(false);
+      /**
+       * For macOS we enable mouse layer tracking for a smoother experience.
+       * It is not supported for Windows or Linux.
+       */
       newMouseWindow.webContents.send('enable-mouse-layer-tracking');
     } else if (isWindows) {
       hideCursor(newMouseWindow.webContents);
@@ -182,7 +191,7 @@ const createMouseOverlayWindow = () => {
     }
   };
 
-  newMouseWindow.on('ready-to-show', mouseSetup);
+  newMouseWindow.webContents.on('dom-ready', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
@@ -202,7 +211,7 @@ const createMouseOverlayWindow = () => {
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  MouseHelper.registerListeners(newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {
@@ -211,14 +220,27 @@ app.on('window-all-closed', () => {
   if (!isMac) app.quit();
 });
 
+// quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
+// do our cleanup, and then re-emit and actually quit it
+let lastQuitSignal: number = 0;
+app.on('before-quit', (event) => {
+  if (lastQuitSignal === 0) {
+    lastQuitSignal = new Date().getTime() - 1;
+    event.preventDefault();
+    mainWindow.webContents.send('realm.before-quit');
+    setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+  }
+});
+ipcMain.on('realm.app.quit', app.quit);
+
 app
   .whenReady()
-  .then(async () => {
+  .then(() => {
     new AppUpdater().checkForUpdates().then(() => {
       createWindow();
       createMouseOverlayWindow();
     });
-    app.on('activate', async () => {
+    app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (BrowserWindow.getAllWindows().length === 0) {

@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Anchor, Spinner } from 'renderer/components';
+import { Anchor } from 'renderer/components';
 import {
   Avatar,
   TextInput,
@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   Icon,
+  Spinner,
 } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
@@ -26,32 +27,57 @@ import {
   BitcoinWalletType,
   TransactionType,
   ProtocolType,
+  WalletStoreType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
+const getTransaction = (walletApp: WalletStoreType): TransactionType | null => {
+  const isEthereum = walletApp.navState.network === NetworkType.ETHEREUM;
+  const isCoin = walletApp.navState.detail?.txtype === 'coin';
+  const currentWallet = walletApp.currentWallet;
+
+  if (!walletApp.navState.detail?.key) return null;
+
+  if (isEthereum) {
+    const walletData = (currentWallet as EthWalletType).data;
+    if (isCoin) {
+      if (!walletData) return null;
+
+      const transactions = walletData
+        .get(walletApp.navState.protocol)
+        ?.coins?.get(walletApp.navState.detail?.coinKey ?? '')
+        ?.transactionList.transactions;
+
+      if (!transactions) return null;
+
+      return transactions.get(walletApp.navState.detail.key) as TransactionType;
+    } else {
+      const transactions = walletData.get(walletApp.navState.protocol)
+        ?.transactionList.transactions;
+
+      if (!transactions) return null;
+
+      return transactions.get(walletApp.navState.detail.key) as TransactionType;
+    }
+  }
+
+  const bitcoinWallet = currentWallet as BitcoinWalletType;
+  const transactions = bitcoinWallet.transactionList.transactions;
+
+  if (!transactions) return null;
+
+  return transactions.get(walletApp.navState.detail.key) as TransactionType;
+};
+
 const TransactionDetailPresenter = () => {
   const { walletApp } = useTrayApps();
-  const transactionList =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? walletApp.navState.detail?.txtype &&
-        walletApp.navState.detail!.txtype === 'coin'
-        ? (walletApp.currentWallet! as EthWalletType).data
-            .get(walletApp.navState.protocol)!
-            .coins.get(walletApp.navState.detail!.coinKey!)!.transactionList
-            .transactions
-        : (walletApp.currentWallet! as EthWalletType).data.get(
-            walletApp.navState.protocol
-          )!.transactionList.transactions
-      : (walletApp.currentWallet! as BitcoinWalletType).transactionList
-          .transactions;
-  const transaction = transactionList.get(
-    walletApp.navState.detail!.key
-  )! as TransactionType;
+
+  let transaction = getTransaction(walletApp);
 
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);
 
-  const [notes, setNotes] = useState(transaction.notes);
+  const [notes, setNotes] = useState(transaction?.notes ?? '');
   const [loading, setLoading] = useState(false);
 
   const saveNotes = () => {
@@ -60,6 +86,8 @@ const TransactionDetailPresenter = () => {
       setLoading(false);
     });
   };
+
+  if (!transaction) return null;
 
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';

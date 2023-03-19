@@ -1,20 +1,16 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text } from '@holium/design-system';
-import { Card, Select } from 'renderer/components';
-import { lighten, darken } from 'polished';
+import { Flex, Select, Text } from '@holium/design-system';
+import { Card } from 'renderer/components';
+import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AboutPanelPresenter = () => {
   const { theme } = useServices();
-  const { windowColor, inputColor, mode, textColor, iconColor } =
-    theme.currentTheme;
+  const { windowColor } = theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-  const secondaryInputColor = useMemo(() => {
-    return mode === 'light' ? darken(0.015, inputColor) : inputColor;
-  }, [inputColor, mode]);
 
   const [selectedChannel, setSelectedChannel] = useState('');
 
@@ -42,12 +38,7 @@ const AboutPanelPresenter = () => {
         </Text.Body>
         <Select
           id="about-release-channel-setting"
-          height={32}
           maxWidth={200}
-          textColor={textColor}
-          iconColor={iconColor}
-          inputColor={secondaryInputColor}
-          customBg={inputColor}
           options={[
             { label: 'prerelease', value: 'alpha', disabled: true },
             { label: 'production', value: 'latest' },

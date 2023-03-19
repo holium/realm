@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Flex, Spinner } from 'renderer/components';
+import { Flex, Spinner } from '@holium/design-system';
 import { darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -19,7 +19,7 @@ const StripePaymentPresenter = (props: StripePaymentProps) => {
   const [loading, setLoading] = useState(true);
   const [stripePromise, setStripePromise] = useState<any>();
   const baseTheme = getBaseTheme(theme.currentTheme);
-  const clientSecret = identity.auth.clientSecret!;
+  const clientSecret = identity.auth.clientSecret;
   const appearance = {
     variables: {
       fontFamily: '"Rubik", sans-serif',
@@ -33,7 +33,7 @@ const StripePaymentPresenter = (props: StripePaymentProps) => {
   useEffect(() => {
     async function getStripeKey() {
       const key = await OnboardingActions.getStripeKey();
-      setStripePromise(loadStripe(key!));
+      setStripePromise(loadStripe(key));
       setLoading(false);
     }
     getStripeKey();

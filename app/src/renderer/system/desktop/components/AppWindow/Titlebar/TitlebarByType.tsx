@@ -1,14 +1,12 @@
-import { FC, useEffect } from 'react';
-import { DragControls } from 'framer-motion';
+import { FC, useEffect, PointerEvent } from 'react';
 import { Titlebar } from './Titlebar';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/Toolbar';
+import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
@@ -16,39 +14,33 @@ import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
-  appInfo: AppType;
   shell: ShellStoreType;
-  dragControls: DragControls;
   currentTheme: ThemeType;
+  hideTitlebarBorder: boolean;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
   onDevTools: () => void;
-  onDragStart: () => void;
-  onDragStop: () => void;
+  onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: () => void;
 };
 
 export const TitlebarByType = ({
   appWindow,
-  appInfo,
   shell,
-  dragControls,
   currentTheme,
+  hideTitlebarBorder,
   onDevTools,
   onDragStart,
-  onDragStop,
+  onDragEnd,
   onClose,
   onMaximize,
   onMinimize,
 }: Props) => {
-  let hideTitlebarBorder = false;
   let noTitlebar = false;
   let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps> | null;
   let showDevToolsToggle = true;
   let maximizeButton = true;
-  if (appInfo?.type === 'urbit') {
-    hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
-  }
 
   let titlebar = (
     <Titlebar
@@ -60,10 +52,9 @@ export const TitlebarByType = ({
       hasBorder={!hideTitlebarBorder}
       showDevToolsToggle={showDevToolsToggle}
       zIndex={appWindow.zIndex}
-      dragControls={dragControls}
       onDevTools={onDevTools}
       onDragStart={onDragStart}
-      onDragStop={onDragStop}
+      onDragEnd={onDragEnd}
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
@@ -73,9 +64,10 @@ export const TitlebarByType = ({
   );
 
   if (appWindow.type === 'native') {
-    hideTitlebarBorder =
-      nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
-    noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
+    hideTitlebarBorder = Boolean(
+      nativeApps[appWindow.appId].native?.hideTitlebarBorder
+    );
+    noTitlebar = Boolean(nativeApps[appWindow.appId].native?.noTitlebar);
     CustomTitlebar =
       getNativeAppWindow[appWindow.appId as NativeAppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
@@ -85,9 +77,8 @@ export const TitlebarByType = ({
         <CustomTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
-          dragControls={dragControls}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragStart={onDragStart as any}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -104,10 +95,9 @@ export const TitlebarByType = ({
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
           zIndex={appWindow.zIndex}
-          dragControls={dragControls}
           onDevTools={onDevTools}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
@@ -125,7 +115,7 @@ export const TitlebarByType = ({
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
-    noTitlebar = dialogConfig.noTitlebar!;
+    noTitlebar = Boolean(dialogConfig.noTitlebar);
     const onCloseDialog = dialogConfig.hasCloseButton
       ? dialogConfig.onClose
       : undefined;
@@ -146,10 +136,9 @@ export const TitlebarByType = ({
         <CustomTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
-          dragControls={dragControls}
           onClose={onCloseDialog}
           onDragStart={onDragStart}
-          onDragStop={onDragStop}
+          onDragEnd={onDragEnd}
         />
       );
     }

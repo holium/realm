@@ -3,14 +3,14 @@ import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
-import { Flex, Box, Icons, Text, Spinner } from 'renderer/components';
+import { Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { ContainerFlex } from './styled';
-import { Avatar, Input } from '@holium/design-system';
+import { Avatar, Flex, Box, Input, Spinner } from '@holium/design-system';
 
 export const RecipientInput = observer(
   (props: {
@@ -93,12 +93,12 @@ export const RecipientInput = observer(
         .catch((err: Error) => {
           console.error(err);
           /* @ts-expect-error */
-          if (patp !== stateRef.current!.recipient!) return;
+          if (patp !== stateRef.current.recipient) return;
           setRecipientDetails({ failed: true, details: { patp } });
         })
         .finally(() => {
           /* @ts-expect-error */
-          if (stateRef.current!.currPromise! === promise) {
+          if (stateRef.current.currPromise === promise) {
             setCurrPromise(null);
           }
         });
@@ -111,8 +111,8 @@ export const RecipientInput = observer(
       ) {
         props.setValid(true, {
           patp: recipientDetails.details.patp,
-          color: recipientDetails.details.recipientMetadata?.color!,
-          address: recipientDetails.details.address!,
+          color: recipientDetails.details.recipientMetadata?.color,
+          address: recipientDetails.details.address ?? '',
         });
       } else if (
         recipientDetails.failed &&

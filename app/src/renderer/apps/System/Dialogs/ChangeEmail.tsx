@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
-
 import {
-  Flex,
   Input,
   TextButton,
-  Spinner,
   Text,
   Label,
   BigInput,
   Button,
-  Box,
 } from 'renderer/components';
+import { Box, Flex, Spinner } from '@holium/design-system';
 import { ThemeType } from 'renderer/theme';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -85,7 +82,7 @@ const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
 function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   const { identity } = useServices();
-  const [email, setEmail] = useState(identity.auth.email!);
+  const [email, setEmail] = useState(identity.auth.email);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -96,6 +93,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   };
 
   const onClick = async () => {
+    if (!email) return;
     console.log(`setting email: ${email}`);
     setLoading(true);
     const result = await AuthActions.changeEmail(email);
@@ -129,7 +127,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
             disabled={
               !email ||
               !emailValidator.validate(email) ||
-              email.toLowerCase() === identity.auth.email!.toLowerCase()
+              email.toLowerCase() === identity.auth.email?.toLowerCase()
             }
             isLoading={loading}
             onClick={onClick}

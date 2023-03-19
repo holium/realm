@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { Badge } from 'renderer/components';
-import { Flex, Button, Icon, Text } from '@holium/design-system';
+import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { CommButton } from '../components/CommButton';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
@@ -14,13 +13,15 @@ import { useRooms } from '../useRooms';
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { ship, theme } = useServices();
+  const { ship, theme, desktop } = useServices();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const muted = roomsManager?.protocol.local?.isMuted;
+  const isMuted = roomsManager?.protocol.local?.isMuted;
+  const commButtonBg =
+    mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
   const presentRoom = useMemo(() => {
     if (!roomsManager?.live.room) return;
@@ -73,7 +74,6 @@ const RoomPresenter = () => {
           <Button.IconButton
             className="realm-cursor-hover"
             size={26}
-            style={{ cursor: 'none' }}
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomsApp.setView('list');
@@ -126,7 +126,6 @@ const RoomPresenter = () => {
           {/* <IconButton
             className="realm-cursor-hover"
             size={26}
-            style={{ cursor: 'none' }}
             color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
@@ -153,11 +152,11 @@ const RoomPresenter = () => {
               className="realm-cursor-hover"
               size={26}
               customColor={
-                presentRoom.creator === ship!.patp ? '#E56262' : undefined
+                presentRoom.creator === ship?.patp ? '#E56262' : undefined
               }
-              onClick={(evt: any) => {
+              onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === ship!.patp) {
+                if (presentRoom.creator === ship?.patp) {
                   roomsManager?.deleteRoom(rid);
                 } else {
                   roomsManager?.leaveRoom();
@@ -169,28 +168,22 @@ const RoomPresenter = () => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
-              icon={muted ? 'MicOff' : 'MicOn'}
-              customBg={
-                mode === 'light'
-                  ? darken(0.04, dockColor)
-                  : darken(0.01, dockColor)
-              }
-              onClick={(evt: any) => {
+              icon={isMuted ? 'MicOff' : 'MicOn'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
                 evt.stopPropagation();
-                if (muted) {
+                if (isMuted) {
                   roomsManager?.unmute();
                 } else {
                   roomsManager?.mute();
                 }
               }}
             />
-            {/* <CommButton
-              icon="CursorOn"
-              customBg={dockColor}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-              }}
-            /> */}
+            <CommButton
+              icon={desktop.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
+              customBg={commButtonBg}
+              onClick={desktop.toggleMultiplayer}
+            />
             {/* <CommButton
               icon="HeadphoneLine"
               customBg={dockColor}

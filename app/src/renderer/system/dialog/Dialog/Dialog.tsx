@@ -8,8 +8,7 @@ import {
   RefObject,
 } from 'react';
 import styled from 'styled-components';
-import { Button, Icon } from '@holium/design-system';
-import { Flex, Spinner } from 'renderer/components';
+import { Button, Icon, Flex, Spinner } from '@holium/design-system';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { AppWindowType } from 'os/services/shell/desktop.model';
@@ -52,7 +51,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
-    return dialogConfig.component!;
+    return dialogConfig.component;
   }, [appWindow.appId, shell.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[appWindow.appId];

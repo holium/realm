@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
+import { Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
-  Flex,
   Label,
   ShipSearch,
   Input,
   Icons,
   Crest,
-  Box,
   IconButton,
-  Select,
   Skeleton,
   Grid,
 } from 'renderer/components';
@@ -26,7 +24,6 @@ import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { Avatar } from '@holium/design-system';
 
-type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
   customBg: string;
   height?: any;
@@ -78,8 +75,7 @@ export const createPeopleForm = (
 
 const InviteMembersPresenter = (props: BaseDialogProps) => {
   const { theme, ship, friends } = useServices();
-  const { inputColor, iconColor, textColor, windowColor, mode } =
-    theme.currentTheme;
+  const { inputColor, iconColor, windowColor, mode } = theme.currentTheme;
   const { workflowState, setState } = props;
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -96,7 +92,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       status: MemberStatus;
     };
   }>({
-    [ship!.patp]: {
+    [ship?.patp ?? '']: {
       primaryRole: 'owner',
       roles: ['owner'],
       alias: '',
@@ -111,7 +107,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   // Setting up options menu
   useEffect(() => {
     /*      if (props.edit) {
-        const editMembers = membership.getSpaceMembers(workflowState.path)!.toJSON();
+        const editMembers = membership.getSpaceMembers(workflowState.path).toJSON();
         let members: any = {}
         for (var member of Object.keys(editMembers)) {
           const memberVal = editMembers[member]
@@ -128,17 +124,18 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
         setPermissionMap(members);
         setWorkspaceState({members});
       }*/
+    if (!ship) return;
     if (workflowState.type === 'group') {
       setLoading(true);
       ShipActions.getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
           console.log(groupMembers);
-          groupMembers[ship!.patp].roles = ['owner'];
-          groupMembers[ship!.patp].status = 'host';
-          groupMembers[ship!.patp].primaryRole = 'owner';
-          selectedPatp.add(ship!.patp);
-          setNicknameMap({ ...nicknameMap, [ship!.patp]: '' });
+          groupMembers[ship.patp].roles = ['owner'];
+          groupMembers[ship.patp].status = 'host';
+          groupMembers[ship.patp].primaryRole = 'owner';
+          selectedPatp.add(ship.patp);
+          setNicknameMap({ ...nicknameMap, [ship.patp]: '' });
           const newMembers: any = {
             ...groupMembers,
           };
@@ -147,7 +144,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             ...workflowState,
             members: newMembers,
           });
-          delete groupMembers[ship!.patp];
+          delete groupMembers[ship.patp];
           for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
@@ -159,7 +156,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       setWorkspaceState({
         ...workflowState,
         members: {
-          [ship!.patp]: {
+          [ship.patp]: {
             roles: ['owner'],
             alias: '',
             status: 'host',
@@ -167,7 +164,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           },
         },
       });
-      selectedPatp.add(ship!.patp);
+      selectedPatp.add(ship.patp);
     }
   }, []);
 
@@ -195,7 +192,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
 
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
-    const isOur = patp === ship!.patp;
+    const isOur = patp === ship?.patp;
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (
@@ -234,9 +231,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           <Select
             id="select-role"
             placeholder="Select role"
-            customBg={windowColor}
-            textColor={textColor}
-            iconColor={iconColor}
+            backgroundColor={windowColor}
             selected={permissionMap[patp].primaryRole}
             disabled={isOur}
             options={[
@@ -246,11 +241,11 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
               // { label: 'Host', value: 'host' }, TODO elect a data host
               { label: 'Owner', value: 'owner', hidden: true },
             ]}
-            onClick={(selected: Roles) => {
+            onClick={(selected) => {
               setPermissionMap({
                 ...permissionMap,
                 [patp]: {
-                  primaryRole: selected,
+                  primaryRole: selected as MemberRole,
                   roles: [selected],
                   alias: '',
                   status: 'invited',

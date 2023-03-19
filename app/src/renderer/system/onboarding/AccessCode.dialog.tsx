@@ -106,7 +106,8 @@ const AccessCodePresenter = (props: BaseDialogProps) => {
 
   async function redeemCode() {
     try {
-      await OnboardingActions.setAccessCode(accessCode!);
+      if (!accessCode) return;
+      await OnboardingActions.setAccessCode(accessCode);
       props.onNext && props.onNext();
     } catch {
       setErrorMessage('Error redeeming access code.');
