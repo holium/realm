@@ -5,4 +5,4 @@ export const CampfireStore = types.model('ComposerStore', {
   view: types.maybe(types.string),
 });
 
-export type ComposerStoreType = Instance<typeof CampfireStore>;
+export type CampfireStoreType = Instance<typeof CampfireStore>;
