@@ -111,7 +111,8 @@ export class ComposerService extends BaseService {
 
   async load(patp: string) {
     const secretKey: string | null = this.core.passwords.getPassword(patp);
-    this.db = new DiskStore('composer', patp, secretKey!, ComposerStore, {});
+    if (!secretKey) throw new Error('No password found for this ship');
+    this.db = new DiskStore('composer', patp, secretKey, ComposerStore, {});
     this.state = this.db.model as ComposerStoreType;
     this.db.initialUpdate(this.core.onEffect);
     this.db.registerPatches(this.core.onEffect);
