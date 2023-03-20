@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 import { Button, Icon, TextInput } from '@holium/design-system';
 
 const AddShipPresenter = (props: BaseDialogProps) => {

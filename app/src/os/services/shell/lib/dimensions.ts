@@ -1,4 +1,4 @@
-import { Dimensions } from 'os/types';
+import { Dimensions } from '@holium/shared';
 import { normalizeDimensions } from './window-manager';
 
 const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
