@@ -1,4 +1,4 @@
-import { TomeOptions } from '../../../app/src/os/services/tome/models/types';
+import { TomeOptions } from './types';
 
 /* TODO add docstring */
 export const initTome = async (
