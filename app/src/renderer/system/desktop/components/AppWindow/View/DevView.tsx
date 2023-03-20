@@ -149,7 +149,6 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           webpreferences="sandbox=false"
           isLocked={isResizing || loading.isOn}
           style={{
-            background: lighten(0.04, currentTheme.windowColor),
             width: 'inherit',
             height: '100%',
             position: 'relative',
