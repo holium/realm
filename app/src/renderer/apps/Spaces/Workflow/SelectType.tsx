@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import { Grid, Text, Flex, Skeleton } from 'renderer/components';
+import { Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -96,7 +96,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
       );
     }
     return (
-      <Grid.Column noGutter lg={12} xl={12}>
+      <Flex flexDirection="column" width="100%">
         <Text
           fontSize={5}
           lineHeight="24px"
@@ -151,7 +151,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
             </Flex>
           </Flex>
         </Flex>
-      </Grid.Column>
+      </Flex>
     );
   }
 );

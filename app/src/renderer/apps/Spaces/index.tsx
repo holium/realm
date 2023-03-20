@@ -223,8 +223,11 @@ const SpacesTrayAppPresenter = () => {
           <YouRow
             colorTheme={windowColor}
             selected={`/${ship.patp}/our` === spaces.selected?.path}
+            space={spaces.ourSpace}
             ship={ship}
-            onSelect={SpacesActions.selectSpace}
+            onSelect={async (path: string) =>
+              await SpacesActions.selectSpace(path)
+            }
           />
         )}
       </Flex>

@@ -8,8 +8,8 @@ import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
+import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { snakeify } from '../../lib/obj';
-import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
@@ -378,11 +378,11 @@ export class SpacesService extends BaseService {
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     if (!this.core.conduit) throw new Error('No conduit found');
     const members = body.members;
-    const id = spaceToSnake(body.name);
+    const slug = humanFriendlySpaceNameSlug(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit,
       {
-        slug: id,
+        slug,
         payload: snakeify({
           name: body.name,
           description: body.description,
