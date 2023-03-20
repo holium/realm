@@ -15,9 +15,13 @@
   ==
 ::
 +$  settings
-  $:  setting=(unit cord)  :: tbd
+  $:  setting=~  :: tbd
   ==
 ::
++$  view
+  $%  [%bookmarks =bookmarks]
+      [%settings =settings]
+  ==
 +$  action
   $%  [%add-bookmark =url =permissions]
       [%remove-bookmark =url]

@@ -79,13 +79,13 @@
   =.  bookmarks  (~(put by bookmarks) [url permissions])
   `state
 ::
-++  handle-remove-space
-  |=  =url
+++  handle-remove-bookmark
+  |=  =url:store
   =.  bookmarks  (~(del by bookmarks) url)
   `state
 ::
 ++  handle-set-settings
-  |=  =settings
+  |=  =settings:store
   =.  settings.state  settings
   `state
 ::

@@ -1,4 +1,4 @@
-/-  sur=composer
+/-  sur=bookmark
 |%
 ++  dejs
   =,  dejs:format
@@ -12,12 +12,13 @@
       %-  of
       :~  [%add-bookmark (ot ~[url+so permissions+permissions])]
           [%remove-bookmark (ot ~[url+so])]
-          [%set-settings (ot ~[ul])]
+          [%set-settings (ot ~[setting+ul])]
       ==
     ++  permissions
       %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
-          [%space so]
+      :~  [%view (as (su (perk %initiate %member %admin %owner ~)))]
+          [%edit (as (su (perk %initiate %member %admin %owner ~)))]
+          [%delete (as (su (perk %initiate %member %admin %owner ~)))]
       ==
     --
   --
@@ -34,6 +35,11 @@
       :_  ~
       ^-  [cord json]
       [%bookmarks (bookmarks:encode bookmarks.view)]
+        %settings
+      %-  pairs
+      :_  ~
+      ^-  [cord json]
+      [%settings ~]
     ==
   --
 ::
@@ -41,15 +47,17 @@
   =,  enjs:format
   |%
   ++  bookmarks
-    |=  =compositions:sur
+    |=  =bookmarks:sur
     ^-  json
     %-  pairs
     %+  turn  ~(tap by bookmarks)
     |=  [=url:sur =permissions:sur]
     ^-  [cord json]
-    :-  ''
+    :-  url
     %-  pairs
-    :~  ['space' s+(spat /(scot %p ship.space.composer)/(scot %tas space.space.composer))]
+    :~  ['view' s+'']
+        ['edit' s+'']
+        ['delete' s+'']
     ==
   --
 --
