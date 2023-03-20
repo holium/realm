@@ -27,6 +27,6 @@
   "dependencies": {
     "axios": "^0.27.2",
     "babel-loader": "^8.2.5",
-    "eventsource": "https://github.com/leowini/eventsource.git#master"
+    "eventsource": "https://github.com/holium/eventsource.git#master"
   }
 }

@@ -8887,9 +8887,9 @@ events@^3.0.0, events@^3.2.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-"eventsource@https://github.com/leowini/eventsource.git#master":
+"eventsource@https://github.com/holium/eventsource.git#master":
   version "2.0.2"
-  resolved "https://github.com/leowini/eventsource.git#e51a18119b937a54ecb978d11cdb164e19dbbdb4"
+  resolved "https://github.com/holium/eventsource.git#79dacfa860751438c116df76f9c5fdb9a2a3d69f"
 
 evp_bytestokey@^1.0.0, evp_bytestokey@^1.0.3:
   version "1.0.3"
