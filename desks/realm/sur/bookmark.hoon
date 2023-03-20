@@ -13,3 +13,8 @@
 +$  settings
   $:  :: tbd
   ==
+::
++$  action
+  $%  [%add-bookmark =url =permissions]
+      [%remove-bookmark =url]
+  ==
