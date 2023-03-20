@@ -1,12 +1,12 @@
 {
-  "name": "@holium/realm-multiplayer",
-  "version": "0.1.0",
+  "name": "@holium/realm-presence",
+  "version": "0.1.2",
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A lib for developers to leverage shared cursors in their apps.",
-  "main": "dist/holium-realm-multiplayer.cjs.js",
-  "module": "dist/holium-realm-multiplayer.esm.js",
-  "typings": "dist/holium-realm-multiplayer.cjs.d.ts",
+  "main": "dist/holium-realm-presence.cjs.js",
+  "module": "dist/holium-realm-presence.esm.js",
+  "typings": "dist/holium-realm-presence.cjs.d.ts",
   "scripts": {
     "prepare": "yarn build",
     "prebuild:prod": "yarn clean",
@@ -32,7 +32,15 @@
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "babel-loader": "^8.2.5",
-    "@radix-ui/react-slot": "^0.1.2"
-  }
+    "@radix-ui/react-slot": "^0.1.2",
+    "babel-loader": "^8.2.5"
+  },
+  "keywords": [
+    "holium",
+    "realm",
+    "react",
+    "presence",
+    "shared",
+    "cursor"
+  ]
 }

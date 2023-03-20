@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { ShipModelType } from 'os/services/ship/models/ship';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { useServices } from 'renderer/logic/store';
 import { Avatar, Box, Row, Text, Flex } from '@holium/design-system';
 
@@ -18,12 +19,13 @@ const Wrapper = styled(Box)`
 interface SpaceRowProps {
   colorTheme: string;
   ship: ShipModelType;
+  space: SpaceModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
 }
 
 export const YouRow = (props: SpaceRowProps) => {
-  const { selected, onSelect } = props;
+  const { selected, onSelect, space } = props;
   const { ship } = useServices();
 
   if (!ship) return null;
@@ -36,7 +38,7 @@ export const YouRow = (props: SpaceRowProps) => {
         className="realm-cursor-hover"
         selected={selected}
         onClick={() => {
-          onSelect(`/${ship.patp}/our`);
+          onSelect(space.path);
         }}
       >
         <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>

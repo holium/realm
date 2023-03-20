@@ -13,6 +13,8 @@ import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
 import { FeaturedList } from './FeaturedList';
 
+const bottomHeight = 54;
+
 const SpacesTrayAppPresenter = () => {
   const { ship, theme, spaces } = useServices();
   const { dimensions } = useTrayApps();
@@ -35,8 +37,6 @@ const SpacesTrayAppPresenter = () => {
       mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
     [inputColor, mode]
   );
-
-  const bottomHeight = 54;
 
   const [searchVisible, setSearchVisible] = useState(false);
 
@@ -206,9 +206,7 @@ const SpacesTrayAppPresenter = () => {
             }}
             selected={spaces.selected}
             spaces={spaces.spacesList}
-            onSelect={async (path: string) =>
-              await SpacesActions.selectSpace(path)
-            }
+            onSelect={SpacesActions.selectSpace}
           />
         </Flex>
       )}
@@ -225,6 +223,7 @@ const SpacesTrayAppPresenter = () => {
           <YouRow
             colorTheme={windowColor}
             selected={`/${ship.patp}/our` === spaces.selected?.path}
+            space={spaces.ourSpace}
             ship={ship}
             onSelect={async (path: string) =>
               await SpacesActions.selectSpace(path)

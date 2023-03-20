@@ -8,14 +8,18 @@ import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
+import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { snakeify } from '../../lib/obj';
-import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
-import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
+import {
+  DevAppType,
+  NewBazaarStore,
+  NewBazaarStoreType,
+} from './models/bazaar';
 import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
 import { BulletinApi } from '../../api/bulletin';
@@ -23,7 +27,7 @@ import { NotificationStore, NotificationStoreType } from './models/beacon';
 import { BulletinStore, BulletinStoreType } from './models/bulletin';
 
 export const getHost = (path: string) => path.split('/')[1];
-let devApps: any = null;
+let devApps: Record<string, DevAppType> | null = null;
 
 // Loads the app.dev.json config file if it exists
 if (fs.existsSync(path.resolve(__dirname, '../../../app.dev.json'))) {
@@ -374,11 +378,11 @@ export class SpacesService extends BaseService {
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     if (!this.core.conduit) throw new Error('No conduit found');
     const members = body.members;
-    const id = spaceToSnake(body.name);
+    const slug = humanFriendlySpaceNameSlug(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit,
       {
-        slug: id,
+        slug,
         payload: snakeify({
           name: body.name,
           description: body.description,

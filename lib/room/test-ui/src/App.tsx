@@ -2,7 +2,8 @@ import * as process from 'process';
 import { useEffect, useState } from 'react';
 import './App.css';
 import { UI } from './UI';
-import { RoomsManagerProvider, ShipConfig } from '@holium/realm-room';
+import { ShipConfig } from '@holium/realm-room';
+import { RoomsManagerProvider } from './components/RoomsManagerProvider';
 
 (window as any).global = window;
 (window as any).process = process;
