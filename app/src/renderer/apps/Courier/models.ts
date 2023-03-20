@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, applySnapshot, Instance, types, cast } from 'mobx-state-tree';
+import { flow, Instance, types, cast } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -72,19 +72,6 @@ export const ChatMessage = types
       if (!self.replyToPath || !self.replyToMsgId) return null;
       return ChatDBActions.getChatReplyTo(self.replyToMsgId);
     },
-    fetchReactions: flow(function* () {
-      try {
-        const reactions = yield ChatDBActions.getChatReactions(
-          self.path,
-          self.id
-        );
-        applySnapshot(self.reactions, reactions);
-        return self.reactions;
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
-    }),
     insertTempReaction(react: ReactionModelType) {
       self.reactions.push({
         emoji: react.emoji,

@@ -19,7 +19,7 @@ type ChatLogProps = {
   storage: IuseStorage;
 };
 
-const replyHeight = 46;
+const replyHeight = 50;
 const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
@@ -203,7 +203,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                         containerWidth={containerWidth}
                         replyTo={replyToObj}
                         message={row as ChatMessageType}
-                        canReact={true}
+                        canReact={selectedChat.metadata.reactions}
                         ourColor={ourColor}
                         measure={measure}
                       />

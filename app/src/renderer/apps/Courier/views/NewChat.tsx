@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Flex,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   Avatar,
   Spinner,
+  Tooltip,
 } from '@holium/design-system';
 import { useTrayApps } from '../../store';
 import { useChatStore } from '../store';
@@ -19,7 +20,7 @@ import { ChatPathType } from 'os/services/chat/chat.service';
 export const NewChat = () => {
   const { ship, friends } = useServices();
   const { dimensions } = useTrayApps();
-  const { setSubroute, createChat } = useChatStore();
+  const { inbox, setSubroute, createChat } = useChatStore();
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -67,6 +68,18 @@ export const NewChat = () => {
     setSelected(new Set(selectedPatp));
   };
 
+  const dmAlreadyExists = useMemo(() => {
+    if (selectedPatp.size !== 1) return false;
+    return inbox.some((chat) => {
+      return (
+        chat.type === 'dm' &&
+        chat.peers.find((p) => p.ship === Array.from(selectedPatp)[0])
+      );
+    });
+  }, [selectedPatp.size === 1]);
+
+  console.log('dmAlreadyExists', dmAlreadyExists);
+
   return (
     <Flex gap={4} height={dimensions.height - 14} flexDirection="column">
       <Flex minHeight={32} height={36} flexDirection="row" alignItems="center">
@@ -91,16 +104,23 @@ export const NewChat = () => {
         </Text.Custom>
         <Flex width={120} alignItems="flex-start" justifyContent="flex-end">
           {selectedPatp.size > 0 && (
-            <Button.TextButton
-              showOnHover
-              disabled={creating}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                onCreateChat();
-              }}
+            <Tooltip
+              id="create-chat-tooltip"
+              show={dmAlreadyExists}
+              placement="bottom-left"
+              content={'Chat already exists'}
             >
-              {creating ? <Spinner size={0} color="#FFF" /> : 'Create'}
-            </Button.TextButton>
+              <Button.TextButton
+                showOnHover
+                disabled={creating || dmAlreadyExists}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  onCreateChat();
+                }}
+              >
+                {creating ? <Spinner size={0} color="#FFF" /> : 'Create'}
+              </Button.TextButton>
+            </Tooltip>
           )}
         </Flex>
       </Flex>
