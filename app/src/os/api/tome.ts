@@ -19,8 +19,8 @@ export const TomeApi = {
             app,
           },
         },
-        onReaction: (data: any) => {
-          resolve(data);
+        onSuccess: (id: number) => {
+          resolve(id);
         },
         onError: (e: any) => {
           reject(
