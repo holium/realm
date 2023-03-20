@@ -131,7 +131,10 @@ export const ChatInput = ({
   };
 
   const isDisabled =
-    disabled || loading || (value.length === 0 && !attachments);
+    disabled ||
+    loading ||
+    (value.length === 0 && !attachments) ||
+    (value.length === 0 && attachments && attachments.length === 0);
 
   const onKeyDown = (evt: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (evt.key === 'Enter' && !evt.shiftKey) {

@@ -62,25 +62,13 @@ export const PinnedMessage = (props: PinnedProps) => {
     <Flex id={id} key={id} width="100%" onClick={onClick}>
       <FragmentBlock id={id}>
         <FragmentBlockquote
-          className="pinned-message"
+          className="pinned-or-reply-message"
           id={id}
           style={{
-            paddingTop: 4,
-            paddingBottom: 4,
-            paddingRight: 6,
-            borderRadius: 4,
-            marginLeft: 0,
-            marginRight: 0,
-            marginBottom: 0,
-            height: 44,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
-            background: 'var(--rlm-overlay-hover)',
           }}
         >
+          {mediaContent}
           <Flex
             gap={0}
             flexDirection="column"
@@ -91,7 +79,6 @@ export const PinnedMessage = (props: PinnedProps) => {
             </BubbleAuthor>
             {pinnedContent}
           </Flex>
-          {mediaContent}
         </FragmentBlockquote>
       </FragmentBlock>
     </Flex>

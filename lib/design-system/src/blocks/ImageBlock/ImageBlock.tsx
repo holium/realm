@@ -38,8 +38,8 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
           onLoaded && onLoaded();
         }}
         onLoad={() => {
-          onLoaded && onLoaded();
           setImgLoaded(true);
+          onLoaded && onLoaded();
         }}
       />
       <Flex className="block-footer">

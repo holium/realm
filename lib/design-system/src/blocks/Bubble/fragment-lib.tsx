@@ -193,19 +193,28 @@ export const FragmentBlockquote = styled(motion.blockquote)`
       }
     }
   }
-  &.pinned-message {
+  &.pinned-or-reply-message {
     padding-top: 4px;
     padding-bottom: 4px;
     padding-left: 6px;
-    padding-right: 6px;
+    padding-right: 4px;
+    border-radius: 3px;
+    height: 46px;
+    width: 100%;
+    gap: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    background: var(--rlm-overlay-hover);
     ${FragmentImage} {
-      /* width: 34px !important; */
-      height: 40px !important;
+      border-radius: 2px;
+      height: 36px !important;
     }
   }
   &:hover:not([disabled]) {
     transition: var(--transition);
-    /* background-color: rgba(0, 0, 0, 0.12); */
     cursor: pointer;
   }
 `;

@@ -37,7 +37,6 @@ export const ChatInputBox = ({
   const mediaRef = useRef<HTMLDivElement>(null);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
-
   useEffect(() => {
     // send attachment count to parent
     onAttachmentChange(attachments.length);

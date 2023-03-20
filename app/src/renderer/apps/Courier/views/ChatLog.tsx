@@ -13,7 +13,7 @@ import { PinnedContainer } from '../components/PinnedMessage';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
-import { toJS } from 'mobx';
+// import { toJS } from 'mobx';
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -97,7 +97,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   };
 
-  let height = dimensions.height - 106;
+  let height = dimensions.height - 104;
 
   if (showPin) {
     height = height - pinHeight;

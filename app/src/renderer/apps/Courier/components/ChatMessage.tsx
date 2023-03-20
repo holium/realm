@@ -92,16 +92,16 @@ export const ChatMessagePresenter = ({
       });
     }
     if (hasImage) {
-      menu.push({
-        id: `${messageRowId}-save-image`,
-        icon: 'CloudDownload',
-        label: 'Save image',
-        disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-          evt.stopPropagation();
-          // selectedChat.saveImage(message.id);
-        },
-      });
+      // menu.push({
+      //   id: `${messageRowId}-save-image`,
+      //   icon: 'CloudDownload',
+      //   label: 'Save image',
+      //   disabled: false,
+      //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      //     evt.stopPropagation();
+      //     // selectedChat.saveImage(message.id);
+      //   },
+      // });
       // TODO if trove is installed
       // save to trove
     }
