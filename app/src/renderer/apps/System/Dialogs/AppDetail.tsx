@@ -344,7 +344,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
           x: 0,
           y: 0,
           width: 600,
-          height: 480,
+          height: 520,
         },
         desktopDimensions
       ),
