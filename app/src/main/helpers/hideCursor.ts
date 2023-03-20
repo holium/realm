@@ -26,6 +26,6 @@ const hideCursorCss = `
   }
 `;
 
-export const hideCursor = (webContents: Electron.WebContents) => {
+export const HideCursorHelper = (webContents: Electron.WebContents) => {
   webContents.insertCSS(hideCursorCss);
 };

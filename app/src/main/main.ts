@@ -15,15 +15,17 @@ import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
 import { Realm } from '../os';
-import { FullScreenHelper } from './helpers/fullscreen';
-import { WebViewHelper } from './helpers/webview';
-import { DevHelper } from './helpers/dev';
-import { PowerHelper } from './helpers/power';
-import { MediaHelper } from './helpers/media';
-import { MouseHelper } from './helpers/mouse';
-import { KeyHelper } from './helpers/key';
-import { BrowserHelper } from './helpers/browser';
-import { hideCursor } from './helpers/hideCursor';
+import {
+  FullScreenHelper,
+  WebViewHelper,
+  DevHelper,
+  PowerHelper,
+  MediaHelper,
+  MouseHelper,
+  KeyHelper,
+  BrowserHelper,
+  HideCursorHelper,
+} from './helpers';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
 
@@ -107,7 +109,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('dom-ready', () => {
     // We use the default cursor for Linux.
-    if (isMac || isWindows) hideCursor(mainWindow.webContents);
+    if (isMac || isWindows) HideCursorHelper(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
@@ -177,7 +179,7 @@ const createMouseOverlayWindow = () => {
 
   const mouseSetup = () => {
     if (isMac) {
-      hideCursor(newMouseWindow.webContents);
+      HideCursorHelper(newMouseWindow.webContents);
       newMouseWindow.setWindowButtonVisibility(false);
       /**
        * For macOS we enable mouse layer tracking for a smoother experience.
@@ -185,7 +187,7 @@ const createMouseOverlayWindow = () => {
        */
       newMouseWindow.webContents.send('enable-mouse-layer-tracking');
     } else if (isWindows) {
-      hideCursor(newMouseWindow.webContents);
+      HideCursorHelper(newMouseWindow.webContents);
     } else {
       newMouseWindow.webContents.send('disable-custom-mouse');
     }
