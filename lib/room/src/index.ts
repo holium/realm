@@ -1,7 +1,6 @@
 import { RealmProtocol } from './connection/RealmProtocol';
 import { TestProtocol } from './connection/TestProtocol';
 import { RoomsManager } from './RoomsManager';
-import { RoomsManagerProvider, useRoomsManager } from './RoomsManagerProvider';
 import { RemotePeer } from './peer/RemotePeer';
 import { LocalPeer } from './peer/LocalPeer';
 import { RoomState } from './types';
@@ -12,8 +11,6 @@ import { DataPacket_Kind } from './helpers/data';
 
 export {
   RoomsManager,
-  RoomsManagerProvider,
-  useRoomsManager,
   RoomState,
   TestProtocol,
   RealmProtocol,

@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
-import { Tooltip } from 'renderer/components';
-import { Flex, Text, Button, Icon } from '@holium/design-system';
+import { Flex, Text, Button, Icon, Tooltip } from '@holium/design-system';
 import { RoomRow } from './components/RoomRow';
 import { useServices } from 'renderer/logic/store';
 import { ProviderSelector } from './components/ProviderSelector';
@@ -81,7 +80,7 @@ const RoomsPresenter = () => {
               onClick={async (evt: any) => {
                 evt.stopPropagation();
                 if (roomsManager?.live.room?.rid !== room.rid) {
-                  roomsManager?.enterRoom(room.rid);
+                  roomsManager?.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}

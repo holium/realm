@@ -11,9 +11,8 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     const { theme } = useServices();
     const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
-    const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
-      'community'
-    );
+    const [selectedArchetype, setSelectedArchetype] =
+      useState<string | null>('community');
 
     const setWorkspaceState = (obj: any) => {
       setState &&
@@ -31,7 +30,7 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
       });
     }, []);
     return (
-      <Grid.Column noGutter lg={12} xl={12}>
+      <Flex flexDirection="column" width="100%">
         <Text
           fontSize={5}
           lineHeight="24px"
@@ -105,7 +104,7 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
             subtitle="Pool resources and invest with friends."
           />
         </Flex>
-      </Grid.Column>
+      </Flex>
     );
   }
 );

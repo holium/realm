@@ -2,7 +2,14 @@ import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { Avatar, Flex, Box, MenuItem, Spinner } from '@holium/design-system';
+import {
+  Avatar,
+  Flex,
+  Box,
+  MenuItem,
+  Portal,
+  Spinner,
+} from '@holium/design-system';
 import {
   Text,
   Input,
@@ -16,7 +23,6 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';

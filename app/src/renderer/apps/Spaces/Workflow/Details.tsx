@@ -196,7 +196,7 @@ const SpacesCreateFormPresenter = ({
     }, []);
 
   return (
-    <Grid.Column noGutter lg={12} xl={12}>
+    <Flex flexDirection="column" width="100%">
       <Text
         fontSize={5}
         lineHeight="24px"
@@ -473,7 +473,7 @@ const SpacesCreateFormPresenter = ({
           </FormControl.Field>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };
 

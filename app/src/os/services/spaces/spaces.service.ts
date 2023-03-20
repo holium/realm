@@ -15,7 +15,11 @@ import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
-import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
+import {
+  DevAppType,
+  NewBazaarStore,
+  NewBazaarStoreType,
+} from './models/bazaar';
 import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
 import { BulletinApi } from '../../api/bulletin';
@@ -23,7 +27,7 @@ import { NotificationStore, NotificationStoreType } from './models/beacon';
 import { BulletinStore, BulletinStoreType } from './models/bulletin';
 
 export const getHost = (path: string) => path.split('/')[1];
-let devApps: any = null;
+let devApps: Record<string, DevAppType> | null = null;
 
 // Loads the app.dev.json config file if it exists
 if (fs.existsSync(path.resolve(__dirname, '../../../app.dev.json'))) {

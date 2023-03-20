@@ -1,0 +1,38 @@
+{
+  "name": "@holium/realm-presence",
+  "version": "0.1.0",
+  "author": "trent@holium.com",
+  "license": "MIT",
+  "description": "A lib for developers to leverage shared cursors in their apps.",
+  "main": "dist/holium-realm-presence.cjs.js",
+  "module": "dist/holium-realm-presence.esm.js",
+  "typings": "dist/holium-realm-presence.cjs.d.ts",
+  "scripts": {
+    "prepare": "yarn build",
+    "prebuild:prod": "yarn clean",
+    "postinstall": "preconstruct dev",
+    "dev": "preconstruct dev",
+    "build": "preconstruct build",
+    "build:prod": "preconstruct build"
+  },
+  "preconstruct": {
+    "globals": {
+      "react": "React"
+    }
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@preconstruct/cli": "^2.2.1",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^0.1.2",
+    "babel-loader": "^8.2.5"
+  }
+}

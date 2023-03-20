@@ -1,8 +1,10 @@
 export * from './Avatar/Avatar';
 export * from './Box/Box';
 export * from './Button/Button';
+export { CommButton } from './CommButton/CommButton';
 export * from './Flex/Flex';
 export * from './Icon/Icon';
+export type { IconPathsType } from './Icon/icons';
 export * from './Skeleton/Skeleton';
 export * from './Text/Text';
 export * from './WindowedList/WindowedList';
@@ -13,3 +15,5 @@ export { Spinner } from './Spinner/Spinner';
 export { ProgressBar } from './ProgressBar/ProgressBar';
 export { MenuItem } from './MenuItem/MenuItem';
 export type { MenuItemProps } from './MenuItem/MenuItem';
+export { Tooltip } from './Tooltip/Tooltip';
+export { Portal } from './Portal/Portal';

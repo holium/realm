@@ -321,7 +321,7 @@
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
       ?>  (team:title our.bowl src.bowl)
-      =.  slug  (find-available-path [our.bowl slug] spaces.state)
+      =.  slug                  (find-available-path [our.bowl slug] spaces.state)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
       =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
       ::  we need to set a host + member value and exclude the host from make-invitations

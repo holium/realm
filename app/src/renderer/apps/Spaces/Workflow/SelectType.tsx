@@ -96,7 +96,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
       );
     }
     return (
-      <Grid.Column noGutter lg={12} xl={12}>
+      <Flex flexDirection="column" width="100%">
         <Text
           fontSize={5}
           lineHeight="24px"
@@ -151,7 +151,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
             </Flex>
           </Flex>
         </Flex>
-      </Grid.Column>
+      </Flex>
     );
   }
 );

@@ -1,3 +1,4 @@
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useEffect } from 'react';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
@@ -10,7 +11,6 @@ import { useTrayApps } from '../store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { useRooms } from '../Rooms/useRooms';
 import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
@@ -120,8 +120,8 @@ const AccountTrayAppPresenter = () => {
           <Button.IconButton
             size={28}
             className="realm-cursor-hover"
-            onClick={async () => {
-              await roomsManager.cleanup();
+            onClick={() => {
+              roomsManager.cleanup();
               AuthActions.logout(ship.patp);
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
