@@ -1,3 +1,7 @@
+/-  *membership, spaces-path
+|%
+::
++$  space-path  path:spaces-path
 +$  url  cord
 ::
 +$  bookmarks  (map url permissions)
@@ -11,10 +15,13 @@
   ==
 ::
 +$  settings
-  $:  :: tbd
+  $:  setting=(unit cord)  :: tbd
   ==
 ::
 +$  action
   $%  [%add-bookmark =url =permissions]
       [%remove-bookmark =url]
+      [%set-settings ~]
   ==
+::
+--
