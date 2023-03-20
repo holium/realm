@@ -325,12 +325,12 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    const secretKey: string = this.core.passwords.getPassword(ship)!;
+    const secretKey = this.core.passwords.getPassword(ship) ?? '';
 
     this.db = new DiskStore(
       'wallet',
       ship,
-      secretKey!,
+      secretKey,
       WalletStore,
       initialWalletState(ship)
     );
@@ -339,29 +339,33 @@ export class WalletService extends BaseService {
     this.db.initialUpdate(this.core.onEffect);
     this.db.registerPatches(this.core.onEffect);
 
+    if (!this.state) throw new Error('Failed to load wallet state');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
     const protocolMap = new Map<ProtocolType, BaseProtocol>([
       [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
       [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
       [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
-    this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
-    WalletApi.watchUpdates(this.core.conduit!, this.state!, () => {
-      this.wallet!.updateWalletState(
-        this.core.conduit!,
-        this.state!,
+    this.wallet = new Wallet(protocolMap, this.state.navState.protocol);
+    const onUpdate = () => {
+      if (!this.state) return;
+      this.wallet?.updateWalletState(
+        this.core.conduit,
+        this.state,
         ProtocolType.UQBAR
       );
       if (
-        this.state!.navState.network === NetworkType.ETHEREUM &&
-        !(this.state!.navState.protocol === ProtocolType.UQBAR)
+        this.state.navState.network === NetworkType.ETHEREUM &&
+        !(this.state.navState.protocol === ProtocolType.UQBAR)
       ) {
-        this.wallet?.updateWalletState(this.core.conduit!, this.state!);
+        this.wallet?.updateWalletState(this.core.conduit, this.state);
       }
-    });
-    UqbarApi.watchUpdates(this.core.conduit!, this.state!);
+    };
+    WalletApi.watchUpdates(this.core.conduit, this.state, onUpdate);
+    UqbarApi.watchUpdates(this.core.conduit, this.state);
 
     if (this.state && this.state.navState.view !== WalletView.NEW) {
-      this.state!.resetNavigation();
+      this.state.resetNavigation();
     }
     this.lock(); // lock wallet on login
     this.getConversion(null, 'ETH', 'USD').catch((err) => {
@@ -400,7 +404,7 @@ export class WalletService extends BaseService {
     const hasPasscode = this.state && this.state.settings.passcodeHash;
     this.wallet?.pauseUpdates();
     if (hasPasscode) {
-      this.state!.navigate(WalletView.LOCKED);
+      this.state?.navigate(WalletView.LOCKED);
     }
   }
 
@@ -417,51 +421,69 @@ export class WalletService extends BaseService {
     return result.data[to];
   }
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+
     const passcodeString = passcode.map(String).join('');
     (this.signer as RealmSigner).setMnemonic(
       mnemonic,
-      this.state!.ourPatp!,
+      this.state.ourPatp ?? '',
       passcodeString
     );
     const passcodeHash = await bcrypt.hash(passcodeString, 12);
-    await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
+    await WalletApi.setPasscodeHash(this.core.conduit, passcodeHash);
     const ethPath = "m/44'/60'/0'";
     const btcPath = "m/44'/0'/0'";
     const btcTestnetPath = "m/44'/1'/0'";
     let xpub: string;
     // eth
-    xpub = this.signer.getXpub(ethPath, this.state!.ourPatp!, passcodeString);
-    await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
+    xpub = this.signer.getXpub(
+      ethPath,
+      this.state.ourPatp ?? '',
+      passcodeString
+    );
+    await WalletApi.setXpub(this.core.conduit, 'ethereum', xpub);
     // btc
-    xpub = this.signer.getXpub(btcPath, this.state!.ourPatp!, passcodeString);
-    await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+    xpub = this.signer.getXpub(
+      btcPath,
+      this.state.ourPatp ?? '',
+      passcodeString
+    );
+    await WalletApi.setXpub(this.core.conduit, 'bitcoin', xpub);
     // btc testnet
     xpub = this.signer.getXpub(
       btcTestnetPath,
-      this.state!.ourPatp!,
+      this.state.ourPatp ?? '',
       passcodeString
     );
-    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
-    this.state!.navigate(WalletView.LIST);
+    await WalletApi.setXpub(this.core.conduit, 'btctestnet', xpub);
+    this.state.navigate(WalletView.LIST);
   }
 
   async setNetwork(_event: any, network: NetworkType) {
-    this.state!.navigate(WalletView.LIST);
-    if (this.state!.navState.network !== network) {
-      this.state!.setNetwork(network);
-      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.navigate(WalletView.LIST);
+    if (this.state.navState.network !== network) {
+      this.state.setNetwork(network);
+      if (!this.wallet) throw new Error('Wallet not loaded');
+      this.wallet.watchUpdates(this.core.conduit, this.state);
     }
   }
 
   setProtocol(_event: any, protocol: ProtocolType) {
-    this.state!.navigate(WalletView.LIST);
-    if (this.state!.navState.protocol !== protocol) {
-      this.state!.setProtocol(protocol);
-      this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.navigate(WalletView.LIST);
+    if (this.state.navState.protocol !== protocol) {
+      this.state.setProtocol(protocol);
+      if (!this.wallet) throw new Error('Wallet not loaded');
+      this.wallet.watchUpdates(this.core.conduit, this.state);
     }
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+
     const recipientMetadata: {
       color: string;
       avatar?: string;
@@ -470,8 +492,8 @@ export class WalletService extends BaseService {
 
     try {
       const address: any = await WalletApi.getAddress(
-        this.core.conduit!,
-        this.state!.navState.network,
+        this.core.conduit,
+        this.state.navState.network,
         patp
       );
 
@@ -495,16 +517,19 @@ export class WalletService extends BaseService {
   }
 
   async saveTransactionNotes(_event: any, notes: string) {
-    const network = this.state!.navState.network;
-    const net = this.state!.navState.protocol;
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+
+    const network = this.state.navState.network;
+    const net = this.state.navState.protocol;
     const contract =
-      this.state!.navState.detail!.txtype === 'coin'
-        ? this.state!.navState.detail!.coinKey!
+      this.state.navState.detail?.txtype === 'coin'
+        ? this.state.navState.detail.coinKey ?? null
         : null;
-    const hash = this.state!.navState.detail!.key;
-    const index = this.state!.currentWallet!.index;
+    const hash = this.state.navState.detail?.key ?? '';
+    const index = this.state.currentWallet?.index ?? 0;
     await WalletApi.saveTransactionNotes(
-      this.core.conduit!,
+      this.core.conduit,
       network,
       net,
       index,
@@ -515,24 +540,28 @@ export class WalletService extends BaseService {
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {
-    await WalletApi.setSettings(this.core.conduit!, network, settings);
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+    await WalletApi.setSettings(this.core.conduit, network, settings);
   }
 
   async changeDefaultWallet(_event: any, network: string, index: number) {
-    await WalletApi.changeDefaultWallet(this.core.conduit!, network, index);
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+    await WalletApi.changeDefaultWallet(this.core.conduit, network, index);
   }
 
   async createWallet(_event: any, nickname: string) {
-    const sender: string = this.state!.ourPatp!;
-    let network: string = this.state!.navState.network;
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+    const sender = this.state.ourPatp ?? '';
+    let network: string = this.state.navState.network;
     if (
       network === 'bitcoin' &&
-      this.state!.navState.btcNetwork === NetworkStoreType.BTC_TEST
+      this.state.navState.btcNetwork === NetworkStoreType.BTC_TEST
     ) {
       network = 'btctestnet';
     }
-    await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.state!.navigate(WalletView.LIST, { canReturn: false });
+    await WalletApi.createWallet(this.core.conduit, sender, network, nickname);
+    this.state.navigate(WalletView.LIST, { canReturn: false });
   }
 
   async enqueueUqbarTransaction(
@@ -541,8 +570,8 @@ export class WalletService extends BaseService {
     _to: string,
     _amount: string
   ) {
-    /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
-    // const protocol = this.wallet!.currentProtocol;
+    /*const from = this.state.ethereum.wallets.get(walletIndex).address;
+    // const protocol = this.wallet.currentProtocol;
     const tx = {
       from,
       to,
@@ -556,11 +585,11 @@ export class WalletService extends BaseService {
       nonce: await protocol.getNonce(from),
       chainId: await protocol.getChainId(),
     };
-    const tx = this.state!.uqTx!;
+    const tx = this.state.uqTx;
     const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
-    const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
-    await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
-    const pendingTxns = await UqbarApi.scryPending(this.core.conduit!, from);
+    const item = this.state.ethereum.wallets.get(walletIndex).data.get(this.state.navState.protocol).uqbarTokenId;
+    await UqbarApi.enqueueTransaction(this.core.conduit, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
+    const pendingTxns = await UqbarApi.scryPending(this.core.conduit, from);
 */
   }
 
@@ -570,7 +599,9 @@ export class WalletService extends BaseService {
     passcode: number[]
     // toPatp?: string,
   ) {
-    /*const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Failed to load conduit');
+    /*const from = this.state.ethereum.wallets.get(walletIndex).address;
     const tx = {
       from,
       to,
@@ -584,51 +615,51 @@ export class WalletService extends BaseService {
     // nonce: await protocol.getNonce(from),
     // chainId: await protocol.getChainId(),
     // };
-    const uqTx = this.state!.uqTx!;
+    const uqTx = this.state?.uqTx;
     const tx = {
       ...uqTx,
       rate: 2,
       budget: 2000000,
     };
     // const ZIG_CONTRACT_ADDRESS = '0x74.6361.7274.6e6f.632d.7367.697a';
-    /*const item = this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.uqbarTokenId!;
-    await UqbarApi.enqueueTransaction(this.core.conduit!, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
-    const pendingTxns = await UqbarApi.scryPending(this.core.conduit!, from);
+    /*const item = this.state.ethereum.wallets.get(walletIndex).data.get(this.state.navState.protocol).uqbarTokenId;
+    await UqbarApi.enqueueTransaction(this.core.conduit, from, ZIG_CONTRACT_ADDRESS, '0x0', to, item, Number(amount));
+    const pendingTxns = await UqbarApi.scryPending(this.core.conduit, from);
     let hash = Object.keys(pendingTxns)
       .filter(hash => pendingTxns[hash].from === addDots(from))
       .sort((a, b) => pendingTxns[a].nonce - pendingTxns[b].nonce)[0]
     console.log(hash)
     const txn = pendingTxns[hash];*/
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const contract = removeDots(tx.contract.slice(2));
+    const contract = removeDots(tx.contract?.slice(2) ?? '');
     const to =
       (tx as any)?.action?.give?.to ||
       (tx as any)?.action?.['give-nft']?.to ||
       `0x${contract}${contract}`;
-    const signed = await (this.signer! as RealmSigner).signUqbarTransaction(
+    const signed = await (this.signer as RealmSigner).signUqbarTransaction(
       path,
-      tx.hash,
+      tx.hash ?? '',
       { ...tx, to },
-      this.state!.ourPatp!,
+      this.state?.ourPatp ?? '',
       passcode.map(String).join('')
     );
     console.log('signed the tx');
     console.log(signed.sig);
     await UqbarApi.submitSigned(
-      this.core.conduit!,
-      tx.from,
-      tx.hash,
+      this.core.conduit,
+      tx.from ?? '',
+      tx.hash ?? '',
       tx.rate,
       tx.budget,
       signed.ethHash,
       signed.sig
     ); //signed.ethHash, signed.sig);
     console.log('submitted');
-    const hash = removeDots(tx.hash);
-    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const hash = removeDots(tx.hash ?? '');
+    const currentWallet = this.state.currentWallet as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
-      this.state!.navState.protocol,
+      this.state.navState.protocol ?? '',
       hash,
       '',
       '', //toPatp,
@@ -638,12 +669,12 @@ export class WalletService extends BaseService {
     );
     console.log('enqueued');
     const stateTx = currentWallet.data
-      .get(this.state!.navState.protocol)!
-      .transactionList.getStoredTransaction(hash);
+      ?.get(this.state.navState.protocol)
+      ?.transactionList.getStoredTransaction(hash);
     await WalletApi.setTransaction(
-      this.core.conduit!,
+      this.core.conduit,
       'ethereum',
-      this.state!.navState.protocol,
+      this.state?.navState.protocol,
       currentWallet.index,
       null,
       hash,
@@ -659,11 +690,15 @@ export class WalletService extends BaseService {
     passcode: number[],
     toPatp?: string
   ) {
+    if (!this.wallet) throw new Error('Wallet not loaded');
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Conduit not loaded');
+
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
+    const protocol = this.wallet.protocols.get(
+      this.state.navState.protocol
     ) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    const from = this.state.ethereum.wallets.get(walletIndex)?.address ?? '';
     const tx = {
       from,
       to,
@@ -677,21 +712,21 @@ export class WalletService extends BaseService {
       nonce: await protocol.getNonce(from),
       chainId: await protocol.getChainId(),
     };
-    const signedTx = await this.signer!.signTransaction(
+    const signedTx = await this.signer.signTransaction(
       path,
       tx,
-      this.state!.ourPatp!,
+      this.state.ourPatp ?? '',
       passcode.map(String).join('')
     );
     const hash = await (
-      this.wallet!.protocols.get(
-        this.state!.navState.protocol
-      )! as BaseBlockProtocol
+      this.wallet.protocols.get(
+        this.state.navState.protocol
+      ) as BaseBlockProtocol
     ).sendTransaction(signedTx);
-    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const currentWallet = this.state.currentWallet as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
-      this.state!.navState.protocol,
+      this.state.navState.protocol,
       hash,
       tx.to,
       toPatp,
@@ -700,13 +735,13 @@ export class WalletService extends BaseService {
       new Date().toISOString()
     );
     const stateTx = currentWallet.data
-      .get(this.state!.navState.protocol)!
-      .transactionList.getStoredTransaction(hash);
+      .get(this.state.navState.protocol)
+      ?.transactionList.getStoredTransaction(hash);
 
     await WalletApi.setTransaction(
-      this.core.conduit!,
+      this.core.conduit,
       'ethereum',
-      this.state!.navState.protocol,
+      this.state.navState.protocol,
       currentWallet.index,
       null,
       hash,
@@ -723,46 +758,51 @@ export class WalletService extends BaseService {
     passcode: number[],
     toPatp?: string
   ) {
+    if (!this.wallet) throw new Error('Wallet not loaded');
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Conduit not loaded');
+
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     console.log(walletIndex, to, amount, toPatp, path);
 
     const ethAmount = ethers.utils.parseEther(amount);
     const tx = await (
-      this.wallet!.protocols.get(
-        this.state!.navState.protocol
-      )! as EthereumProtocol
+      this.wallet.protocols.get(
+        this.state.navState.protocol
+      ) as EthereumProtocol
     ).populateERC20(
       contractAddress,
       to,
       amount,
-      this.state!.ethereum.wallets.get(walletIndex)!
-        .data.get(this.state!.navState.protocol)!
-        .coins.get(contractAddress)!.decimals
+      this.state.ethereum.wallets
+        .get(walletIndex)
+        ?.data.get(this.state.navState.protocol)
+        ?.coins.get(contractAddress)?.decimals ?? 0
     );
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
+    const protocol = this.wallet.protocols.get(
+      this.state.navState.protocol
     ) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    const from = this.state.ethereum.wallets.get(walletIndex)?.address ?? '';
     tx.from = from;
     tx.gasLimit = await protocol.getFeeEstimate(tx);
     tx.gasPrice = await protocol.getFeePrice();
     tx.nonce = await protocol.getNonce(from);
     tx.chainId = await protocol.getChainId();
-    const signedTx = await this.signer!.signTransaction(
+    const signedTx = await this.signer.signTransaction(
       path,
       tx,
-      this.state!.ourPatp!,
+      this.state.ourPatp ?? '',
       passcode.map(String).join('')
     );
     const hash = await (
-      this.wallet!.protocols.get(
-        this.state!.navState.protocol
-      )! as BaseBlockProtocol
+      this.wallet.protocols.get(
+        this.state.navState.protocol
+      ) as BaseBlockProtocol
     ).sendTransaction(signedTx);
-    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const currentWallet = this.state.currentWallet as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
-      this.state!.navState.protocol,
+      this.state.navState.protocol,
       hash,
       to,
       toPatp,
@@ -772,14 +812,14 @@ export class WalletService extends BaseService {
       contractAddress
     );
     const stateTx = currentWallet.data
-      .get(this.state!.navState.protocol)!
-      .coins.get(contractAddress)!
-      .transactionList.getStoredTransaction(hash);
+      .get(this.state.navState.protocol)
+      ?.coins.get(contractAddress)
+      ?.transactionList.getStoredTransaction(hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
-      this.core.conduit!,
+      this.core.conduit,
       'ethereum',
-      this.state!.navState.protocol,
+      this.state.navState.protocol,
       currentWallet.index,
       contractAddress,
       hash,
@@ -791,10 +831,10 @@ export class WalletService extends BaseService {
 
   sendBitcoinTransaction() {}
 
-  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+  async checkPasscode(_event: any, passcode: number[]) {
     return await bcrypt.compare(
       passcode.map(String).join(''),
-      this.state!.settings.passcodeHash!
+      this.state?.settings.passcodeHash ?? ''
     );
   }
 
@@ -815,74 +855,90 @@ export class WalletService extends BaseService {
   }
 
   async checkMnemonic(_event: any, mnemonic: string) {
+    if (!this.core.conduit) throw new Error('Conduit not loaded');
+
     const ethXpub = ethers.utils.HDNode.fromMnemonic(mnemonic)
       .derivePath("m/44'/60'/0'")
       .neuter().extendedKey;
-    const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit!))[
+    const agentEthXpub = (await WalletApi.getEthXpub(this.core.conduit))[
       'eth-xpub'
     ];
     return ethXpub === agentEthXpub;
   }
 
   navigate(_event: any, view: WalletView, options?: WalletNavOptions) {
-    this.state!.navigate(view, options);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.navigate(view, options);
   }
 
   navigateBack() {
-    this.state!.navigateBack();
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.navigateBack();
   }
 
   toggleNetwork(_evt: any) {
-    if (this.state!.navState.network === NetworkType.ETHEREUM) {
-      if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
-        this.state!.setProtocol(ProtocolType.ETH_GORLI);
-        this.wallet!.watchUpdates(this.core.conduit!, this.state!);
-      } else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
-        this.state!.setProtocol(ProtocolType.ETH_MAIN);
-        this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.wallet) throw new Error('Wallet not loaded');
+    if (this.state.navState.network === NetworkType.ETHEREUM) {
+      if (this.state.navState.protocol === ProtocolType.ETH_MAIN) {
+        this.state.setProtocol(ProtocolType.ETH_GORLI);
+        this.wallet.watchUpdates(this.core.conduit, this.state);
+      } else if (this.state.navState.protocol === ProtocolType.ETH_GORLI) {
+        this.state.setProtocol(ProtocolType.ETH_MAIN);
+        this.wallet.watchUpdates(this.core.conduit, this.state);
       }
     }
   }
 
   async uqbarDeskExists(_evt: any) {
-    return await UqbarApi.uqbarDeskExists(this.core.conduit!);
+    if (!this.core.conduit) throw new Error('Conduit not loaded');
+    return await UqbarApi.uqbarDeskExists(this.core.conduit);
   }
 
   toggleUqbar(_evt: any) {
-    this.state!.navState.protocol !== ProtocolType.UQBAR
-      ? this.state!.setProtocol(ProtocolType.UQBAR)
-      : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
-    this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.wallet) throw new Error('Wallet not loaded');
+    this.state.navState.protocol !== ProtocolType.UQBAR
+      ? this.state.setProtocol(ProtocolType.UQBAR)
+      : this.state.setProtocol(this.state.navState.lastEthProtocol);
+    this.wallet.watchUpdates(this.core.conduit, this.state);
   }
 
   async watchUpdates(_evt: any) {
-    this.wallet!.watchUpdates(this.core.conduit!, this.state!);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.wallet) throw new Error('Wallet not loaded');
+    this.wallet.watchUpdates(this.core.conduit, this.state);
   }
 
   async setForceActive(_evt: any, forceActive: boolean) {
-    this.state!.setForceActive(forceActive);
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.setForceActive(forceActive);
   }
 
   async resetNavigation() {
-    this.state!.resetNavigation();
+    if (!this.state) throw new Error('Wallet state not loaded');
+    this.state.resetNavigation();
   }
 
   async deleteLocalWallet(_evt: any, passcode: number[]) {
+    if (!this.state) throw new Error('Wallet state not loaded');
     const passcodeString = passcode.map(String).join('');
-    (this.signer! as RealmSigner).deleteMnemonic(
-      this.state!.ourPatp!,
-      passcodeString
+    (this.signer as RealmSigner).deleteMnemonic(
+      this.state.ourPatp ?? '',
+      passcodeString ?? ''
     );
     this.db?.resetToDefaults();
   }
 
   async deleteShipWallet(_evt: any, passcode: number[]) {
+    if (!this.state) throw new Error('Wallet state not loaded');
+    if (!this.core.conduit) throw new Error('Conduit not loaded');
     const passcodeString = passcode.map(String).join('');
-    (this.signer! as RealmSigner).deleteMnemonic(
-      this.state!.ourPatp!,
-      passcodeString
+    (this.signer as RealmSigner).deleteMnemonic(
+      this.state.ourPatp ?? '',
+      passcodeString ?? ''
     );
     this.db?.resetToDefaults();
-    WalletApi.initialize(this.core.conduit!);
+    WalletApi.initialize(this.core.conduit);
   }
 }

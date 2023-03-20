@@ -56,13 +56,13 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const next = () => {
       if (walletApp.navState.protocol === ProtocolType.UQBAR) {
         WalletActions.enqueueUqbarTransaction(
-          walletApp.navState.walletIndex!,
+          walletApp.navState.walletIndex ?? '',
           props.transactionAmount
         );
       } else {
-        const wallet = walletApp.currentWallet!;
+        const wallet = walletApp.currentWallet;
         WalletActions.navigate(WalletView.TRANSACTION_CONFIRM, {
-          walletIndex: `${wallet.index!}`,
+          walletIndex: `${wallet?.index}`,
           protocol: walletApp.navState.protocol,
           ...(coin && {
             detail: {
@@ -85,7 +85,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const amountValidator = (valid: boolean, amount?: number) => {
       setAmountValid(valid);
       if (valid) {
-        props.setTransactionAmount(amount!);
+        props.setTransactionAmount(amount);
       }
     };
 
@@ -146,7 +146,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     $
                     {ethToUsd(
                       props.transactionAmount,
-                      walletApp.ethereum.conversions.usd!
+                      walletApp.ethereum.conversions.usd ?? 0
                     )}{' '}
                     USD
                   </Text>
@@ -193,7 +193,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                                 ]}
                                 simple={true}
                                 size={24}
-                                patp={props.transactionRecipient.patp!}
+                                patp={props.transactionRecipient.patp}
                               />{' '}
                               <Flex
                                 flexDirection="column"
@@ -253,7 +253,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                           ≈{' '}
                           {ethToUsd(
                             0.0005,
-                            walletApp.ethereum.conversions.usd!
+                            walletApp.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
                         </Text>
@@ -281,7 +281,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                           ≈{' '}
                           {ethToUsd(
                             props.transactionAmount + 0.0005,
-                            walletApp.ethereum.conversions.usd!
+                            walletApp.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
                         </Text>

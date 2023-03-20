@@ -82,7 +82,7 @@ const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
 function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   const { identity } = useServices();
-  const [email, setEmail] = useState(identity.auth.email!);
+  const [email, setEmail] = useState(identity.auth.email);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -93,6 +93,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   };
 
   const onClick = async () => {
+    if (!email) return;
     console.log(`setting email: ${email}`);
     setLoading(true);
     const result = await AuthActions.changeEmail(email);
@@ -126,7 +127,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
             disabled={
               !email ||
               !emailValidator.validate(email) ||
-              email.toLowerCase() === identity.auth.email!.toLowerCase()
+              email.toLowerCase() === identity.auth.email?.toLowerCase()
             }
             isLoading={loading}
             onClick={onClick}

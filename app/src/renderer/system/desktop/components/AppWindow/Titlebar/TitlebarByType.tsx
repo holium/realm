@@ -7,7 +7,6 @@ import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
@@ -15,9 +14,9 @@ import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
-  appInfo: AppType;
   shell: ShellStoreType;
   currentTheme: ThemeType;
+  hideTitlebarBorder: boolean;
   onClose: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
@@ -28,9 +27,9 @@ type Props = {
 
 export const TitlebarByType = ({
   appWindow,
-  appInfo,
   shell,
   currentTheme,
+  hideTitlebarBorder,
   onDevTools,
   onDragStart,
   onDragEnd,
@@ -38,14 +37,10 @@ export const TitlebarByType = ({
   onMaximize,
   onMinimize,
 }: Props) => {
-  let hideTitlebarBorder = false;
   let noTitlebar = false;
   let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps> | null;
   let showDevToolsToggle = true;
   let maximizeButton = true;
-  if (appInfo?.type === 'urbit') {
-    hideTitlebarBorder = !appInfo.config?.titlebarBorder || false;
-  }
 
   let titlebar = (
     <Titlebar
@@ -69,9 +64,10 @@ export const TitlebarByType = ({
   );
 
   if (appWindow.type === 'native') {
-    hideTitlebarBorder =
-      nativeApps[appWindow.appId].native!.hideTitlebarBorder!;
-    noTitlebar = nativeApps[appWindow.appId].native!.noTitlebar!;
+    hideTitlebarBorder = Boolean(
+      nativeApps[appWindow.appId].native?.hideTitlebarBorder
+    );
+    noTitlebar = Boolean(nativeApps[appWindow.appId].native?.noTitlebar);
     CustomTitlebar =
       getNativeAppWindow[appWindow.appId as NativeAppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
@@ -119,7 +115,7 @@ export const TitlebarByType = ({
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
-    noTitlebar = dialogConfig.noTitlebar!;
+    noTitlebar = Boolean(dialogConfig.noTitlebar);
     const onCloseDialog = dialogConfig.hasCloseButton
       ? dialogConfig.onClose
       : undefined;

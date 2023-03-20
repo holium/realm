@@ -32,7 +32,7 @@ const HostingConfirmationPresenter = (props: BaseDialogProps) => {
   const [startTime, _] = useState(Date.now());
   const [error, setError] = useState('');
   const { onboarding } = useServices();
-  const planet = onboarding.planet!;
+  const planet = onboarding.planet;
 
   useInterval(() => {
     OnboardingActions.checkShipBooted()
@@ -54,6 +54,8 @@ const HostingConfirmationPresenter = (props: BaseDialogProps) => {
         console.error(reason);
       });
   }, 5000);
+
+  if (!planet) return null;
 
   return (
     <Grid.Column noGutter lg={12} xl={12}>

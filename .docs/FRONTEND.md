@@ -37,3 +37,21 @@ export const MyComponent = observer(MyComponentPresenter);
 ```
 
 This makes sure `eslint-plugin-react-hooks` identifies the React component and will lint its hooks correctly. We use the `Presenter` suffix to indicate that the component is unwrapped and should not be used directly.
+
+## Component Null Checks
+
+Any nullable value that is critical to the component should be null checked before being used:
+
+```tsx
+const MyComponent = ({ prop }: { prop: string | null }) => {
+  if (!prop) return null;
+
+  return <div>{prop}</div>;
+};
+```
+
+Note that the component might need to broken down into smaller components to achieve this without calling hooks conditionally.
+
+Alternatively, if a nullable value is not critical to the component, it can be defaulted to a placeholder value (e.g. `''` or `[]`).
+
+Avoid using `!` to assert that a value is not null as it will cause a runtime error if the value is null.

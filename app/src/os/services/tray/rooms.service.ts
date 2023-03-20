@@ -70,11 +70,11 @@ export class RoomsService extends BaseService {
   };
 
   static preload = {
-    poke: async (params: PokeParams) => {
-      return await ipcRenderer.invoke('realm.rooms.poke', params);
+    poke: (params: PokeParams) => {
+      return ipcRenderer.invoke('realm.rooms.poke', params);
     },
-    scry: async (params: Scry) => {
-      return await ipcRenderer.invoke('realm.rooms.scry', params);
+    scry: (params: Scry) => {
+      return ipcRenderer.invoke('realm.rooms.scry', params);
     },
     onUpdate: (
       callback: (

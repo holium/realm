@@ -1,39 +1,33 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { MouseState } from '@holium/realm-presence';
 import { osPreload } from '../os/preload';
+import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
+import { multiplayerPreload } from './preload.multiplayer';
 import './helpers/mouseListener';
-import { MouseState, Vec2 } from '../renderer/system/mouse/AnimatedCursor';
+import './helpers/keyListener';
 
 const appPreload = {
+  /* Senders */
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
   },
-  setMouseColor(callback: any) {
-    ipcRenderer.on('mouse-color', callback);
+  openApp: (app: any, partition: string) => {
+    return ipcRenderer.invoke('open-app', app, partition);
   },
-  openApp: async (app: any, partition: string) => {
-    return await ipcRenderer.invoke('open-app', app, partition);
+  closeApp: (app: any) => {
+    return ipcRenderer.invoke('close-app', app);
   },
-  setPartitionCookies: async (partition: any, cookies: any) => {
-    return await ipcRenderer.invoke(
-      'set-partition-cookies',
-      partition,
-      cookies
-    );
+  askForMicrophone: (): Promise<MediaAccessStatus> => {
+    return ipcRenderer.invoke('ask-for-mic');
   },
-  closeApp: async (app: any) => {
-    return await ipcRenderer.invoke('close-app', app);
+  askForCamera: (): Promise<MediaAccessStatus> => {
+    return ipcRenderer.invoke('ask-for-camera');
   },
-  askForMicrophone: async () => {
-    return await ipcRenderer.invoke('ask-for-mic');
+  getMediaStatus: (): Promise<MediaAccess> => {
+    return ipcRenderer.invoke('get-media-status');
   },
-  askForCamera: async () => {
-    return await ipcRenderer.invoke('ask-for-camera');
-  },
-  getMediaStatus: async () => {
-    return await ipcRenderer.invoke('get-media-status');
-  },
-  toggleDevTools: async () => {
-    return await ipcRenderer.invoke('toggle-devtools');
+  toggleDevTools: () => {
+    return ipcRenderer.invoke('toggle-devtools');
   },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');
@@ -41,42 +35,55 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
+  setMouseColor(hex: string) {
+    ipcRenderer.invoke('mouse-color', hex);
+  },
+  toggleOnEphemeralChat() {
+    ipcRenderer.invoke('realm.toggle-on-ephemeral-chat');
+  },
+  toggleOffEphemeralChat() {
+    ipcRenderer.invoke('realm.toggle-off-ephemeral-chat');
+  },
+  realmToAppEphemeralChat(patp: string, message: string) {
+    ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
+  },
+  /* Receivers */
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
   onInitialDimensions(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
-  onMouseOver(callback: () => void) {
-    ipcRenderer.on('mouse-over', callback);
-  },
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
-  /**
-   * For macOS we enable mouse layer tracking for a smoother experience.
-   * It is not supported for Windows or Linux.
-   */
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
   onDisableCustomMouse(callback: () => void) {
     ipcRenderer.on('disable-custom-mouse', callback);
   },
-  mouseColorChanged(hex: string) {
-    ipcRenderer.invoke('mouse-color', hex);
+  onToggleOnEphemeralChat(callback: () => void) {
+    ipcRenderer.on('realm.toggle-on-ephemeral-chat', () => {
+      callback();
+    });
+  },
+  onToggleOffEphemeralChat(callback: () => void) {
+    ipcRenderer.on('realm.toggle-off-ephemeral-chat', () => {
+      callback();
+    });
   },
   onMouseMove(
     callback: (
-      coordinates: Vec2,
+      position: Position,
       state: MouseState,
       isDragging: boolean
     ) => void
   ) {
     ipcRenderer.on(
       'mouse-move',
-      (_, coordinates: Vec2, state: MouseState, isDragging: boolean) => {
-        callback(coordinates, state, isDragging);
+      (_, position: Position, state: MouseState, isDragging: boolean) => {
+        callback(position, state, isDragging);
       }
     );
   },
@@ -91,6 +98,35 @@ const appPreload = {
       callback(hex);
     });
   },
+  onKeyDown(callback: (key: string, isFocused: boolean) => void) {
+    ipcRenderer.on('key-down', (_, key: string, isFocused: boolean) => {
+      callback(key, isFocused);
+    });
+  },
+  onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {
+    ipcRenderer.on(
+      'realm-to-app.ephemeral-chat',
+      (_, patp: string, message: string) => {
+        callback(patp, message);
+      }
+    );
+  },
+  /* Removers */
+  removeOnKeyDown() {
+    ipcRenderer.removeAllListeners('key-down');
+  },
+  removeOnMouseOut() {
+    ipcRenderer.removeAllListeners('mouse-out');
+  },
+  removeOnMouseDown() {
+    ipcRenderer.removeAllListeners('mouse-down');
+  },
+  removeOnMouseUp() {
+    ipcRenderer.removeAllListeners('mouse-up');
+  },
+  removeOnMouseMove() {
+    ipcRenderer.removeAllListeners('mouse-move');
+  },
 };
 
 export type AppPreloadType = typeof appPreload;
@@ -98,4 +134,5 @@ export type AppPreloadType = typeof appPreload;
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
   os: osPreload,
+  multiplayer: multiplayerPreload,
 });

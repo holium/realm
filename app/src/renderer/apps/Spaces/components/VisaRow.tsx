@@ -67,7 +67,7 @@ export const VisaRow = ({
     //   selected={selected}
     //   customBg={colorTheme}
     //   onClick={() => {
-    //     onSelect(`/${ship!.patp}/our`);
+    //     onSelect(`/${ship.patp}/our`);
     //   }}
     // >
     <Row

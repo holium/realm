@@ -30,7 +30,9 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   const { getOptions, setOptions } = useContextMenu();
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
-  const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
+  const members = membership.spaces.get(space.path);
+  const member = members?.get(ship?.patp ?? '');
+  const roles = member?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];
     menu.push({
@@ -53,12 +55,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         },
       });
     }
-    if (
-      membership.spaces
-        .get(space.path)!
-        .get(ship!.patp)
-        ?.roles.includes('owner')
-    ) {
+    if (member?.roles.includes('owner')) {
       menu.push({
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',

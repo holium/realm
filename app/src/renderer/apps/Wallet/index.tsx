@@ -50,24 +50,28 @@ const WalletAppPresenter = (props: any) => {
     if (!wallet) continue;
     const walletTransactions = getTransactions(
       (walletApp.navState.network === NetworkType.ETHEREUM
-        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .transactionList.transactions
+        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+            ?.transactionList.transactions
         : (wallet as BitcoinWalletType).transactionList.transactions) ||
         new Map()
     );
     if (walletApp.navState.network === NetworkType.ETHEREUM) {
       for (const key of walletApp.currentStore.wallets.keys()) {
-        for (const coin of (
-          walletApp.currentStore.wallets.get(key)! as EthWalletType
+        const coinKeys = (
+          walletApp.currentStore.wallets.get(key) as EthWalletType
         ).data
-          .get(walletApp.navState.protocol)!
-          .coins.keys()) {
+          .get(walletApp.navState.protocol)
+          ?.coins.keys();
+        if (!coinKeys) continue;
+
+        for (const coin of coinKeys) {
           const coinTransactions = (
-            walletApp.currentStore.wallets.get(key)! as EthWalletType
+            walletApp.currentStore.wallets.get(key) as EthWalletType
           ).data
-            .get(walletApp.navState.protocol)!
-            .coins.get(coin)!
-            .transactionList.transactions.values();
+            .get(walletApp.navState.protocol)
+            ?.coins.get(coin)
+            ?.transactionList.transactions.values();
+          if (!coinTransactions) continue;
           transactions = [...coinTransactions, ...transactions];
         }
       }

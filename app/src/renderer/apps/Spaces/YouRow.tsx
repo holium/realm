@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { ShipModelType } from 'os/services/ship/models/ship';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { useServices } from 'renderer/logic/store';
 import { Avatar, Box, Row, Text, Flex } from '@holium/design-system';
 
@@ -18,14 +19,16 @@ const Wrapper = styled(Box)`
 interface SpaceRowProps {
   colorTheme: string;
   ship: ShipModelType;
+  space: SpaceModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
 }
 
 export const YouRow = (props: SpaceRowProps) => {
-  const { selected, onSelect } = props;
+  const { selected, onSelect, space } = props;
   const { ship } = useServices();
-  const currentShip = ship!;
+
+  if (!ship) return null;
 
   return (
     <Wrapper>
@@ -35,7 +38,7 @@ export const YouRow = (props: SpaceRowProps) => {
         className="realm-cursor-hover"
         selected={selected}
         onClick={() => {
-          onSelect(`/${ship!.patp}/our`);
+          onSelect(space.path);
         }}
       >
         <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
@@ -43,13 +46,13 @@ export const YouRow = (props: SpaceRowProps) => {
             simple
             borderRadiusOverride="6px"
             size={32}
-            avatar={currentShip.avatar}
-            patp={currentShip.patp}
-            sigilColor={[currentShip.color || '#000000', 'white']}
+            avatar={ship.avatar}
+            patp={ship.patp}
+            sigilColor={[ship.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom fontSize={3} fontWeight={500}>
-              {currentShip.nickname || currentShip.patp}
+              {ship.nickname || ship.patp}
             </Text.Custom>
           </Flex>
         </Flex>

@@ -68,14 +68,14 @@ export class ShellService extends BaseService {
     // let persistedState: ShellStoreType = this.db.store;
     // this.state = ShellStore.create(castToSnapshot(persistedState));
     // const syncEffect = {
-    //   model: getSnapshot(this.state!),
+    //   model: getSnapshot(this.state),
     //   resource: 'shell',
     //   key: null,
     //   response: 'initial',
     // };
     // this.core.onEffect(syncEffect);
     // onSnapshot(this.state, (snapshot) => {
-    //   this.db!.store = castToSnapshot(snapshot);
+    //   this.db.store = castToSnapshot(snapshot);
     // });
 
     onPatch(this.state, (patch) => {

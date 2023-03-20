@@ -9,6 +9,7 @@ const TrayManagerPresenter = () => {
   const { activeApp, coords, walletApp, dimensions, setActiveApp } =
     useTrayApps();
   const [walletForceActive, setWalletForceActive] = useState(false);
+
   if (walletForceActive && activeApp !== 'wallet-tray') {
     WalletActions.setForceActive(false);
     setWalletForceActive(false);
@@ -22,6 +23,7 @@ const TrayManagerPresenter = () => {
 
   const TrayAppView = trayAppRenderers[activeApp].component;
   const height = document.body.clientHeight;
+
   return (
     <TrayApp
       zIndex={100}
@@ -32,9 +34,7 @@ const TrayManagerPresenter = () => {
         height: dimensions.height,
         width: dimensions.width,
       }}
-      closeTray={() => {
-        setActiveApp(null);
-      }}
+      closeTray={() => setActiveApp(null)}
     >
       {TrayAppView && <TrayAppView />}
     </TrayApp>

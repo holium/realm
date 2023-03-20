@@ -89,13 +89,13 @@
       ::
         [%x %groups @ @ %members ~]
       =/  =ship                `@p`(slav %p i.t.t.path)
-      =/  name                 `@t`i.t.t.t.path
+      =/  name                 (woad i.t.t.t.path)
       =/  group                (get-group:grp [ship name] our.bowl now.bowl)
       ``groups-view+!>([%members fleet.group])
       ::
         [%x @ @ ~]
       =/  =ship                 `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (woad i.t.t.path)
       =/  space                 (~(got by spaces.state) [ship space-pth])
       ``spaces-view+!>([%space space])
       ::
@@ -104,13 +104,13 @@
       ::
         [%x @ @ %members ~]     ::  ~/scry/spaces/~zod/our/members.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (woad i.t.t.path)
       =/  members               (~(got by membership.state) [host space-pth])
       ``membership-view+!>([%members members])
       ::
         [%x @ @ %members @ ~]   ::  ~/scry/spaces/~zod/our/members/~dev.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (woad i.t.t.path)
       =/  patp                  `@p`(slav %p i.t.t.t.t.path)
       =/  members               (~(get by membership.state) [host space-pth])
       =/  member                (~(get by (need members)) patp)
@@ -119,7 +119,7 @@
       :: ::
         [%x @ @ %is-member @ ~] ::  ~/scry/spaces/~zod/our/is-member/~fes.json
       =/  host                  `@p`(slav %p i.t.path)
-      =/  space-pth             `@t`i.t.t.path
+      =/  space-pth             (woad i.t.t.path)
       =/  patp                  `@p`(slav %p i.t.t.t.t.path)
       =/  members               (~(get by membership.state) [host space-pth])
       ?~  members               ``membership-view+!>([%is-member %.n])
@@ -148,7 +148,7 @@
         ::
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
-        =/  space-pth           `@t`i.t.t.path
+        =/  space-pth             (woad i.t.t.path)
         =/  space               (~(got by spaces.state) [host space-pth])
         ?>  ?|  (check-member:security [host space-pth] src.bowl)     ::  only members should subscribe
                 =(access.space %public)                               :: allow public spaces to be watched
@@ -186,6 +186,43 @@
                 %group-update-0
               =/  groups-update  q:!<(update:g q.cage.sign)
               ?+  -.groups-update  `this
+                  %cordon
+                ?-  +<.groups-update
+                    %shut
+                  ?-  +>-.groups-update
+                      %add-ships
+                    ?+  +>+<.groups-update  `this
+                        %pending
+                      =^  cards  state
+                        %^  spin  ~(tap in `(set ship)`+>+>.groups-update)
+                          state
+                        |=  [=ship =_state]
+                        ^-  [(list card) _state]
+                        =/  join-action
+                          ^-  action:vstore
+                          :*  %send-invite
+                              ^-  space-path:store
+                              :-  (slav %p (snag 1 `(list knot)`wire))
+                              (snag 2 `(list knot)`wire)
+                              ship
+                              role=%member
+                              message='Join the space for the group'
+                          ==
+                        %-  action:visas:core
+                        join-action
+                      =/  cards  (zing cards)
+                      [cards this] 
+                    ==
+                      %del-ships
+                    `this
+                  ==
+                    %open
+                  :: TODO: sync bans
+                  `this
+                    %swap
+                  :: TODO: sync entry policy
+                  `this
+                ==
                   %fleet
                 ?+  -.q.groups-update  `this
                     %add
@@ -284,9 +321,8 @@
       |=  [slug=@t payload=add-payload:store members=members:membership-store]
       ^-  (quip card _state)
       ?>  (team:title our.bowl src.bowl)
+      =.  slug                  (find-available-path [our.bowl slug] spaces.state)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
-      ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
-        [~ state]
       =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
       ::  we need to set a host + member value and exclude the host from make-invitations
       =.  members               (~(put by members) [our.bowl [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]])
@@ -309,6 +345,22 @@
         `(list card)`[%pass watch-path %agent [our.bowl %groups] %watch watch-path]~
       :-  cards
       state(current path.new-space)
+    ::
+    ++  find-available-path
+      |=  [spath=[=ship slug=@t] =spaces:store]
+      ^-  @t
+      |-
+        ?.  (~(has by spaces) spath)   :: if the path is empty, return the valid slug
+          slug.spath
+        $(spath [ship.spath (increment-slug slug.spath)])  :: if the slug was already taken, try incrementing
+    ::
+    ++  increment-slug
+      |=  slug=@t
+      ^-  @t
+      =/  last-char  (snag 0 (flop (trip slug)))
+      ?:  &((gte last-char '0') (lte last-char '9')) :: if last-char is a numeric digit
+        (crip (snoc (snip (trip slug)) `@t`(add 1 last-char))) :: increment the digit
+      (crip (snoc (trip slug) '1')) :: else append '1' to the slug
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -459,6 +511,7 @@
     ++  handle-current
       |=  [path=space-path:store]
       ^-  (quip card _state)
+      =.  space.path  (woad space.path)
       ?>  =(our.bowl src.bowl) :: only we can set current
       ?:  =(current.state path)
         `state
@@ -565,7 +618,6 @@
     ++  on-current
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      :: TODO I don't know when/why this function is called yet. Revisit
       :_  state(current path)
       [%give %fact [/current ~] spaces-reaction+!>([%current path])]~
     ::

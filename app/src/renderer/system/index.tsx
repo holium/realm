@@ -45,7 +45,10 @@ const ShellPresenter = () => {
     [shell.dialogId, shell.dialogProps]
   );
 
-  const shipLoaded = ship?.loader.isLoaded;
+  const shipLoaded = useMemo(
+    () => ship?.loader.isLoaded,
+    [ship?.loader.isLoaded]
+  );
 
   const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
 
@@ -56,7 +59,8 @@ const ShellPresenter = () => {
     } else {
       DesktopActions.disableIsolationMode();
     }
-  }, [desktop.isIsolationMode]);
+    if (ship?.color) DesktopActions.setMouseColor(ship.color);
+  }, [desktop.isIsolationMode, ship?.color]);
 
   return (
     <ViewPort>
