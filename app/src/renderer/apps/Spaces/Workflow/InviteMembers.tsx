@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
-import { Box, Flex, Select } from '@holium/design-system';
+import { Avatar, Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
   Label,
@@ -21,7 +21,6 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { Avatar } from '@holium/design-system';
 
 interface IMemberList {
   customBg: string;

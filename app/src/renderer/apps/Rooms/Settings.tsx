@@ -1,8 +1,14 @@
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
-import { RadioOption, Select } from '@holium/design-system';
+import {
+  RadioOption,
+  Select,
+  Flex,
+  Button,
+  Text,
+  Icon,
+} from '@holium/design-system';
 import { Label, FormControl } from 'renderer/components';
-import { Flex, Button, Text, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';

@@ -16,8 +16,7 @@ import {
   RoomsManager,
 } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
-import { useToggle } from '@holium/shared';
-import { Dimensions } from '@holium/shared';
+import { Dimensions, useToggle } from '@holium/shared';
 
 type Props = {
   patp: string | undefined;
