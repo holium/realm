@@ -1,7 +1,7 @@
 import { forwardRef, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
-import { FragmentBlock, renderFragment } from './fragment-lib';
+import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
 import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { chatDate } from '../../util/date';
@@ -67,8 +67,23 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const fragments = useMemo(() => {
       return message?.map((fragment, index) => {
+        // if the previous fragment was a link or a code block, we need to add a space
+        // to the beginning of this fragment
+        let lineBreak;
+        if (index > 0) {
+          const previousType = Object.keys(message[index - 1])[0];
+          if (
+            previousType === 'link' ||
+            previousType === 'code' ||
+            previousType === 'image'
+          ) {
+            lineBreak = <LineBreak />;
+          }
+        }
+
         return (
           <span id={id} key={`${id}-index-${index}`}>
+            {lineBreak}
             {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
           </span>
         );

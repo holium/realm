@@ -37,7 +37,7 @@ const VIDEO_REGEX = [
 ];
 
 const MEDIA_TYPE = {
-  IMAGE: /(\.jpg|\.jpeg|\.png|\.gif|\.svg)$/,
+  IMAGE: /(\.jpg|\.jpeg|\.png|\.gif|\.svg|\.avif)$/,
   VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
   AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
   DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
@@ -56,7 +56,11 @@ export const isMusicLink = (link: string) => {
 };
 
 export const isMediaBlock = (link: string) => {
-  return VIDEO_REGEX.some((regex) => link.match(regex)) || isMusicLink(link);
+  return (
+    VIDEO_REGEX.some((regex) => link.match(regex)) ||
+    isMusicLink(link) ||
+    link.match(MEDIA_TYPE.VIDEO)
+  );
 };
 
 export const isTwitterLink = (link: string) => {

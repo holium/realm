@@ -12,11 +12,26 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
   const { image, by, variant, width = 'inherit', onLoaded, ...rest } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const parsedHeight = (
+    rest.height
+      ? typeof rest.height === 'number'
+        ? `${rest.height}px`
+        : rest.height
+      : 'inherit'
+  ) as string;
+
+  const parsedWidth = (
+    width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
+  ) as string;
+
   return (
     <Block variant={variant} width={width} {...rest}>
       <FragmentImage
+        id={rest.id}
         isSkeleton={!imgLoaded}
         src={image}
+        height={parsedHeight}
+        width={parsedWidth}
         draggable={false}
         onError={() => {
           // TODO: handle error using placeholder image

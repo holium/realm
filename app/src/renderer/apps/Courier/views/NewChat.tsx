@@ -27,6 +27,7 @@ export const NewChat = () => {
   const onCreateChat = () => {
     let title: string;
     let chatType: ChatPathType;
+    if (!ship) return;
     if (selectedPatp.size === 1) {
       chatType = 'dm';
       const metadata = friends.getContactAvatarMetadata(
@@ -43,7 +44,7 @@ export const NewChat = () => {
       chatType = 'group';
     }
     setCreating(true);
-    createChat(title, ship!.patp, chatType, Array.from(selectedPatp))
+    createChat(title, ship.patp, chatType, Array.from(selectedPatp))
       .then(() => {
         setSubroute('inbox');
         setCreating(false);

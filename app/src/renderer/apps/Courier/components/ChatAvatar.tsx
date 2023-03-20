@@ -1,4 +1,3 @@
-import { isValidPatp } from 'urbit-ob';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
@@ -53,7 +52,7 @@ export const ChatAvatar = ({
   if (!image && type === 'group') {
     avatarElement = (
       <GroupSigil
-        path={path!}
+        path={path}
         size={size / 3.5 + size}
         patps={peers.filter((peer) => peer !== window.ship) as string[]}
       />

@@ -154,7 +154,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === ship!.patp)?.role === 'host';
+    sortedPeers.find((peer) => peer.ship === ship?.patp)?.role === 'host';
 
   const patps = sortedPeers.map((peer) => peer.ship);
 

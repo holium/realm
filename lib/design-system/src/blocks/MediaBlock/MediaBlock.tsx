@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import Spotify from 'react-spotify-embed';
 import ReactPlayer from 'react-player/lazy';
 import { Flex, Icon, isSpotifyLink, Text } from '../..';
@@ -9,6 +9,7 @@ const MediaWrapper = styled(Flex)`
   position: relative;
   height: fit-content;
   width: 100%;
+  min-width: 250px;
   .react-player-hide-cursor {
     position: absolute;
     top: 0;
@@ -82,6 +83,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
           </Flex>
         ) : (
           <ReactPlayer
+            id={rest.id}
             url={url}
             controls
             className={'react-player-iframe'}
