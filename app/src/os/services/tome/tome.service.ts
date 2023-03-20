@@ -1,9 +1,9 @@
 import { BaseService } from '../base.service';
 import { Realm } from '../../index';
 import { IpcMainInvokeEvent, ipcMain, ipcRenderer } from 'electron';
-import { TomeApi } from 'os/api/tome';
+import { TomeApi } from '../../api/tome';
 import { TomeOptions } from './models/types';
-import { SpacesApi } from 'os/api/spaces';
+import { SpacesApi } from '../../api/spaces';
 import { Tome } from './models/tome';
 
 export class TomeService extends BaseService {
@@ -98,9 +98,7 @@ export class TomeService extends BaseService {
         locked,
         inRealm,
       });
-      /* TODO return something */
     }
     return new Tome(false, { app: appName, tomeShip: 'zod', ourShip: 'zod' });
-    /* TODO return something */
   }
 }
