@@ -2,8 +2,9 @@ import { BaseService } from '../base.service';
 import { Realm } from '../../index';
 import { IpcMainInvokeEvent, ipcMain, ipcRenderer } from 'electron';
 import { TomeApi } from 'os/api/tome';
-import { TomeOptions } from 'tome/types';
+import { TomeOptions } from './models/types';
 import { SpacesApi } from 'os/api/spaces';
+import { Tome } from './models/tome';
 
 export class TomeService extends BaseService {
   handlers = {
@@ -36,7 +37,6 @@ export class TomeService extends BaseService {
     app?: string,
     options: TomeOptions = {}
   ) {
-    /* logic */
     const appName = app ?? 'all';
     if (urbit) {
       if (!this.core.conduit) throw new Error('No conduit found');
@@ -88,8 +88,19 @@ export class TomeService extends BaseService {
         ? options.permissions
         : ({ read: 'our', write: 'our', admin: 'our' } as const);
       await TomeApi.initTome(this.core.conduit, tomeShip, space, appName);
+      return new Tome(true, {
+        tomeShip,
+        ourShip,
+        space,
+        spaceForPath,
+        app: appName,
+        perm,
+        locked,
+        inRealm,
+      });
       /* TODO return something */
     }
+    return new Tome(false, { app: appName, tomeShip: 'zod', ourShip: 'zod' });
     /* TODO return something */
   }
 }
