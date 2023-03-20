@@ -7,7 +7,8 @@
   "main": "dist/holium-design-system.cjs.js",
   "module": "dist/holium-design-system.esm.js",
   "scripts": {
-    "build": "preconstruct build"
+    "build": "preconstruct build",
+    "postinstall": "preconstruct dev"
   },
   "dependencies": {
     "@tlon/sigil-js": "^1.4.5",
