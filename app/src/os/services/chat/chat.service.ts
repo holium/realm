@@ -234,8 +234,24 @@ export class ChatService extends BaseService {
       this.insertPaths(data.tables.paths);
       this.insertPeers(data.tables.peers);
     } else if (Array.isArray(data)) {
-      console.log('db update', data);
-      data.forEach(this.handleDBChange);
+      console.log('db update array', data);
+      if (
+        data.length > 1 &&
+        data[0].type === 'add-row' &&
+        data[0].table === 'messages'
+      ) {
+        // insert multi fragment messages
+        // TODO find a way to handle multiple msg-ids in one db update
+        // if it is even possible
+        const messages = data.map(
+          (row) => (row as AddRow).row as MessagesRow
+        ) as MessagesRow[];
+        this.insertMessages(messages);
+        const msg = this.getChatMessage(messages[0]['msg-id']);
+        this.sendChatUpdate('message-received', msg);
+      } else {
+        data.forEach(this.handleDBChange);
+      }
     } else {
       console.log(data);
     }
