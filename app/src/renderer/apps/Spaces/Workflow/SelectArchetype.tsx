@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { Grid, Text, Flex } from 'renderer/components';
+import { Text, Flex } from 'renderer/components';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -11,8 +11,9 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     const { theme } = useServices();
     const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
-    const [selectedArchetype, setSelectedArchetype] =
-      useState<string | null>('community');
+    const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
+      'community'
+    );
 
     const setWorkspaceState = (obj: any) => {
       setState &&
