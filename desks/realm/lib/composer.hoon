@@ -80,7 +80,7 @@
     %+  turn  ~(tap by compositions)
     |=  [=space-path:sur =composer:sur]
     ^-  [cord json]
-    :-  ''
+    :-  (spat /(scot %p ship.space-path)/(scot %tas space.space-path))
     %-  pairs
     :~  ['space' s+(spat /(scot %p ship.space.composer)/(scot %tas space.space.composer))]
         ['current' s+current.composer]
