@@ -1,9 +1,10 @@
 {
   "name": "@holium/design-system",
   "version": "0.1.6",
-  "description": "A component library for Realm.",
+  "description": "A component library for Realm apps.",
   "license": "MIT",
   "author": "trent@holium.com",
+  "homepage": "https://holium.com",
   "main": "dist/holium-design-system.cjs.js",
   "module": "dist/holium-design-system.esm.js",
   "scripts": {
