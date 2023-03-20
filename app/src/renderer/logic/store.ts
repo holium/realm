@@ -78,6 +78,7 @@ const Services = types
         incoming: {},
         outgoing: {},
       });
+      self.campfire = castToSnapshot({});
     },
   }));
 

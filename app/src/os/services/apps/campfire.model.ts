@@ -1,7 +1,7 @@
 import { Instance, types } from 'mobx-state-tree';
 
 export const CampfireStore = types
-  .model('ComposerStore', {
+  .model('CampfireStore', {
     campfires: types.map(types.string),
     view: types.maybe(types.string),
   })

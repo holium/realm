@@ -253,6 +253,7 @@ export class ShipService extends BaseService {
     friendsStore.registerPatches(this.core.onEffect);
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
+    this.core.services.ship.campfire.load();
 
     onSnapshot(this.state, (snapshot: any) => {
       if (this.db) {
@@ -303,7 +304,6 @@ export class ShipService extends BaseService {
 
       this.rooms?.watch();
       this.wallet?.onLogin(ship);
-      this.campfire?.onLogin(ship);
 
       // return ship state
     } catch (err) {

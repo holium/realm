@@ -3,8 +3,8 @@ import { CampfireActions } from 'renderer/logic/actions/campfire';
 
 export const Landing = () => {
   return (
-    <Flex flexDirection="row" alignItems="center">
-      <Flex flexDirection="column" minHeight={0} gap={10}>
+    <Flex flexDirection="row" alignItems="center" justifyContent="space-around">
+      <Flex flexDirection="column" gap={10} flex={0}>
         <Text.Custom
           style={{
             fontStyle: 'normal',
@@ -47,11 +47,11 @@ export const Landing = () => {
             New Audio
           </Button.Base>
         </Flex>
+        <Text.Caption opacity={0.5} alignSelf="flex-end" mb={20}>
+          Campfire calls are initiated via a star-hosted relay server. Once two
+          peers are connected, the call is fully P2P. For more info click here.
+        </Text.Caption>
       </Flex>
-      <Text.Caption opacity={0.5} alignSelf="flex-end" mb={20}>
-        Campfire calls are initiated via a star-hosted relay server. Once two
-        peers are connected, the call is fully P2P. For more info click here.
-      </Text.Caption>
       <Flex style={{ height: 172, width: 172 }}>
         <Icon name="Bonfire" overflow="visible" />
       </Flex>

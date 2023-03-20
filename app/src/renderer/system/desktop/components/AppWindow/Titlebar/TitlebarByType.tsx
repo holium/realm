@@ -11,6 +11,7 @@ import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
 import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+import { CampfireActions } from 'renderer/logic/actions/campfire';
 
 type Props = {
   appWindow: AppWindowType;
@@ -38,6 +39,7 @@ export const TitlebarByType = ({
   onMinimize,
 }: Props) => {
   let noTitlebar = false;
+  let backButton = false;
   let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps> | null;
   let showDevToolsToggle = true;
   let maximizeButton = true;
@@ -68,6 +70,8 @@ export const TitlebarByType = ({
       nativeApps[appWindow.appId].native?.hideTitlebarBorder
     );
     noTitlebar = Boolean(nativeApps[appWindow.appId].native?.noTitlebar);
+    backButton = Boolean(nativeApps[appWindow.appId].native?.backButton);
+    console.log('back', backButton);
     CustomTitlebar =
       getNativeAppWindow[appWindow.appId as NativeAppId].titlebar;
     // TODO: Remove hardcoded showDevToolsToggle
@@ -91,6 +95,7 @@ export const TitlebarByType = ({
           maximizeButton={maximizeButton}
           minimizeButton
           closeButton
+          backButton={backButton}
           noTitlebar={noTitlebar}
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
@@ -101,6 +106,7 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
+          onBack={() => CampfireActions.setView('landing')}
           theme={currentTheme}
           appWindow={appWindow}
         />

@@ -16,6 +16,7 @@ type Props = {
   closeButton?: boolean;
   maximizeButton?: boolean;
   minimizeButton?: boolean;
+  backButton?: boolean;
   isAppWindow?: boolean;
   noTitlebar?: boolean;
   shareable?: boolean;
@@ -28,6 +29,7 @@ type Props = {
   onDevTools: () => void;
   onDragEnd: () => void;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
+  onBack?: () => void;
 };
 
 export const Titlebar = ({
@@ -41,6 +43,7 @@ export const Titlebar = ({
   isAppWindow,
   maximizeButton,
   minimizeButton,
+  backButton,
   navigationButtons,
   shareable,
   hasBlur,
@@ -51,6 +54,7 @@ export const Titlebar = ({
   onDevTools,
   onDragEnd,
   onDragStart,
+  onBack,
 }: Props) => {
   const onDoubleClick = useDoubleClick(onMaximize);
   const iconColor = theme.iconColor ?? '#333333';
@@ -99,6 +103,17 @@ export const Titlebar = ({
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onDevTools && onDevTools();
+              }}
+            />
+          )}
+          {backButton && (
+            <AppWindowIcon
+              icon="ArrowLeftLine"
+              iconColor={iconColor}
+              bg="#97A3B2"
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onBack && onBack();
               }}
             />
           )}

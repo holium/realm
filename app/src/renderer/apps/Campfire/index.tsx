@@ -7,11 +7,9 @@ import { Landing } from './Landing';
 
 const CampfirePresenter = () => {
   const { campfire } = useServices();
-  console.log(campfire);
   const view = campfire.view || 'landing';
-  console.log('view', view);
   return (
-    <Flex flex={1} flexDirection="row" alignItems="center">
+    <Flex flex={1} minHeight={0}>
       {view === 'landing' && <Landing />}
       {view === 'video' && <VideoCall />}
       {view === 'voice' && <VoiceCall />}

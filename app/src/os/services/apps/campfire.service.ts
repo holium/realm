@@ -1,17 +1,15 @@
-import { ipcMain, ipcRenderer } from 'electron';
-import { getSnapshot } from 'mobx-state-tree';
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
+import { getSnapshot, onPatch } from 'mobx-state-tree';
 import { Realm } from '../../';
 
 import { BaseService } from '../base.service';
-import { DiskStore } from '../base.store';
 import { CampfireStore, CampfireStoreType } from './campfire.model';
 
 /**
  * CampfireService
  */
 export class CampfireService extends BaseService {
-  private db?: DiskStore; // for persistance
-  private state?: CampfireStoreType; // for state management
+  private readonly state: CampfireStoreType; // for state management
 
   handlers = {
     'realm.campfire.set-view': this.setView,
@@ -26,6 +24,7 @@ export class CampfireService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
+    this.state = CampfireStore.create({});
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
@@ -36,20 +35,22 @@ export class CampfireService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async onLogin(patp: string) {
-    const secretKey: string | null = this.core.passwords.getPassword(patp);
-    if (!secretKey) throw new Error('No password found for this ship');
-    this.db = new DiskStore('campfire', patp, secretKey, CampfireStore, {});
-    this.state = this.db.model as CampfireStoreType;
-    this.db.initialUpdate(this.core.onEffect);
-    this.db.registerPatches(this.core.onEffect);
+  async load() {
+    onPatch(this.state, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'campfire',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
   }
 
   // ***********************************************************
   // ************************ CAMPFIRE ***************************
   // ***********************************************************
 
-  setView(view: string) {
+  setView(_event: IpcMainInvokeEvent, view: string) {
     this.state?.setView(view);
   }
 }

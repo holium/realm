@@ -10,6 +10,7 @@ type NativeAppType = {
     hideTitlebarBorder?: boolean;
     noTitlebar?: boolean;
     openFullscreen?: boolean;
+    backButton?: boolean;
   };
   web?: {
     url: string;
@@ -71,6 +72,7 @@ export const nativeApps: AppManifestMap = {
     type: 'native',
     native: {
       hideTitlebarBorder: true,
+      backButton: true,
     },
   },
   ...devApps,
