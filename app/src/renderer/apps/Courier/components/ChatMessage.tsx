@@ -1,4 +1,10 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
+import {
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -16,7 +22,7 @@ type ChatMessageProps = {
   message: ChatMessageType;
   canReact: boolean;
   ourColor: string;
-  onLoad: () => void;
+  measure: () => void;
 };
 
 export const ChatMessagePresenter = ({
@@ -25,13 +31,16 @@ export const ChatMessagePresenter = ({
   message,
   canReact,
   ourColor,
-  onLoad,
+  measure,
 }: ChatMessageProps) => {
   const { ship, friends } = useServices();
   const { selectedChat } = useChatStore();
   const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
+
+  useLayoutEffect(measure);
+
   useEffect(() => {
     if (!ship) return;
     window.ship = ship.patp;
@@ -49,9 +58,6 @@ export const ChatMessagePresenter = ({
     (payload: OnReactionPayload) => {
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
-        if (message.reactions.length === 0) {
-          onLoad();
-        }
       } else {
         if (!payload.reactId) {
           console.warn('No reactId', payload);
@@ -60,7 +66,7 @@ export const ChatMessagePresenter = ({
         selectedChat?.deleteReaction(message.id, payload.reactId);
       }
     },
-    [selectedChat, message, onLoad]
+    [selectedChat, message]
   );
 
   const contextMenuOptions = useMemo(() => {
@@ -149,7 +155,7 @@ export const ChatMessagePresenter = ({
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}
       sentAt={sentAt}
-      onLoad={onLoad}
+      onLoad={measure}
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
     />
