@@ -55,7 +55,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-settings': this.setSettings,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
     'realm.tray.wallet.create-wallet': this.createWallet,
-    'realm.wallet.get-conversion': this.getConversion,
+    'realm.tray.wallet.get-conversion': this.getConversion,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
     'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
@@ -86,7 +86,11 @@ export class WalletService extends BaseService {
       );
     },
     getConversion: async (from: 'ETH', to: 'USD' | 'EUR' | string) => {
-      return await ipcRenderer.invoke('realm.wallet.get-conversion', from, to);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.get-conversion',
+        from,
+        to
+      );
     },
     checkMnemonic: async (mnemonic: string) => {
       return await ipcRenderer.invoke(

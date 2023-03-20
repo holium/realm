@@ -209,8 +209,8 @@ export class Realm extends EventEmitter {
     let bazaar = null;
     let beacon = null;
     let bulletin = null;
-    let campfire = null;
     let wallet = null;
+    let campfire = null;
     let visas = null;
     let models = {};
 
@@ -218,8 +218,8 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      campfire = this.services.ship.campfire.snapshot;
       wallet = this.services.ship.wallet.snapshot;
+      campfire = this.services.ship.campfire.snapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       beacon = this.services.spaces.modelSnapshots.beacon;
       bulletin = this.services.spaces.modelSnapshots.bulletin;
@@ -242,8 +242,8 @@ export class Realm extends EventEmitter {
       beacon,
       membership,
       visas,
-      campfire,
       wallet,
+      campfire,
       models,
       bulletin,
       loggedIn: !!this.session,
