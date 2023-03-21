@@ -82,12 +82,6 @@
       ::
         [%new ~]  :: the "new notificaitons only" path
           ~  :: we don't "prime" this path with anything, only give-facts on %create action
-      :: /path/<app name>/<the/actual/path>
-      ::[%path @ *]
-      ::  =/  path-notifs   (notifs-by-path:core i.t.path t.t.path) :: list of [key val] of matching notif-rows
-      ::  =/  changes  (turn path-notifs keyval-to-change:core)
-      ::  :~  [%give %fact ~ db-change+!>(changes)]
-      ::  ==
     ==
     [cards this]
   ::

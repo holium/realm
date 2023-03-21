@@ -100,7 +100,7 @@
   ]
   =.  notifs-table.state  (put:notifon:sur notifs-table.state next.state row)
   =.  next.state          +(next.state)
-  =/  thechange  db-change+!>((limo [[%add-row row] ~]))
+  =/  thechange  notif-db-change+!>((limo [[%add-row row] ~]))
   =/  gives  :~
     [%give %fact [/db /new ~] thechange]
   ==
@@ -112,7 +112,7 @@
   ^-  (quip card state-0)
   =/  row  (mark-row-read (got:notifon:sur notifs-table.state id) now.bowl)
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
-  =/  thechange  db-change+!>((limo [[%update-row row] ~]))
+  =/  thechange  notif-db-change+!>((limo [[%update-row row] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -125,7 +125,7 @@
   ::  mark-result is like: [notifs-table ids]
   =/  mark-result  (mark-app-read notifs-table.state app now.bowl)
   =.  notifs-table.state  -:mark-result
-  =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
+  =/  thechange  notif-db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -138,7 +138,7 @@
   ::  mark-result is like: [notifs-table ids]
   =/  mark-result  (mark-path-read notifs-table.state app.act path.act now.bowl)
   =.  notifs-table.state  -:mark-result
-  =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
+  =/  thechange  notif-db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -150,7 +150,7 @@
   ^-  (quip card state-0)
   =/  t  now.bowl
   =.  notifs-table.state  (run:notifon:sur notifs-table.state |=(r=notif-row:sur ?:(flag (mark-row-read r t) (mark-row-unread r t))))
-  =/  thechange  db-change+!>((limo [[%update-all flag] ~]))
+  =/  thechange  notif-db-change+!>((limo [[%update-all flag] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -162,7 +162,7 @@
   ^-  (quip card state-0)
   =/  row  (got:notifon:sur notifs-table.state id)
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id (toggle-dismissed row now.bowl %.y))
-  =/  thechange  db-change+!>((limo [[%update-row row] ~]))
+  =/  thechange  notif-db-change+!>((limo [[%update-row row] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -175,7 +175,7 @@
   ::  mark-result is like: [notifs-table ids]
   =/  mark-result  (mark-app-dismiss notifs-table.state app now.bowl)
   =.  notifs-table.state  -:mark-result
-  =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
+  =/  thechange  notif-db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -188,7 +188,7 @@
   ::  mark-result is like: [notifs-table ids]
   =/  mark-result  (mark-path-dismiss notifs-table.state app.act path.act now.bowl)
   =.  notifs-table.state  -:mark-result
-  =/  thechange  db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
+  =/  thechange  notif-db-change+!>((turn +:mark-result |=(id=@ud [%update-row (got:notifon:sur notifs-table.state id)])))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -210,7 +210,7 @@
   =.  metadata.row   metadata.create-action.act
   =.  updated-at.row      now.bowl
   =.  notifs-table.state  (put:notifon:sur notifs-table.state id.act row)
-  =/  thechange  db-change+!>([[%update-row row] ~])
+  =/  thechange  notif-db-change+!>([[%update-row row] ~])
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
@@ -221,7 +221,7 @@
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =.  notifs-table.state  (remove-notif-from-table notifs-table.state id)
-  =/  thechange  db-change+!>((limo [[%del-row id] ~]))
+  =/  thechange  notif-db-change+!>((limo [[%del-row id] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
   ==
