@@ -37,7 +37,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
       ? css`
           position: absolute;
           left: 0px;
-          bottom: -12px;
+          bottom: -8px;
         `
       : css`
           flex-direction: row;
