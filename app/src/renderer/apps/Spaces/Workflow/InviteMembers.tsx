@@ -11,7 +11,6 @@ import {
   Crest,
   IconButton,
   Skeleton,
-  Grid,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { createField, createForm } from 'mobx-easy-form';
@@ -291,7 +290,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   if (!workflowState) return null;
 
   return (
-    <Grid.Column noGutter lg={12} xl={12}>
+    <Flex flexDirection="column" width="100%" overflowY="hidden">
       <Text
         fontSize={5}
         lineHeight="24px"
@@ -400,7 +399,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           </MemberList>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };
 

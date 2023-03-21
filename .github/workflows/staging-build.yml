@@ -13,7 +13,7 @@ env:
 #
 jobs:
   pre-deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
@@ -66,7 +66,7 @@ jobs:
           CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-mac:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: macos-latest
     steps:
@@ -144,7 +144,7 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   build-linux:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     steps:
@@ -192,7 +192,7 @@ jobs:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-windows:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     container:
@@ -259,8 +259,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
+          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
+          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   deploy-desks:
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
@@ -341,6 +345,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
@@ -385,12 +390,13 @@ jobs:
           environment: staging
           sourcemaps: './app/release/app/dist'
           version: $BUILD_VERSION
+          SENTRY_LOG_LEVEL: debug
 
   #
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:
-    if: always()
+    if: always() && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy, post-deploy]
     runs-on: ubuntu-latest
     steps:

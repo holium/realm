@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, skeletonStyle, Text, Bookmark, MediaBlock } from '../..';
+import {
+  Flex,
+  skeletonStyle,
+  Text,
+  Bookmark,
+  MediaBlock,
+  ImageBlock,
+} from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
@@ -76,7 +83,7 @@ export const LinkBlock = ({
   useEffect(() => {
     const { linkType } = parseMediaType(link);
     if (linkType !== 'link') {
-      setLinkBlockType(linkType);
+      return setLinkBlockType(linkType);
     }
     if (!openGraph && linkBlockType === 'opengraph') {
       fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
@@ -140,11 +147,25 @@ export const LinkBlock = ({
     }
     return (
       <MediaBlock
-        id="vid-1"
+        id={`media-${link}`}
         mode="embed"
         url={link}
         width={rest.width as number}
         height={rest.height as number}
+        onLoaded={onLinkLoaded}
+      />
+    );
+  }
+
+  if (linkBlockType === 'image') {
+    return (
+      <ImageBlock
+        id={`image-${link}`}
+        mode="embed"
+        by={by}
+        image={link}
+        width={rest.width || 'fit-content'}
+        height={rest.height}
         onLoaded={onLinkLoaded}
       />
     );

@@ -154,7 +154,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === ship!.patp)?.role === 'host';
+    sortedPeers.find((peer) => peer.ship === ship?.patp)?.role === 'host';
 
   const patps = sortedPeers.map((peer) => peer.ship);
 
@@ -166,6 +166,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       peers={patps}
       size={48}
       image={image}
+      metadata={metadata}
       canEdit={amHost && canUpload}
       onUpload={() => {
         if (!containerRef.current) return;

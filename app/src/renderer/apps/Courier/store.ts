@@ -1,13 +1,6 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
-import {
-  flow,
-  Instance,
-  types,
-  tryReference,
-  applySnapshot,
-  destroy,
-} from 'mobx-state-tree';
+import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
 import { OSActions } from 'renderer/logic/actions/os';
@@ -53,7 +46,8 @@ const ChatStore = types
       const chat = self.inbox.find((c) => c.path === path);
       if (!ship || !chat) return 'Error loading title';
       if (chat.type === 'dm') {
-        return chat.peers.filter((p) => p.ship !== ship)[0].ship;
+        const peer = chat.peers.filter((p) => p.ship !== ship)[0];
+        return peer ? peer.ship : chat.metadata.peer || 'Error loading title';
       } else {
         return chat.metadata.title;
       }
@@ -170,8 +164,9 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext =
-  createContext<null | ChatStoreInstance>(chatStore);
+export const ChatStoreContext = createContext<null | ChatStoreInstance>(
+  chatStore
+);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {

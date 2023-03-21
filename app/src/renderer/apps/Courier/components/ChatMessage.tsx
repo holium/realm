@@ -73,6 +73,12 @@ export const ChatMessagePresenter = ({
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !ship) return menu;
     const isAdmin = selectedChat.isHost(ship.patp);
+    let hasImage = false;
+    msgModel?.contents.forEach((content) => {
+      if (Object.keys(content)[0].includes('image')) {
+        hasImage = true;
+      }
+    });
     if (isAdmin) {
       menu.push({
         id: `${messageRowId}-pin-message`,
@@ -84,6 +90,20 @@ export const ChatMessagePresenter = ({
           selectedChat.setPinnedMessage(message.id);
         },
       });
+    }
+    if (hasImage) {
+      // menu.push({
+      //   id: `${messageRowId}-save-image`,
+      //   icon: 'CloudDownload',
+      //   label: 'Save image',
+      //   disabled: false,
+      //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      //     evt.stopPropagation();
+      //     // selectedChat.saveImage(message.id);
+      //   },
+      // });
+      // TODO if trove is installed
+      // save to trove
     }
     menu.push({
       id: `${messageRowId}-reply-to`,

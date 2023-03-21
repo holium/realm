@@ -1,25 +1,9 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import Spotify from 'react-spotify-embed';
 import ReactPlayer from 'react-player/lazy';
 import { Flex, Icon, isSpotifyLink, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import styled from 'styled-components';
-
-const MediaWrapper = styled(Flex)`
-  position: relative;
-  height: fit-content;
-  width: 100%;
-  .react-player-hide-cursor {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    cursor: none !important;
-    z-index: 100;
-    pointer-events: auto;
-  }
-`;
 
 type MediaBlockProps = {
   url: string;
@@ -82,6 +66,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
           </Flex>
         ) : (
           <ReactPlayer
+            id={rest.id}
             url={url}
             controls
             className={'react-player-iframe'}
@@ -103,6 +88,14 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
               youtube: {
                 playerVars: { showinfo: 1 },
               },
+              file: {
+                attributes: {
+                  id: rest.id,
+                  controlsList: 'nodownload noplaybackrate',
+                  disablepictureinpicture: 'true',
+                  'x-webkit-airplay': 'allow',
+                },
+              },
             }}
           />
         )}
@@ -113,3 +106,116 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
     </Block>
   );
 };
+
+const MediaWrapper = styled(Flex)`
+  position: relative;
+  height: fit-content;
+  width: 100%;
+  min-width: 250px;
+  .react-player-hide-cursor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    cursor: none !important;
+    z-index: 100;
+    pointer-events: auto;
+  }
+
+  video::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-play-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-volume-slider-container {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-volume-slider {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-mute-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-timeline {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-current-time-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-full-page-media::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-start-playback-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-overlay-play-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-toggle-closed-captions-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-status-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-mouse-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-timeline-container {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-time-remaining-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-seek-back-button {
+    cursor: none !important;
+  }
+
+  video {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-seek-forward-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-fullscreen-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-enclosure {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-rewind-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-return-to-realtime-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-toggle-closed-captions-button {
+    cursor: none !important;
+  }
+`;

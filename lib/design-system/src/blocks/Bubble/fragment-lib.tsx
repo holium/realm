@@ -170,9 +170,11 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   padding-top: 6px;
   padding-bottom: 6px;
   background-color: rgba(0, 0, 0, 0.12);
+
   .fragment-reply {
     border-radius: 4px;
     gap: 2px;
+
     ${FragmentBase} {
       font-size: 0.86em;
     }
@@ -183,17 +185,43 @@ export const FragmentBlockquote = styled(motion.blockquote)`
       width: fit-content;
       height: 40px;
     }
+    &.pinned {
+      gap: 0px;
+      ${Text.Custom} {
+        line-height: inherit;
+        font-size: 0.8em;
+      }
+    }
+  }
+  &.pinned-or-reply-message {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 4px;
+    border-radius: 3px;
+    height: 46px;
+    width: 100%;
+    gap: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    background: var(--rlm-overlay-hover);
+    ${FragmentImage} {
+      border-radius: 2px;
+      height: 36px !important;
+    }
   }
   &:hover:not([disabled]) {
     transition: var(--transition);
-    /* background-color: rgba(0, 0, 0, 0.12); */
     cursor: pointer;
   }
 `;
 
-const LineBreak = styled.div`
+export const LineBreak = styled.div`
   width: 100%;
-  height: 6px;
+  height: 4px;
   margin: 0;
   padding: 0;
 `;
@@ -287,13 +315,13 @@ export const renderFragment = (
       );
     case 'link':
       return (
-        <BlockWrapper key={author + index}>
+        <BlockWrapper id={id} key={author + index}>
           <LinkBlock
             draggable={false}
             mode="embed"
             containerWidth={containerWidth}
             link={(fragment as FragmentLinkType).link}
-            id={author + index}
+            id={id}
             by={author}
             onLinkLoaded={onLoaded}
             minWidth={320}
@@ -303,12 +331,12 @@ export const renderFragment = (
 
     case 'image':
       return (
-        <BlockWrapper key={author + index}>
+        <BlockWrapper id={id} key={author + index}>
           <ImageBlock
             draggable={false}
             mode="embed"
             variant="content"
-            id={author + index}
+            id={id}
             image={(fragment as FragmentImageType).image}
             by={author}
             onLoaded={onLoaded}

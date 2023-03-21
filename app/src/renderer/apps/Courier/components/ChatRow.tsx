@@ -6,7 +6,6 @@ import {
   timelineDate,
   MenuItemProps,
 } from '@holium/design-system';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -143,6 +142,7 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={metadata?.image}
+          metadata={metadata}
           canEdit={false}
         />
       ),
