@@ -609,7 +609,6 @@ export class ChatService extends BaseService {
           (message: any) => message && JSON.parse(message)
         );
       }
-      console.log('lastMessage', lastMessage);
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1 ? true : false,

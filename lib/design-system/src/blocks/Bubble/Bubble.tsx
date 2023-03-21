@@ -94,6 +94,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       });
     }, [message]);
 
+    const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
+
     return (
       <Flex
         ref={ref}
@@ -150,8 +152,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               display="inline-flex"
               alignItems="flex-end"
               justifyContent="flex-end"
-              minWidth="114px"
-              flexBasis="114px"
+              minWidth={minBubbleWidth}
+              flexBasis={minBubbleWidth}
               opacity={0.35}
             >
               {isEditing && 'Editing... · '}
