@@ -2,7 +2,20 @@
 
 A desktop environment for Urbit.
 
+## Directory structure
+
 We use yarn workspace to manage the multiple modules.
+
+```
+- app/ - the Realm desktop client
+- onboarding/ – holium.network
+- shared/ - shared code in the monorepo
+- lib/ - outwards facing packages that are published to npmjs.com
+  - conduit/ – SSE event handler
+  - design-system/ – component library for Realm apps
+  - presence/ – cursor streaming for Realm apps
+  - room/ – data streaming for Realm apps
+```
 
 ## Getting started
 

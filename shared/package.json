@@ -1,0 +1,17 @@
+{
+  "name": "@holium/shared",
+  "version": "1.0.0",
+  "main": "dist/holium-shared.cjs.js",
+  "module": "dist/holium-shared.esm.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "postinstall": "preconstruct dev"
+  },
+  "dependencies": {
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@preconstruct/cli": "2.2.1"
+  }
+}

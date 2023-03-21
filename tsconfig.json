@@ -3,6 +3,7 @@
   "include": [
     ".eslintrc.js",
     "app",
+    "shared",
     "lib/conduit",
     "lib/design-system",
     "lib/presence/code",

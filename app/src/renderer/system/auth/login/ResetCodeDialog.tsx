@@ -10,7 +10,7 @@ import {
   TextInput,
   Spinner,
 } from '@holium/design-system';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { ShellActions } from 'renderer/logic/actions/shell';

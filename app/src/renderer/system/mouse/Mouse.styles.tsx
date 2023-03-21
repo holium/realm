@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { bgIsLightOrDark } from 'os/lib/color';
-import { Position } from 'os/types';
+import { Position } from '@holium/shared';
 
 export const CursorLabel = styled(motion.div)<{
   position: Position;

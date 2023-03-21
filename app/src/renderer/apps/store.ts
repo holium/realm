@@ -20,7 +20,7 @@ import {
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
-import { Dimensions } from 'os/types';
+import { Dimensions } from '@holium/shared';
 
 const TrayAppCoords = types.model({
   left: types.number,

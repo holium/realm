@@ -8,7 +8,7 @@ import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
