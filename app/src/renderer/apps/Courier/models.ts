@@ -19,6 +19,7 @@ export const ChatMetadataModel = types.model({
   description: types.maybe(types.string),
   image: types.maybe(types.string),
   creator: types.string,
+  peer: types.maybe(types.string),
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
 });
@@ -171,6 +172,9 @@ export const Chat = types
     },
     isHost(ship: string) {
       return self.host === ship;
+    },
+    get noPeer() {
+      return self.type === 'dm' && self.peers.length === 1;
     },
   }))
   .actions((self) => ({

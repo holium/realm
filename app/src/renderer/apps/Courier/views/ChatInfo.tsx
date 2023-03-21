@@ -166,6 +166,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       peers={patps}
       size={48}
       image={image}
+      metadata={metadata}
       canEdit={amHost && canUpload}
       onUpload={() => {
         if (!containerRef.current) return;

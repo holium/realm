@@ -60,6 +60,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
       path={path}
       peers={peers.map((p) => p.ship)}
       image={metadata?.image}
+      metadata={metadata}
       canEdit={false}
     />
   );
@@ -111,6 +112,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const containerWidth = dimensions.width - 24;
 
+  let subtitle;
+  if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
+    subtitle = `${selectedChat.peers.length} members`;
+  }
+
   return (
     <>
       <Flex
@@ -124,11 +130,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           onBack={() => setSubroute('inbox')}
           hasMenu
           avatar={chatAvatarEl}
-          subtitle={
-            selectedChat.peers.length > 1 && selectedChat.type !== 'dm'
-              ? `${selectedChat.peers.length} members`
-              : undefined
-          }
+          subtitle={subtitle}
         />
         <Flex
           initial={{ opacity: 0 }}

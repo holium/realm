@@ -39,6 +39,7 @@ export type ChatPathMetadata = {
   creator: string;
   timestamp: string;
   reactions?: string;
+  peer?: string; // if type is dm, this is the peer
 };
 
 const parseMetadata = (metadata: string) => {
@@ -859,7 +860,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'send-message': {
           path: path,
@@ -880,7 +881,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'pin-message': {
           'msg-id': msgId,
@@ -901,7 +902,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'clear-pinned-messages': {
           path: path,
@@ -920,7 +921,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'edit-message': {
           'msg-id': msgId,
@@ -942,7 +943,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'delete-message': {
           'msg-id': msgId,
@@ -963,7 +964,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'delete-backlog': {
           path,
@@ -985,9 +986,17 @@ export class ChatService extends BaseService {
     metadata: ChatPathMetadata
   ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
+    let dmPeer = '';
+    if (type === 'dm') {
+      // store the peer in metadata in the case the peer leaves
+      dmPeer =
+        peers.filter((p) => p !== `~${this.core.conduit?.ship}`)[0] || '';
+      metadata.peer = dmPeer;
+    }
+    console.log('createChat', peers, type, metadata);
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'create-chat': {
@@ -1024,7 +1033,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'pin-chat': {
@@ -1053,7 +1062,7 @@ export class ChatService extends BaseService {
     console.log('editChatMetadata', path, invites, peersGetBacklog);
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'edit-chat': {
@@ -1077,7 +1086,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'add-ship-to-chat': {
@@ -1098,7 +1107,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'remove-ship-from-chat': {
@@ -1129,7 +1138,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'remove-ship-from-chat': {

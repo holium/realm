@@ -12,6 +12,7 @@ type ChatAvatarProps = {
   path: string;
   image?: string;
   canEdit?: boolean;
+  metadata?: any;
   size?: number;
   peers: string[];
   onUpload?: (evt: any) => void;
@@ -23,6 +24,7 @@ export const ChatAvatar = ({
   path,
   peers,
   image,
+  metadata,
   onUpload,
   canEdit = false,
   size = 28,
@@ -33,7 +35,8 @@ export const ChatAvatar = ({
 
   if (type === 'dm') {
     // 1-1 chat
-    const patp = peers.map((p) => p).find((p) => p !== window.ship);
+    let patp = peers.map((p) => p).find((p) => p !== window.ship);
+    if (!patp) patp = metadata.peer;
     if (!patp) return null;
 
     const { avatar, color: sigilColor } = title
