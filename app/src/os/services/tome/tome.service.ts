@@ -2,13 +2,14 @@ import { BaseService } from '../base.service';
 import { Realm } from '../../index';
 import { IpcMainInvokeEvent, ipcMain, ipcRenderer } from 'electron';
 import { TomeApi } from '../../api/tome';
-import { TomeOptions } from './models/types';
+import { StoreOptions, TomeOptions } from './models/types';
 import { SpacesApi } from '../../api/spaces';
 import { Tome } from './models/tome';
 
 export class TomeService extends BaseService {
   handlers = {
     'realm.tome.initTome': this.initTome,
+    'realm.tome.initKeyValueStore': this.initKeyValueStore,
   };
 
   static preload = {
@@ -17,6 +18,13 @@ export class TomeService extends BaseService {
         'realm.tome.initTome',
         urbit,
         app,
+        options
+      );
+    },
+    initKeyValueStore: async (tome: Tome, options?: StoreOptions) => {
+      return await ipcRenderer.invoke(
+        'realm.tome.initKeyValueStore',
+        tome,
         options
       );
     },
@@ -101,4 +109,10 @@ export class TomeService extends BaseService {
     }
     return new Tome(false, { app: appName, tomeShip: 'zod', ourShip: 'zod' });
   }
+
+  async initKeyValueStore(
+    _event: IpcMainInvokeEvent,
+    tome: Tome,
+    options?: StoreOptions
+  ) {}
 }

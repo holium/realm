@@ -44,7 +44,6 @@ export interface StoreOptions {
   permissions?: Perm;
   preload?: boolean;
   onReadyChange?: (ready: boolean) => void;
-  onLoadChange?: (loaded: boolean) => void;
   onWriteChange?: (write: boolean) => void;
   onAdminChange?: (admin: boolean) => void;
   onDataChange?: (data: any) => void;
@@ -62,7 +61,6 @@ export interface InitStoreOptions {
   ourShip?: string;
   locked?: boolean;
   inRealm?: boolean;
-  preload?: boolean;
   onReadyChange?: (ready: boolean) => void;
   onLoadChange?: (loaded: boolean) => void;
   onWriteChange?: (write: boolean) => void;

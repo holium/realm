@@ -1,20 +1,40 @@
 /*
   Classes returned by `initTome` for direct use by external apps.
-  These dispatch the relevant IPC calls to Realm.
+  These simply dispatch the relevant IPC calls to Realm.
 */
-import { StoreOptions, InitStoreOptions, Perm } from './types';
+import {
+  InviteLevel,
+  StoreType,
+  Value,
+  Content,
+  SubscribeUpdate,
+  FeedlogUpdate,
+  FeedlogEntry,
+  Perm,
+  StoreOptions,
+  TomeOptions,
+  InitStoreOptions,
+} from './types';
+import {
+  agent,
+  tomeMark,
+  kvMark,
+  feedMark,
+  kvThread,
+  feedThread,
+} from './constants';
 
 export class Tome {
   protected urbit: boolean;
 
-  protected tomeShip: string | undefined;
-  protected ourShip: string | undefined;
-  protected space: string | undefined;
-  protected spaceForPath: string | undefined; // space name as woad (encoded)
-  protected app: string | undefined;
-  protected perm: Perm | undefined;
-  protected locked: boolean | undefined; // if true, Tome is locked to the initial ship and space.
-  protected inRealm: boolean | undefined;
+  protected tomeShip: string;
+  protected ourShip: string;
+  protected space?: string;
+  protected spaceForPath?: string; // space name as woad (encoded)
+  protected app: string;
+  protected perm?: Perm;
+  protected locked?: boolean; // if true, Tome is locked to the initial ship and space.
+  protected inRealm?: boolean;
 
   // maybe use a different (sub) type here?
   constructor(urbit: boolean, options?: InitStoreOptions) {
@@ -54,40 +74,55 @@ export class Tome {
    * defaults to the Tome's permissions, `bucket` to `'def'`, and `preload` to `true`.
    * @returns A `KeyValueStore`.
    */
-  // public async keyvalue(options: StoreOptions = {}) {
-  //   if (this.urbit) {
-  //     // TODO do as IPC call
-  //     //return (await this._initStore(options, 'kv', false)) as KeyValueStore;
-  //   }
-  //   return new KeyValueStore({
-  //     app: this.app,
-  //     bucket: options.bucket ?? 'def',
-  //     preload: options.preload ?? true,
-  //     onDataChange: options.onDataChange,
-  //     onLoadChange: options.onLoadChange,
-  //     type: 'kv',
-  //   });
-  // }
+  public async keyvalue(options: StoreOptions = {}) {
+    return await window.electron.os.tome.initKeyValueStore(this, options);
+  }
 }
 
-// export class DataStore extends Tome {
-//   protected preload: boolean;
-//   protected loaded: boolean;
-//   protected ready: boolean; // if false, we are switching spaces.
-//   protected onReadyChange: (ready: boolean) => void;
-//   protected onLoadChange: (loaded: boolean) => void;
-//   protected onWriteChange: (write: boolean) => void;
-//   protected onAdminChange: (admin: boolean) => void;
-//   protected onDataChange: (data: any) => void;
+export class DataStore extends Tome {
+  protected ready?: boolean; // if false, we are switching spaces.
+  protected onReadyChange?: (ready: boolean) => void;
+  protected onWriteChange?: (write: boolean) => void;
+  protected onAdminChange?: (admin: boolean) => void;
+  protected onDataChange?: (data: any) => void;
 
-//   protected cache: Map<string, Value>; // cache key-value pairs
+  protected cache: Map<string, Value>; // cache key-value pairs
 
-//   protected bucket: string;
-//   protected write: boolean;
-//   protected admin: boolean;
+  protected bucket?: string;
+  protected write?: boolean;
+  protected admin?: boolean;
 
-//   protected type: StoreType;
-// }
+  protected type?: StoreType;
+
+  constructor(urbit: boolean, options?: InitStoreOptions) {
+    super(urbit, options);
+    const {
+      bucket,
+      write,
+      admin,
+      onReadyChange,
+      onWriteChange,
+      onAdminChange,
+      onDataChange,
+      type,
+    } = options ?? {};
+    this.bucket = bucket;
+    this.type = type;
+    this.write = write;
+    this.admin = admin;
+    this.onDataChange = onDataChange;
+    this.onReadyChange = onReadyChange;
+    this.onWriteChange = onWriteChange;
+    this.onAdminChange = onAdminChange;
+    this.cache = new Map<string, Value>();
+    if (urbit) {
+      if (this.inRealm) {
+        this.watchCurrentSpace();
+      }
+      this.setReady(true);
+    }
+  }
+}
 
 // export class KeyValueStore extends DataStore {
 //   constructor(options?: InitStoreOptions) {
