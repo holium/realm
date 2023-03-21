@@ -153,6 +153,8 @@
       all-peers
     |=  [s=ship role=@tas]
     (create-path-db-poke s pathrow all-peers)
+  =/  status  
+  =.  cards  (snoc cards [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%send-message chat-path ~[[[%custom "{'data': {'status': '~lomder-librun created the chat'}}"] ~ ~]] ~])])
   [cards state]
 ::
 ++  edit-chat
