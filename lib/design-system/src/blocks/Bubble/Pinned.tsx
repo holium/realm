@@ -1,12 +1,13 @@
-import { Flex, BoxProps, capitalizeFirstLetter } from '../..';
+import { Flex, Box, BoxProps, capitalizeFirstLetter } from '../..';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlock,
   FragmentPlain,
   FragmentBlockquote,
   renderFragment,
+  FragmentImage,
 } from './fragment-lib';
-import { FragmentType, TEXT_TYPES } from './Bubble.types';
+import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 // import { chatDate } from '../../util/date';
 
 export type PinnedProps = {
@@ -24,15 +25,34 @@ export const PinnedMessage = (props: PinnedProps) => {
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
   let pinnedContent = null;
+  let mediaContent = null;
   if (
-    !TEXT_TYPES.includes(fragmentType) &&
-    fragmentType !== 'image' &&
-    fragmentType !== 'reply'
+    (!TEXT_TYPES.includes(fragmentType) &&
+      fragmentType !== 'image' &&
+      fragmentType !== 'reply') ||
+    fragmentType === 'code'
   ) {
     pinnedContent = (
-      <FragmentPlain id={id}>
+      <FragmentPlain mt={0} id={id}>
         {capitalizeFirstLetter(fragmentType)}
       </FragmentPlain>
+    );
+  } else if (fragmentType === 'image') {
+    pinnedContent = (
+      <FragmentPlain mt={0} id={id}>
+        {capitalizeFirstLetter(fragmentType)}
+      </FragmentPlain>
+    );
+    const link: string = (message[0] as FragmentImageType).image;
+    mediaContent = (
+      <Box>
+        <FragmentImage
+          id={'pin-image-preview'}
+          src={link}
+          style={{ display: 'block' }}
+          draggable={false}
+        />
+      </Box>
     );
   } else {
     pinnedContent = renderFragment(id, message[0], 0, author);
@@ -42,18 +62,18 @@ export const PinnedMessage = (props: PinnedProps) => {
     <Flex id={id} key={id} width="100%" onClick={onClick}>
       <FragmentBlock id={id}>
         <FragmentBlockquote
+          className="pinned-or-reply-message"
           id={id}
           style={{
-            paddingTop: 6,
-            paddingBottom: 6,
-            borderRadius: 4,
-            marginLeft: 0,
-            marginRight: 0,
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
-            background: 'var(--rlm-overlay-hover)',
           }}
         >
-          <Flex flexDirection="column" className="fragment-reply">
+          {mediaContent}
+          <Flex
+            gap={0}
+            flexDirection="column"
+            className="fragment-reply pinned"
+          >
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>

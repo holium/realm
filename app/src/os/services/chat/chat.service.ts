@@ -39,6 +39,7 @@ export type ChatPathMetadata = {
   creator: string;
   timestamp: string;
   reactions?: string;
+  peer?: string; // if type is dm, this is the peer
 };
 
 const parseMetadata = (metadata: string) => {
@@ -63,7 +64,6 @@ export class ChatService extends BaseService {
   handlers = {
     'realm.chat.get-chat-list': this.getChatList,
     'realm.chat.get-chat-log': this.getChatLog,
-    'realm.chat.get-chat-reactions': this.getChatReactions,
     'realm.chat.get-chat-peers': this.getChatPeers,
     'realm.chat.get-reply-to': this.getReplyToMessage,
     'realm.chat.send-message': this.sendMessage,
@@ -92,8 +92,6 @@ export class ChatService extends BaseService {
       path: string,
       params?: { start: number; amount: number }
     ) => await ipcRenderer.invoke('realm.chat.get-chat-log', path, params),
-    getChatReactions: async (path: string, msgId: string) =>
-      ipcRenderer.invoke('realm.chat.get-chat-reactions', path, msgId),
     getChatReplyTo: async (msgId: string) =>
       ipcRenderer.invoke('realm.chat.get-reply-to', msgId),
     getChatPeers: async (path: string) =>
@@ -237,8 +235,24 @@ export class ChatService extends BaseService {
       this.insertPaths(data.tables.paths);
       this.insertPeers(data.tables.peers);
     } else if (Array.isArray(data)) {
-      console.log('db update', data);
-      data.forEach(this.handleDBChange);
+      console.log('db update array', data);
+      if (
+        data.length > 1 &&
+        data[0].type === 'add-row' &&
+        data[0].table === 'messages'
+      ) {
+        // insert multi fragment messages
+        // TODO find a way to handle multiple msg-ids in one db update
+        // if it is even possible
+        const messages = data.map(
+          (row) => (row as AddRow).row as MessagesRow
+        ) as MessagesRow[];
+        this.insertMessages(messages);
+        const msg = this.getChatMessage(messages[0]['msg-id']);
+        this.sendChatUpdate('message-received', msg);
+      } else {
+        data.forEach(this.handleDBChange);
+      }
     } else {
       console.log(data);
     }
@@ -408,7 +422,6 @@ export class ChatService extends BaseService {
         ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @invites, @created_at, @updated_at)`
     );
     const insertMany = this.db.transaction((paths) => {
-      console.log(paths);
       for (const path of paths)
         insert.run({
           path: path.path,
@@ -554,7 +567,7 @@ export class ChatService extends BaseService {
       ), chat_with_messages AS (
         SELECT
             path,
-            contents lastMessage,
+            json_object('contents', contents, 'id', msg_id) lastMessage,
             sender lastSender,
             m_created_at created_at,
             m_updated_at updated_at
@@ -589,16 +602,19 @@ export class ChatService extends BaseService {
     const result = query.all();
 
     return result.map((row) => {
+      // deserialize the last message
+      const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
+      if (lastMessage && lastMessage.contents) {
+        lastMessage.contents = JSON.parse(lastMessage.contents).map(
+          (message: any) => message && JSON.parse(message)
+        );
+      }
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
-        lastMessage: row.lastMessage
-          ? JSON.parse(row.lastMessage).map(
-              (message: any) => message && JSON.parse(message)
-            )
-          : null,
+        lastMessage,
       };
     });
   }
@@ -728,31 +744,39 @@ export class ChatService extends BaseService {
             realm_chat.created_at DESC,
             realm_chat.msg_id DESC,
             realm_chat.msg_part_id
-      )
-           SELECT
-        formed_fragments.path,
-        formed_fragments.msg_id id,
-        json_group_array(json_extract(content, '$')) as contents,
-        formed_fragments.sender,
-        json_extract(formed_fragments.reply_to, '$."path"') replyToMsgPath,
-        json_extract(formed_fragments.reply_to, '$."msg-id"') replyToMsgId,
-        formed_fragments.metadata,
-        CASE
-            WHEN messages.sender IS NOT NULL THEN json_group_array(
+        ),
+        reactions AS (
+        SELECT
+            json_extract(messages.reply_to, '$."msg-id"') reply_msg_id,
+            json_group_array(
                 json_object(
-                    'msgId', messages.msg_id, 
-                    'by', messages.sender, 
+                    'msgId', messages.msg_id,
+                    'by', messages.sender,
                     'emoji', messages.content_data
                     )
-                )
-            WHEN messages.sender IS NULL THEN NULL
-        END reactions,
-        MAX(formed_fragments.created_at) createdAt,
-        MAX(formed_fragments.updated_at) updatedAt
-      FROM formed_fragments
-      LEFT OUTER JOIN messages ON json_extract(messages.reply_to, '$."msg-id"') = formed_fragments.msg_id AND content_type = 'react'
-      GROUP BY formed_fragments.msg_id
-      ORDER BY createdAt;
+            ) reacts
+            FROM messages
+            WHERE content_type = 'react'
+            GROUP BY reply_msg_id
+        )
+        SELECT
+          formed_fragments.path,
+          formed_fragments.msg_id id,
+          json_group_array(json_extract(content, '$')) as contents,
+          formed_fragments.sender,
+          json_extract(formed_fragments.reply_to, '$."path"') replyToMsgPath,
+          json_extract(formed_fragments.reply_to, '$."msg-id"') replyToMsgId,
+          formed_fragments.metadata,
+          CASE
+              WHEN reactions.reacts IS NOT NULL THEN reacts
+              WHEN reactions.reacts IS NULL THEN NULL
+          END reactions,
+          MAX(formed_fragments.created_at) createdAt,
+          MAX(formed_fragments.updated_at) updatedAt
+        FROM formed_fragments
+        LEFT OUTER JOIN reactions ON reactions.reply_msg_id = formed_fragments.msg_id
+        GROUP BY formed_fragments.msg_id
+        ORDER BY createdAt;
     `);
     const result = query.all(path);
     return result.map((row) => {
@@ -763,24 +787,6 @@ export class ChatService extends BaseService {
         reactions: row.reactions ? JSON.parse(row.reactions) : [],
       };
     });
-  }
-
-  getChatReactions(_evt: any, path: string, replyId: string) {
-    if (!this.db) throw new Error('No db connection');
-    const query = this.db.prepare(`
-      SELECT
-        json_group_array(json_object('msgId', msg_id, 'by', sender, 'emoji', content_data)) reactions
-      FROM messages
-      WHERE path = ?
-        AND json_extract(reply_to, '$."msg-id"') = ?
-        AND content_type = 'react'
-    `);
-    const result = query.all(path, replyId);
-    const rows = result.map((row) => {
-      return JSON.parse(row.reactions);
-    });
-    if (rows.length === 0) return [];
-    return rows[0];
   }
 
   getReplyToMessage(_evt: any, replyId: string) {
@@ -857,7 +863,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'send-message': {
           path: path,
@@ -878,7 +884,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'pin-message': {
           'msg-id': msgId,
@@ -899,7 +905,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'clear-pinned-messages': {
           path: path,
@@ -918,7 +924,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'edit-message': {
           'msg-id': msgId,
@@ -940,7 +946,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'delete-message': {
           'msg-id': msgId,
@@ -961,7 +967,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       json: {
         'delete-backlog': {
           path,
@@ -983,9 +989,17 @@ export class ChatService extends BaseService {
     metadata: ChatPathMetadata
   ) {
     if (!this.core.conduit) throw new Error('No conduit connection');
+    let dmPeer = '';
+    if (type === 'dm') {
+      // store the peer in metadata in the case the peer leaves
+      dmPeer =
+        peers.filter((p) => p !== `~${this.core.conduit?.ship}`)[0] || '';
+      metadata.peer = dmPeer;
+    }
+    console.log('createChat', peers, type, metadata);
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'create-chat': {
@@ -1022,7 +1036,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'pin-chat': {
@@ -1051,7 +1065,7 @@ export class ChatService extends BaseService {
     console.log('editChatMetadata', path, invites, peersGetBacklog);
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'edit-chat': {
@@ -1075,7 +1089,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'add-ship-to-chat': {
@@ -1096,7 +1110,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'remove-ship-from-chat': {
@@ -1127,7 +1141,7 @@ export class ChatService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
       app: 'realm-chat',
-      mark: 'action',
+      mark: 'chat-action',
       reaction: '',
       json: {
         'remove-ship-from-chat': {

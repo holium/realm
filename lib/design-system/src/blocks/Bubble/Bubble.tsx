@@ -1,7 +1,7 @@
 import { forwardRef, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
-import { FragmentBlock, renderFragment } from './fragment-lib';
+import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
 import { FragmentReactionType, FragmentType } from './Bubble.types';
 import { chatDate } from '../../util/date';
@@ -20,6 +20,8 @@ export type BubbleProps = {
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
   containerWidth?: number;
+  isPrevGrouped?: boolean; // should we show the author if multiple messages by same author?
+  isNextGrouped?: boolean; // should we show the author if multiple messages by same author?
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
@@ -40,6 +42,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       isEditing,
       containerWidth,
       reactions = [],
+      isPrevGrouped,
+      isNextGrouped,
       onLoaded,
       onReaction,
       // onReplyClick = () => {},
@@ -67,13 +71,30 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const fragments = useMemo(() => {
       return message?.map((fragment, index) => {
+        // if the previous fragment was a link or a code block, we need to add a space
+        // to the beginning of this fragment
+        let lineBreak;
+        if (index > 0) {
+          const previousType = Object.keys(message[index - 1])[0];
+          if (
+            previousType === 'link' ||
+            previousType === 'code' ||
+            previousType === 'image'
+          ) {
+            lineBreak = <LineBreak />;
+          }
+        }
+
         return (
           <span id={id} key={`${id}-index-${index}`}>
+            {lineBreak}
             {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
           </span>
         );
       });
     }, [message]);
+
+    const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
     return (
       <Flex
@@ -85,6 +106,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       >
         <BubbleStyle
           id={id}
+          isPrevGrouped={isPrevGrouped}
+          isNextGrouped={isNextGrouped}
           style={
             isOur
               ? {
@@ -97,7 +120,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           }
           className={isOur ? 'bubble-our' : ''}
         >
-          {!isOur && (
+          {!isOur && !isPrevGrouped && (
             <BubbleAuthor
               style={{
                 color: authorColorDisplay,
@@ -129,9 +152,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               display="inline-flex"
               alignItems="flex-end"
               justifyContent="flex-end"
-              minWidth="114px"
-              flexBasis="114px"
-              opacity={0.5}
+              minWidth={minBubbleWidth}
+              flexBasis={minBubbleWidth}
+              opacity={0.35}
             >
               {isEditing && 'Editing... · '}
               {isEdited && !isEditing && 'Edited · '}

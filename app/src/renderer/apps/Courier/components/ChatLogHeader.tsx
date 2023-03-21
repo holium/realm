@@ -9,6 +9,7 @@ import {
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useServices } from 'renderer/logic/store';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -32,12 +33,14 @@ export const ChatLogHeader = ({
   const { ship } = useServices();
   const { selectedChat, setSubroute } = useChatStore();
 
+  const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
+
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !ship) return menu;
     const isAdmin = selectedChat.isHost(ship.patp);
     menu.push({
-      id: 'chat-info',
+      id: `${chatLogId}-chat-info`,
       icon: 'Info',
       label: 'Info',
       disabled: false,
@@ -47,7 +50,7 @@ export const ChatLogHeader = ({
       },
     });
     menu.push({
-      id: 'mute-chat',
+      id: `${chatLogId}-mute-chat`,
       icon: 'NotificationOff',
       label: 'Mute',
       disabled: true,
@@ -57,7 +60,7 @@ export const ChatLogHeader = ({
     });
     if (selectedChat?.hidePinned) {
       menu.push({
-        id: 'show-hidden-pinned',
+        id: `${chatLogId}-show-hidden-pinned`,
         icon: 'EyeOn',
         label: 'Show hidden pins',
         disabled: false,
@@ -69,7 +72,7 @@ export const ChatLogHeader = ({
     }
     if (isAdmin) {
       menu.push({
-        id: 'clear-history',
+        id: `${chatLogId}-clear-history`,
         icon: 'ClearHistory',
         section: 2,
         label: 'Clear history',
@@ -82,7 +85,7 @@ export const ChatLogHeader = ({
     }
 
     menu.push({
-      id: 'leave-chat',
+      id: `${chatLogId}-leave-chat`,
       icon: isAdmin ? 'Trash' : 'Logout',
       section: 2,
       iconColor: '#ff6240',
@@ -91,6 +94,12 @@ export const ChatLogHeader = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
+        ShellActions.setBlur(true);
+        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+          path,
+          amHost: isAdmin.toString(),
+          our: ship.patp,
+        });
       },
     });
     return menu.filter(Boolean) as MenuItemProps[];

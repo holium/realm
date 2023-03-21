@@ -142,7 +142,7 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
             <Flex flexDirection={'column'} gap={10}>
               {apps.map((item, index) => (
                 <AppRow
-                  key={index}
+                  key={`app-${item.id}-${index}`}
                   app={item}
                   descriptionWidth={dimensions.width - 225}
                   actionRenderer={() => (

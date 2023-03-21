@@ -54,11 +54,16 @@ interface AppDetailProps {
 interface KPIProps {
   title: string;
   value: string | React.ReactNode;
+  hover?: string;
 }
 const KPI: FC<KPIProps> = (props: KPIProps) => {
   let valueContent: React.ReactNode;
   if (typeof props.value === 'string') {
-    valueContent = <Text flex={3}>{props.value}</Text>;
+    valueContent = (
+      <Text flex={3} title={props.hover}>
+        {props.value}
+      </Text>
+    );
   } else {
     valueContent = <Flex flex={3}>{props.value}</Flex>;
   }
@@ -159,7 +164,15 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
         {app.href && app.href.glob && app.href.glob['glob-reference'] && (
           <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
         )}
-        {isInstalled && deskHash && <KPI title="Desk Hash" value={deskHash} />}
+        {isInstalled && deskHash && (
+          <KPI
+            title="Desk Hash"
+            hover={deskHash}
+            value={`${deskHash.split('.')[0]}...${
+              deskHash.split('.')[deskHash.split('.').length - 1]
+            }`}
+          />
+        )}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
@@ -331,7 +344,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
           x: 0,
           y: 0,
           width: 600,
-          height: 480,
+          height: 520,
         },
         desktopDimensions
       ),

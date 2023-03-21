@@ -1,9 +1,19 @@
 import styled from 'styled-components';
-import { Text, Box } from '../..';
+import { Text, Box, BoxProps } from '../..';
 import { BlockStyle } from '../Block/Block';
-import { FragmentBlockquote, FragmentShip, BlockWrapper } from './fragment-lib';
+import {
+  FragmentBlockquote,
+  FragmentShip,
+  BlockWrapper,
+  CodeWrapper,
+} from './fragment-lib';
 
-export const BubbleStyle = styled(Box)`
+export type BubbleStyleProps = {
+  isPrevGrouped?: boolean;
+  isNextGrouped?: boolean;
+} & BoxProps;
+
+export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   display: inline-flex;
   flex-direction: column;
   width: auto;
@@ -16,17 +26,46 @@ export const BubbleStyle = styled(Box)`
   max-width: 100%;
   color: var(--rlm-text-color);
   background: var(--rlm-input-color);
-  border-radius: 9px 9px 9px 0px;
+  border-radius: ${(props) => {
+    if (props.isPrevGrouped && props.isNextGrouped) {
+      return '0px 12px 12px 0px';
+    }
+    if (props.isPrevGrouped) {
+      return '0px 12px 12px 12px';
+    }
+    // if (props.isNextGrouped) {
+    //     return '12px 0px 12px 12px';
+    // }
+    return '12px 12px 12px 0px';
+  }};
   transition: width 1s ease-in-out;
   &.bubble-our {
     background: var(--rlm-intent-caution-color);
-    border-radius: 12px 12px 0px 12px !important;
+    border-radius: ${(props) => {
+      if (props.isPrevGrouped && props.isNextGrouped) {
+        return '12px 0px 0px 12px';
+      }
+      if (props.isPrevGrouped) {
+        return '12px 0px 12px 12px';
+      }
+      if (props.isNextGrouped) {
+        return '12px 12px 0px 12px';
+      }
+      return '12px 12px 0px 12px';
+    }} !important;
     ${Text.Custom} {
       color: #ffffff !important;
     }
     ${FragmentBlockquote} {
       color: #ffffff;
       border-left: 2px solid #ffffff70;
+    }
+    ${CodeWrapper} {
+      background-color: rgba(0, 0, 0, 0.12);
+      &:hover {
+        transition: var(--transition);
+        background-color: rgba(0, 0, 0, 0.15);
+      }
     }
     ${FragmentShip} {
       background: #ffffff30;

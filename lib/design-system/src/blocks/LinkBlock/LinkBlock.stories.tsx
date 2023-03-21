@@ -1,7 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
 import { LinkBlock } from './LinkBlock';
-import { TweetBlock } from './TweetBlock';
 
 export default {
   component: LinkBlock,

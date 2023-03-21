@@ -71,8 +71,10 @@ export const SpacesStore = types
         (space: SpaceModelType) => space.type !== 'our'
       );
     },
-    getOurSpace() {
-      // TODO get our space by type='our'
+    get ourSpace() {
+      return Array.from(self.spaces.values()).filter(
+        (space: SpaceModelType) => space.type === 'our'
+      )[0];
     },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our.path) {

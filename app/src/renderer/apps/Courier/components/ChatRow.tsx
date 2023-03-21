@@ -5,8 +5,8 @@ import {
   Text,
   timelineDate,
   MenuItemProps,
+  TEXT_TYPES,
 } from '@holium/design-system';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
@@ -30,7 +30,6 @@ type ChatRowProps = {
 
 export const ChatRowPresenter = ({
   path,
-  title,
   peers,
   timestamp,
   isAdmin,
@@ -54,6 +53,7 @@ export const ChatRowPresenter = ({
   const isMuted = false; // TODO
 
   const contextMenuOptions = useMemo(() => {
+    if (!ship) return [];
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
@@ -107,7 +107,8 @@ export const ChatRowPresenter = ({
         ShellActions.setBlur(true);
         ShellActions.openDialogWithStringProps('leave-chat-dialog', {
           path,
-          title,
+          amHost: isAdmin.toString(),
+          our: ship.patp,
         });
       },
     });
@@ -143,6 +144,7 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={metadata?.image}
+          metadata={metadata}
           canEdit={false}
         />
       ),
@@ -150,8 +152,42 @@ export const ChatRowPresenter = ({
   );
 
   const chat = inbox.find((c) => c.path === path);
-  const lastMessageUpdated: { [key: string]: any } =
-    chat && chat.lastMessage && chat.lastMessage[0];
+  const lastMessageUpdated: React.ReactNode = useMemo(
+    () => (
+      <span>
+        {chat &&
+          chat.lastMessage &&
+          chat.lastMessage.contents.map(
+            (content: { [key: string]: string }, idx: number) => {
+              let type = Object.keys(content)[0];
+              const value = content[type];
+              if (TEXT_TYPES.includes(type)) {
+                return (
+                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
+                    {value}
+                  </span>
+                );
+              } else {
+                if (type === 'code') type = 'code block';
+                return (
+                  <span
+                    style={{
+                      marginLeft: 2,
+                      marginRight: 2,
+                      fontStyle: 'italic',
+                    }}
+                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
+                  >
+                    {type}
+                  </span>
+                );
+              }
+            }
+          )}
+      </span>
+    ),
+    [chat?.lastMessage?.id]
+  );
 
   return (
     <Row
@@ -208,9 +244,7 @@ export const ChatRowPresenter = ({
               exit={{ opacity: 0 }}
               fontSize={2}
             >
-              {lastMessageUpdated
-                ? Object.values(lastMessageUpdated)[0]
-                : 'No messages yet'}
+              {lastMessageUpdated ? lastMessageUpdated : 'No messages yet'}
             </Text.Custom>
           </Flex>
         </Flex>

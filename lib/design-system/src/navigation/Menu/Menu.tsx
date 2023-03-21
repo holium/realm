@@ -197,6 +197,9 @@ export const Menu = ({
                   duration: 0.1,
                 },
               }}
+              onClick={(evt) => {
+                evt.stopPropagation();
+              }}
               gap={type === 'options' ? 2 : 0}
               style={{
                 y: anchorPoint.y,

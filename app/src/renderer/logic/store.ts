@@ -307,11 +307,7 @@ export function useCore() {
   return store;
 }
 
-OSActions.onLogin((_event: any) => {
-  SoundActions.playLogin();
-  const shipColor = servicesStore.desktop.mouseColor;
-  if (shipColor) DesktopActions.setMouseColor(shipColor);
-});
+OSActions.onLogin(SoundActions.playLogin);
 
 OSActions.onConnected(
   (

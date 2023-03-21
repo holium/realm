@@ -1,4 +1,10 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
+import {
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -11,12 +17,14 @@ import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 
 type ChatMessageProps = {
+  isPrevGrouped: boolean;
+  isNextGrouped: boolean;
   containerWidth: number;
   replyTo?: ChatMessageType;
   message: ChatMessageType;
   canReact: boolean;
   ourColor: string;
-  onLoad: () => void;
+  measure: () => void;
 };
 
 export const ChatMessagePresenter = ({
@@ -25,13 +33,18 @@ export const ChatMessagePresenter = ({
   message,
   canReact,
   ourColor,
-  onLoad,
+  isPrevGrouped,
+  isNextGrouped,
+  measure,
 }: ChatMessageProps) => {
   const { ship, friends } = useServices();
   const { selectedChat } = useChatStore();
   const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
+
+  useLayoutEffect(measure);
+
   useEffect(() => {
     if (!ship) return;
     window.ship = ship.patp;
@@ -49,9 +62,6 @@ export const ChatMessagePresenter = ({
     (payload: OnReactionPayload) => {
       if (payload.action === 'add') {
         selectedChat?.sendReaction(message.id, payload.emoji);
-        if (message.reactions.length === 0) {
-          onLoad();
-        }
       } else {
         if (!payload.reactId) {
           console.warn('No reactId', payload);
@@ -60,13 +70,19 @@ export const ChatMessagePresenter = ({
         selectedChat?.deleteReaction(message.id, payload.reactId);
       }
     },
-    [selectedChat, message, onLoad]
+    [selectedChat, message]
   );
 
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !ship) return menu;
     const isAdmin = selectedChat.isHost(ship.patp);
+    let hasImage = false;
+    msgModel?.contents.forEach((content) => {
+      if (Object.keys(content)[0].includes('image')) {
+        hasImage = true;
+      }
+    });
     if (isAdmin) {
       menu.push({
         id: `${messageRowId}-pin-message`,
@@ -78,6 +94,20 @@ export const ChatMessagePresenter = ({
           selectedChat.setPinnedMessage(message.id);
         },
       });
+    }
+    if (hasImage) {
+      // menu.push({
+      //   id: `${messageRowId}-save-image`,
+      //   icon: 'CloudDownload',
+      //   label: 'Save image',
+      //   disabled: false,
+      //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      //     evt.stopPropagation();
+      //     // selectedChat.saveImage(message.id);
+      //   },
+      // });
+      // TODO if trove is installed
+      // save to trove
     }
     menu.push({
       id: `${messageRowId}-reply-to`,
@@ -126,6 +156,8 @@ export const ChatMessagePresenter = ({
     [message.createdAt]
   );
 
+  const hasEdited = useMemo(() => message.metadata.edited, [message.updatedAt]);
+
   const reactionList = useMemo(
     () => msgModel?.reactions,
     [
@@ -139,17 +171,19 @@ export const ChatMessagePresenter = ({
     <Bubble
       ref={messageRef}
       id={messageRowId}
+      isPrevGrouped={isPrevGrouped}
+      isNextGrouped={isNextGrouped}
       containerWidth={containerWidth}
       isOur={isOur}
       ourShip={ship?.patp}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
-      isEdited={message.metadata?.edited}
+      isEdited={hasEdited}
       author={message.sender}
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}
       sentAt={sentAt}
-      onLoad={onLoad}
+      onLoad={measure}
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
     />

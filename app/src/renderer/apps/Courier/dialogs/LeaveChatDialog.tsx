@@ -6,17 +6,17 @@ import { useChatStore } from '../store';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;
-  title: string;
   [key: string]: any;
 };
 
 const LeaveChatDialogConfigComponent = ({
   path,
-  title,
+  amHost,
+  our,
   ...props
 }: LeaveChatDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
-  const { leaveChat } = useChatStore();
+  const { getChatTitle, leaveChat } = useChatStore();
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
@@ -26,10 +26,15 @@ const LeaveChatDialogConfigComponent = ({
     }
   };
 
+  const amHostBool = amHost === 'true';
+  const chatTitle = getChatTitle(path, our);
+
   return (
     <ConfirmDialog
-      title="Leave chat"
-      description={`Are you sure you want to leave ${title}? Doing this will remove message history from this chat.`}
+      title={amHostBool ? 'Delete chat' : 'Leave chat'}
+      description={`Are you sure you want to ${
+        amHostBool ? 'delete' : 'leave'
+      } the chat ${chatTitle}?`}
       confirmText="Leave"
       loading={loading}
       onConfirm={onConfirm}
@@ -45,7 +50,8 @@ export const LeaveChatDialogConfig: (dialogProps: any) => DialogConfig = (
     component: (props) => (
       <LeaveChatDialogConfigComponent
         path={dialogProps.path}
-        title={dialogProps.title}
+        amHost={dialogProps.amHost}
+        our={dialogProps.our}
         {...props}
       />
     ),

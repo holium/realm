@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, applySnapshot, Instance, types, cast } from 'mobx-state-tree';
+import { flow, Instance, types, cast } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -19,6 +19,7 @@ export const ChatMetadataModel = types.model({
   description: types.maybe(types.string),
   image: types.maybe(types.string),
   creator: types.string,
+  peer: types.maybe(types.string),
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
 });
@@ -72,19 +73,6 @@ export const ChatMessage = types
       if (!self.replyToPath || !self.replyToMsgId) return null;
       return ChatDBActions.getChatReplyTo(self.replyToMsgId);
     },
-    fetchReactions: flow(function* () {
-      try {
-        const reactions = yield ChatDBActions.getChatReactions(
-          self.path,
-          self.id
-        );
-        applySnapshot(self.reactions, reactions);
-        return self.reactions;
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
-    }),
     insertTempReaction(react: ReactionModelType) {
       self.reactions.push({
         emoji: react.emoji,
@@ -133,7 +121,10 @@ export const Chat = types
     // peerRows: types.array(PeerModel),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
-    lastMessage: types.maybeNull(types.array(types.frozen())),
+    lastMessage: types.model({
+      id: types.string,
+      contents: types.array(types.frozen()),
+    }),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -185,6 +176,9 @@ export const Chat = types
     isHost(ship: string) {
       return self.host === ship;
     },
+    get noPeer() {
+      return self.type === 'dm' && self.peers.length === 1;
+    },
   }))
   .actions((self) => ({
     fetchMessages: flow(function* () {
@@ -214,7 +208,6 @@ export const Chat = types
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
-        console.log('sending message', path, fragments);
         yield ChatDBActions.sendMessage(path, fragments);
         self.replyingMsg = null;
         // TODO naive send, should add to local store and update on ack
@@ -236,7 +229,7 @@ export const Chat = types
       }
       self.messages.push(message);
       self.lastSender = message.sender;
-      self.lastMessage = message.contents;
+      self.lastMessage = { contents: message.contents, id: message.id };
     },
     replaceMessage(message: ChatMessageType) {
       const msg = self.messages.find((m) => m.id === message.id);
@@ -247,6 +240,7 @@ export const Chat = types
         );
       }
       msg.updateContents(message.contents, message.updatedAt);
+      self.lastMessage = { contents: message.contents, id: message.id };
       // self.messages.replace([...self.messages, msg]);
     },
     deleteMessage: flow(function* (messageId: string) {

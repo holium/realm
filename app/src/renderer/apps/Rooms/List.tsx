@@ -80,7 +80,7 @@ const RoomsPresenter = () => {
               onClick={async (evt: any) => {
                 evt.stopPropagation();
                 if (roomsManager?.live.room?.rid !== room.rid) {
-                  roomsManager?.enterRoom(room.rid);
+                  roomsManager?.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}

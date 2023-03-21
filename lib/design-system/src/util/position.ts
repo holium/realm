@@ -137,7 +137,7 @@ export const getAnchorPointByElement = (
     default:
       let pointerY = el.clientTop;
       if (position === 'above') {
-        pointerY = pointerY - menuHeight!;
+        pointerY = pointerY - menuHeight;
       }
       // pointer or default
       return { x: offsetX + offset.x, y: pointerY + offset.y };
@@ -231,7 +231,7 @@ export const getAnchorPointByTarget = (
       default:
         let pointerY = event.clientY;
         if (position === 'above') {
-          pointerY = pointerY - menuHeight!;
+          pointerY = pointerY - menuHeight;
         }
         // pointer or default
         return { x: event.clientX + offset.x, y: pointerY + offset.y };
