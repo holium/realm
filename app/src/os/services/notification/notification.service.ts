@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
+import { ipcMain, ipcRenderer, app } from 'electron';
 import { BaseService } from '../base.service';
 import fs from 'fs';
 import path from 'path';
@@ -44,14 +44,10 @@ export class NotificationService extends BaseService {
    * Preload functions to register with the renderer
    */
   static preload = {
-    readNotification: (
-      appTag: string,
-      path?: string,
-    ) => ipcRenderer.invoke('realm.notification.mark-read', appTag, path),
-    dismissNotification: (
-      appTag: string,
-      path?: string,
-    ) => ipcRenderer.invoke('realm.notification.dismiss', appTag, path),
+    readNotification: (appTag: string, path?: string) =>
+      ipcRenderer.invoke('realm.notification.mark-read', appTag, path),
+    dismissNotification: (appTag: string, path?: string) =>
+      ipcRenderer.invoke('realm.notification.dismiss', appTag, path),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -72,9 +68,12 @@ export class NotificationService extends BaseService {
   // ----------------- DB setup -------------------
   // ----------------------------------------------
   async subscribe(ship: Patp) {
-    this.db = new Database(`${app.getPath('userData')}/realm.${ship}/realm.db`, {
-      // verbose: console.log,
-    });
+    this.db = new Database(
+      `${app.getPath('userData')}/realm.${ship}/realm.db`,
+      {
+        // verbose: console.log,
+      }
+    );
     this.db.exec(this.initSql);
     await this.core.conduit?.watch({
       app: 'notif-db',
@@ -85,6 +84,7 @@ export class NotificationService extends BaseService {
     });
 
     const notifications = await this.fetchNotifications();
+    console.log(notifications, 'insertNotifications');
     this.insertNotifications(notifications);
     //console.log('realm-chat unreads', await this.getUnreads(null, 'realm-chat'));
     //console.log(await this.getUnreads(null, 'realm-chat', '/new-messages'));
@@ -252,10 +252,9 @@ export class NotificationService extends BaseService {
         ...row,
         buttons: row.buttons ? JSON.parse(row.buttons) : null,
         metadata: row.metadata ? JSON.parse(row.metadata) : null,
-      }
+      };
     });
   }
-
 
   // ------------------------------
   // ---------- Actions -----------
@@ -264,54 +263,62 @@ export class NotificationService extends BaseService {
   async readNotification(
     _evt: any,
     appTag: string, // if just app is passed in, will mark all notifs from app as "read"
-    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
+    path?: string // if this is also passed in, will only mark notifs with both app and path as "read"
   ) {
     // default assume only app
     let pokeJson = {
-      "read-app": appTag
+      'read-app': appTag,
     };
     if (path) {
       pokeJson = {
-        "read-path": {
+        'read-path': {
           app: appTag,
-          path
-        }
-      }
+          path,
+        },
+      };
     }
     const payload = {
       app: 'notif-db',
-      mark: 'ndb-poke',
+      mark: 'notif-db-poke',
       reaction: '',
       json: pokeJson,
     };
 
-    await pokeHelper(this.core, payload, `Failed to mark notifications read for ${appTag}`);
+    await pokeHelper(
+      this.core,
+      payload,
+      `Failed to mark notifications read for ${appTag}`
+    );
   }
 
   async dismissNotification(
     _evt: any,
     appTag: string, // if just app is passed in, will mark all notifs from app as "read"
-    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
+    path?: string // if this is also passed in, will only mark notifs with both app and path as "read"
   ) {
     // default assume only app
     let pokeJson = {
-      "dismiss-app": appTag
+      'dismiss-app': appTag,
     };
     if (path) {
       pokeJson = {
-        "dismiss-path": {
+        'dismiss-path': {
           app: appTag,
-          path
-        }
-      }
+          path,
+        },
+      };
     }
     const payload = {
       app: 'notif-db',
-      mark: 'ndb-poke',
+      mark: 'notif-db-poke',
       reaction: '',
       json: pokeJson,
     };
 
-    await pokeHelper(this.core, payload, `Failed to dismiss notifications for ${appTag}`);
+    await pokeHelper(
+      this.core,
+      payload,
+      `Failed to dismiss notifications for ${appTag}`
+    );
   }
 }

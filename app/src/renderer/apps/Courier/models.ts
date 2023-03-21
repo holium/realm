@@ -121,10 +121,12 @@ export const Chat = types
     // peerRows: types.array(PeerModel),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
-    lastMessage: types.model({
-      id: types.string,
-      contents: types.array(types.frozen()),
-    }),
+    lastMessage: types.maybeNull(
+      types.model({
+        id: types.string,
+        contents: types.array(types.frozen()),
+      })
+    ),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),

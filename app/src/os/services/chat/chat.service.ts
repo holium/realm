@@ -167,9 +167,12 @@ export class ChatService extends BaseService {
   // ----------------- DB setup -------------------
   // ----------------------------------------------
   async subscribe(ship: Patp) {
-    this.db = new Database(`${app.getPath('userData')}/realm.${ship}/realm.db`, {
-      // verbose: console.log,
-    });
+    this.db = new Database(
+      `${app.getPath('userData')}/realm.${ship}/realm.db`,
+      {
+        // verbose: console.log,
+      }
+    );
     this.db.exec(this.initSql);
     await this.core.conduit?.watch({
       app: 'chat-db',
@@ -605,6 +608,7 @@ export class ChatService extends BaseService {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
+        console.log('lastMessage', lastMessage);
         lastMessage.contents = JSON.parse(lastMessage.contents).map(
           (message: any) => message && JSON.parse(message)
         );
@@ -996,7 +1000,6 @@ export class ChatService extends BaseService {
         peers.filter((p) => p !== `~${this.core.conduit?.ship}`)[0] || '';
       metadata.peer = dmPeer;
     }
-    console.log('createChat', peers, type, metadata);
     const payload = {
       app: 'realm-chat',
       mark: 'chat-action',

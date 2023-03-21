@@ -152,13 +152,15 @@ export const ChatRowPresenter = ({
   );
 
   const chat = inbox.find((c) => c.path === path);
-  const lastMessageUpdated: React.ReactNode = useMemo(
-    () => (
+  const lastMessageUpdated: React.ReactNode = useMemo(() => {
+    if (!chat) return null;
+    if (!chat.lastMessage) return 'No messages yet';
+    return (
       <span>
-        {chat &&
-          chat.lastMessage &&
+        {chat.lastMessage &&
           chat.lastMessage.contents.map(
             (content: { [key: string]: string }, idx: number) => {
+              if (!chat.lastMessage) return null;
               let type = Object.keys(content)[0];
               const value = content[type];
               if (TEXT_TYPES.includes(type)) {
@@ -185,9 +187,8 @@ export const ChatRowPresenter = ({
             }
           )}
       </span>
-    ),
-    [chat?.lastMessage?.id]
-  );
+    );
+  }, [chat?.lastMessage?.id]);
 
   return (
     <Row
@@ -244,7 +245,7 @@ export const ChatRowPresenter = ({
               exit={{ opacity: 0 }}
               fontSize={2}
             >
-              {lastMessageUpdated ? lastMessageUpdated : 'No messages yet'}
+              {lastMessageUpdated}
             </Text.Custom>
           </Flex>
         </Flex>

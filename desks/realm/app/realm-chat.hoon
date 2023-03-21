@@ -219,7 +219,7 @@
     %agent
     [ship %notif-db]
     %poke
-    %ndb-poke
+    %notif-db-poke
     !>([%create %realm-chat /new-messages %message 'New Message' (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])
   ]
 --
