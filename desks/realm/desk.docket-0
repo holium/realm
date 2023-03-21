@@ -7,5 +7,5 @@
     license+'MIT'
     base+'realm'
     image+'https://holium-app-globs.nyc3.cdn.digitaloceanspaces.com/realm%2Frealm.svg'
-    glob-http+['https://holium-app-globs.nyc3.cdn.digitaloceanspaces.com/realm%2Fglob-0v7.j0j2a.m8eq6.8pvfh.2gb6a.9hek2.glob' 0v7.j0j2a.m8eq6.8pvfh.2gb6a.9hek2]
+    glob-http+['https://holium-app-globs.nyc3.cdn.digitaloceanspaces.com/realm%2Fholium-com-redirect.glob' 0v4.39m1m.t5rlt.d94cv.akdr1.389ub]
 ==
