@@ -567,7 +567,7 @@ export class ChatService extends BaseService {
       ), chat_with_messages AS (
         SELECT
             path,
-            contents lastMessage,
+            json_object('contents', contents, 'id', msg_id) lastMessage,
             sender lastSender,
             m_created_at created_at,
             m_updated_at updated_at
@@ -602,16 +602,20 @@ export class ChatService extends BaseService {
     const result = query.all();
 
     return result.map((row) => {
+      // deserialize the last message
+      const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
+      if (lastMessage && lastMessage.contents) {
+        lastMessage.contents = JSON.parse(lastMessage.contents).map(
+          (message: any) => message && JSON.parse(message)
+        );
+      }
+      console.log('lastMessage', lastMessage);
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
-        lastMessage: row.lastMessage
-          ? JSON.parse(row.lastMessage).map(
-              (message: any) => message && JSON.parse(message)
-            )
-          : null,
+        lastMessage,
       };
     });
   }

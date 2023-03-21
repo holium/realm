@@ -17,6 +17,8 @@ import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 
 type ChatMessageProps = {
+  isPrevGrouped: boolean;
+  isNextGrouped: boolean;
   containerWidth: number;
   replyTo?: ChatMessageType;
   message: ChatMessageType;
@@ -31,6 +33,8 @@ export const ChatMessagePresenter = ({
   message,
   canReact,
   ourColor,
+  isPrevGrouped,
+  isNextGrouped,
   measure,
 }: ChatMessageProps) => {
   const { ship, friends } = useServices();
@@ -152,6 +156,8 @@ export const ChatMessagePresenter = ({
     [message.createdAt]
   );
 
+  const hasEdited = useMemo(() => message.metadata.edited, [message.updatedAt]);
+
   const reactionList = useMemo(
     () => msgModel?.reactions,
     [
@@ -165,12 +171,14 @@ export const ChatMessagePresenter = ({
     <Bubble
       ref={messageRef}
       id={messageRowId}
+      isPrevGrouped={isPrevGrouped}
+      isNextGrouped={isNextGrouped}
       containerWidth={containerWidth}
       isOur={isOur}
       ourShip={ship?.patp}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
-      isEdited={message.metadata?.edited}
+      isEdited={hasEdited}
       author={message.sender}
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}

@@ -78,8 +78,6 @@ export const NewChat = () => {
     });
   }, [selectedPatp.size === 1]);
 
-  console.log('dmAlreadyExists', dmAlreadyExists);
-
   return (
     <Flex gap={4} height={dimensions.height - 14} flexDirection="column">
       <Flex minHeight={32} height={36} flexDirection="row" alignItems="center">

@@ -20,6 +20,8 @@ export type BubbleProps = {
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
   containerWidth?: number;
+  isPrevGrouped?: boolean; // should we show the author if multiple messages by same author?
+  isNextGrouped?: boolean; // should we show the author if multiple messages by same author?
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onLoaded?: () => void;
@@ -40,6 +42,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       isEditing,
       containerWidth,
       reactions = [],
+      isPrevGrouped,
+      isNextGrouped,
       onLoaded,
       onReaction,
       // onReplyClick = () => {},
@@ -100,6 +104,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       >
         <BubbleStyle
           id={id}
+          isPrevGrouped={isPrevGrouped}
+          isNextGrouped={isNextGrouped}
           style={
             isOur
               ? {
@@ -112,7 +118,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           }
           className={isOur ? 'bubble-our' : ''}
         >
-          {!isOur && (
+          {!isOur && !isPrevGrouped && (
             <BubbleAuthor
               style={{
                 color: authorColorDisplay,
@@ -146,7 +152,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               justifyContent="flex-end"
               minWidth="114px"
               flexBasis="114px"
-              opacity={0.5}
+              opacity={0.35}
             >
               {isEditing && 'Editing... · '}
               {isEdited && !isEditing && 'Edited · '}

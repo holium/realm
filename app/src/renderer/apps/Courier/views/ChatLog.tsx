@@ -67,7 +67,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const onMessageSend = (fragments: any[]) => {
     if (!selectedChat) return;
-    console.log('sending message', fragments);
     selectedChat.sendMessage(
       path,
       fragments.map((frag) => {
@@ -195,13 +194,26 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                     }
                   }
 
+                  const isNextGrouped =
+                    index < messages.length - 1 &&
+                    row.sender === messages[index + 1].sender;
+                  const isPrevGrouped =
+                    index > 0 && row.sender === messages[index - 1].sender;
+
+                  const topSpacing = isPrevGrouped ? '3px' : 2;
+                  const bottomSpacing = isNextGrouped ? '3px' : 2;
+
                   return (
                     <Box
                       key={`${row.id}-${row.updatedAt}-${index}-last=${isLast}-${reactionLength}`}
-                      pt={2}
-                      pb={isLast ? 2 : 0}
+                      pt={topSpacing}
+                      pb={isLast ? bottomSpacing : 0}
                     >
                       <ChatMessage
+                        isPrevGrouped={
+                          index > 0 && row.sender === messages[index - 1].sender
+                        }
+                        isNextGrouped={isNextGrouped}
                         containerWidth={containerWidth}
                         replyTo={replyToObj}
                         message={row as ChatMessageType}

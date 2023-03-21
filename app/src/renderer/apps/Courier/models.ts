@@ -121,7 +121,10 @@ export const Chat = types
     // peerRows: types.array(PeerModel),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
-    lastMessage: types.maybeNull(types.array(types.frozen())),
+    lastMessage: types.model({
+      id: types.string,
+      contents: types.array(types.frozen()),
+    }),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -226,7 +229,7 @@ export const Chat = types
       }
       self.messages.push(message);
       self.lastSender = message.sender;
-      self.lastMessage = message.contents;
+      self.lastMessage = { contents: message.contents, id: message.id };
     },
     replaceMessage(message: ChatMessageType) {
       const msg = self.messages.find((m) => m.id === message.id);
@@ -237,6 +240,7 @@ export const Chat = types
         );
       }
       msg.updateContents(message.contents, message.updatedAt);
+      self.lastMessage = { contents: message.contents, id: message.id };
       // self.messages.replace([...self.messages, msg]);
     },
     deleteMessage: flow(function* (messageId: string) {

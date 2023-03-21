@@ -35,7 +35,7 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
-  margin: 0px 2px;
+  margin: 0px 0px;
 `;
 
 export const BlockWrapper = styled(motion.span)`
@@ -125,10 +125,17 @@ export const FragmentShip = styled(FragmentBase)`
   }
 `;
 
-const CodeWrapper = styled(Flex)`
+export const CodeWrapper = styled(Flex)`
   border-radius: 4px;
-  background: var(--rlm-card-color);
-  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.08);
+  transition: var(--transition);
+  &:hover {
+    transition: var(--transition);
+    background-color: rgba(0, 0, 0, 0.12);
+  }
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding: 6px 8px;
   width: 100%;
   ${Text.Custom} {
     color: var(--rlm-text-color) !important;
@@ -307,7 +314,10 @@ export const renderFragment = (
 
     case 'code':
       return (
-        <CodeWrapper py={1}>
+        <CodeWrapper
+          py={1}
+          minWidth={containerWidth ? containerWidth / 1.25 : 150}
+        >
           <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
           </FragmentCodeBlock>
