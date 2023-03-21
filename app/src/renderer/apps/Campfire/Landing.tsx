@@ -3,8 +3,19 @@ import { CampfireActions } from 'renderer/logic/actions/campfire';
 
 export const Landing = () => {
   return (
-    <Flex flexDirection="row" alignItems="center" justifyContent="space-around">
-      <Flex flexDirection="column" gap={10} flex={0}>
+    <Flex
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-around"
+      flex={1}
+    >
+      <Flex
+        flexDirection="column"
+        gap={10}
+        ml="auto"
+        mr="auto"
+        justifyContent="space-between"
+      >
         <Text.Custom
           style={{
             fontStyle: 'normal',
@@ -25,8 +36,9 @@ export const Landing = () => {
           name="join-campfire"
           placeholder="Enter a code or @p"
           rightAdornment={<Button.TextButton>Join</Button.TextButton>}
+          width={400}
         />
-        <Flex flexDirection="row" gap={10}>
+        <Flex flexDirection="row" gap={10} flex={0}>
           <Button.Base
             background="#F8E390"
             padding="4px 12px"
@@ -47,13 +59,13 @@ export const Landing = () => {
             New Audio
           </Button.Base>
         </Flex>
-        <Text.Caption opacity={0.5} alignSelf="flex-end" mb={20}>
+        <Text.Caption opacity={0.5} marginBottom="auto" width={500}>
           Campfire calls are initiated via a star-hosted relay server. Once two
           peers are connected, the call is fully P2P. For more info click here.
         </Text.Caption>
       </Flex>
-      <Flex style={{ height: 172, width: 172 }}>
-        <Icon name="Bonfire" overflow="visible" />
+      <Flex margin="auto">
+        <Icon name="Bonfire" overflow="visible" size={172} />
       </Flex>
     </Flex>
   );

@@ -5,10 +5,12 @@ import {
   TextInput,
   Button,
   CommButton,
+  Avatar,
 } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { useMemo } from 'react';
 import { darken } from 'polished';
+import { Card } from '@holium/design-system/src/general/Card/Card';
 
 export const VideoCall = () => {
   const { theme } = useServices();
@@ -20,12 +22,11 @@ export const VideoCall = () => {
     <Flex flexDirection="row" flex={1}>
       <Flex
         background={videoColor}
-        flex={1}
+        flex={4}
         margin={16}
         borderRadius={20}
         flexDirection="column"
         justifyContent="flex-start"
-        alignItems="flex-start"
       >
         <Flex flexDirection="column" margin={20}>
           <Flex
@@ -49,12 +50,13 @@ export const VideoCall = () => {
           height={50}
           alignItems="center"
           marginTop="auto"
-          marginLeft="auto"
-          marginRight="auto"
+          marginLeft={50}
+          marginRight={50}
           borderRadius={10}
           gap={10}
           py={10}
           px={30}
+          justifyContent="space-between"
         >
           <Flex flexDirection="column">
             <Text.H5>testing</Text.H5>
@@ -63,34 +65,36 @@ export const VideoCall = () => {
               <Text.Caption>3/6 Participants</Text.Caption>
             </Flex>
           </Flex>
-          <CommButton
-            icon={'MicOn'}
-            customBg={commButtonBg}
-            onClick={(evt) => {
-              evt.stopPropagation();
-            }}
-          />
-          <CommButton
-            icon={'VideoOn'}
-            customBg={commButtonBg}
-            onClick={(evt) => {
-              evt.stopPropagation();
-            }}
-          />
-          <CommButton
-            icon={'ScreenShare'}
-            customBg={commButtonBg}
-            onClick={(evt) => {
-              evt.stopPropagation();
-            }}
-          />
-          <CommButton
-            icon={'AudioInput'}
-            customBg={commButtonBg}
-            onClick={(evt) => {
-              evt.stopPropagation();
-            }}
-          />
+          <Flex gap={10}>
+            <CommButton
+              icon={'MicOn'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
+                evt.stopPropagation();
+              }}
+            />
+            <CommButton
+              icon={'VideoOn'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
+                evt.stopPropagation();
+              }}
+            />
+            <CommButton
+              icon={'ScreenShare'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
+                evt.stopPropagation();
+              }}
+            />
+            <CommButton
+              icon={'AudioInput'}
+              customBg={commButtonBg}
+              onClick={(evt) => {
+                evt.stopPropagation();
+              }}
+            />
+          </Flex>
           <Icon name="AddParticipant" size={30} />
         </Flex>
       </Flex>
@@ -105,7 +109,27 @@ export const VideoCall = () => {
           placeholder="Enter Urbit ID"
           rightAdornment={<Button.TextButton>Add</Button.TextButton>}
         ></TextInput>
-        <Flex></Flex>
+        <Card background={windowColor} padding={12}>
+          <Flex
+            flex={1}
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Flex gap={10}>
+              <Avatar
+                patp="~ravmel-ropdyl"
+                avatar={null}
+                nickname="test"
+                size={20}
+                clickable={true}
+                sigilColor={['black', 'black']}
+              />
+              <Text.H6>~ravmel-ropdyl</Text.H6>
+            </Flex>
+            <Icon name="MicOn" size={20} />
+          </Flex>
+        </Card>
         <Flex flexDirection="row">
           <Icon name="CampfireMessages" size={25} />
           <Text.H5>Messages</Text.H5>
