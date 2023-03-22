@@ -1,19 +1,13 @@
-import { InvitePermissionType } from 'renderer/apps/Courier/models';
-
-export type DbChangeType =
-  | 'del-row'
-  | 'add-row'
-  | 'update-row'
-  | 'update-all';
+export type DbChangeType = 'del-row' | 'add-row' | 'update-row' | 'update-all';
 
 export type AddRow = {
   type: 'add-row';
-  row: NotificationRow;
+  row: NotificationsRow;
 };
 
 export type UpdateRow = {
   type: 'update-row';
-  row: NotificationRow;
+  row: NotificationsRow;
 };
 
 export type UpdateAll = {
@@ -26,17 +20,11 @@ export type DelRow = {
   id: number;
 };
 
-export type NotifDbOps =
-  | AddRow
-  | DelsRow
-  | UpdateAll
-  | UpdateRow;
+export type NotifDbOps = AddRow | DelRow | UpdateAll | UpdateRow;
 
 export type NotifDbChangeReactions = NotifDbOps[];
 
-export type NotifDbReactions =
-  | NotificationsRow[]
-  | NotifDbChangeReactions;
+export type NotifDbReactions = NotificationsRow[] | NotifDbChangeReactions;
 
 export type NotificationsRow = {
   id: number;
@@ -56,4 +44,3 @@ export type NotificationsRow = {
   'dismissed-at': number | null;
   dismissed: boolean;
 };
-

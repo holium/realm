@@ -19,6 +19,7 @@ type NotificationProps = {
   appInfo?: {
     image: string;
     name: string;
+    key: string;
   };
   isGrouped?: boolean;
   canHover?: boolean;
@@ -26,7 +27,8 @@ type NotificationProps = {
   notification: NotificationType;
   showApp?: boolean;
   showDismiss?: boolean;
-  onDismiss: (id: number) => void;
+  onLinkClick: (app: string, path: string, link?: string) => void;
+  onDismiss: (app: string, path: string, id: number) => void;
 };
 
 export const Notification = ({
@@ -35,15 +37,16 @@ export const Notification = ({
   canHover = false,
   appInfo,
   onDismiss,
+  onLinkClick,
   notification,
   containerWidth,
 }: NotificationProps) => {
-  const { id, image, app, buttons } = notification;
+  const { id, image, app, path, buttons } = notification;
 
-  const displayDate = timelineDate(new Date(notification.createdAt * 1000));
+  const displayDate = timelineDate(new Date(notification.createdAt));
 
   const textWidth = useMemo(
-    () => (image ? containerWidth - 112 : containerWidth - 70),
+    () => (image ? containerWidth - 112 : containerWidth - 76),
     [containerWidth, image]
   );
 
@@ -55,10 +58,9 @@ export const Notification = ({
       width={containerWidth}
       id={`notification-${id.toString()}`}
       background="card"
-      onClick={() => {
-        if (notification.link) {
-          window.open(notification.link, '_blank');
-        }
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        onLinkClick(app, path, notification.link);
       }}
     >
       <Flex
@@ -107,7 +109,7 @@ export const Notification = ({
           size={22}
           onClick={(evt) => {
             evt.stopPropagation();
-            onDismiss(id);
+            onDismiss(app, path, id);
           }}
         >
           <Icon name="Close" size={20} opacity={0.4} />
@@ -137,6 +139,7 @@ export type NotifAppRowProps = {
   appInfo: {
     image: string;
     name: string;
+    key: string;
   };
   buttons?: NotificationButtonType[];
   buttonsOnClick?: Array<() => void>;
@@ -162,30 +165,34 @@ export const NotifAppRow = ({
       </Flex>
       {buttons && (
         <Flex flexDirection="row" gap={6}>
-          {buttons.reverse().map((button, index) => {
-            // NOTE: there should only be two buttons max
-            const ButtonTag =
-              button.metadata &&
-              JSON.parse(button.metadata).variant === 'secondary'
-                ? Button.Secondary
-                : Button.Minimal;
+          {buttons
+            .slice()
+            .reverse()
+            .map((button, index) => {
+              // NOTE: there should only be two buttons max
+              const ButtonTag =
+                button.metadata &&
+                JSON.parse(button.metadata).variant === 'secondary'
+                  ? Button.Secondary
+                  : Button.Minimal;
 
-            return (
-              <ButtonTag
-                py={1}
-                px={2}
-                onClick={(evt) => {
-                  const buttonClickFunc = buttonsOnClick
-                    ? buttonsOnClick[index]
-                    : () => {};
-                  evt.stopPropagation();
-                  buttonClickFunc();
-                }}
-              >
-                {button.label}
-              </ButtonTag>
-            );
-          })}
+              return (
+                <ButtonTag
+                  key={`notif-button-${appInfo.key}-${index}`}
+                  py={1}
+                  px={2}
+                  onClick={(evt) => {
+                    const buttonClickFunc = buttonsOnClick
+                      ? buttonsOnClick[index]
+                      : () => {};
+                    evt.stopPropagation();
+                    buttonClickFunc();
+                  }}
+                >
+                  {button.label}
+                </ButtonTag>
+              );
+            })}
         </Flex>
       )}
     </AppRow>
@@ -218,7 +225,6 @@ const NotifRow = styled(Flex)<NotifRowProps>`
   &:hover {
     transition: var(--transition);
     background-color: ${(props) => props.canHover && 'rgba(0, 0, 0, 0.06)'};
-
     cursor: pointer;
     .notification-date {
       opacity: 0;
@@ -249,6 +255,7 @@ const AppRow = styled(Flex)`
   align-items: center;
   flex-direction: row;
   width: 100%;
+  height: 27px;
   justify-content: space-between;
   margin-top: 4px;
   .notif-app-image {

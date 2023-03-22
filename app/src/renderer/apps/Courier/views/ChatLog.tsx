@@ -13,6 +13,7 @@ import { PinnedContainer } from '../components/PinnedMessage';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
+import { useAccountStore } from 'renderer/apps/Account/store';
 // import { toJS } from 'mobx';
 
 type ChatLogProps = {
@@ -25,6 +26,7 @@ const pinHeight = 46;
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, getChatTitle, setSubroute } = useChatStore();
+  const accountStore = useAccountStore();
   const { ship, friends } = useServices();
   const [showAttachments, setShowAttachments] = useState(false);
 
@@ -36,7 +38,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   useEffect(() => {
     if (!selectedChat) return;
     selectedChat.fetchMessages();
-  }, [selectedChat]);
+    const unreadCount = accountStore.getUnreadCountByPath(selectedChat.path);
+    if (unreadCount > 0) {
+      accountStore.readPath('realm-chat', selectedChat.path);
+    }
+  }, [selectedChat?.path]);
 
   const resolvedTitle = useMemo(() => {
     if (!selectedChat || !ship) return 'Error loading title';

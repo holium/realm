@@ -6,16 +6,20 @@ import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
 import {
-  DbChangeType,
   AddRow,
   UpdateRow,
-  UpdateAll,
   DelRow,
   NotifDbOps,
   NotifDbChangeReactions,
-  NotifDbReactions,
   NotificationsRow,
 } from './notification.types';
+
+type GetParamsObj = {
+  app?: string;
+  path?: string;
+  excludeDismissed?: boolean;
+  excludeRead?: boolean;
+};
 
 const pokeHelper = async (core: any, payload: any, errMsg: string) => {
   if (!core.conduit) throw new Error('No conduit connection');
@@ -36,6 +40,7 @@ export class NotificationService extends BaseService {
    * Handlers for the ipcRenderer invoked functions
    **/
   handlers = {
+    'realm.notification.get': this.getNotifications,
     'realm.notification.mark-read': this.readNotification,
     'realm.notification.dismiss': this.dismissNotification,
   };
@@ -44,10 +49,12 @@ export class NotificationService extends BaseService {
    * Preload functions to register with the renderer
    */
   static preload = {
-    readNotification: (appTag: string, path?: string) =>
-      ipcRenderer.invoke('realm.notification.mark-read', appTag, path),
-    dismissNotification: (appTag: string, path?: string) =>
-      ipcRenderer.invoke('realm.notification.dismiss', appTag, path),
+    getNotifications: (params?: GetParamsObj) =>
+      ipcRenderer.invoke('realm.notification.get', params),
+    readNotification: (app: string, path?: string, id?: number) =>
+      ipcRenderer.invoke('realm.notification.mark-read', app, path, id),
+    dismissNotification: (app: string, path?: string, id?: number) =>
+      ipcRenderer.invoke('realm.notification.dismiss', app, path, id),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -130,13 +137,13 @@ export class NotificationService extends BaseService {
     }
   }
 
-  sendChatUpdate(type: ChatUpdateType, data: any) {
-    this.core.mainWindow.webContents.send(
-      'realm.chat.on-db-change',
-      type,
-      data
-    );
-  }
+  // sendChatUpdate(type: ChatUpdateType, data: any) {
+  //   this.core.mainWindow.webContents.send(
+  //     'realm.chat.on-db-change',
+  //     type,
+  //     data
+  //   );
+  // }
 
   onQuit() {
     console.log('fail!');
@@ -247,9 +254,62 @@ export class NotificationService extends BaseService {
     } else {
       result = query.all(appTag);
     }
-    return result.map((row) => {
+    return result.map((row: any) => {
       return {
         ...row,
+        buttons: row.buttons ? JSON.parse(row.buttons) : null,
+        metadata: row.metadata ? JSON.parse(row.metadata) : null,
+      };
+    });
+  }
+
+  getNotifications(_evt: any, _params?: GetParamsObj) {
+    if (!this.db) throw new Error('No db connection');
+    // const hasParams = params && Object.keys(params).length > 0;
+    const query = this.db.prepare(`
+      SELECT id,
+        app,
+        path,
+        type,
+        title,
+        content,
+        image,
+        buttons,
+        link,
+        metadata,
+        created_at   createdAt,
+        updated_at   updatedAt,
+        read_at      readAt,
+        read,
+        dismissed_at dismissedAt,
+        dismissed
+      FROM notifications
+      WHERE dismissed = 0
+
+    `);
+    // ${hasParams ? 'WHERE' : ''}
+    // ${params.excludeRead ? 'read = 0' : ''}
+    // ${params.excludeDismissed ? 'dismissed = 0' : ''}
+    // ${params.app ? 'AND app = ?' : ''}
+    // ${params.path ? 'AND path = ?' : ''};
+    let result: any;
+    // if (params.app && params.path) {
+    //   result = query.all(params.app, params.path);
+    // } else if (params.app) {
+    //   result = query.all(params.app);
+    // } else if (params.path) {
+    //   result = query.all(params.path);
+    // } else {
+    // result = query.all();
+    // }
+
+    result = query.all();
+
+    return result.map((row: any) => {
+      return {
+        ...row,
+        read: row.read === 1,
+        dismissed: row.dismissed === 1,
         buttons: row.buttons ? JSON.parse(row.buttons) : null,
         metadata: row.metadata ? JSON.parse(row.metadata) : null,
       };
@@ -262,19 +322,26 @@ export class NotificationService extends BaseService {
 
   async readNotification(
     _evt: any,
-    appTag: string, // if just app is passed in, will mark all notifs from app as "read"
-    path?: string // if this is also passed in, will only mark notifs with both app and path as "read"
+    app: string, // if just app is passed in, will mark all notifs from app as "read"
+    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
+    id?: number // if this is also passed in, will only mark notif with id as "read"
   ) {
     // default assume only app
-    let pokeJson = {
-      'read-app': appTag,
-    };
-    if (path) {
+    let pokeJson;
+    if (id) {
+      pokeJson = {
+        'read-id': id,
+      };
+    } else if (path) {
       pokeJson = {
         'read-path': {
-          app: appTag,
+          app,
           path,
         },
+      };
+    } else {
+      pokeJson = {
+        'read-app': app,
       };
     }
     const payload = {
@@ -287,25 +354,32 @@ export class NotificationService extends BaseService {
     await pokeHelper(
       this.core,
       payload,
-      `Failed to mark notifications read for ${appTag}`
+      `Failed to mark notifications read for ${app}`
     );
   }
 
   async dismissNotification(
     _evt: any,
-    appTag: string, // if just app is passed in, will mark all notifs from app as "read"
-    path?: string // if this is also passed in, will only mark notifs with both app and path as "read"
+    app: string, // if just app is passed in, will mark all notifs from app as "read"
+    path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
+    id?: number // if this is also passed in, will only mark notif with id as "read"
   ) {
     // default assume only app
-    let pokeJson = {
-      'dismiss-app': appTag,
-    };
-    if (path) {
+    let pokeJson;
+    if (id) {
+      pokeJson = {
+        'dismiss-id': id,
+      };
+    } else if (path) {
       pokeJson = {
         'dismiss-path': {
-          app: appTag,
+          app,
           path,
         },
+      };
+    } else {
+      pokeJson = {
+        'dismiss-app': app,
       };
     }
     const payload = {
@@ -318,7 +392,7 @@ export class NotificationService extends BaseService {
     await pokeHelper(
       this.core,
       payload,
-      `Failed to dismiss notifications for ${appTag}`
+      `Failed to dismiss notifications for ${app}`
     );
   }
 }

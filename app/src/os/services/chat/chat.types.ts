@@ -121,4 +121,3 @@ export type NotificationsRow = {
   'dismissed-at': number | null;
   dismissed: boolean;
 };
-

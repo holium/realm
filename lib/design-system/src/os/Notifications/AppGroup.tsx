@@ -8,10 +8,14 @@ type AppGroupProps = {
   appInfo: {
     image: string;
     name: string;
+    key: string;
   };
   groupByPath?: boolean;
   containerWidth: number;
   notifications: NotificationType[];
+  onLinkClick: (app: string, path: string, link?: string) => void;
+  onDismiss: (app: string, path: string, id: number) => void;
+  onDismissAll: (app: string, path?: string) => void;
 } & BoxProps;
 
 export const AppGroup = ({
@@ -19,6 +23,9 @@ export const AppGroup = ({
   notifications,
   containerWidth,
   appInfo,
+  onDismiss,
+  onDismissAll,
+  onLinkClick,
 }: AppGroupProps) => {
   let paths = notifications.map((n) => n.path);
   // reduce notifications to unique paths
@@ -27,9 +34,6 @@ export const AppGroup = ({
     let grouped = notifications.filter((n) => n.path === path);
     return grouped;
   });
-  if (appInfo.name === 'Realm Chat') {
-    // todo render chat notifications
-  }
 
   return (
     <AppGroupContainer width={containerWidth}>
@@ -37,15 +41,14 @@ export const AppGroup = ({
         ? notifications.map((n) => {
             return (
               <Notification
+                key={`${n.path}-${n.id}`}
                 isGrouped
                 canHover
                 showApp={false}
                 containerWidth={containerWidth - 12}
                 notification={n}
-                onDismiss={() => {
-                  // n.dismiss();
-                  console.log('dismissed', n.id);
-                }}
+                onDismiss={onDismiss}
+                onLinkClick={onLinkClick}
               />
             );
           })
@@ -53,7 +56,9 @@ export const AppGroup = ({
             if (!notifs[0].metadata) return <div />;
             const metadata = JSON.parse(notifs[0].metadata);
             return (
-              <PathContainer>
+              <PathContainer
+                key={`path-grouped-${notifs[0].app}-${notifs[0].path}`}
+              >
                 <Flex justifyContent="space-between" alignItems="center" py={1}>
                   <Flex px={1} flexDirection="row" gap={6}>
                     {metadata.image && (
@@ -77,15 +82,14 @@ export const AppGroup = ({
                   {notifs.map((n) => {
                     return (
                       <Notification
+                        key={`path-grouped-${n.app}-${n.path}-${n.id}`}
                         isGrouped
                         canHover
                         showApp={false}
                         containerWidth={containerWidth - 20}
                         notification={n}
-                        onDismiss={() => {
-                          // n.dismiss();
-                          console.log('dismissed', n.id);
-                        }}
+                        onDismiss={onDismiss}
+                        onLinkClick={onLinkClick}
                       />
                     );
                   })}
@@ -106,9 +110,7 @@ export const AppGroup = ({
         ]}
         buttonsOnClick={[
           () => {
-            notifications.forEach((n) => {
-              console.log('dismissed', n.id);
-            });
+            appInfo && onDismissAll(appInfo.key);
           },
         ]}
       />

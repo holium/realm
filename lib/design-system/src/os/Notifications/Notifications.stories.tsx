@@ -32,6 +32,9 @@ export const Base: ComponentStory<typeof Notification> = () => (
           updatedAt: new Date().getTime(),
         }}
         onDismiss={() => console.log('dismissed')}
+        onLinkClick={(app, path, link) =>
+          console.log(`clicked - ${app} ${path} ${link}`)
+        }
       />
     </Flex>
     <Flex flexDirection="column" px={3} mt={3} gap={4} width={containerWidth}>
@@ -57,6 +60,9 @@ export const Base: ComponentStory<typeof Notification> = () => (
           updatedAt: new Date().getTime(),
         }}
         onDismiss={() => console.log('dismissed')}
+        onLinkClick={(app, path, link) =>
+          console.log(`clicked - ${app} ${path} ${link}`)
+        }
       />
     </Flex>
     <Flex flexDirection="column" px={3} mt={3} gap={4} width={containerWidth}>
@@ -68,6 +74,7 @@ export const Base: ComponentStory<typeof Notification> = () => (
           image:
             'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/engram.svg',
           name: 'Engram',
+          key: 'engram',
         }}
         containerWidth={containerWidth}
         notification={{
@@ -85,6 +92,9 @@ export const Base: ComponentStory<typeof Notification> = () => (
           updatedAt: new Date().getTime(),
         }}
         onDismiss={() => console.log('dismissed')}
+        onLinkClick={(app, path, link) =>
+          console.log(`clicked - ${app} ${path} ${link}`)
+        }
       />
     </Flex>
     <Flex flexDirection="column" px={3} mt={3} gap={4} width={containerWidth}>
@@ -96,6 +106,7 @@ export const Base: ComponentStory<typeof Notification> = () => (
           image:
             'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/engram.svg',
           name: 'Engram',
+          key: 'engram',
         }}
         containerWidth={containerWidth}
         notification={{
@@ -125,6 +136,9 @@ export const Base: ComponentStory<typeof Notification> = () => (
           updatedAt: new Date().getTime(),
         }}
         onDismiss={() => console.log('dismissed')}
+        onLinkClick={(app, path, link) =>
+          console.log(`clicked - ${app} ${path} ${link}`)
+        }
       />
     </Flex>
     <Flex flexDirection="column" px={3} mt={3} gap={4} width={containerWidth}>
@@ -149,6 +163,9 @@ export const Base: ComponentStory<typeof Notification> = () => (
           updatedAt: new Date().getTime(),
         }}
         onDismiss={() => console.log('dismissed')}
+        onLinkClick={(app, path, link) =>
+          console.log(`clicked - ${app} ${path} ${link}`)
+        }
       />
     </Flex>
   </>
@@ -184,7 +201,15 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
           appInfo={{
             image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',
             name: 'Realm Chat',
+            key: 'realm-chat',
           }}
+          onDismiss={(id) => console.log(`dismissed - ${id}`)}
+          onDismissAll={(app, path) =>
+            console.log(`dismissed all ${app} ${path}`)
+          }
+          onLinkClick={(app, path, link) =>
+            console.log(`clicked - ${app} ${path} ${link}`)
+          }
           containerWidth={containerWidth}
           notifications={[
             {
@@ -243,8 +268,16 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
           appInfo={{
             image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',
             name: 'Realm Chat',
+            key: 'realm-chat',
           }}
           groupByPath
+          onDismiss={(id) => console.log(`dismissed - ${id}`)}
+          onDismissAll={(app, path) =>
+            console.log(`dismissed all ${app} ${path}`)
+          }
+          onLinkClick={(app, path, link) =>
+            console.log(`clicked - ${app} ${path} ${link}`)
+          }
           containerWidth={containerWidth}
           notifications={[
             {

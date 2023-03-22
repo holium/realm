@@ -615,7 +615,7 @@ export class ChatService extends BaseService {
       }
       return {
         ...row,
-        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage,
@@ -705,7 +705,7 @@ export class ChatService extends BaseService {
     const rows = result.map((row) => {
       return {
         ...row,
-        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage

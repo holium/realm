@@ -163,7 +163,7 @@ export const chatStore = ChatStore.create({
 // -------------------------------
 // Create core context
 // -------------------------------
-type ChatStoreInstance = Instance<typeof ChatStore>;
+export type ChatStoreInstance = Instance<typeof ChatStore>;
 export const ChatStoreContext = createContext<null | ChatStoreInstance>(
   chatStore
 );

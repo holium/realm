@@ -14,13 +14,14 @@ import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
+import { useAccountStore } from 'renderer/apps/Account/store';
+import { UnreadBadge } from './UnreadBadge';
 
 type ChatRowProps = {
   path: string;
   title: string;
   peers: string[];
   isAdmin: boolean;
-  lastMessage: string;
   metadata: any;
   timestamp: number;
   type: ChatPathType;
@@ -46,7 +47,12 @@ export const ChatRowPresenter = ({
     isChatPinned,
     togglePinned,
   } = useChatStore();
+  const { getUnreadCountByPath } = useAccountStore();
   const { getOptions, setOptions } = useContextMenu();
+
+  const unreadCount = getUnreadCountByPath(path);
+
+  console.log('unreadCount', unreadCount);
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
@@ -249,16 +255,16 @@ export const ChatRowPresenter = ({
             </Text.Custom>
           </Flex>
         </Flex>
-        <Flex alignItems="flex-end" flexDirection="column">
+        <Flex alignItems="flex-end" gap={2} flexDirection="column">
           <Text.Custom
             style={{ wordBreak: 'keep-all' }}
             fontWeight={400}
-            fontSize={2}
+            fontSize={1}
             opacity={0.3}
           >
             {timelineDate(new Date(timestamp))}
           </Text.Custom>
-          <Flex height={14}>{/* unread count */}</Flex>
+          <UnreadBadge count={unreadCount} />
         </Flex>
       </Flex>
     </Row>
