@@ -1,5 +1,4 @@
-import { renderToString } from 'react-dom/server';
-import { CheckBoxInput } from './CheckBox.styles';
+import { useToggle } from '@holium/shared';
 import { Flex } from '../../general/Flex/Flex';
 import { Text } from '../../general/Text/Text';
 import { Icon } from '../../general/Icon/Icon';
@@ -10,7 +9,7 @@ type Props = {
   isChecked?: boolean;
   disabled?: boolean;
   defaultChecked?: boolean;
-  onChange?: () => void;
+  onClick?: () => void;
 };
 
 export const CheckBox = ({
@@ -19,28 +18,32 @@ export const CheckBox = ({
   isChecked,
   disabled,
   defaultChecked,
-  onChange,
+  onClick,
 }: Props) => {
-  const blankSvgJsxElement = (
-    <Icon name="CheckboxBlank" color="text" isBackgroundImage />
-  );
-  const checkedSvgJsxElement = (
-    <Icon name="CheckboxChecked" color="accent" isBackgroundImage />
-  );
-  const blankSvgString = renderToString(blankSvgJsxElement);
-  const checkedSvgString = renderToString(checkedSvgJsxElement);
+  const toggled = useToggle(isChecked ?? defaultChecked ?? false);
+
+  const onToggle = () => {
+    if (disabled) return;
+    toggled.toggle();
+    onClick?.();
+  };
 
   return (
     <Flex alignItems="center" gap={12}>
-      <CheckBoxInput
-        type="checkbox"
-        checked={isChecked}
-        defaultChecked={defaultChecked}
-        disabled={disabled}
-        blankSvgString={blankSvgString}
-        checkedSvgString={checkedSvgString}
-        onChange={onChange}
-      />
+      <Flex
+        onClick={onToggle}
+        style={{
+          opacity: disabled ? 0.7 : 1,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {toggled.isOn ? (
+          <Icon name="CheckboxChecked" fill="accent" />
+        ) : (
+          <Icon name="CheckboxBlank" fill="text" />
+        )}
+      </Flex>
+
       <Flex flexDirection="column">
         {title && (
           <Text.Body

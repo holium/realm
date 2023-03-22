@@ -40,10 +40,10 @@ const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
       {isChecking ? (
         <Spinner size={1} />
       ) : onboarding.versionLoader.state === 'loaded' ? (
-        <Icon ml={2} size={24} name="CheckCircle" color="intent-success" />
+        <Icon ml={2} size={24} name="CheckCircle" fill="intent-success" />
       ) : (
         onboarding.versionLoader.state === 'error' && (
-          <Icon ml={2} size={24} name="Error" color="intent-alert" />
+          <Icon ml={2} size={24} name="Error" fill="intent-alert" />
         )
       )}
       {isChecking ? (

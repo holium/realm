@@ -161,10 +161,10 @@ const ResetCodeDialogPresenter = ({ ship, password }: ResetCodeProps) => {
             {saveShipCodeResult === 'success' && (
               <Icon
                 mr={1}
-                name={'CheckCircle'}
+                name="CheckCircle"
                 opacity={1}
                 size={18}
-                color={'intent-success'}
+                fill="intent-success"
               />
             )}
             <Button.IconButton onClick={showAccessKey.toggle}>
