@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
-import { Box, Flex, Select } from '@holium/design-system';
+import { Avatar, Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
   Label,
@@ -11,7 +11,6 @@ import {
   Crest,
   IconButton,
   Skeleton,
-  Grid,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { createField, createForm } from 'mobx-easy-form';
@@ -22,7 +21,6 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { Avatar } from '@holium/design-system';
 
 interface IMemberList {
   customBg: string;
@@ -92,7 +90,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       status: MemberStatus;
     };
   }>({
-    [ship!.patp]: {
+    [ship?.patp ?? '']: {
       primaryRole: 'owner',
       roles: ['owner'],
       alias: '',
@@ -107,7 +105,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   // Setting up options menu
   useEffect(() => {
     /*      if (props.edit) {
-        const editMembers = membership.getSpaceMembers(workflowState.path)!.toJSON();
+        const editMembers = membership.getSpaceMembers(workflowState.path).toJSON();
         let members: any = {}
         for (var member of Object.keys(editMembers)) {
           const memberVal = editMembers[member]
@@ -124,17 +122,18 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
         setPermissionMap(members);
         setWorkspaceState({members});
       }*/
+    if (!ship) return;
     if (workflowState.type === 'group') {
       setLoading(true);
       ShipActions.getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
           console.log(groupMembers);
-          groupMembers[ship!.patp].roles = ['owner'];
-          groupMembers[ship!.patp].status = 'host';
-          groupMembers[ship!.patp].primaryRole = 'owner';
-          selectedPatp.add(ship!.patp);
-          setNicknameMap({ ...nicknameMap, [ship!.patp]: '' });
+          groupMembers[ship.patp].roles = ['owner'];
+          groupMembers[ship.patp].status = 'host';
+          groupMembers[ship.patp].primaryRole = 'owner';
+          selectedPatp.add(ship.patp);
+          setNicknameMap({ ...nicknameMap, [ship.patp]: '' });
           const newMembers: any = {
             ...groupMembers,
           };
@@ -143,7 +142,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             ...workflowState,
             members: newMembers,
           });
-          delete groupMembers[ship!.patp];
+          delete groupMembers[ship.patp];
           for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
@@ -155,7 +154,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       setWorkspaceState({
         ...workflowState,
         members: {
-          [ship!.patp]: {
+          [ship.patp]: {
             roles: ['owner'],
             alias: '',
             status: 'host',
@@ -163,7 +162,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           },
         },
       });
-      selectedPatp.add(ship!.patp);
+      selectedPatp.add(ship.patp);
     }
   }, []);
 
@@ -191,7 +190,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
 
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
-    const isOur = patp === ship!.patp;
+    const isOur = patp === ship?.patp;
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (
@@ -290,7 +289,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   if (!workflowState) return null;
 
   return (
-    <Grid.Column noGutter lg={12} xl={12}>
+    <Flex flexDirection="column" width="100%" overflowY="hidden">
       <Text
         fontSize={5}
         lineHeight="24px"
@@ -399,7 +398,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           </MemberList>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };
 

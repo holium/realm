@@ -382,7 +382,7 @@ export const SpacesApi = {
         if (mark === 'visa-reaction') {
           handleInviteReactions(
             data['visa-reaction'],
-            conduit.ship!,
+            conduit.ship ?? '',
             membersState,
             spacesState,
             visaState,
@@ -434,7 +434,7 @@ const handleSpacesReactions = (
         setTheme(spacesState.getSpaceByPath(currentPath)?.theme);
         roomService.setProvider(getHost(currentPath));
       }
-      // roomService!.setProvider(null, getHost(spacesState.selected!.path));
+      // roomService.setProvider(null, getHost(spacesState.selected.path));
       break;
     case 'add':
       const newSpace = spacesState.addSpace(data.add);

@@ -3,9 +3,11 @@
   "include": [
     ".eslintrc.js",
     "app",
+    "shared",
     "lib/conduit",
     "lib/design-system",
-    "lib/multiplayer",
+    "lib/presence/code",
+    "lib/presence",
     "lib/room/test-ui",
     "lib/room"
   ]

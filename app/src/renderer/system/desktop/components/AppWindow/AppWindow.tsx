@@ -8,7 +8,7 @@ import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
@@ -19,7 +19,6 @@ import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
 
 const CURSOR_WIDTH = 10;
-const CURSOR_HEIGHT = 10;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -60,6 +59,36 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const resizeBottomRightX = useMotionValue(bounds.x + bounds.width);
   const resizeBottomRightY = useMotionValue(bounds.y + bounds.height);
 
+  const isInResizeCorner = useCallback(
+    (x: number, y: number) =>
+      (x >= resizeTopLeftX.get() &&
+        x <= resizeTopLeftX.get() + CURSOR_WIDTH &&
+        y >= resizeTopLeftY.get() &&
+        y <= resizeTopLeftY.get() + CURSOR_WIDTH) ||
+      (x >= resizeTopRightX.get() - CURSOR_WIDTH &&
+        x <= resizeTopRightX.get() &&
+        y >= resizeTopRightY.get() &&
+        y <= resizeTopRightY.get() + CURSOR_WIDTH) ||
+      (x >= resizeBottomLeftX.get() &&
+        x <= resizeBottomLeftX.get() + CURSOR_WIDTH &&
+        y >= resizeBottomLefty.get() - CURSOR_WIDTH &&
+        y <= resizeBottomLefty.get()) ||
+      (x >= resizeBottomRightX.get() - CURSOR_WIDTH &&
+        x <= resizeBottomRightX.get() &&
+        y >= resizeBottomRightY.get() - CURSOR_WIDTH &&
+        y <= resizeBottomRightY.get()),
+    [
+      resizeTopLeftX,
+      resizeTopLeftY,
+      resizeTopRightX,
+      resizeTopRightY,
+      resizeBottomLeftX,
+      resizeBottomLefty,
+      resizeBottomRightX,
+      resizeBottomRightY,
+    ]
+  );
+
   useEffect(() => {
     motionX.set(bounds.x);
     motionY.set(bounds.y);
@@ -70,9 +99,15 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   useEffect(() => {
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
       if (isDragging) {
-        resizing.toggleOn();
         mouseDragX.set(mousePosition.x);
         mouseDragY.set(mousePosition.y);
+        // Check if the mouse is in a resize handle.
+        if (
+          !resizing.isOn &&
+          isInResizeCorner(mousePosition.x, mousePosition.y)
+        ) {
+          resizing.toggleOn();
+        }
       } else {
         resizing.toggleOff();
       }
@@ -80,7 +115,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, []);
 
   const windowId = `app-window-${appWindow.appId}`;
-  const webViewId = getWebViewId(appWindow.appId, appWindow.type!);
+  const webViewId = getWebViewId(appWindow.appId, appWindow.type);
 
   useEffect(() => {
     const windowEl = document.getElementById(windowId);
@@ -96,7 +131,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
       // 1/4th of the cursor should be inside the window when resizing.
       const mouseX = mouseDragX.get() - CURSOR_WIDTH;
-      const mouseY = mouseDragY.get() - CURSOR_HEIGHT * 0.25;
+      const mouseY = mouseDragY.get() - CURSOR_WIDTH * 0.25;
 
       const newWidth = motionX.get() + motionWidth.get() - mouseX;
       const newHeight = motionY.get() + motionHeight.get() - mouseY;
@@ -266,6 +301,9 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   return (
     <AppWindowContainer
       id={windowId}
+      // TODO: Use composer to determine if a window is part
+      // of the singleplayer or multiplayer stack.
+      // className="multiplayer-window"
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}
@@ -320,9 +358,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       >
         <TitlebarByType
           appWindow={appWindow}
-          appInfo={appInfo}
           shell={shell}
           currentTheme={theme.currentTheme}
+          hideTitlebarBorder={
+            appInfo?.type === 'urbit' && !appInfo.config?.titlebarBorder
+          }
           onDevTools={onDevTools}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}

@@ -1,44 +1,38 @@
 import { useState, useEffect } from 'react';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { MouseState } from '@holium/realm-presence';
+import { useToggle } from '@holium/shared';
 import { hexToRgb, rgbToString } from 'os/lib/color';
-import { AnimatedCursor, MouseState } from './AnimatedCursor';
+import { AnimatedCursor } from './AnimatedCursor';
+import { EphemeralChat } from './Mouse.styles';
 
 export const Mouse = () => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [state, setState] = useState<MouseState>('pointer');
-  const [mouseColor, setMouseColor] = useState('0, 0, 0');
   const active = useToggle(false);
   const visible = useToggle(false);
-  const mouseLayerTracking = useToggle(false);
   const disabled = useToggle(false);
-  const [icon, setIcon] = useState<'Airlift' | undefined>(undefined);
-  const [airlift, setAirlift] = useState<string | undefined>(undefined);
+  const mouseLayerTracking = useToggle(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [state, setState] = useState<MouseState>('pointer');
+  const [mouseColor, setMouseColor] = useState('0, 0, 0');
+  const ephemeralChat = useToggle(false);
+  const [chat, setChat] = useState('');
 
   useEffect(() => {
-    window.electron.app.onMouseOver(visible.toggleOn);
     window.electron.app.onMouseOut(visible.toggleOff);
+
     window.electron.app.onMouseMove((newCoordinates, newState, isDragging) => {
       // We only use the IPC'd coordinates if
-      // A) mouse layer tracking is disabled, or
-      // B) the mouse is dragging, since the mouse layer doesn't capture movement on click.
-      if (!mouseLayerTracking.isOn) {
-        setCoords(newCoordinates);
-      } else {
-        if (isDragging) setCoords(newCoordinates);
+      // A) mouse layer tracking is disabled (Win & Linux), or
+      // B) the mouse is dragging, since the mouse layer can't record position on drag.
+      if (!mouseLayerTracking.isOn || isDragging) {
+        setPosition(newCoordinates);
       }
+
       if (!isDragging) setState(newState);
+      if (!visible.isOn) visible.toggleOn();
     });
-
-    window.electron.app.onMouseColorChange((hex) => {
-      const rgbString = rgbToString(hexToRgb(hex));
-      if (rgbString) setMouseColor(rgbString);
-    });
-
-    window.electron.app.onMouseDown(active.toggleOn);
-    window.electron.app.onMouseUp(active.toggleOff);
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!active.isOn) setCoords({ x: e.clientX, y: e.clientY });
+      if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
     };
 
     window.electron.app.onEnableMouseLayerTracking(() => {
@@ -46,24 +40,46 @@ export const Mouse = () => {
       window.addEventListener('mousemove', handleMouseMove);
     });
 
+    window.electron.app.onMouseDown(active.toggleOn);
+
+    window.electron.app.onMouseUp(active.toggleOff);
+
+    window.electron.app.onMouseColorChange((hex) => {
+      const rgbString = rgbToString(hexToRgb(hex));
+      if (rgbString) setMouseColor(rgbString);
+    });
+
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
 
+    window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
+
+    window.electron.app.onToggleOffEphemeralChat(ephemeralChat.toggleOff);
+
+    window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
+
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseLayerTracking.isOn) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
     };
   }, []);
 
   if (disabled.isOn) return null;
 
   return (
-    <AnimatedCursor
-      state={state}
-      coords={coords}
-      isActive={active.isOn}
-      isVisible={visible.isOn}
-      color={mouseColor}
-      icon={icon}
-      airlift={airlift}
-    />
+    <>
+      <AnimatedCursor
+        state={state}
+        color={mouseColor}
+        position={position}
+        isActive={active.isOn}
+        isVisible={visible.isOn}
+      />
+      {ephemeralChat.isOn && (
+        <EphemeralChat position={position} color={mouseColor}>
+          {chat}
+        </EphemeralChat>
+      )}
+    </>
   );
 };

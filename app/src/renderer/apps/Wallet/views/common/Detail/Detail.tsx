@@ -45,34 +45,34 @@ const DetailPresenter = (props: DetailProps) => {
     await WalletActions.navigateBack();
   };
 
-  const wallet = walletApp.currentWallet!;
+  const wallet = walletApp.currentWallet;
   let coins = null;
   let nfts = null;
   const hasCoin =
     walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
   let coin: ERC20Type | null = null;
   if (walletApp.navState.network === 'ethereum') {
-    if (hasCoin) {
-      coin = (wallet as EthWalletType).data
-        .get(walletApp.navState.protocol)!
-        .coins.get(walletApp.navState.detail!.key)!;
+    const ethWalletData = (wallet as EthWalletType).data.get(
+      walletApp.navState.protocol
+    );
+    if (ethWalletData) {
+      if (hasCoin && walletApp.navState.detail?.key) {
+        const newCoin = ethWalletData.coins.get(walletApp.navState.detail?.key);
+        if (newCoin) coin = newCoin;
+      }
+      coins = getCoins(ethWalletData.coins);
+      nfts = getNfts(ethWalletData.nfts);
     }
-    coins = getCoins(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-    );
-    nfts = getNfts(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
-    );
   }
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? coin
         ? (wallet as EthWalletType).data
-            .get(walletApp.navState.protocol)!
-            .coins.get(coin.address)!.transactionList.transactions
-        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .transactionList.transactions
+            ?.get(walletApp.navState.protocol ?? '')
+            ?.coins.get(coin.address)?.transactionList.transactions
+        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+            ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
   let transactions = useMemo(
@@ -83,15 +83,19 @@ const DetailPresenter = (props: DetailProps) => {
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
-        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+        new Date(b.completedAt ?? 0).getTime() -
+        new Date(a.completedAt ?? 0).getTime()
     );
   const transactionHistory = transactions
     .filter((trans) => trans.status !== 'pending')
     .sort(
       (a, b) =>
-        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+        new Date(b.completedAt ?? 0).getTime() -
+        new Date(a.completedAt ?? 0).getTime()
     );
   transactions = [...pendingTransactions, ...transactionHistory];
+
+  if (!wallet) return null;
 
   return (
     <Flex
@@ -114,7 +118,7 @@ const DetailPresenter = (props: DetailProps) => {
         setSendTrans={(send: boolean) => {
           if (send) {
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {
-              walletIndex: `${wallet.index!}`,
+              walletIndex: `${wallet.index}`,
               protocol: walletApp.navState.protocol,
               ...(coin && {
                 detail: {
@@ -176,8 +180,8 @@ const DetailPresenter = (props: DetailProps) => {
                   hidePending={props.hidePending}
                 />
               )}
-              {listView === 'coins' && <CoinList coins={coins!} />}
-              {listView === 'nfts' && <NFTList nfts={nfts!} />}
+              {listView === 'coins' && coins && <CoinList coins={coins} />}
+              {listView === 'nfts' && nfts && <NFTList nfts={nfts} />}
             </>
           )}
         </Flex>

@@ -69,6 +69,18 @@ const MembersPresenter = ({ our }: IMembers) => {
   const searchRef = useRef(null);
 
   const { inputColor, windowColor, mode, dockColor } = theme.currentTheme;
+  const themeInputColor = useMemo(
+    () =>
+      mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
+    [inputColor]
+  );
+  const backgroundColor = useMemo(
+    () =>
+      mode === 'light'
+        ? lighten(0.025, rgba(dockColor, 0.9))
+        : darken(0.05, rgba(dockColor, 0.9)),
+    [dockColor]
+  );
 
   const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
@@ -77,13 +89,15 @@ const MembersPresenter = ({ our }: IMembers) => {
     new Set()
   );
 
+  if (!spaces.selected) return null;
+
   const onShipSelected = (ship: [string, string?]) => {
     const patp = ship[0];
     const nickname = ship[1];
     if (our) {
       ShipActions.addFriend(patp);
     } else {
-      SpacesActions.inviteMember(spaces.selected!.path, {
+      SpacesActions.inviteMember(spaces.selected?.path ?? '', {
         patp,
         role: 'member',
         message: '',
@@ -103,19 +117,6 @@ const MembersPresenter = ({ our }: IMembers) => {
     //   ...metadata,
     // });
   };
-
-  const themeInputColor = useMemo(
-    () =>
-      mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
-    [inputColor]
-  );
-  const backgroundColor = useMemo(
-    () =>
-      mode === 'light'
-        ? lighten(0.025, rgba(dockColor, 0.9))
-        : darken(0.05, rgba(dockColor, 0.9)),
-    [dockColor]
-  );
 
   return (
     <HomeSidebar
@@ -177,7 +178,7 @@ const MembersPresenter = ({ our }: IMembers) => {
             <Button.TextButton
               disabled={!person.computed.parsed}
               onClick={() => {
-                onShipSelected([person.computed.parsed!, '']);
+                onShipSelected([person.computed.parsed ?? '', '']);
                 person.actions.onChange('');
               }}
             >
@@ -216,7 +217,7 @@ const MembersPresenter = ({ our }: IMembers) => {
         />
       </Flex>
       {our && <FriendsList />}
-      {!our && <MembersList path={spaces.selected!.path} />}
+      {!our && <MembersList path={spaces.selected.path ?? ''} />}
     </HomeSidebar>
   );
 };

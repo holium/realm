@@ -9,10 +9,18 @@ import { AirliftManager } from './AirliftManager';
 import { AppWindowManager } from './AppWindowManager';
 import { AirliftDragManager } from './AirliftDragManager';
 import { IconDragManager } from './IconDragManager';
+import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
-  const { ship, desktop } = useServices();
-  useRooms(ship?.patp); // creates first instance of roomsManager
+  const { ship, shell, desktop } = useServices();
+  const roomsManager = useRooms(ship?.patp);
+  useMultiplayer({
+    patp: ship?.patp,
+    shipColor: ship?.color ?? '#000000',
+    desktopDimensions: shell.desktopDimensions,
+    isMultiplayerEnabled: desktop.multiplayerEnabled,
+    roomsManager,
+  });
 
   return (
     <Fill>

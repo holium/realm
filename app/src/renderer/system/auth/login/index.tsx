@@ -2,7 +2,14 @@ import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { Avatar, Flex, Box, MenuItem, Spinner } from '@holium/design-system';
+import {
+  Avatar,
+  Flex,
+  Box,
+  MenuItem,
+  Portal,
+  Spinner,
+} from '@holium/design-system';
 import {
   Text,
   Input,
@@ -16,7 +23,6 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { Portal } from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
@@ -30,7 +36,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
-  const passwordRef = useRef(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
@@ -70,10 +76,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   }, [pendingShip]);
 
   const login = async () => {
+    if (!pendingShip) return;
     const status = await AuthActions.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
+      pendingShip.patp ?? '',
+      passwordRef.current?.value ?? ''
     );
     if (status && status.startsWith('error:')) {
       if (submitRef.current) {
@@ -86,7 +92,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       if (parts.length > 1 && parseInt(parts[1]) === 400) {
         setLoginError('missing');
         ShellActions.openDialogWithStringProps('reset-code-dialog', {
-          ship: pendingShip!.patp,
+          ship: pendingShip.patp,
           // @ts-ignore
           password: passwordRef.current?.value,
         });

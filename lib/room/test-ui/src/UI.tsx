@@ -1,9 +1,6 @@
 import { observer } from 'mobx-react';
-import {
-  useRoomsManager,
-  DataPacket_Kind,
-  RemotePeer,
-} from '@holium/realm-room';
+import { DataPacket_Kind, RemotePeer } from '@holium/realm-room';
+import { useRoomsManager } from './components/RoomsManagerProvider';
 import { Speaker } from './Speaker';
 
 const UIPresenter = () => {
@@ -54,7 +51,7 @@ const UIPresenter = () => {
                   if (isPresent) {
                     roomsManager.leaveRoom();
                   } else {
-                    roomsManager.enterRoom(room.rid);
+                    roomsManager.joinRoom(room.rid);
                   }
                 }}
               >

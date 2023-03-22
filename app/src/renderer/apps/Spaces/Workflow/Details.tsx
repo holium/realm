@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import {
-  Grid,
   Text,
   Label,
   Input,
@@ -144,7 +143,8 @@ const SpacesCreateFormPresenter = ({
       });
     }
     if (edit) {
-      const space = spaces.spaces.get(edit.space)!;
+      const space = spaces.spaces.get(edit.space);
+      if (!space) return;
       setWorkspaceState({
         ...space,
         description: space.description,
@@ -195,7 +195,7 @@ const SpacesCreateFormPresenter = ({
     }, []);
 
   return (
-    <Grid.Column noGutter lg={12} xl={12}>
+    <Flex flexDirection="column" width="100%">
       <Text
         fontSize={5}
         lineHeight="24px"
@@ -472,7 +472,7 @@ const SpacesCreateFormPresenter = ({
           </FormControl.Field>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };
 

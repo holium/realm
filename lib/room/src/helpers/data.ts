@@ -1,4 +1,4 @@
-import { CursorPayload } from '@holium/realm-multiplayer';
+import { MultiplayerPayload, PresenceBroadcast } from '@holium/realm-presence';
 import { Patp } from '../types';
 
 export enum DataPacket_Kind {
@@ -12,24 +12,14 @@ export enum DataPacket_Kind {
 
 export interface DataPayload {
   app?: string;
-  data: any;
-}
-
-export interface TrackMetaPayload {
-  peer: Patp;
-  isMuted: boolean;
-  isCursorSharing: boolean;
-  isScreenSharing: boolean;
-  isSpeaking: boolean;
-  audioLevel: number; // 0 - 10
-  lastSpokeAt: number; // unix timestamp
+  data?: any;
 }
 
 export interface DataPacket {
   from: Patp;
   kind: DataPacket_Kind;
-  value:
-    | { cursor: CursorPayload }
-    | DataPayload
-    | { trackMeta: TrackMetaPayload };
+  value: {
+    multiplayer?: MultiplayerPayload;
+    broadcast?: PresenceBroadcast;
+  } & DataPayload;
 }

@@ -1,11 +1,18 @@
 import { observer } from 'mobx-react';
-import { Spinner } from '@holium/design-system';
 import { ActionButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { Avatar, Flex, Text, Button, Box, Icon } from '@holium/design-system';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import {
+  Avatar,
+  Flex,
+  Text,
+  Button,
+  Box,
+  Icon,
+  Spinner,
+} from '@holium/design-system';
+import { useToggle } from '@holium/shared';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();
@@ -19,7 +26,7 @@ const InstallAgentPresenter = () => {
 
   const shipName = onboarding.ship.patp;
   const shipNick = onboarding.ship.nickname;
-  const shipColor = onboarding.ship.color!;
+  const shipColor = onboarding.ship.color ?? '#000000';
   const avatar = onboarding.ship.avatar;
 
   const installRealm = () => {

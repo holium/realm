@@ -71,8 +71,8 @@ const View = ({ id, children }: Props) => (
   </Flex>
 );
 
-const container = document.getElementById('root')!;
-const root = createRoot(container);
+const container = document.getElementById('root');
+const root = createRoot(container as HTMLElement);
 const containerId = 'splash-view';
 root.render(<View id={containerId} />);
 

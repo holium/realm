@@ -69,7 +69,7 @@ const AppWindowManagerPresenter = () => {
       }}
     >
       {windows.map((appWindow, index: number) => (
-        <AppWindow key={`${window.id}-${index}`} appWindow={appWindow} />
+        <AppWindow key={`${appWindow.appId}-${index}`} appWindow={appWindow} />
       ))}
     </motion.div>
   );

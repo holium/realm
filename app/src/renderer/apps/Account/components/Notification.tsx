@@ -182,8 +182,8 @@ const NotificationPresenter = (props: NotificationProps) => {
             });
             if (!path) return;
             // ShipActions.draftDm()
-            const dmPreview = courier.previews.get(path)!;
-            openDMsToChat(dmApp, dmPreview, setActiveApp);
+            const dmPreview = courier.previews.get(path);
+            if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);
           }
           evt.preventDefault();
         }}

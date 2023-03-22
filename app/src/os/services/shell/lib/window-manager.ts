@@ -1,5 +1,5 @@
 import { AppType, RealmConfigType } from 'os/services/spaces/models/bazaar';
-import { Dimensions, Position, Bounds } from 'os/types';
+import { Dimensions, Position, Bounds } from '@holium/shared';
 import { getDefaultAppDimensions } from './dimensions';
 
 /**
@@ -206,3 +206,21 @@ export const denormalizeBounds = (
     height,
   };
 };
+
+/* Converts position from pixels to the 1-10 scale. */
+export const normalizePosition = (
+  position: Position,
+  desktopDimensions: Dimensions
+): Position => ({
+  x: position.x / (desktopDimensions.width / 10),
+  y: position.y / (desktopDimensions.height / 10),
+});
+
+/* Converts position from the 1-10 scale to pixels. */
+export const denormalizePosition = (
+  position: Position,
+  desktopDimensions: Dimensions
+): Position => ({
+  x: position.x * (desktopDimensions.width / 10),
+  y: position.y * (desktopDimensions.height / 10),
+});

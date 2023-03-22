@@ -4,7 +4,7 @@
 
 import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { Bounds } from 'os/types';
+import { Bounds } from '@holium/shared';
 import { SpacesActions } from './spaces';
 
 /**
@@ -32,14 +32,11 @@ export const DesktopActions = {
     return await window.electron.os.desktop.closeHomePane();
   },
   setMouseColor: async (mouseColor: string) => {
-    window.electron.app.mouseColorChanged(mouseColor);
+    window.electron.app.setMouseColor(mouseColor);
     await window.electron.os.desktop.setMouseColor(mouseColor);
   },
   setWindowBounds: (appId: string, bounds: Bounds) => {
     window.electron.os.desktop.setWindowBounds(appId, bounds);
-  },
-  setPartitionCookies: async (partition: string, cookies: any) => {
-    return await window.electron.app.setPartitionCookies(partition, cookies);
   },
   openAppWindow: async (app: AppType) => {
     const result = await window.electron.os.desktop.openAppWindow(app);

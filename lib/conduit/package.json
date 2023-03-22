@@ -4,6 +4,7 @@
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A node library for efficiently connecting with a ship",
+  "homepage": "https://holium.com",
   "main": "dist/holium-conduit.cjs.js",
   "module": "dist/holium-conduit.esm.js",
   "typings": "dist/holium-conduit.cjs.d.ts",

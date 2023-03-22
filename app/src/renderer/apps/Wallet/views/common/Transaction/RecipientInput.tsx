@@ -93,12 +93,12 @@ export const RecipientInput = observer(
         .catch((err: Error) => {
           console.error(err);
           /* @ts-expect-error */
-          if (patp !== stateRef.current!.recipient!) return;
+          if (patp !== stateRef.current.recipient) return;
           setRecipientDetails({ failed: true, details: { patp } });
         })
         .finally(() => {
           /* @ts-expect-error */
-          if (stateRef.current!.currPromise! === promise) {
+          if (stateRef.current.currPromise === promise) {
             setCurrPromise(null);
           }
         });
@@ -111,8 +111,8 @@ export const RecipientInput = observer(
       ) {
         props.setValid(true, {
           patp: recipientDetails.details.patp,
-          color: recipientDetails.details.recipientMetadata?.color!,
-          address: recipientDetails.details.address!,
+          color: recipientDetails.details.recipientMetadata?.color,
+          address: recipientDetails.details.address ?? '',
         });
       } else if (
         recipientDetails.failed &&

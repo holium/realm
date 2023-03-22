@@ -10,6 +10,7 @@ module.exports = {
     'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/no-unescaped-entities': 'off',
+    'import/no-duplicates': 'error',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
       'error',
@@ -21,6 +22,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'error',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
   },

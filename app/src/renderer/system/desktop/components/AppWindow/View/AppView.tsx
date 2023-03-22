@@ -151,7 +151,6 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
             bottom: 0,
             right: 0,
             position: 'absolute',
-            background: theme.currentTheme.windowColor,
             overflow: 'hidden',
           }}
         />

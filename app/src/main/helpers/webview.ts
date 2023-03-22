@@ -29,6 +29,7 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     webContents.on('dom-ready', () => {
       if (isMac || isWindows) hideCursor(webContents);
       webContents.send('add-mouse-listeners');
+      webContents.send('add-key-listeners');
     });
   });
 };

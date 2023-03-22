@@ -76,15 +76,21 @@ export interface Membership {
   [path: SpacePath]: Members;
 }
 
-export type Position = { x: number; y: number };
-
-export type Dimensions = { width: number; height: number };
-
-export type Bounds = Position & Dimensions;
-
 export type RealmInstallationStatus = {
   result: 'success' | 'partial' | 'error';
   desks: string[] | undefined;
   installedDesks: string[] | undefined;
   errorMessage: string | undefined;
+};
+
+export type MediaAccessStatus =
+  | 'not-determined'
+  | 'granted'
+  | 'denied'
+  | 'restricted'
+  | 'unknown';
+
+export type MediaAccess = {
+  camera: MediaAccessStatus;
+  mic: MediaAccessStatus;
 };

@@ -8,7 +8,7 @@ import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceC
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
-import { Dimensions } from 'os/types';
+import { Dimensions } from '@holium/shared';
 import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
 
 export interface BaseWorkflowProps {

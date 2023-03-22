@@ -10,8 +10,7 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { Menu } from '../Menu';
 import { PassportCard } from './PassportCard';
-
-type AnchorPoint = { x: number; y: number };
+import { Position } from '@holium/shared';
 
 type PassportMenuOptions = {
   patp: string;
@@ -23,7 +22,7 @@ type PassportMenuOptions = {
 
 type PassportMenuConfig = {
   id: string;
-  anchorPoint: AnchorPoint;
+  anchorPoint: Position;
   options: PassportMenuOptions;
 };
 

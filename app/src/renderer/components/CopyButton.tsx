@@ -1,5 +1,5 @@
 import { Box, Icon } from '@holium/design-system';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 
 interface CopyButtonProps {
   content: string;
