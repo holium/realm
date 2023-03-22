@@ -10,6 +10,7 @@ import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { Dimensions } from 'os/types';
 import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
+import { CampfireAddParticipantDialogConfig } from 'renderer/apps/Campfire/CampfireAddParticipantDialog';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -53,6 +54,7 @@ export const dialogRenderers: DialogRenderers = {
   'delete-space-dialog': DeleteSpaceDialogConfig,
   'change-email-dialog': ChangeEmailDialogConfig,
   'reset-code-dialog': ResetCodeDialogConfig,
+  'campfire-add-participant-dialog': CampfireAddParticipantDialogConfig,
   ...spacesDialogs,
   ...onboardingDialogs,
 };

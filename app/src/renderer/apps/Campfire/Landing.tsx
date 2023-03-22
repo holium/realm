@@ -1,7 +1,23 @@
 import { Flex, Text, TextInput, Button, Icon } from '@holium/design-system';
 import { CampfireActions } from 'renderer/logic/actions/campfire';
+import { useServices } from 'renderer/logic/store';
+import { useRooms } from '../Rooms/useRooms';
 
 export const Landing = () => {
+  const { spaces, ship } = useServices();
+  const roomsManager = useRooms(ship?.patp);
+  const createRoom = (evt: any) => {
+    // setLoading(true);
+    // const { name, isPrivate } = form.actions.submit();
+    const name = 'testing';
+    const isPrivate = false;
+    evt.stopPropagation();
+    const spacePath =
+      spaces.selected?.type !== 'our' ? spaces.selected?.path ?? '' : null;
+    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    CampfireActions.setView('video');
+  };
+
   return (
     <Flex
       flexDirection="row"
@@ -45,6 +61,14 @@ export const Landing = () => {
             justifyContent="center"
             alignItems="center"
             onClick={() => CampfireActions.setView('video')}
+            onKeyDown={(evt: any) => {
+              if (evt.key === 'Enter' && form.computed.isValid) {
+                createRoom(evt);
+              }
+            }}
+            onClick={(evt: any) => {
+              createRoom(evt);
+            }}
           >
             <Icon name="AddVideo" size={20} />
             New Video
