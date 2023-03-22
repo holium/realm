@@ -4,6 +4,7 @@
   "author": "trent@holium.com",
   "license": "MIT",
   "description": "A lib that manages media streams via RTCPeerConnections.",
+  "homepage": "https://holium.com",
   "main": "dist/holium-realm-room.cjs.js",
   "module": "dist/holium-realm-room.esm.js",
   "browser": {

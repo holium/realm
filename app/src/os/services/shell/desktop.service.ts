@@ -12,7 +12,7 @@ import {
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
-import { Bounds } from 'os/types';
+import { Bounds } from '@holium/shared';
 
 import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
 
@@ -112,7 +112,7 @@ export class DesktopService extends BaseService {
 
   async load(_patp: string, mouseColor: string) {
     // const syncEffect = {
-    //   model: getSnapshot(this.state!),
+    //   model: getSnapshot(this.state),
     //   resource: 'desktop',
     //   key: null,
     //   response: 'initial',
@@ -139,9 +139,9 @@ export class DesktopService extends BaseService {
     this.core.services.spaces.setSpaceWallpaper(spaceId, theme);
     this.core.services.shell.closeDialog(null);
 
-    // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
+    // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit.ship}/our`);
     // if (newTheme) {
-    //   this.state?.setTheme(newTheme!);
+    //   this.state?.setTheme(newTheme);
     // }
   }
 
@@ -168,7 +168,8 @@ export class DesktopService extends BaseService {
   }
 
   openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
-    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    const desktopDimensions = this.core.services.shell.desktopDimensions;
+    if (!desktopDimensions) throw new Error('No desktop dimensions found');
     const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials;
@@ -177,7 +178,7 @@ export class DesktopService extends BaseService {
 
     if (selectedApp.type === 'urbit') {
       const appUrl = newWindow.href?.glob
-        ? `${credentials.url}/apps/${selectedApp.id!}`
+        ? `${credentials.url}/apps/${selectedApp.id}`
         : `${credentials.url}${newWindow.href?.site}`;
 
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
@@ -191,7 +192,7 @@ export class DesktopService extends BaseService {
       session.fromPartition(`${selectedApp.id}-web-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,
-        value: credentials.cookie!.split('=')[1].split('; ')[0],
+        value: credentials.cookie?.split('=')[1].split('; ')[0],
       });
     }
   }
@@ -205,7 +206,8 @@ export class DesktopService extends BaseService {
   }
 
   toggleMaximized(_event: any, appId: string) {
-    const desktopDimensions = this.core.services.shell.desktopDimensions!;
+    const desktopDimensions = this.core.services.shell.desktopDimensions;
+    if (!desktopDimensions) throw new Error('No desktop dimensions found');
     return this.state.toggleMaximize(appId, desktopDimensions);
   }
 
@@ -232,7 +234,7 @@ export class DesktopService extends BaseService {
     }
     for (let i = 0; i < desks.length; i++) {
       const desk = desks[i];
-      this.core.conduit!.poke({
+      this.core.conduit?.poke({
         app: 'hood',
         mark: 'kiln-install',
         json: {

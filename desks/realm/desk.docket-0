@@ -1,10 +1,11 @@
 :~
     title+'Realm'
-    info+'A desktop environment for DAOs and communities. Developed by Holium.'
-    color+0xce.bef0
-    version+[0 1 2]
+    info+'A desktop environment for DAOs and communities.'
+    color+0xfe.9c4f
+    version+[0 1 3]
     website+'https://holium.com'
     license+'MIT'
     base+'realm'
-    glob-http+['https://holium-app-globs.nyc3.digitaloceanspaces.com/realm/glob-0v3.ijtsa.kqfsm.f71li.n99kg.etthr.glob' 0v3.ijtsa.kqfsm.f71li.n99kg.etthr]
+    image+'https://holium-app-globs.nyc3.cdn.digitaloceanspaces.com/realm%2Frealm.svg'
+    glob-http+['https://holium-app-globs.nyc3.cdn.digitaloceanspaces.com/realm%2Fholium-com-redirect.glob' 0v4.39m1m.t5rlt.d94cv.akdr1.389ub]
 ==

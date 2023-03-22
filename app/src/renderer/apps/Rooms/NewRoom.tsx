@@ -61,7 +61,7 @@ const NewRoomPresenter = () => {
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =
-      spaces.selected?.type !== 'our' ? spaces.selected!.path : null;
+      spaces.selected?.type !== 'our' ? spaces.selected?.path ?? '' : null;
     roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };

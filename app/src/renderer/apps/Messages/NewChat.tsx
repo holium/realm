@@ -68,7 +68,7 @@ const NewChatPresenter = (props: IProps) => {
 
   const onShipRemove = (contact: [string, string?]) => {
     selectedPatp.delete(contact[0]);
-    selectedNickname.delete(contact[1]!);
+    if (contact[1]) selectedNickname.delete(contact[1]);
     setSelected(new Set(selectedPatp));
     setSelectedNickname(new Set(selectedNickname));
   };

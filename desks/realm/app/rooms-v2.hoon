@@ -9,9 +9,13 @@
   $:  %0
       provider=provider-state:store
       session=session-state:store
+      active-timer=_|
+      signal-tally=(map signal-action:store @)
   ==
 ::
 +$  card  card:agent:gall
+++  step  ~m1
+++  peak  100
 --
 ::
 %-  agent:dbug
@@ -37,12 +41,20 @@
     !>(state)
   ::
   ++  on-load
-    |=  old-state=vase
-    ^-  (quip card _this)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    |=  =vase
+    ^-  (quip card:agent:gall agent:gall)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old %rooms-v2 state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term]
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -118,7 +130,18 @@
         ==
     ==
   ::
-  ++  on-arvo  on-arvo:def
+  ++  on-arvo
+    |=  [=wire =sign-arvo]
+    ^-  (quip card _this)
+    ?+    wire  (on-arvo:def wire sign-arvo)
+        [%clear-signal-tally ~]
+      ?+    sign-arvo  (on-arvo:def wire sign-arvo)
+          [%behn %wake *]
+        ?~  error.sign-arvo
+          `this(active-timer |, signal-tally ~)
+        (on-arvo:def wire sign-arvo)
+      ==
+    ==
   ::
   ++  on-fail   on-fail:def
   ::
@@ -136,7 +159,7 @@
   ^+  hol
   =/  wire       [/provider-updates/(scot %p our.bol)]
   =/  watch-our  [%pass wire %agent [our.bol %rooms-v2] %watch wire]~
-  hol(state [%0 host=provider-init session=session-init], dek (weld watch-our dek))
+  hol(state [%0 host=provider-init session=session-init | ~], dek (weld watch-our dek))
   ::
   ++  provider-init
     ^-  provider-state:store
@@ -160,12 +183,24 @@
       |=  [from=ship to=ship rid=cord data=cord]
       ^-  (quip card _state)
       ?:  =(from our.bol)
+        =/  signal  [%signal from to rid data]
+        =/  count  (~(gut by signal-tally) signal 0)
+        ?:  (gte count peak)  `state
         ::  Sending a signal to another ship
-        :_  state
+        :_  %=  state
+              active-timer  %.y
+              signal-tally  (~(put by signal-tally) signal +(count))
+            ==
+        %+  welp
+          ?:  active-timer  ~
+          [%pass /clear-signal-tally %arvo %b %wait (add now.bol step)]~
         [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
-      [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
+      ?:  ?~  current.session  %.n
+          =(u.current.session rid)
+        [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
+      [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
     ::
     --
   --

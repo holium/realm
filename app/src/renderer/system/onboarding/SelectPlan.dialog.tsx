@@ -7,20 +7,22 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { Avatar } from '@holium/design-system';
+import { ThemeModelType } from 'os/services/theme.model';
 
 export interface SelectPlanProps extends BaseDialogProps {
   patp: string;
+  theme: ThemeModelType;
 }
 
 const SelectPlanPresenter = (props: SelectPlanProps) => {
   const [subscribeLoading, setSubscribeLoading] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const { onboarding } = useServices();
-  const planet = onboarding.planet!;
+  const planet = onboarding.planet;
 
-  const panelBackground = darken(0.02, props.theme!.windowColor);
+  const panelBackground = darken(0.02, props.theme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
-  const bulletIconColor = transparentize(0.1, props.theme!.iconColor);
+  const bulletIconColor = transparentize(0.1, props.theme.iconColor);
   const selectedBackground = transparentize(
     0.8,
     theme.light.colors.brand.primary
@@ -58,6 +60,8 @@ const SelectPlanPresenter = (props: SelectPlanProps) => {
       window.removeEventListener('keydown', handleKeydown);
     };
   }, [billingPeriod]);
+
+  if (!planet) return null;
 
   const PlanetPreview = () => (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">

@@ -1,8 +1,14 @@
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
-import { RadioOption, Select } from '@holium/design-system';
+import {
+  RadioOption,
+  Select,
+  Flex,
+  Button,
+  Text,
+  Icon,
+} from '@holium/design-system';
 import { Label, FormControl } from 'renderer/components';
-import { Flex, Button, Text, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
@@ -10,7 +16,7 @@ import { useRooms } from './useRooms';
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
   const { ship } = useServices();
-  const roomsManager = useRooms(ship!.patp);
+  const roomsManager = useRooms(ship?.patp);
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []

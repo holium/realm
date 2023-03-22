@@ -6,8 +6,12 @@ import { UqbarApi } from '../../../../api/uqbar';
 export class UqbarProtocol implements BaseProtocol {
   updateWalletState(conduit: Conduit, walletState: WalletStoreType) {
     for (const walletKey of walletState.ethereum.wallets.keys()) {
-      const wallet = walletState.ethereum.wallets.get(walletKey)!;
-      UqbarApi.trackAddress(conduit, wallet.address, wallet.nickname);
+      const wallet = walletState.ethereum.wallets.get(walletKey);
+      const walletAddress = wallet?.address;
+      const walletNickname = wallet?.nickname;
+      if (walletAddress && walletNickname) {
+        UqbarApi.trackAddress(conduit, walletAddress, walletNickname);
+      }
     }
   }
 

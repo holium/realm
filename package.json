@@ -3,19 +3,21 @@
   "name": "realm-monorepo",
   "workspaces": [
     "app",
+    "shared",
     "lib/design-system",
-    "lib/multiplayer",
+    "lib/presence",
+    "lib/presence/code",
     "lib/conduit",
     "lib/room",
     "lib/room/test-ui"
   ],
   "scripts": {
-    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-multiplayer tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
-    "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
+    "build:multiplayer": "yarn workspace @holium/realm-presence build",
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
@@ -60,8 +62,9 @@
   },
   "preconstruct": {
     "packages": [
+      "shared",
       "lib/design-system",
-      "lib/multiplayer",
+      "lib/presence",
       "lib/conduit",
       "lib/room"
     ]

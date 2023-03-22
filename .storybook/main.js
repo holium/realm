@@ -4,9 +4,10 @@ module.exports = {
   webpackFinal: async (config) => {
     const modules = [
       path.resolve(__dirname, '../app/src'),
+      path.resolve(__dirname, '../shared/src'),
       path.resolve(__dirname, '../lib/conduit/src'),
       path.resolve(__dirname, '../lib/design-system/src'),
-      path.resolve(__dirname, '../lib/multiplayer/src'),
+      path.resolve(__dirname, '../lib/presence/src'),
       path.resolve(__dirname, '../lib/room/src'),
     ];
     
@@ -17,9 +18,10 @@ module.exports = {
 
   stories: [
     "../app/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../shared/src/**/*.stories.@(js|jsx|ts|tsx)",
     "../lib/conduit/src/**/*.stories.@(js|jsx|ts|tsx)",
     "../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx)",
-    "../lib/multiplayer/src/**/*.stories.@(js|jsx|ts|tsx)",
+    "../lib/presence/src/**/*.stories.@(js|jsx|ts|tsx)",
     "../lib/room/src/**/*.stories.@(js|jsx|ts|tsx)"
   ],
   addons: [

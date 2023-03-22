@@ -20,6 +20,7 @@ import {
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
+import { Dimensions } from '@holium/shared';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -72,20 +73,20 @@ const TrayAppStore = types
       self.activeApp = null;
     },
     setActiveApp(
-      appKey: TrayAppKeys | null,
+      appId: TrayAppKeys | null,
       params?: {
         willOpen: boolean;
-        position: any;
+        position: string;
         anchorOffset: any;
-        dimensions: any;
+        dimensions: Dimensions;
         innerNavigation?: string;
       }
     ) {
-      self.activeApp = appKey;
-      if (params?.willOpen) {
+      self.activeApp = appId;
+      if (params?.willOpen && appId) {
         const { position, anchorOffset, dimensions } = params;
         self.coords = calculateAnchorPointById(
-          appKey!,
+          appId,
           anchorOffset,
           position,
           dimensions
