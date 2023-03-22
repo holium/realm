@@ -1,10 +1,8 @@
 import { HTMLAttributes, ReactNode } from 'react';
-import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
 type MenuItemStyleProps = {
   children: ReactNode;
-  color?: string;
   customBg?: string;
   selected?: boolean;
   disabled?: boolean;
@@ -36,12 +34,6 @@ export const MenuItemStyle = styled.li<MenuItemStyleProps>`
         outline: none;
         border-color: transparent;
       }
-    `}
-
-  ${({ color, disabled }) =>
-    color &&
-    css`
-      color: ${disabled ? rgba(color, 0.7) : color};
     `}
 
   background-color: transparent;
