@@ -160,8 +160,8 @@
 ::  :notif-db &notif-db-poke [%dismiss-id 0]
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  row  (got:notifon:sur notifs-table.state id)
-  =.  notifs-table.state  (put:notifon:sur notifs-table.state id (toggle-dismissed row now.bowl %.y))
+  =/  row  (toggle-dismissed (got:notifon:sur notifs-table.state id) now.bowl %.y)
+  =.  notifs-table.state  (put:notifon:sur notifs-table.state id row)
   =/  thechange  notif-db-change+!>((limo [[%update-row row] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
