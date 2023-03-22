@@ -9,8 +9,6 @@ import EmojiPicker, {
 } from 'emoji-picker-react';
 import { FragmentReactionType } from './Bubble.types';
 import { AnimatePresence } from 'framer-motion';
-import { lighten } from 'polished';
-import { getVar } from '../../util/colors';
 import { Position } from '@holium/shared';
 
 const WIDTH = 350;
@@ -77,11 +75,13 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   align-items: center;
   justify-content: center;
   background: ${({ selected }) =>
-    selected ? () => lighten(0.3, getVar('accent')) : 'var(--rlm-input-color)'};
+    selected ? 'rgba(var(--rlm-accent-rgba))' : 'rgba(var(--rlm-input-rgba))'};
+  backdrop-filter: ${({ selected }) =>
+    selected ? 'brightness(1.3)' : 'brightness(1)'};
   border: ${({ selected }) =>
     selected
-      ? '1px solid var(--rlm-accent-color)'
-      : '1px solid var(--rlm-window-color)'};
+      ? '1px solid rgba(var(--rlm-accent-rgba))'
+      : '1px solid rgba(var(--rlm-window-rgba))'};
 
   border-radius: 16px;
   transition: var(--transition);
@@ -92,7 +92,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && 'color: var(--rlm-accent-color);'}
+            ${selected && 'color: rgba(var(--rlm-accent-rgba));'}
           }
         `
       : css`

@@ -1,7 +1,6 @@
 import { HTMLAttributes, ReactNode } from 'react';
-import { darken, rgba } from 'polished';
+import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
-import { getVar } from '../../util/colors';
 
 type MenuItemStyleProps = {
   children: ReactNode;
@@ -24,12 +23,12 @@ export const MenuItemStyle = styled.li<MenuItemStyleProps>`
   transition: var(--transition);
   pointer-events: auto;
   user-select: none;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
 
   ${({ disabled }) =>
     disabled &&
     css`
-      color: ${rgba(getVar('text'), 0.7)};
+      color: rgba(var(--rlm-text-rgba), 0.7);
       background: transparent;
       opacity: 0.5;
       cursor: default;
@@ -45,12 +44,10 @@ export const MenuItemStyle = styled.li<MenuItemStyleProps>`
       color: ${disabled ? rgba(color, 0.7) : color};
     `}
 
-  ${({ customBg }) =>
-    customBg &&
-    css`
-      background-color: transparent;
-      &:hover:not([disabled]) {
-        background-color: ${darken(0.035, customBg)};
-      }
-    `}
+  background-color: transparent;
+  &:hover:not([disabled]) {
+    background-color: ${({ customBg }) =>
+      customBg ? customBg : 'rgba(var(--rlm-input-rgba))'};
+    backdrop-filter: brightness(96.5%);
+  }
 `;

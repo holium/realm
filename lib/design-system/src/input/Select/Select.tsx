@@ -5,7 +5,6 @@ import { Text } from '../../general/Text/Text';
 import { MenuItemStyle } from '../../general/MenuItem/MenuItem.styles';
 import { SelectDropdown, SelectWrapper } from './Select.styles';
 import { RadioOption } from '../RadioGroup/RadioGroup';
-import { getVar } from '../../util/colors';
 
 const animationVariants: Variants = {
   enter: {
@@ -113,7 +112,7 @@ export const Select = ({
         {visibleOptions.map((option, index) => (
           <MenuItemStyle
             key={`${option.value}-${index}`}
-            customBg={backgroundColor ?? getVar('input')}
+            customBg={backgroundColor}
             disabled={option.disabled}
             onClick={() =>
               !disabled && !option.disabled && onClick(option.value)

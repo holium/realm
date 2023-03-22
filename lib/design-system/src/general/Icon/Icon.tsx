@@ -36,7 +36,6 @@ const SvgComponent = forwardRef<
     name: IconPathsType;
     title?: string;
     color?: ColorVariants;
-    /* SVGs as CSS background-images don't support the #hex format. */
     isBackgroundImage?: boolean;
   }
 >(
@@ -48,8 +47,9 @@ const SvgComponent = forwardRef<
 
     const svgSafeColor = color
       ? isBackgroundImage
-        ? hexToSvgSafeColor(getVar(color))
-        : getVar(color)
+        ? /* SVGs as CSS background-images don't support the #hex format. */
+          hexToSvgSafeColor(`rgba(${getVar(color)})`)
+        : `rgba(${getVar(color)})`
       : 'currentcolor';
 
     return (

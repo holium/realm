@@ -61,7 +61,6 @@ export const AvatarInput: FC<AvatarInputProps> = (props: AvatarInputProps) => {
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
-        className="realm-cursor-text-cursor"
         placeholder="Paste image link here"
         value={value}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
