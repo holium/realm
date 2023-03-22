@@ -158,30 +158,45 @@
                 `this
               %chat-db-change
                 =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
-                :: only notify on new messages
-                ?.  (lien thechange is-new-message)  `this
-                =/  msg=db-change-type:db-sur  (snag 0 (skim thechange is-new-message))
-                ?+  -.msg  `this
-                  %add-row
-                  ?+  -.db-row.msg  `this
-                    %messages
-                    =/  thepath  path.msg-part.db-row.msg
-                    ?:
-                    ?|  =(sender.msg-id.msg-part.db-row.msg our.bowl) :: if it's our message, don't do anything
-                        (~(has in mutes.state) thepath)               :: if it's a muted path, don't do anything
+                =/  cards=(list card)
+                  %-  zing
+                  %+  turn
+                    %+  skim
+                      thechange 
+                    |=(ch=db-change-type:db-sur =(-.ch %add-row))
+                  |=  ch=db-change-type:db-sur
+                  ^-  (list card)
+                  ?+  -.ch  ~
+                    %add-row
+                    ?+  -.db-row.ch  ~
+                      %paths
+                        =/  pathrow  path-row.db-row.ch
+                        =/  pathpeers  (scry-peers:lib path.pathrow bowl)
+                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                        ?:  =(patp.host our.bowl) :: if it's our own creation, don't do anything
+                          ~
+                        =/  send-status-message
+                          !>([%send-message path.pathrow ~[[[%status (crip "{(scow %p our.bowl)} joined the chat")] ~ ~]] *@dr])
+                        [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
+                      %messages
+                        =/  thepath  path.msg-part.db-row.ch
+                        ?:
+                        ?|  =(sender.msg-id.msg-part.db-row.ch our.bowl) :: if it's our message, don't do anything
+                            (~(has in mutes.state) thepath)               :: if it's a muted path, don't do anything
+                        ==
+                          ~
+                        =/  notif-db-card  (notif-new-msg:core msg-part.db-row.ch our.bowl)
+                        ?:  :: if we should do a push notification also,
+                        ?&  push-enabled.state                  :: push is enabled
+                            (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
+                        ==
+                          =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.ch)}"))
+                          [push-card notif-db-card ~]
+                        :: otherwise, just send to notif-db
+                        [notif-db-card ~]
                     ==
-                      `this
-                    =/  notif-db-card  (notif-new-msg:core msg-part.db-row.msg our.bowl)
-                    ?:  :: if we should do a push notification also,
-                    ?&  push-enabled.state                  :: push is enabled
-                        (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
-                    ==
-                      =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.msg)}"))
-                      [[push-card notif-db-card ~] this]
-                    :: otherwise, just send to notif-db
-                    [[notif-db-card ~] this]
                   ==
-                ==
+                [cards this]
             ==
         ==
     ==

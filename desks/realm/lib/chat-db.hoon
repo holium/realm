@@ -175,7 +175,7 @@
     |=([s=@p role=@tas] [path.row s role now.bowl now.bowl])
 
   =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
-  =/  thechange  db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
+  =/  thechange  chat-db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.row) ~] thechange]
   ==
@@ -201,7 +201,7 @@
 
   =.  paths-table.state  (~(put by paths-table.state) path row)
 
-  =/  thechange  db-change+!>(~[[%upd-paths-row row]])
+  =/  thechange  chat-db-change+!>(~[[%upd-paths-row row]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -223,7 +223,7 @@
   =.  updated-at.row     now.bowl
   =.  paths-table.state  (~(put by paths-table.state) path row)
 
-  =/  thechange  db-change+!>(~[[%upd-paths-row row]])
+  =/  thechange  chat-db-change+!>(~[[%upd-paths-row row]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -243,7 +243,7 @@
   =/  change-row      [%del-paths-row path now.bowl]
   =.  del-log.state   (delete-logs-for-path state path)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
-  =/  thechange       db-change+!>(~[change-row])
+  =/  thechange       chat-db-change+!>(~[change-row])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path) ~] thechange]
   ==
@@ -270,7 +270,7 @@
 
   =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
   =.  messages-table.state  -.add-result
-  =/  thechange  db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
+  =/  thechange  chat-db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start since every new message will need to go out to
   :: those subscriptions
@@ -302,7 +302,7 @@
 
   =.  messages-table.state  (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg)
 
-  =/  thechange  db-change+!>([%add-row %messages msg]~)
+  =/  thechange  chat-db-change+!>([%add-row %messages msg]~)
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start since every new message will need to go out to
   :: those subscriptions
@@ -327,7 +327,7 @@
   =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
 
-  =/  thechange   db-change+!>(~[[%upd-messages msg-id +.add-result]])
+  =/  thechange   chat-db-change+!>(~[[%upd-messages msg-id +.add-result]])
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -365,8 +365,8 @@
   =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row path.row a now.bowl]))
   =/  thechange
     ?:  pinned
-      db-change+!>([[%upd-paths-row row] change-rows])
-    db-change+!>(change-rows)
+      chat-db-change+!>([[%upd-paths-row row] change-rows])
+    chat-db-change+!>(change-rows)
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -392,7 +392,7 @@
   =.  messages-table.state  tbl.remove-result
 
   =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a now.bowl]))
-  =/  thechange     db-change+!>(change-rows)
+  =/  thechange     chat-db-change+!>(change-rows)
   =.  del-log.state   (log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
 
   =/  gives  :~
@@ -418,7 +418,7 @@
   ]
   =/  peers  (snoc original-peers-list row)
   =.  peers-table.state  (~(put by peers-table.state) path.act peers)
-  =/  thechange  db-change+!>(~[[%add-row [%peers row]]])
+  =/  thechange  chat-db-change+!>(~[[%add-row [%peers row]]])
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
   ==
@@ -456,7 +456,7 @@
     [%del-peers-row path.act patp.act now.bowl]
   =.  del-log.state   ?:(our-kicked (delete-logs-for-path state path.act) del-log.state)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
-  =/  thechange   db-change+!>(~[change-row])
+  =/  thechange   chat-db-change+!>(~[change-row])
 
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.act) ~] thechange]
