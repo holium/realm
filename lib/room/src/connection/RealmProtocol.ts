@@ -283,6 +283,11 @@ export class RealmProtocol extends BaseProtocol {
         this.local?.streamTracks(peer);
       });
     });
+    this.local.on(PeerEvent.VideoTrackAdded, () => {
+      this.peers.forEach((peer: RemotePeer) => {
+        this.local?.streamTracks(peer);
+      });
+    });
     this.local.on(PeerEvent.Muted, () => {
       this.sendData({
         kind: DataPacket_Kind.MUTE_STATUS,

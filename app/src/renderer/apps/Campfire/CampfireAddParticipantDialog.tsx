@@ -34,9 +34,7 @@ export const CampfireAddParticipantDialogConfig: (
 });
 
 const CampfireAddParticipantDialogPresenter = () => {
-  const;
   const copied = useToggle(false);
-  console.log('copied', copied);
   return (
     <Flex flexDirection="column" width="100%" alignItems="stretch" gap={20}>
       <Text.Custom
@@ -68,7 +66,6 @@ const CampfireAddParticipantDialogPresenter = () => {
             style={{ borderRadius: '5px' }}
           >
             <Text.Caption>app+realm://~lomder-librun/xy21xao021</Text.Caption>
-            <Icon name="Copy" />
             {!copied ? <Icon name="Copy" /> : <Icon name="CheckCircle" />}
           </Card>
         </Flex>

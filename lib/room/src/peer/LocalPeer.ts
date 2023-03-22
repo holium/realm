@@ -20,6 +20,18 @@ export const DEFAULT_AUDIO_OPTIONS = {
   autoGainControl: false,
 };
 
+export const DEFAULT_VIDEO_OPTIONS = {
+  channelCount: {
+    ideal: 2,
+    min: 1,
+  },
+  sampleRate: 48000,
+  sampleSize: 16,
+  noiseSuppresion: true,
+  echoCancellation: true,
+  autoGainControl: false,
+};
+
 export class LocalPeer extends Peer {
   stream: MediaStream | null = null;
   protocol: BaseProtocol;
@@ -36,6 +48,9 @@ export class LocalPeer extends Peer {
       stream: observable,
       setMedia: action.bound,
     });
+    if (config.video) {
+      this.constraints.video = DEFAULT_VIDEO_OPTIONS;
+    }
   }
 
   setAudioInputDevice(deviceId: string) {
@@ -57,6 +72,27 @@ export class LocalPeer extends Peer {
   // TODO
   setAudioOutputDevice(deviceId: string) {
     localStorage.setItem('rooms-audio-output', deviceId);
+  }
+
+  setVideoInputDevice(deviceId: string) {
+    localStorage.setItem('campfire-video-input', deviceId);
+    if (this.stream?.active) {
+      this.disableMedia();
+      this.enableMedia({
+        audio: this.constraints.audio,
+        video: {
+          ...(this.constraints.video as MediaTrackConstraints),
+          deviceId: {
+            exact: deviceId,
+          },
+        },
+      });
+    }
+  }
+
+  // TODO
+  setVideoOutputDevice(deviceId: string) {
+    localStorage.setItem('campfire-video-output', deviceId);
   }
 
   /**
@@ -111,7 +147,7 @@ export class LocalPeer extends Peer {
   enableMedia(
     options: MediaStreamConstraints = {
       audio: DEFAULT_AUDIO_OPTIONS,
-      video: false,
+      video: DEFAULT_VIDEO_OPTIONS,
     }
   ) {
     if (this.stream) {
@@ -122,6 +158,13 @@ export class LocalPeer extends Peer {
       options.audio = {
         ...DEFAULT_AUDIO_OPTIONS,
         deviceId: { exact: storedDeviceId },
+      };
+    }
+    const storedVideoDeviceId = localStorage.getItem('campfire-video-input');
+    if (storedVideoDeviceId) {
+      options.video = {
+        ...DEFAULT_VIDEO_OPTIONS,
+        deviceId: { exact: storedVideoDeviceId },
       };
     }
     navigator.mediaDevices

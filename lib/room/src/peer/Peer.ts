@@ -9,6 +9,7 @@ import { PeerEvent } from './events';
 export interface PeerConfig {
   isHost: boolean;
   rtc: RTCConfiguration;
+  video?: boolean;
 }
 export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerEventCallbacks>) {
   patp: Patp;

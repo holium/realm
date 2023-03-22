@@ -7,6 +7,7 @@ import {
   CommButton,
   Avatar,
 } from '@holium/design-system';
+import { AvatarRow } from '../Rooms/components/AvatarRow';
 import { useServices } from 'renderer/logic/store';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { darken } from 'polished';
@@ -19,15 +20,47 @@ import { observer } from 'mobx-react';
 import { VideoCaller } from './VideoCaller';
 import Webcam from 'react-webcam';
 
+interface CallerRowProps {
+  patp: string;
+  name: string;
+  isMuted: boolean;
+}
+
+const CallerRow = (props: CallerRowProps) => {
+  return (
+    <Flex
+      flex={1}
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Flex gap={10}>
+        <Avatar
+          patp={props.patp}
+          avatar={null}
+          nickname="test"
+          size={20}
+          clickable={true}
+          sigilColor={['black', 'black']}
+        />
+        <Text.H6>
+          {props.name.substring(0, 20)} {props.name.length > 21 && '...'}
+        </Text.H6>
+      </Flex>
+      <Icon name={props.isMuted ? 'MicOff' : 'MicOn'} size={20} />
+    </Flex>
+  );
+};
+
 export const VideoCall = observer(() => {
   const { theme, desktop, ship } = useServices();
   const { windowColor, mode, dockColor, accentColor } = theme.currentTheme;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
   const videoColor = useMemo(() => darken(0.1, windowColor), [windowColor]);
-  const [muted, setMuted] = useState(false);
   const [video, setVideo] = useState(false);
   const [screenSharing, setScreenSharing] = useState(false);
+  const webcamRef = useRef(null);
 
   useEffect(() => {
     if (!desktop.micAllowed) {
@@ -44,8 +77,6 @@ export const VideoCall = observer(() => {
     }
   }, []);
 
-  const nickname = '~dopmer-fopryg-novned-tidsyl';
-
   const roomsManager = useRooms(ship?.patp);
   const callers = roomsManager
     ? [...Array.from(roomsManager.protocol.peers.keys())]
@@ -57,7 +88,9 @@ export const VideoCall = observer(() => {
   }, [roomsManager?.live.room]);
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
-  const webcamRef = useRef(null);
+  const isMuted = roomsManager?.protocol.local?.isMuted;
+
+  const ourName = ship?.nickname || ship?.patp || '';
 
   return (
     <Flex flexDirection="row" flex={1}>
@@ -140,16 +173,20 @@ export const VideoCall = observer(() => {
             <Text.H5>testing</Text.H5>
             <Flex flexDirection="row">
               <Icon name="Participants" size={20} />
-              <Text.Caption>3/9 Participants</Text.Caption>
+              <Text.Caption>{1 + callers.length}/9 Participants</Text.Caption>
             </Flex>
           </Flex>
           <Flex gap={10}>
             <CommButton
-              icon={muted ? 'MicOff' : 'MicOn'}
+              icon={isMuted ? 'MicOff' : 'MicOn'}
               customBg={commButtonBg}
               onClick={(evt) => {
                 evt.stopPropagation();
-                setMuted(!muted);
+                if (isMuted) {
+                  roomsManager?.unmute();
+                } else {
+                  roomsManager?.mute();
+                }
               }}
             />
             <CommButton
@@ -177,6 +214,14 @@ export const VideoCall = observer(() => {
             />
           </Flex>
           <Flex gap={10}>
+            <AvatarRow
+              people={
+                presentRoom.present.filter(
+                  (person: string) => person !== ship?.patp
+                ) ?? []
+              }
+              backgroundColor={windowColor}
+            />
             <Button.IconButton
               onClick={() =>
                 ShellActions.openDialog('campfire-add-participant-dialog')
@@ -230,27 +275,14 @@ export const VideoCall = observer(() => {
           rightAdornment={<Button.TextButton>Add</Button.TextButton>}
         ></TextInput>
         <Card background={windowColor} padding={12}>
-          <Flex
-            flex={1}
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Flex gap={10}>
-              <Avatar
-                patp="~dopmer-fopryg-novned-tidsyl"
-                avatar={null}
-                nickname="test"
-                size={20}
-                clickable={true}
-                sigilColor={['black', 'black']}
-              />
-              <Text.H6>
-                {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-              </Text.H6>
-            </Flex>
-            <Icon name="MicOn" size={20} />
-          </Flex>
+          {callers.map((person: string) => (
+            <CallerRow key={person} name={person} />
+          ))}
+          <CallerRow
+            patp={ship?.patp || ''}
+            name={ourName}
+            isMuted={isMuted || false}
+          />
         </Card>
         <Flex flexDirection="row">
           <Icon name="CampfireMessages" size={25} />

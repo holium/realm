@@ -25,12 +25,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   };
   state: RoomState = RoomState.Disconnected;
 
-  constructor(protocol: BaseProtocol) {
+  constructor(protocol: BaseProtocol, video?: boolean) {
     super();
     this.protocol = protocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
+      video,
     });
 
     this.live = {
@@ -301,6 +302,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   setAudioInput(deviceId: string) {
     this.local.setAudioInputDevice(deviceId);
+  }
+
+  setVideoInput(deviceId: string) {
+    this.local.setVideoInputDevice(deviceId);
   }
 }
 

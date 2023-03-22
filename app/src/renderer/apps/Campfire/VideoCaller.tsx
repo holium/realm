@@ -96,6 +96,17 @@ const CallerPresenter = (props: ICaller) => {
     }
   }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
 
+  const callerVideo = useRef(null);
+  useEffect(() => {
+    if (callerVideo.current) {
+      if (peer?.videoTracks && peer?.videoTracks.size > 0) {
+        callerVideo.current.srcObject = Array.from(
+          peer?.videoTracks.values()
+        )[0];
+      }
+    }
+  }, []);
+
   return (
     <CallerWrapper
       id={`room-caller-${person}`}
@@ -114,6 +125,7 @@ const CallerPresenter = (props: ICaller) => {
         alignItems="center"
         gap={10}
       >
+        <video ref={callerVideo} autoPlay playsInline></video>
         <Flex
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
