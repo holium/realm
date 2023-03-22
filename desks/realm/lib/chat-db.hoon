@@ -88,7 +88,7 @@
 ::
 ++  expire-old-msgs
   |=  [state=state-0 now=@da]
-  ^-  state-0
+  ^-  [state-0 db-change:sur]
   =/  old-msgs
     ^-  (list [k=uniq-id:sur v=msg-part:sur])
     %+  skim
@@ -108,14 +108,18 @@
     =/  current-key   k:(snag index old-msgs)
     $(index +(index), tbl +:(del:msgon:sur tbl current-key), ids (snoc ids current-key))
 
-  =.  del-log.state         (log-deletes-for-msg-parts state ~ +:rm-result now)
+  =/  logged    (log-deletes-for-msg-parts state ~ +:rm-result now)
+  =.  del-log.state         -.logged
   =.  messages-table.state  -:rm-result
+
+  :-
   state
+  +.logged
 ::
 ++  log-deletes-for-msg-parts
   |=  [state=state-0 p=(unit path) ids=(list uniq-id:sur) now=@da]
-  ^-  del-log:sur
-  =/  change-rows   
+  ^-  [del-log:sur db-change:sur]
+  =/  change-rows=db-change:sur
     %+  turn
       ids
     |=  a=uniq-id:sur
@@ -128,8 +132,7 @@
   =/  new-log       del-log.state
   |-
   ?:  =(index len)
-    new-log
-  ~&  (snag index change-rows)
+    [new-log change-rows]
                                                     :: adding index to now in order to ensure unique keys
   $(index +(index), new-log (put:delon:sur new-log `@da`(add now index) (snag index change-rows)))
 ::
@@ -351,7 +354,7 @@
   =/  remove-result  (remove-message-from-table messages-table.state msg-id)
   =.  messages-table.state  -.remove-result
 
-  =.  del-log.state   (log-deletes-for-msg-parts state `path.msg-part +.remove-result now.bowl)
+  =.  del-log.state   -:(log-deletes-for-msg-parts state `path.msg-part +.remove-result now.bowl)
 
   =/  row=path-row:sur    (~(got by paths-table.state) path.msg-part)
   =/  pinned              (~(has in pins.row) msg-id)
@@ -393,7 +396,7 @@
 
   =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a]))
   =/  thechange     chat-db-change+!>(change-rows)
-  =.  del-log.state   (log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
+  =.  del-log.state   -:(log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
 
   =/  gives  :~
     [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) thechange]
