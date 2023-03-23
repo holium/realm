@@ -116,7 +116,7 @@
     ::
       [%x %pins ~]
         ?>  =(our.bowl src.bowl)
-        ``pins+!>(pins.state)
+        ``chat-pins+!>(pins.state)
     ==
   ::
   ++  on-agent

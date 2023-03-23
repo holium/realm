@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, app } from 'electron';
+import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
 import { BaseService } from '../base.service';
 import fs from 'fs';
 import path from 'path';
@@ -13,6 +13,15 @@ import {
   NotifDbChangeReactions,
   NotificationsRow,
 } from './notification.types';
+import {
+  convertRowToNotification,
+  QUERY_NOTIFICATIONS,
+} from './notification.utils';
+
+type NotifMobxUpdateType =
+  | 'notification-added'
+  | 'notification-updated'
+  | 'notification-deleted';
 
 type GetParamsObj = {
   app?: string;
@@ -40,9 +49,9 @@ export class NotificationService extends BaseService {
    * Handlers for the ipcRenderer invoked functions
    **/
   handlers = {
-    'realm.notification.get': this.getNotifications,
-    'realm.notification.mark-read': this.readNotification,
-    'realm.notification.dismiss': this.dismissNotification,
+    'realm.notifdb.get': this.getNotifications,
+    'realm.notifdb.mark-read': this.readNotification,
+    'realm.notifdb.dismiss': this.dismissNotification,
   };
 
   /**
@@ -50,11 +59,18 @@ export class NotificationService extends BaseService {
    */
   static preload = {
     getNotifications: (params?: GetParamsObj) =>
-      ipcRenderer.invoke('realm.notification.get', params),
+      ipcRenderer.invoke('realm.notifdb.get', params),
     readNotification: (app: string, path?: string, id?: number) =>
-      ipcRenderer.invoke('realm.notification.mark-read', app, path, id),
+      ipcRenderer.invoke('realm.notifdb.mark-read', app, path, id),
     dismissNotification: (app: string, path?: string, id?: number) =>
-      ipcRenderer.invoke('realm.notification.dismiss', app, path, id),
+      ipcRenderer.invoke('realm.notifdb.dismiss', app, path, id),
+    onDbChange: (
+      callback: (
+        evt: IpcRendererEvent,
+        type: NotifMobxUpdateType,
+        data: any
+      ) => void
+    ) => ipcRenderer.on('realm.notifdb.on-db-change', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -91,11 +107,7 @@ export class NotificationService extends BaseService {
     });
 
     const notifications = await this.fetchNotifications();
-    console.log(notifications, 'insertNotifications');
     this.insertNotifications(notifications);
-    //console.log('realm-chat unreads', await this.getUnreads(null, 'realm-chat'));
-    //console.log(await this.getUnreads(null, 'realm-chat', '/new-messages'));
-    //console.log(await this.readNotification(null,'realm-chat', '/new-messages'));
   }
 
   async fetchNotifications() {
@@ -109,7 +121,6 @@ export class NotificationService extends BaseService {
 
   onDbUpdate(data: NotifDbChangeReactions, _id?: number) {
     if (Array.isArray(data)) {
-      console.log('db update', data);
       data.forEach(this.handleDBChange);
     } else {
       console.log(data);
@@ -122,6 +133,8 @@ export class NotificationService extends BaseService {
       console.log('add-row to notifications', addRow.row);
       const notif = addRow.row as NotificationsRow;
       this.insertNotifications([notif]);
+      const notifQueried = this.getNotification(notif.id);
+      this.sendNotifUpdate('notification-added', notifQueried);
     } else if (dbChange.type === 'update-all') {
       console.log('TODO implement updating all rows read column');
     } else if (dbChange.type === 'update-row') {
@@ -129,21 +142,23 @@ export class NotificationService extends BaseService {
       const notif = update.row as NotificationsRow;
       console.log('update-row', notif);
       this.insertNotifications([notif]);
+      const notifUpdatedQueried = this.getNotification(notif.id);
+      this.sendNotifUpdate('notification-updated', notifUpdatedQueried);
     } else if (dbChange.type === 'del-row') {
       console.log('del-row', dbChange);
       const del = dbChange as DelRow;
       this.deleteNotificationsRow(del.id);
-      //this.sendChatUpdate('message-deleted', delMessagesRow['msg-id']);
+      this.sendNotifUpdate('notification-deleted', del.id);
     }
   }
 
-  // sendChatUpdate(type: ChatUpdateType, data: any) {
-  //   this.core.mainWindow.webContents.send(
-  //     'realm.chat.on-db-change',
-  //     type,
-  //     data
-  //   );
-  // }
+  sendNotifUpdate(type: NotifMobxUpdateType, data: any) {
+    this.core.mainWindow.webContents.send(
+      'realm.notifdb.on-db-change',
+      type,
+      data
+    );
+  }
 
   onQuit() {
     console.log('fail!');
@@ -265,55 +280,26 @@ export class NotificationService extends BaseService {
 
   getNotifications(_evt: any, _params?: GetParamsObj) {
     if (!this.db) throw new Error('No db connection');
-    // const hasParams = params && Object.keys(params).length > 0;
+
     const query = this.db.prepare(`
-      SELECT id,
-        app,
-        path,
-        type,
-        title,
-        content,
-        image,
-        buttons,
-        link,
-        metadata,
-        created_at   createdAt,
-        updated_at   updatedAt,
-        read_at      readAt,
-        read,
-        dismissed_at dismissedAt,
-        dismissed
-      FROM notifications
-      WHERE dismissed = 0
-
+      ${QUERY_NOTIFICATIONS} 
+      WHERE dismissed = 0 
+      ORDER BY created_at DESC
     `);
-    // ${hasParams ? 'WHERE' : ''}
-    // ${params.excludeRead ? 'read = 0' : ''}
-    // ${params.excludeDismissed ? 'dismissed = 0' : ''}
-    // ${params.app ? 'AND app = ?' : ''}
-    // ${params.path ? 'AND path = ?' : ''};
-    let result: any;
-    // if (params.app && params.path) {
-    //   result = query.all(params.app, params.path);
-    // } else if (params.app) {
-    //   result = query.all(params.app);
-    // } else if (params.path) {
-    //   result = query.all(params.path);
-    // } else {
-    // result = query.all();
-    // }
 
-    result = query.all();
+    const result = query.all();
+    return result.map(convertRowToNotification);
+  }
 
-    return result.map((row: any) => {
-      return {
-        ...row,
-        read: row.read === 1,
-        dismissed: row.dismissed === 1,
-        buttons: row.buttons ? JSON.parse(row.buttons) : null,
-        metadata: row.metadata ? JSON.parse(row.metadata) : null,
-      };
-    });
+  getNotification(id: number) {
+    if (!this.db) throw new Error('No db connection');
+
+    const query = this.db.prepare(`
+      ${QUERY_NOTIFICATIONS} WHERE id = ?
+    `);
+
+    const result = query.all(id);
+    return result.map(convertRowToNotification)[0] || [];
   }
 
   // ------------------------------

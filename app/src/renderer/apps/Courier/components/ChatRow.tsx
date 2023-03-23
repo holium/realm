@@ -47,12 +47,10 @@ export const ChatRowPresenter = ({
     isChatPinned,
     togglePinned,
   } = useChatStore();
-  const { getUnreadCountByPath } = useAccountStore();
+  const { readPath, getUnreadCountByPath } = useAccountStore();
   const { getOptions, setOptions } = useContextMenu();
 
   const unreadCount = getUnreadCountByPath(path);
-
-  console.log('unreadCount', unreadCount);
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
@@ -71,16 +69,16 @@ export const ChatRowPresenter = ({
         togglePinned(path, !isPinned);
       },
     });
-    // menu.push({
-    //   id: `${chatRowId}-read-chat`,
-    //   icon: 'MessageRead',
-    //   label: 'Mark as read',
-    //   disabled: false,
-    //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-    //     evt.stopPropagation();
-    //     // TODO poke read
-    //   },
-    // });
+    menu.push({
+      id: `${chatRowId}-read-chat`,
+      icon: 'MessageRead',
+      label: 'Mark as read',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        readPath('realm-chat', path);
+      },
+    });
     menu.push({
       id: `${chatRowId}-chat-info`,
       icon: 'Info',

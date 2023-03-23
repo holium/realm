@@ -1,8 +1,7 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
-import { flow, Instance, types } from 'mobx-state-tree';
+// import { toJS } from 'mobx';
+import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
-// import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (
@@ -40,6 +39,9 @@ const NotificationModel = types
     dismissed: types.boolean,
   })
   .actions((self) => ({
+    update(data: Instance<typeof self>) {
+      applySnapshot(self, data);
+    },
     markRead() {
       self.read = true;
       self.readAt = Date.now();
@@ -69,7 +71,7 @@ const AccountStore = types
       return self.notifications.filter((n) => n.dismissed);
     },
     get unreadCount() {
-      return self.notifications.filter((n) => !n.read).length;
+      return self.notifications.filter((n) => !n.read && !n.dismissed).length;
     },
     getUnreadCountByPath(path: string) {
       return self.unreadByPaths.get(path) || 0;
@@ -101,9 +103,6 @@ const AccountStore = types
           self.unreadByApps
         );
 
-        console.log('unreadByApps', toJS(self.unreadByApps));
-        console.log('unreadByPaths', toJS(self.unreadByPaths));
-
         self.notifications = notifications;
         return self.notifications;
       } catch (error) {
@@ -123,14 +122,7 @@ const AccountStore = types
         self.unreadByPaths.set(path, unreadByPaths || 0);
       }
     }),
-    // readAll: flow(function* () {
-    //   try {
-    //     self.notifications.forEach((n) => n.markRead());
-    //     // yield NotifDBActions.readAllNotifications();
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
+
     dismissApp: flow(function* (app: string) {
       const unreadByApps = self.unreadByApps.get(app);
 
@@ -185,86 +177,57 @@ const AccountStore = types
       }
     }),
 
+    // onChangeHandlers
+    onNotifAdded(notif: NotifMobxType) {
+      self.notifications.push(notif);
+      self.unreadByPaths.set(
+        notif.path,
+        (self.unreadByPaths.get(notif.path) || 0) + 1
+      );
+      self.unreadByApps.set(
+        notif.app,
+        (self.unreadByApps.get(notif.app) || 0) + 1
+      );
+    },
+    onNotifUpdated(notif: NotifMobxType) {
+      self.notifications.find((n) => n.id === notif.id)?.update(notif);
+      // if the notification is read, decrement the unread count
+      if (notif.read || notif.dismissed) {
+        const unreadByApps = self.unreadByApps.get(notif.app);
+        const unreadByPaths = self.unreadByPaths.get(notif.path);
+        self.unreadByPaths.set(
+          notif.path,
+          unreadByPaths ? unreadByPaths - 1 : 0
+        );
+        self.unreadByApps.set(notif.app, unreadByApps ? unreadByApps - 1 : 0);
+      }
+    },
+    onNotifDeleted(delId: number) {
+      const notif = self.notifications.find((n) => n.id === delId);
+      if (!notif) return;
+      const index = self.notifications.indexOf(notif);
+      if (index !== -1) {
+        self.notifications.splice(index, 1);
+      }
+      // if the notification is not read, decrement the unread count
+      if (!notif.read) {
+        const unreadByApps = self.unreadByApps.get(notif.app);
+        const unreadByPaths = self.unreadByPaths.get(notif.path);
+        self.unreadByPaths.set(
+          notif.path,
+          unreadByPaths ? unreadByPaths - 1 : 0
+        );
+        self.unreadByApps.set(notif.app, unreadByApps ? unreadByApps - 1 : 0);
+      }
+    },
+
     reset() {
       self.notifications.clear();
     },
   }));
 
 export const accountStore = AccountStore.create({
-  notifications: [
-    {
-      id: 0,
-      app: 'engram',
-      path: '/engram/document/0/new-comment',
-      title: 'New document created',
-      content: '~fasnut-famden created "Tax Notes - 3/22/23"',
-      type: 'message',
-      link: 'realm://apps/engram/document/2',
-      read: true,
-      readAt: null,
-      dismissed: false,
-      dismissedAt: null,
-      createdAt: 1679347373,
-      updatedAt: new Date().getTime(),
-    },
-    {
-      id: 1,
-      app: 'engram',
-      path: '/engram/document/0/new-comment',
-      title: 'New comment on your document',
-      content: 'I think you should change this line to say "goodbye world"',
-      type: 'message',
-      link: 'realm://apps/engram/document/0/comment/1',
-      read: true,
-      readAt: null,
-      dismissed: false,
-      dismissedAt: null,
-      createdAt: 1679347373,
-      updatedAt: new Date().getTime(),
-    },
-    {
-      id: 2,
-      app: 'realm-chat',
-      path: '/realm-chat/0',
-      title: 'Based chat',
-      content: 'DrunkPlato - Where’s the flamethrower?',
-      type: 'message',
-      read: true,
-      readAt: null,
-      dismissed: false,
-      dismissedAt: null,
-      createdAt: 1679433073,
-      updatedAt: new Date().getTime(),
-    },
-    {
-      id: 3,
-      app: 'realm-chat',
-      path: '/realm-chat/0',
-      title: 'Based chat',
-      content: 'dimwit-codder - What do you think of my code?',
-      type: 'message',
-      read: true,
-      readAt: null,
-      dismissed: false,
-      dismissedAt: null,
-      createdAt: 1679423073,
-      updatedAt: new Date().getTime(),
-    },
-    {
-      id: 4,
-      app: 'realm-chat',
-      path: '/realm-chat/1',
-      title: 'Holium chat',
-      content: 'AidenSolaran - Looking at your PR.',
-      type: 'message',
-      read: true,
-      readAt: null,
-      dismissed: false,
-      dismissedAt: null,
-      createdAt: 1679333073,
-      updatedAt: new Date().getTime(),
-    },
-  ],
+  notifications: [],
 });
 
 // -------------------------------
@@ -283,3 +246,17 @@ export function useAccountStore() {
   }
   return store;
 }
+
+NotifDBActions.onDbChange((_evt, type, data) => {
+  switch (type) {
+    case 'notification-added':
+      accountStore.onNotifAdded(data);
+      break;
+    case 'notification-updated':
+      accountStore.onNotifUpdated(data);
+      break;
+    case 'notification-deleted':
+      accountStore.onNotifDeleted(data);
+      break;
+  }
+});

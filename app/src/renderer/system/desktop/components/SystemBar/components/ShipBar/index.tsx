@@ -57,10 +57,6 @@ export const ShipBarPresenter = () => {
     bottom: 8,
   });
 
-  //  | 'rooms-tray'
-  // | 'account-tray'
-  // | 'messages-tray'
-  // | 'wallet-tray'
   const onNotifLinkClick = (app: string, path: string, link?: string) => {
     trackEvent('CLICK_NOTIFICATION', 'DESKTOP_SCREEN', { app });
     console.log('clicked notification', app, path, link);

@@ -5,19 +5,11 @@ import { darken, rgba } from 'polished';
 import { Pulser } from 'renderer/components';
 import { Box, Flex } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
-// import { useTrayApps } from 'renderer/apps/store';
-// import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+
 import { motion } from 'framer-motion';
 import { Avatar } from '@holium/design-system';
 import { TrayClock } from '../Clock';
 import styled from 'styled-components';
-
-// const position = 'top-left';
-// const anchorOffset = { x: 8, y: 26 };
-// const dimensions = {
-//   height: 450,
-//   width: 400,
-// };
 
 type AccountTrayProps = {
   unreadCount: number;
@@ -29,24 +21,6 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
 
   return (
     <Flex gap={8} alignItems="center">
-      {/* <AnimatePresence>
-        {isExpanded && ship && (
-          <Flex ml={2} flexDirection="column">
-            <Text.Custom
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}
-              fontSize="14px"
-              fontWeight={500}
-            >
-              {ship.nickname || ship.patp}
-            </Text.Custom>
-            {ship.nickname ? ship.patp : null}
-          </Flex>
-        )}
-      </AnimatePresence> */}
       <motion.div
         id="account-tray-icon"
         className="realm-cursor-hover"
@@ -58,12 +32,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
         onClick={onClick}
       >
         {ship ? (
-          <AccountPaneStyle
-          // isActive={isOpen}
-          // onHoverStart={() => {
-          //   onToggleExpanded(true);
-          // }}
-          >
+          <AccountPaneStyle>
             <TrayClock />
             <Avatar
               simple
