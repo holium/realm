@@ -201,11 +201,14 @@
     ^-  (quip card _this)
     ?+  wire  !!
       [%timer ~]
-        =.  state  (expire-old-msgs:db-lib state now.bowl)
+        =/  st-ch  (expire-old-msgs:db-lib state now.bowl)
+        =.  state  -:st-ch
         [
           :: we remove the old timer (if any) and add the new one, so that
           :: we don't get an increasing number of timers associated with
           :: this agent every time the agent gets updated
+          :-
+          [%give %fact (limo [/db ~]) chat-db-change+!>(+:st-ch)]
           [[%pass /timer %arvo %b %rest next-expire-time:core] [%pass /timer %arvo %b %wait next-expire-time:core] ~]
           this
         ]

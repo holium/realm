@@ -167,9 +167,12 @@ export class ChatService extends BaseService {
   // ----------------- DB setup -------------------
   // ----------------------------------------------
   async subscribe(ship: Patp) {
-    this.db = new Database(`${app.getPath('userData')}/realm.${ship}/chat.db`, {
-      // verbose: console.log,
-    });
+    this.db = new Database(
+      `${app.getPath('userData')}/realm.${ship}/realm.db`,
+      {
+        // verbose: console.log,
+      }
+    );
     this.db.exec(this.initSql);
     await this.core.conduit?.watch({
       app: 'chat-db',
@@ -605,13 +608,14 @@ export class ChatService extends BaseService {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
+        console.log('lastMessage', lastMessage);
         lastMessage.contents = JSON.parse(lastMessage.contents).map(
           (message: any) => message && JSON.parse(message)
         );
       }
       return {
         ...row,
-        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage,
@@ -701,7 +705,7 @@ export class ChatService extends BaseService {
     const rows = result.map((row) => {
       return {
         ...row,
-        peersGetBacklog: row.peersGetBacklog === 1 ? true : false,
+        peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
         lastMessage: row.lastMessage
@@ -831,7 +835,7 @@ export class ChatService extends BaseService {
   }
 
   getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs'
+    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
   ): number {
     if (!this.db) throw new Error('No db connection');
     const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
@@ -996,7 +1000,6 @@ export class ChatService extends BaseService {
         peers.filter((p) => p !== `~${this.core.conduit?.ship}`)[0] || '';
       metadata.peer = dmPeer;
     }
-    console.log('createChat', peers, type, metadata);
     const payload = {
       app: 'realm-chat',
       mark: 'chat-action',

@@ -35,3 +35,14 @@ export const chatDate = (date: Date) => {
     return dayjs(date).format('h:mm A');
   }
 };
+
+export const shortTimeFromDate = (date: Date) => {
+  if (dayjs(date).isSame(dayjs(), 'day')) {
+    return dayjs(date).fromNow();
+  }
+  if (dayjs(date).isSame(dayjs(), 'hour')) {
+    return `${dayjs().minute() - dayjs(date).minute()}m`;
+  } else {
+    return dayjs(date).format('h:mm A');
+  }
+};

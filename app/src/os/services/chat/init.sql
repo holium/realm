@@ -4,7 +4,7 @@ create table if not exists messages
     msg_id       TEXT    not null,
     msg_part_id  integer not null,
     content_type TEXT,
-    content_data TEXT    not null,
+    content_data TEXT,
     reply_to     TEXT,
     metadata     text,
     sender       text    not null,
