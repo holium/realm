@@ -12,8 +12,8 @@ import {
   LinkBlock,
   isImageLink,
 } from '../..';
-import { FragmentType } from '../Chat/Bubble.types';
-import { FragmentImage } from '../Chat/fragment-lib';
+import { FragmentType } from '../Bubble/Bubble.types';
+import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`

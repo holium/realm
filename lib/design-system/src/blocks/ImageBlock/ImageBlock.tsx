@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { FragmentImage } from '../../os/Chat/fragment-lib';
+import { FragmentImage } from '../Bubble/fragment-lib';
 
 type ImageBlockProps = {
   image: string;

@@ -30,7 +30,7 @@ import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
-import { Bookmark } from '../Bookmark/Bookmark';
+import { Bookmark } from '../../os/Bookmark/Bookmark';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;

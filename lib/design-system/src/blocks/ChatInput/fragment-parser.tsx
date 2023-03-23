@@ -3,7 +3,7 @@ import {
   FragmentType,
   FragmentPlainType,
   FragmentBreakType,
-} from '../Chat/Bubble.types';
+} from '../Bubble/Bubble.types';
 
 type ParserKey =
   | 'bold'

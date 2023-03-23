@@ -10,13 +10,3 @@ export * from './Notifications/Notification';
 export * from './Notifications/NotificationList';
 export * from './Notifications/AppGroup';
 export * from './Notifications/Notifications.types';
-// Chat
-export * from './ChatInput/ChatInput';
-export { Bubble } from './Chat/Bubble';
-export { PinnedMessage } from './Chat/Pinned';
-export { InlineStatus } from './Chat/InlineStatus';
-export { Reply } from './Chat/Reply';
-export * from './Chat/Bubble.types';
-export * from './Chat/Bubble.styles';
-export { Reactions, ReactionPicker } from './Chat/Reaction';
-export type { OnReactionPayload } from './Chat/Reaction';
