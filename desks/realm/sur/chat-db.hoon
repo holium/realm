@@ -68,6 +68,7 @@
       [%image p=cord]
       [%ur-link p=cord]      :: for links to places on the urbit network
       [%react p=cord]        :: for emojii reactions to messages
+      [%status p=cord]       :: for automated messages like "X joined the chat"
       [%break ~]
   ==
 ::
@@ -124,9 +125,9 @@
     [%add-row =db-row]
     [%upd-messages =msg-id =message]
     [%upd-paths-row =path-row]
-    [%del-paths-row =path]
-    [%del-peers-row =path =ship]
-    [%del-messages-row =path =uniq-id]
+    [%del-paths-row =path timestamp=@da]
+    [%del-peers-row =path =ship timestamp=@da]
+    [%del-messages-row =path =uniq-id timestamp=@da]
   ==
 +$  db-row
   $%  [%paths =path-row]

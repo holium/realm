@@ -126,7 +126,7 @@
     =/  pat
       ?~  p  path:(got:msgon:sur messages-table.state a)
       (need p)
-    [%del-messages-row pat a]
+    [%del-messages-row pat a now]
   =/  index=@ud     0
   =/  len=@ud       (lent change-rows)
   =/  new-log       del-log.state
@@ -243,7 +243,7 @@
   :: for now we are assuming that subscribed clients are intelligent
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
-  =/  change-row      [%del-paths-row path]
+  =/  change-row      [%del-paths-row path now.bowl]
   =.  del-log.state   (delete-logs-for-path state path)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange       chat-db-change+!>(~[change-row])
@@ -365,7 +365,7 @@
       (~(put by paths-table.state) path.row row)
     paths-table.state
 
-  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row path.row a]))
+  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row path.row a now.bowl]))
   =/  thechange
     ?:  pinned
       chat-db-change+!>([[%upd-paths-row row] change-rows])
@@ -394,7 +394,7 @@
   =/  remove-result=tbl-and-ids:sur  (remove-messages-for-path-before messages-table.state path before)
   =.  messages-table.state  tbl.remove-result
 
-  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a]))
+  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a now.bowl]))
   =/  thechange     chat-db-change+!>(change-rows)
   =.  del-log.state   -:(log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
 
@@ -454,9 +454,9 @@
       :: for now we are assuming that subscribed clients are intelligent
       :: enough to realize that a %del-paths-row also means remove the
       :: related messages and peers
-      [%del-paths-row path.act]
+      [%del-paths-row path.act now.bowl]
     :: else just update the peers table
-    [%del-peers-row path.act patp.act]
+    [%del-peers-row path.act patp.act now.bowl]
   =.  del-log.state   ?:(our-kicked (delete-logs-for-path state path.act) del-log.state)
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange   chat-db-change+!>(~[change-row])
@@ -627,9 +627,9 @@
         %upd-paths-row
           :~(['type' %s %update] ['table' %s %paths] ['row' (path-row path-row.ch)])
         %del-paths-row
-          :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)])
+          :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)] ['timestamp' (time timestamp.ch)])
         %del-peers-row
-          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)])
+          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)] ['timestamp' (time timestamp.ch)])
         %del-messages-row
           :~
             ['type' %s -.ch]
@@ -637,6 +637,7 @@
             ['path' s+(spat path.ch)]
             ['msg-id' (msg-id-to-json msg-id.uniq-id.ch)]
             ['msg-part-id' (numb msg-part-id.uniq-id.ch)]
+            ['timestamp' (time timestamp.ch)]
           ==
       ==
     ::

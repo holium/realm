@@ -153,6 +153,11 @@
       all-peers
     |=  [s=ship role=@tas]
     (create-path-db-poke s pathrow all-peers)
+  =/  send-status-message
+    ?:  =(2 (lent all-ships)) :: if it's just two ships (and therefore a "dm")
+      !>([%send-message chat-path ~[[[%status (crip "{(scow %p our.bowl)} created the chat")] ~ ~]] *@dr])
+    !>([%send-message chat-path ~[[[%status (crip "{(scow %p our.bowl)} added {(scow %ud (dec (lent all-ships)))} peers")] ~ ~]] *@dr])
+  =.  cards  (snoc cards [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message])
   [cards state]
 ::
 ++  edit-chat
@@ -233,7 +238,7 @@
   [cards state]
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
-::realm-chat &action [%remove-ship-from-chat /realm-chat/path-id ~bus]
+::realm-chat &chat-action [%remove-ship-from-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathpeers  (scry-peers path.act bowl)
@@ -256,7 +261,7 @@
   [cards state]
 ::
 ++  send-message
-::realm-chat &action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] ~]
+::realm-chat &chat-action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] *@dr]
   |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: read the peers for the path
