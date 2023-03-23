@@ -1,4 +1,4 @@
-import { Text, Flex, BoxProps, Icon } from '../..';
+import { Text, Flex, BoxProps } from '../..';
 
 type InlineStatusProps = {
   // icon?: IconPathsType;
