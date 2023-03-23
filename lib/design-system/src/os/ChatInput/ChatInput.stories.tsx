@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex, Box, WindowedList } from '../..';
 import { ChatInput } from './ChatInput';
-import { Bubble } from '../Bubble/Bubble';
-import { ChatMessageType, FragmentType } from '../Bubble/Bubble.types';
+import { Bubble } from '../Chat/Bubble';
+import { ChatMessageType, FragmentType } from '../Chat/Bubble.types';
 
 export default {
   component: ChatInput,

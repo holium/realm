@@ -2,8 +2,8 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
 import { Flex } from '../..';
 import { MemeBlock } from './MemeBlock';
-import { FragmentReactionType } from '../Bubble/Bubble.types';
-import { OnReactionPayload } from '../Bubble/Reaction';
+import { FragmentReactionType } from '../../os/Chat/Bubble.types';
+import { OnReactionPayload } from '../../os/Chat/Reaction';
 import { getVar } from '../../util/colors';
 
 export default {

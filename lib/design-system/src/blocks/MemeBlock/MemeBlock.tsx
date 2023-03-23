@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
-import { FragmentReactionType } from '../Bubble/Bubble.types';
-import { Reactions, OnReactionPayload } from '../Bubble/Reaction';
+import { FragmentReactionType } from '../../os/Chat/Bubble.types';
+import { Reactions, OnReactionPayload } from '../../os/Chat/Reaction';
 
 import { timelineDate } from '../../util/date';
 

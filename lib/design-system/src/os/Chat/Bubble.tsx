@@ -3,8 +3,13 @@ import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
-import { FragmentReactionType, FragmentType } from './Bubble.types';
+import {
+  FragmentReactionType,
+  FragmentStatusType,
+  FragmentType,
+} from './Bubble.types';
 import { chatDate } from '../../util/date';
+import { InlineStatus } from './InlineStatus';
 
 export type BubbleProps = {
   ref: any;
@@ -70,6 +75,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     }, [reactions.length]);
 
     const fragments = useMemo(() => {
+      if (!message) return [];
+
       return message?.map((fragment, index) => {
         // if the previous fragment was a link or a code block, we need to add a space
         // to the beginning of this fragment
@@ -96,6 +103,22 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
+    if (message?.length === 1) {
+      const contentType = Object.keys(message[0])[0];
+      if (contentType === 'status') {
+        return (
+          <Flex
+            ref={ref}
+            key={id}
+            display="inline-flex"
+            mx="1px"
+            justifyContent={isOur ? 'flex-end' : 'flex-start'}
+          >
+            <InlineStatus text={(message[0] as FragmentStatusType).status} />
+          </Flex>
+        );
+      }
+    }
     return (
       <Flex
         ref={ref}

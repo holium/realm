@@ -47,6 +47,10 @@ export type FragmentBreakType = {
   break: null;
 };
 
+export type FragmentStatusType = {
+  status: string;
+};
+
 export type FragmentTabType = {
   tab: {
     url: string;
@@ -73,7 +77,8 @@ export type FragmentType =
   | FragmentUrLinkType
   | FragmentBreakType
   | FragmentReplyType
-  | FragmentTabType;
+  | FragmentTabType
+  | FragmentStatusType;
 
 export type FragmentKey = keyof FragmentType;
 
