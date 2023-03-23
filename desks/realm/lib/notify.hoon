@@ -1,10 +1,10 @@
 
-/-  sur=notify, realm-chat, hark=hark-store, resource, spaces
+/-  sur=notify, realm-chat, hark=hark-store, resource, spaces-path
 =<  [sur .]
 =,  sur
 |%
 ++  notify
-  |=  [pth=space-path:spaces slug=path msg=cord now=@da]
+  |=  [pth=path:spaces-path slug=path msg=cord now=@da]
   ^-  action:hark
   :+  %add-note  `bin:hark`[/ [%realm /spaces/(scot %p ship.pth)]]
   :*  [ship/ship.pth text/msg ~]

@@ -102,3 +102,22 @@ export type ChatDbReactions =
       tables: { messages: MessagesRow[]; paths: PathsRow[]; peers: PeersRow[] };
     }
   | ChatDbChangeReactions;
+
+export type NotificationsRow = {
+  id: number;
+  app: string;
+  path: string;
+  type: string;
+  title: string;
+  content: string;
+  image: string;
+  buttons: any;
+  link: string;
+  metadata: any;
+  'created-at': number;
+  'updated-at': number;
+  'read-at': number | null;
+  read: boolean;
+  'dismissed-at': number | null;
+  dismissed: boolean;
+};

@@ -14,13 +14,14 @@ import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
+import { useAccountStore } from 'renderer/apps/Account/store';
+import { UnreadBadge } from './UnreadBadge';
 
 type ChatRowProps = {
   path: string;
   title: string;
   peers: string[];
   isAdmin: boolean;
-  lastMessage: string;
   metadata: any;
   timestamp: number;
   type: ChatPathType;
@@ -46,7 +47,10 @@ export const ChatRowPresenter = ({
     isChatPinned,
     togglePinned,
   } = useChatStore();
+  const { readPath, getUnreadCountByPath } = useAccountStore();
   const { getOptions, setOptions } = useContextMenu();
+
+  const unreadCount = getUnreadCountByPath(path);
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
@@ -65,16 +69,16 @@ export const ChatRowPresenter = ({
         togglePinned(path, !isPinned);
       },
     });
-    // menu.push({
-    //   id: `${chatRowId}-read-chat`,
-    //   icon: 'MessageRead',
-    //   label: 'Mark as read',
-    //   disabled: false,
-    //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-    //     evt.stopPropagation();
-    //     // TODO poke read
-    //   },
-    // });
+    menu.push({
+      id: `${chatRowId}-read-chat`,
+      icon: 'MessageRead',
+      label: 'Mark as read',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        evt.stopPropagation();
+        readPath('realm-chat', path);
+      },
+    });
     menu.push({
       id: `${chatRowId}-chat-info`,
       icon: 'Info',
@@ -152,13 +156,15 @@ export const ChatRowPresenter = ({
   );
 
   const chat = inbox.find((c) => c.path === path);
-  const lastMessageUpdated: React.ReactNode = useMemo(
-    () => (
+  const lastMessageUpdated: React.ReactNode = useMemo(() => {
+    if (!chat) return null;
+    if (!chat.lastMessage) return 'No messages yet';
+    return (
       <span>
-        {chat &&
-          chat.lastMessage &&
+        {chat.lastMessage &&
           chat.lastMessage.contents.map(
             (content: { [key: string]: string }, idx: number) => {
+              if (!chat.lastMessage) return null;
               let type = Object.keys(content)[0];
               const value = content[type];
               if (TEXT_TYPES.includes(type)) {
@@ -185,9 +191,8 @@ export const ChatRowPresenter = ({
             }
           )}
       </span>
-    ),
-    [chat?.lastMessage?.id]
-  );
+    );
+  }, [chat?.lastMessage?.id]);
 
   return (
     <Row
@@ -244,20 +249,20 @@ export const ChatRowPresenter = ({
               exit={{ opacity: 0 }}
               fontSize={2}
             >
-              {lastMessageUpdated ? lastMessageUpdated : 'No messages yet'}
+              {lastMessageUpdated}
             </Text.Custom>
           </Flex>
         </Flex>
-        <Flex alignItems="flex-end" flexDirection="column">
+        <Flex alignItems="flex-end" gap={2} flexDirection="column">
           <Text.Custom
             style={{ wordBreak: 'keep-all' }}
             fontWeight={400}
-            fontSize={2}
+            fontSize={1}
             opacity={0.3}
           >
             {timelineDate(new Date(timestamp))}
           </Text.Custom>
-          <Flex height={14}>{/* unread count */}</Flex>
+          <UnreadBadge count={unreadCount} />
         </Flex>
       </Flex>
     </Row>

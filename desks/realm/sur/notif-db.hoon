@@ -23,7 +23,7 @@
       title=@t
       content=@t   :: any text to show on the notification, is limited markdown syntax
       image=@t     :: optional image to display (like an icon or something)
-      buttons=(list button)
+      buttons=(list button) :: optional buttons to display like "reply" or "mark as read" (max 2)
       link=@t      :: the place to redirect to when user clicks on the notification
       =metadata    :: notif-db doesn't care about this either, but could be used to implement "archival" or some other concepts around grouping notifications
       created-at=time
@@ -48,6 +48,8 @@
       [%read-path app=@tas =path]
       [%read-all read=?]
       [%dismiss-id =id]
+      [%dismiss-app app=@tas]
+      [%dismiss-path app=@tas =path]
       [%update =id =create-action]
       [%delete =id]
   ==
@@ -71,9 +73,5 @@
     [%del-row =id]
   ==
 +$  db-change  (list db-change-type)
-::
-+$  reaction
-  $%  
-      [%example =ship]
-  ==
+
 --

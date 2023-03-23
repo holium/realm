@@ -122,7 +122,6 @@ export const InboxPresenter = () => {
                     title={chat.metadata.title}
                     isAdmin={isAdmin}
                     peers={chat.peers.map((peer) => peer.ship)}
-                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}
                     metadata={chat.metadata}
@@ -159,7 +158,6 @@ export const InboxPresenter = () => {
                     title={chat.metadata.title}
                     peers={chat.peers.map((peer) => peer.ship)}
                     isAdmin={isAdmin}
-                    lastMessage={chat.lastMessage && chat.lastMessage[0]}
                     type={chat.type}
                     timestamp={chat.createdAt || chat.metadata.timestamp}
                     metadata={chat.metadata}
