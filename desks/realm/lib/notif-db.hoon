@@ -24,7 +24,7 @@
 ::
 ++  mark-app-read
   |=  [tbl=notifs-table:sur app=@tas now=@da]
-  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] =(app app.v)))
+  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(read.v %.n))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
@@ -35,7 +35,7 @@
 ::
 ++  mark-path-read
   |=  [tbl=notifs-table:sur app=@tas =path now=@da]
-  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v))))
+  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v) =(read.v %.n))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
@@ -53,7 +53,7 @@
 ::
 ++  mark-app-dismiss
   |=  [tbl=notifs-table:sur app=@tas now=@da]
-  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] =(app app.v)))
+  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(dismissed.v %.n))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
@@ -64,7 +64,7 @@
 ::
 ++  mark-path-dismiss
   |=  [tbl=notifs-table:sur app=@tas =path now=@da]
-  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v))))
+  =/  kvs  (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(path path.v) =(app app.v) =(dismissed.v %.n))))
   =/  ids=(list id:sur)  (turn kvs |=([k=@ud v=notif-row:sur] k))
   =/  index=@ud  0
   =/  stop=@ud   (lent ids)
