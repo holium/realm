@@ -40,6 +40,6 @@ export const MenuItemStyle = styled.li<MenuItemStyleProps>`
   &:hover:not([disabled]) {
     background-color: ${({ customBg }) =>
       customBg ? customBg : 'rgba(var(--rlm-input-rgba))'};
-    backdrop-filter: brightness(96.5%);
+    filter: brightness(96.5%);
   }
 `;
