@@ -1,29 +1,31 @@
 import { BaseService } from '../base.service';
 import { Realm } from '../../index';
 import { IpcMainInvokeEvent, ipcMain, ipcRenderer } from 'electron';
-import { TomeApi } from '../../api/tome';
+import { TomeApi } from '../../api/tomedb';
 import { StoreOptions, TomeOptions } from './models/types';
 import { SpacesApi } from '../../api/spaces';
-import { KeyValueStore, Tome } from './models/tome';
+import { KeyValueStore, Tome } from './models/tomedb';
 
-export class TomeService extends BaseService {
+export class TomeDBService extends BaseService {
   handlers = {
-    'realm.tome.initTome': this.initTome,
-    'realm.tome.initKeyValueStore': this.initKeyValueStore,
+    'realm.tomedb.initTome': this.initTome,
+    'realm.tomedb.initKeyValueStore': this.initKeyValueStore,
   };
 
   static preload = {
-    initTome: async (urbit?: boolean, app?: string, options?: TomeOptions) => {
-      return await ipcRenderer.invoke(
-        'realm.tome.initTome',
-        urbit,
+    initTome: async (app?: string, options?: TomeOptions) => {
+      const response = await ipcRenderer.invoke(
+        'realm.tomedb.initTome',
         app,
         options
       );
+      console.error(response);
+      console.error(new Tome(response));
+      return new Tome(response);
     },
     initKeyValueStore: async (tome: Tome, options?: StoreOptions) => {
       return await ipcRenderer.invoke(
-        'realm.tome.initKeyValueStore',
+        'realm.tomedb.initKeyValueStore',
         tome,
         options
       );
@@ -88,7 +90,7 @@ export class TomeService extends BaseService {
     // save api.ship so we know who we are.
     const ourShip = `~${this.core.conduit.ship}`;
     await TomeApi.initTome(this.core.conduit, tomeShip, space, appName);
-    return new Tome({
+    return {
       tomeShip,
       ourShip,
       space,
@@ -96,7 +98,7 @@ export class TomeService extends BaseService {
       app: appName,
       locked,
       realm,
-    });
+    };
   }
 
   async initKeyValueStore(

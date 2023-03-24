@@ -10,6 +10,6 @@
     "lib/presence",
     "lib/room/test-ui",
     "lib/room",
-    "lib/tome"
+    "lib/tomedb"
   ]
 }

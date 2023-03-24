@@ -39,8 +39,8 @@ export class Tome {
    * defaults to the Tome's permissions, `bucket` to `'def'`, and `preload` to `true`.
    * @returns A `KeyValueStore`.
    */
-  public async keyvalue(options: StoreOptions = {}) {
-    return await window.electron.os.tome.initKeyValueStore(this, options);
+  public async keyvalue(options: StoreOptions = {}): Promise<KeyValueStore> {
+    return await window.electron.os.tomedb.initKeyValueStore(this, options);
   }
 
   public isOurStore(): boolean {

@@ -1,12 +1,13 @@
 import { Conduit } from '@holium/conduit';
 import { Patp } from 'os/types';
-import { Permissions } from '../services/tome/models/types';
+import { Permissions } from '../services/tomedb/models/types';
 import {
   desk,
   agent,
   kvMark,
   tomeMark,
-} from '../services/tome/models/constants';
+  kvThread,
+} from '../services/tomedb/models/constants';
 
 export const TomeApi = {
   initTome: async (
@@ -89,7 +90,7 @@ export const TomeApi = {
       const result = await conduit.thread({
         inputMark: 'json',
         outputMark: 'json',
-        threadName: 'kv-poke-tunnel',
+        threadName: kvThread,
         body: {
           ship,
           json: JSON.stringify(body),

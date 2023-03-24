@@ -13,7 +13,7 @@ import { Conduit, ConduitState } from '@holium/conduit';
 import { AuthService } from './services/identity/auth.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
-import { TomeService } from './services/tome/tome.service';
+import { TomeDBService } from './services/tomedb/tomedb.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
@@ -50,7 +50,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
-    tome: TomeService;
+    tomedb: TomeDBService;
   };
 
   readonly holiumClient: HoliumAPI;
@@ -149,7 +149,7 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
-      tome: new TomeService(this),
+      tomedb: new TomeDBService(this),
     };
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
