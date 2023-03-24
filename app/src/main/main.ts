@@ -24,8 +24,8 @@ import {
   MouseHelper,
   KeyHelper,
   BrowserHelper,
-  HideCursorHelper,
 } from './helpers';
+import { hideCursor } from './functions/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
 
@@ -109,7 +109,7 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('dom-ready', () => {
     // We use the default cursor for Linux.
-    if (isMac || isWindows) HideCursorHelper(mainWindow.webContents);
+    if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
@@ -179,7 +179,7 @@ const createMouseOverlayWindow = () => {
 
   const mouseSetup = () => {
     if (isMac) {
-      HideCursorHelper(newMouseWindow.webContents);
+      hideCursor(newMouseWindow.webContents);
       newMouseWindow.setWindowButtonVisibility(false);
       /**
        * For macOS we enable mouse layer tracking for a smoother experience.
@@ -187,7 +187,7 @@ const createMouseOverlayWindow = () => {
        */
       newMouseWindow.webContents.send('enable-mouse-layer-tracking');
     } else if (isWindows) {
-      HideCursorHelper(newMouseWindow.webContents);
+      hideCursor(newMouseWindow.webContents);
     } else {
       newMouseWindow.webContents.send('disable-custom-mouse');
     }
