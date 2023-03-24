@@ -9,6 +9,7 @@
     "lib/presence/code",
     "lib/presence",
     "lib/room/test-ui",
-    "lib/room"
+    "lib/room",
+    "lib/tome"
   ]
 }
