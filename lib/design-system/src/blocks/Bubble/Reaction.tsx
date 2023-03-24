@@ -11,6 +11,7 @@ import { FragmentReactionType } from './Bubble.types';
 import { AnimatePresence } from 'framer-motion';
 import { lighten } from 'polished';
 import { getVar } from '../../util/colors';
+import { Position } from '@holium/shared';
 
 const WIDTH = 350;
 const ship = window.ship ?? 'zod';
@@ -148,10 +149,7 @@ export const Reactions = (props: ReactionProps) => {
     onReaction,
   } = props;
   const [isReacting, setIsReacting] = useState<boolean>(false);
-  const [anchorPoint, setAnchorPoint] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
 
   const reactionsAggregated = useMemo(
     () =>

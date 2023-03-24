@@ -1,8 +1,4 @@
-import {
-  PresenceChat,
-  MultiplayerPayload,
-  PresenceBroadcast,
-} from '@holium/realm-presence';
+import { MultiplayerPayload, PresenceBroadcast } from '@holium/realm-presence';
 import { Patp } from '../types';
 
 export enum DataPacket_Kind {
@@ -23,8 +19,7 @@ export interface DataPacket {
   from: Patp;
   kind: DataPacket_Kind;
   value: {
-    cursor?: MultiplayerPayload;
+    multiplayer?: MultiplayerPayload;
     broadcast?: PresenceBroadcast;
-    chat?: PresenceChat;
   } & DataPayload;
 }

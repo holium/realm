@@ -1,9 +1,10 @@
 {
   "name": "@holium/design-system",
-  "version": "0.1.2",
-  "description": "A component library for Realm.",
+  "version": "0.1.7",
+  "description": "A component library for Realm apps.",
   "license": "MIT",
   "author": "trent@holium.com",
+  "homepage": "https://holium.com",
   "main": "dist/holium-design-system.cjs.js",
   "module": "dist/holium-design-system.esm.js",
   "scripts": {
@@ -39,5 +40,14 @@
     "react-dom": "^18.0.0",
     "styled-components": "^5.3.6",
     "styled-system": "^5.1.5"
-  }
+  },
+  "keywords": [
+    "realm",
+    "theming",
+    "design-system",
+    "components",
+    "ui",
+    "react",
+    "styled-components"
+  ]
 }

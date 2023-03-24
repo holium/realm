@@ -1,6 +1,5 @@
+import { Position } from '@holium/shared';
 import { PresenceArg } from './hooks/useBroadcast';
-
-type Position = { x: number; y: number };
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 
@@ -47,15 +46,15 @@ export interface MultiplayerOut extends MultiplayerPayloadBase {
   event: 'mouse-out';
 }
 
-export interface PresenceBroadcast extends PresencePayloadBase {
-  event: 'broadcast';
-  data: PresenceArg[];
-}
-
-export interface PresenceChat extends PresencePayloadBase {
+export interface MultiplayerChat extends PresencePayloadBase {
   patp: string;
   event: 'chat';
   message: string;
+}
+
+export interface PresenceBroadcast extends PresencePayloadBase {
+  event: 'broadcast';
+  data: PresenceArg[];
 }
 
 export type MultiplayerPayload =
@@ -63,6 +62,5 @@ export type MultiplayerPayload =
   | MultiplayerDown
   | MultiplayerUp
   | MultiplayerClick
-  | MultiplayerOut;
-
-export type PresencePayload = PresenceBroadcast | PresenceChat;
+  | MultiplayerOut
+  | MultiplayerChat;

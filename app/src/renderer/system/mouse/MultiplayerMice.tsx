@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Position } from 'os/types';
+import { Position } from '@holium/shared';
 import { AnimatedCursor } from './AnimatedCursor';
 import { hexToRgb, rgbToString } from 'os/lib/color';
 import { MouseState } from '@holium/realm-presence';
@@ -26,6 +26,7 @@ export const MultiplayerMice = () => {
         ...prev,
         [patp]: {
           ...prev[patp],
+          isVisible: false,
         },
       }));
     });

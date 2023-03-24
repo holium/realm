@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
-import { Text, Flex, Avatar } from '@holium/design-system';
-import { useBroadcast, useShips } from '@holium/realm-presence';
+import { Text, Flex } from '@holium/design-system';
+import { useBroadcast } from '@holium/realm-presence';
 import { schema } from './components/schema';
 import { Loader } from './components/Loader';
 import { Authority } from './components/Authority';
@@ -48,7 +48,6 @@ export const App = () => {
     setCarets((prevCarets) => ({ ...prevCarets, [patp]: { x, y } }));
   };
 
-  const ships = useShips();
   const { broadcast: sendTransaction } = useBroadcast({
     channelId: 'transactions',
     onBroadcast: onTransaction,
@@ -109,17 +108,6 @@ export const App = () => {
     >
       <Header>
         <Text.Label>{filePath}</Text.Label>
-        <Flex gap={8}>
-          {ships.map((ship) => (
-            <Avatar
-              key={ship}
-              simple={false}
-              size={24}
-              patp={ship}
-              sigilColor={['#000000', 'white']}
-            />
-          ))}
-        </Flex>
       </Header>
       <EditorContainer>
         <div ref={onEditorRef}>

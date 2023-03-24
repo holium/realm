@@ -6,7 +6,7 @@ import {
   MultiplayerUp,
   MultiplayerMove,
   MultiplayerClick,
-  PresenceChat,
+  MultiplayerChat,
   PresenceBroadcast,
 } from '@holium/realm-presence';
 import {
@@ -16,8 +16,7 @@ import {
   RoomsManager,
 } from '@holium/realm-room';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
-import { useToggle } from 'renderer/logic/lib/useToggle';
-import { Dimensions } from 'os/types';
+import { Dimensions, useToggle } from '@holium/shared';
 
 type Props = {
   patp: string | undefined;
@@ -43,34 +42,42 @@ export const useMultiplayer = ({
   );
 
   const broadcastChat = (patp: string, message: string) => {
-    const PresenceChat: PresenceChat = {
+    const multiplayerChat: MultiplayerChat = {
       patp,
       message,
       event: 'chat',
     };
     roomsManager.sendData({
       kind: DataPacket_Kind.DATA,
-      value: { chat: PresenceChat },
+      value: { multiplayer: multiplayerChat },
     });
   };
 
-  const closeEphemeralChat = useCallback(
-    debounce(() => {
-      chat.current = '';
-      patp && broadcastChat(patp, '');
-      ephemeralChat.toggleOff();
-      window.electron.app.toggleOffEphemeralChat();
-    }, 5000),
+  const closeEphemeralChat = () => {
+    chat.current = '';
+    patp && broadcastChat(patp, '');
+    ephemeralChat.toggleOff();
+    window.electron.app.toggleOffEphemeralChat();
+  };
+
+  const closeEphemeralChatDebounced = useCallback(
+    debounce(closeEphemeralChat, 5000),
     [patp]
   );
 
   const onKeyDown = useCallback(
-    (key: string) => {
+    (key: string, isFocused: boolean) => {
       if (!patp) return;
       if (!isInRoom) return;
       if (!isMultiplayerEnabled) return;
 
-      closeEphemeralChat(); // Refresh the 5s timeout.
+      if (isFocused) {
+        // Don't trigger ephemeral chat if the user is typing in a text field.
+        closeEphemeralChat();
+        return;
+      }
+
+      closeEphemeralChatDebounced(); // Refresh the 5s countdown.
 
       if (key === '/') {
         chat.current = '';
@@ -122,7 +129,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerOut },
+        value: { multiplayer: multiplayerOut },
       });
     }
   }, [patp, isMultiplayerEnabled]);
@@ -138,7 +145,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerOut },
+        value: { multiplayer: multiplayerOut },
       });
     });
 
@@ -151,7 +158,7 @@ export const useMultiplayer = ({
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
         value: {
-          cursor: multiplayerDown,
+          multiplayer: multiplayerDown,
         },
       });
     });
@@ -164,7 +171,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerUp },
+        value: { multiplayer: multiplayerUp },
       });
     });
 
@@ -179,7 +186,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerMove },
+        value: { multiplayer: multiplayerMove },
       });
     });
 
@@ -192,7 +199,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerClick },
+        value: { multiplayer: multiplayerClick },
       });
     });
 
@@ -215,7 +222,7 @@ export const useMultiplayer = ({
       };
       roomsManager.sendData({
         kind: DataPacket_Kind.DATA,
-        value: { cursor: multiplayerOut },
+        value: { multiplayer: multiplayerOut },
       });
     };
 
@@ -224,34 +231,29 @@ export const useMultiplayer = ({
       _peer: string,
       data: DataPacket
     ) => {
-      const PresenceChat = data.value.chat;
-      if (PresenceChat) {
-        if (PresenceChat.event === 'chat') {
-          const { patp, message } = PresenceChat as PresenceChat;
-          window.electron.multiplayer.realmToAppSendChat(patp, message);
-        }
-      }
+      const multiplayerPayload = data.value.multiplayer;
+      if (!multiplayerPayload) return;
 
-      const cursorPayload = data.value.cursor;
-      if (!cursorPayload) return;
-
-      const { event } = cursorPayload;
+      const { event } = multiplayerPayload;
 
       if (event === 'mouse-move') {
-        const { patp, position, state, hexColor } = cursorPayload;
+        const { patp, position, state, hexColor } = multiplayerPayload;
         window.electron.multiplayer.mouseMove(patp, position, state, hexColor);
       } else if (event === 'mouse-out') {
-        const { patp } = cursorPayload;
+        const { patp } = multiplayerPayload;
         window.electron.multiplayer.mouseOut(patp);
       } else if (event === 'mouse-down') {
-        const { patp } = cursorPayload;
+        const { patp } = multiplayerPayload;
         window.electron.multiplayer.mouseDown(patp);
       } else if (event === 'mouse-up') {
-        const { patp } = cursorPayload;
+        const { patp } = multiplayerPayload;
         window.electron.multiplayer.mouseUp(patp);
-      } else {
-        const { patp, elementId } = cursorPayload;
+      } else if (event === 'mouse-click') {
+        const { patp, elementId } = multiplayerPayload;
         window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
+      } else {
+        const { patp, message } = multiplayerPayload;
+        window.electron.multiplayer.realmToAppSendChat(patp, message);
       }
     };
 

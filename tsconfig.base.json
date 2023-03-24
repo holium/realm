@@ -28,6 +28,7 @@
   "exclude": ["node_modules"],
   "references": [
     { "path": "./app" },
+    { "path": "./shared" },
     { "path": "./lib/conduit" },
     { "path": "./lib/design-system" },
     { "path": "./lib/presence" },

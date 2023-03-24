@@ -193,7 +193,7 @@ const createMouseOverlayWindow = () => {
     }
   };
 
-  newMouseWindow.on('ready-to-show', mouseSetup);
+  newMouseWindow.webContents.on('dom-ready', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();

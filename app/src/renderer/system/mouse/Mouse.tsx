@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MouseState } from '@holium/realm-presence';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/shared';
 import { hexToRgb, rgbToString } from 'os/lib/color';
 import { AnimatedCursor } from './AnimatedCursor';
 import { EphemeralChat } from './Mouse.styles';
@@ -31,15 +31,6 @@ export const Mouse = () => {
       if (!visible.isOn) visible.toggleOn();
     });
 
-    window.electron.app.onMouseDown(active.toggleOn);
-
-    window.electron.app.onMouseUp(active.toggleOff);
-
-    window.electron.app.onMouseColorChange((hex) => {
-      const rgbString = rgbToString(hexToRgb(hex));
-      if (rgbString) setMouseColor(rgbString);
-    });
-
     const handleMouseMove = (e: MouseEvent) => {
       if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
     };
@@ -47,6 +38,15 @@ export const Mouse = () => {
     window.electron.app.onEnableMouseLayerTracking(() => {
       mouseLayerTracking.toggleOn();
       window.addEventListener('mousemove', handleMouseMove);
+    });
+
+    window.electron.app.onMouseDown(active.toggleOn);
+
+    window.electron.app.onMouseUp(active.toggleOff);
+
+    window.electron.app.onMouseColorChange((hex) => {
+      const rgbString = rgbToString(hexToRgb(hex));
+      if (rgbString) setMouseColor(rgbString);
     });
 
     window.electron.app.onDisableCustomMouse(disabled.toggleOn);
@@ -61,19 +61,8 @@ export const Mouse = () => {
       if (mouseLayerTracking.isOn) {
         window.removeEventListener('mousemove', handleMouseMove);
       }
-
-      window.electron.app.removeOnMouseOut();
-      window.electron.app.removeOnMouseMove();
-      window.electron.app.removeOnMouseDown();
-      window.electron.app.removeOnMouseUp();
-      window.electron.app.removeOnMouseColorChange();
-      window.electron.app.removeOnEnableMouseLayerTracking();
-      window.electron.app.removeOnDisableCustomMouse();
-      window.electron.app.removeOnToggleOnEphemeralChat();
-      window.electron.app.removeOnToggleOffEphemeralChat();
-      window.electron.app.removeOnRealmToAppEphemeralChat();
     };
-  }, [active.isOn, visible.isOn, mouseLayerTracking.isOn]);
+  }, []);
 
   if (disabled.isOn) return null;
 

@@ -1,4 +1,4 @@
-import { Dimensions, Position } from 'os/types';
+import { Dimensions, Position } from '@holium/shared';
 
 export const calculateAnchorPoint = (
   event: any,

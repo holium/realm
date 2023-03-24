@@ -1,10 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { MouseState } from '@holium/realm-presence';
 import { osPreload } from '../os/preload';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
+import { Position } from '@holium/shared';
+import { multiplayerPreload } from './preload.multiplayer';
 import './helpers/mouseListener';
 import './helpers/keyListener';
-import { MouseState } from '@holium/realm-presence';
-import { Position, MediaAccess, MediaAccessStatus } from '../os/types';
-import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
   /* Senders */
@@ -98,9 +99,9 @@ const appPreload = {
       callback(hex);
     });
   },
-  onKeyDown(callback: (key: string) => void) {
-    ipcRenderer.on('key-down', (_, key: string) => {
-      callback(key);
+  onKeyDown(callback: (key: string, isFocused: boolean) => void) {
+    ipcRenderer.on('key-down', (_, key: string, isFocused: boolean) => {
+      callback(key, isFocused);
     });
   },
   onRealmToAppEphemeralChat(callback: (patp: string, message: string) => void) {
@@ -126,24 +127,6 @@ const appPreload = {
   },
   removeOnMouseMove() {
     ipcRenderer.removeAllListeners('mouse-move');
-  },
-  removeOnMouseColorChange() {
-    ipcRenderer.removeAllListeners('mouse-color');
-  },
-  removeOnEnableMouseLayerTracking() {
-    ipcRenderer.removeAllListeners('enable-mouse-layer-tracking');
-  },
-  removeOnDisableCustomMouse() {
-    ipcRenderer.removeAllListeners('disable-custom-mouse');
-  },
-  removeOnToggleOnEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm.toggle-on-ephemeral-chat');
-  },
-  removeOnToggleOffEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm.toggle-off-ephemeral-chat');
-  },
-  removeOnRealmToAppEphemeralChat() {
-    ipcRenderer.removeAllListeners('realm-to-app.ephemeral-chat');
   },
 };
 
