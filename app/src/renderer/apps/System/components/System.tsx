@@ -96,7 +96,7 @@ const SystemPanelPresenter = () => {
           title="Isolation Mode"
           label="Prevents the native OS from causing edge events and notifications."
           isChecked={desktop.isIsolationMode}
-          onClick={desktop.toggleIsolationMode}
+          onChange={desktop.toggleIsolationMode}
         />
       </Card>
 

@@ -100,7 +100,7 @@ export const Select = ({
           {placeholder}
         </Text.Custom>
       )}
-      <Icon fill="icon" name="ArrowDown" />
+      <Icon name="ArrowDown" />
       <SelectDropdown
         id={`${id}-dropdown`}
         variants={animationVariants}

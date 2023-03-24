@@ -43,7 +43,7 @@ const DisclaimerDialogPresenter = (props: BaseDialogProps) => {
         <CheckBox
           label="I agree"
           isChecked={Boolean(props.workflowState.disclaimerAccepted)}
-          onClick={toggleChecked}
+          onChange={toggleChecked}
         />
       </Flex>
     </Grid.Column>

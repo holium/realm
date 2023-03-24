@@ -35,7 +35,7 @@ export const genCSSVariables = (theme: ThemeType) => {
     ? toRgbaString(lighten(0.05, theme.windowColor))
     : toRgbaString(darken(0.025, theme.windowColor));
   const textColor = toRgbaString(theme.textColor);
-  const iconColor = toRgbaString(theme.iconColor);
+  const iconColor = toRgbaString(rgba(theme.textColor, 0.7));
   const mouseColor = toRgbaString(theme.mouseColor);
   const intentAlertColor = toRgbaString('#ff6240');
   const intentCautionColor = toRgbaString('#ffbc32');

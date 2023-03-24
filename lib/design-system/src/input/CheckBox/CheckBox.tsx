@@ -9,7 +9,7 @@ type Props = {
   isChecked?: boolean;
   disabled?: boolean;
   defaultChecked?: boolean;
-  onClick?: () => void;
+  onChange?: () => void;
 };
 
 export const CheckBox = ({
@@ -18,14 +18,14 @@ export const CheckBox = ({
   isChecked,
   disabled,
   defaultChecked,
-  onClick,
+  onChange,
 }: Props) => {
   const toggled = useToggle(isChecked ?? defaultChecked ?? false);
 
   const onToggle = () => {
     if (disabled) return;
     toggled.toggle();
-    onClick?.();
+    onChange?.();
   };
 
   return (

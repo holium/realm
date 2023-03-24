@@ -17,22 +17,22 @@ import {
 } from 'styled-system';
 import { IconPathsType, paths } from './icons';
 import { BoxProps } from '../Box/Box';
-import { ColorProps, colorStyle } from '../../util/colors';
+import { ColorVariants } from '../../util/colors';
 
 export type IconProps = BoxProps &
   SpaceProps &
-  Pick<ColorProps, 'fill'> &
   LayoutProps &
   TypographyProps &
   WidthProps &
-  HeightProps;
+  HeightProps & {
+    fill?: ColorVariants;
+  };
 
 const SvgComponent = forwardRef<
   SVGSVGElement,
   SVGMotionProps<SVGSVGElement> & {
     name: IconPathsType;
     title?: string;
-    customFill?: string;
     onClick?: () => void;
   }
 >(({ title, name, width, height, onClick, ...rest }, svgRef) => {
@@ -41,7 +41,7 @@ const SvgComponent = forwardRef<
   return (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+      viewBox={`0 0 ${width ?? 24} ${height ?? 24}`}
       width={width || '1em'}
       height={height || '1em'}
       ref={svgRef}
@@ -61,9 +61,8 @@ SvgComponent.displayName = 'SvgComponent';
 export const Icon = styled(SvgComponent)<IconProps>`
   flex: none;
   vertical-align: middle;
-  ${colorStyle}
-  ${({ customFill }) => customFill && `fill: ${customFill};`}
-  ${compose(space, color, width, height, layout, typography)}
+  fill: ${({ fill = 'icon' }) => `rgba(var(--rlm-${fill}-rgba))`};
+  ${compose(space, color, width, height, layout, typography)};
 `;
 
 let lastId = 0;

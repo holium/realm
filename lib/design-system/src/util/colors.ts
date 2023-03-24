@@ -45,7 +45,6 @@ export const getVar = (variable: StyleVars) => {
 
 export interface ColorProps {
   bg?: ColorVariants;
-  fill?: ColorVariants;
   color?: ColorVariants;
   borderColor?: ColorVariants;
 }
@@ -65,10 +64,5 @@ export const colorStyle = css<ColorProps>`
     props.borderColor &&
     css`
       border-color: rgba(var(${variantToRgbCssVar(props.borderColor)}));
-    `}
-  ${(props) =>
-    props.fill &&
-    css`
-      fill: rgba(var(${variantToRgbCssVar(props.fill)}));
     `}
 `;
