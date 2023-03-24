@@ -17,7 +17,7 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
       ? typeof rest.height === 'number'
         ? `${rest.height}px`
         : rest.height
-      : 'inherit'
+      : '100%'
   ) as string;
 
   const parsedWidth = (

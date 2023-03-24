@@ -90,9 +90,13 @@ export const LinkBlock = ({
         .then(async (res) => {
           if (res.status === 200) {
             const data = await res.json();
-            if (!data || data.error) setLinkBlockType('url');
-            setOpenGraph(data);
-            onLinkLoaded && onLinkLoaded();
+            if (!data || data.error) {
+              setLinkBlockType('url');
+              return;
+            } else {
+              setOpenGraph(data);
+              onLinkLoaded && onLinkLoaded();
+            }
           } else {
             setLinkBlockType('url');
           }
@@ -107,12 +111,14 @@ export const LinkBlock = ({
   let description = openGraph?.ogDescription || '';
 
   if (linkBlockType === 'url') {
+    const width = containerWidth ? containerWidth - 12 : 320;
+
     return (
-      <Block {...rest}>
+      <Block {...rest} width={width}>
         <Bookmark
           url={link}
           title={link}
-          width={320}
+          width={width - 16}
           onNavigate={(url: string) => {
             window.open(url, '_blank');
           }}

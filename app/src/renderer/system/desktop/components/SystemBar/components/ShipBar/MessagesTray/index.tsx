@@ -58,6 +58,7 @@ const MessagesTrayPresenter = () => {
           height={28}
           whileTap={{ scale: 0.95 }}
           transition={{ scale: 0.1 }}
+          isSelected={activeApp === 'messages-tray'}
           width={28}
         >
           <Icon name={icon} size={24} pointerEvents="none" />
