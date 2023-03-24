@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Text, Box, BoxProps } from '../..';
-import { BlockStyle } from '../Block/Block';
+import { BlockStyle } from '../../blocks/Block/Block';
 import {
   FragmentBlockquote,
   FragmentShip,
@@ -33,9 +33,6 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
     if (props.isPrevGrouped) {
       return '0px 12px 12px 12px';
     }
-    // if (props.isNextGrouped) {
-    //     return '12px 0px 12px 12px';
-    // }
     return '12px 12px 12px 0px';
   }};
   transition: width 1s ease-in-out;
@@ -53,6 +50,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
       }
       return '12px 12px 0px 12px';
     }} !important;
+
     ${Text.Custom} {
       color: #ffffff !important;
     }

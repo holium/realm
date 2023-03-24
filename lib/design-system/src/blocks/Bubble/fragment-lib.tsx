@@ -27,8 +27,8 @@ import { getVar } from '../../util/colors';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
 import { motion } from 'framer-motion';
-import { ImageBlock } from '../ImageBlock/ImageBlock';
-import { LinkBlock } from '../LinkBlock/LinkBlock';
+import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
+import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 

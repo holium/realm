@@ -1,6 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { darken, rgba } from 'polished';
 import {
   background,
@@ -214,6 +214,7 @@ const TextButton = styled(Base)<TextButtonProps>`
 
 export type IconButtonProps = ButtonProps & {
   showOnHover?: boolean;
+  isSelected?: boolean;
   customColor?: string;
 };
 
@@ -223,7 +224,8 @@ const IconButton = styled(Base)<IconButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
+  background-color: ${(props) =>
+    props.isSelected ? 'var(--rlm-overlay-active)' : 'transparent'};
   &:hover:not([disabled]) {
     transition: var(--transition);
     background-color: var(--rlm-overlay-hover);

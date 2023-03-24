@@ -504,6 +504,7 @@
           [%ship de-ship]
           [%link so]
           [%custom (at ~[so so])]
+          [%status so]
       ==
     ::
     ++  path-and-msg-id

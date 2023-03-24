@@ -3,11 +3,10 @@ import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
 
 import { Pulser } from 'renderer/components';
-import { Box, Flex } from '@holium/design-system';
+import { Box, Flex, Avatar } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 
 import { motion } from 'framer-motion';
-import { Avatar } from '@holium/design-system';
 import { TrayClock } from '../Clock';
 import styled from 'styled-components';
 

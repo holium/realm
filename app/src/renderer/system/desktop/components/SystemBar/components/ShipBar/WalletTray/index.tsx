@@ -40,6 +40,7 @@ export const WalletTrayPresenter: FC = () => {
       id="wallet-tray-icon"
       height={28}
       width={28}
+      isSelected={activeApp === 'wallet-tray'}
       whileTap={{ scale: 0.95 }}
       transition={{ scale: 0.1 }}
       onClick={onButtonClick}

@@ -7,7 +7,7 @@ import {
   ReactionPicker,
   ReactionPickerStyle,
 } from './Reaction';
-import { FragmentReactionType } from '../Bubble/Bubble.types';
+import { FragmentReactionType } from './Bubble.types';
 
 export default {
   component: Reactions,
