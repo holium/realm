@@ -25,7 +25,7 @@ export const RadioLabel = styled(motion.label)<{ isSelected?: boolean }>`
       : css`
           color: rgba(var(--rlm-text-rgba));
           background-color: rgba(var(--rlm-window-rgba));
-          backdrop-filter: brightness(0.98);
+          filter: brightness(0.98);
         `}
 `;
 
@@ -44,6 +44,6 @@ export const RadioHighlight = styled(motion.label)<{ isSelected?: boolean }>`
         `
       : css`
           background-color: rgba(var(--rlm-window-rgba));
-          backdrop-filter: brightness(0.98);
+          filter: brightness(0.98);
         `}
 `;

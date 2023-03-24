@@ -40,10 +40,8 @@ export const genCSSVariables = (theme: ThemeType) => {
   const intentAlertColor = toRgbaString('#ff6240');
   const intentCautionColor = toRgbaString('#ffbc32');
   const intentSuccessColor = toRgbaString('#0fc383');
-  const overlayHoverColor = toRgbaString(rgba(isLight ? '#fff' : '#000', 0.05));
-  const overlayActiveColor = toRgbaString(
-    rgba(isLight ? '#000' : '#fff', 0.09)
-  );
+  const overlayHoverColor = isLight ? '0,0,0,0.04' : '255,255,255,0.06';
+  const overlayActiveColor = isLight ? '0,0,0,0.06' : '255,255,255,0.09';
 
   return `
     :root {

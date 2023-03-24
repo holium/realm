@@ -76,8 +76,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   justify-content: center;
   background: ${({ selected }) =>
     selected ? 'rgba(var(--rlm-accent-rgba))' : 'rgba(var(--rlm-input-rgba))'};
-  backdrop-filter: ${({ selected }) =>
-    selected ? 'brightness(1.3)' : 'brightness(1)'};
+  filter: ${({ selected }) => (selected ? 'brightness(1.3)' : 'brightness(1)')};
   border: ${({ selected }) =>
     selected
       ? '1px solid rgba(var(--rlm-accent-rgba))'

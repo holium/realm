@@ -125,11 +125,11 @@ const Primary = styled(Base)<ButtonProps>`
   color: #ffffff;
   &:hover:not([disabled]) {
     background-color: rgba(var(--rlm-accent-rgba));
-    backdrop-filter: brightness(1.1);
+    filter: brightness(1.1);
   }
   &:active:not([disabled]) {
     background-color: rgba(var(--rlm-accent-rgba));
-    backdrop-filter: brightness(1.2);
+    filter: brightness(1.2);
   }
   svg {
     fill: #ffffff;
@@ -139,14 +139,14 @@ const Primary = styled(Base)<ButtonProps>`
 const Secondary = styled(Base)<ButtonProps>`
   color: rgba(var(--rlm-text-rgba));
   background-color: rgba(var(--rlm-window-rgba));
-  backdrop-filter: brightness(0.975);
+  filter: brightness(0.975);
   &:hover:not([disabled]) {
     background-color: rgba(var(--rlm-window-rgba));
-    backdrop-filter: brightness(0.975);
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
     background-color: rgba(var(--rlm-window-rgba));
-    backdrop-filter: brightness(0.925);
+    filter: brightness(0.925);
   }
 `;
 
@@ -169,11 +169,11 @@ const Transparent = styled(Base)<ButtonProps>`
   background-color: transparent;
   &:hover:not([disabled]) {
     background-color: rgba(var(--rlm-window-rgba));
-    backdrop-filter: brightness(0.975);
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
     background-color: rgba(var(--rlm-window-rgba));
-    backdrop-filter: brightness(0.95);
+    filter: brightness(0.95);
   }
   svg {
     fill: rgba(var(--rlm-text-rgba));

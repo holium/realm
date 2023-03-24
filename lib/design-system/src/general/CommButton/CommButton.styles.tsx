@@ -13,6 +13,6 @@ export const CommCircle = styled(Flex)<{ customBg: string }>`
 
   &:hover {
     background: ${({ customBg }) => customBg};
-    backdrop-filter: brightness(0.975);
+    filter: brightness(0.975);
   }
 `;
