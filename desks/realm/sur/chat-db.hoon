@@ -74,8 +74,9 @@
 ::
 +$  uniq-id  [=msg-id =msg-part-id]
 +$  messages-table  ((mop uniq-id msg-part) idx-sort)
-++  msgon  ((on uniq-id msg-part) idx-sort)
-+$  tbl-and-ids  [tbl=messages-table ids=(list uniq-id)]
+++  msgon           ((on uniq-id msg-part) idx-sort)
++$  tbl-and-ids     [tbl=messages-table ids=(list uniq-id)]
++$  msg-kvs         (list [k=uniq-id v=msg-part])
 ::
 +$  peer-row
   $:  =path

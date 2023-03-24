@@ -35,41 +35,6 @@
     result
   $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
 ::
-++  remove-message-from-table
-  |=  [tbl=messages-table:sur =msg-id:sur]
-  ^-  [messages-table:sur (list uniq-id:sur)]
-  =/  part-counter=@ud  0
-  =/  ids  *(list uniq-id:sur)
-  |-
-  ?.  (has:msgon:sur tbl `uniq-id:sur`[msg-id part-counter])
-    [tbl ids]
-  $(part-counter +(part-counter), tbl +:(del:msgon:sur tbl [msg-id part-counter]), ids (snoc ids [msg-id part-counter]))
-::
-++  remove-messages-for-path
-  |=  [tbl=messages-table:sur =path]
-  =/  badkvs  (skim (tap:msgon:sur tbl) |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path)))
-  |-
-  ?:  =(0 (lent badkvs))
-    tbl
-  =/  current  (snag 0 badkvs)
-  $(tbl +:(del:msgon:sur tbl -.current), badkvs +:badkvs)
-::
-++  remove-messages-for-path-before
-  |=  [tbl=messages-table:sur =path before=time]
-  ^-  tbl-and-ids:sur
-  =/  start=uniq-id:sur  [[before ~zod] 0]
-  =/  badkeys=(list uniq-id:sur)
-    %+  turn
-      %+  skim
-        (tap:msgon:sur (lot:msgon:sur tbl `start ~))
-      |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path))
-    |=(kv=[k=uniq-id:sur v=msg-part:sur] k.kv)
-  =/  index=@ud  0
-  |-
-  ?:  =(index (lent badkeys))
-    [tbl badkeys]
-  $(tbl +:(del:msgon:sur tbl (snag index badkeys)), index +(index))
-::
 ++  make-msg-from-minimal-frags
   |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
   ^-  message:sur
@@ -86,46 +51,114 @@
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
 ::
+++  keys-from-kvs  |=(kvs=msg-kvs:sur (turn kvs |=(kv=[k=uniq-id:sur v=msg-part:sur] k.kv)))
+::
+++  rm-msg-parts
+  |=  [ids=(list uniq-id:sur) tbl=messages-table:sur]
+  ^-  messages-table:sur
+  |-
+  ?:  =(0 (lent ids))
+    tbl
+  $(tbl +:(del:msgon:sur tbl (snag 0 ids)), ids +:ids)
+::
+++  remove-ids-from-pins
+  |=  [ids=(list msg-id:sur) state=state-0 now=@da]
+  ^-  state-and-changes
+  =/  tbl  paths-table.state
+  =/  changes=db-change:sur  *db-change:sur
+  =/  result
+    |-
+    ?:  =(0 (lent ids))
+      [tbl changes]
+    =/  current  (snag 0 ids)
+    =/  msg=msg-part:sur  (got:msgon:sur messages-table.state [current 0])
+    =/  pathrow=path-row:sur  (~(got by tbl) path.msg)
+    =/  pinned                (~(has in pins.pathrow) current)
+    =.  pins.pathrow          ?:(pinned (~(del in pins.pathrow) current) pins.pathrow)
+    =.  updated-at.pathrow    ?:(pinned now updated-at.pathrow)
+    $(tbl (~(put by tbl) path.msg pathrow), ids +:ids, changes ?:(pinned [[%upd-paths-row pathrow] changes] changes))
+  =.  paths-table.state  -:result
+  [state +:result]
+::
+:: helper that is smart enough to remove the pins first,
+:: then add the del-log,
+:: and then remove the actual messages
+++  remove-messages
+  |=  [messages=msg-kvs:sur state=state-0 now=@da]
+  ^-  state-and-changes
+  =/  keys=(list uniq-id:sur)  (keys-from-kvs messages)
+
+  :: remove them from pins in their respective paths
+  =/  s-ch      (remove-ids-from-pins (turn messages |=(kv=[k=uniq-id:sur v=msg-part:sur] msg-id.v.kv)) state now)
+  =.  state     s.s-ch
+  =/  changes   ch.s-ch
+
+  :: log the deletes
+  =/  logged                (log-deletes-for-msg-parts state keys now)
+  =.  del-log.state         -.logged
+  =.  changes               (weld `db-change:sur`changes `db-change:sur`+:logged)
+
+  :: remove the actual messages
+  =.  messages-table.state  (rm-msg-parts keys messages-table.state)
+
+  [state changes]
+::
+:: given a msg-id, remove all the `msg-part`s associated with it
+++  remove-message
+  |=  [state=state-0 =msg-id:sur now=@da]
+  ^-  state-and-changes
+
+  =/  part-counter=@ud  0
+  =/  kvs  *msg-kvs:sur
+  =.  kvs
+    |-
+    ?:  (has:msgon:sur messages-table.state `uniq-id:sur`[msg-id part-counter])
+      $(part-counter +(part-counter), kvs [[[msg-id part-counter] (got:msgon:sur messages-table.state [msg-id part-counter])] kvs])
+    kvs
+
+  (remove-messages kvs state now)
+::
+:: remove all `msg-part`s associated with a given path
+++  remove-messages-for-path
+  |=  [state=state-0 =path now=@da]
+  ^-  state-and-changes
+  %^  remove-messages
+      (skim (tap:msgon:sur messages-table.state) |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path)))
+    state
+  now
+::
+++  remove-messages-for-path-before
+  |=  [state=state-0 =path before=time now=@da]
+  ^-  state-and-changes
+
+  =/  start=uniq-id:sur  [[before ~zod] 0]
+  =/  badkvs=msg-kvs:sur
+    %+  skim
+      (tap:msgon:sur (lot:msgon:sur messages-table.state `start ~))
+    |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path))
+
+  (remove-messages badkvs state now)
+::
 ++  expire-old-msgs
   |=  [state=state-0 now=@da]
-  ^-  [state-0 db-change:sur]
-  =/  old-msgs
-    ^-  (list [k=uniq-id:sur v=msg-part:sur])
+  ^-  state-and-changes
+  =/  old-msgs=msg-kvs:sur
     %+  skim
       :: TODO efficiency by lot:msgon:sur from the last del-log time
       :: since we know we checked then ?
       (tap:msgon:sur messages-table.state)
     |=([k=uniq-id:sur v=msg-part:sur] &(?!(=(*@da expires-at.v)) (gth now expires-at.v)))
-  =/  index=@ud   0
-  =/  len=@ud     (lent old-msgs)
-  =/  tbl         messages-table.state
-  =/  ids         *(list uniq-id:sur)
-  =/  rm-result
-    ^-  [messages-table:sur (list uniq-id:sur)]
-    |-
-    ?:  =(index len)
-      [tbl ids]
-    =/  current-key   k:(snag index old-msgs)
-    $(index +(index), tbl +:(del:msgon:sur tbl current-key), ids (snoc ids current-key))
 
-  =/  logged    (log-deletes-for-msg-parts state ~ +:rm-result now)
-  =.  del-log.state         -.logged
-  =.  messages-table.state  -:rm-result
-
-  :-
-  state
-  +.logged
+  (remove-messages old-msgs state now)
 ::
 ++  log-deletes-for-msg-parts
-  |=  [state=state-0 p=(unit path) ids=(list uniq-id:sur) now=@da]
+  |=  [state=state-0 ids=(list uniq-id:sur) now=@da]
   ^-  [del-log:sur db-change:sur]
   =/  change-rows=db-change:sur
     %+  turn
       ids
     |=  a=uniq-id:sur
-    =/  pat
-      ?~  p  path:(got:msgon:sur messages-table.state a)
-      (need p)
+    =/  pat  path:(got:msgon:sur messages-table.state a)
     [%del-messages-row pat a now]
   =/  index=@ud     0
   =/  len=@ud       (lent change-rows)
@@ -142,6 +175,7 @@
   =/  len-three  (skim ~(val by sup.bowl) |=(a=[p=ship q=path] (gte (lent q.a) 3)))
   =/  matching  (skim len-three |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start)))
   (turn matching |=(a=[p=ship q=path] q.a))
+::
 ++  delete-logs-for-path :: used for clearing del-log when the path itself is deleted, to keep things clean
   |=  [state=state-0 =path]
   ^-  del-log:sur
@@ -237,9 +271,9 @@
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(our.bowl src.bowl)  :: leave pokes are only valid from ourselves. if others want to kick us, that is a different matter
+  =.  messages-table.state  messages-table:s:(remove-messages-for-path state path now.bowl)
   =.  paths-table.state  (~(del by paths-table.state) path)
   =.  peers-table.state  (~(del by peers-table.state) path)
-  =.  messages-table.state  (remove-messages-for-path messages-table.state path)
   :: for now we are assuming that subscribed clients are intelligent
   :: enough to realize that a %del-paths-row also means remove the
   :: related messages and peers
@@ -323,9 +357,11 @@
   ?>  =(sender.msg-id src.bowl)  :: edit pokes are only valid from the ship which is the original sender
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
 
-  =/  original-expires-at  expires-at:(got:msgon:sur messages-table.state [msg-id 0])
-  =/  remove-result  (remove-message-from-table messages-table.state msg-id)
-  =.  messages-table.state  -.remove-result
+  =/  original-expires-at   expires-at:(got:msgon:sur messages-table.state [msg-id 0])
+  =/  remove-result         (remove-message state msg-id now.bowl)
+  :: we don't want to update the del-log here so manually pull out the
+  :: tables we do want to update
+  =.  messages-table.state          messages-table.s.remove-result
 
   =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl)
   =.  messages-table.state  -.add-result
@@ -351,25 +387,10 @@
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: delete pokes are only valid if there is a fragment 0 in the table for the msg-id
 
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
-  =/  remove-result  (remove-message-from-table messages-table.state msg-id)
-  =.  messages-table.state  -.remove-result
+  =/  remove-result   (remove-message state msg-id now.bowl)
+  =.  state           s.remove-result
+  =/  thechange       chat-db-change+!>(ch.remove-result)
 
-  =.  del-log.state   -:(log-deletes-for-msg-parts state `path.msg-part +.remove-result now.bowl)
-
-  =/  row=path-row:sur    (~(got by paths-table.state) path.msg-part)
-  =/  pinned              (~(has in pins.row) msg-id)
-  =.  pins.row        ?:(pinned (~(del in pins.row) msg-id) pins.row)
-  =.  updated-at.row  ?:(pinned now.bowl updated-at.row)
-  =.  paths-table.state
-    ?:  pinned
-      (~(put by paths-table.state) path.row row)
-    paths-table.state
-
-  =/  change-rows   (turn +.remove-result |=(a=uniq-id:sur [%del-messages-row path.row a now.bowl]))
-  =/  thechange
-    ?:  pinned
-      chat-db-change+!>([[%upd-paths-row row] change-rows])
-    chat-db-change+!>(change-rows)
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start AND have a timestamp after the timestamp in the
   :: subscription path since they explicitly DONT care about the ones
@@ -391,15 +412,11 @@
   =/  host-peer  (snag 0 (skim peers |=(p=peer-row:sur =(%host role.p))))
   ?>  =(patp.host-peer src.bowl)  :: delete-backlog pokes are only valid from the host ship
 
-  =/  remove-result=tbl-and-ids:sur  (remove-messages-for-path-before messages-table.state path before)
-  =.  messages-table.state  tbl.remove-result
-
-  =/  change-rows   (turn ids.remove-result |=(a=uniq-id:sur [%del-messages-row path a now.bowl]))
-  =/  thechange     chat-db-change+!>(change-rows)
-  =.  del-log.state   -:(log-deletes-for-msg-parts state `path ids.remove-result now.bowl)
+  =/  remove-result=state-and-changes  (remove-messages-for-path-before state path before now.bowl)
+  =.  state         s.remove-result
 
   =/  gives  :~
-    [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) thechange]
+    [%give %fact (weld (limo [/db (weld /db/path path) ~]) (messages-start-paths bowl)) chat-db-change+!>(ch.remove-result)]
   ==
   [gives state]
 ::
@@ -440,24 +457,16 @@
   =/  host-peer-row         (snag 0 (skim original-peers-list |=(p=peer-row:sur =(role.p %host))))
   ?>  |(=(patp.host-peer-row src.bowl) =(src.bowl patp.act))
 
+  ?:  =(our.bowl patp.act)
+    :: if we were the one kicked, it's the same as if we deleted the path
+    =/  bol  bowl
+    =.  src.bol  our.bowl :: permissions-tinkering to make the leave-path call work
+    (leave-path path.act state bol)
+
   =/  peers  (skip (~(got by peers-table.state) path.act) |=(a=peer-row:sur =(patp.a patp.act)))
-  =/  our-kicked  =(our.bowl patp.act)
+  =.  peers-table.state  (~(put by peers-table.state) path.act peers)
 
-  :: remove from all tables if we were the one kicked
-  :: otherwise, only update the peers-table
-  =.  peers-table.state  ?:(our-kicked (~(del by peers-table.state) path.act) (~(put by peers-table.state) path.act peers))
-  =.  paths-table.state  ?:(our-kicked (~(del by paths-table.state) path.act) paths-table.state)
-  =.  messages-table.state  ?:(our-kicked (remove-messages-for-path messages-table.state path.act) messages-table.state)
-
-  =/  change-row
-    ?:  our-kicked
-      :: for now we are assuming that subscribed clients are intelligent
-      :: enough to realize that a %del-paths-row also means remove the
-      :: related messages and peers
-      [%del-paths-row path.act now.bowl]
-    :: else just update the peers table
-    [%del-peers-row path.act patp.act now.bowl]
-  =.  del-log.state   ?:(our-kicked (delete-logs-for-path state path.act) del-log.state)
+  =/  change-row  [%del-peers-row path.act patp.act now.bowl]
   =.  del-log.state   (put:delon:sur del-log.state now.bowl change-row)
   =/  thechange   chat-db-change+!>(~[change-row])
 
@@ -508,7 +517,7 @@
     |=  [t=time tbl=peers-table:sur]
     ^-  peers-table:sur
 
-    =/  individual-rows=(list peer-row)  (zing ~(val by tbl))
+    =/  individual-rows=(list peer-row:sur)  (zing ~(val by tbl))
     =/  valid-rows
       %+  skim
         individual-rows
@@ -683,8 +692,14 @@
           metadata+(metadata-to-json metadata.msg-part)
           created-at+(time created-at.msg-part)
           updated-at+(time updated-at.msg-part)
-          expires-at+(time expires-at.msg-part)
+          expires-at+(time-bunt-null expires-at.msg-part)
       ==
+    ::
+    ++  time-bunt-null
+      |=  t=@da
+      ?:  =(t *@da)
+        ~
+      (time t)
     ::
     ++  reply-to-to-json
       |=  =reply-to:sur
