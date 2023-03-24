@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
+    "@urbit/api": "^2.3.0",
     "alchemy-sdk": "^2.2.1",
     "ethers": "^5.7.0",
     "qrcode.react": "^3.1.0",
@@ -50,6 +51,7 @@
     "@storybook/manager-webpack5": "^6.5.13",
     "@storybook/react": "^6.5.13",
     "@storybook/testing-library": "^0.0.13",
+    "@types/eventsource": "^1.1.11",
     "@typescript-eslint/parser": "^5.49.0",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",

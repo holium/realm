@@ -211,7 +211,7 @@ export class Conduit extends EventEmitter {
         headers: { Cookie: this.cookie?.split('; ')[0] },
       });
 
-      this.sse.onopen = async (response) => {
+      this.sse.onopen = async (response: any) => {
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
           resolve();
@@ -295,18 +295,15 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
-      this.sse.onerror = async (error) => {
+      this.sse.onerror = async (error: any) => {
         console.log('sse error', error);
         if (error.status === 403) {
-          // @ts-ignore
           error.originator = 'sse';
           this.handleError(error);
         }
-        // @ts-ignore
         if (error.status === '404') {
           return;
         }
-        // @ts-expect-error
         if (error.status >= 500) {
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
