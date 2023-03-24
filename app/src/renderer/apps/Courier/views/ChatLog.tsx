@@ -36,7 +36,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }, []);
 
   useEffect(() => {
-    if (!selectedChat) return;
+    if (!selectedChat || !ship?.patp) return;
     selectedChat.fetchMessages();
     const unreadCount = accountStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
@@ -123,11 +123,12 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }
 
   return (
-    <>
+    <Flex flexDirection="column">
       <Flex
         layout="preserve-aspect"
         layoutId={`chat-${path}-container`}
         flexDirection="column"
+        transition={{ delay: 0.025, duration: 0.25 }}
       >
         <ChatLogHeader
           title={resolvedTitle}
@@ -169,7 +170,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
-                key={`last-${selectedChat.lastFetch}-${selectedChat.messages.length}`}
+                key={`last-${selectedChat.messages.length}`}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
@@ -282,7 +283,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           }}
         />
       </Flex>
-    </>
+    </Flex>
   );
 };
 

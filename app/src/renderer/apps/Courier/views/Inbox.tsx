@@ -98,7 +98,7 @@ export const InboxPresenter = () => {
           </Text.Custom>
         </Flex>
       ) : (
-        <>
+        <Box>
           <Flex
             style={{
               background: 'rgba(0,0,0,0.03)',
@@ -142,11 +142,15 @@ export const InboxPresenter = () => {
             rowHeight={52}
             data={unpinnedChatList}
             filter={searchFilter}
-            rowRenderer={(chat) => {
+            rowRenderer={(chat, index, measure) => {
               const isAdmin = ship ? chat.isHost(ship.patp) : false;
               return (
                 <Box
+                  onLoad={measure}
                   zIndex={2}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.025, duration: 0.5 }}
                   layout="preserve-aspect"
                   key={`${ship?.patp}-unpinned-${chat.path}`}
                   alignItems="center"
@@ -171,7 +175,7 @@ export const InboxPresenter = () => {
               );
             }}
           />
-        </>
+        </Box>
       )}
     </Flex>
   );

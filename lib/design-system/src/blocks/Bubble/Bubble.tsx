@@ -1,4 +1,4 @@
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useEffect, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -66,6 +66,13 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       () => (containerWidth ? containerWidth - 16 : undefined),
       [containerWidth]
     );
+
+    useEffect(() => {
+      console.log('mounted', id);
+      return () => {
+        console.log('unmounted', id);
+      };
+    }, []);
 
     const footerHeight = useMemo(() => {
       if (reactions.length > 0) {

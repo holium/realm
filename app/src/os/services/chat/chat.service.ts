@@ -570,7 +570,7 @@ export class ChatService extends BaseService {
       ), chat_with_messages AS (
         SELECT
             path,
-            json_object('contents', contents, 'id', msg_id) lastMessage,
+            json_object('id', msg_id, 'contents', contents, 'createdAt', m_created_at) lastMessage,
             sender lastSender,
             m_created_at created_at,
             m_updated_at updated_at
@@ -668,7 +668,7 @@ export class ChatService extends BaseService {
       ), chat_with_messages AS (
         SELECT
             path,
-            contents lastMessage,
+            json_object('id', msg_id, 'contents', contents, 'createdAt', m_created_at) lastMessage,
             sender lastSender,
             m_created_at created_at,
             m_updated_at updated_at

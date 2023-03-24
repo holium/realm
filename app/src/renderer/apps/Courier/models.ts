@@ -1,9 +1,47 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast } from 'mobx-state-tree';
+import { flow, Instance, types, cast, clone, detach } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { expiresInMap, ExpiresValue } from './types';
+
+const ChatFragment = types.union(
+  { eager: true },
+  types.model('FragmentPlain', {
+    plain: types.string,
+    pending: types.maybe(types.boolean),
+  }),
+  types.model('FragmentBold', { bold: types.string }),
+  types.model('FragmentItalics', { italics: types.string }),
+  types.model('FragmentStrike', { strike: types.string }),
+  types.model('FragmentBoldItalics', { 'bold-italics': types.string }),
+  types.model('FragmentBoldStrike', { 'bold-strike': types.string }),
+  types.model('FragmentItalicsStrike', { 'italics-strike': types.string }),
+  types.model('FragmentBoldItalicsStrike', {
+    'bold-italics-strike': types.string,
+  }),
+  types.model('FragmentBlockquote', { blockquote: types.string }),
+  types.model('FragmentInlineCode', { 'inline-code': types.string }),
+  types.model('FragmentUrl', { url: types.string }),
+  types.model('FragmentCode', { code: types.string }),
+  types.model('FragmentShip', {
+    ship: types.string,
+  }),
+
+  types.model('FragmentLink', {
+    link: types.string,
+  }),
+  types.model('FragmentImage', {
+    image: types.string,
+  }),
+  types.model('FragmentBreak', {
+    break: types.null,
+  }),
+  types.model('FragmentStatus', {
+    status: types.string,
+  })
+);
+export type ChatFragmentMobxType = Instance<typeof ChatFragment>;
 
 const InvitePermission = types.enumeration(['host', 'anyone']);
 export type InvitePermissionType = Instance<typeof InvitePermission>;
@@ -46,7 +84,7 @@ export const ChatMessage = types
     path: types.string,
     id: types.identifier,
     sender: types.string,
-    contents: types.array(types.frozen()),
+    contents: types.array(ChatFragment),
     replyToPath: types.maybeNull(types.string),
     replyToMsgId: types.maybeNull(types.string),
     metadata: types.optional(types.frozen(), {}),
@@ -124,7 +162,8 @@ export const Chat = types
     lastMessage: types.maybeNull(
       types.model({
         id: types.string,
-        contents: types.array(types.frozen()),
+        contents: types.array(ChatFragment),
+        createdAt: types.number,
       })
     ),
     lastSender: types.maybeNull(types.string),
@@ -210,10 +249,31 @@ export const Chat = types
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
-        yield ChatDBActions.sendMessage(path, fragments);
+        // create temporary message
+        const tempContents: ChatFragmentMobxType = fragments.map((f) =>
+          ChatFragment.create({ ...f.content, pending: true })
+        );
+        const message = ChatMessage.create({
+          id: `temp-${new Date().getTime()}`,
+          path: self.path,
+          contents: tempContents,
+          sender: window.ship,
+          pending: true,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        });
+        self.messages.push(message);
+        self.lastSender = message.sender;
+        const lastContents: ChatFragmentMobxType = fragments.map((f) =>
+          ChatFragment.create({ ...f.content, pending: true })
+        );
+        self.lastMessage = {
+          id: message.id,
+          contents: lastContents,
+          createdAt: new Date().getTime(),
+        };
         self.replyingMsg = null;
-        // TODO naive send, should add to local store and update on ack
-        // self.addMessage(message);
+        yield ChatDBActions.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
       }
@@ -229,9 +289,20 @@ export const Chat = types
           });
         return;
       }
-      self.messages.push(message);
+      const pendingIdx = self.messages.findIndex(
+        (m) => m.sender === message.sender && m.pending && m.id.includes('temp')
+      );
+      if (pendingIdx !== -1) {
+        self.messages.splice(pendingIdx, 1, message);
+      } else {
+        self.messages.push(message);
+      }
       self.lastSender = message.sender;
-      self.lastMessage = { contents: message.contents, id: message.id };
+      self.lastMessage = {
+        id: message.id,
+        contents: message.contents,
+        createdAt: message.createdAt,
+      };
     },
     replaceMessage(message: ChatMessageType) {
       const msg = self.messages.find((m) => m.id === message.id);
@@ -242,16 +313,22 @@ export const Chat = types
         );
       }
       msg.updateContents(message.contents, message.updatedAt);
-      self.lastMessage = { contents: message.contents, id: message.id };
-      // self.messages.replace([...self.messages, msg]);
+      // if the message is the last message, update the last message
+      if (self.lastMessage?.id === message.id) {
+        self.lastMessage = {
+          id: message.id,
+          contents: message.contents,
+          createdAt: message.createdAt,
+        };
+      }
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
       try {
-        yield ChatDBActions.deleteMessage(self.path, messageId);
         const message = self.messages.find((m) => m.id === messageId);
         if (!message) return;
         self.messages.remove(message);
+        yield ChatDBActions.deleteMessage(self.path, messageId);
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);
@@ -456,3 +533,56 @@ export const Chat = types
   }));
 
 export type ChatModelType = Instance<typeof Chat>;
+
+// export type FragmentPlainType = {
+//   plain: string;
+// };
+// export type FragmentBoldType = {
+//   bold: string;
+// };
+// export type FragmentItalicsType = {
+//   italics: string;
+// };
+// export type FragmentStrikeType = {
+//   strike: string;
+// };
+// export type FragmentBoldItalicsType = {
+//   'bold-italics': string;
+// };
+// export type FragmentBoldStrikeType = {
+//   'bold-strike': string;
+// };
+// export type FragmentItalicsStrikeType = {
+//   'italics-strike': string;
+// };
+// export type FragmentBoldItalicsStrikeType = {
+//   'bold-italics-strike': string;
+// };
+// export type FragmentBlockquoteType = {
+//   blockquote: string;
+// };
+// export type FragmentInlineCodeType = {
+//   'inline-code': string;
+// };
+// export type FragmentShipType = {
+//   ship: string;
+// };
+// export type FragmentCodeType = {
+//   code: string;
+// };
+// export type FragmentLinkType = {
+//   link: string;
+// };
+// export type FragmentImageType = {
+//   image: string;
+// };
+// export type FragmentUrLinkType = {
+//   'ur-link': string;
+// };
+// export type FragmentBreakType = {
+//   break: null;
+// };
+
+// export type FragmentStatusType = {
+//   status: string;
+// };
