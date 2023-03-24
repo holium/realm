@@ -361,6 +361,13 @@
   =.  pins.state   new-pins
   `state
 ::
+++  toggle-msg-preview-notif
+  |=  [toggle=? state=state-0]
+  ^-  (quip card state-0)
+  =.  msg-preview-notif.state  toggle
+  `state
+::
+::
 ::  JSON
 ::
 ++  encode
@@ -370,10 +377,19 @@
       |=  path-set=pins
       ^-  json
       a+(turn `(list ^path)`~(tap in path-set) enpath)
+    ::
     ++  enpath
       |=  p=^path
       ^-  json
       s+(spat p)
+    ::
+    ++  settings
+      |=  s=[push-enabled=? msg-preview-notif=?]
+      ^-  json
+      %-  pairs
+      :~  push-enabled+b+push-enabled.s
+          msg-preview-notif+b+msg-preview-notif.s
+      ==
   --
 ++  dejs
   =,  dejs:format

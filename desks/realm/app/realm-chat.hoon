@@ -17,9 +17,10 @@
           '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
-          %.y                                     :: push-enabled
-          ~                                   :: set of muted chats
-          ~                                   :: set of pinned chats
+          %.y            :: push-enabled
+          ~              :: set of muted chats
+          ~              :: set of pinned chats
+          %.n            :: msg-preview-notif
       ==
     :_  this(state default-state)
     :~
@@ -40,9 +41,10 @@
           '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
           (sham our.bowl)                         :: uuid:notify
           *devices:notify
-          %.y                                     :: push-enabled
-          ~                                   :: set of muted chats
-          ~                                   :: set of pinned chats
+          %.y            :: push-enabled
+          ~              :: set of muted chats
+          ~              :: set of pinned chats
+          %.n            :: msg-preview-notif
       ==
     [cards this(state default-state)]
     :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
@@ -94,6 +96,8 @@
         (mute-chat:lib +.act state)
       %pin-chat
         (pin-chat:lib +.act state)
+      %toggle-msg-preview-notif
+        (toggle-msg-preview-notif:lib +.act state)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -117,6 +121,14 @@
       [%x %pins ~]
         ?>  =(our.bowl src.bowl)
         ``chat-pins+!>(pins.state)
+    ::
+      [%x %mutes ~]
+        ?>  =(our.bowl src.bowl)
+        ``chat-mutes+!>(mutes.state)
+    ::
+      [%x %settings ~]
+        ?>  =(our.bowl src.bowl)
+        ``chat-settings+!>([push-enabled.state msg-preview-notif.state])
     ==
   ::
   ++  on-agent
@@ -190,7 +202,7 @@
                         ?&  push-enabled.state                  :: push is enabled
                             (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                         ==
-                          =/  push-card  (push-notification-card:lib bowl state thepath 'New Message' (crip "from {(scow %p sender.msg-id.msg-part.db-row.ch)}"))
+                          =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg msg-part.db-row.ch) (crip "from {(scow %p sender.msg-id.msg-part.db-row.ch)}"))
                           [push-card notif-db-card ~]
                         :: otherwise, just send to notif-db
                         [notif-db-card ~]
@@ -235,6 +247,30 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message 'New Message' (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])
+    !>([%create %realm-chat path.msg-part %message (notif-msg msg-part) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])
   ]
+++  notif-msg
+  |=  =msg-part:db-sur
+  ^-  @t
+  ?.  msg-preview-notif.state
+    'New Message'
+  =/  str
+    ^-  @t
+    :: show the content text from the types where it makes sense to do
+    :: so. For the others, just show the name of the type (like "image")
+    ?+  -.content.msg-part  -.content.msg-part
+      %plain                p.content.msg-part
+      %bold                 p.content.msg-part
+      %italics              p.content.msg-part
+      %strike               p.content.msg-part
+      %bold-italics         p.content.msg-part
+      %bold-strike          p.content.msg-part
+      %italics-strike       p.content.msg-part
+      %bold-italics-strike  p.content.msg-part
+      %blockquote           p.content.msg-part
+      %inline-code          p.content.msg-part
+      %code                 p.content.msg-part
+      %status               p.content.msg-part
+    ==
+  (crip `tape`(swag [0 140] (trip str))) :: only show the first 140 characters of the message in the preview
 --
