@@ -92,10 +92,10 @@ export type Message =
   | (MessageBase & AckParams)
   | (MessageBase & DeleteParams);
 
-export interface Thread<Action> {
+export interface Thread {
   inputMark: string; // graph-update
   outputMark: string; //
   threadName: string; // graph-add-nodes
   desk?: string; // graph-store
-  body: Action;
+  body: Object; // { ship: 'lomder-librun', json: '{"data":"something"}' }
 }

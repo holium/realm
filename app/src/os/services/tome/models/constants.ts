@@ -1,3 +1,4 @@
+export const desk = 'realm';
 export const agent = 'tome';
 
 export const tomeMark = 'tome-action';

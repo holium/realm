@@ -488,7 +488,7 @@ export class Conduit extends EventEmitter {
    * @param params
    * @returns
    */
-  async thread(params: Thread<Action>): Promise<any> {
+  async thread(params: Thread): Promise<any> {
     const { inputMark, outputMark, threadName, body, desk } = params;
 
     try {

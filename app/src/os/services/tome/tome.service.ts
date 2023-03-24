@@ -4,7 +4,7 @@ import { IpcMainInvokeEvent, ipcMain, ipcRenderer } from 'electron';
 import { TomeApi } from '../../api/tome';
 import { StoreOptions, TomeOptions } from './models/types';
 import { SpacesApi } from '../../api/spaces';
-import { Tome } from './models/tome';
+import { KeyValueStore, Tome } from './models/tome';
 
 export class TomeService extends BaseService {
   handlers = {
@@ -41,78 +41,161 @@ export class TomeService extends BaseService {
 
   async initTome(
     _event: IpcMainInvokeEvent,
-    urbit?: boolean,
     app?: string,
     options: TomeOptions = {}
   ) {
     const appName = app ?? 'all';
-    if (urbit) {
-      if (!this.core.conduit) throw new Error('No conduit found');
-      if (!this.core.conduit.ship) throw new Error('Conduit must have a ship');
+    if (!this.core.conduit) throw new Error('No conduit found');
+    if (!this.core.conduit.ship) throw new Error('Conduit must have a ship');
 
-      let locked = false;
-      const inRealm = options.realm ?? false;
-      let tomeShip = options.ship ?? this.core.conduit.ship;
-      let space = options.space ?? 'our';
-      let spaceForPath = space;
+    let locked = false;
+    const realm = options.realm ?? false;
+    let tomeShip = options.ship ?? this.core.conduit.ship;
+    let space = options.space ?? 'our';
+    let spaceForPath = space;
 
-      if (inRealm) {
-        if (options.ship && options.space) {
-          locked = true;
-        } else if (!options.ship && !options.space) {
-          try {
-            const current = await SpacesApi.getCurrentSpace(this.core.conduit);
-            space = current.space;
+    if (realm) {
+      if (options.ship && options.space) {
+        locked = true;
+      } else if (!options.ship && !options.space) {
+        try {
+          const current = await SpacesApi.getCurrentSpace(this.core.conduit);
+          space = current.space;
 
-            const path = current.path.split('/');
-            tomeShip = path[1];
-            spaceForPath = path[2];
-          } catch (e) {
-            throw new Error(
-              'Tome: no current space found. Make sure Realm is installed / configured, ' +
-                'or pass `realm: false` to `Tome.init`.'
-            );
-          }
-        } else {
-          throw new Error(
-            'Tome: `ship` and `space` must neither or both be specified when using Realm.'
-          );
+          const path = current.path.split('/');
+          tomeShip = path[1];
+          spaceForPath = path[2];
+        } catch (e) {
+          throw new Error('Tome: no current space found.');
         }
       } else {
-        if (spaceForPath !== 'our') {
-          throw new Error(
-            "Tome: only the 'our' space is currently supported when not using Realm. " +
-              'If this is needed, please open an issue.'
-          );
-        }
+        throw new Error(
+          'Tome: `ship` and `space` must neither or both be specified when using Realm.'
+        );
       }
-
-      if (!tomeShip.startsWith('~')) {
-        tomeShip = `~${tomeShip}`;
+    } else {
+      if (spaceForPath !== 'our') {
+        throw new Error(
+          "Tome: only the 'our' space is currently supported when not using Realm. " +
+            'If this is needed, please open an issue.'
+        );
       }
-      // save api.ship so we know who we are.
-      const ourShip = `~${this.core.conduit.ship}`;
-      const perm = options.permissions
-        ? options.permissions
-        : ({ read: 'our', write: 'our', admin: 'our' } as const);
-      await TomeApi.initTome(this.core.conduit, tomeShip, space, appName);
-      return new Tome(true, {
-        tomeShip,
-        ourShip,
-        space,
-        spaceForPath,
-        app: appName,
-        perm,
-        locked,
-        inRealm,
-      });
     }
-    return new Tome(false, { app: appName, tomeShip: 'zod', ourShip: 'zod' });
+
+    if (!tomeShip.startsWith('~')) {
+      tomeShip = `~${tomeShip}`;
+    }
+    // save api.ship so we know who we are.
+    const ourShip = `~${this.core.conduit.ship}`;
+    await TomeApi.initTome(this.core.conduit, tomeShip, space, appName);
+    return new Tome({
+      tomeShip,
+      ourShip,
+      space,
+      spaceForPath,
+      app: appName,
+      locked,
+      realm,
+    });
   }
 
   async initKeyValueStore(
     _event: IpcMainInvokeEvent,
     tome: Tome,
     options?: StoreOptions
-  ) {}
+  ) {
+    if (!this.core.conduit) throw new Error('No conduit found');
+    let permissions = options?.permissions ?? {
+      read: 'our',
+      write: 'our',
+      admin: 'our',
+    };
+    const bucket = options?.bucket ?? 'def';
+    const { onReadyChange, onWriteChange, onAdminChange } = options ?? {};
+
+    let write;
+    let admin;
+    if (tome.isOurStore()) {
+      write = true;
+      admin = true;
+      if (tome.app === 'all') {
+        console.warn(
+          `Tome-KV: Permissions on 'all' are ignored. Setting permissions levels to 'our' instead...`
+        );
+        permissions = {
+          read: 'our',
+          write: 'our',
+          admin: 'our',
+        };
+      }
+    }
+    const keyValueOptions = {
+      tomeShip: tome.tomeShip,
+      ourShip: tome.ourShip,
+      space: tome.space,
+      spaceForPath: tome.spaceForPath,
+      app: tome.app,
+      locked: tome.locked,
+      realm: tome.realm,
+      permissions,
+      bucket,
+      write,
+      admin,
+      onReadyChange,
+      onWriteChange,
+      onAdminChange,
+    };
+
+    if (tome.isOurStore()) {
+      await TomeApi.initStore(
+        this.core.conduit,
+        tome.tomeShip,
+        tome.space,
+        tome.app,
+        bucket,
+        permissions
+      );
+    } else {
+      /* 
+        Eventually we should _not_ run through all these initialization pokes
+        on every connection - Realm should catch if we're already
+        good to go.  That will require a lot more logic, though.
+      */
+      await TomeApi.checkBucketExistsAndCanRead(
+        this.core.conduit,
+        tome.tomeShip,
+        tome.space,
+        tome.app,
+        bucket
+      );
+      const foreignPerm = {
+        read: 'yes',
+        write: 'unset',
+        admin: 'unset',
+      } as const;
+      await TomeApi.initStore(
+        this.core.conduit,
+        tome.tomeShip,
+        tome.space,
+        tome.app,
+        bucket,
+        foreignPerm
+      );
+      await TomeApi.startWatchingForeignBucket(
+        this.core.conduit,
+        tome.tomeShip,
+        tome.space,
+        tome.app,
+        bucket
+      );
+      await TomeApi.getCurrentForeignBucketPermissions(
+        this.core.conduit,
+        tome.tomeShip,
+        tome.space,
+        tome.app,
+        bucket
+      );
+    }
+    return new KeyValueStore(keyValueOptions);
+  }
 }
