@@ -1,7 +1,7 @@
-import { useToggle } from '@holium/shared';
 import { Flex } from '../../general/Flex/Flex';
 import { Text } from '../../general/Text/Text';
 import { Icon } from '../../general/Icon/Icon';
+import { useToggle } from '../../util/hooks';
 
 type Props = {
   label?: string;

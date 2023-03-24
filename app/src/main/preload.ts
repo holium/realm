@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { MouseState } from '@holium/realm-presence';
 import { osPreload } from '../os/preload';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
-import { Position } from '@holium/shared';
+import { Position } from '@holium/design-system';
 import { multiplayerPreload } from './preload.multiplayer';
 import './helpers/mouseListener';
 import './helpers/keyListener';

@@ -1,15 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Flex, Box, Icon, Text } from '../..';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
   Emoji,
   SkinTones,
 } from 'emoji-picker-react';
+import { Flex, Box, Icon, Text } from '../../general';
 import { FragmentReactionType } from './Bubble.types';
-import { AnimatePresence } from 'framer-motion';
-import { Position } from '@holium/shared';
+import { Position } from '../../util/types';
 
 const WIDTH = 350;
 const ship = window.ship ?? 'zod';

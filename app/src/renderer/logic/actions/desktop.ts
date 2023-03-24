@@ -4,7 +4,7 @@
 
 import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { Bounds } from '@holium/shared';
+import { Bounds } from '@holium/design-system';
 import { SpacesActions } from './spaces';
 
 /**

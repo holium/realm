@@ -8,8 +8,8 @@ import {
   RadioGroup,
   Spinner,
   TextInput,
+  useToggle,
 } from '@holium/design-system';
-import { useToggle } from '@holium/shared';
 import {
   Text,
   Card,

@@ -12,7 +12,7 @@ import {
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
-import { Bounds } from '@holium/shared';
+import { Bounds } from '@holium/design-system';
 
 import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
 
