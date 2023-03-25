@@ -96,7 +96,7 @@ const CallerPresenter = (props: ICaller) => {
     }
   }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
 
-  const callerVideo = useRef();
+  const callerVideo = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (callerVideo.current) {
       if (peer?.videoTracks && peer?.videoTracks.size > 0) {
