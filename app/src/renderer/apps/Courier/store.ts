@@ -58,6 +58,10 @@ const ChatStore = types
       try {
         self.inbox = yield ChatDBActions.getChatList();
         const pinnedChats = yield ChatDBActions.fetchPinnedChats();
+        const muted = yield ChatDBActions.fetchMutedChats();
+        self.inbox.forEach((chat) => {
+          chat.setMuted(muted.includes(chat.path));
+        });
         self.pinnedChats = pinnedChats;
         return self.pinnedChats;
       } catch (error) {
@@ -98,6 +102,14 @@ const ChatStore = types
         console.error(error);
         self.pinnedChats.remove(path);
         return self.pinnedChats;
+      }
+    }),
+    toggleMuted: flow(function* (path: string, muted: boolean) {
+      const chat = self.inbox.find((chat) => chat.path === path);
+      if (chat) {
+        yield chat.muteNotification(muted);
+      } else {
+        console.info(`chat ${path} not found`);
       }
     }),
     createChat: flow(function* (

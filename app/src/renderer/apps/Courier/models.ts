@@ -70,8 +70,6 @@ const ChatFragment = types.union(
       types.model({
         width: types.maybe(types.string),
         height: types.maybe(types.string),
-        timestamp: types.maybe(types.number),
-        reactions: types.maybe(types.boolean),
       })
     ),
   }),
@@ -199,7 +197,7 @@ export const Chat = types
     type: ChatTypes,
     host: types.string,
     peers: types.array(PeerModel),
-    // peerRows: types.array(PeerModel),
+    muted: types.optional(types.boolean, false),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
     lastMessage: types.maybeNull(
@@ -268,6 +266,7 @@ export const Chat = types
     fetchMessages: flow(function* () {
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
+        console.log('fetchMessages', messages);
         self.messages = messages;
         self.hidePinned = self.isPinLocallyHidden();
         self.lastFetch = new Date().getTime();
@@ -377,6 +376,16 @@ export const Chat = types
         console.error(error);
       }
     }),
+    muteNotification: flow(function* (mute: boolean) {
+      try {
+        self.muted = mute;
+        yield ChatDBActions.toggleMutedChat(self.path, mute);
+      } catch (error) {
+        console.error(error);
+        self.muted = !mute;
+      }
+    }),
+
     removeMessage(messageId: string) {
       const message = self.messages.find((m) => m.id === messageId);
       if (!message) return;
@@ -393,6 +402,9 @@ export const Chat = types
         return self.pinnedMessageId;
       }
     }),
+    setMuted(muted: boolean) {
+      self.muted = muted;
+    },
     clearPinnedMessage: flow(function* (_msgId: string) {
       const oldId = self.pinnedMessageId;
       try {

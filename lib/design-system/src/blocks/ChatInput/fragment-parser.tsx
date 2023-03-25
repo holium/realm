@@ -79,7 +79,8 @@ const parserRules: ParserRules = {
   },
   image: {
     regex:
-      /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_+.~#&//=]*)?/i,
+      // /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_+.~#&//=]*)?/i,
+      /(https?:\/\/)?(pbs.twimg.com\/media\/[-a-zA-Z0-9@:%._+~#=]{1,256}\?[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?=(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(&[-a-zA-Z0-9()@:%_+.~#&//=]*)?)|(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_+.~#&//=]*)?/i,
     recurse: false,
     priority: 3,
   },

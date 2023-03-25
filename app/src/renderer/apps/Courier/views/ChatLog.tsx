@@ -138,6 +138,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     subtitle = `${selectedChat.peers.length} members`;
   }
 
+  // console.log('chatlog', toJS(selectedChat));
+
   return (
     <Flex flexDirection="column">
       <Flex
@@ -148,6 +150,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <ChatLogHeader
           title={resolvedTitle}
           path={path}
+          muted={selectedChat.muted}
           onBack={() => setSubroute('inbox')}
           hasMenu
           avatar={chatAvatarEl}

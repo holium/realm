@@ -139,6 +139,7 @@ export const InboxPresenter = () => {
                       timestamp={chat.createdAt || chat.metadata.timestamp}
                       metadata={chat.metadata}
                       peersGetBacklog={chat.peersGetBacklog}
+                      muted={chat.muted}
                       onClick={(evt) => {
                         evt.stopPropagation();
                         setChat(chat.path);
@@ -175,6 +176,7 @@ export const InboxPresenter = () => {
                       timestamp={chat.createdAt || chat.metadata.timestamp}
                       metadata={chat.metadata}
                       peersGetBacklog={chat.peersGetBacklog}
+                      muted={chat.muted}
                       onClick={(evt) => {
                         evt.stopPropagation();
                         setChat(chat.path);

@@ -22,6 +22,7 @@ type ChatRowProps = {
   title: string;
   peers: string[];
   isAdmin: boolean;
+  muted: boolean;
   metadata: any;
   timestamp: number;
   type: ChatPathType;
@@ -36,6 +37,7 @@ export const ChatRowPresenter = ({
   isAdmin,
   type,
   metadata,
+  muted,
   onClick,
 }: ChatRowProps) => {
   const { ship, friends } = useServices();
@@ -46,6 +48,7 @@ export const ChatRowPresenter = ({
     setChat,
     isChatPinned,
     togglePinned,
+    toggleMuted,
   } = useChatStore();
   const { readPath, getUnreadCountByPath } = useAccountStore();
   const { getOptions, setOptions } = useContextMenu();
@@ -54,7 +57,7 @@ export const ChatRowPresenter = ({
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
-  const isMuted = false; // TODO
+  const isMuted = muted;
 
   const contextMenuOptions = useMemo(() => {
     if (!ship) return [];
@@ -92,12 +95,11 @@ export const ChatRowPresenter = ({
     });
     menu.push({
       id: `${chatRowId}-mute-chat`,
-      icon: 'NotificationOff',
-      label: 'Mute',
-      disabled: true,
+      icon: isMuted ? 'NotificationOff' : 'Notification',
+      label: isMuted ? 'Unmute' : 'Mute',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        // TODO poke mute notifications
+        toggleMuted(path, !isMuted);
       },
     });
     menu.push({

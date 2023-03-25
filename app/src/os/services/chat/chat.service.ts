@@ -63,6 +63,7 @@ export class ChatService extends BaseService {
    **/
   handlers = {
     'realm.chat.get-chat-list': this.getChatList,
+    'realm.chat.fetch-muted-chats': this.fetchMuted,
     'realm.chat.get-chat-log': this.getChatLog,
     'realm.chat.get-chat-peers': this.getChatPeers,
     'realm.chat.get-reply-to': this.getReplyToMessage,
@@ -72,6 +73,7 @@ export class ChatService extends BaseService {
     // 'realm.chat.read-chat': this.readChat,
     'realm.chat.create-chat': this.createChat,
     'realm.chat.edit-chat': this.editChatMetadata,
+    'realm.chat.toggle-muted-chat': this.toggleMutedChat,
     'realm.chat.fetch-pinned-chats': this.fetchPinnedChats,
     'realm.chat.toggle-pinned-chat': this.togglePinnedChat,
     'realm.chat.set-pinned-message': this.setPinnedMessage,
@@ -98,6 +100,8 @@ export class ChatService extends BaseService {
       await ipcRenderer.invoke('realm.chat.get-chat-peers', path),
     sendMessage: (path: string, fragments: any[]) =>
       ipcRenderer.invoke('realm.chat.send-message', path, fragments),
+    toggleMutedChat: (path: string, muted: boolean) =>
+      ipcRenderer.invoke('realm.chat.toggle-muted-chat', path, muted),
     editMessage: (path: string, msgId: string, fragments: any[]) =>
       ipcRenderer.invoke('realm.chat.edit-message', path, msgId, fragments),
     deleteMessage: (path: string, msgId: string) =>
@@ -127,6 +131,7 @@ export class ChatService extends BaseService {
     removePeer: (path: string, peer: string) =>
       ipcRenderer.invoke('realm.chat.remove-peer', path, peer),
     fetchPinnedChats: () => ipcRenderer.invoke('realm.chat.fetch-pinned-chats'),
+    fetchMutedChats: () => ipcRenderer.invoke('realm.chat.fetch-muted-chats'),
     togglePinnedChat: (path: string, pinned: boolean) =>
       ipcRenderer.invoke('realm.chat.toggle-pinned-chat', path, pinned),
     setPinnedMessage: (path: string, msgId: string) =>
@@ -195,6 +200,14 @@ export class ChatService extends BaseService {
     });
   }
 
+  async fetchMuted() {
+    const response = await this.core.conduit?.scry({
+      app: 'realm-chat',
+      path: '/mutes',
+    });
+    return response;
+  }
+
   async fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     const response = await this.core.conduit?.scry({
@@ -233,12 +246,10 @@ export class ChatService extends BaseService {
 
   onDbUpdate(data: ChatDbReactions, _id?: number) {
     if ('tables' in data) {
-      console.log('db update', data.tables.messages);
       this.insertMessages(data.tables.messages);
       this.insertPaths(data.tables.paths);
       this.insertPeers(data.tables.peers);
     } else if (Array.isArray(data)) {
-      console.log('db update array', data);
       if (
         data.length > 1 &&
         data[0].type === 'add-row' &&
@@ -807,7 +818,7 @@ export class ChatService extends BaseService {
         contents: row.contents
           ? JSON.parse(row.contents).map((content: any) => {
               if (content?.metadata) {
-                content.metadata = parseMetadata(content.metadata);
+                content.metadata = JSON.parse(content.metadata);
               }
               return content;
             })
@@ -856,7 +867,7 @@ export class ChatService extends BaseService {
           ? JSON.parse(row.contents).map((content: any) => {
               const parsedContent = content;
               if (parsedContent?.metadata) {
-                parsedContent.metadata = parseMetadata(parsedContent.metadata);
+                parsedContent.metadata = JSON.parse(content.metadata);
               }
               return parsedContent;
             })
@@ -917,6 +928,26 @@ export class ChatService extends BaseService {
     };
   }
 
+  async toggleMutedChat(_evt: any, path: string, mute: boolean) {
+    if (!this.core.conduit) throw new Error('No conduit connection');
+    const payload = {
+      app: 'realm-chat',
+      mark: 'chat-action',
+      json: {
+        'mute-chat': {
+          path,
+          mute,
+        },
+      },
+    };
+    try {
+      await this.core.conduit.poke(payload);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to toggle muted chat');
+    }
+  }
+
   async setPinnedMessage(_evt: any, path: string, msgId: string) {
     if (!this.core.conduit) throw new Error('No conduit connection');
     const payload = {
@@ -970,7 +1001,6 @@ export class ChatService extends BaseService {
         },
       },
     };
-    console.log(payload);
     try {
       await this.core.conduit.poke(payload);
     } catch (err) {
