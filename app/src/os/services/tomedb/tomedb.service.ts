@@ -5,6 +5,7 @@ import { TomeApi } from '../../api/tomedb';
 import { StoreOptions, TomeOptions } from './models/types';
 import { SpacesApi } from '../../api/spaces';
 import { KeyValueStore, Tome } from './models/tomedb';
+import { agent } from './models/constants';
 
 export class TomeDBService extends BaseService {
   handlers = {
@@ -32,9 +33,19 @@ export class TomeDBService extends BaseService {
     },
   };
 
+  async subscribe() {
+    await this.core.conduit?.watch({
+      app: agent,
+      path: '/slip/local',
+      onEvent: this.handleSlip,
+      onQuit: this.onQuit,
+      onError: this.onError,
+    });
+  }
+
   constructor(core: Realm, options: any = {}) {
     super(core, options);
-
+    this.subscribe();
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
