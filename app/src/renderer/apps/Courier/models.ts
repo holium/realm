@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast, clone, detach } from 'mobx-state-tree';
+import { flow, Instance, types, cast } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -9,7 +9,6 @@ const ChatFragment = types.union(
   { eager: true },
   types.model('FragmentPlain', {
     plain: types.string,
-    pending: types.maybe(types.boolean),
   }),
   types.model('FragmentBold', { bold: types.string }),
   types.model('FragmentItalics', { italics: types.string }),
@@ -248,10 +247,11 @@ export const Chat = types
 
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
+      console.log(fragments);
       try {
         // create temporary message
         const tempContents: ChatFragmentMobxType = fragments.map((f) =>
-          ChatFragment.create({ ...f.content, pending: true })
+          ChatFragment.create({ ...f.content })
         );
         const message = ChatMessage.create({
           id: `temp-${new Date().getTime()}`,
@@ -265,7 +265,7 @@ export const Chat = types
         self.messages.push(message);
         self.lastSender = message.sender;
         const lastContents: ChatFragmentMobxType = fragments.map((f) =>
-          ChatFragment.create({ ...f.content, pending: true })
+          ChatFragment.create({ ...f.content })
         );
         self.lastMessage = {
           id: message.id,
@@ -290,7 +290,7 @@ export const Chat = types
         return;
       }
       const pendingIdx = self.messages.findIndex(
-        (m) => m.sender === message.sender && m.pending && m.id.includes('temp')
+        (m) => m.sender === message.sender && m.id.includes('temp')
       );
       if (pendingIdx !== -1) {
         self.messages.splice(pendingIdx, 1, message);
@@ -533,56 +533,3 @@ export const Chat = types
   }));
 
 export type ChatModelType = Instance<typeof Chat>;
-
-// export type FragmentPlainType = {
-//   plain: string;
-// };
-// export type FragmentBoldType = {
-//   bold: string;
-// };
-// export type FragmentItalicsType = {
-//   italics: string;
-// };
-// export type FragmentStrikeType = {
-//   strike: string;
-// };
-// export type FragmentBoldItalicsType = {
-//   'bold-italics': string;
-// };
-// export type FragmentBoldStrikeType = {
-//   'bold-strike': string;
-// };
-// export type FragmentItalicsStrikeType = {
-//   'italics-strike': string;
-// };
-// export type FragmentBoldItalicsStrikeType = {
-//   'bold-italics-strike': string;
-// };
-// export type FragmentBlockquoteType = {
-//   blockquote: string;
-// };
-// export type FragmentInlineCodeType = {
-//   'inline-code': string;
-// };
-// export type FragmentShipType = {
-//   ship: string;
-// };
-// export type FragmentCodeType = {
-//   code: string;
-// };
-// export type FragmentLinkType = {
-//   link: string;
-// };
-// export type FragmentImageType = {
-//   image: string;
-// };
-// export type FragmentUrLinkType = {
-//   'ur-link': string;
-// };
-// export type FragmentBreakType = {
-//   break: null;
-// };
-
-// export type FragmentStatusType = {
-//   status: string;
-// };

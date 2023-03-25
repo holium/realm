@@ -1,3 +1,4 @@
+export { CellMeasurer } from './WindowedList/source/CellMeasurer/CellMeasurer';
 export * from './Avatar/Avatar';
 export * from './Box/Box';
 export * from './Button/Button';

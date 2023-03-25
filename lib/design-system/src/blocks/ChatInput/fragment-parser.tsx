@@ -356,7 +356,7 @@ export const fragmentToText = (fragment: FragmentType): string => {
   if (type === 'inline-code')
     return `${parserRules['inline-code'].token}${text}${parserRules['inline-code'].token}`;
   if (type === 'code')
-    return `${parserRules.code.token}\n${text}\n${parserRules.code.token}`;
+    return `${parserRules.code.token}${text}${parserRules.code.token}`;
   if (type === 'break') return '\n';
   return text;
 };

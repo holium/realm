@@ -66,17 +66,20 @@ export type DelPeersRow = {
   type: 'del-peers-row';
   row: string;
   ship: string;
+  timestamp: number;
 };
 export type DelPathsRow = {
   table: ChatTables;
   type: 'del-paths-row';
   row: string;
+  timestamp: number;
 };
 export type DelMessagesRow = {
   table: ChatTables;
   type: 'del-messages-row';
   path: string;
   'msg-id': string;
+  timestamp: number;
 };
 
 export type ChatDbOps =

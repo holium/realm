@@ -328,20 +328,37 @@ export class ChatService extends BaseService {
       console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
       this.deleteMessagesRow(delMessagesRow['msg-id']);
-      // this.deleteDeleteLog(delMessagesRow['msg-id']);
       this.sendChatUpdate('message-deleted', delMessagesRow);
+      this.insertDeleteLogs([
+        {
+          change: delMessagesRow,
+          timestamp: delMessagesRow.timestamp,
+        },
+      ]);
     }
     if (dbChange.type === 'del-paths-row') {
       console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
       this.deletePathsRow(delPathsRow.row);
       this.sendChatUpdate('path-deleted', delPathsRow.row);
+      this.insertDeleteLogs([
+        {
+          change: delPathsRow,
+          timestamp: delPathsRow.timestamp,
+        },
+      ]);
     }
     if (dbChange.type === 'del-peers-row') {
       console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
       this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
       this.sendChatUpdate('peer-deleted', delPeersRow);
+      this.insertDeleteLogs([
+        {
+          change: delPeersRow,
+          timestamp: delPeersRow.timestamp,
+        },
+      ]);
     }
   }
 
@@ -520,6 +537,7 @@ export class ChatService extends BaseService {
     );
     console.log('deleting msgId', msgId);
     deleteMessage.run(msgId);
+    // insert into delete logs
   }
   // ----------------------------------------------
   // ----------------- DB queries -----------------
@@ -608,7 +626,6 @@ export class ChatService extends BaseService {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
-        console.log('lastMessage', lastMessage);
         lastMessage.contents = JSON.parse(lastMessage.contents).map(
           (message: any) => message && JSON.parse(message)
         );

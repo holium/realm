@@ -17,11 +17,11 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   display: inline-flex;
   flex-direction: column;
   width: auto;
-  padding: 8px;
   user-select: text;
   font-size: 14px;
   align-self: flex-start;
   box-sizing: border-box;
+  padding: 8px;
   min-width: 150px;
   max-width: 100%;
   color: var(--rlm-text-color);

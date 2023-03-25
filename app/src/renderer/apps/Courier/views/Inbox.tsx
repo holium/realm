@@ -19,6 +19,7 @@ import { useServices } from 'renderer/logic/store';
 export const InboxPresenter = () => {
   const { ship } = useServices();
   const { dimensions } = useTrayApps();
+  const [showList, setShowList] = useState<boolean>(false);
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
     useChatStore();
   const [searchString, setSearchString] = useState<string>('');
@@ -41,7 +42,18 @@ export const InboxPresenter = () => {
   );
 
   return (
-    <Flex height={dimensions.height - 24} flexDirection="column">
+    <Flex
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.01 }}
+      height={dimensions.height - 24}
+      width={dimensions.width - 24}
+      flexDirection="column"
+      onAnimationComplete={() => {
+        setShowList(true);
+      }}
+    >
       <Flex zIndex={1} mb={1} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
@@ -98,84 +110,82 @@ export const InboxPresenter = () => {
           </Text.Custom>
         </Flex>
       ) : (
-        <Box>
-          <Flex
-            style={{
-              background: 'rgba(0,0,0,0.03)',
-            }}
-            flexDirection="column"
-            mb={1}
-            borderRadius={6}
-          >
-            {pinnedChatList.map((chat) => {
-              const isAdmin = ship ? chat.isHost(ship.patp) : false;
-              return (
-                <Box
-                  zIndex={2}
-                  key={`${ship?.patp}-pinned-${chat.path}`}
-                  height={52}
-                  alignItems="center"
-                  layoutId={`chat-${chat.path}-container`}
-                >
-                  <ChatRow
-                    path={chat.path}
-                    title={chat.metadata.title}
-                    isAdmin={isAdmin}
-                    peers={chat.peers.map((peer) => peer.ship)}
-                    type={chat.type}
-                    timestamp={chat.createdAt || chat.metadata.timestamp}
-                    metadata={chat.metadata}
-                    peersGetBacklog={chat.peersGetBacklog}
-                    onClick={(evt) => {
-                      evt.stopPropagation();
-                      setChat(chat.path);
-                    }}
-                  />
-                </Box>
-              );
-            })}
-          </Flex>
-          <WindowedList
-            key={`${ship?.patp}-inbox-${unpinnedChatList.length}`}
-            width={listWidth}
-            height={listHeight}
-            rowHeight={52}
-            data={unpinnedChatList}
-            filter={searchFilter}
-            rowRenderer={(chat, index, measure) => {
-              const isAdmin = ship ? chat.isHost(ship.patp) : false;
-              return (
-                <Box
-                  onLoad={measure}
-                  zIndex={2}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.025, duration: 0.5 }}
-                  layout="preserve-aspect"
-                  key={`${ship?.patp}-unpinned-${chat.path}`}
-                  alignItems="center"
-                  height={52}
-                  layoutId={`chat-${chat.path}-container`}
-                >
-                  <ChatRow
-                    path={chat.path}
-                    title={chat.metadata.title}
-                    peers={chat.peers.map((peer) => peer.ship)}
-                    isAdmin={isAdmin}
-                    type={chat.type}
-                    timestamp={chat.createdAt || chat.metadata.timestamp}
-                    metadata={chat.metadata}
-                    peersGetBacklog={chat.peersGetBacklog}
-                    onClick={(evt) => {
-                      evt.stopPropagation();
-                      setChat(chat.path);
-                    }}
-                  />
-                </Box>
-              );
-            }}
-          />
-        </Box>
+        showList && (
+          <Box width={dimensions.width - 24}>
+            <Flex
+              style={{
+                background: 'rgba(0,0,0,0.03)',
+              }}
+              flexDirection="column"
+              mb={1}
+              borderRadius={6}
+            >
+              {pinnedChatList.map((chat) => {
+                const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                return (
+                  <Box
+                    zIndex={2}
+                    key={`${ship?.patp}-pinned-${chat.path}`}
+                    height={52}
+                    alignItems="center"
+                    layoutId={`chat-${chat.path}-container`}
+                  >
+                    <ChatRow
+                      path={chat.path}
+                      title={chat.metadata.title}
+                      isAdmin={isAdmin}
+                      peers={chat.peers.map((peer) => peer.ship)}
+                      type={chat.type}
+                      timestamp={chat.createdAt || chat.metadata.timestamp}
+                      metadata={chat.metadata}
+                      peersGetBacklog={chat.peersGetBacklog}
+                      onClick={(evt) => {
+                        evt.stopPropagation();
+                        setChat(chat.path);
+                      }}
+                    />
+                  </Box>
+                );
+              })}
+            </Flex>
+            <WindowedList
+              width={listWidth}
+              height={listHeight}
+              rowHeight={52}
+              data={unpinnedChatList}
+              filter={searchFilter}
+              rowRenderer={(chat) => {
+                const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                return (
+                  <Box
+                    width={listWidth}
+                    zIndex={2}
+                    layout="preserve-aspect"
+                    key={`${ship?.patp}-unpinned-${chat.path}`}
+                    alignItems="center"
+                    height={52}
+                    layoutId={`chat-${chat.path}-container`}
+                  >
+                    <ChatRow
+                      path={chat.path}
+                      title={chat.metadata.title}
+                      peers={chat.peers.map((peer) => peer.ship)}
+                      isAdmin={isAdmin}
+                      type={chat.type}
+                      timestamp={chat.createdAt || chat.metadata.timestamp}
+                      metadata={chat.metadata}
+                      peersGetBacklog={chat.peersGetBacklog}
+                      onClick={(evt) => {
+                        evt.stopPropagation();
+                        setChat(chat.path);
+                      }}
+                    />
+                  </Box>
+                );
+              }}
+            />
+          </Box>
+        )
       )}
     </Flex>
   );

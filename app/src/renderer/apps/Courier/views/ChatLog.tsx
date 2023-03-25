@@ -1,7 +1,14 @@
 import { useMemo, useEffect, useState } from 'react';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Box, Flex, WindowedList, Text, Reply } from '@holium/design-system';
+import {
+  Box,
+  Flex,
+  WindowedList,
+  Text,
+  Reply,
+  measureImage,
+} from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
@@ -71,11 +78,22 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     />
   );
 
-  const onMessageSend = (fragments: any[]) => {
+  const containerWidth = dimensions.width - 24;
+
+  const onMessageSend = async (fragments: any[]) => {
     if (!selectedChat) return;
-    selectedChat.sendMessage(
-      path,
-      fragments.map((frag) => {
+    // containerWidth;
+    const measuredFrags = await Promise.all(
+      fragments.map(async (frag) => {
+        let metadata: {} | string = {};
+        if (Object.keys(frag)[0] === 'image') {
+          const { width, height } = await measureImage(
+            frag.image,
+            containerWidth
+          );
+          metadata = { width, height };
+        }
+
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
@@ -84,10 +102,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 'msg-id': selectedChat.replyingMsg?.id,
               }
             : null,
-          metadata: {},
+          metadata,
         };
       })
     );
+    selectedChat.sendMessage(path, measuredFrags);
   };
   const onEditConfirm = (fragments: any[]) => {
     if (!selectedChat || !selectedChat.editingMsg) return;
@@ -115,8 +134,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     height = height - 110;
   }
 
-  const containerWidth = dimensions.width - 24;
-
   let subtitle;
   if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
     subtitle = `${selectedChat.peers.length} members`;
@@ -128,7 +145,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         layout="preserve-aspect"
         layoutId={`chat-${path}-container`}
         flexDirection="column"
-        transition={{ delay: 0.025, duration: 0.25 }}
       >
         <ChatLogHeader
           title={resolvedTitle}
@@ -170,7 +186,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
-                key={`last-${selectedChat.messages.length}`}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
