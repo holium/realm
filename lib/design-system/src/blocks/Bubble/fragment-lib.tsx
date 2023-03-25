@@ -340,6 +340,9 @@ export const renderFragment = (
       );
 
     case 'image':
+      const imageFrag = fragment as FragmentImageType;
+      const isPrecalculated =
+        imageFrag.metadata?.width && imageFrag.metadata?.height;
       return (
         <BlockWrapper id={id} key={author + index}>
           <ImageBlock
@@ -347,9 +350,11 @@ export const renderFragment = (
             mode="embed"
             variant="content"
             id={id}
-            image={(fragment as FragmentImageType).image}
+            image={imageFrag.image}
+            width={imageFrag.metadata?.width}
+            height={imageFrag.metadata?.height}
             by={author}
-            onLoaded={onLoaded}
+            onLoaded={!isPrecalculated ? onLoaded : undefined}
           />
         </BlockWrapper>
       );

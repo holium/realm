@@ -9,35 +9,79 @@ const ChatFragment = types.union(
   { eager: true },
   types.model('FragmentPlain', {
     plain: types.string,
+    metadata: types.optional(types.frozen(), {}),
   }),
-  types.model('FragmentBold', { bold: types.string }),
-  types.model('FragmentItalics', { italics: types.string }),
-  types.model('FragmentStrike', { strike: types.string }),
-  types.model('FragmentBoldItalics', { 'bold-italics': types.string }),
-  types.model('FragmentBoldStrike', { 'bold-strike': types.string }),
-  types.model('FragmentItalicsStrike', { 'italics-strike': types.string }),
+  types.model('FragmentBold', {
+    bold: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentItalics', {
+    italics: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentStrike', {
+    strike: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentBoldItalics', {
+    'bold-italics': types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentBoldStrike', {
+    'bold-strike': types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentItalicsStrike', {
+    'italics-strike': types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
   types.model('FragmentBoldItalicsStrike', {
     'bold-italics-strike': types.string,
+    metadata: types.optional(types.frozen(), {}),
   }),
-  types.model('FragmentBlockquote', { blockquote: types.string }),
-  types.model('FragmentInlineCode', { 'inline-code': types.string }),
-  types.model('FragmentUrl', { url: types.string }),
-  types.model('FragmentCode', { code: types.string }),
+  types.model('FragmentBlockquote', {
+    blockquote: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentInlineCode', {
+    'inline-code': types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentUrl', {
+    url: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentCode', {
+    code: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
   types.model('FragmentShip', {
     ship: types.string,
+    metadata: types.optional(types.frozen(), {}),
   }),
 
   types.model('FragmentLink', {
     link: types.string,
+    metadata: types.optional(types.frozen(), {}),
   }),
   types.model('FragmentImage', {
     image: types.string,
+    metadata: types.maybe(
+      types.model({
+        width: types.maybe(types.string),
+        height: types.maybe(types.string),
+        timestamp: types.maybe(types.number),
+        reactions: types.maybe(types.boolean),
+      })
+    ),
   }),
   types.model('FragmentBreak', {
     break: types.null,
+    metadata: types.optional(types.frozen(), {}),
   }),
   types.model('FragmentStatus', {
     status: types.string,
+    metadata: types.optional(types.frozen(), {}),
   })
 );
 export type ChatFragmentMobxType = Instance<typeof ChatFragment>;
@@ -247,11 +291,10 @@ export const Chat = types
 
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
-      console.log(fragments);
       try {
         // create temporary message
         const tempContents: ChatFragmentMobxType = fragments.map((f) =>
-          ChatFragment.create({ ...f.content })
+          ChatFragment.create({ ...f.content, metadata: f.metadata })
         );
         const message = ChatMessage.create({
           id: `temp-${new Date().getTime()}`,
@@ -265,7 +308,7 @@ export const Chat = types
         self.messages.push(message);
         self.lastSender = message.sender;
         const lastContents: ChatFragmentMobxType = fragments.map((f) =>
-          ChatFragment.create({ ...f.content })
+          ChatFragment.create({ ...f.content, metadata: f.metadata })
         );
         self.lastMessage = {
           id: message.id,

@@ -754,7 +754,7 @@ export class ChatService extends BaseService {
             realm_chat.path,
             realm_chat.msg_id,
             realm_chat.msg_part_id,
-            json_object(realm_chat.content_type, realm_chat.content_data) content,
+            json_object(realm_chat.content_type, realm_chat.content_data, 'metadata', realm_chat.metadata) content,
             realm_chat.sender,
             realm_chat.created_at,
             realm_chat.updated_at,
@@ -767,15 +767,15 @@ export class ChatService extends BaseService {
             realm_chat.msg_part_id
         ),
         reactions AS (
-        SELECT
-            json_extract(messages.reply_to, '$."msg-id"') reply_msg_id,
-            json_group_array(
-                json_object(
-                    'msgId', messages.msg_id,
-                    'by', messages.sender,
-                    'emoji', messages.content_data
-                    )
-            ) reacts
+            SELECT
+              json_extract(messages.reply_to, '$."msg-id"') reply_msg_id,
+              json_group_array(
+                  json_object(
+                      'msgId', messages.msg_id,
+                      'by', messages.sender,
+                      'emoji', messages.content_data
+                      )
+              ) reacts
             FROM messages
             WHERE content_type = 'react'
             GROUP BY reply_msg_id
@@ -804,7 +804,14 @@ export class ChatService extends BaseService {
       return {
         ...row,
         metadata: row.metadata ? parseMetadata(row.metadata) : [null],
-        contents: row.contents ? JSON.parse(row.contents) : null,
+        contents: row.contents
+          ? JSON.parse(row.contents).map((content: any) => {
+              if (content?.metadata) {
+                content.metadata = parseMetadata(content.metadata);
+              }
+              return content;
+            })
+          : null,
         reactions: row.reactions ? JSON.parse(row.reactions) : [],
       };
     });
@@ -820,7 +827,7 @@ export class ChatService extends BaseService {
       SELECT
         path,
         msg_id id,
-        json_group_array(json_object(content_type, content_data)) contents,
+        json_group_array(json_object(content_type, content_data, 'metadata', metadata)) contents,
         sender,
         json_extract(reply_to, '$."path"') replyToMsgPath,
         json_extract(reply_to, '$."msg-id"') replyToMsgId,
@@ -830,6 +837,7 @@ export class ChatService extends BaseService {
                   msg_id,
                   content_type,
                   content_data,
+                  metadata,
                   reply_to,
                   sender,
                   created_at,
@@ -844,7 +852,15 @@ export class ChatService extends BaseService {
     const rows = result.map((row) => {
       return {
         ...row,
-        contents: JSON.parse(row.contents),
+        contents: row.contents
+          ? JSON.parse(row.contents).map((content: any) => {
+              const parsedContent = content;
+              if (parsedContent?.metadata) {
+                parsedContent.metadata = parseMetadata(parsedContent.metadata);
+              }
+              return parsedContent;
+            })
+          : null,
       };
     });
     if (rows.length === 0) return null;

@@ -82,7 +82,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const onMessageSend = async (fragments: any[]) => {
     if (!selectedChat) return;
-    // containerWidth;
     const measuredFrags = await Promise.all(
       fragments.map(async (frag) => {
         let metadata: {} | string = {};
