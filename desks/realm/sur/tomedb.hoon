@@ -1,10 +1,10 @@
 |%
-+$  space         @tas              :: space name.  if no space this is 'our'
-+$  app           @tas              :: app name (reduce namespace collisions).  if no app this is 'all'
-+$  bucket        @tas              :: bucket name (with its own permissions).  if no bucket this is 'def'
-+$  key           @t                :: key name
-+$  value         @t                :: value in kv store
-+$  json-value    [%s value]        :: value (JSON encoded as a string).  Store with %s so we aren't constantly adding it to requests.
++$  space         @tas     :: space name.  if no space this is 'our'
++$  app           @tas     :: app name (reduce namespace collisions).  if no app this is 'all'
++$  bucket        @tas     :: bucket name (with its own permissions).  if no bucket this is 'def'
++$  key           @t
++$  value         @t
+:: +$  json-value    [%s @t]  :: value (JSON encoded as a string).  Store with %s so we aren't constantly adding it to requests.
 +$  ships         (set ship)
 +$  invited       (map ship invite-level)
 ::
@@ -24,18 +24,25 @@
       %block
   ==
 ::
-+$  meta
-  $:  created-by=ship
-      updated-by=ship
-      created-at=time
-      updated-at=time
-  ==
-::
 +$  perm     [read=perm-level write=perm-level admin=perm-level]
 ::
-+$  kv-data  (map key json-value)
-+$  kv-meta  (map key meta)
-+$  store    (map bucket [=perm invites=invited meta=kv-meta data=kv-data])
+::  **************************************
+::  replicate kv-store as top level object for retrieving diffs
+++  kv-sort
+  |=  [a=kv-key b=kv-key]
+  ^-  ?
+  (gth timestamp.a timestamp.b)
+::
+++  kvon     ((on kv-key value) kv-sort)
+::
++$  kv-key    [timestamp=@da ship=@t =space =app =bucket =key]
++$  realm-kv  ((mop kv-key value) kv-sort)
+::
+::  **************************************
+::
++$  kv-meta   (map key [created-by=ship updated-at=@da]) :: timestamp of last update
++$  kv-data   (map key value)
++$  store     (map bucket [=perm invites=invited meta=kv-meta data=kv-data])
 ::
 +$  tome-data  [=store]
 ::
@@ -65,7 +72,7 @@
       [%remove =key]
       [%clear ~]
     ::
-      [%get value=?(~ json-value)]
+      :: [%get value=?(~ json-value)]
       [%all data=kv-data]
       [%perm write=?(%yes %no) admin=?(%yes %no)]
   ==

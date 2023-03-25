@@ -6,8 +6,10 @@ import { StoreOptions, TomeOptions } from './models/types';
 import { SpacesApi } from '../../api/spaces';
 import { KeyValueStore, Tome } from './models/tomedb';
 import { agent } from './models/constants';
+import Store from 'electron-store';
 
 export class TomeDBService extends BaseService {
+  private db;
   handlers = {
     'realm.tomedb.initTome': this.initTome,
     'realm.tomedb.initKeyValueStore': this.initKeyValueStore,
@@ -33,19 +35,29 @@ export class TomeDBService extends BaseService {
     },
   };
 
-  async subscribe() {
-    await this.core.conduit?.watch({
-      app: agent,
-      path: '/slip/local',
-      onEvent: this.handleSlip,
-      onQuit: this.onQuit,
-      onError: this.onError,
-    });
-  }
+  // async subscribe() {
+  //   await this.core.conduit?.watch({
+  //     app: agent,
+  //     path: '/kv/',
+  //     onEvent: this.handleSlip,
+  //     onQuit: this.onQuit,
+  //     onError: this.onError,
+  //   });
+  // }
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
-    this.subscribe();
+    this.db = new Store({
+      name: 'realm.tomedb.kv',
+      accessPropertiesByDotNotation: true,
+      schema: {
+        latest: {
+          type: 'number',
+          default: 0,
+        },
+      },
+    });
+    // this.subscribe();
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));

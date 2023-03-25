@@ -20,19 +20,19 @@
     ==
   ::
   --
-++  enjs  =,  enjs:format
-  |%
-  ++  tomedb-kv-reaction
-    |=  upd=^tomedb-kv-reaction
-    ^-  json
-    ?-  -.upd
-      %set     (frond key.upd s+value.upd)
-      %remove  (frond key.upd ~)
-      %clear   (pairs ~)
-      %perm    (pairs ~[[%write s+write.upd] [%admin s+admin.upd]])
-      %get     value.upd
-      %all     o+data.upd
-    ==
-  ::
-  --
+:: ++  enjs  =,  enjs:format
+::   |%
+::   ++  tomedb-kv-reaction
+::     |=  upd=^tomedb-kv-reaction
+::     ^-  json
+::     ?-  -.upd
+::       %set     (frond key.upd s+value.upd)
+::       %remove  (frond key.upd ~)
+::       %clear   (pairs ~)
+::       %perm    (pairs ~[[%write s+write.upd] [%admin s+admin.upd]])
+::       :: %get     value.upd
+::       %all     o+data.upd
+::     ==
+::   ::
+::   --
 --

@@ -10,7 +10,7 @@
 ::
 +$  versioned-state  $%(state-0)
 ::
-+$  state-0  [%0 tome=(mip path:s-p app tome-data) subs=(set path)] :: subs is data paths we are subscribed to
++$  state-0  [%0 =realm-kv tome=(mip path:s-p app tome-data) subs=(set path)] :: subs is data paths we are subscribed to
 ::
 +$  card  card:agent:gall
 --
@@ -58,7 +58,8 @@
     |=  =path
     ~>  %bout.[0 '%tomedb +on-peek']
     ^-  (unit (unit cage))
-    (peek:eng path)
+    [~ ~]
+    :: (peek:eng path)
   ::
   ++  on-agent
     |=  [pol=(pole knot) sig=sign:agent:gall]
@@ -117,6 +118,12 @@
     =^  cards  state
       kv-abet:(kv-watch:(kv-abed:kv [ship space app.pol bucket.pol]) rest.pol)
     (emil cards)
+  ::
+  ::  %since: get all updates from now on (used by Realm, in coordination with scry.)
+  ::
+      :: [%kv ~]
+    
+  ::
   ==
 ::  +dude: handle on-agent
 ::
@@ -125,6 +132,8 @@
   ^+  dat
   =^  cards  state
     ?+    pol  ~|(bad-dude-wire/pol !!)
+      :: ship-to-ship update (by bucket)
+      ::
         [%kv ship=@ space=@ app=@ bucket=@ rest=*]
       ::
       =/  ship  `@p`(slav %p ship.pol)
@@ -209,16 +218,16 @@
   (emil cards)
 ::  +peek: handle on-peek
 ::
-++  peek
-  |=  pol=(pole knot)
-  ^-  (unit (unit cage))
-  ?+    pol  ~|(bad-tome-peek-path/pol !!)
-      [%x %kv ship=@ space=@ app=@ bucket=@ rest=*]
-    =/  ship   `@p`(slav %p ship.pol)
-    =/  space  (woad space.pol)
-    (kv-peek:(kv-abed:kv [ship space app.pol bucket.pol]) rest.pol)
-  ::
-  ==
+:: ++  peek
+::   |=  pol=(pole knot)
+::   ^-  (unit (unit cage))
+::   ?+    pol  ~|(bad-tome-peek-path/pol !!)
+::       [%x %kv ship=@ space=@ app=@ bucket=@ rest=*]
+::     =/  ship   `@p`(slav %p ship.pol)
+::     =/  space  (woad space.pol)
+::     (kv-peek:(kv-abed:kv [ship space app.pol bucket.pol]) rest.pol)
+::   ::
+::   ==
 ::
 ::  +kv: keyvalue engine
 ::
@@ -273,10 +282,10 @@
     ?+    p.cag  ~|('bad-kv-dude' !!)
         %tomedb-kv-reaction
       =/  upd       !<(tomedb-kv-reaction q.cag)
-      ?+    -.upd   ~|('bad-tomedb-kv-reaction' !!)
+      ?-    -.upd   ::  ~|('bad-tomedb-kv-reaction' !!)
           %set
         %=  kv
-          data  (~(put by data) key.upd s+value.upd)
+          data  (~(put by data) key.upd value.upd)
           caz   [[%give %fact ~[data-pax] %tomedb-kv-reaction !>(upd)] caz]
         ==
       ::
@@ -342,18 +351,18 @@
         ?:(=(src.bol created-by.cm) %create %overwrite)
       ?>  (kv-perm lvl)
       ::  equivalent value is already set, do nothing.
-      ?:  =(s+value.act (~(gut by data) key.act ~))  kv
+      ?:  =(value.act (~(gut by data) key.act ~))  kv
       ::
       =/  nm
         ?~  cm
           ::  this value is new, so create new metadata entry alongside it
-          [src.bol src.bol now.bol now.bol]
+          [src.bol now.bol]
         ::  this value already exists, so update its metadata
-        [created-by.cm src.bol created-at.cm now.bol]
+        [created-by.cm now.bol]
       ::
       %=  kv
         meta  (~(put by meta) key.act nm)
-        data  (~(put by data) key.act s+value.act)
+        data  (~(put by data) key.act value.act)
         caz   [[%give %fact ~[data-pax] %tomedb-kv-reaction !>(`tomedb-kv-reaction`[%set key.act value.act])] caz]
       ==
     ::
@@ -403,18 +412,18 @@
     ==
   ::  +kv-peek: handle kv peek requests
   ::
-  ++  kv-peek
-    |=  rest=(pole knot)
-    ^-  (unit (unit cage))
-    ::  no perms check since no remote scry
-    ?+    rest  ~|(bad-kv-peek-path/rest !!)
-        [%data %all ~]
-      ``tomedb-kv-reaction+!>(`tomedb-kv-reaction`[%all data])
-    ::
-        [%data %key key=@t ~]
-      ``tomedb-kv-reaction+!>(`tomedb-kv-reaction`[%get (~(gut by data) key.rest ~)])
-    ::
-    ==
+  :: ++  kv-peek
+  ::   |=  rest=(pole knot)
+  ::   ^-  (unit (unit cage))
+  ::   ::  no perms check since no remote scry
+  ::   ?+    rest  ~|(bad-kv-peek-path/rest !!)
+  ::       [%data %all ~]
+  ::     ``tomedb-kv-reaction+!>(`tomedb-kv-reaction`[%all data])
+  ::   ::
+  ::       [%data %key key=@t ~]
+  ::     ``tomedb-kv-reaction+!>(`tomedb-kv-reaction`[%get (~(gut by data) key.rest ~)])
+  ::   ::
+  ::   ==
   ::  +kv-view: start watching foreign kv (permissions or path)
   ::
   ++  kv-view
