@@ -533,7 +533,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
