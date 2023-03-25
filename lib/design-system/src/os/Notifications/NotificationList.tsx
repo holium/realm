@@ -10,6 +10,7 @@ type NotificationListProps = {
       groupByPath?: boolean;
     };
   };
+  groupByPath?: boolean;
   containerWidth: number;
   notifications: NotificationType[];
   appLookup: (app: string) => { name: string; image: string; key: string };
@@ -21,6 +22,7 @@ type NotificationListProps = {
 export const NotificationList = ({
   containerWidth,
   notifications,
+  groupByPath = true,
   justifyContent = 'flex-start',
   appLookup,
   onDismiss,
@@ -50,7 +52,12 @@ export const NotificationList = ({
     );
   }
   return (
-    <Flex flexDirection="column" gap={8} justifyContent={justifyContent}>
+    <Flex
+      height="inherit"
+      flexDirection="column"
+      gap={8}
+      justifyContent={justifyContent}
+    >
       {appGroupedNotifications.map((appNotifs) => {
         const appInfo = appLookup(appNotifs[0].app);
         if (appNotifs.length === 1) {
@@ -70,6 +77,7 @@ export const NotificationList = ({
             key={`${appNotifs[0].app}`}
             containerWidth={containerWidth}
             notifications={appNotifs}
+            groupByPath={groupByPath}
             appInfo={appInfo}
             onDismiss={onDismiss}
             onDismissAll={onDismissAll}

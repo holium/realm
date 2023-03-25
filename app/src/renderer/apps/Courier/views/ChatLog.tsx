@@ -195,10 +195,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 data={messages}
                 rowRenderer={(row, index, measure) => {
                   const isLast = index === messages.length - 1;
-                  const msgModel = selectedChat.messages.find(
-                    (m) => row.id === m.id
-                  );
-                  const reactionLength = msgModel?.reactions.length || 0;
+
                   let replyToObj: any | undefined;
                   if (row.replyToMsgId) {
                     const originalMsg = selectedChat.messages.find(
@@ -229,7 +226,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   return (
                     <Box
-                      key={`${row.id}-${row.updatedAt}-${index}-last=${isLast}-${reactionLength}`}
+                      key={`${path}-${index}`}
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
                     >

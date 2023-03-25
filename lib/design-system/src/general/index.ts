@@ -17,3 +17,4 @@ export { Spinner } from './Spinner/Spinner';
 export { ProgressBar } from './ProgressBar/ProgressBar';
 export { Tooltip } from './Tooltip/Tooltip';
 export { Portal } from './Portal/Portal';
+export { NoScrollBar } from './Scrollbars/NoScrollBar';

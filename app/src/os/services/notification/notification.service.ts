@@ -284,7 +284,7 @@ export class NotificationService extends BaseService {
     const query = this.db.prepare(`
       ${QUERY_NOTIFICATIONS} 
       WHERE dismissed = 0 
-      ORDER BY created_at DESC
+      ORDER BY notifications.created_at DESC
     `);
 
     const result = query.all();

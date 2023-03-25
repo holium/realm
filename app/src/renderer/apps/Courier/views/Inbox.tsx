@@ -124,8 +124,8 @@ export const InboxPresenter = () => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 return (
                   <Box
+                    key={`${chat.path}-pinned`}
                     zIndex={2}
-                    key={`${ship?.patp}-pinned-${chat.path}`}
                     height={52}
                     alignItems="center"
                     layoutId={`chat-${chat.path}-container`}
@@ -159,10 +159,10 @@ export const InboxPresenter = () => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 return (
                   <Box
+                    key={`${chat.path}-unpinned`}
                     width={listWidth}
                     zIndex={2}
                     layout="preserve-aspect"
-                    key={`${ship?.patp}-unpinned-${chat.path}`}
                     alignItems="center"
                     height={52}
                     layoutId={`chat-${chat.path}-container`}

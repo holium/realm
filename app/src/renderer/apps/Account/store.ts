@@ -31,6 +31,7 @@ const NotificationModel = types
     buttons: types.maybeNull(types.array(NotificationButtonModel)),
     link: types.maybeNull(types.string),
     metadata: types.maybeNull(types.frozen()),
+    pathMetadata: types.maybeNull(types.frozen()),
     createdAt: types.number,
     updatedAt: types.number,
     readAt: types.maybeNull(types.number),

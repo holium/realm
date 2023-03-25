@@ -11,6 +11,7 @@ import {
   Button,
   Icon,
   Box,
+  NoScrollBar,
 } from '@holium/design-system';
 import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
@@ -41,6 +42,7 @@ export const ShipBarPresenter = () => {
     undismissedNotifications,
     dismissOne,
     dismissApp,
+    dismissPath,
   } = useAccountStore();
   const roomsManager = useRooms(ship?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
@@ -162,7 +164,7 @@ export const ShipBarPresenter = () => {
   return (
     <BarStyle
       id={id}
-      pl="3px"
+      pl="6px"
       pr="6px"
       flexDirection="column"
       justifyContent="flex-end"
@@ -194,7 +196,7 @@ export const ShipBarPresenter = () => {
             minHeight={minHeight - 40}
             pt="6px"
             pb="6px"
-            pl="3px"
+            pl="0px"
             gap={10}
             width={width - 12}
             justifyContent="flex-end"
@@ -210,27 +212,33 @@ export const ShipBarPresenter = () => {
               transition: { duration: 0.1, ease: 'easeInOut' },
             }}
           >
-            <NotificationList
-              justifyContent="flex-end"
-              appLookup={(app) => {
-                return apps[app];
-              }}
-              onDismiss={(app, path, id) => {
-                console.log(`dismissed - ${app} ${path} ${id}`);
-                dismissOne(id);
-              }}
-              onDismissAll={(app, path) => {
-                if (path) {
-                  // TODO dismiss all for path
-                  // dismissPath(app, path);
-                } else {
-                  dismissApp(app);
-                }
-              }}
-              onLinkClick={onNotifLinkClick}
-              containerWidth={width - 12}
-              notifications={undismissedNotifications as NotificationType[]}
-            />
+            <NoScrollBar
+              justifyContent="flex-start"
+              overflowY="auto"
+              overflowX="hidden"
+              width={width - 12}
+            >
+              <NotificationList
+                justifyContent="flex-end"
+                appLookup={(app) => {
+                  return apps[app];
+                }}
+                onDismiss={(app, path, id) => {
+                  console.log(`dismissed - ${app} ${path} ${id}`);
+                  dismissOne(id);
+                }}
+                onDismissAll={(app, path) => {
+                  if (path) {
+                    dismissPath(app, path);
+                  } else {
+                    dismissApp(app);
+                  }
+                }}
+                onLinkClick={onNotifLinkClick}
+                containerWidth={width - 12}
+                notifications={undismissedNotifications as NotificationType[]}
+              />
+            </NoScrollBar>
             <Flex
               animate={{
                 opacity: 1,

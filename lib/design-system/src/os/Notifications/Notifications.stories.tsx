@@ -291,7 +291,7 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
               readAt: null,
               dismissed: false,
               dismissedAt: null,
-              metadata: JSON.stringify(chatModel['/realm-chat/0']),
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/0']),
               createdAt: 1679433073,
               updatedAt: new Date().getTime(),
             },
@@ -305,7 +305,7 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
               read: true,
               readAt: null,
               dismissed: false,
-              metadata: JSON.stringify(chatModel['/realm-chat/0']),
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/0']),
               dismissedAt: null,
               createdAt: 1679423073,
               updatedAt: new Date().getTime(),
@@ -320,7 +320,105 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
               read: true,
               readAt: null,
               dismissed: false,
-              metadata: JSON.stringify(chatModel['/realm-chat/1']),
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/1']),
+              dismissedAt: null,
+              createdAt: 1679333073,
+              updatedAt: new Date().getTime(),
+            },
+          ]}
+        />
+      </Flex>
+    </>
+  );
+};
+
+export const GroupedByPath: ComponentStory<typeof AppGroup> = () => {
+  const chatModel: any = {
+    '/realm-chat/0': {
+      id: 0,
+      title: 'Based chat',
+      description: 'A chat for based people',
+      members: ['~zod', '~nus', '~tasfyn'],
+      image:
+        'https://www.memeatlas.com/images/pepes/pepe-bit-art-face-profile-picture.png',
+    },
+    '/realm-chat/1': {
+      id: 0,
+      title: 'Holium chat',
+      description: 'A chat for based people',
+      members: ['~zod', '~nus', '~tasfyn'],
+      image:
+        'https://pbs.twimg.com/profile_images/1621630320796745729/H5wKemm1_400x400.jpg',
+    },
+  };
+
+  return (
+    <>
+      <Flex
+        flexDirection="column"
+        px={3}
+        mt={3}
+        gap={4}
+        height={700}
+        width={containerWidth}
+      >
+        <AppGroup
+          appInfo={{
+            image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',
+            name: 'Realm Chat',
+            key: 'realm-chat',
+          }}
+          groupByPath
+          onDismiss={(id) => console.log(`dismissed - ${id}`)}
+          onDismissAll={(app, path) =>
+            console.log(`dismissed all ${app} ${path}`)
+          }
+          onLinkClick={(app, path, link) =>
+            console.log(`clicked - ${app} ${path} ${link}`)
+          }
+          containerWidth={containerWidth}
+          notifications={[
+            {
+              id: 1,
+              app: 'realm-chat',
+              path: '/realm-chat/0',
+              title: 'DrunkPlato',
+              content: 'Where’s the flamethrower?',
+              type: 'message',
+              read: true,
+              readAt: null,
+              dismissed: false,
+              dismissedAt: null,
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/0']),
+              createdAt: 1679433073,
+              updatedAt: new Date().getTime(),
+            },
+            {
+              id: 1,
+              app: 'realm-chat',
+              path: '/realm-chat/0',
+              title: 'dimwit-codder',
+              content: 'What do you think of my code?',
+              type: 'message',
+              read: true,
+              readAt: null,
+              dismissed: false,
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/0']),
+              dismissedAt: null,
+              createdAt: 1679423073,
+              updatedAt: new Date().getTime(),
+            },
+            {
+              id: 1,
+              app: 'realm-chat',
+              path: '/realm-chat/1',
+              title: 'AidenSolaran',
+              content: 'Looking at your PR.',
+              type: 'message',
+              read: true,
+              readAt: null,
+              dismissed: false,
+              pathMetadata: JSON.stringify(chatModel['/realm-chat/1']),
               dismissedAt: null,
               createdAt: 1679333073,
               updatedAt: new Date().getTime(),
