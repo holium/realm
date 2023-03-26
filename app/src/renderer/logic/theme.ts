@@ -86,6 +86,23 @@ export const Theme = types
     mouseColor: types.optional(types.string, '#4E9EFD'),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
   })
+  .views((self) => ({
+    get values() {
+      return {
+        id: self.id,
+        backgroundColor: self.backgroundColor,
+        accentColor: self.accentColor,
+        inputColor: self.inputColor,
+        dockColor: self.dockColor,
+        windowColor: self.windowColor,
+        mode: self.mode,
+        textColor: self.textColor,
+        iconColor: self.iconColor,
+        mouseColor: self.mouseColor,
+        wallpaper: self.wallpaper,
+      };
+    },
+  }))
   .actions((self) => ({
     setMouseColor(color: string) {
       self.mouseColor = color;

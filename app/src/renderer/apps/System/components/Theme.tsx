@@ -13,6 +13,7 @@ import { MembershipType } from 'os/services/spaces/models/members';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeStoreType } from 'renderer/logic/theme';
 import { Flex, RadioImages } from '@holium/design-system';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -88,12 +89,18 @@ const ThemePanelPresenterView = ({
         return;
       }
 
+      let newTheme;
       if (values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
-        await theme.setWallpaper(space.path, values.customWallpaper);
+        newTheme = await theme.setWallpaper(space.path, values.customWallpaper);
       } else if (wpOption !== undefined) {
-        await theme.setWallpaper(space.path, wpGallery[wpOption]);
+        newTheme = await theme.setWallpaper(space.path, wpGallery[wpOption]);
+      } else {
+        console.log('wallpaper was undefined.');
+        return;
       }
+      // @ts-ignore
+      AuthActions.setShipTheme(me.patp, newTheme.values);
 
       // TODO doesnt work
       // could probably be made to work, but it would be pretty hacky
