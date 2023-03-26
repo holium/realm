@@ -1,6 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
-
 import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
@@ -59,7 +58,6 @@ export class ShellService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
     this.state = ShellStore.create({});
-
     // this.db = new Store({
     //   name: `realm.shell`, // TODO add windowId here
     //   accessPropertiesByDotNotation: true,
@@ -128,6 +126,12 @@ export class ShellService extends BaseService {
   }
 
   setBlur(_event: any, blurred: boolean) {
+    // setting blur to false when Home pane is open should be ignored.
+    if (!blurred) {
+      if (this.core.services.desktop.isHomePaneOpen()) {
+        return;
+      }
+    }
     this.state?.setIsBlurred(blurred);
   }
 
