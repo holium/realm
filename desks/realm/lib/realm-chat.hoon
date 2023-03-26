@@ -310,11 +310,14 @@
   :: just pass along the delete-backlog to all the peers chat-db
   :: %chat-db will disallow invalid signals
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  cards
+  =/  cards=(list card)
     %:  turn
       pathpeers
       |=(p=peer-row:db (into-delete-backlog-poke p path.act now.bowl))
     ==
+  =/  cleared-status-message
+    !>([%send-message path.act ~[[[%status (crip "{(scow %p our.bowl)} cleared the chat history")] ~ ~]] *@dr])
+  =.  cards  (snoc cards [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action cleared-status-message])
   [cards state]
 ::
 ++  disable-push
