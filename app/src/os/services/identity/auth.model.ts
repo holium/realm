@@ -21,7 +21,6 @@ export const AuthShip = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     mnemonic: types.maybe(types.string),
-    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
   })
