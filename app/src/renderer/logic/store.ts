@@ -199,7 +199,6 @@ OSActions.onLog((_event: any, data: any) => {
 });
 
 OSActions.onSetTheme((_event: any, data: any) => {
-  // console.log('onSetTheme', data);
   const patp: string | undefined =
     servicesStore.identity.auth.currentShip?.patp;
   patp && AuthActions.setShipTheme(patp, data);

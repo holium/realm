@@ -274,8 +274,6 @@ export class AuthService extends BaseService {
   }
 
   getShipTheme(_event: any, patp: string) {
-    console.log('get ship theme', patp);
-    console.log('value:', this.themeDb.get(patp, defaultTheme));
     return this.themeDb.get(patp, defaultTheme);
   }
 

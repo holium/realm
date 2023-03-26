@@ -52,7 +52,6 @@ const ShipSelectorPresenter = () => {
           onClick={async () => {
             !dragging && AuthActions.setSelected(ship.patp);
             const currTheme = await AuthActions.getShipTheme(ship.patp);
-            // console.log('currTheme:', currTheme);
             if (currTheme) {
               theme.setCurrentTheme(currTheme);
             } else {
