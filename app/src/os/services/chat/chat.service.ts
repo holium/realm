@@ -1,7 +1,6 @@
 import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
 import { BaseService } from '../base.service';
-import fs from 'fs';
-import path from 'path';
+// import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
@@ -21,6 +20,7 @@ import {
   UpdateMessage,
 } from './chat.types';
 import { InvitePermissionType } from 'renderer/apps/Courier/models';
+import { chatInitSql } from './chat.init-sql';
 
 type ChatUpdateType =
   | 'message-received'
@@ -55,7 +55,6 @@ export type ChatPathType = 'dm' | 'group' | 'space';
 
 export class ChatService extends BaseService {
   db: Database.Database | null = null;
-  initSql = fs.readFileSync(`${path.resolve(__dirname)}/init.sql`, 'utf8');
   lastTimestamp = 0;
 
   /**
@@ -178,7 +177,8 @@ export class ChatService extends BaseService {
         // verbose: console.log,
       }
     );
-    this.db.exec(this.initSql);
+    this.db.pragma('journal_mode = WAL');
+    this.db.exec(chatInitSql);
     await this.core.conduit?.watch({
       app: 'chat-db',
       path: '/db',
@@ -873,7 +873,7 @@ export class ChatService extends BaseService {
       GROUP BY msg_id
       ORDER BY created_at;
     `);
-    const result = query.all(path, msgId);
+    const result = query.all(msgId);
     const rows = result.map((row) => {
       return {
         ...row,

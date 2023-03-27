@@ -1,7 +1,5 @@
 import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
 import { BaseService } from '../base.service';
-import fs from 'fs';
-import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
@@ -17,6 +15,7 @@ import {
   convertRowToNotification,
   QUERY_NOTIFICATIONS,
 } from './notification.utils';
+import notifInitSql from './notif.init-sql';
 
 type NotifMobxUpdateType =
   | 'notification-added'
@@ -42,7 +41,6 @@ const pokeHelper = async (core: any, payload: any, errMsg: string) => {
 
 export class NotificationService extends BaseService {
   db: Database.Database | null = null;
-  initSql = fs.readFileSync(`${path.resolve(__dirname)}/init.sql`, 'utf8');
   lastTimestamp = 0;
 
   /**
@@ -97,7 +95,7 @@ export class NotificationService extends BaseService {
         // verbose: console.log,
       }
     );
-    this.db.exec(this.initSql);
+    this.db.exec(notifInitSql);
     await this.core.conduit?.watch({
       app: 'notif-db',
       path: '/db',

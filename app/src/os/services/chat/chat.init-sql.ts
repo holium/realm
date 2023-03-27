@@ -1,3 +1,4 @@
+export const chatInitSql = `
 create table if not exists messages
 (
     path         TEXT    not null,
@@ -16,7 +17,7 @@ create table if not exists messages
 create unique index if not exists messages_path_msg_id_msg_part_id_uindex
     on messages (path, msg_id, msg_part_id);
 
-create table if not exists  paths
+create table if not exists paths
 (
     path                        TEXT not null,
     type                        TEXT not null,
@@ -52,3 +53,6 @@ create table if not exists delete_logs
 
 create unique index if not exists delete_log_change_uindex
     on delete_logs (timestamp, change);
+`;
+
+export default chatInitSql;

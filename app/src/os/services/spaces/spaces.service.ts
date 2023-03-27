@@ -272,6 +272,7 @@ export class SpacesService extends BaseService {
     if (!this.core.conduit) throw new Error('No conduit found');
     const secretKey = this.core.passwords.getPassword(patp);
     this.db = new DiskStore('spaces', patp, secretKey, SpacesStore);
+    // todo comment this back in
     // if (!secretKey) throw new Error('No password found for this ship');
     this.state = this.db.model as SpacesStoreType;
     if (!isReconnecting) this.state.setLoader('loading');
