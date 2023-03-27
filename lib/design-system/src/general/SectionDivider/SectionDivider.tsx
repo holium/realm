@@ -17,7 +17,7 @@ const AligmnentMap = {
 const HorizontalLine = styled.div`
   flex: 1;
   height: 1px;
-  background-color: var(--rlm-border-color);
+  background-color: rgba(var(--rlm-border-rgba));
 `;
 
 export const SectionDivider: FC<SectionDividerProps> = (

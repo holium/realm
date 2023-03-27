@@ -62,15 +62,37 @@ export function cleanNounColor(ux: string) {
 }
 
 export function hexToRgb(hex: string) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
+  if (hex.length === 4) {
+    const r = hex.substring(1, 2);
+    const g = hex.substring(2, 3);
+    const b = hex.substring(3, 4);
+    return {
+      r: parseInt(`${r}${r}`, 16),
+      g: parseInt(`${g}${g}`, 16),
+      b: parseInt(`${b}${b}`, 16),
+    };
+  } else if (hex.length === 7) {
+    const r = hex.substring(1, 3);
+    const g = hex.substring(3, 5);
+    const b = hex.substring(5, 7);
+    return {
+      r: parseInt(r, 16),
+      g: parseInt(g, 16),
+      b: parseInt(b, 16),
+    };
+  }
+
+  return null;
 }
+
+export const rgbToHex = (r: number, g: number, b: number) => {
+  const componentToHex = (c: number) => {
+    var hex = c.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+
+  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
+};
 
 export function rgbToString(rgb: { r: number; g: number; b: number } | null) {
   return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : rgb;
@@ -81,6 +103,26 @@ export function rgbToStringFull(
 ) {
   return rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : 'rgb(0, 0, 0)';
 }
+
+/* Converts to 'r,g,b,a' string. */
+export const toRgbaString = (color: string): string => {
+  const isHex = color.startsWith('#');
+  const isRgb = color.startsWith('rgb');
+  const isRgba = color.startsWith('rgba');
+
+  if (isHex) {
+    const rgbaString = hexToRgb(color);
+    return rgbToString(rgbaString) as string;
+  } else if (isRgba) {
+    const rgbaString = color.replace('rgba(', '').replace(')', '');
+    return rgbaString;
+  } else if (isRgb) {
+    const rgbaString = color.replace('rgb(', '').replace(')', '');
+    return rgbaString;
+  } else {
+    return color;
+  }
+};
 
 // ---------
 

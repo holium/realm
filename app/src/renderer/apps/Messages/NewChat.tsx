@@ -187,7 +187,7 @@ const NewChatPresenter = (props: IProps) => {
             mx={2}
             width="100%"
             className="realm-cursor-text-cursor"
-            placeholder="Add someone?"
+            placeholder="Who would you like to add?"
             value={patp}
             onChange={(e: any) => setPatp(e.target.value)}
             // onFocus={() => urbitId.actions.onFocus()}

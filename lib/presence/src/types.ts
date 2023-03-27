@@ -1,6 +1,5 @@
+import { Position } from '@holium/design-system';
 import { PresenceArg } from './hooks/useBroadcast';
-
-type Position = { x: number; y: number };
 
 export type MouseState = 'text' | 'resize' | 'pointer';
 

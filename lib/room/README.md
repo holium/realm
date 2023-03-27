@@ -39,3 +39,7 @@ A "peer" can create a room via the host and perform certain actions against the 
 
 - `%rooms`: the provider agent
 - `%room`: the peer agent
+
+## Support
+
+For questions, reach out on Twitter [@HoliumCorp](https://twitter.com/HoliumCorp) or our Realm Forerunners group (~lomder-librun/realm-forerunners).

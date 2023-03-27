@@ -15,16 +15,16 @@ export const RoomsDockStyle = styled(Flex)<any>`
   gap: 8px;
   cursor: pointer;
   border-radius: var(--rlm-border-radius-4);
-  background-color: var(--rlm-overlay-hover);
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
   box-shadow: inset 0px 0px 1px rgba(0, 0, 0, 0.25);
 
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-hover);
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
   }
   &:active:not([disabled]):not(:focus-within) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
 `;
 

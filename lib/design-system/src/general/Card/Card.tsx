@@ -19,8 +19,11 @@ export const Card = styled(Box)<CardProps>`
   margin-top: 1px;
   flex-direction: column;
   backdrop-filter: var(--blur);
-  background-color: ${(props) => props.customBg || 'var(--rlm-card-color)'};
-  border: 1px solid var(--rlm-border-color);
+  background: ${(props) => props.customBg || 'rgba(var(--rlm-card-rgba))'};
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  transition: var(--transition);
+  box-sizing: border-box;
+  border-radius: 12px;
   ${(props: CardProps) => css`
     display: ${props.fill ? 'flex' : 'inline-flex'};
     box-shadow: ${elevation[props.elevation || 0]};

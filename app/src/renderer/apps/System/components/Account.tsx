@@ -8,6 +8,7 @@ import {
   RadioGroup,
   Spinner,
   TextInput,
+  useToggle,
 } from '@holium/design-system';
 import {
   Text,
@@ -25,7 +26,6 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 
 const AccountPanelPresenter = () => {
   const { theme, ship, identity } = useServices();
@@ -141,7 +141,6 @@ const AccountPanelPresenter = () => {
               <TextInput
                 id="account-nickname"
                 name="account-nickname"
-                className="realm-cursor-text-cursor"
                 width="100%"
                 type="text"
                 placeholder="(none)"

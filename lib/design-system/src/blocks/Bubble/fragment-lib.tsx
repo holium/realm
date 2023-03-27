@@ -20,10 +20,7 @@ import {
   FragmentTabType,
   TEXT_TYPES,
 } from './Bubble.types';
-
 import styled from 'styled-components';
-import { rgba } from 'polished';
-import { getVar } from '../../util/colors';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
 import { motion } from 'framer-motion';
@@ -96,13 +93,13 @@ export const FragmentReplyTo = styled(motion.blockquote)`
   margin: 0px;
   flex-direction: column;
   padding: 4px;
-  background: var(--rlm-card-color);
+  background: rgba(var(--rlm-card-rgba));
   ${FragmentBase} {
     font-size: 0.86em;
-    color: var(--rlm-text-color);
+    color: rgba(var(--rlm-text-rgba));
   }
   ${Text.Custom} {
-    color: var(--rlm-text-color);
+    color: rgba(var(--rlm-text-rgba));
   }
 `;
 
@@ -113,14 +110,14 @@ export const FragmentInlineCode = styled(FragmentBase)`
 `;
 
 export const FragmentShip = styled(FragmentBase)`
-  color: var(--rlm-accent-color);
-  background: ${() => rgba(getVar('accent'), 0.12)};
+  color: rgba(var(--rlm-accent-rgba));
+  background: rgba(var(--rlm-accent-rgba), 0.12);
   border-radius: 4px;
   padding: 2px 4px;
   transition: var(--transition);
   &:hover {
     transition: var(--transition);
-    background: ${() => rgba(getVar('accent'), 0.18)};
+    background: rgba(var(--rlm-accent-rgba), 0.18);
     cursor: pointer;
   }
 `;
@@ -138,7 +135,7 @@ export const CodeWrapper = styled(Flex)`
   padding: 6px 8px;
   width: 100%;
   ${Text.Custom} {
-    color: var(--rlm-text-color) !important;
+    color: rgba(var(--rlm-text-rgba)) !important;
   }
 `;
 
@@ -162,15 +159,15 @@ export const FragmentImage = styled(motion.img)<FragmentImageProps>`
 
 const TabWrapper = styled(Flex)<FlexProps>`
   border-radius: 6px;
-  background: var(--rlm-card-color);
+  background: rgba(var(--rlm-card-rgba));
   ${Text.Custom} {
-    color: var(--rlm-text-color);
+    color: rgba(var(--rlm-text-rgba));
   }
 `;
 
 export const FragmentBlockquote = styled(motion.blockquote)`
   font-style: italic;
-  border-left: 2px solid var(--rlm-accent-color);
+  border-left: 2px solid rgba(var(--rlm-accent-rgba));
   padding-left: 6px;
   padding-right: 8px;
   border-radius: 3px;
@@ -214,7 +211,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     justify-content: flex-start;
     align-items: center;
     margin: 0;
-    background: var(--rlm-overlay-hover);
+    background: rgba(var(--rlm-overlay-hover-rgba));
     ${FragmentImage} {
       border-radius: 2px;
       height: 36px !important;
@@ -222,6 +219,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   }
   &:hover:not([disabled]) {
     transition: var(--transition);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
     cursor: pointer;
   }
 `;

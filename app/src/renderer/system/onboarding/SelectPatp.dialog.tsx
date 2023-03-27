@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 import { Grid, UrbitSVG } from 'renderer/components';
@@ -38,13 +38,12 @@ const PatpOption = styled(Button.Base)<PatpOptionProps>`
   justify-content: flex-start;
   align-items: center;
   gap: 6px;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   transition: var(--transition);
   border: 1px solid
-    ${(props: PatpOptionProps) =>
-      props.customBorder || 'var(--rlm-border-color)'};
+    ${(props) => props.customBorder || 'rgba(var(--rlm-border-rgba))'};
 
-  ${(props: PatpOptionProps) =>
+  ${(props) =>
     props.customBg &&
     css`
       background-color: ${props.customBg};
@@ -62,9 +61,7 @@ const PatpOption = styled(Button.Base)<PatpOptionProps>`
   }
 `;
 
-const AvailablePlanet: FC<AvailablePlanetProps> = (
-  props: AvailablePlanetProps
-) => {
+const AvailablePlanet = (props: AvailablePlanetProps) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 

@@ -1,7 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
-import { darken, rgba } from 'polished';
+import styled from 'styled-components';
 import {
   background,
   BackgroundProps,
@@ -27,7 +26,7 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
-import { ColorProps, colorStyle, getVar } from '../../util/colors';
+import { ColorProps, colorStyle } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -124,13 +123,15 @@ const Base = styled(motion.button)<ButtonProps>`
 `;
 
 const Primary = styled(Base)<ButtonProps>`
-  background-color: var(--rlm-accent-color);
+  background-color: rgba(var(--rlm-accent-rgba));
   color: #ffffff;
   &:hover:not([disabled]) {
-    background-color: var(--rlm-accent-color);
+    background-color: rgba(var(--rlm-accent-rgba));
+    filter: brightness(1.1);
   }
   &:active:not([disabled]) {
-    background-color: var(--rlm-accent-color);
+    background-color: rgba(var(--rlm-accent-rgba));
+    filter: brightness(1.2);
   }
   svg {
     fill: #ffffff;
@@ -138,44 +139,46 @@ const Primary = styled(Base)<ButtonProps>`
 `;
 
 const Secondary = styled(Base)<ButtonProps>`
-  color: var(--rlm-text-color);
-  background-color: var(--rlm-window-color);
+  color: rgba(var(--rlm-text-rgba));
+  background-color: rgba(var(--rlm-window-rgba));
   filter: brightness(0.975);
   &:hover:not([disabled]) {
-    background-color: var(--rlm-window-color);
-    filter: brightness(0.965);
+    background-color: rgba(var(--rlm-window-rgba));
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
-    background-color: var(--rlm-window-color);
-    filter: brightness(0.95);
+    background-color: rgba(var(--rlm-window-rgba));
+    filter: brightness(0.925);
   }
 `;
 
 const Minimal = styled(Base)<ButtonProps>`
-  color: var(--rlm-accent-color);
-  background-color: ${() => rgba(getVar('accent'), 0.1)};
+  color: rgba(var(--rlm-accent-rgba));
+  background-color: rgba(var(--rlm-accent-rgba), 0.1);
   &:hover:not([disabled]) {
-    background-color: ${() => rgba(getVar('accent'), 0.15)};
+    background-color: rgba(var(--rlm-accent-rgba), 0.15);
   }
   &:active:not([disabled]) {
-    background-color: ${() => rgba(getVar('accent'), 0.18)};
+    background-color: rgba(var(--rlm-accent-rgba), 0.3);
   }
   svg {
-    fill: var(--rlm-accent-color);
+    fill: rgba(var(--rlm-accent-rgba));
   }
 `;
 
 const Transparent = styled(Base)<ButtonProps>`
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   background-color: transparent;
   &:hover:not([disabled]) {
-    background-color: ${() => darken(0.025, getVar('window'))};
+    background-color: rgba(var(--rlm-window-rgba));
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
-    background-color: ${() => darken(0.05, getVar('window'))};
+    background-color: rgba(var(--rlm-window-rgba));
+    filter: brightness(0.95);
   }
   svg {
-    fill: var(--rlm-text-color);
+    fill: rgba(var(--rlm-text-rgba));
   }
 `;
 
@@ -186,29 +189,29 @@ const TextButton = styled(Base)<TextButtonProps>`
   padding: 4px 8px;
   color: ${(props) =>
     props.color
-      ? `var(--rlm-${props.color}-color)`
-      : 'var(--rlm-accent-color)'};
+      ? `rgba(var(--rlm-${props.color}-rgba))`
+      : 'rgba(var(--rlm-accent-rgba))'};
 
   background-color: ${(props) =>
     props.showOnHover
       ? 'transparent'
       : props.color
-      ? rgba(getVar(props.color), 0.1)
-      : rgba(getVar('accent'), 0.1)};
+      ? `rgba(var(--rlm-${props.color}-rgba), 0.1)`
+      : 'rgba(var(--rlm-accent-rgba), 0.1)'};
   &:hover:not([disabled]) {
     background-color: ${(props) =>
       props.color
-        ? rgba(getVar(props.color), 0.15)
-        : rgba(getVar('accent'), 0.15)};
+        ? `rgba(var(--rlm-${props.color}-rgba), 0.15)`
+        : 'rgba(var(--rlm-accent-rgba), 0.15)'};
   }
   &:active:not([disabled]) {
     background-color: ${(props) =>
       props.color
-        ? rgba(getVar(props.color), 0.2)
-        : rgba(getVar('accent'), 0.2)};
+        ? `rgba(var(--rlm-${props.color}-rgba), 0.2)`
+        : 'rgba(var(--rlm-accent-rgba), 0.2)'};
   }
   svg {
-    fill: var(--rlm-accent-color);
+    fill: rgba(var(--rlm-accent-rgba));
   }
 `;
 
@@ -228,19 +231,19 @@ const IconButton = styled(Base)<IconButtonProps>`
     props.isSelected ? 'var(--rlm-overlay-active)' : 'transparent'};
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-hover);
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
   }
   /* &:active:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   } */
   &:focus:not([disabled]) {
     outline: none;
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
   svg {
     fill: ${(props) =>
-      props.customColor ? props.customColor : 'var(--rlm-icon-color)'};
+      props.customColor ? props.customColor : 'rgba(var(--rlm-icon-rgba))'};
   }
 `;
 

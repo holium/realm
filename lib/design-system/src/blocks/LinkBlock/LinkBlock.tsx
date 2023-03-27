@@ -31,7 +31,7 @@ const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   height: 170px;
   object-fit: cover;
   border-radius: 4px;
-  background: var(--rlm-window-color);
+  background: rgba(var(--rlm-window-rgba));
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 

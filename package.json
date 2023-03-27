@@ -3,6 +3,7 @@
   "name": "realm-monorepo",
   "workspaces": [
     "app",
+    "shared",
     "lib/design-system",
     "lib/presence",
     "lib/presence/code",
@@ -62,6 +63,7 @@
   },
   "preconstruct": {
     "packages": [
+      "shared",
       "lib/design-system",
       "lib/presence",
       "lib/conduit",

@@ -29,7 +29,7 @@ export const RoomsDockControls = ({
           alignItems="center"
           justifyContent="center"
         >
-          <Icon name="InfoCircle" color="intent-alert" size={20} />
+          <Icon name="InfoCircle" fill="intent-alert" size={20} />
         </Flex>
       </Tooltip>
     );
@@ -52,7 +52,7 @@ export const RoomsDockControls = ({
       }}
     >
       <Icon
-        color={isMuted ? 'intent-warning' : 'text'}
+        fill={isMuted ? 'intent-warning' : 'text'}
         name={isMuted ? 'Unmute' : 'Mute'}
         size={26}
       />

@@ -24,8 +24,8 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   padding: 8px;
   min-width: 150px;
   max-width: 100%;
-  color: var(--rlm-text-color);
-  background: var(--rlm-input-color);
+  color: rgba(var(--rlm-text-rgba));
+  background: rgba(var(--rlm-input-rgba));
   border-radius: ${(props) => {
     if (props.isPrevGrouped && props.isNextGrouped) {
       return '0px 12px 12px 0px';
@@ -117,7 +117,7 @@ export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
   font-size: 12px;
   font-weight: 500;
   user-select: text;
-  color: ${(props) => props.authorColor ?? 'var(--rlm-text-color)'};
+  color: ${(props) => props.authorColor ?? 'rgba(var(--rlm-text-rgba))'};
 `;
 
 export const BubbleFooter = styled(Box)`

@@ -54,9 +54,10 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   align-items: flex-start;
   padding: 6px;
   backdrop-filter: brightness(95%) blur(6px);
-  color: var(--rlm-text-color) !important;
+  gap: 6px;
+  color: rgba(var(--rlm-text-rgba)) !important;
   ${Text.Custom} {
-    color: var(--rlm-text-color) !important;
+    color: rgba(var(--rlm-text-rgba)) !important;
   }
   border-radius: var(--rlm-border-radius-9);
   width: ${(props) => (props.width ? `${props.width}px` : 'initial')};
@@ -102,7 +103,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
           .block-footer {
             transition: var(--transition);
             opacity: 1;
-            background: var(--rlm-window-color);
+            background: rgba(var(--rlm-window-rgba));
           }
           .block-author {
             opacity: 1;

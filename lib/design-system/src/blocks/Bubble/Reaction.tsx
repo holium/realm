@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { Flex, Box, Icon, Text, Menu } from '../..';
 import EmojiPicker, {
@@ -83,7 +84,17 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   box-shadow: ${({ selected }) =>
     selected
       ? 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.1)'
-      : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
+    : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
+
+  /* TODO merged from master */
+  /* background: ${({ selected }) =>
+    selected ? 'rgba(var(--rlm-accent-rgba))' : 'rgba(var(--rlm-input-rgba))'};
+  filter: ${({ selected }) => (selected ? 'brightness(1.3)' : 'brightness(1)')};
+  border: ${({ selected }) =>
+    selected
+      ? '1px solid rgba(var(--rlm-accent-rgba))'
+      : '1px solid rgba(var(--rlm-window-rgba))'}; */
+
   border-radius: 16px;
   transition: var(--transition);
   ${({ size, selected, isOur }) =>
@@ -95,6 +106,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
             font-size: ${FontSizes[size]}px;
             ${selected && !isOur && 'color: var(--rlm-text-color);'}
             ${selected && isOur && 'color: #FFF;'}
+            /* ${selected && 'color: rgba(var(--rlm-accent-rgba));'} */
           }
         `
       : css`
@@ -177,8 +189,13 @@ export const Reactions = (props: ReactionProps) => {
     reactions = [],
     onReaction,
   } = props;
+<<<<<<< HEAD
   const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
   const reactIds = reactions.map((r) => r.msgId);
+=======
+  const [isReacting, setIsReacting] = useState<boolean>(false);
+  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
+>>>>>>> master
 
   const reactionsAggregated = useMemo(() => {
     if (reactions.length === 0) {

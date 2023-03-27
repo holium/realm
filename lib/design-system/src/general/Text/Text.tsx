@@ -48,14 +48,11 @@ const customStyling = css<TextProps>`
       `}
   ${(props) => props.fontWeight && `font-weight: ${props.fontWeight};`}
   ${(props) => props.noSelection && 'user-select: none;'}
-  &:disabled {
-      color: var(--rlm-text-disabled);
-    }
   }
 `;
 
 const Default = styled(Box)<TextProps>`
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   font-family: var(--rlm-font);
   font-weight: 400;
   font-size: 0.889rem;
@@ -136,7 +133,7 @@ const Patp = styled(motion.p)<TextProps>`
   line-height: normal;
   font-size: 0.9rem;
   font-family: 'Source Code Pro', monospace;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   margin-top: 0px;
   margin-bottom: 0px;
   user-select: text;

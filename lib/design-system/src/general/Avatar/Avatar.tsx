@@ -26,7 +26,7 @@ export const AvatarWrapper = styled(Box)<AvatarStyleProps>`
   img {
     user-select: none;
     pointer-events: none;
-    background: var(--rlm-base-color);
+    background: rgba(var(--rlm-base-rgba));
     border-radius: var(--rlm-border-radius-4);
   }
   transition: var(--transition);

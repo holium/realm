@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MouseState } from '@holium/realm-presence';
 import { AnimatedCursor } from './AnimatedCursor';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/design-system';
 import { getMouseState } from './getMouseState';
 
 const useMouseState = (containerId: string) => {

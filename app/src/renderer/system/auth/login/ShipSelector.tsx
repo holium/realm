@@ -6,10 +6,9 @@ import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { delay } from 'lodash';
 
-import { Flex, Tooltip } from '@holium/design-system';
+import { Avatar, Flex, Tooltip } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { Avatar } from '@holium/design-system';
 
 // ----------------------------------------
 // -------- Local style components --------

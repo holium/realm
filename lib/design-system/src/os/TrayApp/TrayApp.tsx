@@ -12,8 +12,8 @@ const Wrapper = styled(motion.div)`
   transform: translate3d(0, 0, 0);
   backdrop-filter: blur(24px);
   backface-visibility: hidden;
-  background: var(--rlm-window-bg);
-  border: 1px solid var(--rlm-border-color);
+  background: rgba(var(--rlm-window-bg-rgba));
+  border: 1px solid rgba(var(--rlm-border-rgba));
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
   ::-webkit-scrollbar {
     display: none;

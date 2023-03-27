@@ -53,7 +53,7 @@ const RoomPresenter = () => {
 
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
-  const presentCount = (roomsManager?.protocol.peers.size ?? 0) + 1; // to include self
+  const presentCount = presentRoom?.present?.length ?? 0;
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
