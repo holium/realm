@@ -16,7 +16,7 @@ type ChatLogHeaderProps = {
   title: string;
   subtitle?: string;
   avatar: React.ReactNode;
-  muted: boolean;
+  isMuted: boolean;
   onBack: () => void;
   hasMenu: boolean;
   rightAction?: React.ReactNode;
@@ -29,7 +29,7 @@ export const ChatLogHeader = ({
   avatar,
   onBack,
   rightAction,
-  muted,
+  isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
   const { ship } = useServices();
@@ -53,11 +53,11 @@ export const ChatLogHeader = ({
     });
     menu.push({
       id: `${chatLogId}-mute-chat`,
-      icon: muted ? 'NotificationOff' : 'Notification',
-      label: muted ? 'Unmute' : 'Mute',
+      icon: isMuted ? 'NotificationOff' : 'Notification',
+      label: isMuted ? 'Unmute' : 'Mute',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        toggleMuted(path, !muted);
+        toggleMuted(path, !isMuted);
       },
     });
     if (selectedChat?.hidePinned) {
@@ -105,7 +105,7 @@ export const ChatLogHeader = ({
       },
     });
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [selectedChat?.hidePinned, muted]);
+  }, [selectedChat?.hidePinned, isMuted]);
 
   return (
     <Flex

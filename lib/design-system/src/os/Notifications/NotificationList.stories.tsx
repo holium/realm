@@ -27,8 +27,12 @@ export const ListGroupedByApp: ComponentStory<typeof NotificationList> = () => {
       <Flex flexDirection="column" px={3} mt={3} gap={4} width={containerWidth}>
         <NotificationList
           containerWidth={containerWidth}
-          appLookup={(app) => {
+          onAppLookup={(app) => {
             return chatModel[app];
+          }}
+          onPathLookup={(app, path) => {
+            console.log(`path lookup - ${app} ${path}`);
+            return chatModel[path];
           }}
           onLinkClick={(app, path, link) =>
             console.log(`clicked - ${app} ${path} ${link}`)

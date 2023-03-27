@@ -4,6 +4,7 @@ import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
 import { OSActions } from 'renderer/logic/actions/os';
+import { servicesStore } from 'renderer/logic/store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -45,14 +46,31 @@ const ChatStore = types
         .filter((c) => !self.pinnedChats.includes(c.path))
         .sort(sortByUpdatedAt);
     },
-    getChatTitle(path: string, ship: string) {
+    getChatHeader(path: string): {
+      title: string;
+      sigil?: any;
+      image?: string;
+    } {
       const chat = self.inbox.find((c) => c.path === path);
-      if (!ship || !chat) return 'Error loading title';
+      if (!window.ship || !chat) return { title: 'Error loading title' };
       if (chat.type === 'dm') {
-        const peer = chat.peers.filter((p) => p.ship !== ship)[0];
-        return peer ? peer.ship : chat.metadata.peer || 'Error loading title';
+        const peer = chat.peers.filter((p) => p.ship !== window.ship)[0];
+        const { nickname, avatar, color } =
+          servicesStore.friends.getContactAvatarMetadata(peer.ship);
+        return {
+          title: nickname || peer.ship || 'Error loading title',
+          sigil: {
+            patp: peer.ship,
+            color: color ? [color, '#FFF'] : ['#000', '#FFF'],
+            nickname: nickname || '',
+          },
+          image: avatar || chat.metadata.image,
+        };
       } else {
-        return chat.metadata.title;
+        return {
+          title: chat.metadata.title,
+          image: chat.metadata.image,
+        };
       }
     },
   }))
@@ -61,7 +79,10 @@ const ChatStore = types
       try {
         self.inbox = yield ChatDBActions.getChatList();
         const pinnedChats = yield ChatDBActions.fetchPinnedChats();
-        localStorage.setItem('pinnedChats', JSON.stringify(pinnedChats));
+        localStorage.setItem(
+          `${window.ship}-pinnedChats`,
+          JSON.stringify(pinnedChats)
+        );
 
         const muted = yield ChatDBActions.fetchMutedChats();
         self.inbox.forEach((chat) => {
@@ -102,7 +123,10 @@ const ChatStore = types
           self.pinnedChats.remove(path);
         }
         yield ChatDBActions.togglePinnedChat(path, pinned);
-        localStorage.setItem('pinnedChats', JSON.stringify(self.pinnedChats));
+        localStorage.setItem(
+          `${window.ship}-pinnedChats`,
+          JSON.stringify(self.pinnedChats)
+        );
         return self.pinnedChats;
       } catch (error) {
         console.error(error);
@@ -175,13 +199,15 @@ const ChatStore = types
 
 // -------------------------------
 // TODO Write a caching layer for the inbox
-const pinnedChats = localStorage.getItem('pinnedChats');
+const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
 export const chatStore = ChatStore.create({
   subroute: 'inbox',
   isOpen: false,
   pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
 });
+
+chatStore.init();
 
 // -------------------------------
 // Create core context

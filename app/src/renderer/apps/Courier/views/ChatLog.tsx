@@ -32,7 +32,7 @@ const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
-  const { selectedChat, getChatTitle, setSubroute } = useChatStore();
+  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
   const accountStore = useAccountStore();
   const { ship, friends } = useServices();
   const [showAttachments, setShowAttachments] = useState(false);
@@ -51,15 +51,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     }
   }, [selectedChat?.path]);
 
-  const resolvedTitle = useMemo(() => {
-    if (!selectedChat || !ship) return 'Error loading title';
-    let title = getChatTitle(selectedChat.path, ship.patp);
-    if (selectedChat.type === 'dm') {
-      const { nickname } = friends.getContactAvatarMetadata(title);
-      if (nickname) title = nickname;
-    }
-    return title;
-  }, [selectedChat?.path, ship]);
+  const { title, sigil, image } = useMemo(() => {
+    if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };
+    return getChatHeader(selectedChat.path);
+  }, [selectedChat?.path, window.ship]);
 
   if (!selectedChat || !ship) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
@@ -68,11 +63,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
   const chatAvatarEl = (
     <ChatAvatar
-      title={resolvedTitle}
+      sigil={sigil}
       type={type}
       path={path}
       peers={peers.map((p) => p.ship)}
-      image={metadata?.image}
+      image={image}
       metadata={metadata}
       canEdit={false}
     />
@@ -148,9 +143,9 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         flexDirection="column"
       >
         <ChatLogHeader
-          title={resolvedTitle}
+          title={title}
           path={path}
-          muted={selectedChat.muted}
+          isMuted={selectedChat.muted}
           onBack={() => setSubroute('inbox')}
           hasMenu
           avatar={chatAvatarEl}

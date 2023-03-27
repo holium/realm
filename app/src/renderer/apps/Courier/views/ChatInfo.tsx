@@ -64,8 +64,8 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute, getChatTitle } = useChatStore();
-  const { friends, ship } = useServices();
+  const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { ship } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -76,39 +76,22 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const isDMType = selectedChat?.type === 'dm';
 
   // TODO consolidate this
-  const { resolvedTitle, subtitle } = useMemo(() => {
+  const { title, subtitle, sigil } = useMemo(() => {
     if (!selectedChat || !ship)
       return { resolvedTitle: 'Error loading title', subtitle: '' };
-    let title = getChatTitle(selectedChat.path, ship.patp);
+
+    let { title, sigil, image: chatImage } = getChatHeader(selectedChat.path);
     let subtitle = '';
     if (selectedChat.type === 'dm') {
-      const { patp, nickname } = friends.getContactAvatarMetadata(title);
-      if (nickname) {
-        title = nickname;
-        subtitle = patp;
-      } else {
-        title = patp;
+      if (chatImage) setImage(chatImage);
+      if (sigil.nickname) {
+        subtitle = sigil.patp;
       }
     }
-    return { resolvedTitle: title, subtitle };
+    return { title, subtitle, sigil };
   }, [selectedChat?.path, ship]);
 
-  const contactMetadata =
-    isDMType && resolvedTitle
-      ? friends.getContactAvatarMetadata(resolvedTitle)
-      : {
-          patp: resolvedTitle,
-          color: '#000',
-          nickname: '',
-          avatar: '',
-        };
-
-  const [editTitle, setEditTitle] = useState(
-    resolvedTitle ||
-      contactMetadata.nickname ||
-      contactMetadata.patp ||
-      'Error loading title'
-  );
+  const [editTitle, setEditTitle] = useState(title || 'Error loading title');
 
   useEffect(() => {
     if (!selectedChat || !ship) return;
@@ -160,7 +143,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   const chatAvatarEl = (
     <ChatAvatar
-      title={resolvedTitle}
+      sigil={sigil}
       type={type}
       path={path}
       peers={patps}
@@ -202,6 +185,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       <ChatLogHeader
         path={path}
         title={'Chat Info'}
+        isMuted={selectedChat.muted}
         avatar={<div />}
         onBack={() => setSubroute('chat')}
         hasMenu={false}

@@ -12,11 +12,10 @@ type LeaveChatDialogConfigComponentProps = {
 const LeaveChatDialogConfigComponent = ({
   path,
   amHost,
-  our,
   ...props
 }: LeaveChatDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
-  const { getChatTitle, leaveChat } = useChatStore();
+  const { getChatHeader, leaveChat } = useChatStore();
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
@@ -27,7 +26,7 @@ const LeaveChatDialogConfigComponent = ({
   };
 
   const amHostBool = amHost === 'true';
-  const chatTitle = getChatTitle(path, our);
+  const { title: chatTitle } = getChatHeader(path);
 
   return (
     <ConfirmDialog
@@ -51,7 +50,6 @@ export const LeaveChatDialogConfig: (dialogProps: any) => DialogConfig = (
       <LeaveChatDialogConfigComponent
         path={dialogProps.path}
         amHost={dialogProps.amHost}
-        our={dialogProps.our}
         {...props}
       />
     ),

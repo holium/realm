@@ -13,7 +13,15 @@ type NotificationListProps = {
   groupByPath?: boolean;
   containerWidth: number;
   notifications: NotificationType[];
-  appLookup: (app: string) => { name: string; image: string; key: string };
+  onAppLookup: (app: string) => { name: string; image: string; key: string };
+  onPathLookup: (
+    app: string,
+    path: string
+  ) => {
+    title: string;
+    sigil?: any;
+    image?: string;
+  } | null;
   onDismiss: (app: string, path: string, id: number) => void;
   onDismissAll: (app: string, path?: string) => void;
   onLinkClick: (app: string, path: string, link?: string) => void;
@@ -24,7 +32,8 @@ export const NotificationList = ({
   notifications,
   groupByPath = true,
   justifyContent = 'flex-start',
-  appLookup,
+  onAppLookup,
+  onPathLookup,
   onDismiss,
   onDismissAll,
   onLinkClick,
@@ -59,7 +68,7 @@ export const NotificationList = ({
       justifyContent={justifyContent}
     >
       {appGroupedNotifications.map((appNotifs) => {
-        const appInfo = appLookup(appNotifs[0].app);
+        const appInfo = onAppLookup(appNotifs[0].app);
         if (appNotifs.length === 1) {
           return (
             <Notification
@@ -79,6 +88,7 @@ export const NotificationList = ({
             notifications={appNotifs}
             groupByPath={groupByPath}
             appInfo={appInfo}
+            onPathLookup={onPathLookup}
             onDismiss={onDismiss}
             onDismissAll={onDismissAll}
             onLinkClick={onLinkClick}

@@ -210,6 +210,10 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
           onLinkClick={(app, path, link) =>
             console.log(`clicked - ${app} ${path} ${link}`)
           }
+          onPathLookup={(app, path) => {
+            console.log(`path lookup - ${app} ${path}`);
+            return chatModel[path];
+          }}
           containerWidth={containerWidth}
           notifications={[
             {
@@ -275,6 +279,10 @@ export const GroupedByApp: ComponentStory<typeof AppGroup> = () => {
           onDismissAll={(app, path) =>
             console.log(`dismissed all ${app} ${path}`)
           }
+          onPathLookup={(app, path) => {
+            console.log(`path lookup - ${app} ${path}`);
+            return chatModel[path];
+          }}
           onLinkClick={(app, path, link) =>
             console.log(`clicked - ${app} ${path} ${link}`)
           }
@@ -367,6 +375,10 @@ export const GroupedByPath: ComponentStory<typeof AppGroup> = () => {
             image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',
             name: 'Realm Chat',
             key: 'realm-chat',
+          }}
+          onPathLookup={(app, path) => {
+            console.log(`path lookup - ${app} ${path}`);
+            return chatModel[path];
           }}
           groupByPath
           onDismiss={(id) => console.log(`dismissed - ${id}`)}

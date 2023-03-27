@@ -220,7 +220,19 @@ export const ShipBarPresenter = () => {
             >
               <NotificationList
                 justifyContent="flex-end"
-                appLookup={(app: string) => {
+                onPathLookup={(app: string, path: string) => {
+                  if (app === 'realm-chat') {
+                    let { title, sigil, image } = chatStore.getChatHeader(path);
+                    return {
+                      title,
+                      sigil,
+                      image,
+                    };
+                  }
+                  return null;
+                  // return getNotificationPath(app, path);
+                }}
+                onAppLookup={(app: string) => {
                   return apps[app];
                 }}
                 onDismiss={(app: string, path: string, id: number) => {

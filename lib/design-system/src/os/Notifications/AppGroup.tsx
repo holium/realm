@@ -24,6 +24,15 @@ type AppGroupProps = {
   groupByPath?: boolean;
   containerWidth: number;
   notifications: NotificationType[];
+
+  onPathLookup: (
+    app: string,
+    path: string
+  ) => {
+    title: string;
+    sigil?: any;
+    image?: string;
+  } | null;
   onLinkClick: (app: string, path: string, link?: string) => void;
   onDismiss: (app: string, path: string, id: number) => void;
   onDismissAll: (app: string, path?: string) => void;
@@ -34,6 +43,7 @@ export const AppGroup = ({
   notifications,
   containerWidth,
   appInfo,
+  onPathLookup,
   onDismiss,
   onDismissAll,
   onLinkClick,
@@ -78,31 +88,33 @@ export const AppGroup = ({
       {!groupByPath
         ? renderedNotifications(notifications, outerOffset)
         : groupedNotifications.map((notifs) => {
-            if (!notifs[0].pathMetadata)
-              return renderedNotifications(notifs, outerOffset);
-            let metadata;
-            if (typeof notifs[0].pathMetadata === 'string') {
-              metadata = JSON.parse(notifs[0].pathMetadata);
-            } else metadata = notifs[0].pathMetadata;
-            let avatar = metadata?.image && (
-              <img
-                height={20}
-                width={20}
-                style={{ borderRadius: 3 }}
-                src={metadata.image}
-                alt=""
-              />
-            );
-            if (metadata.peer) {
+            const metadata = onPathLookup(notifs[0].app, notifs[0].path);
+            if (!metadata) return renderedNotifications(notifs, outerOffset);
+            let title = metadata.title;
+
+            let avatar;
+            if (metadata?.image) {
+              avatar = (
+                <img
+                  height={20}
+                  width={20}
+                  style={{ borderRadius: 3 }}
+                  src={metadata.image}
+                  alt=""
+                />
+              );
+            } else if (metadata.sigil) {
               avatar = (
                 <Avatar
                   simple
-                  patp={metadata.peer}
+                  patp={metadata.sigil.patp}
+                  avatar={metadata.image}
                   size={20}
-                  sigilColor={['#000', '#FFF']}
+                  sigilColor={metadata.sigil.color}
                 />
               );
             }
+
             const isExpanded = pathExpandMap[notifs[0].path];
             return (
               <PathContainer
@@ -115,10 +127,10 @@ export const AppGroup = ({
                   alignItems="center"
                   py={1}
                 >
-                  <Flex px={1} flexDirection="row" gap={6}>
+                  <Flex px={1} flexDirection="row" alignItems="center" gap={6}>
                     {avatar}
                     <Text.Custom fontSize={2} fontWeight={500} opacity={0.8}>
-                      {metadata?.title}
+                      {title}
                     </Text.Custom>
                   </Flex>
                   <Flex flexDirection="row" alignItems="center">

@@ -9,7 +9,7 @@ export type NotificationType = {
   buttons?: NotificationButtonType[]; // NOTE: there should only be two buttons max
   link?: string;
   metadata?: string;
-  pathMetadata?: string;
+  pathMetadata?: string | any;
   createdAt: number;
   updatedAt: number;
   readAt: number | null;

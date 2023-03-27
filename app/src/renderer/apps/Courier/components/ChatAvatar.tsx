@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
-import { useServices } from 'renderer/logic/store';
 import { useState } from 'react';
 
 type ChatAvatarProps = {
-  title: string;
+  sigil?: {
+    patp: string;
+    color: [string, string];
+  };
   type: string;
   path: string;
   image?: string;
@@ -19,36 +21,27 @@ type ChatAvatarProps = {
 };
 
 export const ChatAvatar = ({
-  title,
+  sigil,
   type,
   path,
   peers,
   image,
-  metadata,
   onUpload,
   canEdit = false,
   size = 28,
 }: ChatAvatarProps) => {
-  const { friends } = useServices();
   const [showEdit, setShowEdit] = useState(false);
   let avatarElement = null;
 
   if (type === 'dm') {
-    // 1-1 chat
-    let patp = peers.map((p) => p).find((p) => p !== window.ship);
-    if (!patp) patp = metadata.peer;
-    if (!patp) return null;
-
-    const { avatar, color: sigilColor } = title
-      ? friends.getContactAvatarMetadata(patp)
-      : { color: '#000', avatar: '' };
+    if (!sigil) return null;
     avatarElement = (
       <Avatar
-        patp={patp}
-        avatar={avatar}
-        size={size}
-        sigilColor={[sigilColor, '#ffffff']}
         simple
+        patp={sigil.patp}
+        avatar={image}
+        size={size}
+        sigilColor={sigil.color}
       />
     );
   }

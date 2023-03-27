@@ -39,10 +39,10 @@ export const ChatRowPresenter = ({
   metadata,
   onClick,
 }: ChatRowProps) => {
-  const { ship, friends } = useServices();
+  const { ship } = useServices();
   const {
     inbox,
-    getChatTitle,
+    getChatHeader,
     setSubroute,
     setChat,
     isChatPinned,
@@ -128,33 +128,28 @@ export const ChatRowPresenter = ({
   }, [contextMenuOptions, getOptions, setOptions, chatRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-  const resolvedTitle = useMemo(() => {
-    if (!ship) return 'Error loading title';
-    let title = getChatTitle(path, ship.patp);
-    if (type === 'dm') {
-      const { nickname } = friends.getContactAvatarMetadata(title);
-      if (nickname) title = nickname;
-    }
-    return title;
-  }, [path, ship]);
+
+  const { title, sigil, image } = useMemo(() => {
+    return getChatHeader(path);
+  }, [path, window.ship]);
 
   const chatAvatarEl = useMemo(
     () =>
-      resolvedTitle &&
+      title &&
       type &&
       path &&
       peers && (
         <ChatAvatar
-          title={resolvedTitle}
+          sigil={sigil}
           type={type}
           path={path}
           peers={peers}
-          image={metadata?.image}
+          image={image}
           metadata={metadata}
           canEdit={false}
         />
       ),
-    [resolvedTitle, path, type, peers, metadata.image, ship?.patp]
+    [title, path, type, peers, sigil, image]
   );
 
   const chat = inbox.find((c) => c.path === path);
@@ -235,7 +230,7 @@ export const ChatRowPresenter = ({
               fontWeight={500}
               fontSize={3}
             >
-              {resolvedTitle}
+              {title}
             </Text.Custom>
             <Text.Custom
               textAlign="left"
