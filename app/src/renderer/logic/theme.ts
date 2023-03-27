@@ -8,38 +8,78 @@ import {
   getSnapshot,
 } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
-import { bgIsLightOrDark } from '../../os/lib/color';
+import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
 
 export const genCSSVariables = (theme: ThemeType) => {
+  /**
+   * All --rlm-*-rgba variables should be in rgba format.
+   * This is to allow for opacity to be applied to the color.
+   */
+  const themeMode = toRgbaString(theme.mode);
+  const isLight = themeMode === 'light';
+  const homeButtonColor = isLight
+    ? toRgbaString(rgba(darken(0.2, theme.dockColor), 0.5))
+    : toRgbaString(rgba(darken(0.15, theme.dockColor), 0.6));
+  const baseColor = toRgbaString(theme.backgroundColor);
+  const accentColor = toRgbaString(theme.accentColor);
+  const inputColor = toRgbaString(theme.inputColor);
+  const borderColor = isLight
+    ? toRgbaString(darken(0.1, theme.windowColor))
+    : toRgbaString(darken(0.075, theme.windowColor));
+  const windowColor = toRgbaString(theme.windowColor);
+  const windowBgColor = toRgbaString(rgba(theme.windowColor, 0.9));
+  const dockColor = toRgbaString(rgba(theme.windowColor, 0.65));
+  const cardColor = isLight
+    ? toRgbaString(lighten(0.05, theme.windowColor))
+    : toRgbaString(darken(0.025, theme.windowColor));
+  const textColor = toRgbaString(theme.textColor);
+  const iconColor = toRgbaString(rgba(theme.textColor, 0.7));
+  const mouseColor = toRgbaString(theme.mouseColor);
+  const intentAlertColor = toRgbaString('#ff6240');
+  const intentCautionColor = toRgbaString('#ffbc32');
+  const intentSuccessColor = toRgbaString('#0fc383');
+  const overlayHoverColor = isLight ? '0,0,0,0.04' : '255,255,255,0.06';
+  const overlayActiveColor = isLight ? '0,0,0,0.06' : '255,255,255,0.09';
+
   return `
-      :root {
-        --rlm-font: 'Rubik', sans-serif;
-        --rlm-base-color: ${theme.backgroundColor};
-        --rlm-accent-color: ${theme.accentColor};
-        --rlm-input-color: ${theme.inputColor};
-        --rlm-border-color: ${
-          theme.mode === 'light'
-            ? darken(0.1, theme.windowColor)
-            : darken(0.075, theme.windowColor)
-        };
-        --rlm-window-color: ${theme.windowColor};
-        --rlm-card-color: ${
-          theme.mode === 'light'
-            ? lighten(0.05, theme.windowColor)
-            : darken(0.025, theme.windowColor)
-        };
-        --rlm-theme-mode: ${theme.mode};
-        --rlm-text-color: ${theme.textColor};
-        --rlm-icon-color: ${theme.iconColor};
-        --rlm-mouse-color: ${theme.mouseColor};
-      }
-   
-      div[data-radix-portal] {
-        z-index: 2000 !important;
-      }
-    `;
+    :root {
+      --theme-mode: ${themeMode};
+      --rlm-font: 'Rubik',sans-serif;
+      --blur: blur(24px);
+      --transition-fast: 0.4s ease;
+      --transition: all 0.25s ease;
+      --transition-2x: all 0.5s ease;
+      --rlm-border-radius-4: 4px;
+      --rlm-border-radius-6: 6px;
+      --rlm-border-radius-9: 9px;
+      --rlm-border-radius-12: 12px;
+      --rlm-border-radius-16: 16px;
+      --rlm-box-shadow-1: 0px 0px 4px rgba(0,0,0,0.06);
+      --rlm-box-shadow-2: 0px 0px 9px rgba(0,0,0,0.12);
+      --rlm-box-shadow-3: 0px 0px 9px rgba(0,0,0,0.18);
+      --rlm-box-shadow-lifted: 0px 0px 9px rgba(0,0,0,0.24);
+
+      --rlm-home-button-rgba: ${homeButtonColor};
+      --rlm-dock-rgba: ${dockColor};
+      --rlm-base-rgba: ${baseColor};
+      --rlm-accent-rgba: ${accentColor};
+      --rlm-input-rgba: ${inputColor};
+      --rlm-border-rgba: ${borderColor};
+      --rlm-window-rgba: ${windowColor};
+      --rlm-window-bg-rgba: ${windowBgColor};
+      --rlm-card-rgba: ${cardColor};
+      --rlm-text-rgba: ${textColor};
+      --rlm-icon-rgba: ${iconColor};
+      --rlm-mouse-rgba: ${mouseColor};
+      --rlm-intent-alert-rgba: ${intentAlertColor};
+      --rlm-intent-caution-rgba: ${intentCautionColor};
+      --rlm-intent-success-rgba: ${intentSuccessColor};
+      --rlm-overlay-hover-rgba: ${overlayHoverColor};
+      --rlm-overlay-active-rgba: ${overlayActiveColor};
+    }
+  `;
 };
 
 export const DEFAULT_WALLPAPER =
@@ -144,9 +184,9 @@ export const ThemeStore = types
       self.currentTheme = Theme.create(theme);
       return self.currentTheme;
     },
-    // setCurrentSpaceTheme(spaceId: string, theme?: ThemeType) {
+    // setCurrentSpaceTheme(spaceId: string,theme?: ThemeType) {
     //   if (theme) {
-    //     self.spaces.set(spaceId, theme);
+    //     self.spaces.set(spaceId,theme);
     //   }
     //   self.currentTheme = self.spaces.get(spaceId);
     //   return self.currentTheme;
@@ -166,11 +206,11 @@ export const ThemeStore = types
       yield DesktopActions.changeWallpaper(id, toJS(theme));
       return self.currentTheme;
       //   // if (config.patp) {
-      //   //   self.ships.set(themeId, theme);
+      //   //   self.ships.set(themeId,theme);
       //   //   self.currentTheme = self.ships.get(themeId);
       //   // }
       //   // if (config.spaceId) {
-      //   //   self.spaces.set(themeId, theme);
+      //   //   self.spaces.set(themeId,theme);
       //   //   self.currentTheme = self.ships.get(themeId);
       //   // }
     }),

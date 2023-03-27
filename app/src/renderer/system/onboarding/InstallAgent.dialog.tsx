@@ -11,8 +11,8 @@ import {
   Box,
   Icon,
   Spinner,
+  useToggle,
 } from '@holium/design-system';
-import { useToggle } from '@holium/shared';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();

@@ -1,7 +1,5 @@
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-import { getVar } from '../../util/colors';
 
 export const RadioLabelContainer = styled(motion.div)<{ hasIcon: boolean }>`
   position: relative;
@@ -22,11 +20,12 @@ export const RadioLabel = styled(motion.label)<{ isSelected?: boolean }>`
   ${({ isSelected }) =>
     isSelected
       ? css`
-          color: var(--rlm-accent-color);
+          color: rgba(var(--rlm-accent-rgba));
         `
       : css`
-          color: var(--rlm-text-color);
-          background-color: ${darken(0.015, getVar('window'))};
+          color: rgba(var(--rlm-text-rgba));
+          background-color: rgba(var(--rlm-window-rgba));
+          filter: brightness(0.98);
         `}
 `;
 
@@ -41,9 +40,10 @@ export const RadioHighlight = styled(motion.label)<{ isSelected?: boolean }>`
   ${({ isSelected }) =>
     isSelected
       ? css`
-          background-color: ${rgba(getVar('accent'), 0.12)};
+          background-color: rgba(var(--rlm-accent-rgba), 0.12);
         `
       : css`
-          background-color: ${darken(0.015, getVar('window'))};
+          background-color: rgba(var(--rlm-window-rgba));
+          filter: brightness(0.98);
         `}
 `;

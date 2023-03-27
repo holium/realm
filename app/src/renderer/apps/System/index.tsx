@@ -65,7 +65,6 @@ const SystemAppPresenter = () => {
 
         {/* <Flex width={'100%'}>
             <Input
-            className="realm-cursor-text-cursor"
             type="text"
             placeholder="Search settings..."
             wrapperStyle={{

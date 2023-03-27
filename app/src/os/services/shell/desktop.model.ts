@@ -1,5 +1,5 @@
 import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
-import { Dimensions } from '@holium/shared';
+import { Dimensions } from '@holium/design-system';
 import { AppType, Glob } from '../spaces/models/bazaar';
 import { toJS } from 'mobx';
 import {

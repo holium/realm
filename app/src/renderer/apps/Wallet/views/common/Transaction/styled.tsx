@@ -1,11 +1,9 @@
 import styled from 'styled-components';
 import { Flex } from 'renderer/components';
 
-/* @ts-expect-error */
-export const ContainerFlex = styled(Flex)<ContainerFlexProps>`
-  background-color: var(--rlm-input-color);
+export const ContainerFlex = styled(Flex)<{ focusBorder: string }>`
+  background-color: rgba(var(--rlm-input-rgba));
   :focus-within {
-    /* @ts-ignore */
     border: 1px solid ${(props) => props.focusBorder};
   }
 `;

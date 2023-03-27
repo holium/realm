@@ -144,7 +144,6 @@ const SetPasswordPresenterView = ({
                 name="password"
                 type="password"
                 placeholder="Must have at least 8 characters"
-                className="realm-cursor-text-cursor"
                 width="100%"
                 error={
                   password.computed.ifWasEverBlurredThenError &&
@@ -167,7 +166,6 @@ const SetPasswordPresenterView = ({
                 name="confirm-password"
                 type="password"
                 placeholder="Must match"
-                className="realm-cursor-text-cursor"
                 width="100%"
                 error={
                   confirmPassword.computed.ifWasEverBlurredThenError &&

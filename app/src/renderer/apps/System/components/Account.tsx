@@ -8,8 +8,8 @@ import {
   RadioGroup,
   Spinner,
   TextInput,
+  useToggle,
 } from '@holium/design-system';
-import { useToggle } from '@holium/shared';
 import {
   Text,
   Card,
@@ -141,7 +141,6 @@ const AccountPanelPresenter = () => {
               <TextInput
                 id="account-nickname"
                 name="account-nickname"
-                className="realm-cursor-text-cursor"
                 width="100%"
                 type="text"
                 placeholder="(none)"

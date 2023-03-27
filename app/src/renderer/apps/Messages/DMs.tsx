@@ -152,7 +152,6 @@ const DMsPresenter = (props: IProps) => {
           <TextInput
             id="dm-search"
             name="dm-search"
-            className="realm-cursor-text-cursor"
             type="text"
             height={30}
             width="100%"

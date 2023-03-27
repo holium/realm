@@ -16,8 +16,6 @@ const Wrapper = styled(Box)`
   padding: 12px;
   height: 50px;
   width: calc(100% + 24px);
-  /* background-color: var(--rlm-window-bg); */
-  /* backdrop-filter: blur(24px); */
   display: ${(props) => (props.hidden ? 'none' : 'block')};
 `;
 

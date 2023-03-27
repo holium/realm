@@ -1,4 +1,4 @@
-import { Box } from '@holium/design-system';
+import { Box, Position } from '@holium/design-system';
 import { AnimatePresence } from 'framer-motion';
 import {
   createContext,
@@ -10,7 +10,6 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { Menu } from '../Menu';
 import { PassportCard } from './PassportCard';
-import { Position } from '@holium/shared';
 
 type PassportMenuOptions = {
   patp: string;

@@ -277,7 +277,6 @@ const ThemePanelPresenterView = ({
           Custom
         </Text>
         <Input
-          className="realm-cursor-text-cursor"
           type="text"
           placeholder="Paste url here"
           wrapperStyle={{
