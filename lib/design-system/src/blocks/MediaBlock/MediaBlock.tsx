@@ -1,6 +1,6 @@
 import { FC, useMemo, useState } from 'react';
 import Spotify from 'react-spotify-embed';
-import ReactPlayer from 'react-player/lazy';
+import ReactPlayer from 'react-player';
 import { Flex, Icon, isSpotifyLink, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import styled from 'styled-components';
@@ -92,7 +92,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
                 attributes: {
                   id: rest.id,
                   controlsList: 'nodownload noplaybackrate',
-                  disablepictureinpicture: 'true',
+                  disablePictureInPicture: 'true',
                   'x-webkit-airplay': 'allow',
                 },
               },

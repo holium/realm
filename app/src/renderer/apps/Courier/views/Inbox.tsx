@@ -15,7 +15,7 @@ import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
 import { useServices } from 'renderer/logic/store';
-
+const rowHeight = 52;
 export const InboxPresenter = () => {
   const { ship } = useServices();
   const { dimensions } = useTrayApps();
@@ -64,7 +64,7 @@ export const InboxPresenter = () => {
             name="dm-search"
             width="100%"
             borderRadius={16}
-            height={34}
+            height={32}
             placeholder="Search"
             onChange={(evt: any) => {
               evt.stopPropagation();
@@ -111,7 +111,7 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box width={dimensions.width - 24}>
+          <Box height={544} width={dimensions.width - 24}>
             <Flex
               style={{
                 background: 'rgba(0,0,0,0.03)',
@@ -126,11 +126,12 @@ export const InboxPresenter = () => {
                   <Box
                     key={`${window.ship}-${chat.path}-pinned`}
                     zIndex={2}
-                    height={52}
+                    height={rowHeight}
                     alignItems="center"
                     layoutId={`chat-${chat.path}-container`}
                   >
                     <ChatRow
+                      height={rowHeight}
                       path={chat.path}
                       title={chat.metadata.title}
                       isAdmin={isAdmin}
@@ -152,7 +153,7 @@ export const InboxPresenter = () => {
             <WindowedList
               width={listWidth}
               height={listHeight}
-              rowHeight={52}
+              rowHeight={rowHeight}
               data={unpinnedChatList}
               filter={searchFilter}
               rowRenderer={(chat) => {
@@ -164,13 +165,14 @@ export const InboxPresenter = () => {
                     zIndex={2}
                     layout="preserve-aspect"
                     alignItems="center"
-                    height={52}
+                    height={rowHeight}
                     layoutId={`chat-${chat.path}-container`}
                   >
                     <ChatRow
+                      height={rowHeight}
                       path={chat.path}
                       title={chat.metadata.title}
-                      peers={chat.peers}
+                      peers={chat.peers.map((peer) => peer.ship)}
                       isAdmin={isAdmin}
                       type={chat.type}
                       timestamp={chat.createdAt || chat.metadata.timestamp}

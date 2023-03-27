@@ -182,8 +182,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               {expiresAt && (
                 // TODO tooltip with time remaining
                 <Icon
+                  mb="1px"
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.25 }}
+                  animate={{ opacity: 0.35 }}
                   transition={{ opacity: 0.2 }}
                   name="ClockSlash"
                   size={12}

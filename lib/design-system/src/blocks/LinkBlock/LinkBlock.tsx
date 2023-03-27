@@ -151,12 +151,14 @@ export const LinkBlock = ({
       // convert rem to px
       else rest.height = parseInt(rest.height.replace('rem', '')) * 16;
     }
+    const width = containerWidth ? containerWidth * 0.9 : 320;
     return (
       <MediaBlock
         id={`media-${link}`}
         mode="embed"
+        variant="content"
         url={link}
-        width={rest.width as number}
+        width={width as number}
         height={rest.height as number}
         onLoaded={onLinkLoaded}
       />

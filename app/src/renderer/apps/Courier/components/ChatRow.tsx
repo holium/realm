@@ -27,6 +27,7 @@ type ChatRowProps = {
   timestamp: number;
   type: ChatPathType;
   peersGetBacklog: boolean;
+  height: number;
   onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
 };
 
@@ -37,6 +38,7 @@ export const ChatRowPresenter = ({
   isAdmin,
   type,
   metadata,
+  height,
   onClick,
 }: ChatRowProps) => {
   const { ship } = useServices();
@@ -194,6 +196,7 @@ export const ChatRowPresenter = ({
   return (
     <Row
       id={chatRowId}
+      height={height}
       onClick={(evt: any) => {
         if (!contextMenuButtonIds.includes(evt.target.id)) {
           onClick(evt);
