@@ -16,6 +16,7 @@ export type BubbleProps = {
   id: string;
   author: string;
   authorColor?: string;
+  authorNickname?: string;
   isEdited?: boolean;
   isEditing?: boolean;
   expiresAt?: number | null;
@@ -38,6 +39,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     const {
       id,
       author,
+      authorNickname,
       isOur,
       ourColor,
       ourShip,
@@ -78,8 +80,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const fragments = useMemo(() => {
       if (!message) return [];
-
-      // console.log(id, 'rerendering fragments');
 
       return message?.map((fragment, index) => {
         // if the previous fragment was a link or a code block, we need to add a space
@@ -154,7 +154,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               }}
               authorColor={authorColor}
             >
-              {author}
+              {authorNickname || author}
             </BubbleAuthor>
           )}
           <FragmentBlock id={id}>{fragments}</FragmentBlock>
@@ -178,16 +178,15 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               justifyContent="flex-end"
               minWidth={minBubbleWidth}
               flexBasis={minBubbleWidth}
-              opacity={0.35}
             >
               {expiresAt && (
                 // TODO tooltip with time remaining
                 <Icon
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={{ opacity: 0.25 }}
                   transition={{ opacity: 0.2 }}
                   name="ClockSlash"
-                  size={14}
+                  size={12}
                 />
               )}
               <Text.Custom
@@ -197,6 +196,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                 display="inline-flex"
                 alignItems="flex-end"
                 justifyContent="flex-end"
+                opacity={0.35}
               >
                 {isEditing && 'Editing... · '}
                 {isEdited && !isEditing && 'Edited · '}

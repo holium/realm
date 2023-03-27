@@ -368,47 +368,49 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         </Box>
         {!isDMType && (
           <>
-            <Flex py={1} width="100%" px={1}>
-              <TextInput
-                id="new-chat-patp-search"
-                name="new-chat-patp-search"
-                tabIndex={1}
-                mx={2}
-                width="100%"
-                className="realm-cursor-text-cursor"
-                placeholder="Add someone?"
-                value={person.state.value}
-                height={34}
-                onKeyDown={(evt: any) => {
-                  if (evt.key === 'Enter' && person.computed.parsed) {
-                    onShipSelected([person.computed.parsed, '']);
+            <Flex position="relative" width="100%">
+              <Flex py={1} width="100%" px={1}>
+                <TextInput
+                  id="new-chat-patp-search"
+                  name="new-chat-patp-search"
+                  tabIndex={1}
+                  mx={2}
+                  width="100%"
+                  className="realm-cursor-text-cursor"
+                  placeholder="Add someone?"
+                  value={person.state.value}
+                  height={34}
+                  onKeyDown={(evt: any) => {
+                    if (evt.key === 'Enter' && person.computed.parsed) {
+                      onShipSelected([person.computed.parsed, '']);
+                      person.actions.onChange('');
+                    }
+                  }}
+                  onChange={(e: any) => {
+                    person.actions.onChange(e.target.value);
+                  }}
+                  onFocus={() => {
+                    person.actions.onFocus();
+                  }}
+                  onBlur={() => {
+                    person.actions.onBlur();
+                  }}
+                  // onFocus={() => urbitId.actions.onFocus()}
+                  // onBlur={() => urbitId.actions.onBlur()}
+                  // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
+                />
+              </Flex>
+              <Flex px={2}>
+                <ShipSearch
+                  isDropdown
+                  search={person.state.value}
+                  selected={selectedPatp}
+                  onSelected={(contact: any) => {
+                    onShipSelected(contact);
                     person.actions.onChange('');
-                  }
-                }}
-                onChange={(e: any) => {
-                  person.actions.onChange(e.target.value);
-                }}
-                onFocus={() => {
-                  person.actions.onFocus();
-                }}
-                onBlur={() => {
-                  person.actions.onBlur();
-                }}
-                // onFocus={() => urbitId.actions.onFocus()}
-                // onBlur={() => urbitId.actions.onBlur()}
-                // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
-              />
-            </Flex>
-            <Flex px={3}>
-              <ShipSearch
-                isDropdown
-                search={person.state.value}
-                selected={selectedPatp}
-                onSelected={(contact: any) => {
-                  onShipSelected(contact);
-                  person.actions.onChange('');
-                }}
-              />
+                  }}
+                />
+              </Flex>
             </Flex>
           </>
         )}

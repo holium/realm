@@ -19,7 +19,10 @@ export const Default: ComponentStory<typeof Reactions> = () => {
   window.ship = isOurPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { by: isOurPatp, emoji: payload.emoji }]);
+      setReacts([
+        ...reacts,
+        { msgId: '1', by: isOurPatp, emoji: payload.emoji },
+      ]);
     } else {
       const removeIdx = reacts.findIndex(
         (r) => r.emoji === payload.emoji && r.by === isOurPatp

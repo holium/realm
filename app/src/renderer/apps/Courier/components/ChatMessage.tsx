@@ -52,7 +52,7 @@ export const ChatMessagePresenter = ({
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
-  const { color: authorColor } = useMemo(() => {
+  const { color: authorColor, nickname: authorNickname } = useMemo(() => {
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
 
@@ -181,6 +181,7 @@ export const ChatMessagePresenter = ({
       isEditing={selectedChat?.isEditing(message.id)}
       isEdited={hasEdited}
       author={message.sender}
+      authorNickname={authorNickname}
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}
       sentAt={sentAt}
