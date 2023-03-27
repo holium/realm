@@ -27,7 +27,7 @@ export type ShipCredentials = {
  */
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
-  private themeDb;
+  private themeDb: Store<Record<string, ThemeType>>;
   private readonly state: AuthStoreType;
 
   handlers = {
@@ -274,6 +274,7 @@ export class AuthService extends BaseService {
   }
 
   getShipTheme(_event: any, patp: string) {
+    // @ts-ignore
     return this.themeDb.get(patp, defaultTheme);
   }
 
