@@ -5,10 +5,6 @@
 ::
 :: helpers
 ::
-++  remove-notif-from-table
-  |=  [tbl=notifs-table:sur =id:sur]
-  +:(del:notifon:sur tbl id)
-::
 ++  mark-row-unread
   |=  [r=notif-row:sur t=@da]
   =.  read.r        %.n
@@ -220,7 +216,8 @@
 ::  :notif-db &notif-db-poke [%delete 0]
   |=  [=id:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =.  notifs-table.state  (remove-notif-from-table notifs-table.state id)
+  =.  notifs-table.state  +:(del:notifon:sur notifs-table.state id)
+  =.  del-log.state       (put:delon:sur del-log.state now.bowl [%del-row id])
   =/  thechange  notif-db-change+!>((limo [[%del-row id] ~]))
   =/  gives  :~
     [%give %fact [/db ~] thechange]
@@ -301,6 +298,18 @@
 ++  encode
   =,  enjs:format
   |%
+    ++  del-log
+      |=  log=del-log:sur
+      ^-  json
+      :-  %a
+      %+  turn  (tap:delon:sur log)
+      |=  [k=@da v=db-change-type:sur]
+      %-  pairs
+      :~
+        ['timestamp' (time k)]
+        ['change' (individual-change v)]
+      ==
+    ::
     ++  notifs
       |=  rows=(list notif-row:sur)
       ^-  json

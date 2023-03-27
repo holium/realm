@@ -13,7 +13,7 @@
   ++  on-init
     ^-  (quip card _this)
     =/  default-state=state-0
-      [%0 0 *notifs-table:sur]
+      [%0 0 *notifs-table:sur *del-log:sur]
     `this(state default-state)
   ++  on-save   !>(state)
   ++  on-load
@@ -137,6 +137,10 @@
             (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] |((gth created-at.v ms) (gth updated-at.v ms))))
           val-r:core
         ``notif-rows+!>(new-rows)
+    ::
+      [%x %delete-log %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        ``notif-del-log+!>((lot:delon:sur del-log.state ~ `timestamp))
     ==
   :: notif-db does not subscribe to anything.
   :: notif-db does not care
