@@ -8,7 +8,6 @@
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.prod.ts && electron-rebuild better-sqlite3",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
-    "rebuild:sqlite3": "electron-rebuild better-sqlite3",
     "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
     "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
     "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish never",

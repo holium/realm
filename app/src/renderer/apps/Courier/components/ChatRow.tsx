@@ -37,7 +37,6 @@ export const ChatRowPresenter = ({
   isAdmin,
   type,
   metadata,
-  muted,
   onClick,
 }: ChatRowProps) => {
   const { ship, friends } = useServices();
@@ -47,6 +46,7 @@ export const ChatRowPresenter = ({
     setSubroute,
     setChat,
     isChatPinned,
+    isChatMuted,
     togglePinned,
     toggleMuted,
   } = useChatStore();
@@ -57,7 +57,7 @@ export const ChatRowPresenter = ({
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
-  const isMuted = muted;
+  const isMuted = isChatMuted(path);
 
   const contextMenuOptions = useMemo(() => {
     if (!ship) return [];

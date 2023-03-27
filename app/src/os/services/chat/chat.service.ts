@@ -208,6 +208,14 @@ export class ChatService extends BaseService {
     return response;
   }
 
+  async fetchPinnedChats() {
+    const response = await this.core.conduit?.scry({
+      app: 'realm-chat',
+      path: '/pins',
+    });
+    return response;
+  }
+
   async fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     const response = await this.core.conduit?.scry({
@@ -659,7 +667,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%' AND content_type != 'react'
+                WHERE path LIKE '%realm-chat%' AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -731,16 +739,18 @@ export class ChatService extends BaseService {
     const result = query.all(`~${this.core.conduit?.ship}`, path);
 
     const rows = result.map((row) => {
+      const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
+      if (lastMessage && lastMessage.contents) {
+        lastMessage.contents = JSON.parse(lastMessage.contents).map(
+          (message: any) => message && JSON.parse(message)
+        );
+      }
       return {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? parseMetadata(row.metadata) : null,
-        lastMessage: row.lastMessage
-          ? JSON.parse(row.lastMessage).map(
-              (message: any) => message && JSON.parse(message)
-            )
-          : null,
+        lastMessage,
       };
     });
     if (rows.length === 0) return null;
@@ -769,6 +779,7 @@ export class ChatService extends BaseService {
             realm_chat.sender,
             realm_chat.created_at,
             realm_chat.updated_at,
+            realm_chat.expires_at,
             realm_chat.reply_to,
             realm_chat.metadata
         FROM realm_chat
@@ -804,7 +815,8 @@ export class ChatService extends BaseService {
               WHEN reactions.reacts IS NULL THEN NULL
           END reactions,
           MAX(formed_fragments.created_at) createdAt,
-          MAX(formed_fragments.updated_at) updatedAt
+          MAX(formed_fragments.updated_at) updatedAt,
+          MAX(formed_fragments.expires_at) expiresAt
         FROM formed_fragments
         LEFT OUTER JOIN reactions ON reactions.reply_msg_id = formed_fragments.msg_id
         GROUP BY formed_fragments.msg_id
@@ -843,7 +855,8 @@ export class ChatService extends BaseService {
         json_extract(reply_to, '$."path"') replyToMsgPath,
         json_extract(reply_to, '$."msg-id"') replyToMsgId,
         MAX(created_at) as createdAt,
-        MAX(updated_at) as updatedAt
+        MAX(updated_at) as updatedAt,
+        MAX(expires_at) as expiresAt
       FROM (SELECT path,
                   msg_id,
                   content_type,
@@ -852,7 +865,8 @@ export class ChatService extends BaseService {
                   reply_to,
                   sender,
                   created_at,
-                  updated_at
+                  updated_at,
+                  expires_at
             FROM messages
             WHERE msg_id = ?
             ORDER BY msg_id, msg_part_id)
@@ -1089,14 +1103,6 @@ export class ChatService extends BaseService {
   //   if (!this.core.conduit) throw new Error('No conduit connection');
   //   // this.core.conduit.readChat(path);
   // }
-
-  async fetchPinnedChats() {
-    const response = await this.core.conduit?.scry({
-      app: 'realm-chat',
-      path: '/pins',
-    });
-    return response;
-  }
 
   async togglePinnedChat(_evt: any, path: string, pinned: boolean) {
     if (!this.core.conduit) throw new Error('No conduit connection');

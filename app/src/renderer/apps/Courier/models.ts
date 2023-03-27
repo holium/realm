@@ -131,6 +131,7 @@ export const ChatMessage = types
     metadata: types.optional(types.frozen(), {}),
     createdAt: types.number,
     updatedAt: types.number,
+    expiresAt: types.maybeNull(types.number),
     reactions: types.optional(types.array(ReactionModel), []),
     // ui state
     pending: types.optional(types.boolean, false),

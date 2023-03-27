@@ -22,8 +22,7 @@ const TweetWrapper = styled(BlockStyle)<TweetWrapperProps>`
     css`
       ${skeletonStyle}
       border-radius: 12px;
-      min-width: 392px;
-      width: calc(100% - 8px) !important;
+      min-width: 320px;
       height: calc(100% - 8px) !important;
       padding: 4px;
       min-height: 250px;

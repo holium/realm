@@ -164,7 +164,7 @@ export const ShipBarPresenter = () => {
   return (
     <BarStyle
       id={id}
-      pl="6px"
+      pl="3px"
       pr="6px"
       flexDirection="column"
       justifyContent="flex-end"
@@ -220,14 +220,14 @@ export const ShipBarPresenter = () => {
             >
               <NotificationList
                 justifyContent="flex-end"
-                appLookup={(app) => {
+                appLookup={(app: string) => {
                   return apps[app];
                 }}
-                onDismiss={(app, path, id) => {
+                onDismiss={(app: string, path: string, id: number) => {
                   console.log(`dismissed - ${app} ${path} ${id}`);
                   dismissOne(id);
                 }}
-                onDismissAll={(app, path) => {
+                onDismissAll={(app: string, path?: string) => {
                   if (path) {
                     dismissPath(app, path);
                   } else {

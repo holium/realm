@@ -173,6 +173,7 @@ export const ChatMessagePresenter = ({
       id={messageRowId}
       isPrevGrouped={isPrevGrouped}
       isNextGrouped={isNextGrouped}
+      expiresAt={message.expiresAt}
       containerWidth={containerWidth}
       isOur={isOur}
       ourShip={ship?.patp}
@@ -185,7 +186,7 @@ export const ChatMessagePresenter = ({
       sentAt={sentAt}
       onLoad={measure}
       reactions={reactionList}
-      onReaction={canReact ? onReaction : undefined}
+      onReaction={canReact && !isOur ? onReaction : undefined}
     />
   );
 };

@@ -29,6 +29,9 @@ const ChatStore = types
     isChatPinned(path: string) {
       return self.pinnedChats.includes(path);
     },
+    isChatMuted(path: string) {
+      return self.inbox.find((c) => path === c.path)?.muted || false;
+    },
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
@@ -58,6 +61,8 @@ const ChatStore = types
       try {
         self.inbox = yield ChatDBActions.getChatList();
         const pinnedChats = yield ChatDBActions.fetchPinnedChats();
+        localStorage.setItem('pinnedChats', JSON.stringify(pinnedChats));
+
         const muted = yield ChatDBActions.fetchMutedChats();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
@@ -97,6 +102,7 @@ const ChatStore = types
           self.pinnedChats.remove(path);
         }
         yield ChatDBActions.togglePinnedChat(path, pinned);
+        localStorage.setItem('pinnedChats', JSON.stringify(self.pinnedChats));
         return self.pinnedChats;
       } catch (error) {
         console.error(error);
@@ -167,9 +173,14 @@ const ChatStore = types
     },
   }));
 
+// -------------------------------
+// TODO Write a caching layer for the inbox
+const pinnedChats = localStorage.getItem('pinnedChats');
+
 export const chatStore = ChatStore.create({
   subroute: 'inbox',
   isOpen: false,
+  pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
 });
 
 // -------------------------------

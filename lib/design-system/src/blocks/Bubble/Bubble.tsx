@@ -1,5 +1,5 @@
 import { forwardRef, useMemo } from 'react';
-import { Flex, Text, BoxProps, Box, convertDarkText } from '../..';
+import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
@@ -18,6 +18,7 @@ export type BubbleProps = {
   authorColor?: string;
   isEdited?: boolean;
   isEditing?: boolean;
+  expiresAt?: number | null;
   sentAt: string;
   isOur?: boolean;
   ourShip?: string;
@@ -49,6 +50,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       reactions = [],
       isPrevGrouped,
       isNextGrouped,
+      expiresAt,
       onLoaded,
       onReaction,
       // onReplyClick = () => {},
@@ -169,22 +171,38 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                 />
               )}
             </Box>
-            <Text.Custom
+            <Flex
               width="30%"
-              style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-              pointerEvents="none"
-              textAlign="right"
-              display="inline-flex"
+              gap={4}
               alignItems="flex-end"
               justifyContent="flex-end"
               minWidth={minBubbleWidth}
               flexBasis={minBubbleWidth}
               opacity={0.35}
             >
-              {isEditing && 'Editing... · '}
-              {isEdited && !isEditing && 'Edited · '}
-              {dateDisplay}
-            </Text.Custom>
+              {expiresAt && (
+                // TODO tooltip with time remaining
+                <Icon
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ opacity: 0.2 }}
+                  name="ClockSlash"
+                  size={14}
+                />
+              )}
+              <Text.Custom
+                style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+                pointerEvents="none"
+                textAlign="right"
+                display="inline-flex"
+                alignItems="flex-end"
+                justifyContent="flex-end"
+              >
+                {isEditing && 'Editing... · '}
+                {isEdited && !isEditing && 'Edited · '}
+                {dateDisplay}
+              </Text.Custom>
+            </Flex>
           </BubbleFooter>
         </BubbleStyle>
       </Flex>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Box, BoxProps } from '../..';
+import { Text, Box, BoxProps, Icon } from '../..';
 import { BlockStyle } from '../../blocks/Block/Block';
 import {
   FragmentBlockquote,
@@ -52,6 +52,9 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
     }} !important;
 
     ${Text.Custom} {
+      color: #ffffff !important;
+    }
+    ${Icon} {
       color: #ffffff !important;
     }
     ${FragmentBlockquote} {
