@@ -78,10 +78,10 @@ export class AuthService extends BaseService {
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
     ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
-    setShipTheme: async (patp: string, theme: ThemeType) =>
-      await ipcRenderer.invoke('realm.auth.set-ship-theme', patp, theme),
-    getShipTheme: async (patp: string) =>
-      await ipcRenderer.invoke('realm.auth.get-ship-theme', patp),
+    setShipTheme: (patp: string, theme: ThemeType) =>
+      ipcRenderer.invoke('realm.auth.set-ship-theme', patp, theme),
+    getShipTheme: (patp: string) =>
+      ipcRenderer.invoke('realm.auth.get-ship-theme', patp),
     setEmail: async (email: string) =>
       await ipcRenderer.invoke('realm.auth.set-email', email),
     changeEmail: async (
