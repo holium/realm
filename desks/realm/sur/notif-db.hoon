@@ -73,5 +73,6 @@
     [%del-row =id]
   ==
 +$  db-change  (list db-change-type)
-
++$  del-log  ((mop time db-change-type) gth)
+++  delon  ((on time db-change-type) gth)
 --

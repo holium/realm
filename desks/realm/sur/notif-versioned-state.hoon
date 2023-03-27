@@ -8,5 +8,6 @@
   $:  %0
       next=@ud
       =notifs-table
+      =del-log
   ==
 --
