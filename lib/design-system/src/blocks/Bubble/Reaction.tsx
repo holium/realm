@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { Flex, Box, Icon, Text, Menu } from '../..';
 import EmojiPicker, {
@@ -84,7 +83,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   box-shadow: ${({ selected }) =>
     selected
       ? 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.1)'
-    : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
+      : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
 
   /* TODO merged from master */
   /* background: ${({ selected }) =>
@@ -189,13 +188,8 @@ export const Reactions = (props: ReactionProps) => {
     reactions = [],
     onReaction,
   } = props;
-<<<<<<< HEAD
   const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
   const reactIds = reactions.map((r) => r.msgId);
-=======
-  const [isReacting, setIsReacting] = useState<boolean>(false);
-  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
->>>>>>> master
 
   const reactionsAggregated = useMemo(() => {
     if (reactions.length === 0) {

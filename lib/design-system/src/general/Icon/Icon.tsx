@@ -26,6 +26,7 @@ export type IconProps = BoxProps &
   WidthProps &
   HeightProps & {
     fill?: ColorVariants;
+    iconColor?: string;
   };
 
 const SvgComponent = forwardRef<
@@ -33,9 +34,10 @@ const SvgComponent = forwardRef<
   SVGMotionProps<SVGSVGElement> & {
     name: IconPathsType;
     title?: string;
+    iconColor?: string;
     onClick?: () => void;
   }
->(({ title, name, width, height, onClick, ...rest }, svgRef) => {
+>(({ title, name, width, height, onClick, iconColor, ...rest }, svgRef) => {
   const [titleId] = useState(() => (title ? uuid() : undefined));
 
   return (
@@ -49,6 +51,7 @@ const SvgComponent = forwardRef<
       pointerEvents="none"
       onClick={onClick}
       {...rest}
+      fill={iconColor}
     >
       {title ? <title id={titleId}>{title}</title> : null}
       {/* @ts-ignore */}
@@ -63,6 +66,7 @@ export const Icon = styled(SvgComponent)<IconProps>`
   flex: none;
   vertical-align: middle;
   fill: ${({ fill = 'icon' }) => `rgba(var(--rlm-${fill}-rgba))`};
+  ${({ iconColor }) => iconColor && `fill: ${iconColor}`};
   ${compose(space, color, width, height, layout, typography)};
 `;
 

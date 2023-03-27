@@ -1,14 +1,5 @@
 import styled from 'styled-components';
-import { rgba } from 'polished';
-import {
-  timelineDate,
-  Flex,
-  Text,
-  getVar,
-  Button,
-  Icon,
-  FlexProps,
-} from '../../';
+import { timelineDate, Flex, Text, Button, Icon, FlexProps } from '../../';
 import {
   NotificationButtonType,
   NotificationType,
@@ -219,12 +210,12 @@ const NotifRow = styled(Flex)<NotifRowProps>`
     props.isGrouped
       ? 'transparent'
       : props.hasRead
-      ? rgba(getVar('card'), 0.7)
-      : rgba(getVar('accent'), 0.08)};
+      ? 'rgba(var(--rlm-card-rgba), 0.7)'
+      : 'rgba(var(--rlm-accent-rgba), 0.08)'};
   transition: var(--transition);
   &:hover {
     transition: var(--transition);
-    background-color: ${(props) => props.canHover && 'rgba(0, 0, 0, 0.06)'};
+    background: ${(props) => props.canHover && 'rgba(0, 0, 0, 0.06)'};
     cursor: pointer;
     .notification-date {
       opacity: 0;

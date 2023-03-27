@@ -16,11 +16,12 @@ type StyledBoxProps = {
 
 const StyledBox = styled(Box)<StyledBoxProps>`
   position: relative;
-  border-radius: var(--rlm-border-radius-6);
+  /* border-radius: var(--rlm-border-radius-6); */
   border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: rgba(var(--rlm-input-rgba));
   min-height: 32px;
   box-sizing: content-box;
+  overflow: hidden;
 
   ${(props) =>
     props.shouldHighlightOnFocus &&
@@ -41,7 +42,7 @@ const StyledBox = styled(Box)<StyledBoxProps>`
     font-size: ${(props) =>
       `${props.fontSize ? props.fontSize.toString().replace('px', '') : 14}px`};
     text-align: ${(props) => (props.textAlign ? props.textAlign : 'left')};
-    border-radius: var(--rlm-border-radius-4);
+    /* border-radius: var(--rlm-border-radius-4); */
     background-color: rgba(var(--rlm-input-rgba));
     color: rgba(var(--rlm-text-rgba));
     pointer-events: all;

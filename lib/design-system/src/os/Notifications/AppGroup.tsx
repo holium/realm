@@ -2,7 +2,6 @@ import {
   Flex,
   BoxProps,
   FlexProps,
-  getVar,
   Text,
   Button,
   Icon,
@@ -10,7 +9,6 @@ import {
   NoScrollBar,
 } from '../../';
 import styled from 'styled-components';
-import { rgba } from 'polished';
 import { NotificationType } from './Notifications.types';
 import { NotifAppRow, Notification } from './Notification';
 import { useState } from 'react';
@@ -134,23 +132,25 @@ export const AppGroup = ({
                     </Text.Custom>
                   </Flex>
                   <Flex flexDirection="row" alignItems="center">
-                    <Button.IconButton
-                      size={24}
-                      mr={1}
-                      onClick={(evt) => {
-                        evt.stopPropagation();
-                        setPathExpandMap({
-                          ...pathExpandMap,
-                          [notifs[0].path]: !isExpanded,
-                        });
-                      }}
-                    >
-                      <Icon
-                        name={isExpanded ? 'ArrowUp' : 'ArrowDown'}
-                        size={20}
-                        opacity={0.3}
-                      />
-                    </Button.IconButton>
+                    {notifs.length > 1 && (
+                      <Button.IconButton
+                        size={24}
+                        mr={1}
+                        onClick={(evt) => {
+                          evt.stopPropagation();
+                          setPathExpandMap({
+                            ...pathExpandMap,
+                            [notifs[0].path]: !isExpanded,
+                          });
+                        }}
+                      >
+                        <Icon
+                          name={isExpanded ? 'ArrowUp' : 'ArrowDown'}
+                          size={20}
+                          opacity={0.3}
+                        />
+                      </Button.IconButton>
+                    )}
                     <Button.IconButton
                       size={24}
                       mr={1}
@@ -222,7 +222,7 @@ const AppGroupContainer = styled(Flex)<AppGroupContainerProps>`
   padding: 6px;
   color: var(--rlm-text-color);
   border-radius: var(--rlm-border-radius-6);
-  background: ${() => rgba(getVar('card'), 0.7)};
+  background: rgba(var(--rlm-card-rgba), 0.7);
   transition: var(--transition);
 `;
 

@@ -170,7 +170,7 @@ export const InboxPresenter = () => {
                     <ChatRow
                       path={chat.path}
                       title={chat.metadata.title}
-                      peers={chat.peers.map((peer) => peer.ship)}
+                      peers={chat.peers}
                       isAdmin={isAdmin}
                       type={chat.type}
                       timestamp={chat.createdAt || chat.metadata.timestamp}

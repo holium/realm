@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 export { CellMeasurer } from './WindowedList/source/CellMeasurer/CellMeasurer';
 export * from './Anchor/Anchor';
 export * from './Avatar/Avatar';

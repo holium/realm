@@ -194,9 +194,9 @@ export const ShipBarPresenter = () => {
           <Flex
             flexDirection="column"
             minHeight={minHeight - 40}
-            pt="6px"
+            pt="8px"
             pb="6px"
-            pl="0px"
+            pl="3px"
             gap={10}
             width={width - 12}
             justifyContent="flex-end"
@@ -216,7 +216,7 @@ export const ShipBarPresenter = () => {
               justifyContent="flex-start"
               overflowY="auto"
               overflowX="hidden"
-              width={width - 12}
+              width={width - 15}
             >
               <NotificationList
                 justifyContent="flex-end"
@@ -247,7 +247,7 @@ export const ShipBarPresenter = () => {
                   }
                 }}
                 onLinkClick={onNotifLinkClick}
-                containerWidth={width - 12}
+                containerWidth={width - 15}
                 notifications={undismissedNotifications as NotificationType[]}
               />
             </NoScrollBar>

@@ -55,7 +55,8 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
       color: #ffffff !important;
     }
     ${Icon} {
-      color: #ffffff !important;
+      line-height: 1.1;
+      fill: #ffffff !important;
     }
     ${FragmentBlockquote} {
       color: #ffffff;
