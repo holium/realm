@@ -73,7 +73,7 @@
 ::  poke actions
 ::
 ++  create
-:: :notif-db &notif-db-poke [%create %chat-db /realm-chat/path-id %message 'Title' 'the message' '' ~ '' ~]
+:: :notif-db &notif-db-poke [%create %chat-db /realm-chat/path-id %message 'Title' 'the message' '' ~ '' ~ %.n]
   |=  [act=create-action:sur state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  row=notif-row:sur  [
@@ -91,8 +91,8 @@
     now.bowl
     *@da
     %.n
-    *@da
-    %.n
+    ?:(dismissed.act now.bowl *@da)
+    dismissed.act
   ]
   =.  notifs-table.state  (put:notifon:sur notifs-table.state next.state row)
   =.  next.state          +(next.state)
@@ -265,6 +265,7 @@
           [%buttons (ar button)]
           [%link so]
           [%metadata (om so)]
+          [%dismissed bo]
       ==
     ::
     ++  button

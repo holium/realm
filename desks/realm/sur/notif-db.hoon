@@ -63,6 +63,7 @@
       buttons=(list button)
       link=@t      :: the place to redirect to when user clicks on the notification
       =metadata
+      dismissed=?
   ==
 ::
 +$  db-change-type

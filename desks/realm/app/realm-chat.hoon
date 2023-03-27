@@ -192,12 +192,12 @@
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                       %messages
                         =/  thepath  path.msg-part.db-row.ch
-                        ?:
-                        ?|  =(sender.msg-id.msg-part.db-row.ch our.bowl) :: if it's our message, don't do anything
-                            (~(has in mutes.state) thepath)               :: if it's a muted path, don't do anything
-                        ==
+                        ?:  =(sender.msg-id.msg-part.db-row.ch our.bowl) :: if it's our message, don't do anything
                           ~
-                        =/  notif-db-card  (notif-new-msg:core msg-part.db-row.ch our.bowl)
+                        ?:  (~(has in mutes.state) thepath)               :: if it's a muted path, send a pre-dismissed notif to notif-db
+                          =/  notif-db-card  (notif-new-msg:core msg-part.db-row.ch our.bowl %.y)
+                          [notif-db-card ~]
+                        =/  notif-db-card  (notif-new-msg:core msg-part.db-row.ch our.bowl %.n)
                         ?:  :: if we should do a push notification also,
                         ?&  push-enabled.state                  :: push is enabled
                             (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
@@ -239,7 +239,7 @@
   ==
 ::
 ++  notif-new-msg
-  |=  [=msg-part:db-sur =ship]
+  |=  [=msg-part:db-sur =ship dismissed=?]
   ^-  card  [
     %pass
     /dbpoke
@@ -247,7 +247,7 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message (notif-msg msg-part) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~])
+    !>([%create %realm-chat path.msg-part %message (notif-msg msg-part) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~ dismissed])
   ]
 ++  notif-msg
   |=  =msg-part:db-sur
