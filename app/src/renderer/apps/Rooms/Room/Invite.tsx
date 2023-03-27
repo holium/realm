@@ -70,7 +70,6 @@ export const RoomInvite = observer(() => {
       <Flex flexDirection="row" gap={4} width="100%">
         <Input
           tabIndex={2}
-          className="realm-cursor-text-cursor"
           type="text"
           placeholder="~sampel-palnet"
           autoFocus

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
-import { darken, desaturate } from 'polished';
+import { darken, desaturate, lighten, rgba } from 'polished';
 import { Text } from 'renderer/components';
 import { Box, Flex, Spinner } from '@holium/design-system';
 import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
-import { lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from 'os/lib/color';
 import { Icons } from '../Icons';
 import { ThemeType } from 'renderer/theme';

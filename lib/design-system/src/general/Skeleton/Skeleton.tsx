@@ -14,11 +14,11 @@ export const skeletonStyle = css`
   border-radius: var(--rlm-border-radius-4);
   @keyframes skeleton-loading {
     0% {
-      background-color: var(--rlm-base-color);
+      background-color: rgba(var(--rlm-base-rgba));
       opacity: 0.2;
     }
     100% {
-      background-color: var(--rlm-base-color);
+      background-color: rgba(var(--rlm-base-rgba));
       opacity: 0.4;
     }
   }

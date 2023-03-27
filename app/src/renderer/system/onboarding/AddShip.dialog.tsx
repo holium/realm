@@ -3,13 +3,19 @@ import { isValidPatp } from 'urbit-ob';
 import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { Grid, Label, FormControl, UrbitSVG } from 'renderer/components';
-import { Spinner, Box, Flex } from '@holium/design-system';
+import {
+  Button,
+  Icon,
+  TextInput,
+  Spinner,
+  Box,
+  Flex,
+  useToggle,
+} from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import { useToggle } from 'renderer/logic/lib/useToggle';
-import { Button, Icon, TextInput } from '@holium/design-system';
 
 const AddShipPresenter = (props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();

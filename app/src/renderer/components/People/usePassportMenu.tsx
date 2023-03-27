@@ -1,4 +1,4 @@
-import { Box } from '@holium/design-system';
+import { Box, Position } from '@holium/design-system';
 import { AnimatePresence } from 'framer-motion';
 import {
   createContext,
@@ -11,8 +11,6 @@ import { useServices } from 'renderer/logic/store';
 import { Menu } from '../Menu';
 import { PassportCard } from './PassportCard';
 
-type AnchorPoint = { x: number; y: number };
-
 type PassportMenuOptions = {
   patp: string;
   sigilColor?: string | null;
@@ -23,7 +21,7 @@ type PassportMenuOptions = {
 
 type PassportMenuConfig = {
   id: string;
-  anchorPoint: AnchorPoint;
+  anchorPoint: Position;
   options: PassportMenuOptions;
 };
 

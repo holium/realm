@@ -20,24 +20,23 @@ export const Row = styled(Button.Base)<RowProps>`
   align-items: center;
   background-color: transparent;
   gap: ${(props: RowProps) => props.gap || '6px'};
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   transition: var(--transition);
 
   &:active:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
 
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-hover);
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
     cursor: pointer;
   }
 
   &:focus:not([disabled]) {
     outline: none;
-    background-color: var(--rlm-overlay-active);
-    /* border: 1px solid var(--rlm-accent-color); */
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
   &:disabled {
     opacity: 0.2;
@@ -52,9 +51,9 @@ export const Row = styled(Button.Base)<RowProps>`
       `}
       ${props.selected &&
       css`
-        background-color: var(--rlm-overlay-active);
+        background-color: rgba(var(--rlm-overlay-active-rgba));
         &:hover:not([disabled]) {
-          background-color: var(--rlm-overlay-active);
+          background-color: rgba(var(--rlm-overlay-active-rgba));
         }
       `}
     `}

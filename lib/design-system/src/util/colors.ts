@@ -7,6 +7,7 @@ export type ColorVariants =
   | 'input'
   | 'border'
   | 'window'
+  | 'window-bg'
   | 'card'
   | 'text'
   | 'icon'
@@ -16,14 +17,14 @@ export type ColorVariants =
   | 'intent-warning'
   | 'intent-info';
 
-export type ThemeVar = 'theme-mode';
-export type StyleVars = ColorVariants | ThemeVar;
+type ThemeVar = 'theme-mode';
+type StyleVars = ColorVariants | ThemeVar;
 
-export const variantToColorVar = (colorVariant: ColorVariants) => {
-  return `--rlm-${colorVariant}-color`;
+const variantToRgbCssVar = (colorVariant: ColorVariants) => {
+  return `--rlm-${colorVariant}-rgba`;
 };
 
-export const variantToCssVar = (variable: ThemeVar) => {
+const variantToCssVar = (variable: ThemeVar) => {
   return `--rlm-${variable}`;
 };
 
@@ -32,7 +33,7 @@ export const getVar = (variable: StyleVars) => {
   if (variable === 'theme-mode') {
     cssVar = variantToCssVar(variable);
   } else {
-    cssVar = variantToColorVar(variable);
+    cssVar = variantToRgbCssVar(variable);
   }
 
   const value = getComputedStyle(document.documentElement)
@@ -52,16 +53,16 @@ export const colorStyle = css<ColorProps>`
   ${(props) =>
     props.bg &&
     css`
-      background-color: var(${variantToColorVar(props.bg)});
+      background-color: rgba(var(${variantToRgbCssVar(props.bg)}));
     `}
   ${(props) =>
     props.color &&
     css`
-      color: var(${variantToColorVar(props.color)});
+      color: rgba(var(${variantToRgbCssVar(props.color)}));
     `}
   ${(props) =>
     props.borderColor &&
     css`
-      border-color: var(${variantToColorVar(props.borderColor)});
+      border-color: rgba(var(${variantToRgbCssVar(props.borderColor)}));
     `}
 `;

@@ -103,7 +103,6 @@ const NewRoomPresenter = () => {
               id="room-name-new"
               name="room-name-new"
               tabIndex={2}
-              className="realm-cursor-text-cursor"
               width="100%"
               type="text"
               autoFocus

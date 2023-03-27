@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 export const Input = styled(motion.input)`
   border-radius: var(--rlm-border-radius-4);
-  background-color: var(--rlm-input-color);
-  color: var(--rlm-text-color);
+  background-color: rgba(var(--rlm-input-rgba));
+  color: rgba(var(--rlm-text-rgba));
   pointer-events: all;
   flex: 1;
   height: inherit;
@@ -18,8 +18,8 @@ export const Input = styled(motion.input)`
 
 export const TextArea = styled(motion.textarea)`
   border-radius: var(--rlm-border-radius-4);
-  background-color: var(--rlm-input-color);
-  color: var(--rlm-text-color);
+  background-color: rgba(var(--rlm-input-rgba));
+  color: rgba(var(--rlm-text-rgba));
   width: 100%;
   pointer-events: all;
   appearance: none;

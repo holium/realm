@@ -12,7 +12,7 @@ import {
 import { AppType } from '../spaces/models/bazaar';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
-import { Bounds } from 'os/types';
+import { Bounds } from '@holium/design-system';
 
 import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
 
@@ -33,6 +33,10 @@ import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
  *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
+  public isHomePaneOpen = () => {
+    return this.state.homePaneOpen;
+  };
+
   private readonly state: DesktopStoreType; // for state management
   handlers: Record<string, (...args: any[]) => void> = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,

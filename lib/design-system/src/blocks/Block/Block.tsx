@@ -54,10 +54,10 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   align-items: flex-start;
   padding: 6px;
   gap: 6px;
-  background: var(--rlm-card-color);
-  color: var(--rlm-text-color) !important;
+  background: rgba(var(--rlm-card-rgba));
+  color: rgba(var(--rlm-text-rgba)) !important;
   ${Text.Custom} {
-    color: var(--rlm-text-color) !important;
+    color: rgba(var(--rlm-text-rgba)) !important;
   }
   backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
@@ -106,7 +106,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
           .block-footer {
             transition: var(--transition);
             opacity: 1;
-            background: var(--rlm-window-color);
+            background: rgba(var(--rlm-window-rgba));
           }
           .block-author {
             opacity: 1;

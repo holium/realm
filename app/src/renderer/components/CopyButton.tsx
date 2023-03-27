@@ -1,5 +1,4 @@
-import { Box, Icon } from '@holium/design-system';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { Box, Icon, useToggle } from '@holium/design-system';
 
 interface CopyButtonProps {
   content: string;
@@ -19,10 +18,10 @@ export const CopyButton = ({ content, size = 2 }: CopyButtonProps) => {
     <Box>
       {!copied.isOn ? (
         <Box onClick={copy}>
-          <Icon name="Copy" size={size} color="text" opacity={0.5} />
+          <Icon name="Copy" size={size} fill="text" opacity={0.5} />
         </Box>
       ) : (
-        <Icon name="CheckCircle" size={size} color="intent-success" />
+        <Icon name="CheckCircle" size={size} fill="intent-success" />
       )}
     </Box>
   );

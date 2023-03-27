@@ -1,16 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Flex, Box, Icon, Text } from '../..';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
   Emoji,
   SkinTones,
 } from 'emoji-picker-react';
+import { Flex, Box, Icon, Text } from '../../general';
 import { FragmentReactionType } from './Bubble.types';
-import { AnimatePresence } from 'framer-motion';
-import { lighten } from 'polished';
-import { getVar } from '../../util/colors';
+import { Position } from '../../util/types';
 
 const WIDTH = 350;
 const ship = window.ship ?? 'zod';
@@ -76,11 +75,12 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
   align-items: center;
   justify-content: center;
   background: ${({ selected }) =>
-    selected ? () => lighten(0.3, getVar('accent')) : 'var(--rlm-input-color)'};
+    selected ? 'rgba(var(--rlm-accent-rgba))' : 'rgba(var(--rlm-input-rgba))'};
+  filter: ${({ selected }) => (selected ? 'brightness(1.3)' : 'brightness(1)')};
   border: ${({ selected }) =>
     selected
-      ? '1px solid var(--rlm-accent-color)'
-      : '1px solid var(--rlm-window-color)'};
+      ? '1px solid rgba(var(--rlm-accent-rgba))'
+      : '1px solid rgba(var(--rlm-window-rgba))'};
 
   border-radius: 16px;
   transition: var(--transition);
@@ -91,7 +91,7 @@ const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && 'color: var(--rlm-accent-color);'}
+            ${selected && 'color: rgba(var(--rlm-accent-rgba));'}
           }
         `
       : css`
@@ -148,10 +148,7 @@ export const Reactions = (props: ReactionProps) => {
     onReaction,
   } = props;
   const [isReacting, setIsReacting] = useState<boolean>(false);
-  const [anchorPoint, setAnchorPoint] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
 
   const reactionsAggregated = useMemo(
     () =>
