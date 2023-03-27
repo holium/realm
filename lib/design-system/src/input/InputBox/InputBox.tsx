@@ -17,8 +17,8 @@ type StyledBoxProps = {
 const StyledBox = styled(Box)<StyledBoxProps>`
   position: relative;
   border-radius: var(--rlm-border-radius-6);
-  border: 1px solid var(--rlm-border-color);
-  background-color: var(--rlm-input-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  background-color: rgba(var(--rlm-input-rgba));
   min-height: 32px;
   ${(props) =>
     props.shouldHighlightOnFocus &&
@@ -28,7 +28,7 @@ const StyledBox = styled(Box)<StyledBoxProps>`
       &:active {
         transition: var(--transition);
         outline: none;
-        border-color: var(--rlm-accent-color);
+        border-color: rgba(var(--rlm-accent-rgba));
         &::placeholder {
           color: transparent;
         }
@@ -40,8 +40,8 @@ const StyledBox = styled(Box)<StyledBoxProps>`
       `${props.fontSize ? props.fontSize.toString().replace('px', '') : 14}px`};
     text-align: ${(props) => (props.textAlign ? props.textAlign : 'left')};
     border-radius: var(--rlm-border-radius-4);
-    background-color: var(--rlm-input-color);
-    color: var(--rlm-text-color);
+    background-color: rgba(var(--rlm-input-rgba));
+    color: rgba(var(--rlm-text-rgba));
     pointer-events: all;
     flex: 1;
     height: inherit;
@@ -69,7 +69,7 @@ const StyledBox = styled(Box)<StyledBoxProps>`
       }
       opacity: 0.6; /* correct opacity on iOS */
       &::placeholder {
-        color: rgba(var(--rlm-text-color, #333333), 0.3);
+        color: rgba(var(--rlm-text-rgba, #333333), 0.3);
         opacity: 1;
       }
       &:hover {
@@ -80,13 +80,13 @@ const StyledBox = styled(Box)<StyledBoxProps>`
   ${(props) =>
     props.error &&
     css`
-      border-color: var(--rlm-intent-alert-color);
+      border-color: rgba(var(--rlm-intent-alert-rgba));
       &:focus,
       &:focus-within,
       &:active {
         transition: ${(props) => props.theme.transition};
         outline: none;
-        border-color: var(--rlm-intent-alert-color);
+        border-color: rgba(var(--rlm-intent-alert-rgba));
         &::placeholder {
           color: transparent;
         }

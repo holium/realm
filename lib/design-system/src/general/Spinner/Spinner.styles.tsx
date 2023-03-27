@@ -1,4 +1,3 @@
-import { rgba } from 'polished';
 import styled from 'styled-components';
 
 type Props = {
@@ -12,7 +11,7 @@ export const StyledSpinner = styled.div<Props>`
   border-width: ${({ size }) => (size < 2 ? 0.75 : 5)}px;
   border-style: solid;
   // TODO: get brand color from a CSS variable.
-  border-color: ${rgba('#757575', 0.2)};
+  border-color: rgba(117, 117, 117, 0.2);
   border-bottom-color: ${({ color }) => color ?? '#ef9134'};
   border-radius: 50%;
   display: inline-block;

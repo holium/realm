@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { Box, BoxProps } from '../Box/Box';
 
 const Bar = styled(Box)`
-  background-color: var(--rlm-input-color);
-  border: 1px solid var(--rlm-border-color);
+  background-color: rgba(var(--rlm-input-rgba));
+  border: 1px solid rgba(var(--rlm-border-rgba));
   height: 12px;
   padding: 2px 1px;
   width: 100%;
@@ -16,7 +16,8 @@ const Bar = styled(Box)`
 const Progress = styled(Box)`
   height: 8px;
   border-radius: 4px;
-  background-color: ${(props) => props.background || 'var(--rlm-accent-color)'};
+  background-color: ${(props) =>
+    props.background || 'rgba(var(--rlm-accent-rgba))'};
 `;
 
 type ProgressBarProps = {

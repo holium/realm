@@ -92,7 +92,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
         innerRef={inputRef}
         flex={8}
         id={`${popoverId}-trigger`}
-        className="realm-cursor-text-cursor"
         type="text"
         placeholder={searchPlaceholder}
         bgOpacity={0.3}

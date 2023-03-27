@@ -11,8 +11,8 @@ import {
   Spinner,
   Icon,
   TextInput,
+  useToggle,
 } from '@holium/design-system';
-import { useToggle } from '@holium/shared';
 
 const ViewCodePresenter = () => {
   const { theme } = useServices();

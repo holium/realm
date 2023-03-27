@@ -39,7 +39,6 @@ const MessagesTrayPresenter = () => {
 
   return (
     <Flex
-      id="messages-tray-icon"
       className="realm-cursor-hover"
       position="relative"
       whileTap={{ scale: 0.95 }}

@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { darken } from 'polished';
 import { Flex } from '../../general/Flex/Flex';
 
 export const CommCircle = styled(Flex)<{ customBg: string }>`
@@ -9,10 +8,11 @@ export const CommCircle = styled(Flex)<{ customBg: string }>`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: ${(props) => props.customBg};
+  background: ${({ customBg }) => customBg};
   transition: var(--transition);
 
   &:hover {
-    background: ${(props) => darken(0.025, props.customBg)};
+    background: ${({ customBg }) => customBg};
+    filter: brightness(0.975);
   }
 `;

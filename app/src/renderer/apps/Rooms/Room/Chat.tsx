@@ -113,7 +113,6 @@ const RoomChatPresenter = () => {
       >
         <Input
           tabIndex={2}
-          className="realm-cursor-text-cursor"
           type="text"
           placeholder="whats up dawg"
           autoFocus
