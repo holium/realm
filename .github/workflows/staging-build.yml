@@ -386,11 +386,12 @@ jobs:
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           # SENTRY_URL: https://sentry.io/
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          SENTRY_LOG_LEVEL: debug
         with:
           environment: staging
           sourcemaps: './app/release/app/dist'
           version: $BUILD_VERSION
-          SENTRY_LOG_LEVEL: debug
+          ignore_empty: true
 
   #
   # this will run even if the build is canceled or fails
