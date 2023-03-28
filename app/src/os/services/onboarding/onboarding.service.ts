@@ -361,7 +361,7 @@ export class OnboardingService extends BaseService {
       else if (isRecoveringAccount) {
         return {
           success: false,
-          errorMessage: `Account not found using email address '${email}`,
+          errorMessage: `Account not found using email address ${email}`,
         };
       } else {
         const newAccount = await this.core.holiumClient.createAccount(
