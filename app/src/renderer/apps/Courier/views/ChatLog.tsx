@@ -31,7 +31,7 @@ const replyHeight = 50;
 const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
-  const { dimensions, activeApp } = useTrayApps();
+  const { dimensions } = useTrayApps();
   const { selectedChat, getChatHeader, setSubroute } = useChatStore();
   const accountStore = useAccountStore();
   const { ship, friends } = useServices();
