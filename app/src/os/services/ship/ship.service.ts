@@ -217,7 +217,6 @@ export class ShipService extends BaseService {
     this.state = ShipModel.create({
       patp: ship,
       url: persistedState.url || shipInfo.url,
-      wallpaper: persistedState.wallpaper || null,
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
@@ -325,7 +324,6 @@ export class ShipService extends BaseService {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
-      wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
