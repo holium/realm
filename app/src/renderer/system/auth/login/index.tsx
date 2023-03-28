@@ -102,11 +102,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         console.error('Unknown error', parts);
         setLoginError('unknown');
       } else {
-        // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
-        //  assume 400 means they may have changed ship code. ask them to enter the new one.
         if (parts[1] === 'password') {
           setLoginError('password');
-        } else if (parseInt(parts[1]) === 400) {
+        }
+        // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+        //  assume 400 means they may have changed ship code. ask them to enter the new one.
+        else if (parseInt(parts[1]) === 400) {
           setLoginError('missing');
           ShellActions.openDialogWithStringProps('reset-code-dialog', {
             ship: pendingShip.patp,
