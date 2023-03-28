@@ -96,6 +96,15 @@ export const FriendsStore = types
         }))
         .filter((friend: any) => friend.status !== 'contact');
     },
+    get search(): [string, ContactModelType][] {
+      const filtered = Array.from(self.all.entries()).filter(
+        (value: [patp: string, friend: FriendType]) => value[0] !== window.ship
+      );
+      return filtered.map((value: [patp: string, friend: any]) => [
+        value[0],
+        value[1].contactInfo || { color: '#000', avatar: '', nickname: '' },
+      ]);
+    },
     get contacts(): [string, ContactModelType][] {
       const filtered = Array.from(self.all.entries()).filter(
         (value: [patp: string, friend: FriendType]) =>

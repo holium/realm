@@ -1,16 +1,19 @@
+import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Button } from '..';
+import { Box, BoxProps } from '..';
 
-interface RowProps {
+type RowProps = {
+  as?: any;
   gap?: string;
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
-}
+} & BoxProps;
 
-export const Row = styled(Button.Base)<RowProps>`
+export const Row = styled(Box)<RowProps>`
+  border: 1px solid transparent;
   border-radius: 6px;
   width: 100%;
   padding: 8px;
@@ -19,6 +22,9 @@ export const Row = styled(Button.Base)<RowProps>`
   justify-content: flex-start;
   align-items: center;
   background-color: transparent;
+  box-sizing: border-box;
+  appearance: none;
+  flex-basis: initial;
   gap: ${(props: RowProps) => props.gap || '6px'};
   color: rgba(var(--rlm-text-rgba));
   transition: var(--transition);
@@ -38,9 +44,16 @@ export const Row = styled(Button.Base)<RowProps>`
     outline: none;
     background-color: rgba(var(--rlm-overlay-active-rgba));
   }
+
   &:disabled {
     opacity: 0.2;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
+    div {
+      cursor: not-allowed !important;
+    }
+    svg {
+      cursor: not-allowed !important;
+    }
   }
 
   ${(props: RowProps) =>
@@ -60,7 +73,9 @@ export const Row = styled(Button.Base)<RowProps>`
 `;
 
 Row.defaultProps = {
-  onMouseOut: (evt: React.MouseEvent<HTMLButtonElement>) => {
+  as: motion.fieldset,
+  fontSize: 1,
+  onMouseOut: (evt: React.MouseEvent<HTMLDivElement>) => {
     evt.currentTarget.blur();
   },
 };

@@ -34,6 +34,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
+  console.log(metadata);
 
   let name = metadata?.nickname || person;
   const peer = isOur

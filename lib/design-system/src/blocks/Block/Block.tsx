@@ -53,15 +53,13 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   box-sizing: content-box;
   align-items: flex-start;
   padding: 6px;
+  backdrop-filter: brightness(95%) blur(6px);
   gap: 6px;
-  background: rgba(var(--rlm-card-rgba));
   color: rgba(var(--rlm-text-rgba)) !important;
   ${Text.Custom} {
     color: rgba(var(--rlm-text-rgba)) !important;
   }
-  backdrop-filter: blur(6px);
   border-radius: var(--rlm-border-radius-9);
-  border: 1px solid transparent;
   width: ${(props) => (props.width ? `${props.width}px` : 'initial')};
   ${(props) =>
     props.mode === 'display' &&
@@ -73,18 +71,17 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
     transition: var(--transition);
     opacity: 0;
   }
-
+  /* 
   &:hover {
     .block-author {
       transition: var(--transition);
       opacity: 0.5;
     }
-  }
+  } */
   ${(props) =>
     (props.variant === 'overlay' || props.variant === 'content') &&
     css`
       padding: 0px;
-      border: 0px solid transparent;
       background: transparent;
       position: relative;
       .block-footer {
@@ -132,6 +129,7 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
 export type BlockProps = {
   id: string;
   draggable?: boolean;
+  onLoaded?: () => void;
 } & StyleProps;
 
 type BlockElProps = BlockProps & { children?: React.ReactNode };

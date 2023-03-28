@@ -17,10 +17,12 @@
     "dom-helpers": "^5.2.1",
     "emoji-picker-react": "^4.4.7",
     "framer-motion": "^7.6.7",
+    "polished": "^4.2.2",
     "react-lifecycles-compat": "^3.0.4",
     "react-player": "^2.11.0",
     "react-spotify-embed": "^1.0.4",
-    "react-twitter-embed": "^4.0.4"
+    "react-twitter-embed": "^4.0.4",
+    "urbit-ob": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",

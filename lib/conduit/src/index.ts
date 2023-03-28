@@ -192,6 +192,7 @@ export class Conduit extends EventEmitter {
   }
 
   async startSSE(channelUrl: string): Promise<void> {
+    console.log('startSSE ->>>>>', channelUrl, this.prevMsgId);
     if (this.status === ConduitState.Connected) {
       return await Promise.resolve();
     }
@@ -216,6 +217,7 @@ export class Conduit extends EventEmitter {
       // this.sse = new EventSource(channelUrl);
 
       this.sse.onopen = async (response) => {
+        console.log('ON SSE OPEN', response);
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
           resolve();
@@ -349,6 +351,7 @@ export class Conduit extends EventEmitter {
       mark: params.mark,
       json: params.json,
     };
+    console.log('sending poke', message);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }

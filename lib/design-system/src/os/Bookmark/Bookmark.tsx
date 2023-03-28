@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Text, Row, Favicon, Flex, BoxProps } from '../..';
 
 const BookmarkRow = styled(Row)`
-  flex: 1;
   padding: 4px 4px 4px 6px;
   justify-content: space-between;
   align-items: center;
@@ -39,7 +38,7 @@ export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
     <BookmarkRow
       id={id}
       width={width}
-      onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         onNavigate(url);
       }}
