@@ -20,6 +20,8 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
       : '100%'
   ) as string;
 
+  const shouldMeasure = !rest.height && !width;
+
   const parsedWidth = (
     width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
   ) as string;
@@ -35,11 +37,15 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         draggable={false}
         onError={() => {
           // TODO: handle error using placeholder image
-          onLoaded && onLoaded();
+          if (shouldMeasure) {
+            onLoaded && onLoaded();
+          }
         }}
         onLoad={() => {
           setImgLoaded(true);
-          onLoaded && onLoaded();
+          if (shouldMeasure) {
+            onLoaded && onLoaded();
+          }
         }}
       />
       <Flex className="block-footer">
