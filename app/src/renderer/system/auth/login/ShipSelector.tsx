@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
 import { motion, Reorder } from 'framer-motion';
@@ -9,6 +9,7 @@ import { delay } from 'lodash';
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { LoginError } from 'renderer/system/auth/login';
 
 // ----------------------------------------
 // -------- Local style components --------
@@ -25,7 +26,11 @@ export const SelectedLine = styled(motion.div)`
     lighten(0.05, props.theme.colors.brand.primary)};
 `;
 
-const ShipSelectorPresenter = () => {
+interface ShipSelectorProps {
+  setLoginError: Dispatch<SetStateAction<LoginError>>;
+}
+
+const ShipSelectorPresenter = ({ setLoginError }: ShipSelectorProps) => {
   const { identity } = useServices();
   const { auth } = identity;
   const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
@@ -49,8 +54,14 @@ const ShipSelectorPresenter = () => {
           style={{ zIndex: 1 }}
           whileDrag={{ zIndex: 20 }}
           onDragStart={() => setDragging(true)}
-          onClick={() => {
-            !dragging && AuthActions.setSelected(ship.patp);
+          onClick={async () => {
+            const selectedPatp = await AuthActions.getSelected();
+            if (selectedPatp) {
+              if (selectedPatp !== ship.patp) {
+                !dragging && AuthActions.setSelected(ship.patp);
+                setLoginError('');
+              }
+            }
           }}
           onMouseUp={() => {
             setDragging(false);
