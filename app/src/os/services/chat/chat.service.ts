@@ -1,6 +1,6 @@
 import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
 import { BaseService } from '../base.service';
-// import path from 'path';
+import path from 'path';
 import Database from 'better-sqlite3';
 import { Patp } from '../../types';
 import { Realm } from '../..';
@@ -171,14 +171,20 @@ export class ChatService extends BaseService {
   // ----------------- DB setup -------------------
   // ----------------------------------------------
   async subscribe(ship: Patp) {
-    this.db = new Database(
-      `${app.getPath('userData')}/realm.${ship}/realm.db`,
-      {
-        // verbose: console.log,
-      }
-    );
-    this.db.pragma('journal_mode = WAL');
-    this.db.exec(chatInitSql);
+    try {
+      const dbPath = path.join(
+        app.getPath('userData'),
+        `realm.${ship}`,
+        'realm.db'
+      );
+      this.db = new Database(dbPath, {
+        // verbose: (msg) => this.core.sendLog(msg.toString()),
+      });
+      this.db.pragma('journal_mode = WAL');
+      this.db.exec(chatInitSql);
+    } catch (e) {
+      this.core.sendLog(e);
+    }
     await this.core.conduit?.watch({
       app: 'chat-db',
       path: '/db',

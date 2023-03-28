@@ -8,6 +8,7 @@ if (dependencies) {
   const nativeDeps = fs
     .readdirSync('node_modules')
     .filter((folder) => fs.existsSync(`node_modules/${folder}/binding.gyp`));
+
   if (nativeDeps.length === 0) {
     process.exit(0);
   }

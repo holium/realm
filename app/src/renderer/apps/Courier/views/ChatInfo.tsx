@@ -11,6 +11,7 @@ import {
   Select,
   Icon,
   TextInput,
+  NoScrollBar,
 } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
@@ -29,6 +30,7 @@ import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { observer } from 'mobx-react-lite';
 import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
+import { useTrayApps } from 'renderer/apps/store';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -65,6 +67,7 @@ type ChatInfoProps = {
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { dimensions } = useTrayApps();
   const { ship } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
@@ -181,7 +184,12 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   return (
-    <Flex flexDirection="column">
+    <Flex
+      flexDirection="column"
+      height={dimensions.height}
+      overflowX="hidden"
+      overflowY="auto"
+    >
       <ChatLogHeader
         path={path}
         title={'Chat Info'}
@@ -190,278 +198,292 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         onBack={() => setSubroute('chat')}
         hasMenu={false}
       />
-      {/* Chat Info */}
-      <Flex flexDirection="column" gap={4} pt={3} pb={4}>
-        <Flex
-          flexDirection="column"
-          justifyContent="center"
-          gap={4}
-          alignItems="center"
-          pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
-        >
-          <div ref={containerRef} style={{ display: 'none' }}></div>
-          {chatAvatarEl}
-          {uploadError && (
-            <Text.Custom color="intent-alert" fontSize={1}>
-              {uploadError}
-            </Text.Custom>
-          )}
+      <NoScrollBar
+        flexDirection="column"
+        height={dimensions.height - 48}
+        overflowX="hidden"
+        overflowY="auto"
+        pb={2}
+      >
+        {/* Chat Info */}
+        <Flex flexDirection="column" gap={4} pt={3} pb={4}>
           <Flex
             flexDirection="column"
+            justifyContent="center"
+            gap={4}
+            alignItems="center"
             pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
           >
-            <InlineEdit
-              fontWeight={500}
-              fontSize={3}
-              textAlign="center"
-              width={350}
-              value={editTitle}
-              editable={amHost}
-              onBlur={() => {
-                if (editTitle.length > 1) {
-                  editMetadata({ title: editTitle });
-                }
-              }}
-              onChange={(evt: any) => {
-                setEditTitle(evt.target.value);
-              }}
-            />
-            {subtitle && (
-              <Text.Custom textAlign="center" fontSize={2} opacity={0.5}>
-                {subtitle}
+            <div ref={containerRef} style={{ display: 'none' }}></div>
+            {chatAvatarEl}
+            {uploadError && (
+              <Text.Custom color="intent-alert" fontSize={1}>
+                {uploadError}
               </Text.Custom>
             )}
+            <Flex
+              flexDirection="column"
+              pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
+            >
+              <InlineEdit
+                fontWeight={500}
+                fontSize={3}
+                textAlign="center"
+                width={350}
+                value={editTitle}
+                editable={amHost}
+                onBlur={() => {
+                  if (editTitle.length > 1) {
+                    editMetadata({ title: editTitle });
+                  }
+                }}
+                onChange={(evt: any) => {
+                  setEditTitle(evt.target.value);
+                }}
+              />
+              {subtitle && (
+                <Text.Custom textAlign="center" fontSize={2} opacity={0.5}>
+                  {subtitle}
+                </Text.Custom>
+              )}
+            </Flex>
           </Flex>
         </Flex>
-      </Flex>
-      {/* Settings */}
-      <Flex my={2} flexDirection="column">
-        <Box mb={2}>
-          <SectionDivider label="Settings" alignment="left" />
-        </Box>
-        <Flex flexDirection="column">
-          <Flex
-            width="100%"
-            px={2}
-            py={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Flex alignItems="center">
-              <Icon name="ChatReactionSetting" size={24} mr={2} />
-              <Text.Custom fontWeight={400} fontSize="14px">
-                Reactions
-              </Text.Custom>
+        {/* Settings */}
+        <Flex my={2} flexDirection="column">
+          <Box mb={2}>
+            <SectionDivider label="Settings" alignment="left" />
+          </Box>
+          <Flex flexDirection="column">
+            <Flex
+              width="100%"
+              px={2}
+              py={2}
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Flex alignItems="center">
+                <Icon name="ChatReactionSetting" size={24} mr={2} />
+                <Text.Custom fontWeight={400} fontSize="14px">
+                  Reactions
+                </Text.Custom>
+              </Flex>
+              <Toggle
+                disabled={!amHost}
+                initialChecked={metadata?.reactions}
+                onChange={(isChecked) => {
+                  editMetadata({ reactions: isChecked });
+                }}
+              />
             </Flex>
-            <Toggle
-              disabled={!amHost}
-              initialChecked={metadata?.reactions}
-              onChange={(isChecked) => {
-                editMetadata({ reactions: isChecked });
-              }}
-            />
+            {!isDMType && (
+              <>
+                <Flex
+                  width="100%"
+                  px={2}
+                  py={2}
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Flex alignItems="center">
+                    <Icon name="ChatHistorySetting" size={24} mr={2} />
+                    <Text.Custom
+                      alignItems="center"
+                      fontWeight={400}
+                      fontSize="14px"
+                    >
+                      Chat history for new members
+                    </Text.Custom>
+                  </Flex>
+                  <Toggle
+                    disabled={!amHost}
+                    initialChecked={peersGetBacklog}
+                    onChange={(isChecked) => {
+                      updatePeersGetBacklog(isChecked);
+                    }}
+                  />
+                </Flex>
+                <Flex
+                  width="100%"
+                  px={2}
+                  pt={1}
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Flex alignItems="center">
+                    <Icon name="ChatInvitePermission" size={24} mr={2} />
+                    <Text.Custom
+                      alignItems="center"
+                      fontWeight={400}
+                      fontSize="14px"
+                    >
+                      Invites
+                    </Text.Custom>
+                  </Flex>
+                  <Select
+                    disabled={!amHost}
+                    id="select-invite-permission"
+                    width={120}
+                    options={[
+                      { label: 'Host only', value: 'host' },
+                      { label: 'Anyone', value: 'anyone' },
+                    ]}
+                    selected={invites}
+                    onClick={(value: string) => {
+                      updateInvitePermissions(value as InvitePermissionType);
+                    }}
+                  />
+                </Flex>
+              </>
+            )}
+
+            <Flex
+              width="100%"
+              px={2}
+              {...(isDMType ? { pt: 1 } : { py: 2 })}
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Flex alignItems="center">
+                <Icon name="ChatDisappearingMessages" size={24} mr={2} />
+                <Text.Custom
+                  alignItems="center"
+                  fontWeight={400}
+                  fontSize="14px"
+                >
+                  Disappearing messages
+                </Text.Custom>
+              </Flex>
+              <Select
+                disabled={!amHost}
+                id="select-disappearing-duration"
+                width={120}
+                options={[
+                  { label: 'Off', value: 'off' },
+                  { label: '1 month', value: '1-month' },
+                  { label: '1 week', value: '1-week' },
+                  { label: '1 day', value: '1-day' },
+                  { label: '12 hours', value: '12-hours' },
+                  { label: '1 hour', value: '1-hour' },
+                  { label: '10 minutes', value: '10-mins' },
+                ]}
+                selected={
+                  expiresDuration
+                    ? millisecondsToExpires(expiresDuration)
+                    : 'off'
+                }
+                onClick={(value: string) => {
+                  updateExpiresDuration(value as ExpiresValue);
+                }}
+              />
+            </Flex>
           </Flex>
+        </Flex>
+        {/* Members */}
+        <Flex my={2} flexDirection="column">
+          <Box mb={1}>
+            <SectionDivider
+              label={`${sortedPeers.length} members`}
+              alignment="left"
+            />
+          </Box>
           {!isDMType && (
             <>
-              <Flex
-                width="100%"
-                px={2}
-                py={2}
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Flex alignItems="center">
-                  <Icon name="ChatHistorySetting" size={24} mr={2} />
-                  <Text.Custom
-                    alignItems="center"
-                    fontWeight={400}
-                    fontSize="14px"
-                  >
-                    Chat history for new members
-                  </Text.Custom>
+              <Flex flexDirection="column" position="relative" width="100%">
+                <Flex py={1} width="100%">
+                  <TextInput
+                    id="new-chat-patp-search"
+                    name="new-chat-patp-search"
+                    tabIndex={1}
+                    width="100%"
+                    className="realm-cursor-text-cursor"
+                    placeholder="Add someone?"
+                    // TODO disable if not permissioned
+                    value={person.state.value}
+                    height={34}
+                    onKeyDown={(evt: any) => {
+                      if (evt.key === 'Enter' && person.computed.parsed) {
+                        onShipSelected([person.computed.parsed, '']);
+                        person.actions.onChange('');
+                      }
+                    }}
+                    onChange={(e: any) => {
+                      person.actions.onChange(e.target.value);
+                    }}
+                    onFocus={() => {
+                      person.actions.onFocus();
+                    }}
+                    onBlur={() => {
+                      person.actions.onBlur();
+                    }}
+                    // onFocus={() => urbitId.actions.onFocus()}
+                    // onBlur={() => urbitId.actions.onBlur()}
+                    // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
+                  />
                 </Flex>
-                <Toggle
-                  disabled={!amHost}
-                  initialChecked={peersGetBacklog}
-                  onChange={(isChecked) => {
-                    updatePeersGetBacklog(isChecked);
-                  }}
-                />
-              </Flex>
-              <Flex
-                width="100%"
-                px={2}
-                pt={1}
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Flex alignItems="center">
-                  <Icon name="ChatInvitePermission" size={24} mr={2} />
-                  <Text.Custom
-                    alignItems="center"
-                    fontWeight={400}
-                    fontSize="14px"
-                  >
-                    Invites
-                  </Text.Custom>
+                <Flex px={2}>
+                  <ShipSearch
+                    isDropdown
+                    search={person.state.value}
+                    selected={selectedPatp}
+                    onSelected={(contact: any) => {
+                      onShipSelected(contact);
+                      person.actions.onChange('');
+                    }}
+                  />
                 </Flex>
-                <Select
-                  disabled={!amHost}
-                  id="select-invite-permission"
-                  width={120}
-                  options={[
-                    { label: 'Host only', value: 'host' },
-                    { label: 'Anyone', value: 'anyone' },
-                  ]}
-                  selected={invites}
-                  onClick={(value: string) => {
-                    updateInvitePermissions(value as InvitePermissionType);
-                  }}
-                />
               </Flex>
             </>
           )}
-
-          <Flex
-            width="100%"
-            px={2}
-            {...(isDMType ? { pt: 1 } : { py: 2 })}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Flex alignItems="center">
-              <Icon name="ChatDisappearingMessages" size={24} mr={2} />
-              <Text.Custom alignItems="center" fontWeight={400} fontSize="14px">
-                Disappearing messages
-              </Text.Custom>
-            </Flex>
-            <Select
-              disabled={!amHost}
-              id="select-disappearing-duration"
-              width={120}
-              options={[
-                { label: 'Off', value: 'off' },
-                { label: '1 month', value: '1-month' },
-                { label: '1 week', value: '1-week' },
-                { label: '1 day', value: '1-day' },
-                { label: '12 hours', value: '12-hours' },
-                { label: '1 hour', value: '1-hour' },
-                { label: '10 minutes', value: '10-mins' },
-              ]}
-              selected={
-                expiresDuration ? millisecondsToExpires(expiresDuration) : 'off'
-              }
-              onClick={(value: string) => {
-                updateExpiresDuration(value as ExpiresValue);
-              }}
-            />
-          </Flex>
+          {sortedPeers.map((peer: PeerModelType) => {
+            const id = `${path}-peer-${peer.ship}`;
+            const options = [];
+            if (peer.ship !== ship?.patp) {
+              // TODO check if peer is friend
+              options.push({
+                id: `${id}-add-friend`,
+                label: 'Add as friend',
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  console.log('adding friend', peer.ship);
+                },
+              });
+            }
+            if (peer.role !== 'host' && amHost) {
+              options.push({
+                id: `${id}-remove`,
+                label: 'Remove',
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  ChatDBActions.removePeer(path, peer.ship)
+                    .then(() => {
+                      console.log('removed peer');
+                    })
+                    .catch((e) => {
+                      console.error(e);
+                    });
+                },
+              });
+            }
+            // options.push({
+            //   id: `${id}-profile`,
+            //   label: 'View Profile',
+            //   onClick: (_evt: any) => {
+            //     console.log('view profile');
+            //   },
+            // });
+            return (
+              <PeerRow
+                key={id}
+                id={id}
+                peer={peer.ship}
+                role={peer.role}
+                options={options}
+              />
+            );
+          })}
         </Flex>
-      </Flex>
-      {/* Members */}
-      <Flex my={2} flexDirection="column">
-        <Box mb={1}>
-          <SectionDivider
-            label={`${sortedPeers.length} members`}
-            alignment="left"
-          />
-        </Box>
-        {!isDMType && (
-          <>
-            <Flex position="relative" width="100%">
-              <Flex py={1} width="100%" px={1}>
-                <TextInput
-                  id="new-chat-patp-search"
-                  name="new-chat-patp-search"
-                  tabIndex={1}
-                  mx={2}
-                  width="100%"
-                  className="realm-cursor-text-cursor"
-                  placeholder="Add someone?"
-                  value={person.state.value}
-                  height={34}
-                  onKeyDown={(evt: any) => {
-                    if (evt.key === 'Enter' && person.computed.parsed) {
-                      onShipSelected([person.computed.parsed, '']);
-                      person.actions.onChange('');
-                    }
-                  }}
-                  onChange={(e: any) => {
-                    person.actions.onChange(e.target.value);
-                  }}
-                  onFocus={() => {
-                    person.actions.onFocus();
-                  }}
-                  onBlur={() => {
-                    person.actions.onBlur();
-                  }}
-                  // onFocus={() => urbitId.actions.onFocus()}
-                  // onBlur={() => urbitId.actions.onBlur()}
-                  // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
-                />
-              </Flex>
-              <Flex px={2}>
-                <ShipSearch
-                  isDropdown
-                  search={person.state.value}
-                  selected={selectedPatp}
-                  onSelected={(contact: any) => {
-                    onShipSelected(contact);
-                    person.actions.onChange('');
-                  }}
-                />
-              </Flex>
-            </Flex>
-          </>
-        )}
-        {sortedPeers.map((peer: PeerModelType) => {
-          const id = `${path}-peer-${peer.ship}`;
-          const options = [];
-          if (peer.ship !== ship?.patp) {
-            // TODO check if peer is friend
-            options.push({
-              id: `${id}-add-friend`,
-              label: 'Add as friend',
-              onClick: (evt: any) => {
-                evt.stopPropagation();
-                console.log('adding friend', peer.ship);
-              },
-            });
-          }
-          if (peer.role !== 'host' && amHost) {
-            options.push({
-              id: `${id}-remove`,
-              label: 'Remove',
-              onClick: (evt: any) => {
-                evt.stopPropagation();
-                ChatDBActions.removePeer(path, peer.ship)
-                  .then(() => {
-                    console.log('removed peer');
-                  })
-                  .catch((e) => {
-                    console.error(e);
-                  });
-              },
-            });
-          }
-          // options.push({
-          //   id: `${id}-profile`,
-          //   label: 'View Profile',
-          //   onClick: (_evt: any) => {
-          //     console.log('view profile');
-          //   },
-          // });
-          return (
-            <PeerRow
-              key={id}
-              id={id}
-              peer={peer.ship}
-              role={peer.role}
-              options={options}
-            />
-          );
-        })}
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 };
