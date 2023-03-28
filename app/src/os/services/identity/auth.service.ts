@@ -360,9 +360,8 @@ export class AuthService extends BaseService {
       }
       const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
       if (!passwordCorrect) {
-        const error = 'error:password';
         this.state.setLoader('error');
-        return error;
+        return 'error:password';
       }
 
       this.core.passwords.setPassword(patp, password);
