@@ -31,7 +31,7 @@
   ==
 ::
 +$  chat-access
-  $:  [%members ~]  :: ships in the members map
+  $%  [%members ~]  :: ships in the members map
       [%admins ~]   :: ships in the members map that are also admins
       [%invited ~]  :: ships in the invitations map
       [%whitelist ships=(set ship)]   :: specific ships, must also be in members map
@@ -41,6 +41,7 @@
   $:  =path
       access=chat-access
   ==
++$  chats  (map path chat)
 ::
 +$  spaces              (map space-path space)
 +$  space
@@ -54,7 +55,7 @@
       =archetype
       =theme
       updated-at=@da
-      chats=(map path chat)
+      =chats
   ==
 ::  %0 and %1 compatible types
 +$  spaces-v1          (map space-path space-v1)

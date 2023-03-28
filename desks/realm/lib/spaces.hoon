@@ -1,8 +1,52 @@
-/-  store=spaces-store, member-store=membership, visas
-/+  memb-lib=membership
+/-  store=spaces-store, member-store=membership, visas, chat-db
+/+  memb-lib=membership, rc-lib=realm-chat
 =<  [store .]
 =,  store
 |%
+
+++  create-space-chat
+  |=  [=space:store =chat-access:store =members:member-store t=@da]
+  ^-  (quip card:agent:gall space:store)
+  =/  chat-path  /realm/space-chat/(scot %uv (sham path.space))
+  =/  pathrow=path-row:chat-db  [chat-path *(map cord cord) %space-chat t t ~ %host %.n *@dr]
+  =/  all-peers=ship-roles:chat-db
+    ::?+  -.chat-access  !! :: default crash not-implemented an access type
+    ::  %members
+        %+  turn
+          ~(tap by members)
+        |=  kv=[k=ship v=member:member-store]
+        [k.kv ?:(=(status.v.kv %host) %host %member)]
+      :: TODO logic for peers lists for %admins %invited %whitelist and %blacklist
+    ::==
+  =/  cards
+    %+  turn
+      all-peers
+    |=  [s=ship role=@tas]
+    (create-path-db-poke:rc-lib s pathrow all-peers)
+
+  =.  chats.space  (~(put by chats.space) chat-path [chat-path chat-access])
+
+  [cards space]
+
+++  conditionally-add-ship-to-space-chats
+  |=  [=ship action=?(%member-join %role-change %invited) =space:store =bowl:gall]
+  ^-  (list card:agent:gall)
+  %-  zing
+  %+  turn
+    ~(tap by chats.space)
+  |=  kv=[k=path v=chat:store]
+  ^-  (list card:agent:gall)
+  ?:  &(=(action %member-join) =(-.access.v.kv %members))
+    =/  pathpeers  (scry-peers:rc-lib k.kv bowl)
+    =/  matches  (skim pathpeers |=(p=peer-row:chat-db =(patp.p ship)))
+    ?.  =(0 (lent matches))
+      ~
+    [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%add-ship-to-chat k.kv ship])]~
+  ?:  &(=(action %role-change) =(-.access.v.kv %admins))
+    ~  :: TODO handle detecting if we need to add this ship to the chat
+  ?:  &(=(action %invited) =(-.access.v.kv %invited))
+    ~  :: TODO handle detecting if we need to add this ship to the chat
+  ~
 
 ++  create-space
   |=  [=ship slug=@t payload=add-payload:store updated-at=@da]
@@ -31,6 +75,7 @@
       archetype=archetype:payload
       theme=default-theme
       updated-at=updated-at
+      chats=*chats:store
     ]
   new-space
 ::
