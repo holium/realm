@@ -12,13 +12,22 @@
   |%
   +$  card  card:agent:gall
   +$  versioned-state
-      $%  state-1
+      $%  state-2
+          state-1
           state-0
       ==
   ::
+  +$  state-2
+    $:  %2
+        =spaces:store
+        =invitations:vstore
+        =membership:membership-store
+        current=space-path:store
+    ==
+  ::
   +$  state-1
     $:  %1
-        =spaces:store
+        =spaces-v1:store
         =invitations:vstore
         =membership:membership-store
         current=space-path:store
@@ -26,12 +35,12 @@
   ::
   +$  state-0
     $:  %0
-        =spaces:store
+        =spaces-v1:store
         =invitations:vstore
         =membership:membership-store
     ==
   --
-=|  state-1
+=|  state-2
 =*  state  -
 =<
   %-  agent:dbug
@@ -60,8 +69,38 @@
     ^-  (quip card _this)
     =/  old  !<(versioned-state old-state)
     ?-  -.old
-      %0  `this(state [%1 spaces=spaces.old invitations=invitations.old membership=membership.old current=[our.bowl 'our']])
-      %1  `this(state old)
+      :: recursively upgrade all the way to %2
+      %0  (on-load !>([%1 spaces-v1.old invitations.old membership.old [our.bowl 'our']]))
+
+      :: do the actual work of adding in a `chats` map on each space
+      %1  
+        =/  to-add=(list [k=space-path:store v=space:store])
+          %+  turn
+            ~(tap by spaces-v1.old)
+          |=  kv=[k=space-path:store v=space-v1:store]
+          ^-  [k=space-path:store v=space:store]
+          [
+            k.kv
+            [
+              path.v.kv
+              name.v.kv
+              description.v.kv
+              type.v.kv
+              access.v.kv
+              picture.v.kv
+              color.v.kv
+              archetype.v.kv
+              theme.v.kv
+              updated-at.v.kv
+              chats=*(map path chat:store)
+            ]
+          ]
+        =/  new-spaces=spaces:store
+          (~(gas by *spaces:store) to-add)
+        `this(state [%2 new-spaces invitations.old membership.old current.old])
+
+      :: we're already upgraded
+      %2  `this(state old)
     ==
   ::
   ++  on-poke
