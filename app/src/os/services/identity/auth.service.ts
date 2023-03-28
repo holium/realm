@@ -14,7 +14,7 @@ import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
 import { EncryptedStore } from '../../lib/encryptedStore';
-import { ThemeType } from 'renderer/logic/theme';
+import { ThemeSnapshotType } from 'renderer/logic/theme';
 import { defaultTheme } from '@holium/shared';
 
 export type ShipCredentials = {
@@ -27,7 +27,7 @@ export type ShipCredentials = {
  */
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
-  private themeDb: Store<Record<string, ThemeType>>;
+  private themeDb: Store<Record<string, ThemeSnapshotType>>;
   private readonly state: AuthStoreType;
 
   handlers = {
@@ -78,7 +78,7 @@ export class AuthService extends BaseService {
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
     ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
-    setShipTheme: (patp: string, theme: ThemeType) =>
+    setShipTheme: (patp: string, theme: ThemeSnapshotType) =>
       ipcRenderer.invoke('realm.auth.set-ship-theme', patp, theme),
     getShipTheme: (patp: string) =>
       ipcRenderer.invoke('realm.auth.get-ship-theme', patp),
@@ -267,14 +267,13 @@ export class AuthService extends BaseService {
     );
   }
 
-  setShipTheme(_event: any, patp: string, theme: ThemeType) {
+  setShipTheme(_event: any, patp: string, theme: ThemeSnapshotType) {
     if (theme) {
       this.themeDb.set(patp, theme);
     }
   }
 
   getShipTheme(_event: any, patp: string) {
-    // @ts-ignore
     return this.themeDb.get(patp, defaultTheme);
   }
 

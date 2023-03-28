@@ -99,7 +99,6 @@ const ThemePanelPresenterView = ({
         console.log('wallpaper was undefined.');
         return;
       }
-      // @ts-ignore
       AuthActions.setShipTheme(me.patp, newTheme.values);
 
       // TODO doesnt work

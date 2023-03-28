@@ -6,6 +6,7 @@ import {
   Instance,
   applySnapshot,
   getSnapshot,
+  SnapshotOut,
 } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
@@ -162,6 +163,7 @@ export const Theme = types
   }));
 
 export type ThemeType = Instance<typeof Theme>;
+export type ThemeSnapshotType = SnapshotOut<typeof Theme>;
 
 export const ThemeStore = types
   .model({
