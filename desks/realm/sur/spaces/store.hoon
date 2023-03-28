@@ -30,8 +30,35 @@
       wallpaper=@t
   ==
 ::
++$  chat-access
+  $:  [%members ~]  :: ships in the members map
+      [%admins ~]   :: ships in the members map that are also admins
+      [%invited ~]  :: ships in the invitations map
+      [%whitelist ships=(set ship)]   :: specific ships, must also be in members map
+      [%blacklist ships=(set ship)]   :: all ships in members map, except specific ships
+  ==
++$  chat
+  $:  =path
+      access=chat-access
+  ==
+::
 +$  spaces              (map space-path space)
 +$  space
+  $:  path=space-path
+      name=space-name
+      description=space-description
+      type=space-type
+      access=space-access
+      picture=@t
+      color=@t  :: '#000000'
+      =archetype
+      =theme
+      updated-at=@da
+      chats=(map path chat)
+  ==
+::  %0 and %1 compatible types
++$  spaces-v1          (map space-path space-v1)
++$  space-v1
   $:  path=space-path
       name=space-name
       description=space-description
