@@ -24,10 +24,6 @@ const configuration: webpack.Configuration = {
           },
         },
       },
-      {
-        test: /\.sql$/i,
-        use: 'raw-loader',
-      },
     ],
   },
 

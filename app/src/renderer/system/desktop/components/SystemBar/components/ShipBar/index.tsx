@@ -159,7 +159,7 @@ export const ShipBarPresenter = () => {
     },
   };
 
-  const width = 394;
+  const width = 390;
   const minHeight = 138;
   return (
     <BarStyle
@@ -331,10 +331,6 @@ export const ShipBarPresenter = () => {
         <Flex
           layout="preserve-aspect"
           layoutId="account-bar-buttons"
-          justifyContent="flex-end"
-          // transition={{
-          //   duration: 0.25,
-          // }}
           initial={{ opacity: 0 }}
           animate={{
             opacity: isAccountExpanded ? 0 : 1,
@@ -342,10 +338,6 @@ export const ShipBarPresenter = () => {
           }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: 'easeInOut' }}
-          // animate={{
-          // opacity: isAccountExpanded ? 0 : 1,
-          // width: isAccountExpanded ? '50%' : '100%',
-          // }}
         >
           <Flex gap={8} height={34} alignItems="center">
             <RoomTray />

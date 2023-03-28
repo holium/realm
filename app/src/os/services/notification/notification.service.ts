@@ -16,6 +16,7 @@ import {
   QUERY_NOTIFICATIONS,
 } from './notification.utils';
 import notifInitSql from './notif.init-sql';
+import path from 'path';
 
 type NotifMobxUpdateType =
   | 'notification-added'
@@ -90,11 +91,13 @@ export class NotificationService extends BaseService {
   // ----------------------------------------------
   async subscribe(ship: Patp) {
     this.db = new Database(
-      `${app.getPath('userData')}/realm.${ship}/realm.db`,
+      path.join(app.getPath('userData'), `realm.${ship}`, 'realm.db'),
+      // `${app.getPath('userData')}/realm.${ship}/realm.db`,
       {
         // verbose: console.log,
       }
     );
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(notifInitSql);
     await this.core.conduit?.watch({
       app: 'notif-db',

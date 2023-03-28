@@ -78,7 +78,7 @@ export const ToggleStyle = styled.div<ToggleStyleProps>`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
     transition: 0.4s;
   }
 
@@ -89,17 +89,17 @@ export const ToggleStyle = styled.div<ToggleStyleProps>`
     width: ${(props) => sizeMap[props.size].dot}px;
     left: 4px;
     bottom: 4px;
-    background-color: var(--rlm-input-color);
+    background-color: rgba(var(--rlm-input-rgba));
     -webkit-transition: 0.4s;
     transition: 0.4s;
   }
 
   input:checked + .toggle-slider {
-    background-color: var(--rlm-accent-color);
+    background-color: rgba(var(--rlm-accent-rgba));
   }
 
   input:focus + .toggle-slider {
-    box-shadow: 0 0 1px var(--rlm-accent-color);
+    box-shadow: 0 0 1px rgba(var(--rlm-accent-rgba));
   }
 
   input:checked + .toggle-slider:before {

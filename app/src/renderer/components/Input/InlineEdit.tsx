@@ -64,7 +64,9 @@ const ContentArea: any = styled(Text)<
   &:hover {
     transition: ${(props) => props.theme.transition};
     background: ${(props: { theme: ThemeType; customBg?: string }) =>
-      props.customBg ? rgba(props.customBg, 0.6) : 'var(--rlm-overlay-hover)'};
+      props.customBg
+        ? rgba(props.customBg, 0.6)
+        : 'rgba(var(--rlm-overlay-hover-rgba))'};
     padding-left: ${(props) =>
       props.hasLeftIcon
         ? inputTokens.iconSize + (2 * props.theme.space[inputTokens.x]) / 2
@@ -82,7 +84,7 @@ const ContentArea: any = styled(Text)<
       color: transparent;
     }
     background: ${(props: { theme: ThemeType; customBg?: string }) =>
-      props.customBg || 'var(--rlm-overlay-active)'};
+      props.customBg || 'rgba(var(--rlm-overlay-active-rgba))'};
     padding-left: ${(props) =>
       props.hasLeftIcon
         ? inputTokens.iconSize + 2 * props.theme.space[inputTokens.x]

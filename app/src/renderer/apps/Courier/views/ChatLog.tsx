@@ -21,6 +21,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
+import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 
 type ChatLogProps = {
@@ -183,6 +184,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
+                key={path}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
@@ -193,8 +195,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   let replyToObj: any | undefined;
                   if (row.replyToMsgId) {
-                    const originalMsg = selectedChat.messages.find(
-                      (m) => m.id === row.replyToMsgId
+                    const originalMsg = toJS(
+                      selectedChat.messages.find(
+                        (m) => m.id === row.replyToMsgId
+                      )
                     );
                     if (originalMsg) {
                       let { nickname } = friends.getContactAvatarMetadata(
@@ -213,22 +217,20 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   const isNextGrouped =
                     index < messages.length - 1 &&
                     row.sender === messages[index + 1].sender;
+
                   const isPrevGrouped =
-                    index > 0 && row.sender === messages[index - 1].sender;
+                    index > 0 &&
+                    row.sender === messages[index - 1].sender &&
+                    Object.keys(messages[index - 1].contents[0])[0] !==
+                      'status';
 
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
 
                   return (
-                    <Box
-                      key={`${path}-${index}`}
-                      pt={topSpacing}
-                      pb={isLast ? bottomSpacing : 0}
-                    >
+                    <Box pt={topSpacing} pb={isLast ? bottomSpacing : 0}>
                       <ChatMessage
-                        isPrevGrouped={
-                          index > 0 && row.sender === messages[index - 1].sender
-                        }
+                        isPrevGrouped={isPrevGrouped}
                         isNextGrouped={isNextGrouped}
                         containerWidth={containerWidth}
                         replyTo={replyToObj}

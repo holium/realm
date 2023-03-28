@@ -4,7 +4,7 @@
   "description": "A desktop environment for Urbit",
   "private": "true",
   "scripts": {
-    "prebuild": "electron-rebuild better-sqlite3",
+    "prebuild": "electron-rebuild -f -w better-sqlite3",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.prod.ts",
@@ -38,7 +38,7 @@
     "aws-sdk": "^2.1204.0",
     "axios": "^0.26.1",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^8.1.0",
+    "better-sqlite3": "^8.2.0",
     "big-integer": "^1.6.51",
     "color.js": "^1.2.0",
     "cross-fetch": "^3.1.5",
@@ -130,7 +130,12 @@
     "productName": "Realm",
     "appId": "org.holium.Realm",
     "asar": true,
-    "asarUnpack": "**\\*.{node,dll}",
+    "asarUnpack": [
+      "**\\*.{node,dll}",
+      "**/node_modules/better-sqlite3/**/*",
+      "**/node_modules/bindings/**/*",
+      "**/node_modules/file-uri-to-path/**/*"
+    ],
     "files": [
       "dist",
       "node_modules",

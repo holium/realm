@@ -177,10 +177,12 @@ export const FragmentBlockquote = styled(motion.blockquote)`
 
   .fragment-reply {
     border-radius: 4px;
-    gap: 2px;
 
     ${FragmentBase} {
       font-size: 0.86em;
+    }
+    ${Text.Custom} {
+      line-height: 1rem;
     }
     .block-author {
       display: none !important;
@@ -368,7 +370,12 @@ export const renderFragment = (
         fragmentType !== 'reply'
       ) {
         replyContent = (
-          <FragmentPlain id={id}>
+          <FragmentPlain
+            maxWidth={containerWidth && containerWidth - 16}
+            truncate
+            id={id}
+            key={`${author + index}-reply`}
+          >
             {capitalizeFirstLetter(fragmentType)}
           </FragmentPlain>
         );
@@ -382,10 +389,20 @@ export const renderFragment = (
         );
       }
       return (
-        <FragmentBlockquote id={id}>
+        <FragmentBlockquote
+          style={{ height: 42 }}
+          id={id}
+          key={`${author + index}-reply`}
+        >
           <Flex flexDirection="column" className="fragment-reply">
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
-            {replyContent}
+            <Text.Custom
+              truncate
+              overflow="hidden"
+              maxWidth={containerWidth && containerWidth - 16}
+            >
+              {replyContent}
+            </Text.Custom>
           </Flex>
         </FragmentBlockquote>
       );

@@ -107,7 +107,7 @@ const ChatAvatarBox = styled(Box)<ChatAvatarBoxProps>`
     css`
       &:hover {
         transition: var(--transition);
-        background: var(--rlm-overlay-hover);
+        background: rgba(var(--rlm-overlay-hover-rgba));
       }
     `}
 `;

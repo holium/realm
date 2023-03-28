@@ -93,9 +93,9 @@ const AccountPaneStyle = styled(Flex)<{ isActive?: boolean }>`
   border-radius: 4px;
   transition: var(--transition);
   background: ${(props) =>
-    props.isActive ? 'var(--rlm-overlay-active)' : 'transparent'};
+    props.isActive ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
   &:hover {
     transition: var(--transition);
-    background: var(--rlm-overlay-hover);
+    background: rgba(var(--rlm-overlay-hover-rgba));
   }
 `;

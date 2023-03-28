@@ -228,7 +228,7 @@ const IconButton = styled(Base)<IconButtonProps>`
   align-items: center;
   justify-content: center;
   background-color: ${(props) =>
-    props.isSelected ? 'var(--rlm-overlay-active)' : 'transparent'};
+    props.isSelected ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
   &:hover:not([disabled]) {
     transition: var(--transition);
     background-color: rgba(var(--rlm-overlay-hover-rgba));

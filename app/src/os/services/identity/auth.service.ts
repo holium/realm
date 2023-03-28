@@ -14,6 +14,8 @@ import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
 import { EncryptedStore } from '../../lib/encryptedStore';
+import { ThemeSnapshotType } from 'renderer/logic/theme';
+import { defaultTheme } from '@holium/shared';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
@@ -25,6 +27,7 @@ export type ShipCredentials = {
  */
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
+  private themeDb: Store<Record<string, ThemeSnapshotType>>;
   private readonly state: AuthStoreType;
 
   handlers = {
@@ -38,6 +41,8 @@ export class AuthService extends BaseService {
     'realm.auth.remove-ship': this.removeShip,
     'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
+    'realm.auth.set-ship-theme': this.setShipTheme,
+    'realm.auth.get-ship-theme': this.getShipTheme,
     'realm.auth.cancel-login': this.cancelLogin,
     'realm.auth.set-email': this.setEmail,
     'realm.auth.change-email': this.changeEmail,
@@ -73,6 +78,10 @@ export class AuthService extends BaseService {
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
     ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
+    setShipTheme: (patp: string, theme: ThemeSnapshotType) =>
+      ipcRenderer.invoke('realm.auth.set-ship-theme', patp, theme),
+    getShipTheme: (patp: string) =>
+      ipcRenderer.invoke('realm.auth.get-ship-theme', patp),
     setEmail: async (email: string) =>
       await ipcRenderer.invoke('realm.auth.set-email', email),
     changeEmail: async (
@@ -103,6 +112,10 @@ export class AuthService extends BaseService {
       name: 'realm.auth',
       accessPropertiesByDotNotation: true,
       defaults: AuthStore.create({ firstTime: true }),
+    });
+    this.themeDb = new Store({
+      name: 'realm.auth-theme',
+      accessPropertiesByDotNotation: true,
     });
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-expect-error
@@ -252,6 +265,16 @@ export class AuthService extends BaseService {
       profile.color,
       profile.avatar
     );
+  }
+
+  setShipTheme(_event: any, patp: string, theme: ThemeSnapshotType) {
+    if (theme) {
+      this.themeDb.set(patp, theme);
+    }
+  }
+
+  getShipTheme(_event: any, patp: string) {
+    return this.themeDb.get(patp, defaultTheme);
   }
 
   storeCredentials(
@@ -441,8 +464,6 @@ export class AuthService extends BaseService {
       id,
       url,
       patp: ship,
-      wallpaper:
-        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     });
 
     this.db.set(`ships.${id}`, getSnapshot(newAuthShip));

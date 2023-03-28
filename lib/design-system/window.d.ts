@@ -5,3 +5,4 @@ declare global {
     onSpotifyIframeApiReady: any;
   }
 }
+declare module 'urbit-ob';

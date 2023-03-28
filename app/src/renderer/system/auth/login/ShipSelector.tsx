@@ -26,7 +26,7 @@ export const SelectedLine = styled(motion.div)`
 `;
 
 const ShipSelectorPresenter = () => {
-  const { identity } = useServices();
+  const { identity, theme } = useServices();
   const { auth } = identity;
   const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
   const [orderedList, setOrder] = useState(auth.order || []);
@@ -49,8 +49,14 @@ const ShipSelectorPresenter = () => {
           style={{ zIndex: 1 }}
           whileDrag={{ zIndex: 20 }}
           onDragStart={() => setDragging(true)}
-          onClick={() => {
+          onClick={async () => {
             !dragging && AuthActions.setSelected(ship.patp);
+            const currTheme = await AuthActions.getShipTheme(ship.patp);
+            if (currTheme) {
+              theme.setCurrentTheme(currTheme);
+            } else {
+              console.error('Error: no theme found for ship:', ship.patp);
+            }
           }}
           onMouseUp={() => {
             setDragging(false);

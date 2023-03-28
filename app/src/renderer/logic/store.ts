@@ -30,9 +30,10 @@ import {
 // import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
-import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
+import { AuthActions } from './actions/auth';
+import { defaultTheme } from '@holium/shared';
 
 const Services = types
   .model('ServicesStore', {
@@ -87,20 +88,7 @@ const services = Services.create({
   theme: {
     currentTheme: 'default',
     themes: {
-      default: {
-        id: 'default',
-        backgroundColor: '#c4c3bf',
-        accentColor: '#4E9EFD',
-        inputColor: '#FFFFFF',
-        dockColor: '#F5F5F4',
-        windowColor: '#f5f5f4',
-        mode: 'light',
-        textColor: '#2a2927',
-        iconColor: rgba('#333333', 0.6),
-        mouseColor: '#4E9EFD',
-        wallpaper:
-          'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
-      },
+      default: defaultTheme,
     },
   },
   shell: {},
@@ -211,7 +199,9 @@ OSActions.onLog((_event: any, data: any) => {
 });
 
 OSActions.onSetTheme((_event: any, data: any) => {
-  // console.log('onSetTheme', data);
+  const patp: string | undefined =
+    servicesStore.identity.auth.currentShip?.patp;
+  patp && AuthActions.setShipTheme(patp, data);
   servicesStore.theme.setCurrentTheme(data);
 });
 
@@ -281,7 +271,17 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   // console.log(response.ship)
   if (!response.ship) {
-    // if we haven't logged in, set false for auth page
+    // if we haven't logged in
+    const patp: string | undefined =
+      servicesStore.identity.auth.currentShip?.patp;
+    if (patp) {
+      AuthActions.getShipTheme(patp).then((currTheme) => {
+        if (currTheme) {
+          servicesStore.theme.setCurrentTheme(currTheme);
+        }
+      });
+    }
+    // set false for auth page
     coreStore.setResuming(false);
   } else {
     // if we have logged in, set false only if the ship has loaded
