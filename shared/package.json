@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "react": "^18.0.0",
+    "polished": "^4.2.2",
     "babel-loader": "^8.2.5"
   },
   "devDependencies": {
