@@ -11,6 +11,7 @@ import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
+import { defaultTheme as dt } from '@holium/shared';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**
@@ -82,9 +83,6 @@ export const genCSSVariables = (theme: ThemeType) => {
   `;
 };
 
-export const DEFAULT_WALLPAPER =
-  'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
-
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   const windowColor =
     bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
@@ -115,16 +113,16 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 export const Theme = types
   .model('Theme', {
     id: types.identifier,
-    backgroundColor: types.optional(types.string, '#c4c3bf'),
-    accentColor: types.optional(types.string, '#4E9EFD'),
-    inputColor: types.optional(types.string, '#FFFFFF'),
-    dockColor: types.optional(types.string, '#F5F5F4'),
-    windowColor: types.optional(types.string, '#f5f5f4'),
-    mode: types.optional(types.enumeration(['light', 'dark']), 'light'),
-    textColor: types.optional(types.string, '#2a2927'),
-    iconColor: types.optional(types.string, '#333333'),
-    mouseColor: types.optional(types.string, '#4E9EFD'),
-    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
+    mode: types.optional(types.enumeration(['light', 'dark']), dt.mode),
+    backgroundColor: types.optional(types.string, dt.backgroundColor),
+    accentColor: types.optional(types.string, dt.accentColor),
+    inputColor: types.optional(types.string, dt.inputColor),
+    dockColor: types.optional(types.string, dt.dockColor),
+    iconColor: types.optional(types.string, dt.iconColor),
+    textColor: types.optional(types.string, dt.textColor),
+    windowColor: types.optional(types.string, dt.windowColor),
+    wallpaper: types.optional(types.string, dt.wallpaper),
+    mouseColor: types.optional(types.string, dt.mouseColor),
   })
   .views((self) => ({
     get values() {
