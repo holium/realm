@@ -21,6 +21,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
+import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 
 type ChatLogProps = {
@@ -183,6 +184,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
+                key={path}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
@@ -193,8 +195,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   let replyToObj: any | undefined;
                   if (row.replyToMsgId) {
-                    const originalMsg = selectedChat.messages.find(
-                      (m) => m.id === row.replyToMsgId
+                    const originalMsg = toJS(
+                      selectedChat.messages.find(
+                        (m) => m.id === row.replyToMsgId
+                      )
                     );
                     if (originalMsg) {
                       let { nickname } = friends.getContactAvatarMetadata(
