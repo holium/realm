@@ -32,7 +32,8 @@ export const ShutdownDialogConfig: DialogConfig = {
 };
 
 const ShutdownDialogPresenter = () => {
-  const [timer, setTimer] = useState<NodeJS.Timeout>();
+  const [seconds, setSeconds] = useState(60);
+  const [id, setId] = useState<NodeJS.Timer>();
 
   function shutdown() {
     trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
@@ -40,10 +41,14 @@ const ShutdownDialogPresenter = () => {
   }
 
   useEffect(() => {
-    console.log('timer', timer);
-    if (!timer) {
-      const timeout = setTimeout(shutdown, 60000);
-      setTimer(timeout);
+    if (seconds <= 0) {
+      shutdown();
+    }
+    if (!id) {
+      const interval = setInterval(() => {
+        setSeconds((seconds) => seconds - 1);
+      }, 1000);
+      setId(interval);
     }
   });
 
@@ -53,16 +58,21 @@ const ShutdownDialogPresenter = () => {
         Power Off
       </Text>
       <Text fontSize={2} lineHeight="copy" variant="body">
-        Realm will power off automatically in 60 seconds.
+        Realm will power off automatically in {seconds} second
+        {seconds > 1 && 's'}.
       </Text>
       <Box mt={4} width="100%">
         <Button
           width="45%"
           disabled={false}
           onClick={() => {
-            clearTimeout(timer);
+            id && clearInterval(id);
             ShellActions.closeDialog();
             ShellActions.setBlur(false);
+            // reset seconds/id for next open
+            // 62 === 60 ???
+            setId(undefined);
+            setSeconds(62);
           }}
           variant="secondary"
         >
