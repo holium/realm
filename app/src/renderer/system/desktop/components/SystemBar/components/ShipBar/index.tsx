@@ -273,9 +273,8 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  AuthActions.logout(ship.patp);
-                  setActiveApp(null);
-                  // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
+                  trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
+                  AuthActions.shutdown();
                 }}
               >
                 <Icon name="Shutdown" size={22} />

@@ -6,7 +6,8 @@ type Action =
   | 'CLICK_INSTALL_REALM'
   | 'CLICK_LOG_IN'
   | 'CLICK_LOG_OUT'
-  | 'CLICK_NOTIFICATION';
+  | 'CLICK_NOTIFICATION'
+  | 'CLICK_SHUTDOWN';
 
 export const trackEvent = (
   event: Action,
