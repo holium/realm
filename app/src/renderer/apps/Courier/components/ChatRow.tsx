@@ -193,6 +193,12 @@ export const ChatRowPresenter = ({
     );
   }, [chat?.lastMessage?.id]);
 
+  const lastMessageTimestamp = useMemo(() => {
+    if (!chat || !chat.lastMessage) return timelineDate(new Date(timestamp));
+
+    return timelineDate(new Date(chat.lastMessage.createdAt));
+  }, [chat?.lastMessage?.id]);
+
   return (
     <Row
       id={chatRowId}
@@ -260,7 +266,7 @@ export const ChatRowPresenter = ({
             fontSize={1}
             opacity={0.3}
           >
-            {timelineDate(new Date(timestamp))}
+            {lastMessageTimestamp}
           </Text.Custom>
           <UnreadBadge count={unreadCount} />
         </Flex>

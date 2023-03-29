@@ -217,7 +217,6 @@ export class ShipService extends BaseService {
     this.state = ShipModel.create({
       patp: ship,
       url: persistedState.url || shipInfo.url,
-      wallpaper: persistedState.wallpaper || null,
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
@@ -325,7 +324,6 @@ export class ShipService extends BaseService {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
-      wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
@@ -562,9 +560,14 @@ export class ShipService extends BaseService {
       this.getS3Bucket()
         .then(async (response: any) => {
           console.log(response);
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
           const client = new S3Client({
             credentials: response.credentials,
-            endpoint: response.credentials.endpoint,
+            endpoint: endp,
             signatureVersion: 'v4',
           });
           let fileContent, fileName, fileExtension;

@@ -23,21 +23,25 @@ import {
 import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
+import { BlockStyle } from '../Block/Block';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { BUBBLE_HEIGHT } from './Bubble.constants';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
   margin: 0px 0px;
+  line-height: ${BUBBLE_HEIGHT.rem.fragment};
 `;
 
 export const BlockWrapper = styled(motion.span)`
   padding: 0px;
   display: inline-block;
+  margin-top: 2px;
   height: 100%;
 `;
 
@@ -52,7 +56,7 @@ export const FragmentBlock = styled(motion.span)`
 export const FragmentPlain = styled(FragmentBase)`
   font-weight: 400;
   margin: 0 0;
-  line-height: 1.1rem;
+  line-height: ${BUBBLE_HEIGHT.rem.fragment};
 `;
 
 export const FragmentBold = styled(FragmentBase)`
@@ -173,21 +177,34 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-radius: 3px;
   padding-top: 6px;
   padding-bottom: 6px;
-  background-color: rgba(0, 0, 0, 0.12);
+  background-color: rgba(0, 0, 0, 0.1);
 
   .fragment-reply {
     border-radius: 4px;
-    gap: 2px;
+    height: 2rem;
 
     ${FragmentBase} {
-      font-size: 0.86em;
+      font-size: 0.82rem;
+    }
+    ${Text.Custom} {
+      line-height: 1rem;
     }
     .block-author {
       display: none !important;
     }
+    ${BlockWrapper} {
+      height: 32px !important;
+      width: fit-content !important;
+    }
+    ${BlockStyle} {
+      padding: 0px;
+      margin: 0px;
+      height: 32px !important;
+      width: fit-content !important;
+    }
     ${FragmentImage} {
-      width: fit-content;
-      height: 40px;
+      width: fit-content !important;
+      height: 32px !important;
     }
     &.pinned {
       gap: 0px;
@@ -237,7 +254,7 @@ export const renderFragment = (
   index: number,
   author: string,
   containerWidth?: number,
-  onLoaded?: () => void // used in the case where async data is loaded
+  onMeasure?: () => void // used in the case where async data is loaded
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -328,10 +345,20 @@ export const renderFragment = (
             draggable={false}
             mode="embed"
             containerWidth={containerWidth}
+            metadata={(fragment as FragmentLinkType).metadata}
             link={(fragment as FragmentLinkType).link}
             id={id}
             by={author}
-            onLinkLoaded={onLoaded}
+            onLinkLoaded={
+              // onMeasure
+              //   ? onMeasure
+              //   : () => {
+              //       // do nothing
+              //     }
+              () => {
+                // do nothing
+              }
+            }
             minWidth={320}
           />
         </BlockWrapper>
@@ -339,8 +366,6 @@ export const renderFragment = (
 
     case 'image':
       const imageFrag = fragment as FragmentImageType;
-      const isPrecalculated =
-        imageFrag.metadata?.width && imageFrag.metadata?.height;
       return (
         <BlockWrapper id={id} key={author + index}>
           <ImageBlock
@@ -352,7 +377,7 @@ export const renderFragment = (
             width={imageFrag.metadata?.width}
             height={imageFrag.metadata?.height}
             by={author}
-            onLoaded={!isPrecalculated ? onLoaded : undefined}
+            onImageLoaded={onMeasure}
           />
         </BlockWrapper>
       );
@@ -368,36 +393,60 @@ export const renderFragment = (
         fragmentType !== 'reply'
       ) {
         replyContent = (
-          <FragmentPlain id={id}>
+          <FragmentPlain
+            maxWidth={containerWidth && containerWidth - 16}
+            truncate
+            id={id}
+            key={`${author + index}-reply`}
+          >
             {capitalizeFirstLetter(fragmentType)}
           </FragmentPlain>
         );
       } else {
-        replyContent = renderFragment(
-          id,
-          msg,
-          index,
-          replyAuthor,
-          containerWidth
-        );
+        // TODO flesh out the image case with the following text
+        if (fragmentType === 'image') {
+          // take out precalculated height and width
+          (msg as FragmentImageType).metadata = {};
+        }
+        replyContent = renderFragment(id, msg, index, replyAuthor);
       }
+
       return (
-        <FragmentBlockquote id={id}>
-          <Flex flexDirection="column" className="fragment-reply">
+        <FragmentBlockquote
+          style={{ height: 42 }}
+          id={id}
+          key={`${author + index}-reply`}
+        >
+          <Flex
+            gap={fragmentType === 'image' ? 6 : 0}
+            flexDirection={fragmentType === 'image' ? 'row-reverse' : 'column'}
+            className="fragment-reply"
+          >
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
-            {replyContent}
+            <Text.Custom
+              truncate
+              overflow="hidden"
+              width="fit-content"
+              maxWidth={containerWidth && containerWidth - 16}
+            >
+              {replyContent}
+            </Text.Custom>
           </Flex>
         </FragmentBlockquote>
       );
     case 'tab':
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
-        <TabWrapper width={340} id={url} p={0}>
+        <TabWrapper
+          width={containerWidth && containerWidth - 16}
+          id={url}
+          p={0}
+        >
           <Bookmark
             url={url}
             favicon={favicon}
             title={title}
-            width={320}
+            width={containerWidth && containerWidth - 36}
             onNavigate={(url: string) => {
               window.open(url, '_blank');
             }}

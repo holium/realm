@@ -1,3 +1,4 @@
+// @ts-ignore
 import { isValidPatp } from 'urbit-ob';
 import {
   FragmentType,

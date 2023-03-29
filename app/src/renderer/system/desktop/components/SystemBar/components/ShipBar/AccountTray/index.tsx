@@ -89,7 +89,7 @@ export const AccountTray = observer(AccountTrayPresenter);
 const AccountPaneStyle = styled(Flex)<{ isActive?: boolean }>`
   gap: 10px;
   align-items: center;
-  padding: 2px 2px 2px 6px;
+  padding: 2px 4px 2px 6px;
   border-radius: 4px;
   transition: var(--transition);
   background: ${(props) =>

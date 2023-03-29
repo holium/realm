@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast } from 'mobx-state-tree';
+import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -265,11 +265,11 @@ export const Chat = types
   }))
   .actions((self) => ({
     fetchMessages: flow(function* () {
+      self.lastFetch = new Date().getTime();
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
-        self.messages = messages;
+        applySnapshot(self.messages, messages);
         self.hidePinned = self.isPinLocallyHidden();
-        self.lastFetch = new Date().getTime();
         return self.messages;
       } catch (error) {
         console.error(error);

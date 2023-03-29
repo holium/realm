@@ -173,7 +173,7 @@ type ReactionProps = {
   defaultIsOpen?: boolean;
   reactions: FragmentReactionType[];
   size?: keyof typeof ReactionSizes;
-  onReaction: (payload: OnReactionPayload) => void;
+  onReaction?: (payload: OnReactionPayload) => void;
 };
 
 export const Reactions = (props: ReactionProps) => {
@@ -224,6 +224,7 @@ export const Reactions = (props: ReactionProps) => {
   };
 
   const onClick = (emoji: string) => {
+    if (!onReaction) return;
     setIsReacting(false);
     if (checkDupe(emoji)) {
       const reactToRemove = reactions.find(
@@ -318,47 +319,49 @@ export const Reactions = (props: ReactionProps) => {
           </ReactionButton>
         );
       })}
-      <Menu
-        id={id}
-        orientation="top-left"
-        clickPreventClass="epr-category-nav"
-        className="emoji-picker-menu"
-        dimensions={{ width: WIDTH, height: HEIGHT }}
-        offset={{ x: 2, y: 2 }}
-        triggerEl={
-          <ReactionButton
-            isOur={isOur}
-            ourColor={ourColor}
-            size={size}
-            className="bubble-reactions"
-          >
-            <Icon
-              pointerEvents="none"
-              size={18}
-              opacity={0.5}
-              name="Reaction"
+      {!isOur && (
+        <Menu
+          id={id}
+          orientation="top-left"
+          clickPreventClass="epr-category-nav"
+          className="emoji-picker-menu"
+          dimensions={{ width: WIDTH, height: HEIGHT }}
+          offset={{ x: 2, y: 2 }}
+          triggerEl={
+            <ReactionButton
+              isOur={isOur}
+              ourColor={ourColor}
+              size={size}
+              className="bubble-reactions"
+            >
+              <Icon
+                pointerEvents="none"
+                size={18}
+                opacity={0.5}
+                name="Reaction"
+              />
+            </ReactionButton>
+          }
+        >
+          <ReactionPickerStyle zIndex={20} transition={{ duration: 0.15 }}>
+            <EmojiPicker
+              emojiVersion="0.6"
+              height={HEIGHT}
+              width={WIDTH}
+              lazyLoadEmojis
+              previewConfig={{
+                showPreview: false,
+              }}
+              defaultSkinTone={SkinTones.NEUTRAL}
+              onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
+                evt.stopPropagation();
+                onClick(emojiData.unified);
+              }}
+              autoFocusSearch={false}
             />
-          </ReactionButton>
-        }
-      >
-        <ReactionPickerStyle zIndex={20} transition={{ duration: 0.15 }}>
-          <EmojiPicker
-            emojiVersion="0.6"
-            height={HEIGHT}
-            width={WIDTH}
-            lazyLoadEmojis
-            previewConfig={{
-              showPreview: false,
-            }}
-            defaultSkinTone={SkinTones.NEUTRAL}
-            onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
-              evt.stopPropagation();
-              onClick(emojiData.unified);
-            }}
-            autoFocusSearch={false}
-          />
-        </ReactionPickerStyle>
-      </Menu>
+          </ReactionPickerStyle>
+        </Menu>
+      )}
     </ReactionRow>
   );
 };

@@ -8,6 +8,10 @@ import {
   Text,
   Reply,
   measureImage,
+  fetchOGData,
+  LINK_PREVIEW_HEIGHT,
+  RAW_LINK_HEIGHT,
+  extractOGData,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -21,6 +25,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
+import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 
 type ChatLogProps = {
@@ -87,6 +92,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           );
           metadata = { width, height };
         }
+        if (Object.keys(frag)[0] === 'link') {
+          const result = await fetchOGData(frag.link);
+          if (result.linkType === 'opengraph') {
+            metadata = {
+              height: LINK_PREVIEW_HEIGHT as string,
+              ogData: JSON.stringify(extractOGData(result.data)) as string,
+            };
+          } else {
+            metadata = { height: RAW_LINK_HEIGHT as string };
+          }
+        }
 
         return {
           content: frag,
@@ -132,8 +148,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
     subtitle = `${selectedChat.peers.length} members`;
   }
-
-  // console.log('chatlog', toJS(selectedChat));
 
   return (
     <Flex flexDirection="column">
@@ -183,6 +197,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
+                key={`${path}-${selectedChat.lastFetch}`}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
@@ -193,8 +208,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   let replyToObj: any | undefined;
                   if (row.replyToMsgId) {
-                    const originalMsg = selectedChat.messages.find(
-                      (m) => m.id === row.replyToMsgId
+                    const originalMsg = toJS(
+                      selectedChat.messages.find(
+                        (m) => m.id === row.replyToMsgId
+                      )
                     );
                     if (originalMsg) {
                       let { nickname } = friends.getContactAvatarMetadata(
@@ -213,22 +230,27 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   const isNextGrouped =
                     index < messages.length - 1 &&
                     row.sender === messages[index + 1].sender;
+
                   const isPrevGrouped =
-                    index > 0 && row.sender === messages[index - 1].sender;
+                    index > 0 &&
+                    row.sender === messages[index - 1].sender &&
+                    Object.keys(messages[index - 1].contents[0])[0] !==
+                      'status';
 
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
 
                   return (
                     <Box
-                      key={`${path}-${index}`}
+                      key={`${row.id}-${row.updatedAt}-${
+                        isLast ? 'last' : 'not-last'
+                      }}`}
+                      mx="1px"
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
                     >
                       <ChatMessage
-                        isPrevGrouped={
-                          index > 0 && row.sender === messages[index - 1].sender
-                        }
+                        isPrevGrouped={isPrevGrouped}
                         isNextGrouped={isNextGrouped}
                         containerWidth={containerWidth}
                         replyTo={replyToObj}

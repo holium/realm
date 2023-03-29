@@ -1,1 +1,1 @@
-export {};
+export { defaultTheme } from './constants/theme';

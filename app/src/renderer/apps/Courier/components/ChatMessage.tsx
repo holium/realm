@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -42,8 +36,6 @@ export const ChatMessagePresenter = ({
   const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
   const { getOptions, setOptions } = useContextMenu();
-
-  useLayoutEffect(measure);
 
   useEffect(() => {
     if (!ship) return;
@@ -185,9 +177,9 @@ export const ChatMessagePresenter = ({
       authorColor={authorColor}
       message={replyTo ? [replyTo, ...message.contents] : message.contents}
       sentAt={sentAt}
-      onLoad={measure}
+      onMeasure={measure}
       reactions={reactionList}
-      onReaction={canReact && !isOur ? onReaction : undefined}
+      onReaction={canReact ? onReaction : undefined}
     />
   );
 };

@@ -195,6 +195,7 @@ export const ChatInput = ({
                 mb={1}
                 width="fit-content"
                 height={100}
+                onLinkLoaded={() => {}}
               />
               <motion.div className="chat-attachment-remove-btn">
                 <Button.Base
