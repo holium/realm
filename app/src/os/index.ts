@@ -6,6 +6,7 @@ import {
   dialog,
   session,
   WebPreferences,
+  app,
 } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -263,6 +264,10 @@ export class Realm extends EventEmitter {
 
   get credentials() {
     return this.session;
+  }
+
+  shutdown() {
+    app.quit();
   }
 
   async disconnect() {

@@ -36,6 +36,7 @@ export class AuthService extends BaseService {
     'realm.auth.set-first-time': this.setFirstTime,
     'realm.auth.set-selected': this.setSelected,
     'realm.auth.set-order': this.setOrder,
+    'realm.auth.shutdown': this.shutdown,
     'realm.auth.login': this.login,
     'realm.auth.logout': this.logout,
     'realm.auth.remove-ship': this.removeShip,
@@ -54,6 +55,7 @@ export class AuthService extends BaseService {
   };
 
   static preload = {
+    shutdown: async () => await ipcRenderer.invoke('realm.auth.shutdown'),
     login: async (ship: string, password: string) =>
       await ipcRenderer.invoke('realm.auth.login', ship, password),
     logout: async (ship: string) =>
@@ -364,6 +366,10 @@ export class AuthService extends BaseService {
       result = 'error';
     }
     return result;
+  }
+
+  async shutdown(_event: any): Promise<void> {
+    this.core.shutdown();
   }
 
   async login(_event: any, patp: string, password: string): Promise<string> {
