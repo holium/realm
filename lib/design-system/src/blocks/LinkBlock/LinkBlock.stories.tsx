@@ -1,7 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Flex } from '../..';
 import { LinkBlock } from './LinkBlock';
-import { TweetBlock } from './TweetBlock';
 
 export default {
   component: LinkBlock,
@@ -99,19 +98,42 @@ export const NoOpenGraph: ComponentStory<typeof LinkBlock> = () => (
 export const Twitter: ComponentStory<typeof LinkBlock> = () => (
   <Flex flexDirection="row" gap={16} p={1}>
     <Flex flexDirection="column" width={430} p={2} background={'#FFFF'}>
-      <TweetBlock
+      <LinkBlock
         id="link-block-1"
         mode="display"
         link={'https://twitter.com/Ollyoxalls/status/1620941313431445504'}
+        by="~lomder-librun"
         width={400}
       />
     </Flex>
     <Flex flexDirection="column" width={430} p={2} background={'#FFFF'}>
-      <TweetBlock
+      <LinkBlock
         id="link-block-1"
         mode="display"
         link={'https://twitter.com/HoliumCorp/status/1619123218442248195'}
+        by="~lomder-librun"
         width={400}
+      />
+    </Flex>
+  </Flex>
+);
+
+export const Media: ComponentStory<typeof LinkBlock> = () => (
+  <Flex flexDirection="row" gap={16} p={1}>
+    <Flex flexDirection="column" width={500} p={2} background={'#FFFF'}>
+      <LinkBlock
+        id="link-block-1"
+        mode="display"
+        link={'https://www.youtube.com/watch?v=RnAuSsAuJuw'}
+        by="~lomder-librun"
+      />
+    </Flex>
+    <Flex flexDirection="column" width={500} p={2} background={'#FFFF'}>
+      <LinkBlock
+        id="link-block-1"
+        mode="display"
+        link={'https://www.youtube.com/watch?v=Q-MtMu-Jbf4&pp=ygUGaG9saXVt'}
+        by="~lomder-librun"
       />
     </Flex>
   </Flex>

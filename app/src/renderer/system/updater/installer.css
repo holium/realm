@@ -1,40 +1,39 @@
 :root {
-  font-family: 'Rubik', system-ui, sans-serif;
-  color: var(--rlm-text-color);
   --theme-mode: 'light';
   --blur: blur(24px);
   --transition: all 0.25s ease;
   --transition-slow: all 0.5s ease;
-  --rlm-font: 'Rubik', system-ui, sans-serif;
-  --rlm-base-color: #c4c3bf;
-  --rlm-accent-color: #4e9efd;
-  --rlm-input-color: #f5f5f4;
-  --rlm-border-color: #ddddda;
-  --rlm-window-color: #ffffff;
-  --rlm-dock-color: #f5f5f475;
-  --rlm-card-color: #f5f5f4;
-  --rlm-theme-mode: light;
-  --rlm-text-color: #2a2927;
-  --rlm-icon-color: #333333;
-  --rlm-intent-alert-color: #e82a00;
-  --rlm-intent-caution-color: #ffbc32;
-  --rlm-intent-success-color: #0fc383;
+  --rlm-font: 'Rubik',system-ui,sans-serif;
   --rlm-border-radius-4: 4px;
   --rlm-border-radius-6: 6px;
   --rlm-border-radius-9: 9px;
   --rlm-border-radius-12: 12px;
   --rlm-border-radius-12: 16px;
-  --rlm-box-shadow-1: 0px 0px 4px rgba(0, 0, 0, 0.06);
-  --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
-  --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
-  --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
-  --rlm-overlay-hover: rgba(0, 0, 0, 0.05);
-  --rlm-overlay-active: rgba(0, 0, 0, 0.09);
+  --rlm-box-shadow-1: 0px 0px 4px rgba(0,0,0,0.06);
+  --rlm-box-shadow-2: 0px 0px 9px rgba(0,0,0,0.12);
+  --rlm-box-shadow-3: 0px 0px 9px rgba(0,0,0,0.18);
+  --rlm-box-shadow-lifted: 0px 0px 9px rgba(0,0,0,0.24);
+
+  --rlm-base-rgba: 196,195,191;
+  --rlm-accent-rgba: 78,158,253;
+  --rlm-input-rgba: 245,245,244;
+  --rlm-border-rgba: 221,221,218;
+  --rlm-window-rgba: 255,255,255;
+  --rlm-dock-rgba: 245,245,244,0.45;
+  --rlm-card-rgba: 245,245,244;
+  --rlm-text-rgba: 42,41,39;
+  --rlm-icon-rgba: 51,51,51;
+  --rlm-intent-alert-rgba: 232,42,0;
+  --rlm-intent-caution-rgba: 255,188,50;
+  --rlm-intent-success-rgba: 15,195,131;
+  --rlm-overlay-hover-rgba: 0,0,0,0.05;
+  --rlm-overlay-active-rgba: 0,0,0,0.09;
 }
 body {
   margin: 0;
   padding: 0;
-  background: var(--rlm-window-color);
+  color: rgba(var(--rlm-text-rgba));
+  background: rgba(var(--rlm-window-rgba));
   font-family: var(--rlm-font);
 }
 * {

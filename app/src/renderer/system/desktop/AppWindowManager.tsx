@@ -21,21 +21,23 @@ const AppWindowManagerPresenter = () => {
     () => [
       {
         label: 'Change wallpaper',
+        icon: 'Palette',
         onClick: () => {
           ShellActions.setBlur(true);
           ShellActions.openDialog('wallpaper-dialog');
         },
       },
-      {
-        label: 'Show dashboard',
-        disabled: true,
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          console.log('changing wallpaper');
-        },
-      },
+      // TODO leave in as a reminder to add this feature
+      // {
+      //   label: 'Show widgets',
+      //   disabled: true,
+      //   onClick: (evt: any) => {
+      //     evt.stopPropagation();
+      //   },
+      // },
       {
         label: 'Toggle devtools',
+        icon: 'DevBox',
         onClick: () => {
           DesktopActions.toggleDevTools();
         },

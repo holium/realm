@@ -1,6 +1,6 @@
 {
   "name": "@holium/design-system",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "A component library for Realm apps.",
   "license": "MIT",
   "author": "trent@holium.com",
@@ -21,7 +21,8 @@
     "react-lifecycles-compat": "^3.0.4",
     "react-player": "^2.11.0",
     "react-spotify-embed": "^1.0.4",
-    "react-twitter-embed": "^4.0.4"
+    "react-twitter-embed": "^4.0.4",
+    "urbit-ob": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",

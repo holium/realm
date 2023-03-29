@@ -294,7 +294,6 @@ const ProfileSetupPresenter = (props: BaseDialogProps) => {
                   <TextInput
                     id="onboarding-nickname"
                     name="nickname"
-                    className="realm-cursor-text-cursor"
                     width="100%"
                     type="text"
                     height={36}

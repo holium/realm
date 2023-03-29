@@ -10,12 +10,12 @@ import {
   Spinner,
   Box,
   Flex,
+  useToggle,
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
-import { useToggle } from '@holium/shared';
 
 const AddShipPresenter = (props: BaseDialogProps) => {
   const { theme, onboarding } = useServices();

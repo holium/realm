@@ -19,7 +19,7 @@ export class DiskStore {
   constructor(
     name: string,
     patp: Patp,
-    _secretKey: string,
+    _secretKey: string | null,
     store: IAnyType,
     defaults: any = {}
   ) {
@@ -52,7 +52,6 @@ export class DiskStore {
     }
 
     // autosave snapshots
-
     onSnapshot(this.model, (snapshot) => {
       this.persisted.store = castToSnapshot(snapshot);
     });

@@ -13,9 +13,9 @@ const TabRow = styled(Row)<{ collapsed?: boolean }>`
   padding: 4px 4px 4px 6px;
   align-items: space-between;
   text-align: left;
-  background-color: var(--rlm-overlay-hover);
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
   &:hover {
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
   ${(props) =>
     props.collapsed &&

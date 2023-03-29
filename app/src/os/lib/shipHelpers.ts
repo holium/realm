@@ -15,6 +15,7 @@ export async function getCookie(ship: ShipConnectionData) {
     `password=${ship.code.trim()}`,
     { withCredentials: true, httpAgent }
   );
+
   const cookie = response.headers['set-cookie']?.[0];
   return cookie;
 }

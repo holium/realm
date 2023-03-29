@@ -48,20 +48,18 @@ const customStyling = css<TextProps>`
       `}
   ${(props) => props.fontWeight && `font-weight: ${props.fontWeight};`}
   ${(props) => props.noSelection && 'user-select: none;'}
-  &:disabled {
-      color: var(--rlm-text-disabled);
-    }
   }
 `;
 
 const Default = styled(Box)<TextProps>`
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   font-family: var(--rlm-font);
   font-weight: 400;
   font-size: 0.889rem;
   line-height: normal;
   margin-top: 0px;
   margin-bottom: 0px;
+  user-select: text;
   ${customStyling}
 `;
 
@@ -126,6 +124,7 @@ const Label = styled(Default)<TextProps>`
 `;
 
 const Custom = styled(Box)<TextProps>`
+  user-select: text;
   ${customStyling}
 `;
 
@@ -134,15 +133,14 @@ const Patp = styled(motion.p)<TextProps>`
   line-height: normal;
   font-size: 0.9rem;
   font-family: 'Source Code Pro', monospace;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   margin-top: 0px;
   margin-bottom: 0px;
+  user-select: text;
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
 const Anchor = styled(motion.a)<TextProps>`
-  ${boxStyles}
-  ${colorStyle}
   &:hover {
     cursor: pointer;
     text-decoration: underline;
@@ -153,6 +151,16 @@ const Anchor = styled(motion.a)<TextProps>`
       line-height: normal;
       ${skeletonStyle}
     `};
+  ${boxStyles}
+  ${colorStyle}
+  ${(props) =>
+    props.truncate &&
+    css`
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
+    `}
 `;
 
 export const Text = {

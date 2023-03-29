@@ -6,8 +6,8 @@ export const PassportButton = styled(motion.button)`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-color);
-  background-color: var(--background-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  background-color: rgba(var(--rlm-window-rgba));
   height: 26px;
   width: 40px;
   transition: var(--transition);
@@ -15,8 +15,4 @@ export const PassportButton = styled(motion.button)`
   /* svg {
     fill: rgba(var(--text-color), 0.7);
   } */
-  :hover {
-    background-color: darken(0.1, var(--background-color));
-    transition: var(--transition);
-  }
 `;

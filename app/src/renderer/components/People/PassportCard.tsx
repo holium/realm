@@ -100,6 +100,7 @@ const PassportCardPresenter = ({
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
             onClick={(evt: any) => {
+              // TODO replace with new DMs
               if (courier.previews.has(`/dm-inbox/${patp}`)) {
                 const dmPreview = courier.previews.get(`/dm-inbox/${patp}`);
                 if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);

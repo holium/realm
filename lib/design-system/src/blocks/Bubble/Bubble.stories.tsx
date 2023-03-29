@@ -12,6 +12,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2022-11-26T10:04:38.000Z"
@@ -25,7 +26,8 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-2'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -37,7 +39,8 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-3'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -51,6 +54,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
+        id={'i-4'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -69,14 +73,15 @@ webpack building...
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-5'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
           { plain: 'Meme drop' },
           {
             image:
-              'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+              'https://www.memeatlas.com/images/boomers/boomer-toilet-paper-back-pack.jpg',
           },
         ]}
         onReaction={() => {}}
@@ -89,6 +94,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -102,7 +108,8 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-2'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -123,6 +130,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -141,7 +149,8 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-2'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -162,6 +171,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -175,7 +185,8 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-2'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -194,6 +205,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
   return (
     <Flex gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
@@ -207,7 +219,8 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         onReaction={() => {}}
       />
       <Bubble
-        our
+        id={'i-2'}
+        isOur
         author="~lomder-librun"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
@@ -225,20 +238,22 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
 export const Link: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-25T11:04:38.000Z"
       message={[
         { plain: 'Open Graph' },
         {
-          link: 'https://www.cnn.com/2023/01/25/tech/meta-facebook-trump-decision/index.html',
+          link: 'https://www.coindesk.com/layer2/2022/09/24/urbit-cisOurts-daos-crypto-teams-in-push-to-make-internet-p2p-again/',
         },
       ]}
       onReaction={() => {}}
     />
 
     <Bubble
-      our
+      id={'i-2'}
+      isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
@@ -250,6 +265,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-3'}
       author="~lodlev-migdev"
       sentAt="2023-01-26T11:06:38.000Z"
       message={[
@@ -265,6 +281,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
 export const Image: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -277,7 +294,8 @@ export const Image: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
-      our
+      id={'i-2'}
+      isOur
       author="~lomder-librun"
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
@@ -294,14 +312,17 @@ export const Image: ComponentStory<typeof Bubble> = () => (
 
 export const Reactions: ComponentStory<typeof Bubble> = () => {
   const [reacts, setReacts] = useState<FragmentReactionType[]>([]);
-  const ourPatp = '~lomder-librun';
-  window.ship = ourPatp;
+  const isOurPatp = '~lomder-librun';
+  window.ship = isOurPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: ourPatp, emoji: payload.emoji }]);
+      setReacts([
+        ...reacts,
+        { msgId: '0', by: isOurPatp, emoji: payload.emoji },
+      ]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === ourPatp
+        (r) => r.emoji === payload.emoji && r.by === isOurPatp
       );
       if (removeIdx === -1) {
         return;
@@ -310,11 +331,15 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
     }
   };
   return (
-    <Flex gap={12} flexDirection="column" width={500}>
+    <Flex ml={400} mt={50} gap={12} flexDirection="column" width={500}>
       <Bubble
+        id={'i-1'}
+        ourColor="#FF0000"
+        ourShip="~fasnut-famden"
         author="~fasnut-famden"
         authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
+        isEdited
         message={[
           {
             image:
@@ -325,21 +350,24 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         onReaction={onReaction}
       />
       <Bubble
+        id={'i-2'}
+        isOur
+        ourColor="#9664FF"
+        ourShip="~fasnut-famden"
         author="~fasnut-famden"
-        authorColor="#FF0000"
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
             image:
-              'https://pbs.twimg.com/media/FnC6z0VXkAA6XQe?format=png&name=small',
+              'https://www.memeatlas.com/images/wojaks/wojak-npc-thinks-he-isnt-npc.jpg',
           },
         ]}
         reactions={[
-          { author: '~lodlev-migdev', emoji: '1f44d' },
-          { author: '~fasnut-famden', emoji: '1f44d' },
-          { author: '~zod', emoji: '1f525' },
-          { author: '~dev', emoji: '1f525' },
-          { author: '~fes', emoji: '1f525' },
+          { msgId: '1', by: '~lodlev-migdev', emoji: '1f44d' },
+          { msgId: '2', by: '~fasnut-famden', emoji: '1f44d' },
+          { msgId: '3', by: '~zod', emoji: '1f525' },
+          { msgId: '4', by: '~dev', emoji: '1f525' },
+          { msgId: '5', by: '~fes', emoji: '1f525' },
         ]}
         onReaction={() => {}}
       />
@@ -350,6 +378,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
 export const ReplyTo: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#FF0000"
       sentAt="2023-01-26T11:00:30.000Z"
@@ -368,8 +397,9 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-2'}
       author="~lomder-librun"
-      our
+      isOur
       sentAt="2023-01-26T11:04:38.000Z"
       message={[
         {
@@ -387,6 +417,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-3'}
       author="~lodlev-migdev"
       authorColor="#428E65"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -410,6 +441,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
       onReaction={() => {}}
     />
     <Bubble
+      id={'i-4'}
       author="~zod"
       authorColor="#e3a30e"
       sentAt="2023-01-26T11:04:38.000Z"
@@ -437,6 +469,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
 export const RelicTab: ComponentStory<typeof Bubble> = () => (
   <Flex gap={12} flexDirection="column" width={500}>
     <Bubble
+      id={'i-1'}
       author="~fasnut-famden"
       authorColor="#428E65"
       sentAt="2023-01-26T11:00:30.000Z"

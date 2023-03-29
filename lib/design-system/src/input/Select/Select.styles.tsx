@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 type SelectWrapperProps = {
   maxWidth?: number;
+  width?: number;
   disabled?: boolean;
 };
 
@@ -13,19 +14,20 @@ export const SelectWrapper = styled(motion.div)<SelectWrapperProps>`
   justify-content: space-between;
   position: relative;
   height: 32px;
+  width: ${({ width }) => (width ? `${width}px` : '100%')};
   max-width: ${({ maxWidth }) => (maxWidth ? `${maxWidth}px` : '100%')};
   min-height: 32px;
   padding: 4px 8px;
   border-radius: var(--rlm-border-radius-6);
-  border: 1px solid var(--rlm-border-color);
-  background-color: var(--rlm-input-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  background-color: rgba(var(--rlm-input-rgba));
   user-select: none;
   cursor: pointer;
 
   select {
     border-radius: var(--rlm-border-radius-4);
-    background-color: var(--rlm-input-color);
-    color: var(--rlm-text-color);
+    background-color: rgba(var(--rlm-input-rgba));
+    color: rgba(var(--rlm-text-rgba));
     pointer-events: all;
     flex: 1;
     height: inherit;
@@ -43,9 +45,9 @@ export const SelectWrapper = styled(motion.div)<SelectWrapperProps>`
       input {
         pointer-events: none;
       }
-      opacity: 0.6; /* correct opacity on iOS */
+      opacity: 0.6;
       &::placeholder {
-        color: rgba(var(--rlm-text-color, #333333), 0.3);
+        color: rgba(var(--rlm-text-rgba, #333333), 0.3);
         opacity: 1;
       }
       &:hover {
@@ -63,8 +65,8 @@ export const SelectDropdown = styled(motion.ul)<{ backgroundColor?: string }>`
   width: 100%;
   border-radius: 6px;
   gap: 2px;
-  border: 1px solid var(--rlm-border-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: ${({ backgroundColor }) =>
-    backgroundColor ? backgroundColor : 'var(--rlm-input-color)'};
+    backgroundColor ? backgroundColor : 'rgba(var(--rlm-input-rgba))'};
   box-shadow: var(--rlm-box-shadow-1);
 `;
