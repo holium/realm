@@ -365,6 +365,7 @@
   `state
 ::
 ++  toggle-msg-preview-notif
+::realm-chat &chat-action [%toggle-msg-preview-notif %.y]
   |=  [toggle=? state=state-0]
   ^-  (quip card state-0)
   =.  msg-preview-notif.state  toggle
