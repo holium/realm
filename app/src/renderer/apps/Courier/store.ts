@@ -55,12 +55,13 @@ const ChatStore = types
       if (!window.ship || !chat) return { title: 'Error loading title' };
       if (chat.type === 'dm') {
         const peer = chat.peers.filter((p) => p.ship !== window.ship)[0];
+        const ship = peer?.ship;
         const { nickname, avatar, color } =
-          servicesStore.friends.getContactAvatarMetadata(peer.ship);
+          servicesStore.friends.getContactAvatarMetadata(ship);
         return {
-          title: nickname || peer.ship || 'Error loading title',
+          title: nickname || ship || 'Error loading title',
           sigil: {
-            patp: peer.ship,
+            patp: ship,
             color: color ? [color, '#FFF'] : ['#000', '#FFF'],
             nickname: nickname || '',
           },
@@ -207,15 +208,14 @@ export const chatStore = ChatStore.create({
   pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
 });
 
-chatStore.init();
+// chatStore.init();
 
 // -------------------------------
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
+export const ChatStoreContext =
+  createContext<null | ChatStoreInstance>(chatStore);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {

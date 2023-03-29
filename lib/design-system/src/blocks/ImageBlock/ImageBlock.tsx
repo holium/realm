@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useLayoutEffect, useState } from 'react';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
@@ -15,17 +15,21 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
     by,
     variant,
     width = 'inherit',
+    height,
     onImageLoaded,
     ...rest
   } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const isPrecalculated =
+    typeof height === 'number' && typeof width === 'number';
+
+  useLayoutEffect(() => {
+    if (!isPrecalculated && onImageLoaded) onImageLoaded();
+  });
+
   const parsedHeight = (
-    rest.height
-      ? typeof rest.height === 'number'
-        ? `${rest.height}px`
-        : rest.height
-      : '100%'
+    height ? (typeof height === 'number' ? `${height}px` : height) : '100%'
   ) as string;
 
   const parsedWidth = (
@@ -42,11 +46,11 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         width={parsedWidth}
         draggable={false}
         onError={() => {
-          onImageLoaded && onImageLoaded();
+          if (!isPrecalculated && onImageLoaded) onImageLoaded();
         }}
         onLoad={() => {
           setImgLoaded(true);
-          // onImageLoaded && onImageLoaded();
+          if (!isPrecalculated && onImageLoaded) onImageLoaded();
         }}
       />
       <Flex className="block-footer">

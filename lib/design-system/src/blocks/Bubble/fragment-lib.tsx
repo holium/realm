@@ -41,6 +41,7 @@ export const FragmentBase = styled(Text.Custom)<TextProps>`
 export const BlockWrapper = styled(motion.span)`
   padding: 0px;
   display: inline-block;
+  margin-top: 2px;
   height: 100%;
 `;
 
@@ -365,8 +366,6 @@ export const renderFragment = (
 
     case 'image':
       const imageFrag = fragment as FragmentImageType;
-      const isPrecalculated =
-        imageFrag.metadata?.width && imageFrag.metadata?.height;
       return (
         <BlockWrapper id={id} key={author + index}>
           <ImageBlock
@@ -378,7 +377,7 @@ export const renderFragment = (
             width={imageFrag.metadata?.width}
             height={imageFrag.metadata?.height}
             by={author}
-            // onImageLoaded={!isPrecalculated ? onMeasure : undefined}
+            onImageLoaded={onMeasure}
           />
         </BlockWrapper>
       );

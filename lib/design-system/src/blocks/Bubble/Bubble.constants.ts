@@ -1,5 +1,7 @@
 import { pxToRem } from '../../util';
 
+export const STATUS_HEIGHT = 24;
+
 export const BUBBLE_PADDING_Y = 6;
 export const BUBBLE_PADDING_X = 8;
 export const BUBBLE_AUTHOR_HEIGHT = 16;

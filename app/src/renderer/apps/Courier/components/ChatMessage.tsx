@@ -179,7 +179,7 @@ export const ChatMessagePresenter = ({
       sentAt={sentAt}
       onMeasure={measure}
       reactions={reactionList}
-      onReaction={canReact && !isOur ? onReaction : undefined}
+      onReaction={canReact ? onReaction : undefined}
     />
   );
 };

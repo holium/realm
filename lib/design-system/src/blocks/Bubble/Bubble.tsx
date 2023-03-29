@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useLayoutEffect, useMemo } from 'react';
+import { forwardRef, useLayoutEffect, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -12,7 +12,7 @@ import {
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 import { InlineStatus } from './InlineStatus';
-import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 
 export type BubbleProps = {
   ref: any;
@@ -81,8 +81,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       return BUBBLE_HEIGHT.rem.footer;
     }, [reactions.length]);
 
-    // useLayoutEffect(onMeasure);
-
     const fragments = useMemo(() => {
       if (!message) return [];
       return message?.map((fragment, index) => {
@@ -110,34 +108,34 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       });
     }, [message]);
 
-    // useEffect(() => {
-    //   // only measure if all fragments are text
-    //   let allTextTypes = true;
-    //   if (!message) return;
-    //   message.forEach((fragment) => {
-    //     const fragmentType = Object.keys(fragment)[0];
-    //     if (!TEXT_TYPES.includes(fragmentType)) {
-    //       allTextTypes = false;
-    //     }
-    //     if (
-    //       fragmentType === 'image' &&
-    //       (fragment as FragmentImageType).metadata?.height &&
-    //       (fragment as FragmentImageType).metadata?.width
-    //     ) {
-    //       // if we have an image, we need to measure it
-    //       onMeasure();
-    //     }
-    //   });
-    //   if (allTextTypes) {
-    //     onMeasure();
-    //   }
-    // }, []);
-
-    // useEffect(() => {
-    //   onMeasure();
-    // }, [reactions.length]);
-
-    console.log('rendering bubble', id);
+    useLayoutEffect(() => {
+      // only measure if all fragments are text
+      let allTextTypes = true;
+      let hasCalculatedImage = false;
+      if (!message) return;
+      message.forEach((fragment) => {
+        const fragmentType = Object.keys(fragment)[0];
+        if (!TEXT_TYPES.includes(fragmentType)) {
+          allTextTypes = false;
+        }
+        if (
+          fragmentType === 'image' &&
+          (fragment as FragmentImageType).metadata?.height &&
+          (fragment as FragmentImageType).metadata?.width
+        ) {
+          // if we have an image, we need to measure it
+          hasCalculatedImage = true;
+        }
+      });
+      if (allTextTypes) {
+        onMeasure();
+        return;
+      }
+      if (hasCalculatedImage) {
+        onMeasure();
+        return;
+      }
+    }, []);
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
@@ -149,8 +147,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             ref={ref}
             key={id}
             display="inline-flex"
-            mx="1px"
+            height={STATUS_HEIGHT}
             justifyContent={isOur ? 'flex-end' : 'flex-start'}
+            onLoad={onMeasure}
           >
             <InlineStatus text={(message[0] as FragmentStatusType).status} />
           </Flex>
