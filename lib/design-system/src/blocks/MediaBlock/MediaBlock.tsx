@@ -92,16 +92,13 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
                 attributes: {
                   id: rest.id,
                   controlsList: 'nodownload noplaybackrate',
-                  disablePictureInPicture: 'true',
+                  disablePictureInPicture: true,
                   'x-webkit-airplay': 'allow',
                 },
               },
             }}
           />
         )}
-        {/* <div
-          className="react-player-hide-cursor"
-        ></div> */}
       </MediaWrapper>
     </Block>
   );

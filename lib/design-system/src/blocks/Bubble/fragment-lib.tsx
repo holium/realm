@@ -22,7 +22,14 @@ import {
 } from './Bubble.types';
 import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../util/strings';
-import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
+import {
+  Text,
+  TextProps,
+  Flex,
+  FlexProps,
+  skeletonStyle,
+  BlockStyle,
+} from '../..';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
@@ -33,6 +40,7 @@ export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
   margin: 0px 0px;
+  line-height: 1.1rem;
 `;
 
 export const BlockWrapper = styled(motion.span)`
@@ -173,13 +181,14 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-radius: 3px;
   padding-top: 6px;
   padding-bottom: 6px;
-  background-color: rgba(0, 0, 0, 0.12);
+  background-color: rgba(0, 0, 0, 0.1);
 
   .fragment-reply {
     border-radius: 4px;
+    height: 2rem;
 
     ${FragmentBase} {
-      font-size: 0.86em;
+      font-size: 0.82rem;
     }
     ${Text.Custom} {
       line-height: 1rem;
@@ -187,9 +196,15 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     .block-author {
       display: none !important;
     }
+    ${BlockStyle} {
+      padding: 0px;
+      margin: 0px;
+      height: 32px;
+      width: fit-content;
+    }
     ${FragmentImage} {
       width: fit-content;
-      height: 40px;
+      height: 32px;
     }
     &.pinned {
       gap: 0px;
@@ -380,6 +395,7 @@ export const renderFragment = (
           </FragmentPlain>
         );
       } else {
+        // TODO flesh out the image case with the following text
         replyContent = renderFragment(
           id,
           msg,
@@ -388,13 +404,18 @@ export const renderFragment = (
           containerWidth
         );
       }
+
       return (
         <FragmentBlockquote
           style={{ height: 42 }}
           id={id}
           key={`${author + index}-reply`}
         >
-          <Flex flexDirection="column" className="fragment-reply">
+          <Flex
+            gap={fragmentType === 'image' ? 6 : 0}
+            flexDirection={fragmentType === 'image' ? 'row-reverse' : 'column'}
+            className="fragment-reply"
+          >
             <BubbleAuthor>{replyAuthor}</BubbleAuthor>
             <Text.Custom
               truncate
@@ -409,12 +430,16 @@ export const renderFragment = (
     case 'tab':
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
-        <TabWrapper width={340} id={url} p={0}>
+        <TabWrapper
+          width={containerWidth && containerWidth - 16}
+          id={url}
+          p={0}
+        >
           <Bookmark
             url={url}
             favicon={favicon}
             title={title}
-            width={320}
+            width={containerWidth && containerWidth - 36}
             onNavigate={(url: string) => {
               window.open(url, '_blank');
             }}
