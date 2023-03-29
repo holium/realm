@@ -22,25 +22,20 @@ import {
 } from './Bubble.types';
 import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../util/strings';
-import {
-  Text,
-  TextProps,
-  Flex,
-  FlexProps,
-  skeletonStyle,
-  BlockStyle,
-} from '../..';
+import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
+import { BlockStyle } from '../Block/Block';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { BUBBLE_HEIGHT } from './Bubble.constants';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
   user-select: text;
   margin: 0px 0px;
-  line-height: 1.1rem;
+  line-height: ${BUBBLE_HEIGHT.rem.fragment};
 `;
 
 export const BlockWrapper = styled(motion.span)`
@@ -60,7 +55,7 @@ export const FragmentBlock = styled(motion.span)`
 export const FragmentPlain = styled(FragmentBase)`
   font-weight: 400;
   margin: 0 0;
-  line-height: 1.1rem;
+  line-height: ${BUBBLE_HEIGHT.rem.fragment};
 `;
 
 export const FragmentBold = styled(FragmentBase)`
@@ -349,15 +344,19 @@ export const renderFragment = (
             draggable={false}
             mode="embed"
             containerWidth={containerWidth}
+            metadata={(fragment as FragmentLinkType).metadata}
             link={(fragment as FragmentLinkType).link}
             id={id}
             by={author}
             onLinkLoaded={
-              onMeasure
-                ? onMeasure
-                : () => {
-                    // do nothing
-                  }
+              // onMeasure
+              //   ? onMeasure
+              //   : () => {
+              //       // do nothing
+              //     }
+              () => {
+                // do nothing
+              }
             }
             minWidth={320}
           />
@@ -379,7 +378,7 @@ export const renderFragment = (
             width={imageFrag.metadata?.width}
             height={imageFrag.metadata?.height}
             by={author}
-            onImageLoaded={!isPrecalculated ? onMeasure : undefined}
+            // onImageLoaded={!isPrecalculated ? onMeasure : undefined}
           />
         </BlockWrapper>
       );
