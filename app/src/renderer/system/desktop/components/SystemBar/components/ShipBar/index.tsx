@@ -26,6 +26,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useAccountStore } from 'renderer/apps/Account/store';
 import { useChatStore } from 'renderer/apps/Courier/store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -273,8 +274,9 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
-                  AuthActions.shutdown();
+                  ShellActions.setBlur(true);
+                  ShellActions.openDialog('shutdown-dialog');
+                  setActiveApp(null);
                 }}
               >
                 <Icon name="Shutdown" size={22} />
