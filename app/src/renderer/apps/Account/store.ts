@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
+import { chatStore } from '../Courier/store';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (
@@ -252,6 +253,9 @@ NotifDBActions.onDbChange((_evt, type, data) => {
   switch (type) {
     case 'notification-added':
       accountStore.onNotifAdded(data);
+      if (chatStore.isChatSelected(data.path) && data.app === 'realm-chat') {
+        accountStore.readPath(data.app, data.path);
+      }
       break;
     case 'notification-updated':
       accountStore.onNotifUpdated(data);
