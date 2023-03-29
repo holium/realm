@@ -27,7 +27,7 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
                 isOur={row.our}
                 {...row}
                 onReaction={() => {}}
-                onLoad={measure}
+                onMeasure={measure}
               />
             </Box>
           )}

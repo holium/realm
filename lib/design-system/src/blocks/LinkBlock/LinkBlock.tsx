@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import {
@@ -8,6 +8,7 @@ import {
   Bookmark,
   MediaBlock,
   ImageBlock,
+  Box,
 } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
@@ -61,12 +62,15 @@ type LinkBlockProps = {
   by: string;
   metadata?: any;
   containerWidth?: number;
-  onLinkLoaded?: () => void;
+  onLinkLoaded: () => void;
 } & BlockProps;
 
 type LinkType = 'opengraph' | 'url';
 type MediaType = 'twitter' | 'media' | 'image';
 type LinkBlockType = LinkType | MediaType;
+
+const nonOpengraphLinkTypes = ['twitter', 'media', 'image'];
+const rawLinkHeight = 100;
 
 export const LinkBlock = ({
   link,
@@ -95,7 +99,6 @@ export const LinkBlock = ({
               return;
             } else {
               setOpenGraph(data);
-              onLinkLoaded && onLinkLoaded();
             }
           } else {
             setLinkBlockType('url');
@@ -108,13 +111,17 @@ export const LinkBlock = ({
     }
   }, []);
 
+  useLayoutEffect(() => {
+    onLinkLoaded;
+  }, [imgLoaded]);
+
   let description = openGraph?.ogDescription || '';
 
   if (linkBlockType === 'url') {
     const width = containerWidth ? containerWidth - 12 : 320;
 
     return (
-      <Block {...rest} width={width}>
+      <Block {...rest} width={width} onLoaded={onLinkLoaded}>
         <Bookmark
           url={link}
           title={link}
@@ -174,91 +181,93 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onLoaded={onLinkLoaded}
+        onImageLoaded={onLinkLoaded}
       />
     );
   }
 
   const ogHasURL = openGraph && openGraph.ogUrl;
+  // 254px in rem is 15.875rem
   return (
-    <Block {...rest}>
-      <LinkImage
-        isSkeleton={!ogHasURL || !imgLoaded}
-        src={openGraph?.ogImage?.url}
-        alt={openGraph?.ogTitle}
-        onError={() => {
-          // onLoaded && onLoaded();
-        }}
-        onLoad={() => {
-          setImgLoaded(true);
-          // onLoaded && onLoaded();
-        }}
-      />
-      <Flex mb="0.25rem" width="100%" flexDirection="column">
-        <LinkTitle
-          truncate
-          isSkeleton={!ogHasURL}
-          fontSize={2}
-          fontWeight={500}
-          width={containerWidth ? containerWidth - 20 : 'inherit'}
-          onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
-            evt.stopPropagation();
-            window.open(openGraph?.ogUrl, '_blank');
+    <Box onLayoutMeasure={onLinkLoaded}>
+      <Block {...rest} height="15.875rem">
+        <LinkImage
+          isSkeleton={!ogHasURL || !imgLoaded}
+          src={openGraph?.ogImage?.url}
+          alt={openGraph?.ogTitle}
+          onError={() => {
+            // onLoaded && onLoaded();
           }}
-        >
-          {openGraph?.ogTitle}
-        </LinkTitle>
-        <LinkDescription
-          truncate
-          isSkeleton={!ogHasURL}
-          fontSize={1}
-          opacity={0.7}
-          width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
-        >
-          {description}
-        </LinkDescription>
-      </Flex>
-      <Flex
-        className="block-footer"
-        flex={1}
-        justifyContent="space-between"
-        width="100%"
-      >
-        <Flex
-          flexDirection="row"
-          gap={4}
-          justifyContent="space-between"
-          alignItems="center"
-          width="50%"
-        >
-          <Text.Anchor
+          onLoad={() => {
+            setImgLoaded(true);
+          }}
+        />
+        <Flex mb="0.25rem" width="100%" flexDirection="column">
+          <LinkTitle
+            truncate
             isSkeleton={!ogHasURL}
-            fontSize={0}
-            opacity={0.5}
+            fontSize={2}
+            fontWeight={500}
+            width={containerWidth ? containerWidth - 20 : 'inherit'}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              if (ogHasURL) {
-                const origin = new URL(openGraph.ogUrl).origin;
-                window.open(origin, '_blank');
-              }
+              window.open(openGraph?.ogUrl, '_blank');
             }}
           >
-            {openGraph?.ogSiteName ||
-              (ogHasURL && new URL(openGraph.ogUrl).hostname)}
-          </Text.Anchor>
+            {openGraph?.ogTitle}
+          </LinkTitle>
+          <LinkDescription
+            truncate
+            isSkeleton={!ogHasURL}
+            fontSize={1}
+            opacity={0.7}
+            width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
+          >
+            {description}
+          </LinkDescription>
         </Flex>
-
-        <Text.Custom
-          truncate
-          width="50%"
-          textAlign="right"
-          className="block-author"
-          noSelection
-          fontSize={0}
+        <Flex
+          className="block-footer"
+          flex={1}
+          justifyContent="space-between"
+          width="100%"
         >
-          {by}
-        </Text.Custom>
-      </Flex>
-    </Block>
+          <Flex
+            flexDirection="row"
+            gap={4}
+            justifyContent="space-between"
+            alignItems="center"
+            width="50%"
+          >
+            <Text.Anchor
+              isSkeleton={!ogHasURL}
+              fontSize={0}
+              opacity={0.5}
+              onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
+                evt.stopPropagation();
+                if (ogHasURL) {
+                  const origin = new URL(openGraph.ogUrl).origin;
+                  window.open(origin, '_blank');
+                }
+              }}
+            >
+              {openGraph?.ogSiteName ||
+                (ogHasURL && new URL(openGraph.ogUrl).hostname)}
+            </Text.Anchor>
+          </Flex>
+
+          <Text.Custom
+            truncate
+            width="50%"
+            textAlign="right"
+            className="block-author"
+            noSelection
+            fontSize={0}
+          >
+            {by}
+          </Text.Custom>
+        </Flex>
+      </Block>
+    </Box>
   );
 };

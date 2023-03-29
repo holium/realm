@@ -196,15 +196,19 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     .block-author {
       display: none !important;
     }
+    ${BlockWrapper} {
+      height: 32px !important;
+      width: fit-content !important;
+    }
     ${BlockStyle} {
       padding: 0px;
       margin: 0px;
-      height: 32px;
-      width: fit-content;
+      height: 32px !important;
+      width: fit-content !important;
     }
     ${FragmentImage} {
-      width: fit-content;
-      height: 32px;
+      width: fit-content !important;
+      height: 32px !important;
     }
     &.pinned {
       gap: 0px;
@@ -254,7 +258,7 @@ export const renderFragment = (
   index: number,
   author: string,
   containerWidth?: number,
-  onLoaded?: () => void // used in the case where async data is loaded
+  onMeasure?: () => void // used in the case where async data is loaded
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -348,7 +352,13 @@ export const renderFragment = (
             link={(fragment as FragmentLinkType).link}
             id={id}
             by={author}
-            onLinkLoaded={onLoaded}
+            onLinkLoaded={
+              onMeasure
+                ? onMeasure
+                : () => {
+                    // do nothing
+                  }
+            }
             minWidth={320}
           />
         </BlockWrapper>
@@ -369,7 +379,7 @@ export const renderFragment = (
             width={imageFrag.metadata?.width}
             height={imageFrag.metadata?.height}
             by={author}
-            onLoaded={!isPrecalculated ? onLoaded : undefined}
+            onImageLoaded={!isPrecalculated ? onMeasure : undefined}
           />
         </BlockWrapper>
       );
@@ -396,13 +406,11 @@ export const renderFragment = (
         );
       } else {
         // TODO flesh out the image case with the following text
-        replyContent = renderFragment(
-          id,
-          msg,
-          index,
-          replyAuthor,
-          containerWidth
-        );
+        if (fragmentType === 'image') {
+          // take out precalculated height and width
+          (msg as FragmentImageType).metadata = {};
+        }
+        replyContent = renderFragment(id, msg, index, replyAuthor);
       }
 
       return (
@@ -420,6 +428,7 @@ export const renderFragment = (
             <Text.Custom
               truncate
               overflow="hidden"
+              width="fit-content"
               maxWidth={containerWidth && containerWidth - 16}
             >
               {replyContent}

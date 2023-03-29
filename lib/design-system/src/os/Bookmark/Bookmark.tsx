@@ -5,6 +5,7 @@ import { Text, Row, Favicon, Flex, BoxProps } from '../..';
 const BookmarkRow = styled(Row)`
   padding: 4px 4px 4px 6px;
   justify-content: space-between;
+  height: 2rem; // 32px in rem is 2rem
   align-items: center;
   text-align: left;
 `;

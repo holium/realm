@@ -1,4 +1,4 @@
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useLayoutEffect, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -7,6 +7,7 @@ import {
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
+  TEXT_TYPES,
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 import { InlineStatus } from './InlineStatus';
@@ -31,7 +32,7 @@ export type BubbleProps = {
   isNextGrouped?: boolean; // should we show the author if multiple messages by same author?
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
-  onLoaded?: () => void;
+  onMeasure: () => void;
 } & BoxProps;
 
 export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
@@ -53,7 +54,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       isPrevGrouped,
       isNextGrouped,
       expiresAt,
-      onLoaded,
+      onMeasure,
       onReaction,
       // onReplyClick = () => {},
     } = props;
@@ -80,7 +81,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const fragments = useMemo(() => {
       if (!message) return [];
-
       return message?.map((fragment, index) => {
         // if the previous fragment was a link or a code block, we need to add a space
         // to the beginning of this fragment
@@ -99,11 +99,26 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
         return (
           <span id={id} key={`${id}-index-${index}`}>
             {lineBreak}
-            {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
+            {renderFragment(id, fragment, index, author, innerWidth, onMeasure)}
           </span>
         );
       });
     }, [message]);
+
+    useLayoutEffect(() => {
+      // only measure if all fragments are text
+      let allTextTypes = true;
+      if (!message) return;
+      message.forEach((fragment) => {
+        const fragmentType = Object.keys(fragment)[0];
+        if (!TEXT_TYPES.includes(fragmentType)) {
+          allTextTypes = false;
+        }
+      });
+      if (allTextTypes) {
+        onMeasure();
+      }
+    }, []);
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 

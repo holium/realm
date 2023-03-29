@@ -24,6 +24,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
           { ship: '~lomder-librun' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -37,6 +38,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
           { italics: 'italics' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-3'}
@@ -52,6 +54,7 @@ export const Default: ComponentStory<typeof Bubble> = () => {
           { plain: 'and then let me know whats up' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-4'}
@@ -71,6 +74,7 @@ webpack building...
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-5'}
@@ -85,6 +89,7 @@ webpack building...
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -106,6 +111,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
           { plain: 'woooohooo' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -121,6 +127,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
           { plain: 'woooohooo' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -147,6 +154,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
           { plain: 'before running' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -162,6 +170,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
           { plain: 'and then let me know whats up' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -183,6 +192,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
           { ship: '~lomder-librun' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -196,6 +206,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
           { ship: '~fasnut-famden' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -217,6 +228,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -230,6 +242,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -249,6 +262,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
 
     <Bubble
@@ -263,6 +277,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-3'}
@@ -274,6 +289,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -292,6 +308,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-2'}
@@ -306,6 +323,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -348,6 +366,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         ]}
         reactions={reacts}
         onReaction={onReaction}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -370,6 +389,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
           { msgId: '5', by: '~fes', emoji: '1f525' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -395,6 +415,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-2'}
@@ -415,6 +436,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-3'}
@@ -439,6 +461,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-4'}
@@ -462,6 +485,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -487,6 +511,7 @@ export const RelicTab: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );

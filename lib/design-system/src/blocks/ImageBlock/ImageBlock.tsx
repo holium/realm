@@ -6,10 +6,18 @@ import { FragmentImage } from '../Bubble/fragment-lib';
 type ImageBlockProps = {
   image: string;
   by: string;
+  onImageLoaded?: () => void;
 } & BlockProps;
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
-  const { image, by, variant, width = 'inherit', onLoaded, ...rest } = props;
+  const {
+    image,
+    by,
+    variant,
+    width = 'inherit',
+    onImageLoaded,
+    ...rest
+  } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const parsedHeight = (
@@ -19,8 +27,6 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         : rest.height
       : '100%'
   ) as string;
-
-  const shouldMeasure = !rest.height && !width;
 
   const parsedWidth = (
     width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
@@ -36,16 +42,11 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         width={parsedWidth}
         draggable={false}
         onError={() => {
-          // TODO: handle error using placeholder image
-          if (shouldMeasure) {
-            onLoaded && onLoaded();
-          }
+          onImageLoaded && onImageLoaded();
         }}
         onLoad={() => {
           setImgLoaded(true);
-          if (shouldMeasure) {
-            onLoaded && onLoaded();
-          }
+          onImageLoaded && onImageLoaded();
         }}
       />
       <Flex className="block-footer">
