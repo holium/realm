@@ -17,7 +17,6 @@ import {
   fetchOGData,
   RAW_LINK_HEIGHT,
   LINK_PREVIEW_HEIGHT,
-  OpenGraphType,
   extractOGData,
   LinkPreviewType,
 } from './util';

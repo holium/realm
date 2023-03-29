@@ -149,8 +149,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     subtitle = `${selectedChat.peers.length} members`;
   }
 
-  console.log('ChatLog rendering');
-
   return (
     <Flex flexDirection="column">
       <Flex
@@ -241,8 +239,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
-
-                  // console.log('rendering', index);
 
                   return (
                     <Box

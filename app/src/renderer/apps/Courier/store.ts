@@ -208,8 +208,6 @@ export const chatStore = ChatStore.create({
   pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
 });
 
-// chatStore.init();
-
 // -------------------------------
 // Create core context
 // -------------------------------

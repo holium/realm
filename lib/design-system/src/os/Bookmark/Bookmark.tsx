@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Text, Row, Favicon, Flex, BoxProps, Icon } from '../..';
+import { Text, Favicon, Flex, BoxProps, Icon } from '../..';
 
 const BookmarkRow = styled(Flex)`
   border-radius: 6px;
