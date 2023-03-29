@@ -1,15 +1,18 @@
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useLayoutEffect, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
 import {
+  FragmentImageType,
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
+  TEXT_TYPES,
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 import { InlineStatus } from './InlineStatus';
+import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 
 export type BubbleProps = {
   ref: any;
@@ -31,7 +34,7 @@ export type BubbleProps = {
   isNextGrouped?: boolean; // should we show the author if multiple messages by same author?
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
-  onLoaded?: () => void;
+  onMeasure: () => void;
 } & BoxProps;
 
 export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
@@ -53,7 +56,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       isPrevGrouped,
       isNextGrouped,
       expiresAt,
-      onLoaded,
+      onMeasure,
       onReaction,
       // onReplyClick = () => {},
     } = props;
@@ -73,37 +76,66 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const footerHeight = useMemo(() => {
       if (reactions.length > 0) {
-        return '1.7rem';
+        return BUBBLE_HEIGHT.rem.footerReactions;
       }
-      return '1.25rem';
+      return BUBBLE_HEIGHT.rem.footer;
     }, [reactions.length]);
 
     const fragments = useMemo(() => {
       if (!message) return [];
-
       return message?.map((fragment, index) => {
-        // if the previous fragment was a link or a code block, we need to add a space
-        // to the beginning of this fragment
-        let lineBreak;
+        let prevLineBreak, nextLineBreak;
         if (index > 0) {
           const previousType = Object.keys(message[index - 1])[0];
-          if (
-            // previousType === 'link' ||
-            // previousType === 'code' ||
-            previousType === 'image'
-          ) {
-            lineBreak = <LineBreak />;
+          if (previousType === 'image') {
+            prevLineBreak = <LineBreak />;
+          }
+        }
+        if (index < message.length - 1) {
+          const nextType = Object.keys(message[index + 1])[0];
+          if (nextType === 'image') {
+            nextLineBreak = <LineBreak />;
           }
         }
 
         return (
           <span id={id} key={`${id}-index-${index}`}>
-            {lineBreak}
-            {renderFragment(id, fragment, index, author, innerWidth, onLoaded)}
+            {prevLineBreak}
+            {renderFragment(id, fragment, index, author, innerWidth, onMeasure)}
+            {nextLineBreak}
           </span>
         );
       });
     }, [message]);
+
+    useLayoutEffect(() => {
+      // only measure if all fragments are text
+      let allTextTypes = true;
+      let hasCalculatedImage = false;
+      if (!message) return;
+      message.forEach((fragment) => {
+        const fragmentType = Object.keys(fragment)[0];
+        if (!TEXT_TYPES.includes(fragmentType)) {
+          allTextTypes = false;
+        }
+        if (
+          fragmentType === 'image' &&
+          (fragment as FragmentImageType).metadata?.height &&
+          (fragment as FragmentImageType).metadata?.width
+        ) {
+          // if we have an image, we need to measure it
+          hasCalculatedImage = true;
+        }
+      });
+      if (allTextTypes) {
+        onMeasure();
+        return;
+      }
+      if (hasCalculatedImage) {
+        onMeasure();
+        return;
+      }
+    }, []);
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
@@ -115,8 +147,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             ref={ref}
             key={id}
             display="inline-flex"
-            mx="1px"
+            height={STATUS_HEIGHT}
             justifyContent={isOur ? 'flex-end' : 'flex-start'}
+            onLoad={onMeasure}
           >
             <InlineStatus text={(message[0] as FragmentStatusType).status} />
           </Flex>
@@ -128,7 +161,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
         ref={ref}
         key={id}
         display="inline-flex"
-        mx="1px"
         justifyContent={isOur ? 'flex-end' : 'flex-start'}
       >
         <BubbleStyle
@@ -160,16 +192,14 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           <FragmentBlock id={id}>{fragments}</FragmentBlock>
           <BubbleFooter id={id} height={footerHeight}>
             <Box width="70%">
-              {onReaction && (
-                <Reactions
-                  id={`${id}-reactions`}
-                  isOur={isOur}
-                  ourShip={ourShip}
-                  ourColor={ourColor}
-                  reactions={reactions}
-                  onReaction={onReaction}
-                />
-              )}
+              <Reactions
+                id={`${id}-reactions`}
+                isOur={isOur}
+                ourShip={ourShip}
+                ourColor={ourColor}
+                reactions={reactions}
+                onReaction={onReaction}
+              />
             </Box>
             <Flex
               width="30%"

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useLayoutEffect, useState } from 'react';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
@@ -6,21 +6,31 @@ import { FragmentImage } from '../Bubble/fragment-lib';
 type ImageBlockProps = {
   image: string;
   by: string;
+  onImageLoaded?: () => void;
 } & BlockProps;
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
-  const { image, by, variant, width = 'inherit', onLoaded, ...rest } = props;
+  const {
+    image,
+    by,
+    variant,
+    width = 'inherit',
+    height,
+    onImageLoaded,
+    ...rest
+  } = props;
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  const parsedHeight = (
-    rest.height
-      ? typeof rest.height === 'number'
-        ? `${rest.height}px`
-        : rest.height
-      : '100%'
-  ) as string;
+  const isPrecalculated =
+    typeof height === 'number' && typeof width === 'number';
 
-  const shouldMeasure = !rest.height && !width;
+  useLayoutEffect(() => {
+    if (!isPrecalculated && onImageLoaded) onImageLoaded();
+  });
+
+  const parsedHeight = (
+    height ? (typeof height === 'number' ? `${height}px` : height) : '100%'
+  ) as string;
 
   const parsedWidth = (
     width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
@@ -36,16 +46,11 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         width={parsedWidth}
         draggable={false}
         onError={() => {
-          // TODO: handle error using placeholder image
-          if (shouldMeasure) {
-            onLoaded && onLoaded();
-          }
+          if (!isPrecalculated && onImageLoaded) onImageLoaded();
         }}
         onLoad={() => {
           setImgLoaded(true);
-          if (shouldMeasure) {
-            onLoaded && onLoaded();
-          }
+          if (!isPrecalculated && onImageLoaded) onImageLoaded();
         }}
       />
       <Flex className="block-footer">

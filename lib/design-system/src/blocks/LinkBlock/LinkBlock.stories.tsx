@@ -23,6 +23,7 @@ export const Default: ComponentStory<typeof LinkBlock> = () => (
         }
         by="~lomder-librun"
         width={350}
+        onLinkLoaded={() => {}}
       />
     </Flex>
     <Flex
@@ -40,6 +41,7 @@ export const Default: ComponentStory<typeof LinkBlock> = () => (
         }
         by="~lomder-librun"
         width={350}
+        onLinkLoaded={() => {}}
       />
     </Flex>
     <Flex
@@ -55,6 +57,7 @@ export const Default: ComponentStory<typeof LinkBlock> = () => (
         link="https://www.cnn.com/2023/01/25/tech/meta-facebook-trump-decision/index.html"
         by="~lomder-librun"
         width={350}
+        onLinkLoaded={() => {}}
       />
     </Flex>
     <Flex
@@ -70,6 +73,7 @@ export const Default: ComponentStory<typeof LinkBlock> = () => (
         link="https://www.nytimes.com/2023/01/21/style/nikki-finke-hollywood-journalist.html"
         by="~lomder-librun"
         width={350}
+        onLinkLoaded={() => {}}
       />
     </Flex>
   </Flex>
@@ -90,6 +94,7 @@ export const NoOpenGraph: ComponentStory<typeof LinkBlock> = () => (
         link={'http://localhost:3000/index'}
         by="~lomder-librun"
         width={350}
+        onLinkLoaded={() => {}}
       />
     </Flex>
   </Flex>
@@ -104,6 +109,7 @@ export const Twitter: ComponentStory<typeof LinkBlock> = () => (
         link={'https://twitter.com/Ollyoxalls/status/1620941313431445504'}
         by="~lomder-librun"
         width={400}
+        onLinkLoaded={() => {}}
       />
     </Flex>
     <Flex flexDirection="column" width={430} p={2} background={'#FFFF'}>
@@ -113,6 +119,7 @@ export const Twitter: ComponentStory<typeof LinkBlock> = () => (
         link={'https://twitter.com/HoliumCorp/status/1619123218442248195'}
         by="~lomder-librun"
         width={400}
+        onLinkLoaded={() => {}}
       />
     </Flex>
   </Flex>
@@ -126,6 +133,7 @@ export const Media: ComponentStory<typeof LinkBlock> = () => (
         mode="display"
         link={'https://www.youtube.com/watch?v=RnAuSsAuJuw'}
         by="~lomder-librun"
+        onLinkLoaded={() => {}}
       />
     </Flex>
     <Flex flexDirection="column" width={500} p={2} background={'#FFFF'}>
@@ -134,6 +142,7 @@ export const Media: ComponentStory<typeof LinkBlock> = () => (
         mode="display"
         link={'https://www.youtube.com/watch?v=Q-MtMu-Jbf4&pp=ygUGaG9saXVt'}
         by="~lomder-librun"
+        onLinkLoaded={() => {}}
       />
     </Flex>
   </Flex>

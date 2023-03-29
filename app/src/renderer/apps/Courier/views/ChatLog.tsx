@@ -8,6 +8,10 @@ import {
   Text,
   Reply,
   measureImage,
+  fetchOGData,
+  LINK_PREVIEW_HEIGHT,
+  RAW_LINK_HEIGHT,
+  extractOGData,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -88,6 +92,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           );
           metadata = { width, height };
         }
+        if (Object.keys(frag)[0] === 'link') {
+          const result = await fetchOGData(frag.link);
+          if (result.linkType === 'opengraph') {
+            metadata = {
+              height: LINK_PREVIEW_HEIGHT as string,
+              ogData: JSON.stringify(extractOGData(result.data)) as string,
+            };
+          } else {
+            metadata = { height: RAW_LINK_HEIGHT as string };
+          }
+        }
 
         return {
           content: frag,
@@ -133,8 +148,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
     subtitle = `${selectedChat.peers.length} members`;
   }
-
-  // console.log('chatlog', toJS(selectedChat));
 
   return (
     <Flex flexDirection="column">
@@ -184,7 +197,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </AnimatePresence>
               )}
               <WindowedList
-                key={path}
+                key={`${path}-${selectedChat.lastFetch}`}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
@@ -228,7 +241,14 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
 
                   return (
-                    <Box pt={topSpacing} pb={isLast ? bottomSpacing : 0}>
+                    <Box
+                      key={`${row.id}-${row.updatedAt}-${
+                        isLast ? 'last' : 'not-last'
+                      }}`}
+                      mx="1px"
+                      pt={topSpacing}
+                      pb={isLast ? bottomSpacing : 0}
+                    >
                       <ChatMessage
                         isPrevGrouped={isPrevGrouped}
                         isNextGrouped={isNextGrouped}

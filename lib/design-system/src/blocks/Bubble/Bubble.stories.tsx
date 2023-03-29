@@ -2,7 +2,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
 import { FragmentReactionType } from './Bubble.types';
 import { OnReactionPayload } from './Reaction';
-import { Flex, Bubble } from '../..';
+import { Flex, Bubble, Box } from '../..';
 
 export default {
   component: Bubble,
@@ -10,83 +10,94 @@ export default {
 
 export const Default: ComponentStory<typeof Bubble> = () => {
   return (
-    <Flex gap={12} flexDirection="column" width={500}>
-      <Bubble
-        id={'i-1'}
-        author="~fasnut-famden"
-        authorColor="#FF0000"
-        sentAt="2022-11-26T10:04:38.000Z"
-        message={[
-          {
-            plain:
-              'Yesterday, I wrote up a company handbook. Check it out and let me know',
-          },
-          { ship: '~lomder-librun' },
-        ]}
-        onReaction={() => {}}
-      />
-      <Bubble
-        id={'i-2'}
-        isOur
-        author="~lomder-librun"
-        sentAt="2023-01-26T11:04:38.000Z"
-        message={[
-          { plain: 'Yo we should do XYZ in' },
-          { bold: 'bold' },
-          { plain: 'and' },
-          { italics: 'italics' },
-        ]}
-        onReaction={() => {}}
-      />
-      <Bubble
-        id={'i-3'}
-        isOur
-        author="~lomder-librun"
-        sentAt="2023-01-26T11:04:38.000Z"
-        message={[
-          { plain: 'Run the following command' },
-          {
-            'inline-code':
-              'npx cross-env DEBUG_PROD=true yarn package:prerelease:mac',
-          },
-          { plain: 'and then let me know whats up' },
-        ]}
-        onReaction={() => {}}
-      />
-      <Bubble
-        id={'i-4'}
-        author="~fasnut-famden"
-        authorColor="#FF0000"
-        sentAt="2023-01-26T11:04:38.000Z"
-        message={[
-          {
-            plain: 'I get this error',
-          },
-          {
-            code: `99% done plugins webpack-hot-middlewarewebpack built preview 643abb6f494255842d56 in 1968ms
+    <Box pt={4} px={4}>
+      <Flex gap={12} flexDirection="column" width={500}>
+        <Bubble
+          id={'i-1'}
+          author="~fasnut-famden"
+          authorColor="#FF0000"
+          sentAt="2022-11-26T10:04:38.000Z"
+          message={[
+            {
+              plain:
+                'Yesterday, I wrote up a company handbook. Check it out and let me know',
+            },
+            { ship: '~lomder-librun' },
+          ]}
+          onReaction={() => {}}
+          onMeasure={() => {}}
+        />
+        <Bubble
+          id={'i-2'}
+          isOur
+          author="~lomder-librun"
+          authorColor="#FF0000"
+          ourColor="#F08735"
+          sentAt="2023-01-26T11:04:38.000Z"
+          message={[
+            { plain: 'Yo we should do XYZ in' },
+            { bold: 'bold' },
+            { plain: 'and' },
+            { italics: 'italics' },
+          ]}
+          onReaction={() => {}}
+          onMeasure={() => {}}
+        />
+        <Bubble
+          id={'i-3'}
+          isOur
+          author="~lomder-librun"
+          sentAt="2023-01-26T11:04:38.000Z"
+          ourColor="#F08735"
+          message={[
+            { plain: 'Run the following command' },
+            {
+              'inline-code':
+                'npx cross-env DEBUG_PROD=true yarn package:prerelease:mac',
+            },
+            { plain: 'and then let me know whats up' },
+          ]}
+          onReaction={() => {}}
+          onMeasure={() => {}}
+        />
+        <Bubble
+          id={'i-4'}
+          author="~fasnut-famden"
+          authorColor="#FF0000"
+          sentAt="2023-01-26T11:04:38.000Z"
+          message={[
+            {
+              plain: 'I get this error',
+            },
+            {
+              code: `99% done plugins webpack-hot-middlewarewebpack built preview 643abb6f494255842d56 in 1968ms
 webpack building...
 99% done plugins webpack-hot-middlewarewebpack built preview c882f45221129543c371 in 2494ms
 webpack building...
 99% done plugins webpack-hot-middlewarewebpack built preview 4b80b9a66efd70ac5226 in 2279ms`,
-          },
-        ]}
-        onReaction={() => {}}
-      />
-      <Bubble
-        id={'i-5'}
-        isOur
-        author="~lomder-librun"
-        sentAt="2023-01-26T11:04:38.000Z"
-        message={[
-          { plain: 'Meme drop' },
-          {
-            image:
-              'https://www.memeatlas.com/images/boomers/boomer-toilet-paper-back-pack.jpg',
-          },
-        ]}
-        onReaction={() => {}}
-      />
-    </Flex>
+            },
+          ]}
+          onReaction={() => {}}
+          onMeasure={() => {}}
+        />
+        <Bubble
+          id={'i-5'}
+          isOur
+          author="~lomder-librun"
+          ourColor="#F08735"
+          sentAt="2023-01-26T11:04:38.000Z"
+          message={[
+            { plain: 'Meme drop' },
+            {
+              image:
+                'https://www.memeatlas.com/images/boomers/boomer-toilet-paper-back-pack.jpg',
+            },
+          ]}
+          onReaction={() => {}}
+          onMeasure={() => {}}
+        />
+      </Flex>
+    </Box>
   );
 };
 
@@ -106,6 +117,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
           { plain: 'woooohooo' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -121,6 +133,7 @@ export const BlockQuote: ComponentStory<typeof Bubble> = () => {
           { plain: 'woooohooo' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -147,6 +160,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
           { plain: 'before running' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -162,6 +176,7 @@ export const InlineCode: ComponentStory<typeof Bubble> = () => {
           { plain: 'and then let me know whats up' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -183,6 +198,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
           { ship: '~lomder-librun' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -196,6 +212,7 @@ export const Mentions: ComponentStory<typeof Bubble> = () => {
           { ship: '~fasnut-famden' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -217,6 +234,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -230,6 +248,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
           },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -249,6 +268,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
 
     <Bubble
@@ -263,6 +283,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-3'}
@@ -274,6 +295,7 @@ export const Link: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -292,6 +314,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-2'}
@@ -306,6 +329,7 @@ export const Image: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -348,6 +372,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
         ]}
         reactions={reacts}
         onReaction={onReaction}
+        onMeasure={() => {}}
       />
       <Bubble
         id={'i-2'}
@@ -370,6 +395,7 @@ export const Reactions: ComponentStory<typeof Bubble> = () => {
           { msgId: '5', by: '~fes', emoji: '1f525' },
         ]}
         onReaction={() => {}}
+        onMeasure={() => {}}
       />
     </Flex>
   );
@@ -395,6 +421,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-2'}
@@ -415,6 +442,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-3'}
@@ -439,6 +467,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
     <Bubble
       id={'i-4'}
@@ -462,6 +491,7 @@ export const ReplyTo: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );
@@ -487,6 +517,7 @@ export const RelicTab: ComponentStory<typeof Bubble> = () => (
         },
       ]}
       onReaction={() => {}}
+      onMeasure={() => {}}
     />
   </Flex>
 );

@@ -340,7 +340,7 @@ export const ShipBarPresenter = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: 'easeInOut' }}
         >
-          <Flex gap={8} height={34} alignItems="center">
+          <Flex gap={6} height={34} alignItems="center">
             <RoomTray />
             <Box
               initial={{ opacity: 0 }}

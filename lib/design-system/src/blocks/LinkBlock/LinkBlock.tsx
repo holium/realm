@@ -8,12 +8,18 @@ import {
   Bookmark,
   MediaBlock,
   ImageBlock,
+  Box,
 } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
-
-const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
+import {
+  fetchOGData,
+  RAW_LINK_HEIGHT,
+  LINK_PREVIEW_HEIGHT,
+  extractOGData,
+  LinkPreviewType,
+} from './util';
 
 const LinkTitle = styled(Text.Anchor)`
   overflow: hidden;
@@ -35,95 +41,73 @@ const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
-type OpenGraphType = {
-  twitterCard: string; // 'summary_large_image'
-  twitterSite: string; // '@verge';
-  ogSiteName: string; //'The Verge';
-  ogTitle: string; //'Spotify is laying off 6 percent of its global workforce, CEO announces';
-  ogDescription: string; // 'Impacting almost 600 employees.';
-  ogUrl: string; //'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting';
-  ogType: string; //'article';
-  articlePublishedTime: string; //'2023-01-23T12:30:00.726Z';
-  articleModifiedTime: string; //'2023-01-23T12:30:00.726Z';
-  author: string; //'Jon Porter';
-  ogImage: {
-    url: string; //'https://cdn.vox-cdn.com/thumbor/TN-dCJzSsrzVGl4x4SgbBQJ1ajU=/0x0:2040x1360/1200x628/filters:focal(1020x680:1021x681)/cdn.vox-cdn.com/uploads/chorus_asset/file/23951394/STK088_VRG_Illo_N_Barclay_1_spotify.jpg';
-    width: number | null;
-    height: number | null;
-    type: string | null;
-  };
-  requestUrl: string; //'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting';
-  success: boolean; // true
-};
-
 type LinkBlockProps = {
   link: string;
   by: string;
   metadata?: any;
   containerWidth?: number;
-  onLinkLoaded?: () => void;
+  onLinkLoaded: () => void;
 } & BlockProps;
 
-type LinkType = 'opengraph' | 'url';
+export type LinkType = 'opengraph' | 'url';
 type MediaType = 'twitter' | 'media' | 'image';
-type LinkBlockType = LinkType | MediaType;
+export type LinkBlockType = LinkType | MediaType;
 
 export const LinkBlock = ({
   link,
   by,
   containerWidth,
+  metadata,
   onLinkLoaded,
   ...rest
 }: LinkBlockProps) => {
-  const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
+  const [openGraph, setOpenGraph] = useState<LinkPreviewType | null>(
+    metadata.ogData ? JSON.parse(metadata.ogData) : null
+  );
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [linkBlockType, setLinkBlockType] =
-    useState<LinkBlockType>('opengraph');
+  const [linkBlockType, setLinkBlockType] = useState<LinkBlockType>('url');
 
   useEffect(() => {
-    const { linkType } = parseMediaType(link);
-    if (linkType !== 'link') {
-      return setLinkBlockType(linkType);
-    }
-    if (!openGraph && linkBlockType === 'opengraph') {
-      fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
-        .then(async (res) => {
-          if (res.status === 200) {
-            const data = await res.json();
-            if (!data || data.error) {
-              setLinkBlockType('url');
-              return;
-            } else {
-              setOpenGraph(data);
-              onLinkLoaded && onLinkLoaded();
-            }
-          } else {
-            setLinkBlockType('url');
+    if (!metadata.ogData && !metadata.height) {
+      const { linkType } = parseMediaType(link);
+      if (linkType !== 'link') {
+        return setLinkBlockType(linkType);
+      }
+      if (!openGraph && linkBlockType === 'opengraph') {
+        fetchOGData(link).then(({ linkType: detectedLinkType, data }) => {
+          setLinkBlockType(detectedLinkType);
+          if (data) {
+            setOpenGraph(extractOGData(data));
           }
-        })
-        .catch((err) => {
-          console.error(err);
-          setLinkBlockType('url');
         });
+      }
     }
   }, []);
 
+  useEffect(() => {
+    onLinkLoaded();
+  }, [openGraph]);
+
   let description = openGraph?.ogDescription || '';
 
-  if (linkBlockType === 'url') {
+  if (
+    (metadata.height && !metadata.ogData) ||
+    (!metadata.ogData && linkBlockType === 'url')
+  ) {
     const width = containerWidth ? containerWidth - 12 : 320;
-
     return (
-      <Block {...rest} width={width}>
-        <Bookmark
-          url={link}
-          title={link}
-          width={width - 16}
-          onNavigate={(url: string) => {
-            window.open(url, '_blank');
-          }}
-        />
-      </Block>
+      <Box height={RAW_LINK_HEIGHT}>
+        <Block {...rest} width={width - 4}>
+          <Bookmark
+            url={link}
+            title={link}
+            width={width - 12}
+            onNavigate={(url: string) => {
+              window.open(url, '_blank');
+            }}
+          />
+        </Block>
+      </Box>
     );
   }
   if (linkBlockType === 'twitter') {
@@ -174,91 +158,101 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onLoaded={onLinkLoaded}
+        onImageLoaded={onLinkLoaded}
       />
     );
   }
 
   const ogHasURL = openGraph && openGraph.ogUrl;
+  // 254px in rem is 15rem
+  if (!ogHasURL) {
+    const width = containerWidth ? containerWidth - 12 : 320;
+    return (
+      <Box height={RAW_LINK_HEIGHT}>
+        <Block id="loader" width={width - 4}>
+          <Box isSkeleton height={'1.875rem'} width={width - 4}></Box>
+        </Block>
+      </Box>
+    );
+  }
   return (
-    <Block {...rest}>
-      <LinkImage
-        isSkeleton={!ogHasURL || !imgLoaded}
-        src={openGraph?.ogImage?.url}
-        alt={openGraph?.ogTitle}
-        onError={() => {
-          // onLoaded && onLoaded();
-        }}
-        onLoad={() => {
-          setImgLoaded(true);
-          // onLoaded && onLoaded();
-        }}
-      />
-      <Flex mb="0.25rem" width="100%" flexDirection="column">
-        <LinkTitle
-          truncate
-          isSkeleton={!ogHasURL}
-          fontSize={2}
-          fontWeight={500}
-          width={containerWidth ? containerWidth - 20 : 'inherit'}
-          onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
-            evt.stopPropagation();
-            window.open(openGraph?.ogUrl, '_blank');
+    <Box>
+      <Block {...rest} height={LINK_PREVIEW_HEIGHT}>
+        <LinkImage
+          isSkeleton={!ogHasURL || !imgLoaded}
+          src={openGraph?.ogImage}
+          alt={openGraph?.ogTitle}
+          onError={() => {}}
+          onLoad={() => {
+            setImgLoaded(true);
           }}
-        >
-          {openGraph?.ogTitle}
-        </LinkTitle>
-        <LinkDescription
-          truncate
-          isSkeleton={!ogHasURL}
-          fontSize={1}
-          opacity={0.7}
-          width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
-        >
-          {description}
-        </LinkDescription>
-      </Flex>
-      <Flex
-        className="block-footer"
-        flex={1}
-        justifyContent="space-between"
-        width="100%"
-      >
-        <Flex
-          flexDirection="row"
-          gap={4}
-          justifyContent="space-between"
-          alignItems="center"
-          width="50%"
-        >
-          <Text.Anchor
+        />
+        <Flex mb="0.25rem" width="100%" flexDirection="column">
+          <LinkTitle
+            truncate
             isSkeleton={!ogHasURL}
-            fontSize={0}
-            opacity={0.5}
+            fontSize={2}
+            fontWeight={500}
+            width={containerWidth ? containerWidth - 20 : 'inherit'}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              if (ogHasURL) {
-                const origin = new URL(openGraph.ogUrl).origin;
-                window.open(origin, '_blank');
-              }
+              window.open(openGraph?.ogUrl, '_blank');
             }}
           >
-            {openGraph?.ogSiteName ||
-              (ogHasURL && new URL(openGraph.ogUrl).hostname)}
-          </Text.Anchor>
+            {openGraph?.ogTitle}
+          </LinkTitle>
+          <LinkDescription
+            truncate
+            isSkeleton={!ogHasURL}
+            fontSize={1}
+            opacity={0.7}
+            width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
+          >
+            {description}
+          </LinkDescription>
         </Flex>
-
-        <Text.Custom
-          truncate
-          width="50%"
-          textAlign="right"
-          className="block-author"
-          noSelection
-          fontSize={0}
+        <Flex
+          className="block-footer"
+          flex={1}
+          justifyContent="space-between"
+          width="100%"
         >
-          {by}
-        </Text.Custom>
-      </Flex>
-    </Block>
+          <Flex
+            flexDirection="row"
+            gap={4}
+            justifyContent="space-between"
+            alignItems="center"
+            width="50%"
+          >
+            <Text.Anchor
+              isSkeleton={!ogHasURL}
+              fontSize={0}
+              opacity={0.5}
+              onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
+                evt.stopPropagation();
+                if (ogHasURL) {
+                  const origin = new URL(openGraph.ogUrl).origin;
+                  window.open(origin, '_blank');
+                }
+              }}
+            >
+              {openGraph?.ogSiteName ||
+                (ogHasURL && new URL(openGraph.ogUrl).hostname)}
+            </Text.Anchor>
+          </Flex>
+
+          <Text.Custom
+            truncate
+            width="50%"
+            textAlign="right"
+            className="block-author"
+            noSelection
+            fontSize={0}
+          >
+            {by}
+          </Text.Custom>
+        </Flex>
+      </Block>
+    </Box>
   );
 };
