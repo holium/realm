@@ -445,7 +445,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Add as friend',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  console.log('adding friend', peer.ship);
+                  ShipActions.addFriend(peer.ship);
                 },
               });
             }
