@@ -62,25 +62,27 @@ const ShutdownDialogPresenter = () => {
         {seconds > 1 && 's'}.
       </Text>
       <Box mt={4} width="100%">
-        <Button
-          width="45%"
-          disabled={false}
-          onClick={() => {
-            id && clearInterval(id);
-            ShellActions.closeDialog();
-            ShellActions.setBlur(false);
-            // reset seconds/id for next open
-            // 62 === 60 ???
-            setId(undefined);
-            setSeconds(62);
-          }}
-          variant="secondary"
-        >
-          Cancel
-        </Button>
-        <Button width="55%" disabled={false} onClick={shutdown}>
-          Power Off
-        </Button>
+        <Flex width="100%" justifyContent="space-between">
+          <Button
+            width="45%"
+            disabled={false}
+            onClick={() => {
+              id && clearInterval(id);
+              ShellActions.closeDialog();
+              ShellActions.setBlur(false);
+              // reset seconds/id for next open
+              // 62 === 60 ???
+              setId(undefined);
+              setSeconds(62);
+            }}
+            variant="secondary"
+          >
+            Cancel
+          </Button>
+          <Button width="50%" disabled={false} onClick={shutdown}>
+            Power Off
+          </Button>
+        </Flex>
       </Box>
     </Flex>
   );
