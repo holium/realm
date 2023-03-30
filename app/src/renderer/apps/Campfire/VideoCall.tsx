@@ -58,7 +58,7 @@ export const VideoCall = observer(() => {
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
   const videoColor = useMemo(() => darken(0.1, windowColor), [windowColor]);
-  const [video, setVideo] = useState(false);
+  const [video, setVideo] = useState(true);
   const [screenSharing, setScreenSharing] = useState(false);
   const webcamRef = useRef(null);
 
@@ -104,22 +104,32 @@ export const VideoCall = observer(() => {
         padding={20}
         gap={20}
       >
-        <Webcam
-          videoConstraints={{
-            facingMode: 'user',
-          }}
-          audio={false}
-          screenshotFormat="image/jpeg"
-          ref={webcamRef}
-          style={{
-            objectFit: 'cover',
-            width: '100%',
-            height: '100%',
-            borderRadius: 10,
-            maxHeight: '90%',
-          }}
-          mirrored={true}
-        ></Webcam>
+        {video ? (
+          <Webcam
+            videoConstraints={{
+              facingMode: 'user',
+            }}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            ref={webcamRef}
+            style={{
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              borderRadius: 10,
+              maxHeight: '90%',
+            }}
+            mirrored={true}
+          ></Webcam>
+        ) : (
+          <Flex justifyContent="center" alignItems="center" flex={1}>
+            <Avatar
+              patp={ship?.patp ?? ''}
+              size={30}
+              sigilColor={[ship?.color || '#000000', 'white']}
+            />
+          </Flex>
+        )}
         {callers.map((person: string) => (
           <VideoCaller key={person} type="caller" person={person} />
         ))}
@@ -190,7 +200,7 @@ export const VideoCall = observer(() => {
               }}
             />
             <CommButton
-              icon={video ? 'VideoOff' : 'VideoOn'}
+              icon={video ? 'VideoOn' : 'VideoOff'}
               customBg={commButtonBg}
               onClick={(evt) => {
                 evt.stopPropagation();
@@ -276,7 +286,12 @@ export const VideoCall = observer(() => {
         ></TextInput>
         <Card background={windowColor} padding={12}>
           {callers.map((person: string) => (
-            <CallerRow key={person} name={person} />
+            <CallerRow
+              key={person}
+              name={person}
+              patp={'~zod'}
+              isMuted="false"
+            />
           ))}
           <CallerRow
             patp={ship?.patp || ''}

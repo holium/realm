@@ -2,9 +2,15 @@ import { observer } from 'mobx-react';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { Button, Flex, Text, TextInput, Icon } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Text,
+  TextInput,
+  Icon,
+  useToggle,
+} from '@holium/design-system';
 import { Card } from '@holium/design-system/src/general/Card/Card';
-import { useToggle } from 'renderer/logic/lib/useToggle';
 
 export const CampfireAddParticipantDialogConfig: (
   dialogProps: any

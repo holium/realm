@@ -53,6 +53,7 @@ export const Landing = () => {
           placeholder="Enter a code or @p"
           rightAdornment={<Button.TextButton>Join</Button.TextButton>}
           width={400}
+          height={40}
         />
         <Flex flexDirection="row" gap={10} flex={0}>
           <Button.Base
