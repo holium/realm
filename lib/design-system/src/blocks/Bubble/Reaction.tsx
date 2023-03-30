@@ -1,15 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Box, Icon, Text, Menu } from '../..';
+import { Flex, Box, Icon, Text, Portal, Card } from '../..';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
   Emoji,
   SkinTones,
 } from 'emoji-picker-react';
+
 import { FragmentReactionType } from './Bubble.types';
 import { rgba, darken } from 'polished';
 import { getVar } from '../../util/colors';
+import { useMenu } from '../../navigation/Menu/useMenu';
+import { AnimatePresence } from 'framer-motion';
 
 const WIDTH = 300;
 const HEIGHT = 350;
@@ -170,7 +173,6 @@ type ReactionProps = {
   ourColor?: string;
   ourShip?: string;
   variant?: 'overlay' | 'inline';
-  defaultIsOpen?: boolean;
   reactions: FragmentReactionType[];
   size?: keyof typeof ReactionSizes;
   onReaction?: (payload: OnReactionPayload) => void;
@@ -184,13 +186,17 @@ export const Reactions = (props: ReactionProps) => {
     isOur = false,
     ourShip = defaultShip,
     ourColor,
-    defaultIsOpen = false,
     reactions = [],
     onReaction,
   } = props;
-  const [isReacting, setIsReacting] = useState<boolean>(defaultIsOpen);
   const reactIds = reactions.map((r) => r.msgId);
-
+  const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
+    'top-left',
+    { width: WIDTH, height: HEIGHT },
+    { x: 0, y: 2 },
+    [], // closeableIds
+    [] // closeableClasses
+  );
   const reactionsAggregated = useMemo(() => {
     if (reactions.length === 0) {
       return [];
@@ -223,53 +229,28 @@ export const Reactions = (props: ReactionProps) => {
     return false;
   };
 
-  const onClick = (emoji: string) => {
-    if (!onReaction) return;
-    setIsReacting(false);
-    if (checkDupe(emoji)) {
-      const reactToRemove = reactions.find(
-        (r) => r.by === ourShip && r.emoji === emoji
-      );
-      if (!reactToRemove) return;
-      onReaction({
-        reactId: reactToRemove.msgId,
-        emoji,
-        action: 'remove',
-        by: ourShip,
-      });
-    } else {
-      onReaction({ emoji, action: 'add', by: ourShip });
-    }
-  };
+  const onClick = useCallback(
+    (emoji: string) => {
+      if (!onReaction) return;
+      closeMenu();
 
-  const root = document.getElementById('root');
-  useEffect(() => {
-    if (!root) return;
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isReacting) {
-        const addButton = document.getElementById('reaction-add-button');
-        const dropdownNode = document.getElementById('emoji-picker');
-        const isVisible = dropdownNode
-          ? dropdownNode.getAttribute('data-is-open') === 'true'
-          : false; // get if the picker is visible currently
-        if (
-          addButton?.contains(event.target as Node) ||
-          dropdownNode?.contains(event.target as Node) ||
-          !isVisible
-        ) {
-          return;
-        }
-        // You are clicking outside
-        if (isVisible) {
-          setIsReacting(false);
-        }
+      if (checkDupe(emoji)) {
+        const reactToRemove = reactions.find(
+          (r) => r.by === ourShip && r.emoji === emoji
+        );
+        if (!reactToRemove) return;
+        onReaction({
+          reactId: reactToRemove.msgId,
+          emoji,
+          action: 'remove',
+          by: ourShip,
+        });
+      } else {
+        onReaction({ emoji, action: 'add', by: ourShip });
       }
-    };
-    root.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      root.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [root, isReacting]);
+    },
+    [reactionsAggregated, ourShip, onReaction]
+  );
 
   // if we have reactions, and we're in overlay mode, switch to inline
   const variantAuto = useMemo(
@@ -277,6 +258,40 @@ export const Reactions = (props: ReactionProps) => {
       reactions.length > 0 && variant === 'overlay' ? 'inline' : 'overlay',
     [reactions.length, variant]
   );
+
+  const memoizedRow = useMemo(() => {
+    return reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
+      return (
+        <ReactionButton
+          key={`${reaction.emoji}-by-${reaction.by}-${index}`}
+          isOur={isOur}
+          ourColor={ourColor}
+          size={size}
+          hasCount={reaction.count > 1}
+          onClick={(evt) => {
+            evt.stopPropagation();
+            onClick(reaction.emoji);
+          }}
+          selected={reaction.by.includes(ourShip)}
+        >
+          <Emoji
+            key={`${reaction.emoji}-emoji`}
+            unified={reaction.emoji}
+            emojiStyle={EmojiStyle.APPLE}
+            size={EmojiSizes[size]}
+          />
+          {reaction.count > 1 && (
+            <Text.Hint
+              opacity={0.9}
+              style={{ color: isOur ? '#ffffff' : 'var(--rlm-text-color)' }}
+            >
+              {reaction.count}
+            </Text.Hint>
+          )}
+        </ReactionButton>
+      );
+    });
+  }, [reactionsAggregated, isOur, ourColor, size, onClick, ourShip]);
 
   return (
     <ReactionRow
@@ -288,80 +303,85 @@ export const Reactions = (props: ReactionProps) => {
         evt.stopPropagation();
       }}
     >
-      {reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
-        return (
-          <ReactionButton
-            key={`${reaction.emoji}-by-${reaction.by}-${index}`}
-            isOur={isOur}
-            ourColor={ourColor}
-            size={size}
-            hasCount={reaction.count > 1}
-            onClick={(evt) => {
-              evt.stopPropagation();
-              onClick(reaction.emoji);
-            }}
-            selected={reaction.by.includes(ourShip)}
-          >
-            <Emoji
-              key={`${reaction.emoji}-emoji`}
-              unified={reaction.emoji}
-              emojiStyle={EmojiStyle.APPLE}
-              size={EmojiSizes[size]}
-            />
-            {reaction.count > 1 && (
-              <Text.Hint
-                opacity={0.9}
-                style={{ color: isOur ? '#ffffff' : 'var(--rlm-text-color)' }}
-              >
-                {reaction.count}
-              </Text.Hint>
-            )}
-          </ReactionButton>
-        );
-      })}
-      {!isOur && (
-        <Menu
-          id={id}
-          orientation="top-left"
-          clickPreventClass="epr-category-nav"
-          className="emoji-picker-menu"
-          dimensions={{ width: WIDTH, height: HEIGHT }}
-          offset={{ x: 2, y: 2 }}
-          triggerEl={
-            <ReactionButton
-              isOur={isOur}
-              ourColor={ourColor}
-              size={size}
-              className="bubble-reactions"
-            >
-              <Icon
-                pointerEvents="none"
-                size={18}
-                opacity={0.5}
-                name="Reaction"
-              />
-            </ReactionButton>
-          }
+      {memoizedRow}
+      <>
+        <ReactionButton
+          isOur={isOur}
+          ourColor={ourColor}
+          size={size}
+          className="bubble-reactions"
+          onClick={(evt) => {
+            toggleMenu(evt);
+          }}
         >
-          <ReactionPickerStyle zIndex={20} transition={{ duration: 0.15 }}>
-            <EmojiPicker
-              emojiVersion="0.6"
-              height={HEIGHT}
-              width={WIDTH}
-              lazyLoadEmojis
-              previewConfig={{
-                showPreview: false,
-              }}
-              defaultSkinTone={SkinTones.NEUTRAL}
-              onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
-                evt.stopPropagation();
-                onClick(emojiData.unified);
-              }}
-              autoFocusSearch={false}
-            />
-          </ReactionPickerStyle>
-        </Menu>
-      )}
+          <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
+        </ReactionButton>
+        <Portal>
+          <AnimatePresence>
+            {isOpen && position && (
+              <Card
+                ref={menuRef}
+                p={0}
+                elevation={2}
+                position="absolute"
+                id={id}
+                zIndex={100}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                gap={0}
+                style={{
+                  y: position.y,
+                  x: position.x,
+                  border: 'none',
+                  width: WIDTH,
+                  height: HEIGHT,
+                  overflowY: 'hidden',
+                }}
+              >
+                <ReactionPickerStyle
+                  zIndex={20}
+                  transition={{ duration: 0.15 }}
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                  }}
+                >
+                  <EmojiPicker
+                    emojiVersion="0.6"
+                    height={HEIGHT}
+                    width={WIDTH}
+                    lazyLoadEmojis
+                    previewConfig={{
+                      showPreview: false,
+                    }}
+                    defaultSkinTone={SkinTones.NEUTRAL}
+                    onEmojiClick={(
+                      emojiData: EmojiClickData,
+                      evt: MouseEvent
+                    ) => {
+                      onClick(emojiData.unified);
+                      evt.stopPropagation();
+                    }}
+                    autoFocusSearch
+                  />
+                </ReactionPickerStyle>
+              </Card>
+            )}
+          </AnimatePresence>
+        </Portal>
+      </>
     </ReactionRow>
   );
 };
@@ -380,6 +400,7 @@ export const ReactionPickerStyle = styled(Flex)`
     --epr-search-input-height: 34px;
     font-size: 12px;
   }
+
   .epr-header-overlay {
     padding: 8px !important;
   }
@@ -429,6 +450,7 @@ export const ReactionPicker = ({
         defaultSkinTone={SkinTones.NEUTRAL}
         onEmojiClick={(emojiData: EmojiClickData, evt: MouseEvent) => {
           evt.stopPropagation();
+          // evt.preventDefault();
           onClick(emojiData.unified);
         }}
         autoFocusSearch={false}

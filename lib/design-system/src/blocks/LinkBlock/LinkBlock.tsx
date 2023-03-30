@@ -57,7 +57,7 @@ export const LinkBlock = ({
   link,
   by,
   containerWidth,
-  metadata,
+  metadata = {},
   onLinkLoaded,
   ...rest
 }: LinkBlockProps) => {
@@ -92,7 +92,8 @@ export const LinkBlock = ({
 
   if (
     (metadata.height && !metadata.ogData) ||
-    (!metadata.ogData && linkBlockType === 'url')
+    (!metadata.ogData && linkBlockType === 'url') ||
+    (metadata.ogData && !metadata.ogData.ogTitle)
   ) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
@@ -182,7 +183,10 @@ export const LinkBlock = ({
           isSkeleton={!ogHasURL || !imgLoaded}
           src={openGraph?.ogImage}
           alt={openGraph?.ogTitle}
-          onError={() => {}}
+          onError={() => {
+            // TODO placeholder image
+            setImgLoaded(true);
+          }}
           onLoad={() => {
             setImgLoaded(true);
           }}

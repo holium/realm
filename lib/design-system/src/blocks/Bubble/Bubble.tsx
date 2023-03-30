@@ -1,4 +1,4 @@
-import { forwardRef, useLayoutEffect, useMemo } from 'react';
+import { forwardRef, useCallback, useLayoutEffect, useMemo } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -81,6 +81,19 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       return BUBBLE_HEIGHT.rem.footer;
     }, [reactions.length]);
 
+    const handleOnReaction = useCallback(
+      (payload: OnReactionPayload) => {
+        if (!onReaction) return;
+        if (reactions.length === 0 && payload.action === 'add') {
+          onMeasure();
+        } else if (reactions.length === 1 && payload.action === 'remove') {
+          onMeasure();
+        }
+        onReaction(payload);
+      },
+      [onReaction, reactions.length]
+    );
+
     const fragments = useMemo(() => {
       if (!message) return [];
       return message?.map((fragment, index) => {
@@ -139,6 +152,19 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
+    const reactionsDisplay = useMemo(() => {
+      return (
+        <Reactions
+          id={`${id}-reactions`}
+          isOur={isOur}
+          ourShip={ourShip}
+          ourColor={ourColor}
+          reactions={reactions}
+          onReaction={handleOnReaction}
+        />
+      );
+    }, [reactions.length, isOur, ourShip, ourColor, handleOnReaction]);
+
     if (message?.length === 1) {
       const contentType = Object.keys(message[0])[0];
       if (contentType === 'status') {
@@ -191,16 +217,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           )}
           <FragmentBlock id={id}>{fragments}</FragmentBlock>
           <BubbleFooter id={id} height={footerHeight}>
-            <Box width="70%">
-              <Reactions
-                id={`${id}-reactions`}
-                isOur={isOur}
-                ourShip={ourShip}
-                ourColor={ourColor}
-                reactions={reactions}
-                onReaction={onReaction}
-              />
-            </Box>
+            <Box width="70%">{reactionsDisplay}</Box>
             <Flex
               width="30%"
               gap={4}
