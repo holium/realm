@@ -1,4 +1,10 @@
-import { forwardRef, useCallback, useLayoutEffect, useMemo } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -69,10 +75,28 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       [authorColor]
     );
 
+    const [lastReactonLength, setLastReactionLength] = useState(
+      reactions.length
+    );
+
     const innerWidth = useMemo(
       () => (containerWidth ? containerWidth - 16 : undefined),
       [containerWidth]
     );
+
+    // if the number of reactions changes, we need to re-measure
+    useEffect(() => {
+      if (lastReactonLength !== reactions.length) {
+        if (
+          (lastReactonLength === 0 && reactions.length === 1) ||
+          (reactions.length === 0 && lastReactonLength === 1)
+        ) {
+          // only re-measure if we're going from 0 to 1 or 1 to 0
+          onMeasure();
+        }
+        setLastReactionLength(reactions.length);
+      }
+    }, [reactions.length, lastReactonLength, onMeasure]);
 
     const footerHeight = useMemo(() => {
       if (reactions.length > 0) {
@@ -80,19 +104,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       }
       return BUBBLE_HEIGHT.rem.footer;
     }, [reactions.length]);
-
-    const handleOnReaction = useCallback(
-      (payload: OnReactionPayload) => {
-        if (!onReaction) return;
-        if (reactions.length === 0 && payload.action === 'add') {
-          onMeasure();
-        } else if (reactions.length === 1 && payload.action === 'remove') {
-          onMeasure();
-        }
-        onReaction(payload);
-      },
-      [onReaction, reactions.length]
-    );
 
     const fragments = useMemo(() => {
       if (!message) return [];
@@ -160,10 +171,10 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           ourShip={ourShip}
           ourColor={ourColor}
           reactions={reactions}
-          onReaction={handleOnReaction}
+          onReaction={onReaction}
         />
       );
-    }, [reactions.length, isOur, ourShip, ourColor, handleOnReaction]);
+    }, [reactions.length, isOur, ourShip, ourColor, onReaction]);
 
     if (message?.length === 1) {
       const contentType = Object.keys(message[0])[0];
