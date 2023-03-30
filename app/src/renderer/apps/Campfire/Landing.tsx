@@ -61,14 +61,14 @@ export const Landing = () => {
             padding="4px 12px"
             justifyContent="center"
             alignItems="center"
-            onClick={() => CampfireActions.setView('video')}
+            onClick={(evt: any) => {
+              createRoom(evt);
+              CampfireActions.setView('video');
+            }}
             onKeyDown={(evt: any) => {
               if (evt.key === 'Enter' && form.computed.isValid) {
                 createRoom(evt);
               }
-            }}
-            onClick={(evt: any) => {
-              createRoom(evt);
             }}
           >
             <Icon name="AddVideo" size={20} />
