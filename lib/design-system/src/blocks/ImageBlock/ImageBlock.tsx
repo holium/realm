@@ -26,7 +26,7 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
 
   useLayoutEffect(() => {
     if (!isPrecalculated && onImageLoaded) onImageLoaded();
-  });
+  }, [isPrecalculated]);
 
   const parsedHeight = (
     height ? (typeof height === 'number' ? `${height}px` : height) : '100%'

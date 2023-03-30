@@ -1,20 +1,12 @@
-import {
-  forwardRef,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
 import {
-  FragmentImageType,
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
-  TEXT_TYPES,
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 import { InlineStatus } from './InlineStatus';
@@ -134,35 +126,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       });
     }, [message]);
 
-    useLayoutEffect(() => {
-      // only measure if all fragments are text
-      let allTextTypes = true;
-      let hasCalculatedImage = false;
-      if (!message) return;
-      message.forEach((fragment) => {
-        const fragmentType = Object.keys(fragment)[0];
-        if (!TEXT_TYPES.includes(fragmentType)) {
-          allTextTypes = false;
-        }
-        if (
-          fragmentType === 'image' &&
-          (fragment as FragmentImageType).metadata?.height &&
-          (fragment as FragmentImageType).metadata?.width
-        ) {
-          // if we have an image, we need to measure it
-          hasCalculatedImage = true;
-        }
-      });
-      if (allTextTypes) {
-        onMeasure();
-        return;
-      }
-      if (hasCalculatedImage) {
-        onMeasure();
-        return;
-      }
-    }, []);
-
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
     const reactionsDisplay = useMemo(() => {
@@ -201,6 +164,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
         key={id}
         display="inline-flex"
         justifyContent={isOur ? 'flex-end' : 'flex-start'}
+        onLoad={onMeasure}
       >
         <BubbleStyle
           id={id}

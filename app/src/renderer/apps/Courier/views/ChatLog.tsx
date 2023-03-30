@@ -26,6 +26,7 @@ import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
 import { toJS } from 'mobx';
+// import MessageList from '../components/MessageList';
 // import { toJS } from 'mobx';
 
 type ChatLogProps = {
@@ -196,6 +197,66 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   />
                 </AnimatePresence>
               )}
+              {/* <MessageList
+                items={messages.slice()}
+                itemKey={(item) => `${item.id}-${item.updatedAt}`}
+                itemRenderer={(item, index) => {
+                  const isLast = index === messages.length - 1;
+
+                  let replyToObj: any | undefined;
+                  if (item.replyToMsgId) {
+                    const originalMsg = toJS(
+                      selectedChat.messages.find(
+                        (m) => m.id === item.replyToMsgId
+                      )
+                    );
+                    if (originalMsg) {
+                      let { nickname } = friends.getContactAvatarMetadata(
+                        originalMsg?.sender
+                      );
+                      replyToObj = originalMsg && {
+                        reply: {
+                          msgId: originalMsg.id,
+                          author: nickname || originalMsg.sender,
+                          message: [originalMsg.contents[0]],
+                        },
+                      };
+                    }
+                  }
+
+                  // const isNextGrouped =
+                  //   index < messages.length - 1 &&
+                  //   item.sender === messages[index + 1].sender;
+
+                  // const isPrevGrouped =
+                  //   index > 0 &&
+                  //   item.sender === messages[index - 1].sender &&
+                  //   Object.keys(messages[index - 1].contents[0])[0] !==
+                  //     'status';
+
+                  // const topSpacing = isPrevGrouped ? '3px' : 2;
+                  // const bottomSpacing = isNextGrouped ? '3px' : 2;
+
+                  return (
+                    <Box
+                      mx="1px"
+                      // pt={topSpacing}
+                      // pb={isLast ? bottomSpacing : 0}
+                    >
+                      <ChatMessage
+                        isPrevGrouped={false}
+                        isNextGrouped={false}
+                        containerWidth={containerWidth}
+                        replyTo={replyToObj}
+                        message={item as ChatMessageType}
+                        canReact={selectedChat.metadata.reactions}
+                        ourColor={ourColor}
+                        measure={() => {}}
+                      />
+                    </Box>
+                  );
+                }}
+              /> */}
               <WindowedList
                 key={`${path}-${selectedChat.lastFetch}`}
                 startAtBottom
