@@ -8,8 +8,10 @@ import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceC
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
-import { Dimensions } from 'os/types';
+import { Dimensions } from '@holium/design-system';
 import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
+import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
+import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
 import { CampfireAddParticipantDialogConfig } from 'renderer/apps/Campfire/CampfireAddParticipantDialog';
 
 export interface BaseWorkflowProps {
@@ -48,9 +50,11 @@ export interface DialogRenderers {
 }
 
 export const dialogRenderers: DialogRenderers = {
+  'shutdown-dialog': ShutdownDialogConfig,
   'app-detail-dialog': AppDetailDialog,
   'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
+  'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
   'change-email-dialog': ChangeEmailDialogConfig,
   'reset-code-dialog': ResetCodeDialogConfig,

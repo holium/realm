@@ -27,7 +27,9 @@ export const TitlebarContainer = styled(motion.div)<Props>`
   backface-visibility: hidden;
   ${({ zIndex, hasBorder }) => css`
     z-index: ${zIndex};
-    border-bottom: ${hasBorder ? ' 1px solid var(--rlm-border-color)' : 'none'};
+    border-bottom: ${hasBorder
+      ? '1px solid rgba(var(--rlm-border-rgba))'
+      : 'none'};
   `}
 `;
 

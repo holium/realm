@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
-import { Box, Flex, Select } from '@holium/design-system';
+import { Avatar, Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
   Label,
@@ -11,7 +11,6 @@ import {
   Crest,
   IconButton,
   Skeleton,
-  Grid,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { createField, createForm } from 'mobx-easy-form';
@@ -22,7 +21,6 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { Avatar } from '@holium/design-system';
 
 interface IMemberList {
   customBg: string;
@@ -291,7 +289,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   if (!workflowState) return null;
 
   return (
-    <Grid.Column noGutter lg={12} xl={12}>
+    <Flex flexDirection="column" width="100%" overflowY="hidden">
       <Text
         fontSize={5}
         lineHeight="24px"
@@ -400,7 +398,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           </MemberList>
         </Flex>
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };
 

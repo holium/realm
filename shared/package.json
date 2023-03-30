@@ -1,0 +1,23 @@
+{
+  "name": "@holium/shared",
+  "version": "1.0.0",
+  "main": "dist/holium-shared.cjs.js",
+  "module": "dist/holium-shared.esm.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "postinstall": "preconstruct dev"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "babel-loader": "^8.2.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@preconstruct/cli": "2.2.1",
+    "ts-node": "^10.9.1"
+  }
+}

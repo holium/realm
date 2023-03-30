@@ -1,4 +1,3 @@
-import { darken } from 'polished';
 import { Icon } from '../../general/Icon/Icon';
 import { IconPathsType } from '../../general/Icon/icons';
 import { Flex } from '../../general/Flex/Flex';
@@ -7,7 +6,6 @@ import {
   RadioLabel,
   RadioLabelContainer,
 } from './RadioGroup.style';
-import { getVar } from '../../util/colors';
 
 export type RadioOption = {
   label: string;
@@ -33,7 +31,8 @@ export const RadioGroup = ({ options, selected, onClick }: Props) => (
     justifyContent="flex-start"
     gap={4}
     borderRadius={6}
-    background={darken(0.025, getVar('window'))}
+    bg="window"
+    style={{ backdropFilter: 'brightness(0.975)' }}
   >
     {options.map((option) => {
       const isSelected = option.value === selected;

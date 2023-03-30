@@ -2,7 +2,6 @@ import { S3Api } from './../../api/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
-import { Content } from '@urbit/api';
 import { S3Client, StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
 import { Realm } from '../../index';
@@ -10,8 +9,6 @@ import { BaseService } from '../base.service';
 import { EncryptedStore } from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { Patp } from '../../types';
-import { DmApi } from '../../api/dms';
-import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
@@ -145,7 +142,7 @@ export class ShipService extends BaseService {
     setScreen: async (screen: boolean) => {
       return await ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
     },
-    sendDm: async (path: string, contents: Content[]) => {
+    sendDm: async (path: string, contents: any[]) => {
       return await ipcRenderer.invoke('realm.ship.send-dm', path, contents);
     },
     draftDm: async (patps: Patp[], metadata: any[]) => {
@@ -223,7 +220,6 @@ export class ShipService extends BaseService {
     this.state = ShipModel.create({
       patp: ship,
       url: persistedState.url || shipInfo.url,
-      wallpaper: persistedState.wallpaper || null,
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
@@ -271,35 +267,14 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
 
     try {
-      /*
-      // TODO rewrite the contact store logic
-      try {
-        this.core.conduit.watch({
-          app: 'contact-store',
-          path: '/all',
-          onEvent: (data: any) => {
-            this.models.friends.setInitial(data);
-          },
-          onError: () => console.log('Subscription rejected'),
-          onQuit: () => console.log('Kicked from subscription'),
-        });
-      } catch {
-        console.log('Subscription failed');
-      }*/
-
       if (!this.core.conduit) throw new Error('No conduit found');
       FriendsApi.watchFriends(this.core.conduit, this.models.friends);
 
       FriendsApi.getContact(this.core.conduit, ship).then((value: any) => {
         this.state?.setOurMetadata(value);
       });
-
-      MetadataApi.syncGraphMetadata(this.core.conduit, this.metadataStore);
-
       // register dm update handler
       if (!this.models.courier) throw new Error('No courier found');
-      DmApi.updates(this.core.conduit, this.models.courier);
-      CourierApi.dmUpdates(this.core.conduit, this.models.courier);
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
@@ -349,7 +324,6 @@ export class ShipService extends BaseService {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
-      wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
@@ -549,7 +523,7 @@ export class ShipService extends BaseService {
     return toJS(draft);
   }
 
-  async sendDm(_event: any, path: string, contents: Content[]) {
+  async sendDm(_event: any, path: string, contents: any[]) {
     if (!this.core.conduit) throw new Error('No conduit found');
     const dmLog = this.models.courier?.dms.get(path);
     if (!dmLog) throw new Error('DM log not found, check path');
@@ -586,9 +560,14 @@ export class ShipService extends BaseService {
       this.getS3Bucket()
         .then(async (response: any) => {
           console.log(response);
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
           const client = new S3Client({
             credentials: response.credentials,
-            endpoint: response.credentials.endpoint,
+            endpoint: endp,
             signatureVersion: 'v4',
           });
           let fileContent, fileName, fileExtension;
@@ -597,9 +576,11 @@ export class ShipService extends BaseService {
             // console.log(fileContent);
             const fileParts = args.content.split('.');
             fileName = fileParts.slice(0, -1);
+            // only take the filename, not the path
+            fileName = fileName[0].split('/').pop();
             fileExtension = fileParts.pop();
           } else if (args.source === 'buffer') {
-            fileContent = await Buffer.from(args.content, 'base64');
+            fileContent = Buffer.from(args.content, 'base64');
             fileName = 'clipboard';
             fileExtension = args.contentType.split('/')[1];
           }

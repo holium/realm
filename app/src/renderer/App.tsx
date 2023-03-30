@@ -17,6 +17,7 @@ import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { SelectionProvider } from './logic/lib/selection';
 import { ErrorBoundary } from './logic/ErrorBoundary';
+import { AccountProvider, accountStore } from './apps/Account/store';
 
 const AppPresenter = () => {
   const { booted } = useCore();
@@ -43,7 +44,6 @@ const AppPresenter = () => {
 
   useEffect(() => {
     return () => {
-      console.log('on dismount');
       ShellActions.closeDialog();
     };
   }, []);
@@ -53,17 +53,20 @@ const AppPresenter = () => {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} realmTheme={theme.currentTheme} />
           {/* Modal provider */}
-          <ServiceProvider value={servicesStore}>
-            <SelectionProvider>
-              <ContextMenuProvider>
-                <ErrorBoundary>
-                  {shellMemo}
-                  {contextMenuMemo}
-                  <div id="portal-root" />
-                </ErrorBoundary>
-              </ContextMenuProvider>
-            </SelectionProvider>
-          </ServiceProvider>
+          <AccountProvider value={accountStore}>
+            <ServiceProvider value={servicesStore}>
+              <SelectionProvider>
+                <ContextMenuProvider>
+                  <ErrorBoundary>
+                    {shellMemo}
+                    {contextMenuMemo}
+                    <div id="portal-root" />
+                    <div id="menu-root" />
+                  </ErrorBoundary>
+                </ContextMenuProvider>
+              </SelectionProvider>
+            </ServiceProvider>
+          </AccountProvider>
         </MotionConfig>
       </ThemeProvider>
     </CoreProvider>

@@ -1,5 +1,5 @@
 import { AppType, RealmConfigType } from 'os/services/spaces/models/bazaar';
-import { Dimensions, Position, Bounds } from 'os/types';
+import { Dimensions, Position, Bounds } from '@holium/design-system';
 import { getDefaultAppDimensions } from './dimensions';
 
 /**

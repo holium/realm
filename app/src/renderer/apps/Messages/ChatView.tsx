@@ -12,9 +12,17 @@ import {
 import { lighten, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { Content } from '@urbit/api';
-import { Spinner, Tooltip } from '@holium/design-system';
+import {
+  Avatar,
+  Button,
+  Icon,
+  Text,
+  Box,
+  Flex,
+  Spinner,
+  Tooltip,
+} from '@holium/design-system';
 import { Input } from 'renderer/components';
-import { Avatar, Button, Icon, Text, Box, Flex } from '@holium/design-system';
 import { ThemeModelType } from 'os/services/theme.model';
 import { createDmForm } from './forms/chatForm';
 import { useServices } from 'renderer/logic/store';
@@ -35,7 +43,6 @@ import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import styled from 'styled-components';
 
 const ChatInputWrapper = styled(Box)`
-  /* background: var(--rlm-window-bg); */
   backdrop-filter: blur(24px);
   padding: 0 24px;
 `;
@@ -414,7 +421,6 @@ export const ChatView = observer(({ selectedChat, theme, storage }: Props) => {
             autoFocus
             name="dm-message"
             shouldHighlightOnFocus
-            className="realm-cursor-text-cursor"
             width="100%"
             placeholder="Write a message"
             rightInteractive

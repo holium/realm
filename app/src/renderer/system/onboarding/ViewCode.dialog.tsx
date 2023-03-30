@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Grid, Text, CopyButton } from 'renderer/components';
-import { Box, Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { Avatar, Button, Icon, TextInput } from '@holium/design-system';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import {
+  Avatar,
+  Button,
+  Box,
+  Flex,
+  Spinner,
+  Icon,
+  TextInput,
+  useToggle,
+} from '@holium/design-system';
 
 const ViewCodePresenter = () => {
   const { theme } = useServices();

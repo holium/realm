@@ -8,8 +8,8 @@ import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { SpacesApi } from '../../api/spaces';
+import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { snakeify } from '../../lib/obj';
-import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
@@ -51,6 +51,7 @@ interface SpaceModels {
 export class SpacesService extends BaseService {
   private db?: DiskStore; // for persistance
   private state?: SpacesStoreType; // for state management
+  newChatEnabled = false;
   private models: SpaceModels = {
     membership: MembershipStore.create({}),
     visas: VisaModel.create({
@@ -270,8 +271,9 @@ export class SpacesService extends BaseService {
   async load(patp: string, isReconnecting: boolean) {
     if (!this.core.conduit) throw new Error('No conduit found');
     const secretKey = this.core.passwords.getPassword(patp);
-    if (!secretKey) throw new Error('No password found for this ship');
     this.db = new DiskStore('spaces', patp, secretKey, SpacesStore);
+    // todo comment this back in
+    // if (!secretKey) throw new Error('No password found for this ship');
     this.state = this.db.model as SpacesStoreType;
     if (!isReconnecting) this.state.setLoader('loading');
     // Load sub-models
@@ -308,8 +310,10 @@ export class SpacesService extends BaseService {
     if (devApps) {
       this.models.bazaar.loadDevApps(devApps);
     }
-    this.models.beacon = beaconStore.model;
-    this.models.beacon.load(this.core.conduit);
+    if (this.newChatEnabled) {
+      this.models.beacon = beaconStore.model;
+      this.models.beacon.load(this.core.conduit);
+    }
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -378,11 +382,11 @@ export class SpacesService extends BaseService {
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     if (!this.core.conduit) throw new Error('No conduit found');
     const members = body.members;
-    const id = spaceToSnake(body.name);
+    const slug = humanFriendlySpaceNameSlug(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit,
       {
-        slug: id,
+        slug,
         payload: snakeify({
           name: body.name,
           description: body.description,
@@ -455,6 +459,7 @@ export class SpacesService extends BaseService {
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
     if (!this.core.conduit) throw new Error('No conduit found');
     return await SpacesApi.leaveSpace(this.core.conduit, { path });
+    ``;
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {

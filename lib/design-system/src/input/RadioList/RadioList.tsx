@@ -28,7 +28,7 @@ export const RadioList = ({ options, selected, onClick }: Props) => (
                 opacity={isSelected ? 1 : 0.6}
                 size={24}
                 name={option.icon}
-                color={isSelected ? 'accent' : 'text'}
+                fill={isSelected ? 'accent' : 'text'}
               />
             </Flex>
           )}

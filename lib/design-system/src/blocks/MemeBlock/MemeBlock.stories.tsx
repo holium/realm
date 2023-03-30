@@ -4,7 +4,6 @@ import { Flex } from '../..';
 import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
-import { getVar } from '../../util/colors';
 
 export default {
   component: MemeBlock,
@@ -12,17 +11,17 @@ export default {
 
 export const Default: ComponentStory<typeof MemeBlock> = () => {
   const [reacts, setReacts] = useState<FragmentReactionType[]>([
-    { author: '~fasnut-famden', emoji: '1f525' },
-    { author: '~zod', emoji: '1f525' },
+    { msgId: '1', by: '~fasnut-famden', emoji: '1f525' },
+    { msgId: '2', by: '~zod', emoji: '1f525' },
   ]);
   const ourPatp = '~lomder-librun';
   window.ship = ourPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: ourPatp, emoji: payload.emoji }]);
+      setReacts([...reacts, { msgId: '3', by: ourPatp, emoji: payload.emoji }]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === ourPatp
+        (r) => r.emoji === payload.emoji && r.by === ourPatp
       );
       if (removeIdx === -1) {
         return;
@@ -36,7 +35,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
         flexDirection="column"
         width={432}
         p={2}
-        background={getVar('window')}
+        background={'rgba(var(--rlm-window-rgba))'}
       >
         <MemeBlock
           id="meme-block-1"

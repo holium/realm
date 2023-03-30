@@ -86,7 +86,7 @@ const TooltipStyle = styled(
     width: max-content;
     height: max-content;
     overflow: hidden;
-    color: var(--rlm-text-color);
+    color: rgba(var(--rlm-text-rgba));
     box-shadow: var(--rlm-box-shadow-1);
     ${(props) => placementMaps[props.placement]};
   `

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useServices } from 'renderer/logic/store';
-import { lighten, darken } from 'polished';
 import { WebView } from './WebView';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
-import { useToggle } from 'renderer/logic/lib/useToggle';
+import { useToggle } from '@holium/design-system';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
+import { genCSSVariables } from 'renderer/logic/theme';
 
 const connectWebviewToMultiplayer = async (
   ship: string,
@@ -54,39 +54,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     () => `${appWindow.appId}-web-webview`,
     [appWindow.appId]
   );
-  const themeCss = useMemo(
-    () => `
-      :root {
-        --rlm-font: 'Rubik', sans-serif;
-        --rlm-base-color: ${currentTheme.backgroundColor};
-        --rlm-accent-color: ${currentTheme.accentColor};
-        --rlm-input-color: ${currentTheme.inputColor};
-        --rlm-border-color: ${
-          currentTheme.mode === 'light'
-            ? darken(0.1, currentTheme.windowColor)
-            : darken(0.075, currentTheme.windowColor)
-        };
-        --rlm-window-color: ${currentTheme.windowColor};
-        --rlm-card-color: ${
-          currentTheme.mode === 'light'
-            ? lighten(0.05, currentTheme.windowColor)
-            : darken(0.025, currentTheme.windowColor)
-        };
-        --rlm-theme-mode: ${currentTheme.mode};
-        --rlm-text-color: ${currentTheme.textColor};
-        --rlm-icon-color: ${currentTheme.iconColor};
-      }
-      div[data-radix-portal] {
-        z-index: 2000 !important;
-      }
-
-      #rlm-cursor {
-        position: absolute;
-        z-index: 2147483646 !important;
-      }
-    `,
-    [currentTheme]
-  );
+  const themeCss = useMemo(() => genCSSVariables(currentTheme), [currentTheme]);
 
   useEffect(() => {
     const webview = document.getElementById(
@@ -149,7 +117,6 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           webpreferences="sandbox=false"
           isLocked={isResizing || loading.isOn}
           style={{
-            background: lighten(0.04, currentTheme.windowColor),
             width: 'inherit',
             height: '100%',
             position: 'relative',

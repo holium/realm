@@ -21,8 +21,8 @@ export const MiniAppWindow = styled(motion.div)<MiniAppStyleProps>`
   /* backdrop-filter: blur(24px); */
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  background: var(--rlm-window-color);
-  border: 1px solid var(--rlm-border-color);
+  background: rgba(var(--rlm-window-rgba));
+  border: 1px solid rgba(var(--rlm-border-rgba));
   z-index: 12;
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
 `;

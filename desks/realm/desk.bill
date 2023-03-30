@@ -6,4 +6,7 @@
     %realm-wallet
     %bulletin
     %realm-beacon
+    %realm-chat
+    %notif-db
+    %chat-db
 ==

@@ -1,11 +1,13 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Text, Row, Favicon, Flex, BoxProps } from '../..';
+import { Text, Favicon, Flex, BoxProps, Icon } from '../..';
 
-const BookmarkRow = styled(Row)`
-  flex: 1;
+const BookmarkRow = styled(Flex)`
+  border-radius: 6px;
   padding: 4px 4px 4px 6px;
   justify-content: space-between;
+  flex-direction: row;
+  height: 1.875rem; // 30px in rem is 1.875rem
   align-items: center;
   text-align: left;
 `;
@@ -39,27 +41,33 @@ export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
     <BookmarkRow
       id={id}
       width={width}
-      onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         onNavigate(url);
       }}
     >
       <Flex gap={8} justifyContent="flex-start" alignItems="center">
-        {favicon && <Favicon src={favicon} />}
-        <Text.Custom truncate width={textWidth}>
+        {favicon ? (
+          <Favicon src={favicon} />
+        ) : (
+          <Icon name="Link" opacity={0.7} />
+        )}
+        <Text.Custom fontSize={2} truncate width={textWidth}>
           {title}
         </Text.Custom>
       </Flex>
-      <Text.Custom
-        textAlign="right"
-        width={110}
-        opacity={0.5}
-        fontSize={1}
-        truncate
-        fontWeight={300}
-      >
-        {member}
-      </Text.Custom>
+      {member && (
+        <Text.Custom
+          textAlign="right"
+          width={110}
+          opacity={0.5}
+          fontSize={1}
+          truncate
+          fontWeight={300}
+        >
+          {member}
+        </Text.Custom>
+      )}
 
       {/* <Button.IconButton
         size={20}

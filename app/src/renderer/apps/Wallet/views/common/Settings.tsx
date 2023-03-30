@@ -10,8 +10,8 @@ import {
   Button,
   Select,
   Spinner,
+  TextInput,
 } from '@holium/design-system';
-import { TextInput } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
