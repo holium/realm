@@ -30,7 +30,7 @@ export const InboxPresenter = () => {
       let title: string;
       const dm = preview as ChatModelType;
       title = dm.metadata.title;
-      return title.indexOf(searchString) === 0;
+      return title.toLowerCase().indexOf(searchString.toLowerCase()) === 0;
     },
     [searchString]
   );
@@ -155,6 +155,7 @@ export const InboxPresenter = () => {
               itemHeight={rowHeight}
               width={listWidth}
               height={listHeight}
+              filterFunction={searchFilter}
               renderItem={(chat) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 return (

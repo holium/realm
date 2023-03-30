@@ -301,6 +301,7 @@ export const Chat = types
           contents: tempContents,
           sender: window.ship,
           pending: true,
+          replyToMsgId: self.replyingMsg?.id,
           createdAt: new Date().getTime(),
           updatedAt: new Date().getTime(),
         });
