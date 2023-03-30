@@ -37,7 +37,7 @@ const VIDEO_REGEX = [
 ];
 
 const MEDIA_TYPE = {
-  IMAGE: /(\.jpg|\.jpeg|\.png|\.gif|\.svg|\.avif)$/,
+  IMAGE: /(\.jpg|\.webp|\.jpeg|\.png|\.gif|\.svg|\.avif)$/,
   VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
   AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
   DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
