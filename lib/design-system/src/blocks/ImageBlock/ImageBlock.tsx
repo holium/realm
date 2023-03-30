@@ -1,9 +1,10 @@
-import { FC, useLayoutEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
 type ImageBlockProps = {
+  showLoader?: boolean;
   image: string;
   by: string;
   onImageLoaded?: () => void;
@@ -11,23 +12,17 @@ type ImageBlockProps = {
 
 export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
   const {
+    showLoader,
     image,
     by,
     variant,
     width = 'inherit',
     height,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     onImageLoaded,
     ...rest
   } = props;
-  const [imgLoaded, setImgLoaded] = useState(false);
-
-  const isPrecalculated =
-    typeof height === 'number' && typeof width === 'number';
-
-  useLayoutEffect(() => {
-    if (!isPrecalculated && onImageLoaded) onImageLoaded();
-  }, [isPrecalculated]);
-
+  const [isLoaded, setIsLoaded] = useState(false);
   const parsedHeight = (
     height ? (typeof height === 'number' ? `${height}px` : height) : '100%'
   ) as string;
@@ -40,25 +35,31 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
     <Block variant={variant} width={width} {...rest}>
       <FragmentImage
         id={rest.id}
-        isSkeleton={!imgLoaded}
+        loading="eager"
+        {...(showLoader && { isSkeleton: !isLoaded })}
         src={image}
         height={parsedHeight}
         width={parsedWidth}
         draggable={false}
-        onError={() => {
-          if (!isPrecalculated && onImageLoaded) onImageLoaded();
-        }}
         onLoad={() => {
-          setImgLoaded(true);
-          if (!isPrecalculated && onImageLoaded) onImageLoaded();
+          if (showLoader) {
+            onImageLoaded && onImageLoaded();
+          }
+          console.log('image loade showLoader,', showLoader);
+          setIsLoaded(true);
+        }}
+        onError={() => {
+          // setIsError(true);
         }}
       />
-      <Flex className="block-footer">
-        <Flex></Flex>
-        <Text.Hint className="block-author" noSelection fontSize={0}>
-          {by}
-        </Text.Hint>
-      </Flex>
+      {by && (
+        <Flex className="block-footer">
+          <Flex></Flex>
+          <Text.Hint className="block-author" noSelection fontSize={0}>
+            {by}
+          </Text.Hint>
+        </Flex>
+      )}
     </Block>
   );
 };
