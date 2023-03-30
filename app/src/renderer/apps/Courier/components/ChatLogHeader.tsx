@@ -94,8 +94,8 @@ export const ChatLogHeader = ({
       labelColor: '#ff6240',
       label: isAdmin ? 'Delete chat' : 'Leave chat',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
+      onClick: () => {
+        // evt.stopPropagation();
         ShellActions.setBlur(true);
         ShellActions.openDialogWithStringProps('leave-chat-dialog', {
           path,

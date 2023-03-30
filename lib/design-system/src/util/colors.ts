@@ -97,9 +97,9 @@ export function bgIsLightOrDark(hexColor: string) {
   }
 }
 
-export function convertDarkText(hexColor: string) {
+export function convertDarkText(hexColor: string, themeMode: string = 'light') {
   let color = hexColor;
-  if (getVar('theme-mode') === 'dark') {
+  if (themeMode === 'dark') {
     var c = hexColor.substring(1); // strip #
     var rgb = parseInt(c, 16); // convert rrggbb to decimal
     var r = (rgb >> 16) & 0xff; // extract red

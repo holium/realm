@@ -319,7 +319,6 @@ export const BazaarSubscriptions = {
         }
       },
       onSubscribed: () => {
-        console.log('Subscribed to %bazaar');
         model.setSubscriptionStatus('subscribed');
       },
       onError: () => {

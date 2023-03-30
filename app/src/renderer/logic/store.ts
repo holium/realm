@@ -329,6 +329,7 @@ OSActions.onConnected(
       castToSnapshot(initials.models.friends)
     );
     applySnapshot(servicesStore.beacon, castToSnapshot(initials.beacon));
+    window.ship = initials.ship.patp;
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -339,6 +340,7 @@ OSActions.onConnected(
 
 // Auth events
 OSActions.onLogout((_event: any) => {
+  window.ship = '';
   SoundActions.playLogout();
   servicesStore.clearAll();
   servicesStore.clearShip();

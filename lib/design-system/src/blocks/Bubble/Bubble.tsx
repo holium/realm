@@ -1,4 +1,10 @@
-import { forwardRef, useCallback, useLayoutEffect, useMemo } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -19,6 +25,7 @@ export type BubbleProps = {
   id: string;
   author: string;
   authorColor?: string;
+  themeMode?: 'dark' | 'light';
   authorNickname?: string;
   isEdited?: boolean;
   isEditing?: boolean;
@@ -43,6 +50,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       id,
       author,
       authorNickname,
+      themeMode,
       isOur,
       ourColor,
       ourShip,
@@ -64,9 +72,13 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     const dateDisplay = chatDate(new Date(sentAt));
     const authorColorDisplay = useMemo(
       () =>
-        (authorColor && convertDarkText(authorColor)) ||
-        'var(--rlm-text-color)',
+        (authorColor && convertDarkText(authorColor, themeMode)) ||
+        'rgba(var(--rlm-text-rgba))',
       [authorColor]
+    );
+
+    const [lastReactonLength, setLastReactionLength] = useState(
+      reactions.length
     );
 
     const innerWidth = useMemo(
@@ -74,25 +86,26 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       [containerWidth]
     );
 
+    // if the number of reactions changes, we need to re-measure
+    useEffect(() => {
+      if (lastReactonLength !== reactions.length) {
+        if (
+          (lastReactonLength === 0 && reactions.length === 1) ||
+          (reactions.length === 0 && lastReactonLength === 1)
+        ) {
+          // only re-measure if we're going from 0 to 1 or 1 to 0
+          onMeasure();
+        }
+        setLastReactionLength(reactions.length);
+      }
+    }, [reactions.length, lastReactonLength, onMeasure]);
+
     const footerHeight = useMemo(() => {
       if (reactions.length > 0) {
         return BUBBLE_HEIGHT.rem.footerReactions;
       }
       return BUBBLE_HEIGHT.rem.footer;
     }, [reactions.length]);
-
-    const handleOnReaction = useCallback(
-      (payload: OnReactionPayload) => {
-        if (!onReaction) return;
-        if (reactions.length === 0 && payload.action === 'add') {
-          onMeasure();
-        } else if (reactions.length === 1 && payload.action === 'remove') {
-          onMeasure();
-        }
-        onReaction(payload);
-      },
-      [onReaction, reactions.length]
-    );
 
     const fragments = useMemo(() => {
       if (!message) return [];
@@ -160,10 +173,10 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           ourShip={ourShip}
           ourColor={ourColor}
           reactions={reactions}
-          onReaction={handleOnReaction}
+          onReaction={onReaction}
         />
       );
-    }, [reactions.length, isOur, ourShip, ourColor, handleOnReaction]);
+    }, [reactions.length, isOur, ourShip, ourColor, onReaction]);
 
     if (message?.length === 1) {
       const contentType = Object.keys(message[0])[0];
