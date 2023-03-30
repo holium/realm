@@ -1,17 +1,16 @@
 import { AnimatePresence } from 'framer-motion';
-import { Card, Box, BoxProps } from '../../';
+import { Card, Box, BoxProps, Portal } from '../../';
 import styled from 'styled-components';
 import {
-  getAnchorPointByTarget,
   getAnchorPointByElement,
   getMenuHeight,
   Position,
   Orientation,
   Dimensions,
 } from '../../util/position';
-import { useState, useEffect, useCallback } from 'react';
-import { MenuPortal } from './MenuPortal';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { MenuItem, MenuItemProps } from './MenuItem';
+import { useMenu } from './useMenu';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;
@@ -34,7 +33,8 @@ export type MenuProps = {
   anchorRef?: React.RefObject<HTMLElement>;
   triggerEl?: React.ReactNode;
   controlledIsOpen?: boolean;
-  clickPreventClass?: string;
+  closableIds?: string[];
+  closableClasses?: string[];
   children?: React.ReactNode;
   dimensions?: Dimensions;
   offset?: Position;
@@ -46,44 +46,36 @@ export const Menu = ({
   triggerEl,
   children,
   dimensions,
-  orientation = 'bottom-left',
+  orientation = 'bottom-right',
   offset = { x: 0, y: 2 },
   options,
-  clickPreventClass,
+  closableIds,
+  closableClasses,
   ...rest
 }: MenuProps) => {
-  const root = document.getElementById('root');
   let innerContent: React.ReactNode;
   let type: MenuType = 'custom';
-  const [isOpen, setIsOpen] = useState(false);
-  const [anchorPoint, setAnchorPoint] = useState<Position | null>(null);
 
-  const handleClick = useCallback(
-    (e: MouseEvent) => {
-      const menu = document.getElementById(id);
-      const trigger = document.getElementById(`${id}-trigger`);
-      const clickEl =
-        clickPreventClass &&
-        document.getElementsByClassName(clickPreventClass)[0];
-      if (
-        (menu && menu.contains(e.target as Node)) ||
-        (trigger && trigger.contains(e.target as Node)) ||
-        (clickEl && clickEl.contains(e.target as Node))
-      )
-        return;
-      setIsOpen(false);
-    },
-    [id]
+  // calculate the height of the menu based on the number of options
+  // or use the passed in dimensions
+  const menuHeight = useMemo(
+    () =>
+      dimensions?.height ||
+      getMenuHeight(options || [], MENU_ITEM_HEIGHT, DIVIDER_HEIGHT, PADDING),
+    [dimensions, options]
   );
-
-  useEffect(() => {
-    if (!root) return;
-    root.addEventListener('mousedown', handleClick);
-
-    return () => {
-      root.removeEventListener('mousedown', handleClick);
-    };
-  }, [handleClick, root]);
+  // create dimensions object for the menu
+  const menuDimensions = {
+    width: dimensions?.width || WIDTH,
+    height: menuHeight,
+  };
+  const { isOpen, menuRef, position, toggleMenu } = useMenu(
+    orientation,
+    menuDimensions,
+    offset,
+    closableIds,
+    closableClasses
+  );
 
   if (!children && options && options.length > 0) {
     type = 'options';
@@ -111,50 +103,11 @@ export const Menu = ({
     innerContent = children;
   }
 
-  const onTriggerClick = (
-    evt: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    if (!isOpen) {
-      setIsOpen(true);
-      if (type === 'options' && options) {
-        const menuHeight = getMenuHeight(
-          options,
-          MENU_ITEM_HEIGHT,
-          DIVIDER_HEIGHT,
-          PADDING
-        );
-
-        setAnchorPoint(
-          getAnchorPointByTarget(
-            evt.nativeEvent,
-            { width: WIDTH, height: menuHeight },
-            orientation,
-            offset
-          )
-        );
-      } else {
-        if (!dimensions) {
-          throw new Error(
-            'You must provide dimensions if you are using a custom menu'
-          );
-        }
-
-        setAnchorPoint(
-          getAnchorPointByTarget(
-            evt.nativeEvent,
-            dimensions,
-            orientation,
-            offset
-          )
-        );
-      }
-    } else {
-      setIsOpen(false);
-      setAnchorPoint(null);
-    }
-  };
-
   const isCustom = type === 'custom';
+
+  const preventPropagation = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+  }, []);
 
   return (
     <>
@@ -163,19 +116,16 @@ export const Menu = ({
           id={`${id}-trigger`}
           display="inline"
           position="relative"
-          onClick={(evt) => {
-            evt.preventDefault();
-            evt.stopPropagation();
-            onTriggerClick(evt);
-          }}
+          onClick={toggleMenu}
         >
           {triggerEl}
         </Box>
       )}
-      <MenuPortal id={`${id}-portal`} isOpen={isOpen}>
+      <Portal>
         <AnimatePresence>
-          {isOpen && anchorPoint && (
+          {isOpen && position && (
             <Card
+              ref={menuRef}
               p={type === 'custom' ? 0 : 1}
               elevation={2}
               position="absolute"
@@ -197,13 +147,11 @@ export const Menu = ({
                   duration: 0.1,
                 },
               }}
-              onClick={(evt) => {
-                evt.stopPropagation();
-              }}
+              onClick={preventPropagation}
               gap={type === 'options' ? 2 : 0}
               style={{
-                y: anchorPoint.y,
-                x: anchorPoint.x,
+                y: position.y,
+                x: position.x,
                 border: isCustom ? 'none' : '1px solid var(--rlm-border-color)',
                 width: dimensions?.width || WIDTH,
                 height: dimensions?.height || 'auto',
@@ -215,7 +163,7 @@ export const Menu = ({
             </Card>
           )}
         </AnimatePresence>
-      </MenuPortal>
+      </Portal>
     </>
   );
 };
@@ -259,7 +207,7 @@ export const CustomMenu = ({
   console.log('CustomMenu achnor', anchorPoint);
   if (!anchorPoint) return null;
   return (
-    <MenuPortal id={`${id}-portal`} isOpen={true}>
+    <Portal>
       <Card
         p={0}
         id={id}
@@ -289,6 +237,6 @@ export const CustomMenu = ({
       >
         {children}
       </Card>
-    </MenuPortal>
+    </Portal>
   );
 };
