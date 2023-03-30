@@ -212,8 +212,9 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext =
-  createContext<null | ChatStoreInstance>(chatStore);
+export const ChatStoreContext = createContext<null | ChatStoreInstance>(
+  chatStore
+);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {
