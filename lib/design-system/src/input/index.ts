@@ -2,6 +2,7 @@ export { AvatarInput } from './AvatarInput/AvatarInput';
 export { CheckBox } from './CheckBox/CheckBox';
 export { Input, TextArea } from './Input/Input';
 export { InputBox } from './InputBox/InputBox';
+export { Toggle } from './Toggle/Toggle';
 export { RadioGroup } from './RadioGroup/RadioGroup';
 export type { RadioOption } from './RadioGroup/RadioGroup';
 export { RadioImages } from './RadioImages/RadioImages';

@@ -43,7 +43,6 @@ import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import styled from 'styled-components';
 
 const ChatInputWrapper = styled(Box)`
-  /* background: var(--rlm-window-bg); */
   backdrop-filter: blur(24px);
   padding: 0 24px;
 `;
@@ -422,7 +421,6 @@ export const ChatView = observer(({ selectedChat, theme, storage }: Props) => {
             autoFocus
             name="dm-message"
             shouldHighlightOnFocus
-            className="realm-cursor-text-cursor"
             width="100%"
             placeholder="Write a message"
             rightInteractive

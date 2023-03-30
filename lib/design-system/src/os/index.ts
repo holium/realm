@@ -6,3 +6,7 @@ export * from './SystemBar/SystemBar';
 export { Bookmark } from './Bookmark/Bookmark';
 export * from './Tab/Tab';
 export * from './TrayApp/TrayApp';
+export * from './Notifications/Notification';
+export * from './Notifications/NotificationList';
+export * from './Notifications/AppGroup';
+export * from './Notifications/Notifications.types';

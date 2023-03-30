@@ -43,9 +43,14 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
     ) {
       return;
     }
+    // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+    let endp = s3.credentials.endpoint;
+    if (endp.split('.')[0] === s3.configuration.currentBucket) {
+      endp = endp.split('.').slice(1).join('.');
+    }
     client.current = new S3Client({
       credentials: s3.credentials,
-      endpoint: s3.credentials.endpoint,
+      endpoint: endp,
       signatureVersion: 'v4',
     });
   }, [s3]);

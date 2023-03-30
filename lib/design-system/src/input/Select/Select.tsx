@@ -5,7 +5,6 @@ import { Text } from '../../general/Text/Text';
 import { MenuItemStyle } from '../../general/MenuItem/MenuItem.styles';
 import { SelectDropdown, SelectWrapper } from './Select.styles';
 import { RadioOption } from '../RadioGroup/RadioGroup';
-import { getVar } from '../../util/colors';
 
 const animationVariants: Variants = {
   enter: {
@@ -36,6 +35,7 @@ type Props = {
   options: RadioOption[];
   selected?: string;
   maxWidth?: number;
+  width?: number;
   backgroundColor?: string;
   onClick: (value: string) => void;
 };
@@ -48,6 +48,7 @@ export const Select = ({
   placeholder = 'Select one',
   disabled,
   backgroundColor,
+  width,
   onClick,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -88,6 +89,7 @@ export const Select = ({
   return (
     <SelectWrapper
       id={id}
+      width={width}
       disabled={disabled}
       maxWidth={maxWidth}
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}
@@ -101,7 +103,7 @@ export const Select = ({
           {placeholder}
         </Text.Custom>
       )}
-      <Icon color="icon" name="ArrowDown" />
+      <Icon name="ArrowDown" />
       <SelectDropdown
         id={`${id}-dropdown`}
         variants={animationVariants}
@@ -113,7 +115,7 @@ export const Select = ({
         {visibleOptions.map((option, index) => (
           <MenuItemStyle
             key={`${option.value}-${index}`}
-            customBg={backgroundColor ?? getVar('input')}
+            customBg={backgroundColor}
             disabled={option.disabled}
             onClick={() =>
               !disabled && !option.disabled && onClick(option.value)

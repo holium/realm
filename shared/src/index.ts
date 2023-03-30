@@ -1,2 +1,1 @@
-export { useToggle } from './hooks/useToggle';
-export type { Bounds, Dimensions, Position } from './types/types';
+export { defaultTheme } from './constants/theme';

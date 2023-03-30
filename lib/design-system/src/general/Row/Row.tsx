@@ -1,16 +1,19 @@
+import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Button } from '..';
+import { Box, BoxProps } from '..';
 
-interface RowProps {
+type RowProps = {
+  as?: any;
   gap?: string;
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
-}
+} & BoxProps;
 
-export const Row = styled(Button.Base)<RowProps>`
+export const Row = styled(Box)<RowProps>`
+  border: 1px solid transparent;
   border-radius: 6px;
   width: 100%;
   padding: 8px;
@@ -19,29 +22,38 @@ export const Row = styled(Button.Base)<RowProps>`
   justify-content: flex-start;
   align-items: center;
   background-color: transparent;
+  box-sizing: border-box;
+  appearance: none;
+  flex-basis: initial;
   gap: ${(props: RowProps) => props.gap || '6px'};
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   transition: var(--transition);
 
   &:active:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-active);
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
 
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: var(--rlm-overlay-hover);
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
     cursor: pointer;
   }
 
   &:focus:not([disabled]) {
     outline: none;
-    background-color: var(--rlm-overlay-active);
-    /* border: 1px solid var(--rlm-accent-color); */
+    background-color: rgba(var(--rlm-overlay-active-rgba));
   }
+
   &:disabled {
     opacity: 0.2;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
+    div {
+      cursor: not-allowed !important;
+    }
+    svg {
+      cursor: not-allowed !important;
+    }
   }
 
   ${(props: RowProps) =>
@@ -52,16 +64,18 @@ export const Row = styled(Button.Base)<RowProps>`
       `}
       ${props.selected &&
       css`
-        background-color: var(--rlm-overlay-active);
+        background-color: rgba(var(--rlm-overlay-active-rgba));
         &:hover:not([disabled]) {
-          background-color: var(--rlm-overlay-active);
+          background-color: rgba(var(--rlm-overlay-active-rgba));
         }
       `}
     `}
 `;
 
 Row.defaultProps = {
-  onMouseOut: (evt: React.MouseEvent<HTMLButtonElement>) => {
+  as: motion.fieldset,
+  fontSize: 1,
+  onMouseOut: (evt: React.MouseEvent<HTMLDivElement>) => {
     evt.currentTarget.blur();
   },
 };

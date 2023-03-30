@@ -38,7 +38,7 @@ export const BarStyle = styled(motion.div)<BarStyleProps>`
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transition: var(--transition-slow);
-  background: var(--rlm-dock-color);
+  background: rgba(var(--rlm-dock-rgba));
   ${compose(space, layout, flexbox, border, position, color)}
 `;
 
