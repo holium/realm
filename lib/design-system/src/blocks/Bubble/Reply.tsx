@@ -109,7 +109,7 @@ export const Reply = (props: ReplyProps) => {
           style={{
             paddingRight: 6,
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
-            width: "calc(100% - 60px)",
+            width: 'calc(100% - 60px)',
           }}
         >
           {mediaContent}
@@ -122,11 +122,7 @@ export const Reply = (props: ReplyProps) => {
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>
-            <Text.Custom
-              truncate
-              overflow="hidden"
-              maxWidth="100%"
-            >
+            <Text.Custom truncate overflow="hidden" maxWidth="100%">
               {replyContent}
             </Text.Custom>
           </Flex>

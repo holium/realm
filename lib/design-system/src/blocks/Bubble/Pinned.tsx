@@ -67,7 +67,7 @@ export const PinnedMessage = (props: PinnedProps) => {
           style={{
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
             height: 42,
-            width: "100%",
+            width: '100%',
           }}
         >
           {mediaContent}
@@ -80,11 +80,7 @@ export const PinnedMessage = (props: PinnedProps) => {
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>
-           <Text.Custom
-              truncate
-              overflow="hidden"
-              maxWidth="100%"
-            >
+            <Text.Custom truncate overflow="hidden" maxWidth="100%">
               {pinnedContent}
             </Text.Custom>
           </Flex>
