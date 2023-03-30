@@ -6,6 +6,7 @@ import {
   capitalizeFirstLetter,
   Button,
   Icon,
+  Text,
 } from '../..';
 import { BubbleAuthor } from './Bubble.styles';
 import {
@@ -48,7 +49,7 @@ export const Reply = (props: ReplyProps) => {
 
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
-  let pinnedContent = null;
+  let replyContent = null;
   let mediaContent = null;
   if (
     (!TEXT_TYPES.includes(fragmentType) &&
@@ -56,13 +57,13 @@ export const Reply = (props: ReplyProps) => {
       fragmentType !== 'reply') ||
     fragmentType === 'code'
   ) {
-    pinnedContent = (
+    replyContent = (
       <FragmentPlain id={id}>
         {capitalizeFirstLetter(fragmentType)}
       </FragmentPlain>
     );
   } else if (fragmentType === 'image') {
-    pinnedContent = (
+    replyContent = (
       <FragmentPlain mt={0} id={id}>
         {capitalizeFirstLetter(fragmentType)}
       </FragmentPlain>
@@ -79,7 +80,7 @@ export const Reply = (props: ReplyProps) => {
       </Box>
     );
   } else {
-    pinnedContent = renderFragment(id, message[0], 0, author);
+    replyContent = renderFragment(id, message[0], 0, author);
   }
   return (
     <ReplyContainer
@@ -108,6 +109,7 @@ export const Reply = (props: ReplyProps) => {
           style={{
             paddingRight: 6,
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            width: "calc(100% - 60px)",
           }}
         >
           {mediaContent}
@@ -115,11 +117,18 @@ export const Reply = (props: ReplyProps) => {
             flex={1}
             flexDirection="column"
             className="fragment-reply pinned"
+            maxWidth="100%"
           >
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>
-            {pinnedContent}
+            <Text.Custom
+              truncate
+              overflow="hidden"
+              maxWidth="100%"
+            >
+              {replyContent}
+            </Text.Custom>
           </Flex>
           {onCancel && (
             <Button.IconButton

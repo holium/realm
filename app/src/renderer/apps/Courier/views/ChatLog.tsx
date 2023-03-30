@@ -188,9 +188,9 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
               </Text.Custom>
             </Flex>
           ) : (
-            <Flex flexDirection="column">
+            <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence>
+                <AnimatePresence width="100%">
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
