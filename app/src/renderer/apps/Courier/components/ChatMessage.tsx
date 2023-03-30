@@ -31,7 +31,7 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   measure,
 }: ChatMessageProps) => {
-  const { ship, friends } = useServices();
+  const { ship, friends, theme } = useServices();
   const { selectedChat } = useChatStore();
   const messageRef = useRef<HTMLDivElement>(null);
   const isOur = message.sender === ship?.patp;
@@ -167,6 +167,7 @@ export const ChatMessagePresenter = ({
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
+      themeMode={theme.currentTheme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ship?.patp}
       ourColor={ourColor}

@@ -391,7 +391,6 @@ export const SpacesApi = {
         }
       },
       onSubscribed: () => {
-        console.log('Subscribed to %spaces');
         spacesState.setSubscriptionStatus('subscribed');
       },
       onError: () => {

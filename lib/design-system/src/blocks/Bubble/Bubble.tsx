@@ -25,6 +25,7 @@ export type BubbleProps = {
   id: string;
   author: string;
   authorColor?: string;
+  themeMode?: 'dark' | 'light';
   authorNickname?: string;
   isEdited?: boolean;
   isEditing?: boolean;
@@ -49,6 +50,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       id,
       author,
       authorNickname,
+      themeMode,
       isOur,
       ourColor,
       ourShip,
@@ -70,8 +72,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     const dateDisplay = chatDate(new Date(sentAt));
     const authorColorDisplay = useMemo(
       () =>
-        (authorColor && convertDarkText(authorColor)) ||
-        'var(--rlm-text-color)',
+        (authorColor && convertDarkText(authorColor, themeMode)) ||
+        'rgba(var(--rlm-text-rgba))',
       [authorColor]
     );
 

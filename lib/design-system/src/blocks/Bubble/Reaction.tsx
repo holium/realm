@@ -10,7 +10,6 @@ import EmojiPicker, {
 
 import { FragmentReactionType } from './Bubble.types';
 import { rgba, darken } from 'polished';
-import { getVar } from '../../util/colors';
 import { useMenu } from '../../navigation/Menu/useMenu';
 import { AnimatePresence } from 'framer-motion';
 
@@ -81,7 +80,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   color: var(--rlm-text-color);
   background: ${({ selected, ourColor }) =>
     selected
-      ? () => (ourColor ? rgba(ourColor, 0.3) : getVar('accent'))
+      ? () => (ourColor ? rgba(ourColor, 0.3) : 'rgba(var(--rlm-accent-rgba))')
       : 'rgba(0, 0, 0, 0.08)'};
   box-shadow: ${({ selected }) =>
     selected
@@ -106,7 +105,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
           height: ${ReactionSizes[size]}px;
           ${Text.Hint} {
             font-size: ${FontSizes[size]}px;
-            ${selected && !isOur && 'color: var(--rlm-text-color);'}
+            ${selected && !isOur && 'color: rgba(var(--rlm-text-rgba));'}
             ${selected && isOur && 'color: #FFF;'}
             /* ${selected && 'color: rgba(var(--rlm-accent-rgba));'} */
           }
@@ -261,6 +260,7 @@ export const Reactions = (props: ReactionProps) => {
 
   const memoizedRow = useMemo(() => {
     return reactionsAggregated.map((reaction: ReactionAggregateType, index) => {
+      const selected = reaction.by.includes(ourShip);
       return (
         <ReactionButton
           key={`${reaction.emoji}-by-${reaction.by}-${index}`}
@@ -272,7 +272,7 @@ export const Reactions = (props: ReactionProps) => {
             evt.stopPropagation();
             onClick(reaction.emoji);
           }}
-          selected={reaction.by.includes(ourShip)}
+          selected={selected}
         >
           <Emoji
             key={`${reaction.emoji}-emoji`}
@@ -283,7 +283,9 @@ export const Reactions = (props: ReactionProps) => {
           {reaction.count > 1 && (
             <Text.Hint
               opacity={0.9}
-              style={{ color: isOur ? '#ffffff' : 'var(--rlm-text-color)' }}
+              style={{
+                color: isOur ? '#ffffff' : 'rgba(var(--rlm-text-rgba), .7)',
+              }}
             >
               {reaction.count}
             </Text.Hint>

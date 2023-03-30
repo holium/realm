@@ -19,7 +19,7 @@ export const genCSSVariables = (theme: ThemeType) => {
    * All --rlm-*-rgba variables should be in rgba format.
    * This is to allow for opacity to be applied to the color.
    */
-  const themeMode = toRgbaString(theme.mode);
+  const themeMode = theme.mode;
   const isLight = themeMode === 'light';
   const homeButtonColor = isLight
     ? toRgbaString(rgba(darken(0.2, theme.dockColor), 0.5))

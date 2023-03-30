@@ -24,7 +24,6 @@ export const BulletinApi = {
         }
       },
       onSubscribed: () => {
-        console.log('Subscribed to %bulletin');
         store.setSubscriptionStatus('subscribed');
       },
       onError: () => {
