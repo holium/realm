@@ -4,7 +4,6 @@ import {
   Icon,
   Button,
   TextInput,
-  WindowedList,
   Box,
   Text,
 } from '@holium/design-system';
@@ -15,6 +14,7 @@ import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
 import { useServices } from 'renderer/logic/store';
+import InboxList from '../components/InboxList';
 const rowHeight = 52;
 export const InboxPresenter = () => {
   const { ship } = useServices();
@@ -30,7 +30,7 @@ export const InboxPresenter = () => {
       let title: string;
       const dm = preview as ChatModelType;
       title = dm.metadata.title;
-      return title.indexOf(searchString) === 0;
+      return title.toLowerCase().indexOf(searchString.toLowerCase()) === 0;
     },
     [searchString]
   );
@@ -111,7 +111,7 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box height={544} width={dimensions.width - 24}>
+          <Box height={544} width={dimensions.width - 26}>
             <Flex
               style={{
                 background: 'rgba(0,0,0,0.03)',
@@ -150,7 +150,45 @@ export const InboxPresenter = () => {
                 );
               })}
             </Flex>
-            <WindowedList
+            <InboxList
+              items={unpinnedChatList}
+              itemHeight={rowHeight}
+              width={listWidth}
+              height={listHeight}
+              filterFunction={searchFilter}
+              renderItem={(chat) => {
+                const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                return (
+                  <Box
+                    key={`${window.ship}-${chat.path}-unpinned`}
+                    width={listWidth}
+                    zIndex={2}
+                    layout="preserve-aspect"
+                    alignItems="center"
+                    height={rowHeight}
+                    layoutId={`chat-${chat.path}-container`}
+                  >
+                    <ChatRow
+                      height={rowHeight}
+                      path={chat.path}
+                      title={chat.metadata.title}
+                      peers={chat.peers.map((peer) => peer.ship)}
+                      isAdmin={isAdmin}
+                      type={chat.type}
+                      timestamp={chat.createdAt || chat.metadata.timestamp}
+                      metadata={chat.metadata}
+                      peersGetBacklog={chat.peersGetBacklog}
+                      muted={chat.muted}
+                      onClick={(evt) => {
+                        evt.stopPropagation();
+                        setChat(chat.path);
+                      }}
+                    />
+                  </Box>
+                );
+              }}
+            />
+            {/* <WindowedList
               width={listWidth}
               height={listHeight}
               rowHeight={rowHeight}
@@ -187,7 +225,7 @@ export const InboxPresenter = () => {
                   </Box>
                 );
               }}
-            />
+            /> */}
           </Box>
         )
       )}

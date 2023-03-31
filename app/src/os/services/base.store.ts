@@ -44,7 +44,6 @@ export class DiskStore {
 
     try {
       typecheck(store, this.persisted.store);
-      console.log(`typecheck passed: ${store.name}`);
       this.model = store.create(castToSnapshot(this.persisted.store));
     } catch (err) {
       console.error(`typecheck failed: ${store.name} rebuilding...`);

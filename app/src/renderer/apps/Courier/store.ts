@@ -184,7 +184,12 @@ const ChatStore = types
     onPathDeleted(path: string) {
       const chat = self.inbox.find((chat) => chat.path === path);
       if (chat) {
+        if (self.selectedChat?.path === path) {
+          self.selectedChat = undefined;
+          self.subroute = 'inbox';
+        }
         self.inbox.remove(chat);
+        // destroy(chat);
         self.pinnedChats.remove(path);
       }
     },
@@ -225,8 +230,13 @@ export function useChatStore() {
   return store;
 }
 
+OSActions.onBoot(() => {
+  chatStore.init();
+});
+OSActions.onConnected(() => {
+  chatStore.init();
+});
 OSActions.onLogout((_event: any) => {
-  console.log('resetting chatStore on logout');
   chatStore.reset();
 });
 // -------------------------------

@@ -41,6 +41,7 @@ export const MenuItem = ({
       key={id}
       height={34}
       disabled={disabled}
+      className="nav-menu-item"
       onClick={(evt) => !disabled && onClick(evt)}
     >
       <Flex

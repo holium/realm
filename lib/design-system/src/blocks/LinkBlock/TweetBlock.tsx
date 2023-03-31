@@ -2,7 +2,6 @@ import { FC, useMemo, useState } from 'react';
 import { TwitterTweetEmbed } from 'react-twitter-embed';
 import styled, { css } from 'styled-components';
 import { skeletonStyle } from '../..';
-import { getVar } from '../../util/colors';
 import { BlockStyle, BlockProps } from '../Block/Block';
 
 type TweetWrapperProps = { isSkeleton: boolean };
@@ -38,7 +37,8 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
   const { id, link, onTweetLoad, ...rest } = props;
   let tweetEmbed: any = null;
   const [tweetLoaded, setTweetLoaded] = useState(false);
-  const themeMode = getVar('theme-mode') || 'light';
+  // todo: get theme mode from context
+  const themeMode = 'light';
   return useMemo(() => {
     if (link.includes('status')) {
       const tweetId = link.split('status/')[1].split('?')[0];

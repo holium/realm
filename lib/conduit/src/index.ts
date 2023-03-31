@@ -194,7 +194,7 @@ export class Conduit extends EventEmitter {
   async startSSE(channelUrl: string): Promise<void> {
     console.log('startSSE ->>>>>', channelUrl, this.prevMsgId);
     if (this.status === ConduitState.Connected) {
-      return await Promise.resolve();
+      return Promise.resolve();
     }
     if (this.prevMsgId === 0) {
       await this.poke({
@@ -204,10 +204,9 @@ export class Conduit extends EventEmitter {
       });
       return;
     }
-
     this.updateStatus(ConduitState.Initialized);
 
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie?.split('; ')[0] },
         responseTimeout: 25000,
@@ -299,7 +298,10 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
-      this.sse.onerror = async (error: any) => {
+      this.sse.onerror = async (error) => {
+        if (!error) {
+          this.handleError({ status: 500, message: 'Unknown error' });
+        }
         console.log('sse error', error);
         if (error.status === 403) {
           error.originator = 'sse';
@@ -346,7 +348,7 @@ export class Conduit extends EventEmitter {
       mark: params.mark,
       json: params.json,
     };
-    console.log('sending poke', message);
+    console.log('sending poke', message.app, message.mark, message.json);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
@@ -426,7 +428,7 @@ export class Conduit extends EventEmitter {
    * @param watchId the id of the watch to re-subscribe to
    * @returns boolean indicating if the re-subscription was successful
    */
-  async resubscribe(watchId: number, retryCount = 0) {
+  async resubscribe(watchId: number, retryCount = 0, retryDelay = 2000) {
     const idleWatch = this.idleWatches.get(watchId);
     if (!idleWatch) {
       console.log("Watch doesn't exist, can't re-subscribe.");
@@ -442,11 +444,13 @@ export class Conduit extends EventEmitter {
         return true;
       }
     } catch {
-      if (true) {
-        setTimeout(() => {
-          this.resubscribe(watchId, retryCount + 1);
-        }, 2000);
-      }
+      // throttle retries based on retryCount using exponential backoff
+      retryDelay = Math.min(retryDelay * 2, 60000);
+      console.log('resubcribing in', retryDelay / 1000, 'seconds...');
+      setTimeout(() => {
+        this.resubscribe(watchId, retryCount + 1, retryDelay);
+      }, retryDelay);
+
       console.log('Failed to re-subscribe to', idleWatch?.app);
     }
 
@@ -612,7 +616,14 @@ export class Conduit extends EventEmitter {
         if (response.status > 300 && response.status < 200) {
           return false;
         }
-        if (this.status !== ConduitState.Initialized) {
+        if (
+          this.status !== ConduitState.Connected &&
+          this.status !== ConduitState.Initialized
+        ) {
+          console.log(
+            'postToChannel: ',
+            `status is ${this.status}, reconnecting...`
+          );
           await this.startSSE(this.channelUrl(this.uid));
         }
 

@@ -301,6 +301,7 @@ export const Chat = types
           contents: tempContents,
           sender: window.ship,
           pending: true,
+          replyToMsgId: self.replyingMsg?.id,
           createdAt: new Date().getTime(),
           updatedAt: new Date().getTime(),
         });
@@ -429,8 +430,8 @@ export const Chat = types
     sendReaction: flow(function* (msgId: string, emoji: string) {
       const chatMsg = self.messages.find((m) => m.id === msgId);
       try {
-        if (chatMsg && self.our)
-          chatMsg.insertTempReaction({ msgId, emoji, by: self.our });
+        if (chatMsg && window.ship)
+          chatMsg.insertTempReaction({ msgId, emoji, by: window.ship });
         yield ChatDBActions.sendMessage(self.path, [
           {
             content: { react: emoji },

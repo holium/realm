@@ -131,17 +131,17 @@ export class NotificationService extends BaseService {
   handleDBChange(dbChange: NotifDbOps) {
     if (dbChange.type === 'add-row') {
       const addRow = dbChange as AddRow;
-      console.log('add-row to notifications', addRow.row);
+      // console.log('add-row to notifications', addRow.row);
       const notif = addRow.row as NotificationsRow;
       this.insertNotifications([notif]);
       const notifQueried = this.getNotification(notif.id);
       this.sendNotifUpdate('notification-added', notifQueried);
     } else if (dbChange.type === 'update-all') {
-      console.log('TODO implement updating all rows read column');
+      // console.log('TODO implement updating all rows read column');
     } else if (dbChange.type === 'update-row') {
       const update = dbChange as UpdateRow;
       const notif = update.row as NotificationsRow;
-      console.log('update-row', notif);
+      // console.log('update-row', notif);
       this.insertNotifications([notif]);
       const notifUpdatedQueried = this.getNotification(notif.id);
       this.sendNotifUpdate('notification-updated', notifUpdatedQueried);

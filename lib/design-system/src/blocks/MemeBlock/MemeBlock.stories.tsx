@@ -4,7 +4,6 @@ import { Flex } from '../..';
 import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
-import { getVar } from '../../util/colors';
 
 export default {
   component: MemeBlock,
@@ -36,7 +35,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
         flexDirection="column"
         width={432}
         p={2}
-        background={getVar('window')}
+        background={'rgba(var(--rlm-window-rgba))'}
       >
         <MemeBlock
           id="meme-block-1"

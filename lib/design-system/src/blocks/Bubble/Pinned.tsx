@@ -1,4 +1,4 @@
-import { Flex, Box, BoxProps, capitalizeFirstLetter } from '../..';
+import { Text, Flex, Box, BoxProps, capitalizeFirstLetter } from '../..';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlock,
@@ -60,12 +60,14 @@ export const PinnedMessage = (props: PinnedProps) => {
 
   return (
     <Flex id={id} key={id} width="100%" onClick={onClick}>
-      <FragmentBlock id={id}>
+      <FragmentBlock id={id} width="100%">
         <FragmentBlockquote
           className="pinned-or-reply-message"
           id={id}
           style={{
             borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            height: 42,
+            width: '100%',
           }}
         >
           {mediaContent}
@@ -73,11 +75,14 @@ export const PinnedMessage = (props: PinnedProps) => {
             gap={0}
             flexDirection="column"
             className="fragment-reply pinned"
+            maxWidth="100%"
           >
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>
-            {pinnedContent}
+            <Text.Custom truncate overflow="hidden" maxWidth="100%">
+              {pinnedContent}
+            </Text.Custom>
           </Flex>
         </FragmentBlockquote>
       </FragmentBlock>
