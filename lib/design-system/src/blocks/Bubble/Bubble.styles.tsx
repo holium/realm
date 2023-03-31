@@ -38,7 +38,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   }};
   transition: width 1s ease-in-out;
   &.bubble-our {
-    background: var(--rlm-intent-caution-color);
+    background: rgba(var(--rlm-intent-caution-rgba));
     border-radius: ${(props) => {
       if (props.isPrevGrouped && props.isNextGrouped) {
         return '12px 0px 0px 12px';

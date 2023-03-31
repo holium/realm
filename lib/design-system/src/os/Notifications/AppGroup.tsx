@@ -220,7 +220,7 @@ const AppGroupContainer = styled(Flex)<AppGroupContainerProps>`
   flex-direction: column;
   justify-content: space-between;
   padding: 6px;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   border-radius: var(--rlm-border-radius-6);
   background: rgba(var(--rlm-card-rgba), 0.7);
   transition: var(--transition);
@@ -233,7 +233,7 @@ const PathContainer = styled(Flex)`
   flex-direction: column;
   justify-content: space-between;
   padding: 4px 4px 4px 4px;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   border-radius: var(--rlm-border-radius-6);
   &:hover {
     transition: var(--transition);

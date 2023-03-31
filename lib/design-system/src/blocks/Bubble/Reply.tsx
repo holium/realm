@@ -108,7 +108,9 @@ export const Reply = (props: ReplyProps) => {
           className="pinned-or-reply-message"
           style={{
             paddingRight: 6,
-            borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            borderLeft: `2px solid ${
+              authorColor || 'rgba(var(--rlm-accent-rgba))'
+            }`,
             width: 'calc(100% - 60px)',
           }}
         >
