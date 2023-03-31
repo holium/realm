@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Grid, Text, CopyButton } from 'renderer/components';
+import { Grid, Text } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
@@ -11,6 +11,7 @@ import {
   Spinner,
   Icon,
   TextInput,
+  CopyButton,
   useToggle,
 } from '@holium/design-system';
 

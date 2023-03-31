@@ -20,7 +20,9 @@ export const Card = styled(Box)<CardProps>`
   flex-direction: column;
   backdrop-filter: var(--blur);
   background: ${(props) => props.customBg || 'rgba(var(--rlm-card-rgba))'};
-  border: 1px solid rgba(var(--rlm-border-rgba));
+  border-width: 1px;
+  border-style: solid;
+  border-color: ${(props) => props.customBg || 'rgba(var(--rlm-border-rgba))'};
   transition: var(--transition);
   box-sizing: border-box;
   border-radius: 12px;

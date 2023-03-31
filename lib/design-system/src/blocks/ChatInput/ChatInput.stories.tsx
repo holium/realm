@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Box, WindowedList } from '../..';
+import { Flex, Box, WindowedList } from '../../general';
 import { ChatInput } from './ChatInput';
 import { Bubble } from '../Bubble/Bubble';
 import { ChatMessageType, FragmentType } from '../Bubble/Bubble.types';

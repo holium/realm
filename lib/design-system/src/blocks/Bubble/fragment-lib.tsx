@@ -22,7 +22,7 @@ import {
 } from './Bubble.types';
 import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../util/strings';
-import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../..';
+import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../../general';
 import { BlockStyle } from '../Block/Block';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';

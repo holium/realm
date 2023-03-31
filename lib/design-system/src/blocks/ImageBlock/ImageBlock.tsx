@@ -1,5 +1,5 @@
-import { FC, useMemo, useState } from 'react';
-import { Flex, Text } from '../..';
+import { useMemo, useState } from 'react';
+import { Flex, Text } from '../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
@@ -10,7 +10,7 @@ type ImageBlockProps = {
   onImageLoaded?: () => void;
 } & BlockProps;
 
-export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
+export const ImageBlock = (props: ImageBlockProps) => {
   const {
     showLoader,
     image,

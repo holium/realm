@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
-import { Box, BoxProps, boxStyles } from '../Box/Box';
 import { motion } from 'framer-motion';
+import { Box, BoxProps, boxStyles } from '../Box/Box';
 import { colorStyle } from '../../util/colors';
 import { skeletonStyle } from '../../general/Skeleton/Skeleton';
 
@@ -67,60 +67,70 @@ const H1 = styled(Default)<TextProps>`
   font-weight: 700;
   line-height: 1.5rem;
   font-size: 1.8rem;
+  ${colorStyle}
 `;
 
 const H2 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.5rem;
   font-size: 1.6rem;
+  ${colorStyle}
 `;
 
 const H3 = styled(Default)<TextProps>`
   font-weight: 600;
   line-height: 1.25rem;
   font-size: 1.42rem;
+  ${colorStyle}
 `;
 
 const H4 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.26rem;
+  ${colorStyle}
 `;
 
 const H5 = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.25rem;
   font-size: 1.125rem;
+  ${colorStyle}
 `;
 
 const H6 = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: 1rem;
   font-size: 1rem;
+  ${colorStyle}
 `;
 
 const Body = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.9rem;
+  ${colorStyle}
 `;
 
 const Caption = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.9rem;
+  ${colorStyle}
 `;
 
 const Hint = styled(Default)<TextProps>`
   font-weight: 400;
   line-height: normal;
   font-size: 0.702rem;
+  ${colorStyle}
 `;
 
 const Label = styled(Default)<TextProps>`
   font-weight: 500;
   line-height: 1.1rem;
   font-size: 0.8rem;
+  ${colorStyle}
 `;
 
 const Custom = styled(Box)<TextProps>`

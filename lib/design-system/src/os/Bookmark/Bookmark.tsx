@@ -1,6 +1,5 @@
-import { FC } from 'react';
 import styled from 'styled-components';
-import { Text, Favicon, Flex, BoxProps, Icon } from '../..';
+import { Text, Favicon, Flex, BoxProps, Icon } from '../../general';
 
 const BookmarkRow = styled(Flex)`
   border-radius: 6px;
@@ -22,17 +21,15 @@ export type BookmarkProps = {
   onRemove?: (url: string) => void;
 } & BoxProps;
 
-export const Bookmark: FC<BookmarkProps> = (props: BookmarkProps) => {
-  const {
-    id,
-    favicon,
-    title,
-    url,
-    member = '',
-    width = 270,
-    onNavigate,
-  } = props;
-
+export const Bookmark = ({
+  id,
+  favicon,
+  title,
+  url,
+  member = '',
+  width = 270,
+  onNavigate,
+}: BookmarkProps) => {
   const textWidth = member ? width - 10 - 110 : width - 10;
 
   // TODO handle moon names? or tooltip on hover with full name?
