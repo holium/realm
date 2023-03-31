@@ -1,5 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
 import {
   Box,
   Flex,
@@ -18,11 +20,13 @@ import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-// import { toJS } from 'mobx';
+
+const FullWidthAnimatePresence = styled(AnimatePresence)`
+  width: 100%;
+`;
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -187,11 +191,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           ) : (
             <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence width="100%">
+                <FullWidthAnimatePresence>
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
-                </AnimatePresence>
+                </FullWidthAnimatePresence>
               )}
               <WindowedList
                 key={`${path}-${selectedChat.lastFetch}-${messages.length}`}

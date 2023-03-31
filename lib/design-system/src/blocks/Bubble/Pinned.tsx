@@ -1,4 +1,5 @@
-import { Text, Flex, Box, BoxProps, capitalizeFirstLetter } from '../..';
+import styled from 'styled-components';
+import { Text, Flex, Box, BoxProps, capitalizeFirstLetter } from '../../index';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlock,
@@ -8,7 +9,10 @@ import {
   FragmentImage,
 } from './fragment-lib';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
-// import { chatDate } from '../../util/date';
+
+const FullWidthFragmentBlock = styled(FragmentBlock)`
+  width: 100%;
+`;
 
 export type PinnedProps = {
   id: string;
@@ -60,7 +64,7 @@ export const PinnedMessage = (props: PinnedProps) => {
 
   return (
     <Flex id={id} key={id} width="100%" onClick={onClick}>
-      <FragmentBlock id={id} width="100%">
+      <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
           className="pinned-or-reply-message"
           id={id}
@@ -85,7 +89,7 @@ export const PinnedMessage = (props: PinnedProps) => {
             </Text.Custom>
           </Flex>
         </FragmentBlockquote>
-      </FragmentBlock>
+      </FullWidthFragmentBlock>
     </Flex>
   );
 };
