@@ -49,9 +49,9 @@ export const Menu = ({
   orientation = 'bottom-right',
   offset = { x: 0, y: 2 },
   options,
+  className,
   closableIds,
   closableClasses,
-  ...rest
 }: MenuProps) => {
   let innerContent: React.ReactNode;
   let type: MenuType = 'custom';
@@ -129,7 +129,7 @@ export const Menu = ({
               p={type === 'custom' ? 0 : 1}
               elevation={2}
               position="absolute"
-              className={rest.className}
+              className={className}
               id={id}
               zIndex={100}
               initial={{

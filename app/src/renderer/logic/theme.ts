@@ -63,6 +63,7 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
       --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
       --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
+
       --rlm-home-button-rgba: ${homeButtonColor};
       --rlm-dock-rgba: ${dockColor};
       --rlm-base-rgba: ${baseColor};
