@@ -18,12 +18,14 @@
   ^-  friend:sur
   =/  friend  ?~(ufriend *friend:sur u.ufriend)
   =/  contact-info
+    ^-  contact-info:sur
     :*  nickname.contact
-        bio.contact
-        color.contact
+        `@t`color.contact
+        ~  :: twitter
+        `bio.contact
         avatar.contact
         cover.contact
-        :: groups.contact
+        ~  :: featured-url
     ==
   friend(contact-info `contact-info)
 ::
@@ -222,7 +224,15 @@
       |=  =json
       ^-  contact-info-edit
       %.  json
-      :~  (ot ~[nickname+so:dejs-soft:format bio+so:dejs-soft:format color+(mu nu) avatar+so:dejs-soft:format cover+so:dejs-soft:format])
+      :~  %-  ot
+        :~  nickname+so:dejs-soft:format
+            color+(mu nu)
+            twitter+so:dejs-soft:format
+            bio+so:dejs-soft:format
+            avatar+so:dejs-soft:format
+            cover+so:dejs-soft:format
+            featured-url+so:dejs-soft:format
+        ==
       ==
     ::
     --
@@ -249,14 +259,7 @@
         ['status' s+status.friend]
         :-  'contactInfo'
           ?~  contact-info.friend  ~
-          %-  pairs
-          ^-  (list [@t json])
-          :~  ['nickname' s+nickname.u.contact-info.friend]
-              ['bio' s+bio.u.contact-info.friend]
-              ['color' s+(scot %ux color.u.contact-info.friend)]
-              ['avatar' ?~(avatar.u.contact-info.friend ~ s+u.avatar.u.contact-info.friend)]
-              ['cover' ?~(cover.u.contact-info.friend ~ s+u.cover.u.contact-info.friend)]
-          ==
+          (enjs-contact-info u.contact-info.friend)
     ==
   ::
   ++  enjs-contact-info
@@ -264,10 +267,12 @@
     %-  pairs
     ^-  (list [@t json])
     :~  ['nickname' s+nickname.contact-info]
-        ['bio' s+bio.contact-info]
         ['color' s+(scot %ux color.contact-info)]
+        ['twitter' ?~(twitter.contact-info ~ s+u.twitter.contact-info)]
+        ['bio' ?~(bio.contact-info ~ s+u.bio.contact-info)]
         ['avatar' ?~(avatar.contact-info ~ s+u.avatar.contact-info)]
         ['cover' ?~(cover.contact-info ~ s+u.cover.contact-info)]
+        ['featured-url' ?~(featured-url.contact-info ~ s+u.featured-url.contact-info)]
     ==
   ::
   --

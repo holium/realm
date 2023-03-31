@@ -8,9 +8,10 @@
 +$  card  card:agent:gall
 +$  versioned-state  $%(state-0 state-1)
 +$  state-0  [%0 is-public=? friends=friends-0:store]
-+$  state-1  [%1 sync-contact-store=? is-public=? =friends:store]
++$  state-1  [%1 sync-contact-store=? is-public=? friends=friends-1:store]
++$  state-2  [%2 sync-contact-store=? is-public=? =friends:store]
 --
-=|  state-1
+=|  state-2
 =*  state  -
 %-  agent:dbug
 ^-  agent:gall
@@ -45,7 +46,7 @@
         %0
       :-  ~
       %=  this
-          state  :*  %1
+          state  :*  %2
                      %.y
                      is-public.old
                      ^-  friends:store
@@ -56,11 +57,30 @@
                      :*  pinned.fren
                          tags.fren
                          status.fren
+                         %offline
                          ~
                      ==
                  ==
       ==
         %1
+      :-  ~
+      %=  this
+          state  :*  %2
+                     %.y
+                     is-public.old
+                     ^-  friends:store
+                     %-  malt
+                     %+  turn  ~(tap by friends.old)
+                     |=  [=ship fren=friend-1:store]
+                     :-  ship
+                     :*  pinned.fren
+                         tags.fren
+                         status.fren
+                         ~
+                     ==
+                 ==
+      ==
+        %2
       `this(state old)
     ==
   ::
@@ -192,19 +212,19 @@
     ^-  contact-info-edit:store
     %=  our-contact
       nickname  `nickname.our-contact
-      bio       `bio.our-contact
+      bio       bio.our-contact
       color     `color.our-contact
     ==
   =/  dock  [ship dap.bowl]
   =/  share-contact-cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
   :: If fren is in friends
   ?.  ?=(~ ufren)
-    =/  status  ?:(=(%follower status.u.ufren) %fren %following)
-    =/  fren  u.ufren(status status)
+    =/  relationship  ?:(=(%received status.u.ufren) %fren %sent)
+    =/  fren  u.ufren(relationship relationship)
     =.  friends  (~(put by friends) ship fren)
     =.  core
       :: If fren is follower, confirm new frenship
-      ?.  =(%follower status.u.ufren)  core
+      ?.  =(%received relationship.u.ufren)  core
       %-  emit
       =/  cage  friends-action+!>([%yes-fren ~])
       [%pass / %agent dock %poke cage]
@@ -214,7 +234,7 @@
         [%pass / %agent dock %poke share-contact-cage]
     ==
   :: If the fren is not added yet
-  =/  fren     [.(status %following)]:*friend:store
+  =/  fren     [.(relationship %sent)]:*friend:store
   =.  friends  (~(put by friends) ship fren)
   %-  emil
   %+  welp  contact-cards
@@ -275,14 +295,14 @@
   ^-  _core
   ?<  =(our.bowl src.bowl)
   ?~  ufren=(~(get by friends) ship)
-    =/  fren              [.(status %follower)]:*friend:store
+    =/  fren              [.(relationship %received)]:*friend:store
     =.  friends           (~(put by friends) ship fren)
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
   =/  fren=friend:store  u.ufren
-  ?+    status.fren  core
-      %following
-    =/  fren              fren(status %fren)
+  ?+    relationship.fren  core
+      %sent
+    =/  fren              fren(relationship %fren)
     =.  friends           (~(put by friends) ship fren)
     %-  emil
     :~  =/  dock  [ship dap.bowl]
@@ -291,7 +311,7 @@
         [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
     ==
       %contact
-    =/  fren              fren(status %follower)
+    =/  fren              fren(relationship %received)
     =.  friends           (~(put by friends) ship fren)
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
@@ -303,28 +323,28 @@
   ^-  _core
   ?<  =(our.bowl src.bowl)
   =/  fren                (~(got by friends) ship)
-  =.  status.fren         %fren
+  =.  relationship.fren         %fren
   =.  friends             (~(put by friends) ship fren)
   %-  emit
   [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
 ::
-:: ship notifies you that it is no longer your follower
+:: ship notifies you that it has cancelled friend request
 ++  bye-fren
   |=  =ship
   ^-  _core
   ?<  =(our.bowl src.bowl)
   ?~  ufren=(~(get by friends) ship)  core
   =/  fren=friend:store  u.ufren
-  ?+    status.fren  core
+  ?+    relationship.fren  core
       %fren
-    =/  fren              fren(status %following)
+    =/  fren              fren(relationship %sent)
     =.  friends           (~(put by friends) ship fren)
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
-      %follower
+      %received
     =.  friends
       ?~  contact-info.fren  (~(del by friends) ship)
-      (~(put by friends) ship fren(status %contact))
+      (~(put by friends) ship fren(relationship %contact))
     %-  emit
     [%give %fact ~[/all] friends-reaction+!>([%bye-friend ship])]
   ==
@@ -335,6 +355,7 @@
   %-  emit
   =/  dock  [ship dap.bowl]
   =/  our-contact
+    ^-  contact-info:store
     =/  our-fren  (~(get by friends) our.bowl)
     ?~  our-fren  *contact-info:store
     ?~  contact-info.u.our-fren  *contact-info:store
@@ -343,7 +364,7 @@
     ^-  contact-info-edit:store
     %=  our-contact
       nickname  `nickname.our-contact
-      bio       `bio.our-contact
+      bio       bio.our-contact
       color     `color.our-contact
     ==
   =/  cage  friends-action+!>(`action:store`[%set-contact our.bowl our-contact])
@@ -363,7 +384,9 @@
       ^-  friend:store
       :*  %.n
           ~
+          ~
           %contact
+          %offline
           [~ *contact-info:store]
       ==
     =.  contact-info.new-contact  [~ (edit-contact *contact-info:store edit)]
@@ -389,7 +412,7 @@
       ^-  contact-info-edit:store
       %=  our-contact
         nickname  `nickname.our-contact
-        bio       `bio.our-contact
+        bio       bio.our-contact
         color     `color.our-contact
       ==
     %+  murn  ~(tap in ~(key by friends))
@@ -405,7 +428,7 @@
       u.nickname.edit
     =.  bio.contact-info
       ?~  bio.edit  bio.contact-info
-      u.bio.edit
+      bio.edit
     =.  color.contact-info
       ?~  color.edit  color.contact-info
       u.color.edit
@@ -453,19 +476,19 @@
   ^-  friends:store
   %-  ~(gas by *friends:store)
   %+  turn  ~(tap in pals-mutuals:core)
-  |=(=ship [ship [.(status %fren)]:*friend:store])
+  |=(=ship [ship [.(relationship %fren)]:*friend:store])
 ::
 ++  pals-followers
   ^-  friends:store
   %-  ~(gas by *friends:store)
   %+  turn  ~(tap in pals-leeches:core)
-  |=(=ship [ship [.(status %follower)]:*friend:store])
+  |=(=ship [ship [.(relationship %received)]:*friend:store])
 ::
 ++  pals-following
   ^-  friends:store
   %-  ~(gas by *friends:store)
   %+  turn  ~(tap in pals-targets:core)
-  |=(=ship [ship [.(status %following)]:*friend:store])
+  |=(=ship [ship [.(relationship %sent)]:*friend:store])
 ::
 ++  pals-friends
   ^-  friends:store
