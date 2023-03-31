@@ -210,6 +210,8 @@ export class Conduit extends EventEmitter {
     return await new Promise((resolve, reject) => {
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie?.split('; ')[0] },
+        responseTimeout: 25000,
+        onreconnect: () => console.log('SSE RECONNECTED!!'),
       });
 
       this.sse.onopen = async (response) => {
@@ -440,7 +442,7 @@ export class Conduit extends EventEmitter {
         return true;
       }
     } catch {
-      if (true /*retryCount < 5*/) {
+      if (true) {
         setTimeout(() => {
           this.resubscribe(watchId, retryCount + 1);
         }, 2000);
