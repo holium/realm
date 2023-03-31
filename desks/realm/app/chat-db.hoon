@@ -39,7 +39,6 @@
     ?>  ?=(%chat-db-action mark)
     =/  act  !<(action:sur vase)
     =^  cards  state
-    ~&  >  (crip "%chat-db {<-.act>}")
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: paths-table pokes
       %create-path 
