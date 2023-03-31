@@ -165,7 +165,7 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1} height="inherit">
+    <Box display="flex" flexDirection="row" flex={1} height="100%">
       {leftAdornment && (
         <Adornment mr={1} disabled={disabled}>
           {leftAdornment}
