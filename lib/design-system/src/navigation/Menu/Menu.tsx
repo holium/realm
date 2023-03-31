@@ -20,7 +20,7 @@ const PADDING = 4;
 
 const Divider = styled(Box)`
   width: 95%;
-  border: 1px solid var(--rlm-border-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
   opacity: 0.3;
   margin: 1px auto;
 `;
@@ -152,7 +152,9 @@ export const Menu = ({
               style={{
                 y: position.y,
                 x: position.x,
-                border: isCustom ? 'none' : '1px solid var(--rlm-border-color)',
+                border: isCustom
+                  ? 'none'
+                  : '1px solid rgba(var(--rlm-border-rgba)',
                 width: dimensions?.width || WIDTH,
                 height: dimensions?.height || 'auto',
                 maxHeight: dimensions?.height || MAX_HEIGHT,

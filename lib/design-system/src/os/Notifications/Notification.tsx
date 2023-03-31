@@ -204,7 +204,7 @@ const NotifRow = styled(Flex)<NotifRowProps>`
   flex-direction: column;
   justify-content: space-between;
   padding: 6px;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   border-radius: var(--rlm-border-radius-6);
   background: ${(props) =>
     props.isGrouped

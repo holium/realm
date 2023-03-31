@@ -69,7 +69,9 @@ export const PinnedMessage = (props: PinnedProps) => {
           className="pinned-or-reply-message"
           id={id}
           style={{
-            borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            borderLeft: `2px solid ${
+              authorColor || 'rgba(var(--rlm-accent-rgba))'
+            }`,
             height: 42,
             width: '100%',
           }}

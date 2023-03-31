@@ -177,7 +177,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                 ? {
                     background: ourColor,
                     boxShadow: isEditing
-                      ? 'inset 0px 0px 0px 2px var(--rlm-intent-caution-color)'
+                      ? 'inset 0px 0px 0px 2px rgba(var(--rlm-intent-caution-rgba))'
                       : 'none',
                   }
                 : {}

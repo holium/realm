@@ -77,7 +77,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   background: ${({ selected, ourColor }) =>
     selected
       ? () => (ourColor ? rgba(ourColor, 0.3) : 'rgba(var(--rlm-accent-rgba))')
@@ -144,7 +144,7 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     ourColor &&
     css`
       background: ${darken(selected ? 0.2 : 0.1, ourColor)};
-      border-color: var(--rlm-accent-color);
+      border-color: rgba(var(--rlm-accent-rgba));
       transition: var(--transition);
       &:hover {
         transition: var(--transition);
