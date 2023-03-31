@@ -108,7 +108,7 @@ export const ChatRowPresenter = ({
     )
   );
   useEffect(() => {
-    let timer: any = null;
+    let timer: NodeJS.Timeout;
     function initClock() {
       clearTimeout(timer);
       const sentDate = new Date(
@@ -119,7 +119,9 @@ export const ChatRowPresenter = ({
       timer = setTimeout(initClock, interval);
     }
     initClock();
-    return () => {};
+    return () => {
+      clearTimeout(timer);
+    };
   }, [chat?.lastMessage?.id]);
 
   const contextMenuOptions = useMemo(() => {

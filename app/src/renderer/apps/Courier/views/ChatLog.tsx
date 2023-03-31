@@ -223,10 +223,12 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
 
+                  const thisMsgDate = new Date(row.createdAt).toDateString();
+                  const prevMsgDate =
+                    messages[index - 1] &&
+                    new Date(messages[index - 1].createdAt).toDateString();
                   const showDate: boolean =
-                    index === 0 ||
-                    new Date(row.createdAt).toDateString() !==
-                      new Date(messages[index - 1].createdAt).toDateString();
+                    index === 0 || thisMsgDate !== prevMsgDate;
                   return (
                     <Box
                       mx="1px"

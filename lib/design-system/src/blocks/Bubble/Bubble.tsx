@@ -71,7 +71,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
 
     const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
     useEffect(() => {
-      let timer: any = null;
+      let timer: NodeJS.Timeout;
       function initClock() {
         clearTimeout(timer);
         const sentDate = new Date(sentAt);
@@ -80,7 +80,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
         timer = setTimeout(initClock, interval);
       }
       initClock();
-      return () => {};
+      return () => {
+        clearTimeout(timer);
+      };
     }, [sentAt]);
 
     const authorColorDisplay = useMemo(
