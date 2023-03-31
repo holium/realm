@@ -18,7 +18,7 @@ import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 36px;
+  line-height: 16px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;
@@ -171,6 +171,11 @@ export const ChatInput = ({
     }
   };
 
+  let rows: number = 1;
+  if (value.split('\n').length > 1) {
+    rows = Math.min(value.split('\n').length, 5);
+  }
+
   return (
     <Flex flexDirection="column" overflow="visible">
       {attachments && (
@@ -220,7 +225,7 @@ export const ChatInput = ({
       <InputBox
         inputId={id}
         disabled={disabled}
-        height={36}
+        height={rows === 1 ? 36 : (rows * 16)+4}
         py="3px"
         error={!!error}
         leftAdornment={
@@ -277,7 +282,7 @@ export const ChatInput = ({
           required
           name="chat-input"
           placeholder="New message"
-          rows={1}
+          style={{lineHeight: rows === 1 ? "36px" : null}}
           value={value}
           tabIndex={tabIndex}
           disabled={disabled}
