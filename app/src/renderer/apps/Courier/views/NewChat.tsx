@@ -73,7 +73,7 @@ export const NewChat = () => {
     return inbox.some((chat) => {
       return (
         chat.type === 'dm' &&
-        chat.peers.find((p) => p.ship === Array.from(selectedPatp)[0])
+        chat.peers.find((p: any) => p.ship === Array.from(selectedPatp)[0])
       );
     });
   }, [selectedPatp.size === 1]);
