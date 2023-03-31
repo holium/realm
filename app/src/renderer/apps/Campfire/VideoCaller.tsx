@@ -112,6 +112,7 @@ const CallerPresenter = (props: ICaller) => {
       id={`room-caller-${person}`}
       // data-close-tray="false"
       ref={callerRef}
+      background={theme.currentTheme.windowColor}
       hoverBg={darken(0.04, theme.currentTheme.windowColor)}
       key={person}
       gap={4}
@@ -125,13 +126,13 @@ const CallerPresenter = (props: ICaller) => {
         alignItems="center"
         gap={10}
       >
-        <video ref={callerVideo} autoPlay playsInline></video>
         <Flex
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
           alignItems="center"
           gap={0}
         >
+          <video ref={callerVideo} autoPlay playsInline></video>
           <Avatar
             clickable={false}
             opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}

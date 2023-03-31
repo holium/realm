@@ -104,35 +104,53 @@ export const VideoCall = observer(() => {
         padding={20}
         gap={20}
       >
-        {video ? (
-          <Webcam
-            videoConstraints={{
-              facingMode: 'user',
-            }}
-            audio={false}
-            screenshotFormat="image/jpeg"
-            ref={webcamRef}
-            style={{
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              borderRadius: 10,
-              maxHeight: '90%',
-            }}
-            mirrored={true}
-          ></Webcam>
-        ) : (
-          <Flex justifyContent="center" alignItems="center" flex={1}>
-            <Avatar
-              patp={ship?.patp ?? ''}
-              size={30}
-              sigilColor={[ship?.color || '#000000', 'white']}
-            />
-          </Flex>
-        )}
-        {callers.map((person: string) => (
-          <VideoCaller key={person} type="caller" person={person} />
-        ))}
+        <Flex maxHeight="90%">
+          {video ? (
+            <Webcam
+              videoConstraints={{
+                facingMode: 'user',
+              }}
+              audio={false}
+              screenshotFormat="image/jpeg"
+              ref={webcamRef}
+              style={{
+                objectFit: 'cover',
+                width: '100%',
+                height: '100%',
+                borderRadius: 10,
+              }}
+              mirrored={true}
+            ></Webcam>
+          ) : (
+            <Flex justifyContent="center" alignItems="center" flex={1}>
+              <Avatar
+                patp={ship?.patp ?? ''}
+                size={30}
+                sigilColor={[ship?.color || '#000000', 'white']}
+              />
+            </Flex>
+          )}
+          {callers.length === 1 ? (
+            <Flex
+              position="absolute"
+              margin={10}
+              justifyContent="center"
+              alignItems="center"
+              flex={1}
+            >
+              <VideoCaller
+                key={callers.at(0)}
+                type="caller"
+                person={callers.at(0) ?? ''}
+                flex={1}
+              />
+            </Flex>
+          ) : (
+            callers.map((person: string) => (
+              <VideoCaller key={person} type="caller" person={person} />
+            ))
+          )}
+        </Flex>
 
         {/*<Flex flexDirection="column" margin={20}>
           <Flex
@@ -285,19 +303,21 @@ export const VideoCall = observer(() => {
           rightAdornment={<Button.TextButton>Add</Button.TextButton>}
         ></TextInput>
         <Card background={windowColor} padding={12}>
-          {callers.map((person: string) => (
+          <Flex flexDirection="column" gap={10}>
+            {callers.map((person: string) => (
+              <CallerRow
+                key={person}
+                name={person}
+                patp={'~zod'}
+                isMuted={false}
+              />
+            ))}
             <CallerRow
-              key={person}
-              name={person}
-              patp={'~zod'}
-              isMuted="false"
+              patp={ship?.patp || ''}
+              name={ourName}
+              isMuted={isMuted || false}
             />
-          ))}
-          <CallerRow
-            patp={ship?.patp || ''}
-            name={ourName}
-            isMuted={isMuted || false}
-          />
+          </Flex>
         </Card>
         <Flex flexDirection="row">
           <Icon name="CampfireMessages" size={25} />
