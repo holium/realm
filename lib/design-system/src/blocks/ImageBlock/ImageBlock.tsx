@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Flex, Text } from '../..';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
@@ -23,13 +23,25 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
     ...rest
   } = props;
   const [isLoaded, setIsLoaded] = useState(false);
-  const parsedHeight = (
-    height ? (typeof height === 'number' ? `${height}px` : height) : '100%'
-  ) as string;
+  const parsedHeight = useMemo(
+    () =>
+      (height
+        ? typeof height === 'number'
+          ? `${height}px`
+          : height
+        : '100%') as string,
+    [height]
+  );
 
-  const parsedWidth = (
-    width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
-  ) as string;
+  const parsedWidth = useMemo(
+    () =>
+      (width
+        ? typeof width === 'number'
+          ? `${width}px`
+          : width
+        : 'fit-content') as string,
+    [width]
+  );
 
   return (
     <Block variant={variant} width={width} {...rest}>
@@ -44,9 +56,8 @@ export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
         onLoad={() => {
           if (showLoader) {
             onImageLoaded && onImageLoaded();
+            setIsLoaded(true);
           }
-          console.log('image loade showLoader,', showLoader);
-          setIsLoaded(true);
         }}
         onError={() => {
           // setIsError(true);

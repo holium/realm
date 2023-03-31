@@ -187,7 +187,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           ) : (
             <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence width="100%">
+                <AnimatePresence>
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
@@ -220,9 +220,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   return (
                     <Box
                       mx="1px"
-                      key={`${row.id}-${row.updatedAt}-${
-                        isLast ? 'last' : 'not-last'
-                      }`}
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
                     >
