@@ -2,7 +2,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
 import { FragmentReactionType } from './Bubble.types';
 import { OnReactionPayload } from './Reaction';
-import { Flex, Bubble, Box } from '../..';
+import { Flex, Bubble, Box } from '../../index';
 
 export default {
   component: Bubble,

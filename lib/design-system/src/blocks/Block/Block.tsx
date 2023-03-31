@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
-import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Text } from '../..';
-
+import { Text } from '../../general/Text/Text';
 import {
   background,
   BackgroundProps,
@@ -134,16 +132,14 @@ export type BlockProps = {
 
 type BlockElProps = BlockProps & { children?: React.ReactNode };
 
-export const Block: FC<BlockElProps> = (props: BlockElProps) => {
-  const {
-    id,
-    mode = 'embed',
-    variant = 'default',
-    draggable = false,
-    children,
-    ...rest
-  } = props;
-
+export const Block = ({
+  id,
+  mode = 'embed',
+  variant = 'default',
+  draggable = false,
+  children,
+  ...rest
+}: BlockElProps) => {
   return (
     <BlockStyle
       id={id}

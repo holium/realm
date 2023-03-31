@@ -1,19 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import {
-  Icon,
-  Button,
-  InputBox,
-  BoxProps,
-  TextArea,
-  Flex,
-  Spinner,
-  isImageLink,
-  ImageBlock,
-  parseMediaType,
-  MediaBlock,
-} from '../..';
+import { Icon, Button, BoxProps, Flex, Spinner } from '../../general';
+import { InputBox, TextArea } from '../../input';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';

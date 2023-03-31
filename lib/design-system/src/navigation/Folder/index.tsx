@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Flex, BoxProps, Icon, Row } from '../..';
+import { Flex, BoxProps, Icon, Row } from '../../general';
 
 type FolderProps = {
   label: string;

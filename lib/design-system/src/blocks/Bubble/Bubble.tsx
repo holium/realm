@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react';
-import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
+import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../../index';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
