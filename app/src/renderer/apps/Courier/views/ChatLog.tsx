@@ -224,9 +224,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   return (
                     <Box
                       mx="1px"
-                      key={`${row.id}-${row.updatedAt}-${
-                        isLast ? 'last' : 'not-last'
-                      }`}
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
                     >

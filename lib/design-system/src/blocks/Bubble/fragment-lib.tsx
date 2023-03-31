@@ -420,9 +420,23 @@ export const renderFragment = (
           <Flex
             gap={fragmentType === 'image' ? 6 : 0}
             flexDirection={fragmentType === 'image' ? 'row-reverse' : 'column'}
+            justifyContent={
+              fragmentType === 'image' ? 'flex-end' : 'flex-start'
+            }
+            alignItems={fragmentType === 'image' ? 'center' : 'flex-start'}
             className="fragment-reply"
           >
-            <BubbleAuthor>{replyAuthor}</BubbleAuthor>
+            <Flex
+              flexDirection="column"
+              height={fragmentType === 'image' ? 30 : 'auto'}
+            >
+              <BubbleAuthor height={fragmentType === 'image' ? 30 : 'auto'}>
+                {replyAuthor}
+              </BubbleAuthor>
+              {fragmentType === 'image' && (
+                <Text.Custom fontSize={1}>Image</Text.Custom>
+              )}
+            </Flex>
             <Text.Custom
               truncate
               overflow="hidden"
