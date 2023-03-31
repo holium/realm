@@ -3,6 +3,6 @@
   "compilerOptions": {
     "baseUrl": "src"
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "./node_modules/eventsource/types/eventsource.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
