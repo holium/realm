@@ -6,7 +6,7 @@
 /+  dbug, default-agent, lib=friends
 |%
 +$  card  card:agent:gall
-+$  versioned-state  $%(state-0 state-1)
++$  versioned-state  $%(state-0 state-1 state-2)
 +$  state-0  [%0 is-public=? friends=friends-0:store]
 +$  state-1  [%1 sync-contact-store=? is-public=? friends=friends-1:store]
 +$  state-2  [%2 sync-contact-store=? is-public=? =friends:store]
@@ -54,9 +54,15 @@
                      %+  turn  ~(tap by friends.old)
                      |=  [=ship fren=friend-0:store]
                      :-  ship
+                     ^-  friend:store
                      :*  pinned.fren
                          tags.fren
-                         status.fren
+                         ~
+                         ?-  status.fren
+                           %fren  %fren
+                           %following  %sent
+                           %follower  %received
+                         ==
                          %offline
                          ~
                      ==
@@ -75,7 +81,15 @@
                      :-  ship
                      :*  pinned.fren
                          tags.fren
-                         status.fren
+                         ~
+                         ?-  status.fren
+                           %fren  %fren
+                           %following  %sent
+                           %follower  %received
+                           %contact  %contact
+                           %our  %our
+                         ==
+                         %offline
                          ~
                      ==
                  ==
