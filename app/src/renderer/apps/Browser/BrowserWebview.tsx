@@ -94,6 +94,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
             partition="browser-webview"
             isLocked={isDragging || isResizing || loadingState === 'loading'}
+            webpreferences="sandbox=false, nativeWindowOpen=yes"
             style={{
               background: 'white',
               width: '100%',
