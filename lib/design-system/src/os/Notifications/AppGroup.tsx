@@ -7,7 +7,7 @@ import {
   Icon,
   Avatar,
   NoScrollBar,
-} from '../../';
+} from '../../general';
 import styled from 'styled-components';
 import { NotificationType } from './Notifications.types';
 import { NotifAppRow, Notification } from './Notification';

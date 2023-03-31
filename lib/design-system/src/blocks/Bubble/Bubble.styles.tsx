@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Box, BoxProps, Icon } from '../..';
+import { Text, Box, BoxProps, Icon } from '../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
 import {

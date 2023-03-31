@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
-import { timelineDate, Flex, Text, Button, Icon, FlexProps } from '../../';
+import { timelineDate } from '../../util/date';
+import { Flex, Text, Button, Icon, FlexProps } from '../../general';
 import {
   NotificationButtonType,
   NotificationType,
 } from './Notifications.types';
-import { useMemo } from 'react';
 
 type NotificationProps = {
   appInfo?: {

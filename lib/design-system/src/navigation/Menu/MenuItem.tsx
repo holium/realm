@@ -1,6 +1,6 @@
 import { MouseEventHandler } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Row, Text, Icon, TextProps } from '../../';
+import { Flex, Row, Text, Icon, TextProps } from '../../general';
 import { IconPathsType } from '../../general/Icon/icons';
 
 export type MenuItemProps = {

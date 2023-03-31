@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import { Card, Box, BoxProps, Portal } from '../../';
+import { Card, Box, BoxProps, Portal } from '../../general';
 import styled from 'styled-components';
 import {
   getAnchorPointByElement,
@@ -154,7 +154,7 @@ export const Menu = ({
                 x: position.x,
                 border: isCustom
                   ? 'none'
-                  : '1px solid rgba(var(--rlm-border-rgba)',
+                  : '1px solid rgba(var(--rlm-border-rgba))',
                 width: dimensions?.width || WIDTH,
                 height: dimensions?.height || 'auto',
                 maxHeight: dimensions?.height || MAX_HEIGHT,

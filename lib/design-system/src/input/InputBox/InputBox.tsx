@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps } from '../..';
+import { Text, Box, BoxProps } from '../../general';
 import { AnimationProps } from 'framer-motion';
 
 type StyledBoxProps = {
