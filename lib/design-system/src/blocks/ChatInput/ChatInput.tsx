@@ -295,7 +295,7 @@ export const ChatInput = ({
           required
           name="chat-input"
           placeholder="New message"
-          style={{ lineHeight: rows === 1 ? '36px' : null }}
+          style={{ lineHeight: rows === 1 ? '36px' : undefined }}
           value={value}
           tabIndex={tabIndex}
           disabled={disabled}

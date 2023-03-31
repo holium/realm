@@ -1,4 +1,10 @@
-import { forwardRef, useLayoutEffect, useMemo, useState } from 'react';
+import {
+  forwardRef,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -63,7 +69,20 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       // onReplyClick = () => {},
     } = props;
 
-    const dateDisplay = useMemo(() => chatDate(new Date(sentAt)), [sentAt]);
+    const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
+    useEffect(() => {
+      let timer: any = null;
+      function initClock() {
+        clearTimeout(timer);
+        const sentDate = new Date(sentAt);
+        const interval: number = (60 - sentDate.getSeconds()) * 1000 + 5;
+        setDateDisplay(chatDate(sentDate));
+        timer = setTimeout(initClock, interval);
+      }
+      initClock();
+      return () => {};
+    }, [sentAt]);
+
     const authorColorDisplay = useMemo(
       () =>
         (authorColor && convertDarkText(authorColor, themeMode)) ||
