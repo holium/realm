@@ -2,10 +2,9 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import { Flex, Text, Skeleton, Mention } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
-
-import { motion } from 'framer-motion';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';

@@ -1,7 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import { TwitterTweetEmbed } from 'react-twitter-embed';
 import styled, { css } from 'styled-components';
-import { skeletonStyle } from '../..';
+import { skeletonStyle } from '../../general';
 import { BlockStyle, BlockProps } from '../Block/Block';
 
 type TweetWrapperProps = { isSkeleton: boolean };

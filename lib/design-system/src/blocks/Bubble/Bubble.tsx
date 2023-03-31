@@ -1,20 +1,12 @@
-import {
-  forwardRef,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { forwardRef, useLayoutEffect, useMemo, useState } from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { Reactions, OnReactionPayload } from './Reaction';
 import {
-  FragmentImageType,
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
-  TEXT_TYPES,
 } from './Bubble.types';
 import { chatDate } from '../../util/date';
 import { InlineStatus } from './InlineStatus';
@@ -30,6 +22,7 @@ export type BubbleProps = {
   isEdited?: boolean;
   isEditing?: boolean;
   expiresAt?: number | null;
+  updatedAt?: number | null;
   sentAt: string;
   isOur?: boolean;
   ourShip?: string;
@@ -63,13 +56,14 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       reactions = [],
       isPrevGrouped,
       isNextGrouped,
+      updatedAt,
       expiresAt,
       onMeasure,
       onReaction,
       // onReplyClick = () => {},
     } = props;
 
-    const dateDisplay = chatDate(new Date(sentAt));
+    const dateDisplay = useMemo(() => chatDate(new Date(sentAt)), [sentAt]);
     const authorColorDisplay = useMemo(
       () =>
         (authorColor && convertDarkText(authorColor, themeMode)) ||
@@ -87,16 +81,16 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     );
 
     // if the number of reactions changes, we need to re-measure
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (lastReactonLength !== reactions.length) {
         if (
           (lastReactonLength === 0 && reactions.length === 1) ||
-          (reactions.length === 0 && lastReactonLength === 1)
+          (reactions.length === 0 && lastReactonLength >= 1)
         ) {
           // only re-measure if we're going from 0 to 1 or 1 to 0
           onMeasure();
+          setLastReactionLength(reactions.length);
         }
-        setLastReactionLength(reactions.length);
       }
     }, [reactions.length, lastReactonLength, onMeasure]);
 
@@ -132,36 +126,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           </span>
         );
       });
-    }, [message]);
-
-    useLayoutEffect(() => {
-      // only measure if all fragments are text
-      let allTextTypes = true;
-      let hasCalculatedImage = false;
-      if (!message) return;
-      message.forEach((fragment) => {
-        const fragmentType = Object.keys(fragment)[0];
-        if (!TEXT_TYPES.includes(fragmentType)) {
-          allTextTypes = false;
-        }
-        if (
-          fragmentType === 'image' &&
-          (fragment as FragmentImageType).metadata?.height &&
-          (fragment as FragmentImageType).metadata?.width
-        ) {
-          // if we have an image, we need to measure it
-          hasCalculatedImage = true;
-        }
-      });
-      if (allTextTypes) {
-        onMeasure();
-        return;
-      }
-      if (hasCalculatedImage) {
-        onMeasure();
-        return;
-      }
-    }, []);
+    }, [message, updatedAt]);
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
@@ -178,95 +143,113 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       );
     }, [reactions.length, isOur, ourShip, ourColor, onReaction]);
 
-    if (message?.length === 1) {
-      const contentType = Object.keys(message[0])[0];
-      if (contentType === 'status') {
-        return (
-          <Flex
-            ref={ref}
-            key={id}
-            display="inline-flex"
-            height={STATUS_HEIGHT}
-            justifyContent={isOur ? 'flex-end' : 'flex-start'}
-            onLoad={onMeasure}
-          >
-            <InlineStatus text={(message[0] as FragmentStatusType).status} />
-          </Flex>
-        );
-      }
-    }
-    return (
-      <Flex
-        ref={ref}
-        key={id}
-        display="inline-flex"
-        justifyContent={isOur ? 'flex-end' : 'flex-start'}
-      >
-        <BubbleStyle
-          id={id}
-          isPrevGrouped={isPrevGrouped}
-          isNextGrouped={isNextGrouped}
-          style={
-            isOur
-              ? {
-                  background: ourColor,
-                  boxShadow: isEditing
-                    ? 'inset 0px 0px 0px 2px var(--rlm-intent-caution-color)'
-                    : 'none',
-                }
-              : {}
-          }
-          className={isOur ? 'bubble-our' : ''}
-        >
-          {!isOur && !isPrevGrouped && (
-            <BubbleAuthor
-              style={{
-                color: authorColorDisplay,
-              }}
-              authorColor={authorColor}
-            >
-              {authorNickname || author}
-            </BubbleAuthor>
-          )}
-          <FragmentBlock id={id}>{fragments}</FragmentBlock>
-          <BubbleFooter id={id} height={footerHeight}>
-            <Box width="70%">{reactionsDisplay}</Box>
+    return useMemo(() => {
+      if (message?.length === 1) {
+        const contentType = Object.keys(message[0])[0];
+        if (contentType === 'status') {
+          return (
             <Flex
-              width="30%"
-              gap={4}
-              alignItems="flex-end"
-              justifyContent="flex-end"
-              minWidth={minBubbleWidth}
-              flexBasis={minBubbleWidth}
+              ref={ref}
+              key={id}
+              display="inline-flex"
+              height={STATUS_HEIGHT}
+              justifyContent={isOur ? 'flex-end' : 'flex-start'}
             >
-              {expiresAt && (
-                // TODO tooltip with time remaining
-                <Icon
-                  mb="1px"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.35 }}
-                  transition={{ opacity: 0.2 }}
-                  name="ClockSlash"
-                  size={12}
-                />
-              )}
-              <Text.Custom
-                style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-                pointerEvents="none"
-                textAlign="right"
-                display="inline-flex"
+              <InlineStatus text={(message[0] as FragmentStatusType).status} />
+            </Flex>
+          );
+        }
+      }
+      return (
+        <Flex
+          ref={ref}
+          key={id}
+          display="inline-flex"
+          justifyContent={isOur ? 'flex-end' : 'flex-start'}
+        >
+          <BubbleStyle
+            id={id}
+            isPrevGrouped={isPrevGrouped}
+            isNextGrouped={isNextGrouped}
+            style={
+              isOur
+                ? {
+                    background: ourColor,
+                    boxShadow: isEditing
+                      ? 'inset 0px 0px 0px 2px rgba(var(--rlm-intent-caution-rgba))'
+                      : 'none',
+                  }
+                : {}
+            }
+            className={isOur ? 'bubble-our' : ''}
+          >
+            {!isOur && !isPrevGrouped && (
+              <BubbleAuthor
+                style={{
+                  color: authorColorDisplay,
+                }}
+                authorColor={authorColor}
+              >
+                {authorNickname || author}
+              </BubbleAuthor>
+            )}
+            <FragmentBlock id={id}>{fragments}</FragmentBlock>
+            <BubbleFooter id={id} height={footerHeight}>
+              <Box width="70%">{reactionsDisplay}</Box>
+              <Flex
+                width="30%"
+                gap={4}
                 alignItems="flex-end"
                 justifyContent="flex-end"
-                opacity={0.35}
+                minWidth={minBubbleWidth}
+                flexBasis={minBubbleWidth}
               >
-                {isEditing && 'Editing... · '}
-                {isEdited && !isEditing && 'Edited · '}
-                {dateDisplay}
-              </Text.Custom>
-            </Flex>
-          </BubbleFooter>
-        </BubbleStyle>
-      </Flex>
-    );
+                {expiresAt && (
+                  // TODO tooltip with time remaining
+                  <Icon
+                    mb="1px"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.35 }}
+                    transition={{ opacity: 0.2 }}
+                    name="ClockSlash"
+                    size={12}
+                  />
+                )}
+                <Text.Custom
+                  style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+                  pointerEvents="none"
+                  textAlign="right"
+                  display="inline-flex"
+                  alignItems="flex-end"
+                  justifyContent="flex-end"
+                  opacity={0.35}
+                >
+                  {isEditing && 'Editing... · '}
+                  {isEdited && !isEditing && 'Edited · '}
+                  {dateDisplay}
+                </Text.Custom>
+              </Flex>
+            </BubbleFooter>
+          </BubbleStyle>
+        </Flex>
+      );
+    }, [
+      id,
+      isPrevGrouped,
+      isNextGrouped,
+      isOur,
+      ourColor,
+      isEditing,
+      isEdited,
+      authorColorDisplay,
+      authorNickname,
+      author,
+      fragments,
+      reactionsDisplay,
+      dateDisplay,
+      minBubbleWidth,
+      footerHeight,
+      onMeasure,
+    ]);
   }
 );

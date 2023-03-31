@@ -73,7 +73,7 @@ export const NewChat = () => {
     return inbox.some((chat) => {
       return (
         chat.type === 'dm' &&
-        chat.peers.find((p) => p.ship === Array.from(selectedPatp)[0])
+        chat.peers.find((p: any) => p.ship === Array.from(selectedPatp)[0])
       );
     });
   }, [selectedPatp.size === 1]);
@@ -161,7 +161,7 @@ const RemoveWrapper = styled(motion.div)`
   .new-chat-remove-ship {
     justify-content: center;
     align-items: center;
-    background-color: var(--rlm-intent-alert-color);
+    background-color: rgba(var(--rlm-intent-alert-rgba));
     svg {
       fill: #fff;
     }

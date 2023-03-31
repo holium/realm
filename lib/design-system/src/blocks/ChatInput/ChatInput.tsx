@@ -1,17 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import {
-  Icon,
-  Button,
-  InputBox,
-  BoxProps,
-  TextArea,
-  Flex,
-  Spinner,
-  LinkBlock,
-  isImageLink,
-} from '../..';
+import { Icon, Button, BoxProps, Flex, Spinner } from '../../general';
+import { InputBox, TextArea } from '../../input';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
@@ -186,40 +180,59 @@ export const ChatInput = ({
           flexDirection="row"
           alignItems="flex-start"
         >
-          {attachments.map((attachment: string, index: number) => (
-            <RemoveAttachmentButton
-              key={index}
-              id={`attachment-image-${index}`}
-            >
-              <LinkBlock
-                id={`attachment-${index}`}
-                by={window.ship}
-                link={attachment}
-                mode="embed"
-                variant="content"
-                mb={1}
-                width="fit-content"
-                height={100}
-                onLinkLoaded={() => {}}
-              />
-              <motion.div className="chat-attachment-remove-btn">
-                <Button.Base
-                  size={24}
-                  borderRadius={12}
-                  onClick={
-                    onRemoveAttachment
-                      ? (evt) => {
-                          evt.stopPropagation();
-                          onRemoveAttachment(index);
-                        }
-                      : undefined
-                  }
-                >
-                  <Icon name="Close" size={16} />
-                </Button.Base>
-              </motion.div>
-            </RemoveAttachmentButton>
-          ))}
+          {attachments.map((attachment: string, index: number) => {
+            const { linkType } = parseMediaType(attachment);
+            let block = null;
+            if (linkType === 'image') {
+              block = (
+                <ImageBlock
+                  mb={1}
+                  minWidth={100}
+                  width="fit-content"
+                  showLoader
+                  height={100}
+                  id={`attachment-${index}`}
+                  by={''}
+                  image={attachment}
+                />
+              );
+            } else {
+              block = (
+                <MediaBlock
+                  mb={1}
+                  width="fit-content"
+                  minWidth={200}
+                  height={100}
+                  id={`attachment-${index}`}
+                  url={attachment}
+                />
+              );
+            }
+            return (
+              <RemoveAttachmentButton
+                key={index}
+                id={`attachment-image-${index}`}
+              >
+                {block}
+                <motion.div className="chat-attachment-remove-btn">
+                  <Button.Base
+                    size={24}
+                    borderRadius={12}
+                    onClick={
+                      onRemoveAttachment
+                        ? (evt) => {
+                            evt.stopPropagation();
+                            onRemoveAttachment(index);
+                          }
+                        : undefined
+                    }
+                  >
+                    <Icon name="Close" size={16} />
+                  </Button.Base>
+                </motion.div>
+              </RemoveAttachmentButton>
+            );
+          })}
         </Flex>
       )}
       <InputBox

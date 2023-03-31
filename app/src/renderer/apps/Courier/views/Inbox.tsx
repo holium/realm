@@ -4,7 +4,6 @@ import {
   Icon,
   Button,
   TextInput,
-  WindowedList,
   Box,
   Text,
 } from '@holium/design-system';
@@ -15,7 +14,25 @@ import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
 import { useServices } from 'renderer/logic/store';
+import InboxList from '../components/InboxList';
 const rowHeight = 52;
+
+const sortFunction = (a: ChatModelType, b: ChatModelType) => {
+  if (
+    (a.createdAt || a.metadata.timestamp) >
+    (b.createdAt || b.metadata.timestamp)
+  ) {
+    return -1;
+  }
+  if (
+    (a.createdAt || a.metadata.timestamp) <
+    (b.createdAt || b.metadata.timestamp)
+  ) {
+    return 1;
+  }
+  return 0;
+};
+
 export const InboxPresenter = () => {
   const { ship } = useServices();
   const { dimensions } = useTrayApps();
@@ -30,7 +47,7 @@ export const InboxPresenter = () => {
       let title: string;
       const dm = preview as ChatModelType;
       title = dm.metadata.title;
-      return title.indexOf(searchString) === 0;
+      return title.toLowerCase().indexOf(searchString.toLowerCase()) === 0;
     },
     [searchString]
   );
@@ -111,7 +128,7 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box height={544} width={dimensions.width - 24}>
+          <Box height={544} width={dimensions.width - 26}>
             <Flex
               style={{
                 background: 'rgba(0,0,0,0.03)',
@@ -150,13 +167,14 @@ export const InboxPresenter = () => {
                 );
               })}
             </Flex>
-            <WindowedList
+            <InboxList
+              items={unpinnedChatList}
+              itemHeight={rowHeight}
               width={listWidth}
               height={listHeight}
-              rowHeight={rowHeight}
-              data={unpinnedChatList}
-              filter={searchFilter}
-              rowRenderer={(chat) => {
+              filterFunction={searchFilter}
+              sortFunction={sortFunction}
+              renderItem={(chat) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 return (
                   <Box

@@ -1,64 +1,76 @@
-import { FC, useLayoutEffect, useState } from 'react';
-import { Flex, Text } from '../..';
+import { useMemo, useState } from 'react';
+import { Flex, Text } from '../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
 type ImageBlockProps = {
+  showLoader?: boolean;
   image: string;
   by: string;
   onImageLoaded?: () => void;
 } & BlockProps;
 
-export const ImageBlock: FC<ImageBlockProps> = (props: ImageBlockProps) => {
+export const ImageBlock = (props: ImageBlockProps) => {
   const {
+    showLoader,
     image,
     by,
     variant,
     width = 'inherit',
     height,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     onImageLoaded,
     ...rest
   } = props;
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const parsedHeight = useMemo(
+    () =>
+      (height
+        ? typeof height === 'number'
+          ? `${height}px`
+          : height
+        : '100%') as string,
+    [height]
+  );
 
-  const isPrecalculated =
-    typeof height === 'number' && typeof width === 'number';
-
-  useLayoutEffect(() => {
-    if (!isPrecalculated && onImageLoaded) onImageLoaded();
-  });
-
-  const parsedHeight = (
-    height ? (typeof height === 'number' ? `${height}px` : height) : '100%'
-  ) as string;
-
-  const parsedWidth = (
-    width ? (typeof width === 'number' ? `${width}px` : width) : 'fit-content'
-  ) as string;
+  const parsedWidth = useMemo(
+    () =>
+      (width
+        ? typeof width === 'number'
+          ? `${width}px`
+          : width
+        : 'fit-content') as string,
+    [width]
+  );
 
   return (
     <Block variant={variant} width={width} {...rest}>
       <FragmentImage
         id={rest.id}
-        isSkeleton={!imgLoaded}
+        loading="eager"
+        {...(showLoader && { isSkeleton: !isLoaded })}
         src={image}
         height={parsedHeight}
         width={parsedWidth}
         draggable={false}
-        onError={() => {
-          if (!isPrecalculated && onImageLoaded) onImageLoaded();
-        }}
         onLoad={() => {
-          setImgLoaded(true);
-          if (!isPrecalculated && onImageLoaded) onImageLoaded();
+          if (showLoader) {
+            onImageLoaded && onImageLoaded();
+            setIsLoaded(true);
+          }
+        }}
+        onError={() => {
+          // setIsError(true);
         }}
       />
-      <Flex className="block-footer">
-        <Flex></Flex>
-        <Text.Hint className="block-author" noSelection fontSize={0}>
-          {by}
-        </Text.Hint>
-      </Flex>
+      {by && (
+        <Flex className="block-footer">
+          <Flex></Flex>
+          <Text.Hint className="block-author" noSelection fontSize={0}>
+            {by}
+          </Text.Hint>
+        </Flex>
+      )}
     </Block>
   );
 };

@@ -1,21 +1,21 @@
 import { useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Box, Icon, Text, Portal, Card } from '../..';
+import { AnimatePresence } from 'framer-motion';
+import { Flex, Box, Icon, Text, Portal, Card } from '../../general';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
   Emoji,
   SkinTones,
 } from 'emoji-picker-react';
-
 import { FragmentReactionType } from './Bubble.types';
-import { rgba, darken } from 'polished';
+import { opacifyHexColor } from '../../util/colors';
 import { useMenu } from '../../navigation/Menu/useMenu';
-import { AnimatePresence } from 'framer-motion';
 
 const WIDTH = 300;
 const HEIGHT = 350;
-const defaultShip = window.ship ?? 'zod';
+const defaultShip =
+  typeof window !== 'undefined' ? (window as any)?.ship ?? 'zod' : 'zod';
 
 const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
@@ -77,10 +77,12 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  color: var(--rlm-text-color);
+  color: rgba(var(--rlm-text-rgba));
   background: ${({ selected, ourColor }) =>
     selected
-      ? () => (ourColor ? rgba(ourColor, 0.3) : 'rgba(var(--rlm-accent-rgba))')
+      ? ourColor
+        ? opacifyHexColor(ourColor, 0.3)
+        : 'gba(var(--rlm-accent-rgba))'
       : 'rgba(0, 0, 0, 0.08)'};
   box-shadow: ${({ selected }) =>
     selected
@@ -143,13 +145,24 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     isOur &&
     ourColor &&
     css`
-      background: ${darken(selected ? 0.2 : 0.1, ourColor)};
-      border-color: var(--rlm-accent-color);
+      background: ${ourColor};
+      filter: brightness(0.9);
+      border-color: rgba(var(--rlm-accent-rgba));
       transition: var(--transition);
       &:hover {
         transition: var(--transition);
-        background: ${darken(selected ? 0.225 : 0.125, ourColor)};
+        filter: brightness(0.875);
       }
+
+        ${
+          selected &&
+          css`
+            filter: brightness(0.8);
+            &:hover {
+              filter: brightness(0.775);
+            }
+          `
+        }}
     `}
 `;
 
@@ -177,17 +190,16 @@ type ReactionProps = {
   onReaction?: (payload: OnReactionPayload) => void;
 };
 
-export const Reactions = (props: ReactionProps) => {
-  const {
-    id = 'reaction-menu',
-    variant = 'overlay',
-    size = 'medium',
-    isOur = false,
-    ourShip = defaultShip,
-    ourColor,
-    reactions = [],
-    onReaction,
-  } = props;
+export const Reactions = ({
+  id = 'reaction-menu',
+  variant = 'overlay',
+  size = 'medium',
+  isOur = false,
+  ourShip = defaultShip,
+  ourColor,
+  reactions = [],
+  onReaction,
+}: ReactionProps) => {
   const reactIds = reactions.map((r) => r.msgId);
   const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
     'top-left',

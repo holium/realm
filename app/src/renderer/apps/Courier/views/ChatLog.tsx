@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
-// import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
 import {
   Box,
   Flex,
@@ -9,8 +10,6 @@ import {
   Reply,
   measureImage,
   fetchOGData,
-  LINK_PREVIEW_HEIGHT,
-  RAW_LINK_HEIGHT,
   extractOGData,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
@@ -21,12 +20,13 @@ import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-import { toJS } from 'mobx';
-// import { toJS } from 'mobx';
+
+const FullWidthAnimatePresence = styled(AnimatePresence)`
+  width: 100%;
+`;
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -96,14 +96,15 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           const result = await fetchOGData(frag.link);
           if (result.linkType === 'opengraph') {
             metadata = {
-              height: LINK_PREVIEW_HEIGHT as string,
+              linkType: 'opengraph',
               ogData: JSON.stringify(extractOGData(result.data)) as string,
             };
           } else {
-            metadata = { height: RAW_LINK_HEIGHT as string };
+            metadata = {
+              linkType: 'url',
+            };
           }
         }
-
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
@@ -190,42 +191,23 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           ) : (
             <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence width="100%">
+                <FullWidthAnimatePresence>
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
-                </AnimatePresence>
+                </FullWidthAnimatePresence>
               )}
               <WindowedList
-                key={`${path}-${selectedChat.lastFetch}`}
+                key={`${path}-${selectedChat.lastFetch}-${messages.length}`}
                 startAtBottom
                 hideScrollbar
                 width={containerWidth}
                 height={height}
                 data={messages}
                 rowRenderer={(row, index, measure) => {
-                  const isLast = index === messages.length - 1;
-
-                  let replyToObj: any | undefined;
-                  if (row.replyToMsgId) {
-                    const originalMsg = toJS(
-                      selectedChat.messages.find(
-                        (m) => m.id === row.replyToMsgId
-                      )
-                    );
-                    if (originalMsg) {
-                      let { nickname } = friends.getContactAvatarMetadata(
-                        originalMsg?.sender
-                      );
-                      replyToObj = originalMsg && {
-                        reply: {
-                          msgId: originalMsg.id,
-                          author: nickname || originalMsg.sender,
-                          message: [originalMsg.contents[0]],
-                        },
-                      };
-                    }
-                  }
+                  const isLast = selectedChat
+                    ? index === messages.length - 1
+                    : false;
 
                   const isNextGrouped =
                     index < messages.length - 1 &&
@@ -239,12 +221,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
-
                   return (
                     <Box
-                      key={`${row.id}-${row.updatedAt}-${
-                        isLast ? 'last' : 'not-last'
-                      }}`}
                       mx="1px"
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
@@ -253,9 +231,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                         isPrevGrouped={isPrevGrouped}
                         isNextGrouped={isNextGrouped}
                         containerWidth={containerWidth}
-                        replyTo={replyToObj}
                         message={row as ChatMessageType}
-                        canReact={selectedChat.metadata.reactions}
                         ourColor={ourColor}
                         measure={measure}
                       />
