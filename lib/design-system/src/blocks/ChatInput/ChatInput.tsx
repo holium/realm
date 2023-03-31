@@ -238,7 +238,7 @@ export const ChatInput = ({
       <InputBox
         inputId={id}
         disabled={disabled}
-        height={rows === 1 ? 36 : (rows * 16)+4}
+        height={rows === 1 ? 36 : rows * 16 + 4}
         py="3px"
         error={!!error}
         leftAdornment={
@@ -295,7 +295,7 @@ export const ChatInput = ({
           required
           name="chat-input"
           placeholder="New message"
-          style={{lineHeight: rows === 1 ? "36px" : null}}
+          style={{ lineHeight: rows === 1 ? '36px' : undefined }}
           value={value}
           tabIndex={tabIndex}
           disabled={disabled}
