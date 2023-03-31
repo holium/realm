@@ -11,7 +11,7 @@ export default {
       },
     },
   },
-  title: 'App/System/Mouse',
+  title: 'OS/Mouse',
 } as ComponentMeta<typeof AnimatedCursor>;
 
 export const Demo: ComponentStory<typeof AnimatedCursor> = ({ color }) => {
