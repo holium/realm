@@ -1,5 +1,5 @@
 import { Database } from 'better-sqlite3';
-import AbstractDataAccess from '../../../services/abstract.db';
+import AbstractDataAccess from '../../abstract.db';
 
 interface NotificationRow {
   id: number;

@@ -1,16 +1,16 @@
 import { app } from 'electron';
-
-import AbstractService, {
-  ServiceOptions,
-} from '../../services/abstract.service';
 import log from 'electron-log';
+import { ConduitSession } from './../conduit';
+import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
+import { ChatDAO } from './models/chat.model';
+import APIConnection from '../conduit';
 
 export class ShipService extends AbstractService {
   private patp: string;
   private readonly shipDB?: ShipDB;
   models?: {
-    chat: null;
+    chat: ChatDAO;
     notifications: null;
     passports: null;
     friends: null;
@@ -22,15 +22,30 @@ export class ShipService extends AbstractService {
       return;
     }
     this.shipDB = new ShipDB(this.patp, password);
+    const credentials = this.shipDB.getCredentials();
+    if (!this.shipDB || !credentials) {
+      log.info(`No ship found for ${patp}`);
+      return;
+    }
 
+    // create an instance of the conduit
+    APIConnection.getInstance(credentials).conduit.on(
+      'refreshed',
+      (session: ConduitSession) => {
+        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
+      }
+    );
+    // init all models
     this.models = {
-      chat: null,
+      chat: new ChatDAO(this.shipDB.db),
       notifications: null,
       passports: null,
       friends: null,
     };
+
     app.on('quit', () => {
       this.shipDB?.disconnect();
+      APIConnection.getInstance(credentials).conduit.removeAllListeners();
     });
   }
 

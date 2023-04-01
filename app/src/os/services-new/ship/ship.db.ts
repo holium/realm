@@ -1,14 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
-// import sqlite3 from 'better-sqlite3';
 import sqlite3 from 'better-sqlite3-multiple-ciphers';
-import Store from 'electron-store';
 import log from 'electron-log';
 import { notifInitSql } from './models/notifications.model';
-import { chatInitSql } from './models/chats.model';
-
-// sqlcipher(sqlite3);
+import { chatInitSql } from './models/chat.model';
 
 export class ShipDB {
   private shipDB: sqlite3.Database;
@@ -45,6 +41,25 @@ export class ShipDB {
     }
   }
 
+  get db() {
+    return this.shipDB;
+  }
+
+  getCredentials() {
+    const result = this.shipDB
+      .prepare('SELECT * FROM credentials LIMIT 1;')
+      .get();
+    return { ...result, ship: this.patp };
+  }
+
+  setCredentials(url: string, code: string, cookie: string) {
+    this.shipDB
+      .prepare(
+        'INSERT OR REPLACE INTO credentials (url, code, cookie) VALUES (?, ?, ?);'
+      )
+      .run(url, code, cookie);
+  }
+
   open() {
     return new sqlite3(this.dbPath);
   }
@@ -66,8 +81,10 @@ const initSql = `
 ${chatInitSql}
 ${notifInitSql}
 create table if not exists credentials (
+  url       text primary key,
   code      text,
   cookie    text,
   wallet    text
 );
+create unique index if not exists credentials_url_uindex on credentials (url);
 `;

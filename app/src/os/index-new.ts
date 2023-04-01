@@ -1,7 +1,7 @@
 import RealmProcess from '../background/realm.process';
 import { app, BrowserWindow } from 'electron';
 import log from 'electron-log';
-import AbstractService from './services/abstract.service';
+import AbstractService from './services-new/abstract.service';
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 

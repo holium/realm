@@ -1,6 +1,4 @@
-import AbstractService, {
-  ServiceOptions,
-} from '../../services/abstract.service';
+import AbstractService, { ServiceOptions } from '../abstract.service';
 import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 import { AuthDB } from './auth.db';
