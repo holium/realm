@@ -297,7 +297,7 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
-      this.sse.onerror = async (error) => {
+      this.sse.onerror = async (error: any) => {
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
