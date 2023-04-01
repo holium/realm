@@ -1,5 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
 import {
   Box,
   Flex,
@@ -18,11 +20,14 @@ import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-// import { toJS } from 'mobx';
+import { displayDate } from 'os/lib/time';
+
+const FullWidthAnimatePresence = styled(AnimatePresence)`
+  width: 100%;
+`;
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -187,11 +192,11 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           ) : (
             <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence width="100%">
+                <FullWidthAnimatePresence>
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
-                </AnimatePresence>
+                </FullWidthAnimatePresence>
               )}
               <WindowedList
                 key={`${path}-${selectedChat.lastFetch}-${messages.length}`}
@@ -217,15 +222,31 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
                   const topSpacing = isPrevGrouped ? '3px' : 2;
                   const bottomSpacing = isNextGrouped ? '3px' : 2;
+
+                  const thisMsgDate = new Date(row.createdAt).toDateString();
+                  const prevMsgDate =
+                    messages[index - 1] &&
+                    new Date(messages[index - 1].createdAt).toDateString();
+                  const showDate: boolean =
+                    index === 0 || thisMsgDate !== prevMsgDate;
                   return (
                     <Box
                       mx="1px"
-                      key={`${row.id}-${row.updatedAt}-${
-                        isLast ? 'last' : 'not-last'
-                      }`}
                       pt={topSpacing}
                       pb={isLast ? bottomSpacing : 0}
                     >
+                      {showDate && (
+                        <Text.Custom
+                          opacity={0.5}
+                          fontSize="12px"
+                          fontWeight={500}
+                          textAlign="center"
+                          mt={2}
+                          mb={2}
+                        >
+                          {displayDate(row.createdAt)}
+                        </Text.Custom>
+                      )}
                       <ChatMessage
                         isPrevGrouped={isPrevGrouped}
                         isNextGrouped={isNextGrouped}

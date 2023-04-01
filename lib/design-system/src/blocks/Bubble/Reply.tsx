@@ -1,13 +1,6 @@
 import styled from 'styled-components';
-import {
-  Flex,
-  Box,
-  BoxProps,
-  capitalizeFirstLetter,
-  Button,
-  Icon,
-  Text,
-} from '../..';
+import { Text, Flex, Box, BoxProps, Button, Icon } from '../../general';
+import { capitalizeFirstLetter } from '../../util/strings';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlock,
@@ -108,7 +101,9 @@ export const Reply = (props: ReplyProps) => {
           className="pinned-or-reply-message"
           style={{
             paddingRight: 6,
-            borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            borderLeft: `2px solid ${
+              authorColor || 'rgba(var(--rlm-accent-rgba))'
+            }`,
             width: 'calc(100% - 60px)',
           }}
         >

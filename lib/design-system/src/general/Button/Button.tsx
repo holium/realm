@@ -94,6 +94,7 @@ const Base = styled(motion.button)<ButtonProps>`
   appearance: none;
   width: fit-content;
   display: inline-flex;
+  user-select: none;
   align-items: center;
   flex-basis: initial;
   font-size: 0.889rem;
@@ -113,7 +114,6 @@ const Base = styled(motion.button)<ButtonProps>`
     filter: brightness(0.95);
   }
   &:disabled {
-    cursor: not-allowed !important;
     opacity: 0.5;
     transition: var(--transition);
   }

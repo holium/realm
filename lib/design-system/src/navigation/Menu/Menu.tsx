@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import { Card, Box, BoxProps, Portal } from '../../';
+import { Card, Box, BoxProps, Portal } from '../../general';
 import styled from 'styled-components';
 import {
   getAnchorPointByElement,
@@ -20,7 +20,7 @@ const PADDING = 4;
 
 const Divider = styled(Box)`
   width: 95%;
-  border: 1px solid var(--rlm-border-color);
+  border: 1px solid rgba(var(--rlm-border-rgba));
   opacity: 0.3;
   margin: 1px auto;
 `;
@@ -49,9 +49,9 @@ export const Menu = ({
   orientation = 'bottom-right',
   offset = { x: 0, y: 2 },
   options,
+  className,
   closableIds,
   closableClasses,
-  ...rest
 }: MenuProps) => {
   let innerContent: React.ReactNode;
   let type: MenuType = 'custom';
@@ -129,7 +129,7 @@ export const Menu = ({
               p={type === 'custom' ? 0 : 1}
               elevation={2}
               position="absolute"
-              className={rest.className}
+              className={className}
               id={id}
               zIndex={100}
               initial={{
@@ -152,7 +152,9 @@ export const Menu = ({
               style={{
                 y: position.y,
                 x: position.x,
-                border: isCustom ? 'none' : '1px solid var(--rlm-border-color)',
+                border: isCustom
+                  ? 'none'
+                  : '1px solid rgba(var(--rlm-border-rgba))',
                 width: dimensions?.width || WIDTH,
                 height: dimensions?.height || 'auto',
                 maxHeight: dimensions?.height || MAX_HEIGHT,

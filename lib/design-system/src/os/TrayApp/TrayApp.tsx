@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
-import { BoxProps } from '../../';
+import { BoxProps } from '../../general/Box/Box';
 
 const Wrapper = styled(motion.div)`
   z-index: 16;

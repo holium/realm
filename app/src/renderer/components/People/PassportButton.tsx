@@ -12,7 +12,4 @@ export const PassportButton = styled(motion.button)`
   width: 40px;
   transition: var(--transition);
   border-radius: 6px;
-  /* svg {
-    fill: rgba(var(--text-color), 0.7);
-  } */
 `;

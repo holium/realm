@@ -149,6 +149,9 @@ export const ChatMessage = types
       self.contents = contents;
       self.updatedAt = updatedAt;
     },
+    setMetadata(metadata: any) {
+      self.metadata = metadata;
+    },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
       return ChatDBActions.getChatReplyTo(self.replyToMsgId);
@@ -244,7 +247,7 @@ export const Chat = types
       );
     },
     isEditing(msgId: string) {
-      return self.editingMsg?.id === msgId;
+      return self.editingMsg?.id === msgId || false;
     },
     // Check if the pinned message is hidden locally
     isPinLocallyHidden() {
@@ -465,6 +468,15 @@ export const Chat = types
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
       const oldMessages = self.messages;
       try {
+        // find the message and update it
+        const message = self.messages.find((m) => m.id === messageId);
+        if (!message) return;
+        self.editingMsg = null;
+        message.setMetadata({ edited: 'true' });
+        message.updateContents(
+          contents.map((frag) => frag.content),
+          Date.now()
+        );
         yield ChatDBActions.editMessage(
           self.path,
           messageId,
@@ -473,8 +485,6 @@ export const Chat = types
             metadata: { edited: 'true' },
           }))
         );
-        // todo intermeidate state?
-        self.editingMsg = null;
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);

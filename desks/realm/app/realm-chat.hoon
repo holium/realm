@@ -30,35 +30,20 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    ~&  wex.bowl
     :: do a quick check to make sure we are subbed to /db in %chat-db
     =/  cards  ?:  =(wex.bowl ~)  
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     ~
-    :: REMOVE THIS SECTION WHEN YOU DONT WANT TO AUTO-BORK STATE EVERY TIME
-    =/  default-state=state-0
-      :*  %0
-          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
-          (sham our.bowl)                         :: uuid:notify
-          *devices:notify
-          %.y            :: push-enabled
-          ~              :: set of muted chats
-          ~              :: set of pinned chats
-          %.n            :: msg-preview-notif
-      ==
-    [cards this(state default-state)]
-    :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
-    ::=/  old  !<(versioned-state old-state)
-    ::?-  -.old
-    ::  %0  [cards this(state old)]
-    ::==
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  [cards this(state old)]
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?>  ?=(%chat-action mark)
     =/  act  !<(action vase)
-    ~&  >  "%realm-chat poked {<-.act>}"
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: meta-chat management pokes
@@ -165,8 +150,6 @@
           %fact
             ?+    p.cage.sign  `this
               %chat-db-dump
-                ::~&  >>>  'we got a new db-dump thing'
-                ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
                 `this
               %chat-db-change
                 =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
