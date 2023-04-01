@@ -1,5 +1,5 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../..';
+import { Flex } from '../../general/Flex/Flex';
 import { Tab, TabProps } from './Tab';
 
 export default {

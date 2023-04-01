@@ -1,4 +1,10 @@
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import {
+  forwardRef,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react';
 import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
 import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
 import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
@@ -22,6 +28,7 @@ export type BubbleProps = {
   isEdited?: boolean;
   isEditing?: boolean;
   expiresAt?: number | null;
+  updatedAt?: number | null;
   sentAt: string;
   isOur?: boolean;
   ourShip?: string;
@@ -55,13 +62,29 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       reactions = [],
       isPrevGrouped,
       isNextGrouped,
+      updatedAt,
       expiresAt,
       onMeasure,
       onReaction,
       // onReplyClick = () => {},
     } = props;
 
-    const dateDisplay = useMemo(() => chatDate(new Date(sentAt)), [sentAt]);
+    const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
+    useEffect(() => {
+      let timer: NodeJS.Timeout;
+      function initClock() {
+        clearTimeout(timer);
+        const sentDate = new Date(sentAt);
+        const interval: number = (60 - sentDate.getSeconds()) * 1000 + 5;
+        setDateDisplay(chatDate(sentDate));
+        timer = setTimeout(initClock, interval);
+      }
+      initClock();
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [sentAt]);
+
     const authorColorDisplay = useMemo(
       () =>
         (authorColor && convertDarkText(authorColor, themeMode)) ||
@@ -77,10 +100,9 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       () => (containerWidth ? containerWidth - 16 : undefined),
       [containerWidth]
     );
-    // useLayoutEffect(() => onMeasure(), [message]);
 
     // if the number of reactions changes, we need to re-measure
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (lastReactonLength !== reactions.length) {
         if (
           (lastReactonLength === 0 && reactions.length === 1) ||
@@ -125,7 +147,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           </span>
         );
       });
-    }, [message]);
+    }, [message, updatedAt]);
 
     const minBubbleWidth = useMemo(() => (isEdited ? 164 : 114), [isEdited]);
 
@@ -153,7 +175,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               display="inline-flex"
               height={STATUS_HEIGHT}
               justifyContent={isOur ? 'flex-end' : 'flex-start'}
-              onLoad={onMeasure}
             >
               <InlineStatus text={(message[0] as FragmentStatusType).status} />
             </Flex>
@@ -166,7 +187,6 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           key={id}
           display="inline-flex"
           justifyContent={isOur ? 'flex-end' : 'flex-start'}
-          onLoad={onMeasure}
         >
           <BubbleStyle
             id={id}
@@ -177,7 +197,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                 ? {
                     background: ourColor,
                     boxShadow: isEditing
-                      ? 'inset 0px 0px 0px 2px var(--rlm-intent-caution-color)'
+                      ? 'inset 0px 0px 0px 2px rgba(var(--rlm-intent-caution-rgba))'
                       : 'none',
                   }
                 : {}

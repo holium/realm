@@ -171,7 +171,7 @@ const eatSpecialType = (
           ? possibleMatch.index
           : -1;
       if (startIndex >= 0) {
-        startTokenLength = possibleMatch[0].length;
+        startTokenLength = possibleMatch?.[0].length ?? 0;
       }
     } else {
       throw new Error('should not be possible to reach this');

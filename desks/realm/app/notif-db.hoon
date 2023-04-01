@@ -31,7 +31,6 @@
     ^-  (quip card _this)
     ?>  ?=(%notif-db-poke mark)
     =/  act  !<(action:sur vase)
-    ~&  >  (crip "%notif-db {<-.act>}")
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: permission-wise, basically others can %create notifs for us,

@@ -148,7 +148,10 @@ export const ChatMessagePresenter = ({
     [message.createdAt]
   );
 
-  const hasEdited = useMemo(() => message.metadata.edited, [message.updatedAt]);
+  const hasEdited = useMemo(
+    () => message.metadata.edited,
+    [message.updatedAt, message.metadata.edited]
+  );
 
   const reactionList = useMemo(
     () => msgModel?.reactions,
@@ -203,6 +206,7 @@ export const ChatMessagePresenter = ({
       ourShip={ourShip}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
+      updatedAt={message.updatedAt}
       isEdited={hasEdited}
       author={message.sender}
       authorNickname={authorNickname}

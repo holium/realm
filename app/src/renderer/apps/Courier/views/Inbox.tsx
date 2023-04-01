@@ -16,6 +16,23 @@ import { ChatModelType } from '../models';
 import { useServices } from 'renderer/logic/store';
 import InboxList from '../components/InboxList';
 const rowHeight = 52;
+
+const sortFunction = (a: ChatModelType, b: ChatModelType) => {
+  if (
+    (a.createdAt || a.metadata.timestamp) >
+    (b.createdAt || b.metadata.timestamp)
+  ) {
+    return -1;
+  }
+  if (
+    (a.createdAt || a.metadata.timestamp) <
+    (b.createdAt || b.metadata.timestamp)
+  ) {
+    return 1;
+  }
+  return 0;
+};
+
 export const InboxPresenter = () => {
   const { ship } = useServices();
   const { dimensions } = useTrayApps();
@@ -156,6 +173,7 @@ export const InboxPresenter = () => {
               width={listWidth}
               height={listHeight}
               filterFunction={searchFilter}
+              sortFunction={sortFunction}
               renderItem={(chat) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 return (
@@ -188,44 +206,6 @@ export const InboxPresenter = () => {
                 );
               }}
             />
-            {/* <WindowedList
-              width={listWidth}
-              height={listHeight}
-              rowHeight={rowHeight}
-              data={unpinnedChatList}
-              filter={searchFilter}
-              rowRenderer={(chat) => {
-                const isAdmin = ship ? chat.isHost(ship.patp) : false;
-                return (
-                  <Box
-                    key={`${window.ship}-${chat.path}-unpinned`}
-                    width={listWidth}
-                    zIndex={2}
-                    layout="preserve-aspect"
-                    alignItems="center"
-                    height={rowHeight}
-                    layoutId={`chat-${chat.path}-container`}
-                  >
-                    <ChatRow
-                      height={rowHeight}
-                      path={chat.path}
-                      title={chat.metadata.title}
-                      peers={chat.peers.map((peer) => peer.ship)}
-                      isAdmin={isAdmin}
-                      type={chat.type}
-                      timestamp={chat.createdAt || chat.metadata.timestamp}
-                      metadata={chat.metadata}
-                      peersGetBacklog={chat.peersGetBacklog}
-                      muted={chat.muted}
-                      onClick={(evt) => {
-                        evt.stopPropagation();
-                        setChat(chat.path);
-                      }}
-                    />
-                  </Box>
-                );
-              }}
-            /> */}
           </Box>
         )
       )}

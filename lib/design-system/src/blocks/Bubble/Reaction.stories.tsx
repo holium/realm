@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Box } from '../..';
+import { Flex, Box } from '../../general';
 import {
   OnReactionPayload,
   Reactions,

@@ -142,7 +142,6 @@ export const VideoCall = observer(() => {
                 key={callers.at(0)}
                 type="caller"
                 person={callers.at(0) ?? ''}
-                flex={1}
               />
             </Flex>
           ) : (
