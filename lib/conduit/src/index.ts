@@ -213,8 +213,7 @@ export class Conduit extends EventEmitter {
         onreconnect: () => console.log('SSE RECONNECTED!!'),
       });
 
-      this.sse.onopen = async (response) => {
-        console.log('ON SSE OPEN', response);
+      this.sse.onopen = async (response: any) => {
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
           resolve();
@@ -362,6 +361,7 @@ export class Conduit extends EventEmitter {
             resolve(message.id);
           },
           onError: (err) => {
+            console.log('poke error', err);
             handlers.onError?.(message.id, err);
             reject(err);
           },
