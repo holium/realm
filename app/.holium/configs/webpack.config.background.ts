@@ -5,12 +5,16 @@
 import webpack from 'webpack';
 import webpackPaths from './webpack.paths';
 import { dependencies as externals } from '../../release/app/package.json';
+import path from 'path';
 
 const configuration: webpack.Configuration = {
-  externals: [...Object.keys(externals || {})],
-
-  stats: 'errors-only',
-
+  mode: 'production',
+  target: 'electron-main',
+  entry: {
+    os: {
+      import: path.join(webpackPaths.srcPath, 'os/start.ts'),
+    },
+  },
   module: {
     rules: [
       {
@@ -26,25 +30,27 @@ const configuration: webpack.Configuration = {
       },
     ],
   },
+  // externals: [...Object.keys(externals || {})],
+  // todo support fs and path
+  externals: ['fsevents', 'crypto-browserify'],
 
   output: {
-    path: webpackPaths.srcPath,
+    path: path.join(webpackPaths.srcPath, 'background'),
+    filename: '[name].js',
     // https://github.com/webpack/webpack/issues/1114
-    library: {
-      type: 'commonjs2',
-    },
   },
 
   /**
    * Determine the array of extensions that should be used to resolve modules.
    */
-  resolve: {
-    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
-    modules: [webpackPaths.srcPath, 'node_modules'],
+  // resolve: {
+  //   extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+  //   modules: [webpackPaths.srcPath, 'node_modules'],
+  // },
+  node: {
+    __dirname: false,
+    __filename: false,
   },
-
-  plugins: [],
 };
-// export default merge(backgroundConfig, configuration);
 
 export default configuration;

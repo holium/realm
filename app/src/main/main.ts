@@ -7,6 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import log from 'electron-log';
 import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
@@ -26,6 +27,14 @@ import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { RealmService } from '../os/index-new';
+
+// TODO test this
+log.create('main');
+log.catchErrors();
+log.transports.file.level = 'info';
+log.transports.file.resolvePath = () =>
+  path.join(app.getPath('userData'), 'main.log');
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -94,6 +103,9 @@ const createWindow = async () => {
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
+  const realmService = new RealmService(mainWindow);
+  realmService.login('~lomder-librun', 'password');
+  // ---------------------------------------------------------------------
 
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);

@@ -27,6 +27,7 @@ import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { AuthIPC } from 'renderer/logic/ipc';
 
 interface LoginProps {
   addShip: () => void;
@@ -55,6 +56,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
+    AuthIPC.getAccounts().then((accounts) => {
+      console.log('accounts', accounts);
+    });
     OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
       if (status === ConduitState.Failed) {
         AuthActions.cancelLogin();

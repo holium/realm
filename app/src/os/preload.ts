@@ -1,7 +1,7 @@
 import { Realm } from './index';
 import { ChatService } from './services/chat/chat.service';
 import { NotificationService } from './services/notification/notification.service';
-import { AuthService } from './services/identity/auth.service';
+import { AuthService as authOld } from './services/identity/auth.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
@@ -13,7 +13,7 @@ import { WalletService } from './services/tray/wallet.service';
 
 export const osPreload = {
   ...Realm.preload,
-  auth: AuthService.preload,
+  auth: authOld.preload,
   ship: ShipService.preload,
   spaces: SpacesService.preload,
   desktop: DesktopService.preload,
@@ -29,3 +29,6 @@ export const osPreload = {
 };
 
 export type OSPreloadType = typeof osPreload;
+// export type RealmPreloadType = typeof realmPreload;
+
+// console.log(realmPreload);

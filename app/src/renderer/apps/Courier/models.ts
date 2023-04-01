@@ -93,12 +93,13 @@ const PeerModel = types.model('PeerModel', {
 });
 export type PeerModelType = Instance<typeof PeerModel>;
 
+// Path row metadata
 export const ChatMetadataModel = types.model({
-  title: types.string,
-  description: types.maybe(types.string),
-  image: types.maybe(types.string),
-  creator: types.string,
-  peer: types.maybe(types.string),
+  title: types.string, // group title
+  description: types.maybe(types.string), // not used
+  image: types.maybe(types.string), // image url
+  creator: types.string, // ship of the creator
+  peer: types.maybe(types.string), // ship of the peer only for DMs
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
 });
