@@ -5,6 +5,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
 import { ChatDAO } from './models/chat.model';
 import APIConnection from '../conduit';
+import RoomsService from './rooms.service';
 
 export class ShipService extends AbstractService {
   private patp: string;
@@ -15,6 +16,10 @@ export class ShipService extends AbstractService {
     passports: null;
     friends: null;
   };
+  services?: {
+    rooms: RoomsService;
+  };
+
   constructor(patp: string, password: string, options?: ServiceOptions) {
     super('shipService', options);
     this.patp = patp;
@@ -23,6 +28,7 @@ export class ShipService extends AbstractService {
     }
     this.shipDB = new ShipDB(this.patp, password);
     const credentials = this.shipDB.getCredentials();
+    log.info('credentials', credentials);
     if (!this.shipDB || !credentials) {
       log.info(`No ship found for ${patp}`);
       return;
@@ -42,6 +48,23 @@ export class ShipService extends AbstractService {
       passports: null,
       friends: null,
     };
+
+    this.services = {
+      rooms: new RoomsService(),
+    };
+
+    this.sendUpdate({
+      type: 'ready',
+      payload: {
+        patp,
+      },
+    });
+
+    // app.on('refresh', () => {
+    //   this.shipDB?.disconnect();
+    //   APIConnection.getInstance(credentials).conduit.removeAllListeners();
+    //   this.removeAllListeners();
+    // });
 
     app.on('quit', () => {
       this.shipDB?.disconnect();

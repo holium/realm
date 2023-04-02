@@ -14,7 +14,7 @@ type TextInputProps = {
   defaultValue?: string;
   autoFocus?: boolean;
   inputStyle?: React.CSSProperties;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 } & Partial<InputBoxProps> & { cols?: number; rows?: number };
 
 export const TextInput = forwardRef(

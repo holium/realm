@@ -75,6 +75,82 @@ abstract class AbstractDataAccess<T> {
     const stmt = this.prepare(query);
     return stmt.all(params);
   }
+
+  /**
+   * ------------------------------
+   * _registerIpcRendererCallbacks
+   * ------------------------------
+   * Override this method to register callbacks for IPC events.
+   * By default, this method returns an onUpdate callback that sends
+   * an IPC event to the renderer process.
+   *
+   * @returns a map of event names to callback functions
+   * @protected
+   */
+  protected _registerIpcRendererCallbacks(): {
+    [event: string]: (...args: any[]) => void;
+  } {
+    return {
+      onUpdate: (callback: (...args: any[]) => void) => {
+        ipcRenderer.on(`db.${this.tableName}.onUpdate`, callback);
+      },
+    };
+  }
+  /**
+   * ------------------------------
+   * sendUpdate
+   * ------------------------------
+   * Sends an IPC event to the renderer process.
+   *
+   * @param data the data to send
+   * @returns void
+   * @protected
+   */
+  protected sendUpdate(data: any): void {
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach((window) => {
+      window.webContents.send(`db.${this.tableName}.onUpdate`, data);
+    });
+  }
+
+  /**
+   * ------------------------------
+   * preload
+   * ------------------------------
+   * Generates a preload object for the renderer process.
+   *
+   * @param service
+   * @returns a map of method names to functions
+   */
+  static preload(
+    service: AbstractDataAccess<any>
+  ): Record<string, (...args: any[]) => Promise<any> | void> {
+    const tableName = service.tableName;
+    const methods = Object.getOwnPropertyNames(
+      Object.getPrototypeOf(service)
+    ).filter(
+      (method) =>
+        method !== 'constructor' &&
+        !method.startsWith('_') &&
+        typeof (service as any)[method] === 'function'
+    );
+
+    const mappedMethods: Record<
+      string,
+      (...args: any[]) => Promise<any> | void
+    > = {};
+    methods.forEach((method) => {
+      mappedMethods[method] = async (...args: any[]) => {
+        return await ipcRenderer.invoke(`db.${tableName}.${method}`, ...args);
+      };
+    });
+
+    const callbacks = service._registerIpcRendererCallbacks();
+    Object.keys(callbacks).forEach((event) => {
+      mappedMethods[event] = callbacks[event];
+    });
+    return mappedMethods;
+  }
 }
 
 export default AbstractDataAccess;

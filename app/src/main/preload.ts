@@ -9,6 +9,7 @@ import './helpers/mouseListener';
 import './helpers/keyListener';
 import { shipPreload } from '../os/services-new/ship/ship.service';
 import { authPreload } from '../os/services-new/auth/auth.service';
+import { roomsPreload } from 'os/services-new/ship/rooms.service';
 
 const appPreload = {
   /* Senders */
@@ -141,6 +142,11 @@ contextBridge.exposeInMainWorld('electron', {
   multiplayer: multiplayerPreload,
 });
 
+contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
-contextBridge.exposeInMainWorld('realm', realmPreload);
+contextBridge.exposeInMainWorld('roomsService', roomsPreload);
+
+// contextBridge.exposeInMainWorld('db', {
+//   chat
+// });

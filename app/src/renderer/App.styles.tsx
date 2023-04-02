@@ -1,7 +1,10 @@
+import { AnimatePresence } from 'framer-motion';
 import { darken } from 'polished';
+import { useMemo } from 'react';
 import { createGlobalStyle, css } from 'styled-components';
 import { genCSSVariables } from './logic/theme';
 import { ThemeType } from './stores/models/Theme.model';
+import { BackgroundImage } from './system/system.styles';
 import { ThemeType as OldTheme } from './theme';
 
 interface StyleProps {
@@ -80,14 +83,36 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     padding-inline-start: 0px;
   }
 
-  /* a {
-    text-decoration: none;
-    height: fit-content;
-    width: fit-content;
-    margin: 10px;
-  } */
-
   fieldset {
     border: 0;
   }
 `;
+
+export const BgImage = ({
+  blurred,
+  wallpaper,
+}: {
+  blurred: boolean;
+  wallpaper: string;
+}) => {
+  return useMemo(
+    () => (
+      <AnimatePresence>
+        <BackgroundImage
+          key={wallpaper}
+          src={wallpaper}
+          initial={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            filter: blurred ? `blur(24px)` : 'blur(0px)',
+          }}
+          transition={{
+            opacity: { duration: 0.5 },
+          }}
+        />
+      </AnimatePresence>
+    ),
+    [blurred, wallpaper]
+  );
+};

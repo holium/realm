@@ -9,7 +9,7 @@ import { Splash } from './Splash';
 import { useAppState } from 'renderer/stores/app.store';
 
 const AuthPresenter = () => {
-  const {} = useAppState();
+  // const {} = useAppState();
   // const { onboarding } = useServices();
   const [addShip, setAddShip] = useState(false);
 

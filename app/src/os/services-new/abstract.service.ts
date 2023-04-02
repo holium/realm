@@ -11,8 +11,6 @@ export interface ServiceOptions {
   preload: boolean;
 }
 
-type IPCInvokeMap = Record<string, (...args: any[]) => Promise<any> | void>;
-
 abstract class AbstractService extends EventEmitter {
   serviceName: string;
 
@@ -42,7 +40,6 @@ abstract class AbstractService extends EventEmitter {
    */
   protected sendUpdate(data: any): void {
     const windows = BrowserWindow.getAllWindows();
-
     windows.forEach((window) => {
       window.webContents.send(`${this.serviceName}.onUpdate`, data);
     });
@@ -88,7 +85,6 @@ abstract class AbstractService extends EventEmitter {
 
     methods.forEach((method) => {
       const ipcChannel = `${this.serviceName}.${method}`;
-
       ipcMain.handle(
         ipcChannel,
         async (_event: IpcMainInvokeEvent, ...args: any[]) => {
@@ -138,7 +134,6 @@ abstract class AbstractService extends EventEmitter {
     Object.keys(callbacks).forEach((event) => {
       mappedMethods[event] = callbacks[event];
     });
-
     return mappedMethods;
   }
 }

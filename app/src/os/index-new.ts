@@ -1,11 +1,30 @@
 import RealmProcess from '../background/realm.process';
-import { app, ipcRenderer } from 'electron';
+import { app } from 'electron';
 import log from 'electron-log';
 import AbstractService, {
   ServiceOptions,
 } from './services-new/abstract.service';
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
+import { AccountModelType } from 'renderer/stores/models/Account.model';
+
+export type RealmUpdateBooted = {
+  type: 'booted';
+  payload: {
+    accounts: AccountModelType[];
+    screen: 'login' | 'onboarding' | 'os';
+  };
+};
+
+export type RealmUpdateAuthenticated = {
+  type: 'authenticated';
+  payload: {
+    patp: string;
+    token: string;
+  };
+};
+
+export type RealmUpdateTypes = RealmUpdateAuthenticated | RealmUpdateBooted;
 
 export class RealmService extends AbstractService {
   public services?: {
@@ -48,18 +67,31 @@ export class RealmService extends AbstractService {
   }
 
   async login(patp: string, password: string): Promise<boolean> {
+    log.info('loggin in ');
     if (!this.services) {
       return false;
     }
+
     const isAuthenticated = this.services?.auth.login(patp, password);
+    log.info('index isAuthenticated', isAuthenticated);
     if (!isAuthenticated) {
       log.warn(`${patp} failed to authenticate`);
+      this.sendUpdate({
+        type: 'login-failed',
+        payload: `${patp} failed to authenticate`,
+      });
       return false;
     }
     if (isAuthenticated) {
       log.info(`${patp} authenticated`);
       this.services.ship = new ShipService(patp, password);
-      // console.log(this.services.ship.getMessages());
+      this.sendUpdate({
+        type: 'authenticated',
+        payload: {
+          patp,
+          token: 'token',
+        },
+      });
     }
     return isAuthenticated;
   }

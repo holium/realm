@@ -3,6 +3,22 @@ import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 import { AuthDB } from './auth.db';
 import { Account } from './models/accounts.db';
+import { AccountModelType } from 'renderer/stores/models/Account.model';
+
+export type AuthUpdateInit = {
+  type: 'init';
+  payload: AccountModelType[];
+};
+
+export type AuthUpdateLogin = {
+  type: 'login';
+  payload: {
+    patp: string;
+    token: string;
+  };
+};
+
+export type AuthUpdateTypes = AuthUpdateInit | AuthUpdateLogin;
 
 export class AuthService extends AbstractService {
   private readonly authDB?: AuthDB;
@@ -12,7 +28,10 @@ export class AuthService extends AbstractService {
       return;
     }
     this.authDB = new AuthDB();
-    this.sendUpdate({ type: 'accounts', data: this.getAccounts() });
+    this.sendUpdate({
+      type: 'init',
+      payload: this.getAccounts(),
+    });
   }
 
   public getAccounts(): Account[] {
@@ -33,7 +52,20 @@ export class AuthService extends AbstractService {
       return false;
     }
     // TODO Add amplitude logging here
-    return this._verifyPassword(password, account.passwordHash);
+    const authenticated = this._verifyPassword(password, account.passwordHash);
+    if (authenticated) {
+      // this.sendUpdate({
+      //   type: 'login',
+      //   payload: {
+      //     patp,
+      //     token: 'TODO',
+      //   },
+      // });
+      return true;
+    } else {
+      log.info(`Failed to authenticate ${patp}`);
+      return false;
+    }
   }
 
   public logout(): void {

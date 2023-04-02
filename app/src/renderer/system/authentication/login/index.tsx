@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useContext } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
@@ -16,22 +16,23 @@ import {
   Menu,
 } from '@holium/design-system';
 import { ShipSelector } from './ShipSelector';
-// import { useServices } from 'renderer/logic/store';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { useAppState } from 'renderer/stores/app.store';
+import { AuthIPC } from 'renderer/logic/ipc';
+import AccountContext from 'renderer/stores/AccountContext';
 
 interface LoginProps {
   addShip: () => void;
 }
 
 const LoginPresenter = ({ addShip }: LoginProps) => {
-  const { accounts, setTheme } = useAppState();
+  const { setTheme, authStore } = useAppState();
+  const { accounts, status: loginStatus } = authStore;
+
   const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
   // const wrapperRef = useRef(null);
-  const submitRef = useRef(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef(null);
   const [loginError, setLoginError] = useState('');
 
@@ -73,38 +74,38 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
 
   const login = async () => {
     if (!selectedShip) return;
-    const status = await AuthActions.login(
+    const status = await authStore.login(
       selectedShip.patp ?? '',
       passwordRef.current?.value ?? ''
     );
-    if (status && status.startsWith('error:')) {
-      if (submitRef.current) {
-        // @ts-ignore
-        submitRef.current.blur();
-      }
-      const parts = status.split(':');
-      // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
-      //  assume 400 means they may have changed ship code. ask them to enter the new one.
-      if (parts.length > 1 && parseInt(parts[1]) === 400) {
-        setLoginError('missing');
-        ShellActions.openDialogWithStringProps('reset-code-dialog', {
-          ship: selectedShip.patp,
-          // @ts-ignore
-          password: passwordRef.current?.value,
-        });
-      } else {
-        // assume all others are incorrect passwords
-        setLoginError('password');
-      }
-    }
-    trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
-  };
+    // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
 
-  const submitPassword = (event: any) => {
-    if (event.keyCode === 13) {
-      // @ts-expect-error typescript...
-      passwordRef.current.blur();
-    }
+    // if (status) {
+    //   // setAccount(selectedShip);
+    // }
+    //
+    // TODO refactor
+    // if (status && status.startsWith('error:')) {
+    //   if (submitRef.current) {
+    //     // @ts-ignore
+    //     submitRef.current.blur();
+    //   }
+    //   const parts = status.split(':');
+    //   // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+    //   //  assume 400 means they may have changed ship code. ask them to enter the new one.
+    //   if (parts.length > 1 && parseInt(parts[1]) === 400) {
+    //     setLoginError('missing');
+    //     ShellActions.openDialogWithStringProps('reset-code-dialog', {
+    //       ship: selectedShip.patp,
+    //       // @ts-ignore
+    //       password: passwordRef.current?.value,
+    //     });
+    //   } else {
+    //     // assume all others are incorrect passwords
+    //     setLoginError('password');
+    //   }
+    // }
+    // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
   const clickSubmit = async (event: any) => {
     event.stopPropagation();
@@ -112,13 +113,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     login();
   };
 
-  let colorProps = null;
-  // if (theme) {
-  colorProps = {
-    color: theme.textColor,
-    textShadow: theme.mode === 'dark' ? '0 1px black' : 'none',
+  const submitPassword = (event: any) => {
+    if (event.keyCode === 13) {
+      passwordRef.current?.blur();
+      submitRef.current?.click();
+    }
   };
-  // }
 
   const isVertical = true;
 
@@ -145,10 +145,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               </Box>
               <Flex flexDirection="column" gap={10}>
                 <Flex
-                  gap={12}
+                  gap={8}
+                  mb={1}
                   flexDirection={isVertical ? 'column' : 'row'}
                   alignItems="center"
                   justifyContent="flex-start"
+                  animate={{ height: 'auto' }}
                 >
                   <Text.Custom
                     key={`${selectedShip.patp}`}
@@ -165,7 +167,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   </Text.Custom>
                   {selectedShip.nickname && (
                     <Text.Custom
-                      mt="1px"
                       initial={{ opacity: 0 }}
                       exit={{ opacity: 0.35 }}
                       animate={{
@@ -248,7 +249,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                             </Portal>
                           )}
                         </AnimatePresence> */}
-                        {false && !hasFailed ? (
+                        {loginStatus === 'loading' && !hasFailed ? (
                           <Spinner size={0} />
                         ) : (
                           <Button.IconButton
@@ -315,8 +316,17 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Icon size={22} name="AddCircleLine" />
-                Add Urbit ID
+                <Icon
+                  size={22}
+                  name="AddCircleLine"
+                  transition={{ duration: 0.5 }}
+                />
+                <Text.Custom
+                  fontWeight={500}
+                  // transition={{ color: { duration: 0.5 } }}
+                >
+                  Add Urbit ID
+                </Text.Custom>
               </Flex>
             </Button.TextButton>
           </Flex>

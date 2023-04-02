@@ -9,7 +9,7 @@ import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpac
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { Dimensions } from '@holium/design-system';
-import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
+import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
 import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
 

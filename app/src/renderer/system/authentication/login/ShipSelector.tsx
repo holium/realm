@@ -35,7 +35,9 @@ const ShipSelectorPresenter = ({
 }) => {
   // const { identity, theme } = useServices();
   // const { auth } = identity;
-  const { accounts, setTheme } = useAppState();
+  const { setTheme, authStore } = useAppState();
+  const { accounts } = authStore;
+
   const [orderedList, setOrder] = useState(accounts.map((a) => a.patp) || []);
   const [dragging, setDragging] = useState(false);
 

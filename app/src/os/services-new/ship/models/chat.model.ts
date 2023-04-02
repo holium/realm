@@ -1,5 +1,4 @@
 import { Database } from 'better-sqlite3';
-import { BrowserWindow } from 'electron';
 import AbstractDataAccess from '../../abstract.db';
 import { APIConnection } from '../../conduit';
 
@@ -49,7 +48,8 @@ interface ChatRow {
 }
 
 export class ChatDAO extends AbstractDataAccess<ChatRow> {
-  constructor(db: Database) {
+  constructor(db: Database, preload?: boolean) {
+    if (preload) return;
     super(db, 'paths');
     this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
@@ -170,15 +170,12 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
         data[0].type === 'add-row' &&
         data[0].table === 'messages'
       ) {
-        // insert multi fragment messages
-        // TODO find a way to handle multiple msg-ids in one db update
-        // if it is even possible
         const messages = data.map(
           (row) => (row as AddRow).row as MessagesRow
         ) as MessagesRow[];
         this.insertMessages(messages);
         const msg = this.getChatMessage(messages[0]['msg-id']);
-        this.sendChatUpdate('message-received', msg);
+        this.sendUpdate({ type: 'message-received', payload: msg });
       } else {
         data.forEach(this.handleDBChange);
       }
@@ -196,21 +193,21 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
-          this.sendChatUpdate('message-received', msg);
+          this.sendUpdate({ type: 'message-received', payload: msg });
           break;
         case 'paths':
           // console.log('add-row to paths', addRow.row);
           const path = addRow.row as PathsRow;
           this.insertPaths([path]);
           const chat = this.getChat(path.path);
-          this.sendChatUpdate('path-added', chat);
+          this.sendUpdate({ type: 'path-added', payload: chat });
 
           break;
         case 'peers':
           // console.log('add-row to peers', addRow.row);
           const peers = addRow.row as PeersRow;
           this.insertPeers([peers]);
-          this.sendChatUpdate('peer-added', peers);
+          this.sendUpdate({ type: 'peer-added', payload: peers });
           break;
       }
     }
@@ -223,14 +220,14 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
           const msgId = message.message[0]['msg-id'];
           this.insertMessages(message.message);
           const msg = this.getChatMessage(msgId);
-          this.sendChatUpdate('message-edited', msg);
+          this.sendUpdate({ type: 'message-edited', payload: msg });
           break;
         case 'paths':
           // console.log('update paths', update.row);
           const path = update.row as PathsRow;
           this.insertPaths([path]);
           const chat = this.getChat(path.path);
-          this.sendChatUpdate('path-updated', chat);
+          this.sendUpdate({ type: 'path-updated', payload: chat });
           break;
         case 'peers':
           // console.log('update peers', update.row);
@@ -254,7 +251,7 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
       this.deleteMessagesRow(delMessagesRow['msg-id']);
-      this.sendChatUpdate('message-deleted', delMessagesRow);
+      this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
       this.insertDeleteLogs([
         {
           change: delMessagesRow,
@@ -266,7 +263,7 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
       this.deletePathsRow(delPathsRow.row);
-      this.sendChatUpdate('path-deleted', delPathsRow.row);
+      this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.row });
       this.insertDeleteLogs([
         {
           change: delPathsRow,
@@ -278,7 +275,7 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
       this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
-      this.sendChatUpdate('peer-deleted', delPeersRow);
+      this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
       this.insertDeleteLogs([
         {
           change: delPeersRow,
@@ -286,11 +283,6 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
         },
       ]);
     }
-  }
-
-  sendChatUpdate(type: ChatUpdateType, data: any) {
-    const window = BrowserWindow.getFocusedWindow();
-    if (window) window.webContents.send('realm.chat.on-db-change', type, data);
   }
 
   onQuit() {
@@ -893,3 +885,6 @@ create table if not exists delete_logs
 create unique index if not exists delete_log_change_uindex
     on delete_logs (timestamp, change);
 `;
+
+// Generate preload
+// export const chatPreload = ChatDAO.preload(new ChatDAO());
