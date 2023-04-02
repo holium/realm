@@ -67,6 +67,7 @@ const ShipSelectorPresenter = ({ setLoginError }: ShipSelectorProps) => {
                   console.error('Error: no theme found for ship:', ship.patp);
                 }
               }
+            }
           }}
           onMouseUp={() => {
             setDragging(false);
