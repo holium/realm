@@ -31,6 +31,12 @@ const registerListeners = (mainWindow: BrowserWindow) => {
       webContents.send('add-mouse-listeners');
       webContents.send('add-key-listeners');
     });
+
+    // Log crashed reason.
+    webContents.on('render-process-gone', (event, killed) => {
+      console.log('Webview crashed.');
+      console.log(event, killed);
+    });
   });
 };
 
