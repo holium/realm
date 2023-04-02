@@ -39,7 +39,7 @@ export const ChangeEmailDialogConfig: DialogConfig = {
       desktopDimensions
     ),
   }),
-  hasCloseButton: false,
+  hasCloseButton: true,
   unblurOnClose: true,
   noTitlebar: false,
 };

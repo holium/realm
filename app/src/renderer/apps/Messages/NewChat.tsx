@@ -186,6 +186,7 @@ const NewChatPresenter = (props: IProps) => {
             tabIndex={1}
             mx={2}
             width="100%"
+            className="realm-cursor-text-cursor"
             placeholder="Who would you like to add?"
             value={patp}
             onChange={(e: any) => setPatp(e.target.value)}

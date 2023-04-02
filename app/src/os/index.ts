@@ -6,6 +6,7 @@ import {
   dialog,
   session,
   WebPreferences,
+  app,
 } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -21,6 +22,8 @@ import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
+import { ChatService } from './services/chat/chat.service';
+import { NotificationService } from './services/notification/notification.service';
 
 export interface ISession {
   ship: string;
@@ -49,6 +52,8 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
+    chat: ChatService;
+    notification: NotificationService;
   };
 
   readonly holiumClient: HoliumAPI;
@@ -147,6 +152,8 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
+      chat: new ChatService(this),
+      notification: new NotificationService(this),
     };
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
@@ -257,6 +264,10 @@ export class Realm extends EventEmitter {
 
   get credentials() {
     return this.session;
+  }
+
+  shutdown() {
+    app.quit();
   }
 
   async disconnect() {
@@ -443,6 +454,8 @@ export class Realm extends EventEmitter {
     await this.services.ship.subscribe(sessionPatp, this.session);
     // this.sendLog('after ship subscribe');
     await this.services.spaces.load(sessionPatp, params.reconnecting);
+    this.services.chat.subscribe(sessionPatp);
+    this.services.notification.subscribe(sessionPatp);
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: this.services.ship.snapshot,

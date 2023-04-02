@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Button, IconButtonProps } from '../..';
+import { Button, IconButtonProps } from '../../general';
 
 export const BarButton = styled(Button.IconButton)<IconButtonProps>`
   &:hover:not([disabled]) {

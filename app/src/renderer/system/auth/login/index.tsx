@@ -265,7 +265,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                               >
                                 <MenuItem
                                   label="Remove ship"
-                                  customBg={theme.currentTheme.windowColor}
                                   onClick={() => {
                                     AuthActions.removeShip(pendingShip.patp);
                                   }}

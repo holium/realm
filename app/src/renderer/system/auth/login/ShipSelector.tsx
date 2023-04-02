@@ -31,7 +31,7 @@ interface ShipSelectorProps {
 }
 
 const ShipSelectorPresenter = ({ setLoginError }: ShipSelectorProps) => {
-  const { identity } = useServices();
+  const { identity, theme } = useServices();
   const { auth } = identity;
   const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
   const [orderedList, setOrder] = useState(auth.order || []);
@@ -60,8 +60,13 @@ const ShipSelectorPresenter = ({ setLoginError }: ShipSelectorProps) => {
               if (selectedPatp !== ship.patp) {
                 !dragging && AuthActions.setSelected(ship.patp);
                 setLoginError('');
+                const currTheme = await AuthActions.getShipTheme(ship.patp);
+                if (currTheme) {
+                  theme.setCurrentTheme(currTheme);
+                } else {
+                  console.error('Error: no theme found for ship:', ship.patp);
+                }
               }
-            }
           }}
           onMouseUp={() => {
             setDragging(false);

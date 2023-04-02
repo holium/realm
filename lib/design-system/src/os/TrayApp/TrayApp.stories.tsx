@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { motion } from 'framer-motion';
-import { Button, Flex, Text, Icon, Row } from '../../';
+import { Button, Flex, Text, Icon, Row } from '../../general';
 import { TrayApp } from './TrayApp';
 
 export default {

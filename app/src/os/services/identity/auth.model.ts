@@ -9,9 +9,6 @@ import {
 import { LoaderModel, StepList } from '../common.model';
 import { Patp } from 'os/types';
 
-export const DEFAULT_WALLPAPER =
-  'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
-
 export const AuthShip = types
   .model('AuthShipModel', {
     url: types.string,
@@ -21,7 +18,6 @@ export const AuthShip = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     mnemonic: types.maybe(types.string),
-    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
   })

@@ -1,10 +1,10 @@
 import styled from 'styled-components';
-import { Flex } from '../../index';
+import { Flex } from '../../general/Flex/Flex';
 import { ContactData } from '../../general/Avatar/AvatarRow';
 import { RoomsDockDescription } from './RoomsDockDescription';
 import { RoomsDockControls } from './RoomsDockControls';
 
-export const RoomsDockStyle = styled(Flex)<any>`
+export const RoomsDockStyle = styled(Flex)`
   transition: var(--transition);
   height: 34px;
   width: 200px;

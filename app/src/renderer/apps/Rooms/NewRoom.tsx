@@ -107,21 +107,20 @@ const NewRoomPresenter = () => {
               type="text"
               autoFocus
               placeholder="Name your room"
-              style={{ width: '100%' }}
               value={name.state.value}
               error={
                 name.computed.isDirty && name.computed.ifWasEverBlurredThenError
               }
-              onChange={(e: any) => {
-                name.actions.onChange(e.target.value);
+              onChange={(e) => {
+                name.actions.onChange((e.target as any).value);
               }}
-              onKeyDown={(evt: any) => {
+              onKeyDown={(evt) => {
                 if (evt.key === 'Enter' && form.computed.isValid) {
                   createRoom(evt);
                 }
               }}
-              onFocus={() => name.actions.onFocus()}
-              onBlur={() => name.actions.onBlur()}
+              onFocus={name.actions.onFocus}
+              onBlur={name.actions.onBlur}
             />
           </Flex>
           <Button.TextButton

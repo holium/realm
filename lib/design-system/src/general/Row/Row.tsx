@@ -1,16 +1,20 @@
+import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Button } from '..';
+import { Box, BoxProps } from '../index';
 
-interface RowProps {
+type RowProps = {
+  as?: any;
   gap?: string;
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
-}
+  backgroundColor?: string;
+} & BoxProps;
 
-export const Row = styled(Button.Base)<RowProps>`
+export const Row = styled(Box)<RowProps>`
+  border: 1px solid transparent;
   border-radius: 6px;
   width: 100%;
   padding: 8px;
@@ -19,31 +23,51 @@ export const Row = styled(Button.Base)<RowProps>`
   justify-content: flex-start;
   align-items: center;
   background-color: transparent;
+  box-sizing: border-box;
+  appearance: none;
+  flex-basis: initial;
   gap: ${(props: RowProps) => props.gap || '6px'};
   color: rgba(var(--rlm-text-rgba));
   transition: var(--transition);
 
   &:active:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.8);
+      `}}
+
   }
 
   &:hover:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.9);
+      `}}
     cursor: pointer;
   }
 
   &:focus:not([disabled]) {
     outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-  }
-  &:disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.9);
+      `}}
   }
 
-  ${(props: RowProps) =>
+  &:disabled {
+    opacity: 0.2;
+  }
+
+  ${(props) =>
     css`
       ${props.small &&
       css`
@@ -60,7 +84,9 @@ export const Row = styled(Button.Base)<RowProps>`
 `;
 
 Row.defaultProps = {
-  onMouseOut: (evt: React.MouseEvent<HTMLButtonElement>) => {
+  as: motion.fieldset,
+  fontSize: 1,
+  onMouseOut: (evt: React.MouseEvent<HTMLDivElement>) => {
     evt.currentTarget.blur();
   },
 };
