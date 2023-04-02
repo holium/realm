@@ -14,7 +14,7 @@ import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
+import { useAccountStore } from 'renderer/stores/ship.store';
 import { UnreadBadge } from './UnreadBadge';
 
 type ChatRowProps = {

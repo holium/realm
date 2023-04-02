@@ -1,4 +1,5 @@
 import { Database, Statement } from 'better-sqlite3';
+import { BrowserWindow } from 'electron';
 
 abstract class AbstractDataAccess<T> {
   protected readonly db: Database;

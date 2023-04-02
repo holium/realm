@@ -158,6 +158,7 @@ export class ChatDAO extends AbstractDataAccess<ChatRow> {
     });
     return response;
   }
+
   onDbUpdate(data: ChatDbReactions, _id?: number) {
     if ('tables' in data) {
       this.insertMessages(data.tables.messages);

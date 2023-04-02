@@ -1,4 +1,4 @@
-import { NotifMobxType } from 'renderer/apps/Account/store';
+import { NotifMobxType } from 'renderer/stores/ship.store';
 
 export const QUERY_NOTIFICATIONS = `
   SELECT id,

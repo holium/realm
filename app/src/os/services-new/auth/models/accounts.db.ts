@@ -83,6 +83,7 @@ export class Accounts extends AbstractDataAccess<Account> {
 export const accountsInit = `
   create table if not exists accounts (
     onboardingId    INTEGER REFERENCES accounts_onboarding(id) ON DELETE CASCADE,
+    accountId       TEXT NOT NULL,
     patp            TEXT PRIMARY KEY NOT NULL,
     url             TEXT NOT NULL,
     nickname        TEXT,

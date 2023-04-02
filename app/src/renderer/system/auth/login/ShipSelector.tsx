@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
-import { motion, Reorder } from 'framer-motion';
+import { LayoutGroup, motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { delay } from 'lodash';
@@ -9,6 +9,8 @@ import { delay } from 'lodash';
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { AccountModelType } from 'renderer/stores/models/Account.model';
+import { useAppState } from 'renderer/stores/app.store';
 
 // ----------------------------------------
 // -------- Local style components --------
@@ -21,27 +23,32 @@ export const SelectedLine = styled(motion.div)`
   height: 5px;
   border-radius: 4px;
   position: absolute;
-  background-color: ${(props: any) =>
-    lighten(0.05, props.theme.colors.brand.primary)};
+  background-color: #4e9efd;
 `;
 
-const ShipSelectorPresenter = () => {
-  const { identity, theme } = useServices();
-  const { auth } = identity;
-  const selectedShip = useMemo(() => auth.currentShip, [auth.currentShip]);
-  const [orderedList, setOrder] = useState(auth.order || []);
+const ShipSelectorPresenter = ({
+  selectedShip,
+  onSelect,
+}: {
+  selectedShip: AccountModelType;
+  onSelect: (account: AccountModelType) => void;
+}) => {
+  // const { identity, theme } = useServices();
+  // const { auth } = identity;
+  const { accounts, setTheme } = useAppState();
+  const [orderedList, setOrder] = useState(accounts.map((a) => a.patp) || []);
   const [dragging, setDragging] = useState(false);
 
-  useEffect(() => {
-    auth.order && setOrder(auth.order);
-  });
+  // useEffect(() => {
+  //   auth.order && setOrder(auth.order);
+  // });
 
   const shipList = orderedList
     .map((shipKey: any) => {
-      const ship = auth.ships.get(shipKey);
+      const ship = accounts.find((a) => a.patp === shipKey);
       if (!ship) return null;
 
-      const selected = selectedShip && ship.id === selectedShip.id;
+      const selected = selectedShip && ship.patp === selectedShip.patp;
       return (
         <Reorder.Item
           key={ship.patp}
@@ -50,22 +57,20 @@ const ShipSelectorPresenter = () => {
           whileDrag={{ zIndex: 20 }}
           onDragStart={() => setDragging(true)}
           onClick={async () => {
-            !dragging && AuthActions.setSelected(ship.patp);
-            const currTheme = await AuthActions.getShipTheme(ship.patp);
-            if (currTheme) {
-              theme.setCurrentTheme(currTheme);
-            } else {
-              console.error('Error: no theme found for ship:', ship.patp);
+            onSelect(ship);
+            if (!dragging) {
+              onSelect(ship);
+              setTheme(ship.theme);
             }
           }}
           onMouseUp={() => {
             setDragging(false);
           }}
           onDragEnd={(_event: any) => {
-            delay(
-              async () => await AuthActions.setOrder(toJS(auth.order)),
-              1500
-            );
+            // delay(
+            //   async () => await AuthActions.setOrder(toJS(auth.order)),
+            //   1500
+            // );
           }}
         >
           <Flex position="relative" height="100%">
@@ -97,10 +102,11 @@ const ShipSelectorPresenter = () => {
             </Tooltip>
             {selected && (
               <SelectedLine
+                layoutId="selectedLine"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
               />
             )}
           </Flex>
@@ -110,21 +116,23 @@ const ShipSelectorPresenter = () => {
     .filter(Boolean);
 
   return (
-    <Reorder.Group
-      axis="x"
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 16,
-      }}
-      values={orderedList}
-      onReorder={(newOrder: any) => {
-        auth.setOrder(newOrder);
-      }}
-    >
-      {shipList}
-    </Reorder.Group>
+    <LayoutGroup>
+      <Reorder.Group
+        axis="x"
+        style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 16,
+        }}
+        values={orderedList}
+        onReorder={(newOrder: any) => {
+          // auth.setOrder(newOrder);
+        }}
+      >
+        {shipList}
+      </Reorder.Group>
+    </LayoutGroup>
   );
 };
 

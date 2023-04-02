@@ -1,6 +1,7 @@
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
-import { genCSSVariables, ThemeType } from './logic/theme';
+import { genCSSVariables } from './logic/theme';
+import { ThemeType } from './stores/models/Theme.model';
 import { ThemeType as OldTheme } from './theme';
 
 interface StyleProps {
@@ -57,7 +58,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
 
   body {
-    background-color: rgba(var(--rlm-window-rgba));
+    background-color: rgba(var(--rlm-base-rgba));
     transition: background-color 1s ease;
     color: rgba(var(--rlm-text-rgba));
     height: 100vh;

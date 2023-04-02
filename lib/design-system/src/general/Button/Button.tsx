@@ -211,7 +211,10 @@ const TextButton = styled(Base)<TextButtonProps>`
         : 'rgba(var(--rlm-accent-rgba), 0.2)'};
   }
   svg {
-    fill: rgba(var(--rlm-accent-rgba));
+    fill: ${(props) =>
+      props.color
+        ? `rgba(var(--rlm-${props.color}-rgba))`
+        : 'rgba(var(--rlm-accent-rgba))'};
   }
 `;
 

@@ -9,66 +9,58 @@ import {
   MenuItem,
   Portal,
   Spinner,
-} from '@holium/design-system';
-import {
+  TextInput,
   Text,
-  Input,
-  IconButton,
-  Icons,
-  TextButton,
-  useMenu,
+  Button,
+  Icon,
   Menu,
-  FormControl,
-} from 'renderer/components';
+} from '@holium/design-system';
 import { ShipSelector } from './ShipSelector';
-import { useServices } from 'renderer/logic/store';
+// import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { OSActions } from 'renderer/logic/actions/os';
-import { ConduitState } from '@holium/conduit/src/types';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { AuthIPC } from 'renderer/logic/ipc';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface LoginProps {
   addShip: () => void;
 }
 
 const LoginPresenter = ({ addShip }: LoginProps) => {
-  const { identity, theme } = useServices();
-  const { auth } = identity;
+  const { accounts, setTheme } = useAppState();
   const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const wrapperRef = useRef(null);
+  // const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
   const [loginError, setLoginError] = useState('');
 
   // Setting up options menu
   const menuWidth = 180;
-  const config = useMenu(optionsRef, {
-    orientation: 'bottom-left',
-    padding: 6,
-    menuWidth,
-  });
-  const { anchorPoint, show, setShow } = config;
+  // const config = useMenu(optionsRef, {
+  //   orientation: 'bottom-left',
+  //   padding: 6,
+  //   menuWidth,
+  // });
+  // const { anchorPoint, show, setShow } = config;
+  const [selectedShip, setSelectedShip] = useState(accounts[0]);
 
-  const pendingShip = auth.currentShip;
-  const shipName = pendingShip?.nickname || pendingShip?.patp;
+  const theme = selectedShip.theme;
+  const shipName = selectedShip?.nickname || selectedShip?.patp;
 
   useEffect(() => {
-    AuthIPC.getAccounts().then((accounts) => {
-      console.log('accounts', accounts);
-    });
-    OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
-      if (status === ConduitState.Failed) {
-        AuthActions.cancelLogin();
-        setHasFailed(true);
-      }
-      if (status === ConduitState.Disconnected) {
-        AuthActions.cancelLogin();
-        setHasFailed(true);
-      }
-    });
+    selectedShip && setTheme(selectedShip.theme);
+
+    // OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
+    //   if (status === ConduitState.Failed) {
+    //     AuthActions.cancelLogin();
+    //     setHasFailed(true);
+    //   }
+    //   if (status === ConduitState.Disconnected) {
+    //     AuthActions.cancelLogin();
+    //     setHasFailed(true);
+    //   }
+    // });
   }, []);
 
   useEffect(() => {
@@ -77,12 +69,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       const passInput = passwordRef.current as HTMLInputElement;
       passInput.value = '';
     }
-  }, [pendingShip]);
+  }, [selectedShip]);
 
   const login = async () => {
-    if (!pendingShip) return;
+    if (!selectedShip) return;
     const status = await AuthActions.login(
-      pendingShip.patp ?? '',
+      selectedShip.patp ?? '',
       passwordRef.current?.value ?? ''
     );
     if (status && status.startsWith('error:')) {
@@ -96,7 +88,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       if (parts.length > 1 && parseInt(parts[1]) === 400) {
         setLoginError('missing');
         ShellActions.openDialogWithStringProps('reset-code-dialog', {
-          ship: pendingShip.patp,
+          ship: selectedShip.patp,
           // @ts-ignore
           password: passwordRef.current?.value,
         });
@@ -111,11 +103,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
       // @ts-expect-error typescript...
-      submitRef.current.focus();
-      // @ts-expect-error typescript...
       passwordRef.current.blur();
-      // @ts-expect-error typescript...
-      wrapperRef.current.blur();
     }
   };
   const clickSubmit = async (event: any) => {
@@ -127,8 +115,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: theme.currentTheme.textColor,
-    textShadow: theme.currentTheme.mode === 'dark' ? '0 1px black' : 'none',
+    color: theme.textColor,
+    textShadow: theme.mode === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -137,7 +125,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   return (
     <Fill>
       <Centered>
-        {pendingShip && (
+        {selectedShip && (
           <Flex alignItems="center" justifyContent="center">
             <Flex
               flexDirection={isVertical ? 'column' : 'row'}
@@ -150,9 +138,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
-                  avatar={pendingShip.avatar}
-                  patp={pendingShip.patp}
-                  sigilColor={[pendingShip.color || '#000000', 'white']}
+                  avatar={selectedShip.avatar}
+                  patp={selectedShip.patp}
+                  sigilColor={[selectedShip.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -162,22 +150,21 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   alignItems="center"
                   justifyContent="flex-start"
                 >
-                  <Text
-                    key={`${pendingShip.patp}`}
+                  <Text.Custom
+                    key={`${selectedShip.patp}`}
                     initial={{ opacity: 0 }}
                     exit={{ opacity: 0.75 }}
                     animate={{
                       opacity: 1,
                     }}
                     transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
-                    {...colorProps}
                     fontWeight={500}
                     fontSize={20}
                   >
                     {shipName}
-                  </Text>
-                  {pendingShip.nickname && (
-                    <Text
+                  </Text.Custom>
+                  {selectedShip.nickname && (
+                    <Text.Custom
                       mt="1px"
                       initial={{ opacity: 0 }}
                       exit={{ opacity: 0.35 }}
@@ -185,13 +172,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                         opacity: 0.4,
                       }}
                       transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
-                      {...colorProps}
                       fontWeight={400}
                       fontSize={16}
                       opacity={0.35}
                     >
-                      {pendingShip.patp}
-                    </Text>
+                      {selectedShip.patp}
+                    </Text.Custom>
                   )}
                 </Flex>
                 <Flex
@@ -200,43 +186,49 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   flexDirection="column"
                   alignItems="center"
                 >
-                  <Input
-                    innerRef={passwordRef}
-                    wrapperRef={wrapperRef}
-                    bg="bg.blendedBg"
+                  <TextInput
+                    id="login"
+                    ref={passwordRef}
                     autoFocus
                     autoCorrect="false"
                     bgOpacity={0.3}
-                    wrapperStyle={{
-                      borderRadius: 8,
-                      width: isVertical ? 320 : 260,
-                    }}
                     placeholder="Password"
                     fontSize={16}
+                    height={36}
+                    borderRadius={9}
+                    style={{
+                      width: 270,
+                      backgroundColor: 'rgba(var(--rlm-input-rgba), 0.5)',
+                    }}
+                    inputStyle={{
+                      backgroundColor: 'transparent',
+                    }}
                     name="password"
                     type="password"
-                    rightInteractive
                     error={hasFailed || loginError !== ''}
                     onKeyDown={submitPassword}
-                    rightIcon={
-                      <Flex gap={4} justifyContent="center" alignItems="center">
-                        <IconButton
+                    rightAdornment={
+                      <Flex
+                        gap={4}
+                        mr={1}
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        {/* <Button.IconButton
                           size={26}
                           ref={optionsRef}
-                          luminosity={theme.currentTheme.mode}
                           opacity={1}
                           onClick={() => {
-                            setShow(true);
+                            // setShow(true);
                           }}
                         >
-                          <Icons name="MoreHorizontal" />
-                        </IconButton>
+                          <Icon name="MoreHorizontal" />
+                        </Button.IconButton>
                         <AnimatePresence>
                           {show && (
                             <Portal>
                               <Menu
-                                id={`${pendingShip.patp}-user-menu`}
-                                customBg={theme.currentTheme.windowColor}
+                                id={`${selectedShip.patp}-user-menu`}
                                 style={{
                                   top: anchorPoint && anchorPoint.y + 9,
                                   left: anchorPoint && anchorPoint.x + 6,
@@ -249,26 +241,26 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                                 <MenuItem
                                   label="Remove ship"
                                   onClick={() => {
-                                    AuthActions.removeShip(pendingShip.patp);
+                                    AuthActions.removeShip(selectedShip.patp);
                                   }}
                                 />
                               </Menu>
                             </Portal>
                           )}
-                        </AnimatePresence>
-                        {auth.loader.isLoading && !hasFailed ? (
+                        </AnimatePresence> */}
+                        {false && !hasFailed ? (
                           <Spinner size={0} />
                         ) : (
-                          <IconButton
+                          <Button.IconButton
                             ref={submitRef}
-                            error={hasFailed}
-                            luminosity={theme.currentTheme.mode}
-                            size={24}
-                            canFocus
                             onClick={async (evt: any) => await clickSubmit(evt)}
                           >
-                            <Icons name="ArrowRightLine" />
-                          </IconButton>
+                            <Icon
+                              name="ArrowRightLine"
+                              size={20}
+                              opacity={0.6}
+                            />
+                          </Button.IconButton>
                         )}
                       </Flex>
                     }
@@ -277,15 +269,19 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   {(['password', 'missing', 'code'].indexOf(loginError) !==
                     -1 ||
                     hasFailed) && (
-                    <FormControl.Error
-                      style={{ height: 15, fontSize: 14 }}
-                      textShadow="0.5px 0.5px #080000"
+                    <Text.Hint
+                      style={{
+                        height: 15,
+                        fontSize: 14,
+                        textShadow: '0.5px 0.5px #080000',
+                      }}
+                      color="intent-alert"
                     >
                       {hasFailed && 'Connection to your ship has been refused.'}
                       {loginError === 'password' && 'Incorrect password.'}
                       {loginError === 'missing' && 'Unable to connect to ship.'}
                       {loginError === 'code' && 'Error saving new ship code'}
-                    </FormControl.Error>
+                    </Text.Hint>
                   )}
                 </Flex>
               </Flex>
@@ -297,15 +293,19 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         <Flex
           overflow="visible"
           height={70}
-          mr={5}
-          ml={5}
+          mr={3}
+          ml={3}
           justifyContent="space-between"
           alignItems="center"
         >
-          <ShipSelector />
+          <ShipSelector
+            selectedShip={selectedShip}
+            onSelect={setSelectedShip}
+          />
           <Flex gap={12}>
-            <TextButton
-              {...colorProps}
+            <Button.TextButton
+              showOnHover
+              color="text"
               style={{ padding: '6px 10px', borderRadius: 6 }}
               onClick={() => addShip()}
             >
@@ -315,10 +315,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Icons size={22} name="AddCircleLine" />
+                <Icon size={22} name="AddCircleLine" />
                 Add Urbit ID
               </Flex>
-            </TextButton>
+            </Button.TextButton>
           </Flex>
         </Flex>
       </Bottom>

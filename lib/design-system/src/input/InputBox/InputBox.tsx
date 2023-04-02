@@ -138,9 +138,11 @@ export const InputBox = ({
   error,
   children,
   borderRadius = '6px',
+  style,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
+    style={style}
     width={width}
     height={height}
     error={error}

@@ -23,7 +23,7 @@ import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
+import { useAccountStore } from 'renderer/stores/ship.store';
 import { useChatStore } from 'renderer/apps/Courier/store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
 import { ShellActions } from 'renderer/logic/actions/shell';

@@ -24,7 +24,6 @@ create unique index if not exists notifications_id_uindex
 
 create index if not exists notifications_read_dismissed_index
     on notifications (read, dismissed);
-
 `;
 
 export default notifInitSql;

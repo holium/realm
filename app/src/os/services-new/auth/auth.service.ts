@@ -12,6 +12,7 @@ export class AuthService extends AbstractService {
       return;
     }
     this.authDB = new AuthDB();
+    this.sendUpdate({ type: 'accounts', data: this.getAccounts() });
   }
 
   public getAccounts(): Account[] {
@@ -19,18 +20,12 @@ export class AuthService extends AbstractService {
     return this.authDB.models.accounts.find();
   }
 
-  // public register(patp: string, password: string): boolean {
-  //   const account = this.authDB.models.accounts.findOne(patp);
-  //   if (account) {
-  //     log.info(`Account already exists for ${patp}`);
-  //     return false;
-  //   }
-  //   const passwordHash = bcrypt.hashSync(password, 10);
-  //   this.authDB.models.accounts.create({ patp, passwordHash });
-  //   // TODO Add amplitude logging here
-  //   return true;
-  // }
-
+  /**
+   *
+   * @param patp
+   * @param password
+   * @returns boolean - true if login was successful, false otherwise
+   */
   public login(patp: string, password: string): boolean {
     const account = this.authDB?.models.accounts.findOne(patp);
     if (!account) {
@@ -57,3 +52,15 @@ export default AuthService;
 export const authPreload = AuthService.preload(
   new AuthService({ preload: true })
 );
+
+// public register(patp: string, password: string): boolean {
+//   const account = this.authDB.models.accounts.findOne(patp);
+//   if (account) {
+//     log.info(`Account already exists for ${patp}`);
+//     return false;
+//   }
+//   const passwordHash = bcrypt.hashSync(password, 10);
+//   this.authDB.models.accounts.create({ patp, passwordHash });
+//   // TODO Add amplitude logging here
+//   return true;
+// }

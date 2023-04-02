@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
-import { chatStore } from '../Courier/store';
+import { chatStore } from '../apps/Courier/store';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (
@@ -236,9 +236,8 @@ export const accountStore = AccountStore.create({
 // Create core context
 // -------------------------------
 type AccountStoreInstance = Instance<typeof AccountStore>;
-export const AccountStoreContext = createContext<null | AccountStoreInstance>(
-  accountStore
-);
+export const AccountStoreContext =
+  createContext<null | AccountStoreInstance>(accountStore);
 
 export const AccountProvider = AccountStoreContext.Provider;
 export function useAccountStore() {

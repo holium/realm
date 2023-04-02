@@ -22,7 +22,7 @@ import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
-import { useAccountStore } from 'renderer/apps/Account/store';
+import { useAccountStore } from 'renderer/stores/ship.store';
 import { displayDate } from 'os/lib/time';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`

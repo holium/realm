@@ -13,8 +13,9 @@ import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
 import { defaultTheme as dt } from '@holium/shared';
+import { ThemeType as ThemeModelType } from '../stores/models/Theme.model';
 
-export const genCSSVariables = (theme: ThemeType) => {
+export const genCSSVariables = (theme: ThemeModelType) => {
   /**
    * All --rlm-*-rgba variables should be in rgba format.
    * This is to allow for opacity to be applied to the color.

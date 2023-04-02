@@ -1,3 +1,4 @@
+import { realmPreload } from './../os/index-new';
 import { contextBridge, ipcRenderer } from 'electron';
 import { MouseState } from '@holium/realm-presence';
 import { osPreload } from '../os/preload';
@@ -142,3 +143,4 @@ contextBridge.exposeInMainWorld('electron', {
 
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
+contextBridge.exposeInMainWorld('realm', realmPreload);

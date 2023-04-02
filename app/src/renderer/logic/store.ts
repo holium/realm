@@ -192,7 +192,7 @@ OSActions.onConnectionStatus((_event: any, status: any) => {
   coreStore.setConnectionStatus(status);
 });
 
-OSActions.boot();
+// OSActions.boot();
 
 OSActions.onLog((_event: any, data: any) => {
   console.log(data);

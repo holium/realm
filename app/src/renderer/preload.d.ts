@@ -1,5 +1,6 @@
 import { AppPreloadType } from 'main/preload';
 import { OSPreloadType } from 'os/preload';
+import { authPreload } from 'os/index-new';
 import { shipPreload } from 'os/services-new/ship/ship.service';
 import { authPreload } from 'os/services-new/auth/auth.service';
 
@@ -16,6 +17,7 @@ declare global {
     ship: string;
     shipService: typeof shipPreload;
     authService: typeof authPreload;
+    realm: typeof realmPreload;
   }
 }
 

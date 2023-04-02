@@ -102,9 +102,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  Realm.start(mainWindow);
-  const realmService = new RealmService(mainWindow);
-  realmService.login('~lomder-librun', 'password');
+  // Realm.start(mainWindow);
   // ---------------------------------------------------------------------
 
   FullScreenHelper.registerListeners(mainWindow);
@@ -124,8 +122,14 @@ const createWindow = async () => {
     mainWindow.webContents.send('add-key-listeners');
   });
 
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  const realmService = new RealmService();
+  // realmService.login('~lomder-librun', 'password');
+
   // TODO why is this rendering multiple times?
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.once('ready-to-show', () => {
     // This is how you can set scale
     mainWindow.webContents.setZoomFactor(1.0);
 

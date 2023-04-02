@@ -1,9 +1,18 @@
 import { EventEmitter } from 'events';
-import { ipcMain, ipcRenderer, IpcMainInvokeEvent } from 'electron';
+import {
+  ipcMain,
+  ipcRenderer,
+  IpcMainInvokeEvent,
+  BrowserWindow,
+} from 'electron';
+import log from 'electron-log';
 
 export interface ServiceOptions {
   preload: boolean;
 }
+
+type IPCInvokeMap = Record<string, (...args: any[]) => Promise<any> | void>;
+
 abstract class AbstractService extends EventEmitter {
   serviceName: string;
 
@@ -13,12 +22,63 @@ abstract class AbstractService extends EventEmitter {
   ) {
     super();
     this.serviceName = serviceName;
+    if (options?.preload) {
+      return;
+    }
     if (!options.preload) {
-      this.registerIpcHandlers();
+      this._registerIpcHandlers();
     }
   }
 
-  private registerIpcHandlers(): void {
+  /**
+   * ------------------------------
+   * sendUpdate
+   * ------------------------------
+   * Sends an IPC event to the renderer process.
+   *
+   * @param data the data to send
+   * @returns void
+   * @protected
+   */
+  protected sendUpdate(data: any): void {
+    const windows = BrowserWindow.getAllWindows();
+
+    windows.forEach((window) => {
+      window.webContents.send(`${this.serviceName}.onUpdate`, data);
+    });
+  }
+
+  /**
+   * ------------------------------
+   * _registerIpcRendererCallbacks
+   * ------------------------------
+   * Override this method to register callbacks for IPC events.
+   * By default, this method returns an onUpdate callback that sends
+   * an IPC event to the renderer process.
+   *
+   * @returns a map of event names to callback functions
+   * @protected
+   */
+  protected _registerIpcRendererCallbacks(): {
+    [event: string]: (...args: any[]) => void;
+  } {
+    return {
+      onUpdate: (callback: (...args: any[]) => void) => {
+        ipcRenderer.on(`${this.serviceName}.onUpdate`, callback);
+      },
+    };
+  }
+
+  /**
+   * ------------------------------
+   * _registerIpcHandlers
+   * ------------------------------
+   * Registers IPC handlers for all methods on the service.
+   * This method is called by the constructor.
+   * @returns void
+   * @private
+   */
+  private _registerIpcHandlers(): void {
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(this)
     ).filter(
@@ -42,10 +102,18 @@ abstract class AbstractService extends EventEmitter {
       );
     });
   }
-
+  /**
+   * ------------------------------
+   * preload
+   * ------------------------------
+   * Generates a preload object for the renderer process.
+   *
+   * @param service
+   * @returns a map of method names to functions
+   */
   static preload(
     service: AbstractService
-  ): Record<string, (...args: any[]) => Promise<any>> {
+  ): Record<string, (...args: any[]) => Promise<any> | void> {
     const serviceName = service.serviceName;
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(service)
@@ -56,11 +124,19 @@ abstract class AbstractService extends EventEmitter {
         typeof (service as any)[method] === 'function'
     );
 
-    const mappedMethods: Record<string, (...args: any[]) => Promise<any>> = {};
+    const mappedMethods: Record<
+      string,
+      (...args: any[]) => Promise<any> | void
+    > = {};
     methods.forEach((method) => {
       mappedMethods[method] = async (...args: any[]) => {
         return await ipcRenderer.invoke(`${serviceName}.${method}`, ...args);
       };
+    });
+
+    const callbacks = service._registerIpcRendererCallbacks();
+    Object.keys(callbacks).forEach((event) => {
+      mappedMethods[event] = callbacks[event];
     });
 
     return mappedMethods;
