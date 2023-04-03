@@ -127,15 +127,23 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
       return message?.map((fragment, index) => {
         let prevLineBreak, nextLineBreak;
         if (index > 0) {
-          const previousType = Object.keys(message[index - 1])[0];
-          if (previousType === 'image') {
-            prevLineBreak = <LineBreak />;
+          if (message[index - 1]) {
+            const previousType = Object.keys(message[index - 1])[0];
+            if (previousType === 'image') {
+              prevLineBreak = <LineBreak />;
+            }
+          } else {
+            console.warn('expected a non-null message at ', index - 1, message[index - 1]);
           }
         }
         if (index < message.length - 1) {
-          const nextType = Object.keys(message[index + 1])[0];
-          if (nextType === 'image') {
-            nextLineBreak = <LineBreak />;
+          if (message[index + 1]) {
+            const nextType = Object.keys(message[index + 1])[0];
+            if (nextType === 'image') {
+              nextLineBreak = <LineBreak />;
+            }
+          } else {
+            console.warn('expected a non-null message at ', index + 1, message[index + 1]);
           }
         }
 
