@@ -205,7 +205,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 width={containerWidth}
                 height={height}
                 data={messages}
-                rowRenderer={(row, index, measure) => {
+                rowRenderer={(row, index, measure, _, scrollToRow) => {
                   const isLast = selectedChat
                     ? index === messages.length - 1
                     : false;
@@ -229,6 +229,9 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                     new Date(messages[index - 1].createdAt).toDateString();
                   const showDate: boolean =
                     index === 0 || thisMsgDate !== prevMsgDate;
+
+                  const onClickReply = () => scrollToRow(index);
+
                   return (
                     <Box
                       mx="1px"
@@ -254,6 +257,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                         message={row as ChatMessageType}
                         ourColor={ourColor}
                         measure={measure}
+                        onClickReply={onClickReply}
                       />
                     </Box>
                   );

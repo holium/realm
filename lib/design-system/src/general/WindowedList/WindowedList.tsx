@@ -12,7 +12,8 @@ type WindowedListProps<T> = {
     rowData: T,
     index: number,
     measure: () => void,
-    sortedAndFilteredData: T[]
+    sortedAndFilteredData: T[],
+    scrollToRow: (top: number) => void
   ) => JSX.Element;
   /**
    * The width of the list. If undefined, the list will auto-size to the width of its parent container.
@@ -77,7 +78,7 @@ export const WindowedList = <T,>({
             rowCount={data.length}
             rowHeight={cache.current.rowHeight as any}
             deferredMeasurementCache={cache.current}
-            rowRenderer={({ key, index, style, parent }) => (
+            rowRenderer={({ key, index, style, parent, scrollToRow }) => (
               <CellMeasurer
                 key={key}
                 cache={cache.current}
@@ -86,7 +87,13 @@ export const WindowedList = <T,>({
               >
                 {({ measure, registerChild }) => (
                   <div style={style} ref={registerChild}>
-                    {rowRenderer(data[index], index, measure, data)}
+                    {rowRenderer(
+                      data[index],
+                      index,
+                      measure,
+                      data,
+                      scrollToRow
+                    )}
                   </div>
                 )}
               </CellMeasurer>

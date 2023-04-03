@@ -30,6 +30,7 @@ import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { MouseEventHandler } from 'react';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
@@ -254,7 +255,8 @@ export const renderFragment = (
   index: number,
   author: string,
   containerWidth?: number,
-  onMeasure?: () => void // used in the case where async data is loaded
+  onMeasure?: () => void, // used in the case where async data is loaded
+  onClickReply?: () => void
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -411,11 +413,17 @@ export const renderFragment = (
         replyContent = renderFragment(id, msg, index, replyAuthor);
       }
 
+      const onClick: MouseEventHandler<HTMLQuoteElement> = (e) => {
+        e.stopPropagation();
+        onClickReply?.();
+      };
+
       return (
         <FragmentBlockquote
           style={{ height: 42 }}
           id={id}
           key={`${author + index}-reply`}
+          onClick={onClick}
         >
           <Flex
             gap={fragmentType === 'image' ? 6 : 0}

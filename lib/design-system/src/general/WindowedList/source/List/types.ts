@@ -6,6 +6,7 @@ export type RowRendererParams = {
   key: string;
   parent: Record<string, any>;
   style: Record<string, any>;
+  scrollToRow: (index: number) => void;
 };
 export type RowRenderer = (
   params: RowRendererParams

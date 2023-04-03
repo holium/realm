@@ -232,6 +232,7 @@ export class List extends PureComponent<Props> {
       isVisible,
       key,
       parent,
+      scrollToRow: this.scrollToRow.bind(this),
     });
   };
   _setRef = (ref: ElementRef<typeof Grid> | null | undefined) => {

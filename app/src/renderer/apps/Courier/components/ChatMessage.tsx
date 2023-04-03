@@ -18,6 +18,7 @@ type ChatMessageProps = {
   isPrevGrouped: boolean;
   isNextGrouped: boolean;
   measure: () => void;
+  onClickReply?: () => void;
 };
 
 export const ChatMessagePresenter = ({
@@ -27,6 +28,7 @@ export const ChatMessagePresenter = ({
   isPrevGrouped,
   isNextGrouped,
   measure,
+  onClickReply,
 }: ChatMessageProps) => {
   const { ship, friends, theme } = useServices();
   const { selectedChat } = useChatStore();
@@ -195,7 +197,7 @@ export const ChatMessagePresenter = ({
 
   return (
     <Bubble
-      ref={messageRef}
+      innerRef={messageRef}
       id={messageRowId}
       isPrevGrouped={isPrevGrouped}
       isNextGrouped={isNextGrouped}
@@ -216,6 +218,7 @@ export const ChatMessagePresenter = ({
       onMeasure={measure}
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
+      onClickReply={onClickReply}
     />
   );
 };
