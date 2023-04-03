@@ -52,6 +52,7 @@ type Props = {
   shipMaintenanceWindow: number;
   setSelectedPatp: (patp: string) => void;
   onClickChangeEmail: () => void;
+  onClickChangePassword: () => void;
   onClickManageBilling: () => void;
   onClickGetNewAccessCode: () => void;
   onClickChangeMaintenanceWindow: () => void;
@@ -69,6 +70,7 @@ export const AccountHostingDialog = ({
   shipMaintenanceWindow,
   setSelectedPatp,
   onClickChangeEmail,
+  onClickChangePassword,
   onClickManageBilling,
   onClickGetNewAccessCode,
   onClickChangeMaintenanceWindow,
@@ -94,6 +96,14 @@ export const AccountHostingDialog = ({
           <AccountDialogDescription>{email}</AccountDialogDescription>
           <ChangeButton type="button" onClick={onClickChangeEmail}>
             Change email
+          </ChangeButton>
+        </AccountDialogTableRowContainer>
+      </AccountDialogTableRow>
+      <AccountDialogTableRow title="Password">
+        <AccountDialogTableRowContainer>
+          <AccountDialogDescription>• • • • • • • •</AccountDialogDescription>
+          <ChangeButton type="button" onClick={onClickChangePassword}>
+            Change password
           </ChangeButton>
         </AccountDialogTableRowContainer>
       </AccountDialogTableRow>

@@ -26,6 +26,7 @@ type VerifyEmailResponse = {
 };
 
 type RefreshTokenResponse = {
+  email: string;
   token: string;
 };
 
@@ -83,6 +84,12 @@ type SetCustomDomainResponse = {
 
 type ChangeEmailResponse = {
   message: string;
+  email?: string;
+};
+
+type ChangePasswordResponse = {
+  message: string;
+  token?: string;
   email?: string;
 };
 
@@ -262,6 +269,22 @@ export const api = {
         email,
       }),
     });
+  },
+  changePassword(token: string, password: string) {
+    return http<ChangePasswordResponse>(
+      `${constants.API_URL}/change-password`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          version: constants.API_HEADERS_VERSION,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          password,
+        }),
+      }
+    );
   },
   setCustomDomain(
     token: string,

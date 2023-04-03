@@ -37,6 +37,7 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
     const refreshAndStoreToken = async (token: string) => {
       try {
         const response = await api.refreshToken(token);
+        localStorage.setItem('email', response.email);
         localStorage.setItem('token', response.token);
         authenticated.toggleOn();
       } catch (error) {

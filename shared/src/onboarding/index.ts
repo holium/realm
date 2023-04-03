@@ -14,6 +14,7 @@ export { VerifyEmailDialog } from './dialogs/VerifyEmailDialog';
 export { ChangeEmailModal } from './components/hosting/ChangeEmailModal';
 export { ChangeMaintenanceWindowModal } from './components/hosting/ChangeMaintenanceWindowModal';
 export { VerifyEmailModal } from './components/hosting/VerifyEmailModal';
+export { ChangePasswordModal } from './components/hosting/ChangePasswordModal';
 export { GetNewAccessCodeModal } from './components/hosting/GetNewAccessCodeModal';
 
 export type {

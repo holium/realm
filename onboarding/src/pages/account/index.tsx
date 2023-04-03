@@ -5,6 +5,7 @@ import {
   ChangeMaintenanceWindowModal,
   VerifyEmailModal,
   GetNewAccessCodeModal,
+  ChangePasswordModal,
 } from '@holium/shared';
 import { useToggle } from '@holium/design-system';
 import { Page } from '../../components/Page';
@@ -14,10 +15,11 @@ import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const HostingPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, ships, selectedPatp, setSelectedPatp } = useUser();
+  const { token, email, ships, selectedPatp, setSelectedPatp } = useUser();
 
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
+  const changePasswordModal = useToggle(false);
   const getNewAccessCodeModal = useToggle(false);
   const changeMaintenanceWindowModal = useToggle(false);
 
@@ -57,6 +59,21 @@ const HostingPresenter = () => {
 
       if (response.token) {
         window.location.reload();
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return false;
+  };
+
+  const onSubmitNewPassword = async (password: string) => {
+    try {
+      const response = await api.changePassword(token, password);
+
+      if (response?.token) {
+        changePasswordModal.toggleOff();
         return true;
       }
     } catch (e) {
@@ -119,6 +136,11 @@ const HostingPresenter = () => {
         onDismiss={getNewAccessCodeModal.toggleOff}
         onSubmit={onSubmitNewAccessCode}
       />
+      <ChangePasswordModal
+        isOpen={changePasswordModal.isOn}
+        onDismiss={changePasswordModal.toggleOff}
+        onSubmit={onSubmitNewPassword}
+      />
       <ChangeMaintenanceWindowModal
         isOpen={changeMaintenanceWindowModal.isOn}
         initialSelected={selectedShip.maintenance_window.toString()}
@@ -128,12 +150,13 @@ const HostingPresenter = () => {
       <AccountHostingDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
-        email={selectedShip.email}
+        email={email}
         shipUrl={selectedShip.link}
         shipCode={selectedShip.code}
         shipMaintenanceWindow={selectedShip.maintenance_window}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
+        onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}
         onClickGetNewAccessCode={getNewAccessCodeModal.toggleOn}
         onClickChangeMaintenanceWindow={changeMaintenanceWindowModal.toggleOn}
