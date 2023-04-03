@@ -5,7 +5,7 @@ import { ChatStore, chatStore } from '../apps/Courier/store';
 import { NotifIPC, RealmIPC } from './ipc';
 import { Theme } from './models/theme.model';
 import { RealmUpdateTypes } from 'os/realm.service';
-import { SpacesStore } from 'os/services/spaces/models/spaces';
+import { SpacesStore } from './models/spaces.model';
 import { FriendModel, FriendsStore } from './models/friends.model';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
@@ -259,9 +259,9 @@ const ShipStore = types
   .model('ShipStore', {
     ship: types.maybeNull(ShipModel),
     friends: FriendsStore,
-    spacesStore: types.optional(SpacesStore, {}),
     notifStore: NotifStore,
     chatStore: ChatStore,
+    spacesStore: SpacesStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -274,6 +274,7 @@ const ShipStore = types
       });
       self.ship = ShipModel.create(ship);
       self.chatStore.init();
+      self.spacesStore.init();
     },
     reset() {
       self.ship = null;
@@ -295,6 +296,9 @@ export const shipStore = ShipStore.create({
     subroute: 'inbox',
     isOpen: false,
     pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+  },
+  spacesStore: {
+    spaces: {},
   },
 });
 

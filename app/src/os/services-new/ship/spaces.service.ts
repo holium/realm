@@ -4,18 +4,21 @@ import sqlite3, { Database } from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import APIConnection from '../conduit';
 import { PokeParams, Scry } from '@holium/conduit/src/types';
-import { SpacesDB } from './models/spaces.model';
-import { MembersDB } from './models/spaces_members.model';
+import { SpacesDB } from './models/spaces/spaces.model';
+import { MembersDB } from './models/spaces/members.model';
 
 export class SpacesService extends AbstractService {
+  private shipDB?: Database;
   public spacesDB?: SpacesDB;
   public membersDB?: MembersDB;
+  public selectedSpace: string | null = null;
 
   constructor(options?: ServiceOptions, db?: Database) {
     super('spacesService', options);
     if (options?.preload) {
       return;
     }
+    this.shipDB = db;
     this.spacesDB = new SpacesDB(false, db);
     this.membersDB = new MembersDB(false, db);
     this._onEvent = this._onEvent.bind(this);
@@ -36,6 +39,7 @@ export class SpacesService extends AbstractService {
         case 'initial':
           this.spacesDB?.insertAll(data['initial'].spaces);
           this.membersDB?.insertAll(data['initial'].membership);
+          this.selectedSpace = data['initial'].current.path;
           break;
         case 'add':
           // this.spacesDB?.insert(data['add']);
@@ -86,6 +90,48 @@ export class SpacesService extends AbstractService {
   private _onError = (err: any) => {
     log.warn('Spaces subscription error', err);
   };
+
+  public async getInitial() {
+    if (!this.shipDB) return;
+    console.log('getInitial');
+    const query = this.shipDB.prepare(`
+      SELECT
+        path,
+        name,
+        description,
+        color,
+        type,
+        archetype,
+        picture,
+        access,
+        json(theme) theme,
+        json_group_array(
+            json_object(
+              'patp', spaces_members.patp,
+              'roles', json(spaces_members.roles),
+              'alias', spaces_members.alias,
+              'status', spaces_members.status
+            )
+        ) members
+      FROM spaces
+      JOIN spaces_members ON path = spaces_members.space
+      GROUP BY path;
+    `);
+    const result = query.all();
+
+    return {
+      current: this.selectedSpace,
+      spaces: result.map((row) => {
+        return {
+          ...row,
+          archetype: row.archetype || 'community',
+          theme: row.theme ? JSON.parse(row.theme) : null,
+          members: row.members ? JSON.parse(row.members) : null,
+        };
+      }),
+    };
+  }
+
   // public poke(payload: PokeParams) {
   //   return APIConnection.getInstance().conduit.poke(payload);
   // }
@@ -98,6 +144,6 @@ export class SpacesService extends AbstractService {
 export default SpacesService;
 
 // Generate preload
-export const roomsPreload = SpacesService.preload(
+export const spacesPreload = SpacesService.preload(
   new SpacesService({ preload: true })
 );

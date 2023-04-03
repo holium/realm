@@ -2,6 +2,8 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text, Avatar, BarButton } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 type EmptyPictureProps = {
   color?: string;
@@ -40,9 +42,10 @@ const FadeInMotion = {
 };
 
 const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
-  const { spaces, ship, theme } = useServices();
-  const selectedSpace = spaces.selected;
-  const { textColor } = theme.currentTheme;
+  const { theme } = useAppState();
+  const { ship, spacesStore } = useShipStore();
+  const selectedSpace = spacesStore.selected;
+  const { textColor } = theme;
 
   let innerContent: JSX.Element | null;
 

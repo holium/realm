@@ -7,6 +7,7 @@ import { authPreload } from 'os/services-new/auth/auth.service';
 import { chatPreload } from 'os/services-new/ship/models/chat.model';
 import { notifPreload } from 'os/services-new/ship/notifications.service';
 import { friendsPreload } from 'os/services-new/ship/models/friends.model';
+import { spacesPreload } from 'os/services-new/ship/spaces.service';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 
 declare global {
@@ -25,6 +26,7 @@ declare global {
     notifService: typeof notifPreload;
     friendDb: typeof friendsPreload;
     realm: typeof realmPreload;
+    spacesService: typeof spacesPreload;
   }
 }
 

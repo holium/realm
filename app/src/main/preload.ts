@@ -14,6 +14,7 @@ import { roomsPreload } from '../os/services-new/ship/rooms.service';
 import { notifPreload } from '../os/services-new/ship/notifications.service';
 import { chatPreload } from './../os/services-new/ship/chat.service';
 import { friendsPreload } from './../os/services-new/ship/models/friends.model';
+import { spacesPreload } from 'os/services-new/ship/spaces.service';
 
 const appPreload = {
   /* Senders */
@@ -148,6 +149,7 @@ contextBridge.exposeInMainWorld('electron', {
 
 contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
+contextBridge.exposeInMainWorld('spacesService', spacesPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
 contextBridge.exposeInMainWorld('roomsService', roomsPreload);
 contextBridge.exposeInMainWorld('chatService', chatPreload);

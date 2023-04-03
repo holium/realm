@@ -1,6 +1,7 @@
 import {
   Instance,
   types,
+  flow,
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
@@ -8,6 +9,8 @@ import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, WebApp } from './bazaar.model';
 import { MembersStore, VisaModel } from './members.model';
 import { Theme } from './theme.model';
+import { SpacesIPC } from '../ipc';
+import { appState } from '../app.store';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -82,27 +85,36 @@ export const SpacesStore = types
     },
   }))
   .actions((self) => ({
-    initialSync: (syncEffect: { key: string; model: typeof self }) => {
-      // console.log('initial %spaces sync');
-      applySnapshot(self, castToSnapshot(syncEffect.model));
-      self.loader.set('loaded');
-    },
-    initialReaction: (data: { spaces: any; members: any }, ship: string) => {
-      Object.keys(data.spaces).forEach((key: string) => {
-        // if (!data.spaces[key].members) {
-        //   data.spaces[key].members = { all: {} };
-        // }
-        // data.spaces[key].members = MembersStore.create({
-        //   all: data.members[key],
-        // });
-        data.spaces[key].theme.id = `${key}`;
-      });
-      // self.loader.set('loaded');
-      applySnapshot(self.spaces, castToSnapshot(data.spaces));
-      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
-      self.loader.state = 'loaded';
-      console.log(self.loader.state);
-    },
+    init: flow(function* () {
+      self.loader.set('loading');
+      try {
+        const { current, spaces } =
+          yield SpacesIPC.getInitial() as Promise<any>;
+
+        spaces.forEach((space: any) => {
+          space.theme.id = space.path;
+          const spaceModel = SpaceModel.create({
+            ...space,
+            members: {
+              all: space.members.reduce((map: any, mem: any) => {
+                map[mem.patp] = mem;
+                return map;
+              }, {}),
+            },
+          });
+          self.spaces.set(space.path, spaceModel);
+        });
+        self.selected = self.spaces.get(current);
+        if (self.selected) {
+          appState.setTheme(self.selected.theme);
+        }
+        self.loader.set('loaded');
+      } catch (e) {
+        console.error(e);
+        self.loader.set('error');
+      }
+    }),
+
     addSpace: (addReaction: { space: any; members: any }) => {
       const space = addReaction.space;
       const newSpace = SpaceModel.create({

@@ -4,23 +4,25 @@ import { rgba, lighten, darken } from 'polished';
 
 import { Flex, Pulser, Divider } from 'renderer/components';
 import { SelectedSpace } from './SelectedSpace';
-import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { BarButton } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 const position = 'top-right';
 const anchorOffset = { x: 4, y: 16 };
 const dimensions = { height: 500, width: 380 };
 
 const SpaceSelectorPresenter = () => {
-  const { ship, spaces, theme } = useServices();
+  const { theme } = useAppState();
+  const { ship, spacesStore } = useShipStore();
   const selectorRef = createRef<HTMLDivElement>();
 
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
     useTrayApps();
 
-  const { dockColor, mode } = theme.currentTheme;
+  const { dockColor, mode } = theme;
 
   const dividerBg = useMemo(
     () =>
@@ -54,7 +56,7 @@ const SpaceSelectorPresenter = () => {
     [activeApp, setTrayAppCoords, setTrayAppDimensions, setActiveApp]
   );
 
-  const isLoaded = spaces.isLoaded || spaces.selected;
+  const isLoaded = spacesStore.isLoaded || spacesStore.selected;
 
   return (
     <Flex
@@ -71,7 +73,7 @@ const SpaceSelectorPresenter = () => {
         <BarButton whileTap={{ scale: 0.975 }} transition={{ scale: 0.2 }}>
           <Flex>
             <Pulser
-              background={rgba(theme.currentTheme.backgroundColor, 0.5)}
+              background={rgba(theme.backgroundColor, 0.5)}
               borderRadius={4}
               height={28}
               width={28}
@@ -84,13 +86,13 @@ const SpaceSelectorPresenter = () => {
           >
             <Pulser
               style={{ marginBottom: 2 }}
-              background={rgba(theme.currentTheme.backgroundColor, 0.5)}
+              background={rgba(theme.backgroundColor, 0.5)}
               borderRadius={4}
               height={12}
               width={40}
             />
             <Pulser
-              background={rgba(theme.currentTheme.backgroundColor, 0.5)}
+              background={rgba(theme.backgroundColor, 0.5)}
               borderRadius={4}
               height={14}
               width={90}

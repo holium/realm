@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3';
-import APIConnection from '../../conduit';
-import AbstractDataAccess from '../../abstract.db';
-import { cleanNounColor } from '../../../lib/color';
+import APIConnection from '../../../conduit';
+import AbstractDataAccess from '../../../abstract.db';
+import { cleanNounColor } from '../../../../lib/color';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import log from 'electron-log';
 
@@ -20,7 +20,7 @@ export class MembersDB extends AbstractDataAccess<Member> {
     super({
       preload: preload,
       db,
-      name: 'spacesMembers',
+      name: 'membersDB',
       tableName: 'spaces_members',
     });
     if (preload) {
@@ -71,6 +71,10 @@ export class MembersDB extends AbstractDataAccess<Member> {
       });
     });
     insertMany(spacesMembers);
+    this.sendUpdate({
+      type: 'insert',
+      payload: this.find(),
+    });
   }
 
   public findOne(path: string): Member | null {

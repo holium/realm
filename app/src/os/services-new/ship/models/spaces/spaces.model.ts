@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3';
-import APIConnection from '../../conduit';
-import AbstractDataAccess from '../../abstract.db';
-import { cleanNounColor } from '../../../lib/color';
+import APIConnection from '../../../conduit';
+import AbstractDataAccess from '../../../abstract.db';
+import { cleanNounColor } from '../../../../lib/color';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import log from 'electron-log';
 
@@ -21,7 +21,7 @@ export interface Space {
 
 export class SpacesDB extends AbstractDataAccess<Space> {
   constructor(preload: boolean, db?: Database) {
-    super({ preload: preload, db, name: 'spaces', tableName: 'spaces' });
+    super({ preload: preload, db, name: 'spacesDB', tableName: 'spaces' });
     if (preload) {
       return;
     }
@@ -76,7 +76,7 @@ export class SpacesDB extends AbstractDataAccess<Space> {
           description: space.description,
           color: space.color,
           type: space.type,
-          archetype: space.archetype,
+          archetype: space.archetype || 'community',
           picture: space.picture,
           access: space.access,
           theme: JSON.stringify(space.theme),
@@ -84,6 +84,10 @@ export class SpacesDB extends AbstractDataAccess<Space> {
       });
     });
     insertMany(spaces);
+    this.sendUpdate({
+      type: 'insert',
+      payload: this.find(),
+    });
   }
 
   public findOne(path: string): Space | null {
