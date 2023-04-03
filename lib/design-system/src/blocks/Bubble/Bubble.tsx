@@ -217,10 +217,13 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             )}
             <FragmentBlock id={id}>{fragments}</FragmentBlock>
             <BubbleFooter id={id} height={footerHeight}>
-              <Box width="70%" id={id}>{reactionsDisplay}</Box>
+              <Box width="70%" id={id}>
+                {reactionsDisplay}
+              </Box>
               <Flex
                 width="30%"
-                gap={4} id={id}
+                gap={4}
+                id={id}
                 alignItems="flex-end"
                 justifyContent="flex-end"
                 minWidth={minBubbleWidth}
@@ -229,7 +232,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                 {expiresAt && (
                   // TODO tooltip with time remaining
                   <Icon
-                    mb="1px" id={id}
+                    mb="1px"
+                    id={id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.35 }}
                     transition={{ opacity: 0.2 }}
@@ -244,7 +248,8 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                   display="inline-flex"
                   alignItems="flex-end"
                   justifyContent="flex-end"
-                  opacity={0.35} id={id}
+                  opacity={0.35}
+                  id={id}
                 >
                   {isEditing && 'Editing... · '}
                   {isEdited && !isEditing && 'Edited · '}
