@@ -33,7 +33,6 @@ export const createManager = (our: Patp) => {
     scry: RoomsIPC.scry as (...args: any[]) => Promise<any>,
     poke: RoomsIPC.poke as (...args: any[]) => Promise<any>,
   };
-  console.log('creating manager', handlers);
   protocol = new RealmProtocol(our, config, handlers);
   const manager = new RoomsManager(protocol);
 

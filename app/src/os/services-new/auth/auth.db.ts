@@ -4,11 +4,12 @@ import sqlite3 from 'better-sqlite3';
 import Store from 'electron-store';
 import log from 'electron-log';
 import { AuthStore } from '../../services/identity/auth.model';
-import { Accounts, accountsInit } from './models/accounts.db';
+import { Account, Accounts, accountsInit } from './models/accounts.db';
 import {
   AccountsOnboarding,
   accountsOnboardingInit,
 } from './models/accountsOnboarding.db';
+import { SessionType } from './auth.service';
 
 export class AuthDB {
   private readonly authDB: sqlite3.Database;
@@ -95,6 +96,41 @@ export class AuthDB {
       .run(Date.now());
   }
 
+  public _setSession(patp: string, cookie: string) {
+    log.info(`Setting session for ${patp} to ${cookie}`);
+    const query = this.authDB.prepare(`
+      REPLACE INTO accounts_session (patp, key, createdAt)
+      VALUES (?, ?, ?);
+    `);
+    query.run(patp, cookie, Date.now());
+  }
+
+  public _getSession(patp?: string): SessionType | null {
+    const query = this.authDB.prepare(
+      patp
+        ? `
+      SELECT patp, key FROM accounts_session WHERE patp = ?;
+    `
+        : `SELECT patp, key FROM accounts_session LIMIT 1;`
+    );
+    const result = patp ? query.get(patp) : query.get();
+    if (result) {
+      return result;
+    }
+    return null;
+  }
+
+  public _clearSession(patp?: string): void {
+    const query = this.authDB.prepare(
+      patp
+        ? `
+      DELETE FROM accounts_session WHERE patp = ?;
+    `
+        : `DELETE FROM accounts_session;`
+    );
+    patp ? query.run(patp) : query.run();
+  }
+
   disconnect() {
     this.authDB.close();
   }
@@ -122,4 +158,9 @@ create table if not exists accounts_meta (
   migratedAt          INTEGER
 );
 
+create table if not exists accounts_session (
+  patp          TEXT PRIMARY KEY NOT NULL,
+  key           TEXT NOT NULL,
+  createdAt     INTEGER
+);
 `;

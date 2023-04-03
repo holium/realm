@@ -2,6 +2,7 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useContext, useEffect, useMemo } from 'react';
+import { Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
@@ -12,7 +13,14 @@ import { ErrorBoundary } from './logic/ErrorBoundary';
 import AccountContext, { AccountProvider } from './stores/AccountContext';
 
 function AppContent() {
-  const { authStore } = useAppState();
+  const { authStore, booted } = useAppState();
+  if (!booted) {
+    return (
+      <Flex>
+        <Spinner size={2} />
+      </Flex>
+    );
+  }
   return authStore.session ? <Shell /> : <Auth />;
 }
 

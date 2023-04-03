@@ -15,7 +15,6 @@ import fetch from 'cross-fetch';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
-import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
@@ -27,7 +26,7 @@ import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
-import { RealmService } from '../os/index-new';
+import { RealmService } from '../os/realm.service';
 
 // TODO test this
 log.create('main');

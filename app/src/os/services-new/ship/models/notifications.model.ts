@@ -41,9 +41,10 @@ type GetParamsObj = {
   excludeRead?: boolean;
 };
 
-export class NotificationsDAO extends AbstractDataAccess<NotificationRow> {
-  constructor(db: Database) {
-    super(db, 'notifications');
+export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
+  constructor(preload: boolean = true, db?: Database) {
+    super(preload, db, 'notifications');
+    if (preload) return;
     this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
 
@@ -250,7 +251,7 @@ export class NotificationsDAO extends AbstractDataAccess<NotificationRow> {
     });
   }
 
-  getNotifications(_evt: any, _params?: GetParamsObj) {
+  getNotifications(_params?: GetParamsObj) {
     if (!this.db) throw new Error('No db connection');
 
     const query = this.db.prepare(`
@@ -403,3 +404,5 @@ export const QUERY_NOTIFICATIONS = `
   FROM notifications 
   LEFT OUTER JOIN paths ON notifications.path = paths.path
 `;
+
+export const notifPreload = NotificationsDB.preload(new NotificationsDB(true));

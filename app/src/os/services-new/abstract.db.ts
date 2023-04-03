@@ -2,10 +2,11 @@ import { Database, Statement } from 'better-sqlite3';
 import { BrowserWindow } from 'electron';
 
 abstract class AbstractDataAccess<T> {
-  protected readonly db: Database;
-  protected readonly tableName: string;
+  protected readonly db?: Database;
+  protected readonly tableName?: string;
 
-  constructor(db: Database, tableName: string) {
+  constructor(preload: boolean = false, db?: Database, tableName?: string) {
+    if (preload) return;
     this.db = db;
     this.tableName = tableName;
   }
@@ -13,7 +14,8 @@ abstract class AbstractDataAccess<T> {
   protected abstract mapRow(row: any): T;
 
   protected prepare(query: string): Statement {
-    return this.db.prepare(query);
+    if (!this.db) throw new Error('Database not initialized');
+    return this.db?.prepare(query);
   }
 
   public find(where?: string): T[] {

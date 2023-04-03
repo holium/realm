@@ -22,7 +22,7 @@ interface AccountOnboarding {
 
 export class AccountsOnboarding extends AbstractDataAccess<AccountOnboarding> {
   constructor(db: Database) {
-    super(db, 'accountsOnboarding');
+    super(false, db, 'accountsOnboarding');
   }
 
   protected mapRow(row: any): AccountOnboarding {

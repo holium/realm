@@ -1,3 +1,4 @@
+import { session } from 'electron';
 import { RealmIPC, ShipIPC } from '../logic/ipc';
 import { createContext, useContext } from 'react';
 import {
@@ -22,7 +23,7 @@ import {
 } from 'os/services-new/auth/auth.service';
 import { ShellModel } from './models/Shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
-import { RealmUpdateBooted, RealmUpdateTypes } from 'os/index-new';
+import { RealmUpdateBooted, RealmUpdateTypes } from 'os/realm.service';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -40,10 +41,18 @@ const AppStateModel = types
     setBooted(data: {
       accounts: AccountModelType[];
       screen: 'login' | 'onboarding' | 'os';
+      session?: {
+        patp: string;
+        cookie: string;
+      };
     }) {
       self.authStore._setAccounts(data.accounts);
-      self.booted = true;
       self.currentScreen = data.screen;
+      self.booted = true;
+      if (data.session) {
+        self.authStore._setSession(data.session.patp);
+        self.isLoggedIn = true;
+      }
     },
     setTheme(theme: ThemeType) {
       self.theme = clone(theme);
@@ -112,12 +121,14 @@ ShipIPC.onUpdate((_event: any, update: any) => {
 RealmIPC.boot();
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+  console.log('realm update', update);
   if (update.type === 'booted') {
+    appState.reset();
     appState.setBooted(update.payload);
   }
   if (update.type === 'authenticated') {
-    appState.setLoggedIn();
     appState.authStore._setSession(update.payload.patp);
+    appState.setLoggedIn();
   }
 });
 
@@ -146,6 +157,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 window.addEventListener('beforeunload', function (event) {
   if (event.type === 'beforeunload') {
     console.log('refreshing');
+    appState.reset();
     // The event was triggered by a refresh or navigation
     // Your code to handle the refresh event here
   } else {

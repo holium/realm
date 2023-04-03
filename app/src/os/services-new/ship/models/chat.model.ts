@@ -47,10 +47,10 @@ interface ChatRow {
   dismissed: boolean;
 }
 
-export class ChatDAO extends AbstractDataAccess<ChatRow> {
-  constructor(db: Database, preload?: boolean) {
+export class ChatDB extends AbstractDataAccess<ChatRow> {
+  constructor(preload: boolean = false, db?: Database) {
+    super(preload, db, 'paths');
     if (preload) return;
-    super(db, 'paths');
     this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
     this.onDbUpdate = this.onDbUpdate.bind(this);
@@ -886,5 +886,4 @@ create unique index if not exists delete_log_change_uindex
     on delete_logs (timestamp, change);
 `;
 
-// Generate preload
-// export const chatPreload = ChatDAO.preload(new ChatDAO());
+export const chatPreload = ChatDB.preload(new ChatDB(true));

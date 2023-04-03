@@ -1,4 +1,5 @@
-import { realmPreload } from './../os/index-new';
+import { chatPreload } from './../os/services-new/ship/models/chat.model';
+import { realmPreload } from '../os/realm.service';
 import { contextBridge, ipcRenderer } from 'electron';
 import { MouseState } from '@holium/realm-presence';
 import { osPreload } from '../os/preload';
@@ -9,7 +10,8 @@ import './helpers/mouseListener';
 import './helpers/keyListener';
 import { shipPreload } from '../os/services-new/ship/ship.service';
 import { authPreload } from '../os/services-new/auth/auth.service';
-import { roomsPreload } from 'os/services-new/ship/rooms.service';
+import { roomsPreload } from '../os/services-new/ship/rooms.service';
+import { notifPreload } from '../os/services-new/ship/models/notifications.model';
 
 const appPreload = {
   /* Senders */
@@ -146,7 +148,9 @@ contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
 contextBridge.exposeInMainWorld('roomsService', roomsPreload);
-
-// contextBridge.exposeInMainWorld('db', {
-//   chat
-// });
+contextBridge.exposeInMainWorld('chatDb', {
+  chatPreload,
+});
+contextBridge.exposeInMainWorld('notifDb', {
+  notifPreload,
+});

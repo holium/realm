@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
 import { chatStore } from '../apps/Courier/store';
+import { NotifDBIPC } from 'renderer/logic/ipc';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (
@@ -85,7 +86,8 @@ const AccountStore = types
   .actions((self) => ({
     initNotifications: flow(function* () {
       try {
-        const notifications = yield NotifDBActions.getNotifications();
+        const notifications =
+          yield NotifDBIPC.getNotifications() as Promise<any>;
         self.unreadByPaths = notifications.reduce(
           (acc: Map<string, number>, n: NotifMobxType) => {
             if (!n.read) {

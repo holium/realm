@@ -3,21 +3,25 @@ import log from 'electron-log';
 import { ConduitSession } from './../conduit';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
-import { ChatDAO } from './models/chat.model';
+import { ChatDB } from './models/chat.model';
 import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
+import NotificationsService from './notifications.service';
+import ChatService from './chat.service';
 
 export class ShipService extends AbstractService {
   private patp: string;
   private readonly shipDB?: ShipDB;
   models?: {
-    chat: ChatDAO;
+    chat: ChatDB;
     notifications: null;
     passports: null;
     friends: null;
   };
   services?: {
     rooms: RoomsService;
+    notifications: NotificationsService;
+    chat: ChatService;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -43,7 +47,7 @@ export class ShipService extends AbstractService {
     );
     // init all models
     this.models = {
-      chat: new ChatDAO(this.shipDB.db),
+      chat: new ChatDB(false, this.shipDB.db),
       notifications: null,
       passports: null,
       friends: null,
@@ -51,6 +55,8 @@ export class ShipService extends AbstractService {
 
     this.services = {
       rooms: new RoomsService(),
+      notifications: new NotificationsService(undefined, this.shipDB.db),
+      chat: new ChatService(undefined, this.shipDB.db),
     };
 
     this.sendUpdate({
@@ -72,7 +78,11 @@ export class ShipService extends AbstractService {
     });
   }
 
-  decryptDb(password: string) {
+  get credentials() {
+    return this.shipDB?.getCredentials();
+  }
+
+  private decryptDb(password: string) {
     this.shipDB?.decrypt(password);
   }
 

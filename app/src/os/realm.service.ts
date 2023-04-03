@@ -13,6 +13,10 @@ export type RealmUpdateBooted = {
   payload: {
     accounts: AccountModelType[];
     screen: 'login' | 'onboarding' | 'os';
+    session?: {
+      patp: string;
+      cookie: string;
+    };
   };
 };
 
@@ -20,18 +24,18 @@ export type RealmUpdateAuthenticated = {
   type: 'authenticated';
   payload: {
     patp: string;
-    token: string;
+    cookie: string;
   };
 };
 
 export type RealmUpdateTypes = RealmUpdateAuthenticated | RealmUpdateBooted;
 
 export class RealmService extends AbstractService {
+  // private realmProcess: RealmProcess | null = null;
   public services?: {
     auth: AuthService;
     ship?: ShipService;
   };
-  private realmProcess: RealmProcess | null = null;
 
   constructor(options?: ServiceOptions) {
     super('realmService', options);
@@ -39,12 +43,12 @@ export class RealmService extends AbstractService {
     this.services = {
       auth: new AuthService(),
     };
-    // on electron app quit, stop the realm process
-    app.on('quit', () => {
-      this.realmProcess?.stop();
-    });
 
-    this.sendUpdate({ type: 'booted', payload: null });
+    const session = this._hydrateSessionIfExists();
+    if (session) this._sendAuthenticated(session.patp, session.cookie);
+    app.on('quit', () => {
+      // do other cleanup here
+    });
   }
 
   /**
@@ -56,14 +60,36 @@ export class RealmService extends AbstractService {
    *
    * @returns void
    */
-  async boot() {
+  public boot() {
+    const hasSession = this.services?.auth.session;
+    let session;
+    if (hasSession) {
+      session = this._hydrateSessionIfExists();
+    }
+
     this.sendUpdate({
       type: 'booted',
       payload: {
-        screen: 'login',
+        screen: hasSession ? 'os' : 'login',
         accounts: this.services?.auth.getAccounts(),
+        session,
       },
     });
+  }
+
+  private _hydrateSessionIfExists(): { patp: string; cookie: string } | null {
+    if (this.services?.auth.session) {
+      const { patp, key } = this.services.auth.session;
+      if (!this.services.ship) {
+        this.services.ship = new ShipService(patp, key);
+      }
+      const credentials = this.services.ship.credentials;
+      return {
+        patp,
+        cookie: credentials.cookie,
+      };
+    }
+    return null;
   }
 
   async login(patp: string, password: string): Promise<boolean> {
@@ -72,8 +98,16 @@ export class RealmService extends AbstractService {
       return false;
     }
 
-    const isAuthenticated = this.services?.auth.login(patp, password);
-    log.info('index isAuthenticated', isAuthenticated);
+    const account = this.services.auth.getAccount(patp);
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return false;
+    }
+    const isAuthenticated = this.services.auth._verifyPassword(
+      password,
+      account.passwordHash
+    );
+
     if (!isAuthenticated) {
       log.warn(`${patp} failed to authenticate`);
       this.sendUpdate({
@@ -83,17 +117,25 @@ export class RealmService extends AbstractService {
       return false;
     }
     if (isAuthenticated) {
+      // TODO Add amplitude logging here
       log.info(`${patp} authenticated`);
-      this.services.ship = new ShipService(patp, password);
-      this.sendUpdate({
-        type: 'authenticated',
-        payload: {
-          patp,
-          token: 'token',
-        },
-      });
+      const key = await this.services.auth.deriveDbKey(password);
+      this.services.ship = new ShipService(patp, key);
+      const credentials = this.services.ship.credentials;
+      this.services.auth._setSession(patp, key);
+      this._sendAuthenticated(patp, credentials.cookie);
     }
     return isAuthenticated;
+  }
+
+  private _sendAuthenticated(patp: string, cookie: string) {
+    this.sendUpdate({
+      type: 'authenticated',
+      payload: {
+        patp,
+        cookie: cookie,
+      },
+    });
   }
 
   // private startBackgroundProcess(): void {
