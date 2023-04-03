@@ -16,9 +16,10 @@ import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatPathType } from 'os/services/chat/chat.service';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const NewChat = () => {
-  const { ship, friends } = useServices();
+  const { ship, friends } = useShipStore();
   const { dimensions } = useTrayApps();
   const { inbox, setSubroute, createChat } = useChatStore();
   const [creating, setCreating] = useState<boolean>(false);

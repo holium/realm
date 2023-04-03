@@ -1,5 +1,7 @@
 import { Database } from 'better-sqlite3';
-import AbstractDataAccess from '../../abstract.db';
+import AbstractDataAccess, {
+  DataAccessContructorParams,
+} from '../../abstract.db';
 import { APIConnection } from '../../conduit';
 
 import {
@@ -48,35 +50,38 @@ interface ChatRow {
 }
 
 export class ChatDB extends AbstractDataAccess<ChatRow> {
-  constructor(preload: boolean = false, db?: Database) {
-    super(preload, db, 'paths');
-    if (preload) return;
-    this.onQuit = this.onQuit.bind(this);
-    this.onError = this.onError.bind(this);
-    this.onDbUpdate = this.onDbUpdate.bind(this);
+  constructor(params: DataAccessContructorParams) {
+    params.name = 'chatDB';
+    params.tableName = 'paths';
+    super(params);
+    if (params.preload) return;
+    this._onQuit = this._onQuit.bind(this);
+    this._onQuit = this._onQuit.bind(this);
+    this._onDbUpdate = this._onDbUpdate.bind(this);
+    this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
       app: 'chat-db',
       path: '/db',
-      onEvent: this.onDbUpdate,
-      onQuit: this.onQuit,
-      onError: this.onError,
+      onEvent: this._onDbUpdate,
+      onQuit: this._onQuit,
+      onError: this._onQuit,
     });
     this.init();
   }
 
   async init() {
-    const paths = await this.fetchPaths();
-    const peers = await this.fetchPeers();
-    const messages = await this.fetchMessages();
-    const deleteLogs = await this.fetchDeleteLogs();
-    this.insertMessages(messages);
-    this.insertPaths(paths);
-    this.insertPeers(peers);
+    const paths = await this._fetchPaths();
+    const peers = await this._fetchPeers();
+    const messages = await this._fetchMessages();
+    const deleteLogs = await this._fetchDeleteLogs();
+    this._insertMessages(messages);
+    this._insertPaths(paths);
+    this._insertPeers(peers);
     // Missed delete events must be applied after inserts
-    this.applyDeleteLogs(deleteLogs).then(() => {
+    this._applyDeleteLogs(deleteLogs).then(() => {
       // and after applying successfully, insert them into the db
-      this.insertDeleteLogs(deleteLogs);
+      this._insertDeleteLogs(deleteLogs);
     });
   }
 
@@ -119,7 +124,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     return response;
   }
 
-  async fetchMessages() {
+  private async _fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     try {
       const response = await APIConnection.getInstance().conduit.scry({
@@ -132,25 +137,25 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     }
   }
 
-  async fetchPaths() {
+  private async _fetchPaths() {
     const lastTimestamp = this.getLastTimestamp('paths');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
-    return response.tables.paths;
+    return response?.tables.paths;
   }
 
-  async fetchPeers() {
+  private async _fetchPeers() {
     const lastTimestamp = this.getLastTimestamp('peers');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
-    return response.tables.peers;
+    return response?.tables.peers;
   }
 
-  async fetchDeleteLogs() {
+  private async _fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('delete_logs');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
@@ -159,11 +164,11 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     return response;
   }
 
-  onDbUpdate(data: ChatDbReactions, _id?: number) {
+  private _onDbUpdate(data: ChatDbReactions, _id?: number) {
     if ('tables' in data) {
-      this.insertMessages(data.tables.messages);
-      this.insertPaths(data.tables.paths);
-      this.insertPeers(data.tables.peers);
+      this._insertMessages(data.tables.messages);
+      this._insertPaths(data.tables.paths);
+      this._insertPeers(data.tables.peers);
     } else if (Array.isArray(data)) {
       if (
         data.length > 1 &&
@@ -173,32 +178,32 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         const messages = data.map(
           (row) => (row as AddRow).row as MessagesRow
         ) as MessagesRow[];
-        this.insertMessages(messages);
+        this._insertMessages(messages);
         const msg = this.getChatMessage(messages[0]['msg-id']);
         this.sendUpdate({ type: 'message-received', payload: msg });
       } else {
-        data.forEach(this.handleDBChange);
+        data.forEach(this._handleDBChange);
       }
     } else {
       console.log(data);
     }
   }
 
-  handleDBChange(dbChange: ChatDbOps) {
+  private _handleDBChange(dbChange: ChatDbOps) {
     if (dbChange.type === 'add-row') {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
         case 'messages':
           // console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
-          this.insertMessages([message]);
+          this._insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
           break;
         case 'paths':
           // console.log('add-row to paths', addRow.row);
           const path = addRow.row as PathsRow;
-          this.insertPaths([path]);
+          this._insertPaths([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-added', payload: chat });
 
@@ -206,7 +211,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         case 'peers':
           // console.log('add-row to peers', addRow.row);
           const peers = addRow.row as PeersRow;
-          this.insertPeers([peers]);
+          this._insertPeers([peers]);
           this.sendUpdate({ type: 'peer-added', payload: peers });
           break;
       }
@@ -218,21 +223,21 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           const message = update as UpdateMessage;
           // console.log('update messages', message.message);
           const msgId = message.message[0]['msg-id'];
-          this.insertMessages(message.message);
+          this._insertMessages(message.message);
           const msg = this.getChatMessage(msgId);
           this.sendUpdate({ type: 'message-edited', payload: msg });
           break;
         case 'paths':
           // console.log('update paths', update.row);
           const path = update.row as PathsRow;
-          this.insertPaths([path]);
+          this._insertPaths([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-updated', payload: chat });
           break;
         case 'peers':
           // console.log('update peers', update.row);
           const peers = update.row as PeersRow;
-          this.insertPeers([peers]);
+          this._insertPeers([peers]);
           break;
       }
     }
@@ -241,18 +246,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       dbChange.type === 'del-paths-row' ||
       dbChange.type === 'del-peers-row'
     ) {
-      this.handleDeletes(dbChange);
+      this._handleDeletes(dbChange);
     }
   }
 
-  handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
+  private _handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
     // insert into delete_logs
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
-      this.deleteMessagesRow(delMessagesRow['msg-id']);
+      this._deleteMessagesRow(delMessagesRow['msg-id']);
       this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
-      this.insertDeleteLogs([
+      this._insertDeleteLogs([
         {
           change: delMessagesRow,
           timestamp: delMessagesRow.timestamp,
@@ -262,9 +267,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     if (dbChange.type === 'del-paths-row') {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this.deletePathsRow(delPathsRow.row);
+      this._deletePathsRow(delPathsRow.row);
       this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.row });
-      this.insertDeleteLogs([
+      this._insertDeleteLogs([
         {
           change: delPathsRow,
           timestamp: delPathsRow.timestamp,
@@ -274,9 +279,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     if (dbChange.type === 'del-peers-row') {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
+      this._deletePeersRow(delPeersRow.row, delPeersRow.ship);
       this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
-      this.insertDeleteLogs([
+      this._insertDeleteLogs([
         {
           change: delPeersRow,
           timestamp: delPeersRow.timestamp,
@@ -285,13 +290,13 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     }
   }
 
-  onQuit() {
+  private _onQuit() {
     console.log('fail!');
   }
-  onError(err: any) {
+  private _onError(err: any) {
     console.log('err!', err);
   }
-  parseMetadata = (metadata: string) => {
+  private _parseMetadata = (metadata: string) => {
     const mtd = JSON.parse(metadata);
     return {
       ...mtd,
@@ -394,7 +399,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
-        metadata: row.metadata ? this.parseMetadata(row.metadata) : null,
+        metadata: row.metadata ? this._parseMetadata(row.metadata) : null,
         lastMessage,
       };
     });
@@ -493,7 +498,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         ...row,
         peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
-        metadata: row.metadata ? this.parseMetadata(row.metadata) : null,
+        metadata: row.metadata ? this._parseMetadata(row.metadata) : null,
         lastMessage,
       };
     });
@@ -570,7 +575,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     return result.map((row) => {
       return {
         ...row,
-        metadata: row.metadata ? this.parseMetadata(row.metadata) : [null],
+        metadata: row.metadata ? this._parseMetadata(row.metadata) : [null],
         contents: row.contents
           ? JSON.parse(row.contents).map((content: any) => {
               if (content?.metadata) {
@@ -665,7 +670,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   // Inserts
   //
 
-  insertMessages(messages: MessagesRow[]) {
+  private _insertMessages(messages: MessagesRow[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO messages (
@@ -714,8 +719,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     insertMany(messages);
   }
 
-  insertPaths(paths: PathsRow[]) {
+  private _insertPaths(paths: PathsRow[]) {
     if (!this.db) throw new Error('No db connection');
+    if (!paths) return;
     const insert = this.db.prepare(
       `REPLACE INTO paths (
           path, 
@@ -746,8 +752,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     insertMany(paths);
   }
 
-  insertPeers(peers: PeersRow[]) {
+  private _insertPeers(peers: PeersRow[]) {
     if (!this.db) throw new Error('No db connection');
+    if (!peers) return;
     const insert = this.db.prepare(
       `REPLACE INTO peers (
           path, 
@@ -770,13 +777,13 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     insertMany(peers);
   }
 
-  async applyDeleteLogs(deleteLogs: DeleteLogRow[]) {
+  private async _applyDeleteLogs(deleteLogs: DeleteLogRow[]) {
     deleteLogs.forEach((deleteLog) => {
-      this.handleDeletes(deleteLog.change);
+      this._handleDeletes(deleteLog.change);
     });
   }
 
-  insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
+  private _insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO delete_logs (
@@ -794,7 +801,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     insertMany(deleteLogs);
   }
 
-  deletePathsRow(path: string) {
+  private _deletePathsRow(path: string) {
     if (!this.db) throw new Error('No db connection');
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
     console.log('deleting path', path);
@@ -809,7 +816,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     deletePeers.run(path);
   }
 
-  deletePeersRow(path: string, peer: string) {
+  private _deletePeersRow(path: string, peer: string) {
     if (!this.db) throw new Error('No db connection');
     const deletePath = this.db.prepare(
       'DELETE FROM peers WHERE path = ? AND ship = ?'
@@ -818,7 +825,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     deletePath.run(path, peer);
   }
 
-  deleteMessagesRow(msgId: string) {
+  private _deleteMessagesRow(msgId: string) {
     if (!this.db) throw new Error('No db connection');
     const deleteMessage = this.db.prepare(
       'DELETE FROM messages WHERE msg_id = ?'
@@ -886,4 +893,6 @@ create unique index if not exists delete_log_change_uindex
     on delete_logs (timestamp, change);
 `;
 
-export const chatPreload = ChatDB.preload(new ChatDB(true));
+export const chatDBPreload = ChatDB.preload(
+  new ChatDB({ preload: true, name: 'chatDB' })
+);

@@ -5,6 +5,8 @@ import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
 import { OSActions } from 'renderer/logic/actions/os';
 import { servicesStore } from 'renderer/logic/store';
+import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
+import { RealmUpdateTypes } from 'os/realm.service';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -15,7 +17,7 @@ const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
   );
 };
 
-const ChatStore = types
+export const ChatStore = types
   .model('ChatStore', {
     subroute: types.optional(
       types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
@@ -78,14 +80,14 @@ const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.inbox = yield ChatDBActions.getChatList();
-        const pinnedChats = yield ChatDBActions.fetchPinnedChats();
+        self.inbox = yield ChatIPC.getChatList();
+        const pinnedChats = yield ChatIPC.fetchPinnedChats();
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(pinnedChats)
         );
 
-        const muted = yield ChatDBActions.fetchMutedChats();
+        const muted = yield ChatIPC.fetchMuted();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -217,9 +219,8 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
+export const ChatStoreContext =
+  createContext<null | ChatStoreInstance>(chatStore);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {
@@ -230,12 +231,18 @@ export function useChatStore() {
   return store;
 }
 
-OSActions.onBoot(() => {
-  chatStore.init();
+RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+  if (update.type === 'authenticated') {
+    chatStore.init();
+  }
 });
-OSActions.onConnected(() => {
-  chatStore.init();
-});
+
+// OSActions.onBoot(() => {
+//   chatStore.init();
+// });
+// OSActions.onConnected(() => {
+//   chatStore.init();
+// });
 OSActions.onLogout((_event: any) => {
   chatStore.reset();
 });

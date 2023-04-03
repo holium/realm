@@ -8,7 +8,7 @@ import { Patp } from 'os/types';
 import { OSActions } from 'renderer/logic/actions/os';
 
 import { SoundActions } from 'renderer/logic/actions/sound';
-import { RoomsIPC } from 'renderer/logic/ipc';
+import { RoomsIPC } from 'renderer/stores/ipc';
 
 const config = {
   rtc: {

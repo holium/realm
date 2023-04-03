@@ -1,7 +1,7 @@
 import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { useContext, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ShellActions } from './logic/actions/shell';
@@ -10,7 +10,6 @@ import { useAppState, appState, AppStateProvider } from './stores/app.store';
 import { Auth } from './system/authentication';
 import { SelectionProvider } from './logic/lib/selection';
 import { ErrorBoundary } from './logic/ErrorBoundary';
-import AccountContext, { AccountProvider } from './stores/AccountContext';
 
 function AppContent() {
   const { authStore, booted } = useAppState();
@@ -25,7 +24,7 @@ function AppContent() {
 }
 
 const AppPresenter = () => {
-  const { isLoggedIn, theme } = useAppState();
+  const { theme, shellStore } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
@@ -34,11 +33,12 @@ const AppPresenter = () => {
       ShellActions.closeDialog();
     };
   }, []);
+
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
-        <BgImage blurred={!isLoggedIn || true} wallpaper={bgImage} />
+        <BgImage blurred={shellStore.isBlurred} wallpaper={bgImage} />
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>

@@ -1,4 +1,4 @@
-import { RealmIPC } from './../logic/ipc';
+import { RealmIPC } from './ipc';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -10,7 +10,7 @@ import {
   flow,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { AuthIPC, ShipIPC } from 'renderer/logic/ipc';
+import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
 import { AccountModel, AccountModelType } from './models/Account.model';
 import AccountContext from './AccountContext';
 import {

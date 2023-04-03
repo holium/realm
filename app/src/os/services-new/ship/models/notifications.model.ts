@@ -1,6 +1,8 @@
 import { Database } from 'better-sqlite3';
 import APIConnection from '../../conduit';
-import AbstractDataAccess from '../../abstract.db';
+import AbstractDataAccess, {
+  DataAccessContructorParams,
+} from '../../abstract.db';
 import {
   AddRow,
   DelRow,
@@ -42,9 +44,11 @@ type GetParamsObj = {
 };
 
 export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
-  constructor(preload: boolean = true, db?: Database) {
-    super(preload, db, 'notifications');
-    if (preload) return;
+  constructor(params: DataAccessContructorParams) {
+    params.name = 'notifDB';
+    params.tableName = 'notifications';
+    super(params);
+    if (params.preload) return;
     this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
 
@@ -79,11 +83,11 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
       buttons: row.buttons ? JSON.parse(row.buttons) : null,
       link: row.link,
       metadata: row.metadata ? JSON.parse(row.metadata) : null,
-      createdAt: row['created-at'],
-      updatedAt: row['updated-at'],
-      readAt: row['read-at'],
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      readAt: row.readAt,
       read: row.read === 1,
-      dismissedAt: row['dismissed-at'],
+      dismissedAt: row.dismissedAt,
       dismissed: row.dismissed === 1,
     };
   }
@@ -143,6 +147,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
 
   insertNotifications(notifications: NotificationsRow[]) {
     if (!this.db) throw new Error('No db connection');
+    if (!notifications) return;
     const insert = this.db.prepare(
       `REPLACE INTO notifications (
         id,
@@ -405,4 +410,6 @@ export const QUERY_NOTIFICATIONS = `
   LEFT OUTER JOIN paths ON notifications.path = paths.path
 `;
 
-export const notifPreload = NotificationsDB.preload(new NotificationsDB(true));
+export const notifDBPreload = NotificationsDB.preload(
+  new NotificationsDB({ preload: true })
+);

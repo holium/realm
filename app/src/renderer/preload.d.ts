@@ -5,7 +5,8 @@ import { shipPreload } from 'os/services-new/ship/ship.service';
 import { roomsPreload } from 'os/services-new/ship/rooms.service';
 import { authPreload } from 'os/services-new/auth/auth.service';
 import { chatPreload } from 'os/services-new/ship/models/chat.model';
-import { notifPreload } from 'os/services-new/ship/models/notifications.model';
+import { notifPreload } from 'os/services-new/ship/notifications.service';
+import { friendsPreload } from 'os/services-new/ship/models/friends.model';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 
 declare global {
@@ -20,8 +21,9 @@ declare global {
     shipService: typeof shipPreload;
     authService: typeof authPreload;
     roomsService: typeof roomsPreload;
-    chatDB: typeof chatPreload;
-    notifDB: typeof notifPreload;
+    chatService: typeof chatPreload;
+    notifService: typeof notifPreload;
+    friendDb: typeof friendsPreload;
     realm: typeof realmPreload;
   }
 }

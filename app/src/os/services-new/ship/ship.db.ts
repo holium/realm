@@ -5,6 +5,7 @@ import sqlite3 from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import { notifInitSql } from './models/notifications.model';
 import { chatInitSql } from './models/chat.model';
+import { friendsInitSql } from './models/friends.model';
 
 export class ShipDB {
   private shipDB: sqlite3.Database;
@@ -80,6 +81,7 @@ export class ShipDB {
 const initSql = `
 ${chatInitSql}
 ${notifInitSql}
+${friendsInitSql}
 create table if not exists credentials (
   url       text primary key,
   code      text,

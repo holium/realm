@@ -1,14 +1,11 @@
 // import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken, rgba } from 'polished';
-
 import { Pulser } from 'renderer/components';
 import { Box, Flex, Avatar } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-
 import { motion } from 'framer-motion';
 import { TrayClock } from '../Clock';
 import styled from 'styled-components';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type AccountTrayProps = {
   unreadCount: number;
@@ -16,7 +13,7 @@ type AccountTrayProps = {
 };
 
 const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
-  const { ship, theme } = useServices();
+  const { ship } = useShipStore();
 
   return (
     <Flex gap={8} alignItems="center">
@@ -46,7 +43,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
         ) : (
           <Flex>
             <Pulser
-              background={rgba(theme.currentTheme.backgroundColor, 0.5)}
+              background="rgba(var(--rlm-background-rgba), 0.5)"
               borderRadius={4}
               height={28}
               width={28}
@@ -67,10 +64,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
             style={{
               position: 'absolute',
               background: '#4E9EFD',
-              border: `2px solid ${darken(
-                0.025,
-                theme.currentTheme.dockColor
-              )}`,
+              border: `2px solid rgba(#4E9EFD, .25)`,
               borderRadius: '50%',
               right: -2,
               bottom: -2,

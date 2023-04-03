@@ -8,12 +8,12 @@ import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications.service';
 import ChatService from './chat.service';
+import { Friends } from './models/friends.model';
 
 export class ShipService extends AbstractService {
   private patp: string;
   private readonly shipDB?: ShipDB;
   models?: {
-    chat: ChatDB;
     notifications: null;
     passports: null;
     friends: null;
@@ -22,6 +22,7 @@ export class ShipService extends AbstractService {
     rooms: RoomsService;
     notifications: NotificationsService;
     chat: ChatService;
+    friends: Friends;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -47,7 +48,6 @@ export class ShipService extends AbstractService {
     );
     // init all models
     this.models = {
-      chat: new ChatDB(false, this.shipDB.db),
       notifications: null,
       passports: null,
       friends: null,
@@ -57,6 +57,7 @@ export class ShipService extends AbstractService {
       rooms: new RoomsService(),
       notifications: new NotificationsService(undefined, this.shipDB.db),
       chat: new ChatService(undefined, this.shipDB.db),
+      friends: new Friends(false, this.shipDB.db),
     };
 
     this.sendUpdate({
@@ -65,12 +66,6 @@ export class ShipService extends AbstractService {
         patp,
       },
     });
-
-    // app.on('refresh', () => {
-    //   this.shipDB?.disconnect();
-    //   APIConnection.getInstance(credentials).conduit.removeAllListeners();
-    //   this.removeAllListeners();
-    // });
 
     app.on('quit', () => {
       this.shipDB?.disconnect();

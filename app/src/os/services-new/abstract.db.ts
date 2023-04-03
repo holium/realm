@@ -1,14 +1,37 @@
 import { Database, Statement } from 'better-sqlite3';
-import { BrowserWindow } from 'electron';
+import {
+  BrowserWindow,
+  ipcMain,
+  IpcMainInvokeEvent,
+  ipcRenderer,
+} from 'electron';
+
+export interface DataAccessContructorParams {
+  preload: boolean;
+  name?: string;
+  db?: Database;
+  tableName?: string;
+}
 
 abstract class AbstractDataAccess<T> {
   protected readonly db?: Database;
   protected readonly tableName?: string;
+  protected readonly name: string;
 
-  constructor(preload: boolean = false, db?: Database, tableName?: string) {
-    if (preload) return;
-    this.db = db;
-    this.tableName = tableName;
+  constructor(params: {
+    preload: boolean;
+    name?: string;
+    db?: Database;
+    tableName?: string;
+  }) {
+    if (!params.name) throw new Error('DataAccess must have a name');
+    this.name = params.name;
+    if (params.preload) return;
+    this.db = params.db;
+    this.tableName = params.tableName;
+    if (!params.preload) {
+      this._registerIpcHandlers();
+    }
   }
 
   protected abstract mapRow(row: any): T;
@@ -94,10 +117,43 @@ abstract class AbstractDataAccess<T> {
   } {
     return {
       onUpdate: (callback: (...args: any[]) => void) => {
-        ipcRenderer.on(`db.${this.tableName}.onUpdate`, callback);
+        ipcRenderer.on(`${this.name}.onUpdate`, callback);
       },
     };
   }
+  /**
+   * ------------------------------
+   * _registerIpcHandlers
+   * ------------------------------
+   * Registers IPC handlers for all methods on the service.
+   * This method is called by the constructor.
+   * @returns void
+   * @private
+   */
+  private _registerIpcHandlers(): void {
+    const methods = Object.getOwnPropertyNames(
+      Object.getPrototypeOf(this)
+    ).filter(
+      (method) =>
+        method !== 'constructor' && typeof (this as any)[method] === 'function'
+    );
+
+    methods.forEach((method) => {
+      const ipcChannel = `${this.name}.${method}`;
+      ipcMain.handle(
+        ipcChannel,
+        async (_event: IpcMainInvokeEvent, ...args: any[]) => {
+          try {
+            return await (this as any)[method](...args);
+          } catch (error) {
+            console.error(`Error in ${ipcChannel}:`, error);
+            throw error;
+          }
+        }
+      );
+    });
+  }
+
   /**
    * ------------------------------
    * sendUpdate
@@ -111,7 +167,7 @@ abstract class AbstractDataAccess<T> {
   protected sendUpdate(data: any): void {
     const windows = BrowserWindow.getAllWindows();
     windows.forEach((window) => {
-      window.webContents.send(`db.${this.tableName}.onUpdate`, data);
+      window.webContents.send(`${this.name}.onUpdate`, data);
     });
   }
 
@@ -127,7 +183,7 @@ abstract class AbstractDataAccess<T> {
   static preload(
     service: AbstractDataAccess<any>
   ): Record<string, (...args: any[]) => Promise<any> | void> {
-    const tableName = service.tableName;
+    const dbName = service.name;
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(service)
     ).filter(
@@ -143,7 +199,7 @@ abstract class AbstractDataAccess<T> {
     > = {};
     methods.forEach((method) => {
       mappedMethods[method] = async (...args: any[]) => {
-        return await ipcRenderer.invoke(`db.${tableName}.${method}`, ...args);
+        return await ipcRenderer.invoke(`${dbName}.${method}`, ...args);
       };
     });
 

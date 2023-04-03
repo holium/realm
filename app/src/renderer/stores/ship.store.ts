@@ -2,8 +2,12 @@ import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
-import { chatStore } from '../apps/Courier/store';
-import { NotifDBIPC } from 'renderer/logic/ipc';
+import { ChatStore, chatStore } from '../apps/Courier/store';
+import { NotifIPC, RealmIPC } from './ipc';
+import { Theme } from './models/Theme.model';
+import { RealmUpdateTypes } from 'os/realm.service';
+import { SpacesStore } from 'os/services/spaces/models/spaces';
+import { FriendModel, FriendsStore } from './models/friends.model';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (
@@ -57,8 +61,8 @@ const NotificationModel = types
 
 export type NotifMobxType = Instance<typeof NotificationModel>;
 
-const AccountStore = types
-  .model('AccountStore', {
+const NotifStore = types
+  .model('NotifStore', {
     notifications: types.array(NotificationModel),
     unreadByPaths: types.map(types.number),
     unreadByApps: types.map(types.number),
@@ -86,8 +90,7 @@ const AccountStore = types
   .actions((self) => ({
     initNotifications: flow(function* () {
       try {
-        const notifications =
-          yield NotifDBIPC.getNotifications() as Promise<any>;
+        const notifications = yield NotifIPC.getNotifications() as Promise<any>;
         self.unreadByPaths = notifications.reduce(
           (acc: Map<string, number>, n: NotifMobxType) => {
             if (!n.read) {
@@ -230,39 +233,112 @@ const AccountStore = types
     },
   }));
 
-export const accountStore = AccountStore.create({
-  notifications: [],
+const ShipModel = types
+  .model('ShipModel', {
+    url: types.string,
+    patp: types.identifier,
+    cookie: types.string,
+    nickname: types.maybeNull(types.string),
+    color: types.maybeNull(types.string),
+    avatar: types.maybeNull(types.string),
+  })
+  .actions((self) => ({
+    setMetadata(metadata: any) {
+      self.nickname = metadata.nickname;
+      self.color = metadata.color;
+      self.avatar = metadata.avatar;
+    },
+  }));
+
+export type ShipMobxType = Instance<typeof ShipModel>;
+
+const ShipStore = types
+  .model('ShipStore', {
+    ship: types.maybeNull(ShipModel),
+    friends: FriendsStore,
+    spacesStore: types.optional(SpacesStore, {}),
+    notifStore: NotifStore,
+    chatStore: ChatStore,
+  })
+  .actions((self) => ({
+    setShip(ship: any) {
+      window.ship = ship.patp;
+      self.friends.init().then(() => {
+        const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
+        if (myMeta) {
+          self.ship?.setMetadata(myMeta);
+        }
+      });
+      self.ship = ShipModel.create(ship);
+      self.chatStore.init();
+    },
+    reset() {
+      self.ship = null;
+      self.notifStore.reset();
+      self.chatStore.reset();
+    },
+  }));
+
+const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
+
+export const shipStore = ShipStore.create({
+  notifStore: {
+    notifications: [],
+  },
+  friends: {
+    all: [],
+  },
+  chatStore: {
+    subroute: 'inbox',
+    isOpen: false,
+    pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+  },
 });
 
 // -------------------------------
 // Create core context
 // -------------------------------
-type AccountStoreInstance = Instance<typeof AccountStore>;
-export const AccountStoreContext =
-  createContext<null | AccountStoreInstance>(accountStore);
+type ShipStoreInstance = Instance<typeof ShipStore>;
+export const ShipStoreContext =
+  createContext<null | ShipStoreInstance>(shipStore);
 
-export const AccountProvider = AccountStoreContext.Provider;
-export function useAccountStore() {
-  const store = useContext(AccountStoreContext);
+export const AccountProvider = ShipStoreContext.Provider;
+export function useShipStore() {
+  const store = useContext(ShipStoreContext);
   if (store === null) {
     throw new Error('Store cannot be null, please add a context provider');
   }
   return store;
 }
 
+// updates
+RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+  console.log('realm update', update);
+  if (update.type === 'booted') {
+    if (update.payload.session) {
+      shipStore.setShip(update.payload.session);
+    }
+  }
+  if (update.type === 'authenticated') {
+    shipStore.setShip(update.payload);
+  }
+});
 NotifDBActions.onDbChange((_evt, type, data) => {
   switch (type) {
     case 'notification-added':
-      accountStore.onNotifAdded(data);
-      if (chatStore.isChatSelected(data.path) && data.app === 'realm-chat') {
-        accountStore.readPath(data.app, data.path);
+      shipStore.notifStore.onNotifAdded(data);
+      if (
+        shipStore.chatStore.isChatSelected(data.path) &&
+        data.app === 'realm-chat'
+      ) {
+        shipStore.notifStore.readPath(data.app, data.path);
       }
       break;
     case 'notification-updated':
-      accountStore.onNotifUpdated(data);
+      shipStore.notifStore.onNotifUpdated(data);
       break;
     case 'notification-deleted':
-      accountStore.onNotifDeleted(data);
+      shipStore.notifStore.onNotifDeleted(data);
       break;
   }
 });

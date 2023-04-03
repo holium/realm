@@ -1,7 +1,7 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import log from 'electron-log';
 import APIConnection from '../conduit';
-import { NotificationsDB } from './models/notifications.model';
+import { notifDBPreload, NotificationsDB } from './models/notifications.model';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 
 export class NotificationsService extends AbstractService {
@@ -11,17 +11,18 @@ export class NotificationsService extends AbstractService {
     if (options?.preload) {
       return;
     }
-    this.notifDB = new NotificationsDB(false, db);
-  }
-
-  public getNotifications() {
-    return this.notifDB?.getNotifications();
+    this.notifDB = new NotificationsDB({ preload: false, name: 'notifDB', db });
   }
 }
 
 export default NotificationsService;
 
 // Generate preload
-export const roomsPreload = NotificationsService.preload(
+const notifServiceInstance = NotificationsService.preload(
   new NotificationsService({ preload: true })
 );
+
+export const notifPreload = {
+  ...notifDBPreload,
+  ...notifServiceInstance,
+};

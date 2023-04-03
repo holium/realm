@@ -17,7 +17,7 @@ export interface Account {
 
 export class Accounts extends AbstractDataAccess<Account> {
   constructor(db: Database) {
-    super(false, db, 'accounts');
+    super({ preload: false, db, name: 'accounts', tableName: 'accounts' });
   }
 
   protected mapRow(row: any): Account {

@@ -17,14 +17,12 @@ import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { useServices } from 'renderer/logic/store';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
-import { useAccountStore } from 'renderer/stores/ship.store';
-import { useChatStore } from 'renderer/apps/Courier/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
 import { ShellActions } from 'renderer/logic/actions/shell';
 
@@ -36,7 +34,7 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
-  const { ship } = useServices();
+  const { ship, chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
     initNotifications,
@@ -44,10 +42,9 @@ export const ShipBarPresenter = () => {
     dismissOne,
     dismissApp,
     dismissPath,
-  } = useAccountStore();
+  } = notifStore;
   const roomsManager = useRooms(ship?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
-  const chatStore = useChatStore();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
 

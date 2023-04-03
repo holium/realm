@@ -1,5 +1,5 @@
 import { session } from 'electron';
-import { RealmIPC, ShipIPC } from '../logic/ipc';
+import { RealmIPC, ShipIPC } from './ipc';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -11,19 +11,14 @@ import {
 } from 'mobx-state-tree';
 
 import { OSActions } from '../logic/actions/os';
-import { AuthIPC } from 'renderer/logic/ipc';
 import { AccountModel, AccountModelType } from './models/Account.model';
 import { Theme, ThemeType } from './models/Theme.model';
 import { defaultTheme } from '@holium/shared';
 import { AuthenticationModel } from './auth.store';
-import {
-  AuthUpdateInit,
-  AuthUpdateLogin,
-  AuthUpdateTypes,
-} from 'os/services-new/auth/auth.service';
+
 import { ShellModel } from './models/Shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
-import { RealmUpdateBooted, RealmUpdateTypes } from 'os/realm.service';
+import { RealmUpdateTypes } from 'os/realm.service';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -51,6 +46,7 @@ const AppStateModel = types
       self.booted = true;
       if (data.session) {
         self.authStore._setSession(data.session.patp);
+        self.shellStore.setIsBlurred(false);
         self.isLoggedIn = true;
       }
     },
@@ -59,13 +55,16 @@ const AppStateModel = types
     },
     setLoggedIn() {
       self.isLoggedIn = true;
+      self.shellStore.setIsBlurred(false);
     },
     setLoggedOut() {
       self.isLoggedIn = false;
+      self.shellStore.setIsBlurred(true);
     },
     reset() {
       self.booted = false;
       self.isLoggedIn = false;
+      self.shellStore.setIsBlurred(true);
     },
   }));
 
@@ -77,6 +76,8 @@ const AppStateModel = types
 
 // const persistedState = loadSnapshot();
 // delete defaultTheme.id
+const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
+
 export const appState = AppStateModel.create({
   booted: false,
   currentScreen: 'onboarding',
@@ -129,24 +130,6 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'authenticated') {
     appState.authStore._setSession(update.payload.patp);
     appState.setLoggedIn();
-  }
-});
-
-AuthIPC.onUpdate((_evt: any, update: AuthUpdateTypes) => {
-  console.log('auth update', update);
-  switch (update.type) {
-    case 'init':
-      appState.authStore._setAccounts((update as AuthUpdateInit).payload);
-      break;
-    case 'login':
-      appState.authStore._setSession((update as AuthUpdateLogin).payload.patp);
-      break;
-    // case 'logout':
-    //   authState.session = null;
-    //   break;
-
-    default:
-      break;
   }
 });
 

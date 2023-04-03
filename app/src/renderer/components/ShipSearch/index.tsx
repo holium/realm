@@ -3,12 +3,21 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
-import { Flex, Text, Box, IconButton, Icons } from '../';
+import { Text } from '../';
 import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
-import { Row, Avatar, WindowedList } from '@holium/design-system';
+import {
+  Flex,
+  Box,
+  Button,
+  Icon,
+  Row,
+  Avatar,
+  WindowedList,
+} from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const resultHeight = 50;
 
@@ -38,17 +47,11 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
   /* margin-top: 2px; */
   padding: 4px 4px;
   border-radius: 9px;
-  box-shadow: ${(props: IAutoCompleteBox) => props.theme.elevations.two};
-  border: 1px solid
-    ${(props: IAutoCompleteBox) => props.theme.colors.ui.borderColor};
-
-  background-color: ${(props: IAutoCompleteBox) => props.customBg};
 `;
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
-    const { theme, ship, friends } = useServices();
-    const { mode, dockColor, windowColor } = theme.currentTheme;
+    const { theme, ship, friends } = useShipStore();
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
       return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
@@ -59,7 +62,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
       [results.length, search.length]
     );
 
-    const RowRenderer = (contact: (typeof results)[number]) => {
+    const RowRenderer = (contact: typeof results[number]) => {
       const nickname = contact[1].nickname ?? '';
       const sigilColor = contact[1].color ?? '#000000';
       const avatar = contact[1].avatar;
@@ -94,10 +97,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
 
           <Flex justifyContent="center" alignItems="center">
             {!isDropdown && (
-              <IconButton
-                luminosity={mode}
-                customBg={dockColor}
-                size={24}
+              <Button.IconButton
                 canFocus
                 // isDisabled={selected.size > 0}
                 onClick={(evt: any) => {
@@ -105,8 +105,8 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                   onSelected([contact[0], nickname]);
                 }}
               >
-                <Icons opacity={0.5} name="Plus" />
-              </IconButton>
+                <Icon opacity={0.5} name="Plus" size={20} />
+              </Button.IconButton>
             )}
           </Flex>
         </Row>
@@ -172,11 +172,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
               duration: 0.2,
             },
           }}
-          customBg={
-            mode === 'light'
-              ? lighten(0.1, windowColor)
-              : darken(0.2, windowColor)
-          }
         >
           {resultList}
         </AutoCompleteBox>

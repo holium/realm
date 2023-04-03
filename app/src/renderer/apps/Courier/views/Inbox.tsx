@@ -13,8 +13,8 @@ import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
-import { useServices } from 'renderer/logic/store';
 import InboxList from '../components/InboxList';
+import { useShipStore } from 'renderer/stores/ship.store';
 const rowHeight = 52;
 
 const sortFunction = (a: ChatModelType, b: ChatModelType) => {
@@ -34,7 +34,7 @@ const sortFunction = (a: ChatModelType, b: ChatModelType) => {
 };
 
 export const InboxPresenter = () => {
-  const { ship } = useServices();
+  const { ship } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =

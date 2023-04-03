@@ -14,6 +14,7 @@ export type RealmUpdateBooted = {
     accounts: AccountModelType[];
     screen: 'login' | 'onboarding' | 'os';
     session?: {
+      url: string;
       patp: string;
       cookie: string;
     };
@@ -23,6 +24,7 @@ export type RealmUpdateBooted = {
 export type RealmUpdateAuthenticated = {
   type: 'authenticated';
   payload: {
+    url: string;
     patp: string;
     cookie: string;
   };
@@ -45,7 +47,8 @@ export class RealmService extends AbstractService {
     };
 
     const session = this._hydrateSessionIfExists();
-    if (session) this._sendAuthenticated(session.patp, session.cookie);
+    if (session)
+      this._sendAuthenticated(session.patp, session.url, session.cookie);
     app.on('quit', () => {
       // do other cleanup here
     });
@@ -77,7 +80,11 @@ export class RealmService extends AbstractService {
     });
   }
 
-  private _hydrateSessionIfExists(): { patp: string; cookie: string } | null {
+  private _hydrateSessionIfExists(): {
+    patp: string;
+    url: string;
+    cookie: string;
+  } | null {
     if (this.services?.auth.session) {
       const { patp, key } = this.services.auth.session;
       if (!this.services.ship) {
@@ -86,6 +93,7 @@ export class RealmService extends AbstractService {
       const credentials = this.services.ship.credentials;
       return {
         patp,
+        url: credentials.url,
         cookie: credentials.cookie,
       };
     }
@@ -93,7 +101,6 @@ export class RealmService extends AbstractService {
   }
 
   async login(patp: string, password: string): Promise<boolean> {
-    log.info('loggin in ');
     if (!this.services) {
       return false;
     }
@@ -123,17 +130,18 @@ export class RealmService extends AbstractService {
       this.services.ship = new ShipService(patp, key);
       const credentials = this.services.ship.credentials;
       this.services.auth._setSession(patp, key);
-      this._sendAuthenticated(patp, credentials.cookie);
+      this._sendAuthenticated(patp, credentials.url, credentials.cookie);
     }
     return isAuthenticated;
   }
 
-  private _sendAuthenticated(patp: string, cookie: string) {
+  private _sendAuthenticated(patp: string, url: string, cookie: string) {
     this.sendUpdate({
       type: 'authenticated',
       payload: {
         patp,
-        cookie: cookie,
+        url,
+        cookie,
       },
     });
   }

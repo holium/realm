@@ -15,7 +15,6 @@ export const AccountModel = types.model('AccountModel', {
   nickname: types.maybeNull(types.string),
   color: types.maybeNull(types.string),
   avatar: types.maybeNull(types.string),
-  passwordHash: types.maybeNull(types.string),
   theme: Theme,
   createdAt: types.number,
   updatedAt: types.number,
