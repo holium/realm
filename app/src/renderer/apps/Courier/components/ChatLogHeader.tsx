@@ -7,9 +7,8 @@ import {
   Menu,
   MenuItemProps,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
-import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -32,8 +31,8 @@ export const ChatLogHeader = ({
   isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
-  const { ship } = useServices();
-  const { selectedChat, setSubroute, toggleMuted } = useChatStore();
+  const { ship, chatStore } = useShipStore();
+  const { selectedChat, setSubroute, toggleMuted } = chatStore;
 
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
 

@@ -1,0 +1,149 @@
+import { Database } from 'better-sqlite3';
+import APIConnection from '../../conduit';
+import AbstractDataAccess from '../../abstract.db';
+import { cleanNounColor } from '../../../lib/color';
+import { ThemeType } from 'renderer/stores/models/theme.model';
+import log from 'electron-log';
+
+export interface Space {
+  path: string;
+  name: string;
+  description: string;
+  color: string;
+  type: string;
+  archetype: string;
+  picture: string;
+  access: string;
+  theme: ThemeType;
+  // createdAt: number;
+  // updatedAt: number;
+}
+
+export class SpacesDB extends AbstractDataAccess<Space> {
+  constructor(preload: boolean, db?: Database) {
+    super({ preload: preload, db, name: 'spaces', tableName: 'spaces' });
+    if (preload) {
+      return;
+    }
+  }
+
+  protected mapRow(row: any): Space {
+    return {
+      path: row.path,
+      name: row.name,
+      description: row.description,
+      color: row.color ? cleanNounColor(row.color) : '#000000',
+      type: row.type,
+      archetype: row.archetype,
+      picture: row.picture,
+      access: row.access,
+      theme: JSON.parse(row.theme),
+      // updatedAt: row.updatedAt,
+      // createdAt: row.createdAt,
+    };
+  }
+
+  public insertAll(spaces: Space[]) {
+    if (!this.db) throw new Error('No db connection');
+    const insert = this.db.prepare(
+      `REPLACE INTO spaces (
+        path,
+        name,
+        description,
+        color,
+        type,
+        archetype,
+        picture,
+        access,
+        theme
+      ) VALUES (
+        @path,
+        @name,
+        @description,
+        @color,
+        @type,
+        @archetype,
+        @picture,
+        @access,
+        @theme
+      )`
+    );
+    const insertMany = this.db.transaction((spaces) => {
+      Object.entries<any>(spaces).forEach(([path, space]) => {
+        insert.run({
+          path,
+          name: space.name,
+          description: space.description,
+          color: space.color,
+          type: space.type,
+          archetype: space.archetype,
+          picture: space.picture,
+          access: space.access,
+          theme: JSON.stringify(space.theme),
+        });
+      });
+    });
+    insertMany(spaces);
+  }
+
+  public findOne(path: string): Space | null {
+    const query = `SELECT * FROM ${this.tableName} WHERE path = ?`;
+    const stmt = this.prepare(query);
+    const row = stmt.get(path);
+    return row ? this.mapRow(row) : null;
+  }
+
+  public create(values: Partial<Space>): Space {
+    const columns = Object.keys(values).join(', ');
+    const placeholders = Object.keys(values)
+      .map(() => '?')
+      .join(', ');
+    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
+    const stmt = this.prepare(query);
+
+    stmt.run(Object.values(values));
+    if (!values.path) throw new Error('Failed to create new record');
+    const created = this.findOne(values.path);
+    if (!created) throw new Error('Failed to create new record');
+    return created;
+  }
+
+  public update(path: string, values: Partial<Space>): Space {
+    const setClause = Object.keys(values)
+      .map((key) => `${key} = ?`)
+      .join(', ');
+    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE path = ?`;
+    const stmt = this.prepare(query);
+
+    stmt.run([...Object.values(values), path]);
+    const updated = this.findOne(path);
+    if (!updated) throw new Error('Failed to update record');
+    return updated;
+  }
+
+  public delete(path: string): void {
+    const query = `DELETE FROM ${this.tableName} WHERE path = ?`;
+    const stmt = this.prepare(query);
+
+    const result = stmt.run(path);
+    if (result.changes !== 1) throw new Error('Failed to delete record');
+  }
+}
+
+export const spacesInitSql = `
+  create table if not exists spaces (
+    current       integer default 0,
+    path          text primary key,
+    name          text not null,
+    description   text,
+    color         text,
+    type          text not null,
+    archetype     text,
+    picture       text,
+    access        text,
+    theme         text
+  );
+  create unique index if not exists spaces_path_uindex on spaces (path);
+`;
+
+export const spacesDBPreload = SpacesDB.preload(new SpacesDB(true));

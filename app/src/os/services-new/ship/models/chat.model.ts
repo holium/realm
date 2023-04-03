@@ -506,11 +506,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     return rows[0];
   }
 
-  getChatLog(
-    _evt: any,
-    path: string,
-    _params?: { start: number; amount: number }
-  ) {
+  getChatLog(path: string, _params?: { start: number; amount: number }) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_fragments AS (
@@ -589,7 +585,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     });
   }
 
-  getReplyToMessage(_evt: any, replyId: string) {
+  getReplyToMessage(replyId: string) {
     return this.getChatMessage(replyId);
   }
 
@@ -655,7 +651,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     return result[0].lastTimestamp + 1 || 0;
   }
 
-  getChatPeers(_evt: any, path: string) {
+  getChatPeers(path: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT ship, role

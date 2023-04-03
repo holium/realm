@@ -41,7 +41,7 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { ship, notifStore, chatStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -51,8 +51,7 @@ export const ChatRowPresenter = ({
     isChatMuted,
     togglePinned,
     toggleMuted,
-  } = useChatStore();
-  const { notifStore } = useShipStore();
+  } = chatStore;
   const { readPath, getUnreadCountByPath } = notifStore;
   const { getOptions, setOptions } = useContextMenu();
 

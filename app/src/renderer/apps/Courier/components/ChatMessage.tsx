@@ -1,15 +1,14 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import {
   Bubble,
   MenuItemProps,
   OnReactionPayload,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -28,8 +27,8 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   measure,
 }: ChatMessageProps) => {
-  const { ship, friends, theme } = useServices();
-  const { selectedChat } = useChatStore();
+  const { ship, chatStore, friends } = useShipStore();
+  const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => ship?.patp, [ship]);
   const isOur = message.sender === ourShip;
@@ -201,7 +200,7 @@ export const ChatMessagePresenter = ({
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
-      themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+      // themeMode={theme.currentTheme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ourShip}
       ourColor={ourColor}

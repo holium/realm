@@ -1,10 +1,8 @@
 import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
 import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
-import { OSActions } from 'renderer/logic/actions/os';
-import { servicesStore } from 'renderer/logic/store';
+import { shipStore } from '../../stores/ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
 import { RealmUpdateTypes } from 'os/realm.service';
 
@@ -59,7 +57,7 @@ export const ChatStore = types
         const peer = chat.peers.filter((p) => p.ship !== window.ship)[0];
         const ship = peer?.ship;
         const { nickname, avatar, color } =
-          servicesStore.friends.getContactAvatarMetadata(ship);
+          shipStore.friends.getContactAvatarMetadata(ship);
         return {
           title: nickname || ship || 'Error loading title',
           sigil: {
@@ -125,7 +123,7 @@ export const ChatStore = types
         } else {
           self.pinnedChats.remove(path);
         }
-        yield ChatDBActions.togglePinnedChat(path, pinned);
+        yield ChatIPC.togglePinnedChat(path, pinned);
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(self.pinnedChats)
@@ -152,7 +150,7 @@ export const ChatStore = types
       peers: string[]
     ) {
       try {
-        yield ChatDBActions.createChat(peers, type, {
+        yield ChatIPC.createChat(peers, type, {
           title,
           description: '',
           image: '',
@@ -170,7 +168,7 @@ export const ChatStore = types
         if (chat) {
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
-          yield ChatDBActions.leaveChat(path);
+          yield ChatIPC.leaveChat(path);
         } else {
           console.info(`chat ${path} not found`);
         }
@@ -233,7 +231,7 @@ export function useChatStore() {
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'authenticated') {
-    chatStore.init();
+    shipStore.chatStore.init();
   }
 });
 
@@ -243,54 +241,54 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 // OSActions.onConnected(() => {
 //   chatStore.init();
 // });
-OSActions.onLogout((_event: any) => {
-  chatStore.reset();
-});
 // -------------------------------
 // Listen for changes
-ChatDBActions.onDbChange((_evt, type, data) => {
+type ChatUpdateTypes = { type: string; payload: any };
+ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
   if (type === 'path-added') {
-    console.log('onPathsAdded', toJS(data));
-    chatStore.onPathsAdded(data);
+    console.log('onPathsAdded', toJS(payload));
+    shipStore.chatStore.onPathsAdded(payload);
   }
   if (type === 'path-deleted') {
-    console.log('onPathDeleted', data);
-    chatStore.onPathDeleted(data);
+    console.log('onPathDeleted', payload);
+    shipStore.chatStore.onPathDeleted(payload);
   }
   if (type === 'message-deleted') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.removeMessage(data['msg-id']);
+    selectedChat.removeMessage(payload['msg-id']);
   }
   if (type === 'message-received') {
-    // console.log('addMessage', data);
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    // console.log('addMessage', payload);
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.addMessage(data);
+    selectedChat.addMessage(payload);
   }
   if (type === 'message-edited') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.replaceMessage(data);
+    selectedChat.replaceMessage(payload);
   }
   if (type === 'peer-added') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    console.log('onPeerAdded', toJS(data));
-    selectedChat.onPeerAdded(data.ship, data.role);
+    console.log('onPeerAdded', toJS(payload));
+    selectedChat.onPeerAdded(payload.ship, payload.role);
   }
   if (type === 'peer-deleted') {
-    const selectedChat = chatStore.inbox.find((chat) => chat.path === data.row);
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.row
+    );
     if (!selectedChat) return;
-    console.log('onPeerDeleted', toJS(data));
-    selectedChat.onPeerDeleted(data.ship);
+    console.log('onPeerDeleted', toJS(payload));
+    selectedChat.onPeerDeleted(payload.ship);
   }
 });

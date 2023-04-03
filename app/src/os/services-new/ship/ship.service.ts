@@ -9,20 +9,17 @@ import RoomsService from './rooms.service';
 import NotificationsService from './notifications.service';
 import ChatService from './chat.service';
 import { Friends } from './models/friends.model';
+import SpacesService from './spaces.service';
 
 export class ShipService extends AbstractService {
   private patp: string;
   private readonly shipDB?: ShipDB;
-  models?: {
-    notifications: null;
-    passports: null;
-    friends: null;
-  };
   services?: {
     rooms: RoomsService;
     notifications: NotificationsService;
     chat: ChatService;
     friends: Friends;
+    spaces: SpacesService;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -46,18 +43,13 @@ export class ShipService extends AbstractService {
         this.shipDB?.setCredentials(session.url, session.code, session.cookie);
       }
     );
-    // init all models
-    this.models = {
-      notifications: null,
-      passports: null,
-      friends: null,
-    };
 
     this.services = {
       rooms: new RoomsService(),
       notifications: new NotificationsService(undefined, this.shipDB.db),
       chat: new ChatService(undefined, this.shipDB.db),
       friends: new Friends(false, this.shipDB.db),
+      spaces: new SpacesService(undefined, this.shipDB.db),
     };
 
     this.sendUpdate({

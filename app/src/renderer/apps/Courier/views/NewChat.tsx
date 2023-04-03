@@ -19,9 +19,9 @@ import { ChatPathType } from 'os/services/chat/chat.service';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export const NewChat = () => {
-  const { ship, friends } = useShipStore();
+  const { ship, friends, chatStore } = useShipStore();
   const { dimensions } = useTrayApps();
-  const { inbox, setSubroute, createChat } = useChatStore();
+  const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());

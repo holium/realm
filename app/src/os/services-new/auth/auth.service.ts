@@ -6,7 +6,7 @@ import Store from 'electron-store';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './models/accounts.db';
-import { AccountModelType } from 'renderer/stores/models/Account.model';
+import { AccountModelType } from 'renderer/stores/models/account.model';
 
 export type AuthUpdateInit = {
   type: 'init';

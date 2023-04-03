@@ -124,3 +124,15 @@ export type NotificationsRow = {
   'dismissed-at': number | null;
   dismissed: boolean;
 };
+
+export type ChatPathMetadata = {
+  title: string;
+  description?: string;
+  image?: string;
+  creator: string;
+  timestamp: string;
+  reactions?: string;
+  peer?: string; // if type is dm, this is the peer
+};
+
+export type ChatPathType = 'dm' | 'group' | 'space';

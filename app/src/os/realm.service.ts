@@ -6,7 +6,7 @@ import AbstractService, {
 } from './services-new/abstract.service';
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
-import { AccountModelType } from 'renderer/stores/models/Account.model';
+import { AccountModelType } from 'renderer/stores/models/account.model';
 
 export type RealmUpdateBooted = {
   type: 'booted';

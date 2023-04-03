@@ -11,12 +11,12 @@ import {
 } from 'mobx-state-tree';
 
 import { OSActions } from '../logic/actions/os';
-import { AccountModel, AccountModelType } from './models/Account.model';
-import { Theme, ThemeType } from './models/Theme.model';
+import { AccountModelType } from './models/account.model';
+import { Theme, ThemeType } from './models/theme.model';
 import { defaultTheme } from '@holium/shared';
 import { AuthenticationModel } from './auth.store';
 
-import { ShellModel } from './models/Shell.model';
+import { ShellModel } from './models/shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { RealmUpdateTypes } from 'os/realm.service';
 

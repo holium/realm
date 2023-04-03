@@ -1,6 +1,7 @@
 // import { osState, shipState } from './../store';
 import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { AppWindowModel } from './window.model';
 
 export const ShellModel = types
   .model('ShellModel', {
@@ -20,6 +21,7 @@ export const ShellModel = types
     isolationMode: types.optional(types.boolean, false),
     micAllowed: types.optional(types.boolean, false),
     multiplayerEnabled: types.optional(types.boolean, false),
+    windows: types.map(AppWindowModel),
   })
   .views((self) => ({
     get isHomePaneOpen() {

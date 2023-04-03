@@ -10,8 +10,8 @@ import {
   Toggle,
   Select,
   Icon,
-  TextInput,
   NoScrollBar,
+  TextInput,
 } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
@@ -31,6 +31,7 @@ import { observer } from 'mobx-react-lite';
 import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -66,9 +67,9 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { ship, chatStore } = useShipStore();
+  const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
-  const { ship } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -225,13 +226,14 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               flexDirection="column"
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
-              <InlineEdit
+              <TextInput
+                id="chat-title"
+                name="chat-title"
                 fontWeight={500}
-                fontSize={3}
                 textAlign="center"
                 width={350}
                 value={editTitle}
-                editable={amHost}
+                // editable={amHost}
                 onBlur={() => {
                   if (editTitle.length > 1) {
                     editMetadata({ title: editTitle });

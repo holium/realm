@@ -11,7 +11,7 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
-import { AccountModel, AccountModelType } from './models/Account.model';
+import { AccountModel, AccountModelType } from './models/account.model';
 import AccountContext from './AccountContext';
 import {
   AuthUpdateInit,

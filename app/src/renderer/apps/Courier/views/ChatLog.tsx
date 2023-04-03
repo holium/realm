@@ -12,7 +12,6 @@ import {
   fetchOGData,
   extractOGData,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
@@ -22,7 +21,7 @@ import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
-import { useAccountStore } from 'renderer/stores/ship.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { displayDate } from 'os/lib/time';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
@@ -38,9 +37,8 @@ const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
-  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
-  const accountStore = useAccountStore();
-  const { ship, friends } = useServices();
+  const { ship, notifStore, friends, chatStore } = useShipStore();
+  const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
 
   const { color: ourColor } = useMemo(() => {
@@ -51,9 +49,9 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   useEffect(() => {
     if (!selectedChat || !ship?.patp) return;
     selectedChat.fetchMessages();
-    const unreadCount = accountStore.getUnreadCountByPath(selectedChat.path);
+    const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
-      accountStore.readPath('realm-chat', selectedChat.path);
+      notifStore.readPath('realm-chat', selectedChat.path);
     }
   }, [selectedChat?.path]);
 

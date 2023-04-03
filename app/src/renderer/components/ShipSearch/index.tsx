@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
-import { Text } from '../';
 import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -16,6 +15,8 @@ import {
   Row,
   Avatar,
   WindowedList,
+  Text,
+  Card,
 } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -29,13 +30,7 @@ interface ShipSearchProps {
   onSelected: (ship: [string, string?], metadata?: any) => void;
 }
 
-interface IAutoCompleteBox {
-  customBg: string;
-  height?: any;
-  theme: ThemeType;
-}
-
-const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
+const AutoCompleteBox = styled(Card)`
   position: absolute;
   display: flex;
   top: 38px;
@@ -51,7 +46,7 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
-    const { theme, ship, friends } = useShipStore();
+    const { ship, friends } = useShipStore();
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
       return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
@@ -85,11 +80,11 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 sigilColor={[sigilColor || '#000000', 'white']}
               />
             </Box>
-            <Text fontSize={2}>{contact[0]}</Text>
+            <Text.Custom fontSize={2}>{contact[0]}</Text.Custom>
             {nickname ? (
-              <Text fontSize={2} opacity={0.7}>
+              <Text.Custom fontSize={2} opacity={0.7}>
                 {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-              </Text>
+              </Text.Custom>
             ) : (
               []
             )}
@@ -98,7 +93,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
           <Flex justifyContent="center" alignItems="center">
             {!isDropdown && (
               <Button.IconButton
-                canFocus
                 // isDisabled={selected.size > 0}
                 onClick={(evt: any) => {
                   evt.stopPropagation();

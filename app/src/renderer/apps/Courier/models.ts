@@ -1,8 +1,8 @@
 import { toJS } from 'mobx';
 import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { ChatIPC } from 'renderer/stores/ipc';
 import { expiresInMap, ExpiresValue } from './types';
 
 const ChatFragment = types.union(
@@ -155,7 +155,7 @@ export const ChatMessage = types
     },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
-      return ChatDBActions.getChatReplyTo(self.replyToMsgId);
+      return ChatIPC.getChatReplyTo(self.replyToMsgId);
     },
     insertTempReaction(react: ReactionModelType) {
       self.reactions.push({
@@ -185,7 +185,7 @@ export const ChatMessage = types
     },
     delete: flow(function* () {
       try {
-        yield ChatDBActions.deleteMessage(self.path, self.id);
+        yield ChatIPC.deleteMessage(self.path, self.id);
       } catch (error) {
         console.error(error);
       }
@@ -271,7 +271,7 @@ export const Chat = types
     fetchMessages: flow(function* () {
       self.lastFetch = new Date().getTime();
       try {
-        const messages = yield ChatDBActions.getChatLog(self.path);
+        const messages = yield ChatIPC.getChatLog(self.path);
         applySnapshot(self.messages, messages);
         self.hidePinned = self.isPinLocallyHidden();
         return self.messages;
@@ -283,7 +283,7 @@ export const Chat = types
     fetchPeers: flow(function* (our: string) {
       try {
         self.our = our;
-        const peers = yield ChatDBActions.getChatPeers(self.path);
+        const peers = yield ChatIPC.getChatPeers(self.path);
         self.peers = peers.map((p: PeerModelType) =>
           PeerModel.create({ ship: p.ship, role: p.role })
         );
@@ -320,7 +320,7 @@ export const Chat = types
           createdAt: new Date().getTime(),
         };
         self.replyingMsg = null;
-        yield ChatDBActions.sendMessage(path, fragments);
+        yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
       }
@@ -375,7 +375,7 @@ export const Chat = types
         const message = self.messages.find((m) => m.id === messageId);
         if (!message) return;
         self.messages.remove(message);
-        yield ChatDBActions.deleteMessage(self.path, messageId);
+        yield ChatIPC.deleteMessage(self.path, messageId);
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);
@@ -384,7 +384,7 @@ export const Chat = types
     muteNotification: flow(function* (mute: boolean) {
       try {
         self.muted = mute;
-        yield ChatDBActions.toggleMutedChat(self.path, mute);
+        yield ChatIPC.toggleMutedChat(self.path, mute);
       } catch (error) {
         console.error(error);
         self.muted = !mute;
@@ -398,7 +398,7 @@ export const Chat = types
     },
     setPinnedMessage: flow(function* (msgId: string) {
       try {
-        yield ChatDBActions.setPinnedMessage(self.path, msgId);
+        yield ChatIPC.setPinnedMessage(self.path, msgId);
         self.pinnedMessageId = msgId;
         return self.pinnedMessageId;
       } catch (error) {
@@ -413,7 +413,7 @@ export const Chat = types
     clearPinnedMessage: flow(function* (_msgId: string) {
       const oldId = self.pinnedMessageId;
       try {
-        yield ChatDBActions.clearPinnedMessage(self.path);
+        yield ChatIPC.clearPinnedMessage(self.path);
         self.pinnedMessageId = null;
         return self.pinnedMessageId;
       } catch (error) {
@@ -436,7 +436,7 @@ export const Chat = types
       try {
         if (chatMsg && window.ship)
           chatMsg.insertTempReaction({ msgId, emoji, by: window.ship });
-        yield ChatDBActions.sendMessage(self.path, [
+        yield ChatIPC.sendMessage(self.path, [
           {
             content: { react: emoji },
             'reply-to': {
@@ -455,7 +455,7 @@ export const Chat = types
       const chatMsg = self.messages.find((m) => m.id === messageId);
       try {
         if (chatMsg) chatMsg.removeReaction(reactionId);
-        yield ChatDBActions.deleteMessage(self.path, reactionId);
+        yield ChatIPC.deleteMessage(self.path, reactionId);
       } catch (err) {
         console.error(err);
       }
@@ -478,7 +478,7 @@ export const Chat = types
           contents.map((frag) => frag.content),
           Date.now()
         );
-        yield ChatDBActions.editMessage(
+        yield ChatIPC.editMessage(
           self.path,
           messageId,
           contents.map((c) => ({
@@ -502,7 +502,7 @@ export const Chat = types
       };
       self.metadata = ChatMetadataModel.create(newMetadata);
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -520,7 +520,7 @@ export const Chat = types
       const oldPeerGetBacklog = self.peersGetBacklog;
       self.peersGetBacklog = peersGetBacklog;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -538,7 +538,7 @@ export const Chat = types
       const oldInvitePermission = self.invites;
       self.invites = invitePermission;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -554,7 +554,7 @@ export const Chat = types
       const oldExpiresDuration = self.expiresDuration;
       self.expiresDuration = expiresInMap[expiresValue] || null;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -574,7 +574,7 @@ export const Chat = types
     clearChatBacklog: flow(function* () {
       const oldMessages = self.messages;
       try {
-        yield ChatDBActions.clearChatBacklog(self.path);
+        yield ChatIPC.clearChatBacklog(self.path);
         self.messages.clear();
         return self.messages;
       } catch (error) {

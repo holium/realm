@@ -6,7 +6,7 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { Theme } from './Theme.model';
+import { Theme } from './theme.model';
 
 export const AccountModel = types.model('AccountModel', {
   onboardingId: types.maybeNull(types.string),

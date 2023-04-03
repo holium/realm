@@ -1,10 +1,9 @@
 import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
-import { NotifDBActions } from 'renderer/logic/actions/notif-db';
 import { ChatStore, chatStore } from '../apps/Courier/store';
 import { NotifIPC, RealmIPC } from './ipc';
-import { Theme } from './models/Theme.model';
+import { Theme } from './models/theme.model';
 import { RealmUpdateTypes } from 'os/realm.service';
 import { SpacesStore } from 'os/services/spaces/models/spaces';
 import { FriendModel, FriendsStore } from './models/friends.model';
@@ -123,7 +122,7 @@ const NotifStore = types
       try {
         self.notifications.forEach((n) => n.path === path && n.markRead());
         self.unreadByPaths.set(path, 0);
-        yield NotifDBActions.readNotification(app, path);
+        yield NotifIPC.readNotification(app, path) as Promise<any>;
       } catch (error) {
         console.error('readPath', error);
         self.unreadByPaths.set(path, unreadByPaths || 0);
@@ -140,7 +139,7 @@ const NotifStore = types
             n.markDismissed();
           }
         });
-        yield NotifDBActions.dismissNotification(app);
+        yield NotifIPC.dismissNotification(app) as Promise<any>;
       } catch (error) {
         console.error(error);
         self.unreadByApps.set(app, unreadByApps || 0);
@@ -155,7 +154,7 @@ const NotifStore = types
             n.markDismissed();
           }
         });
-        yield NotifDBActions.dismissNotification(app, path);
+        yield NotifIPC.dismissNotification(app, path) as Promise<any>;
       } catch (error) {
         console.error(error);
         self.unreadByPaths.set(path, unreadByPaths || 0);
@@ -174,7 +173,11 @@ const NotifStore = types
           self.unreadByApps.set(notif.app, decUnreadByApps);
           self.unreadByPaths.set(notif.app, decUnreadByPaths);
 
-          yield NotifDBActions.dismissNotification(notif.app, notif.path, id);
+          yield NotifIPC.dismissNotification(
+            notif.app,
+            notif.path,
+            id
+          ) as Promise<any>;
         } catch (error) {
           console.error(error);
           // if there's an error, revert the changes
@@ -299,8 +302,9 @@ export const shipStore = ShipStore.create({
 // Create core context
 // -------------------------------
 type ShipStoreInstance = Instance<typeof ShipStore>;
-export const ShipStoreContext =
-  createContext<null | ShipStoreInstance>(shipStore);
+export const ShipStoreContext = createContext<null | ShipStoreInstance>(
+  shipStore
+);
 
 export const AccountProvider = ShipStoreContext.Provider;
 export function useShipStore() {
@@ -323,22 +327,22 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
     shipStore.setShip(update.payload);
   }
 });
-NotifDBActions.onDbChange((_evt, type, data) => {
+NotifIPC.onUpdate(({ type, payload }: any) => {
   switch (type) {
     case 'notification-added':
-      shipStore.notifStore.onNotifAdded(data);
+      shipStore.notifStore.onNotifAdded(payload);
       if (
-        shipStore.chatStore.isChatSelected(data.path) &&
-        data.app === 'realm-chat'
+        shipStore.chatStore.isChatSelected(payload.path) &&
+        payload.app === 'realm-chat'
       ) {
-        shipStore.notifStore.readPath(data.app, data.path);
+        shipStore.notifStore.readPath(payload.app, payload.path);
       }
       break;
     case 'notification-updated':
-      shipStore.notifStore.onNotifUpdated(data);
+      shipStore.notifStore.onNotifUpdated(payload);
       break;
     case 'notification-deleted':
-      shipStore.notifStore.onNotifDeleted(data);
+      shipStore.notifStore.onNotifDeleted(payload);
       break;
   }
 });

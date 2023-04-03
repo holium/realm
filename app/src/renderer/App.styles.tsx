@@ -3,7 +3,7 @@ import { darken } from 'polished';
 import { useMemo } from 'react';
 import { createGlobalStyle, css } from 'styled-components';
 import { genCSSVariables } from './logic/theme';
-import { ThemeType } from './stores/models/Theme.model';
+import { ThemeType } from './stores/models/theme.model';
 import { BackgroundImage } from './system/system.styles';
 import { ThemeType as OldTheme } from './theme';
 

@@ -234,7 +234,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
     return result[0].lastTimestamp + 1 || 0;
   }
 
-  getUnreads(_evt: any, appTag: string, path?: string) {
+  getUnreads(appTag: string, path?: string) {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       SELECT *
@@ -285,7 +285,6 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
   // ------------------------------
 
   async readNotification(
-    _evt: any,
     app: string, // if just app is passed in, will mark all notifs from app as "read"
     path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
     id?: number // if this is also passed in, will only mark notif with id as "read"
@@ -323,7 +322,6 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
   }
 
   async dismissNotification(
-    _evt: any,
     app: string, // if just app is passed in, will mark all notifs from app as "read"
     path?: string, // if this is also passed in, will only mark notifs with both app and path as "read"
     id?: number // if this is also passed in, will only mark notif with id as "read"

@@ -34,11 +34,11 @@ const sortFunction = (a: ChatModelType, b: ChatModelType) => {
 };
 
 export const InboxPresenter = () => {
-  const { ship } = useShipStore();
+  const { ship, chatStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
-    useChatStore();
+    chatStore;
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
