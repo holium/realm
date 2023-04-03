@@ -59,7 +59,7 @@ export const Landing = () => {
           <Button.Base
             background="#F8E390"
             padding="4px 12px"
-            justifyContent="center"
+            justifyContent="space-around"
             alignItems="center"
             onClick={(evt: any) => {
               createRoom(evt);
@@ -77,7 +77,7 @@ export const Landing = () => {
           <Button.Base
             background="#F8E390"
             padding="4px 12px"
-            justifyContent="center"
+            justifyContent="space-around"
             alignItems="center"
           >
             <Icon name="Audio" size={20} />

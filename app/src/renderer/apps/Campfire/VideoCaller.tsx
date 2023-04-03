@@ -97,12 +97,7 @@ const CallerPresenter = (props: ICaller) => {
   }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
 
   const callerVideo = useRef<HTMLVideoElement>(null);
-  if (callerVideo.current) {
-    if (peer?.videoTracks && peer?.videoTracks.size > 0) {
-      callerVideo.current.srcObject = Array.from(peer?.videoTracks.values())[0];
-    }
-  }
-  /*useEffect(() => {
+  useEffect(() => {
     if (callerVideo.current) {
       if (peer?.videoTracks && peer?.videoTracks.size > 0) {
         callerVideo.current.srcObject = Array.from(
@@ -110,7 +105,7 @@ const CallerPresenter = (props: ICaller) => {
         )[0];
       }
     }
-  }, []);*/
+  }, [peer]);
 
   return (
     <CallerWrapper
