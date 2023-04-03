@@ -25,6 +25,8 @@ export default function Booting() {
 
     if (logs.length === 1) {
       setLogs((logs) => [...logs, `${patp} will be ready in a few minutes.`]);
+    } else if (logs.length === 2) {
+      setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
 
     const shipCode = ship.code;
