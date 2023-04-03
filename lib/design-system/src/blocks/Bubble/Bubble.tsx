@@ -133,7 +133,11 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               prevLineBreak = <LineBreak />;
             }
           } else {
-            console.warn('expected a non-null message at ', index - 1, message[index - 1]);
+            console.warn(
+              'expected a non-null message at ',
+              index - 1,
+              message[index - 1]
+            );
           }
         }
         if (index < message.length - 1) {
@@ -143,7 +147,11 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
               nextLineBreak = <LineBreak />;
             }
           } else {
-            console.warn('expected a non-null message at ', index + 1, message[index + 1]);
+            console.warn(
+              'expected a non-null message at ',
+              index + 1,
+              message[index + 1]
+            );
           }
         }
 
