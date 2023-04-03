@@ -12,7 +12,7 @@ import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
-import { defaultTheme as dt } from '@holium/shared';
+import { defaultTheme } from '../../os/services/theme.model';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**
@@ -116,16 +116,19 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 export const Theme = types
   .model('Theme', {
     id: types.identifier,
-    mode: types.optional(types.enumeration(['light', 'dark']), dt.mode),
-    backgroundColor: types.optional(types.string, dt.backgroundColor),
-    accentColor: types.optional(types.string, dt.accentColor),
-    inputColor: types.optional(types.string, dt.inputColor),
-    dockColor: types.optional(types.string, dt.dockColor),
-    iconColor: types.optional(types.string, dt.iconColor),
-    textColor: types.optional(types.string, dt.textColor),
-    windowColor: types.optional(types.string, dt.windowColor),
-    wallpaper: types.optional(types.string, dt.wallpaper),
-    mouseColor: types.optional(types.string, dt.mouseColor),
+    mode: types.optional(
+      types.enumeration(['light', 'dark']),
+      defaultTheme.mode
+    ),
+    backgroundColor: types.optional(types.string, defaultTheme.backgroundColor),
+    accentColor: types.optional(types.string, defaultTheme.accentColor),
+    inputColor: types.optional(types.string, defaultTheme.inputColor),
+    dockColor: types.optional(types.string, defaultTheme.dockColor),
+    iconColor: types.optional(types.string, defaultTheme.iconColor),
+    textColor: types.optional(types.string, defaultTheme.textColor),
+    windowColor: types.optional(types.string, defaultTheme.windowColor),
+    wallpaper: types.optional(types.string, defaultTheme.wallpaper),
+    mouseColor: types.optional(types.string, defaultTheme.mouseColor),
   })
   .views((self) => ({
     get values() {
