@@ -154,7 +154,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
     const reactionsDisplay = useMemo(() => {
       return (
         <Reactions
-          id={`${id}-reactions`}
+          id={id}
           isOur={isOur}
           ourShip={ourShip}
           ourColor={ourColor}
@@ -206,6 +206,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
           >
             {!isOur && !isPrevGrouped && (
               <BubbleAuthor
+                id={id}
                 style={{
                   color: authorColorDisplay,
                 }}
@@ -216,10 +217,13 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
             )}
             <FragmentBlock id={id}>{fragments}</FragmentBlock>
             <BubbleFooter id={id} height={footerHeight}>
-              <Box width="70%">{reactionsDisplay}</Box>
+              <Box width="70%" id={id}>
+                {reactionsDisplay}
+              </Box>
               <Flex
                 width="30%"
                 gap={4}
+                id={id}
                 alignItems="flex-end"
                 justifyContent="flex-end"
                 minWidth={minBubbleWidth}
@@ -229,6 +233,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                   // TODO tooltip with time remaining
                   <Icon
                     mb="1px"
+                    id={id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.35 }}
                     transition={{ opacity: 0.2 }}
@@ -244,6 +249,7 @@ export const Bubble = forwardRef<HTMLDivElement, BubbleProps>(
                   alignItems="flex-end"
                   justifyContent="flex-end"
                   opacity={0.35}
+                  id={id}
                 >
                   {isEditing && 'Editing... · '}
                   {isEdited && !isEditing && 'Edited · '}
