@@ -11,11 +11,12 @@ export { DownloadDialog } from './dialogs/DownloadDialog';
 export { LoginDialog } from './dialogs/LoginDialog';
 export { PaymentDialog } from './dialogs/PaymentDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmailDialog';
-export { ChangeEmailModal } from './components/hosting/ChangeEmailModal';
-export { ChangeMaintenanceWindowModal } from './components/hosting/ChangeMaintenanceWindowModal';
-export { VerifyEmailModal } from './components/hosting/VerifyEmailModal';
-export { ChangePasswordModal } from './components/hosting/ChangePasswordModal';
-export { GetNewAccessCodeModal } from './components/hosting/GetNewAccessCodeModal';
+export { ChangeEmailModal } from './components/hosting/modals/ChangeEmailModal';
+export { ChangeMaintenanceWindowModal } from './components/hosting/modals/ChangeMaintenanceWindowModal';
+export { VerifyEmailModal } from './components/hosting/modals/VerifyEmailModal';
+export { ChangePasswordModal } from './components/hosting/modals/ChangePasswordModal';
+export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
+export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 
 export type {
   ThirdEarthShip,

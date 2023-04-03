@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex } from '@holium/design-system';
+import { Flex, Button, Text } from '@holium/design-system';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
@@ -74,6 +74,7 @@ export const AccountHostingDialog = ({
   onClickManageBilling,
   onClickGetNewAccessCode,
   onClickChangeMaintenanceWindow,
+  onClickEjectId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -132,7 +133,7 @@ export const AccountHostingDialog = ({
         onClick={onClickChangeMaintenanceWindow}
       />
     </AccountDialogTable>
-    {/* <Flex
+    <Flex
       flex={1}
       width="100%"
       alignContent="flex-end"
@@ -142,6 +143,6 @@ export const AccountHostingDialog = ({
       <Button.Transparent height="15px" onClick={onClickEjectId}>
         <Text.Body color="intent-alert">Eject ID</Text.Body>
       </Button.Transparent>
-    </Flex> */}
+    </Flex>
   </AccountDialog>
 );

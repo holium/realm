@@ -6,6 +6,7 @@ import {
   VerifyEmailModal,
   GetNewAccessCodeModal,
   ChangePasswordModal,
+  EjectIdModal,
 } from '@holium/shared';
 import { useToggle } from '@holium/design-system';
 import { Page } from '../../components/Page';
@@ -22,6 +23,7 @@ const HostingPresenter = () => {
   const changePasswordModal = useToggle(false);
   const getNewAccessCodeModal = useToggle(false);
   const changeMaintenanceWindowModal = useToggle(false);
+  const ejectIdModal = useToggle(false);
 
   const selectedShip = useMemo(
     () => ships.find((ship) => ship.patp === selectedPatp),
@@ -109,7 +111,20 @@ const HostingPresenter = () => {
     window.open(managePaymentLink, '_blank');
   };
 
-  const onClickEjectId = () => {};
+  const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
+    if (!selectedShip) return Promise.resolve(false);
+
+    const response = await api.ejectShip(
+      token,
+      selectedShip.id.toString(),
+      ejectAddress,
+      ethAddress
+    );
+
+    if (response) return true;
+
+    return false;
+  };
 
   useEffect(() => {
     api
@@ -147,6 +162,11 @@ const HostingPresenter = () => {
         onDismiss={changeMaintenanceWindowModal.toggleOff}
         onSubmit={onSubmitNewMaintenanceWindow}
       />
+      <EjectIdModal
+        isOpen={ejectIdModal.isOn}
+        onDismiss={ejectIdModal.toggleOff}
+        onSubmit={onSubmitEjectId}
+      />
       <AccountHostingDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
@@ -160,7 +180,7 @@ const HostingPresenter = () => {
         onClickManageBilling={onClickManageBilling}
         onClickGetNewAccessCode={getNewAccessCodeModal.toggleOn}
         onClickChangeMaintenanceWindow={changeMaintenanceWindowModal.toggleOn}
-        onClickEjectId={onClickEjectId}
+        onClickEjectId={ejectIdModal.toggleOn}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

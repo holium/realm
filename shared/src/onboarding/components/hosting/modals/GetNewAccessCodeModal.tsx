@@ -1,8 +1,8 @@
 import { FormEvent } from 'react';
 import { Text, Flex, useToggle } from '@holium/design-system';
-import { Modal } from '../Modal';
+import { Modal } from '../../Modal';
 
-import { SubmitButton } from './SubmitButton';
+import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;

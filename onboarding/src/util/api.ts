@@ -102,6 +102,10 @@ type UpdateMaintenanceWindowResponse = {
   maintenance_window: string;
 };
 
+type EjectShipResponse = {
+  message: string;
+};
+
 export const api = {
   login: (email: string, password: string) => {
     return http<LoginResponse>(`${constants.API_URL}/login`, {
@@ -338,6 +342,25 @@ export const api = {
         }),
       }
     );
+  },
+  ejectShip(
+    token: string,
+    shipId: string,
+    ejectAddress: string,
+    ethAddress: string
+  ) {
+    return http<EjectShipResponse>(`${constants.API_URL}/send-eject-id-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        shipId,
+        ejectAddress,
+        ethAddress,
+      }),
+    });
   },
   refreshToken: (token: string) => {
     return http<RefreshTokenResponse>(`${constants.API_URL}/refresh-token`, {
