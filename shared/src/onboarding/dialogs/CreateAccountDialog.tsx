@@ -2,7 +2,6 @@ import { ChangeEvent, useRef } from 'react';
 import {
   Flex,
   HoliumButton,
-  Text,
   Anchor,
   useToggle,
   isValidEmail,
@@ -11,6 +10,7 @@ import {
   OnboardDialogDescription,
   OnboardDialogInput,
   OnboardDialogInputLabel,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';
 
@@ -66,7 +66,7 @@ export const CreateAccountDialog = ({
       icon={<HoliumButton size={100} pointer={false} />}
       body={
         <>
-          <Text.H1 pb={3}>Create account</Text.H1>
+          <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="email">
               Email

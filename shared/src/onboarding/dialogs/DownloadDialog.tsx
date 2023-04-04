@@ -1,6 +1,9 @@
-import { Flex, Text } from '@holium/design-system';
+import { Flex } from '@holium/design-system';
 import { DownloadButton } from '../components/DownloadButton';
-import { OnboardDialogDescription } from '../components/OnboardDialog.styles';
+import {
+  OnboardDialogTitle,
+  OnboardDialogDescription,
+} from '../components/OnboardDialog.styles';
 import { AppleIcon } from '../icons/AppleIcon';
 import { ArrowRightIcon } from '../icons/ArrowRightIcon';
 import { DownloadIcon } from '../icons/DownloadIcon';
@@ -58,7 +61,7 @@ export const DownloadDialog = ({
     icon={<DownloadIcon />}
     body={
       <Flex flexDirection="column" gap={16} marginBottom={30}>
-        <Text.H1 lineHeight="12">Download Realm for desktop</Text.H1>
+        <OnboardDialogTitle>Download Realm for desktop</OnboardDialogTitle>
         <OnboardDialogDescription>
           Realm is a community OS for crypto, groups, and friends. It’s a new OS
           build on a decentralized network.

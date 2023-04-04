@@ -4,6 +4,7 @@ import { CredentialsIcon } from '../icons/CredentialsIcon';
 import {
   OnboardDialogDescription,
   OnboardDialogSubTitle,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';
 
@@ -38,7 +39,7 @@ export const CredentialsDialog = ({ credentials, onBack, onNext }: Props) => (
     icon={<CredentialsIcon />}
     body={
       <Flex flexDirection="column" gap={16}>
-        <Text.H1>Credentials</Text.H1>
+        <OnboardDialogTitle>Credentials</OnboardDialogTitle>
         <OnboardDialogDescription>
           Save this information in case you want to connect to your personal
           server from any other browser or device.

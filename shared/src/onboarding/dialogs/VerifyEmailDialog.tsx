@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
-import { Anchor, Text, Input, Icon } from '@holium/design-system';
-import { OnboardDialogDescription } from '../components/OnboardDialog.styles';
+import { Anchor, Input, Icon } from '@holium/design-system';
+import {
+  OnboardDialogDescription,
+  OnboardDialogTitle,
+} from '../components/OnboardDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
@@ -42,7 +45,7 @@ export const VerifyEmailDialog = ({ onResend, onBack, onNext }: Props) => {
       icon={<Icon name="AtSign" fill="accent" width="86px" height="86px" />}
       body={
         <>
-          <Text.H1>Verify email</Text.H1>
+          <OnboardDialogTitle>Verify email</OnboardDialogTitle>
           <OnboardDialogDescription>
             You will receive a code via email to verify your account.
           </OnboardDialogDescription>

@@ -1,5 +1,5 @@
-import { Text } from '@holium/design-system';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
+import { OnboardDialogTitle } from 'onboarding/components/OnboardDialog.styles';
 
 type Props = {
   patps: string[];
@@ -24,6 +24,6 @@ export const AccountStatisticsDialog = ({
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
-    <Text.H2>Coming soon...</Text.H2>
+    <OnboardDialogTitle>Coming soon...</OnboardDialogTitle>
   </AccountDialog>
 );

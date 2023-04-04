@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Text, Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system';
 import { IdentityIcon } from '../icons/IdentityIcon';
-import { OnboardDialogDescription } from '../components/OnboardDialog.styles';
+import {
+  OnboardDialogTitle,
+  OnboardDialogDescription,
+} from '../components/OnboardDialog.styles';
 import { PatpsPaginated } from '../components/PatpsPaginated';
 import { OnboardDialog } from '../components/OnboardDialog';
 
@@ -29,7 +32,7 @@ export const ChooseIdDialog = ({ patps, onSelectPatp, onNext }: Props) => {
       body={
         <>
           <Flex flexDirection="column" gap={16} marginBottom={30}>
-            <Text.H1>Choose ID</Text.H1>
+            <OnboardDialogTitle>Choose ID</OnboardDialogTitle>
             <OnboardDialogDescription>
               An ID is like a phone number. It’s how your friends connect with
               you on Realm.
