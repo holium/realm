@@ -241,7 +241,7 @@ export const ChatInput = ({
         inputId={id}
         disabled={disabled}
         height={
-          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 4
+          rows === 1 ? 38 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 6
         }
         py="3px"
         error={!!error}
@@ -303,7 +303,7 @@ export const ChatInput = ({
           tabIndex={tabIndex}
           disabled={disabled}
           style={{
-            marginTop: rows === 1 ? '8px' : undefined,
+            marginTop: rows === 1 ? '10px' : '3px',
             height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
           }}
           onChange={onChange}
