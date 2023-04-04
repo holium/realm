@@ -32,6 +32,7 @@ import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipIPC } from 'renderer/stores/ipc';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -129,7 +130,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
     setUploadError('');
-    ShipActions.uploadFile(params)
+    (ShipIPC.uploadFile(params) as Promise<any>)
       .then((url: string) => {
         setImage(url);
         editMetadata({ image: url });

@@ -7,15 +7,18 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
 
 const AccountTrayAppPresenter = () => {
-  const { ship } = useServices();
+  const { shellStore } = useAppState();
+  const { ship } = useShipStore();
   const { setActiveApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
   const openSettingsApp = () => {
-    DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
+    shellStore.openWindow(nativeApps['os-settings'] as AppType);
   };
 
   if (!ship) return null;

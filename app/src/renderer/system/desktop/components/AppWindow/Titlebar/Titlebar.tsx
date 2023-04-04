@@ -1,6 +1,5 @@
 import { ReactNode, PointerEvent } from 'react';
-import { ThemeModelType } from 'os/services/theme.model';
-import { Flex, Text } from 'renderer/components';
+import { Text, Flex } from '@holium/design-system';
 import { AppWindowIcon } from '../AppWindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
@@ -8,7 +7,6 @@ import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
 
 type Props = {
-  theme: Partial<ThemeModelType>;
   zIndex: number;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;
@@ -44,7 +42,6 @@ export const Titlebar = ({
   navigationButtons,
   shareable,
   hasBlur,
-  theme,
   onClose,
   onMaximize,
   onMinimize,
@@ -53,7 +50,6 @@ export const Titlebar = ({
   onDragStart,
 }: Props) => {
   const onDoubleClick = useDoubleClick(onMaximize);
-  const iconColor = theme.iconColor ?? '#333333';
 
   return (
     <TitlebarContainer
@@ -71,30 +67,29 @@ export const Titlebar = ({
         <TitleCentered justifyContent="center" flex={1} onClick={onDoubleClick}>
           <Flex gap={4} alignItems="center">
             <Flex justifyContent="center" alignItems="center">
-              <Text
+              <Text.Custom
                 opacity={0.7}
                 style={{ textTransform: 'capitalize', userSelect: 'none' }}
                 fontSize={2}
                 fontWeight={500}
               >
                 {appWindow.title}
-              </Text>
+              </Text.Custom>
             </Flex>
           </Flex>
         </TitleCentered>
       )}
       {shareable || navigationButtons || showDevToolsToggle ? (
         <Flex ml="2px" zIndex={zIndex + 1} gap={4} alignItems="center">
-          {shareable && (
+          {/* {shareable && (
             <SharedAvatars
               iconColor={iconColor}
               backgroundColor={theme.windowColor}
             />
-          )}
+          )} */}
           {showDevToolsToggle && (
             <AppWindowIcon
               icon="DevBox"
-              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -106,13 +101,11 @@ export const Titlebar = ({
             <>
               <AppWindowIcon
                 icon="ArrowLeftLine"
-                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
               <AppWindowIcon
                 icon="ArrowRightLine"
-                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={() => {}}
               />
@@ -128,35 +121,32 @@ export const Titlebar = ({
           {minimizeButton && (
             <AppWindowIcon
               icon="Minimize"
-              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                onMinimize?.();
+                onMinimize();
               }}
             />
           )}
           {maximizeButton && (
             <AppWindowIcon
               icon="Expand"
-              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                onMaximize?.();
+                onMaximize();
               }}
             />
           )}
           {closeButton && (
             <AppWindowIcon
               icon="Close"
-              iconColor={iconColor}
               bg="#FF6240"
-              fillWithBg
               onClick={(evt) => {
                 evt.stopPropagation();
+                console.log('closign');
                 // closeDevTools();
-                onClose?.();
+                onClose();
               }}
             />
           )}

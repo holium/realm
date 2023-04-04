@@ -1,5 +1,5 @@
 import { DetailedHTMLProps, useEffect, WebViewHTMLAttributes } from 'react';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useAppState } from 'renderer/stores/app.store';
 
 type WebViewProps = {
   id: string;
@@ -22,13 +22,14 @@ export const WebView = ({
   style,
   ...rest
 }: WebViewProps) => {
+  const { shellStore } = useAppState();
   useEffect(() => {
     const webView = document.getElementById(id) as Electron.WebviewTag | null;
 
     if (!webView) return;
 
     webView.addEventListener('focus', () => {
-      DesktopActions.setActive(appId);
+      shellStore.setActive(appId);
     });
   });
 

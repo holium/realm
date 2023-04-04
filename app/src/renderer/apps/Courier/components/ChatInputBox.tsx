@@ -9,8 +9,8 @@ import { Box, ChatInput } from '@holium/design-system';
 import { ChatMessageType } from '../models';
 import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import { ShipActions } from 'renderer/logic/actions/ship';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { ShipIPC } from 'renderer/stores/ipc';
 
 type CourierInputProps = {
   storage: IuseStorage;
@@ -46,7 +46,7 @@ export const ChatInputBox = ({
     (params: FileUploadParams) => {
       setIsUploading(true);
       setUploadError('');
-      ShipActions.uploadFile(params)
+      (ShipIPC.uploadFile(params) as Promise<any>)
         .then((url) => {
           console.log(url);
           setAttachment([...attachments, url]);

@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Text, TextButton } from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Spinner, WindowedList } from '@holium/design-system';
+import {
+  Flex,
+  Text,
+  Button,
+  Spinner,
+  WindowedList,
+  Row,
+} from '@holium/design-system';
 import { EmptyGroup } from './SpaceRow';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export interface Space {
   color?: string;
@@ -17,8 +22,8 @@ export interface Space {
 }
 
 const FeaturedListPresenter = () => {
-  const { theme, spaces, bulletin } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { spacesStore } = useShipStore();
+  const { bulletin } = useServices();
 
   const [joining, setJoining] = useState(false);
 
@@ -27,9 +32,15 @@ const FeaturedListPresenter = () => {
   if (listData.length === 0) {
     return (
       <Flex flex={1} py={1} px={4} width="100%">
-        <Text fontWeight={200} opacity={0.5}>
+        <Text.Custom
+          fontWeight={200}
+          opacity={0.5}
+          width="100%"
+          mt={4}
+          textAlign="center"
+        >
           No featured spaces
-        </Text>
+        </Text.Custom>
       </Flex>
     );
   }
@@ -42,10 +53,11 @@ const FeaturedListPresenter = () => {
         rowRenderer={(data: any) => {
           const onJoin = async () => {
             setJoining(true);
-            SpacesActions.joinSpace(data.path.substring(1))
+            spacesStore
+              .joinSpace(data.path.substring(1))
               .then(() => {
-                SpacesActions.selectSpace(data.path);
-                SpacesActions.setJoin('loaded');
+                spacesStore.selectSpace(data.path);
+                spacesStore.setJoin('loaded');
                 setJoining(false);
               })
               .catch((err) => {
@@ -53,12 +65,11 @@ const FeaturedListPresenter = () => {
                 setJoining(false);
               });
           };
-          const hasJoined = spaces.getSpaceByPath(data.path) !== undefined;
+          const hasJoined = spacesStore.getSpaceByPath(data.path) !== undefined;
           return (
             <Row
               selected
-              gap={8}
-              customBg={windowColor}
+              gap="8px"
               style={{
                 padding: 12,
                 flexDirection: 'column',
@@ -86,12 +97,17 @@ const FeaturedListPresenter = () => {
                   justifyContent="space-between"
                 >
                   <Flex flexDirection="column">
-                    <Text mb="2px" opacity={0.9} fontSize={3} fontWeight={500}>
+                    <Text.Custom
+                      mb="2px"
+                      opacity={0.9}
+                      fontSize={3}
+                      fontWeight={500}
+                    >
                       {data.name}
-                    </Text>
-                    <Text opacity={0.5} fontSize={2} fontWeight={400}>
+                    </Text.Custom>
+                    <Text.Custom opacity={0.5} fontSize={2} fontWeight={400}>
                       {data.description}
-                    </Text>
+                    </Text.Custom>
                   </Flex>
                 </Flex>
               </Flex>
@@ -102,12 +118,12 @@ const FeaturedListPresenter = () => {
                 flexDirection="row"
                 justifyContent="flex-end"
               >
-                <TextButton
+                <Button.TextButton
                   fontSize={2}
-                  showBackground
+                  // showBackground
                   disabled={hasJoined}
                   style={{ borderRadius: 6 }}
-                  highlightColor="#4E9EFD"
+                  // color="#4E9EFD"
                   onClick={(evt: any) => {
                     evt.stopPropagation();
                     !hasJoined && onJoin();
@@ -115,7 +131,7 @@ const FeaturedListPresenter = () => {
                 >
                   {!hasJoined && (joining ? <Spinner size={0} /> : 'Join')}
                   {hasJoined && 'Joined'}
-                </TextButton>
+                </Button.TextButton>
               </Flex>
             </Row>
           );

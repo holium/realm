@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Text } from 'renderer/components';
 import { Flex, Box } from '@holium/design-system';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { useAppState } from 'renderer/stores/app.store';
 
 export const ShutdownDialogConfig: DialogConfig = {
   component: (props: any) => <ShutdownDialog {...props} />,
@@ -32,6 +32,7 @@ export const ShutdownDialogConfig: DialogConfig = {
 };
 
 const ShutdownDialogPresenter = () => {
+  const { shellStore } = useAppState();
   const [seconds, setSeconds] = useState(60);
   const [id, setId] = useState<NodeJS.Timer>();
 
@@ -68,8 +69,8 @@ const ShutdownDialogPresenter = () => {
             disabled={false}
             onClick={() => {
               id && clearInterval(id);
-              ShellActions.closeDialog();
-              ShellActions.setBlur(false);
+              shellStore.closeDialog();
+              shellStore.setIsBlurred(false);
               // reset seconds/id for next open
               // 62 === 60 ???
               setId(undefined);

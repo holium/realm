@@ -91,6 +91,7 @@ export const SpacesStore = types
         const { current, spaces } =
           yield SpacesIPC.getInitial() as Promise<any>;
 
+        // TODO form the data in the SQL query later
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create({
@@ -112,6 +113,18 @@ export const SpacesStore = types
       } catch (e) {
         console.error(e);
         self.loader.set('error');
+      }
+    }),
+
+    joinSpace: flow(function* (spacePath: string) {
+      self.join.set('loading');
+      try {
+        const space = yield SpacesIPC.join(spacePath) as Promise<any>;
+        self.join.set('loaded');
+        return space;
+      } catch (e) {
+        console.error(e);
+        self.join.set('error');
       }
     }),
 
@@ -164,6 +177,9 @@ export const SpacesStore = types
     },
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath);
+      if (self.selected) {
+        appState.setTheme(self.selected.theme);
+      }
       return self.selected;
     },
     setSubscriptionStatus: (

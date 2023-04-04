@@ -1,26 +1,27 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Input } from 'renderer/components';
-import { Text, Flex, Button, Icon, Spinner } from '@holium/design-system';
+import { useState, useEffect } from 'react';
+import {
+  Text,
+  Flex,
+  Button,
+  Icon,
+  Spinner,
+  TextInput,
+} from '@holium/design-system';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { lighten, darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
-import { getBaseTheme } from '../Wallet/lib/helpers';
 import { useTrayApps } from '../store';
 import { FeaturedList } from './FeaturedList';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const bottomHeight = 54;
 
 const SpacesTrayAppPresenter = () => {
-  const { ship, theme, spaces } = useServices();
+  const { shellStore } = useAppState();
+  const { ship, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
-  const themeData = getBaseTheme(theme.currentTheme);
-  const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
-  const { windowColor, mode, inputColor } = spaceTheme;
   const [searchString, setSearchString] = useState<string>('');
 
   const isValidSpace = (space: string) => {
@@ -32,26 +33,21 @@ const SpacesTrayAppPresenter = () => {
     const spaceName = pathArr[1];
     return ship.length > 1 && isValidPatp(ship) && spaceName.length > 0;
   };
-  const themeInputColor = useMemo(
-    () =>
-      mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
-    [inputColor, mode]
-  );
 
   const [searchVisible, setSearchVisible] = useState(false);
 
   useEffect(() => {
-    SpacesActions.setJoin('initial');
+    spacesStore.setJoin('initial');
   }, []);
   if (
-    spaces.join.state === 'loading' &&
-    spaces.spaces.has('/' + searchString)
+    spacesStore.join.state === 'loading' &&
+    spacesStore.spaces.has('/' + searchString)
   ) {
-    SpacesActions.selectSpace('/' + searchString);
+    spacesStore.selectSpace('/' + searchString);
     if (searchVisible === true) {
       setSearchVisible(false);
     }
-    SpacesActions.setJoin('loaded');
+    spacesStore.setJoin('loaded');
   }
 
   return (
@@ -79,7 +75,7 @@ const SpacesTrayAppPresenter = () => {
             width={26}
             height={26}
             onClick={() => {
-              SpacesActions.setJoin('initial');
+              spacesStore.setJoin('initial');
               setSearchVisible(!searchVisible);
             }}
           >
@@ -91,14 +87,14 @@ const SpacesTrayAppPresenter = () => {
             width={26}
             height={26}
             onClick={() => {
-              ShellActions.openDialog('create-space-1');
+              shellStore.openDialog('create-space-1');
             }}
           >
             <Icon name="Plus" size={24} opacity={0.7} />
           </Button.IconButton>
         </Flex>
       </Flex>
-      {searchVisible && spaces.join.state !== 'loaded' ? (
+      {searchVisible && spacesStore.join.state !== 'loaded' ? (
         <Flex
           position="absolute"
           flexDirection="column"
@@ -107,51 +103,29 @@ const SpacesTrayAppPresenter = () => {
           overflowY="hidden"
         >
           <Flex position="relative" flexDirection="column">
-            <Input
+            <TextInput
               tabIndex={1}
               autoCapitalize="false"
               autoCorrect="false"
               autoComplete="false"
-              name="person"
+              id="space-input"
+              name="space-input"
               height={34}
               placeholder="Enter space path (e.g. ~zod/galaxy-space)"
-              bg={
-                mode === 'light'
-                  ? lighten(0.2, inputColor)
-                  : darken(0.005, inputColor)
-              }
-              wrapperMotionProps={{
-                initial: {
-                  backgroundColor: themeInputColor,
-                },
-                animate: {
-                  backgroundColor: themeInputColor,
-                },
-                transition: {
-                  backgroundColor: { duration: 0.3 },
-                  borderColor: { duration: 0.3 },
-                  color: { duration: 0.5 },
-                },
-              }}
-              wrapperStyle={{
-                borderRadius: 6,
-                paddingRight: 4,
-              }}
               onChange={(evt: any) => {
                 evt.stopPropagation();
-                SpacesActions.setJoin('initial');
+                spacesStore.setJoin('initial');
                 setSearchString(evt.target.value);
               }}
-              rightInteractive
-              rightIcon={
+              rightAdornment={
                 <Button.TextButton
                   disabled={!isValidSpace(searchString)}
                   onClick={() => {
-                    SpacesActions.setJoin('loading');
-                    SpacesActions.joinSpace(searchString);
+                    spacesStore.setJoin('loading');
+                    spacesStore.joinSpace(searchString);
                   }}
                 >
-                  {spaces.join.state === 'loading' ? (
+                  {spacesStore.join.state === 'loading' ? (
                     <Spinner size={0} />
                   ) : (
                     'Join'
@@ -160,15 +134,15 @@ const SpacesTrayAppPresenter = () => {
               }
               onKeyDown={(evt: any) => {
                 if (evt.key === 'Enter' && isValidSpace(searchString)) {
-                  SpacesActions.setJoin('loading');
-                  SpacesActions.joinSpace(searchString);
+                  spacesStore.setJoin('loading');
+                  spacesStore.joinSpace(searchString);
                 }
               }}
             />
           </Flex>
           <Flex width="100%" justifyContent="flex-end">
-            <Text.Custom fontSize="11px" color={themeData.colors.text.error}>
-              {spaces.join.state === 'error' &&
+            <Text.Custom fontSize="11px" color="intent-alert">
+              {spacesStore.join.state === 'error' &&
                 `Failed to join ${searchString}.`}
               &nbsp;&nbsp;&nbsp;
             </Text.Custom>
@@ -204,9 +178,9 @@ const SpacesTrayAppPresenter = () => {
             onFindMore={() => {
               setSearchVisible(true);
             }}
-            selected={spaces.selected}
-            spaces={spaces.spacesList}
-            onSelect={SpacesActions.selectSpace}
+            selected={spacesStore.selected}
+            spaces={spacesStore.spacesList}
+            onSelect={spacesStore.selectSpace}
           />
         </Flex>
       )}
@@ -221,13 +195,10 @@ const SpacesTrayAppPresenter = () => {
       >
         {ship && (
           <YouRow
-            colorTheme={windowColor}
-            selected={`/${ship.patp}/our` === spaces.selected?.path}
-            space={spaces.ourSpace}
+            selected={`/${ship.patp}/our` === spacesStore.selected?.path}
+            space={spacesStore.ourSpace}
             ship={ship}
-            onSelect={async (path: string) =>
-              await SpacesActions.selectSpace(path)
-            }
+            onSelect={(path: string) => spacesStore.selectSpace(path)}
           />
         )}
       </Flex>

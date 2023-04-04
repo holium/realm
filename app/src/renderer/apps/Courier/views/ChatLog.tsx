@@ -168,7 +168,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <Flex
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.2 }}
+          transition={{ delay: 0.1, duration: 0.1 }}
         >
           {messages.length === 0 ? (
             <Flex

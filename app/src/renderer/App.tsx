@@ -4,7 +4,6 @@ import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
 import { Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
 import { Auth } from './system/authentication';
@@ -30,7 +29,7 @@ const AppPresenter = () => {
 
   useEffect(() => {
     return () => {
-      ShellActions.closeDialog();
+      shellStore.closeDialog();
     };
   }, []);
 

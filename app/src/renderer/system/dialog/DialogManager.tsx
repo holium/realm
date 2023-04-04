@@ -2,13 +2,11 @@ import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useServices } from 'renderer/logic/store';
 import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
-import { getCenteredPosition } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useAppState } from 'renderer/stores/app.store';
+import { getCenteredPosition } from 'renderer/stores/lib/window-manager';
 
 interface DialogManagerProps {
   dialogId?: string;
@@ -19,7 +17,7 @@ const DialogManagerPresenter = ({
   dialogId,
   dialogProps,
 }: DialogManagerProps) => {
-  const { shell } = useServices();
+  const { shellStore } = useAppState();
   const [dialogConfig, setDialogConfig] = useState<DialogConfig | null>(null);
   const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
@@ -31,8 +29,8 @@ const DialogManagerPresenter = ({
       dialogId as OnboardingStep
     );
     if (isOpen && notOnboardingDialog && dialogConfig?.hasCloseButton) {
-      ShellActions.closeDialog();
-      if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
+      shellStore.closeDialog();
+      if (dialogConfig.unblurOnClose) shellStore.setIsBlurred(false);
     }
   }, [dialogId, dialogConfig, isOpen]);
 
@@ -49,8 +47,8 @@ const DialogManagerPresenter = ({
           : dialogRenderer;
       setDialogConfig(newDialogConfig);
 
-      const appWindow = await DesktopActions.openDialog(
-        newDialogConfig.getWindowProps(shell.desktopDimensions)
+      const appWindow = shellStore.openDialogWindow(
+        newDialogConfig.getWindowProps(shellStore.desktopDimensions)
       );
 
       setDialogWindow(
@@ -65,7 +63,7 @@ const DialogManagerPresenter = ({
         />
       );
     },
-    [dialogProps, shell.desktopDimensions]
+    [dialogProps, shellStore.desktopDimensions]
   );
 
   useEffect(() => {
@@ -84,7 +82,7 @@ const DialogManagerPresenter = ({
         top: 0,
         right: 0,
         height: '100vh',
-        paddingTop: shell.isFullscreen ? 0 : 30,
+        paddingTop: shellStore.isFullscreen ? 0 : 30,
       }}
     >
       {dialogWindow}

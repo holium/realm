@@ -7,9 +7,9 @@ import { Flex, Divider } from 'renderer/components';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
+import { useAppState } from 'renderer/stores/app.store';
 
 type Props = {
   spacePath: string;
@@ -24,22 +24,24 @@ const AppDockViewPresenter = ({
   pinnedDockApps,
   unpinnedDockApps,
 }: Props) => {
-  const { desktop, bazaar, theme } = useServices();
+  const { shellStore, theme } = useAppState();
+
+  const { desktop, bazaar } = useServices();
 
   const [localDockAppIds, setLocalDockAppIds] = useState(pinnedDockAppsOrder);
 
   const onClickDockedApp = useCallback((dockedApp: AppType) => {
-    const appWindow = desktop.getWindowByAppId(dockedApp.id);
+    const appWindow = shellStore.getWindowByAppId(dockedApp.id);
     if (appWindow) {
       if (appWindow.isMinimized) {
-        DesktopActions.toggleMinimized(dockedApp.id);
+        shellStore.toggleMinimized(dockedApp.id);
       } else {
-        DesktopActions.setActive(dockedApp.id);
+        shellStore.setActive(dockedApp.id);
       }
     } else {
-      DesktopActions.openAppWindow(dockedApp);
+      shellStore.openWindow(dockedApp);
     }
-    DesktopActions.closeHomePane();
+    shellStore.closeHomePane();
   }, []);
 
   const onOrderUpdate = useCallback(() => {
@@ -108,7 +110,7 @@ const AppDockViewPresenter = ({
           key={`dock-divider-${spacePath}`}
           ml={2}
           mr={2}
-          customBg={rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4)}
+          customBg={rgba(lighten(0.2, theme.dockColor), 0.4)}
         />
       )}
       <Flex position="relative" flexDirection="row" alignItems="center" gap={8}>

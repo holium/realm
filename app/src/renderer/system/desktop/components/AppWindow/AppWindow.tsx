@@ -9,14 +9,13 @@ import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { useToggle } from '@holium/design-system';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
   denormalizeBounds,
   normalizeBounds,
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
-import rgba from 'polished/lib/color/rgba';
+import { useAppState } from 'renderer/stores/app.store';
 
 const CURSOR_WIDTH = 10;
 
@@ -28,8 +27,8 @@ type Props = {
 };
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
-  const { shell, bazaar, theme } = useServices();
-  const { textColor, windowColor } = theme.currentTheme;
+  const { shellStore } = useAppState();
+  const { bazaar } = useServices();
 
   const dragControls = useDragControls();
   const resizing = useToggle(false);
@@ -38,8 +37,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const appInfo = bazaar.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
   const bounds = useMemo(
-    () => denormalizeBounds(appWindow.bounds, shell.desktopDimensions),
-    [appWindow.bounds, shell.desktopDimensions]
+    () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
+    [appWindow.bounds, shellStore.desktopDimensions]
   );
 
   const mouseDragX = useMotionValue(0);
@@ -232,7 +231,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const updateWindowBounds = useCallback(
     debounce(() => {
-      DesktopActions.setWindowBounds(
+      shellStore.setWindowBounds(
         appWindow.appId,
         normalizeBounds(
           {
@@ -241,7 +240,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
             height: motionHeight.get(),
             width: motionWidth.get(),
           },
-          shell.desktopDimensions
+          shellStore.desktopDimensions
         )
       );
 
@@ -268,18 +267,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   };
 
   const onMaximize = async () => {
-    const mb = await DesktopActions.toggleMaximized(appWindow.appId);
-    const dmb = denormalizeBounds(mb, shell.desktopDimensions);
+    const mb = shellStore.toggleMaximized(appWindow.appId);
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
     motionX.set(dmb.x);
     motionY.set(dmb.y);
     motionWidth.set(dmb.width);
     motionHeight.set(dmb.height);
   };
 
-  const onMinimize = () => DesktopActions.toggleMinimized(appWindow.appId);
+  const onMinimize = () => shellStore.toggleMinimized(appWindow.appId);
 
   const onClose = () =>
-    appWindow.isActive && DesktopActions.closeAppWindow(appWindow.appId);
+    appWindow.isActive && shellStore.closeWindow(appWindow.appId);
 
   const onDevTools = useCallback(() => {
     const webView = document.getElementById(
@@ -293,8 +292,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       : webView.openDevTools();
   }, [webViewId]);
 
-  const onMouseDown = () => DesktopActions.setActive(appWindow.appId);
-
+  const onMouseDown = () => shellStore.setActive(appWindow.appId);
+  console.log(
+    'rendering window',
+    appWindow.appId,
+    'is active?',
+    appWindow.isActive
+  );
   return (
     <AppWindowContainer
       id={windowId}
@@ -333,8 +337,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         borderRadius,
         display: appWindow.isMinimized ? 'none' : 'block',
       }}
-      color={textColor}
-      customBg={rgba(windowColor, 0.9)}
       onMouseDown={onMouseDown}
     >
       <Flex
@@ -348,8 +350,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       >
         <TitlebarByType
           appWindow={appWindow}
-          shell={shell}
-          currentTheme={theme.currentTheme}
+          shell={shellStore}
           hideTitlebarBorder={
             appInfo?.type === 'urbit' && !appInfo.config?.titlebarBorder
           }

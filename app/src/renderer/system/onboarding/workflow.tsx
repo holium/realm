@@ -1,5 +1,4 @@
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { servicesStore } from 'renderer/logic/store';
 import {
@@ -29,6 +28,7 @@ import { AccessGatePassed } from 'renderer/system/onboarding/AccessGatePassed.di
 import { ViewCode } from './ViewCode.dialog';
 import { CheckInstallationDialog } from './CheckInstallation.dialog';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
@@ -41,7 +41,7 @@ const initialOnboardingDialogs: DialogRenderers = {
       return state?.disclaimerAccepted;
     },
     onOpen: () => {
-      ShellActions.setBlur(true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (_data: any) => {
       OnboardingActions.agreedToDisclaimer();
@@ -69,7 +69,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     customNext: true,
     component: (props: BaseDialogProps) => <AccessGate {...props} />,
     onOpen: () => {
-      ShellActions.setBlur(true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (isRecoveringAccount: boolean) => {
       if (isRecoveringAccount) {
@@ -100,7 +100,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     customNext: true,
     component: (props: BaseDialogProps) => <AccessGatePassed {...props} />,
     onOpen: () => {
-      ShellActions.setBlur(true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.EMAIL);
@@ -126,7 +126,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     customNext: true,
     component: (props: BaseDialogProps) => <EmailDialog {...props} />,
     onOpen: () => {
-      ShellActions.setBlur(true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (_data: any) => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
@@ -154,7 +154,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     component: (props: BaseDialogProps) => <HaveUrbitDialog {...props} />,
     hasPrevious: () => !servicesStore.identity.auth.firstTime,
     onPrevious: () => {
-      ShellActions.closeDialog();
+      appState.shellStore.closeDialog();
       OnboardingActions.exitOnboarding();
     },
     async onNext(selfHosted: boolean) {
@@ -227,7 +227,7 @@ const completeProfileDialogs: DialogRenderers = {
       return state && state.versionVerified;
     },
     onOpen: () => {
-      ShellActions.setBlur(true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: () => {
       OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP);

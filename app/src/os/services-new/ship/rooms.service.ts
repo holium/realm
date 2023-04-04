@@ -25,7 +25,6 @@ export class RoomsService extends AbstractService {
     return APIConnection.getInstance().conduit.poke(payload);
   }
   public scry(payload: Scry) {
-    console.log('scry', payload);
     return APIConnection.getInstance().conduit.scry(payload);
   }
 }

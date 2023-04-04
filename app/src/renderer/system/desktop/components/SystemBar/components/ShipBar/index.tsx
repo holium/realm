@@ -24,7 +24,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -34,6 +34,7 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
+  const { shellStore } = useAppState();
   const { ship, chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
@@ -271,8 +272,8 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  ShellActions.setBlur(true);
-                  ShellActions.openDialog('shutdown-dialog');
+                  shellStore.setIsBlurred(true);
+                  shellStore.openDialog('shutdown-dialog');
                   setActiveApp(null);
                 }}
               >
@@ -303,9 +304,7 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() =>
-                  DesktopActions.openAppWindow(
-                    nativeApps['os-settings'] as AppType
-                  )
+                  shellStore.openWindow(nativeApps['os-settings'] as AppType)
                 }
               >
                 <Icon name="Settings" size={22} />
@@ -357,7 +356,6 @@ export const ShipBarPresenter = () => {
             </Box>
           </Flex>
         </Flex>
-
         <AccountTray unreadCount={unreadCount} onClick={onAccountTrayClick} />
       </Flex>
     </BarStyle>
@@ -365,88 +363,3 @@ export const ShipBarPresenter = () => {
 };
 
 export const ShipBar = observer(ShipBarPresenter);
-
-// {
-//   isAccountTrayOpen || isAccountExpanded ? (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       pl="3px"
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//       onHoverEnd={() => {
-//         if (!isAccountTrayOpen) {
-//           setIsAccountExpanded(false);
-//         }
-//       }}
-//     >
-//       <Flex gap={8} height={34} alignItems="center">
-//         {/* <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Shutdown" size={22} opacity={0.7} />
-//             </Button.IconButton>
-//             <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Logout" size={22} opacity={0.7} />
-//             </Button.IconButton>
-
-//             <Button.IconButton
-//               className="realm-cursor-hover"
-//               data-close-tray="true"
-//               size={28}
-//               onClick={() =>
-//                 DesktopActions.openAppWindow(
-//                   nativeApps['os-settings'] as AppType
-//                 )
-//               }
-//             >
-//               <Icon name="Settings" size={22} opacity={0.7} />
-//             </Button.IconButton> */}
-//       </Flex>
-//       <AccountTray
-//         isOpen={isAccountTrayOpen}
-//         isExpanded={isAccountExpanded}
-//         onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//         onClick={onAccountTrayClick}
-//       />
-//     </Flex>
-//   ) : (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//     >
-//       <RoomTray />
-//       <Flex gap={8} height={34} alignItems="center">
-//         <WalletTray />
-//         <MessagesTray />
-//         <AccountTray
-//           isOpen={isAccountTrayOpen}
-//           isExpanded={isAccountExpanded}
-//           onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//           onClick={onAccountTrayClick}
-//         />
-//       </Flex>
-//       {/* <TrayClock /> */}
-//     </Flex>
-//   );
-// }

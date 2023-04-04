@@ -9,13 +9,11 @@ import {
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useChatStore } from '../store';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
-import { useServices } from 'renderer/logic/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { UnreadBadge } from './UnreadBadge';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatRowProps = {
   path: string;
@@ -41,6 +39,7 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
+  const { shellStore } = useAppState();
   const { ship, notifStore, chatStore } = useShipStore();
   const {
     inbox,
@@ -175,8 +174,8 @@ export const ChatRowPresenter = ({
       labelColor: '#ff6240',
       onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+        shellStore.setIsBlurred(true);
+        shellStore.openDialogWithStringProps('leave-chat-dialog', {
           path,
           amHost: isAdmin.toString(),
           our: ship.patp,

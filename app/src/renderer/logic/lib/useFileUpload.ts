@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { useState, ClipboardEvent, useCallback } from 'react';
-// import { useFileDrag } from './useDrag';
 import { IuseStorage } from './useStorage';
 
 export type FileUploadSource = 'drag' | 'paste' | 'direct';

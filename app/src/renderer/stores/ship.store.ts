@@ -321,7 +321,6 @@ export function useShipStore() {
 
 // updates
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-  console.log('realm update', update);
   if (update.type === 'booted') {
     if (update.payload.session) {
       shipStore.setShip(update.payload.session);

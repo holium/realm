@@ -88,5 +88,5 @@ export const AppWindowModel = types
     },
   }));
 
-export interface AppWindowType extends Instance<typeof AppWindowModel> {}
+export interface AppWindowMobxType extends Instance<typeof AppWindowModel> {}
 export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}

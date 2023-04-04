@@ -1,15 +1,17 @@
 import { app } from 'electron';
+import fs from 'fs';
 import log from 'electron-log';
+import moment from 'moment';
 import { ConduitSession } from './../conduit';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
-import { ChatDB } from './models/chat.model';
 import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications.service';
 import ChatService from './chat.service';
 import { Friends } from './models/friends.model';
 import SpacesService from './spaces.service';
+import { S3Client, StorageAcl } from '../../s3/S3Client';
 
 export class ShipService extends AbstractService {
   private patp: string;
@@ -52,13 +54,6 @@ export class ShipService extends AbstractService {
       spaces: new SpacesService(undefined, this.shipDB.db),
     };
 
-    this.sendUpdate({
-      type: 'ready',
-      payload: {
-        patp,
-      },
-    });
-
     app.on('quit', () => {
       this.shipDB?.disconnect();
       APIConnection.getInstance(credentials).conduit.removeAllListeners();
@@ -69,12 +64,73 @@ export class ShipService extends AbstractService {
     return this.shipDB?.getCredentials();
   }
 
-  private decryptDb(password: string) {
+  private _decryptDb(password: string) {
     this.shipDB?.decrypt(password);
   }
 
-  getMessages() {
-    return this.shipDB?.getMessages();
+  // ----------------------------------------
+  // ------------------ S3 ------------------
+  // ----------------------------------------
+  public async getS3Bucket() {
+    const [credentials, configuration] = await Promise.all([
+      APIConnection.getInstance().conduit.scry({
+        app: 's3-store',
+        path: `/credentials`,
+      }),
+      APIConnection.getInstance().conduit.scry({
+        app: 's3-store',
+        path: `/configuration`,
+      }),
+    ]);
+
+    return {
+      ...credentials['s3-update'],
+      ...configuration['s3-update'],
+    };
+  }
+
+  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+    return await new Promise((resolve, reject) => {
+      this.getS3Bucket()
+        .then(async (response: any) => {
+          console.log(response);
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: endp,
+            signatureVersion: 'v4',
+          });
+          let fileContent, fileName, fileExtension;
+          if (args.source === 'file' && typeof args.content === 'string') {
+            fileContent = fs.readFileSync(args.content);
+            // console.log(fileContent);
+            const fileParts = args.content.split('.');
+            fileName = fileParts.slice(0, -1);
+            // only take the filename, not the path
+            fileName = fileName[0].split('/').pop();
+            fileExtension = fileParts.pop();
+          } else if (args.source === 'buffer') {
+            fileContent = Buffer.from(args.content, 'base64');
+            fileName = 'clipboard';
+            fileExtension = args.contentType.split('/')[1];
+          }
+          if (!fileContent) log.warn('No file content found');
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: `${this.patp}/${moment().unix()}-${fileName}.${fileExtension}`,
+            Body: fileContent as Buffer,
+            ACL: StorageAcl.PublicRead,
+            ContentType: args.contentType,
+          };
+          const { Location } = await client.upload(params).promise();
+          resolve(Location);
+        })
+        .catch(reject);
+    });
   }
 }
 
@@ -84,3 +140,11 @@ export default ShipService;
 export const shipPreload = ShipService.preload(
   new ShipService('', '', { preload: true })
 );
+
+export interface FileUploadParams {
+  source: 'file' | 'buffer';
+  // when source='file', content is filename; otherwise
+  //   content should be clipboard contents
+  content: string;
+  contentType: string;
+}

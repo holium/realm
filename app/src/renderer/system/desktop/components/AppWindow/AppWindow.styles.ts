@@ -1,22 +1,15 @@
 import { motion } from 'framer-motion';
-import { darken } from 'polished';
 import styled from 'styled-components';
-import { ThemeType } from '../../../../theme';
 
-type AppWindowStyleProps = {
-  theme: ThemeType;
-  customBg: string;
-};
-
-export const AppWindowContainer = styled(motion.div)<AppWindowStyleProps>`
+export const AppWindowContainer = styled(motion.div)`
   position: absolute;
   border-radius: 9px;
   overflow: hidden;
   box-sizing: content-box;
   backdrop-filter: blur(24px);
-  box-shadow: ${(props) => props.theme.elevations.two};
-  border: 1px solid ${(props) => darken(0.1, props.customBg)};
-  background-color: ${(props) => props.customBg};
+  box-shadow: var(--rlm-box-shadow-2);
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  background-color: rgba(var(--rlm-window-bg-rgba));
 `;
 
 const DragHandle = styled(motion.div)<{ zIndex: number }>`

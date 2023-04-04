@@ -75,8 +75,6 @@ const AppStateModel = types
 // };
 
 // const persistedState = loadSnapshot();
-// delete defaultTheme.id
-const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
 export const appState = AppStateModel.create({
   booted: false,
@@ -122,7 +120,6 @@ ShipIPC.onUpdate((_event: any, update: any) => {
 RealmIPC.boot();
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-  console.log('realm update', update);
   if (update.type === 'booted') {
     appState.reset();
     appState.setBooted(update.payload);
@@ -134,13 +131,14 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 });
 
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
+  console.log('initial dimensions', dims);
   appState.shellStore.setDesktopDimensions(dims.width, dims.height);
 });
 
 window.addEventListener('beforeunload', function (event) {
   if (event.type === 'beforeunload') {
     console.log('refreshing');
-    appState.reset();
+    // appState.reset();
     // The event was triggered by a refresh or navigation
     // Your code to handle the refresh event here
   } else {

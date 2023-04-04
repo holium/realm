@@ -7,8 +7,8 @@ import {
   Menu,
   MenuItemProps,
 } from '@holium/design-system';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -31,6 +31,7 @@ export const ChatLogHeader = ({
   isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
+  const { shellStore } = useAppState();
   const { ship, chatStore } = useShipStore();
   const { selectedChat, setSubroute, toggleMuted } = chatStore;
 
@@ -95,8 +96,8 @@ export const ChatLogHeader = ({
       disabled: false,
       onClick: () => {
         // evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+        shellStore.setIsBlurred(true);
+        shellStore.openDialogWithStringProps('leave-chat-dialog', {
           path,
           amHost: isAdmin.toString(),
           our: ship.patp,

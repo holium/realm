@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-
-import { Flex, Text, ActionButton, Icons } from 'renderer/components';
+import { Flex, Text, Button, Icon } from '@holium/design-system';
+// import { ActionButton } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
 import { WindowedList } from '@holium/design-system';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export interface Space {
   color?: string;
@@ -32,8 +33,10 @@ const SpacesListPresenter = ({
   onSelect,
   onFindMore,
 }: SpacesListProps) => {
-  const { theme, visas } = useServices();
-  const { textColor } = theme.currentTheme;
+  const { shellStore } = useAppState();
+  const { spacesStore } = useShipStore();
+  // const { visas } = spacesStore;
+  const visas = { incoming: new Map() };
 
   const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
@@ -67,46 +70,56 @@ const SpacesListPresenter = ({
         alignItems="center"
         gap={24}
       >
-        <Text color={textColor} width={200} textAlign="center" opacity={0.5}>
+        <Text.Custom width={200} textAlign="center" opacity={0.5}>
           None of your groups have Spaces enabled.
-        </Text>
+        </Text.Custom>
         <Flex
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
           gap={12}
         >
-          <ActionButton
-            style={{ width: 162, paddingRight: 8 }}
+          <Button.TextButton
+            style={{
+              width: 162,
+              paddingRight: 8,
+              justifyContent: 'space-between',
+            }}
             tabIndex={-1}
             height={36}
-            rightContent={<Icons size={2} name="Plus" />}
             data-close-tray="true"
             onClick={() => {
-              ShellActions.openDialog('create-space-1');
+              shellStore.openDialog('create-space-1');
             }}
           >
-            Create one
-          </ActionButton>
-          <ActionButton
-            style={{ width: 162, paddingRight: 8 }}
+            Create one <Icon size={22} name="Plus" />
+          </Button.TextButton>
+          <Button.TextButton
+            style={{
+              width: 162,
+              paddingRight: 8,
+              justifyContent: 'space-between',
+            }}
             tabIndex={-1}
             height={36}
-            rightContent={<Icons mr="2px" size="22px" name="ArrowRightLine" />}
             onClick={(evt) => {
               evt.stopPropagation();
               onFindMore();
             }}
           >
-            Find spaces
-          </ActionButton>
+            Find spaces <Icon mr="2px" size={20} name="ArrowRightLine" />
+          </Button.TextButton>
         </Flex>
       </Flex>
     );
   }
 
   return (
-    <Flex flex={1} width="100%">
+    <Flex
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.1, duration: 0.1 }}
+    >
       <WindowedList
         rowHeight={56}
         key={`${spaces.length}-${incoming.length}`}

@@ -7,6 +7,8 @@ import AbstractService, {
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 import { AccountModelType } from 'renderer/stores/models/account.model';
+import { getReleaseChannel, setReleaseChannel } from './lib/settings';
+import APIConnection from './services-new/conduit';
 
 export type RealmUpdateBooted = {
   type: 'booted';
@@ -146,6 +148,40 @@ export class RealmService extends AbstractService {
     });
   }
 
+  async getReleaseChannel(): Promise<string> {
+    return getReleaseChannel();
+  }
+
+  setReleaseChannel(channel: string) {
+    let ship = undefined;
+    let desks = undefined;
+    // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
+    // example: INSTALL_MOON=~hostyv:realm,courier
+    if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
+      const parts: string[] = process.env.INSTALL_MOON.split(':');
+      ship = parts[0];
+      desks = parts[1].split(',');
+    } else {
+      ship = channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv';
+      desks = ['realm', 'courier'];
+    }
+    for (let i = 0; i < desks.length; i++) {
+      const desk = desks[i];
+      APIConnection.getInstance().conduit.poke({
+        app: 'hood',
+        mark: 'kiln-install',
+        json: {
+          ship: ship,
+          desk: desk,
+          local: desk,
+        },
+        onError: (e: any) => {
+          console.error(e);
+        },
+      });
+    }
+    setReleaseChannel(channel);
+  }
   // private startBackgroundProcess(): void {
   //   if (this.realmProcess) {
   //     return;

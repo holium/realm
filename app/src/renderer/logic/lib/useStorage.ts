@@ -1,7 +1,7 @@
 import { S3Client, StorageClient, StorageAcl } from '../s3/S3Client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
-import { ShipActions } from '../actions/ship';
+import { ShipIPC } from 'renderer/stores/ipc';
 
 // Pulled this from landscape
 
@@ -19,7 +19,7 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
 
   useEffect(() => {
     if (!s3) {
-      ShipActions.getS3Bucket()
+      (ShipIPC.getS3Bucket() as Promise<any>)
         .then((response: any) => {
           setS3(response);
         })

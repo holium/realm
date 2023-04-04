@@ -1,5 +1,4 @@
 import { toJS } from 'mobx';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { CreateSpaceModal } from './SelectType';
@@ -7,6 +6,7 @@ import { SpacesCreateForm } from './Details';
 import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { appState } from 'renderer/stores/app.store';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
@@ -29,14 +29,14 @@ export const spacesDialogs: DialogRenderers = {
     component: (props: any) => <CreateSpaceModal {...props} />,
     hasPrevious: () => true,
     onOpen: () => {
-      ShellActions.setBlur(true, true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (_evt: any) => {
-      ShellActions.nextDialog('create-space-3');
+      appState.shellStore.openDialog('create-space-3');
     },
     onClose: () => {
-      ShellActions.setBlur(false, true);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'create-space-1',
@@ -67,14 +67,14 @@ export const spacesDialogs: DialogRenderers = {
       }
     },
     onNext: (_evt: any, _state: any) => {
-      ShellActions.nextDialog('create-space-3');
+      appState.shellStore.openDialog('create-space-3');
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-1');
+      appState.shellStore.openDialog('create-space-1');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'create-space-2',
@@ -97,14 +97,14 @@ export const spacesDialogs: DialogRenderers = {
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
     onNext: (_evt: any, _state: any, _setState: any) => {
-      ShellActions.nextDialog('create-space-4');
+      appState.shellStore.openDialog('create-space-4');
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-1');
+      appState.shellStore.openDialog('create-space-1');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       if (
@@ -163,8 +163,8 @@ export const spacesDialogs: DialogRenderers = {
     },
     onPrevious: () => {},
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       if (
@@ -215,11 +215,11 @@ export const spacesDialogs: DialogRenderers = {
       });
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-3');
+      appState.shellStore.openDialog('create-space-3');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       return state && state.members;
