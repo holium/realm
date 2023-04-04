@@ -1,5 +1,5 @@
 import { Database } from 'better-sqlite3';
-import AbstractDataAccess from '../../abstract.db';
+import AbstractDataAccess from '../abstract.db';
 
 export interface Account {
   onboardingId: number;

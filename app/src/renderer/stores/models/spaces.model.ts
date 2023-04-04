@@ -90,7 +90,6 @@ export const SpacesStore = types
       try {
         const { current, spaces } =
           yield SpacesIPC.getInitial() as Promise<any>;
-
         // TODO form the data in the SQL query later
         spaces.forEach((space: any) => {
           space.theme.id = space.path;

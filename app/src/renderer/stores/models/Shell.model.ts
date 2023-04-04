@@ -1,6 +1,5 @@
 // import { osState, shipState } from './../store';
 import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
-import { Dimensions } from '@holium/design-system';
 import {
   AppWindowMobxType,
   AppWindowModel,

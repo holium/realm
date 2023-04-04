@@ -11,7 +11,6 @@ export class SpacesService extends AbstractService {
   private shipDB?: Database;
   public spacesDB?: SpacesDB;
   public membersDB?: MembersDB;
-  public selectedSpace: string | null = null;
 
   constructor(options?: ServiceOptions, db?: Database) {
     super('spacesService', options);
@@ -39,7 +38,7 @@ export class SpacesService extends AbstractService {
         case 'initial':
           this.spacesDB?.insertAll(data['initial'].spaces);
           this.membersDB?.insertAll(data['initial'].membership);
-          this.selectedSpace = data['initial'].current.path;
+          this.spacesDB?.setCurrent(data['initial'].current.path);
           break;
         case 'add':
           // this.spacesDB?.insert(data['add']);
@@ -93,9 +92,9 @@ export class SpacesService extends AbstractService {
 
   public async getInitial() {
     if (!this.shipDB) return;
-    console.log('getInitial');
     const query = this.shipDB.prepare(`
       SELECT
+        current,
         path,
         name,
         description,
@@ -118,9 +117,10 @@ export class SpacesService extends AbstractService {
       GROUP BY path;
     `);
     const result = query.all();
+    const currentSpace = result.filter((row) => row.current === 1)[0];
 
     return {
-      current: this.selectedSpace,
+      current: currentSpace ? currentSpace.path : null,
       spaces: result.map((row) => {
         return {
           ...row,

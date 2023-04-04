@@ -5,7 +5,7 @@ import Store from 'electron-store';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
-import { Account } from './models/accounts.db';
+import { Account } from './accounts.table';
 import { AccountModelType } from 'renderer/stores/models/account.model';
 
 export type AuthUpdateInit = {
@@ -75,12 +75,12 @@ export class AuthService extends AbstractService {
 
   public getAccounts(): Account[] {
     if (!this.authDB) return [];
-    return this.authDB.models.accounts.find();
+    return this.authDB.tables.accounts.find();
   }
 
   public getAccount(patp: string): Account | null {
     if (!this.authDB) return null;
-    return this.authDB.models.accounts.findOne(patp);
+    return this.authDB.tables.accounts.findOne(patp);
   }
 
   /**
@@ -90,7 +90,7 @@ export class AuthService extends AbstractService {
    * @returns boolean - true if login was successful, false otherwise
    */
   public login(patp: string, password: string): boolean {
-    const account = this.authDB?.models.accounts.findOne(patp);
+    const account = this.authDB?.tables.accounts.findOne(patp);
     if (!account) {
       log.info(`No account found for ${patp}`);
       return false;

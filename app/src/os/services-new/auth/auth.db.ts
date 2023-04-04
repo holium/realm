@@ -4,18 +4,13 @@ import sqlite3 from 'better-sqlite3';
 import Store from 'electron-store';
 import log from 'electron-log';
 import { AuthStore } from '../../services/identity/auth.model';
-import { Account, Accounts, accountsInit } from './models/accounts.db';
-import {
-  AccountsOnboarding,
-  accountsOnboardingInit,
-} from './models/accountsOnboarding.db';
+import { Accounts, accountsInit } from './accounts.table';
 import { SessionType } from './auth.service';
 
 export class AuthDB {
   private readonly authDB: sqlite3.Database;
-  models: {
+  tables: {
     accounts: Accounts;
-    accountsOnboarding: AccountsOnboarding;
   };
 
   constructor() {
@@ -33,9 +28,8 @@ export class AuthDB {
 
     const migrated = result[0]?.migrated || null;
     if (!migrated) this.migrateJsonToSqlite();
-    this.models = {
+    this.tables = {
       accounts: new Accounts(this.authDB),
-      accountsOnboarding: new AccountsOnboarding(this.authDB),
     };
 
     app.on('quit', () => {
@@ -138,9 +132,7 @@ export class AuthDB {
 
 const initSql = `
 
-${accountsOnboardingInit}
-
-create table if not exists accounts_onboarding_meta (
+create table if not exists onboarding_meta (
   firstTime           INTEGER NOT NULL DEFAULT 1,
   agreedToDisclaimer  INTEGER NOT NULL DEFAULT 0,
   agreedAt            INTEGER

@@ -90,6 +90,21 @@ export class SpacesDB extends AbstractDataAccess<Space> {
     });
   }
 
+  public setCurrent(path: string) {
+    // update all to 0 and then set the one to 1 in one transaction
+    const query = `
+    UPDATE spaces
+      SET current = (
+        CASE
+          WHEN path = ? THEN 1
+          ELSE 0
+        END
+      )`;
+
+    const stmt = this.prepare(query);
+    stmt.run(path);
+  }
+
   public findOne(path: string): Space | null {
     const query = `SELECT * FROM ${this.tableName} WHERE path = ?`;
     const stmt = this.prepare(query);
@@ -136,16 +151,16 @@ export class SpacesDB extends AbstractDataAccess<Space> {
 
 export const spacesInitSql = `
   create table if not exists spaces (
-    current       integer default 0,
-    path          text primary key,
-    name          text not null,
-    description   text,
-    color         text,
-    type          text not null,
-    archetype     text,
-    picture       text,
-    access        text,
-    theme         text
+    current         integer default 0,
+    path            text primary key,
+    name            text not null,
+    description     text,
+    color           text,
+    type            text not null,
+    archetype       text,
+    picture         text,
+    access          text,
+    theme           text
   );
   create unique index if not exists spaces_path_uindex on spaces (path);
 `;

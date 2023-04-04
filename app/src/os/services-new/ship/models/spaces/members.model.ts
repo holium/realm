@@ -1,9 +1,6 @@
 import { Database } from 'better-sqlite3';
-import APIConnection from '../../../conduit';
-import AbstractDataAccess from '../../../abstract.db';
-import { cleanNounColor } from '../../../../lib/color';
-import { ThemeType } from 'renderer/stores/models/theme.model';
 import log from 'electron-log';
+import AbstractDataAccess from '../../../abstract.db';
 
 export interface Member {
   space: string;

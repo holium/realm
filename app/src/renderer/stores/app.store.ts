@@ -131,7 +131,6 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 });
 
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
-  console.log('initial dimensions', dims);
   appState.shellStore.setDesktopDimensions(dims.width, dims.height);
 });
 
