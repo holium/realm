@@ -178,6 +178,7 @@ export const SpacesStore = types
       self.selected = self.spaces.get(spacePath);
       if (self.selected) {
         appState.setTheme(self.selected.theme);
+        SpacesIPC.setSelectedSpace(spacePath);
       }
       return self.selected;
     },

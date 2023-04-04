@@ -68,6 +68,15 @@ export class ShipService extends AbstractService {
     this.shipDB?.decrypt(password);
   }
 
+  public cleanup() {
+    // remove all ipcMain listeners
+    this.reset();
+    this.services?.chat.reset();
+    this.services?.rooms.reset();
+    this.services?.notifications.reset();
+    this.services?.friends.reset();
+    this.services?.spaces.reset();
+  }
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------

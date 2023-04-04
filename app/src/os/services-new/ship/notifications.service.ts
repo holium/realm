@@ -12,6 +12,11 @@ export class NotificationsService extends AbstractService {
     }
     this.notifDB = new NotificationsDB({ preload: false, name: 'notifDB', db });
   }
+
+  reset(): void {
+    super.reset();
+    this.notifDB?.reset();
+  }
 }
 
 export default NotificationsService;

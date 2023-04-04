@@ -171,6 +171,20 @@ abstract class AbstractDataAccess<T> {
     });
   }
 
+  reset() {
+    const methods = Object.getOwnPropertyNames(
+      Object.getPrototypeOf(this)
+    ).filter(
+      (method) =>
+        method !== 'constructor' && typeof (this as any)[method] === 'function'
+    );
+    methods.forEach((method) => {
+      const ipcChannel = `${this.name}.${method}`;
+
+      ipcMain.removeHandler(ipcChannel);
+    });
+  }
+
   /**
    * ------------------------------
    * preload

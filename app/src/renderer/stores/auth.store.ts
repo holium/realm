@@ -1,5 +1,4 @@
 import { RealmIPC } from './ipc';
-import { createContext, useContext } from 'react';
 import {
   applyPatch,
   Instance,
@@ -8,16 +7,12 @@ import {
   applySnapshot,
   clone,
   flow,
+  getSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
 import { AccountModel, AccountModelType } from './models/account.model';
-import AccountContext from './AccountContext';
-import {
-  AuthUpdateInit,
-  AuthUpdateLogin,
-  AuthUpdateTypes,
-} from 'os/services-new/auth/auth.service';
+import { AuthUpdateLogin } from 'os/services-new/auth/auth.service';
 import { trackEvent } from 'renderer/logic/lib/track';
 
 export const LoginStatus = types.enumeration([
@@ -47,11 +42,25 @@ export const AuthenticationModel = types
       self.status = 'success';
       self.session = account;
     },
+    _clearSession(patp: string) {
+      if (self.session?.patp === patp) {
+        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
+        self.status = 'initial';
+        self.session = null;
+      }
+    },
     _authSuccess(data: AuthUpdateLogin) {
       // self.session = account;
     },
     _authError(data: AuthUpdateLogin) {},
-
+    //
+    setAccountCurrentTheme(theme: any) {
+      const account = self.accounts.find((a) => a.patp === self.session?.patp);
+      if (account) {
+        account.theme = clone(theme);
+        AuthIPC.setAccountTheme(account.patp, getSnapshot(theme));
+      }
+    },
     // use flow to login the account
     login: flow(function* (patp: string, password: string) {
       self.status = 'loading';
@@ -74,11 +83,14 @@ export const AuthenticationModel = types
       return self.status;
     }),
     logout: flow(function* () {
-      const result = yield AuthIPC.logout() as Promise<any>;
-      if (result) {
+      try {
+        yield RealmIPC.logout(self.session?.patp) as Promise<any>;
         self.session = null;
-      } else {
-        // TODO show error
+        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
+        self.status = 'initial';
+        self.session = null;
+      } catch (e) {
+        console.log(e);
       }
     }),
     removeAccount: flow(function* (patp: string) {

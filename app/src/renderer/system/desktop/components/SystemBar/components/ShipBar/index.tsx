@@ -15,16 +15,15 @@ import {
 } from '@holium/design-system';
 import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
+import { RealmIPC } from 'renderer/stores/ipc';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -34,7 +33,7 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
-  const { shellStore } = useAppState();
+  const { shellStore, authStore } = useAppState();
   const { ship, chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
@@ -63,10 +62,10 @@ export const ShipBarPresenter = () => {
     console.log('clicked notification', app, path, link);
     switch (app) {
       case 'os-settings':
-        DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
+        shellStore.openWindow(nativeApps['os-settings'] as AppType);
         break;
       case 'os-browser':
-        DesktopActions.openAppWindow(nativeApps['os-browser'] as AppType);
+        shellStore.openWindow(nativeApps['os-browser'] as AppType);
         break;
       case 'realm-chat':
         openChatToPath(chatStore, setActiveApp, path, link);
@@ -288,9 +287,8 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  AuthActions.logout(ship.patp);
+                  authStore.logout();
                   setActiveApp(null);
-                  trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
                 }}
               >
                 <Icon name="Logout" size={22} />

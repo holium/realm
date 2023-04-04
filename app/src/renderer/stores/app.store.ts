@@ -1,5 +1,4 @@
-import { session } from 'electron';
-import { RealmIPC, ShipIPC } from './ipc';
+import { AuthIPC, RealmIPC, ShipIPC } from './ipc';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -7,6 +6,7 @@ import {
   types,
   onSnapshot,
   applySnapshot,
+  getSnapshot,
   clone,
 } from 'mobx-state-tree';
 
@@ -18,7 +18,7 @@ import { AuthenticationModel } from './auth.store';
 
 import { ShellModel } from './models/shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
-import { RealmUpdateTypes } from 'os/realm.service';
+import { RealmUpdateTypes } from 'os/realm.types';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -52,6 +52,11 @@ const AppStateModel = types
     },
     setTheme(theme: ThemeType) {
       self.theme = clone(theme);
+      if (self.authStore.session) {
+        // if the user is logged in, update the theme for the account
+        // the login screen will use the theme from the account
+        self.authStore.setAccountCurrentTheme(theme);
+      }
     },
     setLoggedIn() {
       self.isLoggedIn = true;
@@ -105,18 +110,6 @@ export function useAppState() {
   return store;
 }
 
-OSActions.onLogin((_event: any) => {
-  appState.setLoggedIn();
-});
-
-OSActions.onLogout((_event: any) => {
-  appState.setLoggedOut();
-});
-
-ShipIPC.onUpdate((_event: any, update: any) => {
-  console.log('ship update', update);
-});
-
 RealmIPC.boot();
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
@@ -127,6 +120,9 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'authenticated') {
     appState.authStore._setSession(update.payload.patp);
     appState.setLoggedIn();
+  }
+  if (update.type === 'logout') {
+    appState.setLoggedOut();
   }
 });
 

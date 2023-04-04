@@ -6,33 +6,8 @@ import AbstractService, {
 } from './services-new/abstract.service';
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
-import { AccountModelType } from 'renderer/stores/models/account.model';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import APIConnection from './services-new/conduit';
-
-export type RealmUpdateBooted = {
-  type: 'booted';
-  payload: {
-    accounts: AccountModelType[];
-    screen: 'login' | 'onboarding' | 'os';
-    session?: {
-      url: string;
-      patp: string;
-      cookie: string;
-    };
-  };
-};
-
-export type RealmUpdateAuthenticated = {
-  type: 'authenticated';
-  payload: {
-    url: string;
-    patp: string;
-    cookie: string;
-  };
-};
-
-export type RealmUpdateTypes = RealmUpdateAuthenticated | RealmUpdateBooted;
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -135,6 +110,19 @@ export class RealmService extends AbstractService {
       this._sendAuthenticated(patp, credentials.url, credentials.cookie);
     }
     return isAuthenticated;
+  }
+
+  async logout(patp: string) {
+    if (!this.services) {
+      return;
+    }
+    this.services.ship?.cleanup();
+    delete this.services.ship;
+    this.services.auth._clearSession();
+    this.sendUpdate({
+      type: 'logout',
+      payload: patp,
+    });
   }
 
   private _sendAuthenticated(patp: string, url: string, cookie: string) {

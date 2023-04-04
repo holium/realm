@@ -6,11 +6,13 @@ import log from 'electron-log';
 import { AuthStore } from '../../services/identity/auth.model';
 import { Accounts, accountsInit } from './accounts.table';
 import { SessionType } from './auth.service';
+import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
 
 export class AuthDB {
   private readonly authDB: sqlite3.Database;
   tables: {
     accounts: Accounts;
+    masterAccounts: MasterAccounts;
   };
 
   constructor() {
@@ -20,6 +22,7 @@ export class AuthDB {
       {}
     );
     this.authDB.pragma('journal_mode = WAL');
+    this.authDB.pragma('foreign_keys = ON');
     this.authDB.exec(initSql);
 
     const result = this.authDB
@@ -30,6 +33,7 @@ export class AuthDB {
     if (!migrated) this.migrateJsonToSqlite();
     this.tables = {
       accounts: new Accounts(this.authDB),
+      masterAccounts: new MasterAccounts(this.authDB),
     };
 
     app.on('quit', () => {
@@ -131,15 +135,8 @@ export class AuthDB {
 }
 
 const initSql = `
-
-create table if not exists onboarding_meta (
-  firstTime           INTEGER NOT NULL DEFAULT 1,
-  agreedToDisclaimer  INTEGER NOT NULL DEFAULT 0,
-  agreedAt            INTEGER
-);
-
 ${accountsInit}
-
+${masterAccountsInit}
 create table if not exists accounts_order (
   patp          TEXT PRIMARY KEY NOT NULL,
   idx           INTEGER NOT NULL

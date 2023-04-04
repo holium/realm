@@ -98,6 +98,20 @@ abstract class AbstractService extends EventEmitter {
       );
     });
   }
+
+  reset() {
+    const methods = Object.getOwnPropertyNames(
+      Object.getPrototypeOf(this)
+    ).filter(
+      (method) =>
+        method !== 'constructor' && typeof (this as any)[method] === 'function'
+    );
+    methods.forEach((method) => {
+      const ipcChannel = `${this.serviceName}.${method}`;
+
+      ipcMain.removeHandler(ipcChannel);
+    });
+  }
   /**
    * ------------------------------
    * preload

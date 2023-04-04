@@ -7,6 +7,15 @@ import { PokeParams, Scry } from '@holium/conduit/src/types';
 import { SpacesDB } from './models/spaces/spaces.model';
 import { MembersDB } from './models/spaces/members.model';
 
+const pathToObj = (path: string) => {
+  const pathArr = path.split('/');
+  const pathObj = {
+    ship: pathArr[1],
+    space: pathArr[2],
+  };
+  return pathObj;
+};
+
 export class SpacesService extends AbstractService {
   private shipDB?: Database;
   public spacesDB?: SpacesDB;
@@ -29,6 +38,12 @@ export class SpacesService extends AbstractService {
       onQuit: this._onQuit,
       onError: this._onError,
     });
+  }
+
+  reset(): void {
+    super.reset();
+    this.spacesDB?.reset();
+    this.membersDB?.reset();
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
@@ -130,6 +145,19 @@ export class SpacesService extends AbstractService {
         };
       }),
     };
+  }
+
+  public async setSelectedSpace(path: string) {
+    this.spacesDB?.setCurrent(path);
+    APIConnection.getInstance().conduit.poke({
+      app: 'spaces',
+      mark: 'spaces-action',
+      json: {
+        current: {
+          path: pathToObj(path),
+        },
+      },
+    });
   }
 
   // public poke(payload: PokeParams) {

@@ -2,7 +2,8 @@ import { Database } from 'better-sqlite3';
 import AbstractDataAccess from '../abstract.db';
 
 export interface Account {
-  onboardingId: number;
+  accountId: number;
+  type: 'local' | 'hosted';
   patp: string;
   url: string;
   nickname: string;
@@ -11,6 +12,8 @@ export interface Account {
   status: string;
   theme: string;
   passwordHash: string;
+  encryptionKey: string;
+  authToken: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -22,7 +25,8 @@ export class Accounts extends AbstractDataAccess<Account> {
 
   protected mapRow(row: any): Account {
     return {
-      onboardingId: row.onboardingId,
+      accountId: row.accountId,
+      type: row.type,
       patp: row.patp,
       url: row.url,
       nickname: row.nickname,
@@ -31,6 +35,8 @@ export class Accounts extends AbstractDataAccess<Account> {
       status: row.status,
       theme: row.theme ? JSON.parse(row.theme) : {},
       passwordHash: row.passwordHash,
+      encryptionKey: row.encryptionKey,
+      authToken: row.authToken,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
@@ -82,9 +88,9 @@ export class Accounts extends AbstractDataAccess<Account> {
 
 export const accountsInit = `
   create table if not exists accounts (
-    onboardingId    INTEGER REFERENCES accounts_onboarding(id) ON DELETE CASCADE,
-    accountId       TEXT NOT NULL,
+    accountId       INTEGER,
     patp            TEXT PRIMARY KEY NOT NULL,
+    type            TEXT NOT NULL DEFAULT 'local',
     url             TEXT NOT NULL,
     nickname        TEXT,
     color           TEXT default '#000000',
@@ -93,7 +99,9 @@ export const accountsInit = `
     theme           TEXT,
     passwordHash    TEXT,
     createdAt       INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
-    updatedAt       INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+    updatedAt       INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+    FOREIGN KEY (accountId) REFERENCES master_accounts(id) ON DELETE CASCADE
+
   );
   create unique index if not exists accounts_patp_uindex on accounts (patp);
 `;

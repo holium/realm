@@ -2,7 +2,7 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -10,7 +10,7 @@ import { Auth } from './system/authentication';
 import { SelectionProvider } from './logic/lib/selection';
 import { ErrorBoundary } from './logic/ErrorBoundary';
 
-function AppContent() {
+function AppContentPresenter() {
   const { authStore, booted } = useAppState();
   if (!booted) {
     return (
@@ -19,8 +19,25 @@ function AppContent() {
       </Flex>
     );
   }
-  return authStore.session ? <Shell /> : <Auth />;
+  const isOnboarding = authStore.accounts.length === 0;
+  const isLoggedOut = !authStore.session;
+
+  if (isOnboarding) {
+    // TODO onboarding here
+    return (
+      <Flex>
+        <Text.Custom>onboarding</Text.Custom>
+      </Flex>
+    );
+  }
+  if (isLoggedOut) {
+    return <Auth />;
+  }
+
+  return <Shell />;
 }
+
+export const AppContent = observer(AppContentPresenter);
 
 const AppPresenter = () => {
   const { theme, shellStore } = useAppState();

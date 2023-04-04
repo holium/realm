@@ -16,6 +16,11 @@ export class ChatService extends AbstractService {
     this.chatDB = new ChatDB({ preload: false, db });
   }
 
+  reset(): void {
+    super.reset();
+    this.chatDB?.reset();
+  }
+
   async sendMessage(path: string, fragments: any[]) {
     const payload = {
       app: 'realm-chat',

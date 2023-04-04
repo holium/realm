@@ -7,6 +7,8 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
 import { AccountModelType } from 'renderer/stores/models/account.model';
+import { ThemeType } from 'renderer/stores/models/theme.model';
+import { MasterAccount } from './masterAccounts.table';
 
 export type AuthUpdateInit = {
   type: 'init';
@@ -83,6 +85,62 @@ export class AuthService extends AbstractService {
     return this.authDB.tables.accounts.findOne(patp);
   }
 
+  public async createMasterAccount(mAccount: MasterAccount) {
+    if (!this.authDB) return;
+    // if a master account already exists, return
+
+    // TODO implement password hashing and other account creation logic
+    const newAccount = this.authDB.tables.masterAccounts.create(mAccount);
+    if (newAccount) {
+      // sends update to renderer with new account
+      this.sendUpdate({
+        type: 'init',
+        payload: this.getAccounts(),
+      });
+    }
+  }
+
+  public async setAccountTheme(patp: string, theme: ThemeType) {
+    if (!this.authDB) return;
+    const account = this.authDB.tables.accounts.findOne(patp);
+    if (account) {
+      this.authDB.tables.accounts.update(patp, {
+        theme: JSON.stringify(theme),
+      });
+    }
+  }
+
+  // public createAccount(
+  //   patp: string,
+  //   password: string,
+  //   email: string,
+  //   ship: string
+  // ): boolean {
+  //   if (!this.authDB) return false;
+  //   const account = this.authDB.tables.accounts.findOne(patp);
+  //   if (account) {
+  //     log.info(`Account already exists for ${patp}`);
+  //     return false;
+  //   }
+  //   const passwordHash = this._hashPassword(password);
+  //   const newAccount = this.authDB.tables.accounts.create({
+  //     patp,
+  //     passwordHash,
+  //     email,
+  //     ship,
+  //   });
+  //   if (newAccount) {
+  //     this.sendUpdate({
+  //       type: 'init',
+
+  //       payload: this.getAccounts(),
+  //     });
+  //     return true;
+  //   } else {
+  //     log.info(`Failed to create account for ${patp}`);
+  //     return false;
+  //   }
+  // }
   /**
    *
    * @param patp
@@ -129,11 +187,6 @@ export class AuthService extends AbstractService {
 
   public _clearSession(patp?: string) {
     this.authDB?._clearSession(patp);
-  }
-
-  public logout(): void {
-    // TODO Add amplitude logging here
-    // TODO Stop the realm process
   }
 
   public _verifyPassword(password: string, hash: string): boolean {

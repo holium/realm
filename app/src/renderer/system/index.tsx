@@ -1,11 +1,9 @@
-import { useContext, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 import { Desktop } from './desktop/Desktop';
 import { DialogManager } from './dialog/DialogManager';
-import { Spinner } from '@holium/design-system';
 import { ConnectionStatus } from 'renderer/components';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useAppState } from 'renderer/stores/app.store';
 
 const ShellPresenter = () => {

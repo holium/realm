@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
-import { ChatStore, chatStore } from '../apps/Courier/store';
+import { ChatStore } from '../apps/Courier/store';
 import { NotifIPC, RealmIPC } from './ipc';
 import { Theme } from './models/theme.model';
-import { RealmUpdateTypes } from 'os/realm.service';
+import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStore } from './models/spaces.model';
-import { FriendModel, FriendsStore } from './models/friends.model';
+import { FriendsStore } from './models/friends.model';
 
 // const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
 //   return (

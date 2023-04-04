@@ -1,6 +1,6 @@
 import { AppPreloadType } from 'main/preload';
 import { OSPreloadType } from 'os/preload';
-import { authPreload } from 'os/realm.service';
+import { authPreload } from 'os/services-new/auth.service';
 import { shipPreload } from 'os/services-new/ship/ship.service';
 import { roomsPreload } from 'os/services-new/ship/rooms.service';
 import { authPreload } from 'os/services-new/auth/auth.service';

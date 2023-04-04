@@ -19,7 +19,6 @@ import { ShipSelector } from './ShipSelector';
 import { trackEvent } from 'renderer/logic/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { AuthIPC } from 'renderer/stores/ipc';
-import AccountContext from 'renderer/stores/AccountContext';
 
 interface LoginProps {
   addShip: () => void;
