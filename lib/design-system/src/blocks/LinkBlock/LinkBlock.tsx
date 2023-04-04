@@ -87,7 +87,7 @@ export const LinkBlock = ({
   if (
     metadata.linkType === 'url' ||
     !metadata.ogData ||
-    (metadata.ogData && !metadata.ogData.ogTitle)
+    (metadata.ogData && !openGraph?.ogTitle)
   ) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (

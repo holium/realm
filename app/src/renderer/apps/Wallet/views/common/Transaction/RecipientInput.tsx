@@ -277,7 +277,7 @@ export const RecipientInput = observer(
           >
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
-              `${recipient} doesn\'t have a Realm wallet.`}
+              `${recipient} doesn't have a Realm wallet.`}
             &nbsp;&nbsp;&nbsp;
           </Text>
         </Flex>
