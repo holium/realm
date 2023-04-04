@@ -11,6 +11,7 @@ import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import fetch from 'cross-fetch';
+import { download } from 'electron-dl';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
@@ -232,6 +233,13 @@ app.on('before-quit', (event) => {
   }
 });
 ipcMain.on('realm.app.quit', app.quit);
+
+ipcMain.on('download-url-as-file', async (_event, { url }) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    await download(win, url);
+  }
+});
 
 app
   .whenReady()

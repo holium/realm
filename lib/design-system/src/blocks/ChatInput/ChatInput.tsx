@@ -169,6 +169,7 @@ export const ChatInput = ({
       onEditConfirm(parsedFragments);
     } else {
       onSend(parsedFragments);
+      setRows(1);
     }
   };
 
