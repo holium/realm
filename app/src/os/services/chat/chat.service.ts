@@ -672,6 +672,7 @@ export class ChatService extends BaseService {
   }
 
   getChat(path: string) {
+    console.log('getChat', path);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_messages AS (
@@ -774,6 +775,7 @@ export class ChatService extends BaseService {
     path: string,
     _params?: { start: number; amount: number }
   ) {
+    console.log('getChatLog', path, _params);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_fragments AS (
