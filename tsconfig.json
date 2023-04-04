@@ -4,6 +4,7 @@
     ".eslintrc.js",
     "app",
     "shared",
+    "onboarding",
     "lib/conduit",
     "lib/design-system",
     "lib/presence/code",

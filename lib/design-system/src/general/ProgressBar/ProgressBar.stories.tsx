@@ -8,6 +8,6 @@ export default {
 
 export const Default: ComponentStory<typeof ProgressBar> = () => (
   <Flex flexDirection="column" width="300px">
-    <ProgressBar percentage={50} />
+    <ProgressBar percentages={[50]} />
   </Flex>
 );

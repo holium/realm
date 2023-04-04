@@ -214,7 +214,7 @@ const StartingDownload = (props: StartingDownloadProps) => {
       alignItems="center"
     >
       <Flex width={308}>
-        <ProgressBar percentage={0} progressColor="#F08735" />
+        <ProgressBar percentages={[0]} progressColors={['brand']} />
       </Flex>
       <Flex justifyContent="space-between" width={308} alignItems="flex-start">
         <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
@@ -248,7 +248,7 @@ const UpdateStats = (props: UpdateStatsProps) => {
       alignItems="center"
     >
       <Flex width={308}>
-        <ProgressBar percentage={stats.percent} progressColor="#F08735" />
+        <ProgressBar percentages={[stats.percent]} progressColors={['brand']} />
       </Flex>
       <Flex justifyContent="space-between" width={308} alignItems="flex-start">
         <Text.Custom fontSize={2} fontWeight={300} opacity={0.5}>
