@@ -10,18 +10,17 @@ type ImageBlockProps = {
   onImageLoaded?: () => void;
 } & BlockProps;
 
-export const ImageBlock = (props: ImageBlockProps) => {
-  const {
-    showLoader,
-    image,
-    by,
-    variant,
-    width = 'inherit',
-    height,
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    onImageLoaded,
-    ...rest
-  } = props;
+export const ImageBlock = ({
+  id,
+  showLoader,
+  image,
+  by,
+  variant,
+  width = 'inherit',
+  height,
+  onImageLoaded,
+  ...rest
+}: ImageBlockProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const parsedHeight = useMemo(
     () =>
@@ -44,9 +43,8 @@ export const ImageBlock = (props: ImageBlockProps) => {
   );
 
   return (
-    <Block variant={variant} width={width} {...rest}>
+    <Block id={id} variant={variant} width={width} {...rest}>
       <FragmentImage
-        id={rest.id}
         loading="eager"
         {...(showLoader && { isSkeleton: !isLoaded })}
         src={image}
@@ -59,9 +57,7 @@ export const ImageBlock = (props: ImageBlockProps) => {
             setIsLoaded(true);
           }
         }}
-        onError={() => {
-          // setIsError(true);
-        }}
+        onError={() => {}}
       />
       {by && (
         <Flex className="block-footer">
