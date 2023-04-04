@@ -28,12 +28,18 @@ export const AccountHostingDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountHostingDialog
-      id="~pasren-satmex"
+      patps={['~pasren-satmex']}
+      selectedPatp="~pasren-satmex"
+      setSelectedPatp={() => {}}
       email="rubberducky12@protonmail.com"
-      payment="Credit Card"
-      url="https://pasren-satmex.holium.network/"
-      accessCode="tolnym-rilmug-ricnep-marlyx"
-      maintenanceWindow="Sunday, 04:00 - 06:00 GMT"
+      shipUrl="https://pasren-satmex.holium.network/"
+      shipCode="tolnym-rilmug-ricnep-marlyx"
+      shipMaintenanceWindow={7}
+      onClickChangeEmail={() => {}}
+      onClickChangePassword={() => {}}
+      onClickManageBilling={() => {}}
+      onClickGetNewAccessCode={() => {}}
+      onClickChangeMaintenanceWindow={() => {}}
       onClickEjectId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
@@ -48,11 +54,17 @@ export const AccountS3StorageDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountS3StorageDialog
+      patps={['~pasren-satmex']}
+      selectedPatp="~pasren-satmex"
+      setSelectedPatp={() => {}}
       url="https://console.s31.holium.network"
       s3Bucket="pasren-satmex"
       s3Password="1234567890"
       dataStorage={{ used: 800, total: 2000 }}
-      dataSent={{ shipUsed: 20.1, s3Used: 50, total: 200 }}
+      dataSent={{
+        networkUsage: 20,
+        minioUsage: 30,
+      }}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -66,6 +78,9 @@ export const AccountStatisticsDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountStatisticsDialog
+      patps={['~pasren-satmex']}
+      selectedPatp="~pasren-satmex"
+      setSelectedPatp={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -79,6 +94,11 @@ export const AccountCustomDomainDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountCustomDomainDialog
+      patps={['~pasren-satmex']}
+      selectedPatp="~pasren-satmex"
+      dropletIp="123.123.123.123"
+      setSelectedPatp={() => {}}
+      onClickSave={() => Promise.resolve()}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -92,6 +112,9 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountDownloadRealmDialog
+      patps={['~pasren-satmex']}
+      selectedPatp="~pasren-satmex"
+      setSelectedPatp={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}

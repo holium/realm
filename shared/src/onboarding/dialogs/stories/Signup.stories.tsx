@@ -7,6 +7,7 @@ import { DownloadDialog } from '../DownloadDialog';
 import { PaymentDialog } from '../PaymentDialog';
 import { VerifyEmailDialog } from '../VerifyEmailDialog';
 import { OnboardingDialogWrapper } from './helpers';
+import { ThirdEarthProduct } from '../../types/index';
 
 export default {
   component: CreateAccountDialog,
@@ -64,19 +65,32 @@ export const ChooseIdDialogStory: ComponentStory<
 
 ChooseIdDialogStory.storyName = '3. Choose ID';
 
+const thirdEarthProductMock: ThirdEarthProduct = {
+  id: 1,
+  client_id: 1,
+  droplet_class_id: 1,
+  is_migration: false,
+  is_planet: true,
+  lang_code: 'en',
+  priority: 1,
+  product_status: 'active',
+  product_type: 'subscription',
+  threshold: 0,
+  comet_count: '0',
+  title: 'Monthly',
+  description: 'Monthly subscription',
+  long_description: 'Monthly subscription',
+  price_id: '11',
+  subscription_price: 15,
+};
+
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
       products={[
+        thirdEarthProductMock,
         {
-          id: 1,
-          title: 'Monthly',
-          description: 'Monthly subscription',
-          long_description: 'Monthly subscription',
-          price_id: '11',
-          subscription_price: 15,
-        },
-        {
+          ...thirdEarthProductMock,
           id: 2,
           title: 'Yearly',
           description: 'Yearly subscription',
