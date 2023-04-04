@@ -4,11 +4,11 @@
   "description": "A desktop environment for Urbit",
   "private": "true",
   "scripts": {
-    "prebuild": "electron-rebuild -f -w better-sqlite3",
+    "prebuild": "./node_modules/.bin/electron-rebuild -f -w better-sqlite3",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.prod.ts",
-    "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
+    "rebuild": "./node_modules/.bin/electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
     "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && yarn rebuild && electron-builder build --mac --publish never",
     "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish never",

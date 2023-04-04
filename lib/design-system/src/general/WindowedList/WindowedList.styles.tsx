@@ -1,15 +1,26 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { List } from './source/List/List';
 
-export const StyledList = styled(List)<{ hideScrollbar: boolean }>`
+export const StyledList = styled(List)<{
+  startAtBottom: boolean;
+  hideScrollbar: boolean;
+}>`
+  ${({ startAtBottom }) =>
+    startAtBottom &&
+    css`
+      :nth-child(1) {
+        transform: scaleY(-1);
+      }
+    `}
+
   ${({ hideScrollbar }) =>
     hideScrollbar &&
-    `
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    css`
+      -ms-overflow-style: none;
+      scrollbar-width: none;
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  `}
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    `}
 `;

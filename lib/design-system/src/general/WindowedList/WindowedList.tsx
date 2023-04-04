@@ -48,10 +48,10 @@ export const WindowedList = <T,>({
   sort = () => 0,
   filter = () => true,
 }: WindowedListProps<T>) => {
-  const data = useMemo(
-    () => rawData.filter(filter).sort(sort),
-    [rawData, filter, sort]
-  );
+  const data = useMemo(() => {
+    const filteredAndSorted = rawData.filter(filter).sort(sort);
+    return startAtBottom ? filteredAndSorted.reverse() : filteredAndSorted;
+  }, [rawData, filter, sort]);
   const cache = useRef(
     new CellMeasurerCache({
       fixedWidth: true,
@@ -75,7 +75,8 @@ export const WindowedList = <T,>({
             width={width ?? maybeAutoWidth}
             height={height ?? maybeAutoHeight}
             rowCount={data.length}
-            rowHeight={cache.current.rowHeight as any}
+            rowHeight={(i) => cache.current.rowHeight(i) ?? 60}
+            estimatedRowSize={60}
             deferredMeasurementCache={cache.current}
             rowRenderer={({ key, index, style, parent }) => (
               <CellMeasurer
@@ -85,7 +86,13 @@ export const WindowedList = <T,>({
                 rowIndex={index}
               >
                 {({ measure, registerChild }) => (
-                  <div style={style} ref={registerChild}>
+                  <div
+                    style={{
+                      ...style,
+                      transform: startAtBottom ? 'scaleY(-1)' : undefined,
+                    }}
+                    ref={registerChild}
+                  >
                     {rowRenderer(data[index], index, measure, data)}
                   </div>
                 )}
@@ -94,8 +101,6 @@ export const WindowedList = <T,>({
             onScroll={onScroll}
             hideScrollbar={hideScrollbar}
             startAtBottom={startAtBottom}
-            scrollToIndex={startAtBottom ? data.length - 1 : 0}
-            scrollToAlignment={startAtBottom ? 'end' : 'auto'}
           />
         )}
       </AutoSizer>

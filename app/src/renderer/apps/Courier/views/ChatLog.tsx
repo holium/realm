@@ -232,8 +232,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   return (
                     <Box
                       mx="1px"
-                      pt={topSpacing}
-                      pb={isLast ? bottomSpacing : 0}
+                      pb={topSpacing}
+                      pt={isLast ? bottomSpacing : 0}
                     >
                       {showDate && (
                         <Text.Custom

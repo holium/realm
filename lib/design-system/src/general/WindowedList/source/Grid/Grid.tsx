@@ -978,7 +978,6 @@ export class Grid extends React.PureComponent<Props, State> {
     const childrenToDisplay = this._childrenToDisplay;
     const showNoContentRenderer =
       childrenToDisplay?.length === 0 && height > 0 && width > 0;
-    const whiteSpace = height - totalRowsHeight;
 
     return (
       <div
@@ -991,9 +990,6 @@ export class Grid extends React.PureComponent<Props, State> {
         style={{
           ...gridStyle,
           ...style,
-          ...(this.props.startAtBottom && whiteSpace > 0
-            ? { transform: `translateY(${whiteSpace}px)` }
-            : {}),
         }}
         tabIndex={tabIndex}
       >
