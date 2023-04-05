@@ -4,9 +4,9 @@
   box-sizing: border-box;
 }
 
-body {
+#__next {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
