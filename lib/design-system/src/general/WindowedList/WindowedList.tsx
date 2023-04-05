@@ -5,6 +5,7 @@ import { CellMeasurer } from './source/CellMeasurer/CellMeasurer';
 import { CellMeasurerCache } from './source/CellMeasurer/CellMeasurerCache';
 import { Scroll } from './source/List/types';
 import { StyledList } from './WindowedList.styles';
+import { Gallery } from 'react-photoswipe-gallery';
 
 type WindowedListProps<T> = {
   data: T[];
@@ -64,41 +65,43 @@ export const WindowedList = <T,>({
 
   return (
     <Box style={{ width: '100%', height: '100%' }}>
-      <AutoSizer
-        defaultWidth={width}
-        defaultHeight={height}
-        disableWidth={Boolean(width)}
-        disableHeight={Boolean(height)}
-      >
-        {({ width: maybeAutoWidth, height: maybeAutoHeight }) => (
-          <StyledList
-            width={width ?? maybeAutoWidth}
-            height={height ?? maybeAutoHeight}
-            rowCount={data.length}
-            rowHeight={cache.current.rowHeight as any}
-            deferredMeasurementCache={cache.current}
-            rowRenderer={({ key, index, style, parent }) => (
-              <CellMeasurer
-                key={key}
-                cache={cache.current}
-                parent={parent}
-                rowIndex={index}
-              >
-                {({ measure, registerChild }) => (
-                  <div style={style} ref={registerChild}>
-                    {rowRenderer(data[index], index, measure, data)}
-                  </div>
-                )}
-              </CellMeasurer>
-            )}
-            onScroll={onScroll}
-            hideScrollbar={hideScrollbar}
-            startAtBottom={startAtBottom}
-            scrollToIndex={startAtBottom ? data.length - 1 : 0}
-            scrollToAlignment={startAtBottom ? 'end' : 'auto'}
-          />
-        )}
-      </AutoSizer>
+      <Gallery>
+        <AutoSizer
+          defaultWidth={width}
+          defaultHeight={height}
+          disableWidth={Boolean(width)}
+          disableHeight={Boolean(height)}
+        >
+          {({ width: maybeAutoWidth, height: maybeAutoHeight }) => (
+            <StyledList
+              width={width ?? maybeAutoWidth}
+              height={height ?? maybeAutoHeight}
+              rowCount={data.length}
+              rowHeight={cache.current.rowHeight as any}
+              deferredMeasurementCache={cache.current}
+              rowRenderer={({ key, index, style, parent }) => (
+                <CellMeasurer
+                  key={key}
+                  cache={cache.current}
+                  parent={parent}
+                  rowIndex={index}
+                >
+                  {({ measure, registerChild }) => (
+                    <div style={style} ref={registerChild}>
+                      {rowRenderer(data[index], index, measure, data)}
+                    </div>
+                  )}
+                </CellMeasurer>
+              )}
+              onScroll={onScroll}
+              hideScrollbar={hideScrollbar}
+              startAtBottom={startAtBottom}
+              scrollToIndex={startAtBottom ? data.length - 1 : 0}
+              scrollToAlignment={startAtBottom ? 'end' : 'auto'}
+            />
+          )}
+        </AutoSizer>
+      </Gallery>
     </Box>
   );
 };
