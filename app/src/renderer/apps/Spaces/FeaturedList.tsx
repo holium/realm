@@ -39,7 +39,7 @@ const FeaturedListPresenter = () => {
         key={`featured-spaces-${listData.length}`}
         width={354}
         data={listData}
-        rowRenderer={(data: any) => {
+        itemContent={(_, data) => {
           const onJoin = async () => {
             setJoining(true);
             SpacesActions.joinSpace(data.path.substring(1))
@@ -75,6 +75,7 @@ const FeaturedListPresenter = () => {
                     height="32px"
                     width="32px"
                     src={data.picture}
+                    alt={data.name}
                   />
                 ) : (
                   <EmptyGroup color={data.color || '#000000'} />

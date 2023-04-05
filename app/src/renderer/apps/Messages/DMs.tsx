@@ -111,10 +111,8 @@ const DMsPresenter = (props: IProps) => {
         key={lastTimeSent}
         width={364}
         height={544}
-        rowHeight={57}
-        data={previews}
-        filter={searchFilter}
-        rowRenderer={(dm, index) => (
+        data={previews.filter(searchFilter)}
+        itemContent={(index, dm) => (
           <Box
             display="block"
             key={`dm-${index}-${dm.lastTimeSent}-${dm.pending}`}

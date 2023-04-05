@@ -14705,6 +14705,11 @@ react-twitter-embed@^4.0.4:
   dependencies:
     scriptjs "^2.5.9"
 
+react-virtuoso@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-4.2.0.tgz#29d47c1075793ea5cbc6b9fc3f2345cf17749e2b"
+  integrity sha512-lO1akVyALlDMp+eIo4E99HjSQ8Cn2AKXBVfq7GaBjdlnlJaRvou8az6tVYGHFD6Az5EcPUc7OfzHvAyojOhgqw==
+
 react@^18.0.0, react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"

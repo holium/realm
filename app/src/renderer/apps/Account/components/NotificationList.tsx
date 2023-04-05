@@ -45,7 +45,7 @@ const NotificationListPresenter = ({ unseen, seen }: INotificationList) => {
       <WindowedList
         width={370}
         data={listData}
-        rowRenderer={(item, index) => {
+        itemContent={(index, item) => {
           if (item.type === 'title') {
             const title = item.data as string;
             return (
