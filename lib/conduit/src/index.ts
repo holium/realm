@@ -1,5 +1,6 @@
 import EventEmitter, { setMaxListeners } from 'events';
-import EventSource from 'eventsource';
+// @ts-ignore
+import EventSource from '@holium/eventsource';
 import axios, { AxiosError } from 'axios';
 import {
   Action,
@@ -209,9 +210,13 @@ export class Conduit extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie?.split('; ')[0] },
+        // TODO: add this type def in global.d.ts
+        // @ts-ignore
+        responseTimeout: 25000,
+        onreconnect: () => console.log('SSE RECONNECTED!!'),
       });
 
-      this.sse.onopen = async (response) => {
+      this.sse.onopen = async (response: any) => {
         console.log('ON SSE OPEN', response);
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
@@ -296,7 +301,7 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
-      this.sse.onerror = async (error) => {
+      this.sse.onerror = async (error: any) => {
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
@@ -310,7 +315,6 @@ export class Conduit extends EventEmitter {
         if (error.status === '404') {
           return;
         }
-        // @ts-expect-error
         if (error.status >= 500) {
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
