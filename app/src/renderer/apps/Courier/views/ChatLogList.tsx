@@ -95,9 +95,9 @@ export const ChatLogList = ({
       innerRef={listRef}
       data={messages}
       followOutput="auto"
-      width={width + scrollbarWidth / 2}
+      width={width + scrollbarWidth}
       height={height}
-      style={{ marginRight: -(scrollbarWidth / 2) }}
+      style={{ marginRight: -scrollbarWidth }}
       initialTopMostItemIndex={messages.length - 1}
       itemContent={renderChatRow}
     />
