@@ -7,6 +7,7 @@ import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
 export const createRoomForm = (
+  currentRooms: any,
   defaults: any = {
     name: '',
     isPrivate: false,
@@ -28,7 +29,11 @@ export const createRoomForm = (
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (name.length > 1 && /^[a-zA-Z0-9- ]*$/.test(name)) {
+      if (
+        name.length > 1 &&
+        /^[a-zA-Z0-9- ]*$/.test(name) &&
+        !currentRooms.includes(name)
+      ) {
         return { error: undefined, parsed: name };
       }
 
@@ -54,7 +59,10 @@ const NewRoomPresenter = () => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const { form, name } = useMemo(() => createRoomForm(), []);
+  const { form, name } = useMemo(
+    () => createRoomForm(roomsManager.rooms.map((room: any) => room.title)),
+    []
+  );
 
   const createRoom = (evt: any) => {
     // setLoading(true);
