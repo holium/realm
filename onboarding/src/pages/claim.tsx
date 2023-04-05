@@ -3,10 +3,12 @@ import { ClaimTokenDialog } from '@holium/shared';
 import { Page } from 'components/Page';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
+import { useEffect } from 'react';
 
 type Props = {
   token: string;
   email: string;
+  full_account: boolean;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({
@@ -15,6 +17,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   const token = query.token as string;
   const email = query.email as string;
+  const full_account = Boolean(query.full_account as string);
 
   const redirectHome = () => {
     res.writeHead(302, { Location: '/' });
@@ -31,11 +34,12 @@ export const getServerSideProps: GetServerSideProps = async ({
     props: {
       token,
       email,
+      full_account,
     },
   };
 };
 
-export default function ClaimToken({ token, email }: Props) {
+export default function ClaimToken({ token, email, full_account }: Props) {
   const { goToPage } = useNavigation();
 
   const onAlreadyHaveAccount = () => goToPage('/login');
@@ -55,13 +59,24 @@ export default function ClaimToken({ token, email }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (full_account) {
+      goToPage('/login', {
+        email,
+        redirect: '/account/download-realm',
+      });
+    }
+  }, []);
+
   return (
     <Page title="Claim your Realm invite">
-      <ClaimTokenDialog
-        email={email}
-        onAlreadyHaveAccount={onAlreadyHaveAccount}
-        onClaim={onClaim}
-      />
+      {!full_account && (
+        <ClaimTokenDialog
+          email={email}
+          onAlreadyHaveAccount={onAlreadyHaveAccount}
+          onClaim={onClaim}
+        />
+      )}
     </Page>
   );
 }
