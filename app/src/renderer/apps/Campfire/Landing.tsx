@@ -6,10 +6,20 @@ import { useRooms } from '../Rooms/useRooms';
 export const Landing = () => {
   const { spaces, ship } = useServices();
   const roomsManager = useRooms(ship?.patp);
+
+  const makeid = () => {
+    let result = '';
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < 10) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+  };
   const createRoom = (evt: any) => {
-    // setLoading(true);
-    // const { name, isPrivate } = form.actions.submit();
-    const name = 'testing';
+    const name = makeid();
     const isPrivate = false;
     evt.stopPropagation();
     const spacePath =

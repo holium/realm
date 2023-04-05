@@ -197,7 +197,7 @@ export const VideoCall = observer(() => {
           justifyContent="space-between"
         >
           <Flex flexDirection="column">
-            <Text.H5>testing</Text.H5>
+            <Text.H5>{presentRoom.title}</Text.H5>
             <Flex flexDirection="row">
               <Icon name="Participants" size={20} />
               <Text.Caption>{1 + callers.length}/9 Participants</Text.Caption>
