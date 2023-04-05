@@ -194,9 +194,7 @@
                 =/  cards=(list card)
                   %-  zing
                   %+  turn
-                    %+  skim
-                      thechange 
-                    |=(ch=db-change-type:db-sur =(-.ch %add-row))
+                    thechange 
                   |=  ch=db-change-type:db-sur
                   ^-  (list card)
                   ?+  -.ch  ~
@@ -212,6 +210,19 @@
                           !>([%send-message path.pathrow ~[[[%status (crip "{(scow %p our.bowl)} joined the chat")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                     ==
+
+                    %upd-paths-row
+                      =/  pathpeers  (scry-peers:lib path.path-row.ch bowl)
+                      =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                      ?:  ?&  =(patp.host our.bowl) :: only host will send the status update
+                              ?!(=(max-expires-at-duration.path-row.ch max-expires-at-duration.old.ch)) :: only do the status if the max duration changed
+                          ==
+                        =/  send-status-message
+                          ?:  =(max-expires-at-duration.path-row.ch *@dr)
+                            !>([%send-message path.path-row.ch ~[[[%status (crip "Messages now last forever")] ~ ~]] *@dr])
+                          !>([%send-message path.path-row.ch ~[[[%status (crip "Maximum message duration now {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
+                        [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
+                      ~
                   ==
                 [(weld cards new-msg-notif-cards) this]
             ==
