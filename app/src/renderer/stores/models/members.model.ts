@@ -110,6 +110,9 @@ export const MembersStore = types
     all: types.map(MembersModel),
   })
   .views((self) => ({
+    isAdmin(patp: string) {
+      return self.all.get(patp)?.roles.includes('admin');
+    },
     get count() {
       return self.all.size;
     },

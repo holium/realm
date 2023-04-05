@@ -5,11 +5,11 @@ import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
 import { Flex, Divider } from 'renderer/components';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {
   spacePath: string;
@@ -25,8 +25,7 @@ const AppDockViewPresenter = ({
   unpinnedDockApps,
 }: Props) => {
   const { shellStore, theme } = useAppState();
-
-  const { desktop, bazaar } = useServices();
+  const { spacesStore } = useShipStore();
 
   const [localDockAppIds, setLocalDockAppIds] = useState(pinnedDockAppsOrder);
 
@@ -47,12 +46,11 @@ const AppDockViewPresenter = ({
   const onOrderUpdate = useCallback(() => {
     // First we update the dock locally so the user doesn't have to
     // wait for the subscription to come back from Hoon side.
-    bazaar.setDock(spacePath, localDockAppIds);
-    SpacesActions.setPinnedOrder(spacePath, toJS(localDockAppIds));
+    spacesStore.selected?.reorderPinnedApps(localDockAppIds);
   }, [localDockAppIds]);
 
   const pinnedAppTiles = pinnedDockApps.map((app) => {
-    const appWindow = desktop.getWindowByAppId(app.id);
+    const appWindow = shellStore.getWindowByAppId(app.id);
     const pinnedTileId = `pinned-${app.id}-${spacePath}`;
 
     return (
@@ -60,7 +58,7 @@ const AppDockViewPresenter = ({
         key={`tile-${pinnedTileId}`}
         tileId={pinnedTileId}
         app={app}
-        spacePath={spacePath}
+        space={spacesStore.selected}
         hasWindow={Boolean(appWindow)}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
@@ -70,7 +68,7 @@ const AppDockViewPresenter = ({
   });
 
   const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
-    const appWindow = desktop.getWindowByAppId(app.id);
+    const appWindow = shellStore.getWindowByAppId(app.id);
     const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
 
     return (
@@ -78,7 +76,7 @@ const AppDockViewPresenter = ({
         key={`tile-${unpinnedTileId}`}
         tileId={unpinnedTileId}
         app={app}
-        spacePath={spacePath}
+        space={spacesStore.selected}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
         onClick={onClickDockedApp}

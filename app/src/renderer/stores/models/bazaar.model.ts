@@ -1,5 +1,11 @@
-import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
-import { cleanNounColor } from 'os/lib/color';
+import {
+  types,
+  Instance,
+  getSnapshot,
+  applySnapshot,
+  flow,
+} from 'mobx-state-tree';
+import { BazaarIPC } from '../ipc';
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -88,17 +94,24 @@ export const UrbitApp = types
   .model('UrbitApp', {
     id: types.identifier,
     title: types.string,
-    info: types.string,
+    info: types.maybeNull(types.string),
     color: types.string,
-    type: types.literal(AppTypes.Urbit),
+    favicon: types.maybeNull(types.string),
+    type: types.union(
+      types.literal(AppTypes.Urbit),
+      types.literal(AppTypes.Web),
+      types.literal(AppTypes.Native)
+    ),
     image: types.maybeNull(types.string),
-    href: Glob,
-    version: types.string,
-    website: types.string,
-    license: types.string,
+    href: types.union(Glob, types.string, types.null),
+    version: types.maybeNull(types.string),
+    website: types.maybeNull(types.string),
+    license: types.maybeNull(types.string),
     installStatus: types.string,
+    icon: types.maybeNull(types.string), // native app only
     host: types.maybeNull(types.string),
     config: types.maybeNull(RealmConfig),
+    gridIndex: types.maybe(types.number),
   })
   .actions((self) => ({
     setHost(host: string) {
@@ -124,32 +137,22 @@ const AppModel = types.union(
   {
     eager: true,
   },
-  UrbitApp,
+  UrbitApp
   // WebApp,
-  DevAppModel,
-  NativeApp
+  // DevAppModel,
+  // NativeApp
 );
 
 const AppId = types.string;
-const OrderedAppList = types.array(types.string);
-// const RecommendedByShips = types.array(types.string);
-
-const StallModel = types.model('StallModel', {
-  suite: types.map(AppId), // (map index app-id)
-  recommended: types.map(types.integer),
-});
-
 const AllyModel = types.model('AllyModel', {
   ship: types.identifier,
   desks: types.optional(types.array(types.string), []),
 });
 
-export const NewBazaarStore = types
-  .model('NewBazaarStore', {
-    docks: types.map(OrderedAppList),
-    stalls: types.map(StallModel),
+export const BazaarStore = types
+  .model('BazaarStore', {
     recommendations: types.array(AppId),
-    catalog: types.map(AppModel),
+    catalog: types.map(UrbitApp),
     gridIndex: types.map(AppId),
     treaties: types.map(DocketApp),
     allies: types.map(AllyModel),
@@ -165,304 +168,278 @@ export const NewBazaarStore = types
     // }),
   })
   .actions((self) => ({
-    // Updates
-    _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
-      self.catalog.set(appId, {
-        ...app,
-        color: cleanNounColor(app.color),
-      });
-      applySnapshot(self.gridIndex, gridIndex);
-    },
-    _addPinned(data: { path: string; id: string; index: number }) {
-      if (!self.docks.has(data.path)) {
-        self.docks.set(data.path, []);
-      }
-      const dock = self.docks.get(data.path);
-      dock?.push(data.id);
-      self.docks.set(data.path, dock);
-    },
-    _removePinned(data: { path: string; id: string }) {
-      const dock = self.docks.get(data.path);
-      const removeIndex = dock?.findIndex((id: string) => id === data.id);
-      if (removeIndex) dock?.splice(removeIndex, 1);
-      self.docks.set(data.path, dock);
-    },
-    _reorderPins(data: { path: string; dock: string[] }) {
-      self.docks.set(data.path, data.dock);
-    },
-    _suiteAdded(data: { path: string; id: string; index: number }) {
-      const stall = self.stalls.get(data.path);
-      if (!stall) return;
-      stall?.suite.set(`${data.index}`, data.id);
-      self.stalls.set(data.path, stall);
-    },
-    _suiteRemoved(data: { path: string; index: number }) {
-      const stall = self.stalls.get(data.path);
-      if (!stall) return;
-      stall.suite.delete(`${data.index}`);
-      self.stalls.set(data.path, stall);
-    },
-    _initial(data: any) {
-      Object.keys(data.catalog).forEach((key: string) => {
-        const docket = data.catalog[key];
-        if (docket.type === 'urbit') {
-          data.catalog[key].color = cleanNounColor(data.catalog[key].color);
-        }
-      });
-      applySnapshot(self.docks, data.docks);
-      applySnapshot(self.catalog, data.catalog);
-      applySnapshot(self.recommendations, data.recommendations);
-      applySnapshot(self.stalls, data.stalls);
-      applySnapshot(self.gridIndex, data.grid);
-    },
-    _addJoined(data: { path: string; stall: any; catalog: any }) {
-      Object.keys(data.catalog).forEach((key: string) => {
-        const docket = data.catalog[key];
-        if (docket.type === 'urbit') {
-          // Set new apps in catalog
-          const app = self.catalog.get(key);
-          if (!app) {
-            data.catalog[key].color = cleanNounColor(data.catalog[key].color);
-            self.catalog.set(key, data.catalog[key]);
-          } else {
-            if (!(app as UrbitAppType).host && data.catalog[key].host) {
-              // add host to existing app
-              (app as UrbitAppType).setHost(data.catalog[key].host);
-              self.catalog.set(key, app);
-            }
-          }
-        }
-      });
-      self.stalls.set(data.path, data.stall);
-    },
-    _updateStall(data: any) {
-      if ('add-app' in data) {
-        const app: AppType = data['add-app'];
-        if (app.type === 'urbit') {
-          app.color = cleanNounColor(app.color);
-        }
-        self.catalog.set(app.id, app);
-      } else if ('remove-app' in data) {
-        // const appId: string = data['remove-app'];
-      }
-      self.stalls.set(data.path, data.stall);
-    },
-    _rebuildCatalog(data: any) {
-      if (data.catalog) {
-        for (let i = 0; i < data.catalog.length; i++) {
-          const app: AppType = data.catalog[i];
-          if (app.type === 'urbit') {
-            app.color = cleanNounColor(app.color);
-          }
-          self.catalog.set(app.id, app);
-        }
-      }
-      self.gridIndex.clear();
-      applySnapshot(self.gridIndex, data.grid);
-    },
-    _rebuildStall(data: any) {
-      if (data.catalog) {
-        for (let i = 0; i < data.catalog.length; i++) {
-          const app: AppType = data.catalog[i];
-          if (app.type === 'urbit') {
-            app.color = cleanNounColor(app.color);
-          }
-          self.catalog.set(app.id, app);
-        }
-      }
-      self.stalls.set(data.path, data.stall);
-    },
-    _clearStall(data: any) {
-      self.stalls.set(data.path, StallModel.create());
-    },
-    _allyAdded(ship: string, desks: string[]) {
-      if (self.addingAlly.get(ship)) {
-        self.addingAlly.delete(ship);
-      }
-      // extra desk name from full desk path (i.e. <ship>/<desk>)
-      for (let i = 0; i < desks.length; i++) {
-        desks[i] = desks[i].split('/')[1];
-      }
-      self.allies.set(ship, { ship, desks });
-      // this nice little 'new ally' event allows us to see if this ship
-      //  has any apps available. if not, end the search (i.e. don't wait for
-      //  treaties-loaded event since it will never happen)
-      if (desks.length === 0) {
-        self.loadingTreaties = false;
-        // hmm.wondering if we should use this use-case to send a del to the treaty to remove
-        //   this ally, to force a research if/when the user hits the ship again. keep
-        //   an eye on this
-      }
-    },
-    _allyDeleted(ship: string) {
-      if (self.addingAlly.get(ship)) {
-        self.addingAlly.delete(ship);
-      }
-      if (self.allies.has(ship)) {
-        self.allies.delete(ship);
-      }
-    },
-    _addRecommended(data: { id: string; stalls: any }) {
-      self.recommendations.push(data.id);
-      applySnapshot(self.stalls, data.stalls);
-    },
-    _removeRecommended(data: { id: string; stalls: any }) {
-      const removeIndex = self.recommendations?.findIndex(
-        (id: string) => id === data.id
-      );
-      self.recommendations.splice(removeIndex, 1);
-      applySnapshot(self.stalls, data.stalls);
-    },
-    _treatiesLoaded() {
-      self.loadingTreaties = false;
-      self.treatiesLoaded = !self.treatiesLoaded;
-    },
-    addRecentApp(appId: string) {
-      // keep no more than 5 recent app entries
-      if (self.recentApps.length >= 5) {
-        self.recentApps.pop();
-      }
-      // move the app up to the top if it already exists in the list
-      const idx = self.recentApps.findIndex((item) => item === appId);
-      if (idx !== -1) self.recentApps.splice(idx, 1);
-      // add app to front of list
-      self.recentApps.splice(0, 0, appId);
-    },
-    addRecentDev(shipId: string) {
-      // keep no more than 5 recent app entries
-      if (self.recentDevs.length >= 5) {
-        self.recentDevs.pop();
-      }
-      const idx = self.recentDevs.findIndex((item) => item === shipId);
-      if (idx !== -1) self.recentDevs.splice(idx, 1);
-      self.recentDevs.splice(0, 0, shipId);
-    },
-    installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
-      try {
-        return yield DocketApi.installApp(conduit, body.ship, body.desk);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-
-    installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
-      try {
-        return yield BazaarApi.installApp(conduit, body);
-      } catch (error) {
-        // self.installations.delete(body.desk);
-        console.error(error);
-      }
-    }),
-    uninstallApp: flow(function* (conduit: Conduit, body: UninstallPoke) {
-      // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
-      //   if (app.id === value) self.gridIndex.delete(key);
+    init: flow(function* () {
+      const data = yield BazaarIPC.fetchAppCatalog() as Promise<any>;
+      console.log('catalog', data);
+      applySnapshot(self.catalog, data);
+      // const { apps, gridIndex, recentApps, recentDevs } = data;
+      // self.catalog.clear();
+      // self.gridIndex.clear();
+      // self.recentApps.clear();
+      // self.recentDevs.clear();
+      // apps.forEach((app: UrbitAppType) => {
+      //   self.catalog.set(app.id, {
+      //     ...app,
+      //     color: cleanNounColor(app.color),
+      //   });
       // });
-      try {
-        // self.installations.delete(body.desk);
-        return yield BazaarApi.uninstallApp(conduit, body);
-      } catch (error) {
-        console.error(error);
-      }
+      // applySnapshot(self.gridIndex, gridIndex);
+      // self.recentApps.push(...recentApps);
+      // self.recentDevs.push(...recentDevs);
     }),
-    suspendApp: flow(function* (conduit: Conduit, desk: string) {
-      try {
-        return yield BazaarApi.suspendApp(conduit, desk);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    reviveApp: flow(function* (conduit: Conduit, desk: string) {
-      try {
-        return yield BazaarApi.resumeApp(conduit, desk);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
+    // Updates
+    // _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
+    //   self.catalog.set(appId, {
+    //     ...app,
+    //     color: cleanNounColor(app.color),
+    //   });
+    //   applySnapshot(self.gridIndex, gridIndex);
+    // },
+    // _addPinned(data: { path: string; id: string; index: number }) {
+    //   if (!self.docks.has(data.path)) {
+    //     self.docks.set(data.path, []);
+    //   }
+    //   const dock = self.docks.get(data.path);
+    //   dock?.push(data.id);
+    //   self.docks.set(data.path, dock);
+    // },
+    // _removePinned(data: { path: string; id: string }) {
+    //   const dock = self.docks.get(data.path);
+    //   const removeIndex = dock?.findIndex((id: string) => id === data.id);
+    //   if (removeIndex) dock?.splice(removeIndex, 1);
+    //   self.docks.set(data.path, dock);
+    // },
+    // _reorderPins(data: { path: string; dock: string[] }) {
+    //   self.docks.set(data.path, data.dock);
+    // },
+    // _suiteAdded(data: { path: string; id: string; index: number }) {
+    //   const stall = self.stalls.get(data.path);
+    //   if (!stall) return;
+    //   stall?.suite.set(`${data.index}`, data.id);
+    //   self.stalls.set(data.path, stall);
+    // },
+    // _suiteRemoved(data: { path: string; index: number }) {
+    //   const stall = self.stalls.get(data.path);
+    //   if (!stall) return;
+    //   stall.suite.delete(`${data.index}`);
+    //   self.stalls.set(data.path, stall);
+    // },
 
-    //
-    // Pokes
-    //
-    pinApp: flow(function* (conduit: Conduit, body: PinPoke) {
+    // _addJoined(data: { path: string; stall: any; catalog: any }) {
+    //   Object.keys(data.catalog).forEach((key: string) => {
+    //     const docket = data.catalog[key];
+    //     if (docket.type === 'urbit') {
+    //       // Set new apps in catalog
+    //       const app = self.catalog.get(key);
+    //       if (!app) {
+    //         data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+    //         self.catalog.set(key, data.catalog[key]);
+    //       } else {
+    //         if (!(app as UrbitAppType).host && data.catalog[key].host) {
+    //           // add host to existing app
+    //           (app as UrbitAppType).setHost(data.catalog[key].host);
+    //           self.catalog.set(key, app);
+    //         }
+    //       }
+    //     }
+    //   });
+    //   self.stalls.set(data.path, data.stall);
+    // },
+    // _updateStall(data: any) {
+    //   if ('add-app' in data) {
+    //     const app: AppType = data['add-app'];
+    //     if (app.type === 'urbit') {
+    //       app.color = cleanNounColor(app.color);
+    //     }
+    //     self.catalog.set(app.id, app);
+    //   } else if ('remove-app' in data) {
+    //     // const appId: string = data['remove-app'];
+    //   }
+    //   self.stalls.set(data.path, data.stall);
+    // },
+    // _rebuildCatalog(data: any) {
+    //   if (data.catalog) {
+    //     for (let i = 0; i < data.catalog.length; i++) {
+    //       const app: AppType = data.catalog[i];
+    //       if (app.type === 'urbit') {
+    //         app.color = cleanNounColor(app.color);
+    //       }
+    //       self.catalog.set(app.id, app);
+    //     }
+    //   }
+    //   self.gridIndex.clear();
+    //   applySnapshot(self.gridIndex, data.grid);
+    // },
+    // _rebuildStall(data: any) {
+    //   if (data.catalog) {
+    //     for (let i = 0; i < data.catalog.length; i++) {
+    //       const app: AppType = data.catalog[i];
+    //       if (app.type === 'urbit') {
+    //         app.color = cleanNounColor(app.color);
+    //       }
+    //       self.catalog.set(app.id, app);
+    //     }
+    //   }
+    //   self.stalls.set(data.path, data.stall);
+    // },
+    // _clearStall(data: any) {
+    //   self.stalls.set(data.path, StallModel.create());
+    // },
+    // _allyAdded(ship: string, desks: string[]) {
+    //   if (self.addingAlly.get(ship)) {
+    //     self.addingAlly.delete(ship);
+    //   }
+    //   // extra desk name from full desk path (i.e. <ship>/<desk>)
+    //   for (let i = 0; i < desks.length; i++) {
+    //     desks[i] = desks[i].split('/')[1];
+    //   }
+    //   self.allies.set(ship, { ship, desks });
+    //   // this nice little 'new ally' event allows us to see if this ship
+    //   //  has any apps available. if not, end the search (i.e. don't wait for
+    //   //  treaties-loaded event since it will never happen)
+    //   if (desks.length === 0) {
+    //     self.loadingTreaties = false;
+    //     // hmm.wondering if we should use this use-case to send a del to the treaty to remove
+    //     //   this ally, to force a research if/when the user hits the ship again. keep
+    //     //   an eye on this
+    //   }
+    // },
+    // _allyDeleted(ship: string) {
+    //   if (self.addingAlly.get(ship)) {
+    //     self.addingAlly.delete(ship);
+    //   }
+    //   if (self.allies.has(ship)) {
+    //     self.allies.delete(ship);
+    //   }
+    // },
+    // _addRecommended(data: { id: string; stalls: any }) {
+    //   self.recommendations.push(data.id);
+    //   applySnapshot(self.stalls, data.stalls);
+    // },
+    // _removeRecommended(data: { id: string; stalls: any }) {
+    //   const removeIndex = self.recommendations?.findIndex(
+    //     (id: string) => id === data.id
+    //   );
+    //   self.recommendations.splice(removeIndex, 1);
+    //   applySnapshot(self.stalls, data.stalls);
+    // },
+    // _treatiesLoaded() {
+    //   self.loadingTreaties = false;
+    //   self.treatiesLoaded = !self.treatiesLoaded;
+    // },
+    // addRecentApp(appId: string) {
+    //   // keep no more than 5 recent app entries
+    //   if (self.recentApps.length >= 5) {
+    //     self.recentApps.pop();
+    //   }
+    //   // move the app up to the top if it already exists in the list
+    //   const idx = self.recentApps.findIndex((item) => item === appId);
+    //   if (idx !== -1) self.recentApps.splice(idx, 1);
+    //   // add app to front of list
+    //   self.recentApps.splice(0, 0, appId);
+    // },
+    // addRecentDev(shipId: string) {
+    //   // keep no more than 5 recent app entries
+    //   if (self.recentDevs.length >= 5) {
+    //     self.recentDevs.pop();
+    //   }
+    //   const idx = self.recentDevs.findIndex((item) => item === shipId);
+    //   if (idx !== -1) self.recentDevs.splice(idx, 1);
+    //   self.recentDevs.splice(0, 0, shipId);
+    // },
+    // installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
+    //   try {
+    //     return yield DocketApi.installApp(conduit, body.ship, body.desk);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }),
+
+    // installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
+    //   try {
+    //     return yield BazaarApi.installApp(conduit, body);
+    //   } catch (error) {
+    //     // self.installations.delete(body.desk);
+    //     console.error(error);
+    //   }
+    // }),
+    // uninstallApp: flow(function* (conduit: Conduit, body: UninstallPoke) {
+    //   // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
+    //   //   if (app.id === value) self.gridIndex.delete(key);
+    //   // });
+    //   try {
+    //     // self.installations.delete(body.desk);
+    //     return yield BazaarApi.uninstallApp(conduit, body);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }),
+    // suspendApp: flow(function* (conduit: Conduit, desk: string) {
+    //   try {
+    //     return yield BazaarApi.suspendApp(conduit, desk);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }),
+    // reviveApp: flow(function* (conduit: Conduit, desk: string) {
+    //   try {
+    //     return yield BazaarApi.resumeApp(conduit, desk);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }),
+
+    // //
+    // // Pokes
+    // //
+
+    recommendApp: flow(function* (appId: string) {
       try {
-        return yield BazaarApi.pinApp(conduit, body);
+        self.recommendations.push(appId);
+        return yield BazaarIPC.recommendApp(appId) as Promise<any>;
       } catch (error) {
         console.error(error);
       }
     }),
-    unpinApp: flow(function* (conduit: Conduit, body: UnpinPoke) {
+    unrecommendApp: flow(function* (appId: string) {
       try {
-        return yield BazaarApi.unpinApp(conduit, body);
+        applySnapshot(
+          self.recommendations,
+          self.recommendations.filter((id: string) => id !== appId)
+        );
+
+        return yield BazaarIPC.unrecommendApp(appId) as Promise<any>;
       } catch (error) {
         console.error(error);
       }
     }),
-    reorderPinnedApps: flow(function* (
-      conduit: Conduit,
-      body: ReorderPinnedAppsPoke
-    ) {
+    // addAlly: flow(function* (conduit: Conduit, ship: Patp) {
+    //   try {
+    //     if (self.allies.has(ship)) return;
+    //     self.loadingTreaties = true;
+    //     self.addingAlly.set(ship, 'adding');
+    //     const result: any = yield BazaarApi.addAlly(conduit, ship);
+    //     // self.loadingTreaties = false;
+    //     return result;
+    //   } catch (error) {
+    //     console.error(error);
+    //     self.loadingTreaties = false;
+    //   }
+    // }),
+    // //
+    // // Scries
+    // //
+    // scryHash: flow(function* (conduit: Conduit, app: string) {
+    //   try {
+    //     return yield BazaarApi.scryHash(conduit, app);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }),
+    scryAllies: flow(function* () {
       try {
-        return yield BazaarApi.reorderPinnedApps(conduit, body);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    addToSuite: flow(function* (conduit: Conduit, body: AddToSuitePoke) {
-      try {
-        return yield BazaarApi.addToSuite(conduit, body);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    removeFromSuite: flow(function* (
-      conduit: Conduit,
-      body: RemoveFromSuitePoke
-    ) {
-      try {
-        return yield BazaarApi.removeFromSuite(conduit, body);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    recommendApp: flow(function* (conduit: Conduit, appId: string) {
-      try {
-        return yield BazaarApi.recommendApp(conduit, appId);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    unrecommendApp: flow(function* (conduit: Conduit, appId: string) {
-      try {
-        return yield BazaarApi.unrecommendApp(conduit, appId);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    addAlly: flow(function* (conduit: Conduit, ship: Patp) {
-      try {
-        if (self.allies.has(ship)) return;
-        self.loadingTreaties = true;
-        self.addingAlly.set(ship, 'adding');
-        const result: any = yield BazaarApi.addAlly(conduit, ship);
-        // self.loadingTreaties = false;
-        return result;
-      } catch (error) {
-        console.error(error);
-        self.loadingTreaties = false;
-      }
-    }),
-    //
-    // Scries
-    //
-    scryHash: flow(function* (conduit: Conduit, app: string) {
-      try {
-        return yield BazaarApi.scryHash(conduit, app);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    scryAllies: flow(function* (conduit: Conduit) {
-      try {
-        const allies = yield BazaarApi.scryAllies(conduit);
+        const allies = yield BazaarIPC.scryAllies() as Promise<any>;
+        console.log('allies', allies);
         for (const key in allies) {
           const desks = allies[key];
           for (let i = 0; i < desks.length; i++) {
@@ -476,52 +453,51 @@ export const NewBazaarStore = types
         throw error;
       }
     }),
-    scryTreaties: flow(function* (conduit: Conduit, ship: Patp) {
-      self.loadingTreaties = true;
-      try {
-        const treaties = yield BazaarApi.scryTreaties(conduit, ship);
-        const formedTreaties = [];
-        for (const key in treaties) {
-          const treaty = treaties[key];
-          const formed = {
-            ...treaty,
-            color: cleanNounColor(treaty.color),
-            id: key,
-          };
-          formedTreaties.push(formed);
-          self.treaties.set(key, {
-            ...treaty,
-            color: cleanNounColor(treaty.color),
-            id: key,
-          });
-        }
-        self.loadingTreaties = false;
-        return formedTreaties;
-      } catch (error) {
-        console.error(error);
-        self.loadingTreaties = false;
-        throw error;
-      }
-    }),
-    loadDevApps(devApps: Record<string, DevAppType>) {
-      Object.values(devApps).forEach((app) => {
-        self.devAppMap.set(app.id, DevAppModel.create(app));
-      });
-    },
-    // setSubscriptionStatus: (
-    //   newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
-    // ) => {
-    //   self.subscription.set(newSubscriptionStatus);
+    // scryTreaties: flow(function* (conduit: Conduit, ship: Patp) {
+    //   self.loadingTreaties = true;
+    //   try {
+    //     const treaties = yield BazaarApi.scryTreaties(conduit, ship);
+    //     const formedTreaties = [];
+    //     for (const key in treaties) {
+    //       const treaty = treaties[key];
+    //       const formed = {
+    //         ...treaty,
+    //         color: cleanNounColor(treaty.color),
+    //         id: key,
+    //       };
+    //       formedTreaties.push(formed);
+    //       self.treaties.set(key, {
+    //         ...treaty,
+    //         color: cleanNounColor(treaty.color),
+    //         id: key,
+    //       });
+    //     }
+    //     self.loadingTreaties = false;
+    //     return formedTreaties;
+    //   } catch (error) {
+    //     console.error(error);
+    //     self.loadingTreaties = false;
+    //     throw error;
+    //   }
+    // }),
+    // loadDevApps(devApps: Record<string, DevAppType>) {
+    //   Object.values(devApps).forEach((app) => {
+    //     self.devAppMap.set(app.id, DevAppModel.create(app));
+    //   });
     // },
-    setDock(path: string, dock: string[]) {
-      self.docks.set(path, dock);
-    },
+    // // setSubscriptionStatus: (
+    // //   newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    // // ) => {
+    // //   self.subscription.set(newSubscriptionStatus);
+    // // },
+    // setDock(path: string, dock: string[]) {
+    //   self.docks.set(path, dock);
+    // },
   }))
   .views((self) => ({
     get installed(): AppType[] {
-      return Array.from(self.gridIndex.entries())
-        .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-        .map((e) => self.catalog.get(e[1]))
+      return Array.from(self.catalog.values())
+        .sort((a, b) => a.gridIndex - b.gridIndex)
         .filter(Boolean) as AppType[];
 
       // return Array.from(Object.values(getSnapshot(self.catalog))).filter(
@@ -586,9 +562,6 @@ export const NewBazaarStore = types
     hasAlly(ship: string) {
       return self.allies.has(ship);
     },
-    isPinned(path: string, appId: string) {
-      return self.docks.get(path)?.includes(appId);
-    },
     isRecommended(appId: string) {
       return self.recommendations.includes(appId);
     },
@@ -597,49 +570,39 @@ export const NewBazaarStore = types
       if (app) return app;
       return self.devAppMap.get(appId);
     },
-    getDock(path: string): string[] {
-      return self.docks.get(path) ?? [];
-    },
-    getDockApps(path: string) {
-      const dock = self.docks.get(path);
-      return dock?.map((appId: string) => {
-        const app = self.catalog.get(appId);
-        return app && getSnapshot(app);
-      });
-    },
-    getStall(path: string) {
-      const stall = self.stalls.get(path);
-      return Array.from(Object.values(stall ? getSnapshot(stall) : {}));
-    },
-    getRecommendedApps(path: string) {
-      const stall = self.stalls.get(path);
-      if (!stall) return [];
-      if (stall.recommended.size === 0) return [];
-      return Array.from(
-        Object.entries(getSnapshot(stall.recommended))
-          .sort((entry: [string, number], entry2: [string, number]) => {
-            return entry2[1] - entry[1];
-          })
-          .slice(0, 4)
-          .map((entry: [appId: string, count: number]) => {
-            return self.catalog.get(entry[0]);
-          })
-      );
-    },
-    getSuite(path: string) {
-      const stall = self.stalls.get(path);
-      const suite = new Map();
-      if (!stall) return suite;
-      Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
-        (index: string) => {
-          const appId = stall.suite.get(index);
-          if (!appId) return;
-          const app = self.catalog.get(appId);
-          suite.set(index, app && getSnapshot(app));
-        }
-      );
-      return suite;
-    },
+    // getStall(path: string) {
+    //   const stall = self.stalls.get(path);
+    //   return Array.from(Object.values(stall ? getSnapshot(stall) : {}));
+    // },
+    // getRecommendedApps(path: string) {
+    //   const stall = self.stalls.get(path);
+    //   if (!stall) return [];
+    //   if (stall.recommended.size === 0) return [];
+    //   return Array.from(
+    //     Object.entries(getSnapshot(stall.recommended))
+    //       .sort((entry: [string, number], entry2: [string, number]) => {
+    //         return entry2[1] - entry[1];
+    //       })
+    //       .slice(0, 4)
+    //       .map((entry: [appId: string, count: number]) => {
+    //         return self.catalog.get(entry[0]);
+    //       })
+    //   );
+    // },
+    // getSuite(path: string) {
+    //   const stall = self.stalls.get(path);
+    //   const suite = new Map();
+    //   if (!stall) return suite;
+    //   Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
+    //     (index: string) => {
+    //       const appId = stall.suite.get(index);
+    //       if (!appId) return;
+    //       const app = self.catalog.get(appId);
+    //       suite.set(index, app && getSnapshot(app));
+    //     }
+    //   );
+    //   return suite;
+    // },
     // get subscriptionState() {
     //   return self.subscription.state;
     // },
@@ -653,5 +616,5 @@ export type NativeAppType = Instance<typeof NativeApp>;
 export type DevAppType = Instance<typeof DevAppModel>;
 export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
-export type NewBazaarStoreType = Instance<typeof NewBazaarStore>;
+export type BazaarStoreType = Instance<typeof BazaarStore>;
 export type RealmConfigType = Instance<typeof RealmConfig>;

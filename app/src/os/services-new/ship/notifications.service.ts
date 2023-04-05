@@ -1,5 +1,4 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
-import log from 'electron-log';
 import { notifDBPreload, NotificationsDB } from './models/notifications.model';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 

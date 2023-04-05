@@ -8,25 +8,24 @@ import {
   UrbitAppType,
   WebAppType,
 } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import {
   handleInstallation,
   handleResumeSuspend,
   installLabel,
   resumeSuspendLabel,
 } from '../AppInstall/helpers';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface AppGridProps {
   tileSize: AppTileSize;
 }
 
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
-  const { spaces, bazaar } = useServices();
-  const currentSpace = spaces.selected;
-  const apps = [...bazaar.installed, ...bazaar.devApps] as
+  const { shellStore } = useAppState();
+  const { bazaarStore, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+  const apps = [...bazaarStore.installed, ...bazaarStore.devApps] as
     | AppType[]
     | WebAppType[];
 
@@ -35,8 +34,8 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   return (
     <>
       {apps.map((app, index: number) => {
-        const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
-        const weRecommended = bazaar.isRecommended(app.id);
+        const isAppPinned = currentSpace.isPinned(app.id);
+        const weRecommended = bazaarStore.isRecommended(app.id);
         const installStatus = app.installStatus as InstallStatus;
 
         const canSuspend =
@@ -93,8 +92,8 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   isAppPinned
-                    ? SpacesActions.unpinApp(currentSpace.path, app.id)
-                    : SpacesActions.pinApp(currentSpace.path, app.id);
+                    ? currentSpace.unpinApp(app.id)
+                    : currentSpace.pinApp(app.id);
                 },
               },
               {
@@ -103,8 +102,8 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
                 onClick: (evt: any) => {
                   evt.stopPropagation();
                   weRecommended
-                    ? SpacesActions.unrecommendApp(app.id)
-                    : SpacesActions.recommendApp(app.id);
+                    ? bazaarStore.unrecommendApp(app.id)
+                    : bazaarStore.recommendApp(app.id);
                 },
               },
               {
@@ -112,7 +111,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
                 disabled: app.type === AppTypes.Web,
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ShellActions.openDialogWithStringProps('app-detail-dialog', {
+                  shellStore.openDialogWithStringProps('app-detail-dialog', {
                     appId: app.id,
                   });
                 },
@@ -121,8 +120,8 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
               ...installRow,
             ]}
             onAppClick={(selectedApp) => {
-              DesktopActions.openAppWindow(toJS(selectedApp));
-              DesktopActions.closeHomePane();
+              shellStore.openWindow(toJS(selectedApp));
+              shellStore.closeHomePane();
             }}
           />
         );

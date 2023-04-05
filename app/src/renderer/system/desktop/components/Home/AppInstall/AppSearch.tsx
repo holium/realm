@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { observer } from 'mobx-react';
-import { Input, Flex } from 'renderer/components';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useAppInstaller } from './store';
 import * as yup from 'yup';
 import { createField, createForm } from 'mobx-easy-form';
+import { Flex, TextInput, Text } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface AppSearchProps {
   mode: 'home' | 'space';
@@ -38,6 +38,7 @@ export const searchForm = (
 const dimensions = { height: 450, width: 550 };
 
 const AppSearchAppPresenter = (props: AppSearchProps) => {
+  const { bazaarStore } = useShipStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
@@ -46,7 +47,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   const selectedShip = appInstaller.selectedShip;
 
   useEffect(() => {
-    SpacesActions.scryAllies();
+    bazaarStore.scryAllies();
   }, []);
 
   useEffect(() => {
@@ -88,26 +89,31 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
 
   return (
     <Flex width={width}>
-      <Input
-        innerRef={inputRef}
+      <TextInput
+        ref={inputRef}
         flex={8}
         id={`${popoverId}-trigger`}
+        name="app-search"
         type="text"
         placeholder={searchPlaceholder}
-        bgOpacity={0.3}
-        borderColor={'input.borderHover'}
-        bg="bg.blendedBg"
-        wrapperStyle={{
+        style={{
           borderRadius: 25,
           height: 42,
           width,
           paddingLeft: 12,
           paddingRight: 16,
+          borderColor: 'rgba(var(--rlm-border-rgba), 0.6)',
         }}
-        leftLabel={
-          searchMode === 'dev-app-search' && selectedShip !== ''
-            ? `Apps by ${selectedShip}:`
-            : 'none'
+        background="rbga(var(--rlm-window-rgba), 0.3)"
+        inputStyle={{
+          background: 'transparent',
+        }}
+        leftAdornment={
+          searchMode === 'dev-app-search' && selectedShip !== '' ? (
+            <Text.Custom>Apps by ${selectedShip}</Text.Custom>
+          ) : (
+            <></>
+          )
         }
         onKeyDown={(evt: any) => {
           evt.stopPropagation();

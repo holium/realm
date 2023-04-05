@@ -1,5 +1,4 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
-import log from 'electron-log';
 import APIConnection from '../conduit';
 import { PokeParams, Scry } from '@holium/conduit/src/types';
 

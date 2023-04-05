@@ -10,8 +10,9 @@ import RoomsService from './rooms.service';
 import NotificationsService from './notifications.service';
 import ChatService from './chat.service';
 import { Friends } from './models/friends.model';
-import SpacesService from './spaces.service';
+import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../s3/S3Client';
+import BazaarService from './spaces/bazaar.service';
 
 export class ShipService extends AbstractService {
   private patp: string;
@@ -22,6 +23,7 @@ export class ShipService extends AbstractService {
     chat: ChatService;
     friends: Friends;
     spaces: SpacesService;
+    bazaar: BazaarService;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -52,6 +54,7 @@ export class ShipService extends AbstractService {
       chat: new ChatService(undefined, this.shipDB.db),
       friends: new Friends(false, this.shipDB.db),
       spaces: new SpacesService(undefined, this.shipDB.db),
+      bazaar: new BazaarService(undefined, this.shipDB.db),
     };
 
     app.on('quit', () => {
@@ -76,6 +79,7 @@ export class ShipService extends AbstractService {
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
+    this.services?.bazaar.reset();
   }
   // ----------------------------------------
   // ------------------ S3 ------------------

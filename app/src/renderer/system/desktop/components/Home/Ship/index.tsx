@@ -1,14 +1,12 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Icons, IconButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import { AppSearchApp } from '../AppInstall/AppSearch';
 import { NoScrollBar } from 'renderer/components/NoScrollbar';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Flex, Button, Icon } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -18,7 +16,7 @@ interface OurHomeProps {
 
 const OurHomePresenter = (props: OurHomeProps) => {
   const { isOpen } = props;
-  const { theme, ship } = useServices();
+  const { ship } = useShipStore();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const sidebarComponent = useMemo(
@@ -43,13 +41,6 @@ const OurHomePresenter = (props: OurHomeProps) => {
       </AnimatePresence>
     ),
     [sidebar]
-  );
-
-  const highlightColor = '#4E9EFD';
-
-  const iconHoverColor = useMemo(
-    () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
-    [theme.currentTheme.iconColor]
   );
 
   return (
@@ -91,20 +82,15 @@ const OurHomePresenter = (props: OurHomeProps) => {
           </Flex>
           <AppSearchApp mode="home" />
           <Flex justifyContent="flex-end">
-            <IconButton
+            <Button.IconButton
               size={3}
-              customBg={iconHoverColor}
-              color={
-                sidebar === 'friends'
-                  ? highlightColor
-                  : theme.currentTheme.iconColor
-              }
+              color={sidebar === 'friends' ? 'accent' : 'icon'}
               onClick={() => {
                 setSidebar(!sidebar ? 'friends' : null);
               }}
             >
-              <Icons name="Members" size="22px" />
-            </IconButton>
+              <Icon name="Members" size="22px" />
+            </Button.IconButton>
           </Flex>
         </Flex>
         <Flex flexDirection="row" justifyContent="space-between" gap={36}>

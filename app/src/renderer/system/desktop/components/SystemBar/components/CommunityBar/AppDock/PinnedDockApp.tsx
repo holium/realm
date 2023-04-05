@@ -15,11 +15,13 @@ import {
   installLabel,
   handleInstallation,
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
+import { useAppState } from 'renderer/stores/app.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 type Props = {
   tileId: string;
   app: AppType;
-  spacePath: string;
+  space?: SpaceModelType;
   hasWindow: boolean;
   isActive: boolean;
   isMinimized: boolean;
@@ -29,12 +31,13 @@ type Props = {
 export const PinnedDockApp = ({
   tileId,
   app,
-  spacePath,
+  space,
   hasWindow,
   isActive,
   isMinimized,
   onClick,
 }: Props) => {
+  const { shellStore } = useAppState();
   const pointerDownRef = useRef<{
     tileId: string;
     rect: DOMRect;
@@ -49,7 +52,7 @@ export const PinnedDockApp = ({
       id: `${app.id}-unpin}`,
       label: 'Unpin',
       onClick: () => {
-        SpacesActions.unpinApp(spacePath, app.id);
+        space?.unpinApp(app.id);
       },
     },
   ];
@@ -59,7 +62,7 @@ export const PinnedDockApp = ({
           id: isMinimized ? `${app.id}-show}` : `${app.id}-hide}`,
           label: isMinimized ? 'Show' : 'Hide',
           section: 2,
-          onClick: () => DesktopActions.toggleMinimized(app.id),
+          onClick: () => shellStore.toggleMinimized(app.id),
         },
       ]
     : [];
@@ -69,7 +72,7 @@ export const PinnedDockApp = ({
           id: `${app.id}-close}`,
           label: 'Close',
           section: 2,
-          onClick: () => DesktopActions.closeAppWindow(app.id),
+          onClick: () => shellStore.closeWindow(app.id),
         },
       ]
     : [];

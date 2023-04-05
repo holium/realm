@@ -1,11 +1,4 @@
-import {
-  detach,
-  Instance,
-  types,
-  flow,
-  applySnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 import { Theme } from './theme.model';
 
 export const AccountModel = types.model('AccountModel', {

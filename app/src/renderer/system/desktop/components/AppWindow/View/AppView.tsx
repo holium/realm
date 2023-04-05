@@ -1,14 +1,13 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { applyStyleOverrides } from './applyStyleOverrides';
 import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
 
 const AppViewContainer = styled.div`
   overflow: hidden;
@@ -18,20 +17,21 @@ const AppViewContainer = styled.div`
 `;
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: any;
   isResizing: boolean;
   isDragging: boolean;
 };
 
 const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
-  const { ship, desktop, theme, spaces, bazaar } = useServices();
+  const { theme, shellStore } = useAppState();
+  const { ship, spacesStore, bazaarStore } = useShipStore();
   const [ready, setReady] = useState(false);
   const webViewRef = useRef<HTMLWebViewElement>(null);
 
   const [appUrl, setAppUrl] = useState<string | null>(null);
 
-  const app = bazaar.getApp(appWindow.appId) as AppType;
-  const isActive = desktop.getWindowByAppId(appWindow.appId)?.isActive;
+  const app = bazaarStore.getApp(appWindow.appId) as AppType;
+  const isActive = shellStore.getWindowByAppId(appWindow.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +43,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
     () => isResizing || isDragging || loading || !isActive,
     [isResizing, isDragging, loading, isActive]
   );
-
+  console.log(appWindow);
   useEffect(() => {
     const webView: Electron.WebviewTag = document.getElementById(
       `${appWindow.appId}-urbit-webview`
@@ -63,17 +63,17 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         );
       }
       const css = `
-          ${genCSSVariables(theme.currentTheme)}
-          ${applyStyleOverrides(appWindow.appId, theme.currentTheme)}
+          ${genCSSVariables(theme)}
+          ${applyStyleOverrides(appWindow.appId, theme)}
         `;
 
       webView.addEventListener('did-attach', () => {
         webView.insertCSS(css);
-        webView.send('mouse-color', desktop.mouseColor);
+        webView.send('mouse-color', shellStore.mouseColor);
       });
       webView.addEventListener('dom-ready', () => {
         webView.insertCSS(css);
-        webView.send('mouse-color', desktop.mouseColor);
+        webView.send('mouse-color', shellStore.mouseColor);
         setReady(true);
       });
 
@@ -81,13 +81,13 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         webView.closeDevTools();
       });
 
-      let appUrl = `${ship.url}/apps/${appWindow.appId}/?spaceId=${spaces.selected?.path}`;
+      let appUrl = `${ship.url}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
       if (appWindow.href?.site) {
-        appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spaces.selected?.path}`;
+        appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
 
-      DesktopActions.openAppWindow(toJS(app));
+      shellStore.openWindow(toJS(app));
       setAppUrl(appUrl);
     }
 
@@ -97,10 +97,10 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
   }, [
     ship,
     appWindow,
-    spaces.selected?.path,
-    desktop.mouseColor,
-    theme.currentTheme.backgroundColor,
-    theme.currentTheme.mode,
+    spacesStore.selected?.path,
+    shellStore.mouseColor,
+    theme.backgroundColor,
+    theme.mode,
   ]);
 
   // Set mouse color
@@ -110,16 +110,16 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         `${appWindow.appId}-urbit-webview`
       ) as Electron.WebviewTag;
 
-      webView?.send('mouse-color', desktop.mouseColor);
+      webView?.send('mouse-color', shellStore.mouseColor);
     }
-  }, [desktop.mouseColor, ready]);
+  }, [shellStore.mouseColor, ready]);
 
   // Set theme on change
   useEffect(() => {
     if (ready) {
       const css = `
-        ${genCSSVariables(theme.currentTheme)}
-        ${applyStyleOverrides(appWindow.appId, theme.currentTheme)}
+        ${genCSSVariables(theme)}
+        ${applyStyleOverrides(appWindow.appId, theme)}
       `;
       const webView: Electron.WebviewTag = document.getElementById(
         `${appWindow.appId}-urbit-webview`
@@ -130,7 +130,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         console.error(e);
       }
     }
-  }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
+  }, [theme.backgroundColor, theme.mode, ready]);
 
   return useMemo(
     () => (

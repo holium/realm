@@ -1,21 +1,10 @@
-import { AuthIPC, RealmIPC, ShipIPC } from './ipc';
+import { RealmIPC } from './ipc';
+import { defaultTheme } from '@holium/shared';
 import { createContext, useContext } from 'react';
-import {
-  applyPatch,
-  Instance,
-  types,
-  onSnapshot,
-  applySnapshot,
-  getSnapshot,
-  clone,
-} from 'mobx-state-tree';
-
-import { OSActions } from '../logic/actions/os';
+import { Instance, types, clone } from 'mobx-state-tree';
 import { AccountModelType } from './models/account.model';
 import { Theme, ThemeType } from './models/theme.model';
-import { defaultTheme } from '@holium/shared';
 import { AuthenticationModel } from './auth.store';
-
 import { ShellModel } from './models/shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { RealmUpdateTypes } from 'os/realm.types';
