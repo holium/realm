@@ -7,8 +7,8 @@ import {
 } from '../components/AccountDialog.styles';
 
 type Props = DownloadRealmBodyProps & {
-  patps: string[];
-  selectedPatp: string;
+  patps: string[] | undefined;
+  selectedPatp: string | undefined;
   setSelectedPatp: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
@@ -26,8 +26,8 @@ export const AccountDownloadRealmDialog = ({
   onExit,
 }: Props) => (
   <AccountDialog
-    patps={patps}
-    selectedPatp={selectedPatp}
+    patps={patps ?? []}
+    selectedPatp={selectedPatp ?? ''}
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.DownloadRealm}
     customBody={

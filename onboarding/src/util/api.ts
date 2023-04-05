@@ -7,7 +7,7 @@ import { constants } from './constants';
 import { http } from './http';
 
 const defaultHeaders = {
-  'Content-Type': 'application/json',
+  'content-type': 'application/json',
   client_id: constants.API_HEADERS_CLIENT_ID,
   version: constants.API_HEADERS_VERSION,
 };
@@ -28,6 +28,13 @@ type VerifyEmailResponse = {
 type RefreshTokenResponse = {
   email: string;
   token: string;
+};
+
+type ResetPasswordResponse = {
+  message: string;
+  token?: string;
+  email?: string;
+  client_side_encryption_key?: string;
 };
 
 type GetProductsResponse = {
@@ -140,6 +147,21 @@ export const api = {
       }),
     });
   },
+  resetPassword(
+    verificationcode: string,
+    newPassword: string,
+    reveal_realm_key?: boolean
+  ) {
+    return http<ResetPasswordResponse>(`${constants.API_URL}/reset-password`, {
+      method: 'POST',
+      headers: defaultHeaders,
+      body: JSON.stringify({
+        verificationcode,
+        newPassword,
+        reveal_realm_key,
+      }),
+    });
+  },
   getProducts: () => {
     return http<GetProductsResponse>(`${constants.API_URL}/products/en`, {
       method: 'GET',
@@ -166,7 +188,7 @@ export const api = {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'content-type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -193,7 +215,7 @@ export const api = {
     return http(`${constants.API_URL}/ship`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
@@ -265,7 +287,7 @@ export const api = {
     return http<ChangeEmailResponse>(`${constants.API_URL}/change-email`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         version: constants.API_HEADERS_VERSION,
         Authorization: `Bearer ${token}`,
       },
@@ -280,7 +302,7 @@ export const api = {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'content-type': 'application/json',
           version: constants.API_HEADERS_VERSION,
           Authorization: `Bearer ${token}`,
         },
@@ -334,7 +356,7 @@ export const api = {
       {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'content-type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -352,7 +374,7 @@ export const api = {
     return http<EjectShipResponse>(`${constants.API_URL}/send-eject-id-email`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({

@@ -1,7 +1,5 @@
 import { ChangeEvent, useRef } from 'react';
-import { HoliumButton } from '@holium/design-system/os';
-import { Flex, Anchor } from '@holium/design-system/general';
-import { isValidEmail, useToggle } from '@holium/design-system/util';
+import { Flex, HoliumButton, Anchor, useToggle } from '@holium/design-system';
 import {
   OnboardDialogDescription,
   OnboardDialogInput,
@@ -11,25 +9,20 @@ import {
 import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
+  email: string;
   onAlreadyHaveAccount: () => void;
-  onNext: (email: string, password: string) => Promise<boolean>;
+  onClaim: (password: string) => Promise<boolean>;
 };
 
-export const CreateAccountDialog = ({
+export const ClaimTokenDialog = ({
+  email,
   onAlreadyHaveAccount,
-  onNext,
+  onClaim,
 }: Props) => {
-  const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
-  const emailError = useToggle(false);
   const confirmPasswordError = useToggle(false);
-
-  const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const email = e.target.value;
-    emailError.setToggle(!isValidEmail(email));
-  };
 
   const onChangePassword = () => {
     confirmPasswordError.toggleOff();
@@ -42,19 +35,14 @@ export const CreateAccountDialog = ({
   };
 
   const handleOnNext = () => {
-    const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
     const confirmPassword = confirmPasswordRef.current?.value;
 
-    if (!email || !password || !confirmPassword) {
+    if (!password || !confirmPassword || password !== confirmPassword) {
       return Promise.resolve(false);
     }
 
-    if (emailError.isOn || confirmPasswordError.isOn) {
-      return Promise.resolve(false);
-    }
-
-    return onNext(email, password);
+    return onClaim(password);
   };
 
   return (
@@ -62,19 +50,12 @@ export const CreateAccountDialog = ({
       icon={<HoliumButton size={100} pointer={false} />}
       body={
         <>
-          <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
-          <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
-              Email
-            </OnboardDialogInputLabel>
-            <OnboardDialogInput
-              ref={emailRef}
-              type="email"
-              placeholder="name@email.com"
-              isError={emailError.isOn}
-              onChange={onEmailChange}
-            />
-          </Flex>
+          <OnboardDialogTitle>Claim your Realm invite</OnboardDialogTitle>
+          <OnboardDialogDescription pb={3}>
+            To get access to Realm, you will need to create an account. After
+            you click Claim, you will be brought to a download page.
+          </OnboardDialogDescription>
+          <OnboardDialogInput value={email} disabled />
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="password">
               Password
@@ -104,6 +85,7 @@ export const CreateAccountDialog = ({
           </OnboardDialogDescription>
         </>
       }
+      nextText="Claim"
       onNext={handleOnNext}
     />
   );
