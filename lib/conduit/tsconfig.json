@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "typeRoots": ["./node_modules/@types", "src/eventsource.d.ts"]
   },
   "include": ["src", "test"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "files": ["src/eventsource.d.ts"]
 }

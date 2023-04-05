@@ -1,5 +1,4 @@
 import EventEmitter, { setMaxListeners } from 'events';
-// @ts-ignore
 import EventSource from '@holium/eventsource';
 import axios, { AxiosError } from 'axios';
 import {
@@ -211,7 +210,6 @@ export class Conduit extends EventEmitter {
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie?.split('; ')[0] },
         // TODO: add this type def in global.d.ts
-        // @ts-ignore
         responseTimeout: 25000,
         onreconnect: () => console.log('SSE RECONNECTED!!'),
       });
