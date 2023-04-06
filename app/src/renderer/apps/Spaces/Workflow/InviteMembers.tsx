@@ -1,31 +1,29 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
-import { Avatar, Box, Flex, Select } from '@holium/design-system';
 import {
   Text,
-  Label,
-  ShipSearch,
-  Input,
-  Icons,
-  Crest,
-  IconButton,
+  Button,
+  Icon,
+  Avatar,
+  Box,
+  Flex,
+  Select,
   Skeleton,
-} from 'renderer/components';
+  TextInput,
+} from '@holium/design-system';
+import { ShipSearch, Crest } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface IMemberList {
-  customBg: string;
   height?: any;
-  theme: ThemeType;
 }
 
 const MemberList = styled(Flex)<IMemberList>`
@@ -38,8 +36,8 @@ const MemberList = styled(Flex)<IMemberList>`
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
-  border: 1px solid ${(props: IMemberList) => props.theme.colors.ui.borderColor};
-  background-color: ${(props: IMemberList) => props.customBg};
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  background-color: rgba(var(--rlm-window-rgba));
 `;
 
 export const createPeopleForm = (
@@ -72,8 +70,7 @@ export const createPeopleForm = (
 };
 
 const InviteMembersPresenter = (props: BaseDialogProps) => {
-  const { theme, ship, friends } = useServices();
-  const { inputColor, iconColor, windowColor, mode } = theme.currentTheme;
+  const { ship, friends } = useShipStore();
   const { workflowState, setState } = props;
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -194,13 +191,8 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (
-      <Row
-        key={patp}
-        noHover
-        style={{ justifyContent: 'space-between' }}
-        customBg={windowColor}
-      >
-        <Flex gap={10} flexDirection="row" alignItems="center">
+      <Row key={patp} noHover style={{ justifyContent: 'space-between' }}>
+        <Flex gap={10} row align="center">
           <Box>
             <Avatar
               simple
@@ -210,26 +202,25 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
               sigilColor={[contact.color || '#000000', 'white']}
             />
           </Box>
-          <Flex flexDirection="row" gap={8}>
-            <Text fontSize={2}>{patp}</Text>
-            <Text fontSize={2} opacity={0.5}>
+          <Flex row gap={8}>
+            <Text.Custom fontSize={2}>{patp}</Text.Custom>
+            <Text.Custom fontSize={2} opacity={0.5}>
               {isOur && '(you)'}
-            </Text>
+            </Text.Custom>
           </Flex>
           {nickname && nickname !== patp ? (
-            <Text fontSize={2} opacity={0.7}>
+            <Text.Custom fontSize={2} opacity={0.7}>
               {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-            </Text>
+            </Text.Custom>
           ) : (
             []
           )}
         </Flex>
 
-        <Flex gap={8} justifyContent="center" alignItems="center">
+        <Flex row gap={8} justify="center" align="center">
           <Select
             id="select-role"
             placeholder="Select role"
-            backgroundColor={windowColor}
             selected={permissionMap[patp].primaryRole}
             disabled={isOur}
             options={[
@@ -252,13 +243,9 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             }}
           />
           {!isOur && (
-            <IconButton
-              luminosity={mode}
-              customBg={windowColor}
-              // customBg={customBg ? darken(0.15, customBg) : undefined}
+            <Button.IconButton
               size={24}
-              canFocus
-              isDisabled={isOur}
+              disabled={isOur}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 const copyPatp = selectedPatp;
@@ -275,8 +262,8 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
                 });
               }}
             >
-              <Icons opacity={0.5} name="Close" />
-            </IconButton>
+              <Icon opacity={0.5} name="Close" size={16} />
+            </Button.IconButton>
           )}
         </Flex>
       </Row>
@@ -289,8 +276,8 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   if (!workflowState) return null;
 
   return (
-    <Flex flexDirection="column" width="100%" overflowY="hidden">
-      <Text
+    <Flex col width="100%" overflowY="hidden">
+      <Text.Custom
         fontSize={5}
         lineHeight="24px"
         fontWeight={500}
@@ -298,9 +285,9 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
         variant="body"
       >
         Invite members
-      </Text>
-      <Flex flexDirection="column" gap={16} justifyContent="flex-start">
-        <Flex gap={16} flexDirection="row" alignItems="center" height={75}>
+      </Text.Custom>
+      <Flex col gap={16} justify="flex-start">
+        <Flex gap={16} row align="center" height={75}>
           <Crest
             color={
               workflowState.crestOption === 'color' ? workflowState.color : ''
@@ -311,43 +298,43 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             size="md"
           />
           <Flex gap={6} flexDirection="column">
-            <Text fontWeight={500} fontSize={4}>
+            <Text.Custom fontWeight={500} fontSize={4}>
               {workflowState.name}
-            </Text>
+            </Text.Custom>
             <Flex flexDirection="row" alignItems="center" gap={6}>
-              <Text opacity={0.6} fontSize={3}>
+              <Text.Custom opacity={0.6} fontSize={3}>
                 {workflowState.archetypeTitle}
-              </Text>
-              <Text opacity={0.6} fontSize={3}>
+              </Text.Custom>
+              <Text.Custom opacity={0.6} fontSize={3}>
                 {' • '}
-              </Text>
+              </Text.Custom>
               <Flex flexDirection="row" alignItems="center">
                 {loading && (
                   <Flex height={16} width={12} mr={1}>
                     <Skeleton height={16} width={12} />{' '}
                   </Flex>
                 )}
-                <Text opacity={0.6} fontSize={3}>
+                <Text.Custom opacity={0.6} fontSize={3}>
                   {!loading && memberCount} {pluralize('member', memberCount)}
-                </Text>
+                </Text.Custom>
               </Flex>
             </Flex>
           </Flex>
         </Flex>
         <Flex position="relative" flexDirection="column">
-          <Input
+          <TextInput
             tabIndex={1}
             autoCapitalize="false"
             autoCorrect="false"
             autoComplete="false"
             spellCheck="false"
+            id="person"
             name="person"
-            innerRef={searchRef}
+            ref={searchRef}
             height={34}
-            leftIcon={<Icons opacity={0.6} color={iconColor} name="UserAdd" />}
+            leftAdornment={<Icon opacity={0.6} name="UserAdd" size={18} />}
             placeholder="Enter Urbit ID"
-            wrapperStyle={{
-              backgroundColor: inputColor,
+            style={{
               borderRadius: 6,
               paddingRight: 4,
             }}
@@ -376,7 +363,6 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             isDropdown
             search={person.state.value}
             selected={selectedPatp}
-            customBg={windowColor}
             onSelected={(contact: any) => {
               onShipSelected(contact);
               person.actions.onChange('');
@@ -384,8 +370,8 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           />
         </Flex>
         <Flex position="relative" flexDirection="column" gap={6} height={294}>
-          <Label fontWeight={500}>Members</Label>
-          <MemberList customBg={inputColor}>
+          <Text.Label fontWeight={500}>Members</Text.Label>
+          <MemberList>
             {!loading ? (
               memberPatps.map(RowRenderer)
             ) : (

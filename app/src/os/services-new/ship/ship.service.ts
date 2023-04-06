@@ -81,6 +81,31 @@ export class ShipService extends AbstractService {
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
   }
+
+  public async getOurGroups(): Promise<{ [path: string]: any }> {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: '/groups', // the spaces scry is at the root of the path
+    });
+    console.log(response);
+    // return response.groups;
+    return Array.from(Object.values(response.groups));
+  }
+  public async getGroup(path: string): Promise<{ [path: string]: any }> {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: `/groups${path}`, // the spaces scry is at the root of the path
+    });
+    return response;
+    // return Array.from(Object.values(response.groups));
+  }
+  public async getGroupMembers(path: string): Promise<{ [path: string]: any }> {
+    return await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: `/groups${path}/members`, // the spaces scry is at the root of the path
+    });
+    // return Array.from(Object.values(response.groups));
+  }
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------

@@ -3,22 +3,10 @@ import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { CreateSpaceModal } from './SelectType';
 import { SpacesCreateForm } from './Details';
-import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { appState } from 'renderer/stores/app.store';
-
-interface NewSpace {
-  access: 'public' | 'antechamber' | 'private';
-  archetype: 'home' | 'community';
-  archetypeTitle?: 'Home' | 'Community';
-  color?: string;
-  picture?: string;
-  members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
-  name: string;
-  description: string;
-  type: 'our' | 'group' | 'space';
-}
+import { shipStore } from 'renderer/stores/ship.store';
+import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
 
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {
@@ -40,44 +28,6 @@ export const spacesDialogs: DialogRenderers = {
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'create-space-1',
-      zIndex: 13,
-      type: 'dialog',
-      bounds: normalizeBounds(
-        {
-          x: 0,
-          y: 0,
-          width: 550,
-          height: 570,
-        },
-        desktopDimensions
-      ),
-    }),
-  },
-  'create-space-2': {
-    workflow: true,
-    customNext: false,
-    hasCloseButton: true,
-    component: (props: any) => <SelectArchetype {...props} />,
-    hasPrevious: () => true,
-    isValidated: (data: any) => {
-      if (data.archetype) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    onNext: (_evt: any, _state: any) => {
-      appState.shellStore.openDialog('create-space-3');
-    },
-    onPrevious: () => {
-      appState.shellStore.openDialog('create-space-1');
-    },
-    onClose: () => {
-      appState.shellStore.setIsBlurred(false);
-      appState.shellStore.closeDialog();
-    },
-    getWindowProps: (desktopDimensions) => ({
-      appId: 'create-space-2',
       zIndex: 13,
       type: 'dialog',
       bounds: normalizeBounds(
@@ -157,7 +107,7 @@ export const spacesDialogs: DialogRenderers = {
         color: createForm.color,
         theme: toJS(createForm.theme),
       };
-      SpacesActions.updateSpace(state.path, createForm).then(() => {
+      shipStore.spacesStore.updateSpace(state.path, createForm).then(() => {
         setState({ loading: false });
       });
     },
@@ -207,10 +157,10 @@ export const spacesDialogs: DialogRenderers = {
       delete state.archetypeTitle;
       state.description = state.description || '';
       if (state.crestOption === 'color') {
-        state.image = '';
+        state.picture = '';
       }
       const createForm: NewSpace = state;
-      SpacesActions.createSpace(createForm).then(() => {
+      shipStore.spacesStore.createSpace(createForm).then(() => {
         setState({ loading: false });
       });
     },

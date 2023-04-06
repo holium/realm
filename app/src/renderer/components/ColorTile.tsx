@@ -18,13 +18,19 @@ export const ColorTile = styled(motion.div)<ColorTileProps>`
 interface ColorPopoverProps {
   isOpen: boolean;
   size?: number;
+  top?: number;
+  left?: number;
 }
 export const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
-  position: absolute;
-  z-index: 3;
-  top: 40px;
-  left: ${(props) =>
-    props.size ? `-${Math.ceil(props.size / 3.5)}px` : '-6px'};
+  position: fixed;
+  z-index: 24;
+  top: ${(props) => `${props.top || 40}px`};
+  left: ${(props) => {
+    if (props.left) {
+      return `${props.left || -6}px`;
+    }
+    return props.size ? `-${Math.ceil(props.size / 3.5)}px` : '-6px';
+  }};
   width: 170px;
   display: ${(props: ColorPopoverProps) => (props.isOpen ? 'block' : 'none')};
 `;

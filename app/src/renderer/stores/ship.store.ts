@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
-import { Instance, onSnapshot, types, SnapshotIn } from 'mobx-state-tree';
+import { Instance, types, flow } from 'mobx-state-tree';
 import { ChatStore } from '../apps/Courier/store';
-import { NotifIPC, RealmIPC } from './ipc';
+import { NotifIPC, RealmIPC, ShipIPC } from './ipc';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStore } from './models/spaces.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
-import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
+import { BazaarStore } from './models/bazaar.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -55,22 +55,45 @@ const ShipStore = types
       self.notifStore.reset();
       self.chatStore.reset();
     },
+    getOurGroups: flow(function* () {
+      try {
+        return yield ShipIPC.getOurGroups() as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
+    getGroup: flow(function* (path: string) {
+      try {
+        return yield ShipIPC.getGroup(path) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
+    getGroupMembers: flow(function* (path: string) {
+      try {
+        return yield ShipIPC.getGroupMembers(path) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
   }));
 
-const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
-  const recentDevsSnapshot = localStorage.getItem('recentAppDevs');
-  const recentAppsSnapshot = localStorage.getItem('recentApps');
-  let recentDevs: string[] = [];
-  let recentApps: string[] = [];
-  if (recentDevsSnapshot) recentDevs = JSON.parse(recentDevsSnapshot);
-  if (recentAppsSnapshot) recentApps = JSON.parse(recentAppsSnapshot);
+// TODO better snapshot loading
 
-  return {
-    recentDevs: recentDevs || [],
-    recentApps: recentApps || [],
-    catalog: {},
-  };
-};
+// const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
+//   const recentDevsSnapshot = localStorage.getItem('recentAppDevs');
+//   const recentAppsSnapshot = localStorage.getItem('recentApps');
+//   let recentDevs: string[] = [];
+//   let recentApps: string[] = [];
+//   if (recentDevsSnapshot) recentDevs = JSON.parse(recentDevsSnapshot);
+//   if (recentAppsSnapshot) recentApps = JSON.parse(recentAppsSnapshot);
+
+//   return {
+//     recentDevs: recentDevs || [],
+//     recentApps: recentApps || [],
+//     catalog: {},
+//   };
+// };
 
 const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
@@ -89,21 +112,21 @@ export const shipStore = ShipStore.create({
   spacesStore: {
     spaces: {},
   },
-  bazaarStore: loadBazaarSnapshot() || {
+  bazaarStore: {
     catalog: {},
   },
 });
 
-onSnapshot(shipStore, (snapshot) => {
-  localStorage.setItem(
-    'recentApps',
-    JSON.stringify(snapshot.bazaarStore.recentApps)
-  );
-  localStorage.setItem(
-    'recentDevs',
-    JSON.stringify(snapshot.bazaarStore.recentDevs)
-  );
-});
+// onSnapshot(shipStore, (snapshot) => {
+//   localStorage.setItem(
+//     'recentApps',
+//     JSON.stringify(snapshot.bazaarStore.recentApps)
+//   );
+//   localStorage.setItem(
+//     'recentDevs',
+//     JSON.stringify(snapshot.bazaarStore.recentDevs)
+//   );
+// });
 // -------------------------------
 // Create core context
 // -------------------------------

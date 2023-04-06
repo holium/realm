@@ -2,17 +2,11 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import APIConnection from '../../conduit';
-import { SpacesDB } from './tables/spaces.model';
-import { MembersDB } from './tables/members.model';
-
-const pathToObj = (path: string) => {
-  const pathArr = path.split('/');
-  const pathObj = {
-    ship: pathArr[1],
-    space: pathArr[2],
-  };
-  return pathObj;
-};
+import { SpacesDB } from './tables/spaces.table';
+import { MembersDB } from './tables/members.table';
+import { humanFriendlySpaceNameSlug } from '../../../lib/text';
+import { snakeify } from '../../../lib/obj';
+import { pathToObj } from '../../..//lib/path';
 
 export class SpacesService extends AbstractService {
   private shipDB?: Database;
@@ -294,13 +288,133 @@ export class SpacesService extends AbstractService {
     });
   }
 
-  // public poke(payload: PokeParams) {
-  //   return APIConnection.getInstance().conduit.poke(payload);
-  // }
-  // public scry(payload: Scry) {
-  //   console.log('scry', payload);
-  //   return APIConnection.getInstance().conduit.scry(payload);
-  // }
+  public async createSpace(newSpace: NewSpace) {
+    const members = newSpace.members;
+    const slug = humanFriendlySpaceNameSlug(newSpace.name);
+    const spacePath: string = await new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          add: {
+            slug,
+            payload: snakeify({
+              name: newSpace.name,
+              description: newSpace.description,
+              type: newSpace.type,
+              access: newSpace.access,
+              picture: newSpace.picture,
+              color: newSpace.color,
+              archetype: newSpace.archetype,
+            }),
+            members,
+          },
+        },
+        reaction: 'spaces-reaction.add',
+        onReaction: (data: any) => {
+          resolve(data.add.space.path);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+    return spacePath;
+  }
+  public async updateSpace(path: string, payload: any): Promise<string> {
+    return await new Promise((resolve, reject) => {
+      console.log({
+        update: {
+          path: pathToObj(path),
+          payload: snakeify(payload.payload),
+        },
+      });
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          update: {
+            path: pathToObj(path),
+            payload: snakeify(payload.payload),
+          },
+        },
+        reaction: 'spaces-reaction.replace',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  }
+
+  public async deleteSpace(path: string): Promise<void> {
+    return await new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          remove: {
+            path: pathToObj(path),
+          },
+        },
+        reaction: 'spaces-reaction.remove',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+          log.info('failed to delete space', e);
+        },
+      });
+    });
+  }
+
+  public async leaveSpace(path: string): Promise<void> {
+    return await new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          remove: {
+            leave: pathToObj(path),
+          },
+        },
+        reaction: 'spaces-reaction.delete',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  }
+
+  public async joinSpace(path: string): Promise<void> {
+    return await new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          remove: {
+            leave: pathToObj(path),
+          },
+        },
+        reaction: 'spaces-reaction.remote-space',
+        onReaction: (data: any) => {
+          console.log('joined space', data);
+          // check if matches path
+          resolve(data);
+        },
+        onError: (e: any) => {
+          log.info('failed to join space', e);
+          reject(e);
+        },
+      });
+    });
+  }
 }
 
 export default SpacesService;
@@ -309,3 +423,15 @@ export default SpacesService;
 export const spacesPreload = SpacesService.preload(
   new SpacesService({ preload: true })
 );
+
+export type NewSpace = {
+  name: string;
+  description: string;
+  color?: string;
+  picture?: string;
+  access: 'public' | 'antechamber' | 'private';
+  archetype: 'home' | 'community';
+  archetypeTitle?: 'Home' | 'Community';
+  members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
+  type: 'our' | 'group' | 'space';
+};

@@ -1,10 +1,18 @@
-import { Instance, types, flow, applySnapshot } from 'mobx-state-tree';
+import {
+  Instance,
+  types,
+  flow,
+  applySnapshot,
+  castToSnapshot,
+} from 'mobx-state-tree';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
 import { MembersStore, VisaModel } from './members.model';
 import { Theme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
+import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
+import { defaultTheme } from '@holium/shared';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -103,10 +111,10 @@ export type SpaceModelType = Instance<typeof SpaceModel>;
 export const SpacesStore = types
   .model('SpacesStore', {
     loader: types.optional(LoaderModel, { state: 'initial' }),
+    creating: types.optional(LoaderModel, { state: 'initial' }),
     join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
-    // friends: types.optional(FriendsStore, { all: {} }),
     subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
@@ -145,7 +153,6 @@ export const SpacesStore = types
       try {
         const { current, spaces } =
           yield SpacesIPC.getInitial() as Promise<any>;
-        // todo form the json in the backend
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create({
@@ -169,7 +176,14 @@ export const SpacesStore = types
         self.loader.set('error');
       }
     }),
-
+    selectSpace(spacePath: string) {
+      self.selected = self.spaces.get(spacePath);
+      if (self.selected) {
+        appState.setTheme(self.selected.theme);
+        SpacesIPC.setSelectedSpace(spacePath);
+      }
+      return self.selected;
+    },
     joinSpace: flow(function* (spacePath: string) {
       self.join.set('loading');
       try {
@@ -179,9 +193,80 @@ export const SpacesStore = types
       } catch (e) {
         console.error(e);
         self.join.set('error');
+        // TODO notify user it failed
+      }
+    }),
+    createSpace: flow(function* (newSpace: NewSpace) {
+      self.creating.set('loading');
+      try {
+        const spacePath = yield SpacesIPC.createSpace(newSpace) as Promise<any>;
+        const created = SpaceModel.create(
+          castToSnapshot({
+            ...newSpace,
+            path: spacePath,
+            theme: defaultTheme,
+          })
+        );
+        self.spaces.set(spacePath, created);
+        self.creating.set('loaded');
+        return spacePath;
+      } catch (e) {
+        console.error(e);
+        self.creating.set('error');
+        // TODO notify user it failed
+      }
+    }),
+    updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
+      try {
+        yield SpacesIPC.update(spacePath, space) as Promise<any>;
+        self.spaces.set(spacePath, space);
+      } catch (e) {
+        // TODO notify user it failed
+        console.error(e);
+      }
+    }),
+    deleteSpace: flow(function* (spacePath: string) {
+      // TODO loading states
+      try {
+        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
+        if (self.selected === self.spaces.get(spacePath)) {
+          self.selected = self.ourSpace;
+        }
+        self.spaces.delete(spacePath);
+      } catch (e) {
+        console.error(e);
+        // TODO notify user it failed
+      }
+    }),
+    leaveSpace: flow(function* (spacePath: string) {
+      // TODO loading states
+      try {
+        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
+        if (self.selected === self.spaces.get(spacePath)) {
+          self.selected = self.ourSpace;
+        }
+        self.spaces.delete(spacePath);
+      } catch (e) {
+        console.error(e);
+        // TODO notify user it failed
       }
     }),
 
+    setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
+      self.loader.state = status;
+    },
+    setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
+      self.join.state = status;
+    },
+    setOurSpace(ourSpace: any) {
+      // self.our = ourSpace;
+      if (!self.selected) self.selected = ourSpace;
+    },
+    setSubscriptionStatus: (
+      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    ) => {
+      self.subscription.set(newSubscriptionStatus);
+    },
     _addSpace: (addReaction: { space: any; members: any }) => {
       const space = addReaction.space;
       const newSpace = SpaceModel.create({
@@ -219,45 +304,6 @@ export const SpacesStore = types
       self.spaces.delete(path);
       return path;
     },
-    setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
-      self.loader.state = status;
-    },
-    setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
-      self.join.state = status;
-    },
-    setOurSpace(ourSpace: any) {
-      // self.our = ourSpace;
-      if (!self.selected) self.selected = ourSpace;
-    },
-    selectSpace(spacePath: string) {
-      self.selected = self.spaces.get(spacePath);
-      if (self.selected) {
-        appState.setTheme(self.selected.theme);
-        SpacesIPC.setSelectedSpace(spacePath);
-      }
-      return self.selected;
-    },
-    setSubscriptionStatus: (
-      newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
-    ) => {
-      self.subscription.set(newSubscriptionStatus);
-    },
-    deleteSpace: flow(function* (spacePath: string) {
-      // TODO loading states
-      try {
-        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
-      } catch (e) {
-        console.error(e);
-      }
-    }),
-    leaveSpace: flow(function* (spacePath: string) {
-      // TODO loading states
-      try {
-        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
-      } catch (e) {
-        console.error(e);
-      }
-    }),
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;

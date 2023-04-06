@@ -1,14 +1,12 @@
 import {
-  Icons,
+  Row,
+  Button,
   Text,
-  TextButton,
+  IconPathsType,
+  Icon,
   Flex,
-  IconTypes,
-  Crest,
-  isValidHexColor,
-  isValidImageUrl,
-} from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
+} from '@holium/design-system';
+import { Crest, isValidHexColor, isValidImageUrl } from 'renderer/components';
 
 import { EmptyGroup } from '../SpaceRow';
 
@@ -16,10 +14,9 @@ interface ISelectRow {
   title: string;
   selected?: boolean;
   disabled?: boolean;
-  icon?: IconTypes;
+  icon?: IconPathsType;
   image?: string;
   color?: string;
-  customBg?: string;
   hideIcon?: boolean;
   buttonText?: string;
   subtitle?: string;
@@ -31,7 +28,6 @@ export const SelectRow = (props: ISelectRow) => {
   const {
     selected,
     disabled,
-    customBg,
     icon,
     image,
     color,
@@ -44,7 +40,7 @@ export const SelectRow = (props: ISelectRow) => {
   } = props;
   let leftIcon = <EmptyGroup />;
   if (icon) {
-    leftIcon = <Icons size={32} name={icon} />;
+    leftIcon = <Icon size={32} name={icon} />;
   }
   if (image || color) {
     const validatedColor = color && isValidHexColor(color) ? color : '';
@@ -58,9 +54,7 @@ export const SelectRow = (props: ISelectRow) => {
     <Row
       selected={selected}
       disabled={disabled}
-      gap={16}
-      style={{ paddingLeft: 12 }}
-      customBg={customBg}
+      style={{ paddingLeft: 12, gap: 16 }}
       onClick={(evt: any) => {
         evt.stopPropagation();
         onClick && onClick(title);
@@ -69,17 +63,17 @@ export const SelectRow = (props: ISelectRow) => {
       {!hideIcon && leftIcon}
       <Flex flex={1} alignItems="center" justifyContent="space-between">
         <Flex flexDirection="column">
-          <Text mb="2px" opacity={0.9} fontSize={3} fontWeight={500}>
+          <Text.Custom mb="2px" opacity={0.9} fontSize={3} fontWeight={500}>
             {title}
-          </Text>
+          </Text.Custom>
           {subtitle && (
-            <Text opacity={0.5} fontSize={2} fontWeight={400}>
+            <Text.Custom opacity={0.5} fontSize={2} fontWeight={400}>
               {subtitle}
-            </Text>
+            </Text.Custom>
           )}
         </Flex>
         {onButtonClick && (
-          <TextButton
+          <Button.TextButton
             fontSize={2}
             onClick={(evt: any) => {
               evt.stopPropagation();
@@ -87,7 +81,7 @@ export const SelectRow = (props: ISelectRow) => {
             }}
           >
             {buttonText}
-          </TextButton>
+          </Button.TextButton>
         )}
       </Flex>
     </Row>

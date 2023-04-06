@@ -1,23 +1,21 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
-import {
-  Text,
-  Label,
-  Input,
-  Icons,
-  Crest,
-  FormControl,
-  isValidHexColor,
-  isImgUrl,
-  TextButton,
-} from 'renderer/components';
+import { Crest, isValidHexColor, isImgUrl } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { observer } from 'mobx-react';
 import { TwitterPicker } from 'react-color';
-import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { Flex, RadioGroup, RadioList } from '@holium/design-system';
+import {
+  Flex,
+  RadioGroup,
+  RadioList,
+  Button,
+  Icon,
+  Text,
+  TextInput,
+} from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type CreateSpaceFormProps = {
   name: string;
@@ -85,8 +83,7 @@ const SpacesCreateFormPresenter = ({
   workflowState,
   setState,
 }: BaseDialogProps) => {
-  const { theme, spaces } = useServices();
-  const { inputColor } = theme.currentTheme;
+  const { spacesStore } = useShipStore();
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const [invalidImg, setInvalidImg] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
@@ -143,7 +140,7 @@ const SpacesCreateFormPresenter = ({
       });
     }
     if (edit) {
-      const space = spaces.spaces.get(edit.space);
+      const space = spacesStore.spaces.get(edit.space);
       if (!space) return;
       setWorkspaceState({
         ...space,
@@ -175,7 +172,7 @@ const SpacesCreateFormPresenter = ({
   const { nameField, descriptionField, pictureField, colorField } =
     useMemo(() => {
       if (edit) {
-        const space = spaces.spaces.get(edit.space);
+        const space = spacesStore.spaces.get(edit.space);
         if (space) return createSpaceForm(space);
       } else if (workflowState.type === 'group') {
         return createSpaceForm({
@@ -195,8 +192,8 @@ const SpacesCreateFormPresenter = ({
     }, []);
 
   return (
-    <Flex flexDirection="column" width="100%">
-      <Text
+    <Flex col width="100%">
+      <Text.Custom
         fontSize={5}
         lineHeight="24px"
         fontWeight={500}
@@ -204,20 +201,16 @@ const SpacesCreateFormPresenter = ({
         variant="body"
       >
         Edit details
-      </Text>
-      <Flex flexDirection="column" gap={16} justifyContent="flex-start">
-        <Flex flexDirection="row" alignItems="center" gap={16}>
+      </Text.Custom>
+      <Flex col width="100%" gap={16} justify="flex-start">
+        <Flex row align="center" gap={16}>
           <Crest
             color={crestOption === 'color' ? workflowState.color : '#00000030'}
             picture={crestOption === 'image' ? workflowState.image : ''}
             size="md"
           />
-          <Flex flex={1} flexDirection="column" gap={4}>
-            <Flex
-              flexDirection="row"
-              justifyContent="space-between"
-              alignItems="flex-end"
-            >
+          <Flex flex={1} col gap={4}>
+            <Flex row justify="space-between" align="flex-end">
               <RadioGroup
                 selected={crestOption}
                 options={[
@@ -231,7 +224,7 @@ const SpacesCreateFormPresenter = ({
                 }}
               />
               {invalidImg ? (
-                <FormControl.Error>Invalid image</FormControl.Error>
+                <Text.Hint color="intent-alert">Invalid image</Text.Hint>
               ) : (
                 <></>
               )}
@@ -242,18 +235,22 @@ const SpacesCreateFormPresenter = ({
                 display: crestOption === 'color' ? 'flex' : 'none',
               }}
               flex={1}
-              alignItems="flex-start"
+              align="flex-start"
               position="relative"
             >
-              <Input
+              <TextInput
+                id="space-color"
                 name="color"
                 tabIndex={1}
                 height={34}
                 required
-                leftIcon={<Text opacity={0.5}>#</Text>}
-                rightInteractive
-                rightIcon={
-                  <Flex position="relative" justifyContent="flex-end">
+                leftAdornment={<Text.Custom opacity={0.5}>#</Text.Custom>}
+                rightAdornment={
+                  <Flex
+                    position="relative"
+                    justifyContent="flex-end"
+                    onClick={(evt) => evt.stopPropagation()}
+                  >
                     <ColorTile
                       id="space-color-tile"
                       size={26}
@@ -265,6 +262,8 @@ const SpacesCreateFormPresenter = ({
                     <ColorTilePopover
                       id="space-color-tile-popover"
                       size={26}
+                      top={146}
+                      left={198}
                       ref={colorPickerRef}
                       isOpen={colorPickerOpen}
                       data-is-open={colorPickerOpen}
@@ -279,6 +278,7 @@ const SpacesCreateFormPresenter = ({
                             color: newColor.hex,
                             crestOption: 'color',
                           });
+                          setColorPickerOpen(false);
                           // setValidatedColor(newColor.hex);
                         }}
                         triangle="top-left"
@@ -296,13 +296,14 @@ const SpacesCreateFormPresenter = ({
                     </ColorTilePopover>
                   </Flex>
                 }
-                wrapperStyle={{
-                  width: 140,
-                  backgroundColor: inputColor,
+                inputStyle={{
+                  width: 80,
+                }}
+                style={{
                   borderRadius: 6,
                   paddingRight: 0,
                 }}
-                value={colorField.state.value}
+                value={colorField.state.value.replace('#', '')}
                 error={colorField.computed.ifWasEverBlurredThenError}
                 onChange={(e: any) => {
                   const color = e.target.value.replace('#', '');
@@ -321,26 +322,26 @@ const SpacesCreateFormPresenter = ({
 
             <Flex
               flex={1}
-              flexDirection="column"
+              col
               initial={{ display: 'none', width: '100%' }}
               animate={{
                 display: crestOption === 'image' ? 'flex' : 'none',
               }}
-              alignItems="flex-start"
+              align="flex-start"
               position="relative"
             >
-              <Input
-                leftIcon={
-                  <Icons name="ProfileImage" color="#C1C1C1" size={24} />
+              <TextInput
+                id="space-image"
+                leftAdornment={
+                  <Icon name="ProfileImage" iconColor="#C1C1C1" size={24} />
                 }
                 name="picture"
                 placeholder="Paste image link here"
                 height={34}
-                wrapperStyle={{
+                style={{
                   borderRadius: 6,
                   paddingLeft: 6,
                   paddingRight: 4,
-                  backgroundColor: inputColor,
                 }}
                 value={pictureField.state.value}
                 // error={!avatar.computed.isDirty || avatar.computed.error}
@@ -355,9 +356,8 @@ const SpacesCreateFormPresenter = ({
                 }}
                 onFocus={pictureField.actions.onFocus}
                 onBlur={pictureField.actions.onBlur}
-                rightInteractive
-                rightIcon={
-                  <TextButton
+                rightAdornment={
+                  <Button.TextButton
                     onClick={async () => {
                       const isImage: boolean = await isImgUrl(
                         pictureField.state.value
@@ -374,26 +374,27 @@ const SpacesCreateFormPresenter = ({
                     }}
                   >
                     Apply
-                  </TextButton>
+                  </Button.TextButton>
                 }
               />
             </Flex>
           </Flex>
         </Flex>
-        <Flex mt={1} flex={1} gap={20} flexDirection="column">
-          <FormControl.Field>
-            <Label fontWeight={500} required>
-              Space name
-            </Label>
-            <Input
+        <Flex col mt={1} flex={1} gap={20} width="100%">
+          <Flex inline col gap={2}>
+            <Text.Label fontWeight={500}>
+              Space name{' '}
+              <span style={{ fontWeight: 400, opacity: 0.3 }}>*</span>
+            </Text.Label>
+            <TextInput
               tabIndex={1}
+              id="space-name"
               name="name"
               required
               placeholder="Enter name"
-              wrapperStyle={{
+              style={{
                 height: 36,
                 borderRadius: 6,
-                backgroundColor: inputColor,
               }}
               defaultValue={nameField.state.value}
               error={nameField.computed.ifWasEverBlurredThenError}
@@ -405,21 +406,23 @@ const SpacesCreateFormPresenter = ({
               onBlur={nameField.actions.onBlur}
               disabled={workflowState.type === 'group'}
             />
-          </FormControl.Field>
-          <FormControl.Field>
-            <Label fontWeight={500} adornment="optional">
-              Description
-            </Label>
-            <Input
+          </Flex>
+          <Flex inline col gap={2}>
+            <Text.Label fontWeight={500}>
+              Description{' '}
+              <span style={{ marginLeft: 4, opacity: 0.3, fontWeight: 400 }}>
+                (optional)
+              </span>
+            </Text.Label>
+            <TextInput
               tabIndex={1}
+              id="space-description"
               name="description"
               fontWeight={400}
-              fontSize={2}
               placeholder="Enter description"
-              wrapperStyle={{
+              style={{
                 height: 36,
                 borderRadius: 6,
-                backgroundColor: inputColor,
               }}
               defaultValue={descriptionField.state.value}
               error={descriptionField.computed.ifWasEverBlurredThenError}
@@ -434,11 +437,11 @@ const SpacesCreateFormPresenter = ({
                 descriptionField.actions.onBlur();
               }}
             />
-          </FormControl.Field>
-          <FormControl.Field>
-            <Label mb={1} fontWeight={500} required>
+          </Flex>
+          <Flex col>
+            <Text.Label mb={1} fontWeight={500}>
               Access
-            </Label>
+            </Text.Label>
             <RadioList
               selected={accessOption}
               options={[
@@ -469,7 +472,7 @@ const SpacesCreateFormPresenter = ({
                 });
               }}
             />
-          </FormControl.Field>
+          </Flex>
         </Flex>
       </Flex>
     </Flex>

@@ -6,6 +6,7 @@ export type FlexProps = {
   inline?: boolean;
   col?: boolean;
   row?: boolean;
+  grow?: boolean;
   justify?:
     | 'center'
     | 'flex-start'
@@ -20,6 +21,7 @@ export const Flex = styled(Box)<FlexProps>`
   ${({ gap }) => gap && `gap: ${typeof gap === 'string' ? gap : `${gap}px`};`}
   ${({ col }) => col && `flex-direction: column;`}
   ${({ row }) => row && `flex-direction: row;`}
+  ${({ grow }) => grow && `flex-grow: 1;`}
   ${({ justify }) => justify && `justify-content: ${justify};`}
   ${({ align }) => align && `align-items: ${align};`}
 `;
