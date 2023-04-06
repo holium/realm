@@ -1,3 +1,4 @@
+// @ts-ignore
 import { isValidPatp } from 'urbit-ob';
 import {
   FragmentType,
@@ -52,15 +53,17 @@ const parserRules: ParserRules = {
   },
 
   code: {
-    token: '```',
+    token: /```\n?/,
     tokenLength: 3,
+    ender: '```',
+    enderLength: 3,
     recurse: false,
     priority: 0,
   },
   blockquote: {
-    token: '> ',
+    token: /(^|\n)> /,
     tokenLength: 2,
-    ender: '\n',
+    ender: /\n|$/,
     enderLength: 1,
     recurse: false,
     priority: 1,
@@ -112,6 +115,10 @@ plain***~~BIS~~***`***~~fake-BIS~~***`plain```codblock `fakeinline` ```plain```c
 b2.5 ***~~fakeBIS~~***
 ```plain ***~~BIS~~***
 plain
+```
+some code
+```
+caption
 > blockquote
 > blockquote`fakecode`*fakeitalics* blockquote
 ~~s~~
@@ -151,6 +158,8 @@ const eatSpecialType = (
     }
   } else {
     let startIndex: number;
+    let startTokenLength: number = parserRules[type]
+      .tokenLength as unknown as number;
     const startToken = parserRules[type].token;
     if (typeof startToken === 'string') {
       startIndex = raw.indexOf(startToken);
@@ -161,6 +170,9 @@ const eatSpecialType = (
         possibleMatch && possibleMatch.index !== undefined
           ? possibleMatch.index
           : -1;
+      if (startIndex >= 0) {
+        startTokenLength = possibleMatch?.[0].length ?? 0;
+      }
     } else {
       throw new Error('should not be possible to reach this');
     }
@@ -172,8 +184,7 @@ const eatSpecialType = (
         frag = { break: null } as FragmentBreakType;
       } else {
         // see if we find an exit match
-        const offset =
-          startIndex + (parserRules[type].tokenLength as unknown as number);
+        const offset = startIndex + startTokenLength;
         const endToken = parserRules[type].ender || startToken;
         let endTokenLength = (parserRules[type].enderLength ||
           parserRules[type].tokenLength) as unknown as number;

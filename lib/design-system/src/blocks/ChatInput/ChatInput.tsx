@@ -1,24 +1,19 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import {
-  Icon,
-  Button,
-  InputBox,
-  BoxProps,
-  TextArea,
-  Flex,
-  Spinner,
-  LinkBlock,
-  isImageLink,
-} from '../..';
+import { Icon, Button, BoxProps, Flex, Spinner } from '../../general';
+import { InputBox, TextArea } from '../../input';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
+const CHAT_INPUT_LINE_HEIGHT = 16;
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 36px;
+  line-height: ${CHAT_INPUT_LINE_HEIGHT}px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;
@@ -92,6 +87,7 @@ export const ChatInput = ({
   onPaste,
   ...chatInputProps
 }: ChatInputProps) => {
+  const [rows, setRows] = useState(1);
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -118,6 +114,11 @@ export const ChatInput = ({
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = evt.target;
     setValue(value);
+    if (value.length < 25 && value.split('\n').length < 2) {
+      setRows(1);
+    } else {
+      setRows(evt.target.scrollHeight / CHAT_INPUT_LINE_HEIGHT);
+    }
   };
 
   const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
@@ -181,45 +182,67 @@ export const ChatInput = ({
           flexDirection="row"
           alignItems="flex-start"
         >
-          {attachments.map((attachment: string, index: number) => (
-            <RemoveAttachmentButton
-              key={index}
-              id={`attachment-image-${index}`}
-            >
-              <LinkBlock
-                id={`attachment-${index}`}
-                by={window.ship}
-                link={attachment}
-                mode="embed"
-                variant="content"
-                mb={1}
-                width="fit-content"
-                height={100}
-              />
-              <motion.div className="chat-attachment-remove-btn">
-                <Button.Base
-                  size={24}
-                  borderRadius={12}
-                  onClick={
-                    onRemoveAttachment
-                      ? (evt) => {
-                          evt.stopPropagation();
-                          onRemoveAttachment(index);
-                        }
-                      : undefined
-                  }
-                >
-                  <Icon name="Close" size={16} />
-                </Button.Base>
-              </motion.div>
-            </RemoveAttachmentButton>
-          ))}
+          {attachments.map((attachment: string, index: number) => {
+            const { linkType } = parseMediaType(attachment);
+            let block = null;
+            if (linkType === 'image') {
+              block = (
+                <ImageBlock
+                  mb={1}
+                  minWidth={100}
+                  width="fit-content"
+                  showLoader
+                  height={100}
+                  id={`attachment-${index}`}
+                  by={''}
+                  image={attachment}
+                />
+              );
+            } else {
+              block = (
+                <MediaBlock
+                  mb={1}
+                  width="fit-content"
+                  minWidth={200}
+                  height={100}
+                  id={`attachment-${index}`}
+                  url={attachment}
+                />
+              );
+            }
+            return (
+              <RemoveAttachmentButton
+                key={index}
+                id={`attachment-image-${index}`}
+              >
+                {block}
+                <motion.div className="chat-attachment-remove-btn">
+                  <Button.Base
+                    size={24}
+                    borderRadius={12}
+                    onClick={
+                      onRemoveAttachment
+                        ? (evt) => {
+                            evt.stopPropagation();
+                            onRemoveAttachment(index);
+                          }
+                        : undefined
+                    }
+                  >
+                    <Icon name="Close" size={16} />
+                  </Button.Base>
+                </motion.div>
+              </RemoveAttachmentButton>
+            );
+          })}
         </Flex>
       )}
       <InputBox
         inputId={id}
         disabled={disabled}
-        height={36}
+        height={
+          rows === 1 ? 38 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 6
+        }
         py="3px"
         error={!!error}
         leftAdornment={
@@ -276,10 +299,13 @@ export const ChatInput = ({
           required
           name="chat-input"
           placeholder="New message"
-          rows={1}
           value={value}
           tabIndex={tabIndex}
           disabled={disabled}
+          style={{
+            marginTop: rows === 1 ? '10px' : '3px',
+            height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
+          }}
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -288,22 +314,5 @@ export const ChatInput = ({
         />
       </InputBox>
     </Flex>
-
-    // <TextInput
-    //   id={id}
-    //   width={300}
-    //   name="test-input-3"
-    //   type="text"
-    //   placeholder="New Message"
-    //   rightAdornment={
-    //     <Button.IconButton
-    //       onClick={() => {
-    //         onSend(fragments);
-    //       }}
-    //     >
-    //       <Icon name="ArrowRightLine" opacity={0.5} />
-    //     </Button.IconButton>
-    //   }
-    // />
   );
 };

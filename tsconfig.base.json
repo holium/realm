@@ -29,6 +29,7 @@
   "references": [
     { "path": "./app" },
     { "path": "./shared" },
+    { "path": "./onboarding" },
     { "path": "./lib/conduit" },
     { "path": "./lib/design-system" },
     { "path": "./lib/presence" },

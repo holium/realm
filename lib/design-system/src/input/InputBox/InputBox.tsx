@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps } from '../..';
+import { Text, Box, BoxProps, Flex } from '../../general';
 import { AnimationProps } from 'framer-motion';
 
 type StyledBoxProps = {
@@ -14,9 +14,9 @@ type StyledBoxProps = {
   error?: string | boolean | undefined;
 } & BoxProps;
 
-const StyledBox = styled(Box)<StyledBoxProps>`
+const StyledBox = styled(Flex)<StyledBoxProps>`
   position: relative;
-  /* border-radius: var(--rlm-border-radius-6); */
+  align-items: center;
   border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: rgba(var(--rlm-input-rgba));
   min-height: 32px;
@@ -165,7 +165,7 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1} height="inherit">
+    <Box display="flex" flexDirection="row" flex={1} height="100%">
       {leftAdornment && (
         <Adornment mr={1} disabled={disabled}>
           {leftAdornment}

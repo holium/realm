@@ -1,13 +1,14 @@
 import { useMemo, useEffect, useState } from 'react';
-// import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
 import {
-  Box,
   Flex,
-  WindowedList,
   Text,
   Reply,
   measureImage,
+  fetchOGData,
+  extractOGData,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -15,14 +16,15 @@ import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
-import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-import { toJS } from 'mobx';
-// import { toJS } from 'mobx';
+import { ChatLogList } from './ChatLogList';
+
+const FullWidthAnimatePresence = styled(AnimatePresence)`
+  width: 100%;
+`;
 
 type ChatLogProps = {
   storage: IuseStorage;
@@ -88,7 +90,19 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           );
           metadata = { width, height };
         }
-
+        if (Object.keys(frag)[0] === 'link') {
+          const result = await fetchOGData(frag.link);
+          if (result.linkType === 'opengraph') {
+            metadata = {
+              linkType: 'opengraph',
+              ogData: JSON.stringify(extractOGData(result.data)) as string,
+            };
+          } else {
+            metadata = {
+              linkType: 'url',
+            };
+          }
+        }
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
@@ -134,8 +148,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     subtitle = `${selectedChat.peers.length} members`;
   }
 
-  // console.log('chatlog', toJS(selectedChat));
-
   return (
     <Flex flexDirection="column">
       <Flex
@@ -175,73 +187,20 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
               </Text.Custom>
             </Flex>
           ) : (
-            <Flex flexDirection="column">
+            <Flex flexDirection="column" width="100%">
               {showPin && (
-                <AnimatePresence>
+                <FullWidthAnimatePresence>
                   <PinnedContainer
                     message={selectedChat.pinnedChatMessage as ChatMessageType}
                   />
-                </AnimatePresence>
+                </FullWidthAnimatePresence>
               )}
-              <WindowedList
-                key={path}
-                startAtBottom
-                hideScrollbar
+              <ChatLogList
+                messages={messages}
+                selectedChat={selectedChat}
                 width={containerWidth}
                 height={height}
-                data={messages}
-                rowRenderer={(row, index, measure) => {
-                  const isLast = index === messages.length - 1;
-
-                  let replyToObj: any | undefined;
-                  if (row.replyToMsgId) {
-                    const originalMsg = toJS(
-                      selectedChat.messages.find(
-                        (m) => m.id === row.replyToMsgId
-                      )
-                    );
-                    if (originalMsg) {
-                      let { nickname } = friends.getContactAvatarMetadata(
-                        originalMsg?.sender
-                      );
-                      replyToObj = originalMsg && {
-                        reply: {
-                          msgId: originalMsg.id,
-                          author: nickname || originalMsg.sender,
-                          message: [originalMsg.contents[0]],
-                        },
-                      };
-                    }
-                  }
-
-                  const isNextGrouped =
-                    index < messages.length - 1 &&
-                    row.sender === messages[index + 1].sender;
-
-                  const isPrevGrouped =
-                    index > 0 &&
-                    row.sender === messages[index - 1].sender &&
-                    Object.keys(messages[index - 1].contents[0])[0] !==
-                      'status';
-
-                  const topSpacing = isPrevGrouped ? '3px' : 2;
-                  const bottomSpacing = isNextGrouped ? '3px' : 2;
-
-                  return (
-                    <Box pt={topSpacing} pb={isLast ? bottomSpacing : 0}>
-                      <ChatMessage
-                        isPrevGrouped={isPrevGrouped}
-                        isNextGrouped={isNextGrouped}
-                        containerWidth={containerWidth}
-                        replyTo={replyToObj}
-                        message={row as ChatMessageType}
-                        canReact={selectedChat.metadata.reactions}
-                        ourColor={ourColor}
-                        measure={measure}
-                      />
-                    </Box>
-                  );
-                }}
+                ourColor={ourColor}
               />
             </Flex>
           )}

@@ -1,8 +1,10 @@
-export { CellMeasurer } from './WindowedList/source/CellMeasurer/CellMeasurer';
 export * from './Anchor/Anchor';
 export * from './Avatar/Avatar';
+export * from './Avatar/AvatarRow';
 export * from './Box/Box';
 export * from './Button/Button';
+export * from './CopyButton/CopyButton';
+export * from './IntentBox/IntentBox';
 export { CommButton } from './CommButton/CommButton';
 export * from './Flex/Flex';
 export * from './Icon/Icon';

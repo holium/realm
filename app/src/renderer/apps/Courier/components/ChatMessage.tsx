@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -15,40 +9,31 @@ import {
 import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
+import { toJS } from 'mobx';
 
 type ChatMessageProps = {
+  containerWidth: number;
+  message: ChatMessageType;
+  ourColor: string;
   isPrevGrouped: boolean;
   isNextGrouped: boolean;
-  containerWidth: number;
-  replyTo?: ChatMessageType;
-  message: ChatMessageType;
-  canReact: boolean;
-  ourColor: string;
-  measure: () => void;
+  onReplyClick?: (msgId: string) => void;
 };
 
 export const ChatMessagePresenter = ({
   containerWidth,
-  replyTo,
   message,
-  canReact,
   ourColor,
   isPrevGrouped,
   isNextGrouped,
-  measure,
+  onReplyClick,
 }: ChatMessageProps) => {
-  const { ship, friends } = useServices();
+  const { ship, friends, theme } = useServices();
   const { selectedChat } = useChatStore();
   const messageRef = useRef<HTMLDivElement>(null);
-  const isOur = message.sender === ship?.patp;
+  const ourShip = useMemo(() => ship?.patp, [ship]);
+  const isOur = message.sender === ourShip;
   const { getOptions, setOptions } = useContextMenu();
-
-  useLayoutEffect(measure);
-
-  useEffect(() => {
-    if (!ship) return;
-    window.ship = ship.patp;
-  }, []);
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
@@ -56,7 +41,14 @@ export const ChatMessagePresenter = ({
     return friends.getContactAvatarMetadata(message.sender);
   }, []);
 
-  const msgModel = selectedChat?.messages.find((m) => m.id === message.id);
+  const msgModel = useMemo(
+    () => selectedChat?.messages.find((m) => m.id === message.id),
+    [message.id, message.updatedAt]
+  );
+  const canReact = useMemo(
+    () => selectedChat?.metadata.reactions,
+    [selectedChat?.metadata.reactions]
+  );
 
   const onReaction = useCallback(
     (payload: OnReactionPayload) => {
@@ -156,7 +148,10 @@ export const ChatMessagePresenter = ({
     [message.createdAt]
   );
 
-  const hasEdited = useMemo(() => message.metadata.edited, [message.updatedAt]);
+  const hasEdited = useMemo(
+    () => message.metadata.edited,
+    [message.updatedAt, message.metadata.edited]
+  );
 
   const reactionList = useMemo(
     () => msgModel?.reactions,
@@ -167,27 +162,60 @@ export const ChatMessagePresenter = ({
     ]
   );
 
+  const messages = selectedChat?.messages || [];
+
+  let mergedContents: any | undefined = useMemo(() => {
+    const replyTo = message.replyToMsgId;
+    let replyToObj;
+    if (replyTo) {
+      const originalMsg = toJS(messages.find((m) => m.id === replyTo));
+      if (originalMsg) {
+        let { nickname } = friends.getContactAvatarMetadata(
+          originalMsg?.sender
+        );
+        replyToObj = originalMsg && {
+          reply: {
+            msgId: originalMsg.id,
+            author: nickname || originalMsg.sender,
+            message: [originalMsg.contents[0]],
+          },
+        };
+      }
+      return [replyToObj, ...message.contents];
+    } else {
+      return message.contents;
+    }
+  }, [
+    message.replyToMsgId,
+    message.contents,
+    message.updatedAt,
+    messages,
+    friends,
+  ]);
+
   return (
     <Bubble
-      ref={messageRef}
+      innerRef={messageRef}
       id={messageRowId}
       isPrevGrouped={isPrevGrouped}
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
+      themeMode={theme.currentTheme.mode as 'light' | 'dark'}
       isOur={isOur}
-      ourShip={ship?.patp}
+      ourShip={ourShip}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
+      updatedAt={message.updatedAt}
       isEdited={hasEdited}
       author={message.sender}
       authorNickname={authorNickname}
       authorColor={authorColor}
-      message={replyTo ? [replyTo, ...message.contents] : message.contents}
+      message={mergedContents}
       sentAt={sentAt}
-      onLoad={measure}
       reactions={reactionList}
-      onReaction={canReact && !isOur ? onReaction : undefined}
+      onReaction={canReact ? onReaction : undefined}
+      onReplyClick={onReplyClick}
     />
   );
 };

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Box, BoxProps } from '..';
+import { Box, BoxProps } from '../index';
 
 type RowProps = {
   as?: any;
@@ -10,6 +10,7 @@ type RowProps = {
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
+  backgroundColor?: string;
 } & BoxProps;
 
 export const Row = styled(Box)<RowProps>`
@@ -30,33 +31,43 @@ export const Row = styled(Box)<RowProps>`
   transition: var(--transition);
 
   &:active:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.8);
+      `}}
+
   }
 
   &:hover:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.9);
+      `}}
     cursor: pointer;
   }
 
   &:focus:not([disabled]) {
     outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba));
+    background-color: rgba(var(--rlm-overlay-active-rgba))
+    ${({ backgroundColor }) =>
+      backgroundColor &&
+      css`
+        background-color: ${backgroundColor};
+        backdrop-filter: brightness(0.9);
+      `}}
   }
 
   &:disabled {
     opacity: 0.2;
-    cursor: not-allowed !important;
-    div {
-      cursor: not-allowed !important;
-    }
-    svg {
-      cursor: not-allowed !important;
-    }
   }
 
-  ${(props: RowProps) =>
+  ${(props) =>
     css`
       ${props.small &&
       css`

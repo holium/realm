@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../..';
+import { Flex, Box } from '../../general';
 import {
   OnReactionPayload,
   Reactions,
@@ -35,11 +35,9 @@ export const Default: ComponentStory<typeof Reactions> = () => {
   };
   return (
     <Flex position="relative" height={670} width={400}>
-      <Reactions
-        defaultIsOpen={true}
-        reactions={reacts}
-        onReaction={onReaction}
-      />
+      <Box position="absolute" left={400} top={600}>
+        <Reactions reactions={reacts} onReaction={onReaction} />
+      </Box>
     </Flex>
   );
 };

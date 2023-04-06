@@ -1,18 +1,22 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import styled from 'styled-components';
 import Spotify from 'react-spotify-embed';
 import ReactPlayer from 'react-player';
-import { Flex, Icon, isSpotifyLink, Text } from '../..';
+import { Flex, Icon, Text } from '../../general';
+import { isSpotifyLink } from '../../util/links';
 import { BlockProps, Block } from '../Block/Block';
-import styled from 'styled-components';
 
 type MediaBlockProps = {
   url: string;
   height?: number;
 } & BlockProps;
 
-export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
-  const { url, height = 230, onLoaded, ...rest } = props;
-
+export const MediaBlock = ({
+  url,
+  height = 230,
+  onLoaded,
+  ...rest
+}: MediaBlockProps) => {
   const [isError, setIsError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -29,9 +33,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ opacity: 0.2 }}
-        onAnimationComplete={() => {
-          onLoaded && onLoaded();
-        }}
+        onAnimationComplete={() => onLoaded?.()}
       >
         <Spotify link={url} width={width} height={heightOverride} />
       </MediaWrapper>
@@ -92,16 +94,13 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
                 attributes: {
                   id: rest.id,
                   controlsList: 'nodownload noplaybackrate',
-                  disablePictureInPicture: 'true',
+                  disablePictureInPicture: true,
                   'x-webkit-airplay': 'allow',
                 },
               },
             }}
           />
         )}
-        {/* <div
-          className="react-player-hide-cursor"
-        ></div> */}
       </MediaWrapper>
     </Block>
   );

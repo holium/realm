@@ -55,12 +55,13 @@ const ChatStore = types
       if (!window.ship || !chat) return { title: 'Error loading title' };
       if (chat.type === 'dm') {
         const peer = chat.peers.filter((p) => p.ship !== window.ship)[0];
+        const ship = peer?.ship;
         const { nickname, avatar, color } =
-          servicesStore.friends.getContactAvatarMetadata(peer.ship);
+          servicesStore.friends.getContactAvatarMetadata(ship);
         return {
-          title: nickname || peer.ship || 'Error loading title',
+          title: nickname || ship || 'Error loading title',
           sigil: {
-            patp: peer.ship,
+            patp: ship,
             color: color ? [color, '#FFF'] : ['#000', '#FFF'],
             nickname: nickname || '',
           },
@@ -165,6 +166,10 @@ const ChatStore = types
       try {
         const chat = self.inbox.find((chat) => chat.path === path);
         if (chat) {
+          if (self.selectedChat?.path === path) {
+            self.selectedChat = undefined;
+            self.subroute = 'inbox';
+          }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
           yield ChatDBActions.leaveChat(path);
@@ -183,7 +188,12 @@ const ChatStore = types
     onPathDeleted(path: string) {
       const chat = self.inbox.find((chat) => chat.path === path);
       if (chat) {
+        if (self.selectedChat?.path === path) {
+          self.selectedChat = undefined;
+          self.subroute = 'inbox';
+        }
         self.inbox.remove(chat);
+        // destroy(chat);
         self.pinnedChats.remove(path);
       }
     },
@@ -207,8 +217,6 @@ export const chatStore = ChatStore.create({
   pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
 });
 
-chatStore.init();
-
 // -------------------------------
 // Create core context
 // -------------------------------
@@ -226,8 +234,13 @@ export function useChatStore() {
   return store;
 }
 
+OSActions.onBoot(() => {
+  chatStore.init();
+});
+OSActions.onConnected(() => {
+  chatStore.init();
+});
 OSActions.onLogout((_event: any) => {
-  console.log('resetting chatStore on logout');
   chatStore.reset();
 });
 // -------------------------------

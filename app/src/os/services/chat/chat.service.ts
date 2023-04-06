@@ -155,6 +155,7 @@ export class ChatService extends BaseService {
 
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
+    this.handleDeletes = this.handleDeletes.bind(this);
     this.sendChatUpdate = this.sendChatUpdate.bind(this);
     this.deletePathsRow = this.deletePathsRow.bind(this);
     this.deleteMessagesRow = this.deleteMessagesRow.bind(this);
@@ -224,11 +225,16 @@ export class ChatService extends BaseService {
 
   async fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
-    const response = await this.core.conduit?.scry({
-      app: 'chat-db',
-      path: `/db/messages/start-ms/${lastTimestamp}`,
-    });
-    return response.tables.messages;
+    try {
+      const response = await this.core.conduit?.scry({
+        app: 'chat-db',
+        path: `/db/messages/start-ms/${lastTimestamp}`,
+      });
+      return response.tables.messages;
+    } catch (e) {
+      this.core.sendLog(e);
+      return [];
+    }
   }
 
   async fetchPaths() {
@@ -291,14 +297,14 @@ export class ChatService extends BaseService {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
         case 'messages':
-          console.log('add-row to messages', addRow.row);
+          // console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this.insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendChatUpdate('message-received', msg);
           break;
         case 'paths':
-          console.log('add-row to paths', addRow.row);
+          // console.log('add-row to paths', addRow.row);
           const path = addRow.row as PathsRow;
           this.insertPaths([path]);
           const chat = this.getChat(path.path);
@@ -306,7 +312,7 @@ export class ChatService extends BaseService {
 
           break;
         case 'peers':
-          console.log('add-row to peers', addRow.row);
+          // console.log('add-row to peers', addRow.row);
           const peers = addRow.row as PeersRow;
           this.insertPeers([peers]);
           this.sendChatUpdate('peer-added', peers);
@@ -318,21 +324,21 @@ export class ChatService extends BaseService {
       switch (update.table) {
         case 'messages':
           const message = update as UpdateMessage;
-          console.log('update messages', message.message);
+          // console.log('update messages', message.message);
           const msgId = message.message[0]['msg-id'];
           this.insertMessages(message.message);
           const msg = this.getChatMessage(msgId);
           this.sendChatUpdate('message-edited', msg);
           break;
         case 'paths':
-          console.log('update paths', update.row);
+          // console.log('update paths', update.row);
           const path = update.row as PathsRow;
           this.insertPaths([path]);
           const chat = this.getChat(path.path);
           this.sendChatUpdate('path-updated', chat);
           break;
         case 'peers':
-          console.log('update peers', update.row);
+          // console.log('update peers', update.row);
           const peers = update.row as PeersRow;
           this.insertPeers([peers]);
           break;
@@ -350,7 +356,7 @@ export class ChatService extends BaseService {
   handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
     // insert into delete_logs
     if (dbChange.type === 'del-messages-row') {
-      console.log('del-messages-row', dbChange);
+      // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
       this.deleteMessagesRow(delMessagesRow['msg-id']);
       this.sendChatUpdate('message-deleted', delMessagesRow);
@@ -362,7 +368,7 @@ export class ChatService extends BaseService {
       ]);
     }
     if (dbChange.type === 'del-paths-row') {
-      console.log('del-paths-row', dbChange);
+      // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
       this.deletePathsRow(delPathsRow.row);
       this.sendChatUpdate('path-deleted', delPathsRow.row);
@@ -374,7 +380,7 @@ export class ChatService extends BaseService {
       ]);
     }
     if (dbChange.type === 'del-peers-row') {
-      console.log('del-peers-row', dbChange);
+      // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
       this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
       this.sendChatUpdate('peer-deleted', delPeersRow);
@@ -666,6 +672,7 @@ export class ChatService extends BaseService {
   }
 
   getChat(path: string) {
+    console.log('getChat', path);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_messages AS (
@@ -768,6 +775,7 @@ export class ChatService extends BaseService {
     path: string,
     _params?: { start: number; amount: number }
   ) {
+    console.log('getChatLog', path, _params);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_fragments AS (

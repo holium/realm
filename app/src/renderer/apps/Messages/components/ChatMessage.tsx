@@ -16,7 +16,6 @@ interface IProps {
   ourColor: string;
   contents: GraphDMType['contents'];
   timeSent: number;
-  onImageLoad?: () => void;
 }
 
 export const ChatMessage = ({
@@ -29,7 +28,6 @@ export const ChatMessage = ({
   isSending,
   primaryBubble,
   timeSent,
-  onImageLoad,
 }: IProps) => {
   const messageTypes = useMemo(
     () =>
@@ -111,7 +109,6 @@ export const ChatMessage = ({
                   textColor={theme.textColor}
                   bgColor={referenceColor}
                   content={content}
-                  onImageLoad={onImageLoad}
                 />
               );
             })}
@@ -135,7 +132,6 @@ export const ChatMessage = ({
       contents,
       isMention,
       isSending,
-      onImageLoad,
       ourColor,
       primaryBubble,
       referenceColor,

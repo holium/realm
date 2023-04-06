@@ -1,4 +1,5 @@
-import { Flex, Box, BoxProps, capitalizeFirstLetter } from '../..';
+import styled from 'styled-components';
+import { Text, Flex, Box, BoxProps, capitalizeFirstLetter } from '../../index';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlock,
@@ -8,7 +9,10 @@ import {
   FragmentImage,
 } from './fragment-lib';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
-// import { chatDate } from '../../util/date';
+
+const FullWidthFragmentBlock = styled(FragmentBlock)`
+  width: 100%;
+`;
 
 export type PinnedProps = {
   id: string;
@@ -60,12 +64,16 @@ export const PinnedMessage = (props: PinnedProps) => {
 
   return (
     <Flex id={id} key={id} width="100%" onClick={onClick}>
-      <FragmentBlock id={id}>
+      <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
           className="pinned-or-reply-message"
           id={id}
           style={{
-            borderLeft: `2px solid ${authorColor || 'var(--rlm-accent-color)'}`,
+            borderLeft: `2px solid ${
+              authorColor || 'rgba(var(--rlm-accent-rgba))'
+            }`,
+            height: 42,
+            width: '100%',
           }}
         >
           {mediaContent}
@@ -73,14 +81,17 @@ export const PinnedMessage = (props: PinnedProps) => {
             gap={0}
             flexDirection="column"
             className="fragment-reply pinned"
+            maxWidth="100%"
           >
             <BubbleAuthor id={id} authorColor={authorColor}>
               {author}
             </BubbleAuthor>
-            {pinnedContent}
+            <Text.Custom truncate overflow="hidden" maxWidth="100%">
+              {pinnedContent}
+            </Text.Custom>
           </Flex>
         </FragmentBlockquote>
-      </FragmentBlock>
+      </FullWidthFragmentBlock>
     </Flex>
   );
 };

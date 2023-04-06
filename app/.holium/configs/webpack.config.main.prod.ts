@@ -20,7 +20,7 @@ const devtoolsConfig = {
 };
 
 const configuration: webpack.Configuration = {
-  // ...devtoolsConfig,
+  ...devtoolsConfig,
   mode: 'production',
   target: 'electron-main',
   entry: {

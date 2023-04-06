@@ -12,14 +12,14 @@ import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
 import { toJS } from 'mobx';
-import { defaultTheme as dt } from '@holium/shared';
+import { defaultTheme } from '../../os/services/theme.model';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**
    * All --rlm-*-rgba variables should be in rgba format.
    * This is to allow for opacity to be applied to the color.
    */
-  const themeMode = toRgbaString(theme.mode);
+  const themeMode = theme.mode;
   const isLight = themeMode === 'light';
   const homeButtonColor = isLight
     ? toRgbaString(rgba(darken(0.2, theme.dockColor), 0.5))
@@ -39,16 +39,17 @@ export const genCSSVariables = (theme: ThemeType) => {
   const textColor = toRgbaString(theme.textColor);
   const iconColor = toRgbaString(rgba(theme.textColor, 0.7));
   const mouseColor = toRgbaString(theme.mouseColor);
+  const realmBrandColor = toRgbaString('#F08735');
   const intentAlertColor = toRgbaString('#ff6240');
   const intentCautionColor = toRgbaString('#ffbc32');
   const intentSuccessColor = toRgbaString('#0fc383');
-  const overlayHoverColor = isLight ? '0,0,0,0.04' : '255,255,255,0.06';
-  const overlayActiveColor = isLight ? '0,0,0,0.06' : '255,255,255,0.09';
+  const overlayHoverColor = isLight ? '0, 0, 0, 0.04' : '255, 255, 255, 0.06';
+  const overlayActiveColor = isLight ? '0, 0, 0, 0.06' : '255, 255, 255, 0.09';
 
   return `
     :root {
       --theme-mode: ${themeMode};
-      --rlm-font: 'Rubik',sans-serif;
+      --rlm-font: 'Rubik', sans-serif;
       --blur: blur(24px);
       --transition-fast: 0.4s ease;
       --transition: all 0.25s ease;
@@ -58,10 +59,10 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-border-radius-9: 9px;
       --rlm-border-radius-12: 12px;
       --rlm-border-radius-16: 16px;
-      --rlm-box-shadow-1: 0px 0px 4px rgba(0,0,0,0.06);
-      --rlm-box-shadow-2: 0px 0px 9px rgba(0,0,0,0.12);
-      --rlm-box-shadow-3: 0px 0px 9px rgba(0,0,0,0.18);
-      --rlm-box-shadow-lifted: 0px 0px 9px rgba(0,0,0,0.24);
+      --rlm-box-shadow-1: 0px 0px 4px rgba(0, 0, 0, 0.06);
+      --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
+      --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
+      --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
 
       --rlm-home-button-rgba: ${homeButtonColor};
       --rlm-dock-rgba: ${dockColor};
@@ -75,6 +76,7 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-text-rgba: ${textColor};
       --rlm-icon-rgba: ${iconColor};
       --rlm-mouse-rgba: ${mouseColor};
+      --rlm-brand-rgba: ${realmBrandColor};
       --rlm-intent-alert-rgba: ${intentAlertColor};
       --rlm-intent-caution-rgba: ${intentCautionColor};
       --rlm-intent-success-rgba: ${intentSuccessColor};
@@ -114,16 +116,19 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 export const Theme = types
   .model('Theme', {
     id: types.identifier,
-    mode: types.optional(types.enumeration(['light', 'dark']), dt.mode),
-    backgroundColor: types.optional(types.string, dt.backgroundColor),
-    accentColor: types.optional(types.string, dt.accentColor),
-    inputColor: types.optional(types.string, dt.inputColor),
-    dockColor: types.optional(types.string, dt.dockColor),
-    iconColor: types.optional(types.string, dt.iconColor),
-    textColor: types.optional(types.string, dt.textColor),
-    windowColor: types.optional(types.string, dt.windowColor),
-    wallpaper: types.optional(types.string, dt.wallpaper),
-    mouseColor: types.optional(types.string, dt.mouseColor),
+    mode: types.optional(
+      types.enumeration(['light', 'dark']),
+      defaultTheme.mode
+    ),
+    backgroundColor: types.optional(types.string, defaultTheme.backgroundColor),
+    accentColor: types.optional(types.string, defaultTheme.accentColor),
+    inputColor: types.optional(types.string, defaultTheme.inputColor),
+    dockColor: types.optional(types.string, defaultTheme.dockColor),
+    iconColor: types.optional(types.string, defaultTheme.iconColor),
+    textColor: types.optional(types.string, defaultTheme.textColor),
+    windowColor: types.optional(types.string, defaultTheme.windowColor),
+    wallpaper: types.optional(types.string, defaultTheme.wallpaper),
+    mouseColor: types.optional(types.string, defaultTheme.mouseColor),
   })
   .views((self) => ({
     get values() {

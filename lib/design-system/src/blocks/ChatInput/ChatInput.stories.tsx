@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Box, WindowedList } from '../..';
+import { Flex, Box } from '../../general';
 import { ChatInput } from './ChatInput';
 import { Bubble } from '../Bubble/Bubble';
 import { ChatMessageType, FragmentType } from '../Bubble/Bubble.types';
+import { Virtuoso } from 'react-virtuoso';
 
 export default {
   component: ChatInput,
@@ -15,19 +16,19 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
   return (
     <Flex position="relative" height={660} width={400}>
       <Box height={600} width="inherit" overflow="hidden">
-        <WindowedList
-          startAtBottom
-          hideScrollbar
-          height={600}
+        <Virtuoso
+          style={{
+            height: 600,
+          }}
           data={messages}
-          rowRenderer={(row: ChatMessageType, index, measure) => (
+          initialItemCount={messages.length - 1}
+          itemContent={(index, row) => (
             <Box key={`index-${row.author}-${index}`} pt={2} width="100%">
               <Bubble
                 id={`i-${index}`}
                 isOur={row.our}
                 {...row}
                 onReaction={() => {}}
-                onLoad={measure}
               />
             </Box>
           )}

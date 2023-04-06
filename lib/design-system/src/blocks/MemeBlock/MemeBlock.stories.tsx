@@ -1,10 +1,17 @@
+import styled from 'styled-components';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
-import { Flex } from '../..';
+import { Flex } from '../../general';
 import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
-import { getVar } from '../../util/colors';
+
+const MemeBlockBackground = styled(Flex)`
+  flex-direction: column;
+  width: 432px;
+  padding: 8px;
+  background: rgba(var(--rlm-window-rgba));
+`;
 
 export default {
   component: MemeBlock,
@@ -32,12 +39,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
   };
   return (
     <Flex flexDirection="row" height={600} gap={16} p={1}>
-      <Flex
-        flexDirection="column"
-        width={432}
-        p={2}
-        background={getVar('window')}
-      >
+      <MemeBlockBackground>
         <MemeBlock
           id="meme-block-1"
           mode="display"
@@ -48,7 +50,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
           reactions={reacts}
           onReaction={onReaction}
         />
-      </Flex>
+      </MemeBlockBackground>
     </Flex>
   );
 };

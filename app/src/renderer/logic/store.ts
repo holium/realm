@@ -22,18 +22,16 @@ import { OSActions } from './actions/os';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
-// import { NotificationStore } from 'os/services/ship/models/notifications';
 import {
   NotificationStore,
   NotificationStoreType,
 } from 'os/services/spaces/models/beacon';
-// import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
 import { AuthActions } from './actions/auth';
-import { defaultTheme } from '@holium/shared';
+import { defaultTheme } from '../../os/services/theme.model';
 
 const Services = types
   .model('ServicesStore', {
@@ -329,6 +327,7 @@ OSActions.onConnected(
       castToSnapshot(initials.models.friends)
     );
     applySnapshot(servicesStore.beacon, castToSnapshot(initials.beacon));
+    window.ship = initials.ship.patp;
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -339,6 +338,7 @@ OSActions.onConnected(
 
 // Auth events
 OSActions.onLogout((_event: any) => {
+  window.ship = '';
   SoundActions.playLogout();
   servicesStore.clearAll();
   servicesStore.clearShip();

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-import { Text, Box, BoxProps, Icon } from '../..';
+import { Text, Box, BoxProps, Icon } from '../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
+import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
 import {
   FragmentBlockquote,
   FragmentShip,
@@ -21,7 +22,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   font-size: 14px;
   align-self: flex-start;
   box-sizing: border-box;
-  padding: 8px;
+  padding: ${BUBBLE_HEIGHT.rem.paddingY} ${BUBBLE_WIDTH.rem.paddingX};
   min-width: 150px;
   max-width: 100%;
   color: rgba(var(--rlm-text-rgba));
@@ -37,7 +38,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   }};
   transition: width 1s ease-in-out;
   &.bubble-our {
-    background: var(--rlm-intent-caution-color);
+    background: rgba(var(--rlm-intent-caution-rgba));
     border-radius: ${(props) => {
       if (props.isPrevGrouped && props.isNextGrouped) {
         return '12px 0px 0px 12px';
@@ -114,7 +115,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
 export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`
   display: inline-block;
   margin-top: -2px;
-  line-height: 1.2rem;
+  line-height: ${BUBBLE_HEIGHT.rem.authorHeight};
   font-size: 12px;
   font-weight: 500;
   user-select: text;

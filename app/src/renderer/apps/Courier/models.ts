@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast } from 'mobx-state-tree';
+import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -149,6 +149,9 @@ export const ChatMessage = types
       self.contents = contents;
       self.updatedAt = updatedAt;
     },
+    setMetadata(metadata: any) {
+      self.metadata = metadata;
+    },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
       return ChatDBActions.getChatReplyTo(self.replyToMsgId);
@@ -244,7 +247,7 @@ export const Chat = types
       );
     },
     isEditing(msgId: string) {
-      return self.editingMsg?.id === msgId;
+      return self.editingMsg?.id === msgId || false;
     },
     // Check if the pinned message is hidden locally
     isPinLocallyHidden() {
@@ -265,11 +268,11 @@ export const Chat = types
   }))
   .actions((self) => ({
     fetchMessages: flow(function* () {
+      self.lastFetch = new Date().getTime();
       try {
         const messages = yield ChatDBActions.getChatLog(self.path);
-        self.messages = messages;
+        applySnapshot(self.messages, messages);
         self.hidePinned = self.isPinLocallyHidden();
-        self.lastFetch = new Date().getTime();
         return self.messages;
       } catch (error) {
         console.error(error);
@@ -301,6 +304,7 @@ export const Chat = types
           contents: tempContents,
           sender: window.ship,
           pending: true,
+          replyToMsgId: self.replyingMsg?.id,
           createdAt: new Date().getTime(),
           updatedAt: new Date().getTime(),
         });
@@ -429,8 +433,8 @@ export const Chat = types
     sendReaction: flow(function* (msgId: string, emoji: string) {
       const chatMsg = self.messages.find((m) => m.id === msgId);
       try {
-        if (chatMsg && self.our)
-          chatMsg.insertTempReaction({ msgId, emoji, by: self.our });
+        if (chatMsg && window.ship)
+          chatMsg.insertTempReaction({ msgId, emoji, by: window.ship });
         yield ChatDBActions.sendMessage(self.path, [
           {
             content: { react: emoji },
@@ -464,6 +468,15 @@ export const Chat = types
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
       const oldMessages = self.messages;
       try {
+        // find the message and update it
+        const message = self.messages.find((m) => m.id === messageId);
+        if (!message) return;
+        self.editingMsg = null;
+        message.setMetadata({ edited: 'true' });
+        message.updateContents(
+          contents.map((frag) => frag.content),
+          Date.now()
+        );
         yield ChatDBActions.editMessage(
           self.path,
           messageId,
@@ -472,8 +485,6 @@ export const Chat = types
             metadata: { edited: 'true' },
           }))
         );
-        // todo intermeidate state?
-        self.editingMsg = null;
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);

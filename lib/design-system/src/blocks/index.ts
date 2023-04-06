@@ -10,6 +10,7 @@ export type { BlockProps } from './Block/Block';
 export * from './ImageBlock/ImageBlock';
 export { measureImage } from './ImageBlock/measure';
 export * from './LinkBlock/LinkBlock';
+export * from './LinkBlock/util';
 export * from './MediaBlock/MediaBlock';
 export * from './MemeBlock/MemeBlock';
 export * from './TextBlock/TextBlock';

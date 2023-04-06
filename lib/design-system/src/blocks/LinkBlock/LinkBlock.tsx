@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import {
-  Flex,
-  skeletonStyle,
-  Text,
-  Bookmark,
-  MediaBlock,
-  ImageBlock,
-} from '../..';
+import { Box, Flex, skeletonStyle, Text } from '../../general';
+import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
-
-const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
+import {
+  fetchOGData,
+  RAW_LINK_HEIGHT,
+  LINK_PREVIEW_HEIGHT,
+  extractOGData,
+  LinkPreviewType,
+} from './util';
 
 const LinkTitle = styled(Text.Anchor)`
   overflow: hidden;
@@ -35,95 +36,73 @@ const LinkImage = styled(motion.img)<{ isSkeleton?: boolean }>`
   ${({ isSkeleton }) => isSkeleton && skeletonStyle}
 `;
 
-type OpenGraphType = {
-  twitterCard: string; // 'summary_large_image'
-  twitterSite: string; // '@verge';
-  ogSiteName: string; //'The Verge';
-  ogTitle: string; //'Spotify is laying off 6 percent of its global workforce, CEO announces';
-  ogDescription: string; // 'Impacting almost 600 employees.';
-  ogUrl: string; //'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting';
-  ogType: string; //'article';
-  articlePublishedTime: string; //'2023-01-23T12:30:00.726Z';
-  articleModifiedTime: string; //'2023-01-23T12:30:00.726Z';
-  author: string; //'Jon Porter';
-  ogImage: {
-    url: string; //'https://cdn.vox-cdn.com/thumbor/TN-dCJzSsrzVGl4x4SgbBQJ1ajU=/0x0:2040x1360/1200x628/filters:focal(1020x680:1021x681)/cdn.vox-cdn.com/uploads/chorus_asset/file/23951394/STK088_VRG_Illo_N_Barclay_1_spotify.jpg';
-    width: number | null;
-    height: number | null;
-    type: string | null;
-  };
-  requestUrl: string; //'https://www.theverge.com/2023/1/23/23567333/spotify-layoffs-daniel-ek-cost-cutting';
-  success: boolean; // true
-};
-
 type LinkBlockProps = {
   link: string;
   by: string;
   metadata?: any;
   containerWidth?: number;
-  onLinkLoaded?: () => void;
+  onLinkLoaded: () => void;
 } & BlockProps;
 
-type LinkType = 'opengraph' | 'url';
+export type LinkType = 'opengraph' | 'url';
 type MediaType = 'twitter' | 'media' | 'image';
-type LinkBlockType = LinkType | MediaType;
+export type LinkBlockType = LinkType | MediaType;
 
 export const LinkBlock = ({
   link,
   by,
   containerWidth,
+  metadata = {},
   onLinkLoaded,
   ...rest
 }: LinkBlockProps) => {
-  const [openGraph, setOpenGraph] = useState<OpenGraphType | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [linkBlockType, setLinkBlockType] =
-    useState<LinkBlockType>('opengraph');
+  const [openGraph, setOpenGraph] = useState<LinkPreviewType | null>(
+    metadata.ogData ? JSON.parse(metadata.ogData) : null
+  );
+  const [linkBlockType, setLinkBlockType] = useState<LinkBlockType>('url');
 
   useEffect(() => {
-    const { linkType } = parseMediaType(link);
-    if (linkType !== 'link') {
-      return setLinkBlockType(linkType);
-    }
-    if (!openGraph && linkBlockType === 'opengraph') {
-      fetch(`${OPENGRAPH_API}?url=${encodeURIComponent(link)}`)
-        .then(async (res) => {
-          if (res.status === 200) {
-            const data = await res.json();
-            if (!data || data.error) {
-              setLinkBlockType('url');
-              return;
-            } else {
-              setOpenGraph(data);
-              onLinkLoaded && onLinkLoaded();
-            }
-          } else {
-            setLinkBlockType('url');
+    if (!metadata.ogData && !metadata.height) {
+      const { linkType } = parseMediaType(link);
+      if (linkType !== 'link') {
+        return setLinkBlockType(linkType);
+      }
+      if (!openGraph && linkBlockType === 'opengraph') {
+        fetchOGData(link).then(({ linkType: detectedLinkType, data }) => {
+          setLinkBlockType(detectedLinkType);
+          if (data) {
+            setOpenGraph(extractOGData(data));
           }
-        })
-        .catch((err) => {
-          console.error(err);
-          setLinkBlockType('url');
         });
+      }
     }
   }, []);
 
+  useEffect(() => {
+    onLinkLoaded();
+  }, [openGraph]);
+
   let description = openGraph?.ogDescription || '';
 
-  if (linkBlockType === 'url') {
+  if (
+    metadata.linkType === 'url' ||
+    !metadata.ogData ||
+    (metadata.ogData && !openGraph?.ogTitle)
+  ) {
     const width = containerWidth ? containerWidth - 12 : 320;
-
     return (
-      <Block {...rest} width={width}>
-        <Bookmark
-          url={link}
-          title={link}
-          width={width - 16}
-          onNavigate={(url: string) => {
-            window.open(url, '_blank');
-          }}
-        />
-      </Block>
+      <Box height={RAW_LINK_HEIGHT}>
+        <Block {...rest} height={24} width={width - 4}>
+          <Bookmark
+            url={link}
+            title={link}
+            width={width - 24}
+            onNavigate={(url: string) => {
+              window.open(url, '_blank');
+            }}
+          />
+        </Block>
+      </Box>
     );
   }
   if (linkBlockType === 'twitter') {
@@ -174,24 +153,30 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onLoaded={onLinkLoaded}
+        onImageLoaded={onLinkLoaded}
       />
     );
   }
 
   const ogHasURL = openGraph && openGraph.ogUrl;
+  // 254px in rem is 15rem
+  if (!ogHasURL) {
+    const width = containerWidth ? containerWidth - 12 : 320;
+    return (
+      <Box height={RAW_LINK_HEIGHT}>
+        <Block id="loader" height={24} width={width - 4}>
+          <Box isSkeleton height={'1.875rem'} width={width - 4}></Box>
+        </Block>
+      </Box>
+    );
+  }
   return (
-    <Block {...rest}>
+    <Block {...rest} height={LINK_PREVIEW_HEIGHT}>
       <LinkImage
-        isSkeleton={!ogHasURL || !imgLoaded}
-        src={openGraph?.ogImage?.url}
+        src={openGraph?.ogImage}
         alt={openGraph?.ogTitle}
         onError={() => {
-          // onLoaded && onLoaded();
-        }}
-        onLoad={() => {
-          setImgLoaded(true);
-          // onLoaded && onLoaded();
+          // todo: if the image fails to load, set the image to error image
         }}
       />
       <Flex mb="0.25rem" width="100%" flexDirection="column">

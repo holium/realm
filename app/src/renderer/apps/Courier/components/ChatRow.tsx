@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import {
   Row,
   Flex,
@@ -60,6 +60,69 @@ export const ChatRowPresenter = ({
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
   const isMuted = isChatMuted(path);
+
+  const chat = inbox.find((c) => c.path === path);
+  const lastMessageUpdated: React.ReactNode = useMemo(() => {
+    if (!chat) return null;
+    if (!chat.lastMessage) return 'No messages yet';
+    return (
+      <span>
+        {chat.lastMessage &&
+          chat.lastMessage.contents.map(
+            (content: { [key: string]: string }, idx: number) => {
+              if (!chat.lastMessage) return null;
+              let type = Object.keys(content)[0];
+              const value = content[type];
+              if (TEXT_TYPES.includes(type)) {
+                return (
+                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
+                    {value}
+                  </span>
+                );
+              } else {
+                if (type === 'code') type = 'code block';
+                return (
+                  <span
+                    style={{
+                      marginLeft: 2,
+                      marginRight: 2,
+                      fontStyle: 'italic',
+                    }}
+                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
+                  >
+                    {type}
+                  </span>
+                );
+              }
+            }
+          )}
+      </span>
+    );
+  }, [chat?.lastMessage?.id]);
+
+  const [lastMessageTimestamp, setLastMessageTimestamp] = useState(
+    timelineDate(
+      new Date(
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+      )
+    )
+  );
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    function initClock() {
+      clearTimeout(timer);
+      const sentDate = new Date(
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+      );
+      const interval: number = (60 - sentDate.getSeconds()) * 1000 + 5;
+      setLastMessageTimestamp(timelineDate(sentDate));
+      timer = setTimeout(initClock, interval);
+    }
+    initClock();
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [chat?.lastMessage?.id]);
 
   const contextMenuOptions = useMemo(() => {
     if (!ship) return [];
@@ -154,45 +217,6 @@ export const ChatRowPresenter = ({
     [title, path, type, peers, sigil, image]
   );
 
-  const chat = inbox.find((c) => c.path === path);
-  const lastMessageUpdated: React.ReactNode = useMemo(() => {
-    if (!chat) return null;
-    if (!chat.lastMessage) return 'No messages yet';
-    return (
-      <span>
-        {chat.lastMessage &&
-          chat.lastMessage.contents.map(
-            (content: { [key: string]: string }, idx: number) => {
-              if (!chat.lastMessage) return null;
-              let type = Object.keys(content)[0];
-              const value = content[type];
-              if (TEXT_TYPES.includes(type)) {
-                return (
-                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
-                    {value}
-                  </span>
-                );
-              } else {
-                if (type === 'code') type = 'code block';
-                return (
-                  <span
-                    style={{
-                      marginLeft: 2,
-                      marginRight: 2,
-                      fontStyle: 'italic',
-                    }}
-                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
-                  >
-                    {type}
-                  </span>
-                );
-              }
-            }
-          )}
-      </span>
-    );
-  }, [chat?.lastMessage?.id]);
-
   return (
     <Row
       id={chatRowId}
@@ -260,7 +284,7 @@ export const ChatRowPresenter = ({
             fontSize={1}
             opacity={0.3}
           >
-            {timelineDate(new Date(timestamp))}
+            {lastMessageTimestamp}
           </Text.Custom>
           <UnreadBadge count={unreadCount} />
         </Flex>

@@ -202,6 +202,7 @@ export class DesktopService extends BaseService {
   }
 
   openDialog(_event: IpcRendererEvent, windowProps: AppWindowProps) {
+    console.log('openDialog', windowProps);
     return toJS(this.state.openDialog(windowProps));
   }
 

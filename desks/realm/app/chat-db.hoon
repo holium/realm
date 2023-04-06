@@ -1,7 +1,7 @@
 ::  app/chat-db.hoon
 /-  *versioned-state, sur=chat-db
 /+  dbug, db-lib=chat-db
-=|  state-0
+=|  state-1
 =*  state  -
 :: ^-  agent:gall
 =<
@@ -12,8 +12,8 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  default-state=state-0
-      [%0 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
+    =/  default-state=state-1
+      [%1 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
     :_  this(state default-state)
     [%pass /timer %arvo %b %wait next-expire-time:core]~
   ++  on-save   !>(state)
@@ -21,15 +21,18 @@
     |=  old-state=vase
     ^-  (quip card _this)
     =/  old  !<(versioned-state old-state)
+    :: we remove the old timer (if any) and add the new one, so that
+    :: we don't get an increasing number of timers associated with
+    :: this agent every time the agent gets updated
+    =/  default-cards
+      [[%pass /timer %arvo %b %rest next-expire-time:core] [%pass /timer %arvo %b %wait next-expire-time:core] ~]
     =^  cards  state
     ?-  -.old
-      %0  [
-        :: we remove the old timer (if any) and add the new one, so that
-        :: we don't get an increasing number of timers associated with
-        :: this agent every time the agent gets updated
-        [[%pass /timer %arvo %b %rest next-expire-time:core] [%pass /timer %arvo %b %wait next-expire-time:core] ~]
-        old
-      ]
+      %0  
+        =/  new  [%1 paths-table.old messages-table.old peers-table.old *del-log:sur]
+        [default-cards new]
+      %1
+        [default-cards old]
     ==
     [cards this]
   ::
@@ -39,7 +42,6 @@
     ?>  ?=(%chat-db-action mark)
     =/  act  !<(action:sur vase)
     =^  cards  state
-    ~&  >  (crip "%chat-db {<-.act>}")
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: paths-table pokes
       %create-path 
