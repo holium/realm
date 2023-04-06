@@ -7,7 +7,7 @@ import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
 export const createRoomForm = (
-  currentRooms: any,
+  currentRooms: string[],
   defaults: any = {
     name: '',
     isPrivate: false,
