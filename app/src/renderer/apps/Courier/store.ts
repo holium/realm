@@ -38,13 +38,27 @@ const ChatStore = types
     },
     get pinnedChatList() {
       return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path) || (c.type === 'space-chat' && c.path.includes(servicesStore.spaces.selected.path)) )
+        .filter(
+          (c) =>
+            self.pinnedChats.includes(c.path) ||
+            (c.type === 'space-chat' &&
+              servicesStore.spaces?.selected?.path &&
+              c.path.includes(servicesStore.spaces.selected.path))
+        )
         .sort(sortByUpdatedAt);
     },
     get unpinnedChatList() {
       return self.inbox
         .filter((c) => !self.pinnedChats.includes(c.path))
-        .filter((c) => !(self.pinnedChats.includes(c.path) || (c.type === 'space-chat' && c.path.includes(servicesStore.spaces.selected.path)) ))
+        .filter(
+          (c) =>
+            !(
+              self.pinnedChats.includes(c.path) ||
+              (c.type === 'space-chat' &&
+                servicesStore.spaces?.selected?.path &&
+                c.path.includes(servicesStore.spaces.selected.path))
+            )
+        )
         .sort(sortByUpdatedAt);
     },
     getChatHeader(path: string): {
@@ -147,7 +161,7 @@ const ChatStore = types
     createChat: flow(function* (
       title: string,
       creator: string,
-      type: 'dm' | 'group' | 'space',
+      type: 'dm' | 'group' | 'space-chat',
       peers: string[]
     ) {
       try {
