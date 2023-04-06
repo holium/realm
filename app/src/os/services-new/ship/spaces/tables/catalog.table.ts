@@ -135,6 +135,11 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
     );
     const insertMany = this.db.transaction((catalog) => {
       Object.values<any>(catalog).forEach((app) => {
+        const { type } = app;
+        let installStatus = app.installStatus || 'uninstalled';
+        if (type === 'native') {
+          installStatus = 'installed';
+        }
         insert.run({
           ...app,
           favicon: app.favicon || null,
@@ -145,7 +150,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
           license: app.license || null,
           host: app.host || null,
           icon: app.icon || null,
-          installStatus: app.installStatus || 'uninstalled',
+          installStatus,
           color: cleanNounColor(app.color),
           href: app.href ? JSON.stringify(app.href) : null,
           config: app.config ? JSON.stringify(app.config) : null,
@@ -183,18 +188,21 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
     const insert = this.db.prepare(
       `REPLACE INTO docks (
         space,
-        id
+        id,
+        idx
       ) VALUES (
         @space,
-        @id
+        @id,
+        @idx
       )`
     );
     const insertMany = this.db.transaction((docks) => {
       Object.entries<any>(docks).forEach(([space, ids]) => {
-        ids.forEach((id: string) => {
+        ids.forEach((id: string, idx: string) => {
           insert.run({
             space,
             id,
+            idx,
           });
         });
       });
@@ -275,6 +283,7 @@ create unique index if not exists grid_uindex on app_grid (idx, appId);
 create table if not exists docks (
     space             TEXT NOT NULL,
     id                TEXT NOT NULL,
+    idx               INTEGER NOT NULL,
     FOREIGN KEY (space) REFERENCES spaces (path),
     FOREIGN KEY (id) REFERENCES app_catalog (id)
 );

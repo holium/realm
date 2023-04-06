@@ -10,3 +10,4 @@ export * from './Notifications/Notification';
 export * from './Notifications/NotificationList';
 export * from './Notifications/AppGroup';
 export * from './Notifications/Notifications.types';
+export * from './AppTile/AppTile';

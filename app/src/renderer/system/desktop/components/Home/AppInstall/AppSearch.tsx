@@ -103,17 +103,22 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
           paddingLeft: 12,
           paddingRight: 16,
           borderColor: 'rgba(var(--rlm-border-rgba), 0.6)',
+          backgroundColor: 'rgba(var(--rlm-window-rgba), 0.5)',
+          backdropFilter: 'blur(10px)',
         }}
-        background="rbga(var(--rlm-window-rgba), 0.3)"
         inputStyle={{
           background: 'transparent',
         }}
         leftAdornment={
-          searchMode === 'dev-app-search' && selectedShip !== '' ? (
-            <Text.Custom>Apps by ${selectedShip}</Text.Custom>
-          ) : (
-            <></>
-          )
+          <>
+            {searchMode === 'dev-app-search' && selectedShip !== '' ? (
+              <Text.Custom color="accent" fontWeight={500}>
+                Apps by {selectedShip}
+              </Text.Custom>
+            ) : (
+              <></>
+            )}
+          </>
         }
         onKeyDown={(evt: any) => {
           evt.stopPropagation();

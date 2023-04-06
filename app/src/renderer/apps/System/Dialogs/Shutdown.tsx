@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Text } from 'renderer/components';
-import { Flex, Box } from '@holium/design-system';
+import { Flex, Box, Button, Text } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { trackEvent } from 'renderer/logic/lib/track';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { useAppState } from 'renderer/stores/app.store';
 
 export const ShutdownDialogConfig: DialogConfig = {
@@ -32,13 +30,13 @@ export const ShutdownDialogConfig: DialogConfig = {
 };
 
 const ShutdownDialogPresenter = () => {
-  const { shellStore } = useAppState();
+  const { shellStore, authStore } = useAppState();
   const [seconds, setSeconds] = useState(60);
   const [id, setId] = useState<NodeJS.Timer>();
 
   function shutdown() {
     trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
-    AuthActions.shutdown();
+    authStore.shutdown();
   }
 
   useEffect(() => {
@@ -55,17 +53,18 @@ const ShutdownDialogPresenter = () => {
 
   return (
     <Flex px={12} width="100%" height="100%" flexDirection="column">
-      <Text fontSize={4} fontWeight={500} mb={10}>
+      <Text.Custom fontSize={3} fontWeight={500} mb={10}>
         Power Off
-      </Text>
-      <Text fontSize={2} lineHeight="copy" variant="body">
+      </Text.Custom>
+      <Text.Custom fontSize={2} lineHeight="copy" variant="body">
         Realm will power off automatically in {seconds} second
         {seconds > 1 && 's'}.
-      </Text>
+      </Text.Custom>
       <Box mt={4} width="100%">
         <Flex width="100%" justifyContent="space-between">
-          <Button
+          <Button.Secondary
             width="45%"
+            textAlign="center"
             disabled={false}
             onClick={() => {
               id && clearInterval(id);
@@ -79,10 +78,16 @@ const ShutdownDialogPresenter = () => {
             variant="secondary"
           >
             Cancel
-          </Button>
-          <Button width="50%" disabled={false} onClick={shutdown}>
+          </Button.Secondary>
+          <Button.Primary
+            textAlign="center"
+            background="intent-alert"
+            width="50%"
+            disabled={false}
+            onClick={shutdown}
+          >
             Power Off
-          </Button>
+          </Button.Primary>
         </Flex>
       </Box>
     </Flex>

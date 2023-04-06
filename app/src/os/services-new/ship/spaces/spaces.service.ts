@@ -122,35 +122,43 @@ export class SpacesService extends AbstractService {
         ),
         dock_agg AS (
           SELECT
-            space,
-            CASE
-              WHEN COUNT(docks.id) > 0 THEN json_array(json_object(
-                      'id', ac.id,
-                      'title', ac.title,
-                      'href', json(ac.href),
-                      'favicon', ac.favicon,
-                      'type', ac.type,
-                      'config', json(ac.config),
-                      'installStatus', ac.installStatus,
-                      'info', ac.info,
-                      'color', ac.color,
-                      'image', ac.image,
-                      'version', ac.version,
-                      'website', ac.website,
-                      'license', ac.license,
-                      'host', ac.host,
-                      'icon', ac.icon,
-                      'gridIndex', ag.idx
+              space,
+              CASE
+                WHEN COUNT(id) > 0
+                  THEN json_group_array(
+                      json_object(
+                        'id', id,
+                        'title', title,
+                        'href', json(href),
+                        'favicon', favicon,
+                        'type', type,
+                        'config', json(config),
+                        'installStatus', installStatus,
+                        'info', info,
+                        'color', color,
+                        'image', image,
+                        'version', version,
+                        'website', website,
+                        'license', license,
+                        'host', host,
+                        'icon', icon,
+                        'dockIndex', docks.idx
                       )
-                  )
-              ELSE json('[]')
-            END AS dock
-          FROM docks
-          LEFT JOIN app_catalog ac ON docks.id = ac.id
-          LEFT JOIN app_grid ag ON ac.id = ag.appId
+                    )
+                ELSE json('[]')
+              END AS dock
+          FROM (
+                SELECT
+                  docks.space,
+                  docks.idx,
+                  ac.*
+                FROM docks
+                LEFT JOIN app_catalog ac ON docks.id = ac.id
+                LEFT JOIN app_grid ag ON ac.id = ag.appId
                 WHERE ag.idx IS NOT NULL
+                ORDER BY docks.space, docks.idx
+          ) AS docks
           GROUP BY space
-
         ),
         ranked_apps AS (
           SELECT

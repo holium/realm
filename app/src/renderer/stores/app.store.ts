@@ -122,11 +122,13 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 window.addEventListener('beforeunload', function (event) {
   if (event.type === 'beforeunload') {
     console.log('refreshing');
+    appState.shellStore.closeDialog();
     // appState.reset();
     // The event was triggered by a refresh or navigation
     // Your code to handle the refresh event here
   } else {
     console.log('closing');
+    appState.shellStore.closeDialog();
     // The event was triggered by a window/tab close
     // Your code to handle the close event here
   }

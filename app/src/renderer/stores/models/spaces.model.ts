@@ -11,8 +11,8 @@ export const DocketMap = types.map(
 );
 
 const StallModel = types.model('StallModel', {
-  suite: types.map(UrbitApp), // {0: 'lexicon', 1: 'engram', 2: 'groups'}
-  recommended: types.array(UrbitApp), // {'lexicon': 12, 'engram': 3, 'groups': 1}
+  suite: types.map(UrbitApp),
+  recommended: types.array(UrbitApp),
 });
 
 export const SpaceModel = types
@@ -38,11 +38,11 @@ export const SpaceModel = types
     isPinned(appId: string) {
       return self.dock.map((app) => app.id === appId);
     },
-    getDock() {
-      return self.dock ?? [];
-    },
-    getDockApps() {
-      return self.dock;
+    get dockAppIds() {
+      return self.dock
+        .slice()
+        .sort((a, b) => (a.dockIndex || 0) - (b.dockIndex || 0))
+        .map((app) => app.id);
     },
   }))
   .actions((self) => ({
@@ -66,9 +66,7 @@ export const SpaceModel = types
     }),
     reorderPinnedApps: flow(function* (dock: string[]) {
       try {
-        s;
         applySnapshot(self.dock, dock);
-
         return yield BazaarIPC.reorderPinnedApps(
           self.path,
           dock
@@ -184,7 +182,7 @@ export const SpacesStore = types
       }
     }),
 
-    addSpace: (addReaction: { space: any; members: any }) => {
+    _addSpace: (addReaction: { space: any; members: any }) => {
       const space = addReaction.space;
       const newSpace = SpaceModel.create({
         ...space,
@@ -197,7 +195,7 @@ export const SpacesStore = types
       self.spaces.set(space.path, newSpace);
       return newSpace.path;
     },
-    updateSpace: (replaceReaction: { space: any }) => {
+    _updateSpace: (replaceReaction: { space: any }) => {
       const members = self.spaces.get(replaceReaction.space.path)?.members;
       replaceReaction.space.theme.id = replaceReaction.space.path;
       self.spaces.set(replaceReaction.space.path, {
@@ -205,7 +203,7 @@ export const SpacesStore = types
         members,
       });
     },
-    deleteSpace: (
+    _deleteSpace: (
       ourSpace: string,
       deleteReaction: { 'space-path': string },
       setTheme: (theme: any) => void
@@ -244,6 +242,22 @@ export const SpacesStore = types
     ) => {
       self.subscription.set(newSubscriptionStatus);
     },
+    deleteSpace: flow(function* (spacePath: string) {
+      // TODO loading states
+      try {
+        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
+    leaveSpace: flow(function* (spacePath: string) {
+      // TODO loading states
+      try {
+        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;

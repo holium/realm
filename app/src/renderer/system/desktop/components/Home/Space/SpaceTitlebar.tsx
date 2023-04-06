@@ -40,12 +40,13 @@ const SpaceTitlebarPresenter = (props: SpaceTitlebarProps) => {
             <Icon name="AppGrid" size={22} />
           </Button.IconButton>
           <Button.IconButton
+            size={32}
             // size={3}
             // customBg={iconHoverColor}
             // color={showMembers ? highlightColor : theme.iconColor}
             onClick={onMemberClick}
           >
-            <Icon name="Members" size={22} />
+            <Icon name="Members" size={22} opacity={0.7} />
           </Button.IconButton>
         </Flex>
       </Flex>

@@ -1,32 +1,28 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
-import {
-  Button,
-  Flex,
-  Icons,
-  Text,
-  Box,
-  LinkPreview,
-} from 'renderer/components';
+import { LinkPreview } from 'renderer/components';
 import styled from 'styled-components';
-
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { useServices } from 'renderer/logic/store';
 import {
-  UrbitApp,
-  AppType,
-  NativeAppType,
-  UrbitAppType,
-  AppTypes,
+  Box,
+  Flex,
+  Button,
+  Icon,
+  Text,
   InstallStatus,
-} from 'os/services/spaces/models/bazaar';
+  IconPathsType,
+} from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { darken, rgba } from 'polished';
-import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  AppMobxType,
+  AppTypes,
+  UrbitApp,
+  GlobMobxType,
+} from 'renderer/stores/models/bazaar.model';
+import { useAppState, appState } from 'renderer/stores/app.store';
 
 const TileStyle = styled(Box)`
   position: relative;
@@ -60,9 +56,9 @@ const KPI: FC<KPIProps> = (props: KPIProps) => {
   let valueContent: React.ReactNode;
   if (typeof props.value === 'string') {
     valueContent = (
-      <Text flex={3} title={props.hover}>
+      <Text.Custom flex={3} title={props.hover}>
         {props.value}
-      </Text>
+      </Text.Custom>
     );
   } else {
     valueContent = <Flex flex={3}>{props.value}</Flex>;
@@ -74,16 +70,17 @@ const KPI: FC<KPIProps> = (props: KPIProps) => {
       justifyContent="flex-start"
       alignItems="center"
     >
-      <Text flex={1} fontWeight={500}>
+      <Text.Custom flex={1} fontWeight={500}>
         {props.title}
-      </Text>
+      </Text.Custom>
       {valueContent}
     </Flex>
   );
 };
 
 const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
-  const { theme, bazaar } = useServices();
+  const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
   const { selectedApp, setSearchMode } = useAppInstaller();
   const [copied, setCopied] = useState<boolean>(false);
   const [deskHash, setDeskHash] = useState<string | null>(null);
@@ -96,18 +93,18 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
 
   useEffect(() => {
     if (appId) {
-      SpacesActions.scryHash(appId).then(
-        (result) => result && setDeskHash(result['app-hash'])
-      );
+      bazaarStore
+        .scryHash(appId)
+        .then((result) => result && setDeskHash(result['app-hash']));
     }
   }, [appId]);
 
-  let app: AppType | null = null;
-  let onClose: any = ShellActions.closeDialog;
+  let app: AppMobxType | null = null;
+  let onClose: any = shellStore.closeDialog;
   if (type === 'app-install') {
     if (!selectedApp) return null;
     onClose = () => setSearchMode('none');
-    const catalogEntry = bazaar.getApp(selectedApp.id.split('/')[1]);
+    const catalogEntry = bazaarStore.getApp(selectedApp.id.split('/')[1]);
     app = getSnapshot(
       UrbitApp.create({
         ...selectedApp,
@@ -125,13 +122,12 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
           (catalogEntry && catalogEntry.installStatus) ||
           InstallStatus.uninstalled,
       })
-    ) as AppType;
+    ) as AppMobxType;
   } else if (appId) {
-    app = bazaar.getApp(appId) as AppType;
+    app = bazaarStore.getApp(appId) as AppMobxType;
   } else {
     return null;
   }
-
   const isInstalled = app && app.installStatus === 'installed';
 
   let graphic;
@@ -139,7 +135,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   let kpis: React.ReactNode = [];
   const tileSize = 110;
   if (app.type === 'urbit') {
-    app as UrbitAppType;
+    app as AppMobxType;
     graphic = app.image && (
       <img
         alt={app.title}
@@ -150,7 +146,8 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
         src={app.image}
       />
     );
-    if (app && !app.image && app.href && app.href.site) {
+    const href = app.href as GlobMobxType;
+    if (app && !app.image && href && href.site) {
       // for the case an image is served by the ship
       // we wont have it until install, so set to null
       graphic = null;
@@ -158,49 +155,52 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     if (app && app.href && !app.title) {
       title = app.id.split('/')[1];
     }
+    const glob = href && href.glob;
     kpis = (
       <>
         <KPI title="Developer desk" value={`${app.host || ''}/${app.id}`} />
-        {app.href && app.href.glob && app.href.glob['glob-reference'] && (
-          <KPI title="Glob Hash" value={app.href.glob['glob-reference'].hash} />
+        {glob && glob['glob-reference'] && (
+          <KPI title="Glob Hash" value={glob['glob-reference'].hash} />
         )}
-        {isInstalled && deskHash && (
+        {isInstalled && (
           <KPI
             title="Desk Hash"
-            hover={deskHash}
-            value={`${deskHash.split('.')[0]}...${
-              deskHash.split('.')[deskHash.split('.').length - 1]
-            }`}
+            hover={deskHash || 'loading...'}
+            value={
+              deskHash &&
+              `${deskHash.split('.')[0]}...${
+                deskHash.split('.')[deskHash.split('.').length - 1]
+              }`
+            }
           />
         )}
         <KPI title="Version" value={app.version} />
         <KPI
           title="Installed to"
-          value={<Text fontByType="monospace">{`%${app.id}`}</Text>}
-        />
-        <KPI
-          title="Website"
           value={
-            <LinkPreview
-              fontSize={15}
-              customBg={darken(0.035, theme.currentTheme.windowColor)}
-              textColor={theme.currentTheme.accentColor}
-              link={app.website}
-              onClick={() => {
-                ShellActions.closeDialog();
-              }}
-            />
+            <Text.Custom fontByType="monospace">{`%${app.id}`}</Text.Custom>
           }
         />
+        {app.website && (
+          <KPI
+            title="Website"
+            value={
+              <LinkPreview
+                fontSize={15}
+                link={app.website}
+                onClick={() => {
+                  shellStore.closeDialog();
+                }}
+              />
+            }
+          />
+        )}
       </>
     );
   }
 
   if (app.type === 'native') {
-    app as NativeAppType;
-    graphic = app.icon && (
-      <Icons name={app.icon as IconPathsType} height={50} width={50} />
-    );
+    graphic = app.icon && <Icon name={app.icon as IconPathsType} size={50} />;
     kpis = (
       <>
         <KPI title="App type" value="Native app" />
@@ -210,11 +210,9 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
           value={
             <LinkPreview
               fontSize={15}
-              customBg={darken(0.035, theme.currentTheme.windowColor)}
-              textColor={theme.currentTheme.accentColor}
               link="https://holium.com"
               onClick={() => {
-                ShellActions.closeDialog();
+                shellStore.closeDialog();
               }}
             />
           }
@@ -234,32 +232,27 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
           style={{
             borderRadius: 12,
             overflow: 'hidden',
+            backgroundColor: app.color || '#F2F3EF',
           }}
           height={tileSize}
           width={tileSize}
-          backgroundColor={app.color || '#F2F3EF'}
         >
           {graphic}
         </TileStyle>
         <Flex flexDirection="column" justifyContent="center" flex={1}>
-          <Text
+          <Text.Custom
             mt={1}
             fontWeight={500}
             fontSize={6}
-            color={theme.currentTheme.textColor}
             style={{
               textOverflow: 'ellipsis',
             }}
           >
             {title}
-          </Text>
-          <Text
-            mt={2}
-            fontSize={3}
-            color={rgba(theme.currentTheme.textColor, 0.4)}
-          >
+          </Text.Custom>
+          <Text.Custom mt={2} fontSize={3} opacity={0.4}>
             {app.info}
-          </Text>
+          </Text.Custom>
           {app.type === 'urbit' && (
             <Flex
               mt={3}
@@ -267,26 +260,26 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
               justifyContent="flex-start"
               gap={10}
             >
-              <Button
+              <Button.Primary
                 borderRadius={6}
                 paddingTop="6px"
                 paddingBottom="6px"
-                variant={isInstalled ? 'disabled' : 'primary'}
+                disabled={isInstalled}
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const a = app as UrbitAppType;
+                  const a = app as AppMobxType;
                   if (!isInstalled && a && a.host) {
-                    SpacesActions.installApp(a.host, a.id);
+                    bazaarStore.installApp(a.host, a.id);
                   }
                   // TODO should we close on install?
                   onClose();
                 }}
               >
                 {isInstalled ? 'Installed' : 'Install'}
-              </Button>
+              </Button.Primary>
 
-              <Button
+              <Button.Secondary
                 borderRadius={6}
                 paddingTop="6px"
                 paddingBottom="6px"
@@ -296,7 +289,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                   e.stopPropagation();
                   if (app) {
                     const content = `web+urbitgraph://${
-                      (app as UrbitAppType).host || ''
+                      (app as AppMobxType).host || ''
                     }/${app.id}`;
                     navigator.clipboard.writeText(content);
                     setCopied(true);
@@ -307,13 +300,9 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                   <div style={{ marginRight: '3px', fontWeight: '500' }}>
                     Copy app link
                   </div>
-                  {!copied ? (
-                    <Icons name="Copy" />
-                  ) : (
-                    <Icons name="CheckCircle" />
-                  )}
+                  {!copied ? <Icon name="Copy" /> : <Icon name="CheckCircle" />}
                 </>
-              </Button>
+              </Button.Secondary>
             </Flex>
           )}
         </Flex>
@@ -333,7 +322,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
   ({
     component: () => <AppDetailDialogComponent {...dialogProps} />,
     onClose: () => {
-      ShellActions.closeDialog();
+      appState.shellStore.closeDialog();
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'app-detail-dialog',
@@ -344,7 +333,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
           x: 0,
           y: 0,
           width: 600,
-          height: 520,
+          height: 540,
         },
         desktopDimensions
       ),

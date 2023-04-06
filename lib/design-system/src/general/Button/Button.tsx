@@ -109,10 +109,10 @@ const Base = styled(motion.button)<ButtonProps>`
     transition: var(--transition);
     filter: brightness(0.975);
   }
-  &:active:not([disabled]) {
+  /* &:active:not([disabled]) {
     transition: var(--transition);
     filter: brightness(0.95);
-  }
+  } */
   &:disabled {
     opacity: 0.5;
     transition: var(--transition);
@@ -123,60 +123,64 @@ const Base = styled(motion.button)<ButtonProps>`
 `;
 
 const Primary = styled(Base)<ButtonProps>`
-  background-color: rgba(var(--rlm-accent-rgba));
+  padding: 4px 8px;
+  background: rgba(var(--rlm-accent-rgba));
   color: #ffffff;
   &:hover:not([disabled]) {
-    background-color: rgba(var(--rlm-accent-rgba));
+    background: rgba(var(--rlm-accent-rgba));
     filter: brightness(1.1);
   }
-  &:active:not([disabled]) {
-    background-color: rgba(var(--rlm-accent-rgba));
+  /* &:active:not([disabled]) {
+    background: rgba(var(--rlm-accent-rgba));
     filter: brightness(1.2);
-  }
+  } */
   svg {
     fill: #ffffff;
   }
 `;
 
 const Secondary = styled(Base)<ButtonProps>`
-  color: rgba(var(--rlm-text-rgba));
-  background-color: rgba(var(--rlm-window-rgba));
+  padding: 4px 8px;
+  color: rgba(var(--rlm-text-rgba), 0.7);
+  background: rgba(var(--rlm-window-rgba));
   filter: brightness(0.975);
   &:hover:not([disabled]) {
-    background-color: rgba(var(--rlm-window-rgba));
+    background: rgba(var(--rlm-window-rgba));
     filter: brightness(0.975);
   }
-  &:active:not([disabled]) {
-    background-color: rgba(var(--rlm-window-rgba));
+  /* &:active:not([disabled]) {
+    background: rgba(var(--rlm-window-rgba));
     filter: brightness(0.925);
-  }
+  } */
 `;
 
 const Minimal = styled(Base)<ButtonProps>`
+  padding: 4px 8px;
   color: rgba(var(--rlm-accent-rgba));
-  background-color: rgba(var(--rlm-accent-rgba), 0.1);
+  background: rgba(var(--rlm-accent-rgba), 0.1);
   &:hover:not([disabled]) {
-    background-color: rgba(var(--rlm-accent-rgba), 0.15);
+    background: rgba(var(--rlm-accent-rgba), 0.15);
   }
-  &:active:not([disabled]) {
-    background-color: rgba(var(--rlm-accent-rgba), 0.3);
-  }
+  /* &:active:not([disabled]) {
+    background: rgba(var(--rlm-accent-rgba), 0.3);
+  } */
   svg {
     fill: rgba(var(--rlm-accent-rgba));
   }
 `;
 
 const Transparent = styled(Base)<ButtonProps>`
-  color: rgba(var(--rlm-text-rgba));
-  background-color: transparent;
+  padding: 4px 8px;
+  color: rgba(var(--rlm-text-rgba), 0.7);
+  background: transparent;
   &:hover:not([disabled]) {
-    background-color: rgba(var(--rlm-window-rgba));
+    background: rgba(var(--rlm-window-rgba));
     filter: brightness(0.975);
   }
-  &:active:not([disabled]) {
-    background-color: rgba(var(--rlm-window-rgba));
+  /* &:active:not([disabled]) {
+    background: rgba(var(--rlm-window-rgba));
     filter: brightness(0.95);
-  }
+  } */
   svg {
     fill: rgba(var(--rlm-text-rgba));
   }
@@ -192,24 +196,24 @@ const TextButton = styled(Base)<TextButtonProps>`
       ? `rgba(var(--rlm-${props.color}-rgba))`
       : 'rgba(var(--rlm-accent-rgba))'};
 
-  background-color: ${(props) =>
+  background: ${(props) =>
     props.showOnHover
       ? 'transparent'
       : props.color
       ? `rgba(var(--rlm-${props.color}-rgba), 0.1)`
       : 'rgba(var(--rlm-accent-rgba), 0.1)'};
   &:hover:not([disabled]) {
-    background-color: ${(props) =>
+    background: ${(props) =>
       props.color
         ? `rgba(var(--rlm-${props.color}-rgba), 0.15)`
         : 'rgba(var(--rlm-accent-rgba), 0.15)'};
   }
-  &:active:not([disabled]) {
-    background-color: ${(props) =>
-      props.color
-        ? `rgba(var(--rlm-${props.color}-rgba), 0.2)`
-        : 'rgba(var(--rlm-accent-rgba), 0.2)'};
-  }
+  /* &:active:not([disabled]) {
+    background: ${(props) =>
+    props.color
+      ? `rgba(var(--rlm-${props.color}-rgba), 0.2)`
+      : 'rgba(var(--rlm-accent-rgba), 0.2)'};
+  } */
   svg {
     fill: ${(props) =>
       props.color
@@ -230,23 +234,31 @@ const IconButton = styled(Base)<IconButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: ${(props) =>
-    props.isSelected ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
+  background: ${(props) => {
+    if (props.customColor) {
+      return props.customColor;
+    }
+    return props.isSelected
+      ? 'rgba(var(--rlm-overlay-active-rgba))'
+      : 'transparent';
+  }};
   &:hover:not([disabled]) {
     transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    background: rgba(var(--rlm-overlay-hover-rgba));
   }
   /* &:active:not([disabled]) {
     transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
+    background: rgba(var(--rlm-overlay-active-rgba));
   } */
   &:focus:not([disabled]) {
     outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba));
+    background: rgba(var(--rlm-overlay-active-rgba));
   }
   svg {
     fill: ${(props) =>
-      props.customColor ? props.customColor : 'rgba(var(--rlm-icon-rgba))'};
+      props.customColor
+        ? props.customColor
+        : 'rgba(var(--rlm-icon-rgba), 0.7)'};
   }
 `;
 

@@ -7,8 +7,6 @@ import { toJS } from 'mobx';
 import { delay } from 'lodash';
 
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { AccountModelType } from 'renderer/stores/models/account.model';
 import { useAppState } from 'renderer/stores/app.store';
 

@@ -1,16 +1,14 @@
 import { useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
 import { Flex, Text, PersonRow } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { FriendType } from 'os/services/ship/models/friends';
 import { WindowedList } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const FriendsListPresenter = () => {
   const paneRef = useRef(null);
-  const { theme, friends } = useServices();
-  const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
+  const { friends } = useShipStore();
 
   const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
   const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
@@ -27,26 +25,26 @@ const FriendsListPresenter = () => {
         ? friends.list.length === 0
           ? [{ type: 'hint', data: 'No friends to pin' }]
           : [{ type: 'hint', data: 'No pinned friends' }]
-        : pinned.map((n) => ({ type: 'friend', data: n }))),
+        : pinned.map((n: any) => ({ type: 'friend', data: n }))),
       { type: 'title', data: 'All' },
       ...(unpinned.length === 0
         ? pinned.length > 0
           ? [{ type: 'hint', data: 'All your friends are pinned' }]
           : [{ type: 'hint', data: 'Add some friends above' }]
-        : unpinned.map((n) => ({ type: 'friend', data: n }))),
+        : unpinned.map((n: any) => ({ type: 'friend', data: n }))),
     ],
     [friends.list.length, pinned, unpinned]
   );
 
   const onUnpin = (friend: any) => {
-    ShipActions.editFriend(friend.patp, {
+    friends.update(friend.patp, {
       pinned: false,
       tags: friend.tags,
     });
   };
 
   const onPin = (friend: any) => {
-    ShipActions.editFriend(friend.patp, {
+    friends.update(friend.patp, {
       pinned: true,
       tags: friend.tags,
     });
@@ -101,8 +99,6 @@ const FriendsListPresenter = () => {
         avatar={contact.avatar}
         description={contact.bio}
         listId="friend-list"
-        rowBg={rowBg}
-        theme={theme.currentTheme}
         contextMenuOptions={[
           ...pinOption,
           {

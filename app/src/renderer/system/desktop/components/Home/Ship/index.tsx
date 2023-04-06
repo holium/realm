@@ -83,13 +83,12 @@ const OurHomePresenter = (props: OurHomeProps) => {
           <AppSearchApp mode="home" />
           <Flex justifyContent="flex-end">
             <Button.IconButton
-              size={3}
-              color={sidebar === 'friends' ? 'accent' : 'icon'}
+              size={32}
               onClick={() => {
                 setSidebar(!sidebar ? 'friends' : null);
               }}
             >
-              <Icon name="Members" size="22px" />
+              <Icon name="Members" size={22} opacity={0.7} />
             </Button.IconButton>
           </Flex>
         </Flex>

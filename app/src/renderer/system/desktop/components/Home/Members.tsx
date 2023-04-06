@@ -4,8 +4,8 @@ import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
-import { Button, TextInput } from '@holium/design-system';
+import { ShipSearch } from 'renderer/components';
+import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
@@ -21,6 +21,8 @@ const HomeSidebar = styled(motion.div)`
   width: 100%;
   height: 100%;
   gap: 16px;
+  background: rgba(var(--rlm-window-rgba), 0.9);
+  backdrop-filter: blur(24px);
 `;
 
 interface IMembers {
@@ -104,10 +106,10 @@ const MembersPresenter = ({ our }: IMembers) => {
       }}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
-        <Icons name="Members" size="18px" opacity={0.5} />
-        <Text fontWeight={500} fontSize={4} opacity={1}>
+        <Icon name="Members" size={18} opacity={0.5} />
+        <Text.Custom fontWeight={500} fontSize={4} opacity={1}>
           {our ? 'Friends' : 'Members'}
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex position="relative">
         {/* Search and dropdown */}
@@ -120,6 +122,7 @@ const MembersPresenter = ({ our }: IMembers) => {
           id="person"
           ref={searchRef}
           height={34}
+          width="100%"
           placeholder="Search..."
           rightAdornment={
             <Button.TextButton

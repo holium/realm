@@ -38,7 +38,9 @@ export const genCSSVariables = (theme: ThemeModelType) => {
     ? toRgbaString(lighten(0.05, theme.windowColor))
     : toRgbaString(darken(0.025, theme.windowColor));
   const textColor = toRgbaString(theme.textColor);
-  const iconColor = toRgbaString(rgba(theme.textColor, 0.7));
+  const iconColor = toRgbaString(
+    isLight ? lighten(0.1, theme.textColor) : darken(0.1, theme.textColor)
+  );
   const mouseColor = toRgbaString(theme.mouseColor);
   const realmBrandColor = toRgbaString('#F08735');
   const intentAlertColor = toRgbaString('#ff6240');

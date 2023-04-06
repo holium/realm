@@ -24,6 +24,7 @@ import { Box } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   index: number;
@@ -162,11 +163,11 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
       <AppTile
         tileId={`${app.id}-app`}
         tileSize="xl1"
-        app={app}
+        app={app as AppMobxType}
         isAnimated={isInstalled}
         installStatus={installStatus}
         contextMenuOptions={contextMenuOptions}
-        onAppClick={(selectedApp: AppType) => {
+        onAppClick={(selectedApp: AppMobxType) => {
           shellStore.openWindow(selectedApp);
           shellStore.closeHomePane();
         }}

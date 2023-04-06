@@ -138,6 +138,7 @@ export const InputBox = ({
   error,
   children,
   borderRadius = '6px',
+  background = 'currentColor',
   style,
   ...boxProps
 }: InputBoxProps) => (
@@ -147,6 +148,7 @@ export const InputBox = ({
     height={height}
     error={error}
     borderRadius={borderRadius}
+    background={background}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}

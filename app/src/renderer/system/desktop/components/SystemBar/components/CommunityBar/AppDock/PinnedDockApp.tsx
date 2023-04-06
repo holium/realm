@@ -1,14 +1,13 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { Reorder } from 'framer-motion';
+import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import {
-  AppType,
+  AppTile,
+  AppTileType,
+  bgIsLightOrDark,
+  getAppTileFlags,
   InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { AppTile, ContextMenuOption } from 'renderer/components';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
+} from '@holium/design-system';
 import {
   resumeSuspendLabel,
   handleResumeSuspend,
@@ -17,15 +16,16 @@ import {
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   tileId: string;
-  app: AppType;
+  app: AppMobxType;
   space?: SpaceModelType;
   hasWindow: boolean;
   isActive: boolean;
   isMinimized: boolean;
-  onClick: (app: AppType) => void;
+  onClick: (app: AppMobxType) => void;
 };
 
 export const PinnedDockApp = ({
@@ -42,6 +42,7 @@ export const PinnedDockApp = ({
     tileId: string;
     rect: DOMRect;
   } | null>(null);
+  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
 
   const { isSuspended, isUninstalled } = getAppTileFlags(
     (app.installStatus as InstallStatus) || InstallStatus.installed
@@ -101,7 +102,7 @@ export const PinnedDockApp = ({
             disabled: false,
             onClick: (evt: any) => {
               evt.stopPropagation();
-              const appHost = (app as UrbitAppType).host;
+              const appHost = (app as AppMobxType).host;
               return handleInstallation(
                 appHost,
                 app.id,
@@ -111,6 +112,43 @@ export const PinnedDockApp = ({
           },
         ]
       : [];
+
+  const contextMenuOptions = useMemo(
+    () => [
+      ...installOption,
+      ...suspendOption,
+      ...unpinOption,
+      ...hideOrShowOption,
+      ...closeOption,
+    ],
+    []
+  );
+
+  const contextMenuColors = useMemo(() => {
+    const isLight = bgIsLightOrDark(app.color) === 'light';
+    const textColor = isLight
+      ? 'rgba(51, 51, 51, 0.8)'
+      : 'rgba(255, 255, 255, 0.8)';
+    return { textColor, backgroundColor: app.color };
+  }, [app.color]);
+
+  useEffect(() => {
+    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+      setOptions(tileId, contextMenuOptions);
+    }
+
+    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+      setColors(tileId, contextMenuColors);
+    }
+  }, [
+    contextMenuColors,
+    contextMenuOptions,
+    getColors,
+    getOptions,
+    setColors,
+    setOptions,
+    tileId,
+  ]);
 
   return useMemo(
     () => (
@@ -161,20 +199,13 @@ export const PinnedDockApp = ({
           tileId={tileId}
           tileSize="sm"
           installStatus={app.installStatus as InstallStatus}
-          app={app}
+          app={app as AppTileType}
           isOpen={hasWindow}
           isActive={isActive}
           isAnimated={
             app.installStatus !== InstallStatus.suspended &&
             app.installStatus !== InstallStatus.failed
           }
-          contextMenuOptions={[
-            ...installOption,
-            ...suspendOption,
-            ...unpinOption,
-            ...hideOrShowOption,
-            ...closeOption,
-          ]}
         />
       </Reorder.Item>
     ),

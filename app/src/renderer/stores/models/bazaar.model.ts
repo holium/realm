@@ -4,7 +4,9 @@ import {
   getSnapshot,
   applySnapshot,
   flow,
+  SnapshotOut,
 } from 'mobx-state-tree';
+import { cleanNounColor } from 'os/lib/color';
 import { BazaarIPC } from '../ipc';
 
 export enum InstallStatus {
@@ -45,6 +47,8 @@ export const Glob = types.model('Glob', {
     })
   ),
 });
+
+export type GlobMobxType = Instance<typeof Glob>;
 
 export const RealmConfig = types.model('RealmConfig', {
   size: types.array(types.number),
@@ -112,6 +116,7 @@ export const UrbitApp = types
     host: types.maybeNull(types.string),
     config: types.maybeNull(RealmConfig),
     gridIndex: types.maybe(types.number),
+    dockIndex: types.maybe(types.number),
   })
   .actions((self) => ({
     setHost(host: string) {
@@ -327,26 +332,26 @@ export const BazaarStore = types
     //   self.loadingTreaties = false;
     //   self.treatiesLoaded = !self.treatiesLoaded;
     // },
-    // addRecentApp(appId: string) {
-    //   // keep no more than 5 recent app entries
-    //   if (self.recentApps.length >= 5) {
-    //     self.recentApps.pop();
-    //   }
-    //   // move the app up to the top if it already exists in the list
-    //   const idx = self.recentApps.findIndex((item) => item === appId);
-    //   if (idx !== -1) self.recentApps.splice(idx, 1);
-    //   // add app to front of list
-    //   self.recentApps.splice(0, 0, appId);
-    // },
-    // addRecentDev(shipId: string) {
-    //   // keep no more than 5 recent app entries
-    //   if (self.recentDevs.length >= 5) {
-    //     self.recentDevs.pop();
-    //   }
-    //   const idx = self.recentDevs.findIndex((item) => item === shipId);
-    //   if (idx !== -1) self.recentDevs.splice(idx, 1);
-    //   self.recentDevs.splice(0, 0, shipId);
-    // },
+    addRecentApp(appId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentApps.length >= 5) {
+        self.recentApps.pop();
+      }
+      // move the app up to the top if it already exists in the list
+      const idx = self.recentApps.findIndex((item) => item === appId);
+      if (idx !== -1) self.recentApps.splice(idx, 1);
+      // add app to front of list
+      self.recentApps.splice(0, 0, appId);
+    },
+    addRecentDev(shipId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentDevs.length >= 5) {
+        self.recentDevs.pop();
+      }
+      const idx = self.recentDevs.findIndex((item) => item === shipId);
+      if (idx !== -1) self.recentDevs.splice(idx, 1);
+      self.recentDevs.splice(0, 0, shipId);
+    },
     // installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
     //   try {
     //     return yield DocketApi.installApp(conduit, body.ship, body.desk);
@@ -354,45 +359,42 @@ export const BazaarStore = types
     //     console.error(error);
     //   }
     // }),
-
-    // installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
-    //   try {
-    //     return yield BazaarApi.installApp(conduit, body);
-    //   } catch (error) {
-    //     // self.installations.delete(body.desk);
-    //     console.error(error);
-    //   }
-    // }),
-    // uninstallApp: flow(function* (conduit: Conduit, body: UninstallPoke) {
-    //   // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
-    //   //   if (app.id === value) self.gridIndex.delete(key);
-    //   // });
-    //   try {
-    //     // self.installations.delete(body.desk);
-    //     return yield BazaarApi.uninstallApp(conduit, body);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
-    // suspendApp: flow(function* (conduit: Conduit, desk: string) {
-    //   try {
-    //     return yield BazaarApi.suspendApp(conduit, desk);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
-    // reviveApp: flow(function* (conduit: Conduit, desk: string) {
-    //   try {
-    //     return yield BazaarApi.resumeApp(conduit, desk);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
-
-    // //
-    // // Pokes
-    // //
-
+    //
+    // Pokes
+    //
+    installApp: flow(function* (ship: string, desk: string) {
+      try {
+        return yield BazaarIPC.installApp(ship, desk) as Promise<any>;
+      } catch (error) {
+        // self.installations.delete(body.desk);
+        console.error(error);
+      }
+    }),
+    uninstallApp: flow(function* (desk: string) {
+      // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
+      //   if (app.id === value) self.gridIndex.delete(key);
+      // });
+      try {
+        // self.installations.delete(body.desk);
+        return yield BazaarIPC.uninstallApp(desk) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    suspendApp: flow(function* (desk: string) {
+      try {
+        return yield BazaarIPC.suspendApp(desk) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    reviveApp: flow(function* (desk: string) {
+      try {
+        return yield BazaarIPC.resumeApp(desk) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     recommendApp: flow(function* (appId: string) {
       try {
         self.recommendations.push(appId);
@@ -413,29 +415,29 @@ export const BazaarStore = types
         console.error(error);
       }
     }),
-    // addAlly: flow(function* (conduit: Conduit, ship: Patp) {
-    //   try {
-    //     if (self.allies.has(ship)) return;
-    //     self.loadingTreaties = true;
-    //     self.addingAlly.set(ship, 'adding');
-    //     const result: any = yield BazaarApi.addAlly(conduit, ship);
-    //     // self.loadingTreaties = false;
-    //     return result;
-    //   } catch (error) {
-    //     console.error(error);
-    //     self.loadingTreaties = false;
-    //   }
-    // }),
-    // //
-    // // Scries
-    // //
-    // scryHash: flow(function* (conduit: Conduit, app: string) {
-    //   try {
-    //     return yield BazaarApi.scryHash(conduit, app);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
+    addAlly: flow(function* (ship: string) {
+      try {
+        if (self.allies.has(ship)) return;
+        self.loadingTreaties = true;
+        self.addingAlly.set(ship, 'adding');
+        const result: any = yield BazaarIPC.addAlly(ship) as Promise<any>;
+        // self.loadingTreaties = false;
+        return result;
+      } catch (error) {
+        console.error(error);
+        self.loadingTreaties = false;
+      }
+    }),
+    //
+    // Scries
+    //
+    scryHash: flow(function* (app: string) {
+      try {
+        return yield BazaarIPC.scryHash(app) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     scryAllies: flow(function* () {
       try {
         const allies = yield BazaarIPC.scryAllies() as Promise<any>;
@@ -453,68 +455,62 @@ export const BazaarStore = types
         throw error;
       }
     }),
-    // scryTreaties: flow(function* (conduit: Conduit, ship: Patp) {
-    //   self.loadingTreaties = true;
-    //   try {
-    //     const treaties = yield BazaarApi.scryTreaties(conduit, ship);
-    //     const formedTreaties = [];
-    //     for (const key in treaties) {
-    //       const treaty = treaties[key];
-    //       const formed = {
-    //         ...treaty,
-    //         color: cleanNounColor(treaty.color),
-    //         id: key,
-    //       };
-    //       formedTreaties.push(formed);
-    //       self.treaties.set(key, {
-    //         ...treaty,
-    //         color: cleanNounColor(treaty.color),
-    //         id: key,
-    //       });
-    //     }
-    //     self.loadingTreaties = false;
-    //     return formedTreaties;
-    //   } catch (error) {
-    //     console.error(error);
-    //     self.loadingTreaties = false;
-    //     throw error;
-    //   }
-    // }),
-    // loadDevApps(devApps: Record<string, DevAppType>) {
-    //   Object.values(devApps).forEach((app) => {
-    //     self.devAppMap.set(app.id, DevAppModel.create(app));
-    //   });
-    // },
-    // // setSubscriptionStatus: (
-    // //   newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
-    // // ) => {
-    // //   self.subscription.set(newSubscriptionStatus);
-    // // },
-    // setDock(path: string, dock: string[]) {
-    //   self.docks.set(path, dock);
+    scryTreaties: flow(function* (ship: string) {
+      self.loadingTreaties = true;
+      try {
+        const treaties = yield BazaarIPC.scryTreaties(ship) as Promise<any>;
+        const formedTreaties = [];
+        for (const key in treaties) {
+          const treaty = treaties[key];
+          const formed = {
+            ...treaty,
+            color: cleanNounColor(treaty.color),
+            id: key,
+          };
+          formedTreaties.push(formed);
+          self.treaties.set(key, {
+            ...treaty,
+            color: cleanNounColor(treaty.color),
+            id: key,
+          });
+        }
+        self.loadingTreaties = false;
+        return formedTreaties;
+      } catch (error) {
+        console.error(error);
+        self.loadingTreaties = false;
+        throw error;
+      }
+    }),
+    loadDevApps(devApps: Record<string, DevAppType>) {
+      Object.values(devApps).forEach((app) => {
+        self.devAppMap.set(app.id, DevAppModel.create(app));
+      });
+    },
+    // setSubscriptionStatus: (
+    //   newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
+    // ) => {
+    //   self.subscription.set(newSubscriptionStatus);
     // },
   }))
   .views((self) => ({
-    get installed(): AppType[] {
-      return Array.from(self.catalog.values())
-        .sort((a, b) => a.gridIndex - b.gridIndex)
-        .filter(Boolean) as AppType[];
-
-      // return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-      //   (app: SnapshotOut<AppType>) => {
-      //     if (app.type === 'urbit') {
-      //       const urb = app as UrbitAppType;
-      //       return (
-      //         urb.installStatus === 'installed' ||
-      //         urb.installStatus === 'suspended' ||
-      //         urb.installStatus === 'resuming' ||
-      //         urb.installStatus === 'failed'
-      //       );
-      //     } else {
-      //       return true;
-      //     }
-      //   }
-      // );
+    get installed(): SnapshotOut<AppMobxType>[] {
+      const apps = Array.from<AppMobxType>(self.catalog.values())
+        .map((app) => getSnapshot(app))
+        .filter((app: SnapshotOut<AppMobxType>) => {
+          if (app.type === 'urbit') {
+            const urb = app as AppMobxType;
+            return (
+              urb.installStatus === 'installed' ||
+              urb.installStatus === 'suspended' ||
+              urb.installStatus === 'resuming' ||
+              urb.installStatus === 'failed'
+            );
+          } else {
+            return true;
+          }
+        });
+      return apps;
     },
     get devApps() {
       if (self.devAppMap.size === 0) return [];
@@ -570,48 +566,16 @@ export const BazaarStore = types
       if (app) return app;
       return self.devAppMap.get(appId);
     },
-    // getStall(path: string) {
-    //   const stall = self.stalls.get(path);
-    //   return Array.from(Object.values(stall ? getSnapshot(stall) : {}));
-    // },
-    // getRecommendedApps(path: string) {
-    //   const stall = self.stalls.get(path);
-    //   if (!stall) return [];
-    //   if (stall.recommended.size === 0) return [];
-    //   return Array.from(
-    //     Object.entries(getSnapshot(stall.recommended))
-    //       .sort((entry: [string, number], entry2: [string, number]) => {
-    //         return entry2[1] - entry[1];
-    //       })
-    //       .slice(0, 4)
-    //       .map((entry: [appId: string, count: number]) => {
-    //         return self.catalog.get(entry[0]);
-    //       })
-    //   );
-    // },
-    // getSuite(path: string) {
-    //   const stall = self.stalls.get(path);
-    //   const suite = new Map();
-    //   if (!stall) return suite;
-    //   Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
-    //     (index: string) => {
-    //       const appId = stall.suite.get(index);
-    //       if (!appId) return;
-    //       const app = self.catalog.get(appId);
-    //       suite.set(index, app && getSnapshot(app));
-    //     }
-    //   );
-    //   return suite;
     // },
     // get subscriptionState() {
     //   return self.subscription.state;
     // },
   }));
 
+export type AppMobxType = Instance<typeof UrbitApp>;
 export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
-export type UrbitAppType = Instance<typeof UrbitApp>;
 export type NativeAppType = Instance<typeof NativeApp>;
 export type DevAppType = Instance<typeof DevAppModel>;
 export type AppType = Instance<typeof AppModel>;

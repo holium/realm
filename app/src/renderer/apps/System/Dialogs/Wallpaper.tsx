@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba } from 'polished';
-import { FormControl, Input, TextButton } from 'renderer/components';
+import { FormControl } from 'renderer/components';
 import { Flex, Spinner, TextInput, Button } from '@holium/design-system';
 import * as yup from 'yup';
 import { createField, createForm } from 'mobx-easy-form';
@@ -110,7 +109,11 @@ const WallpaperDialogPresenter = () => {
           name="imageUrl"
           placeholder="https://my-image.google.com"
           defaultValue={imageUrl.state.value}
-          error={!imageUrl.computed.isDirty || imageUrl.computed.error}
+          error={
+            (imageUrl.computed.ifWasEverBlurredThenError &&
+              imageUrl.computed.isDirty) ||
+            imageUrl.computed.error
+          }
           onChange={(e: any) => imageUrl.actions.onChange(e.target.value)}
           onFocus={() => imageUrl.actions.onFocus()}
           onBlur={() => imageUrl.actions.onBlur()}
@@ -122,22 +125,16 @@ const WallpaperDialogPresenter = () => {
       </FormControl.Field>
 
       <Flex justifyContent="space-between">
-        <Button.TextButton
+        <Button.Secondary
           tabIndex={2}
           style={{ fontWeight: 400 }}
-          // showBackground
-          // highlightColor={theme.backgroundColor}
-          // textColor={rgba(theme.textColor, 0.7)}
           onClick={closeDialog}
         >
           Close
-        </Button.TextButton>
+        </Button.Secondary>
         <Button.TextButton
           tabIndex={1}
           style={{ fontWeight: 400 }}
-          // showBackground
-          // highlightColor={theme.currentTheme.accentColor}
-          // textColor={theme.currentTheme.accentColor}
           onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}

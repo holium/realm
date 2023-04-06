@@ -276,10 +276,12 @@ export class BazaarService extends AbstractService {
   }
 
   async scryTreaties(ship: string) {
-    return APIConnection.getInstance().conduit.scry({
-      app: 'bazaar',
-      path: `/treaties/${ship}`,
-    });
+    return (
+      await APIConnection.getInstance().conduit.scry({
+        app: 'bazaar',
+        path: `/treaties/${ship}`,
+      })
+    ).treaties;
   }
 
   // async addRecentApp(appId: string) {

@@ -1,35 +1,34 @@
 import { useCallback, useState } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
 import { Flex, Divider } from 'renderer/components';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   spacePath: string;
-  pinnedDockAppsOrder: string[];
-  pinnedDockApps: AppType[];
-  unpinnedDockApps: AppType[];
+  pinnedDockApps: AppMobxType[];
+  unpinnedDockApps: AppMobxType[];
 };
 
 const AppDockViewPresenter = ({
   spacePath,
-  pinnedDockAppsOrder,
   pinnedDockApps,
   unpinnedDockApps,
 }: Props) => {
   const { shellStore, theme } = useAppState();
   const { spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+  // todo move this to mobx
+  const [localDockAppIds, setLocalDockAppIds] = useState(
+    currentSpace?.dockAppIds || []
+  );
 
-  const [localDockAppIds, setLocalDockAppIds] = useState(pinnedDockAppsOrder);
-
-  const onClickDockedApp = useCallback((dockedApp: AppType) => {
+  const onClickDockedApp = useCallback((dockedApp: AppMobxType) => {
     const appWindow = shellStore.getWindowByAppId(dockedApp.id);
     if (appWindow) {
       if (appWindow.isMinimized) {

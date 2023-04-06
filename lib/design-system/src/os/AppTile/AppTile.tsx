@@ -1,19 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { observer } from 'mobx-react';
+import { useMemo, useRef } from 'react';
 import styled, { css } from 'styled-components';
-import { darken, desaturate, lighten, rgba } from 'polished';
-import { Text } from 'renderer/components';
-import { Box, Flex, Spinner } from '@holium/design-system';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
-import { bgIsLightOrDark } from 'os/lib/color';
-import { Icons } from '../Icons';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
-import {
-  ContextMenuOption,
-  useContextMenu,
-} from 'renderer/components/ContextMenu';
+import { Box, Flex, Spinner, Text, Icon, bgIsLightOrDark } from '../../';
 import { Variants } from 'framer-motion';
 
 const sizes = {
@@ -38,7 +25,7 @@ const loaderSizes = {
 
 const radius = {
   sm: 4,
-  md: 12,
+  md: 6,
   lg: 16,
   xl: 20,
   xl1: 20,
@@ -56,10 +43,45 @@ const scales = {
   xxl: 0.02,
 };
 
+export enum InstallStatus {
+  uninstalled = 'uninstalled',
+  initial = 'initial',
+  started = 'started',
+  failed = 'failed',
+  installed = 'installed',
+  treaty = 'treaty',
+  suspended = 'suspended',
+  resuming = 'resuming',
+  // this is set when joining a space and you do not have the app
+  //  installed, but want it to appear on the home screen. this
+  //  is different than uninstalled which has %suspend implications
+  //  on the back-end. %desktop requires a fresh install.
+  desktop = 'desktop',
+}
+
+export type AppTileType = {
+  id: string;
+  title: string;
+  info: string | null;
+  color: string;
+  favicon: string | null;
+  type: 'urbit' | 'web' | 'native';
+  image: string | null;
+  href: any | null;
+  version: string | null;
+  website: string | null;
+  license: string | null;
+  installStatus: string;
+  icon: string | null;
+  host: string | null;
+  config: any | null;
+  gridIndex?: number | null;
+  dockIndex?: number | null;
+};
+
 interface TileHighlightProps {
   isActive?: boolean;
   isOpen?: boolean;
-  theme: ThemeType;
 }
 export const TileHighlight = styled(Box)<TileHighlightProps>`
   left: 11px;
@@ -71,12 +93,12 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
   ${(props: TileHighlightProps) =>
     props.isOpen &&
     css`
-      background-color: ${lighten(0.05, props.theme.colors.icon.app)};
+      background-color: rgba((var(--rlm-icon-rgb)), 0.5);
     `}
   ${(props: TileHighlightProps) =>
     props.isActive &&
     css`
-      background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
+      background-color: rgba((var(--rlm-accent-rgb)), 0.5);
     `}
 `;
 
@@ -112,9 +134,8 @@ const TileStyle = styled(Box)<TileStyleProps>`
 
 export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
-  app: AppType;
+  app: AppTileType;
   tileId: string;
-  contextMenuOptions?: ContextMenuOption[];
   variants?: Variants;
   tileSize: AppTileSize;
   installStatus?: InstallStatus;
@@ -123,13 +144,12 @@ interface AppTileProps {
   isActive?: boolean;
   isAnimated?: boolean;
   highlightOnHover?: boolean;
-  onAppClick?: (app: AppType) => void;
+  onAppClick?: (app: AppTileType) => void;
 }
 
-const AppTilePresenter = ({
+export const AppTile = ({
   app,
   tileId,
-  contextMenuOptions,
   variants,
   tileSize = 'md',
   isOpen = false,
@@ -139,8 +159,6 @@ const AppTilePresenter = ({
   installStatus = InstallStatus.installed,
   onAppClick,
 }: AppTileProps) => {
-  const { theme } = useServices();
-  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
   const tileRef = useRef(null);
   const isAppGrid =
     tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
@@ -152,31 +170,9 @@ const AppTilePresenter = ({
   }, [app.color]);
 
   const textColor = useMemo(
-    () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
+    () => (isLight ? 'rgba(51, 51, 51, 0.8)' : 'rgba(255, 255, 255, 0.8)'),
     [isLight]
   );
-  const contextMenuColors = useMemo(
-    () => ({ textColor, backgroundColor: app.color }),
-    [app.color, textColor]
-  );
-
-  useEffect(() => {
-    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
-      setOptions(tileId, contextMenuOptions);
-    }
-
-    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
-      setColors(tileId, contextMenuColors);
-    }
-  }, [
-    contextMenuColors,
-    contextMenuOptions,
-    getColors,
-    getOptions,
-    setColors,
-    setOptions,
-    tileId,
-  ]);
 
   const {
     isInstalling,
@@ -192,47 +188,52 @@ const AppTilePresenter = ({
   if (isAppGrid) {
     const appColor = app.color;
     title = (
-      <Text
+      <Text.Custom
         position="absolute"
-        style={{ pointerEvents: 'none' }}
+        style={{
+          pointerEvents: 'none',
+          color: textColor,
+          backgroundColor: app.image ? appColor : undefined,
+        }}
         left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
         padding=".2rem"
         borderRadius={4}
-        // @ts-ignore
-        backgroundColor={app.image && appColor}
         bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
         fontWeight={500}
         fontSize={2}
-        color={textColor}
       >
         {app.title}
-      </Text>
+      </Text.Custom>
     );
     if (isSuspended || isFailed) {
       let statusBadgeColor = isLight
-        ? darken(0.05, desaturate(1, app.color))
-        : lighten(0.1, desaturate(1, app.color));
+        ? 'brightness(95%) saturate(0.8) hue-rotate(-5deg)'
+        : 'brightness(110%) saturate(0.8) hue-rotate(10deg)';
       if (isFailed) {
         statusBadgeColor = isLight
-          ? rgba(darken(0.05, '#D0384E'), 0.1)
-          : rgba(lighten(0.1, '#D0384E'), 0.1);
+          ? 'brightness(110%) saturate(150%)'
+          : 'brightness(60%) saturate(150%)';
       }
       status = (
-        <Text
+        <Text.Custom
           position="absolute"
-          style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+          style={{
+            pointerEvents: 'none',
+            textTransform: 'uppercase',
+            color: isFailed ? '#5e0b18' : textColor,
+            backgroundColor: app.color,
+            filter: statusBadgeColor,
+          }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
           borderRadius={6}
-          backgroundColor={rgba(statusBadgeColor, 0.5)}
           top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
           textStyle="capitalize"
           fontSize={tileSize === 'xl1' ? '13px' : 2}
-          color={isFailed ? '#5e0b18' : textColor}
         >
           {app.installStatus}
-        </Text>
+        </Text.Custom>
       );
     }
   }
@@ -339,7 +340,7 @@ const AppTilePresenter = ({
         background={tileBg}
       >
         {/* @ts-ignore */}
-        <Icons name={app.icon} height={iconSize} width={iconSize} />
+        <Icon name={app.icon} size={iconSize} />
         {title}
       </TileStyle>
     );
@@ -388,7 +389,7 @@ const AppTilePresenter = ({
   }
 
   return (
-    <Flex flexDirection="column" alignItems="center">
+    <Flex id={tileId} flexDirection="column" alignItems="center">
       <Flex
         position="relative"
         ref={tileRef}
@@ -429,16 +430,49 @@ const AppTilePresenter = ({
         />
       </Flex>
       {hasTitle && (
-        <Text
-          style={{ pointerEvents: 'none' }}
-          color={theme.currentTheme.textColor}
-          mt={2}
-        >
+        <Text.Custom style={{ pointerEvents: 'none' }} mt={2}>
           {app.title}
-        </Text>
+        </Text.Custom>
       )}
     </Flex>
   );
 };
 
-export const AppTile = observer(AppTilePresenter);
+type AppStatusFlags = {
+  isInstalled: boolean;
+  isInstalling: boolean;
+  isUninstalled: boolean;
+  isFaded: boolean;
+  isFailed: boolean;
+  isSuspended: boolean;
+  hasFailed: boolean;
+  isDesktop: boolean;
+};
+export const getAppTileFlags = (
+  installStatus: InstallStatus
+): AppStatusFlags => {
+  const isInstalling =
+    installStatus !== InstallStatus.installed &&
+    installStatus !== InstallStatus.suspended &&
+    installStatus !== InstallStatus.failed &&
+    installStatus !== InstallStatus.uninstalled &&
+    installStatus !== InstallStatus.desktop;
+
+  const isFaded =
+    isInstalling ||
+    installStatus === InstallStatus.suspended ||
+    installStatus === InstallStatus.failed ||
+    installStatus === InstallStatus.uninstalled ||
+    installStatus === InstallStatus.desktop;
+
+  return {
+    isInstalled: installStatus === InstallStatus.installed,
+    isInstalling,
+    isFaded,
+    isSuspended: installStatus === InstallStatus.suspended,
+    isFailed: installStatus === InstallStatus.failed,
+    isUninstalled: installStatus === InstallStatus.uninstalled,
+    hasFailed: installStatus === InstallStatus.failed,
+    isDesktop: installStatus === InstallStatus.desktop,
+  };
+};
