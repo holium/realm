@@ -220,7 +220,7 @@
                         =/  send-status-message
                           ?:  =(max-expires-at-duration.path-row.ch *@dr)
                             !>([%send-message path.path-row.ch ~[[[%status (crip "Messages now last forever")] ~ ~]] *@dr])
-                          !>([%send-message path.path-row.ch ~[[[%status (crip "Maximum message duration now {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
+                          !>([%send-message path.path-row.ch ~[[[%status (crip "You set disppearing messages to {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                       ~
                   ==
