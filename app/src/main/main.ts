@@ -234,10 +234,10 @@ app.on('before-quit', (event) => {
 });
 ipcMain.on('realm.app.quit', app.quit);
 
-ipcMain.on('download-url-as-file', async (_event, { url }) => {
+ipcMain.on('download-url-as-file', (_event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();
   if (win) {
-    await download(win, url);
+    download(win, url, { saveAs: true });
   }
 });
 

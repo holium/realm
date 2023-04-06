@@ -119,22 +119,20 @@ export function createDetectElementResize(hostWindow: Window) {
           ' '
         ),
       pfx = '';
-    {
-      var elm = _window.document.createElement('fakeelement');
+    var elm = _window.document.createElement('fakeelement');
 
-      if (elm.style.animationName !== undefined) {
-        animation = true;
-      }
+    if (elm.style.animationName !== undefined) {
+      animation = true;
+    }
 
-      if (animation === false) {
-        for (var i = 0; i < domPrefixes.length; i++) {
-          if (elm.style[domPrefixes[i] + 'AnimationName'] !== undefined) {
-            pfx = domPrefixes[i];
-            keyframeprefix = '-' + pfx.toLowerCase() + '-';
-            animationstartevent = startEvents[i];
-            animation = true;
-            break;
-          }
+    if (animation === false) {
+      for (var i = 0; i < domPrefixes.length; i++) {
+        if (elm.style[domPrefixes[i] + 'AnimationName'] !== undefined) {
+          pfx = domPrefixes[i];
+          keyframeprefix = '-' + pfx.toLowerCase() + '-';
+          animationstartevent = startEvents[i];
+          animation = true;
+          break;
         }
       }
     }

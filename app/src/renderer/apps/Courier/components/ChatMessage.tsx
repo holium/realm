@@ -94,15 +94,28 @@ export const ChatMessagePresenter = ({
         icon: 'CloudDownload',
         label: 'Save image',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (
+          evt: React.MouseEvent<HTMLButtonElement>,
+          elem: HTMLElement | undefined
+        ) => {
           evt.stopPropagation();
           const images =
             msgModel &&
             msgModel.contents.filter((c) =>
               Object.keys(c)[0].includes('image')
             );
-          if (images)
-            images.forEach((i) => OSActions.downloadUrlAsFile(i.image));
+          if (elem) {
+            let asImage = elem as HTMLImageElement;
+            if (
+              images &&
+              images.length > 0 &&
+              asImage.src &&
+              images.find((i) => i.image === asImage.src)
+            )
+              OSActions.downloadUrlAsFile(asImage.src);
+          } else if (images && images.length > 0) {
+            OSActions.downloadUrlAsFile(images[0].image);
+          }
         },
       });
       // TODO if trove is installed
