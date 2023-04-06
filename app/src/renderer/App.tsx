@@ -1,8 +1,10 @@
 import { MotionConfig } from 'framer-motion';
+import { Fill } from 'react-spaces';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner, Text } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system';
+import { LoginDialog } from '@holium/shared';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -25,9 +27,14 @@ function AppContentPresenter() {
   if (isOnboarding) {
     // TODO onboarding here
     return (
-      <Flex>
-        <Text.Custom>onboarding</Text.Custom>
-      </Flex>
+      <Fill>
+        <Flex height="100vh" alignItems="center" justifyContent="center">
+          <LoginDialog
+            onNoAccount={() => {}}
+            onLogin={() => Promise.resolve(false)}
+          />
+        </Flex>
+      </Fill>
     );
   }
   if (isLoggedOut) {

@@ -1,15 +1,7 @@
-import {
-  detach,
-  Instance,
-  types,
-  flow,
-  applySnapshot,
-  castToSnapshot,
-  getSnapshot,
-} from 'mobx-state-tree';
-import { defaultTheme as dt } from '@holium/shared';
-import { bgIsLightOrDark } from '@holium/design-system';
+import { Instance, types, applySnapshot, getSnapshot } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
+import { bgIsLightOrDark } from '@holium/design-system';
+import { defaultTheme as dt } from 'os/services/theme.model';
 
 export const Theme = types
   .model('Theme', {

@@ -110,6 +110,7 @@ export class AuthService extends AbstractService {
     }
   }
 
+  // Call this from onboarding.
   // public createAccount(
   //   patp: string,
   //   password: string,
