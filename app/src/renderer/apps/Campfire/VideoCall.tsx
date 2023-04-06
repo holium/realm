@@ -78,9 +78,13 @@ export const VideoCall = observer(() => {
   }, []);
 
   const roomsManager = useRooms(ship?.patp);
-  const callers = roomsManager
+  /*const callers = roomsManager
     ? [...Array.from(roomsManager.protocol.peers.keys())]
-    : [];
+    : [];*/
+  const callers = ['~zod', '~nus'];
+  // const callers = ['~zod', '~bus'];
+  const threeAcross = callers.length > 4;
+  console.log('in', threeAcross);
 
   const presentRoom = useMemo(() => {
     if (!roomsManager?.live.room) return;
@@ -104,25 +108,40 @@ export const VideoCall = observer(() => {
         padding={20}
         gap={20}
       >
-        <Flex maxHeight="90%">
+        <Flex
+          maxHeight="90%"
+          gap={20}
+          flexWrap="wrap"
+          maxWidth="100%"
+          flex={1}
+          justifyContent="center"
+        >
           {video ? (
-            <Webcam
-              videoConstraints={{
-                facingMode: 'user',
-              }}
-              audio={false}
-              screenshotFormat="image/jpeg"
-              ref={webcamRef}
-              style={{
-                objectFit: 'cover',
-                width: '100%',
-                height: '100%',
-                borderRadius: 10,
-              }}
-              mirrored={true}
-            ></Webcam>
+            <Flex flex="0 0 48%">
+              <Webcam
+                videoConstraints={{
+                  facingMode: 'user',
+                }}
+                audio={false}
+                screenshotFormat="image/jpeg"
+                ref={webcamRef}
+                style={{
+                  objectFit: 'cover',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 10,
+                }}
+                mirrored={true}
+              ></Webcam>
+            </Flex>
           ) : (
-            <Flex justifyContent="center" alignItems="center" flex={1}>
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              background={theme.currentTheme.windowColor}
+              borderRadius={9}
+              flex={threeAcross ? '0 0 32%' : '0 0 48%'}
+            >
               <Avatar
                 patp={ship?.patp ?? ''}
                 size={30}
@@ -146,7 +165,12 @@ export const VideoCall = observer(() => {
             </Flex>
           ) : (
             callers.map((person: string) => (
-              <VideoCaller key={person} type="caller" person={person} />
+              <VideoCaller
+                key={person}
+                type="caller"
+                person={person}
+                threeAcross={threeAcross}
+              />
             ))
           )}
         </Flex>
@@ -224,14 +248,16 @@ export const VideoCall = observer(() => {
                 setVideo(!video);
               }}
             />
-            <CommButton
-              icon={'ScreenShare'}
-              customBg={screenSharing ? accentColor : commButtonBg}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setScreenSharing(!screenSharing);
-              }}
-            />
+            <Flex>
+              <CommButton
+                icon={'ScreenShare'}
+                customBg={screenSharing ? accentColor : commButtonBg}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  setScreenSharing(!screenSharing);
+                }}
+              />
+            </Flex>
             <CommButton
               icon={'AudioInput'}
               customBg={commButtonBg}

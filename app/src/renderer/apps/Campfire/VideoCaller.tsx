@@ -17,6 +17,7 @@ interface ICaller {
   person: string;
   cursors?: boolean;
   type: 'our' | 'caller' | 'listener' | 'creator';
+  threeAcross?: boolean;
 }
 
 const callerType = {
@@ -107,6 +108,8 @@ const CallerPresenter = (props: ICaller) => {
     }
   }, [peer]);
 
+  console.log('threeAcross', props.threeAcross);
+
   return (
     <CallerWrapper
       id={`room-caller-${person}`}
@@ -119,6 +122,7 @@ const CallerPresenter = (props: ICaller) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
+      flex={props.threeAcross ? '0 0 32%' : '0 0 48%'}
     >
       <Flex
         style={{ pointerEvents: 'none' }}
@@ -132,7 +136,7 @@ const CallerPresenter = (props: ICaller) => {
           alignItems="center"
           gap={0}
         >
-          <video ref={callerVideo} autoPlay playsInline></video>
+          {/*<video ref={callerVideo} autoPlay playsInline></video>*/}
           <Avatar
             clickable={false}
             opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}

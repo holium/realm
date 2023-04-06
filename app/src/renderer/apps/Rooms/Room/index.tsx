@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { Badge } from 'renderer/components';
-import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
+import {
+  CommButton,
+  Flex,
+  Button,
+  Icon,
+  Text,
+  Tooltip,
+} from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { VoiceView } from './Voice';
@@ -61,6 +68,8 @@ const RoomPresenter = () => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
+
+  const openInCampfire = () => {};
 
   return (
     <>
@@ -135,6 +144,15 @@ const RoomPresenter = () => {
             <Icons name="InfoCircle" />
           </IconButton> */}
         </Flex>
+        <Tooltip
+          id="create-chat-tooltip"
+          placement="top-right"
+          content={'Open in Campfire'}
+        >
+          <Button.IconButton onClick={openInCampfire}>
+            <Icon name="AddBonfire" size={30} />
+          </Button.IconButton>
+        </Tooltip>
       </Flex>
       <Flex position="relative" flex={1} flexDirection="column">
         {roomView === 'voice' && <VoiceView />}
