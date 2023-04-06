@@ -8,6 +8,7 @@ import {
 import { displayDate } from 'os/lib/time';
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatMessageType, ChatModelType } from '../models';
+import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
   width: number;
@@ -91,15 +92,17 @@ export const ChatLogList = ({
   };
 
   return (
-    <WindowedList
-      innerRef={listRef}
-      data={messages}
-      followOutput="auto"
-      width={width + scrollbarWidth}
-      height={height}
-      style={{ marginRight: -scrollbarWidth }}
-      initialTopMostItemIndex={messages.length - 1}
-      itemContent={renderChatRow}
-    />
+    <Gallery>
+      <WindowedList
+        innerRef={listRef}
+        data={messages}
+        followOutput="auto"
+        width={width + scrollbarWidth}
+        height={height}
+        style={{ marginRight: -scrollbarWidth }}
+        initialTopMostItemIndex={messages.length - 1}
+        itemContent={renderChatRow}
+      />
+    </Gallery>
   );
 };
