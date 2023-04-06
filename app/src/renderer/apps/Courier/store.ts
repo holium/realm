@@ -38,12 +38,13 @@ const ChatStore = types
     },
     get pinnedChatList() {
       return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path))
+        .filter((c) => self.pinnedChats.includes(c.path) || (c.type === 'space-chat' && c.path.includes(servicesStore.spaces.selected.path)) )
         .sort(sortByUpdatedAt);
     },
     get unpinnedChatList() {
       return self.inbox
         .filter((c) => !self.pinnedChats.includes(c.path))
+        .filter((c) => !(self.pinnedChats.includes(c.path) || (c.type === 'space-chat' && c.path.includes(servicesStore.spaces.selected.path)) ))
         .sort(sortByUpdatedAt);
     },
     getChatHeader(path: string): {

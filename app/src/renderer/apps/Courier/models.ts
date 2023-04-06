@@ -192,7 +192,7 @@ export const ChatMessage = types
   }));
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
-const ChatTypes = types.enumeration(['dm', 'group', 'space']);
+const ChatTypes = types.enumeration(['dm', 'group', 'space-chat']);
 export type ChatRowType = Instance<typeof ChatTypes>;
 
 export const Chat = types
