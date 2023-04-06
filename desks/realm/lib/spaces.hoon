@@ -72,6 +72,18 @@
       [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%add-ship-to-chat k.kv ship])]~
   ==
 
+::  creates the necessary cards for poking %chat-db to remove the new ship
+::  to all chats within the space
+++  remove-ship-from-space-chats
+  |=  [=ship =space:store =bowl:gall]
+  ^-  (list card:agent:gall)
+  %-  zing
+  %+  turn
+    ~(tap by chats.space)
+  |=  kv=[k=path v=chat:store]
+  ^-  (list card:agent:gall)
+  [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%remove-ship-from-chat k.kv ship])]~
+
 ++  create-space
   |=  [=ship slug=@t payload=add-payload:store updated-at=@da]
   ^-  space:store
