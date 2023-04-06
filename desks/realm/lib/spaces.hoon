@@ -4,20 +4,33 @@
 =,  store
 |%
 
+++  pathify-space-path
+  |=  =space-path:store
+  ^-  path
+  /(scot %p ship.space-path)/(wood space.space-path)
+
+:: TODO make this smart enough to actually do different logic based on
+:: the value of `chat-access`, instead of just always doing the logic
+:: for [%role %member]
 ++  create-space-chat
   |=  [=space:store =chat-access:store =members:member-store t=@da]
   ^-  (quip card:agent:gall space:store)
-  =/  chat-path  /realm/space-chat/(scot %uv (sham path.space))
+  ::  spaces chats path format: /spaces/<space-path>/chats/<@uv>
+  =/  chat-path  (weld /spaces (weld (pathify-space-path path.space) /chats/(scot %uv (sham path.space))))
   =/  pathrow=path-row:chat-db  [chat-path *(map cord cord) %space-chat t t ~ %host %.n *@dr]
   =/  all-peers=ship-roles:chat-db
     ::?+  -.chat-access  !! :: default crash not-implemented an access type
     ::  %members
         %+  turn
-          ~(tap by members)
+          %+  skim
+            ~(tap by members)
+          |=  kv=[k=ship v=member:member-store]
+          &(|(=(status.v.kv %joined) =(status.v.kv %host)) (~(has in roles.v.kv) %member))
         |=  kv=[k=ship v=member:member-store]
         [k.kv ?:(=(status.v.kv %host) %host %member)]
       :: TODO logic for peers lists for %admins %invited %whitelist and %blacklist
     ::==
+  ~&  >>>  all-peers
   =/  cards
     %+  turn
       all-peers
@@ -28,25 +41,24 @@
 
   [cards space]
 
-++  conditionally-add-ship-to-space-chats
-  |=  [=ship action=?(%member-join %role-change %invited) =space:store =bowl:gall]
+::  creates the necessary cards for poking %chat-db to add the new ship
+::  to all the relevant chats it should be added to
+++  add-ship-to-matching-chats
+  |=  [=ship =member:member-store =space:store =bowl:gall]
   ^-  (list card:agent:gall)
   %-  zing
   %+  turn
     ~(tap by chats.space)
   |=  kv=[k=path v=chat:store]
   ^-  (list card:agent:gall)
-  ?:  &(=(action %member-join) =(-.access.v.kv %members))
-    =/  pathpeers  (scry-peers:rc-lib k.kv bowl)
-    =/  matches  (skim pathpeers |=(p=peer-row:chat-db =(patp.p ship)))
-    ?.  =(0 (lent matches))
-      ~
-    [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%add-ship-to-chat k.kv ship])]~
-  ?:  &(=(action %role-change) =(-.access.v.kv %admins))
-    ~  :: TODO handle detecting if we need to add this ship to the chat
-  ?:  &(=(action %invited) =(-.access.v.kv %invited))
-    ~  :: TODO handle detecting if we need to add this ship to the chat
-  ~
+  ?+  -.access.v.kv  ~ :: TODO handle other modes of chat access
+    %role
+      ?.  &((~(has in roles.member) role.access.v.kv) |(=(%joined status.member) =(%host status.member)))  ~
+      =/  pathpeers   (scry-peers:rc-lib k.kv bowl)
+      =/  matches     (skim pathpeers |=(p=peer-row:chat-db =(patp.p ship)))
+      ?:  (gth (lent matches) 0)  ~  :: this ship is already in this chat, so no need to add them
+      [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%add-ship-to-chat k.kv ship])]~
+  ==
 
 ++  create-space
   |=  [=ship slug=@t payload=add-payload:store updated-at=@da]
@@ -116,13 +128,13 @@
         %remove
       :-  %remove
       %-  pairs
-      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(wood space.path.rct))]
+      :~  [%space-path s+(spat (pathify-space-path path.rct))]
       ==
     ::
         %remote-space
       :-  %remote-space
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(wood space.path.rct))]
+      :~  [%path s+(spat (pathify-space-path path.rct))]
           [%space (spc:encode space.rct)]
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
@@ -130,7 +142,7 @@
         %current
       :-  %current
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(wood space.path.rct))]
+      :~  [%path s+(spat (pathify-space-path path.rct))]
           [%space s+space.path.rct]
       ==
     
@@ -333,9 +345,8 @@
     %-  pairs
     %+  turn  ~(tap by spaces)
     |=  [pth=space-path:store space=space:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(wood space.pth))
     ^-  [cord json]
-    [spc-path (spc space)]
+    [(spat (pathify-space-path pth)) (spc space)]
   ::
   ++  membership-map
     |=  =membership:member-store
@@ -343,9 +354,8 @@
     %-  pairs
     %+  turn  ~(tap by membership)
     |=  [pth=space-path:store members=members:member-store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(wood space.pth))
     ^-  [cord json]
-    [spc-path (membs members)]
+    [(spat (pathify-space-path pth)) (membs members)]
   ::
   ++  membs
     |=  =members:member-store
@@ -368,7 +378,7 @@
     |=  current=space-path:store
     ^-  json
     %-  pairs
-    :~  ['path' s+(spat /(scot %p ship.current)/(wood space.current))]
+    :~  ['path' s+(spat (pathify-space-path current))]
         ['space' s+space.current]
     ==
   ::
@@ -376,7 +386,7 @@
     |=  =space
     ^-  json
     %-  pairs
-    :~  ['path' s+(spat /(scot %p ship.path.space)/(wood space.path.space))]
+    :~  ['path' s+(spat (pathify-space-path path.space))]
         ['name' s+name.space]
         ['description' s+description.space]
         ['access' s+access.space]
@@ -409,16 +419,15 @@
     %-  pairs
     %+  turn  ~(tap by invitations)
     |=  [pth=space-path:store inv=invite:visas]
-    =/  spc-path  (spat /(scot %p ship.pth)/(wood space.pth))
     ^-  [cord json]
-    [spc-path (invite inv)]
+    [(spat (pathify-space-path pth)) (invite inv)]
   ::
   ++  invite
     |=  =invite:visas
     ^-  json
     %-  pairs:enjs:format
     :~  ['inviter' s+(scot %p inviter.invite)]
-        ['path' s+(spat /(scot %p ship.path.invite)/(wood space.path.invite))]
+        ['path' s+(spat (pathify-space-path path.invite))]
         ['role' s+(scot %tas role.invite)]
         ['message' s+message.invite]
         ['name' s+name.invite]

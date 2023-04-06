@@ -29,11 +29,10 @@
       window-color=@t
       wallpaper=@t
   ==
-::
+:: handle-leave, handle-kick, handle-join, handle-accept
 +$  chat-access
-  $%  [%members ~]  :: ships in the members map
-      [%admins ~]   :: ships in the members map that are also admins
-      [%invited ~]  :: ships in the invitations map
+  $%  [%role =role:membership]        :: ships in the members map with status %joined or %host, and a specified role
+      [%all ~]                        :: any ship in the members map, regardless of status
       [%whitelist ships=(set ship)]   :: specific ships, must also be in members map
       [%blacklist ships=(set ship)]   :: all ships in members map, except specific ships
   ==

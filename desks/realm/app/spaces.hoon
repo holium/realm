@@ -52,14 +52,15 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  our-name                `@t`(scot %p our.bowl)
-    =/  our-space               (create-space:lib our.bowl 'our' [name=our-name '' %our %private '' '#000000' %home] now.bowl)
-    =/  our-member              [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]
-    =/  our-members             (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
-    =/  initial-membs           `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
-    =/  initial-spaces          `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =.  state                   [%2 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
-    `this
+    =/  our-name              `@t`(scot %p our.bowl)
+    =/  our-space             (create-space:lib our.bowl 'our' [name=our-name '' %our %private '' '#000000' %home] now.bowl)
+    =/  our-member            [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]
+    =/  our-members           (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
+    =/  initial-membs         `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
+    =/  initial-spaces        `spaces:store`(~(put by spaces.state) [path:our-space our-space])
+    =.  state                 [%2 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
+    =/  cards                 [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+    [cards this]
   ::
   ++  on-save
     ^-  vase
@@ -69,10 +70,9 @@
     |=  old-state=vase
     ^-  (quip card _this)
     :: do a quick check to make sure we are subbed to /db in %chat-db
-    =/  cards
-      ?:  =(wex.bowl ~)
-        [%pass /db %agent [our.bowl %chat-db] %watch /db]~
-      ~
+    =/  cards=(list card)
+      ?:  (~(has by wex.bowl) [/db our.bowl %chat-db])  ~
+      [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     =/  old  !<(versioned-state old-state)
     ?-  -.old
       :: recursively upgrade all the way to %2
@@ -101,11 +101,24 @@
               *chats:store
             ]
           ]
-        =/  new-spaces=spaces:store
-          (~(gas by *spaces:store) to-add)
-        :: TODO add cards for each new space to poke out into chat-db
-        :: for its default chat
-        [cards this(state [%2 new-spaces invitations.old membership.old current.old])]
+        =/  new-spaces=spaces:store  (~(gas by *spaces:store) to-add)
+
+        =/  index=@ud  0
+        =/  to-add-chat=(list [k=space-path:store v=space:store])
+          %+  skim
+            ~(tap by new-spaces)
+          |=  kv=[k=space-path:store v=space:store]
+          =(ship.path.v.kv our.bowl)
+        |-
+          ?:  =(index (lent to-add-chat))
+            ~&  >>>  'should be sending pokes to members of new chats in old spaces'
+            ~&  >>>  cards
+            [cards this(state [%2 new-spaces invitations.old membership.old current.old])]
+          =/  kv  (snag index to-add-chat)
+          =/  members             (~(got by membership.old) k.kv)
+          =/  cards-and-space     (create-space-chat:lib v.kv [%role %member] members now.bowl)
+          $(index +(index), cards (weld cards -.cards-and-space), new-spaces (~(put by new-spaces) k.kv +.cards-and-space))
+
 
       :: we're already upgraded
       %2  [cards this(state old)]
@@ -332,7 +345,7 @@
               [cards this]
             ==
         ==
-      [%dbpoke ~]
+      [%dbpoke ~] :: for handling poke-acks from chat-DB (db)
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
@@ -340,7 +353,15 @@
             ~&  >>>  p.sign
             `this
         ==
-      [%db ~]
+      [%rcpoke ~] :: for handling poke-acks from Realm-Chat (rc)
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%spaces: {<(spat wire)>} rcpoke failed"
+            ~&  >>>  p.sign
+            `this
+        ==
+      [%db ~]   :: for handling subscription updates from chat-db
         ?+    -.sign    (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -422,8 +443,8 @@
       =.  membership.state      (~(put by membership.state) [path.new-space members])
 
       :: create the space-chat
-      =/  access-type=chat-access:store    [%members ~]
-      =/  cards-and-space  (create-space-chat:lib new-space access-type members now.bowl)
+      =/  access-type=chat-access:store    [%role %member]
+      =/  cards-and-space     (create-space-chat:lib new-space access-type members now.bowl)
       =/  cards=(list card)   -.cards-and-space
       =.  new-space           +.cards-and-space
 
@@ -527,9 +548,9 @@
       ++  host-handle-join
         |=  [path=space-path:store =ship]
         ^-  (quip card _state)
+        =/  space  (~(got by spaces.state) path)
         =.  membership.state
           =/  space-members   (~(got by membership.state) path)
-          =/  space  (~(got by spaces.state) path)
           =/  member
             ?:  =(%public access.space)
               ^-  (unit member:membership-store)
@@ -550,6 +571,8 @@
         =/  member-path             /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths             [member-path /updates ~]
         =/  cards
+          %+  weld
+            (add-ship-to-matching-chats:lib ship member space bowl)
           ^-  (list card)
           ::  temporarily using %invite-accepted until we can add a new action
           :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
@@ -830,7 +853,7 @@
         =/  cards=(list card)
           %+  weld
             ^-  (list card)
-            (conditionally-add-ship-to-space-chats:lib src.bowl %member-join (~(got by spaces.state) path) bowl)
+            (add-ship-to-matching-chats:lib accepter upd-mem (~(got by spaces.state) path) bowl)
           ^-  (list card)
           :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
               :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
