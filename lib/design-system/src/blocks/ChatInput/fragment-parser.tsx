@@ -61,7 +61,7 @@ const parserRules: ParserRules = {
     priority: 0,
   },
   blockquote: {
-    token: '> ',
+    token: /(^|\n)> /,
     tokenLength: 2,
     ender: /\n|$/,
     enderLength: 1,

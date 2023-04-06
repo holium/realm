@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import { lighten } from 'polished';
 import { LayoutGroup, motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
-import { delay } from 'lodash';
 
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { AccountModelType } from 'renderer/stores/models/account.model';
 import { useAppState } from 'renderer/stores/app.store';
 
@@ -63,6 +58,18 @@ const ShipSelectorPresenter = ({
             if (!dragging) {
               onSelect(ship);
               setTheme(ship.theme);
+              // const selectedPatp = await AuthActions.getSelected();
+              // if (selectedPatp) {
+              //   if (selectedPatp !== ship.patp) {
+              //     !dragging && AuthActions.setSelected(ship.patp);
+              //     setLoginError('');
+              //     const currTheme = await AuthActions.getShipTheme(ship.patp);
+              //     if (currTheme) {
+              //       theme.setCurrentTheme(currTheme);
+              //     } else {
+              //       console.error('Error: no theme found for ship:', ship.patp);
+              //     }
+              //   }
             }
           }}
           onMouseUp={() => {

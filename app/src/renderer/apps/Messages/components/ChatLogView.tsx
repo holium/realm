@@ -34,7 +34,8 @@ export const ChatLogView = ({
         <WindowedList
           width={364}
           data={messages}
-          rowRenderer={(message, index, measure) => (
+          initialTopMostItemIndex={messages.length - 1}
+          itemContent={(index, message) => (
             <ChatMessage
               isSending={message.pending}
               // Only show author if it's a group
@@ -56,10 +57,8 @@ export const ChatLogView = ({
               ourColor={ship.color || '#569BE2'}
               contents={message.contents}
               timeSent={message.timeSent}
-              onImageLoad={measure}
             />
           )}
-          startAtBottom
         />
       </Flex>
     ),

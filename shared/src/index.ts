@@ -1,1 +1,1 @@
-export { defaultTheme } from './constants/theme';
+export * from './onboarding';

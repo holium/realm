@@ -78,9 +78,8 @@ const RoomChatPresenter = () => {
       <WindowedList
         width={354}
         height={listHeight}
-        data={chats}
-        sort={(a, b) => a.timeReceived - b.timeReceived}
-        rowRenderer={(chat, index) => (
+        data={chats.sort((a, b) => a.timeReceived - b.timeReceived)}
+        itemContent={(index, chat) => (
           <RoomChatMessage
             key={chat.index}
             chat={chat}
@@ -93,7 +92,6 @@ const RoomChatPresenter = () => {
             }
           />
         )}
-        startAtBottom
       />
     );
   }, [chats]);
