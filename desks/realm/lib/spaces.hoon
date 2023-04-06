@@ -17,7 +17,15 @@
   ^-  (quip card:agent:gall space:store)
   ::  spaces chats path format: /spaces/<space-path>/chats/<@uv>
   =/  chat-path  (weld /spaces (weld (pathify-space-path path.space) /chats/(scot %uv (sham path.space))))
-  =/  pathrow=path-row:chat-db  [chat-path *(map cord cord) %space-chat t t ~ %host %.n *@dr]
+  =/  metadata-settings
+    :~  ['image' '']
+        ['title' (crip "{(trip name.space)}: general chat")]
+        ['description' '']
+        ['creator' (scot %p ship.path.space)]
+        ['reactions' 'true']
+    ==
+  =/  metadata=(map cord cord)   (~(gas by *(map cord cord)) metadata-settings)
+  =/  pathrow=path-row:chat-db  [chat-path metadata %space-chat t t ~ %host %.n *@dr]
   =/  all-peers=ship-roles:chat-db
     ::?+  -.chat-access  !! :: default crash not-implemented an access type
     ::  %members
@@ -25,7 +33,11 @@
           %+  skim
             ~(tap by members)
           |=  kv=[k=ship v=member:member-store]
-          &(|(=(status.v.kv %joined) =(status.v.kv %host)) (~(has in roles.v.kv) %member))
+          :: matching members are status %joined or %host AND have
+          :: either %member or %owner roles
+          ?&  |(=(status.v.kv %joined) =(status.v.kv %host))
+              |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %owner))
+          ==
         |=  kv=[k=ship v=member:member-store]
         [k.kv ?:(=(status.v.kv %host) %host %member)]
       :: TODO logic for peers lists for %admins %invited %whitelist and %blacklist
