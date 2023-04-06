@@ -17,7 +17,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   live: {
     room?: RoomType;
     chat: ChatModelType[];
-  };
+  }[];
   context: {
     path?: string;
     provider: Patp;
@@ -34,10 +34,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       video,
     });
 
-    this.live = {
+    this.live = []; /*{
       room: undefined,
       chat: [],
-    };
+    };*/
 
     this.context = {
       path: undefined,
@@ -72,7 +72,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
-      if (this.live.room?.rid === rid) {
+      if (this.live.find((room: any) => room.rid === rid)) {
         this.clearLiveRoom();
       }
     });
@@ -121,11 +121,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   cleanup() {
-    if (this.live.room) {
-      if (this.live.room.creator === this.our) {
-        return this.deleteRoom(this.live.room.rid);
-      } else {
-        return this.leaveRoom();
+    if (this.live.length > 0) {
+      for (const room of this.live) {
+        if (room.creator === this.our) {
+          return this.deleteRoom(room.rid);
+        } else {
+          return this.leaveRoom();
+        }
       }
     }
 
@@ -178,24 +180,34 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   sendChat(content: string) {
-    this.live.chat.push({
-      author: this.protocol.our,
-      index: this.live.chat.length,
-      content,
-      timeReceived: Date.now(),
-      isRightAligned: true,
-    });
-    this.protocol.sendChat(content);
+    const chat = this.live.find(
+      (room: any) => room.rid === this.presentRoom?.rid
+    )?.chat;
+    if (chat) {
+      chat.push({
+        author: this.protocol.our,
+        index: chat.length,
+        content,
+        timeReceived: Date.now(),
+        isRightAligned: true,
+      });
+      this.protocol.sendChat(content);
+    }
   }
 
   onChat(peer: Patp, content: string) {
-    this.live.chat.push({
-      author: peer,
-      index: this.live.chat.length,
-      content,
-      timeReceived: Date.now(),
-      isRightAligned: false,
-    });
+    const chat = this.live.find(
+      (room: any) => room.rid === this.presentRoom?.rid
+    )?.chat;
+    if (chat) {
+      chat.push({
+        author: peer,
+        index: chat.length,
+        content,
+        timeReceived: Date.now(),
+        isRightAligned: false,
+      });
+    }
   }
 
   setProvider(provider: string) {
