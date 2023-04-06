@@ -3,9 +3,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
 import {
-  Box,
   Flex,
-  WindowedList,
   Text,
   Reply,
   measureImage,
@@ -18,12 +16,11 @@ import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
-import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { useServices } from 'renderer/logic/store';
 import { ChatMessageType, ChatModelType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-import { displayDate } from 'os/lib/time';
+import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   width: 100%;
@@ -198,66 +195,12 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   />
                 </FullWidthAnimatePresence>
               )}
-              <WindowedList
-                key={`${path}-${selectedChat.lastFetch}-${messages.length}`}
-                startAtBottom
-                hideScrollbar
+              <ChatLogList
+                messages={messages}
+                selectedChat={selectedChat}
                 width={containerWidth}
                 height={height}
-                data={messages}
-                rowRenderer={(row, index, measure) => {
-                  const isLast = selectedChat
-                    ? index === messages.length - 1
-                    : false;
-
-                  const isNextGrouped =
-                    index < messages.length - 1 &&
-                    row.sender === messages[index + 1].sender;
-
-                  const isPrevGrouped =
-                    index > 0 &&
-                    row.sender === messages[index - 1].sender &&
-                    Object.keys(messages[index - 1].contents[0])[0] !==
-                      'status';
-
-                  const topSpacing = isPrevGrouped ? '3px' : 2;
-                  const bottomSpacing = isNextGrouped ? '3px' : 2;
-
-                  const thisMsgDate = new Date(row.createdAt).toDateString();
-                  const prevMsgDate =
-                    messages[index - 1] &&
-                    new Date(messages[index - 1].createdAt).toDateString();
-                  const showDate: boolean =
-                    index === 0 || thisMsgDate !== prevMsgDate;
-                  return (
-                    <Box
-                      mx="1px"
-                      pt={topSpacing}
-                      pb={isLast ? bottomSpacing : 0}
-                    >
-                      {showDate && (
-                        <Text.Custom
-                          opacity={0.5}
-                          fontSize="12px"
-                          fontWeight={500}
-                          textAlign="center"
-                          mt={2}
-                          mb={2}
-                        >
-                          {displayDate(row.createdAt)}
-                        </Text.Custom>
-                      )}
-                      <ChatMessage
-                        isPrevGrouped={isPrevGrouped}
-                        isNextGrouped={isNextGrouped}
-                        containerWidth={containerWidth}
-                        message={row as ChatMessageType}
-                        ourColor={ourColor}
-                        measure={measure}
-                      />
-                    </Box>
-                  );
-                }}
+                ourColor={ourColor}
               />
             </Flex>
           )}

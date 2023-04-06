@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
+import { WindowedList } from '@holium/design-system';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-
 import { Flex, Text, ActionButton, Icons } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
-import { WindowedList } from '@holium/design-system';
 
 export interface Space {
   color?: string;
@@ -108,11 +107,10 @@ const SpacesListPresenter = ({
   return (
     <Flex flex={1} width="100%">
       <WindowedList
-        rowHeight={56}
         key={`${spaces.length}-${incoming.length}`}
         width={354}
         data={rows}
-        rowRenderer={({ space, visa }) => {
+        itemContent={(_, { space, visa }) => {
           if (space) {
             return (
               <SpaceRow
