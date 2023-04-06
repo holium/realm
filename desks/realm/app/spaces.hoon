@@ -518,11 +518,14 @@
       ?>  (has-auth:security path src.bowl %owner)
       ?:  =('our' space.path) :: we cannot delete our space
         `state
-      =.  spaces.state                (~(del by spaces.state) path)
-      =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
+      =/  thespace            (~(got by spaces.state) path)
+      =.  spaces.state        (~(del by spaces.state) path)
+      =/  watch-paths         [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
-      =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
+      =/  space-members       `(map ship member:membership-store)`(~(got by membership.state) path)
       =.  cards
+        %+  weld
+          (remove-ship-from-space-chats:lib ship.path thespace bowl)
         %+  weld  cards
         %+  murn  ~(tap by space-members)
         |=  [=ship =member:membership-store]
@@ -598,11 +601,14 @@
       ::
       ++  member-handle-leave
         |=  [path=space-path:store]
+        =/  thespace              (~(got by spaces.state) path)
         =.  spaces.state          (~(del by spaces.state) path)
         =.  membership.state      (~(del by membership.state) path)
         =/  has-incoming          (~(get by invitations.state) path)
         =/  watch-path            [/spaces/(scot %p ship.path)/(scot %tas space.path)]
         =/  cards
+          %+  weld
+            (remove-ship-from-space-chats:lib our.bowl thespace bowl)
           ^-  (list card)
           :~
             [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%leave path])]
@@ -930,6 +936,8 @@
         :: =/  notify=action:hark        (notify path /realm (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
         =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  cards
+          %+  weld
+            (remove-ship-from-space-chats:lib ship (~(got by spaces.state) path) bowl)
           ^-  (list card)
           :~  [%give %fact [watch-path /updates ~] visa-reaction+!>([%kicked path ship])]
               [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]
