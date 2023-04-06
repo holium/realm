@@ -23,6 +23,7 @@
     "react-player": "^2.11.0",
     "react-spotify-embed": "^1.0.4",
     "react-twitter-embed": "^4.0.4",
+    "react-virtuoso": "^4.2.0",
     "urbit-ob": "^5.0.1"
   },
   "devDependencies": {

@@ -59,13 +59,13 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
       [results.length, search.length]
     );
 
-    const RowRenderer = (contact: (typeof results)[number]) => {
+    const RowRenderer = (index: number, contact: (typeof results)[number]) => {
       const nickname = contact[1].nickname ?? '';
       const sigilColor = contact[1].color ?? '#000000';
       const avatar = contact[1].avatar;
       return (
         <Row
-          key={contact[0]}
+          key={`${contact[0]}-${nickname}-${index}`}
           style={{ justifyContent: 'space-between' }}
           onClick={(evt: any) => {
             evt.stopPropagation();
@@ -112,38 +112,8 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         </Row>
       );
     };
-    // Todo, move the show logic in here
-    if (results.length === 0) {
-      return (
-        <Flex
-          flex={1}
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          gap={24}
-        >
-          {/* <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.6}
-                  >
-                    No DMs
-                  </Text> */}
-          {/* <Text
-            color={textColor}
-            width={200}
-            fontSize={2}
-            textAlign="center"
-            opacity={0.3}
-          >
-            Type a valid ID
-          </Text> */}
-        </Flex>
-      );
-    }
     const resultList = (
-      <WindowedList data={results} rowRenderer={RowRenderer} />
+      <WindowedList data={results} itemContent={RowRenderer} />
     );
 
     if (isDropdown) {

@@ -1,107 +1,77 @@
-import { useMemo, useRef } from 'react';
-import { Box } from '../Box/Box';
-import { AutoSizer } from './source/AutoSizer/AutoSizer';
-import { CellMeasurer } from './source/CellMeasurer/CellMeasurer';
-import { CellMeasurerCache } from './source/CellMeasurer/CellMeasurerCache';
-import { Scroll } from './source/List/types';
-import { StyledList } from './WindowedList.styles';
-import { Gallery } from 'react-photoswipe-gallery';
+import { Ref } from 'react';
+import styled from 'styled-components';
+import { Virtuoso, VirtuosoProps, VirtuosoHandle } from 'react-virtuoso';
 
-type WindowedListProps<T> = {
-  data: T[];
-  rowRenderer: (
-    rowData: T,
-    index: number,
-    measure: () => void,
-    sortedAndFilteredData: T[]
-  ) => JSX.Element;
-  /**
-   * The width of the list. If undefined, the list will auto-size to the width of its parent container.
-   * It is preferred to set this value if known ahead of time, to save render time.
-   */
-  width?: number;
-  /**
-   * The height of the list. If undefined, the list will auto-size to the height of its parent container.
-   * It is preferred to set this value if known ahead of time, to save render time.
-   */
-  height?: number;
-  /**
-   * The height of the row. If undefined, the row will auto-size to the height of its parent container.
-   * It is preferred to set this value if known ahead of time, to save render time.
-   */
-  rowHeight?: number;
-  onScroll?: (params: Scroll) => void;
+const Container = styled.div<{ hideScrollbar?: boolean }>`
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  > :nth-child(1) {
+    overflow-x: hidden;
+
+    /* custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 20px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-track {
+      border-radius: 20px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+      background-color: transparent;
+    }
+  }
+
+  // On hover, show the scrollbar, unless hideScrollbar is true.
+  &:hover {
+    > :nth-child(1) {
+      ::-webkit-scrollbar-thumb {
+        background-color: rgba(var(--rlm-text-rgba), 0.5);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(var(--rlm-text-rgba), 1);
+      }
+
+      ::-webkit-scrollbar-track:hover {
+        background-color: rgba(var(--rlm-input-rgba), 0.5);
+      }
+    }
+  }
+`;
+
+export type WindowedListRef = VirtuosoHandle;
+
+type Props<ItemData = any, Context = any> = VirtuosoProps<ItemData, Context> & {
+  innerRef?: Ref<WindowedListRef>;
   hideScrollbar?: boolean;
-  startAtBottom?: boolean;
-  sort?: (a: T, b: T) => number;
-  filter?: (rowData: T, index: number) => boolean;
 };
 
-export const WindowedList = <T,>({
-  data: rawData,
-  rowRenderer,
-  width,
-  height,
-  rowHeight,
-  onScroll,
-  hideScrollbar = true,
-  startAtBottom = false,
-  sort = () => 0,
-  filter = () => true,
-}: WindowedListProps<T>) => {
-  const data = useMemo(
-    () => rawData.filter(filter).sort(sort),
-    [rawData, filter, sort]
-  );
-  const cache = useRef(
-    new CellMeasurerCache({
-      fixedWidth: true,
-      minWidth: width,
-      defaultWidth: width,
-      minHeight: rowHeight,
-      defaultHeight: rowHeight,
-    })
-  );
-
-  return (
-    <Box style={{ width: '100%', height: '100%' }}>
-      <Gallery>
-        <AutoSizer
-          defaultWidth={width}
-          defaultHeight={height}
-          disableWidth={Boolean(width)}
-          disableHeight={Boolean(height)}
-        >
-          {({ width: maybeAutoWidth, height: maybeAutoHeight }) => (
-            <StyledList
-              width={width ?? maybeAutoWidth}
-              height={height ?? maybeAutoHeight}
-              rowCount={data.length}
-              rowHeight={cache.current.rowHeight as any}
-              deferredMeasurementCache={cache.current}
-              rowRenderer={({ key, index, style, parent }) => (
-                <CellMeasurer
-                  key={key}
-                  cache={cache.current}
-                  parent={parent}
-                  rowIndex={index}
-                >
-                  {({ measure, registerChild }) => (
-                    <div style={style} ref={registerChild}>
-                      {rowRenderer(data[index], index, measure, data)}
-                    </div>
-                  )}
-                </CellMeasurer>
-              )}
-              onScroll={onScroll}
-              hideScrollbar={hideScrollbar}
-              startAtBottom={startAtBottom}
-              scrollToIndex={startAtBottom ? data.length - 1 : 0}
-              scrollToAlignment={startAtBottom ? 'end' : 'auto'}
-            />
-          )}
-        </AutoSizer>
-      </Gallery>
-    </Box>
-  );
-};
+export const WindowedList = <ItemData, Context = any>({
+  innerRef,
+  width = '100%',
+  height = '100%',
+  hideScrollbar = false,
+  style,
+  ...props
+}: Props<ItemData, Context>) => (
+  <Container hideScrollbar={hideScrollbar}>
+    <Virtuoso
+      ref={innerRef}
+      style={{
+        width,
+        height,
+        ...style,
+      }}
+      {...props}
+    />
+  </Container>
+);

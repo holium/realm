@@ -1,6 +1,5 @@
 import { Flex, BoxProps, Text } from '../../';
 import { NotificationType } from './Notifications.types';
-// import { WindowedList } from '../../';
 import { AppGroup } from './AppGroup';
 import { Notification } from './Notification';
 
