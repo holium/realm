@@ -11,7 +11,7 @@ import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from 'os/services/spaces/models/spaces';
 import { NewBazaarStore } from 'os/services/spaces/models/bazaar';
 import { AuthStore } from 'os/services/identity/auth.model';
-import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
+import { OnboardingModel } from 'renderer/stores/models/onboarding.model';
 import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
 import { DesktopActions } from './actions/desktop';
@@ -41,7 +41,7 @@ const Services = types
       auth: AuthStore,
     }),
     theme: ThemeStore,
-    onboarding: OnboardingStore,
+    onboarding: OnboardingModel,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
     bazaar: NewBazaarStore,
@@ -96,7 +96,9 @@ const services = Services.create({
       firstTime: true,
     },
   },
-  onboarding: {},
+  onboarding: {
+    step: '/',
+  },
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },

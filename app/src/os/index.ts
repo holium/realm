@@ -16,7 +16,6 @@ import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
-import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
@@ -44,7 +43,6 @@ export class Realm extends EventEmitter {
   private session?: ISession;
   private readonly db: Store<ISession>;
   readonly services: {
-    onboarding: OnboardingService;
     identity: {
       auth: AuthService;
     };
@@ -144,7 +142,6 @@ export class Realm extends EventEmitter {
     this.db = new Store(options);
     // Create an instance of all services
     this.services = {
-      onboarding: new OnboardingService(this),
       identity: {
         auth: new AuthService(this),
       },
@@ -238,7 +235,6 @@ export class Realm extends EventEmitter {
 
     const bootPayload = {
       auth: this.services.identity.auth.snapshot,
-      onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
       desktop,
@@ -456,7 +452,6 @@ export class Realm extends EventEmitter {
     await this.services.spaces.load(sessionPatp, params.reconnecting);
     this.services.chat.subscribe(sessionPatp);
     this.services.notification.subscribe(sessionPatp);
-    this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: this.services.ship.snapshot,
       models: this.services.ship.modelSnapshots,

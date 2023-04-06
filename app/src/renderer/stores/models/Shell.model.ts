@@ -1,4 +1,3 @@
-// import { osState, shipState } from './../store';
 import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
 import {
   AppWindowMobxType,

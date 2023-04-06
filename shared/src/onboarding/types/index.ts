@@ -65,3 +65,38 @@ export type ThirdEarthPortalSession = {
   return_url: string;
   url: string;
 };
+
+type OnboardingAccountPage =
+  | '/account'
+  | '/account/custom-domain'
+  | '/account/download-realm'
+  | '/account/s3-storage'
+  | '/account/statistics';
+
+type OnboardingSignupPage =
+  | '/'
+  | '/login'
+  | '/verify-email'
+  | '/choose-id'
+  | '/payment'
+  | '/booting'
+  | '/credentials'
+  | '/download';
+
+export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
+
+export const onboardingPages: OnboardingPage[] = [
+  '/',
+  '/login',
+  '/verify-email',
+  '/choose-id',
+  '/payment',
+  '/booting',
+  '/credentials',
+  '/download',
+  '/account',
+  '/account/custom-domain',
+  '/account/download-realm',
+  '/account/s3-storage',
+  '/account/statistics',
+];

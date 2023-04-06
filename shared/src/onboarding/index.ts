@@ -22,4 +22,6 @@ export type {
   ThirdEarthShip,
   ThirdEarthProduct,
   ThirdEarthPortalSession,
+  OnboardingPage,
 } from './types';
+export { onboardingPages } from './types';

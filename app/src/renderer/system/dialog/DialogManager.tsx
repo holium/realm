@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { useAppState } from 'renderer/stores/app.store';
 import { getCenteredPosition } from 'renderer/stores/lib/window-manager';
 
@@ -25,10 +24,8 @@ const DialogManagerPresenter = ({
 
   const onEsc = useCallback(() => {
     if (!dialogId) return;
-    const notOnboardingDialog = !Object.values(OnboardingStep).includes(
-      dialogId as OnboardingStep
-    );
-    if (isOpen && notOnboardingDialog && dialogConfig?.hasCloseButton) {
+
+    if (isOpen && dialogConfig?.hasCloseButton) {
       shellStore.closeDialog();
       if (dialogConfig.unblurOnClose) shellStore.setIsBlurred(false);
     }
