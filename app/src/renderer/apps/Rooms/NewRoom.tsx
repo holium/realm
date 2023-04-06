@@ -60,7 +60,7 @@ const NewRoomPresenter = () => {
   const roomsManager = useRooms(ship?.patp);
 
   const { form, name } = useMemo(
-    () => createRoomForm(roomsManager.rooms.map((room: any) => room.title)),
+    () => createRoomForm(roomsManager.rooms.map((room) => room.title)),
     []
   );
 
