@@ -63,6 +63,11 @@ export const TrayApp = ({
         if (`${id}-app` === event.target.id) {
           return;
         }
+        // If the lightbox node contains the click event target, don't close
+        const lightboxNode = document.getElementsByClassName('pswp')[0];
+        if (lightboxNode && lightboxNode.contains(event.target)) {
+          return;
+        }
         // If the app node does not contain the click event target, close it.
         const appNode = document.getElementById(`${id}-app`);
         if (appNode && !appNode.contains(event.target)) {
