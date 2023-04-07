@@ -36,7 +36,7 @@ export const ChatLogHeader = ({
 }: ChatLogHeaderProps) => {
   const { ship } = useServices();
   const { selectedChat, setSubroute, toggleMuted } = useChatStore();
-
+  const isSpaceChat = selectedChat?.type === 'space';
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
 
   const contextMenuOptions = useMemo(() => {
@@ -87,25 +87,27 @@ export const ChatLogHeader = ({
         },
       });
     }
+    if (!isSpaceChat) {
+      menu.push({
+        id: `${chatLogId}-leave-chat`,
+        icon: isAdmin ? 'Trash' : 'Logout',
+        section: 2,
+        iconColor: '#ff6240',
+        labelColor: '#ff6240',
+        label: isAdmin ? 'Delete chat' : 'Leave chat',
+        disabled: false,
+        onClick: () => {
+          // evt.stopPropagation();
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+            path,
+            amHost: isAdmin.toString(),
+            our: ship.patp,
+          });
+        },
+      });
+    }
 
-    menu.push({
-      id: `${chatLogId}-leave-chat`,
-      icon: isAdmin ? 'Trash' : 'Logout',
-      section: 2,
-      iconColor: '#ff6240',
-      labelColor: '#ff6240',
-      label: isAdmin ? 'Delete chat' : 'Leave chat',
-      disabled: false,
-      onClick: () => {
-        // evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
-          path,
-          amHost: isAdmin.toString(),
-          our: ship.patp,
-        });
-      },
-    });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [selectedChat?.hidePinned, isMuted]);
 

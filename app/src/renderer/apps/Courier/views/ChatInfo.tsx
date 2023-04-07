@@ -68,7 +68,7 @@ type ChatInfoProps = {
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { selectedChat, setSubroute, getChatHeader } = useChatStore();
   const { dimensions } = useTrayApps();
-  const { ship, spaces } = useServices();
+  const { ship, spaces, theme } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -450,8 +450,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     borderColor="intent-info"
                     borderRadius={6}
                     style={{
-                      borderColor: 'rgba(0, 0, 0, 0.125)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.065)',
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
+                      backgroundColor:
+                        theme.currentTheme.mode === 'dark'
+                          ? 'rgba(0, 0, 0, 0.125)'
+                          : 'rgba(0, 0, 0, 0.065)',
                     }}
                   >
                     <Icon name="InfoCircle" color="icon" mr={2} opacity={0.7} />

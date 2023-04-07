@@ -640,8 +640,8 @@ export class ChatService extends BaseService {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
@@ -738,8 +738,8 @@ export class ChatService extends BaseService {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
@@ -775,7 +775,6 @@ export class ChatService extends BaseService {
     path: string,
     _params?: { start: number; amount: number }
   ) {
-    console.log('getChatLog', path, _params);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_fragments AS (
