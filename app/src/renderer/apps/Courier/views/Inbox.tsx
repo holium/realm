@@ -14,12 +14,8 @@ import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
-<<<<<<< HEAD
 import InboxList from '../components/InboxList';
 import { useShipStore } from 'renderer/stores/ship.store';
-=======
-import { useServices } from 'renderer/logic/store';
->>>>>>> f4f79bcfe (working on getting the spaces chat logic in the various views)
 const rowHeight = 52;
 
 const sortFunction = (a: ChatModelType, b: ChatModelType) => {

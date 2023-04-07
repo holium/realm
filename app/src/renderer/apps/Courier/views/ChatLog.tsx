@@ -34,14 +34,8 @@ const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
-<<<<<<< HEAD
-  const { ship, notifStore, friends, chatStore } = useShipStore();
+  const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
-=======
-  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
-  const accountStore = useAccountStore();
-  const { ship, friends, spaces } = useServices();
->>>>>>> f4f79bcfe (working on getting the spaces chat logic in the various views)
   const [showAttachments, setShowAttachments] = useState(false);
 
   const { color: ourColor } = useMemo(() => {
@@ -72,7 +66,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   let spaceTitle = undefined;
   let avatarColor: string | undefined;
   if (type === 'space') {
-    const space = spaces.getSpaceByChatPath(path);
+    const space = spacesStore.getSpaceByChatPath(path);
     if (space) {
       spaceTitle = space.name;
       avatarColor = space.color;
