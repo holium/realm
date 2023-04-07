@@ -41,7 +41,8 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'draft-build.yml')
+            const args = { workflowId: 'draft-build.yml' }
+            const result = script({github, context}, args)
             console.log(result)
             return result
         env:
