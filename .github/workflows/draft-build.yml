@@ -135,7 +135,7 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+          # rename the latest-mac.yml file to alpha-mac.yml for draft builds
           mv -f ./app/release/build/latest-mac.yml ./app/release/build/draft-mac.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
@@ -167,7 +167,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'staging-build.yml', 'linux', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'draft-build.yml', 'linux', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -183,7 +183,7 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+          # rename the latest-mac.yml file to alpha-mac.yml for draft builds
           mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
@@ -253,7 +253,7 @@ jobs:
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
-          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          # rename the latest.yml (windows) file to alpha.yml for draft builds
           mv -f ./app/release/build/latest.yml ./app/release/build/draft.yml
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
