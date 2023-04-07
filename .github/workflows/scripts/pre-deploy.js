@@ -140,19 +140,23 @@ module.exports = async ({ github, context }, args) => {
     //     direction: 'desc',
     //   }
     // );
-    const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
-      owner: 'holium',
-      repo: 'realm',
-      per_page: 1, // only give the last result
-      sort: 'created',
-      direction: 'desc',
-    });
-    if (tags.data.length > 0) {
-      // if there is at least one release, use it's tag name to determine next version
-      buildVersion = tags.data[0].name;
+    if (args && args.version) {
+      buildVersion = args.version;
     } else {
-      // otherwise if no releases found, use the version string from package.json
-      buildVersion = (args && args.version) || pkg.version;
+      const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
+        owner: 'holium',
+        repo: 'realm',
+        per_page: 1, // only give the last result
+        sort: 'created',
+        direction: 'desc',
+      });
+      if (tags.data.length > 0) {
+        // if there is at least one release, use it's tag name to determine next version
+        buildVersion = tags.data[0].name;
+      } else {
+        // otherwise if no releases found, use the version string from package.json
+        buildVersion = pkg.version;
+      }
     }
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
