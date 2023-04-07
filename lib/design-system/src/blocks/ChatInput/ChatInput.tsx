@@ -106,6 +106,17 @@ export const ChatInput = ({
       const parsedFragments = convertFragmentsToText(editingMessage);
       setValue(parsedFragments);
       if (inputRef.current && isFocused) {
+        inputRef.current.value = parsedFragments;
+        /*
+          TODO setting inputRef.current.value does not seem to update the scrollHeight
+          like it does below when setting evt.target.value.
+
+          So we hit an edge case when a user is editing a multi-line message,
+          clicks off, and then opens the chat again: the message is on one line
+          rather than multiple.  It would be nice to have a way to calculate
+          scrollHeight independently.
+        */
+        changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();
       } else {
         inputRef.current?.blur();
@@ -113,25 +124,27 @@ export const ChatInput = ({
     }
   }, [editingMessage]);
 
-  const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (
-      evt.target.value.length < 30 &&
-      evt.target.value.split('\n').length < 2
-    ) {
+  const changeRows = (newValue: string, scrollHeight: number) => {
+    if (newValue.length < 30 && newValue.split('\n').length < 2) {
       setRows(1);
-    } else if (evt.target.value.split('\n').length < value.split('\n').length) {
+    } else if (newValue.split('\n').length < value.split('\n').length) {
       setRows(rows - 1);
     } else {
-      setRows(evt.target.scrollHeight / CHAT_INPUT_LINE_HEIGHT);
+      setRows(scrollHeight / CHAT_INPUT_LINE_HEIGHT);
     }
+  };
+
+  const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+    changeRows(evt.target.value, evt.target.scrollHeight);
     setValue(evt.target.value);
   };
 
-  const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    console.log('onFocus');
+  const onFocus = (evt: React.FocusEvent<HTMLTextAreaElement>) => {
     if (!editingMessage) {
       const input = localStorage.getItem(selectedChatPath);
       if (input) {
+        evt.target.value = input;
+        changeRows(evt.target.value, evt.target.scrollHeight);
         setValue(input);
       }
     } else {
@@ -140,7 +153,6 @@ export const ChatInput = ({
   };
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    console.log('onBlur');
     if (!editingMessage) {
       if (value) {
         localStorage.setItem(selectedChatPath, value);
@@ -288,6 +300,7 @@ export const ChatInput = ({
                 disabled={isDisabled}
                 onClick={(evt) => {
                   setValue('');
+                  setRows(1);
                   if (onCancelEdit) onCancelEdit(evt);
                 }}
               >
