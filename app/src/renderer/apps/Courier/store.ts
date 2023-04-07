@@ -9,7 +9,13 @@ import { servicesStore } from 'renderer/logic/store';
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
 const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+  const selectedPath = servicesStore.spaces.selected?.path;
+
   return (
+    (b.type === 'space' &&
+    selectedPath === servicesStore.spaces.getSpaceByChatPath(b.path)?.path
+      ? 1
+      : 0) -
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
   );
@@ -36,6 +42,10 @@ const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
+    get sortedChatList() {
+      return self.inbox.slice().sort(sortByUpdatedAt);
+    },
+
     get pinnedChatList() {
       return self.inbox
         .filter(

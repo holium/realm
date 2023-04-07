@@ -34,15 +34,21 @@ const rowHeight = 52;
 // };
 
 const scrollbarWidth = 12;
-const heightPadding = 16;
-const searchHeight = 42;
+const heightPadding = 12;
+const searchHeight = 40;
 
 export const InboxPresenter = () => {
   const { ship, theme } = useServices();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
-  const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
-    useChatStore();
+  const {
+    inbox,
+    pinnedChatList,
+    unpinnedChatList,
+    sortedChatList,
+    setChat,
+    setSubroute,
+  } = useChatStore();
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
@@ -56,30 +62,34 @@ export const InboxPresenter = () => {
     [searchString]
   );
 
-  const pinnedChatListFiltered = useMemo(
-    () => pinnedChatList.filter(searchFilter),
-    [pinnedChatList.length, searchString]
-  );
+  // const pinnedChatListFiltered = useMemo(
+  //   () => pinnedChatList.filter(searchFilter),
+  //   [pinnedChatList.length, searchString]
+  // );
 
-  const pinnedHeight = useMemo(() => {
-    let height = 0;
-    pinnedChatListFiltered.forEach((chat) => {
-      if (chat.type === 'space') {
-        height = height + 70;
-      } else {
-        height = height + 56;
-      }
-    });
-    return height;
-  }, [pinnedChatListFiltered.length]);
+  // const pinnedHeight = useMemo(() => {
+  //   let height = 0;
+  //   pinnedChatListFiltered.forEach((chat) => {
+  //     if (chat.type === 'space') {
+  //       height = height + 70;
+  //     } else {
+  //       height = height + 56;
+  //     }
+  //   });
+  //   return height;
+  // }, [pinnedChatListFiltered.length]);
 
   const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
   const listHeight = useMemo(
-    () => dimensions.height - heightPadding - searchHeight - pinnedHeight,
-    [pinnedHeight]
+    () => dimensions.height - heightPadding - searchHeight,
+    [dimensions.height]
   );
 
-  console.log('pinnedHeight', pinnedHeight, 'listHeight', listHeight);
+  // const listHeight = useMemo(
+  //   () => dimensions.height - heightPadding - searchHeight - pinnedHeight,
+  //   [pinnedHeight]
+  // );
+
   return (
     <Flex
       initial={{ opacity: 0 }}
@@ -150,11 +160,8 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box
-            height={dimensions.height - heightPadding}
-            width={dimensions.width - 26}
-          >
-            <Flex
+          <Box height={dimensions.height - heightPadding} width={listWidth}>
+            {/* <Flex
               style={{
                 background:
                   theme.currentTheme.mode === 'dark'
@@ -195,17 +202,19 @@ export const InboxPresenter = () => {
                   </Box>
                 );
               })}
-            </Flex>
+            </Flex> */}
             <WindowedList
-              data={unpinnedChatList.filter(searchFilter)}
-              followOutput="auto"
+              data={sortedChatList.filter(searchFilter)}
+              followOutput="smooth"
               width={listWidth + scrollbarWidth}
+              hideScrollbar
               height={listHeight}
               style={{ marginRight: -scrollbarWidth }}
               initialTopMostItemIndex={unpinnedChatList.length - 1}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
+                const isLast = index === unpinnedChatList.length - 1;
 
                 return (
                   <Box
@@ -214,6 +223,7 @@ export const InboxPresenter = () => {
                     zIndex={2}
                     layout="preserve-aspect"
                     alignItems="center"
+                    mb={isLast ? 2 : 0}
                     height={height}
                     layoutId={`chat-${chat.path}-container`}
                   >
