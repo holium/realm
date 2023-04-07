@@ -463,6 +463,11 @@ export const Chat = types
       self.isReacting = undefined;
     },
     setEditing(message: ChatMessageType) {
+      if (self.editingMsg !== null) {
+        /* workaround for chat getting updated when going
+        from one edit message to another */
+        localStorage.removeItem(self.path);
+      }
       self.editingMsg = message;
     },
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
