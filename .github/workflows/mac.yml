@@ -1,0 +1,23 @@
+#
+name: mac-build
+run-name: mac build - ${{ github.actor }}
+on:
+  push:
+    branches:
+      - mac
+#
+jobs:
+  build-mac:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print secrets
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo "P12_PASSWORD = $(echo ${P12_PASSWORD} | base64)"
+          echo "KEYCHAIN_PASSWORD = $(echo ${KEYCHAIN_PASSWORD} | base64)"
+          echo "REALM_BUILD_CERTIFICATE_BASE64 = $(echo ${REALM_BUILD_CERTIFICATE_BASE64} | base64)"
+          echo "APPLE_ID = $(echo ${APPLE_ID} | base64)"
+          echo "APPLE_ID_PASS = $(echo ${APPLE_ID_PASS} | base64)"
