@@ -5,13 +5,13 @@ import styled from 'styled-components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
-import { useCampfire } from '../Rooms/useRooms';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
 import { AudioWave } from '../Rooms/components/AudioWave';
+import { useRooms } from '../Rooms/useRooms';
 
 interface ICaller {
   person: string;
@@ -30,7 +30,7 @@ const CallerPresenter = (props: ICaller) => {
   const { person, type } = props;
   const { ship, theme, friends } = useServices();
   const callerRef = useRef<any>(null);
-  const roomsManager = useCampfire(ship?.patp);
+  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = friends.getContactAvatarMetadata(person);

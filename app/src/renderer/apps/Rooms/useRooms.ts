@@ -131,39 +131,3 @@ export function useRooms(our?: Patp): RoomsManager {
 
   return roomsManager;
 }
-
-export function useCampfire(our?: Patp): RoomsManager {
-  const manager = roomsManagers.find((room) => room.type === 'campfire');
-  if (manager) {
-    return manager;
-  }
-
-  let roomsManager: RoomsManager | null = null;
-  if (!manager && our) {
-    roomsManager = createManager(our, 'campfire');
-    roomsManagers.push(roomsManager);
-  }
-  if (!roomsManager) {
-    throw new Error('roomsManager not initialized');
-  }
-
-  return roomsManager;
-}
-
-export function useTyping(our?: Patp): RoomsManager {
-  const manager = roomsManagers.find((room) => room.type === 'typing');
-  if (manager) {
-    return manager;
-  }
-
-  let roomsManager: RoomsManager | null = null;
-  if (!manager && our) {
-    roomsManager = createManager(our, 'typing');
-    roomsManagers.push(roomsManager);
-  }
-  if (!roomsManager) {
-    throw new Error('roomsManager not initialized');
-  }
-
-  return roomsManager;
-}

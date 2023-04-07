@@ -15,7 +15,7 @@ import { Card } from '@holium/design-system/src/general/Card/Card';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { CampfireActions } from 'renderer/logic/actions/campfire';
-import { useCampfire } from '../Rooms/useRooms';
+import { useRooms } from '../Rooms/useRooms';
 import { observer } from 'mobx-react';
 import { VideoCaller } from './VideoCaller';
 import Webcam from 'react-webcam';
@@ -77,7 +77,7 @@ export const VideoCall = observer(() => {
     }
   }, []);
 
-  const roomsManager = useCampfire(ship?.patp);
+  const roomsManager = useRooms(ship?.patp);
   const callers = roomsManager
     ? [...Array.from(roomsManager.protocol.peers.keys())]
     : [];

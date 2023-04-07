@@ -24,7 +24,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     list: RoomType[];
   };
   state: RoomState = RoomState.Disconnected;
-  type: 'rooms' | 'campfire' | 'typing';
 
   constructor(
     protocol: BaseProtocol,
@@ -203,6 +202,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       return;
     }
     this.connectRoom(rid);
+  }
+
+  joinCampfire(rid: string) {
+    this.type = 'campfire';
+    this.local.video = true;
+    this.joinRoom(rid);
   }
 
   connectRoom(rid: string) {

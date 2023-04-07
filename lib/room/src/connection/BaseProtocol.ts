@@ -71,7 +71,6 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract leave(rid: string): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
-  abstract sendChat(content: string): void;
 }
 
 export type ProtocolEventCallbacks = {
