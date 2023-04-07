@@ -30,7 +30,6 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
         run: |
           import os
-          import sys
           for q in (os.getenv("APPLE_ID")):
-            sys.stdout.write(q)
+            print(q)
         shell: python
