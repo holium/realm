@@ -167,7 +167,7 @@ module.exports = async ({ github, context }, args) => {
       ci.channel = 'alpha';
     } else {
       // channel set to branch name
-      ci.channel = 'draft';
+      ci.channel = (args && args.channel) || 'draft';
       // const tic = context.ref.lastIndexOf('/');
       // if (tic !== -1) {
       //   ci.channel = context.ref.substring(tic + 1);
