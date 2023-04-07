@@ -41,7 +41,7 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { ship, spaces } = useServices();
   const {
     inbox,
     getChatHeader,
@@ -103,7 +103,9 @@ export const ChatRowPresenter = ({
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState(
     timelineDate(
       new Date(
-        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) ||
+          (chat && chat.createdAt) ||
+          timestamp
       )
     )
   );
@@ -217,6 +219,20 @@ export const ChatRowPresenter = ({
     [title, path, type, peers, sigil, image]
   );
 
+  let spaceHeader = null;
+  if (type === 'space-chat') {
+    const space = spaces.getSpaceByChatPath(path);
+    if (!space) {
+      spaceHeader = null;
+    } else {
+      spaceHeader = (
+        <Flex>
+          <Text.Custom>{space.name}</Text.Custom>
+        </Flex>
+      );
+    }
+  }
+
   return (
     <Row
       id={chatRowId}
@@ -234,6 +250,11 @@ export const ChatRowPresenter = ({
         alignItems="center"
         width="100%"
       >
+        {spaceHeader && (
+          <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+            {spaceHeader}
+          </Flex>
+        )}
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
             layoutId={`chat-${path}-avatar`}

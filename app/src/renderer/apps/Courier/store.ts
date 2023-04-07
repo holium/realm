@@ -82,6 +82,12 @@ const ChatStore = types
           },
           image: avatar || chat.metadata.image,
         };
+      } else if (chat.type === 'space-chat') {
+        const space = servicesStore.spaces.getSpaceByChatPath(chat.path);
+        return {
+          title: chat.metadata.title,
+          image: space?.picture,
+        };
       } else {
         return {
           title: chat.metadata.title,

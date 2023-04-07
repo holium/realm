@@ -4,11 +4,13 @@ import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
 import { useState } from 'react';
+import { Crest } from 'renderer/components';
 
 type ChatAvatarProps = {
   sigil?: {
     patp: string;
     color: [string, string];
+    nickname?: string;
   };
   type: string;
   path: string;
@@ -54,8 +56,8 @@ export const ChatAvatar = ({
       />
     );
   }
-  if (!image && type === 'space') {
-    // todo: add space sigil
+  if (!image && type === 'space-chat') {
+    avatarElement = <Crest picture={image} color={sigil?.color} />;
   }
   if (image) {
     avatarElement = (
