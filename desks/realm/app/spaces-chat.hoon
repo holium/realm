@@ -1,7 +1,8 @@
 /-  store=spaces-chat
 /-  sstore=spaces-store
 /-  vstore=visas
-/-  membership-store=membership
+/-  mstore=membership
+/+  lib=spaces-chat
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -21,7 +22,48 @@
   ++  on-init
     ^-  (quip card _this)
     :_  this
-    [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
+    ~&  >  "{<dap.bowl>}: initializing..."
+    =/  spaces-scry       .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+    ?>  ?=(%spaces -.spaces-scry)
+    =/  spaces            spaces.spaces-scry
+    =/  to-add-chat=(list [k=space-path:sstore v=space:sstore])
+          %+  skim  ~(tap by spaces)
+          |=  kv=[k=space-path:sstore v=space:sstore]
+          ::  finds spaces that we the host of to create chats
+          &(=(ship.path.v.kv our.bowl) ?!(=(space.k.kv 'our')))
+          :: =(ship.path.v.kv our.bowl)
+    ::
+    =/  new-chats
+      %+  turn  to-add-chat
+      |=  [sk=space-path:sstore sv=space:sstore]
+      =/  members-scry         .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sk)/(scot %tas space.sk)/members/noun)
+      ?>  ?=(%members -.members-scry)
+      ~&  >  "{<dap.bowl>}: creating chat for {<sk>}"
+      =/  members           members.members-scry
+      =/  chat-and-cards    (create-space-chat:lib sv [%role %member] members now.bowl)
+      =/  chat              +.chat-and-cards
+      =/  cards             -.chat-and-cards
+      [k=sk c=chat cd=cards]
+    ::
+    =/  cards
+      %+  turn  new-chats
+      |=  [k=space-path:sstore c=chat:store cd=(list card)]
+      cd
+    ::
+    =/  chats
+      %+  turn  new-chats
+      |=  [k=space-path:sstore c=chat:store cd=(list card)]
+      :: for map
+      [k [path.c c]]
+    ::
+    ~&  >  [chats]
+    :: =.  chats.state   +.new-chats
+    :: :_  state
+    :: %+  weld  -.new-chats
+    :: ^-  (list card)
+    :~
+      [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+    ==
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
@@ -77,13 +119,15 @@
   ==
   ::
   ++  on-add
-    |=  [space=space:sstore =members:membership-store]
+    |=  [space=space:sstore =members:mstore]
     ::  TODO create a new chat for this space with the members
+    ~&  >  "{<dap.bowl>}: creating chat for {<space>}"
     `state
   ::
   ++  on-remove
     |=  [path=space-path:sstore]
     ::  TODO remove all the chats for this space
+    ~&  >  "{<dap.bowl>}: removing chat for {<path>}"
     `state
     ::
   --
@@ -98,15 +142,17 @@
   ==
   ::
   ++  on-accepted
-    |=  [path=space-path:sstore =ship =member:membership-store]
+    |=  [path=space-path:sstore =ship =member:mstore]
     ^-  (quip card _state)
     ::  TODO add the new member to the chats for this space based on their role
+    ~&  >  "{<dap.bowl>}: adding {<ship>} to chats for {<path>}"
     `state
   ::
   ++  on-kicked
     |=  [path=space-path:sstore =ship]
     ^-  (quip card _state)
     ::  TODO remove the member from the chats for this space
+    ~&  >  "{<dap.bowl>}: removing {<ship>} from chats for {<path>}"
     `state
   --
   

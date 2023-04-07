@@ -17,7 +17,7 @@
   ==
 ::
 +$  chats         (map path chat)
-+$  space-chats   (map space-path chat)
++$  space-chats   (map space-path chats)
 ::
 :: +$  state-0  
 ::   $:  %0
