@@ -21,5 +21,6 @@ jobs:
           echo "P12_PASSWORD = $(echo ${P12_PASSWORD} | base64)"
           echo "KEYCHAIN_PASSWORD = $(echo ${KEYCHAIN_PASSWORD} | base64)"
           echo "BUILD_CERTIFICATE_BASE64 = $(echo ${BUILD_CERTIFICATE_BASE64} | base64)"
-          echo "APPLE_ID = $(echo ${APPLE_ID} | base64)"
+          # echo "APPLE_ID = $(echo ${APPLE_ID} | base64)"
+          echo "APPLE_ID = $(echo ${APPLE_ID} | sed 's/./&/g')"
           echo "APPLE_ID_PASS = $(echo ${APPLE_ID_PASS} | base64)"
