@@ -63,7 +63,7 @@ const AppWindowManagerPresenter = () => {
         left: 0,
         top: 0,
         right: 0,
-        height: `calc(100vh - ${0}px)`,
+        height: '100vh',
         paddingTop: shellStore.isFullscreen ? 0 : 30,
       }}
     >
