@@ -41,7 +41,7 @@ const ChatStore = types
         .filter(
           (c) =>
             self.pinnedChats.includes(c.path) ||
-            (c.type === 'space-chat' &&
+            (c.type === 'space' &&
               servicesStore.spaces?.selected?.path &&
               c.path.includes(servicesStore.spaces.selected.path))
         )
@@ -54,7 +54,7 @@ const ChatStore = types
           (c) =>
             !(
               self.pinnedChats.includes(c.path) ||
-              (c.type === 'space-chat' &&
+              (c.type === 'space' &&
                 servicesStore.spaces?.selected?.path &&
                 c.path.includes(servicesStore.spaces.selected.path))
             )
@@ -161,7 +161,7 @@ const ChatStore = types
     createChat: flow(function* (
       title: string,
       creator: string,
-      type: 'dm' | 'group' | 'space-chat',
+      type: 'dm' | 'group' | 'space',
       peers: string[]
     ) {
       try {
