@@ -281,6 +281,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         )}
         <ChatInputBox
           storage={storage}
+          selectedChatPath={selectedChat.path}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
           onAttachmentChange={(attachmentCount) => {
