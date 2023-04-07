@@ -151,9 +151,8 @@ module.exports = async ({ github, context }, args) => {
       // if there is at least one release, use it's tag name to determine next version
       buildVersion = tags.data[0].name;
     } else {
-      if ( args.)
       // otherwise if no releases found, use the version string from package.json
-      buildVersion = pkg.version;
+      buildVersion = (args && args.version) || pkg.version;
     }
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
