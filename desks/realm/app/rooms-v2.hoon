@@ -167,7 +167,7 @@
   ::
   ++  session-init
     ^-  session-state:store
-    [provider=our.bol current=~ rooms=[~]]
+    [provider=our.bol current=~ rooms=[~] campfire=~ chat=~]
 ::
 ++  signal
   |%
@@ -246,7 +246,6 @@
         %leave-room         (leave-room +.act)
         %invite             `state
         %kick               (handle-kick +.act)
-        %send-chat          (handle-send-chat +.act)
       ==
       ::
       ++  set-provider
@@ -301,7 +300,7 @@
       ++  create-room
         |=  [=rid:store =access:store =title:store path=(unit cord) provide=?]
         ~&  >>  "{<dap.bol>}: [create-room]. {<src.bol>} creating room {<rid>} on provider {<provider.session.state>}"
-        ?:  (new-is-provider:hol src.bol rid)
+        ?:  (is-provider:hol src.bol rid)
           (provider-create-room rid access title path)
         ::  the action is from us and we are not the provider, so send the action to the provider
         (session-create-room rid access title path)
@@ -354,7 +353,7 @@
         |=  [=rid:store =title:store =access:store]
         =/  provider      provider.session.state
         ::
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol src.bol rid)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%edit-room rid title access])]~
         ::
@@ -370,7 +369,7 @@
       ++  delete-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol src.bol rid)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~
         ::
@@ -394,7 +393,7 @@
       ++  enter-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol src.bol rid)
           :_  state
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
@@ -434,7 +433,7 @@
       ++  leave-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol src.bol rid)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
         ::
@@ -451,25 +450,6 @@
         =.  rooms.provider.state      (~(put by rooms.provider.state) [rid room])
         :_  state
         [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid src.bol])]~
-      ::
-      ++  handle-send-chat
-        |=  [content=cord]
-        ^-  (quip card _state)
-        ?~  current.session.state
-            ~&  >>>  'must be in a room to send or receive chat'
-            `state
-        ?:  =(src.bol our.bol)
-          ::  send all present users the chat message
-          =/  room    (~(got by rooms.session.state) u.current.session.state)
-          =/  peers   (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
-          :_  state
-          %+  turn  (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
-            |=  =ship
-            ^-  card
-            [%pass / %agent [ship dap.bol] %poke rooms-v2-session-action+!>([%send-chat content])]
-        ::  Receiving a signal from another ship
-        :_  state
-        [%give %fact [/lib ~] rooms-v2-reaction+!>([%chat-received src.bol content])]~
       ::
       ++  handle-kick
         |=  [rid=cord =ship]
@@ -665,17 +645,9 @@
   =(our.bol ship)
 ::
 ++  is-provider
-  |=  [provider=ship src=ship]
-  ^-  ?
-  ?|
-    ?!(=(src our.bol))  ::  if the action is not from the provider, we are the provider
-    =(provider our.bol) ::  if the action is from the provider, and we are the provider
-  ==
-::
-++  new-is-provider
   |=  [src=ship =rid:store]
   ^-  ?
-  ?|  ?!(=(src our.bol))
-      (~(has by rooms.provider.state) rid)
+  ?|  ?!(=(src our.bol)) :: if the action is not from our, we are the provider
+      (~(has by rooms.provider.state) rid) :: if the action is from our, and we are the provider
   ==
 --

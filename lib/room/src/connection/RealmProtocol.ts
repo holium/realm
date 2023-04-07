@@ -156,11 +156,6 @@ export class RealmProtocol extends BaseProtocol {
     }
 
     if (mark === 'rooms-v2-reaction') {
-      // console.log('%rooms', data);
-      if (data['chat-received']) {
-        const payload = data['chat-received'];
-        this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
-      }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
@@ -444,7 +439,7 @@ export class RealmProtocol extends BaseProtocol {
    * sendChat - Send data to all peers
    * @param data: DataPacket
    */
-  sendChat(content: string) {
+  /*sendChat(content: string) {
     this.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
@@ -452,7 +447,7 @@ export class RealmProtocol extends BaseProtocol {
         'send-chat': content,
       },
     });
-  }
+  }*/
 
   dial(peer: Patp, isHost: boolean): RemotePeer {
     if (!this.local) {
@@ -569,7 +564,7 @@ export class RealmProtocol extends BaseProtocol {
     const room = this.rooms.get(rid);
     if (room) {
       this.transitions.leaving = room;
-      this.emit(ProtocolEvent.RoomLeft, room);
+      this.emit(ProtocolEvent.RoomLeft, rid);
     }
     await this.poke({
       app: 'rooms-v2',

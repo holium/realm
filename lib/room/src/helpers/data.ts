@@ -7,6 +7,9 @@ export enum DataPacket_Kind {
   TRACK_META = 2,
   MUTE_STATUS = 3,
   SPEAKING_CHANGED = 4,
+  CHAT = 5,
+  TYPING = 6,
+  CALL = 7,
   UNRECOGNIZED = -1,
 }
 
@@ -17,6 +20,7 @@ export interface DataPayload {
 
 export interface DataPacket {
   from: Patp;
+  rid: string;
   kind: DataPacket_Kind;
   value: {
     multiplayer?: MultiplayerPayload;

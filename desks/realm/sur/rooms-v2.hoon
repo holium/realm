@@ -1,5 +1,5 @@
 ::
-:: %rooms-v2: is a primitive for who is currently presence.
+:: %rooms-v2: is a primitive for who is currently present.
 ::
 ::
 /-  spaces=spaces-path
@@ -26,10 +26,17 @@
 ::
 +$  rooms  (map rid room)
 ::
++$  campfire
+  [provider=ship =rid =room]
+::
++$  chat  (map rid room)
+::
 +$  session-state
   $:  provider=ship
       current=(unit rid)
       =rooms
+      =campfire
+      =chat
   ==
 :: 
 +$  provider-state
@@ -53,7 +60,6 @@
       [%leave-room =rid]
       [%invite =rid =ship]
       [%kick =rid =ship]
-      [%send-chat content=cord]
   ==
 ::
 +$  reaction
@@ -65,7 +71,6 @@
       [%provider-changed provider=ship =rooms]
       [%invited provider=ship =rid =title =ship]
       [%kicked =rid =ship] 
-      [%chat-received from=ship content=cord] 
   ==
 ::
 +$  provider-action

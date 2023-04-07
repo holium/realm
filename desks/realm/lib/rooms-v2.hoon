@@ -82,13 +82,6 @@
         ['rid' %s rid.rct]
         ['ship' %s (scot %p ship.rct)]
       ==
-      ::
-        %chat-received 
-      %-  pairs
-      :~
-        ['from' %s (scot %p from.rct)]
-        ['content' %s content.rct]
-      ==
     ==
   ++  view
     |=  vi=view:sur
@@ -206,7 +199,6 @@
           [%leave-room so]
           [%invite invite]
           [%kick kick]
-          [%send-chat so]
       ==
     ++  patp
       (su ;~(pfix sig fed:ag))

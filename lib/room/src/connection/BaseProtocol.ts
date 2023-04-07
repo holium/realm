@@ -87,7 +87,6 @@ export type ProtocolEventCallbacks = {
   roomUpdated: (room: RoomType) => void;
   roomInitial: (room: RoomType) => void;
   roomEntered: (room: RoomType) => void;
-  roomLeft: (room: RoomType) => void;
+  roomLeft: (rid: string) => void;
   peerDataReceived: (peer: Patp, data: DataPacket) => void;
-  chatReceived: (peer: Patp, content: string) => void;
 };
