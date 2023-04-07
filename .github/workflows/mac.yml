@@ -31,7 +31,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin production
+          git pull origin mac
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -39,7 +39,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'production-build.yml', version: 'v0.0.1' }
+            const args = { workflowId: 'mac.yml', version: 'v0.0.1' }
             const result = script({github, context}, args)
             console.log(result)
             return result
@@ -107,7 +107,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull origin production
+          git pull origin mac
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -115,7 +115,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-platform.js')
-            const result = script({github, context}, 'production-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            const result = script({github, context}, 'mac.yml', 'mac', JSON.parse(process.env.CI_ENV))
             console.log(result)
             return result
         env:
@@ -191,7 +191,7 @@ jobs:
           script: |
             const script = require('./.github/workflows/scripts/finalize.js')
             const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
-            const result = script({github, context}, 'production-build.yml', ci)
+            const result = script({github, context}, 'mac.yml', ci)
             console.log(result)
             return result
         env:
