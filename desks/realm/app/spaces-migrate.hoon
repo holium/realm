@@ -3,7 +3,8 @@
 /-  vstore=visas
 /-  hark=hark-store
 /-  g=new-groups
-/+  default-agent, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
+/-  chat-db
+/+  default-agent, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups, realm-chat-lib=realm-chat
 ^-  agent:gall
 ::
 ::  %spaces [realm]: A store for Realm space metadata and members.
@@ -12,13 +13,22 @@
   |%
   +$  card  card:agent:gall
   +$  versioned-state
-      $%  state-1
+      $%  state-2
+          state-1
           state-0
       ==
   ::
+  +$  state-2
+    $:  %2
+        =spaces:store
+        =invitations:vstore
+        =membership:membership-store
+        current=space-path:store
+    ==
+  ::
   +$  state-1
     $:  %1
-        =spaces:store
+        =spaces-v1:store
         =invitations:vstore
         =membership:membership-store
         current=space-path:store
@@ -26,12 +36,12 @@
   ::
   +$  state-0
     $:  %0
-        =spaces:store
+        =spaces-v1:store
         =invitations:vstore
         =membership:membership-store
     ==
   --
-=|  state-1
+=|  state-2
 =*  state  -
 =<
   %-  agent:dbug
@@ -42,14 +52,15 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  our-name                `@t`(scot %p our.bowl)
-    =/  our-space               (create-space:lib our.bowl 'our' [name=our-name '' %our %private '' '#000000' %home] now.bowl)
-    =/  our-member              [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]
-    =/  our-members             (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
-    =/  initial-membs           `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
-    =/  initial-spaces          `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =.  state                   [%1 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
-    `this
+    =/  our-name              `@t`(scot %p our.bowl)
+    =/  our-space             (create-space:lib our.bowl 'our' [name=our-name '' %our %private '' '#000000' %home] now.bowl)
+    =/  our-member            [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]
+    =/  our-members           (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
+    =/  initial-membs         `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
+    =/  initial-spaces        `spaces:store`(~(put by spaces.state) [path:our-space our-space])
+    =.  state                 [%2 spaces=initial-spaces invitations=~ membership=initial-membs current=path:our-space]
+    =/  cards                 [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+    [cards this]
   ::
   ++  on-save
     ^-  vase
@@ -58,10 +69,57 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
+    :: do a quick check to make sure we are subbed to /db in %chat-db
+    =/  cards=(list card)
+      ?:  (~(has by wex.bowl) [/db our.bowl %chat-db])  ~
+      [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     =/  old  !<(versioned-state old-state)
     ?-  -.old
-      %0  `this(state [%1 spaces=spaces.old invitations=invitations.old membership=membership.old current=[our.bowl 'our']])
-      %1  `this(state old)
+      :: recursively upgrade all the way to %2
+      %0  (on-load !>([%1 spaces-v1.old invitations.old membership.old [our.bowl 'our']]))
+
+      :: do the actual work of adding in a `chats` map on each space
+      %1  
+        =/  to-add=(list [k=space-path:store v=space:store])
+          %+  turn
+            ~(tap by spaces-v1.old)
+          |=  kv=[k=space-path:store v=space-v1:store]
+          ^-  [k=space-path:store v=space:store]
+          [
+            k.kv
+            [
+              path.v.kv
+              name.v.kv
+              description.v.kv
+              type.v.kv
+              access.v.kv
+              picture.v.kv
+              color.v.kv
+              archetype.v.kv
+              theme.v.kv
+              updated-at.v.kv
+              *chats:store
+            ]
+          ]
+        =/  new-spaces=spaces:store  (~(gas by *spaces:store) to-add)
+
+        =/  index=@ud  0
+        =/  to-add-chat=(list [k=space-path:store v=space:store])
+          %+  skim
+            ~(tap by new-spaces)
+          |=  kv=[k=space-path:store v=space:store]
+          &(=(ship.path.v.kv our.bowl) ?!(=(space.k.kv 'our')))
+        |-
+          ?:  =(index (lent to-add-chat))
+            [cards this(state [%2 new-spaces invitations.old membership.old current.old])]
+          =/  kv  (snag index to-add-chat)
+          =/  members             (~(got by membership.old) k.kv)
+          =/  cards-and-space     (create-space-chat:lib v.kv [%role %member] members now.bowl)
+          $(index +(index), cards (weld cards -.cards-and-space), new-spaces (~(put by new-spaces) k.kv +.cards-and-space))
+
+
+      :: we're already upgraded
+      %2  [cards this(state old)]
     ==
   ::
   ++  on-poke
@@ -285,7 +343,61 @@
               [cards this]
             ==
         ==
-
+      [%dbpoke ~] :: for handling poke-acks from chat-DB (db)
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%spaces: {<(spat wire)>} dbpoke failed"
+            ~&  >>>  p.sign
+            `this
+        ==
+      [%rcpoke ~] :: for handling poke-acks from Realm-Chat (rc)
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%spaces: {<(spat wire)>} rcpoke failed"
+            ~&  >>>  p.sign
+            `this
+        ==
+      [%db ~]   :: for handling subscription updates from chat-db
+        ?+    -.sign    (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: /db subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
+            :_  this
+            [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+          %fact
+            ?+    p.cage.sign  `this
+              %chat-db-change
+                =/  thechange=db-change:chat-db  !<(db-change:chat-db q.cage.sign)
+                =/  cards=(list card)
+                  %-  zing
+                  %+  turn
+                    %+  skim
+                      thechange
+                    |=(ch=db-change-type:chat-db =(-.ch %add-row))
+                  |=  ch=db-change-type:chat-db
+                  ^-  (list card)
+                  ?+  -.ch  ~
+                    %add-row
+                    ?+  -.db-row.ch  ~
+                      :: only care about the creation of new paths
+                      :: (which are chats)
+                      %paths
+                        =/  pathrow  path-row.db-row.ch
+                        =/  pathpeers  (scry-peers:realm-chat-lib path.pathrow bowl)
+                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:chat-db =(role.p %host))))
+                        :: TODO determine if the new path was a
+                        :: space-chat
+                        ~  :: TODO actually update the relevant space since a new chat was created
+                    ==
+                  ==
+                [cards this]
+            ==
+        ==
     ==
   ++  on-arvo   |=([wire sign-arvo] !!)
   ::
@@ -318,19 +430,30 @@
     ==
     ::
     ++  handle-add
-      |=  [slug=@t payload=add-payload:store members=members:membership-store]
+      |=  [slug=@t payload=add-payload:store =members:membership-store]
       ^-  (quip card _state)
       ?>  (team:title our.bowl src.bowl)
       =.  slug                  (find-available-path [our.bowl slug] spaces.state)
       =/  new-space             (create-space:lib our.bowl slug payload now.bowl)
-      =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
+
       ::  we need to set a host + member value and exclude the host from make-invitations
       =.  members               (~(put by members) [our.bowl [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]])
       =.  membership.state      (~(put by membership.state) [path.new-space members])
+
+      :: create the space-chat
+      =/  access-type=chat-access:store    [%role %member]
+      =/  cards-and-space     (create-space-chat:lib new-space access-type members now.bowl)
+      =/  cards=(list card)   -.cards-and-space
+      =.  new-space           +.cards-and-space
+
+      =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
+
       =/  visa-cards            (initial-visas:helpers path.new-space members new-space)
       ::  return updated state and a combination of invitations (pokes)
       ::   to new members and gifts to any existing/current subscribers (weld)
-      =/  cards
+      =.  cards
+        ^-  (list card)
+        %+  weld   cards
         ^-  (list card)
         %+  weld   visa-cards
         ^-  (list card)
@@ -393,11 +516,14 @@
       ?>  (has-auth:security path src.bowl %owner)
       ?:  =('our' space.path) :: we cannot delete our space
         `state
-      =.  spaces.state                (~(del by spaces.state) path)
-      =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
+      =/  thespace            (~(got by spaces.state) path)
+      =.  spaces.state        (~(del by spaces.state) path)
+      =/  watch-paths         [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
-      =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
+      =/  space-members       `(map ship member:membership-store)`(~(got by membership.state) path)
       =.  cards
+        %+  weld
+          (remove-ship-from-space-chats:lib ship.path thespace bowl)
         %+  weld  cards
         %+  murn  ~(tap by space-members)
         |=  [=ship =member:membership-store]
@@ -423,9 +549,9 @@
       ++  host-handle-join
         |=  [path=space-path:store =ship]
         ^-  (quip card _state)
+        =/  space  (~(got by spaces.state) path)
         =.  membership.state
           =/  space-members   (~(got by membership.state) path)
-          =/  space  (~(got by spaces.state) path)
           =/  member
             ?:  =(%public access.space)
               ^-  (unit member:membership-store)
@@ -446,6 +572,8 @@
         =/  member-path             /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths             [member-path /updates ~]
         =/  cards
+          %+  weld
+            (add-ship-to-matching-chats:lib ship member space bowl)
           ^-  (list card)
           ::  temporarily using %invite-accepted until we can add a new action
           :~  [%pass / %agent [ship %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
@@ -471,11 +599,14 @@
       ::
       ++  member-handle-leave
         |=  [path=space-path:store]
+        =/  thespace              (~(got by spaces.state) path)
         =.  spaces.state          (~(del by spaces.state) path)
         =.  membership.state      (~(del by membership.state) path)
         =/  has-incoming          (~(get by invitations.state) path)
         =/  watch-path            [/spaces/(scot %p ship.path)/(scot %tas space.path)]
         =/  cards
+          %+  weld
+            (remove-ship-from-space-chats:lib our.bowl thespace bowl)
           ^-  (list card)
           :~
             [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%leave path])]
@@ -724,6 +855,10 @@
         =/  member-path                 /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  watch-paths                 [/updates member-path ~]
         =/  cards=(list card)
+          %+  weld
+            ^-  (list card)
+            (add-ship-to-matching-chats:lib accepter upd-mem (~(got by spaces.state) path) bowl)
+          ^-  (list card)
           :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
               :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
               [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
@@ -799,6 +934,8 @@
         :: =/  notify=action:hark        (notify path /realm (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
         =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
         =/  cards
+          %+  weld
+            (remove-ship-from-space-chats:lib ship (~(got by spaces.state) path) bowl)
           ^-  (list card)
           :~  [%give %fact [watch-path /updates ~] visa-reaction+!>([%kicked path ship])]
               [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]

@@ -29,36 +29,9 @@
       window-color=@t
       wallpaper=@t
   ==
-:: handle-leave, handle-kick, handle-join, handle-accept
-+$  chat-access
-  $%  [%role =role:membership]        :: ships in the members map with status %joined or %host, and a specified role
-      [%all ~]                        :: any ship in the members map, regardless of status
-      [%whitelist ships=(set ship)]   :: specific ships, must also be in members map
-      [%blacklist ships=(set ship)]   :: all ships in members map, except specific ships
-  ==
-+$  chat
-  $:  =path
-      access=chat-access
-  ==
-+$  chats  (map path chat)
 ::
 +$  spaces              (map space-path space)
 +$  space
-  $:  path=space-path
-      name=space-name
-      description=space-description
-      type=space-type
-      access=space-access
-      picture=@t
-      color=@t  :: '#000000'
-      =archetype
-      =theme
-      updated-at=@da
-      =chats
-  ==
-::  %0 and %1 compatible types
-+$  spaces-v1          (map space-path space-v1)
-+$  space-v1
   $:  path=space-path
       name=space-name
       description=space-description
