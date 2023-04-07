@@ -166,6 +166,10 @@ const ChatStore = types
       try {
         const chat = self.inbox.find((chat) => chat.path === path);
         if (chat) {
+          if (self.selectedChat?.path === path) {
+            self.selectedChat = undefined;
+            self.subroute = 'inbox';
+          }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
           yield ChatDBActions.leaveChat(path);

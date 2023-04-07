@@ -10,9 +10,10 @@ import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
+const CHAT_INPUT_LINE_HEIGHT = 16;
 const ChatBox = styled(TextArea)`
   resize: none;
-  line-height: 16px;
+  line-height: ${CHAT_INPUT_LINE_HEIGHT}px;
   font-size: 14px;
   padding-left: 4px;
   padding-right: 4px;
@@ -86,6 +87,7 @@ export const ChatInput = ({
   onPaste,
   ...chatInputProps
 }: ChatInputProps) => {
+  const [rows, setRows] = useState(1);
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -110,8 +112,17 @@ export const ChatInput = ({
   }, [editingMessage]);
 
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = evt.target;
-    setValue(value);
+    if (
+      evt.target.value.length < 30 &&
+      evt.target.value.split('\n').length < 2
+    ) {
+      setRows(1);
+    } else if (evt.target.value.split('\n').length < value.split('\n').length) {
+      setRows(rows - 1);
+    } else {
+      setRows(evt.target.scrollHeight / CHAT_INPUT_LINE_HEIGHT);
+    }
+    setValue(evt.target.value);
   };
 
   const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
@@ -162,13 +173,9 @@ export const ChatInput = ({
       onEditConfirm(parsedFragments);
     } else {
       onSend(parsedFragments);
+      setRows(1);
     }
   };
-
-  let rows: number = 1;
-  if (value.split('\n').length > 1) {
-    rows = Math.min(value.split('\n').length, 5);
-  }
 
   return (
     <Flex flexDirection="column" overflow="visible">
@@ -238,7 +245,9 @@ export const ChatInput = ({
       <InputBox
         inputId={id}
         disabled={disabled}
-        height={rows === 1 ? 36 : rows * 16 + 4}
+        height={
+          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
+        }
         py="3px"
         error={!!error}
         leftAdornment={
@@ -295,10 +304,13 @@ export const ChatInput = ({
           required
           name="chat-input"
           placeholder="New message"
-          style={{ lineHeight: rows === 1 ? '36px' : undefined }}
           value={value}
           tabIndex={tabIndex}
           disabled={disabled}
+          style={{
+            marginTop: '10px',
+            height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
+          }}
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -307,22 +319,5 @@ export const ChatInput = ({
         />
       </InputBox>
     </Flex>
-
-    // <TextInput
-    //   id={id}
-    //   width={300}
-    //   name="test-input-3"
-    //   type="text"
-    //   placeholder="New Message"
-    //   rightAdornment={
-    //     <Button.IconButton
-    //       onClick={() => {
-    //         onSend(fragments);
-    //       }}
-    //     >
-    //       <Icon name="ArrowRightLine" opacity={0.5} />
-    //     </Button.IconButton>
-    //   }
-    // />
   );
 };

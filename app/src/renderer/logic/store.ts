@@ -22,18 +22,16 @@ import { OSActions } from './actions/os';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
-// import { NotificationStore } from 'os/services/ship/models/notifications';
 import {
   NotificationStore,
   NotificationStoreType,
 } from 'os/services/spaces/models/beacon';
-// import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
 import { AuthActions } from './actions/auth';
-import { defaultTheme } from '@holium/shared';
+import { defaultTheme } from '../../os/services/theme.model';
 import { CampfireStore } from 'os/services/apps/campfire.model';
 
 const Services = types

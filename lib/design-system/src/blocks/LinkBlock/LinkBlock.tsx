@@ -87,7 +87,7 @@ export const LinkBlock = ({
   if (
     metadata.linkType === 'url' ||
     !metadata.ogData ||
-    (metadata.ogData && !metadata.ogData.ogTitle)
+    (metadata.ogData && !openGraph?.ogTitle)
   ) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
@@ -153,7 +153,6 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onImageLoaded={onLinkLoaded}
       />
     );
   }

@@ -15,7 +15,7 @@ import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
 import { EncryptedStore } from '../../lib/encryptedStore';
 import { ThemeSnapshotType } from 'renderer/logic/theme';
-import { defaultTheme } from '@holium/shared';
+import { defaultTheme } from '../theme.model';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)

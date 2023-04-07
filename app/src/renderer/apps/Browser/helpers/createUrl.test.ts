@@ -2,12 +2,12 @@ import { createUrl } from './createUrl';
 
 describe('createUrl', () => {
   it('should return the same query if it is a valid URL', () => {
-    const url = 'https://www.neeva.com';
+    const url = 'https://www.duckduckgo.com';
 
     expect(createUrl(url)).toEqual(url);
   });
   it('should add secure protocol to valid URLs', () => {
-    const url = 'www.neeva.com';
+    const url = 'www.duckduckgo.com';
 
     expect(createUrl(url)).toEqual(`https://${url}`);
   });
@@ -21,9 +21,9 @@ describe('createUrl', () => {
 
     expect(createUrl(url)).toEqual(`http://${url}`);
   });
-  it('should return all other queries as a neeva search', () => {
+  it('should return all other queries as a duckduckgo search', () => {
     const query = 'blabla';
-    const url = `https://neeva.com/search?q=${query}`;
+    const url = `https://duckduckgo.com/?q=${query}`;
 
     expect(createUrl(query)).toEqual(url);
   });
