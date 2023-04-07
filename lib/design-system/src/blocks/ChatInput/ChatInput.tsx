@@ -141,8 +141,12 @@ export const ChatInput = ({
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
     console.log('onBlur');
-    if (value && !editingMessage) {
-      localStorage.setItem(selectedChatPath, value);
+    if (!editingMessage) {
+      if (value) {
+        localStorage.setItem(selectedChatPath, value);
+      } else {
+        localStorage.removeItem(selectedChatPath);
+      }
     }
   };
 
