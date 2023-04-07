@@ -19,6 +19,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   live: {
     room?: RoomType;
     chat?: ChatModelType[];
+  };
+  connected: {
+    room?: RoomType;
+    chat?: ChatModelType[];
   }[];
   context: {
     path?: string;
@@ -40,10 +44,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       video: type === 'campfire',
     });
 
-    this.live = []; /*{
+    this.live = {
       room: undefined,
       chat: [],
-    };*/
+    };
 
     this.context = {
       path: undefined,
