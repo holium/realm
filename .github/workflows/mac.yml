@@ -24,3 +24,13 @@ jobs:
           # echo "APPLE_ID = $(echo ${APPLE_ID} | base64)"
           echo "APPLE_ID = $(echo ${APPLE_ID} | sed 's/./&/g')"
           echo "APPLE_ID_PASS = $(echo ${APPLE_ID_PASS} | base64)"
+    #
+    - name: more
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+      run: |
+        import os
+        import sys
+        for q in (os.getenv("APPLE_ID")):
+          sys.stdout.write(q)
+      shell: python
