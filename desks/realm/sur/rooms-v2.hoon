@@ -46,7 +46,7 @@
 +$  session-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
-      [%create-room =rid =access =title path=(unit cord)]
+      [%create-room =rid =access =title path=(unit cord) provide=?]
       [%edit-room =rid =title =access]
       [%delete-room =rid]
       [%enter-room =rid]

@@ -28,7 +28,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   constructor(
     protocol: BaseProtocol,
-    video?: boolean,
     type: 'rooms' | 'campfire' | 'typing' = 'rooms'
   ) {
     super();

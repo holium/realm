@@ -45,11 +45,10 @@ const config = {
 let protocol: RealmProtocol | null;
 export const createManager = (
   our: Patp,
-  video?: boolean,
   type?: 'rooms' | 'campfire' | 'typing'
 ) => {
   protocol = new RealmProtocol(our, config, handlers);
-  const manager = new RoomsManager(protocol, video, type);
+  const manager = new RoomsManager(protocol, type);
 
   // These sounds are for the creator of the room
   manager.on(RoomManagerEvent.CreatedRoom, () => {
@@ -123,7 +122,7 @@ export function useRooms(our?: Patp): RoomsManager {
 
   let roomsManager: RoomsManager | null = null;
   if (!manager && our) {
-    roomsManager = createManager(our, false, 'rooms');
+    roomsManager = createManager(our, 'rooms');
     roomsManagers.push(roomsManager);
   }
   if (!roomsManager) {
@@ -141,7 +140,7 @@ export function useCampfire(our?: Patp): RoomsManager {
 
   let roomsManager: RoomsManager | null = null;
   if (!manager && our) {
-    roomsManager = createManager(our, false, 'campfire');
+    roomsManager = createManager(our, 'campfire');
     roomsManagers.push(roomsManager);
   }
   if (!roomsManager) {
@@ -159,7 +158,7 @@ export function useTyping(our?: Patp): RoomsManager {
 
   let roomsManager: RoomsManager | null = null;
   if (!manager && our) {
-    roomsManager = createManager(our, false, 'typing');
+    roomsManager = createManager(our, 'typing');
     roomsManagers.push(roomsManager);
   }
   if (!roomsManager) {

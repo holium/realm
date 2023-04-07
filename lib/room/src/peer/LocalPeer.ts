@@ -64,7 +64,7 @@ export class LocalPeer extends Peer {
             exact: deviceId,
           },
         },
-        video: this.constraints.video,
+        // video: this.constraints.video,
       });
     }
   }
@@ -147,7 +147,7 @@ export class LocalPeer extends Peer {
   enableMedia(
     options: MediaStreamConstraints = {
       audio: DEFAULT_AUDIO_OPTIONS,
-      video: DEFAULT_VIDEO_OPTIONS,
+      // video: DEFAULT_VIDEO_OPTIONS,
     }
   ) {
     if (this.stream) {

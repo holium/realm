@@ -217,6 +217,7 @@
           [%access access]
           [%title so]
           [%path (mu so)]
+          [%provide bo]
       ==
     ::
     ++  edit

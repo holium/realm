@@ -301,7 +301,8 @@
       ++  create-room
         |=  [=rid:store =access:store =title:store path=(unit cord) provide=?]
         ~&  >>  "{<dap.bol>}: [create-room]. {<src.bol>} creating room {<rid>} on provider {<provider.session.state>}"
-        ?:  (new-is-provider:hol src.bol rid)
+          (provider-create-room rid access title path)
+        ?:  (is-provider:hol provider.session.state src.bol)
           (provider-create-room rid access title path)
         ::  the action is from us and we are not the provider, so send the action to the provider
         (session-create-room rid access title path)
@@ -354,7 +355,7 @@
         |=  [=rid:store =title:store =access:store]
         =/  provider      provider.session.state
         ::
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol provider src.bol)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%edit-room rid title access])]~
         ::
@@ -370,7 +371,7 @@
       ++  delete-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol provider src.bol)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~
         ::
@@ -394,7 +395,7 @@
       ++  enter-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol provider src.bol)
           :_  state
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
@@ -434,7 +435,7 @@
       ++  leave-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ?.  (new-is-provider:hol src.bol rid)
+        ?.  (is-provider:hol provider src.bol)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
         ::
@@ -663,7 +664,7 @@
   |=  [=ship]
   ^-  ?
   =(our.bol ship)
-::
+
 ++  is-provider
   |=  [provider=ship src=ship]
   ^-  ?
@@ -671,11 +672,7 @@
     ?!(=(src our.bol))  ::  if the action is not from the provider, we are the provider
     =(provider our.bol) ::  if the action is from the provider, and we are the provider
   ==
-::
 ++  new-is-provider
-  |=  [src=ship =rid:store]
+  |=  []
   ^-  ?
-  ?|  ?!(=(src our.bol))
-      (~(has by rooms.provider.state) rid)
-  ==
 --

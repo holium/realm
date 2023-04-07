@@ -333,13 +333,14 @@ export class RealmProtocol extends BaseProtocol {
   createRoom(
     title: string,
     access: 'public' | 'private',
-    path: string | null = null
+    path: string | null = null,
+    provide: boolean = false
   ) {
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, this.our, title),
       title,
       access,
-      provider: this.provider,
+      provider: provide ? this.our : this.provider,
       creator: this.our,
       present: [this.our],
       whitelist: [],
@@ -360,6 +361,7 @@ export class RealmProtocol extends BaseProtocol {
           title,
           access,
           path,
+          provide,
         },
       },
     });

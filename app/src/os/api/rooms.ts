@@ -95,20 +95,23 @@ export const RoomsApi = {
     conduit: Conduit,
     roomId: string,
     access: string,
-    title: string
+    title: string,
+    provide: boolean = false
   ) => {
     // TODO add to roomapp state after poke???
-
+    const json = {
+      create: {
+        rid: roomId,
+        access,
+        title,
+        provide,
+      },
+    };
+    console.log('json', json);
     await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
-      json: {
-        create: {
-          rid: roomId,
-          access,
-          title,
-        },
-      },
+      json,
       onSuccess: () => {
         console.log('rooms-create-success');
       },
