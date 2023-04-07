@@ -14,6 +14,7 @@ import { IuseStorage } from 'renderer/logic/lib/useStorage';
 
 type CourierInputProps = {
   storage: IuseStorage;
+  selectedChatPath: string;
   editMessage?: ChatMessageType | null;
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
@@ -23,6 +24,7 @@ type CourierInputProps = {
 
 export const ChatInputBox = ({
   storage,
+  selectedChatPath,
   editMessage,
   onSend,
   onEditConfirm,
@@ -129,6 +131,7 @@ export const ChatInputBox = ({
       <div ref={mediaRef} style={{ display: 'none' }}></div>
       <ChatInput
         id="chat-log-input"
+        selectedChatPath={selectedChatPath}
         isFocused={isFocused}
         loading={isUploading}
         onSend={(fragments) => {

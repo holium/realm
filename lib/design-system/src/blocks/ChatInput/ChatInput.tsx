@@ -49,6 +49,7 @@ const RemoveAttachmentButton = styled(motion.div)`
 
 type ChatInputProps = {
   id: string;
+  selectedChatPath: string;
   disabled?: boolean;
   isFocused?: boolean;
   loading?: boolean;
@@ -72,6 +73,7 @@ export const parseStringToFragment = (value: string): FragmentType[] => {
 
 export const ChatInput = ({
   id,
+  selectedChatPath,
   loading,
   tabIndex,
   disabled,
@@ -126,13 +128,16 @@ export const ChatInput = ({
   };
 
   const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    // TODO
-    // console.log('onFocus', evt);
+    const input = localStorage.getItem(selectedChatPath);
+    if (input) {
+      setValue(input);
+    }
   };
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    // TODO
-    // console.log('onBlur', evt);
+    if (value) {
+      localStorage.setItem(selectedChatPath, value);
+    }
   };
 
   const isDisabled =
@@ -301,7 +306,6 @@ export const ChatInput = ({
         <ChatBox
           id={id}
           ref={inputRef}
-          required
           name="chat-input"
           placeholder="New message"
           value={value}
