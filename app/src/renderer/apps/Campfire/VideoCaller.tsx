@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
-import { useRooms } from '../Rooms/useRooms';
+import { useCampfire } from '../Rooms/useRooms';
 import {
   ContextMenuOption,
   useContextMenu,
@@ -30,7 +30,7 @@ const CallerPresenter = (props: ICaller) => {
   const { person, type } = props;
   const { ship, theme, friends } = useServices();
   const callerRef = useRef<any>(null);
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useCampfire(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = friends.getContactAvatarMetadata(person);

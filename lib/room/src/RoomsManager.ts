@@ -17,27 +17,33 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   live: {
     room?: RoomType;
     chat: ChatModelType[];
-  }[];
+  };
   context: {
     path?: string;
     provider: Patp;
     list: RoomType[];
   };
   state: RoomState = RoomState.Disconnected;
+  type: 'rooms' | 'campfire' | 'typing';
 
-  constructor(protocol: BaseProtocol, video?: boolean) {
+  constructor(
+    protocol: BaseProtocol,
+    video?: boolean,
+    type: 'rooms' | 'campfire' | 'typing' = 'rooms'
+  ) {
     super();
+    this.type = type;
     this.protocol = protocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
-      video,
+      video: type === 'campfire',
     });
 
-    this.live = []; /*{
+    this.live = {
       room: undefined,
       chat: [],
-    };*/
+    };
 
     this.context = {
       path: undefined,
@@ -72,7 +78,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
-      if (this.live.find((room: any) => room.rid === rid)) {
+      if (this.live.room?.rid === rid) {
         this.clearLiveRoom();
       }
     });
@@ -121,13 +127,11 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   cleanup() {
-    if (this.live.length > 0) {
-      for (const room of this.live) {
-        if (room.creator === this.our) {
-          return this.deleteRoom(room.rid);
-        } else {
-          return this.leaveRoom();
-        }
+    if (this.live.room) {
+      if (this.live.room.creator === this.our) {
+        return this.deleteRoom(this.live.room.rid);
+      } else {
+        return this.leaveRoom();
       }
     }
 
@@ -180,34 +184,24 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   sendChat(content: string) {
-    const chat = this.live.find(
-      (room: any) => room.rid === this.presentRoom?.rid
-    )?.chat;
-    if (chat) {
-      chat.push({
-        author: this.protocol.our,
-        index: chat.length,
-        content,
-        timeReceived: Date.now(),
-        isRightAligned: true,
-      });
-      this.protocol.sendChat(content);
-    }
+    this.live.chat.push({
+      author: this.protocol.our,
+      index: this.live.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: true,
+    });
+    this.protocol.sendChat(content);
   }
 
   onChat(peer: Patp, content: string) {
-    const chat = this.live.find(
-      (room: any) => room.rid === this.presentRoom?.rid
-    )?.chat;
-    if (chat) {
-      chat.push({
-        author: peer,
-        index: chat.length,
-        content,
-        timeReceived: Date.now(),
-        isRightAligned: false,
-      });
-    }
+    this.live.chat.push({
+      author: peer,
+      index: this.live.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: false,
+    });
   }
 
   setProvider(provider: string) {

@@ -1,11 +1,11 @@
 import { Flex, Text, TextInput, Button, Icon } from '@holium/design-system';
 import { CampfireActions } from 'renderer/logic/actions/campfire';
 import { useServices } from 'renderer/logic/store';
-import { useRooms } from '../Rooms/useRooms';
+import { useCampfire } from '../Rooms/useRooms';
 
 export const Landing = () => {
   const { spaces, ship } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useCampfire(ship?.patp);
 
   const makeid = () => {
     let result = '';
