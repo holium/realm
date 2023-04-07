@@ -104,7 +104,6 @@ export const ChatInput = ({
   useEffect(() => {
     if (editingMessage) {
       const parsedFragments = convertFragmentsToText(editingMessage);
-      setValue(parsedFragments);
       if (inputRef.current && isFocused) {
         inputRef.current.value = parsedFragments;
         /*
@@ -118,6 +117,7 @@ export const ChatInput = ({
         */
         changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();
+        setValue(parsedFragments);
       } else {
         inputRef.current?.blur();
       }
@@ -140,25 +140,26 @@ export const ChatInput = ({
   };
 
   const onFocus = (evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (!editingMessage) {
-      const input = localStorage.getItem(selectedChatPath);
-      if (input) {
-        evt.target.value = input;
-        changeRows(evt.target.value, evt.target.scrollHeight);
-        setValue(input);
+    const savedChat = localStorage.getItem(selectedChatPath);
+    if (savedChat) {
+      const savedChatAndType = JSON.parse(savedChat);
+      console.log(savedChatAndType);
+      if (savedChatAndType.isNew === !editingMessage) {
+        evt.target.value = savedChatAndType.value;
+        onChange(evt);
       }
-    } else {
-      localStorage.removeItem(selectedChatPath);
     }
   };
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (!editingMessage) {
-      if (value) {
-        localStorage.setItem(selectedChatPath, value);
-      } else {
-        localStorage.removeItem(selectedChatPath);
-      }
+    if (value) {
+      const isNew = editingMessage ? false : true;
+      localStorage.setItem(
+        selectedChatPath,
+        JSON.stringify({ isNew: isNew, value: value })
+      );
+    } else {
+      localStorage.removeItem(selectedChatPath);
     }
   };
 
@@ -297,7 +298,7 @@ export const ChatInput = ({
             {editingMessage && (
               <Button.IconButton
                 mr={1}
-                disabled={isDisabled}
+                disabled={false}
                 onClick={(evt) => {
                   setValue('');
                   setRows(1);
