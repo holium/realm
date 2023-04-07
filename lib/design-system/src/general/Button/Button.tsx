@@ -227,20 +227,14 @@ const IconButton = styled(Base)<IconButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: ${(props) =>
-    props.isSelected ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
+  background-color: ${({ isSelected }) =>
+    isSelected ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
+  transition: var(--transition);
+
   &:hover:not([disabled]) {
-    transition: var(--transition);
     background-color: rgba(var(--rlm-overlay-hover-rgba));
   }
-  /* &:active:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-  } */
-  &:focus:not([disabled]) {
-    outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-  }
+
   svg {
     fill: ${({ customColor }) =>
       customColor
