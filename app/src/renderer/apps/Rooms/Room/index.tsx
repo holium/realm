@@ -17,7 +17,7 @@ const RoomPresenter = () => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const { dockColor, accentColor, mode } = theme.currentTheme;
+  const { dockColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsManager?.protocol.local?.isMuted;
   const commButtonBg =
@@ -152,7 +152,7 @@ const RoomPresenter = () => {
               className="realm-cursor-hover"
               size={26}
               customColor={
-                presentRoom.creator === ship?.patp ? '#E56262' : undefined
+                presentRoom.creator === ship?.patp ? 'intent-alert' : 'icon'
               }
               onClick={(evt) => {
                 evt.stopPropagation();
@@ -204,7 +204,7 @@ const RoomPresenter = () => {
               <Button.IconButton
                 className="realm-cursor-hover"
                 size={26}
-                customColor={roomView === 'chat' ? accentColor : undefined}
+                customColor={roomView === 'chat' ? 'accent' : 'icon'}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   roomView === 'chat'
