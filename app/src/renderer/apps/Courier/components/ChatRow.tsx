@@ -217,6 +217,7 @@ export const ChatRowPresenter = ({
             duration: 0.15,
           }}
           width={210}
+          initial={{ opacity: 0.5 }}
           animate={{ opacity: 0.5, lineHeight: '1' }}
           fontWeight={500}
           fontSize={1}

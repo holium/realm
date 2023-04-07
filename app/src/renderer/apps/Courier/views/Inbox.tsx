@@ -36,7 +36,7 @@ const sortFunction = (a: ChatModelType, b: ChatModelType) => {
 const scrollbarWidth = 12;
 
 export const InboxPresenter = () => {
-  const { ship } = useServices();
+  const { ship, theme } = useServices();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
   const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
@@ -133,7 +133,10 @@ export const InboxPresenter = () => {
           <Box height={544} width={dimensions.width - 26}>
             <Flex
               style={{
-                background: 'rgba(0,0,0,0.03)',
+                background:
+                  theme.currentTheme.mode === 'dark'
+                    ? 'rgba(0,0,0,0.1)'
+                    : 'rgba(0,0,0,0.035)',
               }}
               flexDirection="column"
               mb={1}
@@ -176,7 +179,7 @@ export const InboxPresenter = () => {
               width={listWidth + scrollbarWidth}
               height={listHeight}
               style={{ marginRight: -scrollbarWidth }}
-              filter={searchFilter}
+              // filter={searchFilter}
               initialTopMostItemIndex={unpinnedChatList.length - 1}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
