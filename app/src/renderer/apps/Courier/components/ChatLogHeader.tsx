@@ -14,7 +14,8 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 type ChatLogHeaderProps = {
   path: string;
   title: string;
-  subtitle?: string;
+  pretitle?: React.ReactNode;
+  subtitle?: React.ReactNode;
   avatar: React.ReactNode;
   isMuted: boolean;
   onBack: () => void;
@@ -25,6 +26,7 @@ type ChatLogHeaderProps = {
 export const ChatLogHeader = ({
   path,
   title,
+  pretitle,
   subtitle,
   avatar,
   onBack,
@@ -144,6 +146,7 @@ export const ChatLogHeader = ({
             {avatar}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {pretitle}
             <Text.Custom
               truncate
               width={255}
@@ -158,22 +161,7 @@ export const ChatLogHeader = ({
             >
               {title}
             </Text.Custom>
-            {subtitle && (
-              <Text.Custom
-                textAlign="left"
-                layoutId={`chat-${path}-subtitle`}
-                layout="preserve-aspect"
-                transition={{
-                  duration: 0.15,
-                }}
-                width={210}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5, lineHeight: '1' }}
-                fontSize={2}
-              >
-                {subtitle}
-              </Text.Custom>
-            )}
+            {subtitle}
           </Flex>
         </Flex>
       </Flex>

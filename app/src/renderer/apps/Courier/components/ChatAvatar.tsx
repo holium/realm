@@ -15,6 +15,7 @@ type ChatAvatarProps = {
   type: string;
   path: string;
   image?: string;
+  color?: string;
   canEdit?: boolean;
   metadata?: any;
   size?: number;
@@ -27,6 +28,7 @@ export const ChatAvatar = ({
   type,
   path,
   peers,
+  color,
   image,
   onUpload,
   canEdit = false,
@@ -56,8 +58,17 @@ export const ChatAvatar = ({
       />
     );
   }
-  if (!image && type === 'space-chat') {
-    avatarElement = <Crest picture={image} color={sigil?.color} />;
+  if (type === 'space' && !image && color) {
+    avatarElement = (
+      <motion.div
+        style={{
+          borderRadius: 4,
+          backgroundColor: color,
+          width: size,
+          height: size,
+        }}
+      />
+    );
   }
   if (image) {
     avatarElement = (
