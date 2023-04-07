@@ -6,30 +6,194 @@ on:
     branches:
       - mac
 #
+env:
+  GH_PROXY: ${{ secrets.GH_PROXY }}
+  GH_PROXY_STAGING: ${{ secrets.GH_PROXY_STAGING }}
+#
 jobs:
-  build-mac:
+  pre-deploy:
     runs-on: ubuntu-latest
+    outputs:
+      # the full CI object returned by the post-deploy script
+      ci: ${{ steps.ci.outputs.result }}
+      release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+      build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
+      build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
+      build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
+      build_version_build: ${{ fromJSON(steps.ci.outputs.result).version.build }}
+      channel: ${{ fromJSON(steps.ci.outputs.result).channel }}
     steps:
-      - name: Print secrets
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin production
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: ci
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-deploy.js')
+            const args = { workflowId: 'production-build.yml', version: 'v0.0.1' }
+            const result = script({github, context}, args)
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #
+      - name: Start release draft
+        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
+        # create annotated tag for this branch. this will become basis for the release
+        run: |
+          mkdir -p ./app/release/build
+          touch ./app/release/build/log.txt
+          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
+          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+          CHANGELOG: ${{ github.event.pull_request.body }}
+  #
+  build-mac:
+    needs: [pre-deploy]
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
         run: |
-          echo "P12_PASSWORD = $(echo ${P12_PASSWORD} | base64)"
-          echo "KEYCHAIN_PASSWORD = $(echo ${KEYCHAIN_PASSWORD} | base64)"
-          echo "BUILD_CERTIFICATE_BASE64 = $(echo ${BUILD_CERTIFICATE_BASE64} | base64)"
-          # echo "APPLE_ID = $(echo ${APPLE_ID} | base64)"
-          echo "APPLE_ID = $(echo ${APPLE_ID} | sed 's/./&/g')"
-          echo "APPLE_ID_PASS = $(echo ${APPLE_ID_PASS} | base64)"
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+          # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+          # apply provisioning profile
+          # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Install app dependencies
+        run: yarn install
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git pull origin production
       #
-      - name: more
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'production-build.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build and publish
+        run: npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
         run: |
-          import os
-          for q in (os.getenv("APPLE_ID")):
-            print(q)
-        shell: python
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
+  #  once everything is done, flip the switch on the draft release to make
+  #    the release available to auto-update
+  post-deploy:
+    needs: [pre-deploy, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: post-deploy
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/post-deploy.js')
+            console.log(process.env.CI_ENV);
+            const result = script({github, context}, JSON.parse(process.env.CI_ENV), './app/release/app/package.json')
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - run: |
+          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  # this will run even if the build is canceled or fails
+  #  we need this to re-enable the workflow
+  finalize:
+    if: always()
+    needs: [pre-deploy, post-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      #
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      #
+      - name: Run post-deploy script
+        uses: actions/github-script@v6
+        id: done
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/finalize.js')
+            const ci = (process.env.CI_ENV && JSON.parse(process.env.CI_ENV)) || {};
+            const result = script({github, context}, 'production-build.yml', ci)
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
