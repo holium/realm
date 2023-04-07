@@ -9,6 +9,7 @@ import { RoomChatMessage } from './RoomChatMessage';
 import { useRooms } from '../useRooms';
 
 export const chatForm = (
+  rid: string,
   defaults: any = {
     netChat: '',
   }
@@ -31,8 +32,8 @@ export const chatForm = (
   };
 };
 
-const RoomChatPresenter = () => {
-  const { text } = useMemo(() => chatForm(), []);
+const RoomChatPresenter = (rid: string) => {
+  const { text } = useMemo(() => chatForm(rid), []);
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
   const { theme: themeStore, ship } = useServices();
@@ -43,7 +44,8 @@ const RoomChatPresenter = () => {
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.live.chat.slice(0);
+  const room = roomsManager?.live.find((live) => live.room?.rid === rid);
+  const chats = room?.chat?.slice(0) ?? [];
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -52,7 +54,7 @@ const RoomChatPresenter = () => {
       if (chatInputRef.current === null) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsManager.sendChat(innerText);
+      roomsManager.sendData(innerText);
       text.actions.onChange('');
     },
     [roomsManager.presentRoom, text.actions]

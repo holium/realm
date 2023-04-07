@@ -14,6 +14,8 @@ import { RoomManagerEvent } from './events';
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
   protocol: BaseProtocol;
+  campfireProtocol: BaseProtocol;
+  dataProtocol: BaseProtocol;
   live: {
     room?: RoomType;
     chat?: ChatModelType[];
@@ -202,12 +204,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       return;
     }
     this.connectRoom(rid);
-  }
-
-  joinCampfire(rid: string) {
-    this.type = 'campfire';
-    this.local.video = true;
-    this.joinRoom(rid);
   }
 
   connectRoom(rid: string) {

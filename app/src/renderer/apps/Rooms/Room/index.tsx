@@ -6,7 +6,6 @@ import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { VoiceView } from './Voice';
-import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { useRooms } from '../useRooms';
 

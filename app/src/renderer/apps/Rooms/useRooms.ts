@@ -81,21 +81,17 @@ export const createManager = (
   return manager;
 };
 
-let roomsManagers: RoomsManager[] = [];
+let roomsManager: RoomsManager | null;
 
 let clearingProtocolAndManager: boolean = false; // switch to ensure we only have one clear() running at a time and the "duplicates" no-op
 const clearProtocolAndManager: (callback?: () => void) => void = (
   callback?: () => void
 ) => {
-  if (roomsManagers && !clearingProtocolAndManager) {
+  if (roomsManager && !clearingProtocolAndManager) {
     clearingProtocolAndManager = true;
-    Promise.all(
-      roomsManagers.map(async (room) => {
-        room.cleanup;
-      })
-    ).then(() => {
+    roomsManager.cleanup().then(() => {
       protocol = null;
-      roomsManagers = [];
+      roomsManager = null;
       clearingProtocolAndManager = false;
       if (callback) {
         callback();
@@ -115,15 +111,12 @@ RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
 });
 
 export function useRooms(our?: Patp): RoomsManager {
-  const manager = roomsManagers.find((room) => room.type === 'rooms');
-  if (manager) {
-    return manager;
+  if (roomsManager) {
+    return roomsManager;
   }
 
-  let roomsManager: RoomsManager | null = null;
-  if (!manager && our) {
+  if (!roomsManager && our) {
     roomsManager = createManager(our, 'rooms');
-    roomsManagers.push(roomsManager);
   }
   if (!roomsManager) {
     throw new Error('roomsManager not initialized');
