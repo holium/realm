@@ -128,14 +128,20 @@ export const ChatInput = ({
   };
 
   const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    const input = localStorage.getItem(selectedChatPath);
-    if (input) {
-      setValue(input);
+    console.log('onFocus');
+    if (!editingMessage) {
+      const input = localStorage.getItem(selectedChatPath);
+      if (input) {
+        setValue(input);
+      }
+    } else {
+      localStorage.removeItem(selectedChatPath);
     }
   };
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (value) {
+    console.log('onBlur');
+    if (value && !editingMessage) {
       localStorage.setItem(selectedChatPath, value);
     }
   };
@@ -173,6 +179,7 @@ export const ChatInput = ({
   };
 
   const onSendClick = (parsedFragments: FragmentType[]) => {
+    localStorage.removeItem(selectedChatPath);
     setValue('');
     if (editingMessage) {
       onEditConfirm(parsedFragments);
