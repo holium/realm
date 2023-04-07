@@ -82,7 +82,10 @@ export class MenuBuilder {
           accelerator: 'Command+U',
           click: () => {
             const appUpdater = new AppUpdater();
-            appUpdater.checkForUpdates(this.mainWindow, true);
+            appUpdater.checkingForUpdates = true;
+            appUpdater
+              .checkForUpdates(this.mainWindow, true)
+              .then(() => (appUpdater.checkingForUpdates = false));
           },
         },
         { type: 'separator' },

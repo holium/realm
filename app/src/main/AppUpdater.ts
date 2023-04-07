@@ -69,6 +69,7 @@ export class AppUpdater implements IAppUpdater {
   private handlers: IpcHandler[] = [];
   private updateInfo: UpdateInfo | undefined = undefined;
   private autoUpdater: typeof autoUpdater;
+  public checkingForUpdates: boolean = false;
 
   constructor() {
     autoUpdater.removeAllListeners();

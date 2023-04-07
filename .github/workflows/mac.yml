@@ -39,7 +39,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'mac.yml', version: 'v0.0.0' }
+            const args = { workflowId: 'mac.yml', version: 'v0.0.0', channel: 'alpha' }
             const result = script({github, context}, args)
             console.log(result)
             return result
