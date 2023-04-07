@@ -106,15 +106,6 @@ export const ChatInput = ({
       const parsedFragments = convertFragmentsToText(editingMessage);
       if (inputRef.current && isFocused) {
         inputRef.current.value = parsedFragments;
-        /*
-          TODO setting inputRef.current.value does not seem to update the scrollHeight
-          like it does below when setting evt.target.value.
-
-          So we hit an edge case when a user is editing a multi-line message,
-          clicks off, and then opens the chat again: the message is on one line
-          rather than multiple.  It would be nice to have a way to calculate
-          scrollHeight independently.
-        */
         changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();
         setValue(parsedFragments);
