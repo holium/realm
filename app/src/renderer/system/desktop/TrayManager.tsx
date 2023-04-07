@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { ErrorBoundary } from '../../logic/ErrorBoundary';
 
 const TrayManagerPresenter = () => {
   const { activeApp, coords, walletApp, dimensions, setActiveApp } =
@@ -36,7 +37,7 @@ const TrayManagerPresenter = () => {
       }}
       closeTray={() => setActiveApp(null)}
     >
-      {TrayAppView && <TrayAppView />}
+      <ErrorBoundary>{TrayAppView && <TrayAppView />}</ErrorBoundary>
     </TrayApp>
   );
 };
