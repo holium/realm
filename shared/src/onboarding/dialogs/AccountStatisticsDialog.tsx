@@ -1,5 +1,5 @@
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { OnboardDialogTitle } from 'onboarding/components/OnboardDialog.styles';
+import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
 
 type Props = {
   patps: string[];
