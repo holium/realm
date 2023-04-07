@@ -1,29 +1,26 @@
-import { useMemo, useState } from 'react';
+import { MutableRefObject, useMemo, useState } from 'react';
+import { Item } from 'react-photoswipe-gallery';
+import 'photoswipe/dist/photoswipe.css';
 import { Flex, Text } from '../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
-import 'photoswipe/dist/photoswipe.css';
-import { Item } from 'react-photoswipe-gallery';
 
 type ImageBlockProps = {
   showLoader?: boolean;
   image: string;
   by: string;
-  onImageLoaded?: () => void;
 } & BlockProps;
 
-export const ImageBlock = (props: ImageBlockProps) => {
-  const {
-    showLoader,
-    image,
-    by,
-    variant,
-    width = 'inherit',
-    height,
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    onImageLoaded,
-    ...rest
-  } = props;
+export const ImageBlock = ({
+  id,
+  showLoader,
+  image,
+  by,
+  variant,
+  width = 'inherit',
+  height,
+  ...rest
+}: ImageBlockProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [naturalWidth, setNaturalWidth] = useState(320);
   const [naturalHeight, setNaturalHeight] = useState(427);
@@ -48,7 +45,7 @@ export const ImageBlock = (props: ImageBlockProps) => {
   );
 
   return (
-    <Block variant={variant} width={width} {...rest}>
+    <Block id={id} variant={variant} width={width} {...rest}>
       <Item
         original={image}
         thumbnail={image}
@@ -57,8 +54,8 @@ export const ImageBlock = (props: ImageBlockProps) => {
       >
         {({ ref, open }) => (
           <FragmentImage
-            id={rest.id}
-            ref={ref as React.MutableRefObject<HTMLImageElement>}
+            id={id}
+            ref={ref as MutableRefObject<HTMLImageElement>}
             loading="eager"
             {...(showLoader && { isSkeleton: !isLoaded })}
             src={image}
@@ -67,7 +64,6 @@ export const ImageBlock = (props: ImageBlockProps) => {
             draggable={false}
             onLoad={() => {
               if (showLoader) {
-                onImageLoaded && onImageLoaded();
                 setIsLoaded(true);
               }
               const curr = ref && (ref.current as HTMLImageElement);
@@ -76,9 +72,6 @@ export const ImageBlock = (props: ImageBlockProps) => {
                 setNaturalHeight(curr.naturalHeight);
             }}
             onClick={open}
-            onError={() => {
-              // setIsError(true);
-            }}
           />
         )}
       </Item>

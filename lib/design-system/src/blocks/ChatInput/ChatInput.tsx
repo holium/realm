@@ -112,13 +112,17 @@ export const ChatInput = ({
   }, [editingMessage]);
 
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = evt.target;
-    setValue(value);
-    if (value.length < 25 && value.split('\n').length < 2) {
+    if (
+      evt.target.value.length < 30 &&
+      evt.target.value.split('\n').length < 2
+    ) {
       setRows(1);
+    } else if (evt.target.value.split('\n').length < value.split('\n').length) {
+      setRows(rows - 1);
     } else {
       setRows(evt.target.scrollHeight / CHAT_INPUT_LINE_HEIGHT);
     }
+    setValue(evt.target.value);
   };
 
   const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
@@ -169,6 +173,7 @@ export const ChatInput = ({
       onEditConfirm(parsedFragments);
     } else {
       onSend(parsedFragments);
+      setRows(1);
     }
   };
 
@@ -241,7 +246,7 @@ export const ChatInput = ({
         inputId={id}
         disabled={disabled}
         height={
-          rows === 1 ? 38 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 6
+          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
         }
         py="3px"
         error={!!error}
@@ -303,7 +308,7 @@ export const ChatInput = ({
           tabIndex={tabIndex}
           disabled={disabled}
           style={{
-            marginTop: rows === 1 ? '10px' : '3px',
+            marginTop: '10px',
             height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
           }}
           onChange={onChange}

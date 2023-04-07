@@ -46,6 +46,7 @@ export const ContextMenu = () => {
 
   if (!mouseRef) return <div />;
 
+  const originatingElement = mouseRef.target as HTMLElement;
   const containerId = (mouseRef.target as HTMLElement).id;
   const contextualOptions = getOptions(containerId);
   const contextualColors = getColors(containerId);
@@ -103,7 +104,7 @@ export const ContextMenu = () => {
                 iconColor={option.iconColor}
                 onClick={(e: any) => {
                   if (option.disabled) return;
-                  option.onClick(e);
+                  option.onClick(e, originatingElement);
                   setMouseRef(null);
                 }}
               />

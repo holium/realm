@@ -10,6 +10,7 @@ import { useContextMenu } from 'renderer/components';
 import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
+import { OSActions } from 'renderer/logic/actions/os';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -88,16 +89,35 @@ export const ChatMessagePresenter = ({
       });
     }
     if (hasImage) {
-      // menu.push({
-      //   id: `${messageRowId}-save-image`,
-      //   icon: 'CloudDownload',
-      //   label: 'Save image',
-      //   disabled: false,
-      //   onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-      //     evt.stopPropagation();
-      //     // selectedChat.saveImage(message.id);
-      //   },
-      // });
+      menu.push({
+        id: `${messageRowId}-save-image`,
+        icon: 'CloudDownload',
+        label: 'Save image',
+        disabled: false,
+        onClick: (
+          evt: React.MouseEvent<HTMLButtonElement>,
+          elem: HTMLElement | undefined
+        ) => {
+          evt.stopPropagation();
+          const images =
+            msgModel &&
+            msgModel.contents.filter((c) =>
+              Object.keys(c)[0].includes('image')
+            );
+          if (elem) {
+            let asImage = elem as HTMLImageElement;
+            if (
+              images &&
+              images.length > 0 &&
+              asImage.src &&
+              images.find((i) => i.image === asImage.src)
+            )
+              OSActions.downloadUrlAsFile(asImage.src);
+          } else if (images && images.length > 0) {
+            OSActions.downloadUrlAsFile(images[0].image);
+          }
+        },
+      });
       // TODO if trove is installed
       // save to trove
     }
