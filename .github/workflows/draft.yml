@@ -1,6 +1,6 @@
 #
 # PR into the draft-build branch to run this script
-name: draft-build
+name: draft
 run-name: Draft Build - ${{ github.actor }}
 on:
   push:
