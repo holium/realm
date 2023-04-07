@@ -19,13 +19,14 @@
   =/  chat-path  (weld /spaces (weld (pathify-space-path path.space) /chats/(scot %uv (sham path.space))))
   =/  metadata-settings
     :~  ['image' '']
-        ['title' (crip "{(trip name.space)}: general chat")]
+        ['title' 'General']
         ['description' '']
         ['creator' (scot %p ship.path.space)]
         ['reactions' 'true']
+        ['space' (spat (pathify-space-path path.space))]
     ==
   =/  metadata=(map cord cord)   (~(gas by *(map cord cord)) metadata-settings)
-  =/  pathrow=path-row:chat-db  [chat-path metadata %space-chat t t ~ %host %.n *@dr]
+  =/  pathrow=path-row:chat-db  [chat-path metadata %space t t ~ %host %.n *@dr]
   =/  all-peers=ship-roles:chat-db
     ::?+  -.chat-access  !! :: default crash not-implemented an access type
     ::  %members

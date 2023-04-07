@@ -51,7 +51,7 @@ const parseMetadata = (metadata: string) => {
   };
 };
 
-export type ChatPathType = 'dm' | 'group' | 'space-chat';
+export type ChatPathType = 'dm' | 'group' | 'space';
 
 export class ChatService extends BaseService {
   db: Database.Database | null = null;

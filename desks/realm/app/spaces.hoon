@@ -108,11 +108,9 @@
           %+  skim
             ~(tap by new-spaces)
           |=  kv=[k=space-path:store v=space:store]
-          =(ship.path.v.kv our.bowl)
+          &(=(ship.path.v.kv our.bowl) ?!(=(space.k.kv 'our')))
         |-
           ?:  =(index (lent to-add-chat))
-            ~&  >>>  'should be sending pokes to members of new chats in old spaces'
-            ~&  >>>  cards
             [cards this(state [%2 new-spaces invitations.old membership.old current.old])]
           =/  kv  (snag index to-add-chat)
           =/  members             (~(got by membership.old) k.kv)
