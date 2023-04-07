@@ -18,23 +18,25 @@ import InboxList from '../components/InboxList';
 import { useShipStore } from 'renderer/stores/ship.store';
 const rowHeight = 52;
 
-const sortFunction = (a: ChatModelType, b: ChatModelType) => {
-  if (
-    (a.createdAt || a.metadata.timestamp) >
-    (b.createdAt || b.metadata.timestamp)
-  ) {
-    return -1;
-  }
-  if (
-    (a.createdAt || a.metadata.timestamp) <
-    (b.createdAt || b.metadata.timestamp)
-  ) {
-    return 1;
-  }
-  return 0;
-};
+// const sortFunction = (a: ChatModelType, b: ChatModelType) => {
+//   if (
+//     (a.createdAt || a.metadata.timestamp) >
+//     (b.createdAt || b.metadata.timestamp)
+//   ) {
+//     return -1;
+//   }
+//   if (
+//     (a.createdAt || a.metadata.timestamp) <
+//     (b.createdAt || b.metadata.timestamp)
+//   ) {
+//     return 1;
+//   }
+//   return 0;
+// };
 
 const scrollbarWidth = 12;
+const heightPadding = 16;
+const searchHeight = 42;
 
 export const InboxPresenter = () => {
   const { ship, chatStore } = useShipStore();
@@ -55,12 +57,30 @@ export const InboxPresenter = () => {
     [searchString]
   );
 
-  const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
-  const listHeight = useMemo(
-    () => 544 - pinnedChatList.length * 56,
-    [pinnedChatList]
+  const pinnedChatListFiltered = useMemo(
+    () => pinnedChatList.filter(searchFilter),
+    [pinnedChatList.length, searchString]
   );
 
+  const pinnedHeight = useMemo(() => {
+    let height = 0;
+    pinnedChatListFiltered.forEach((chat) => {
+      if (chat.type === 'space') {
+        height = height + 70;
+      } else {
+        height = height + 56;
+      }
+    });
+    return height;
+  }, [pinnedChatListFiltered.length]);
+
+  const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
+  const listHeight = useMemo(
+    () => dimensions.height - heightPadding - searchHeight - pinnedHeight,
+    [pinnedHeight]
+  );
+
+  console.log('pinnedHeight', pinnedHeight, 'listHeight', listHeight);
   return (
     <Flex
       initial={{ opacity: 0 }}
@@ -74,7 +94,7 @@ export const InboxPresenter = () => {
         setShowList(true);
       }}
     >
-      <Flex zIndex={1} mb={1} ml={1} flexDirection="row" alignItems="center">
+      <Flex zIndex={1} mb={2} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -131,7 +151,10 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box height={544} width={dimensions.width - 26}>
+          <Box
+            height={dimensions.height - heightPadding}
+            width={dimensions.width - 26}
+          >
             <Flex
               style={{
                 background: 'rgba(0,0,0,0.03)',
@@ -140,7 +163,7 @@ export const InboxPresenter = () => {
               mb={1}
               borderRadius={6}
             >
-              {pinnedChatList.map((chat) => {
+              {pinnedChatListFiltered.filter(searchFilter).map((chat) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
                 return (
@@ -172,12 +195,11 @@ export const InboxPresenter = () => {
               })}
             </Flex>
             <WindowedList
-              data={unpinnedChatList}
+              data={unpinnedChatList.filter(searchFilter)}
               followOutput="auto"
               width={listWidth + scrollbarWidth}
               height={listHeight}
               style={{ marginRight: -scrollbarWidth }}
-              filter={searchFilter}
               initialTopMostItemIndex={unpinnedChatList.length - 1}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;

@@ -4,7 +4,6 @@ import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
 import { useState } from 'react';
-import { Crest } from 'renderer/components';
 
 type ChatAvatarProps = {
   sigil?: {

@@ -453,8 +453,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     borderColor="intent-info"
                     borderRadius={6}
                     style={{
-                      borderColor: 'rgba(0, 0, 0, 0.125)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.065)',
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
+                      backgroundColor:
+                        theme.currentTheme.mode === 'dark'
+                          ? 'rgba(0, 0, 0, 0.125)'
+                          : 'rgba(0, 0, 0, 0.065)',
                     }}
                   >
                     <Icon name="InfoCircle" color="icon" mr={2} opacity={0.7} />
