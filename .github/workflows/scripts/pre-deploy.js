@@ -24,7 +24,7 @@ function versionDiff(a, b) {
   }
 }
 
-module.exports = async ({ github, context }, workflowId) => {
+module.exports = async ({ github, context }, args) => {
   // console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
@@ -151,6 +151,7 @@ module.exports = async ({ github, context }, workflowId) => {
       // if there is at least one release, use it's tag name to determine next version
       buildVersion = tags.data[0].name;
     } else {
+      if ( args.)
       // otherwise if no releases found, use the version string from package.json
       buildVersion = pkg.version;
     }
