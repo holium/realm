@@ -37,6 +37,7 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
       <Box position="absolute" bottom={12} left={0} right={0}>
         <ChatInput
           id="chat-send"
+          selectedChatPath="foo"
           attachments={
             [
               // 'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679310718-pixelady-559.png',
@@ -75,6 +76,7 @@ export const Attachment: ComponentStory<typeof ChatInput> = () => {
       >
         <ChatInput
           id="chat-send"
+          selectedChatPath="foo"
           attachments={[
             'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679310718-pixelady-559.png',
             'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679313918-wallet%20tease.mp4',
