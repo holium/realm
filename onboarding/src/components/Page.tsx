@@ -1,7 +1,6 @@
 import { useEffect, ReactNode } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import NextHead from 'next/head';
-import { Rubik } from 'next/font/google';
 import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
 import { api } from '../util/api';
@@ -14,8 +13,6 @@ const Main = styled.main`
   align-items: center;
   justify-content: center;
 `;
-
-const rubik = Rubik({ subsets: ['latin'], weight: 'variable' });
 
 type Props = {
   title: string;
@@ -60,7 +57,7 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </NextHead>
-      <Main className={rubik.className}>
+      <Main>
         {isProtected ? (authenticated.isOn ? children : null) : children}
       </Main>
     </>
