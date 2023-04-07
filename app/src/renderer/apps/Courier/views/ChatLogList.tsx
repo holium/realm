@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import {
   Box,
   Text,
@@ -28,28 +28,6 @@ export const ChatLogList = ({
   endOfListPadding,
 }: Props) => {
   const listRef = useRef<WindowedListRef>(null);
-
-  const scrollbarWidth = 12;
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollToIndex({
-        index: messages.length - 1,
-        align: 'start',
-        behavior: 'auto',
-      });
-    }
-  }, [listRef.current, selectedChat.path]);
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollToIndex({
-        index: messages.length - 1,
-        align: 'start',
-        behavior: 'auto',
-      });
-    }
-  }, [listRef.current, endOfListPadding]);
 
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
@@ -119,14 +97,11 @@ export const ChatLogList = ({
       <WindowedList
         innerRef={listRef}
         data={messages}
-        followOutput="auto"
-        width={width + scrollbarWidth}
+        width={width}
         height={height}
-        style={{ marginRight: -scrollbarWidth }}
-        atBottomThreshold={100}
-        alignToBottom
-        initialTopMostItemIndex={messages.length - 1}
         itemContent={renderChatRow}
+        chatMode
+        shiftScrollbar
       />
     </Gallery>
   );
