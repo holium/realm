@@ -40,7 +40,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'draft-build.yml', version: 'v0.0.1', channel: 'alpha' }
+            const args = { workflowId: 'draft-build.yml', version: 'v0.0.3', channel: 'alpha' }
             const result = script({github, context}, args)
             console.log(result)
             return result
@@ -144,7 +144,6 @@ jobs:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   build-linux:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     steps:
