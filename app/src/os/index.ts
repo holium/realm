@@ -90,6 +90,9 @@ export class Realm extends EventEmitter {
     showOpenDialog: async () => {
       return await ipcRenderer.invoke('realm.show-open-dialog');
     },
+    downloadUrlAsFile: async (url: string) =>
+      await ipcRenderer.send('download-url-as-file', { url }),
+
     onSetTheme: (callback: any) =>
       ipcRenderer.on('realm.change-theme', callback),
     onLog: (callback: any) => ipcRenderer.on('realm.on-log', callback),
