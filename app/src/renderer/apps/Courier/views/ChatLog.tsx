@@ -34,8 +34,14 @@ const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
+<<<<<<< HEAD
   const { ship, notifStore, friends, chatStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
+=======
+  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
+  const accountStore = useAccountStore();
+  const { ship, friends, spaces } = useServices();
+>>>>>>> f4f79bcfe (working on getting the spaces chat logic in the various views)
   const [showAttachments, setShowAttachments] = useState(false);
 
   const { color: ourColor } = useMemo(() => {
@@ -62,6 +68,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
+
+  let spaceTitle = undefined;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spaces.getSpaceByChatPath(path);
+    if (space) {
+      spaceTitle = space.name;
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = (
     <ChatAvatar
       sigil={sigil}
@@ -70,6 +87,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
       peers={peers.map((p) => p.ship)}
       image={image}
       metadata={metadata}
+      color={avatarColor}
       canEdit={false}
     />
   );
@@ -141,9 +159,43 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     height = height - 110;
   }
 
+  let pretitle;
   let subtitle;
-  if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
-    subtitle = `${selectedChat.peers.length} members`;
+  if (selectedChat.peers.length > 1 && selectedChat.type === 'group') {
+    subtitle = (
+      <Text.Custom
+        textAlign="left"
+        layoutId={`chat-${path}-subtitle`}
+        layout="preserve-aspect"
+        transition={{
+          duration: 0.15,
+        }}
+        width={210}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5, lineHeight: '1' }}
+        fontSize={2}
+      >
+        {selectedChat.peers.length} members
+      </Text.Custom>
+    );
+  }
+  if (selectedChat.type === 'space') {
+    pretitle = (
+      <Text.Custom
+        textAlign="left"
+        layoutId={`chat-${path}-pretitle`}
+        layout="preserve-aspect"
+        transition={{
+          duration: 0.15,
+        }}
+        width={210}
+        animate={{ opacity: 0.5, lineHeight: '1' }}
+        fontSize={1}
+        fontWeight={500}
+      >
+        {spaceTitle}
+      </Text.Custom>
+    );
   }
 
   return (
@@ -160,6 +212,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           onBack={() => setSubroute('inbox')}
           hasMenu
           avatar={chatAvatarEl}
+          pretitle={pretitle}
           subtitle={subtitle}
         />
         <Flex

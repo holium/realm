@@ -40,7 +40,7 @@ export const ChatRowPresenter = ({
   onClick,
 }: ChatRowProps) => {
   const { shellStore } = useAppState();
-  const { ship, notifStore, chatStore, spaceStore } = useShipStore();
+  const { ship, notifStore, chatStore, spacesStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -199,6 +199,34 @@ export const ChatRowPresenter = ({
     return getChatHeader(path);
   }, [path, window.ship]);
 
+  let spaceHeader = null;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spacesStore.getSpaceByChatPath(path);
+
+    if (!space) {
+      spaceHeader = null;
+    } else {
+      spaceHeader = (
+        <Text.Custom
+          textAlign="left"
+          layoutId={`chat-${path}-pretitle`}
+          layout="preserve-aspect"
+          transition={{
+            duration: 0.15,
+          }}
+          width={210}
+          animate={{ opacity: 0.5, lineHeight: '1' }}
+          fontWeight={500}
+          fontSize={1}
+        >
+          {space.name}
+        </Text.Custom>
+      );
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = useMemo(
     () =>
       title &&
@@ -211,26 +239,13 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={image}
+          color={avatarColor}
           metadata={metadata}
           canEdit={false}
         />
       ),
     [title, path, type, peers, sigil, image]
   );
-
-  let spaceHeader = null;
-  if (type === 'space-chat') {
-    const space = spaceStore.getSpaceByChatPath(path);
-    if (!space) {
-      spaceHeader = null;
-    } else {
-      spaceHeader = (
-        <Flex>
-          <Text.Custom>{space.name}</Text.Custom>
-        </Flex>
-      );
-    }
-  }
 
   return (
     <Row
@@ -249,11 +264,6 @@ export const ChatRowPresenter = ({
         alignItems="center"
         width="100%"
       >
-        {spaceHeader && (
-          <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
-            {spaceHeader}
-          </Flex>
-        )}
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
             layoutId={`chat-${path}-avatar`}
@@ -265,6 +275,11 @@ export const ChatRowPresenter = ({
             {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {spaceHeader && (
+              <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+                {spaceHeader}
+              </Flex>
+            )}
             <Text.Custom
               layoutId={`chat-${path}-name`}
               layout="preserve-aspect"

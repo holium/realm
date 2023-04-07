@@ -6,6 +6,7 @@ import {
   TextInput,
   Box,
   Text,
+  WindowedList,
 } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
@@ -13,8 +14,12 @@ import { ChatRow } from '../components/ChatRow';
 import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
+<<<<<<< HEAD
 import InboxList from '../components/InboxList';
 import { useShipStore } from 'renderer/stores/ship.store';
+=======
+import { useServices } from 'renderer/logic/store';
+>>>>>>> f4f79bcfe (working on getting the spaces chat logic in the various views)
 const rowHeight = 52;
 
 const sortFunction = (a: ChatModelType, b: ChatModelType) => {
@@ -32,6 +37,8 @@ const sortFunction = (a: ChatModelType, b: ChatModelType) => {
   }
   return 0;
 };
+
+const scrollbarWidth = 12;
 
 export const InboxPresenter = () => {
   const { ship, chatStore } = useShipStore();
@@ -139,16 +146,17 @@ export const InboxPresenter = () => {
             >
               {pinnedChatList.map((chat) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                const height = chat.type === 'space' ? 70 : rowHeight;
                 return (
                   <Box
                     key={`${window.ship}-${chat.path}-pinned`}
                     zIndex={2}
-                    height={rowHeight}
+                    height={height}
                     alignItems="center"
                     layoutId={`chat-${chat.path}-container`}
                   >
                     <ChatRow
-                      height={rowHeight}
+                      height={height}
                       path={chat.path}
                       title={chat.metadata.title}
                       isAdmin={isAdmin}
@@ -167,27 +175,30 @@ export const InboxPresenter = () => {
                 );
               })}
             </Flex>
-            <InboxList
-              items={unpinnedChatList}
-              itemHeight={rowHeight}
-              width={listWidth}
+            <WindowedList
+              data={unpinnedChatList}
+              followOutput="auto"
+              width={listWidth + scrollbarWidth}
               height={listHeight}
-              filterFunction={searchFilter}
-              sortFunction={sortFunction}
-              renderItem={(chat) => {
+              style={{ marginRight: -scrollbarWidth }}
+              filter={searchFilter}
+              initialTopMostItemIndex={unpinnedChatList.length - 1}
+              itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                const height = chat.type === 'space' ? 70 : rowHeight;
+
                 return (
                   <Box
-                    key={`${window.ship}-${chat.path}-unpinned`}
+                    key={`${window.ship}-${chat.path}-${index}-unpinned`}
                     width={listWidth}
                     zIndex={2}
                     layout="preserve-aspect"
                     alignItems="center"
-                    height={rowHeight}
+                    height={height}
                     layoutId={`chat-${chat.path}-container`}
                   >
                     <ChatRow
-                      height={rowHeight}
+                      height={height}
                       path={chat.path}
                       title={chat.metadata.title}
                       peers={chat.peers.map((peer) => peer.ship)}
