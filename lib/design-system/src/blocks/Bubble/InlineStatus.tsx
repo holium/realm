@@ -15,9 +15,9 @@ export function shortenedTxn(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-export const InlineStatus = ({ text }: InlineStatusProps) => {
+export const InlineStatus = ({ id, text }: InlineStatusProps) => {
   let innerContent = (
-    <Text.Custom fontSize={1} fontWeight={300} opacity={0.5}>
+    <Text.Custom id={id} fontSize={1} fontWeight={300} opacity={0.5}>
       {text}
     </Text.Custom>
   );
