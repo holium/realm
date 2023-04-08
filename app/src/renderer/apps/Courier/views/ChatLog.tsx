@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
@@ -10,6 +10,7 @@ import {
   extractOGData,
   parseMediaType,
   measureTweet,
+  WindowedListRef,
 } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
@@ -34,6 +35,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
+
+  const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
     if (!ship) return { color: '#000' };
@@ -266,6 +269,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </FullWidthAnimatePresence>
               )}
               <ChatLogList
+                listRef={listRef}
                 messages={messages}
                 endOfListPadding={endPadding}
                 selectedChat={selectedChat}
@@ -311,6 +315,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
             } else {
               setShowAttachments(false);
             }
+            // Wait for transition to finish, then scroll to bottom.
+            setTimeout(() => {
+              listRef.current?.scrollToIndex(messages.length - 1);
+            }, 250);
           }}
         />
       </Flex>
