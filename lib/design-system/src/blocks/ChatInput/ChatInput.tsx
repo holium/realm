@@ -254,7 +254,7 @@ export const ChatInput = ({
                         : undefined
                     }
                   >
-                    <Icon name="Close" size={16} />
+                    <Icon name="Close" size={16} fill="window" />
                   </Button.Base>
                 </motion.div>
               </RemoveAttachmentButton>
