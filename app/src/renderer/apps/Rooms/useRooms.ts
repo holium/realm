@@ -48,7 +48,14 @@ export const createManager = (
   type?: 'rooms' | 'campfire' | 'typing'
 ) => {
   protocol = new RealmProtocol(our, config, handlers);
-  const manager = new RoomsManager(protocol, type);
+  const campfireProtocol = new RealmProtocol(our, config, handlers);
+  const dataProtocol = new RealmProtocol(our, config, handlers);
+  const manager = new RoomsManager(
+    protocol,
+    campfireProtocol,
+    dataProtocol,
+    type
+  );
 
   // These sounds are for the creator of the room
   manager.on(RoomManagerEvent.CreatedRoom, () => {

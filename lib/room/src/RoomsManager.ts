@@ -7,7 +7,6 @@ import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
 import { DataPacket } from './helpers/data';
 import { RoomManagerEvent } from './events';
-import { RealmProtocol } from 'connection/RealmProtocol';
 
 /**
  * RoomsManager: top level class for managing the rooms primitive
@@ -18,19 +17,18 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   dataLocals: LocalPeer[] = [];
   protocol: BaseProtocol;
   campfireProtocol: BaseProtocol;
-  dataProtocol: BaseProtocol;
+  dataProtocol: BaseProtocol[] = [];
   live: {
     room?: RoomType;
     chat?: ChatModelType[];
   };
+  // campfire rooms are one-at-a-time, not shared as rooms
   campfire: {
     room?: RoomType;
     chat?: ChatModelType[];
   };
-  connected: {
-    room?: RoomType;
-    chat?: ChatModelType[];
-  }[];
+  // data rooms auto-connect to a set of patps
+  dataRooms: RoomType[];
   context: {
     path?: string;
     provider: Patp;
@@ -40,18 +38,29 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   constructor(
     protocol: BaseProtocol,
+    campfireProtocol: BaseProtocol,
+    dataProtocol: BaseProtocol,
     type: 'rooms' | 'campfire' | 'typing' = 'rooms'
   ) {
     super();
     this.protocol = protocol;
-    this.campfireProtocol = new RealmProtocol(our, config, handlers);
+    this.campfireProtocol = campfireProtocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
-      video: type === 'campfire',
+      video: false,
+    });
+    this.campfireLocal = new LocalPeer(this.protocol, this.protocol.our, {
+      isHost: false,
+      rtc: this.protocol.rtc,
+      video: true,
     });
 
     this.live = {
+      room: undefined,
+      chat: [],
+    };
+    this.campfire = {
       room: undefined,
       chat: [],
     };
@@ -114,7 +123,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.campfireProtocol.on(
       ProtocolEvent.PeerDataReceived,
       (peer: Patp, data: DataPacket) => {
-        if (this.connected.find((live) => live.room?.rid === data.rid)) {
+        if (this.dataRooms.find((live) => live.rid === data.rid)) {
           this.emit(RoomManagerEvent.OnDataChannel, data.rid, peer, data);
         }
       }
@@ -144,9 +153,9 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
         return this.leaveRoom();
       }
     }
-    for (let live of this.connected) {
-      if (live.room?.provider === this.our) {
-        return this.deleteRoom(live.room?.rid);
+    for (let dataRoom of this.dataRooms) {
+      if (dataRoom.provider === this.our) {
+        return this.deleteRoom(dataRoom.rid);
       } else {
         return this.leaveRoom();
       }
@@ -255,28 +264,38 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   updateRoom(room: RoomType) {
-    this.live.room = room;
+    if (room.type === 'rooms') {
+      this.live.room = room;
+    } else if (room.type === 'campfire') {
+      this.campfire.room = room;
+    } else if (room.type === 'data') {
+      this.dataRooms[room.rid].room = room;
+    }
   }
 
   async leaveRoom() {
     if (this.presentRoom) {
       this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid, this.our);
       await this.protocol.leave(this.presentRoom.rid);
-      this.clearRoom(this.presentRoom.rid);
     }
+    this.clearLiveRoom();
   }
 
-  createRoom(title: string, access: 'public' | 'private', path: string | null) {
+  createRoom(
+    title: string,
+    access: 'public' | 'private',
+    path: string | null,
+    type: 'rooms' | 'campfire' | 'data' = 'rooms'
+  ) {
     // creates a room in the current provider
-    const room = this.protocol.createRoom(title, access, path);
+    const room = this.protocol.createRoom(title, access, path, type);
     this.emit(RoomManagerEvent.CreatedRoom, room);
   }
 
   async deleteRoom(rid: string) {
-    // provider/admin action
     if (this.presentRoom?.rid === rid) {
       this.emit(RoomManagerEvent.DeletedRoom, rid);
-      this.clearRoom(rid);
+      this.clearLiveRoom();
     }
     await this.protocol.deleteRoom(rid);
   }
@@ -287,9 +306,9 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   // clear this.live element that has member type === 'rooms'
   clearRoom(rid: string) {
-    let room = this.connected.find((live) => live.room?.rid === rid);
+    let room = this.dataRooms.find((dataRoom) => dataRoom.rid === rid);
     if (room) {
-      this.connected.splice(this.connected.indexOf(room), 1);
+      this.dataRooms.splice(this.dataRooms.indexOf(room), 1);
     }
     this.local.disableMedia();
   }

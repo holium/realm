@@ -23,7 +23,7 @@ export interface RoomType {
   whitelist: string[];
   capacity: number;
   path: string | null;
-  type: 'rooms' | 'campfire' | 'typing';
+  type: 'rooms' | 'campfire' | 'data';
 }
 
 export type RoomMap = Map<string, RoomType>;

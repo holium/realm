@@ -330,8 +330,9 @@ export class RealmProtocol extends BaseProtocol {
     title: string,
     access: 'public' | 'private',
     path: string | null = null,
-    provide: boolean = false
+    type: 'rooms' | 'campfire' | 'data'
   ) {
+    const provide = type !== 'rooms';
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, this.our, title),
       title,
@@ -342,7 +343,7 @@ export class RealmProtocol extends BaseProtocol {
       whitelist: [],
       capacity: 6,
       path,
-      type: 'rooms',
+      type,
     };
     this.transitions.creating = newRoom;
     if (this.presentRoom) {

@@ -67,6 +67,7 @@
         %rooms-v2-provider-action
       (provider:action:rooms:hol !<(provider-action:store vase))
         %rooms-v2-session-action
+      =/  new-thing  !<(session-action:store vase)
       (session:action:rooms:hol !<(session-action:store vase))
     ==
     [cards this]
@@ -167,7 +168,7 @@
   ::
   ++  session-init
     ^-  session-state:store
-    [provider=our.bol current=~ rooms=[~] campfire=~ chat=~]
+    [provider=our.bol current=~ rooms=[~]]
 ::
 ++  signal
   |%
@@ -300,7 +301,9 @@
       ++  create-room
         |=  [=rid:store =access:store =title:store path=(unit cord) provide=?]
         ~&  >>  "{<dap.bol>}: [create-room]. {<src.bol>} creating room {<rid>} on provider {<provider.session.state>}"
-        ?:  (is-provider:hol src.bol rid)
+        ?:  ?|  =(our.bol provider.session.state)
+                provide
+            ==
           (provider-create-room rid access title path)
         ::  the action is from us and we are not the provider, so send the action to the provider
         (session-create-room rid access title path)
@@ -309,7 +312,7 @@
           |=  [=rid:store =access:store =title:store path=(unit cord)]
           =/  provider      provider.session.state
           :_  state
-          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path])]~
+          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path %.n])]~
         ::
         ++  provider-create-room
           |=  [=rid:store =access:store =title:store path=(unit cord)]

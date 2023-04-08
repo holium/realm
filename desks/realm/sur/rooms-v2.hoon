@@ -35,8 +35,6 @@
   $:  provider=ship
       current=(unit rid)
       =rooms
-      =campfire
-      =chat
   ==
 :: 
 +$  provider-state
