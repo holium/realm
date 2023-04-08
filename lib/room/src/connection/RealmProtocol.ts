@@ -341,6 +341,7 @@ export class RealmProtocol extends BaseProtocol {
       whitelist: [],
       capacity: 6,
       path,
+      type: 'rooms',
     };
     this.transitions.creating = newRoom;
     if (this.presentRoom) {
