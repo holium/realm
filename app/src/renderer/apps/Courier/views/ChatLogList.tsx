@@ -77,9 +77,6 @@ export const ChatLogList = ({
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
-
-            console.log('reply index', replyIndex);
-
             listRef.current?.scrollToIndex({
               index: replyIndex,
               align: 'start',
@@ -100,6 +97,8 @@ export const ChatLogList = ({
         width={width + scrollbarWidth}
         height={height}
         style={{ marginRight: -scrollbarWidth }}
+        atBottomThreshold={100}
+        alignToBottom
         initialTopMostItemIndex={messages.length - 1}
         itemContent={renderChatRow}
       />

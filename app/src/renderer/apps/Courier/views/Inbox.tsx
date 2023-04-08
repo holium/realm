@@ -141,6 +141,11 @@ export const InboxPresenter = () => {
               width={listWidth + scrollbarWidth}
               hideScrollbar
               height={listHeight}
+              increaseViewportBy={{
+                top: 300,
+                bottom: 300,
+              }}
+              alignToBottom={false}
               style={{ marginRight: -scrollbarWidth }}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
@@ -160,14 +165,12 @@ export const InboxPresenter = () => {
                   };
                   customStyle = {
                     borderRadius: 6,
-                    // background:
-                    //   theme.currentTheme.mode === 'dark'
-                    //     ? 'rgba(0,0,0,0.1)'
-                    //     : 'rgba(0,0,0,0.04)',
                   };
                 } else if (isPinned) {
                   outerStyle = {
                     height,
+                    // height: height + 4,
+                    // marginBottom: 4,
                   };
                   customStyle = {
                     borderRadius: 6,

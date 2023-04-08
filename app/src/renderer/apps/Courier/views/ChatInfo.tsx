@@ -13,7 +13,6 @@ import {
   TextInput,
   NoScrollBar,
 } from '@holium/design-system';
-// import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
@@ -22,7 +21,6 @@ import { ChatLogHeader } from '../components/ChatLogHeader';
 import { useChatStore } from '../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
-
 import { FileUploadParams } from 'os/services/ship/models/ship';
 import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { ShipActions } from 'renderer/logic/actions/ship';
@@ -236,9 +234,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             )}
             <Flex
               flexDirection="column"
-              pointerEvents={
-                isDMType || isSpaceChat || !amHost ? 'none' : 'auto'
-              }
+              pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
               <InlineEdit
                 fontWeight={500}
@@ -495,7 +491,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 },
               });
             }
-            if (peer.role !== 'host' && amHost) {
+            if (peer.role !== 'host' && amHost && !isSpaceChat) {
               options.push({
                 id: `${id}-remove`,
                 label: 'Remove',
