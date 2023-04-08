@@ -459,7 +459,6 @@ export class SpacesService extends BaseService {
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
     if (!this.core.conduit) throw new Error('No conduit found');
     return await SpacesApi.leaveSpace(this.core.conduit, { path });
-    ``;
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {

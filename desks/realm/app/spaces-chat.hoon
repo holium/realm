@@ -21,7 +21,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    ~&  >  "{<dap.bowl>}: initializing..."
+    %-  (slog leaf+"{<dap.bowl>}: initializing..." ~)
     =/  spaces-scry       .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
     ?>  ?=(%spaces -.spaces-scry)
     =/  spaces            spaces.spaces-scry
@@ -114,7 +114,7 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  hol  .
-
+::
 ++  action
   |=  =action:store
   ^-  (quip card _state)
@@ -126,12 +126,11 @@
     ::  We need members to keep track of the channels in a space.
     ::  This poke is sent by the host of the space when a new channel is created.
     |=  [path=space-path:store =chat:store]
-    ~&  >  "{<dap.bowl>}: creating chat channel for {<path>}"
+    %-  (slog leaf+"{<dap.bowl>}: creating chat channel for {<path>}" ~)
     =/  chats-map        (~(gut by chats.state) path ~)
     =/  chats-map        (~(put by chats-map) path.chat chat)
     =.  chats.state      (~(put by chats.state) path chats-map)
     [cards state]
-  
 ::
 ++  spaces-reaction
   |=  [rct=reaction:sstore]
@@ -146,7 +145,7 @@
     |=  [new-space=space:sstore =members:mstore]
     ?.  (is-host:hol path.new-space) :: only host can create chats
       `state
-    ~&  >  "{<dap.bowl>}: creating chat for {<path.new-space>}"
+    %-  (slog leaf+"{<dap.bowl>}: creating chat for {<path.new-space>}" ~)
     =/  access-type=chat-access:store    [%role %member]
     =/  cards-and-space       (create-space-chat:lib new-space access-type members now.bowl)
     =/  cards=(list card)     -.cards-and-space
@@ -158,16 +157,14 @@
   ::
   ++  on-remove
     |=  [path=space-path:sstore]
-    ~&  >  "{<dap.bowl>}: deleting chat for {<path>}"
+    %-  (slog leaf+"{<dap.bowl>}: deleting chats for {<path>}" ~)
     =/  chats-map           (~(del by chats.state) path)
     =.  chats.state         chats-map
     ?.  (is-host:hol path)  
       `state   
     ::  only host can delete space chats
     =/  chats-to-rm         (~(get by chats.state) path)
-    ?~  chats-to-rm
-      ~&  >  "{<dap.bowl>}: no chats for {<path>}, ignoring"
-      `state
+    ?~  chats-to-rm         `state
     =/  remove-cards        (remove-ship-from-space-chats:lib our.bowl (need chats-to-rm) bowl)
     [remove-cards state]
     ::
@@ -189,23 +186,23 @@
     ::  if we are here, we are the host
     =/  chats           (~(get by chats.state) path)
     ?~  chats           `state
-    ~&  >  "{<dap.bowl>}: adding {<ship>} to chats for {<path>}"
+    %-  (slog leaf+"{<dap.bowl>}: adding {<ship>} to chats for {<path>}" ~)
     =/  add-cards       (add-ship-to-matching-chats:lib ship member path (need chats) bowl)
     [add-cards state]
   ::
   ++  on-kicked
     |=  [path=space-path:sstore =ship]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: kicked from {<path>}"
     ::  we were kicked from a space. Host will remove us from chats
     ?:  =(ship our.bowl)  ::  but we need to delete our record of the chats
+      %-  (slog leaf+"{<dap.bowl>}: kicked from {<path>}, removing chat records" ~)
       =/  chats-map       (~(del by chats.state) path)
       =.  chats.state     chats-map
       `state
     ?.  (is-host:hol path)  `state   ::  only host can remove
     =/  chats             (~(get by chats.state) path)
     ?~  chats             `state
-    ~&  >  "{<dap.bowl>}: removing {<ship>} from chats for {<path>}"
+    %-  (slog leaf+"{<dap.bowl>}: removing {<ship>} from chats for {<path>}" ~)
     =/  remove-cards      (remove-ship-from-space-chats:lib ship (need chats) bowl)
     [remove-cards state]
   --
