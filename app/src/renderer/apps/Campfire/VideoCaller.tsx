@@ -53,7 +53,7 @@ const CallerPresenter = (props: ICaller) => {
           },
         },
         // only the creator can kick people
-        ship?.patp === roomsManager.live.room?.creator && {
+        ship?.patp === roomsManager.campfire.room?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-caller-${person}-kick`,
           label: 'Kick',
@@ -64,7 +64,13 @@ const CallerPresenter = (props: ICaller) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
+    [
+      peer?.status,
+      person,
+      roomsManager.campfire.room,
+      roomsManager.protocol,
+      ship,
+    ]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;

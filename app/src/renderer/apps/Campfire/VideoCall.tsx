@@ -83,9 +83,9 @@ export const VideoCall = observer(() => {
     : [];
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager?.live.room) return;
-    return roomsManager?.live.room;
-  }, [roomsManager?.live.room]);
+    if (!roomsManager?.campfire.room) return;
+    return roomsManager?.campfire.room;
+  }, [roomsManager?.campfire.room]);
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
   const isMuted = roomsManager?.protocol.local?.isMuted;

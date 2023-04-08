@@ -138,6 +138,7 @@
       ['whitelist' (set-ship whitelist.room)]
       ['capacity' (numb capacity.room)]
       ['path' ?~(path.room ~ s+u.path.room)]
+      ['type' s+type.room]
     ==
   ++  set-ship
     |=  ships=(set @p)
@@ -209,7 +210,7 @@
           [%access access]
           [%title so]
           [%path (mu so)]
-          [%provide bo]
+          [%type (su (perk %rooms %campfire %data ~))]
       ==
     ::
     ++  edit

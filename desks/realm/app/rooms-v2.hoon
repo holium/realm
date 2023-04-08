@@ -299,23 +299,23 @@
         ==
       ::
       ++  create-room
-        |=  [=rid:store =access:store =title:store path=(unit cord) provide=?]
+        |=  [=rid:store =access:store =title:store path=(unit cord) type=room-type:store]
         ~&  >>  "{<dap.bol>}: [create-room]. {<src.bol>} creating room {<rid>} on provider {<provider.session.state>}"
         ?:  ?|  =(our.bol provider.session.state)
-                provide
+                !=(%rooms type)
             ==
-          (provider-create-room rid access title path)
+          (provider-create-room rid access title path type)
         ::  the action is from us and we are not the provider, so send the action to the provider
-        (session-create-room rid access title path)
+        (session-create-room rid access title path type)
         ::
         ++  session-create-room
-          |=  [=rid:store =access:store =title:store path=(unit cord)]
+          |=  [=rid:store =access:store =title:store path=(unit cord) type=room-type:store]
           =/  provider      provider.session.state
           :_  state
-          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path %.n])]~
+          [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title path type])]~
         ::
         ++  provider-create-room
-          |=  [=rid:store =access:store =title:store path=(unit cord)]
+          |=  [=rid:store =access:store =title:store path=(unit cord) type=room-type:store]
           ~&  >>  "{<dap.bol>}: [create-room] host. {<src.bol>} creating room {<rid>}"
           ?<  (~(has by rooms.provider.state) rid) :: assert unique room id
           ?>  (lte ~(wyt by rooms.provider.state) max-rooms:lib)
@@ -328,6 +328,7 @@
                 title.room     title
                 capacity.room  max-occupancy:lib
                 path.room      path
+                type.room      type
             ==
           =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
           =.  rooms.provider.state              :: remove old room if it exists
@@ -647,6 +648,7 @@
   ^-  ?
   =(our.bol ship)
 ::
+::  TODO explicitly pass room provider ship in pokes
 ++  is-provider
   |=  [src=ship =rid:store]
   ^-  ?

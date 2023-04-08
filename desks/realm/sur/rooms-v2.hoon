@@ -22,6 +22,7 @@
       =whitelist
       capacity=@ud
       path=(unit cord)
+      type=room-type
   ==
 ::
 +$  rooms  (map rid room)
@@ -48,10 +49,12 @@
       [%access =access]
   ==
 ::
++$  room-type  ?(%rooms %campfire %data)
+::
 +$  session-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
-      [%create-room =rid =access =title path=(unit cord) provide=?]
+      [%create-room =rid =access =title path=(unit cord) type=room-type]
       [%edit-room =rid =title =access]
       [%delete-room =rid]
       [%enter-room =rid]

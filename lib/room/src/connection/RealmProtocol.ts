@@ -332,12 +332,11 @@ export class RealmProtocol extends BaseProtocol {
     path: string | null = null,
     type: 'rooms' | 'campfire' | 'data'
   ) {
-    const provide = type !== 'rooms';
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, this.our, title),
       title,
       access,
-      provider: provide ? this.our : this.provider,
+      provider: type !== 'rooms' ? this.our : this.provider,
       creator: this.our,
       present: [this.our],
       whitelist: [],
@@ -345,6 +344,7 @@ export class RealmProtocol extends BaseProtocol {
       path,
       type,
     };
+    console.log(newRoom);
     this.transitions.creating = newRoom;
     if (this.presentRoom) {
       this.hangupAll();
@@ -359,7 +359,7 @@ export class RealmProtocol extends BaseProtocol {
           title,
           access,
           path,
-          provide,
+          type,
         },
       },
     });
