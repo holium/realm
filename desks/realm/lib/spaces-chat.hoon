@@ -25,36 +25,38 @@
         ['space' (spat (pathify-space-path path.space))]
     ==
   =/  metadata=(map cord cord)   (~(gas by *(map cord cord)) metadata-settings)
-  =/  pathrow=path-row:chat-db  [chat-path metadata %space t t ~ %host %.n *@dr]
+  ::  TODO when making new channels make sure we can disable chat history for new members or enable it
+  =/  pathrow=path-row:chat-db  [chat-path metadata %space t t ~ %host %.y *@dr]
   =/  all-peers=ship-roles:chat-db
-      %+  turn  (skim-joined-members members)
+      %+  turn  (skim-init-members members)
       |=  kv=[k=ship v=member:mstore]
       [k.kv ?:(=(status.v.kv %host) %host %member)]
     :: TODO logic for peers lists for %admins %invited %whitelist and %blacklist
   =/  new-chat      [chat-path chat-access]
-  =/  cards  
-    ::  poke %chat-db to create the chat
+  =/  cards  ::  poke %chat-db to create the chat
     %+  turn  all-peers
     |=  [s=ship role=@tas]
     (create-path-db-poke:rc-lib s pathrow all-peers)
-  :: =/  channel-cards
-  ::   ::  poke %spaces-chat to create the channel in members state
-  ::   %+  turn  all-peers
-  ::   |=  [s=ship role=@tas]
-  ::   ^-  card:agent:gall
-  ::   [%pass / %agent [s %spaces-chat] %poke spaces-chat-action+!>([%create-channel path.space new-chat])]
-  :: =/  cards  (weld path-db-cards channel-cards)
   [cards new-chat]
 
 :: matching members are status %joined or %host AND have
 :: either %member or %owner roles
-++  skim-joined-members
+++  skim-init-members
   |=  =members:mstore
   ^-  (list [ship member:mstore])
   %+  skim  ~(tap by members)
     |=  kv=[k=ship v=member:mstore]
     ?&  |(=(status.v.kv %joined) =(status.v.kv %host))
         |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %owner))
+    ==
+  
+++  skim-joined-members
+  |=  =members:mstore
+  ^-  (list [ship member:mstore])
+  %+  skim  ~(tap by members)
+    |=  kv=[k=ship v=member:mstore]
+    ?&  =(status.v.kv %joined)
+        |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %admin))
     ==
 
 ++  create-channel-pokes

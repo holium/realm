@@ -260,7 +260,8 @@
         ::
         =/  old-wire       [/provider-updates/(scot %p old-provider)]
         =/  wire           [/provider-updates/(scot %p new-provider)]
-        ~&  >>  "{<dap.bol>}: [set-provider]. {<src.bol>} setting provider from {<old-provider>} to {<new-provider>}"
+        ::  TODO this log is triggered 4 times when joining a space, why?
+        %-  (slog leaf+"{<dap.bol>}: [set-provider]. {<src.bol>} setting provider from {<old-provider>} to {<new-provider>}" ~)
         =/  outgoing-sub-wire-leave-cards
           ^-  (list card)
           %+  murn

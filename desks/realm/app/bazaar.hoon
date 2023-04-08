@@ -56,7 +56,7 @@
       (mole |.(!<(state-0 vase)))
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easier
+    %-  (slog leaf+"nuking old %bazaar state" ~) ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
@@ -81,7 +81,6 @@
     =/  cards=(list card)
     ?+  path                  (on-watch:def path)
       [%updates ~]
-        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
         ?>  (is-host:core src.bowl)
         [%give %fact [/updates ~] bazaar-reaction+!>([%initial catalog.state stalls.state docks.state recommendations.state grid-index.state])]~
       ::
@@ -92,7 +91,7 @@
         ::  recommends crash on permission check or other failure
         =/  path              [host space-path]
         ?>  (check-member:security:core path src.bowl)
-        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..."
+        %-  (slog leaf+"{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..." ~)
         =/  space-data        (filter-space-data:helpers:bazaar path)
         [%give %fact ~ bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
       ::
@@ -1195,7 +1194,7 @@
           =.  stalls.state        (~(del by stalls.state) path)
           =.  docks.state         (~(del by docks.state) path)
           :_  state
-          [%pass update-path %agent [our.bowl %bazaar] %leave ~]~
+          [%pass update-path %agent [ship.path %bazaar] %leave ~]~
         ::  another member was kicked
         `state
       =/  stall               (~(got by stalls.state) path)
@@ -1235,7 +1234,6 @@
     ++  on-add
       |=  [space=space:spaces-store members=members:membership-store]
       ^-  (quip card _state)
-      ~&  >  ['%bazarr spaces-reaction on-add']
       =/  recommended=recommended:store
         %-  ~(rep in recommendations.state)  ::  add all of our recs to the created stall
           |=  [=app-id:store result=[=recommended:store]]
@@ -1250,15 +1248,15 @@
     ++  on-remove
       |=  [path=space-path:spaces-store]
       ^-  (quip card _state)
-      ~&  >  ['%bazarr spaces-reaction on-remove']
       =.  stalls.state        (~(del by stalls.state) path)
       =.  docks.state         (~(del by docks.state) path)
-      `state
+      =/  update-path         /bazaar/(scot %p ship.path)/(scot %tas space.path)
+      :_  state
+      [%pass update-path %agent [ship.path %bazaar] %leave ~]~
     ::
     ++  on-remote-space   ::  when we join a new space
       |=  [path=space-path:spaces-store =space:spaces-store =members:membership-store]
       ^-  (quip card _state)
-      ~&  >  ['%bazarr spaces-reaction on-remote-space']
       ?:  =(our.bowl ship.path)  `state
       =/  recs=(list card)
         %+  turn  ~(tap in recommendations.state)
@@ -1345,7 +1343,6 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
-    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}" ~)
     :_  state
     :~
       [%give %fact [/updates ~] bazaar-reaction+!>([%new-ally ship alliance])]
@@ -1354,7 +1351,6 @@
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
-    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-add] => {<ship>}" ~)
     :: =/  treaty    .^(update:treaty:treaty  %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
     :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<update.treaty>}"
     `state
@@ -1362,7 +1358,6 @@
   ++  on-del
     |=  [=ship]
     ^-  (quip card _state)
-    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-del] => {<ship>}" ~)
     :_  state
     :~
       [%give %fact [/updates ~] bazaar-reaction+!>([%ally-deleted ship])]
@@ -1424,7 +1419,6 @@
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
     =/  app  (~(get by catalog.state) desk)
     ?~  app  `state
     ?>  ?=(%urbit -.u.app)
