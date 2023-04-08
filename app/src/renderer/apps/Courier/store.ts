@@ -36,14 +36,64 @@ const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
+    get sortedChatList() {
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        const selectedPath = servicesStore.spaces.selected?.path;
+
+        // Check if the chats are space chats and match the selected space
+        const isASpaceChatAndSelected =
+          a.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(a.path)?.path;
+        const isBSpaceChatAndSelected =
+          b.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(b.path)?.path;
+
+        // Compare the boolean values
+        if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
+          return isBSpaceChatAndSelected ? 1 : -1;
+        }
+
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
+    },
+
     get pinnedChatList() {
       return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path))
+        .filter(
+          (c) =>
+            self.pinnedChats.includes(c.path) ||
+            (c.type === 'space' &&
+              servicesStore.spaces?.selected?.path &&
+              c.path.includes(servicesStore.spaces.selected.path))
+        )
         .sort(sortByUpdatedAt);
     },
     get unpinnedChatList() {
       return self.inbox
         .filter((c) => !self.pinnedChats.includes(c.path))
+        .filter(
+          (c) =>
+            !(
+              self.pinnedChats.includes(c.path) ||
+              (c.type === 'space' &&
+                servicesStore.spaces?.selected?.path &&
+                c.path.includes(servicesStore.spaces.selected.path))
+            )
+        )
         .sort(sortByUpdatedAt);
     },
     getChatHeader(path: string): {
@@ -66,6 +116,12 @@ const ChatStore = types
             nickname: nickname || '',
           },
           image: avatar || chat.metadata.image,
+        };
+      } else if (chat.type === 'space') {
+        const space = servicesStore.spaces.getSpaceByChatPath(chat.path);
+        return {
+          title: chat.metadata.title,
+          image: space?.picture,
         };
       } else {
         return {
@@ -181,7 +237,6 @@ const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
