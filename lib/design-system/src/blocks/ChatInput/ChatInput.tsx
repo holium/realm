@@ -49,6 +49,7 @@ const RemoveAttachmentButton = styled(motion.div)`
 
 type ChatInputProps = {
   id: string;
+  selectedChatPath: string;
   disabled?: boolean;
   isFocused?: boolean;
   loading?: boolean;
@@ -72,6 +73,7 @@ export const parseStringToFragment = (value: string): FragmentType[] => {
 
 export const ChatInput = ({
   id,
+  selectedChatPath,
   loading,
   tabIndex,
   disabled,
@@ -102,37 +104,54 @@ export const ChatInput = ({
   useEffect(() => {
     if (editingMessage) {
       const parsedFragments = convertFragmentsToText(editingMessage);
-      setValue(parsedFragments);
       if (inputRef.current && isFocused) {
+        inputRef.current.value = parsedFragments;
+        changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();
+        setValue(parsedFragments);
       } else {
         inputRef.current?.blur();
       }
     }
   }, [editingMessage]);
 
-  const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (
-      evt.target.value.length < 30 &&
-      evt.target.value.split('\n').length < 2
-    ) {
+  const changeRows = (newValue: string, scrollHeight: number) => {
+    if (newValue.length < 30 && newValue.split('\n').length < 2) {
       setRows(1);
-    } else if (evt.target.value.split('\n').length < value.split('\n').length) {
+    } else if (newValue.split('\n').length < value.split('\n').length) {
       setRows(rows - 1);
     } else {
-      setRows(evt.target.scrollHeight / CHAT_INPUT_LINE_HEIGHT);
+      setRows(scrollHeight / CHAT_INPUT_LINE_HEIGHT);
     }
+  };
+
+  const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+    changeRows(evt.target.value, evt.target.scrollHeight);
     setValue(evt.target.value);
   };
 
-  const onFocus = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    // TODO
-    // console.log('onFocus', evt);
+  const onFocus = (evt: React.FocusEvent<HTMLTextAreaElement>) => {
+    const savedChat = localStorage.getItem(selectedChatPath);
+    if (savedChat) {
+      const savedChatAndType = JSON.parse(savedChat);
+      console.log(savedChatAndType);
+      if (savedChatAndType.isNew === !editingMessage) {
+        evt.target.value = savedChatAndType.value;
+        onChange(evt);
+      }
+    }
   };
 
   const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
-    // TODO
-    // console.log('onBlur', evt);
+    if (value) {
+      const isNew = editingMessage ? false : true;
+      localStorage.setItem(
+        selectedChatPath,
+        JSON.stringify({ isNew: isNew, value: value })
+      );
+    } else {
+      localStorage.removeItem(selectedChatPath);
+    }
   };
 
   const isDisabled =
@@ -168,6 +187,7 @@ export const ChatInput = ({
   };
 
   const onSendClick = (parsedFragments: FragmentType[]) => {
+    localStorage.removeItem(selectedChatPath);
     setValue('');
     if (editingMessage) {
       onEditConfirm(parsedFragments);
@@ -269,9 +289,10 @@ export const ChatInput = ({
             {editingMessage && (
               <Button.IconButton
                 mr={1}
-                disabled={isDisabled}
+                disabled={false}
                 onClick={(evt) => {
                   setValue('');
+                  setRows(1);
                   if (onCancelEdit) onCancelEdit(evt);
                 }}
               >
@@ -301,7 +322,6 @@ export const ChatInput = ({
         <ChatBox
           id={id}
           ref={inputRef}
-          required
           name="chat-input"
           placeholder="New message"
           value={value}
