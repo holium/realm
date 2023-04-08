@@ -14,6 +14,8 @@ import { RealmProtocol } from 'connection/RealmProtocol';
  */
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
+  campfireLocal: LocalPeer;
+  dataLocals: LocalPeer[] = [];
   protocol: BaseProtocol;
   campfireProtocol: BaseProtocol;
   dataProtocol: BaseProtocol;

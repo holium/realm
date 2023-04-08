@@ -36,6 +36,7 @@ export class RealmProtocol extends BaseProtocol {
   queuedPeers: Patp[] = []; // peers that we have queued to dial
   disposePresentRoom: any; // this is a mobx observable disposer
   transitions: RoomTransitionStates; // keeps track of transitions for latency handling
+
   constructor(our: Patp, config: ProtocolConfig, handlers: APIHandlers) {
     super(our, config);
 
