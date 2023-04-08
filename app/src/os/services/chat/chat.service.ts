@@ -40,6 +40,7 @@ export type ChatPathMetadata = {
   timestamp: string;
   reactions?: string;
   peer?: string; // if type is dm, this is the peer
+  space?: string; // the space path if type is space
 };
 
 const parseMetadata = (metadata: string) => {
@@ -197,8 +198,8 @@ export class ChatService extends BaseService {
     const peers = await this.fetchPeers();
     const messages = await this.fetchMessages();
     const deleteLogs = await this.fetchDeleteLogs();
-    this.insertMessages(messages);
     this.insertPaths(paths);
+    this.insertMessages(messages);
     this.insertPeers(peers);
     // Missed delete events must be applied after inserts
     this.applyDeleteLogs(deleteLogs).then(() => {
@@ -243,6 +244,7 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
     return response.tables.paths;
   }
 
@@ -252,6 +254,7 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
     return response.tables.peers;
   }
 
@@ -261,6 +264,8 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
+
     return response;
   }
 

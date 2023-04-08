@@ -8,6 +8,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
+import { useTrayApps } from '../store';
 
 export interface Space {
   color?: string;
@@ -24,6 +25,7 @@ interface SpacesListProps {
   onSelect: (spaceKey: string) => void;
   onFindMore: () => void;
 }
+const scrollbarWidth = 12;
 
 const SpacesListPresenter = ({
   selected,
@@ -32,7 +34,9 @@ const SpacesListPresenter = ({
   onFindMore,
 }: SpacesListProps) => {
   const { theme, visas } = useServices();
+  const { dimensions } = useTrayApps();
   const { textColor } = theme.currentTheme;
+  const listWidth = useMemo(() => dimensions.width - 28, [dimensions.width]);
 
   const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
@@ -64,6 +68,7 @@ const SpacesListPresenter = ({
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        width={dimensions.width - 28}
         gap={24}
       >
         <Text color={textColor} width={200} textAlign="center" opacity={0.5}>
@@ -105,37 +110,36 @@ const SpacesListPresenter = ({
   }
 
   return (
-    <Flex flex={1} width="100%">
-      <WindowedList
-        key={`${spaces.length}-${incoming.length}`}
-        width={354}
-        data={rows}
-        itemContent={(_, { space, visa }) => {
-          if (space) {
-            return (
-              <SpaceRow
-                key={`space-${space.path}`}
-                space={space}
-                selected={selected?.path === space.path}
-                onSelect={onSelect}
-              />
-            );
-          }
-          const visaRowValue = visa as VisaRowValue;
+    <WindowedList
+      key={`${spaces.length}-${incoming.length}`}
+      width={listWidth + scrollbarWidth}
+      data={rows}
+      style={{ marginRight: -scrollbarWidth }}
+      itemContent={(_, { space, visa }) => {
+        if (space) {
           return (
-            <VisaRow
-              key={`visa-${visaRowValue.path}`}
-              image={visaRowValue.picture}
-              color={visaRowValue.color}
-              path={visaRowValue.path}
-              customBg={highlightColor}
-              invitedBy={visaRowValue.inviter}
-              title={visaRowValue.name}
+            <SpaceRow
+              key={`space-${space.path}`}
+              space={space}
+              selected={selected?.path === space.path}
+              onSelect={onSelect}
             />
           );
-        }}
-      />
-    </Flex>
+        }
+        const visaRowValue = visa as VisaRowValue;
+        return (
+          <VisaRow
+            key={`visa-${visaRowValue.path}`}
+            image={visaRowValue.picture}
+            color={visaRowValue.color}
+            path={visaRowValue.path}
+            customBg={highlightColor}
+            invitedBy={visaRowValue.inviter}
+            title={visaRowValue.name}
+          />
+        );
+      }}
+    />
   );
 };
 

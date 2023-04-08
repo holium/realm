@@ -198,6 +198,7 @@ const SpacesTrayAppPresenter = () => {
           position="absolute"
           width="100%"
           style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
+          overflowX="hidden"
           overflowY="hidden"
         >
           <SpacesList

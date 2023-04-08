@@ -396,6 +396,13 @@
       =.  spaces.state                (~(del by spaces.state) path)
       =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      ::  if we are removing current space, set to our space
+      =/  update-current  =(path current.state)
+      =?  current.state  update-current
+        [our.bowl 'our']
+      =?  cards  update-current
+        %+  welp  cards
+        [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
       =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
       =.  cards
         %+  weld  cards
@@ -600,7 +607,6 @@
       ^-  (quip card _state)
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
-      ~&  >>  [%remote-space path members]
       :_  state
       %+  weld
       :~

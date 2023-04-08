@@ -9,13 +9,7 @@ import { servicesStore } from 'renderer/logic/store';
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
 const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
-  const selectedPath = servicesStore.spaces.selected?.path;
-
   return (
-    (b.type === 'space' &&
-    selectedPath === servicesStore.spaces.getSpaceByChatPath(b.path)?.path
-      ? 1
-      : 0) -
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
   );
@@ -43,7 +37,38 @@ const ChatStore = types
       return self.selectedChat?.path === path;
     },
     get sortedChatList() {
-      return self.inbox.slice().sort(sortByUpdatedAt);
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        const selectedPath = servicesStore.spaces.selected?.path;
+
+        // Check if the chats are space chats and match the selected space
+        const isASpaceChatAndSelected =
+          a.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(a.path)?.path;
+        const isBSpaceChatAndSelected =
+          b.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(b.path)?.path;
+
+        // Compare the boolean values
+        if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
+          return isBSpaceChatAndSelected ? 1 : -1;
+        }
+
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
     },
 
     get pinnedChatList() {
@@ -212,7 +237,6 @@ const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange

@@ -35,15 +35,15 @@ const Container = styled.div<{ hideScrollbar?: boolean }>`
   &:hover {
     > :nth-child(1) {
       ::-webkit-scrollbar-thumb {
-        background-color: rgba(var(--rlm-text-rgba), 0.5);
+        background-color: rgba(var(--rlm-text-rgba), 0.3);
       }
 
       ::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(var(--rlm-text-rgba), 1);
+        background-color: rgba(var(--rlm-text-rgba), 0.6);
       }
 
       ::-webkit-scrollbar-track:hover {
-        background-color: rgba(var(--rlm-input-rgba), 0.5);
+        background-color: rgba(var(--rlm-input-rgba), 0.3);
       }
     }
   }
