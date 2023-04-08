@@ -3,37 +3,18 @@
 /-  resource, *contact-store, membership
 |%
 ::
-::  $friends: specifically used for the our space.
-::
-+$  friends-0     (map ship friend-0)
-+$  friends-1  (map ship friend-1)
-+$  friends   (map ship friend)
-+$  is-public   ?
-::
-::  $friend: specifically used for the our space, keeps track of another
-::    ship and allows metadata.
-::
-+$  friend-state  ?(%added %mutual)
-+$  friend-tags   (set cord)
-+$  friend-0
-  $:  pinned=?
-      tags=friend-tags
-      status=?(%fren %following %follower)
-  ==  
-+$  friend-1
-  $:  pinned=_|
-      tags=friend-tags
-      status=?(%fren %following %follower %contact %our)
-      contact-info=(unit contact-info-0)
-  ==
++$  friends    (map ship friend)
++$  tags       (set @t)
 ::
 ::  $friend: these values are mostly used by us for bookkeeping on peers.
-::  contact-info and status is received by peers.
+::  contact-info and status are updated by peers - should be done via SSS.
 ::
 +$  friend
   $:  pinned=_|
-      tags=(set @t)
-      ::
+      =tags
+      created-at=@da
+      updated-at=@da
+      :: 
       :: public -> only set by us. If public, others can discover us
       :: by searching twitter handle or Realm username.
       :: linking contacts allows discovery via phone number.
@@ -44,8 +25,8 @@
       :: can see your profile.
       ::
       :: public=(unit _|)
-      :: this should probably be stored elsewhere
       phone-number=(unit @t)
+      ::
       :: %our = us
       :: %fren = friend (sent/received and accepted)
       :: %received = live friend request received
@@ -61,10 +42,11 @@
       :: "knows" data when you no longer share a connection.
       ::
       :: defaults to %know
-      relationship=?(%our %fren %received %sent %contact %know %block %contact)
+      relationship=?(%our %fren %received %sent %know %block)
       :: %invisible is used by us only, communicated to peers as %offline
       :: defaults to %offline
-      status=?(%online %away %dnd %offline %invisible)
+      :: status=?(%online %away %dnd %offline %invisible)
+      ::
       :: Taking live status updates further:
       :: These are decent ideas but we need to weigh 
       :: implementation time + extra traffic over Urbit.  Putting them as ideas for later
@@ -82,13 +64,6 @@
       ::
       :: I should be able to set my name / photo for different spaces.
   ==
-+$  contact-info-0
-  $:  nickname=@t
-      bio=@t
-      color=@ux
-      avatar=(unit @t)
-      cover=(unit @t)
-  ==
 ::
 ::  $contact-info: what a peer decides to tell us about themselves.
 ::
@@ -100,14 +75,6 @@
       avatar=(unit @t)
       cover=(unit @t)
       featured-url=(unit @t)  :: can be used for personal site, linktree, opensea...
-  ==
-::
-+$  contact-info-edit-0
-  $:  nickname=(unit @t)
-      bio=(unit @t)
-      color=(unit @ux)
-      avatar=(unit @t)
-      cover=(unit @t)
   ==
 ::
 ::  $contact-info-edit: updates from peer about their information.
@@ -123,33 +90,72 @@
       featured-url=(unit @t)
   ==
 ::
-+$  action
-  $%  
-      [%add-friend =ship]
-      [%edit-friend =ship pinned=? tags=friend-tags]
++$  friends-action-0
+      ::  `friend` actions issued from Realm UI to our %friends agent
+  $%  [%add-friend =ship]
+      [%edit-friend =ship pinned=? =tags]
       [%remove-friend =ship]
-      ::  Poke friend actions
-      [%be-fren ~]
-      [%yes-fren ~]
-      [%bye-fren ~]
-      [%set-contact =ship contact-info=contact-info-edit]
-      [%share-contact =ship]
-      [%set-sync sync=?]
+      [%block-friend =ship]
+      [%unblock-friend =ship]
+      :: editing our own passport information
+      [%set-info =contact-info]
+      ::  `fren` actions are sent agent to agent
+      ::
+      ::  follow-fren: ship confirms it is your follower
+      ::  yes-fren: ship confirms it is your fren
+      ::  bye-fren: ship notifies you that it has cancelled friend request or unfriended you.
+      [%follow-friend ~]
+      [%accept-friend ~]
+      [%bye-friend ~]
   ==
 ::
-+$  reaction
-  $%  
-      [%friends =friends]
-      [%friend =ship =friend]       :: reacts when old friend is updated
-      [%new-friend =ship =friend]   :: reacts when a new friend is added
-      [%bye-friend =ship]           :: reacts when a friend is removed 
-  ==
+:: +$  friends-update-0
+::   $%  
+::       [%friends =friends]
+::       [%friend =ship =friend]       :: when old friend is updated
+::       [%new-friend =ship =friend]   :: when a new friend is added
+::       [%bye-friend =ship]           :: when a friend is removed 
+::   ==
 ::
 ::  Scry views
 ::
-+$  view
-  $%  
-      [%friends =friends]
-      [%contact-info =contact-info]
+:: +$  friends-view-0
+::   $%  
+::       [%friends =friends]
+::       [%contact-info =contact-info]
+::   ==
+::
+:: Old types
+::
++$  friends-0  (map ship friend-0)
++$  friends-1  (map ship friend-1)
+::
++$  friend-0
+  $:  pinned=?
+      =tags
+      status=?(%fren %following %follower)
+  ==
+::
++$  friend-1
+  $:  pinned=_|
+      =tags
+      status=?(%fren %following %follower %contact %our)
+      contact-info=(unit contact-info-0)
+  ==
+::
++$  contact-info-0
+  $:  nickname=@t
+      bio=@t
+      color=@ux
+      avatar=(unit @t)
+      cover=(unit @t)
+  ==
+::
++$  contact-info-edit-0
+  $:  nickname=(unit @t)
+      bio=(unit @t)
+      color=(unit @ux)
+      avatar=(unit @t)
+      cover=(unit @t)
   ==
 --
