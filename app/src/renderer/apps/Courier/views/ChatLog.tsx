@@ -141,16 +141,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   };
 
-  let height = dimensions.height - 104;
+  const height = dimensions.height - 104;
+  let listHeight = height;
 
   if (showPin) {
-    height = height - pinHeight;
+    listHeight = listHeight - pinHeight;
   }
   if (selectedChat.replyingMsg) {
-    height = height - replyHeight;
+    listHeight = listHeight - replyHeight;
   }
   if (showAttachments) {
-    height = height - 110;
+    listHeight = listHeight - 110;
   }
 
   let pretitle;
@@ -183,6 +184,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           duration: 0.15,
         }}
         width={210}
+        initial={{ opacity: 0.5 }}
         animate={{ opacity: 0.5, lineHeight: '1' }}
         fontSize={1}
         fontWeight={500}
@@ -244,7 +246,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 messages={messages}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={height}
+                height={listHeight}
                 ourColor={ourColor}
               />
             </Flex>
@@ -254,6 +256,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
       <Flex
         position="absolute"
         flexDirection="column"
+        mt={6}
         bottom={12}
         left={12}
         right={12}
