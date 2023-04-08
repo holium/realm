@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { RefObject } from 'react';
 import {
   Box,
   Text,
@@ -11,6 +11,7 @@ import { ChatMessageType, ChatModelType } from '../models';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
+  listRef?: RefObject<WindowedListRef>;
   width: number;
   height: number;
   messages: ChatMessageType[];
@@ -19,14 +20,13 @@ type Props = {
 };
 
 export const ChatLogList = ({
+  listRef,
   width,
   height,
   messages,
   selectedChat,
   ourColor,
 }: Props) => {
-  const listRef = useRef<WindowedListRef>(null);
-
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
 
@@ -76,7 +76,7 @@ export const ChatLogList = ({
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
 
-            listRef.current?.scrollToIndex({
+            listRef?.current?.scrollToIndex({
               index: replyIndex,
               align: 'start',
               behavior: 'smooth',
