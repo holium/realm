@@ -105,7 +105,7 @@ export const Reply = (props: ReplyProps) => {
             borderLeft: `2px solid ${
               authorColor || 'rgba(var(--rlm-accent-rgba))'
             }`,
-            width: '100%',
+            width: 'calc(100% - 60px)',
           }}
         >
           {mediaContent}
