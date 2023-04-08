@@ -16,7 +16,7 @@ const RoomsPresenter = () => {
   const ourSpace = spaces.selected?.type === 'our';
 
   const rooms = ourSpace
-    ? roomsManager?.rooms
+    ? roomsManager?.rooms.filter((room) => room.type === 'rooms')
     : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
         spaces.selected?.path ?? ''
       );

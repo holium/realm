@@ -414,7 +414,10 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   getSpaceRooms(path: string): RoomType[] {
-    return Array.from(this.rooms.values()).filter((room) => room.path === path);
+    console.log('getting rooms', this.rooms);
+    return Array.from(this.rooms.values())
+      .filter((room) => room.path === path)
+      .filter((room) => room.type === 'rooms');
   }
 
   async getRoom(rid: string): Promise<RoomType> {
