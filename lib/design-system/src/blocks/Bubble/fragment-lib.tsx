@@ -181,7 +181,6 @@ export const FragmentBlockquote = styled(motion.blockquote)`
 
   .fragment-reply {
     border-radius: 4px;
-    height: 2rem;
 
     ${FragmentBase} {
       font-size: 0.82rem;
