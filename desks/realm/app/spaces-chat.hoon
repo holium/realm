@@ -157,15 +157,17 @@
   ::
   ++  on-remove
     |=  [path=space-path:sstore]
-    %-  (slog leaf+"{<dap.bowl>}: deleting chats for {<path>}" ~)
-    =/  chats-map           (~(del by chats.state) path)
-    =.  chats.state         chats-map
     ?.  (is-host:hol path)  
+      =/  chats-map           (~(del by chats.state) path)
+      =.  chats.state         chats-map
       `state   
+    %-  (slog leaf+"{<dap.bowl>}: deleting chats for {<path>}" ~)
     ::  only host can delete space chats
     =/  chats-to-rm         (~(get by chats.state) path)
     ?~  chats-to-rm         `state
     =/  remove-cards        (remove-ship-from-space-chats:lib our.bowl (need chats-to-rm) bowl)
+    =/  chats-map           (~(del by chats.state) path)
+    =.  chats.state         chats-map
     [remove-cards state]
     ::
   --

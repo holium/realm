@@ -467,6 +467,8 @@ export class SpacesService extends BaseService {
     SpacesApi.setCurrentSpace(this.core.conduit, { path }).catch((e) => {
       console.error('Error setting current space', e);
     });
+
+    // console.log('setting selected space', path);
     const selected = this.state?.selectSpace(path);
     if (selected?.theme) this.setTheme(selected.theme);
     // setting provider to current space host

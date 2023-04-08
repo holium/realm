@@ -1,58 +1,65 @@
 export const chatInitSql = `
-create table if not exists messages
+CREATE TABLE IF NOT EXISTS messages
 (
-    path         TEXT    not null,
-    msg_id       TEXT    not null,
-    msg_part_id  integer not null,
+    path         TEXT    NOT NULL,
+    msg_id       TEXT    NOT NULL,
+    msg_part_id  INTEGER NOT NULL,
     content_type TEXT,
     content_data TEXT,
     reply_to     TEXT,
-    metadata     text,
-    sender       text    not null,
-    updated_at   integer not null,
-    created_at   integer not null,
-    expires_at   integer
+    metadata     TEXT,
+    sender       TEXT    NOT NULL,
+    updated_at   INTEGER NOT NULL,
+    created_at   INTEGER NOT NULL,
+    expires_at   INTEGER,
+    PRIMARY KEY (path, msg_id, msg_part_id)
 );
 
-create unique index if not exists messages_path_msg_id_msg_part_id_uindex
-    on messages (path, msg_id, msg_part_id);
-
-create table if not exists paths
+CREATE TABLE IF NOT EXISTS paths
 (
-    path                        TEXT not null,
-    type                        TEXT not null,
-    metadata                    TEXT,
-    invites                     TEXT default 'host' not null,
-    peers_get_backlog           integer default 1 not null,
-    pins                        TEXT,
-    max_expires_at_duration     integer,
-    updated_at                  integer not null,
-    created_at                  integer not null
+    path                    TEXT              NOT NULL,
+    type                    TEXT              NOT NULL,
+    metadata                TEXT,
+    invites                 TEXT    DEFAULT 'host' NOT NULL,
+    peers_get_backlog       INTEGER DEFAULT 1 NOT NULL,
+    pins                    TEXT,
+    max_expires_at_duration INTEGER,
+    updated_at              INTEGER           NOT NULL,
+    created_at              INTEGER           NOT NULL,
+    PRIMARY KEY (path)
 );
 
-create unique index if not exists paths_path_uindex
-    on paths (path);
-
-create table if not exists  peers
+CREATE TABLE IF NOT EXISTS peers
 (
-    path        TEXT not null,
-    ship        text not null,
-    role        TEXT default 'member' not null,
-    updated_at  integer not null,
-    created_at  integer not null
+    path       TEXT    NOT NULL,
+    ship       TEXT    NOT NULL,
+    role       TEXT DEFAULT 'member' NOT NULL,
+    updated_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (path, ship)
 );
 
-create unique index if not exists peers_path_ship_uindex
-    on peers (path, ship);
-
-create table if not exists delete_logs
+CREATE TABLE IF NOT EXISTS delete_logs
 (
     change        TEXT not null,
-    timestamp  integer not null
+    timestamp  INTEGER not null,
+    PRIMARY KEY (change, timestamp)
 );
 
-create unique index if not exists delete_log_change_uindex
-    on delete_logs (timestamp, change);
+CREATE TRIGGER IF NOT EXISTS delete_related_peers
+BEFORE DELETE ON paths
+FOR EACH ROW
+BEGIN
+    DELETE FROM peers WHERE path = OLD.path;
+END;
+
+CREATE TRIGGER IF NOT EXISTS delete_related_messages
+BEFORE DELETE ON paths
+FOR EACH ROW
+BEGIN
+    DELETE FROM messages WHERE path = OLD.path;
+END;
+
 `;
 
 export default chatInitSql;
