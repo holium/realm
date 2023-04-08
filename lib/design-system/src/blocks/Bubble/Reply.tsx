@@ -101,16 +101,18 @@ export const Reply = (props: ReplyProps) => {
           className="pinned-or-reply-message"
           style={{
             paddingRight: 6,
+            alignItems: 'center',
             borderLeft: `2px solid ${
               authorColor || 'rgba(var(--rlm-accent-rgba))'
             }`,
-            width: 'calc(100% - 60px)',
+            width: '100%',
           }}
         >
           {mediaContent}
           <Flex
             flex={1}
             flexDirection="column"
+            justifyContent="center"
             className="fragment-reply pinned"
             maxWidth="100%"
           >
