@@ -43,19 +43,10 @@ const config = {
 };
 
 let protocol: RealmProtocol | null;
-export const createManager = (
-  our: Patp,
-  type?: 'rooms' | 'campfire' | 'typing'
-) => {
+export const createManager = (our: Patp) => {
   protocol = new RealmProtocol(our, config, handlers);
   const campfireProtocol = new RealmProtocol(our, config, handlers);
-  const dataProtocol = new RealmProtocol(our, config, handlers);
-  const manager = new RoomsManager(
-    protocol,
-    campfireProtocol,
-    dataProtocol,
-    type
-  );
+  const manager = new RoomsManager(protocol, campfireProtocol);
 
   // These sounds are for the creator of the room
   manager.on(RoomManagerEvent.CreatedRoom, () => {
@@ -123,7 +114,7 @@ export function useRooms(our?: Patp): RoomsManager {
   }
 
   if (!roomsManager && our) {
-    roomsManager = createManager(our, 'rooms');
+    roomsManager = createManager(our);
   }
   if (!roomsManager) {
     throw new Error('roomsManager not initialized');

@@ -24,7 +24,12 @@ export const Landing = () => {
     evt.stopPropagation();
     const spacePath =
       spaces.selected?.type !== 'our' ? spaces.selected?.path ?? '' : null;
-    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    roomsManager?.createRoom(
+      name,
+      isPrivate ? 'private' : 'public',
+      spacePath,
+      'campfire'
+    );
     CampfireActions.setView('video');
   };
 

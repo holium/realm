@@ -14,7 +14,7 @@ import { RoomManagerEvent } from './events';
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
   campfireLocal: LocalPeer;
-  dataLocals: LocalPeer[] = [];
+  dataLocals: { [rid: string]: LocalPeer } = {};
   protocol: BaseProtocol;
   campfireProtocol: BaseProtocol;
   dataProtocol: BaseProtocol[] = [];
@@ -22,13 +22,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     room?: RoomType;
     chat?: ChatModelType[];
   };
-  // campfire rooms are one-at-a-time, not shared as rooms
+  // campfire rooms are provided one at a time, not shared as rooms
   campfire: {
     room?: RoomType;
     chat?: ChatModelType[];
   };
   // data rooms auto-connect to a set of patps
-  dataRooms: RoomType[];
+  dataRooms: { [rid: string]: RoomType } = {};
   context: {
     path?: string;
     provider: Patp;
@@ -36,12 +36,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   };
   state: RoomState = RoomState.Disconnected;
 
-  constructor(
-    protocol: BaseProtocol,
-    campfireProtocol: BaseProtocol,
-    dataProtocol: BaseProtocol,
-    type: 'rooms' | 'campfire' | 'typing' = 'rooms'
-  ) {
+  constructor(protocol: BaseProtocol, campfireProtocol: BaseProtocol) {
     super();
     this.protocol = protocol;
     this.campfireProtocol = campfireProtocol;
@@ -71,6 +66,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       list: Array.from(this.protocol.rooms.values()),
     };
     this.protocol.registerLocal(this.local);
+    this.campfireProtocol.registerLocal(this.campfireLocal);
 
     // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
@@ -123,7 +119,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.campfireProtocol.on(
       ProtocolEvent.PeerDataReceived,
       (peer: Patp, data: DataPacket) => {
-        if (this.dataRooms.find((live) => live.rid === data.rid)) {
+        if (this.dataRooms[data.rid]) {
           this.emit(RoomManagerEvent.OnDataChannel, data.rid, peer, data);
         }
       }
@@ -153,7 +149,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
         return this.leaveRoom();
       }
     }
-    for (let dataRoom of this.dataRooms) {
+    for (let dataRoom of Object.values(this.dataRooms)) {
       if (dataRoom.provider === this.our) {
         return this.deleteRoom(dataRoom.rid);
       } else {
@@ -269,7 +265,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     } else if (room.type === 'campfire') {
       this.campfire.room = room;
     } else if (room.type === 'data') {
-      this.dataRooms[room.rid].room = room;
+      this.dataRooms[room.rid] = room;
     }
   }
 
@@ -306,11 +302,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   // clear this.live element that has member type === 'rooms'
   clearRoom(rid: string) {
-    let room = this.dataRooms.find((dataRoom) => dataRoom.rid === rid);
-    if (room) {
-      this.dataRooms.splice(this.dataRooms.indexOf(room), 1);
+    if (this.dataRooms[rid]) {
+      delete this.dataRooms[rid];
     }
-    this.local.disableMedia();
+    this.dataLocals[rid].disableMedia();
   }
 
   clearLiveRoom() {
