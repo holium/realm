@@ -101,10 +101,10 @@
       [%set-info =contact-info]
       ::  `fren` actions are sent agent to agent
       ::
-      ::  follow-fren: ship confirms it is your follower
-      ::  yes-fren: ship confirms it is your fren
-      ::  bye-fren: ship notifies you that it has cancelled friend request or unfriended you.
-      [%follow-friend ~]
+      ::  sent-friend: ship confirms it is your follower
+      ::  accept-friend: ship confirms it is your friend
+      ::  bye-friend: ship notifies you that it has cancelled friend request or unfriended you.
+      [%sent-friend ~]
       [%accept-friend ~]
       [%bye-friend ~]
   ==
