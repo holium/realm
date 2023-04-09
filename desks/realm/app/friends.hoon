@@ -165,7 +165,11 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
 ::  CORE: "shared" core that dispatches events                                ::
-::  to the correct versioned core for handling.                               ::
+::  to the correct versioned core for handling.             (´◕o◕｀)          ::
+::                                                                            ::
+::  Versioned cores are of name +core-<version>                               ::
+::  Put older ones further down, so that they can be ignored                  ::
+::  for the probably bad code that they are.                                  ::
 ::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
@@ -247,27 +251,26 @@
   ==
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::                                                                            ::
+::                                                                            ::                                                                    ::
 ::  +poke: handle on-poke                                                     ::
-::
-::    Handle push requests from other ships, and our frontend to our ship.
-::
-::    General steps:
-::    1.  Branch on mark; extract mark's type from vase to get the action.
-::    2.  Branch on action type, conventionally the head of the action.
-::    3.  Handle action; update state and emit effects as necessary.
-::        This step is handled in our versioned core.
-::
-::    Error states:
-::    1.  Poke is not received by the other ship (it is not running).
-::        It _should_ receive it when it boots up again.
-::        We will not receive a response until their next boot: the frontend
-::        should set a timer and notify that the destination did not respond.
-::    2.  Poke is NACKed by the other ship.  Handled in +agent.
-::
-::    Note that we should expect to receive N pokes of the same type.
-::    Therefore receiving a poke we've already received should be idempotent,
-::    and not produce any cards or effects?
+::                                                                            ::
+::                                                                            ::
+::    General steps (2-3 are in the versioned core):                          ::
+::    1.  Branch on mark; extract mark's type from vase to get the action.    ::
+::    2.  Branch on action type, conventionally the head of the action.       ::
+::    3.  Handle action; update state and emit effects as necessary.          ::
+::        This step is handled in our versioned core.                         ::
+::                                                                            ::
+::    Error states:                                                           ::
+::    1.  Poke is not received by the other ship (it is not running).         ::
+::        It _should_ receive it when it boots up again.                      ::
+::        We will not receive a response until their next boot: the frontend  ::
+::        should set a timer and notify that the destination did not respond. ::
+::    2.  Poke is NACKed by the other ship.  Handled in +agent.               ::
+::                                                                            ::
+::    Note that we should expect to receive N pokes of the same type.         ::
+::    Therefore receiving a poke we've already received should be idempotent, ::
+::    and not produce any state changes, here or downstream.                  ::
 ::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
@@ -278,24 +281,29 @@
       %friends-action-0
     (poke:core-0 !<(friends-action-0 vase))
   ==
-::  +agent: handle on-agent
 ::
-::    In +agent we will receive responses from other agents.
-::    See https://developers.urbit.org/reference/arvo/gall/gall#on-agent
-::    for the types of responses we can expect.
-::
-::    General steps (2-4 are in the versioned core):
-::    1.  Check version number of incoming update.
-::        By our convention, this is always the head of path.
-::        Note that these are text constants and not numbers as they are in +load.
-::    2.  Route on request wire.  By our convention, this is always path's tail.
-::    3.  Route on sign.
-::    4.  Update state and emit effects as necessary.
-::
-::    Error states:
-::    1.  Negative poke-ack or watch-ack (NACK).  Notify the frontend that these
-::        requests were rejected.
-::    2.  
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  +agent: handle on-agent                                                   ::
+::                                                                            ::
+::    In +agent we receive responses from other agents.                       ::
+::    See https://developers.urbit.org/reference/arvo/gall/gall#on-agent      ::
+::    for the types of responses we can expect.                               ::
+::                                                                            ::
+::    General steps (2-4 are in the versioned core):                          ::
+::    1.  Check version number of incoming update.                            ::
+::        By our convention, this is always the head of path.  Note that      ::
+::        these are text constants and not numbers, as they are in +load.     ::
+::    2.  Route on request wire.  By our convention,                          ::
+::        this is always path's tail.                                         ::
+::    3.  Route on sign.                                                      ::
+::    4.  Update state and emit effects as necessary.                         ::
+::                                                                            ::
+::    Error states:                                                           ::
+::    1.  Negative poke-ack or watch-ack (NACK).                              ::
+::        Notify the frontend that these requests were rejected.              ::
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
 ++  agent
   |=  [path=(pole knot) =sign:agent:gall]
@@ -471,3 +479,24 @@
   --
 ::
 --
+::
+::  "when they see the Realm of the Gods, they will tremble in fear
+::  and they will know that I am the Lord - and they will know that I am"
+::  - Github Copilot
+::
+:: ⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣴⠶⠾⠟⠛⠛⠛⠿⠶⣶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀
+:: ⠀⠀⠀⠀⠀⣠⣴⠿⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠰⠆⠀⠀⠀⠀⠀⠀
+:: ⠀⠀⠀⣠⣾⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+:: ⠀⠀⣴⡟⠁⠀⠀⠀⢀⣴⡾⠛⠛⠛⢷⣦⡀⠀⠀⠀⢀⣴⠿⠛⠛⠻⢷⣦⡀⠀
+:: ⠀⣼⡏⠀⠀⠀⠀⠀⣾⠋⠀⠀⠀⠀⠀⠘⣿⡀⠀⢠⣿⠃⠀⠀⠀⠀⠀⠹⣷⠀
+:: ⢰⡟⠀⠀⠀⠀⠀⠘⣿⠀⠀⠀⠘⠛⠀⠀⣿⠇⠀⢸⣿⠀⠀⠀⠘⠛⠀⢀⣿⣇
+:: ⣾⠇⠀⠀⠀⠀⠀⠀⠹⣧⣀⠀⠀⠀⣀⣼⠟⠀⠀⠀⢻⣦⡀⠀⠀⠀⣠⣾⠟⣿
+:: ⣿⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠛⠁⠀⠀⠀⠀⠀⠉⠛⠿⠿⠟⠋⠁⠀⣿
+:: ⢿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿
+:: ⠸⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣤⣤⣤⣤⣤⣄⡀⠀⠀⠀⠀⣸⡏
+:: ⠀⢻⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⡿⠉⠁⠀⠀⠀⠀⠀⠈⠉⢿⡆⠀⠀⣰⡿⠀
+:: ⠀⠀⢻⣦⡀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣄⣀⣀⣀⣀⣀⣀⣀⣠⣾⠃⠀⣰⡿⠁⠀
+:: ⠀⠀⠀⠙⢿⣄⡀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠉⠉⠉⠉⠀⣠⡾⠋⠀⠀⠀
+:: ⠀⠀⠀⠀⠀⠙⠿⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⡿⠋⠀⠀⠀⠀⠀
+:: ⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⠶⣶⣤⣤⣤⣤⣴⡶⠾⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀
+::
