@@ -1,6 +1,20 @@
 ::  friends [realm]:
+::    Friend list management within Realm
 ::
-::  Friend list management within Realm
+::  This agent is heavily documented.  It's meant to be an example and reference
+::  for writing future Realm agents.  Follow the structure here whenever possible.
+::
+::  General principles:
+::  - Try to keep width under 80 characters.  To add a ruler in vscode, see:
+::    https://stackoverflow.com/a/29972073
+::  - Choose long names over short names.
+::  - Avoid library files, besides handlers for JSON and maybe threads.
+::  - If in an unexpected state, crash with an error message / stack trace.
+::    Be as strict as possible, especially on the first pass.  Then you'll
+::    start to see how state can get corrupted, and can decide on behavior
+::    for those situations.
+::  - Follow the commenting style shown here and described here:
+::    https://www.ajlamarc.com/blog/2023-02-26-urbit-style/
 ::
 /-  *friends
 /+  verb, dbug, defa=default-agent
@@ -68,25 +82,25 @@
     [~ ~]
   ::
   ++  on-agent
-    |=  [pole=(pole knot) =sign:agent:gall]
+    |=  [path=(pole knot) =sign:agent:gall]
     ~>  %bout.[0 '%friends +on-agent']
     ^-  (quip card _this)
-    =^  cards  state  abet:(agent:core pole sign)
+    =^  cards  state  abet:(agent:core path sign)
     [cards this]
   ::
   ++  on-arvo
-    |=  [pole=(pole knot) sign=sign-arvo]
+    |=  [path=(pole knot) sign=sign-arvo]
     ~>  %bout.[0 '%friends +on-arvo']
     ^-  (quip card _this)
-    :: =^  cards  state  abet:(arvo:core pole sign)
+    :: =^  cards  state  abet:(arvo:core path sign)
     :: [cards this]
     `this
   ::
   ++  on-watch
-    |=  pole=(pole knot)
+    |=  path=(pole knot)
     ~>  %bout.[0 '%arvo +on-watch']
     ^-  (quip card _this)
-    :: =^  cards  state  abet:(watch:core pole)
+    :: =^  cards  state  abet:(watch:core path)
     :: [cards this]
     `this
   ::
@@ -216,20 +230,23 @@
 ::
 ::    General steps (2-4 are in the versioned core):
 ::    1.  Check version number of incoming update.
-::        By our convention, this is always the head of pole.
-::    2.  Route on request wire.  By our convention, this is always pole's tail.
+::        By our convention, this is always the head of path.
+::        Note that these are text constants and not numbers as they are in +load.
+::    2.  Route on request wire.  By our convention, this is always path's tail.
 ::    3.  Route on sign.
 ::    4.  Update state and emit effects as necessary.
 ::
 ::    Error states:
-::    1.  Negative poke-ack or watch-ack.  
+::    1.  Negative poke-ack or watch-ack (NACK).  Notify the frontend that these
+::        requests were rejected.
+::    2.  
 ::
 ++  agent
-  |=  [pole=(pole knot) =sign:agent:gall]
+  |=  [path=(pole knot) =sign:agent:gall]
   ^+  core
-  ?+    -.pole  ~|(bad-agent-version/pole !!)
+  ?+    -.path  ~|(bad-agent-version/path !!)
       %'0'
-    (agent:core-0 +.pole sign)
+    (agent:core-0 +.path sign)
   ::
   ==
 ::
@@ -345,13 +362,13 @@
   ==
   ::
   ++  agent
-  |=  [pole=(pole knot) =sign:agent:gall]
+  |=  [path=(pole knot) =sign:agent:gall]
   ^+  core
   ::  This will be used repeatedly, so define it once.
   ::
-  =*  ship  `@p`(slav %p ship.pole)
+  =*  ship  `@p`(slav %p ship.path)
   ::
-  ?+    pole  ~|(bad-agent-wire/pole !!)
+  ?+    path  ~|(bad-agent-wire/path !!)
       [%sent-friend ship=@ ~]
     ::
     ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
