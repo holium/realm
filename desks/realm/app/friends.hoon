@@ -2,40 +2,50 @@
 ::    Friend list management within Realm
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::  This agent is heavily documented.  It's meant to be an example
-::  and reference for writing future Realm agents.
-::  Follow the structure shown here whenever possible.
-::
-::  Principles:
-::  - Try to keep line width under 80 characters.
-::    To add a ruler in VSCode, see https://stackoverflow.com/a/29972073
-::  - Prefer longer variable names.
-::  - Avoid hiding logic in library files, besides JSON handlers.
-::  - If in an unexpected state, crash with an error message / stack trace.
-::    Be as strict as possible, especially on the first pass.  Then you'll
-::    start to see how state can get corrupted, and can decide on behavior
-::    for those situations.
-::  - Follow the commenting style shown here and described in
-::    https://developers.urbit.org/reference/hoon/style
-::    (minus the "boxed in" comments, they are for describing structure).
-::  - Follow rune choice, file structure, and other style guidelines in
-::    https://www.ajlamarc.com/blog/2023-02-26-urbit-style/
-::
-::  Q: When do I introduce a new state version?
-::  A: Any change in state requires a new state version.
-::
-::  Q: How do I introduce a new state version?
-::  A: Add it to versioned-state, and add a new case to +load.
-::     Modify the versioned cores to work alongside the new state version.
-::     If this is infeasible, 
-::  
+::                                                                            ::
+::  This agent is heavily documented.  It's meant to be an example            ::
+::  and reference for writing future Realm agents.                            ::
+::  Follow the structure shown here whenever possible.                        ::
+::                                                                            ::
+::  Principles:                                                               ::
+::  - Try to keep line width under 80 characters.                             ::
+::    To add a ruler in VSCode, see https://stackoverflow.com/a/29972073      ::
+::  - Prefer longer and more descriptive variable names.                      ::
+::  - Avoid hiding logic in library files, besides JSON handlers.             ::
+::  - If in an unexpected state, crash with an error message / stack trace.   ::
+::    Be as strict as possible, especially on the first pass.  Then you'll    ::
+::    start to see how state can get corrupted, and can decide on behavior    ::
+::    for those situations.                                                   ::
+::  - Follow the commenting style shown here and described in                 ::
+::    https://developers.urbit.org/reference/hoon/style.                      ::
+::    (minus the "boxed in" comments, they are for this guide only).          ::
+::  - Follow rune choice, file structure, and other style guidelines in       ::
+::    https://www.ajlamarc.com/blog/2023-02-26-urbit-style/.                  ::
+::    If another code structure could serve better, discuss with the team.    ::
+::                                                                            ::
+::  Q: How do I introduce a new state version?                                ::
+::  A: Add it to versioned-state, add a new case to +load,                    ::
+::     and update the sur definitions.                                        ::
+::     Modify the versioned cores to work alongside the new state.            ::
+::     If this is infeasible, remove some of the old versioned cores.         ::
+::                                                                            ::
+::  Q: How do I introduce a new mark version?                                 ::
+::  A: Add the new sur definitions.  Add a new versioned core,                ::
+::     copying over the previous's logic and making the necessary changes.    ::
+::     Update the /~/current-version/ scry to latest.                         ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
 /-  *friends
 /+  verb, dbug, defa=default-agent
 |%
+::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
 ::  Define state versioning and other boilerplate                             ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
 +$  versioned-state
   $%  state-0
       state-1
@@ -54,7 +64,9 @@
 =|  state-2
 =*  state  -
 =<
+::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
 ::  Nested core pattern:                                                      ::
 ::    https://developers.urbit.org/blog/nested-core-pattern                   ::
 ::                                                                            ::
@@ -63,9 +75,22 @@
 ::                                                                            ::
 ::    This hides the =^ nonsense from the rest of the code.                   ::
 ::                                                                            ::
-::  See also:                                                                 ::
+::  See also for more information / a refresher about Gall:                   ::
 ::    https://developers.urbit.org/reference/arvo/gall/gall#arms              ::
+::                                                                            ::
+::   ___                                                                  __  ::
+::  /__/|__                                                            __//|  ::
+::  |__|/_/|__                                                       _/_|_||  ::
+::  |_|___|/_/|__                                                 __/_|___||  ::
+::  |___|____|/_/|__             ᕦ( ͡° ͜ʖ ͡°)ᕤ                  __/_|____|_||  ::
+::  |_|___|_____|/_/|_________________________________________/_|_____|___||  ::
+::  |___|___|__|___|/__/___/___/___/___/___/___/___/___/___/_|_____|____|_||  ::
+::  |_|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___||  ::
+::  |___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|_||  ::
+::  |_|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|___|/  ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
   |_  =bowl:gall
   +*  this   .
       def    ~(. (defa this %|) bowl)
@@ -136,22 +161,28 @@
     on-leave:def
   ::
   --
+::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::  CORE: "shared" core that dispatches events                                :: 
+::                                                                            ::
+::  CORE: "shared" core that dispatches events                                ::
 ::  to the correct versioned core for handling.                               ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
 |_  [=bowl:gall cards=(list card)]
 +*  core  .
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
 ++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
+::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
 ::  +load: handle on-load                                                     ::
 ::                                                                            ::
 ::    Handle transition from old state versions.                              ::
-::    Always upgrade state incrementally.                                     ::
-::    From state-0 to state-1, state-1 to state-2, etc.                       ::
-::    This lets you write one state upgrade intead of N.                      ::
+::    Always upgrade state incrementally:                                     ::
+::    from state-0 to state-1, state-1 to state-2, etc.                       ::
+::    This lets you write one state transition per update instead of N.       ::
 ::    Multiple upgrades will be handled recursively.                          ::
 ::                                                                            ::
 ::    1.  Extract old state from vase                                         ::
@@ -163,7 +194,9 @@
 ::  Note that state versions move separately from "mark" versions.            ::
 ::  i.e. action-0, update-0, scry /~/0/<...>, etc.                            ::
 ::  Hence we handle state versioning here rather than in versioned cores.     ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
 ++  load
   |=  =vase
   ^+  core
@@ -212,7 +245,10 @@
   ::
     %2  core(state old)
   ==
-::  +poke: handle on-poke
+::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  +poke: handle on-poke                                                     ::
 ::
 ::    Handle push requests from other ships, and our frontend to our ship.
 ::
@@ -232,6 +268,8 @@
 ::    Note that we should expect to receive N pokes of the same type.
 ::    Therefore receiving a poke we've already received should be idempotent,
 ::    and not produce any cards or effects?
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
 ++  poke
   |=  [=mark =vase]
