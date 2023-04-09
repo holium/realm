@@ -156,7 +156,9 @@
 ::                                                                            ::
 ::    1.  Extract old state from vase                                         ::
 ::    2.  Branch on state version                                             ::
-::    3.  Handle transition to the next version, or return if at latest       ::
+::    3.  Handle transition to the next version, or return if at latest.      ::
+::        This is done by calling $, i.e. re-evaluating at the trap           ::
+::        with `old` updated to the next version.                             ::
 ::                                                                            ::
 ::  Note that state versions move separately from "mark" versions.            ::
 ::  i.e. action-0, update-0, scry /~/0/<...>, etc.                            ::
@@ -169,55 +171,45 @@
   |-
   ?-    -.old
       %0
-    %=  core
-      state
-      :*  %2
-          ^-  ^friends
-          %-  malt
-          %+  turn  ~(tap by friends.old)
-          |=  [=ship fren=friend-0]
-          :-  ship
-          ^-  friend
-          :*  pinned.fren
-              tags.fren
-              now.bowl
-              now.bowl
-              ~
-              ?-  status.fren
-                %fren       %fren
-                %following  %sent
-                %follower   %received
-              ==   
-              ~
-      ==  ==
-    ==
-    ::
+    %=  $
+        old   :*  %1
+                  %.y
+                  is-public.old
+                  ^-  friends-1
+                  %-  malt
+                  %+  turn  ~(tap by friends.old)
+                  |=  [=ship fren=friend-0]
+                  :-  ship
+                  :*  pinned.fren
+                      tags.fren
+                      status.fren
+                      ~
+    ==        ==  ==
+  ::
       %1
-    %=  core
-      state
-      :*  %2
-          ^-  ^friends
-          %-  malt
-          %+  turn  ~(tap by friends.old)
-          |=  [=ship fren=friend-1]
-          :-  ship
-          ^-  friend
-          :*  pinned.fren
-              tags.fren
-              now.bowl
-              now.bowl
-              ~
-              ?-  status.fren
-                %fren       %fren
-                %following  %sent
-                %follower   %received
-                %contact    %know
-                %our        %our
-              ==
-              ~
-      ==  ==
-    ==
-    ::
+    %=  $
+        old   :*  %2
+                  ^-  ^friends
+                  %-  malt
+                  %+  turn  ~(tap by friends.old)
+                  |=  [=ship fren=friend-1]
+                  :-  ship
+                  ^-  friend
+                  :*  pinned.fren
+                      tags.fren
+                      now.bowl
+                      now.bowl
+                      ~
+                      ?-  status.fren
+                        %fren       %fren
+                        %following  %sent
+                        %follower   %received
+                        %contact    %know
+                        %our        %our
+                      ==
+                      ~
+    ==        ==  ==
+  ::
     %2  core(state old)
   ==
 ::  +poke: handle on-poke
