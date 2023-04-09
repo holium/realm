@@ -101,8 +101,8 @@
       [%set-info =contact-info]
       ::  `fren` actions are sent agent to agent
       ::
-      ::  sent-friend: ship confirms it is your follower
-      ::  accept-friend: ship confirms it is your friend
+      ::  sent-friend: ship sends you friend request
+      ::  accept-friend: ship is now your friend
       ::  bye-friend: ship notifies you that it has cancelled friend request or unfriended you.
       [%sent-friend ~]
       [%accept-friend ~]

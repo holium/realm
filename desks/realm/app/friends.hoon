@@ -18,10 +18,13 @@
 ::    for those situations.                                                   ::
 ::  - Follow the commenting style shown here and described in                 ::
 ::    https://developers.urbit.org/reference/hoon/style.                      ::
+::    Block comments (think docstrings) are better than inline comments.      ::
 ::    (minus the "boxed in" comments, they are for this guide only).          ::
 ::  - Follow rune choice, file structure, and other style guidelines in       ::
 ::    https://www.ajlamarc.com/blog/2023-02-26-urbit-style/.                  ::
 ::    If another code structure could serve better, discuss with the team.    ::
+::  - Don't =. the state directly.  Update it with `%=  core...`              ::
+::    when emitting cards.  See below for examples.                           ::
 ::                                                                            ::
 ::  Q: How do I introduce a new state version?                                ::
 ::  A: Add it to versioned-state, add a new case to +load,                    ::
@@ -323,7 +326,7 @@
       %add-friend
     ::  A successful add-friend will result in a follow request
     ::  or an accept request, depending on our state.
-    ::  We don't update state here, rather we wait for a
+    ::  We don't directly update state here, rather we wait for a
     ::  positive %poke-ack from the other ship.
     ::
     ::  TODO: receiving a NACK should notify the UI that the request failed.
@@ -332,11 +335,9 @@
     ::
     ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
     ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
-    ~&  >  ['adding friend' ship.act]
     ::  Pokes to be used later
     ::
     =*  sent-friend
-      %-  emit
       :*  %pass
           /0/sent-friend/(scot %p ship.act)
           %agent
@@ -346,7 +347,6 @@
       ==
     ::
     =*  accept-friend
-      %-  emit
       :*  %pass
           /0/accept-friend/(scot %p ship.act)
           %agent
@@ -355,28 +355,22 @@
           friends-action-0+!>([%accept-friend ~])
       ==
     ::
-    ?:  ::  if this ship is in our friends list
-        ::
-        (~(has by friends) ship.act)
-      ::  get our current information about them
-      ::
+    ?:  (~(has by friends) ship.act)
       =/  fren  (~(got by friends) ship.act)
       ::
-      ?.  ::  if they are not known or received
-          ::
-          ?=(?(%know %received) relationship.fren)
-        ::  then crash
-        ::
+      ?.  ?=(?(%know %received %sent) relationship.fren)
         ~|(invalid-add-friend/relationship.fren !!)
-      ?:  ::  if only know
-          ::
-          ?=(%know relationship.fren)
-        ::  then send a friend request
-        ::
-        sent-friend
-      ::  else (received) send an accept request
       ::
-      accept-friend
+      ::  if already sent, do nothing
+      ::  if know, send friend request
+      ::  if received, accept friend request
+      ::
+      ?:  ?=(%sent relationship.fren)
+        core
+      ?:  ?=(%know relationship.fren)
+        (emit sent-friend)
+      (emit accept-friend)
+    ::
     ::  ship is not in our friends list, so add them as know
     ::  and send a friend request
     ::
@@ -389,8 +383,11 @@
           relationship=%know
           contact-info=~
       ==
-    =.  friends  (~(put by friends) ship.act fren)
-    sent-friend
+    ::
+    %=  core
+      friends  (~(put by friends) ship.act fren)
+      cards    [sent-friend cards]
+    ==
   ::
       %edit-friend
     ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-friend' !!)
@@ -415,10 +412,65 @@
     core
   ::
       %sent-friend
-    core
+    ::  Receive a new friend request from another ship.
+    ::
+    ?:  =(our.bowl src.bowl)  ~|('no-self-sent-friend' !!)
+    ::
+    ?:  (~(has by friends) src.bowl)
+      =/  fren  (~(got by friends) src.bowl)
+      ::
+      ?.  ?=(?(%know %received) relationship.fren)
+        ~|(invalid-sent-friend/relationship.fren !!)
+      ::  If already received, do nothing
+      ::
+      ?:  ?=(%received relationship.fren)
+        core
+      ::
+      =/  fren-upd
+        :*  pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%received
+            contact-info=contact-info.fren
+        ==
+      core(friends (~(put by friends) src.bowl fren-upd))
+    ::
+    ::  Ship not on our list, so add them as received
+    ::
+    =/  fren
+      :*  pinned=%.n
+          tags=*tags
+          created-at=now.bowl
+          updated-at=now.bowl
+          phone-number=~
+          relationship=%received
+          contact-info=~
+      ==
+    core(friends (~(put by friends) src.bowl fren))
   ::
       %accept-friend
-    core
+    ::  Receive a friend request acceptance from another ship.
+    ::
+    ?:  =(our.bowl src.bowl)  ~|('no-self-accept-friend' !!)
+    ::
+    =/  fren  (~(got by friends) src.bowl)
+    ::  We should currently be in %sent to be accepted.
+    ::
+    ?.  ?=(%sent relationship.fren)
+      ~|(invalid-accept-friend/relationship.fren !!)
+    ::
+    =/  fren-upd
+      :*  pinned=pinned.fren
+          tags=tags.fren
+          created-at=created-at.fren
+          updated-at=now.bowl
+          phone-number=phone-number.fren
+          relationship=%fren
+          contact-info=contact-info.fren
+      ==
+    core(friends (~(put by friends) src.bowl fren-upd))
   ::
       %bye-friend
     core
@@ -437,48 +489,63 @@
     ::
     ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
         %poke-ack
+      ::  This checks if poke succeeded or failed.
       ::
-      ?~  ::  If p.sign is null
-          ::
-          p.sign
-        ::  Then the poke succeeded.  Verify that the ship is currently %know,
-        ::  then update our relationship to %sent.
+      ?~  p.sign
+        ::  Poke succeeded.  Verify that the ship is currently %know,
+        ::  then update state.
         ::
         =/  fren  (~(got by friends) ship)
-        ?:  ?=(%know relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
-        =.  relationship.fren  %sent
+        ?.  ?=(%know relationship.fren)
+          ~|(dont-know-cant-follow/relationship.fren !!)
         ::
-        =.  friends  (~(put by friends) ship fren)
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%sent
+              contact-info=contact-info.fren
+          ==
         ::  TODO, emit any necessary cards
-        core
-      ::  Else, the poke failed (was NACKed).  Don't update state.
+        core(friends (~(put by friends) ship fren-upd))
+      ::  Poke failed - don't update state.
       ::  TODO, notify UI of failure.
       ::
       ((slog leaf/"sent-friend nack" ~) core)
     ==
   ::
       [%accept-friend ship=@ ~]
+    ::
     ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
         %poke-ack
+      ::
       ?~  p.sign
-        ::  Poke succeeded, Verify friend is currently %sent, then set to %fren.
-        ::
         =/  fren  (~(got by friends) ship)
-        ?:  ?=(%sent relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
-        =.  relationship.fren  %fren
+        ::  We should be in %received to be accepted.
         ::
-        =.  friends  (~(put by friends) ship fren)
-        ::  TODO, emit any necessary cards
-        core
+        ?.  ?=(%received relationship.fren)
+          ~|(invalid-accept-friend-ack/relationship.fren !!)
+        ::
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%fren
+              contact-info=contact-info.fren
+          ==
+        core(friends (~(put by friends) ship fren-upd))
       ::  Poke failed
       ::
       core
+    ::
     ==
   ::
   ==
   --
-::
---
 ::
 ::  "when they see the Realm of the Gods, they will tremble in fear
 ::  and they will know that I am the Lord - and they will know that I am"
@@ -500,3 +567,4 @@
 :: ⠀⠀⠀⠀⠀⠙⠿⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⡿⠋⠀⠀⠀⠀⠀
 :: ⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⠶⣶⣤⣤⣤⣤⣴⡶⠾⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀
 ::
+--
