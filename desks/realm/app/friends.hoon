@@ -1,28 +1,46 @@
 ::  friends [realm]:
 ::    Friend list management within Realm
 ::
-::  This agent is heavily documented.  It's meant to be an example and reference
-::  for writing future Realm agents.  Follow the structure here whenever possible.
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  This agent is heavily documented.  It's meant to be an example
+::  and reference for writing future Realm agents.
+::  Follow the structure shown here whenever possible.
 ::
-::  General principles:
-::  - Try to keep width under 80 characters.  To add a ruler in vscode, see:
-::    https://stackoverflow.com/a/29972073
-::  - Choose long names over short names.
-::  - Avoid library files, besides handlers for JSON and maybe threads.
+::  Principles:
+::  - Try to keep line width under 80 characters.
+::    To add a ruler in VSCode, see https://stackoverflow.com/a/29972073
+::  - Prefer longer variable names.
+::  - Avoid hiding logic in library files, besides JSON handlers.
 ::  - If in an unexpected state, crash with an error message / stack trace.
 ::    Be as strict as possible, especially on the first pass.  Then you'll
 ::    start to see how state can get corrupted, and can decide on behavior
 ::    for those situations.
-::  - Follow the commenting style shown here and described here:
+::  - Follow the commenting style shown here and described in
+::    https://developers.urbit.org/reference/hoon/style
+::    (minus the "boxed in" comments, they are for describing structure).
+::  - Follow rune choice, file structure, and other style guidelines in
 ::    https://www.ajlamarc.com/blog/2023-02-26-urbit-style/
 ::
+::  Q: When do I introduce a new state version?
+::  A: Any change in state requires a new state version.
+::
+::  Q: How do I introduce a new state version?
+::  A: Add it to versioned-state, and add a new case to +load.
+::     Modify the versioned cores to work alongside the new state version.
+::     If this is infeasible, 
+::  
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 /-  *friends
 /+  verb, dbug, defa=default-agent
 |%
-::
-::  Define state versioning and other boilerplate
-::
-+$  versioned-state  $%(state-0 state-1 state-2)
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  Define state versioning and other boilerplate                             ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
++$  versioned-state
+  $%  state-0
+      state-1
+      state-2
+  ==
 ::
 +$  state-0  [%0 is-public=? friends=friends-0]
 +$  state-1  [%1 sync-contact-store=? is-public=? friends=friends-1]
@@ -36,13 +54,18 @@
 =|  state-2
 =*  state  -
 =<
-::
-::  Nested core pattern: https://developers.urbit.org/blog/nested-core-pattern
-::  Calls the relevant arms in "core" if the arm is implemented, otherwise
-::  functionality is stubbed here.
-::
-::  I prefer this because it hides the =^ nonsense from the rest of the code.
-::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  Nested core pattern:                                                      ::
+::    https://developers.urbit.org/blog/nested-core-pattern                   ::
+::                                                                            ::
+::    Calls the relevant arms in "core" if the arm is implemented             ::
+::    otherwise functionality is stubbed here via default-agent.              ::
+::                                                                            ::
+::    This hides the =^ nonsense from the rest of the code.                   ::
+::                                                                            ::
+::  See also:                                                                 ::
+::    https://developers.urbit.org/reference/arvo/gall/gall#arms              ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   |_  =bowl:gall
   +*  this   .
       def    ~(. (defa this %|) bowl)
@@ -51,9 +74,9 @@
   ++  on-init
     ^-  (quip card _this)
     ~>  %bout.[0 '%friends +on-init']
-    =^  cards  state
-      abet:init:core
-    [cards this]
+    :: =^  cards  state  abet:init:core
+    :: [cards this]
+    on-init:def
   ::
   ++  on-save
     ^-  vase
@@ -113,34 +136,37 @@
     on-leave:def
   ::
   --
-::
-::  CORE: top-level core that handles dispatching to the correct versioned core.
-::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  CORE: "shared" core that dispatches events                                :: 
+::  to the correct versioned core for handling.                               ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 |_  [=bowl:gall cards=(list card)]
 +*  core  .
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
 ++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
-::  +init: handle on-init
-::
-++  init
-  ^+  core
-  core
-::  +load: handle on-load
-::
-::    Handle transition from old state versions.
-::    We should always upgrade state incrementally.
-::    From state-0 to state-1, state-1 to state-2, etc.
-::
-::    1.  Extract old state from vase
-::    2.  Branch on state version
-::    3.  Handle transition to latest state version.
-::        This is done in the versioned core.
-::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  +load: handle on-load                                                     ::
+::                                                                            ::
+::    Handle transition from old state versions.                              ::
+::    Always upgrade state incrementally.                                     ::
+::    From state-0 to state-1, state-1 to state-2, etc.                       ::
+::    This lets you write one state upgrade intead of N.                      ::
+::    Multiple upgrades will be handled recursively.                          ::
+::                                                                            ::
+::    1.  Extract old state from vase                                         ::
+::    2.  Branch on state version                                             ::
+::    3.  Handle transition to the next version, or return if at latest       ::
+::                                                                            ::
+::  Note that state versions move separately from "mark" versions.            ::
+::  i.e. action-0, update-0, scry /~/0/<...>, etc.                            ::
+::  Hence we handle state versioning here rather than in versioned cores.     ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ++  load
   |=  =vase
   ^+  core
   =/  old  !<(versioned-state vase)
+  |-
   ?-    -.old
       %0
     %=  core
