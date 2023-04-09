@@ -27,6 +27,8 @@
 ::  Calls the relevant arms in "core" if the arm is implemented, otherwise
 ::  functionality is stubbed here.
 ::
+::  I prefer this because it hides the =^ nonsense from the rest of the code.
+::
   |_  =bowl:gall
   +*  this   .
       def    ~(. (defa this %|) bowl)
@@ -97,8 +99,11 @@
     on-leave:def
   ::
   --
+::
+::  CORE: top-level core that handles dispatching to the correct versioned core.
+::
 |_  [=bowl:gall cards=(list card)]
-++  core  .
++*  core  .
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
 ++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
@@ -110,10 +115,13 @@
 ::  +load: handle on-load
 ::
 ::    Handle transition from old state versions.
+::    We should always upgrade state incrementally.
+::    From state-0 to state-1, state-1 to state-2, etc.
 ::
 ::    1.  Extract old state from vase
 ::    2.  Branch on state version
-::    3.  Handle transition to latest state version
+::    3.  Handle transition to latest state version.
+::        This is done in the versioned core.
 ::
 ++  load
   |=  =vase
@@ -174,124 +182,31 @@
   ==
 ::  +poke: handle on-poke
 ::
-::    Handle push requests from other ships and our frontend.
+::    Handle push requests from other ships, and our frontend to our ship.
 ::
+::    General steps:
 ::    1.  Branch on mark; extract mark's type from vase to get the action.
 ::    2.  Branch on action type, conventionally the head of the action.
 ::    3.  Handle action; update state and emit effects as necessary.
+::        This step is handled in our versioned core.
+::
+::    Error states:
+::    1.  Poke is not received by the other ship (it is not running).
+::        It _should_ receive it when it boots up again.
+::        We will not receive a response until their next boot: the frontend
+::        should set a timer and notify that the destination did not respond.
+::    2.  Poke is NACKed by the other ship.  Handled in +agent.
+::
+::    Note that we should expect to receive N pokes of the same type.
+::    Therefore receiving a poke we've already received should be idempotent,
+::    and not produce any cards or effects?
 ::
 ++  poke
   |=  [=mark =vase]
   ^+  core
   ?+    mark  ~|(bad-friends-mark/mark !!)
       %friends-action-0
-    =/  act  !<(friends-action-0 vase)
-    ?-    -.act
-      ::
-        %add-friend
-      ::  A successful add-friend will result in a follow request
-      ::  or an accept request, depending on our state.
-      ::  We don't update state here, rather we wait for a
-      ::  positive %poke-ack from the other ship.
-      ::
-      ::  TODO: receiving a NACK should notify the UI that the request failed.
-      ::
-      ::  If trying to add-friend ourselves, or issued from another ship, crash.
-      ::
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
-      ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
-      ~&  >  ['adding friend' ship.act]
-      ::  Pokes to be used later
-      ::
-      =*  sent-friend
-        %-  emit
-        :*  %pass
-            /0/sent-friend/(scot %p ship.act)
-            %agent
-            [ship.act dap.bowl]
-            %poke
-            friends-action-0+!>([%sent-friend ~])
-        ==
-      ::
-      =*  accept-friend
-        %-  emit
-        :*  %pass
-            /0/accept-friend/(scot %p ship.act)
-            %agent
-            [ship.act dap.bowl]
-            %poke
-            friends-action-0+!>([%accept-friend ~])
-        ==
-      ::
-      ?:  ::  if this ship is in our friends list
-          ::
-          (~(has by friends) ship.act)
-        ::  get our current information about them
-        ::
-        =/  fren  (~(got by friends) ship.act)
-        ::
-        ?.  ::  if they are not known or received
-            ::
-            ?=(?(%know %received) relationship.fren)
-          ::  then crash
-          ::
-          ~|(invalid-add-friend/relationship.fren !!)
-        ?:  ::  if only know
-            ::
-            ?=(%know relationship.fren)
-          ::  then send a follow request
-          ::
-          follow-friend
-        ::  else (received) send an accept request
-        ::
-        accept-friend
-      ::  ship is not in our friends list, so add them as know
-      ::  and send a follow request
-      ::
-      =/  fren
-        :*  pinned=%.n
-            tags=*tags
-            created-at=now.bowl
-            updated-at=now.bowl
-            phone-number=~
-            relationship=%know
-            contact-info=~
-        ==
-      =.  friends  (~(put by friends) ship.act fren)
-      sent-friend
-    ::
-        %edit-friend
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-friend' !!)
-      ?:  =(our.bowl ship.act)  ~|('no-self-edit-friend' !!)
-      ~&  >  ['editing friend' ship.act]
-      core
-    ::
-        %remove-friend
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-remove-friend' !!)
-      core
-    ::
-        %block-friend
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
-      core
-    ::
-        %unblock-friend
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
-      core
-    ::
-        %set-info
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-info' !!)
-      core
-    ::
-        %sent-friend
-      core
-    ::
-        %accept-friend
-      core
-    ::
-        %bye-friend
-      core
-    ::
-    ==
+    (poke:core-0 !<(friends-action-0 vase))
   ==
 ::  +agent: handle on-agent
 ::
@@ -299,66 +214,187 @@
 ::    See https://developers.urbit.org/reference/arvo/gall/gall#on-agent
 ::    for the types of responses we can expect.
 ::
+::    General steps (2-4 are in the versioned core):
 ::    1.  Check version number of incoming update.
 ::        By our convention, this is always the head of pole.
 ::    2.  Route on request wire.  By our convention, this is always pole's tail.
 ::    3.  Route on sign.
 ::    4.  Update state and emit effects as necessary.
 ::
+::    Error states:
+::    1.  Negative poke-ack or watch-ack.  
+::
 ++  agent
+  |=  [pole=(pole knot) =sign:agent:gall]
+  ^+  core
+  ?+    -.pole  ~|(bad-agent-version/pole !!)
+      %'0'
+    (agent:core-0 +.pole sign)
+  ::
+  ==
+::
+++  core-0
+  |%
+  ++  poke
+  |=  act=friends-action-0
+  ^+  core
+  ?-    -.act
+      %add-friend
+    ::  A successful add-friend will result in a follow request
+    ::  or an accept request, depending on our state.
+    ::  We don't update state here, rather we wait for a
+    ::  positive %poke-ack from the other ship.
+    ::
+    ::  TODO: receiving a NACK should notify the UI that the request failed.
+    ::
+    ::  If trying to add-friend ourselves, or issued from another ship, crash.
+    ::
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
+    ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
+    ~&  >  ['adding friend' ship.act]
+    ::  Pokes to be used later
+    ::
+    =*  sent-friend
+      %-  emit
+      :*  %pass
+          /0/sent-friend/(scot %p ship.act)
+          %agent
+          [ship.act dap.bowl]
+          %poke
+          friends-action-0+!>([%sent-friend ~])
+      ==
+    ::
+    =*  accept-friend
+      %-  emit
+      :*  %pass
+          /0/accept-friend/(scot %p ship.act)
+          %agent
+          [ship.act dap.bowl]
+          %poke
+          friends-action-0+!>([%accept-friend ~])
+      ==
+    ::
+    ?:  ::  if this ship is in our friends list
+        ::
+        (~(has by friends) ship.act)
+      ::  get our current information about them
+      ::
+      =/  fren  (~(got by friends) ship.act)
+      ::
+      ?.  ::  if they are not known or received
+          ::
+          ?=(?(%know %received) relationship.fren)
+        ::  then crash
+        ::
+        ~|(invalid-add-friend/relationship.fren !!)
+      ?:  ::  if only know
+          ::
+          ?=(%know relationship.fren)
+        ::  then send a friend request
+        ::
+        sent-friend
+      ::  else (received) send an accept request
+      ::
+      accept-friend
+    ::  ship is not in our friends list, so add them as know
+    ::  and send a friend request
+    ::
+    =/  fren
+      :*  pinned=%.n
+          tags=*tags
+          created-at=now.bowl
+          updated-at=now.bowl
+          phone-number=~
+          relationship=%know
+          contact-info=~
+      ==
+    =.  friends  (~(put by friends) ship.act fren)
+    sent-friend
+  ::
+      %edit-friend
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-friend' !!)
+    ?:  =(our.bowl ship.act)  ~|('no-self-edit-friend' !!)
+    ~&  >  ['editing friend' ship.act]
+    core
+  ::
+      %remove-friend
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-remove-friend' !!)
+    core
+  ::
+      %block-friend
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
+    core
+  ::
+      %unblock-friend
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
+    core
+  ::
+      %set-info
+    ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-info' !!)
+    core
+  ::
+      %sent-friend
+    core
+  ::
+      %accept-friend
+    core
+  ::
+      %bye-friend
+    core
+  ::
+  ==
+  ::
+  ++  agent
   |=  [pole=(pole knot) =sign:agent:gall]
   ^+  core
   ::  This will be used repeatedly, so define it once.
   ::
   =*  ship  `@p`(slav %p ship.pole)
   ::
-  ?+    -.pole  ~|(bad-agent-version/pole !!)
-      %0
+  ?+    pole  ~|(bad-agent-wire/pole !!)
+      [%sent-friend ship=@ ~]
     ::
-    ?+    +.pole  ~|(bad-agent-wire/pole !!)
-        [%sent-friend ship=@ ~]
+    ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
+        %poke-ack
       ::
-      ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
-          %poke-ack
-        ::
-        ?~  ::  If p.sign is null
-            ::
-            p.sign
-          ::  Then the poke succeeded.  Verify that the ship is currently %know,
-          ::  then update our relationship to %sent.
+      ?~  ::  If p.sign is null
           ::
-          =/  fren  (~(got by friends) ship)
-          ?:  ?=(%know relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
-          =.  relationship.fren  %sent
-          ::
-          =.  friends  (~(put by friends) ship fren)
-          ::  TODO, emit any necessary cards
-          core
-        ::  Else, the poke failed (was NACKed).  Don't update state.
-        ::  TODO, notify UI of failure.
+          p.sign
+        ::  Then the poke succeeded.  Verify that the ship is currently %know,
+        ::  then update our relationship to %sent.
         ::
+        =/  fren  (~(got by friends) ship)
+        ?:  ?=(%know relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
+        =.  relationship.fren  %sent
+        ::
+        =.  friends  (~(put by friends) ship fren)
+        ::  TODO, emit any necessary cards
         core
-      ==
-    ::
-        [%accept-friend ship=@ ~]
-      ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
-          %poke-ack
-        ?~  p.sign
-          ::  Poke succeeded, Verify friend is currently %sent, then set to %fren.
-          ::
-          =/  fren  (~(got by friends) ship)
-          ?:  ?=(%sent relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
-          =.  relationship.fren  %fren
-          ::
-          =.  friends  (~(put by friends) ship fren)
-          ::  TODO, emit any necessary cards
-          core
-        ::  Poke failed
-        ::
-        core
-      ==
-    ::
+      ::  Else, the poke failed (was NACKed).  Don't update state.
+      ::  TODO, notify UI of failure.
+      ::
+      ((slog leaf/"sent-friend nack" ~) core)
     ==
+  ::
+      [%accept-friend ship=@ ~]
+    ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
+        %poke-ack
+      ?~  p.sign
+        ::  Poke succeeded, Verify friend is currently %sent, then set to %fren.
+        ::
+        =/  fren  (~(got by friends) ship)
+        ?:  ?=(%sent relationship.fren)  ~|(dont-know-cant-follow/relationship.fren !!)
+        =.  relationship.fren  %fren
+        ::
+        =.  friends  (~(put by friends) ship fren)
+        ::  TODO, emit any necessary cards
+        core
+      ::  Poke failed
+      ::
+      core
+    ==
+  ::
   ==
+  --
 ::
 --
