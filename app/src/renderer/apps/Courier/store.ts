@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
+// import { toJS } from 'mobx';
 import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
@@ -8,7 +8,7 @@ import { servicesStore } from 'renderer/logic/store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
-const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+export const sortByUpdatedAt = (a: any, b: any) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -70,7 +70,6 @@ const ChatStore = types
         return bTimestamp - aTimestamp;
       });
     },
-
     get pinnedChatList() {
       return self.inbox
         .filter(
@@ -302,11 +301,11 @@ OSActions.onLogout((_event: any) => {
 // Listen for changes
 ChatDBActions.onDbChange((_evt, type, data) => {
   if (type === 'path-added') {
-    console.log('onPathsAdded', toJS(data));
+    // console.log('onPathsAdded', toJS(data));
     chatStore.onPathsAdded(data);
   }
   if (type === 'path-deleted') {
-    console.log('onPathDeleted', data);
+    // console.log('onPathDeleted', data);
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
@@ -336,13 +335,13 @@ ChatDBActions.onDbChange((_evt, type, data) => {
       (chat) => chat.path === data.path
     );
     if (!selectedChat) return;
-    console.log('onPeerAdded', toJS(data));
+    // console.log('onPeerAdded', toJS(data));
     selectedChat.onPeerAdded(data.ship, data.role);
   }
   if (type === 'peer-deleted') {
     const selectedChat = chatStore.inbox.find((chat) => chat.path === data.row);
     if (!selectedChat) return;
-    console.log('onPeerDeleted', toJS(data));
+    // console.log('onPeerDeleted', toJS(data));
     selectedChat.onPeerDeleted(data.ship);
   }
 });

@@ -18,6 +18,7 @@ type CourierInputProps = {
   selectedChat: ChatModelType;
   editMessage?: ChatMessageType | null;
   containerWidth: number;
+  themeMode: 'light' | 'dark';
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
@@ -30,6 +31,7 @@ export const ChatInputBox = ({
   selectedChat,
   editMessage,
   containerWidth,
+  themeMode,
   onSend,
   onEditConfirm,
   onCancelEdit,
@@ -151,6 +153,7 @@ export const ChatInputBox = ({
           // clear attachments
           setAttachment([]);
         }}
+        themeMode={themeMode}
         attachments={attachments}
         onAttachment={onAttachment}
         onRemoveAttachment={(index: number) => {

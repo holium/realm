@@ -25,6 +25,11 @@ import { useAccountStore } from 'renderer/apps/Account/store';
 import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
+  position: absolute;
+  z-index: 16;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
 `;
 
@@ -36,7 +41,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, getChatHeader, setSubroute } = useChatStore();
   const accountStore = useAccountStore();
-  const { ship, friends, spaces } = useServices();
+  const { ship, friends, spaces, theme } = useServices();
   const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
@@ -53,12 +58,37 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     if (unreadCount > 0) {
       accountStore.readPath('realm-chat', selectedChat.path);
     }
+    setTimeout(() => {
+      listRef.current?.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }, 350);
   }, [selectedChat?.path]);
 
   const { title, sigil, image } = useMemo(() => {
     if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);
+
+  let replyToFormatted = useMemo(() => {
+    if (selectedChat?.replyingMsg) {
+      const {
+        color: authorColor,
+        nickname,
+        patp,
+      } = friends.getContactAvatarMetadata(selectedChat.replyingMsg.sender);
+      return {
+        id: selectedChat.replyingMsg.id,
+        author: nickname || patp,
+        authorColor,
+        sentAt: selectedChat.replyingMsg.updatedAt.toString(),
+        message: selectedChat.replyingMsg.contents,
+      };
+    }
+    return null;
+  }, [selectedChat?.replyingMsg, listRef.current]);
 
   if (!selectedChat || !ship) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
@@ -155,13 +185,12 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   };
 
   const height = dimensions.height - 104;
-  // let listHeight = height;
 
-  // if (showPin) {
-  //   listHeight = listHeight - pinHeight;
-  // }
-
+  let topPadding;
   let endPadding;
+  if (showPin) {
+    topPadding = 50;
+  }
   if (showAttachments) {
     endPadding = 136;
   }
@@ -209,22 +238,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   }
 
-  let replyToFormatted;
-  if (selectedChat.replyingMsg) {
-    const {
-      color: authorColor,
-      nickname,
-      patp,
-    } = friends.getContactAvatarMetadata(selectedChat.replyingMsg.sender);
-    replyToFormatted = {
-      id: selectedChat.replyingMsg.id,
-      author: nickname || patp,
-      authorColor,
-      sentAt: selectedChat.replyingMsg.updatedAt.toString(),
-      message: selectedChat.replyingMsg.contents,
-    };
-  }
-
   return (
     <Flex flexDirection="column">
       <Flex
@@ -265,7 +278,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
               </Text.Custom>
             </Flex>
           ) : (
-            <Flex flexDirection="column" width="100%">
+            <Flex position="relative" flexDirection="column" width="100%">
+              <ChatLogList
+                listRef={listRef}
+                messages={messages}
+                topOfListPadding={topPadding}
+                endOfListPadding={endPadding}
+                selectedChat={selectedChat}
+                width={containerWidth}
+                height={dimensions.height - 104}
+                ourColor={ourColor}
+              />
               {showPin && (
                 <FullWidthAnimatePresence>
                   <PinnedContainer
@@ -273,15 +296,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   />
                 </FullWidthAnimatePresence>
               )}
-              <ChatLogList
-                listRef={listRef}
-                messages={messages}
-                endOfListPadding={endPadding}
-                selectedChat={selectedChat}
-                width={containerWidth}
-                height={dimensions.height - 104}
-                ourColor={ourColor}
-              />
             </Flex>
           )}
         </Flex>
@@ -305,6 +319,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <ChatInputBox
           storage={storage}
           selectedChat={selectedChat}
+          themeMode={theme.currentTheme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
           editMessage={selectedChat.editingMsg}
