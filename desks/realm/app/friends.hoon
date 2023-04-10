@@ -25,6 +25,8 @@
 ::    If another code structure could serve better, discuss with the team.    ::
 ::  - Don't =. the state directly.  Update it with `%=  core...`              ::
 ::    when emitting cards.  See below for examples.                           ::
+::  - Consistency over all else.  The only thing harder to read               ::
+::    than Hoon is someone else's Hoon.                                       ::
 ::                                                                            ::
 ::  Q: How do I introduce a new state version?                                ::
 ::  A: Add it to versioned-state, add a new case to +load,                    ::
@@ -357,20 +359,15 @@
     ::
     ?:  (~(has by friends) ship.act)
       =/  fren  (~(got by friends) ship.act)
+      ::  Already sent, do nothing.
+      ::  Only know, send request.
+      ::  Already received, accept request.
       ::
-      ?.  ?=(?(%know %received %sent) relationship.fren)
-        ~|(invalid-add-friend/relationship.fren !!)
-      ::
-      ::  if already sent, do nothing
-      ::  if know, send friend request
-      ::  if received, accept friend request
-      ::
-      ?:  ?=(%sent relationship.fren)
-        core
-      ?:  ?=(%know relationship.fren)
-        (emit sent-friend)
-      (emit accept-friend)
-    ::
+      ?+  relationship.fren  ~|(invalid-add-friend/relationship.fren !!)
+        %sent      core
+        %know      (emit sent-friend)
+        %received  (emit accept-friend)
+      ==
     ::  ship is not in our friends list, so add them as know
     ::  and send a friend request
     ::
@@ -418,25 +415,25 @@
     ::
     ?:  (~(has by friends) src.bowl)
       =/  fren  (~(got by friends) src.bowl)
+      ::  Already received, do nothing.
+      ::  Only know, update to received.
       ::
-      ?.  ?=(?(%know %received) relationship.fren)
-        ~|(invalid-sent-friend/relationship.fren !!)
-      ::  If already received, do nothing
+      ?+  relationship.fren  ~|(invalid-sent-friend/relationship.fren !!)
+        %received  core
       ::
-      ?:  ?=(%received relationship.fren)
-        core
+          %know
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%received
+              contact-info=contact-info.fren
+          ==
+        core(friends (~(put by friends) src.bowl fren-upd))
       ::
-      =/  fren-upd
-        :*  pinned=pinned.fren
-            tags=tags.fren
-            created-at=created-at.fren
-            updated-at=now.bowl
-            phone-number=phone-number.fren
-            relationship=%received
-            contact-info=contact-info.fren
-        ==
-      core(friends (~(put by friends) src.bowl fren-upd))
-    ::
+      ==
     ::  Ship not on our list, so add them as received
     ::
     =/  fren
@@ -458,19 +455,20 @@
     =/  fren  (~(got by friends) src.bowl)
     ::  We should currently be in %sent to be accepted.
     ::
-    ?.  ?=(%sent relationship.fren)
-      ~|(invalid-accept-friend/relationship.fren !!)
-    ::
-    =/  fren-upd
-      :*  pinned=pinned.fren
-          tags=tags.fren
-          created-at=created-at.fren
-          updated-at=now.bowl
-          phone-number=phone-number.fren
-          relationship=%fren
-          contact-info=contact-info.fren
-      ==
-    core(friends (~(put by friends) src.bowl fren-upd))
+    ?+  relationship.fren  ~|(invalid-accept-friend/relationship.fren !!)
+        %sent
+      ::
+      =/  fren-upd
+        :*  pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%fren
+            contact-info=contact-info.fren
+        ==
+      core(friends (~(put by friends) src.bowl fren-upd))
+    ==
   ::
       %bye-friend
     core
@@ -496,20 +494,21 @@
         ::  then update state.
         ::
         =/  fren  (~(got by friends) ship)
-        ?.  ?=(%know relationship.fren)
-          ~|(dont-know-cant-follow/relationship.fren !!)
-        ::
-        =/  fren-upd
-          :*  pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              phone-number=phone-number.fren
-              relationship=%sent
-              contact-info=contact-info.fren
-          ==
-        ::  TODO, emit any necessary cards
-        core(friends (~(put by friends) ship fren-upd))
+        ?+  relationship.fren  ~|(dont-know-cant-follow/relationship.fren !!)
+            %know
+          ::
+          =/  fren-upd
+            :*  pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%sent
+                contact-info=contact-info.fren
+            ==
+          ::  TODO, emit any necessary cards
+          core(friends (~(put by friends) ship fren-upd))
+        ==
       ::  Poke failed - don't update state.
       ::  TODO, notify UI of failure.
       ::
@@ -525,19 +524,21 @@
         =/  fren  (~(got by friends) ship)
         ::  We should be in %received to be accepted.
         ::
-        ?.  ?=(%received relationship.fren)
-          ~|(invalid-accept-friend-ack/relationship.fren !!)
-        ::
-        =/  fren-upd
-          :*  pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              phone-number=phone-number.fren
-              relationship=%fren
-              contact-info=contact-info.fren
-          ==
-        core(friends (~(put by friends) ship fren-upd))
+        ?+  relationship.fren  ~|(dont-know-cant-follow/relationship.fren !!)
+            %received
+          ::
+          =/  fren-upd
+            :*  pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%fren
+                contact-info=contact-info.fren
+            ==
+          ::  TODO, emit any necessary cards
+          core(friends (~(put by friends) ship fren-upd))
+        ==
       ::  Poke failed
       ::
       core
