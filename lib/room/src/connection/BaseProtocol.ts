@@ -60,7 +60,11 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
       leave: action.bound,
     });
   }
-  abstract registerLocal(local: LocalPeer): void;
+  abstract registerLocals(
+    local: LocalPeer,
+    campfireLocal: LocalPeer,
+    dataLocal: LocalPeer
+  ): void;
   abstract setProvider(provider: Patp): Promise<RoomType[]>;
   abstract createRoom(
     title: string,

@@ -263,36 +263,93 @@ export class RealmProtocol extends BaseProtocol {
     }
   }
 
-  registerLocals(local: LocalPeer, campfireLocal: LocalPeer) {
+  registerLocals(
+    local: LocalPeer,
+    campfireLocal: LocalPeer,
+    dataLocal: LocalPeer
+  ) {
     this.local = local;
     this.campfireLocal = campfireLocal;
+    this.dataLocal = dataLocal;
     this.local.on(PeerEvent.AudioTrackAdded, () => {
-      this.peers.forEach((peer: RemotePeer) => {
-        this.local?.streamTracks(peer);
-      });
+      if (this.presentRoom) {
+        this.peers.get(this.presentRoom.rid)?.forEach((peer: RemotePeer) => {
+          this.local?.streamTracks(peer);
+        });
+      }
     });
     this.local.on(PeerEvent.VideoTrackAdded, () => {
-      this.peers.forEach((peer: RemotePeer) => {
-        this.local?.streamTracks(peer);
-      });
+      if (this.presentRoom) {
+        this.peers.get(this.presentRoom.rid)?.forEach((peer: RemotePeer) => {
+          this.local?.streamTracks(peer);
+        });
+      }
     });
     this.local.on(PeerEvent.Muted, () => {
-      this.sendData({
-        kind: DataPacket_Kind.MUTE_STATUS,
-        value: { data: true },
-      });
+      if (this.presentRoom) {
+        this.sendData(this.presentRoom.rid, {
+          kind: DataPacket_Kind.MUTE_STATUS,
+          value: { data: true },
+        });
+      }
     });
     this.local.on(PeerEvent.Unmuted, () => {
-      this.sendData({
-        kind: DataPacket_Kind.MUTE_STATUS,
-        value: { data: false },
-      });
+      if (this.presentRoom) {
+        this.sendData(this.presentRoom.rid, {
+          kind: DataPacket_Kind.MUTE_STATUS,
+          value: { data: false },
+        });
+      }
     });
     this.local.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
-      this.sendData({
-        kind: DataPacket_Kind.SPEAKING_CHANGED,
-        value: { data: speaking },
-      });
+      if (this.presentRoom) {
+        this.sendData(this.presentRoom.rid, {
+          kind: DataPacket_Kind.SPEAKING_CHANGED,
+          value: { data: speaking },
+        });
+      }
+    });
+    this.campfireLocal.on(PeerEvent.AudioTrackAdded, () => {
+      if (this.presentCampfire) {
+        this.peers
+          .get(this.presentCampfire.rid)
+          ?.forEach((peer: RemotePeer) => {
+            this.local?.streamTracks(peer);
+          });
+      }
+    });
+    this.campfireLocal.on(PeerEvent.VideoTrackAdded, () => {
+      if (this.presentCampfire) {
+        this.peers
+          .get(this.presentCampfire.rid)
+          ?.forEach((peer: RemotePeer) => {
+            this.local?.streamTracks(peer);
+          });
+      }
+    });
+    this.campfireLocal.on(PeerEvent.Muted, () => {
+      if (this.presentCampfire) {
+        this.sendData(this.presentCampfire.rid, {
+          kind: DataPacket_Kind.MUTE_STATUS,
+          value: { data: true },
+        });
+      }
+    });
+    this.campfireLocal.on(PeerEvent.Unmuted, () => {
+      if (this.presentCampfire) {
+        this.sendData(this.presentCampfire.rid, {
+          kind: DataPacket_Kind.MUTE_STATUS,
+          value: { data: false },
+        });
+      }
+    });
+    this.campfireLocal.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
+      if (this.presentCampfire) {
+        this.sendData(this.presentCampfire.rid, {
+          kind: DataPacket_Kind.SPEAKING_CHANGED,
+          value: { data: speaking },
+        });
+      }
     });
   }
 

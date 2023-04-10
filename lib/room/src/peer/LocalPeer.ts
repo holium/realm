@@ -36,7 +36,7 @@ export class LocalPeer extends Peer {
   stream: MediaStream | null = null;
   protocol: BaseProtocol;
   constraints: MediaStreamConstraints = {
-    audio: DEFAULT_AUDIO_OPTIONS,
+    audio: false,
     video: false,
   };
   analysers: IAudioAnalyser[] = [];
@@ -48,6 +48,9 @@ export class LocalPeer extends Peer {
       stream: observable,
       setMedia: action.bound,
     });
+    if (config.audio) {
+      this.constraints.audio = DEFAULT_AUDIO_OPTIONS;
+    }
     if (config.video) {
       this.constraints.video = DEFAULT_VIDEO_OPTIONS;
     }

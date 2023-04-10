@@ -13,6 +13,8 @@ import { RoomManagerEvent } from './events';
  */
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
+  campfireLocal: LocalPeer;
+  dataLocal: LocalPeer;
   protocol: BaseProtocol;
   live: {
     room?: RoomType;
@@ -40,6 +42,19 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
+      audio: true,
+      video: false,
+    });
+    this.campfireLocal = new LocalPeer(this.protocol, this.protocol.our, {
+      isHost: false,
+      rtc: this.protocol.rtc,
+      audio: true,
+      video: true,
+    });
+    this.dataLocal = new LocalPeer(this.protocol, this.protocol.our, {
+      isHost: false,
+      rtc: this.protocol.rtc,
+      audio: false,
       video: false,
     });
 
@@ -57,7 +72,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       provider: this.protocol.provider,
       list: Array.from(this.protocol.rooms.values()),
     };
-    this.protocol.registerLocal(this.local);
+
+    this.protocol.registerLocals(
+      this.local,
+      this.campfireLocal,
+      this.dataLocal
+    );
 
     // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
