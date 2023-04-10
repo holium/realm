@@ -270,7 +270,7 @@ export const VideoCall = observer(() => {
                     roomsManager?.deleteRoom(rid);
                     CampfireActions.setView('landing');
                   } else {
-                    roomsManager?.leaveRoom();
+                    roomsManager?.leaveCampfire();
                     CampfireActions.setView('landing');
                   }
                 }}

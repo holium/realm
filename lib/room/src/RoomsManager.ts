@@ -112,11 +112,15 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       if (this.live.room?.rid === rid) {
         this.clearLiveRoom();
+      } else if (this.campfire.room?.rid === rid) {
+        this.clearCampfireRoom();
+      } else if (this.dataRooms[rid]) {
+        this.clearDataRoom(rid);
       }
     });
 
-    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
-      this.clearRoom(rid);
+    this.protocol.on(ProtocolEvent.RoomKicked, () => {
+      this.clearLiveRoom();
     });
 
     this.protocol.on(
@@ -144,7 +148,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       leaveRoom: action.bound,
       updateRoom: action.bound,
       connectRoom: action.bound,
-      clearRoom: action.bound,
     });
   }
 
@@ -219,31 +222,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     return this.protocol;
   }
 
-  /*sendChat(content: string) {
-    this.live.chat.push({
-      author: this.protocol.our,
-      index: this.live.chat.length,
-      content,
-      timeReceived: Date.now(),
-      isRightAligned: true,
-    });
-    this.protocol.sendChat(content);
-  }
-
-  onChat(peer: Patp, content: string) {
-    this.live.chat.push({
-      author: peer,
-      index: this.live.chat.length,
-      content,
-      timeReceived: Date.now(),
-      isRightAligned: false,
-    });
-  }*/
-
   setProvider(provider: string) {
-    // if (this.state === RoomState.Connected) {
-    //   throw new Error('Must leave current room before switching providers');
-    // }
     this.protocol.setProvider(provider);
   }
 
@@ -300,6 +279,19 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.clearLiveRoom();
   }
 
+  async leaveCampfire() {
+    if (this.presentCampfire) {
+      this.emit(
+        RoomManagerEvent.LeftRoom,
+        this.presentCampfire,
+        this.presentCampfire.rid,
+        this.our
+      );
+      await this.protocol.leave(this.presentCampfire.rid);
+    }
+    this.clearCampfireRoom();
+  }
+
   createRoom(
     title: string,
     access: 'public' | 'private',
@@ -313,10 +305,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   async deleteRoom(rid: string) {
     if (this.presentRoom?.rid === rid) {
+      console.log('deleting presentRoom');
       this.emit(RoomManagerEvent.DeletedRoom, this.presentRoom);
       this.clearLiveRoom();
     }
     if (this.presentCampfire?.rid === rid) {
+      console.log('deleting campfire blah');
       this.emit(RoomManagerEvent.DeletedRoom, this.presentCampfire);
       this.clearCampfireRoom();
     }
@@ -325,13 +319,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   sendData(rid: string, data: Omit<DataPacket, 'from'>) {
     this.protocol.sendData(rid, { from: this.our, ...data });
-  }
-
-  clearRoom(rid: string) {
-    if (this.dataRooms[rid]) {
-      delete this.dataRooms[rid];
-    }
-    // this.dataLocals[rid].disableMedia();
   }
 
   clearLiveRoom() {

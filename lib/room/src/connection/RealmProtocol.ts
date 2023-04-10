@@ -2,7 +2,7 @@ import { PeerEvent } from '../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { action, makeObservable, observable, runInAction } from 'mobx';
+import { action, makeObservable, observable, observe, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
@@ -35,6 +35,7 @@ export class RealmProtocol extends BaseProtocol {
   scry: (...args: any) => Promise<any>;
   queuedPeers: Map<string, Patp[]> = new Map(); // peers that we have queued to dial
   disposePresentRoom: any; // this is a mobx observable disposer
+  disposePresentCampfire: any; // this is a mobx observable disposer
   transitions: RoomTransitionStates; // keeps track of transitions for latency handling
 
   constructor(our: Patp, config: ProtocolConfig, handlers: APIHandlers) {
@@ -366,9 +367,20 @@ export class RealmProtocol extends BaseProtocol {
       });
     }
     runInAction(() => {
-      /*this.disposePresentRoom = observe(this.presentRoom, (change) => {
-        this.emit(ProtocolEvent.RoomUpdated, change.object);
-      });*/
+      if (room.type === 'rooms') {
+        this.presentRoom = room;
+        this.disposePresentRoom = observe(this.presentRoom, (change) => {
+          this.emit(ProtocolEvent.RoomUpdated, change.object);
+        });
+      } else if (room.type === 'campfire') {
+        this.presentCampfire = room;
+        this.disposePresentCampfire = observe(
+          this.presentCampfire,
+          (change) => {
+            this.emit(ProtocolEvent.RoomUpdated, change.object);
+          }
+        );
+      }
     });
 
     return this.dialAll(room);
@@ -424,9 +436,6 @@ export class RealmProtocol extends BaseProtocol {
         'delete-room': rid,
       },
     });
-    this.hangupAll(rid);
-    // if (this.presentRoom?.rid === rid) {
-    // }
   }
 
   kick(rid: string, peer: Patp) {
@@ -459,7 +468,6 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   getSpaceRooms(path: string): RoomType[] {
-    console.log('getting rooms', this.rooms);
     return Array.from(this.rooms.values())
       .filter((room) => room.path === path)
       .filter((room) => room.type === 'rooms');
@@ -606,18 +614,24 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   /**
-   * hangupAll - handles hanging up all peers
+   * hangupAll - handles hanging up all peers for an rid
    *   subscription update
    *
    * @param rid
    */
   hangupAll(rid: string) {
-    this.disposePresentRoom && this.disposePresentRoom();
+    const roomType = this.rooms.get(rid)?.type;
+    if (!roomType) throw new Error('Room for hangupAll not found');
+    if (roomType === 'rooms') {
+      this.disposePresentRoom && this.disposePresentRoom();
+    } else if (roomType === 'campfire') {
+      this.disposePresentCampfire && this.disposePresentCampfire();
+    }
     //  hangup all peers
     this.peers.get(rid)?.forEach((peer) => {
       this.hangup(rid, peer.patp, { shouldEmit: false });
     });
-    this.peers.clear();
+    this.peers.get(rid)?.clear();
   }
 
   async leave(rid: string) {

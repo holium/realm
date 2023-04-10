@@ -330,29 +330,34 @@
                 path.room      path
                 type.room      type
             ==
-          =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
-          =.  rooms.provider.state              :: remove old room if it exists
-            ?~  old-room  rooms.provider.state
-            ?:  ?|  !=(type type.u.old-room)
-                    =(type %data)
-                ==
-              rooms.provider.state
-            ?:  =(src.bol creator.u.old-room)   :: creator is leaving the room, so delete it
-              (~(del by rooms.provider.state) rid.u.old-room)
+::          =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
+::          =.  rooms.provider.state              :: remove old room if it exists
+::            ?~  old-room  rooms.provider.state
+::            ?:  ?|  !=(type type.u.old-room)
+::                    =(type %data)
+::                ==
+::              rooms.provider.state
+::            ?:  =(src.bol creator.u.old-room)   :: creator is leaving the room, so delete it
+::              (~(del by rooms.provider.state) rid.u.old-room)
             :: if participant is leaving, remove participant
-            =.  present.u.old-room    (~(del in present.u.old-room) src.bol)
-            (~(put by rooms.provider.state) [rid.u.old-room u.old-room])
+::            =.  present.u.old-room    (~(del in present.u.old-room) src.bol)
+::            (~(put by rooms.provider.state) [rid.u.old-room u.old-room])
           ::
           =/  fact-path               [/provider-updates/(scot %p our.bol) ~]
-          =/  delete-cards            ::  prep cards to update delete old rooms by the creator
-            ?~  old-room  ~
-            ?:  =(src.bol creator.u.old-room)  ::  creator is leaving the room, so delete it
-              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.u.old-room])]~
-            [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid.u.old-room src.bol])]~
+::          =/  delete-cards            ::  prep cards to update delete old rooms by the creator
+::            ?~  old-room  ~
+::            ?:  ?|  !=(type type.u.old-room)
+::                    =(type %data)
+::                ==
+::              ~
+::            ?:  =(src.bol creator.u.old-room)  ::  creator is leaving the room, so delete it
+::              [%give %fact fact-path rooms-v2-reaction+!>([%room-deleted rid.u.old-room])]~
+::            [%give %fact fact-path rooms-v2-reaction+!>([%room-left rid.u.old-room src.bol])]~
           =.  present.room            (~(put in present.room) src.bol)        :: enter new room
           =.  whitelist.room          (~(put in whitelist.room) src.bol)      :: creator is always on the whitelist
           =.  rooms.provider.state    (~(put by rooms.provider.state) [rid room])
           :_  state
+          =/  delete-cards  ~
           %+  weld  delete-cards
             ^-  (list card)
             [%give %fact fact-path rooms-v2-reaction+!>([%room-created room])]~
@@ -377,6 +382,7 @@
       ++  delete-room
         |=  =rid:store
         =/  provider      provider.session.state
+        ~&  >>  "{<dap.bol>}: [delete-room]. {<src.bol>} deleting room {<rid>}"
         ?.  (is-provider:hol src.bol rid)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~
@@ -430,13 +436,6 @@
         %+  weld  leave-cards
             ^-  (list card)
         [%give %fact fact-path rooms-v2-reaction+!>([%room-entered rid src.bol])]~
-        :: ?.  =(~(wyt by rooms.remove-result) 0)
-        ::     =.  rooms.provider.state    rooms.remove-result ::  remove from present rooms
-        :: :_  state
-        :: %+  weld  cards.remove-result
-        ::     ^-  (list card)
-        ::     [%give %fact [/provider-updates ~] rooms-v2-reaction+!>([%room-entered rid src.bol])]~
-
       ::
       ++  leave-room
         |=  =rid:store
@@ -446,7 +445,6 @@
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
         ::
         ?.  (~(has by rooms.provider.state) rid)  `state  ::  room exists
-        :: ?:  (is-present:hol src.bol rid)      `state  ::  src.bol is present
         =/  fact-path                 [/provider-updates/(scot %p our.bol) ~]
         ?:  (is-creator:hol src.bol rid)
           =.  rooms.provider.state    (~(del by rooms.provider.state) rid)
