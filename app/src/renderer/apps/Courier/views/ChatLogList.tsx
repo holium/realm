@@ -31,11 +31,13 @@ export const ChatLogList = ({
 }: Props) => {
   useEffect(() => {
     if (listRef.current) {
-      listRef.current.scrollToIndex({
-        index: messages.length - 1,
-        align: 'start',
-        behavior: 'auto',
-      });
+      setTimeout(() => {
+        listRef.current?.scrollToIndex({
+          index: messages.length - 1,
+          align: 'start',
+          behavior: 'auto',
+        });
+      }, 350);
     }
   }, [listRef.current, selectedChat.path]);
 

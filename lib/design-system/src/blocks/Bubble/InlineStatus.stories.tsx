@@ -9,7 +9,7 @@ export default {
 export const Default: ComponentStory<typeof InlineStatus> = () => {
   return (
     <Flex position="relative" height={670} width={400}>
-      <InlineStatus text="~sicnum-rocwen joined the chat" />
+      <InlineStatus id="1" text="~sicnum-rocwen joined the chat" />
     </Flex>
   );
 };
