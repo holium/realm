@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import { ChatModelType } from '@holium/realm-room';
 import { lighten, darken } from 'polished';
 import { useEffect, useState } from 'react';
-import { Bubble } from 'renderer/apps/Messages/components/Bubble';
+import { Bubble } from './RoomBubble';
 import { Flex, Tooltip } from '@holium/design-system';
 import { Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
