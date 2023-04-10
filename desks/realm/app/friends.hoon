@@ -349,6 +349,35 @@
   ++  poke
     |=  act=friends-action-0
     ^+  core
+    ::  Deferred pokes that may be used below.
+    ::
+    =*  bye-friend
+      :*  %pass
+          /[ver]/bye-friend/(scot %p ship.act)
+          %agent
+          [ship.act dap.bowl]
+          %poke
+          friends-action-0+!>([%bye-friend ~])
+      ==
+    ::
+    =*  sent-friend
+      :*  %pass
+          /[ver]/sent-friend/(scot %p ship.act)
+          %agent
+          [ship.act dap.bowl]
+          %poke
+          friends-action-0+!>([%sent-friend ~])
+      ==
+    ::
+    =*  accept-friend
+      :*  %pass
+          /[ver]/accept-friend/(scot %p ship.act)
+          %agent
+          [ship.act dap.bowl]
+          %poke
+          friends-action-0+!>([%accept-friend ~])
+      ==
+    ::
     ?-    -.act
         %add-friend
       ::  A successful add-friend will result in a follow request
@@ -362,25 +391,6 @@
       ::
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
-      ::  Pokes to be used later
-      ::
-      =*  sent-friend
-        :*  %pass
-            /[ver]/sent-friend/(scot %p ship.act)
-            %agent
-            [ship.act dap.bowl]
-            %poke
-            friends-action-0+!>([%sent-friend ~])
-        ==
-      ::
-      =*  accept-friend
-        :*  %pass
-            /[ver]/accept-friend/(scot %p ship.act)
-            %agent
-            [ship.act dap.bowl]
-            %poke
-            friends-action-0+!>([%accept-friend ~])
-        ==
       ::
       ?:  (~(has by friends) ship.act)
         =/  fren  (~(got by friends) ship.act)
@@ -460,12 +470,52 @@
       ==
     ::
         %block-friend
+      ::  Emits a %bye-friend poke to unfriend the ship.
+      ::
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
-      core
+      ?:  =(our.bowl ship.act)  ~|('no-self-block-friend' !!)
+      ::
+      =/  fren  (~(got by friends) ship.act)
+      ::
+      ?:  ?=(%blocked relationship.fren)
+        ~|(invalid-block-friend/relationship.fren !!)
+      ::
+      =/  fren-upd
+        :*  pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%blocked
+            contact-info=contact-info.fren
+        ==
+      ::
+      %=  core
+        friends  (~(put by friends) ship.act fren-upd)
+        cards    [bye-friend cards]
+      ==
     ::
         %unblock-friend
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
-      core
+      ?:  =(our.bowl ship.act)  ~|('no-self-unblock-friend' !!)
+      ::
+      =/  fren  (~(got by friends) ship.act)
+      ::
+      ?+    relationship.fren  ~|(invalid-unblock-friend/relationship.fren !!)
+          %blocked
+      ::
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%know
+              contact-info=contact-info.fren
+          ==
+        ::
+        core(friends (~(put by friends) ship.act fren-upd))
+      ==
     ::
         %save-passport
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-save-passport' !!)
@@ -541,8 +591,11 @@
       ::
       =/  fren  (~(got by friends) src.bowl)
       ::  We should be friends, sent, or received.
+      ::  We can also be %know, which means we were probably blocked.
       ::
       ?.  ?=(?(%sent %received %fren) relationship.fren)
+        ?:  ?=(%know relationship.fren)
+          core
         ~|(invalid-bye-friend/relationship.fren !!)
       ::
       =/  fren-upd
@@ -631,8 +684,10 @@
       ==
     ::
         [%bye-friend ship=@ ~]
+      ::
       ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
           %poke-ack
+        ::
         ?~  p.sign
           core
         ((slog leaf/"bye-friend nack" ~) core)

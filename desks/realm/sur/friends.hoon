@@ -42,7 +42,7 @@
       :: "knows" data when you no longer share a connection.
       ::
       :: defaults to %know
-      relationship=?(%our %fren %received %sent %know %block)
+      relationship=?(%our %fren %received %sent %know %blocked)
       :: %invisible is used by us only, communicated to peers as %offline
       :: defaults to %offline
       :: status=?(%online %away %dnd %offline %invisible)
