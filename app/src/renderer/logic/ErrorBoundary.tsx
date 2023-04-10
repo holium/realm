@@ -27,12 +27,18 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <Flex alignItems="center" flexDirection="column">
-          <Flex maxWidth={500} flexDirection="column" my={8}>
+        <Flex
+          width="100%"
+          height="100%"
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+        >
+          <Flex maxWidth="100%" flexDirection="column" my={8}>
             <Text fontSize={8} fontWeight={600}>
               Something went wrong.
             </Text>
-            <Text my={4}>
+            <Text my={4} maxWidth={500}>
               The issue has been logged. Please refresh the page, and reach out
               to{' '}
               <Anchor

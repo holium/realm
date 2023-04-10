@@ -3,6 +3,8 @@ import { types, Instance } from 'mobx-state-tree';
 
 const OnboardingStep = types.enumeration('OnboardingStep', onboardingPages);
 
+export type OnboardingStepType = Instance<typeof OnboardingStep>;
+
 export const OnboardingModel = types
   .model('Onboarding', {
     step: OnboardingStep,
@@ -13,7 +15,7 @@ export const OnboardingModel = types
     },
   }))
   .actions((self) => ({
-    setStep(step: Instance<typeof OnboardingStep>) {
+    setStep(step: OnboardingStepType) {
       self.step = step;
     },
   }));

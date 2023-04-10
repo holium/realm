@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { MutableRefObject, useMemo, useState } from 'react';
+import { Item } from 'react-photoswipe-gallery';
+import 'photoswipe/dist/photoswipe.css';
 import { Flex, Text } from '../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
@@ -7,22 +9,21 @@ type ImageBlockProps = {
   showLoader?: boolean;
   image: string;
   by: string;
-  onImageLoaded?: () => void;
 } & BlockProps;
 
-export const ImageBlock = (props: ImageBlockProps) => {
-  const {
-    showLoader,
-    image,
-    by,
-    variant,
-    width = 'inherit',
-    height,
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    onImageLoaded,
-    ...rest
-  } = props;
+export const ImageBlock = ({
+  id,
+  showLoader,
+  image,
+  by,
+  variant,
+  width = 'inherit',
+  height,
+  ...rest
+}: ImageBlockProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [naturalWidth, setNaturalWidth] = useState(320);
+  const [naturalHeight, setNaturalHeight] = useState(427);
   const parsedHeight = useMemo(
     () =>
       (height
@@ -44,25 +45,35 @@ export const ImageBlock = (props: ImageBlockProps) => {
   );
 
   return (
-    <Block variant={variant} width={width} {...rest}>
-      <FragmentImage
-        id={rest.id}
-        loading="eager"
-        {...(showLoader && { isSkeleton: !isLoaded })}
-        src={image}
-        height={parsedHeight}
-        width={parsedWidth}
-        draggable={false}
-        onLoad={() => {
-          if (showLoader) {
-            onImageLoaded && onImageLoaded();
-            setIsLoaded(true);
-          }
-        }}
-        onError={() => {
-          // setIsError(true);
-        }}
-      />
+    <Block id={id} variant={variant} width={width} {...rest}>
+      <Item
+        original={image}
+        thumbnail={image}
+        width={naturalWidth}
+        height={naturalHeight}
+      >
+        {({ ref, open }) => (
+          <FragmentImage
+            ref={ref as MutableRefObject<HTMLImageElement>}
+            loading="eager"
+            {...(showLoader && { isSkeleton: !isLoaded })}
+            src={image}
+            height={parsedHeight}
+            width={parsedWidth}
+            draggable={false}
+            onLoad={() => {
+              if (showLoader) {
+                setIsLoaded(true);
+              }
+              const curr = ref && (ref.current as HTMLImageElement);
+              if (curr && curr.naturalWidth) setNaturalWidth(curr.naturalWidth);
+              if (curr && curr.naturalHeight)
+                setNaturalHeight(curr.naturalHeight);
+            }}
+            onClick={open}
+          />
+        )}
+      </Item>
       {by && (
         <Flex className="block-footer">
           <Flex></Flex>

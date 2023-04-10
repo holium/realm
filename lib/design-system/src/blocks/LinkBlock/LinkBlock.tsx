@@ -153,7 +153,6 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onImageLoaded={onLinkLoaded}
       />
     );
   }
