@@ -1,5 +1,13 @@
 import styled, { css } from 'styled-components';
-import { Flex, Text, Favicon, Row, BoxProps, Icon, Button } from '../..';
+import {
+  Flex,
+  Text,
+  Favicon,
+  Row,
+  BoxProps,
+  Icon,
+  Button,
+} from '../../general';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 const widths = {

@@ -1,7 +1,11 @@
-import { MouseEventHandler } from 'react';
-import { MenuWrapper } from '../Menu';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { Portal, MenuItem } from '@holium/design-system';
+import {
+  Portal,
+  MenuItem,
+  MenuItemProps,
+  Card,
+  MenuItemDivider,
+} from '@holium/design-system';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;
@@ -33,12 +37,8 @@ const getAnchorPoint = (e: MouseEvent, menuOptions: ContextMenuOption[]) => {
   return { x, y };
 };
 
-export type ContextMenuOption = {
-  id?: string;
-  label: string;
-  disabled?: boolean;
+export type ContextMenuOption = MenuItemProps & {
   section?: number;
-  onClick: MouseEventHandler<HTMLElement>;
 };
 
 export const ContextMenu = () => {
@@ -46,6 +46,7 @@ export const ContextMenu = () => {
 
   if (!mouseRef) return <div />;
 
+  const originatingElement = mouseRef.target as HTMLElement;
   const containerId = (mouseRef.target as HTMLElement).id;
   const contextualOptions = getOptions(containerId);
   const contextualColors = getColors(containerId);
@@ -53,9 +54,11 @@ export const ContextMenu = () => {
 
   return (
     <Portal>
-      <MenuWrapper
+      <Card
         id="context-menu"
-        customBg={contextualColors.backgroundColor}
+        p={1}
+        elevation={2}
+        position="absolute"
         initial={{
           opacity: 0,
         }}
@@ -67,7 +70,7 @@ export const ContextMenu = () => {
         }}
         exit={{
           opacity: 0,
-          // y: 8,
+          y: 8,
           transition: {
             duration: 0.1,
           },
@@ -79,6 +82,7 @@ export const ContextMenu = () => {
           maxHeight: MAX_HEIGHT,
           overflowY: 'auto',
         }}
+        customBg={contextualColors.backgroundColor}
       >
         {contextualOptions.map((option, index: number) => {
           const divider =
@@ -87,23 +91,27 @@ export const ContextMenu = () => {
 
           return (
             <div key={option.label}>
-              {divider && <hr />}
+              {divider && (
+                <MenuItemDivider textColor={contextualColors.textColor} />
+              )}
               <MenuItem
                 id={option.id}
                 label={option.label}
                 disabled={option.disabled}
-                color={contextualColors.textColor}
-                customBg={contextualColors.backgroundColor}
-                onClick={(e) => {
+                icon={option.icon}
+                labelColor={option.labelColor || contextualColors.textColor}
+                backgroundColor={contextualColors.backgroundColor}
+                iconColor={option.iconColor}
+                onClick={(e: any) => {
                   if (option.disabled) return;
-                  option.onClick(e);
+                  option.onClick(e, originatingElement);
                   setMouseRef(null);
                 }}
               />
             </div>
           );
         })}
-      </MenuWrapper>
+      </Card>
     </Portal>
   );
 };

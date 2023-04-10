@@ -1,5 +1,5 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex } from '../..';
+import { Flex } from '../../general';
 import { MediaBlock } from './MediaBlock';
 
 export default {

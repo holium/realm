@@ -1,10 +1,17 @@
+import styled from 'styled-components';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
-import { Flex } from '../..';
+import { Flex } from '../../general';
 import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
-import { getVar } from '../../util/colors';
+
+const MemeBlockBackground = styled(Flex)`
+  flex-direction: column;
+  width: 432px;
+  padding: 8px;
+  background: rgba(var(--rlm-window-rgba));
+`;
 
 export default {
   component: MemeBlock,
@@ -12,17 +19,17 @@ export default {
 
 export const Default: ComponentStory<typeof MemeBlock> = () => {
   const [reacts, setReacts] = useState<FragmentReactionType[]>([
-    { author: '~fasnut-famden', emoji: '1f525' },
-    { author: '~zod', emoji: '1f525' },
+    { msgId: '1', by: '~fasnut-famden', emoji: '1f525' },
+    { msgId: '2', by: '~zod', emoji: '1f525' },
   ]);
   const ourPatp = '~lomder-librun';
   window.ship = ourPatp;
   const onReaction = (payload: OnReactionPayload) => {
     if (payload.action === 'add') {
-      setReacts([...reacts, { author: ourPatp, emoji: payload.emoji }]);
+      setReacts([...reacts, { msgId: '3', by: ourPatp, emoji: payload.emoji }]);
     } else {
       const removeIdx = reacts.findIndex(
-        (r) => r.emoji === payload.emoji && r.author === ourPatp
+        (r) => r.emoji === payload.emoji && r.by === ourPatp
       );
       if (removeIdx === -1) {
         return;
@@ -32,12 +39,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
   };
   return (
     <Flex flexDirection="row" height={600} gap={16} p={1}>
-      <Flex
-        flexDirection="column"
-        width={432}
-        p={2}
-        background={getVar('window')}
-      >
+      <MemeBlockBackground>
         <MemeBlock
           id="meme-block-1"
           mode="display"
@@ -48,7 +50,7 @@ export const Default: ComponentStory<typeof MemeBlock> = () => {
           reactions={reacts}
           onReaction={onReaction}
         />
-      </Flex>
+      </MemeBlockBackground>
     </Flex>
   );
 };

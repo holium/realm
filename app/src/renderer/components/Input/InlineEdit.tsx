@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';
-import { darken, rgba } from 'polished';
+import { rgba } from 'polished';
 import {
   compose,
   space,
@@ -66,7 +66,7 @@ const ContentArea: any = styled(Text)<
     background: ${(props: { theme: ThemeType; customBg?: string }) =>
       props.customBg
         ? rgba(props.customBg, 0.6)
-        : darken(0.05, props.theme.colors.ui.tertiary)};
+        : 'rgba(var(--rlm-overlay-hover-rgba))'};
     padding-left: ${(props) =>
       props.hasLeftIcon
         ? inputTokens.iconSize + (2 * props.theme.space[inputTokens.x]) / 2
@@ -84,7 +84,7 @@ const ContentArea: any = styled(Text)<
       color: transparent;
     }
     background: ${(props: { theme: ThemeType; customBg?: string }) =>
-      props.customBg || darken(0.05, props.theme.colors.ui.tertiary)};
+      props.customBg || 'rgba(var(--rlm-overlay-active-rgba))'};
     padding-left: ${(props) =>
       props.hasLeftIcon
         ? inputTokens.iconSize + 2 * props.theme.space[inputTokens.x]

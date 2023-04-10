@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { Flex, BoxProps } from '../../';
 
 type TemplateProps = {

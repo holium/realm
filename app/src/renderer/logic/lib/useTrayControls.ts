@@ -1,20 +1,21 @@
-import { DMPreviewType } from 'os/services/ship/models/courier';
-import { DmAppInstance } from 'renderer/apps/Messages/store';
-import { defaultTrayDimensions } from 'renderer/system/desktop/components/SystemBar/apps';
-// TODO make a context for controlling the tray
+import { ChatStoreInstance } from 'renderer/apps/Courier/store';
+import { AppRegistry } from 'renderer/apps/registry';
 
-export const openDMsToChat = (
-  dmApp: DmAppInstance,
-  dmPreview: DMPreviewType,
-  setActiveApp: any
+export const openChatToPath = (
+  chatStore: ChatStoreInstance,
+  setActiveApp: any,
+  path: string,
+  _msgId?: string
 ) => {
-  dmApp.setSelectedChat(dmPreview);
-  dmApp.setView('dm-chat');
+  chatStore.setChat(path);
+  chatStore.setSubroute('chat');
+  // TODO scrollTo and highlight msgId
+  const { position, anchorOffset, dimensions } = AppRegistry['chat'];
   setActiveApp('messages-tray', {
     willOpen: true,
-    anchorOffset: { x: 4, y: 26 },
-    position: 'top-left',
-    dimensions: defaultTrayDimensions['messages-tray'],
+    anchorOffset,
+    position,
+    dimensions,
   });
 };
 

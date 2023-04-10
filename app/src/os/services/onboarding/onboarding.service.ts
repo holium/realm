@@ -131,10 +131,8 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
     },
 
-    async preInstallSysCheck() {
-      return await ipcRenderer.invoke('realm.onboarding.pre-install-syscheck');
-    },
-
+    preInstallSysCheck: () =>
+      ipcRenderer.invoke('realm.onboarding.pre-install-syscheck'),
     async prepareCheckout(billingPeriod: string) {
       return await ipcRenderer.invoke(
         'realm.onboarding.prepareCheckout',
@@ -173,19 +171,16 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke('realm.onboarding.selectPlanet', patp);
     },
 
-    async getProfile() {
-      return await ipcRenderer.invoke('realm.onboarding.getProfile');
+    getProfile() {
+      return ipcRenderer.invoke('realm.onboarding.getProfile');
     },
 
-    async setProfile(profileData: {
+    setProfile(profileData: {
       nickname: string;
       color: string;
       avatar: string | null;
     }) {
-      return await ipcRenderer.invoke(
-        'realm.onboarding.setProfile',
-        profileData
-      );
+      return ipcRenderer.invoke('realm.onboarding.setProfile', profileData);
     },
 
     async setPassword(password: string) {
@@ -219,6 +214,7 @@ export class OnboardingService extends BaseService {
       process.env.NODE_ENV === 'production'
         ? 'pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K'
         : 'pk_test_51LJKtvHhoM3uGGuYXzsCKctrpF6Lp9WAqRYEZbBQHxoccDHQLyrYSPt4bUOK6BbSkV5ogtYERCKVi7IAKmeXmYgU00Wv7Q9518';
+
     this.db = new Store({
       name: `realm.onboarding`,
       accessPropertiesByDotNotation: true,
@@ -271,12 +267,16 @@ export class OnboardingService extends BaseService {
     cookie: string,
     code: string | undefined = undefined
   ) {
-    if (this.conduit !== undefined) {
-      await this.closeConduit();
+    try {
+      if (this.conduit !== undefined) {
+        await this.closeConduit();
+      }
+      this.conduit = new Conduit();
+      await this.conduit.init(url, patp.substring(1), cookie, code);
+      return this.conduit;
+    } catch (e) {
+      throw new Error('Failed to connect to ship.');
     }
-    this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie, code);
-    return this.conduit;
   }
 
   reset() {
@@ -361,7 +361,7 @@ export class OnboardingService extends BaseService {
       else if (isRecoveringAccount) {
         return {
           success: false,
-          errorMessage: `Account not found using email address '${email}`,
+          errorMessage: `Account not found using email address ${email}`,
         };
       } else {
         const newAccount = await this.core.holiumClient.createAccount(
@@ -390,7 +390,6 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
-
     const success = await this.core.holiumClient.resendVerificationCode(
       auth.accountId
     );
@@ -573,6 +572,7 @@ export class OnboardingService extends BaseService {
       const cookie = await getCookie({ patp, url, code });
       if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+      const sanitizedCookie = cookie.split('; ')[0];
 
       if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
         return {
@@ -581,9 +581,14 @@ export class OnboardingService extends BaseService {
         };
       }
       // TODO this should be removed.
-      this.core.saveSession({ ship: patp, url, cookie, code });
+      this.core.saveSession({
+        ship: patp,
+        url,
+        cookie: sanitizedCookie,
+        code,
+      });
       this.state.setShip({ patp, url });
-      return { success: true, url, cookie, patp, code: code };
+      return { success: true, url, cookie, patp, code: sanitizedCookie };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       return {
@@ -607,8 +612,6 @@ export class OnboardingService extends BaseService {
     if (!cookie) throw new Error('Cookie not set, cannot get profile.');
 
     const tempConduit = await this.tempConduit(url, patp, cookie, code);
-    // await this.tempConduit.init(url, patp.substring(1), cookie);
-
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 

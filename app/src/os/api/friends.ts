@@ -174,7 +174,6 @@ export const FriendsApi = {
         }
       },
       onSubscribed: () => {
-        console.log('Subscribed to %friends');
         friendsStore.setSubscriptionStatus('subscribed');
       },
       onError: () => {

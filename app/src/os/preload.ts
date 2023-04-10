@@ -1,4 +1,6 @@
 import { Realm } from './index';
+import { ChatService } from './services/chat/chat.service';
+import { NotificationService } from './services/notification/notification.service';
 import { AuthService } from './services/identity/auth.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { DesktopService } from './services/shell/desktop.service';
@@ -22,6 +24,8 @@ export const osPreload = {
     wallet: WalletService.preload,
   },
   slip: SlipService.preload,
+  chat: ChatService.preload,
+  notification: NotificationService.preload,
 };
 
 export type OSPreloadType = typeof osPreload;

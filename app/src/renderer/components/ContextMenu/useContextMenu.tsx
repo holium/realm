@@ -82,6 +82,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         {
           id: 'copy-text',
           label: 'Copy',
+          icon: 'Copy',
           disabled: !isValidCopy,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
@@ -92,6 +93,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         {
           id: 'paste-text',
           label: 'Paste',
+          icon: 'Clipboard',
           disabled: !isValidPaste,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
@@ -109,6 +111,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         },
         showDevTools && {
           id: 'toggle-devtools',
+          icon: 'DevBox',
           label: 'Toggle devtools',
           onClick: DesktopActions.toggleDevTools,
         },

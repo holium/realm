@@ -7,6 +7,7 @@ import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
 export const createRoomForm = (
+  currentRooms: string[],
   defaults: any = {
     name: '',
     isPrivate: false,
@@ -28,7 +29,11 @@ export const createRoomForm = (
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (name.length > 1 && /^[a-zA-Z0-9- ]*$/.test(name)) {
+      if (
+        name.length > 1 &&
+        /^[a-zA-Z0-9- ]*$/.test(name) &&
+        !currentRooms.includes(name)
+      ) {
         return { error: undefined, parsed: name };
       }
 
@@ -54,7 +59,10 @@ const NewRoomPresenter = () => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const { form, name } = useMemo(() => createRoomForm(), []);
+  const { form, name } = useMemo(
+    () => createRoomForm(roomsManager.rooms.map((room) => room.title)),
+    []
+  );
 
   const createRoom = (evt: any) => {
     // setLoading(true);
@@ -107,21 +115,20 @@ const NewRoomPresenter = () => {
               type="text"
               autoFocus
               placeholder="Name your room"
-              style={{ width: '100%' }}
               value={name.state.value}
               error={
                 name.computed.isDirty && name.computed.ifWasEverBlurredThenError
               }
-              onChange={(e: any) => {
-                name.actions.onChange(e.target.value);
+              onChange={(e) => {
+                name.actions.onChange((e.target as any).value);
               }}
-              onKeyDown={(evt: any) => {
+              onKeyDown={(evt) => {
                 if (evt.key === 'Enter' && form.computed.isValid) {
                   createRoom(evt);
                 }
               }}
-              onFocus={() => name.actions.onFocus()}
-              onBlur={() => name.actions.onBlur()}
+              onFocus={name.actions.onFocus}
+              onBlur={name.actions.onBlur}
             />
           </Flex>
           <Button.TextButton

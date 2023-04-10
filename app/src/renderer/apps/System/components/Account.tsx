@@ -8,15 +8,10 @@ import {
   RadioGroup,
   Spinner,
   TextInput,
+  CopyButton,
   useToggle,
 } from '@holium/design-system';
-import {
-  Text,
-  Card,
-  TextButton,
-  Anchor,
-  CopyButton,
-} from 'renderer/components';
+import { Text, Card, TextButton, Anchor } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ColorPicker } from './ColorPicker';

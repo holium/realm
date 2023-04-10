@@ -1,4 +1,3 @@
-import { getVar } from '@holium/design-system';
 import {
   AnimatePresence,
   motion,
@@ -54,7 +53,7 @@ export const AudioWave = ({ speaking }: AudioWaveProps) => {
   const controls = useAnimationControls();
   const [show, setShow] = useState(false);
 
-  const defaultStrokeColor = getVar('accent') || '#4e9efd';
+  const defaultStrokeColor = '#4e9efd';
   const variants: Variants = {
     speaking: (delay: number) => ({
       stroke: defaultStrokeColor,

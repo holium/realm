@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import styled from 'styled-components';
-import { Text, Flex, Row } from '../..';
+import { Text, Flex, Row } from '../../general';
 import { Folder } from '.';
 
 const SidebarList = styled(Flex)`

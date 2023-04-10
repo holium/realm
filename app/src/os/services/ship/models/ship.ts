@@ -24,7 +24,6 @@ export const ShipModel = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     loggedIn: types.optional(types.boolean, false),
-    wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
     // chat: ChatStore,
     // contacts: ContactStore,

@@ -1,6 +1,6 @@
 {
   "name": "@holium/realm",
-  "version": "0.2.0",
+  "version": "0.8.1",
   "description": "A desktop environment for Urbit",
   "main": "./dist/main/main.js",
   "author": {
@@ -13,6 +13,8 @@
     "link-modules": "node -r ts-node/register ../../.holium/scripts/link-modules.ts",
     "postinstall": "npm run electron-rebuild && npm run link-modules"
   },
-  "dependencies": {},
+  "dependencies": {
+    "better-sqlite3": "^8.2.0"
+  },
   "license": "MIT"
 }

@@ -19,7 +19,7 @@ export class DiskStore {
   constructor(
     name: string,
     patp: Patp,
-    _secretKey: string,
+    _secretKey: string | null,
     store: IAnyType,
     defaults: any = {}
   ) {
@@ -44,7 +44,6 @@ export class DiskStore {
 
     try {
       typecheck(store, this.persisted.store);
-      console.log(`typecheck passed: ${store.name}`);
       this.model = store.create(castToSnapshot(this.persisted.store));
     } catch (err) {
       console.error(`typecheck failed: ${store.name} rebuilding...`);
@@ -52,7 +51,6 @@ export class DiskStore {
     }
 
     // autosave snapshots
-
     onSnapshot(this.model, (snapshot) => {
       this.persisted.store = castToSnapshot(snapshot);
     });

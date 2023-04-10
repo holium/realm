@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps } from '../..';
+import { Text, Box, BoxProps, Flex } from '../../general';
 import { AnimationProps } from 'framer-motion';
 
 type StyledBoxProps = {
@@ -14,12 +14,15 @@ type StyledBoxProps = {
   error?: string | boolean | undefined;
 } & BoxProps;
 
-const StyledBox = styled(Box)<StyledBoxProps>`
+const StyledBox = styled(Flex)<StyledBoxProps>`
   position: relative;
-  border-radius: var(--rlm-border-radius-6);
+  align-items: center;
   border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: rgba(var(--rlm-input-rgba));
   min-height: 32px;
+  box-sizing: content-box;
+  overflow: hidden;
+
   ${(props) =>
     props.shouldHighlightOnFocus &&
     css`
@@ -39,7 +42,7 @@ const StyledBox = styled(Box)<StyledBoxProps>`
     font-size: ${(props) =>
       `${props.fontSize ? props.fontSize.toString().replace('px', '') : 14}px`};
     text-align: ${(props) => (props.textAlign ? props.textAlign : 'left')};
-    border-radius: var(--rlm-border-radius-4);
+    /* border-radius: var(--rlm-border-radius-4); */
     background-color: rgba(var(--rlm-input-rgba));
     color: rgba(var(--rlm-text-rgba));
     pointer-events: all;
@@ -98,7 +101,7 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   svg {
     display: block;
@@ -113,7 +116,7 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
 
 StyledBox.defaultProps = {
   px: 1,
-  py: 1,
+  py: 0,
   mb: 0,
   shouldHighlightOnFocus: true,
 };
@@ -134,20 +137,23 @@ export const InputBox = ({
   disabled,
   error,
   children,
+  borderRadius = '6px',
+  px,
+  py,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
-    display="flex"
-    contentEditable="true"
-    suppressContentEditableWarning={true}
     width={width}
     height={height}
     error={error}
+    borderRadius={borderRadius}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}
     fontSize={boxProps.fontSize || '14px'}
     textAlign={boxProps.textAlign || 'left'}
+    px={px}
+    py={py}
   >
     {label && label !== 'none' && (
       <Text.Label
@@ -163,15 +169,15 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1}>
+    <Box display="flex" flexDirection="row" flex={1} height="100%">
       {leftAdornment && (
-        <Adornment mr={1} disabled={disabled}>
+        <Adornment mr={1} disabled={disabled} pb={2}>
           {leftAdornment}
         </Adornment>
       )}
       {children}
       {rightAdornment && (
-        <Adornment ml={1} disabled={disabled}>
+        <Adornment ml={1} disabled={disabled} pb={2}>
           {rightAdornment}
         </Adornment>
       )}

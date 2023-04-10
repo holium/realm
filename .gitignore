@@ -106,8 +106,9 @@ dist
 .tern-port
 
 .DS_Store
-*/*.swp #vim editor files
-*.swp #vim editor files
+#vim editor files
+*/*.swp
+*.swp
 
 # Hide developer ships
 /comets

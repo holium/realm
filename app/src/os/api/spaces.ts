@@ -150,7 +150,7 @@ export const SpacesApi = {
             path: pathObj,
           },
         },
-        reaction: 'spaces-reaction.delete',
+        reaction: 'spaces-reaction.remove',
         onReaction: (data: any) => {
           resolve(data);
         },
@@ -391,7 +391,6 @@ export const SpacesApi = {
         }
       },
       onSubscribed: () => {
-        console.log('Subscribed to %spaces');
         spacesState.setSubscriptionStatus('subscribed');
       },
       onError: () => {

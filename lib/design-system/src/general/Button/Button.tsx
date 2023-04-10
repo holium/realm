@@ -26,7 +26,7 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
-import { ColorProps, colorStyle } from '../../util/colors';
+import { ColorProps, colorStyle, ColorVariants } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -94,6 +94,7 @@ const Base = styled(motion.button)<ButtonProps>`
   appearance: none;
   width: fit-content;
   display: inline-flex;
+  user-select: none;
   align-items: center;
   flex-basis: initial;
   font-size: 0.889rem;
@@ -106,12 +107,13 @@ const Base = styled(motion.button)<ButtonProps>`
   &:hover:not([disabled]) {
     cursor: pointer;
     transition: var(--transition);
+    filter: brightness(0.975);
   }
   &:active:not([disabled]) {
     transition: var(--transition);
+    filter: brightness(0.95);
   }
   &:disabled {
-    cursor: not-allowed !important;
     opacity: 0.5;
     transition: var(--transition);
   }
@@ -215,7 +217,8 @@ const TextButton = styled(Base)<TextButtonProps>`
 
 export type IconButtonProps = ButtonProps & {
   showOnHover?: boolean;
-  customColor?: string;
+  isSelected?: boolean;
+  customColor?: ColorVariants;
 };
 
 const IconButton = styled(Base)<IconButtonProps>`
@@ -224,22 +227,19 @@ const IconButton = styled(Base)<IconButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
+  background-color: ${({ isSelected }) =>
+    isSelected ? 'rgba(var(--rlm-overlay-active-rgba))' : 'transparent'};
+  transition: var(--transition);
+
   &:hover:not([disabled]) {
-    transition: var(--transition);
     background-color: rgba(var(--rlm-overlay-hover-rgba));
   }
-  /* &:active:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-  } */
-  &:focus:not([disabled]) {
-    outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-  }
+
   svg {
-    fill: ${(props) =>
-      props.customColor ? props.customColor : 'rgba(var(--rlm-icon-rgba))'};
+    fill: ${({ customColor }) =>
+      customColor
+        ? `rgba(var(--rlm-${customColor}-rgba))`
+        : 'rgba(var(--rlm-icon-rgba))'};
   }
 `;
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
-import { BoxProps } from '../../';
+import { BoxProps } from '../../general/Box/Box';
 
 const Wrapper = styled(motion.div)`
   z-index: 16;
@@ -50,6 +50,9 @@ export const TrayApp = ({
     (event: any) => {
       // If we aren't clicking on a tray icon, close tray
       if (`${id}-icon` !== event.target.id) {
+        if (event.target.getAttribute('data-close-tray') === 'false') {
+          return;
+        }
         // we are clicking on an element that should close the tray
         if (event.target.getAttribute('data-close-tray') === 'true') {
           event.stopPropagation();
@@ -58,6 +61,11 @@ export const TrayApp = ({
         }
         // If the app id matches the target, don't close
         if (`${id}-app` === event.target.id) {
+          return;
+        }
+        // If the lightbox node contains the click event target, don't close
+        const lightboxNode = document.getElementsByClassName('pswp')[0];
+        if (lightboxNode && lightboxNode.contains(event.target)) {
           return;
         }
         // If the app node does not contain the click event target, close it.

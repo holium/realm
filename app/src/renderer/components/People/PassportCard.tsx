@@ -5,9 +5,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
-import { useServices } from 'renderer/logic/store';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 import { Avatar } from '@holium/design-system';
 
 interface IPassport {
@@ -32,8 +29,7 @@ const PassportCardPresenter = ({
   theme,
   onClose,
 }: IPassport) => {
-  const { courier } = useServices();
-  const { setActiveApp, dmApp, walletApp } = useTrayApps();
+  const { setActiveApp, walletApp } = useTrayApps();
 
   const iconColor = rgba(theme.textColor, 0.7);
   const buttonColor = darken(0.1, theme.windowColor);
@@ -96,27 +92,30 @@ const PassportCardPresenter = ({
               <Icons name="SendCoins" color={iconColor} size="16px" />
             </PassportButton>
           )}
-          <PassportButton
+          {/* TODO re-enable */}
+          {/* <PassportButton
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
             onClick={(evt: any) => {
-              if (courier.previews.has(`/dm-inbox/${patp}`)) {
-                const dmPreview = courier.previews.get(`/dm-inbox/${patp}`);
-                if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);
-              } else {
-                ShipActions.draftDm(
-                  [patp],
-                  [{ color: sigilColor, avatar, nickname }]
-                ).then((dmDraft) => {
-                  openDMsToChat(dmApp, dmDraft, setActiveApp);
-                });
-              }
+              // TODO replace with new DMs
+              // if(chatStore.)
+              // if (courier.previews.has(`/dm-inbox/${patp}`)) {
+              //   const dmPreview = courier.previews.get(`/dm-inbox/${patp}`);
+              //   if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);
+              // } else {
+              //   ShipActions.draftDm(
+              //     [patp],
+              //     [{ color: sigilColor, avatar, nickname }]
+              //   ).then((dmDraft) => {
+              //     openDMsToChat(dmApp, dmDraft, setActiveApp);
+              //   });
+              // }
               onClose();
               evt.stopPropagation();
             }}
           >
             <Icons name="StartDM" color={iconColor} size="16px" />
-          </PassportButton>
+          </PassportButton> */}
         </Flex>
         {description && (
           <Flex flexDirection="column" gap={4}>

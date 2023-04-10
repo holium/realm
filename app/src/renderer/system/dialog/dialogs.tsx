@@ -10,6 +10,8 @@ import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { Dimensions } from '@holium/design-system';
 import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
+import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
+import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -47,9 +49,11 @@ export interface DialogRenderers {
 }
 
 export const dialogRenderers: DialogRenderers = {
+  'shutdown-dialog': ShutdownDialogConfig,
   'app-detail-dialog': AppDetailDialog,
   'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
+  'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
   'change-email-dialog': ChangeEmailDialogConfig,
   'reset-code-dialog': ResetCodeDialogConfig,

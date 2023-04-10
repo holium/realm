@@ -116,3 +116,9 @@ https://stackoverflow.com/questions/12468783/code-sign-windows-programs-with-app
 ```
 Now you need to get a Windows developer certificate. Unfortunately you can't use your Apple certificate (well, actually you can, but it doesn't help because Apple isn't a certificate authority that Windows recognizes). Here is a list of root certificate authorities recognized by Windows.
 ```
+
+## Native modules
+
+In the `package.json` file in `release/app`, you will find `better-sqlite3` which is a native modules. Any native module must be included here so it is properly bundled.
+
+`yarn add better-sqlite3 --build-from-source --runtime=electron --target=23.0.0 --dist-url=https://electronjs.org/headers --force`
