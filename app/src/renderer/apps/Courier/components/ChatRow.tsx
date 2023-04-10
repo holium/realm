@@ -310,7 +310,7 @@ export const ChatRowPresenter = ({
               }}
               initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}
-              exit={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
               fontSize={2}
             >
               {lastMessageUpdated}

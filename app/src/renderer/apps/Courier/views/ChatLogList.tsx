@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import { useEffect, RefObject } from 'react';
 import {
   Box,
   Text,
@@ -11,12 +11,13 @@ import { ChatMessageType, ChatModelType } from '../models';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
-  listRef?: RefObject<WindowedListRef>;
+  listRef: RefObject<WindowedListRef>;
   width: number;
   height: number;
   messages: ChatMessageType[];
   selectedChat: ChatModelType;
   ourColor: string;
+  endOfListPadding?: number;
 };
 
 export const ChatLogList = ({
@@ -26,7 +27,28 @@ export const ChatLogList = ({
   messages,
   selectedChat,
   ourColor,
+  endOfListPadding,
 }: Props) => {
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }
+  }, [listRef.current, selectedChat.path]);
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }
+  }, [listRef.current, endOfListPadding]);
+
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
 
@@ -39,18 +61,22 @@ export const ChatLogList = ({
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
     const topSpacing = isPrevGrouped ? '3px' : 2;
-    const bottomSpacing = isNextGrouped ? '3px' : 2;
+    let bottomSpacing = isNextGrouped ? '3px' : 2;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
     const showDate = index === 0 || thisMsgDate !== prevMsgDate;
+    if (index === messages.length - 1 && endOfListPadding) {
+      bottomSpacing = endOfListPadding;
+    }
 
     return (
       <Box
         key={row.id}
         mx="1px"
+        animate={false}
         pt={topSpacing}
         pb={isLast ? bottomSpacing : 0}
       >
@@ -75,7 +101,6 @@ export const ChatLogList = ({
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
-
             listRef?.current?.scrollToIndex({
               index: replyIndex,
               align: 'start',
@@ -94,6 +119,10 @@ export const ChatLogList = ({
         data={messages}
         width={width}
         height={height}
+        atBottomThreshold={100}
+        // style={{ marginRight: -scrollbarWidth }}
+        // alignToBottom
+        // initialTopMostItemIndex={messages.length - 1}
         itemContent={renderChatRow}
         chatMode
         shiftScrollbar

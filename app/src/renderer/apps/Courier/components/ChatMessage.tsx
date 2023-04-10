@@ -142,6 +142,8 @@ export const ChatMessagePresenter = ({
           selectedChat.setEditing(message);
         },
       });
+    }
+    if (isAdmin || isOur) {
       menu.push({
         id: `${messageRowId}-delete-message`,
         label: 'Delete message',

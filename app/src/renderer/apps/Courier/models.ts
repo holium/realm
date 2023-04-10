@@ -291,7 +291,6 @@ export const Chat = types
         console.error(error);
       }
     }),
-
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
