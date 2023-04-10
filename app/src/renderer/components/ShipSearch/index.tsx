@@ -113,7 +113,11 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
       );
     };
     const resultList = (
-      <WindowedList data={results} itemContent={RowRenderer} />
+      <WindowedList
+        style={{ marginRight: -12, width: 'calc(100% + 12px)' }}
+        data={results}
+        itemContent={RowRenderer}
+      />
     );
 
     if (isDropdown) {

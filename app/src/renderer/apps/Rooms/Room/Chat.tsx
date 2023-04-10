@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { WindowedList } from '@holium/design-system';
-import { RoomChatMessage } from './RoomChatMessage';
+import { RoomChatMessage } from '../components/RoomChatMessage';
 import { useRooms } from '../useRooms';
 
 export const chatForm = (
