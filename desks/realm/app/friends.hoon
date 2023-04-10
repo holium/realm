@@ -104,9 +104,8 @@
   ++  on-init
     ^-  (quip card _this)
     ~>  %bout.[0 '%friends +on-init']
-    :: =^  cards  state  abet:init:core
-    :: [cards this]
-    on-init:def
+    =^  cards  state  abet:init:core
+    [cards this]
   ::
   ++  on-save
     ^-  vase
@@ -183,6 +182,31 @@
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
 ++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
+::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  +init: handle on-init                                                     ::
+::                                                                            ::
+::    Called once, on agent's first boot.                                     ::
+::    Initialize state here and any other one-time setup.                     ::
+::    On a version upgrade, update as necessary.                              ::
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+++  init
+  ^+  core
+  ::
+  =/  us
+    :*  pinned=*pinned
+        tags=*tags
+        created-at=now.bowl
+        updated-at=now.bowl
+        phone-number=*phone-number
+        relationship=%our
+        contact-info=*contact-info
+    ==
+  ::
+  core(friends (~(put by friends) our.bowl us))
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
