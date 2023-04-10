@@ -27,6 +27,8 @@
 ::    when emitting cards.  See below for examples.                           ::
 ::  - Consistency over all else.  The only thing harder to read               ::
 ::    than Hoon is someone else's Hoon.                                       ::
+::  - List the potential "unsynced" states / potential bugs in a comment      ::
+::    at the top of the agent.  These can then be triaged.                    ::
 ::                                                                            ::
 ::  Q: How do I introduce a new state version?                                ::
 ::  A: Add it to versioned-state, add a new case to +load,                    ::
@@ -40,6 +42,10 @@
 ::     Update the /~/current-version/ scry to latest.                         ::
 ::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+:: Potential bugs list (04/10/2023):
+:: - If I remove a friend but their ship is down, then they won't for sure know
+::   about it.  Urbit should "cover" this with retries.
 ::
 /-  *friends
 /+  verb, dbug, defa=default-agent
