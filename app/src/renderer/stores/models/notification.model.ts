@@ -2,12 +2,9 @@
 import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
 import { NotifIPC } from '../ipc';
 
-// const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
-//   return (
-//     (b.updatedAt || b.metadata.timestamp) -
-//     (a.updatedAt || a.metadata.timestamp)
-//   );
-// };
+const sortByUpdatedAt = (a: NotifMobxType, b: NotifMobxType) => {
+  return b.createdAt - a.createdAt;
+};
 
 const NotificationButtonModel = types.model('NotificationButtonModel', {
   label: types.string,
@@ -62,13 +59,19 @@ export const NotifStore = types
   })
   .views((self) => ({
     get undismissedNotifications() {
-      return self.notifications.filter((n) => !n.dismissed);
+      return self.notifications
+        .filter((n) => !n.dismissed)
+        .slice()
+        .sort(sortByUpdatedAt);
     },
     get unreadNotifications() {
       return self.notifications.filter((n) => !n.read);
     },
     get dismissedNotifications() {
-      return self.notifications.filter((n) => n.dismissed);
+      return self.notifications
+        .filter((n) => n.dismissed)
+        .slice()
+        .sort(sortByUpdatedAt);
     },
     get unreadCount() {
       return self.notifications.filter((n) => !n.read && !n.dismissed).length;
