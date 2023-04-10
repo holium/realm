@@ -650,11 +650,8 @@
   ^-  ?
   =(our.bol ship)
 ::
-::  TODO explicitly pass room provider ship in pokes
 ++  is-provider
   |=  [src=ship =rid:store]
   ^-  ?
-  ?|  ?!(=(src our.bol)) :: if the action is not from our, we are the provider
-      (~(has by rooms.provider.state) rid) :: if the action is from our, and we are the provider
-  ==
+  (~(has by rooms.provider.state) rid) :: if the action is from our, and we are the provider
 --

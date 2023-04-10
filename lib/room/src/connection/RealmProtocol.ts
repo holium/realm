@@ -404,7 +404,6 @@ export class RealmProtocol extends BaseProtocol {
       path,
       type,
     };
-    console.log(newRoom);
     this.transitions.creating = newRoom;
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({

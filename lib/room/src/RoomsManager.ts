@@ -299,6 +299,16 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     type: 'rooms' | 'campfire' | 'data' = 'rooms'
   ) {
     // creates a room in the current provider
+    if (type === 'rooms') {
+      if (this.presentRoom) {
+        this.protocol.deleteRoom(this.presentRoom.rid);
+      }
+    }
+    if (type === 'campfire') {
+      if (this.presentCampfire) {
+        this.protocol.deleteRoom(this.presentCampfire.rid);
+      }
+    }
     const room = this.protocol.createRoom(title, access, path, type);
     this.emit(RoomManagerEvent.CreatedRoom, room);
   }
