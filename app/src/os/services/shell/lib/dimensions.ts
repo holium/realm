@@ -1,7 +1,7 @@
 import { Dimensions } from '@holium/design-system';
 import { normalizeDimensions } from './window-manager';
 
-const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
+export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   ballot: {
     width: 1200,
     height: 1000,
@@ -37,6 +37,14 @@ const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   webterm: {
     width: 780,
     height: 600,
+  },
+  pals: {
+    width: 600,
+    height: 700,
+  },
+  rumors: {
+    width: 650,
+    height: 700,
   },
   'os-settings': {
     width: 800,
