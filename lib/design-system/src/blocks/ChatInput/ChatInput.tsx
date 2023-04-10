@@ -9,8 +9,9 @@ import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
+import { Reply } from '../Bubble/Reply';
 
-const CHAT_INPUT_LINE_HEIGHT = 16;
+const CHAT_INPUT_LINE_HEIGHT = 22;
 const ChatBox = styled(TextArea)`
   resize: none;
   line-height: ${CHAT_INPUT_LINE_HEIGHT}px;
@@ -54,12 +55,20 @@ type ChatInputProps = {
   isFocused?: boolean;
   loading?: boolean;
   attachments?: string[];
+  replyTo?: {
+    id: string;
+    author: string;
+    authorColor: string;
+    sentAt: string;
+    message: FragmentType[];
+  };
   editingMessage?: FragmentType[];
   error?: string;
   onPaste?: (evt: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   onSend: (fragments: FragmentType[]) => void;
   onEditConfirm: (fragments: FragmentType[]) => void;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+  onCancelReply?: () => void;
   onAttachment?: () => void;
   onRemoveAttachment?: (index: number) => void;
 } & BoxProps;
@@ -71,9 +80,13 @@ export const parseStringToFragment = (value: string): FragmentType[] => {
   return fragments;
 };
 
+const attachmentHeight = 116;
+const replyHeight = 46;
+
 export const ChatInput = ({
   id,
   selectedChatPath,
+  replyTo,
   loading,
   tabIndex,
   disabled,
@@ -84,6 +97,7 @@ export const ChatInput = ({
   onSend,
   onEditConfirm,
   onCancelEdit,
+  onCancelReply,
   onAttachment,
   onRemoveAttachment,
   onPaste,
@@ -197,146 +211,185 @@ export const ChatInput = ({
     }
   };
 
+  // let inputHeight =
+  //   rows === 1 ? 38 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20;
+
+  // if (attachments && attachments.length > 0) {
+  //   inputHeight += attachmentHeight;
+  // }
+
   return (
     <Flex flexDirection="column" overflow="visible">
-      {attachments && (
-        <Flex
-          gap={8}
-          overflow="visible"
-          flexWrap="wrap"
-          flexDirection="row"
-          alignItems="flex-start"
-        >
-          {attachments.map((attachment: string, index: number) => {
-            const { linkType } = parseMediaType(attachment);
-            let block = null;
-            if (linkType === 'image') {
-              block = (
-                <ImageBlock
-                  mb={1}
-                  minWidth={100}
-                  width="fit-content"
-                  showLoader
-                  height={100}
-                  id={`attachment-${index}`}
-                  by={''}
-                  image={attachment}
-                />
-              );
-            } else {
-              block = (
-                <MediaBlock
-                  mb={1}
-                  width="fit-content"
-                  minWidth={200}
-                  height={100}
-                  id={`attachment-${index}`}
-                  url={attachment}
-                />
-              );
-            }
-            return (
-              <RemoveAttachmentButton
-                key={index}
-                id={`attachment-image-${index}`}
-              >
-                {block}
-                <motion.div className="chat-attachment-remove-btn">
-                  <Button.Base
-                    size={24}
-                    borderRadius={12}
-                    onClick={
-                      onRemoveAttachment
-                        ? (evt) => {
-                            evt.stopPropagation();
-                            onRemoveAttachment(index);
-                          }
-                        : undefined
-                    }
-                  >
-                    <Icon name="Close" size={16} />
-                  </Button.Base>
-                </motion.div>
-              </RemoveAttachmentButton>
-            );
-          })}
-        </Flex>
-      )}
       <InputBox
         inputId={id}
+        px={0}
         disabled={disabled}
-        height={
-          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
-        }
-        py="3px"
+        // height={inputHeight}
         error={!!error}
-        leftAdornment={
-          <Button.IconButton
-            ml={1}
-            size={22}
-            onClick={onAttachment}
-            disabled={loading}
-          >
-            {loading ? (
-              <Spinner size={0} />
-            ) : (
-              <Icon name="Attachment" size={20} opacity={0.5} />
-            )}
-          </Button.IconButton>
-        }
-        rightAdornment={
-          <Flex>
-            {editingMessage && (
+        borderRadius={24}
+        {...chatInputProps}
+      >
+        <Flex
+          flexDirection="column"
+          width="100%"
+          py={2}
+          px={2}
+          justifyContent="flex-end"
+        >
+          {attachments && attachments.length > 0 ? (
+            <Flex
+              pt="4px"
+              px="4px"
+              mb="12px"
+              gap={8}
+              flexDirection="row"
+              height={attachmentHeight}
+              overflowX="auto"
+              alignItems="flex-start"
+            >
+              {attachments.map((attachment: string, index: number) => {
+                const { linkType } = parseMediaType(attachment);
+                let block = null;
+                if (linkType === 'image') {
+                  block = (
+                    <ImageBlock
+                      mb={1}
+                      minWidth={100}
+                      width="fit-content"
+                      showLoader
+                      height={100}
+                      id={`attachment-${index}`}
+                      by={''}
+                      image={attachment}
+                    />
+                  );
+                } else {
+                  block = (
+                    <MediaBlock
+                      mb={1}
+                      width="fit-content"
+                      minWidth={200}
+                      height={100}
+                      id={`attachment-${index}`}
+                      url={attachment}
+                    />
+                  );
+                }
+                return (
+                  <RemoveAttachmentButton
+                    key={index}
+                    id={`attachment-image-${index}`}
+                  >
+                    {block}
+                    <motion.div className="chat-attachment-remove-btn">
+                      <Button.Base
+                        size={24}
+                        borderRadius={12}
+                        onClick={
+                          onRemoveAttachment
+                            ? (evt) => {
+                                evt.stopPropagation();
+                                onRemoveAttachment(index);
+                              }
+                            : undefined
+                        }
+                      >
+                        <Icon name="Close" size={16} />
+                      </Button.Base>
+                    </motion.div>
+                  </RemoveAttachmentButton>
+                );
+              })}
+            </Flex>
+          ) : null}
+          {replyTo ? (
+            <Flex
+              mt="6px"
+              mx="4px"
+              mb="12px"
+              gap={8}
+              flexDirection="row"
+              height={replyHeight}
+              overflowX="auto"
+              alignItems="flex-start"
+            >
+              <Reply
+                id={replyTo.id}
+                author={replyTo.author}
+                authorColor={replyTo.authorColor}
+                message={replyTo.message}
+                sentAt={replyTo.sentAt}
+                onCancel={onCancelReply}
+              />
+            </Flex>
+          ) : null}
+          <Flex flexDirection="row" alignItems="flex-end" gap={4}>
+            <Flex>
               <Button.IconButton
-                mr={1}
-                disabled={false}
+                size={22}
+                onClick={onAttachment}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Spinner size={0} />
+                ) : (
+                  <Icon name="Attachment" size={20} opacity={0.5} />
+                )}
+              </Button.IconButton>
+            </Flex>
+            <ChatBox
+              id={id}
+              ref={inputRef}
+              name="chat-input"
+              placeholder="New message"
+              value={value}
+              tabIndex={tabIndex}
+              disabled={disabled}
+              style={{
+                marginTop: 0,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
+              }}
+              onChange={onChange}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              onPaste={onPaste}
+              onKeyDown={onKeyDown}
+            />
+
+            <Flex>
+              {editingMessage && (
+                <Button.IconButton
+                  mr={1}
+                  disabled={false}
+                  onClick={(evt) => {
+                    setValue('');
+                    setRows(1);
+                    if (onCancelEdit) onCancelEdit(evt);
+                  }}
+                >
+                  <Icon name="Close" size={20} opacity={0.5} />
+                </Button.IconButton>
+              )}
+              <Button.IconButton
+                disabled={isDisabled}
                 onClick={(evt) => {
-                  setValue('');
-                  setRows(1);
-                  if (onCancelEdit) onCancelEdit(evt);
+                  evt.stopPropagation();
+                  const fragments = onParseFragments();
+                  onSendClick(fragments);
                 }}
               >
-                <Icon name="Close" size={20} opacity={0.5} />
+                <Icon
+                  name={editingMessage ? 'Check' : 'ArrowRightLine'}
+                  size={20}
+                  opacity={0.5}
+                />
               </Button.IconButton>
-            )}
-            <Button.IconButton
-              mr={1}
-              disabled={isDisabled}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                const fragments = onParseFragments();
-                onSendClick(fragments);
-              }}
-            >
-              <Icon
-                name={editingMessage ? 'Check' : 'ArrowRightLine'}
-                size={20}
-                opacity={0.5}
-              />
-            </Button.IconButton>
+            </Flex>
           </Flex>
-        }
-        {...chatInputProps}
-        borderRadius={24}
-      >
-        <ChatBox
-          id={id}
-          ref={inputRef}
-          name="chat-input"
-          placeholder="New message"
-          value={value}
-          tabIndex={tabIndex}
-          disabled={disabled}
-          style={{
-            marginTop: '10px',
-            height: Math.min(rows, 5) * CHAT_INPUT_LINE_HEIGHT,
-          }}
-          onChange={onChange}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          onPaste={onPaste}
-          onKeyDown={onKeyDown}
-        />
+        </Flex>
       </InputBox>
     </Flex>
   );

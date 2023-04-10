@@ -5,10 +5,11 @@ import { AnimatePresence } from 'framer-motion';
 import {
   Flex,
   Text,
-  Reply,
   measureImage,
   fetchOGData,
   extractOGData,
+  parseMediaType,
+  measureTweet,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -18,7 +19,7 @@ import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { useServices } from 'renderer/logic/store';
-import { ChatMessageType, ChatModelType } from '../models';
+import { ChatMessageType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
 import { ChatLogList } from './ChatLogList';
 
@@ -29,9 +30,6 @@ const FullWidthAnimatePresence = styled(AnimatePresence)`
 type ChatLogProps = {
   storage: IuseStorage;
 };
-
-const replyHeight = 50;
-const pinHeight = 46;
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
@@ -103,16 +101,26 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           metadata = { width, height };
         }
         if (Object.keys(frag)[0] === 'link') {
-          const result = await fetchOGData(frag.link);
-          if (result.linkType === 'opengraph') {
-            metadata = {
-              linkType: 'opengraph',
-              ogData: JSON.stringify(extractOGData(result.data)) as string,
-            };
+          const { linkType } = parseMediaType(frag.link);
+          if (linkType === 'twitter') {
+            // premeasure twitter
+            const { width, height } = await measureTweet(
+              frag.link,
+              containerWidth
+            );
+            metadata = { linkType: 'twitter', width, height };
           } else {
-            metadata = {
-              linkType: 'url',
-            };
+            const result = await fetchOGData(frag.link);
+            if (result.linkType === 'opengraph') {
+              metadata = {
+                linkType: 'opengraph',
+                ogData: JSON.stringify(extractOGData(result.data)) as string,
+              };
+            } else {
+              metadata = {
+                linkType: 'url',
+              };
+            }
           }
         }
         return {
@@ -144,16 +152,18 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   };
 
   const height = dimensions.height - 104;
-  let listHeight = height;
+  // let listHeight = height;
 
-  if (showPin) {
-    listHeight = listHeight - pinHeight;
+  // if (showPin) {
+  //   listHeight = listHeight - pinHeight;
+  // }
+
+  let endPadding;
+  if (showAttachments) {
+    endPadding = 136;
   }
   if (selectedChat.replyingMsg) {
-    listHeight = listHeight - replyHeight;
-  }
-  if (showAttachments) {
-    listHeight = listHeight - 110;
+    endPadding = 70;
   }
 
   let pretitle;
@@ -194,6 +204,20 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         {spaceTitle}
       </Text.Custom>
     );
+  }
+
+  let replyToFormatted;
+  if (selectedChat.replyingMsg) {
+    const { color: authorColor } = friends.getContactAvatarMetadata(
+      selectedChat.replyingMsg.sender
+    );
+    replyToFormatted = {
+      id: selectedChat.replyingMsg.id,
+      author: selectedChat.replyingMsg.sender,
+      authorColor,
+      sentAt: selectedChat.replyingMsg.updatedAt.toString(),
+      message: selectedChat.replyingMsg.contents,
+    };
   }
 
   return (
@@ -246,9 +270,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
               )}
               <ChatLogList
                 messages={messages}
+                endOfListPadding={endPadding}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={listHeight}
+                height={dimensions.height - 104}
                 ourColor={ourColor}
               />
             </Flex>
@@ -271,36 +296,24 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           duration: 0.1,
         }}
       >
-        {selectedChat.replyingMsg && (
-          <Flex position="relative" flexDirection="column" zIndex={16} mb={1}>
-            <ReplySection
-              selectedChat={selectedChat}
-              onClick={(msgId) => {
-                if (!selectedChat) return;
-                console.log('go to message', msgId);
-                // selectedChat.replyToMessage(msgId);
-              }}
-              onCancel={() => selectedChat.clearReplying()}
-            />
-          </Flex>
-        )}
         <ChatInputBox
           storage={storage}
-          selectedChatPath={selectedChat.path}
+          selectedChat={selectedChat}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
+          editMessage={selectedChat.editingMsg}
+          replyTo={replyToFormatted}
+          onCancelEdit={(evt) => {
+            evt.stopPropagation();
+            if (!selectedChat) return;
+            selectedChat.cancelEditing();
+          }}
           onAttachmentChange={(attachmentCount) => {
             if (attachmentCount > 0) {
               setShowAttachments(true);
             } else {
               setShowAttachments(false);
             }
-          }}
-          editMessage={selectedChat.editingMsg}
-          onCancelEdit={(evt) => {
-            evt.stopPropagation();
-            if (!selectedChat) return;
-            selectedChat.cancelEditing();
           }}
         />
       </Flex>
@@ -309,36 +322,3 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 };
 
 export const ChatLog = observer(ChatLogPresenter);
-
-type ReplySectionProps = {
-  selectedChat: ChatModelType;
-  onCancel: () => void;
-  onClick?: (evt: React.MouseEvent<HTMLDivElement>) => void;
-};
-
-const ReplySection = ({ selectedChat, onCancel }: ReplySectionProps) => {
-  const { friends } = useServices();
-
-  const replyTo = selectedChat.replyingMsg;
-  if (!replyTo) return null;
-  const { color: authorColor } = friends.getContactAvatarMetadata(
-    replyTo.sender
-  );
-  return (
-    <Flex
-      height={replyHeight}
-      flexDirection="column"
-      justifyContent="flex-end"
-      alignItems="center"
-    >
-      <Reply
-        id={replyTo.id}
-        author={replyTo.sender}
-        authorColor={authorColor}
-        message={replyTo.contents}
-        sentAt={replyTo.updatedAt.toString()}
-        onCancel={onCancel}
-      />
-    </Flex>
-  );
-};

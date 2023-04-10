@@ -142,7 +142,8 @@ export const ChatMessagePresenter = ({
           selectedChat.setEditing(message);
         },
       });
-      // TODO or if its a status message and you are admin
+    }
+    if (isAdmin || isOur) {
       menu.push({
         id: `${messageRowId}-delete-message`,
         label: 'Delete message',

@@ -208,8 +208,8 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     &.pinned {
       gap: 0px;
       ${Text.Custom} {
-        line-height: inherit;
-        font-size: 0.8em;
+        /* line-height: inherit; */
+        /* font-size: 0.8em; */
       }
     }
   }

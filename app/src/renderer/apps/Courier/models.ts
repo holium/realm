@@ -1,5 +1,12 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
+import {
+  flow,
+  Instance,
+  types,
+  cast,
+  applySnapshot,
+  detach,
+} from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
@@ -291,7 +298,6 @@ export const Chat = types
         console.error(error);
       }
     }),
-
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {

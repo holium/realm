@@ -6,15 +6,16 @@ import {
   useEffect,
 } from 'react';
 import { Box, ChatInput } from '@holium/design-system';
-import { ChatMessageType } from '../models';
+import { ChatMessageType, ChatModelType } from '../models';
 import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { FileUploadParams } from 'os/services/ship/models/ship';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 
 type CourierInputProps = {
+  replyTo?: any;
   storage: IuseStorage;
-  selectedChatPath: string;
+  selectedChat: ChatModelType;
   editMessage?: ChatMessageType | null;
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
@@ -23,8 +24,9 @@ type CourierInputProps = {
 };
 
 export const ChatInputBox = ({
+  replyTo,
   storage,
-  selectedChatPath,
+  selectedChat,
   editMessage,
   onSend,
   onEditConfirm,
@@ -131,7 +133,8 @@ export const ChatInputBox = ({
       <div ref={mediaRef} style={{ display: 'none' }}></div>
       <ChatInput
         id="chat-log-input"
-        selectedChatPath={selectedChatPath}
+        selectedChatPath={selectedChat.path}
+        replyTo={replyTo}
         isFocused={isFocused}
         loading={isUploading}
         onSend={(fragments) => {
@@ -151,6 +154,7 @@ export const ChatInputBox = ({
         editingMessage={editMessage?.contents}
         onEditConfirm={onEditConfirm}
         onCancelEdit={onCancelEdit}
+        onCancelReply={() => selectedChat.clearReplying()}
       />
     </Box>
   );
