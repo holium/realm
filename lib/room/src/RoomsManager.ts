@@ -289,7 +289,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   async leaveRoom() {
     if (this.presentRoom) {
-      this.emit(RoomManagerEvent.LeftRoom, this.presentRoom.rid, this.our);
+      this.emit(
+        RoomManagerEvent.LeftRoom,
+        this.presentRoom,
+        this.presentRoom.rid,
+        this.our
+      );
       await this.protocol.leave(this.presentRoom.rid);
     }
     this.clearLiveRoom();
@@ -308,8 +313,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   async deleteRoom(rid: string) {
     if (this.presentRoom?.rid === rid) {
-      this.emit(RoomManagerEvent.DeletedRoom, rid);
+      this.emit(RoomManagerEvent.DeletedRoom, this.presentRoom);
       this.clearLiveRoom();
+    }
+    if (this.presentCampfire?.rid === rid) {
+      this.emit(RoomManagerEvent.DeletedRoom, this.presentCampfire);
+      this.clearCampfireRoom();
     }
     await this.protocol.deleteRoom(rid);
   }
@@ -383,9 +392,9 @@ export type RoomsManagerEventCallbacks = {
   started: () => void;
   connected: () => void;
   createdRoom: (room: RoomType) => void;
-  deletedRoom: (rid: string) => void;
+  deletedRoom: (room: RoomType) => void;
   joinedRoom: (rid: string, patp: Patp) => void;
-  leftRoom: (rid: string, patp: Patp) => void;
+  leftRoom: (room: RoomType, rid: string, patp: Patp) => void;
   setNewProvider: (provider: Patp, rooms: RoomType[]) => void;
   onDataChannel: (rid: string, peer: Patp, data: DataPacket) => void;
 };

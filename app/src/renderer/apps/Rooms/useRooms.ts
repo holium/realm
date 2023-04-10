@@ -53,25 +53,25 @@ export const createManager = (our: Patp) => {
     if (room.type !== 'data') SoundActions.playRoomEnter();
   });
 
-  manager.on(RoomManagerEvent.DeletedRoom, () => {
-    SoundActions.playRoomLeave();
+  manager.on(RoomManagerEvent.DeletedRoom, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomLeave();
   });
 
-  protocol.on(ProtocolEvent.RoomEntered, () => {
-    SoundActions.playRoomEnter();
+  protocol.on(ProtocolEvent.RoomEntered, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomEnter();
   });
 
-  manager.on(RoomManagerEvent.LeftRoom, () => {
-    SoundActions.playRoomLeave();
+  manager.on(RoomManagerEvent.LeftRoom, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomLeave();
   });
 
   // These sounds are for peer events
-  protocol.on(ProtocolEvent.PeerAdded, () => {
-    SoundActions.playRoomPeerEnter();
+  protocol.on(ProtocolEvent.PeerAdded, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomPeerEnter();
   });
 
-  protocol.on(ProtocolEvent.PeerRemoved, () => {
-    SoundActions.playRoomPeerLeave();
+  protocol.on(ProtocolEvent.PeerRemoved, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomPeerLeave();
   });
 
   protocol.getSession();

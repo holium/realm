@@ -550,7 +550,9 @@ export class RealmProtocol extends BaseProtocol {
       }
     });
 
-    this.emit(ProtocolEvent.PeerAdded, rid, remotePeer);
+    const room = this.rooms.get(rid);
+    if (!room) throw new Error('Room for adding peer not found');
+    this.emit(ProtocolEvent.PeerAdded, room, rid, remotePeer);
 
     return remotePeer;
   }
@@ -596,7 +598,9 @@ export class RealmProtocol extends BaseProtocol {
     if (remotePeer) {
       remotePeer.removeAllListeners();
       remotePeer.hangup();
-      shouldEmit && this.emit(ProtocolEvent.PeerRemoved, rid, remotePeer);
+      const room = this.rooms.get(rid);
+      if (!room) throw new Error('Room for hangup not found');
+      shouldEmit && this.emit(ProtocolEvent.PeerRemoved, room, rid, remotePeer);
       this.peers.delete(peer);
     }
   }
