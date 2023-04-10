@@ -13,11 +13,7 @@ import { RoomManagerEvent } from './events';
  */
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
-  campfireLocal: LocalPeer;
-  dataLocals: { [rid: string]: LocalPeer } = {};
   protocol: BaseProtocol;
-  campfireProtocol: BaseProtocol;
-  dataProtocol: BaseProtocol[] = [];
   live: {
     room?: RoomType;
     chat?: ChatModelType[];
@@ -35,21 +31,22 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     list: RoomType[];
   };
   state: RoomState = RoomState.Disconnected;
+  campfireState: RoomState = RoomState.Disconnected;
+  dataStates: { [rid: string]: RoomState } = {};
 
-  constructor(protocol: BaseProtocol, campfireProtocol: BaseProtocol) {
+  constructor(protocol: BaseProtocol) {
     super();
     this.protocol = protocol;
-    this.campfireProtocol = campfireProtocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
       video: false,
     });
-    this.campfireLocal = new LocalPeer(this.protocol, this.protocol.our, {
+    /*this.campfireLocal = new LocalPeer(this.protocol, this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
       video: true,
-    });
+    });*/
 
     this.live = {
       room: undefined,
@@ -66,7 +63,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       list: Array.from(this.protocol.rooms.values()),
     };
     this.protocol.registerLocal(this.local);
-    this.campfireProtocol.registerLocal(this.campfireLocal);
 
     // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
@@ -104,33 +100,32 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
     this.protocol.on(
       ProtocolEvent.PeerDataReceived,
-      (peer: Patp, data: DataPacket) => {
+      (rid: string, peer: Patp, data: DataPacket) => {
         if (this.live.room) {
-          this.emit(
-            RoomManagerEvent.OnDataChannel,
-            this.live.room.rid,
-            peer,
-            data
-          );
+          this.emit(RoomManagerEvent.OnDataChannel, rid, peer, data);
         }
       }
     );
 
-    this.campfireProtocol.on(
+    /*this.campfireProtocol.on(
       ProtocolEvent.PeerDataReceived,
-      (peer: Patp, data: DataPacket) => {
+      (rid: string, peer: Patp, data: DataPacket) => {
         if (this.dataRooms[data.rid]) {
           this.emit(RoomManagerEvent.OnDataChannel, data.rid, peer, data);
         }
       }
-    );
+    );*/
 
     this.cleanup = this.cleanup.bind(this);
 
     makeObservable(this, {
       state: observable,
+      campfireState: observable,
+      dataStates: observable,
       protocol: observable,
       live: observable,
+      campfire: observable,
+      dataRooms: observable,
       createRoom: action.bound,
       deleteRoom: action.bound,
       joinRoom: action.bound,
@@ -261,10 +256,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   updateRoom(room: RoomType) {
     if (room.type === 'rooms') {
+      console.log('setting rooms room');
       this.live.room = room;
     } else if (room.type === 'campfire') {
+      console.log('setting campfire room');
       this.campfire.room = room;
     } else if (room.type === 'data') {
+      console.log('setting data room');
       this.dataRooms[room.rid] = room;
     }
   }
@@ -296,16 +294,15 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     await this.protocol.deleteRoom(rid);
   }
 
-  sendData(data: Omit<DataPacket, 'from'>) {
-    this.protocol.sendData({ from: this.our, ...data });
+  sendData(rid: string, data: Omit<DataPacket, 'from'>) {
+    this.protocol.sendData(rid, { from: this.our, ...data });
   }
 
-  // clear this.live element that has member type === 'rooms'
   clearRoom(rid: string) {
     if (this.dataRooms[rid]) {
       delete this.dataRooms[rid];
     }
-    this.dataLocals[rid].disableMedia();
+    // this.dataLocals[rid].disableMedia();
   }
 
   clearLiveRoom() {

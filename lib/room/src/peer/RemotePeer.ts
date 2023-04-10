@@ -17,12 +17,12 @@ export class RemotePeer extends Peer {
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
   rtcConfig: RTCConfiguration;
-  sendSignal: (peer: Patp, data: SignalData) => void;
+  sendSignal: (rid: string, peer: Patp, data: SignalData) => void;
   constructor(
     our: Patp,
     peer: Patp,
     config: PeerConfig & { isInitiator: boolean },
-    sendSignal: (peer: Patp, data: SignalData) => void
+    sendSignal: (rid: string, peer: Patp, data: SignalData) => void
   ) {
     super(peer, config);
     this.our = our;
@@ -77,7 +77,7 @@ export class RemotePeer extends Peer {
     );
   }
 
-  dial() {
+  dial(rid: string) {
     if (this.status !== PeerConnectionState.New) {
       console.log('dialing, not new status');
       this.removeTracks();
@@ -88,7 +88,7 @@ export class RemotePeer extends Peer {
     if (!this.isInitiator) {
       this.createConnection();
       console.log(`%waiting to ${this.patp}`);
-      this.sendSignal(this.patp, { type: 'waiting', from: this.our });
+      this.sendSignal(rid, this.patp, { type: 'waiting', from: this.our });
     }
   }
 

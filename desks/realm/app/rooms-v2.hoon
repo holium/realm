@@ -333,6 +333,10 @@
           =/  old-room                (get-present-room:helpers:rooms:hol src.bol)
           =.  rooms.provider.state              :: remove old room if it exists
             ?~  old-room  rooms.provider.state
+            ?:  ?|  !=(type type.u.old-room)
+                    =(type %data)
+                ==
+              rooms.provider.state
             ?:  =(src.bol creator.u.old-room)   :: creator is leaving the room, so delete it
               (~(del by rooms.provider.state) rid.u.old-room)
             :: if participant is leaving, remove participant
@@ -373,6 +377,8 @@
       ++  delete-room
         |=  =rid:store
         =/  provider      provider.session.state
+        ~&  'deleting room'
+        ~&  rid
         ?.  (is-provider:hol src.bol rid)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~

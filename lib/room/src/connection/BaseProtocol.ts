@@ -17,10 +17,11 @@ export interface ProtocolConfig {
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
   local: LocalPeer | null = null;
+  campfireLocal: LocalPeer | null = null;
+  dataLocal: LocalPeer | null = null;
   provider: string; // default is our
-  presentRoom: RoomType | null = null;
   rooms: RoomMap;
-  peers: Map<Patp, RemotePeer> = new Map();
+  peers: Map<string, Map<Patp, RemotePeer>> = new Map();
   rtc: RTCConfiguration = {
     iceServers: [
       {
@@ -40,9 +41,10 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
     makeObservable(this, {
       provider: observable,
       local: observable,
+      campfireLocal: observable,
+      dataLocal: observable,
       peers: observable,
       rooms: observable,
-      presentRoom: observable,
       setProvider: action.bound,
       getRoom: action.bound,
       getRooms: action.bound,
@@ -66,20 +68,20 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   //
   abstract connect(
     ...args: AgentConnectParams | LocalCommsParams
-  ): Promise<Map<Patp, RemotePeer>>;
-  abstract dial(peer: Patp, isHost: boolean): RemotePeer;
-  abstract kick(peer: Patp): void;
+  ): Promise<Map<string, Map<Patp, RemotePeer>>>;
+  abstract dial(rid: string, peer: Patp, isHost: boolean): RemotePeer;
+  abstract kick(rid: string, peer: Patp): void;
   abstract leave(rid: string): Promise<void>;
-  abstract sendSignal(peer: Patp, msg: any): void;
-  abstract sendData(data: DataPacket): void;
+  abstract sendSignal(rid: string, peer: Patp, msg: any): void;
+  abstract sendData(rid: string, data: DataPacket): void;
 }
 
 export type ProtocolEventCallbacks = {
   ready: () => void;
   providerUpdated: (provider: Patp) => void;
-  hostLeft: (host: Patp) => void;
-  peerAdded: (peer: RemotePeer) => void;
-  peerRemoved: (peer: RemotePeer) => void;
+  hostLeft: (rid: string, host: Patp) => void;
+  peerAdded: (rid: string, peer: RemotePeer) => void;
+  peerRemoved: (rid: string, peer: RemotePeer) => void;
   creatingRoom: (room: RoomType) => void;
   roomCreated: (room: RoomType) => void;
   roomDeleted: (rid: string) => void;
@@ -88,5 +90,5 @@ export type ProtocolEventCallbacks = {
   roomInitial: (room: RoomType) => void;
   roomEntered: (room: RoomType) => void;
   roomLeft: (rid: string) => void;
-  peerDataReceived: (peer: Patp, data: DataPacket) => void;
+  peerDataReceived: (rid: string, peer: Patp, data: DataPacket) => void;
 };

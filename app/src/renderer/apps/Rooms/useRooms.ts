@@ -3,6 +3,7 @@ import {
   ProtocolEvent,
   RoomsManager,
   RoomManagerEvent,
+  RoomType,
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
 import { OSActions } from 'renderer/logic/actions/os';
@@ -45,12 +46,11 @@ const config = {
 let protocol: RealmProtocol | null;
 export const createManager = (our: Patp) => {
   protocol = new RealmProtocol(our, config, handlers);
-  const campfireProtocol = new RealmProtocol(our, config, handlers);
-  const manager = new RoomsManager(protocol, campfireProtocol);
+  const manager = new RoomsManager(protocol);
 
   // These sounds are for the creator of the room
-  manager.on(RoomManagerEvent.CreatedRoom, () => {
-    SoundActions.playRoomEnter();
+  manager.on(RoomManagerEvent.CreatedRoom, (room: RoomType) => {
+    if (room.type !== 'data') SoundActions.playRoomEnter();
   });
 
   manager.on(RoomManagerEvent.DeletedRoom, () => {

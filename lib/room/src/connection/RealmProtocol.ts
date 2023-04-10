@@ -2,7 +2,7 @@ import { PeerEvent } from '../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { action, makeObservable, observable, observe, runInAction } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
@@ -33,7 +33,7 @@ interface RoomTransitionStates {
 export class RealmProtocol extends BaseProtocol {
   poke: (...args: any) => Promise<void>;
   scry: (...args: any) => Promise<any>;
-  queuedPeers: Patp[] = []; // peers that we have queued to dial
+  queuedPeers: Map<string, Patp[]> = new Map(); // peers that we have queued to dial
   disposePresentRoom: any; // this is a mobx observable disposer
   transitions: RoomTransitionStates; // keeps track of transitions for latency handling
 
@@ -66,7 +66,9 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   cleanup() {
-    this.hangupAll();
+    for (let rid of this.peers.keys()) {
+      this.hangupAll(rid);
+    }
   }
 
   /**
@@ -87,21 +89,19 @@ export class RealmProtocol extends BaseProtocol {
     return Array.from(this.rooms.values());
   }
 
-  async sendSignal(peer: Patp, msg: any) /*: void*/ {
-    if (this.presentRoom) {
-      this.poke({
-        app: 'rooms-v2',
-        mark: 'rooms-v2-signal',
-        json: {
-          signal: {
-            from: this.local?.patp,
-            to: peer,
-            rid: this.presentRoom?.rid,
-            data: JSON.stringify(msg),
-          },
+  async sendSignal(rid: string, peer: Patp, msg: any) /*: void*/ {
+    this.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-signal',
+      json: {
+        signal: {
+          from: this.local?.patp,
+          to: peer,
+          rid,
+          data: JSON.stringify(msg),
         },
-      });
-    }
+      },
+    });
   }
 
   async onSignal(data: any, mark: string) {
@@ -111,9 +111,9 @@ export class RealmProtocol extends BaseProtocol {
         const session = data['session'];
         const currentRoom = session.rooms[session.current];
         this.provider = session.provider;
-        if (this.presentRoom) {
-          await this.leave(this.presentRoom.rid);
-        }
+        /*if (this.presentRoom) {*/
+        await this.leave(data['session'].rid);
+        /*}*/
         this.rooms = new Map(Object.entries(session.rooms));
         if (currentRoom) {
           // if we are in a room, send the event up to RoomManager
@@ -125,21 +125,24 @@ export class RealmProtocol extends BaseProtocol {
     if (mark === 'rooms-v2-signal') {
       if (data['signal']) {
         const payload = data['signal'];
-        const remotePeer = this.peers.get(payload.from);
+        const roomPeers = this.peers.get(payload.rid);
+        if (!roomPeers) throw new Error('Room peers not found');
+        const remotePeer = roomPeers.get(payload.from);
         const signalData = JSON.parse(data['signal'].data);
 
         if (signalData.type === 'waiting') {
           if (!remotePeer) {
             console.log(`%waiting from unknown ${payload.from}`);
-            this.queuedPeers.push(payload.from);
+            this.queuedPeers.get(payload.rid)?.push(payload.from);
           } else {
             console.log(`%waiting from ${payload.from}`);
             remotePeer.onWaiting();
           }
         }
         if (signalData.type === 'retry') {
-          const retryingPeer = this.peers.get(payload.from);
-          retryingPeer?.dial();
+          const roomPeers = this.peers.get(payload.rid);
+          const retryingPeer = roomPeers?.get(payload.from);
+          retryingPeer?.dial(payload.rid);
         }
         if (isWebRTCSignal(signalData.type)) {
           if (remotePeer) {
@@ -160,20 +163,15 @@ export class RealmProtocol extends BaseProtocol {
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
-        if (this.presentRoom?.rid) {
-          const rid = this.presentRoom?.rid;
-          this.leave(rid);
-          this.emit(ProtocolEvent.RoomDeleted, rid);
-        }
+        this.leave(payload.rid);
+        this.emit(ProtocolEvent.RoomDeleted, payload.rid);
         this.rooms = new Map(Object.entries(payload.rooms));
       }
       if (data['room-deleted']) {
         const payload = data['room-deleted'];
-        if (this.presentRoom?.rid === payload.rid) {
-          console.log(`%room-deleted creator=${this.presentRoom?.creator}`);
-          this.hangupAll();
-          this.emit(ProtocolEvent.RoomDeleted, payload.rid);
-        }
+        console.log(`%room-deleted rid=${payload.rid}`);
+        this.hangupAll(payload.rid);
+        this.emit(ProtocolEvent.RoomDeleted, payload.rid);
         this.rooms.delete(payload.rid);
       }
       if (data['room-entered']) {
@@ -183,26 +181,23 @@ export class RealmProtocol extends BaseProtocol {
         if (room) {
           room.present.push(payload.ship);
           this.rooms.set(payload.rid, room);
-          if (this.presentRoom?.rid === payload.rid) {
-            // if we are in the room, dial the new peer
-            if (payload.ship !== this.our) {
-              const remotePeer = this.dial(
-                payload.ship,
-                payload.ship === room.creator
-              );
-              // queuedPeers are peers that are ready for us to dial them
-              if (this.queuedPeers.includes(payload.ship)) {
-                console.log('%room-entered in queuedPeer', payload.ship);
-                remotePeer.onWaiting();
-                this.queuedPeers.splice(
-                  this.queuedPeers.indexOf(payload.ship),
-                  1
-                );
-              }
-            } else {
-              this.emit(ProtocolEvent.RoomEntered, room);
-              this.transitions.entering = null;
+          // if we are in the room, dial the new peer
+          if (payload.ship !== this.our) {
+            const remotePeer = this.dial(
+              payload.rid,
+              payload.ship,
+              payload.ship === room.creator
+            );
+            // queuedPeers are peers that are ready for us to dial them
+            if (this.queuedPeers.get(payload.rid)?.includes(payload.ship)) {
+              console.log('%room-entered in queuedPeer', payload.ship);
+              remotePeer.onWaiting();
+              const roomQueue = this.queuedPeers.get(payload.rid);
+              roomQueue?.splice(roomQueue.indexOf(payload.ship), 1);
             }
+          } else {
+            this.emit(ProtocolEvent.RoomEntered, room);
+            this.transitions.entering = null;
           }
           // else {
           //   // if we are not in the room, we need to connect
@@ -216,14 +211,12 @@ export class RealmProtocol extends BaseProtocol {
       if (data['room-left']) {
         const payload = data['room-left'];
         console.log(`%room-left ${payload.ship}`);
-        if (this.presentRoom?.rid === payload.rid) {
-          if (payload.ship !== this.our) {
-            this.hangup(payload.ship);
-          } else {
-            this.hangupAll();
-            this.emit(ProtocolEvent.RoomLeft, payload.rid);
-            this.transitions.leaving = null;
-          }
+        if (payload.ship !== this.our) {
+          this.hangup(payload.rid, payload.ship);
+        } else {
+          this.hangupAll(payload.rid);
+          this.emit(ProtocolEvent.RoomLeft, payload.rid);
+          this.transitions.leaving = null;
         }
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -244,14 +237,12 @@ export class RealmProtocol extends BaseProtocol {
       if (data['kicked']) {
         const payload = data['kicked'];
         console.log(`%room-kicked ${payload.ship}`);
-        if (this.presentRoom?.rid === payload.rid) {
-          // if we are in the room, hangup the peer
-          if (payload.ship !== this.our) {
-            this.hangup(payload.ship);
-          } else {
-            this.hangupAll();
-            this.emit(ProtocolEvent.RoomKicked, payload.rid);
-          }
+        // if we are in the room, hangup the peer
+        if (payload.ship !== this.our) {
+          this.hangup(payload.rid, payload.ship);
+        } else {
+          this.hangupAll(payload.rid);
+          this.emit(ProtocolEvent.RoomKicked, payload.rid);
         }
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -272,8 +263,9 @@ export class RealmProtocol extends BaseProtocol {
     }
   }
 
-  registerLocal(local: LocalPeer) {
+  registerLocals(local: LocalPeer, campfireLocal: LocalPeer) {
     this.local = local;
+    this.campfireLocal = campfireLocal;
     this.local.on(PeerEvent.AudioTrackAdded, () => {
       this.peers.forEach((peer: RemotePeer) => {
         this.local?.streamTracks(peer);
@@ -304,7 +296,7 @@ export class RealmProtocol extends BaseProtocol {
     });
   }
 
-  async connect(room: RoomType): Promise<Map<Patp, RemotePeer>> {
+  async connect(room: RoomType): Promise<Map<string, Map<Patp, RemotePeer>>> {
     if (!room.present.includes(this.our)) {
       this.rooms.set(room.rid, room);
       this.transitions.entering = room;
@@ -317,10 +309,9 @@ export class RealmProtocol extends BaseProtocol {
       });
     }
     runInAction(() => {
-      this.presentRoom = room;
-      this.disposePresentRoom = observe(this.presentRoom, (change) => {
+      /*this.disposePresentRoom = observe(this.presentRoom, (change) => {
         this.emit(ProtocolEvent.RoomUpdated, change.object);
-      });
+      });*/
     });
 
     return this.dialAll(room);
@@ -346,9 +337,6 @@ export class RealmProtocol extends BaseProtocol {
     };
     console.log(newRoom);
     this.transitions.creating = newRoom;
-    if (this.presentRoom) {
-      this.hangupAll();
-    }
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
       app: 'rooms-v2',
@@ -379,18 +367,18 @@ export class RealmProtocol extends BaseProtocol {
         'delete-room': rid,
       },
     });
-    this.hangupAll();
+    this.hangupAll(rid);
     // if (this.presentRoom?.rid === rid) {
     // }
   }
 
-  kick(peer: Patp) {
+  kick(rid: string, peer: Patp) {
     this.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
       json: {
         kick: {
-          rid: this.presentRoom?.rid,
+          rid,
           ship: peer,
         },
       },
@@ -432,9 +420,9 @@ export class RealmProtocol extends BaseProtocol {
    * sendData - Send data to all peers
    * @param data: DataPacket
    */
-  sendData(data: Partial<DataPacket>) {
+  sendData(rid: string, data: Partial<DataPacket>) {
     const payload = { from: this.local?.patp, ...data } as DataPacket;
-    this.peers.forEach((peer) => {
+    this.peers.get(rid)?.forEach((peer) => {
       if (peer.status === PeerConnectionState.Connected) {
         peer.sendData(payload);
       }
@@ -455,7 +443,7 @@ export class RealmProtocol extends BaseProtocol {
     });
   }*/
 
-  dial(peer: Patp, isHost: boolean): RemotePeer {
+  dial(rid: string, peer: Patp, isHost: boolean): RemotePeer {
     if (!this.local) {
       throw new Error('No local peer created');
     }
@@ -472,12 +460,12 @@ export class RealmProtocol extends BaseProtocol {
       this.sendSignal
     );
 
-    this.peers.set(remotePeer.patp, remotePeer);
-    remotePeer.dial();
+    this.peers.get(rid)?.set(remotePeer.patp, remotePeer);
+    remotePeer.dial(rid);
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
-      this.sendData({
+      this.sendData(rid, {
         kind: DataPacket_Kind.MUTE_STATUS,
         value: { data: this.local?.isMuted },
       });
@@ -495,27 +483,34 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data.value as DataPayload;
         remotePeer.isSpeakingChanged(payload.data);
       } else {
-        this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
+        this.emit(
+          ProtocolEvent.PeerDataReceived,
+          data.rid,
+          remotePeer.patp,
+          data
+        );
       }
     });
 
-    this.emit(ProtocolEvent.PeerAdded, remotePeer);
+    this.emit(ProtocolEvent.PeerAdded, rid, remotePeer);
 
     return remotePeer;
   }
 
-  async dialAll(room: RoomType): Promise<Map<Patp, RemotePeer>> {
+  async dialAll(room: RoomType): Promise<Map<string, Map<Patp, RemotePeer>>> {
     const peers = room.present.filter((peer: Patp) => this.our !== peer);
     await Promise.all(
-      peers.map((peer: Patp) => this.dial(peer, peer === room.creator))
+      peers.map((peer: Patp) =>
+        this.dial(room.rid, peer, peer === room.creator)
+      )
     );
     return this.peers;
   }
 
-  retry(peer: Patp) {
-    const remotePeer = this.peers.get(peer);
+  retry(rid: string, peer: Patp) {
+    const remotePeer = this.peers.get(rid)?.get(peer);
     if (remotePeer) {
-      remotePeer.dial();
+      remotePeer.dial(rid);
       // this.sendSignal(peer, { type: 'retry', from: this.our });
     }
   }
@@ -526,9 +521,9 @@ export class RealmProtocol extends BaseProtocol {
    * @param remotePeer
    * @returns Promise<RemotePeer>
    */
-  redial(remotePeer: RemotePeer): Promise<RemotePeer> {
+  redial(rid: string, remotePeer: RemotePeer): Promise<RemotePeer> {
     return new Promise((resolve, reject) => {
-      remotePeer.dial();
+      remotePeer.dial(rid);
       remotePeer.once(PeerEvent.Connected, () => {
         resolve(remotePeer);
       });
@@ -538,12 +533,12 @@ export class RealmProtocol extends BaseProtocol {
     });
   }
 
-  hangup(peer: Patp, { shouldEmit } = { shouldEmit: true }) {
-    const remotePeer = this.peers.get(peer);
+  hangup(rid: string, peer: Patp, { shouldEmit } = { shouldEmit: true }) {
+    const remotePeer = this.peers.get(rid)?.get(peer);
     if (remotePeer) {
       remotePeer.removeAllListeners();
       remotePeer.hangup();
-      shouldEmit && this.emit(ProtocolEvent.PeerRemoved, remotePeer);
+      shouldEmit && this.emit(ProtocolEvent.PeerRemoved, rid, remotePeer);
       this.peers.delete(peer);
     }
   }
@@ -554,19 +549,18 @@ export class RealmProtocol extends BaseProtocol {
    *
    * @param rid
    */
-  hangupAll() {
-    this.presentRoom = null;
+  hangupAll(rid: string) {
     this.disposePresentRoom && this.disposePresentRoom();
     //  hangup all peers
-    this.peers.forEach((peer) => {
-      this.hangup(peer.patp, { shouldEmit: false });
+    this.peers.get(rid)?.forEach((peer) => {
+      this.hangup(rid, peer.patp, { shouldEmit: false });
     });
     this.peers.clear();
   }
 
   async leave(rid: string) {
-    this.hangupAll();
-    this.peers.clear();
+    this.hangupAll(rid);
+    this.peers.get(rid)?.clear();
     const room = this.rooms.get(rid);
     if (room) {
       this.transitions.leaving = room;

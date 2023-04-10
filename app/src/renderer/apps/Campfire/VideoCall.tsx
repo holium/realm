@@ -86,6 +86,8 @@ export const VideoCall = observer(() => {
     if (!roomsManager?.campfire.room) return;
     return roomsManager?.campfire.room;
   }, [roomsManager?.campfire.room]);
+
+  console.log('present room', presentRoom);
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
   const isMuted = roomsManager?.protocol.local?.isMuted;
