@@ -79,7 +79,7 @@ export const Attachment: ComponentStory<typeof ChatInput> = () => {
           selectedChatPath="foo"
           attachments={[
             'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679310718-pixelady-559.png',
-            'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679313918-wallet%20tease.mp4',
+            // 'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679313918-wallet%20tease.mp4',
           ]}
           onSend={(message: FragmentType[]) => {
             setMessages([
@@ -94,6 +94,53 @@ export const Attachment: ComponentStory<typeof ChatInput> = () => {
           }}
           onAttachment={() => {}}
           onEditConfirm={() => {}}
+        />
+      </Box>
+    </Flex>
+  );
+};
+
+export const ReplyTo: ComponentStory<typeof ChatInput> = () => {
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+
+  return (
+    <Flex position="relative" overflow="visible" height={660} width={400}>
+      <Box
+        position="absolute"
+        overflow="visible"
+        bottom={12}
+        left={0}
+        right={0}
+      >
+        <ChatInput
+          id="chat-send"
+          selectedChatPath="foo"
+          replyTo={{
+            id: '1',
+            author: '~lomder-librun',
+            authorColor: '#FF0000',
+            sentAt: '2023-01-26T11:04:38.000Z',
+            message: [
+              { plain: 'Yo we should do XYZ in' },
+              { bold: 'bold' },
+              { plain: 'and' },
+              { italics: 'italics' },
+            ],
+          }}
+          onSend={(message: FragmentType[]) => {
+            setMessages([
+              ...messages,
+              {
+                our: true,
+                author: '~lomder-librun',
+                sentAt: new Date().toISOString(),
+                message: message,
+              },
+            ]);
+          }}
+          onAttachment={() => {}}
+          onEditConfirm={() => {}}
+          onCancelReply={() => {}}
         />
       </Box>
     </Flex>

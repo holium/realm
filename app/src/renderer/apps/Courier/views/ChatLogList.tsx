@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Box,
   Text,
@@ -16,6 +16,7 @@ type Props = {
   messages: ChatMessageType[];
   selectedChat: ChatModelType;
   ourColor: string;
+  endOfListPadding?: number;
 };
 
 export const ChatLogList = ({
@@ -24,10 +25,31 @@ export const ChatLogList = ({
   messages,
   selectedChat,
   ourColor,
+  endOfListPadding,
 }: Props) => {
   const listRef = useRef<WindowedListRef>(null);
 
   const scrollbarWidth = 12;
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }
+  }, [listRef.current, selectedChat.path]);
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }
+  }, [listRef.current, endOfListPadding]);
 
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
@@ -41,18 +63,22 @@ export const ChatLogList = ({
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
     const topSpacing = isPrevGrouped ? '3px' : 2;
-    const bottomSpacing = isNextGrouped ? '3px' : 2;
+    let bottomSpacing = isNextGrouped ? '3px' : 2;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
     const showDate = index === 0 || thisMsgDate !== prevMsgDate;
+    if (index === messages.length - 1 && endOfListPadding) {
+      bottomSpacing = endOfListPadding;
+    }
 
     return (
       <Box
         key={row.id}
         mx="1px"
+        animate={false}
         pt={topSpacing}
         pb={isLast ? bottomSpacing : 0}
       >

@@ -75,13 +75,12 @@ export const Reply = (props: ReplyProps) => {
   } else {
     replyContent = renderFragment(id, message[0], 0, author);
   }
+  // 12px in rem is 0.75rem
   return (
     <ReplyContainer
       id={id}
       key={id}
-      initial={{ opacity: 0, height: 25 }}
       animate={{ opacity: 1, height: 46 }}
-      exit={{ opacity: 0, height: 25 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
     >
@@ -95,19 +94,20 @@ export const Reply = (props: ReplyProps) => {
           gap: 8,
         }}
       >
-        <Icon name="Reply" size={22} color="accent" />
         <FragmentBlockquote
           id={id}
           className="pinned-or-reply-message"
           style={{
             paddingRight: 6,
+            borderRadius: 10,
             alignItems: 'center',
             borderLeft: `2px solid ${
               authorColor || 'rgba(var(--rlm-accent-rgba))'
             }`,
-            width: 'calc(100% - 60px)',
+            width: '100%',
           }}
         >
+          <Icon name="Reply" size={22} iconColor={authorColor} />
           {mediaContent}
           <Flex
             flex={1}
@@ -116,15 +116,25 @@ export const Reply = (props: ReplyProps) => {
             className="fragment-reply pinned"
             maxWidth="100%"
           >
-            <BubbleAuthor id={id} authorColor={authorColor}>
+            <BubbleAuthor
+              id={id}
+              fontSize="0.8125rem"
+              authorColor={authorColor}
+            >
               {author}
             </BubbleAuthor>
-            <Text.Custom truncate overflow="hidden" maxWidth="100%">
+            <Text.Custom
+              truncate
+              overflow="hidden"
+              fontSize="0.8125rem"
+              maxWidth="100%"
+            >
               {replyContent}
             </Text.Custom>
           </Flex>
           {onCancel && (
             <Button.IconButton
+              mr="4px"
               onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
                 evt.stopPropagation();
                 onCancel();
