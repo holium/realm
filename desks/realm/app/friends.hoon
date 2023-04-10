@@ -197,13 +197,13 @@
   ^+  core
   ::
   =/  us
-    :*  pinned=*pinned
+    :*  pinned=%.n
         tags=*tags
         created-at=now.bowl
         updated-at=now.bowl
-        phone-number=*phone-number
+        phone-number=~
         relationship=%our
-        contact-info=*contact-info
+        contact-info=~
     ==
   ::
   core(friends (~(put by friends) our.bowl us))
