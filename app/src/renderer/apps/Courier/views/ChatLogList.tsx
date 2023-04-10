@@ -11,7 +11,7 @@ import { ChatMessageType, ChatModelType } from '../models';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
-  listRef?: RefObject<WindowedListRef>;
+  listRef: RefObject<WindowedListRef>;
   width: number;
   height: number;
   messages: ChatMessageType[];
@@ -29,8 +29,6 @@ export const ChatLogList = ({
   ourColor,
   endOfListPadding,
 }: Props) => {
-  const scrollbarWidth = 12;
-
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollToIndex({

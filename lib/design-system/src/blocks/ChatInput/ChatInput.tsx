@@ -55,6 +55,7 @@ type ChatInputProps = {
   isFocused?: boolean;
   loading?: boolean;
   attachments?: string[];
+  containerWidth?: number;
   replyTo?: {
     id: string;
     author: string;
@@ -71,6 +72,7 @@ type ChatInputProps = {
   onCancelReply?: () => void;
   onAttachment?: () => void;
   onRemoveAttachment?: (index: number) => void;
+  onBlur: () => void;
 } & BoxProps;
 
 export const parseStringToFragment = (value: string): FragmentType[] => {
@@ -94,6 +96,7 @@ export const ChatInput = ({
   editingMessage,
   attachments,
   error,
+  containerWidth,
   onSend,
   onEditConfirm,
   onCancelEdit,
@@ -101,6 +104,7 @@ export const ChatInput = ({
   onAttachment,
   onRemoveAttachment,
   onPaste,
+  onBlur,
   ...chatInputProps
 }: ChatInputProps) => {
   const [rows, setRows] = useState(1);
@@ -148,7 +152,6 @@ export const ChatInput = ({
     const savedChat = localStorage.getItem(selectedChatPath);
     if (savedChat) {
       const savedChatAndType = JSON.parse(savedChat);
-      console.log(savedChatAndType);
       if (savedChatAndType.isNew === !editingMessage) {
         evt.target.value = savedChatAndType.value;
         onChange(evt);
@@ -156,7 +159,7 @@ export const ChatInput = ({
     }
   };
 
-  const onBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
+  const handleOnBlur = (_evt: React.FocusEvent<HTMLTextAreaElement>) => {
     if (value) {
       const isNew = editingMessage ? false : true;
       localStorage.setItem(
@@ -166,6 +169,7 @@ export const ChatInput = ({
     } else {
       localStorage.removeItem(selectedChatPath);
     }
+    onBlur();
   };
 
   const isDisabled =
@@ -205,33 +209,26 @@ export const ChatInput = ({
     setValue('');
     if (editingMessage) {
       onEditConfirm(parsedFragments);
+      setRows(1);
     } else {
       onSend(parsedFragments);
       setRows(1);
     }
   };
 
-  // let inputHeight =
-  //   rows === 1 ? 38 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20;
-
-  // if (attachments && attachments.length > 0) {
-  //   inputHeight += attachmentHeight;
-  // }
-
   return (
-    <Flex flexDirection="column" overflow="visible">
+    <Flex flexDirection="column" overflow="visible" width={containerWidth}>
       <InputBox
         inputId={id}
         px={0}
         disabled={disabled}
-        // height={inputHeight}
         error={!!error}
         borderRadius={24}
         {...chatInputProps}
       >
         <Flex
           flexDirection="column"
-          width="100%"
+          width={containerWidth ? containerWidth - 2 : undefined}
           py={2}
           px={2}
           justifyContent="flex-end"
@@ -310,20 +307,23 @@ export const ChatInput = ({
               gap={8}
               flexDirection="row"
               height={replyHeight}
-              overflowX="auto"
+              overflowX="hidden"
               alignItems="flex-start"
             >
               <Reply
                 id={replyTo.id}
                 author={replyTo.author}
                 authorColor={replyTo.authorColor}
+                containerWidth={
+                  containerWidth ? containerWidth - 10 : undefined
+                }
                 message={replyTo.message}
                 sentAt={replyTo.sentAt}
                 onCancel={onCancelReply}
               />
             </Flex>
           ) : null}
-          <Flex flexDirection="row" alignItems="flex-end" gap={4}>
+          <Flex width="100%" flexDirection="row" alignItems="flex-end" gap={4}>
             <Flex>
               <Button.IconButton
                 size={22}
@@ -354,7 +354,7 @@ export const ChatInput = ({
               }}
               onChange={onChange}
               onFocus={onFocus}
-              onBlur={onBlur}
+              onBlur={handleOnBlur}
               onPaste={onPaste}
               onKeyDown={onKeyDown}
             />

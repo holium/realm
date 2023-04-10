@@ -17,6 +17,7 @@ type CourierInputProps = {
   storage: IuseStorage;
   selectedChat: ChatModelType;
   editMessage?: ChatMessageType | null;
+  containerWidth: number;
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
@@ -28,6 +29,7 @@ export const ChatInputBox = ({
   storage,
   selectedChat,
   editMessage,
+  containerWidth,
   onSend,
   onEditConfirm,
   onCancelEdit,
@@ -39,6 +41,12 @@ export const ChatInputBox = ({
 
   const [attachments, setAttachment] = useState<string[]>([]);
   const mediaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (replyTo) {
+      setIsFocused(true);
+    }
+  }, [replyTo]);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
   useEffect(() => {
@@ -117,7 +125,6 @@ export const ChatInputBox = ({
 
   return (
     <Box
-      width="100%"
       initial={{
         opacity: 0,
       }}
@@ -126,6 +133,7 @@ export const ChatInputBox = ({
         delay: 0.2,
         duration: 0.1,
       }}
+      width={containerWidth}
       onAnimationComplete={() => {
         setIsFocused(true);
       }}
@@ -137,6 +145,7 @@ export const ChatInputBox = ({
         replyTo={replyTo}
         isFocused={isFocused}
         loading={isUploading}
+        containerWidth={containerWidth}
         onSend={(fragments) => {
           onSend(fragments);
           // clear attachments
@@ -155,6 +164,7 @@ export const ChatInputBox = ({
         onEditConfirm={onEditConfirm}
         onCancelEdit={onCancelEdit}
         onCancelReply={() => selectedChat.clearReplying()}
+        onBlur={() => setIsFocused(false)}
       />
     </Box>
   );

@@ -45,7 +45,6 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
     if (webview) {
       webview.addEventListener('dom-ready', () => {
         onTweetLoad && onTweetLoad();
-        // webview.openDevTools();
       });
     }
     return () => {
@@ -61,26 +60,12 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
     if (link.includes('status')) {
       const tweetId = link.split('status/')[1].split('?')[0];
       const tWidth = width;
-      // console.log('tweetId', tweetId, 'width', tWidth, 'height', height);
-
       tweetEmbed = (
         <webview
           id={`${id}-webview`}
           webpreferences="sandbox=false"
-          preload={`javaScript:const ipcRenderer = require('electron');
-              document.addEventListener('DOMContentLoaded', () => {
-                ipc.sendToHost({
-                  height: document.querySelector('article').offsetHeight,
-                });
-              });
-            `}
           src={`https://platform.twitter.com/embed/Tweet.html?dnt=true&embedId=twitter-widget-0a&frame=false&hideCard=false&hideThread=false&id=${tweetId}&lang=en&theme=light&widgetsVersion=aaf4084522e3a%3A1674595607486&width=${tWidth}px`}
           style={{
-            // left: 0,
-            // top: 0,
-            // bottom: 0,
-            // right: 0,
-            // position: 'absolute',
             borderRadius: '4px',
             overflow: 'hidden',
             width: tWidth,
@@ -121,52 +106,25 @@ export const measureTweet = (
   tray.appendChild(div);
   const root = createRoot(div);
 
-  console.log('tray', tray.offsetHeight, tray.offsetWidth);
-
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     root.render(
       <TweetBlock
         id="premeasure-tweet"
         variant="content"
         link={src}
         width={320}
-        height={700}
+        height={340}
         onTweetLoad={() => {
           const webview: HTMLWebViewElement | null = document.getElementById(
             'premeasure-tweet-webview'
           );
           if (webview) {
-            console.log('webview loaded', webview);
-            webview.addEventListener('ipc-message', (event) => {
-              console.log(event);
-              // Prints "pong"
-            });
-            // webview.openDevTools();
-
-            webview
-              // @ts-ignore
-              .executeJavaScript(
-                'document.querySelector("article").offsetHeight'
-              )
-              .then((height: number) => {
-                console.log('tweet height', height);
-                // const height = Math.ceil(div.offsetHeight);
-                const width = Math.ceil(div.offsetWidth);
-                // webview.webContents.
-                console.log(
-                  'tweet measure',
-                  width,
-                  height,
-                  webview?.style.height
-                );
-                tray.removeChild(div);
-                resolve({ width: `${width}`, height: `${height}` });
-              })
-              .catch((e) => {
-                console.error('tweet measure error', e);
-                tray.removeChild(div);
-                reject();
-              });
+            const height = Math.ceil(webview.offsetHeight);
+            const width = Math.ceil(webview.offsetWidth);
+            tray.removeChild(div);
+            resolve({ width: `${width}`, height: `${height}` });
+          } else {
+            resolve({ width: '0px', height: '0px' });
           }
         }}
       />

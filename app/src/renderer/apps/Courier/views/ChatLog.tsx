@@ -211,12 +211,14 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   let replyToFormatted;
   if (selectedChat.replyingMsg) {
-    const { color: authorColor } = friends.getContactAvatarMetadata(
-      selectedChat.replyingMsg.sender
-    );
+    const {
+      color: authorColor,
+      nickname,
+      patp,
+    } = friends.getContactAvatarMetadata(selectedChat.replyingMsg.sender);
     replyToFormatted = {
       id: selectedChat.replyingMsg.id,
-      author: selectedChat.replyingMsg.sender,
+      author: nickname || patp,
       authorColor,
       sentAt: selectedChat.replyingMsg.updatedAt.toString(),
       message: selectedChat.replyingMsg.contents,
@@ -307,6 +309,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           onEditConfirm={onEditConfirm}
           editMessage={selectedChat.editingMsg}
           replyTo={replyToFormatted}
+          containerWidth={containerWidth}
           onCancelEdit={(evt) => {
             evt.stopPropagation();
             if (!selectedChat) return;
