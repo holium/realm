@@ -417,9 +417,13 @@
       core
     ::
         %remove-friend
-      ::  If friends, %remove-friend will emit a %bye-friend poke.
+      ::  If friends, sent, or received a friend request
+      ::  %remove-friend will emit a %bye-friend poke.
+      ::
       ::  Unlike %add-friend, we don't wait for a response before
       ::  updating state - the ship may not exist any more.
+      ::
+      ::  Use for unfriending, cancelling friend request, or declining.
       ::
       ?.  =(our.bowl src.bowl)          ~|('no-foreign-remove-friend' !!)
       ?:  =(our.bowl ship.act)          ~|('no-self-remove-friend' !!)
@@ -435,26 +439,24 @@
         ==
       ::
       =/  fren  (~(got by friends) ship.act)
-      ::  Only remove if currently friends.
+      ::  Only remove if friends or received.
       ::
-      ?+    relationship.fren  ~|(invalid-remove-friend/relationship.fren !!)
-          %fren
-        ::
-        =/  fren-upd
-          :*  pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              phone-number=phone-number.fren
-              relationship=%know
-              contact-info=contact-info.fren
-          ==
-        ::
-        %=  core
-          friends  (~(put by friends) ship.act fren-upd)
-          cards    [bye-friend cards]
+      ?.  ?=(?(%sent %received %fren) relationship.fren)
+        ~|(invalid-remove-friend/relationship.fren !!)
+      ::
+      =/  fren-upd
+        :*  pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%know
+            contact-info=contact-info.fren
         ==
       ::
+      %=  core
+        friends  (~(put by friends) ship.act fren-upd)
+        cards    [bye-friend cards]
       ==
     ::
         %block-friend
@@ -465,8 +467,8 @@
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
       core
     ::
-        %set-info
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-info' !!)
+        %save-passport
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-save-passport' !!)
       core
     ::
         %sent-friend
@@ -538,24 +540,22 @@
       ?.  (~(has by friends) src.bowl)  ~|('no-bye-unknown-friend' !!)
       ::
       =/  fren  (~(got by friends) src.bowl)
-      ::  They should currently be a %fren to unfriend us.
+      ::  We should be friends, sent, or received.
       ::
-      ?+    relationship.fren  ~|(invalid-bye-friend/relationship.fren !!)
-          %fren
-        ::
-        =/  fren-upd
-          :*  pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              phone-number=phone-number.fren
-              relationship=%know
-              contact-info=contact-info.fren
-          ==
-        ::
-        core(friends (~(put by friends) src.bowl fren-upd))
+      ?.  ?=(?(%sent %received %fren) relationship.fren)
+        ~|(invalid-bye-friend/relationship.fren !!)
       ::
-      ==
+      =/  fren-upd
+        :*  pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%know
+            contact-info=contact-info.fren
+        ==
+      ::
+      core(friends (~(put by friends) src.bowl fren-upd))
     ::
     ==
   ::

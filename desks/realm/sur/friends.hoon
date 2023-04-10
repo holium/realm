@@ -98,11 +98,13 @@
       [%block-friend =ship]
       [%unblock-friend =ship]
       :: editing our own passport information
-      [%set-info =contact-info]
+      :: could support diffs, but this is simpler
+      ::
+      [%save-passport =contact-info]
       ::  `fren` actions are sent agent to agent
       ::
       ::  sent-friend: ship sends you friend request
-      ::  accept-friend: ship is now your friend
+      ::  accept-friend: ship accepts your friend request
       ::  bye-friend: ship notifies you that it has cancelled friend request or unfriended you.
       [%sent-friend ~]
       [%accept-friend ~]
