@@ -201,7 +201,7 @@
 ::        with `old` updated to the next version.                             ::
 ::                                                                            ::
 ::  Note that state versions move separately from "mark" versions.            ::
-::  i.e. action-0, update-0, scry /~/0/<...>, etc.                            ::
+::  i.e. action-0, update-0, scry /~/[ver]/<...>, etc.                        ::
 ::  Hence we handle state versioning here rather than in versioned cores.     ::
 ::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -321,231 +321,301 @@
 ::
 ++  core-0
   |%
+  ++  ver  %'0'
   ++  poke
-  |=  act=friends-action-0
-  ^+  core
-  ?-    -.act
-      %add-friend
-    ::  A successful add-friend will result in a follow request
-    ::  or an accept request, depending on our state.
-    ::  We don't directly update state here, rather we wait for a
-    ::  positive %poke-ack from the other ship.
-    ::
-    ::  TODO: receiving a NACK should notify the UI that the request failed.
-    ::
-    ::  If trying to add-friend ourselves, or issued from another ship, crash.
-    ::
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
-    ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
-    ::  Pokes to be used later
-    ::
-    =*  sent-friend
-      :*  %pass
-          /0/sent-friend/(scot %p ship.act)
-          %agent
-          [ship.act dap.bowl]
-          %poke
-          friends-action-0+!>([%sent-friend ~])
+    |=  act=friends-action-0
+    ^+  core
+    ?-    -.act
+        %add-friend
+      ::  A successful add-friend will result in a follow request
+      ::  or an accept request, depending on our state.
+      ::  We don't directly update state here, rather we wait for a
+      ::  positive %poke-ack from the other ship.
+      ::
+      ::  TODO: receiving a NACK should notify the UI that the request failed.
+      ::
+      ::  If trying to add-friend ourselves, or issued from another ship, crash.
+      ::
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
+      ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
+      ::  Pokes to be used later
+      ::
+      =*  sent-friend
+        :*  %pass
+            /[ver]/sent-friend/(scot %p ship.act)
+            %agent
+            [ship.act dap.bowl]
+            %poke
+            friends-action-0+!>([%sent-friend ~])
+        ==
+      ::
+      =*  accept-friend
+        :*  %pass
+            /[ver]/accept-friend/(scot %p ship.act)
+            %agent
+            [ship.act dap.bowl]
+            %poke
+            friends-action-0+!>([%accept-friend ~])
+        ==
+      ::
+      ?:  (~(has by friends) ship.act)
+        =/  fren  (~(got by friends) ship.act)
+        ::  Already sent, do nothing.
+        ::  Only know, send request.
+        ::  Already received, accept request.
+        ::
+        ?+  relationship.fren  ~|(invalid-add-friend/relationship.fren !!)
+          %sent      core
+          %know      (emit sent-friend)
+          %received  (emit accept-friend)
+        ==
+      ::  ship is not in our friends list, so add them as know
+      ::  and send a friend request
+      ::
+      =/  fren
+        :*  pinned=%.n
+            tags=*tags
+            created-at=now.bowl
+            updated-at=now.bowl
+            phone-number=~
+            relationship=%know
+            contact-info=~
+        ==
+      ::
+      %=  core
+        friends  (~(put by friends) ship.act fren)
+        cards    [sent-friend cards]
       ==
     ::
-    =*  accept-friend
-      :*  %pass
-          /0/accept-friend/(scot %p ship.act)
-          %agent
-          [ship.act dap.bowl]
-          %poke
-          friends-action-0+!>([%accept-friend ~])
-      ==
+        %edit-friend
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-friend' !!)
+      ?:  =(our.bowl ship.act)  ~|('no-self-edit-friend' !!)
+      core
     ::
-    ?:  (~(has by friends) ship.act)
+        %remove-friend
+      ::  If friends, %remove-friend will emit a %bye-friend poke.
+      ::  Unlike %add-friend, we don't wait for a response before
+      ::  updating state - the ship may not exist any more.
+      ::
+      ?.  =(our.bowl src.bowl)          ~|('no-foreign-remove-friend' !!)
+      ?:  =(our.bowl ship.act)          ~|('no-self-remove-friend' !!)
+      ?.  (~(has by friends) ship.act)  ~|('no-remove-unknown-friend' !!)
+      ::
+      =*  bye-friend
+        :*  %pass
+            /[ver]/bye-friend/(scot %p ship.act)
+            %agent
+            [ship.act dap.bowl]
+            %poke
+            friends-action-0+!>([%bye-friend ~])
+        ==
+      ::
       =/  fren  (~(got by friends) ship.act)
-      ::  Already sent, do nothing.
-      ::  Only know, send request.
-      ::  Already received, accept request.
+      ::  Only remove if currently friends.
       ::
-      ?+  relationship.fren  ~|(invalid-add-friend/relationship.fren !!)
-        %sent      core
-        %know      (emit sent-friend)
-        %received  (emit accept-friend)
-      ==
-    ::  ship is not in our friends list, so add them as know
-    ::  and send a friend request
-    ::
-    =/  fren
-      :*  pinned=%.n
-          tags=*tags
-          created-at=now.bowl
-          updated-at=now.bowl
-          phone-number=~
-          relationship=%know
-          contact-info=~
-      ==
-    ::
-    %=  core
-      friends  (~(put by friends) ship.act fren)
-      cards    [sent-friend cards]
-    ==
-  ::
-      %edit-friend
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-friend' !!)
-    ?:  =(our.bowl ship.act)  ~|('no-self-edit-friend' !!)
-    ~&  >  ['editing friend' ship.act]
-    core
-  ::
-      %remove-friend
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-remove-friend' !!)
-    core
-  ::
-      %block-friend
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
-    core
-  ::
-      %unblock-friend
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
-    core
-  ::
-      %set-info
-    ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-info' !!)
-    core
-  ::
-      %sent-friend
-    ::  Receive a new friend request from another ship.
-    ::
-    ?:  =(our.bowl src.bowl)  ~|('no-self-sent-friend' !!)
-    ::
-    ?:  (~(has by friends) src.bowl)
-      =/  fren  (~(got by friends) src.bowl)
-      ::  Already received, do nothing.
-      ::  Only know, update to received.
-      ::
-      ?+  relationship.fren  ~|(invalid-sent-friend/relationship.fren !!)
-        %received  core
-      ::
-          %know
+      ?+    relationship.fren  ~|(invalid-remove-friend/relationship.fren !!)
+          %fren
+        ::
         =/  fren-upd
           :*  pinned=pinned.fren
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
               phone-number=phone-number.fren
-              relationship=%received
+              relationship=%know
+              contact-info=contact-info.fren
+          ==
+        ::
+        %=  core
+          friends  (~(put by friends) ship.act fren-upd)
+          cards    [bye-friend cards]
+        ==
+      ::
+      ==
+    ::
+        %block-friend
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
+      core
+    ::
+        %unblock-friend
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
+      core
+    ::
+        %set-info
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-edit-info' !!)
+      core
+    ::
+        %sent-friend
+      ::  Receive a new friend request from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)  ~|('no-self-sent-friend' !!)
+      ::
+      ?:  (~(has by friends) src.bowl)
+        =/  fren  (~(got by friends) src.bowl)
+        ::  Already received, do nothing.
+        ::  Only know, update to received.
+        ::
+        ?+  relationship.fren  ~|(invalid-sent-friend/relationship.fren !!)
+          %received  core
+        ::
+            %know
+          =/  fren-upd
+            :*  pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%received
+                contact-info=contact-info.fren
+            ==
+          core(friends (~(put by friends) src.bowl fren-upd))
+        ::
+        ==
+      ::  Ship not on our list, so add them as received
+      ::
+      =/  fren
+        :*  pinned=%.n
+            tags=*tags
+            created-at=now.bowl
+            updated-at=now.bowl
+            phone-number=~
+            relationship=%received
+            contact-info=~
+        ==
+      core(friends (~(put by friends) src.bowl fren))
+    ::
+        %accept-friend
+      ::  Receive a friend request acceptance from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)  ~|('no-self-accept-friend' !!)
+      ::
+      =/  fren  (~(got by friends) src.bowl)
+      ::  We should currently be in %sent to be accepted.
+      ::
+      ?+  relationship.fren  ~|(invalid-accept-friend/relationship.fren !!)
+          %sent
+        ::
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%fren
               contact-info=contact-info.fren
           ==
         core(friends (~(put by friends) src.bowl fren-upd))
+      ==
+    ::
+        %bye-friend
+      ::  Receive an unfriend request from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)          ~|('no-self-bye-friend' !!)
+      ?.  (~(has by friends) src.bowl)  ~|('no-bye-unknown-friend' !!)
+      ::
+      =/  fren  (~(got by friends) src.bowl)
+      ::  They should currently be a %fren to unfriend us.
+      ::
+      ?+    relationship.fren  ~|(invalid-bye-friend/relationship.fren !!)
+          %fren
+        ::
+        =/  fren-upd
+          :*  pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%know
+              contact-info=contact-info.fren
+          ==
+        ::
+        core(friends (~(put by friends) src.bowl fren-upd))
       ::
       ==
-    ::  Ship not on our list, so add them as received
     ::
-    =/  fren
-      :*  pinned=%.n
-          tags=*tags
-          created-at=now.bowl
-          updated-at=now.bowl
-          phone-number=~
-          relationship=%received
-          contact-info=~
-      ==
-    core(friends (~(put by friends) src.bowl fren))
-  ::
-      %accept-friend
-    ::  Receive a friend request acceptance from another ship.
-    ::
-    ?:  =(our.bowl src.bowl)  ~|('no-self-accept-friend' !!)
-    ::
-    =/  fren  (~(got by friends) src.bowl)
-    ::  We should currently be in %sent to be accepted.
-    ::
-    ?+  relationship.fren  ~|(invalid-accept-friend/relationship.fren !!)
-        %sent
-      ::
-      =/  fren-upd
-        :*  pinned=pinned.fren
-            tags=tags.fren
-            created-at=created-at.fren
-            updated-at=now.bowl
-            phone-number=phone-number.fren
-            relationship=%fren
-            contact-info=contact-info.fren
-        ==
-      core(friends (~(put by friends) src.bowl fren-upd))
     ==
-  ::
-      %bye-friend
-    core
-  ::
-  ==
   ::
   ++  agent
-  |=  [path=(pole knot) =sign:agent:gall]
-  ^+  core
-  ::  This will be used repeatedly, so define it once.
-  ::
-  =*  ship  `@p`(slav %p ship.path)
-  ::
-  ?+    path  ~|(bad-agent-wire/path !!)
-      [%sent-friend ship=@ ~]
+    |=  [path=(pole knot) =sign:agent:gall]
+    ^+  core
+    ::  This will be used repeatedly, so define it once.
     ::
-    ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
-        %poke-ack
-      ::  This checks if poke succeeded or failed.
+    =*  ship  `@p`(slav %p ship.path)
+    ::
+    ?+    path  ~|(bad-agent-wire/path !!)
+        [%sent-friend ship=@ ~]
       ::
-      ?~  p.sign
-        ::  Poke succeeded.  Verify that the ship is currently %know,
-        ::  then update state.
+      ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
+          %poke-ack
+        ::  This checks if poke succeeded or failed.
         ::
-        =/  fren  (~(got by friends) ship)
-        ?+  relationship.fren  ~|(dont-know-cant-follow/relationship.fren !!)
-            %know
+        ?~  p.sign
+          ::  Poke succeeded.  Verify that the ship is currently %know,
+          ::  then update state.
           ::
-          =/  fren-upd
-            :*  pinned=pinned.fren
-                tags=tags.fren
-                created-at=created-at.fren
-                updated-at=now.bowl
-                phone-number=phone-number.fren
-                relationship=%sent
-                contact-info=contact-info.fren
-            ==
-          ::  TODO, emit any necessary cards
-          core(friends (~(put by friends) ship fren-upd))
-        ==
-      ::  Poke failed - don't update state.
-      ::  TODO, notify UI of failure.
-      ::
-      ((slog leaf/"sent-friend nack" ~) core)
-    ==
-  ::
-      [%accept-friend ship=@ ~]
-    ::
-    ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
-        %poke-ack
-      ::
-      ?~  p.sign
-        =/  fren  (~(got by friends) ship)
-        ::  We should be in %received to be accepted.
+          =/  fren  (~(got by friends) ship)
+          ?+  relationship.fren  ~|(dont-know-cant-sent/relationship.fren !!)
+              %know
+            ::
+            =/  fren-upd
+              :*  pinned=pinned.fren
+                  tags=tags.fren
+                  created-at=created-at.fren
+                  updated-at=now.bowl
+                  phone-number=phone-number.fren
+                  relationship=%sent
+                  contact-info=contact-info.fren
+              ==
+            ::  TODO, emit any necessary cards
+            core(friends (~(put by friends) ship fren-upd))
+          ==
+        ::  Poke failed - don't update state.
+        ::  TODO, notify UI of failure.
         ::
-        ?+  relationship.fren  ~|(dont-know-cant-follow/relationship.fren !!)
-            %received
-          ::
-          =/  fren-upd
-            :*  pinned=pinned.fren
-                tags=tags.fren
-                created-at=created-at.fren
-                updated-at=now.bowl
-                phone-number=phone-number.fren
-                relationship=%fren
-                contact-info=contact-info.fren
-            ==
-          ::  TODO, emit any necessary cards
-          core(friends (~(put by friends) ship fren-upd))
-        ==
-      ::  Poke failed
+        ((slog leaf/"sent-friend nack" ~) core)
       ::
-      core
+      ==
+    ::
+        [%accept-friend ship=@ ~]
+      ::
+      ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
+          %poke-ack
+        ::
+        ?~  p.sign
+          =/  fren  (~(got by friends) ship)
+          ::  We should be in %received to be accepted.
+          ::
+          ?+  relationship.fren  ~|(dont-know-cant-accept/relationship.fren !!)
+              %received
+            ::
+            =/  fren-upd
+              :*  pinned=pinned.fren
+                  tags=tags.fren
+                  created-at=created-at.fren
+                  updated-at=now.bowl
+                  phone-number=phone-number.fren
+                  relationship=%fren
+                  contact-info=contact-info.fren
+              ==
+            ::  TODO, emit any necessary cards
+            core(friends (~(put by friends) ship fren-upd))
+          ==
+        ::  Poke failed
+        ::
+        ((slog leaf/"accept-friend nack" ~) core)
+      ::
+      ==
+    ::
+        [%bye-friend ship=@ ~]
+      ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
+          %poke-ack
+        ?~  p.sign
+          core
+        ((slog leaf/"bye-friend nack" ~) core)
+      ::
+      ==
     ::
     ==
-  ::
-  ==
   --
 ::
 ::  "when they see the Realm of the Gods, they will tremble in fear
