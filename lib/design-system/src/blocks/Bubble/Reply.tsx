@@ -14,6 +14,7 @@ import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
 const ReplyContainer = styled(Flex)`
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
   blockquote {
     margin: 0px 0px;
   }
@@ -26,6 +27,7 @@ export type ReplyProps = {
   authorColor?: string;
   sentAt: string;
   message?: FragmentType[];
+  containerWidth?: number;
   onClick?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
   onCancel?: () => void;
 } & BoxProps;
@@ -36,6 +38,7 @@ export const Reply = (props: ReplyProps) => {
     author,
     authorColor,
     message,
+    containerWidth,
     onClick = () => {},
     onCancel,
   } = props;
@@ -68,14 +71,22 @@ export const Reply = (props: ReplyProps) => {
           id={'pin-image-preview'}
           src={link}
           style={{ display: 'block' }}
+          // width={100}
+          // height={100}
           draggable={false}
         />
       </Box>
     );
   } else {
-    replyContent = renderFragment(id, message[0], 0, author);
+    replyContent = renderFragment(
+      id,
+      message[0],
+      0,
+      author,
+      containerWidth ? containerWidth - 16 - 22 : undefined
+    );
   }
-  // 12px in rem is 0.75rem
+  let additionalWidth = mediaContent ? 100 : 0;
   return (
     <ReplyContainer
       id={id}
@@ -83,6 +94,7 @@ export const Reply = (props: ReplyProps) => {
       animate={{ opacity: 1, height: 46 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
+      width={containerWidth}
     >
       <FragmentBlock
         id={id}
@@ -90,7 +102,7 @@ export const Reply = (props: ReplyProps) => {
           display: 'inline-flex',
           flexDirection: 'row',
           alignItems: 'center',
-          width: '100%',
+          // width: containerWidth,
           gap: 8,
         }}
       >
@@ -104,7 +116,7 @@ export const Reply = (props: ReplyProps) => {
             borderLeft: `2px solid ${
               authorColor || 'rgba(var(--rlm-accent-rgba))'
             }`,
-            width: '100%',
+            width: containerWidth ? containerWidth - 16 : '100%',
           }}
         >
           <Icon name="Reply" size={22} iconColor={authorColor} />
@@ -114,7 +126,7 @@ export const Reply = (props: ReplyProps) => {
             flexDirection="column"
             justifyContent="center"
             className="fragment-reply pinned"
-            maxWidth="100%"
+            width={containerWidth ? containerWidth - 16 - 22 : '100%'}
           >
             <BubbleAuthor
               id={id}
@@ -127,7 +139,9 @@ export const Reply = (props: ReplyProps) => {
               truncate
               overflow="hidden"
               fontSize="0.8125rem"
-              maxWidth="100%"
+              width={
+                containerWidth ? containerWidth - 104 - additionalWidth : '100%'
+              }
             >
               {replyContent}
             </Text.Custom>

@@ -174,7 +174,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-left: 2px solid rgba(var(--rlm-accent-rgba));
   padding-left: 6px;
   padding-right: 8px;
-  border-radius: 3px;
+  border-radius: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
   background-color: rgba(0, 0, 0, 0.1);

@@ -1,12 +1,5 @@
 import { toJS } from 'mobx';
-import {
-  flow,
-  Instance,
-  types,
-  cast,
-  applySnapshot,
-  detach,
-} from 'mobx-state-tree';
+import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { ChatIPC } from 'renderer/stores/ipc';
