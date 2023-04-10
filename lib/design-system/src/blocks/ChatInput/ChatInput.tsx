@@ -65,6 +65,7 @@ type ChatInputProps = {
   };
   editingMessage?: FragmentType[];
   error?: string;
+  themeMode?: 'light' | 'dark';
   onPaste?: (evt: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   onSend: (fragments: FragmentType[]) => void;
   onEditConfirm: (fragments: FragmentType[]) => void;
@@ -97,6 +98,7 @@ export const ChatInput = ({
   attachments,
   error,
   containerWidth,
+  themeMode,
   onSend,
   onEditConfirm,
   onCancelEdit,
@@ -314,6 +316,7 @@ export const ChatInput = ({
                 id={replyTo.id}
                 author={replyTo.author}
                 authorColor={replyTo.authorColor}
+                themeMode={themeMode}
                 containerWidth={
                   containerWidth ? containerWidth - 10 : undefined
                 }

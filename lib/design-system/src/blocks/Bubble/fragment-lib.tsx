@@ -177,6 +177,9 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-radius: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   background-color: rgba(0, 0, 0, 0.1);
 
   .fragment-reply {
@@ -412,7 +415,7 @@ export const renderFragment = (
 
       return (
         <FragmentBlockquote
-          style={{ height: 42 }}
+          style={{ height: 46 }}
           id={id}
           key={`${author + index}-reply`}
           onClick={() => onReplyClick?.(replyId)}

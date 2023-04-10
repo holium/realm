@@ -212,6 +212,7 @@ export const Chat = types
         createdAt: types.number,
       })
     ),
+    lastUpdatedAt: types.maybeNull(types.number),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -318,6 +319,7 @@ export const Chat = types
           contents: lastContents,
           createdAt: new Date().getTime(),
         };
+        self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
         yield ChatDBActions.sendMessage(path, fragments);
       } catch (error) {
@@ -367,6 +369,7 @@ export const Chat = types
           createdAt: message.createdAt,
         };
       }
+      // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
