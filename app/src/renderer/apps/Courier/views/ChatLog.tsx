@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
@@ -9,6 +9,7 @@ import {
   measureImage,
   fetchOGData,
   extractOGData,
+  WindowedListRef,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -39,6 +40,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const accountStore = useAccountStore();
   const { ship, friends, spaces } = useServices();
   const [showAttachments, setShowAttachments] = useState(false);
+
+  const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
     if (!ship) return { color: '#000' };
@@ -152,7 +155,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     height = height - replyHeight;
   }
   if (showAttachments) {
-    height = height - 110;
+    height = height - 116;
   }
 
   let pretitle;
@@ -243,6 +246,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 </FullWidthAnimatePresence>
               )}
               <ChatLogList
+                listRef={listRef}
                 messages={messages}
                 selectedChat={selectedChat}
                 width={containerWidth}
@@ -292,6 +296,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
             } else {
               setShowAttachments(false);
             }
+            // Wait for transition to finish, then scroll to bottom.
+            setTimeout(() => {
+              listRef.current?.scrollToIndex(messages.length - 1);
+            }, 250);
           }}
           editMessage={selectedChat.editingMsg}
           onCancelEdit={(evt) => {
