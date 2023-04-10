@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, RefObject } from 'react';
 import {
   Box,
   Text,
@@ -11,6 +11,7 @@ import { ChatMessageType, ChatModelType } from '../models';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
+  listRef?: RefObject<WindowedListRef>;
   width: number;
   height: number;
   messages: ChatMessageType[];
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export const ChatLogList = ({
+  listRef,
   width,
   height,
   messages,
@@ -27,8 +29,6 @@ export const ChatLogList = ({
   ourColor,
   endOfListPadding,
 }: Props) => {
-  const listRef = useRef<WindowedListRef>(null);
-
   const scrollbarWidth = 12;
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export const ChatLogList = ({
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
-            listRef.current?.scrollToIndex({
+            listRef?.current?.scrollToIndex({
               index: replyIndex,
               align: 'start',
               behavior: 'smooth',
@@ -119,14 +119,15 @@ export const ChatLogList = ({
       <WindowedList
         innerRef={listRef}
         data={messages}
-        followOutput="auto"
-        width={width + scrollbarWidth}
+        width={width}
         height={height}
-        style={{ marginRight: -scrollbarWidth }}
         atBottomThreshold={100}
-        alignToBottom
-        initialTopMostItemIndex={messages.length - 1}
+        // style={{ marginRight: -scrollbarWidth }}
+        // alignToBottom
+        // initialTopMostItemIndex={messages.length - 1}
         itemContent={renderChatRow}
+        chatMode
+        shiftScrollbar
       />
     </Gallery>
   );
