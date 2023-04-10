@@ -42,11 +42,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       rtc: this.protocol.rtc,
       video: false,
     });
-    /*this.campfireLocal = new LocalPeer(this.protocol, this.protocol.our, {
-      isHost: false,
-      rtc: this.protocol.rtc,
-      video: true,
-    });*/
 
     this.live = {
       room: undefined,
@@ -84,8 +79,14 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       this.updateRoom(room);
     });
 
-    this.protocol.on(ProtocolEvent.RoomLeft, () => {
-      this.clearLiveRoom();
+    this.protocol.on(ProtocolEvent.RoomLeft, (room: RoomType) => {
+      if (room.type === 'rooms') {
+        this.clearLiveRoom();
+      } else if (room.type === 'campfire') {
+        this.clearCampfireRoom();
+      } else if (room.type === 'data') {
+        this.clearDataRoom(room.rid);
+      }
     });
 
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
@@ -106,15 +107,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
         }
       }
     );
-
-    /*this.campfireProtocol.on(
-      ProtocolEvent.PeerDataReceived,
-      (rid: string, peer: Patp, data: DataPacket) => {
-        if (this.dataRooms[data.rid]) {
-          this.emit(RoomManagerEvent.OnDataChannel, data.rid, peer, data);
-        }
-      }
-    );*/
 
     this.cleanup = this.cleanup.bind(this);
 
@@ -181,6 +173,14 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   get presentRoom(): RoomType | null {
     return this.protocol.presentRoom;
+  }
+
+  get presentCampfire(): RoomType | null {
+    return this.protocol.presentCampfire;
+  }
+
+  get presentData(): Map<string, RoomType> {
+    return this.protocol.presentData;
   }
 
   /**
@@ -308,6 +308,15 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   clearLiveRoom() {
     this.live.room = undefined;
     this.live.chat = [];
+  }
+
+  clearCampfireRoom() {
+    this.campfire.room = undefined;
+    this.campfire.chat = [];
+  }
+
+  clearDataRoom(rid: string) {
+    delete this.dataRooms[rid];
   }
 
   // Setup audio

@@ -18,16 +18,19 @@ export class RemotePeer extends Peer {
   isVideoAttached: boolean = false;
   rtcConfig: RTCConfiguration;
   sendSignal: (rid: string, peer: Patp, data: SignalData) => void;
+  rid: string;
   constructor(
     our: Patp,
     peer: Patp,
     config: PeerConfig & { isInitiator: boolean },
-    sendSignal: (rid: string, peer: Patp, data: SignalData) => void
+    sendSignal: (rid: string, peer: Patp, data: SignalData) => void,
+    rid: string
   ) {
     super(peer, config);
     this.our = our;
     this.isInitiator = config.isInitiator;
     this.sendSignal = sendSignal;
+    this.rid = rid;
     this.rtcConfig = config.rtc;
 
     makeObservable(this, {
@@ -77,7 +80,7 @@ export class RemotePeer extends Peer {
     );
   }
 
-  dial(rid: string) {
+  dial() {
     if (this.status !== PeerConnectionState.New) {
       console.log('dialing, not new status');
       this.removeTracks();
@@ -88,7 +91,7 @@ export class RemotePeer extends Peer {
     if (!this.isInitiator) {
       this.createConnection();
       console.log(`%waiting to ${this.patp}`);
-      this.sendSignal(rid, this.patp, { type: 'waiting', from: this.our });
+      this.sendSignal(this.rid, this.patp, { type: 'waiting', from: this.our });
     }
   }
 
@@ -131,7 +134,7 @@ export class RemotePeer extends Peer {
   }
 
   _onSignal(data: SimplePeer.SignalData) {
-    this.sendSignal(this.patp, data);
+    this.sendSignal(this.rid, this.patp, data);
     if (this.status !== PeerConnectionState.Connected) {
       this.setStatus(PeerConnectionState.Connecting);
     }

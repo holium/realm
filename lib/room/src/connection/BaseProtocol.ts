@@ -20,6 +20,9 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   campfireLocal: LocalPeer | null = null;
   dataLocal: LocalPeer | null = null;
   provider: string; // default is our
+  presentRoom: RoomType | null = null;
+  presentCampfire: RoomType | null = null;
+  presentData: Map<string, RoomType> = new Map();
   rooms: RoomMap;
   peers: Map<string, Map<Patp, RemotePeer>> = new Map();
   rtc: RTCConfiguration = {
@@ -44,6 +47,9 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
       campfireLocal: observable,
       dataLocal: observable,
       peers: observable,
+      presentRoom: observable,
+      presentCampfire: observable,
+      presentData: observable,
       rooms: observable,
       setProvider: action.bound,
       getRoom: action.bound,
@@ -89,6 +95,6 @@ export type ProtocolEventCallbacks = {
   roomUpdated: (room: RoomType) => void;
   roomInitial: (room: RoomType) => void;
   roomEntered: (room: RoomType) => void;
-  roomLeft: (rid: string) => void;
+  roomLeft: (room: RoomType) => void;
   peerDataReceived: (rid: string, peer: Patp, data: DataPacket) => void;
 };

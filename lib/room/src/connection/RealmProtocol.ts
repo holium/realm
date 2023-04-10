@@ -142,7 +142,7 @@ export class RealmProtocol extends BaseProtocol {
         if (signalData.type === 'retry') {
           const roomPeers = this.peers.get(payload.rid);
           const retryingPeer = roomPeers?.get(payload.from);
-          retryingPeer?.dial(payload.rid);
+          retryingPeer?.dial();
         }
         if (isWebRTCSignal(signalData.type)) {
           if (remotePeer) {
@@ -457,11 +457,12 @@ export class RealmProtocol extends BaseProtocol {
       this.our,
       peer,
       peerConfig,
-      this.sendSignal
+      this.sendSignal,
+      rid
     );
 
     this.peers.get(rid)?.set(remotePeer.patp, remotePeer);
-    remotePeer.dial(rid);
+    remotePeer.dial();
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
@@ -510,7 +511,7 @@ export class RealmProtocol extends BaseProtocol {
   retry(rid: string, peer: Patp) {
     const remotePeer = this.peers.get(rid)?.get(peer);
     if (remotePeer) {
-      remotePeer.dial(rid);
+      remotePeer.dial();
       // this.sendSignal(peer, { type: 'retry', from: this.our });
     }
   }
@@ -521,9 +522,9 @@ export class RealmProtocol extends BaseProtocol {
    * @param remotePeer
    * @returns Promise<RemotePeer>
    */
-  redial(rid: string, remotePeer: RemotePeer): Promise<RemotePeer> {
+  redial(remotePeer: RemotePeer): Promise<RemotePeer> {
     return new Promise((resolve, reject) => {
-      remotePeer.dial(rid);
+      remotePeer.dial();
       remotePeer.once(PeerEvent.Connected, () => {
         resolve(remotePeer);
       });
@@ -564,7 +565,7 @@ export class RealmProtocol extends BaseProtocol {
     const room = this.rooms.get(rid);
     if (room) {
       this.transitions.leaving = room;
-      this.emit(ProtocolEvent.RoomLeft, rid);
+      this.emit(ProtocolEvent.RoomLeft, room);
     }
     await this.poke({
       app: 'rooms-v2',
