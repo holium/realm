@@ -37,8 +37,11 @@ export const MultiplayerMice = () => {
       (patp, position, state, hexColor) => {
         const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
         setCursors((prev) => {
-          if (prev[patp]?.timeout) {
-            clearTimeout(prev[patp].timeout);
+          if (prev[patp] && prev[patp].timeout) {
+            const { timeout } = prev[patp];
+            if (timeout) {
+              clearTimeout(timeout);
+            }
           }
 
           const timeout = setTimeout(() => {
