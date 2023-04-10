@@ -19,22 +19,6 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 const rowHeight = 52;
 
-// const sortFunction = (a: ChatModelType, b: ChatModelType) => {
-//   if (
-//     (a.createdAt || a.metadata.timestamp) >
-//     (b.createdAt || b.metadata.timestamp)
-//   ) {
-//     return -1;
-//   }
-//   if (
-//     (a.createdAt || a.metadata.timestamp) <
-//     (b.createdAt || b.metadata.timestamp)
-//   ) {
-//     return 1;
-//   }
-//   return 0;
-// };
-
 const scrollbarWidth = 12;
 const heightPadding = 12;
 const searchHeight = 40;

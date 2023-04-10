@@ -10,6 +10,8 @@ import {
   FragmentImage,
 } from './fragment-lib';
 import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
+import { useMemo } from 'react';
+import { convertDarkText } from '../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;
@@ -28,6 +30,7 @@ export type ReplyProps = {
   sentAt: string;
   message?: FragmentType[];
   containerWidth?: number;
+  themeMode?: 'light' | 'dark';
   onClick?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
   onCancel?: () => void;
 } & BoxProps;
@@ -39,10 +42,17 @@ export const Reply = (props: ReplyProps) => {
     authorColor,
     message,
     containerWidth,
+    themeMode,
     onClick = () => {},
     onCancel,
   } = props;
 
+  const authorColorDisplay = useMemo(
+    () =>
+      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      'rgba(var(--rlm-text-rgba))',
+    [authorColor]
+  );
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
   let replyContent = null;
@@ -114,12 +124,12 @@ export const Reply = (props: ReplyProps) => {
             borderRadius: 10,
             alignItems: 'center',
             borderLeft: `2px solid ${
-              authorColor || 'rgba(var(--rlm-accent-rgba))'
+              authorColorDisplay || 'rgba(var(--rlm-accent-rgba))'
             }`,
             width: containerWidth ? containerWidth - 16 : '100%',
           }}
         >
-          <Icon name="Reply" size={22} iconColor={authorColor} />
+          <Icon name="Reply" size={22} iconColor={authorColorDisplay} />
           {mediaContent}
           <Flex
             flex={1}
@@ -131,7 +141,7 @@ export const Reply = (props: ReplyProps) => {
             <BubbleAuthor
               id={id}
               fontSize="0.8125rem"
-              authorColor={authorColor}
+              authorColor={authorColorDisplay}
             >
               {author}
             </BubbleAuthor>

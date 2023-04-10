@@ -1,14 +1,23 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
+// import { toJS } from 'mobx';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  destroy,
+  getParentOfType,
+} from 'mobx-state-tree';
 import { Chat, ChatModelType } from './models';
-import { shipStore } from '../../stores/ship.store';
+import { shipStore, ShipStore } from '../../stores/ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
 import { RealmUpdateTypes } from 'os/realm.service';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+import { toJS } from 'mobx';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
-const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+export const sortByUpdatedAt = (a: any, b: any) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -37,18 +46,19 @@ export const ChatStore = types
       return self.selectedChat?.path === path;
     },
     get sortedChatList() {
+      const spacesStore: SpacesStoreType = getParentOfType(
+        self,
+        ShipStore
+      ).spacesStore;
+      const selectedPath = spacesStore.selected?.path;
       return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
-        const selectedPath = servicesStore.spaces.selected?.path;
-
         // Check if the chats are space chats and match the selected space
         const isASpaceChatAndSelected =
           a.type === 'space' &&
-          selectedPath ===
-            servicesStore.spaces.getSpaceByChatPath(a.path)?.path;
+          selectedPath === spacesStore.getSpaceByChatPath(a.path)?.path;
         const isBSpaceChatAndSelected =
           b.type === 'space' &&
-          selectedPath ===
-            servicesStore.spaces.getSpaceByChatPath(b.path)?.path;
+          selectedPath === spacesStore.getSpaceByChatPath(b.path)?.path;
 
         // Compare the boolean values
         if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
@@ -71,31 +81,6 @@ export const ChatStore = types
       });
     },
 
-    get pinnedChatList() {
-      return self.inbox
-        .filter(
-          (c) =>
-            self.pinnedChats.includes(c.path) ||
-            (c.type === 'space' &&
-              servicesStore.spaces?.selected?.path &&
-              c.path.includes(servicesStore.spaces.selected.path))
-        )
-        .sort(sortByUpdatedAt);
-    },
-    get unpinnedChatList() {
-      return self.inbox
-        .filter((c) => !self.pinnedChats.includes(c.path))
-        .filter(
-          (c) =>
-            !(
-              self.pinnedChats.includes(c.path) ||
-              (c.type === 'space' &&
-                servicesStore.spaces?.selected?.path &&
-                c.path.includes(servicesStore.spaces.selected.path))
-            )
-        )
-        .sort(sortByUpdatedAt);
-    },
     getChatHeader(path: string): {
       title: string;
       sigil?: any;
@@ -276,8 +261,9 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext =
-  createContext<null | ChatStoreInstance>(chatStore);
+export const ChatStoreContext = createContext<null | ChatStoreInstance>(
+  chatStore
+);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {

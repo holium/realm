@@ -27,7 +27,7 @@ const ShipModel = types
 
 export type ShipMobxType = Instance<typeof ShipModel>;
 
-const ShipStore = types
+export const ShipStore = types
   .model('ShipStore', {
     ship: types.maybeNull(ShipModel),
     friends: FriendsStore,
