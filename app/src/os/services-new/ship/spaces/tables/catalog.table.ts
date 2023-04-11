@@ -82,7 +82,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         LEFT JOIN app_grid ag ON ac.id = ag.appId
         WHERE ag.idx IS NOT NULL;`
     );
-    const apps = select.all();
+    const apps: any[] = select.all();
     if (!apps.length) return {};
     return JSON.parse(apps[0].app);
   }
@@ -183,18 +183,21 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
     const insert = this.db.prepare(
       `REPLACE INTO docks (
         space,
-        id
+        id,
+        idx
       ) VALUES (
         @space,
-        @id
+        @id,
+        @idx
       )`
     );
     const insertMany = this.db.transaction((docks) => {
       Object.entries<any>(docks).forEach(([space, ids]) => {
-        ids.forEach((id: string) => {
+        ids.forEach((id: string, idx: number) => {
           insert.run({
             space,
             id,
+            idx,
           });
         });
       });
