@@ -116,7 +116,6 @@ export class SpacesService extends AbstractService {
         ),
         dock_agg AS (
           SELECT
-<<<<<<< HEAD
               space,
               CASE
                 WHEN COUNT(id) > 0
@@ -154,37 +153,6 @@ export class SpacesService extends AbstractService {
                 ORDER BY docks.space, docks.idx
           ) AS docks
           GROUP BY space
-=======
-            space,
-            CASE
-              WHEN COUNT(docks.id) > 0 THEN json_array(json_object(
-                      'id', ac.id,
-                      'title', ac.title,
-                      'href', json(ac.href),
-                      'favicon', ac.favicon,
-                      'type', ac.type,
-                      'config', json(ac.config),
-                      'installStatus', ac.installStatus,
-                      'info', ac.info,
-                      'color', ac.color,
-                      'image', ac.image,
-                      'version', ac.version,
-                      'website', ac.website,
-                      'license', ac.license,
-                      'host', ac.host,
-                      'icon', ac.icon,
-                      'gridIndex', ag.idx
-                      )
-                  )
-              ELSE json('[]')
-            END AS dock
-          FROM docks
-          LEFT JOIN app_catalog ac ON docks.id = ac.id
-          LEFT JOIN app_grid ag ON ac.id = ag.appId
-                WHERE ag.idx IS NOT NULL
-          GROUP BY space
-
->>>>>>> rebuilt-os-process
         ),
         ranked_apps AS (
           SELECT
@@ -320,7 +288,6 @@ export class SpacesService extends AbstractService {
     });
   }
 
-<<<<<<< HEAD
   public async createSpace(newSpace: NewSpace) {
     const members = newSpace.members;
     const slug = humanFriendlySpaceNameSlug(newSpace.name);
@@ -448,15 +415,6 @@ export class SpacesService extends AbstractService {
       });
     });
   }
-=======
-  // public poke(payload: PokeParams) {
-  //   return APIConnection.getInstance().conduit.poke(payload);
-  // }
-  // public scry(payload: Scry) {
-  //   console.log('scry', payload);
-  //   return APIConnection.getInstance().conduit.scry(payload);
-  // }
->>>>>>> rebuilt-os-process
 }
 
 export default SpacesService;
@@ -465,7 +423,6 @@ export default SpacesService;
 export const spacesPreload = SpacesService.preload(
   new SpacesService({ preload: true })
 );
-<<<<<<< HEAD
 
 export type NewSpace = {
   name: string;
@@ -478,5 +435,3 @@ export type NewSpace = {
   members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
   type: 'our' | 'group' | 'space';
 };
-=======
->>>>>>> rebuilt-os-process
