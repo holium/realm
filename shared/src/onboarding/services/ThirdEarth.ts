@@ -3,14 +3,7 @@ import {
   ThirdEarthPortalSession,
   ThirdEarthShip,
 } from '@holium/shared';
-import { constants } from './constants';
 import { http } from './http';
-
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  client_id: constants.API_HEADERS_CLIENT_ID,
-  version: constants.API_HEADERS_VERSION,
-};
 
 type LoginResponse = {
   token: string;
@@ -58,7 +51,7 @@ type GetUserNetworkUsageResponse = {
   };
 };
 
-export type GetUserS3InfoResponse = {
+type GetUserS3InfoResponse = {
   code: string;
   consoleUrl: string;
   storageCapacity: number;
@@ -106,55 +99,91 @@ type EjectShipResponse = {
   message: string;
 };
 
-export const api = {
-  login: (email: string, password: string) => {
-    return http<LoginResponse>(`${constants.API_URL}/login`, {
+export class ThirdEarth {
+  private apiBaseUrl: string;
+  private headersClientId: string;
+  private headersVersion: string;
+
+  constructor(
+    apiBaseUrl: string,
+    headersClientId: string,
+    headersVersion: string
+  ) {
+    this.apiBaseUrl = apiBaseUrl;
+    this.headersClientId = headersClientId;
+    this.headersVersion = headersVersion;
+  }
+
+  private getHeaders(token?: string) {
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+      client_id: this.headersClientId,
+      version: this.headersVersion,
+    };
+
+    if (!token) {
+      return defaultHeaders;
+    } else {
+      return {
+        ...defaultHeaders,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+  }
+
+  login(email: string, password: string) {
+    return http<LoginResponse>(`${this.apiBaseUrl}/login`, {
       method: 'POST',
-      headers: defaultHeaders,
+      headers: this.getHeaders(),
       body: JSON.stringify({
         email,
         password,
         keepLogged: true,
       }),
     });
-  },
-  register: (email: string, password: string) => {
-    return http<RegisterResponse>(`${constants.API_URL}/register`, {
+  }
+
+  register(email: string, password: string) {
+    return http<RegisterResponse>(`${this.apiBaseUrl}/register`, {
       method: 'POST',
-      headers: defaultHeaders,
+      headers: this.getHeaders(),
       body: JSON.stringify({
         email,
         password,
       }),
     });
-  },
-  verifyEmail: (verificationcode: string, password?: string) => {
-    return http<VerifyEmailResponse>(`${constants.API_URL}/verify-account`, {
+  }
+
+  verifyEmail(verificationcode: string, password?: string) {
+    return http<VerifyEmailResponse>(`${this.apiBaseUrl}/verify-account`, {
       method: 'POST',
-      headers: defaultHeaders,
+      headers: this.getHeaders(),
       body: JSON.stringify({
         verificationcode,
-        /* the account password is needed if confirming an email change,
-        otherwise you can leave out or ignore this field */
+        /* The account password is needed if confirming an email change,
+        otherwise it can be left out. */
         password,
       }),
     });
-  },
-  getProducts: () => {
-    return http<GetProductsResponse>(`${constants.API_URL}/products/en`, {
+  }
+
+  getProducts() {
+    return http<GetProductsResponse>(`${this.apiBaseUrl}/products/en`, {
       method: 'GET',
-      headers: defaultHeaders,
+      headers: this.getHeaders(),
     });
-  },
-  getPlanets: (productId: number) => {
+  }
+
+  getPlanets(productId: number) {
     return http<GetPlanetsResponse>(
-      `${constants.API_URL}/operator/get-planets-to-sell/${productId}`,
+      `${this.apiBaseUrl}/operator/get-planets-to-sell/${productId}`,
       {
         method: 'GET',
-        headers: defaultHeaders,
+        headers: this.getHeaders(),
       }
     );
-  },
+  }
+
   stripeMakePayment(
     token: string,
     productId: string,
@@ -162,13 +191,10 @@ export const api = {
     coupon = 'undefined'
   ) {
     return http<StripeMakePaymentResponse>(
-      `${constants.API_URL}/stripe-make-payment`,
+      `${this.apiBaseUrl}/stripe-make-payment`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: this.getHeaders(token),
         body: JSON.stringify({
           productId,
           patp,
@@ -176,26 +202,23 @@ export const api = {
         }),
       }
     );
-  },
+  }
+
   updatePaymentStatus(token: string, invoiceId: string, paymentStatus: 'OK') {
-    return http(`${constants.API_URL}/update-payment-status`, {
+    return http(`${this.apiBaseUrl}/update-payment-status`, {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         invoiceId,
         paymentStatus,
       }),
     });
-  },
+  }
+
   ship(token: string, patp: string, product: string, invoiceId: string) {
-    return http(`${constants.API_URL}/ship`, {
+    return http(`${this.apiBaseUrl}/ship`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         patp,
         shipType: 'planet',
@@ -203,93 +226,77 @@ export const api = {
         invoiceId,
       }),
     });
-  },
+  }
+
   updatePlanetStatus(
     token: string,
     patp: string,
     planetStatus: 'available' | 'sold'
   ) {
-    return http(`${constants.API_URL}/update-planet-status`, {
+    return http(`${this.apiBaseUrl}/update-planet-status`, {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         patp,
         planetStatus,
       }),
     });
-  },
+  }
+
   getUserShips(token: string) {
-    return http<GetUserShipsResponse>(`${constants.API_URL}/get-user-ships`, {
+    return http<GetUserShipsResponse>(`${this.apiBaseUrl}/get-user-ships`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
     });
-  },
+  }
+
   getUserResourceHistory(token: string, shipId: string) {
     return http<GetUserNetworkUsageResponse>(
-      `${constants.API_URL}/user/resource-history/${shipId}`,
+      `${this.apiBaseUrl}/user/resource-history/${shipId}`,
       {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: this.getHeaders(token),
       }
     );
-  },
+  }
+
   getUserS3Info(token: string, shipId: string) {
-    return http<GetUserS3InfoResponse>(
-      `${constants.API_URL}/user/s3/${shipId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-  },
+    return http<GetUserS3InfoResponse>(`${this.apiBaseUrl}/user/s3/${shipId}`, {
+      method: 'GET',
+      headers: this.getHeaders(token),
+    });
+  }
+
   getManagePaymentLink(token: string) {
     return http<CreateCustomerPortalSessionResponse>(
-      `${constants.API_URL}/create-customer-portal-session`,
+      `${this.apiBaseUrl}/create-customer-portal-session`,
       {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: this.getHeaders(token),
       }
     );
-  },
+  }
+
   changeEmail(token: string, email: string) {
-    return http<ChangeEmailResponse>(`${constants.API_URL}/change-email`, {
+    return http<ChangeEmailResponse>(`${this.apiBaseUrl}/change-email`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        version: constants.API_HEADERS_VERSION,
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         email,
       }),
     });
-  },
+  }
+
   changePassword(token: string, password: string) {
-    return http<ChangePasswordResponse>(
-      `${constants.API_URL}/change-password`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          version: constants.API_HEADERS_VERSION,
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          password,
-        }),
-      }
-    );
-  },
+    return http<ChangePasswordResponse>(`${this.apiBaseUrl}/change-password`, {
+      method: 'POST',
+      headers: this.getHeaders(token),
+      body: JSON.stringify({
+        password,
+      }),
+    });
+  }
+
   setCustomDomain(
     token: string,
     domain: string,
@@ -298,11 +305,9 @@ export const api = {
     shipId: string,
     userId: string
   ) {
-    return http<SetCustomDomainResponse>(`${constants.API_URL}/record-domain`, {
+    return http<SetCustomDomainResponse>(`${this.apiBaseUrl}/record-domain`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         domain,
         dropletId,
@@ -312,62 +317,56 @@ export const api = {
         userId,
       }),
     });
-  },
+  }
+
   resetShipCode(token: string, shipId: string) {
     return http<ResetShipCodeResponse>(
-      `${constants.API_URL}/user/reset-code/${shipId}`,
+      `${this.apiBaseUrl}/user/reset-code/${shipId}`,
       {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: this.getHeaders(token),
       }
     );
-  },
+  }
+
   updateMaintenanceWindow(
     token: string,
     shipId: string,
     maintenanceWindow: string
   ) {
     return http<UpdateMaintenanceWindowResponse>(
-      `${constants.API_URL}/user/ship/${shipId}`,
+      `${this.apiBaseUrl}/user/ship/${shipId}`,
       {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: this.getHeaders(token),
         body: JSON.stringify({
           maintenance_window: maintenanceWindow,
         }),
       }
     );
-  },
+  }
+
   ejectShip(
     token: string,
     shipId: string,
     ejectAddress: string,
     ethAddress: string
   ) {
-    return http<EjectShipResponse>(`${constants.API_URL}/send-eject-id-email`, {
+    return http<EjectShipResponse>(`${this.apiBaseUrl}/send-eject-id-email`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
       body: JSON.stringify({
         shipId,
         ejectAddress,
         ethAddress,
       }),
     });
-  },
-  refreshToken: (token: string) => {
-    return http<RefreshTokenResponse>(`${constants.API_URL}/refresh-token`, {
+  }
+
+  refreshToken(token: string) {
+    return http<RefreshTokenResponse>(`${this.apiBaseUrl}/refresh-token`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.getHeaders(token),
     });
-  },
-};
+  }
+}

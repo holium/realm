@@ -1,6 +1,6 @@
 import { VerifyEmailDialog } from '@holium/shared';
-import { Page } from 'components/Page';
-import { api } from '../util/api';
+import { Page } from '../components/Page';
+import { api } from '../util/constants';
 import { useNavigation } from '../util/useNavigation';
 
 export default function VerifyEmail() {

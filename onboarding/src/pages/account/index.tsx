@@ -11,7 +11,7 @@ import {
 import { useToggle } from '@holium/design-system';
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { api } from '../../util/api';
+import { api } from '../../util/constants';
 import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const HostingPresenter = () => {

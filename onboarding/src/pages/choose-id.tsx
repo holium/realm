@@ -1,7 +1,7 @@
 import { ChooseIdDialog } from '@holium/shared';
-import { Page } from 'components/Page';
+import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
-import { api } from '../util/api';
+import { api } from '../util/constants';
 
 type ServerSideProps = {
   patps: string[];

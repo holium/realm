@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BootingDialog } from '@holium/shared';
-import { Page } from 'components/Page';
-import { useNavigation } from '../util/useNavigation';
-import { api } from '../util/api';
 import { useToggle } from '@holium/design-system';
+import { Page } from '../components/Page';
+import { useNavigation } from '../util/useNavigation';
+import { api } from '../util/constants';
 
 export default function Booting() {
   const { goToPage } = useNavigation();

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { AccountS3StorageDialog } from '@holium/shared';
 import { Page } from '../../components/Page';
-import { api, GetUserS3InfoResponse } from '../../util/api';
+import { api } from '../../util/constants';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { UserContextProvider, useUser } from '../../util/UserContext';
+
+type GetUserS3InfoResponse = Awaited<ReturnType<typeof api.getUserS3Info>>;
 
 const S3StoragePresenter = () => {
   const { goToPage, logout } = useNavigation();

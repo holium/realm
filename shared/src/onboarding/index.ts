@@ -18,6 +18,8 @@ export { ChangePasswordModal } from './components/hosting/modals/ChangePasswordM
 export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
 export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 
+export { ThirdEarth } from './services/ThirdEarth';
+
 export type {
   ThirdEarthShip,
   ThirdEarthProduct,

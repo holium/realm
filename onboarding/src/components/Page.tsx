@@ -4,7 +4,7 @@ import NextHead from 'next/head';
 import { Rubik } from 'next/font/google';
 import styled from 'styled-components';
 import { useToggle } from '@holium/design-system';
-import { api } from '../util/api';
+import { api } from '../util/constants';
 import { useNavigation } from '../util/useNavigation';
 
 const Main = styled.main`

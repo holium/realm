@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { ThirdEarthShip } from '@holium/shared';
-import { api } from './api';
+import { api } from './constants';
 
 interface IUserContext {
   token: string;
