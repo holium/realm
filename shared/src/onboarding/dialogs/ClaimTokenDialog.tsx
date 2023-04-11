@@ -1,5 +1,7 @@
 import { ChangeEvent, useRef } from 'react';
-import { Flex, HoliumButton, Anchor, useToggle } from '@holium/design-system';
+import { Flex, Anchor } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+import { HoliumButton } from '@holium/design-system/os';
 import {
   OnboardDialogDescription,
   OnboardDialogInput,
