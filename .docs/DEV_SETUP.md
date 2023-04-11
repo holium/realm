@@ -51,8 +51,8 @@ Create and mount `%realm` and `%courier` on `zod` only:
 ```
 Watch the desks into your `zod`, so they are always up to date:
 ```bash
-# from the top level realm directory
-$: watch cp -LR desks/realm/* ships/zod/realm/ && watch cp -LR desks/courier/* ships/zod/courier/
+# from the desks directory
+$: ./watch-desks.sh ../ships/zod
 ```
 Now the files are on your ship, commit and start the agents:
 ```hoon
