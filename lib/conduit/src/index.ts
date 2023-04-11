@@ -465,22 +465,32 @@ export class Conduit extends EventEmitter {
    */
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
+    const timeout = 2000;
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
-      const response = await axios.get(
-        `${this.url}/~/scry/${app}${path}.json`,
-        {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Stale connection')), timeout);
+      });
+
+      const response: any = await Promise.race([
+        axios.get(`${this.url}/~/scry/${app}${path}.json`, {
           headers: {
             ...this.headers,
             Cookie: this.headers.Cookie,
           },
-        }
-      );
+        }),
+        timeoutPromise,
+      ]);
+
       return response.data;
     } catch (err: any) {
-      console.error('scry error', app, path, err.response);
-      // console.log(err);
+      if (err.message === 'Stale connection') {
+        console.error('Connection is stale. Reconnecting...');
+        this.reconnectToChannel();
+      } else {
+        console.error('scry error', app, path, err.response);
+      }
     }
   }
 
