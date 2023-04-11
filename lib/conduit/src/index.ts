@@ -497,11 +497,11 @@ export class Conduit extends EventEmitter {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
       const staleConnection = await this.checkStale();
-      console.log('stale?', staleConnection);
       if (staleConnection) {
         this.updateStatus(ConduitState.Stale);
         this.reconnectToChannel();
       }
+
       const response = await axios.get(
         `${this.url}/~/scry/${app}${path}.json`,
         {
