@@ -6,19 +6,15 @@
 # Make ships folder
 mkdir ships
 cd ships
-# Download latest urbit
-curl -L https://urbit.org/install/macos-aarch64/latest | tar xzk -s '/.*/urbit/' && ./urbit
+# Download latest Urbit binary
+https://urbit.org/getting-started/cli
+# TODO: update when we have preboot
+
+# pull down the Urbit repo
+git submodule foreach git pull origin master
 ```
 
 Now you should have the urbit files in the `ships` folder. This folder is ignored by GIT.
-
-#### Download latest urbit repo
-
-```zsh
-git clone https://github.com/urbit/urbit
-```
-
-This will add a `urbit` folder to your local repo which is ignored by git.
 
 #### Booting a fake ship for development
 
@@ -72,7 +68,6 @@ There is a script called `./copy-desk.sh` that takes a ship name and app name. I
 First we need to mount `base`, `garden`, and `landscape` in `~zod` so our script can copy dependencies over.
 
 ```hoon
-|mount %base
 |mount %garden
 |mount %landscape
 ```
@@ -83,6 +78,7 @@ Now we can run the copy script.
 # Only have to run the first time
 chmod +x ./copy-desk.sh
 # this will copy the desk
+watch cp -LR 
 ./copy-desk.sh zod realm
 ./copy-desk.sh zod courier
 ```
