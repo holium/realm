@@ -16,3 +16,4 @@ export * from './MediaBlock/MediaBlock';
 export * from './MemeBlock/MemeBlock';
 export * from './TextBlock/TextBlock';
 export * from './ChatInput/ChatInput';
+export { convertFragmentsToText } from './ChatInput/fragment-parser';
