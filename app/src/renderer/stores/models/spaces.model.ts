@@ -1,20 +1,19 @@
-import {
-  Instance,
-  types,
-  flow,
-  applySnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { Instance, types, flow, applySnapshot } from 'mobx-state-tree';
 import { LoaderModel, SubscriptionModel } from './common.model';
-import { DocketApp, WebApp } from './bazaar.model';
+import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
 import { MembersStore, VisaModel } from './members.model';
 import { Theme } from './theme.model';
-import { SpacesIPC } from '../ipc';
+import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
+
+const StallModel = types.model('StallModel', {
+  suite: types.map(UrbitApp), // {0: 'lexicon', 1: 'engram', 2: 'groups'}
+  recommended: types.array(UrbitApp), // {'lexicon': 12, 'engram': 3, 'groups': 1}
+});
 
 export const SpaceModel = types
   .model('SpaceModel', {
@@ -32,16 +31,74 @@ export const SpaceModel = types
       incoming: {},
     }),
     members: types.optional(MembersStore, { all: {} }),
-    apps: types.maybe(
-      types.model({
-        pinned: types.array(types.string),
-        endorsed: DocketMap, // recommended
-        installed: DocketMap, // registered
-      })
-    ),
+    stall: StallModel,
+    dock: types.array(UrbitApp),
   })
-  .views(() => ({}))
-  .actions(() => ({}));
+  .views((self) => ({
+    isPinned(appId: string) {
+      return self.dock.map((app) => app.id === appId);
+    },
+    getDock() {
+      return self.dock ?? [];
+    },
+    getDockApps() {
+      return self.dock;
+    },
+  }))
+  .actions((self) => ({
+    pinApp: flow(function* (appId: string) {
+      try {
+        return yield BazaarIPC.pinApp(
+          self.path,
+          appId,
+          self.dock.length
+        ) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    unpinApp: flow(function* (appId: string) {
+      try {
+        return yield BazaarIPC.unpinApp(self.path, appId) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    reorderPinnedApps: flow(function* (dock: string[]) {
+      try {
+        s;
+        applySnapshot(self.dock, dock);
+
+        return yield BazaarIPC.reorderPinnedApps(
+          self.path,
+          dock
+        ) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    addToSuite: flow(function* (appId: string, index: number) {
+      try {
+        return yield BazaarIPC.addToSuite(
+          self.path,
+          appId,
+          index
+        ) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    removeFromSuite: flow(function* (index: number) {
+      try {
+        return yield BazaarIPC.removeFromSuite(
+          self.path,
+          index
+        ) as Promise<any>;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+  }));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
 
@@ -90,7 +147,7 @@ export const SpacesStore = types
       try {
         const { current, spaces } =
           yield SpacesIPC.getInitial() as Promise<any>;
-        // TODO form the data in the SQL query later
+        // todo form the json in the backend
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create({

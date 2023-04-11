@@ -21,6 +21,8 @@ const DesktopPresenter = () => {
     roomsManager,
   });
 
+  console.log('DesktopPresenter', shellStore.isHomePaneOpen);
+
   return (
     <Fill>
       <Layer zIndex={15}>
@@ -29,7 +31,7 @@ const DesktopPresenter = () => {
       <Layer zIndex={0}>
         <AppWindowManager />
       </Layer>
-      <Layer zIndex={1}>{shellStore.isHomePaneOpen && <HomePane />}</Layer>
+      <Layer zIndex={16}>{shellStore.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>
         <Bottom size={56}>
           <SystemBar />

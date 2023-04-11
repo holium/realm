@@ -3,12 +3,12 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpaceHome } from './Space';
 import { OurHome } from './Ship';
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const HomeWindow = styled(motion.div)`
   height: 100%;
@@ -19,13 +19,15 @@ const HomeWindow = styled(motion.div)`
 `;
 
 const HomePanePresenter = () => {
-  const { theme, spaces, desktop } = useServices();
-  const isOpen = desktop.isHomePaneOpen;
+  const { shellStore, theme } = useAppState();
+  const { spacesStore } = useShipStore();
+  const isOpen = shellStore.isHomePaneOpen;
 
-  const isOur = spaces.selected?.type === 'our';
+  const isOur = spacesStore.selected?.type === 'our';
 
   useEffect(() => {
-    if (isOpen) ShellActions.setBlur(true);
+    if (isOpen) shellStore.setIsBlurred(true);
+    return () => shellStore.setIsBlurred(false);
   }, [isOpen]);
 
   return useMemo(
@@ -38,8 +40,8 @@ const HomePanePresenter = () => {
             opacity: isOpen ? 1 : 0,
             display: isOpen ? 'block' : 'none',
             background: rgba(
-              theme.currentTheme.mode === 'light' ? '#FFFFFF' : '#000000',
-              theme.currentTheme.mode === 'light' ? 0.25 : 0.25
+              theme.mode === 'light' ? '#FFFFFF' : '#000000',
+              theme.mode === 'light' ? 0.25 : 0.25
             ),
           }}
           transition={{ background: { duration: 0.25 } }}
@@ -54,7 +56,7 @@ const HomePanePresenter = () => {
         </HomeWindow>
       </AnimatePresence>
     ),
-    [isOpen, theme.currentTheme, isOur]
+    [isOpen, theme, isOur]
   );
 };
 

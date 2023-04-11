@@ -1,4 +1,3 @@
-import { Database } from 'better-sqlite3';
 import APIConnection from '../../conduit';
 import AbstractDataAccess, {
   DataAccessContructorParams,
@@ -31,10 +30,10 @@ interface NotificationRow {
   dismissed: boolean;
 }
 
-type NotifMobxUpdateType =
-  | 'notification-added'
-  | 'notification-updated'
-  | 'notification-deleted';
+// type NotifMobxUpdateType =
+//   | 'notification-added'
+//   | 'notification-updated'
+//   | 'notification-deleted';
 
 type GetParamsObj = {
   app?: string;

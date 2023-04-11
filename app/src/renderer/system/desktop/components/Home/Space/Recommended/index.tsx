@@ -1,27 +1,27 @@
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text } from 'renderer/components';
+import { Flex, Text } from '@holium/design-system';
 import { AppPreview } from './AppPreview';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const RecommendedAppsPresenter = () => {
-  const { spaces, bazaar } = useServices();
+  const { spacesStore } = useShipStore();
 
-  const currentSpace = spaces.selected;
+  const currentSpace = spacesStore.selected;
   if (!currentSpace) return null;
-  const apps = bazaar.getRecommendedApps(currentSpace.path);
+  const apps = currentSpace.stall.recommended;
 
   return (
     <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
-      <Text variant="h3" fontWeight={500}>
+      <Text.Custom variant="h3" fontWeight={500}>
         Recommended Apps
-      </Text>
+      </Text.Custom>
 
       {!apps ||
         (apps.length === 0 && (
-          <Text variant="h6" opacity={0.4}>
+          <Text.Custom variant="h6" opacity={0.4}>
             No recommendations. Start liking apps in this space to show them
             here!
-          </Text>
+          </Text.Custom>
         )) || (
           <Flex width="880px" flexWrap="wrap" flexDirection="row">
             {apps.map((app: any) => {

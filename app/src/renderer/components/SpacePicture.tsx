@@ -1,14 +1,14 @@
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Icons, Text, Crest } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { Crest } from 'renderer/components';
+import { Flex, Text, Icon } from '@holium/design-system';
 import { pluralize } from 'renderer/logic/lib/text';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 interface SpacePictureProps {
   space: SpaceModelType;
   size?: number;
   membersCount?: number;
-  textColor: string;
 }
 
 interface PictureProps {
@@ -36,7 +36,7 @@ const FadeInMotion = {
 export const SpacePicture: FC<SpacePictureProps> = (
   props: SpacePictureProps
 ) => {
-  const { space, size, membersCount, textColor } = props;
+  const { space, size, membersCount } = props;
 
   return (
     <Flex gap={12} flexDirection="row" alignItems="center">
@@ -57,54 +57,40 @@ export const SpacePicture: FC<SpacePictureProps> = (
         {...FadeInMotion}
       >
         {/* Title column */}
-        <Text
-          initial={{ color: textColor }}
-          animate={{ color: textColor }}
+        <Text.Custom
           transition={{ color: { duration: 0.5 } }}
           fontSize={4}
           fontWeight={500}
         >
           {space.name}
-        </Text>
+        </Text.Custom>
         <Flex gap={10} alignItems="center">
           {/* Subtitle row */}
           <Flex gap={4} alignItems="center">
             {/* Member count */}
-            <Icons
+            <Icon
               name="Members"
-              size="14px"
-              initial={{ fill: textColor }}
-              animate={{ fill: textColor }}
+              size={14}
               transition={{ fill: { duration: 0.5 } }}
               opacity={0.7}
             />
-            <Text
-              initial={{ color: textColor }}
-              animate={{ color: textColor }}
+            <Text.Custom
               transition={{ color: { duration: 0.5 } }}
               opacity={0.7}
               fontSize={2}
               fontWeight={400}
             >
               {membersCount} {membersCount && pluralize('member', membersCount)}
-            </Text>
+            </Text.Custom>
           </Flex>
-          {space.token && (
+          {/* {space.token && (
             <Flex gap={4} alignItems="center">
-              {/* Token info */}
-              <Icons name="Coins" size="14px" fill={textColor} opacity={0.7} />
-              <Text
-                initial={{ color: textColor }}
-                animate={{ color: textColor }}
-                transition={{ color: { duration: 0.5 } }}
-                opacity={0.7}
-                fontSize={2}
-                fontWeight={400}
-              >
+              <Icon name="Coins" size={14} opacity={0.7} />
+              <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
                 {space.token?.symbol}
-              </Text>
+              </Text.Custom>
             </Flex>
-          )}
+          )} */}
         </Flex>
       </Flex>
     </Flex>

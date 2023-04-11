@@ -1,4 +1,3 @@
-import log from 'electron-log';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import APIConnection from '../conduit';

@@ -1,14 +1,13 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text } from 'renderer/components';
-
+import { Flex, Text } from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface HomePaneProps {
   isOpen?: boolean;
@@ -18,8 +17,8 @@ type SidebarType = 'members' | null;
 
 const SpaceHomePresenter = (props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, spaces, membership } = useServices();
-  const currentSpace = spaces.selected;
+  const { ship, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
 
@@ -49,10 +48,10 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
   if (!ship) return null;
   if (!currentSpace) return null;
 
-  const membersCount = membership.getMemberCount(currentSpace.path);
+  const membersCount = currentSpace.members.count;
   const maxWidth = 880;
 
-  const isAdmin = membership.isAdmin(currentSpace.path, ship.patp);
+  const isAdmin = currentSpace.members.isAdmin(ship.patp);
 
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
@@ -136,9 +135,9 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
               }}
               gap={20}
             >
-              <Text variant="h3" fontWeight={500}>
+              <Text.Custom variant="h3" fontWeight={500}>
                 Your Apps
-              </Text>
+              </Text.Custom>
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}

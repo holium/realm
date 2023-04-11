@@ -1,5 +1,4 @@
 import { Database } from 'better-sqlite3';
-import log from 'electron-log';
 import AbstractDataAccess from '../../../abstract.db';
 
 export interface Member {

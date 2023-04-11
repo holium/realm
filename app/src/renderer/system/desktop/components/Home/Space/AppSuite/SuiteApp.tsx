@@ -1,14 +1,13 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
-import { Box, Icons, BoxProps } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { SuiteAppTile } from './SuiteAppTile';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { Box, BoxProps, Icon } from '@holium/design-system';
 
 type AppEmptyProps = {
   isSelected: boolean;
-  accentColor: string;
   isAdmin: boolean | undefined;
 } & BoxProps;
 
@@ -22,7 +21,7 @@ const AppEmpty = styled(Box)<AppEmptyProps>`
   transition: 0.2s ease;
   ${(props: AppEmptyProps) =>
     css`
-      ${props.isSelected && `border: 2px solid ${props.accentColor}`};
+      ${props.isSelected && `border: 2px solid rgba(var(--rlm-accent-rgba))`};
       background: ${rgba('#FBFBFB', props.isAdmin ? 0.4 : 0.1)};
       &:hover {
         transition: 0.2s ease;
@@ -37,7 +36,6 @@ interface SuiteAppProps {
   selected: boolean;
   space: SpaceModelType;
   highlightColor?: string;
-  accentColor: string;
   app?: AppType;
   isAdmin?: boolean;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app?: any) => void;
@@ -47,7 +45,6 @@ export const SuiteApp = ({
   id,
   selected,
   index,
-  accentColor,
   app,
   space,
   isAdmin,
@@ -60,12 +57,11 @@ export const SuiteApp = ({
         height={160}
         width={160}
         isSelected={selected}
-        accentColor={accentColor}
         isAdmin={isAdmin}
         onClick={(e) => onClick && onClick(e, undefined)}
       >
         {isAdmin && (
-          <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
+          <Icon size={24} name="Plus" iconColor={'#FFFFFF'} opacity={0.4} />
         )}
       </AppEmpty>
     );
