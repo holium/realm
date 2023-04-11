@@ -1,82 +1,86 @@
 ## Getting started
 
+So, you've just cloned down the Realm monorepo.  What now?
 ### Fake ships and Urbit
 
-```zsh
+First, run the following one-time setup commands:
+
+```bash
 # Make ships folder
-mkdir ships
-cd ships
-# Download latest Urbit binary
+mkdir ships && cd ships
+
+# Download latest Urbit binary to the ships folder
 https://urbit.org/getting-started/cli
 
-# pull down the Urbit repo
+# also, pull down the Urbit repo
 git submodule foreach git pull origin master
 ```
 
-Now you should have the urbit files in the `ships` folder. This folder is ignored by GIT.
+### Build a fake ship for development
 
-#### Booting a fake ship for development
+The following steps will need to be run semi-regularly, as ships become stale.
 
-```zsh
-# The -F will create a fake zod
+```bash
+# Build a new fakezod
 ./urbit -F zod
 
 # Optional:
-#   Fake bus for networking between fake ships
+#   Fake bus for testing networking
 ./urbit -F bus
 ```
 
 [See more docs for working with the developer environment.](https://developers.urbit.org/guides/core/environment)
 
-Now, you want to start your dev ship `zod`.
-
-```zsh
+On subsequent boots, you can:
+```bash
 ./zod/.run
+# and
+./bus/.run
 ```
 
-Once started, you should run the following commands on your ship.
-
-For `%realm`:
+### Holium Desks
+Create and mount `%realm` and `%courier` on `zod` only:
 
 ```hoon
 > |new-desk %realm
 > |mount %realm
 ```
-
-For `%courier`:
-
 ```hoon
 > |new-desk %courier
 > |mount %courier
 ```
-
-```zsh
-watch cp -LR 
+Watch the desks into your `zod`, so they are always up to date:
+```bash
+# from the top level realm directory
+$: watch cp -LR desks/realm/* ships/zod/realm/ && watch cp -LR desks/courier/* ships/zod/courier/
 ```
-
-#### Installing %realm and %courier
-
+Now the files are on your ship, commit and start the agents:
 ```hoon
-|revive %realm
-|revive %courier
+> |commit %realm
+> |revive %realm
 ```
+```hoon
+> |commit %courier
+> |revive %revive
+```
+To test your changes, save the files in your IDE, and then `|commit %<desk-name>` to apply.
 
-#### Hosting Realm for other test ships
+### Developing with multiple ships
 
 The best way to update all your test ships at once is to publish `%realm` from `~zod`.
 
 From `~zod`:
 
 ```hoon
-:treaty|publish %realm
-:treaty|publish %courier
+> :treaty|publish %realm
+> :treaty|publish %courier
 ```
 
 From `~bus`:
 
 ```hoon
-|install ~zod %realm
-|install ~zod %courier
+> |install ~zod %realm
+> |install ~zod %courier
 ```
 
 #### Allow origin (CORS)
@@ -84,19 +88,19 @@ From `~bus`:
 For `~zod`:
 
 ```hoon
-~zod:dojo> |pass [%e [%approve-origin 'http://localhost:3000']]
+> |pass [%e [%approve-origin 'http://localhost:3000']]
 ```
 
 For `~bus`:
 
 ```hoon
-~bus:dojo> |pass [%e [%approve-origin 'http://localhost:3001']]
+> |pass [%e [%approve-origin 'http://localhost:3001']]
 ```
 
 For `~dev`:
 
 ```hoon
-~dev:dojo> |pass [%e [%approve-origin 'http://localhost:3002']]
+> |pass [%e [%approve-origin 'http://localhost:3002']]
 ```
 
 READ: https://github.com/urbit/create-landscape-app/tree/master/full
