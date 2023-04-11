@@ -268,7 +268,7 @@
           %kick
             =/  =ship           `@p`(slav %p i.t.wire)
             =/  space-pth       `@t`i.t.t.wire
-            ~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing... {<ship>} {<space-pth>}"
+            %-  (slog leaf+"{<dap.bowl>}: spaces kicked us, resubscribing... {<ship>} {<space-pth>}" ~)
             =/  watch-path      [/spaces/(scot %p ship)/(scot %tas space-pth)]
             :_  this
             :~  [%pass watch-path %agent [ship %spaces] %watch watch-path]
@@ -396,6 +396,13 @@
       =.  spaces.state                (~(del by spaces.state) path)
       =/  watch-paths                 [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards  `(list card)`[%give %fact watch-paths spaces-reaction+!>([%remove path])]~
+      ::  if we are removing current space, set to our space
+      =/  update-current  =(path current.state)
+      =?  current.state  update-current
+        [our.bowl 'our']
+      =?  cards  update-current
+        %+  welp  cards
+        [%give %fact [/current ~] spaces-reaction+!>([%current current.state])]~
       =/  space-members  `(map ship member:membership-store)`(~(got by membership.state) path)
       =.  cards
         %+  weld  cards
@@ -480,7 +487,7 @@
           :~
             [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%leave path])]
             [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
-            [%pass watch-path %agent [our.bowl %spaces] %leave ~]
+            [%pass watch-path %agent [ship.path %spaces] %leave ~]
           ==
         =/  update-current  =(path current.state)
         =?  current.state  update-current
@@ -575,7 +582,7 @@
         =/  cards
           ^-  (list card)
           :~
-            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [our.bowl %spaces] %leave ~]
+            [%pass /spaces/(scot %p ship.path)/(space-name:encode:lib space.path) %agent [ship.path %spaces] %leave ~]
             [%give %fact watch-paths spaces-reaction+!>([%remove path])]
           ==
         =?  cards  update-current
@@ -600,7 +607,6 @@
       ^-  (quip card _state)
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
-      ~&  >>  [%remote-space path members]
       :_  state
       %+  weld
       :~
@@ -695,7 +701,7 @@
       |=  [path=space-path:store =invite:vstore]
       ^-  (quip card _state)
       =.  invitations.state           (~(put by invitations.state) [path invite])
-      =/  notify=action:hark          (notify path /invite (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
+      =/  notify=action:hark          (notify path /invite (crip " invited you to {<`@t`(scot %tas name.invite)>} in Realm."))
       :_  state
       :~  [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]                      ::  send notification to ship
           [%give %fact [/updates ~] visa-reaction+!>([%invite-received path invite])]

@@ -22,7 +22,13 @@ import {
 } from './Bubble.types';
 import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../util/strings';
-import { Text, TextProps, Flex, FlexProps, skeletonStyle } from '../../general';
+import {
+  Text,
+  TextProps,
+  Flex,
+  FlexProps,
+  skeletonStyle,
+} from '../../../general';
 import { BlockStyle } from '../Block/Block';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
@@ -174,14 +180,16 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-left: 2px solid rgba(var(--rlm-accent-rgba));
   padding-left: 6px;
   padding-right: 8px;
-  border-radius: 3px;
+  border-radius: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   background-color: rgba(0, 0, 0, 0.1);
 
   .fragment-reply {
     border-radius: 4px;
-    height: 2rem;
 
     ${FragmentBase} {
       font-size: 0.82rem;
@@ -209,8 +217,8 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     &.pinned {
       gap: 0px;
       ${Text.Custom} {
-        line-height: inherit;
-        font-size: 0.8em;
+        /* line-height: inherit; */
+        /* font-size: 0.8em; */
       }
     }
   }
@@ -254,7 +262,7 @@ export const renderFragment = (
   index: number,
   author: string,
   containerWidth?: number,
-  onMeasure?: () => void // used in the case where async data is loaded
+  onReplyClick?: (id: string) => void
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -377,7 +385,6 @@ export const renderFragment = (
             width={imageFrag.metadata?.width}
             height={imageFrag.metadata?.height}
             by={author}
-            onImageLoaded={onMeasure}
           />
         </BlockWrapper>
       );
@@ -385,6 +392,7 @@ export const renderFragment = (
     case 'reply':
       const msg = (fragment as FragmentReplyType).reply.message[0];
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
+      const replyId = (fragment as FragmentReplyType).reply.msgId;
       const fragmentType: string = Object.keys(msg)[0];
       let replyContent = null;
       if (
@@ -413,9 +421,10 @@ export const renderFragment = (
 
       return (
         <FragmentBlockquote
-          style={{ height: 42 }}
+          style={{ height: 46 }}
           id={id}
           key={`${author + index}-reply`}
+          onClick={() => onReplyClick?.(replyId)}
         >
           <Flex
             gap={fragmentType === 'image' ? 6 : 0}

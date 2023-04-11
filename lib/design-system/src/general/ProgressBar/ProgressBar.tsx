@@ -1,8 +1,9 @@
-import { FC } from 'react';
 import styled from 'styled-components';
 import { Box, BoxProps } from '../Box/Box';
+import { ColorProps, colorStyle, ColorVariants } from '../../util/colors';
 
 const Bar = styled(Box)`
+  position: relative;
   background-color: rgba(var(--rlm-input-rgba));
   border: 1px solid rgba(var(--rlm-border-rgba));
   height: 12px;
@@ -13,29 +14,35 @@ const Bar = styled(Box)`
   align-items: center;
 `;
 
-const Progress = styled(Box)`
+const Progress = styled(Box)<ColorProps>`
   height: 8px;
   border-radius: 4px;
-  background-color: ${(props) =>
-    props.background || 'rgba(var(--rlm-accent-rgba))'};
+  background-color: rgba(var(--rlm-accent-rgba));
+  ${colorStyle};
 `;
 
 type ProgressBarProps = {
-  percentage: number; // 1-100
-  progressColor?: string;
+  percentages: number[];
+  progressColors?: ColorVariants[];
 } & BoxProps;
 
-export const ProgressBar: FC<ProgressBarProps> = (props: ProgressBarProps) => {
-  const { percentage, progressColor } = props;
-
-  return (
-    <Bar>
-      <Progress
-        background={progressColor}
-        initial={{ width: '0%' }}
-        animate={{ width: `${percentage}%` }}
-        transition={{ duration: 0.5, default: { ease: 'linear' } }}
-      />
-    </Bar>
-  );
-};
+export const ProgressBar = ({
+  percentages,
+  progressColors,
+}: ProgressBarProps) => (
+  <Bar>
+    {percentages
+      .sort()
+      .reverse()
+      .map((percentage, index) => (
+        <Progress
+          key={`progress-${index}`}
+          bg={progressColors?.[index]}
+          style={{ position: 'absolute', left: 0, zIndex: index }}
+          initial={{ width: '0%' }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.5, default: { ease: 'linear' } }}
+        />
+      ))}
+  </Bar>
+);

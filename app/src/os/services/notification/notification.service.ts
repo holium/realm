@@ -209,6 +209,7 @@ export class NotificationService extends BaseService {
       )`
     );
     const insertMany = this.db.transaction((notifications) => {
+      if (!notifications) return;
       for (const notif of notifications) {
         insert.run({
           id: notif.id,

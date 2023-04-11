@@ -1,0 +1,56 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url(https://images.unsplash.com/photo-1673447042805-7a3b1096f3a7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4032&q=80);
+}
+
+:root {
+  --blur: blur(24px);
+  --transition-fast: 0.4s ease;
+  --transition: all 0.25s ease;
+  --transition-2x: all 0.5s ease;
+
+  --rlm-border-radius-4: 4px;
+  --rlm-border-radius-6: 6px;
+  --rlm-border-radius-9: 9px;
+  --rlm-border-radius-12: 12px;
+  --rlm-border-radius-16: 16px;
+  --rlm-box-shadow-1: 0px 0px 4px rgba(0, 0, 0, 0.06);
+  --rlm-box-shadow-2: 0px 0px 9px rgba(0, 0, 0, 0.12);
+  --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
+  --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
+
+  --rlm-home-button-rgba: 11, 11, 11, 0.2;
+  --rlm-base-rgba: 114, 76, 84;
+  --rlm-accent-rgba: 78, 158, 253;
+  --rlm-input-rgba: 81, 54, 59;
+  --rlm-border-rgba: 120, 80, 89;
+  --rlm-window-rgba: 99, 66, 73;
+  --rlm-window-bg-rgba: 99, 66, 73, 0.9;
+  --rlm-dock-rgba: 99, 66, 73, 0.65;
+  --rlm-card-rgba: 99, 66, 73;
+  --rlm-text-rgba: 255, 255, 255;
+  --rlm-icon-rgba: 255, 255, 255, 0.7;
+  --rlm-intent-alert-rgba: 255, 98, 64;
+  --rlm-intent-caution-rgba: 255, 188, 50;
+  --rlm-intent-success-rgba: 15, 195, 131;
+  --rlm-overlay-hover-rgba: 255, 255, 255, 0.06;
+  --rlm-overlay-active-rgba: 255, 255, 255, 0.09;
+}
+
+a {
+  color: rgba(var(--rlm-accent-rgba));
+}
+
+a:visted {
+  color: rgba(var(--rlm-accent-rgba));
+}

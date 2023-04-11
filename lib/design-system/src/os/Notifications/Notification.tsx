@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import { timelineDate } from '../../util/date';
-import { Flex, Text, Button, Icon, FlexProps } from '../../general';
+import { Flex, Text, Button, Icon, FlexProps } from '../../../general';
 import {
   NotificationButtonType,
   NotificationType,

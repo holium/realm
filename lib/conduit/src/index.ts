@@ -347,7 +347,6 @@ export class Conduit extends EventEmitter {
       mark: params.mark,
       json: params.json,
     };
-    console.log('sending poke', message.app, message.mark, message.json);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
@@ -444,14 +443,18 @@ export class Conduit extends EventEmitter {
         return true;
       }
     } catch {
+      // if (retryCount < 5) {
+      setTimeout(() => {
+        this.resubscribe(watchId, retryCount + 1);
+      }, 2000);
       // throttle retries based on retryCount using exponential backoff
-      retryDelay = Math.min(retryDelay * 2, 60000);
+      /*retryDelay = Math.min(retryDelay * 2, 60000);
       console.log('resubcribing in', retryDelay / 1000, 'seconds...');
       setTimeout(() => {
         this.resubscribe(watchId, retryCount + 1, retryDelay);
       }, retryDelay);
 
-      console.log('Failed to re-subscribe to', idleWatch?.app);
+      console.log('Failed to re-subscribe to', idleWatch?.app);*/
     }
 
     return false;

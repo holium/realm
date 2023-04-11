@@ -41,7 +41,7 @@ const MEDIA_TYPE = {
   VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
   AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
   DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
-  LINK: /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
+  LINK: /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
 };
 
 type MediaTypes = 'image' | 'video' | 'audio' | 'document' | 'link';

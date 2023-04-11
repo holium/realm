@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Box, Flex, skeletonStyle, Text } from '../../general';
+import { Box, Flex, skeletonStyle, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
+
 import {
   fetchOGData,
   RAW_LINK_HEIGHT,
@@ -84,38 +85,24 @@ export const LinkBlock = ({
 
   let description = openGraph?.ogDescription || '';
 
-  if (
-    metadata.linkType === 'url' ||
-    !metadata.ogData ||
-    (metadata.ogData && !metadata.ogData.ogTitle)
-  ) {
-    const width = containerWidth ? containerWidth - 12 : 320;
-    return (
-      <Box height={RAW_LINK_HEIGHT}>
-        <Block {...rest} height={24} width={width - 4}>
-          <Bookmark
-            url={link}
-            title={link}
-            width={width - 24}
-            onNavigate={(url: string) => {
-              window.open(url, '_blank');
-            }}
-          />
-        </Block>
-      </Box>
-    );
-  }
-  if (linkBlockType === 'twitter') {
-    let width = rest.width || 320;
-    if (width < 400) {
-      width = 320;
+  // TODO make twitter height dynamic
+  if (metadata.linkType === 'twitter' || linkBlockType === 'twitter') {
+    let height = 300;
+    let width = (typeof rest.width === 'number' && rest.width) || 320;
+    if (metadata.width) {
+      width = parseInt(metadata.width);
+      height = parseInt(metadata.height);
     }
+    // if (width < 400) {
+    //   width = 320;
+    // }
     return (
       <TweetBlock
         variant={rest.mode === 'embed' ? 'content' : 'default'}
         link={link}
         {...rest}
         width={width}
+        height={height}
         onTweetLoad={onLinkLoaded}
       />
     );
@@ -153,8 +140,29 @@ export const LinkBlock = ({
         image={link}
         width={rest.width || 'fit-content'}
         height={rest.height}
-        onImageLoaded={onLinkLoaded}
       />
+    );
+  }
+
+  if (
+    metadata.linkType === 'url' ||
+    !metadata.ogData ||
+    (metadata.ogData && !openGraph?.ogTitle)
+  ) {
+    const width = containerWidth ? containerWidth - 12 : 320;
+    return (
+      <Box height={RAW_LINK_HEIGHT}>
+        <Block {...rest} height={24} width={width - 4}>
+          <Bookmark
+            url={link}
+            title={link}
+            width={width - 24}
+            onNavigate={(url: string) => {
+              window.open(url, '_blank');
+            }}
+          />
+        </Block>
+      </Box>
     );
   }
 

@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Box, Icon, Text, Portal, Card } from '../../general';
+import { Flex, Box, Icon, Text, Portal, Card } from '../../../general';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
@@ -275,6 +275,7 @@ export const Reactions = ({
       const selected = reaction.by.includes(ourShip);
       return (
         <ReactionButton
+          id={id}
           key={`${reaction.emoji}-by-${reaction.by}-${index}`}
           isOur={isOur}
           ourColor={ourColor}
@@ -309,6 +310,7 @@ export const Reactions = ({
 
   return (
     <ReactionRow
+      id={id}
       style={{
         width: 'max-content',
       }}
@@ -320,6 +322,7 @@ export const Reactions = ({
       {memoizedRow}
       <>
         <ReactionButton
+          id={id}
           isOur={isOur}
           ourColor={ourColor}
           size={size}

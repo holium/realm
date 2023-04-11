@@ -32,6 +32,14 @@ interface LoginProps {
   addShip: () => void;
 }
 
+export type LoginError =
+  | 'bad-gateway'
+  | 'password'
+  | 'missing'
+  | 'code'
+  | 'unknown'
+  | '';
+
 const LoginPresenter = ({ addShip }: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
@@ -40,7 +48,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState<LoginError>('');
 
   // Setting up options menu
   const menuWidth = 180;
@@ -87,18 +95,31 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         submitRef.current.blur();
       }
       const parts = status.split(':');
-      // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
-      //  assume 400 means they may have changed ship code. ask them to enter the new one.
-      if (parts.length > 1 && parseInt(parts[1]) === 400) {
-        setLoginError('missing');
-        ShellActions.openDialogWithStringProps('reset-code-dialog', {
-          ship: pendingShip.patp,
-          // @ts-ignore
-          password: passwordRef.current?.value,
-        });
+
+      const properLength = parts.length > 1;
+      if (!properLength) {
+        // we should categorize these "unknown errors" and display more helpful messages.
+        console.error('Unknown error', parts);
+        setLoginError('unknown');
       } else {
-        // assume all others are incorrect passwords
-        setLoginError('password');
+        if (parts[1] === 'password') {
+          setLoginError('password');
+        }
+        // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+        //  assume 400 means they may have changed ship code. ask them to enter the new one.
+        else if (parseInt(parts[1]) === 400) {
+          setLoginError('missing');
+          ShellActions.openDialogWithStringProps('reset-code-dialog', {
+            ship: pendingShip.patp,
+            // @ts-ignore
+            password: passwordRef.current?.value,
+          });
+        } else if (parseInt(parts[1]) === 502) {
+          setLoginError('bad-gateway');
+        } else {
+          console.error('Unknown error', parts);
+          setLoginError('unknown');
+        }
       }
     }
     trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
@@ -270,17 +291,26 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     }
                   />
 
-                  {(['password', 'missing', 'code'].indexOf(loginError) !==
-                    -1 ||
+                  {([
+                    'bad-gateway',
+                    'password',
+                    'missing',
+                    'code',
+                    'unknown',
+                  ].indexOf(loginError) !== -1 ||
                     hasFailed) && (
                     <FormControl.Error
                       style={{ height: 15, fontSize: 14 }}
                       textShadow="0.5px 0.5px #080000"
                     >
                       {hasFailed && 'Connection to your ship has been refused.'}
+                      {loginError === 'missing' &&
+                        'Unable to connect to ship - error code 400.'}
+                      {loginError === 'bad-gateway' &&
+                        'Ship is unreachable - error code 502.'}
                       {loginError === 'password' && 'Incorrect password.'}
-                      {loginError === 'missing' && 'Unable to connect to ship.'}
-                      {loginError === 'code' && 'Error saving new ship code'}
+                      {loginError === 'code' && 'Error saving new ship code.'}
+                      {loginError === 'unknown' && 'Unknown error.'}
                     </FormControl.Error>
                   )}
                 </Flex>
@@ -298,7 +328,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <ShipSelector />
+          <ShipSelector setLoginError={setLoginError} />
           <Flex gap={12}>
             <TextButton
               {...colorProps}
