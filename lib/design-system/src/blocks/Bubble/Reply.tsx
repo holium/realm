@@ -11,7 +11,7 @@ import {
 } from './fragment-lib';
 import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
 import { useMemo } from 'react';
-import { convertDarkText } from '../../util';
+import { convertDarkText } from '../../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;
