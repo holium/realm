@@ -27,7 +27,7 @@ export default function VerifyEmail() {
       const result = await thirdEarthApi.verifyEmail(verificationcode);
       localStorage.setItem('token', result.token);
 
-      goToPage('/choose-id');
+      if (Boolean(result)) goToPage('/choose-id');
 
       return Boolean(result);
     } catch (error) {

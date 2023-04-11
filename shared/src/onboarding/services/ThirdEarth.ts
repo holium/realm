@@ -23,9 +23,7 @@ type RefreshTokenResponse = {
   token: string;
 };
 
-type GetProductsResponse = {
-  [key: number]: ThirdEarthProduct;
-};
+type GetProductsResponse = ThirdEarthProduct[];
 
 type GetPlanetsResponse = {
   freeProduct: boolean;
