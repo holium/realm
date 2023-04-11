@@ -68,7 +68,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { ship, chatStore } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
-  const { ship, spaces, theme } = useServices();
+  const { spaces, theme } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
