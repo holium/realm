@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import styled from 'styled-components';
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { OnboardDialogSubTitle, TABLET_WIDTH } from './OnboardDialog.styles';
 
 const AccountDialogTableRowStyled = styled(Flex)`

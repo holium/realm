@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import styled, { css } from 'styled-components';
-import { skeletonStyle } from '../../general';
+import { skeletonStyle } from '../../../general';
 import { BlockStyle, BlockProps } from '../Block/Block';
 
 type TweetWrapperProps = { isSkeleton?: boolean };

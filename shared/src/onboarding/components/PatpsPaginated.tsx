@@ -1,4 +1,4 @@
-import { Icon } from '@holium/design-system';
+import { Icon } from '@holium/design-system/general';
 import { useState } from 'react';
 import { PatpCard } from './PatpCard';
 import styled from 'styled-components';

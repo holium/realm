@@ -1,5 +1,6 @@
 import { FormEvent, ReactNode } from 'react';
-import { Flex, Icon, useToggle } from '@holium/design-system';
+import { Flex, Icon } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import {
   OnboardDialogBackButton,
   OnboardDialogBody,

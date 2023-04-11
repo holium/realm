@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import { Card, Box, BoxProps, Portal } from '../../general';
+import { Card, Box, BoxProps, Portal } from '../../../general';
 import styled from 'styled-components';
 import {
   getAnchorPointByElement,

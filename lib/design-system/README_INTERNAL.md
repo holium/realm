@@ -10,18 +10,28 @@ yarn storybook
 ## Directory structure
 
 ```
-/general - multipurpose components
-  /index.ts - exports general components
+/src
 
-/input - input components
-  /index.ts - exports input components
+  /general - multipurpose components
+    /index.ts - exports general components
 
-/os - core realm components
-  /index.ts - exports os components
+  /input - input components
+    /index.ts - exports input components
 
-/util - internal helpers
+  /os - core realm components
+    /index.ts - exports os components
 
-index.ts - exports all components
+  /util - internal helpers
+
+  index.ts - exports all components
+
+general.ts - exports all general components
+
+input.ts - exports all input components
+
+os.ts - exports all os components
+
+util.ts - exports all util components
 ```
 
 ## Component structure

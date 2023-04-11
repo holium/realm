@@ -1,11 +1,7 @@
 import { FormEvent, ReactNode } from 'react';
-import {
-  Button,
-  Flex,
-  HoliumButton,
-  Icon,
-  Select,
-} from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system/general';
+import { HoliumButton } from '@holium/design-system/os';
+import { Select } from '@holium/design-system/inputs';
 import {
   AccountDialogCard,
   AccountDialogSidebar,
