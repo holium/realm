@@ -4,6 +4,7 @@
   "workspaces": [
     "app",
     "shared",
+    "onboarding",
     "lib/design-system",
     "lib/presence",
     "lib/presence/code",

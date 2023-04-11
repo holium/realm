@@ -62,7 +62,7 @@ export const PersonRow = ({
   }, [contextMenuOptions, getOptions, id, setOptions]);
 
   return (
-    <Flex key={id} style={{ position: 'relative', ...style }}>
+    <Flex key={id} style={{ position: 'relative' }}>
       <Row
         id={id}
         ref={rowRef}

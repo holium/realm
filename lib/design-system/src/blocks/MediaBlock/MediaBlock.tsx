@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import Spotify from 'react-spotify-embed';
 import ReactPlayer from 'react-player';
 import { Flex, Icon, Text } from '../../general';
 import { isSpotifyLink } from '../../util/links';
@@ -26,6 +25,7 @@ export const MediaBlock = ({
   if (isSpotify) {
     heightOverride = 80;
     const width = 300;
+    const spotifyLink = new URL(url);
     return (
       <MediaWrapper
         {...rest}
@@ -33,9 +33,17 @@ export const MediaBlock = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ opacity: 0.2 }}
-        onAnimationComplete={() => onLoaded?.()}
       >
-        <Spotify link={url} width={width} height={heightOverride} />
+        <webview
+          id={rest.id}
+          src={`https://open.spotify.com/embed${spotifyLink.pathname}`}
+          style={{
+            borderRadius: '4px',
+            overflow: 'hidden',
+            width: width,
+            height: heightOverride,
+          }}
+        />
       </MediaWrapper>
     );
   }

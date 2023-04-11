@@ -82,7 +82,11 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         LEFT JOIN app_grid ag ON ac.id = ag.appId
         WHERE ag.idx IS NOT NULL;`
     );
+<<<<<<< HEAD
     const apps = select.all();
+=======
+    const apps: any[] = select.all();
+>>>>>>> rebuilt-os-process
     if (!apps.length) return {};
     return JSON.parse(apps[0].app);
   }
@@ -198,7 +202,11 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
     );
     const insertMany = this.db.transaction((docks) => {
       Object.entries<any>(docks).forEach(([space, ids]) => {
+<<<<<<< HEAD
         ids.forEach((id: string, idx: string) => {
+=======
+        ids.forEach((id: string, idx: number) => {
+>>>>>>> rebuilt-os-process
           insert.run({
             space,
             id,
@@ -283,7 +291,10 @@ create unique index if not exists grid_uindex on app_grid (idx, appId);
 create table if not exists docks (
     space             TEXT NOT NULL,
     id                TEXT NOT NULL,
+<<<<<<< HEAD
     idx               INTEGER NOT NULL,
+=======
+>>>>>>> rebuilt-os-process
     FOREIGN KEY (space) REFERENCES spaces (path),
     FOREIGN KEY (id) REFERENCES app_catalog (id)
 );

@@ -29,6 +29,7 @@ declare global {
     realm: typeof realmPreload;
     spacesService: typeof spacesPreload;
     bazaarService: typeof bazaarPreload;
+    twttr: any;
   }
 }
 

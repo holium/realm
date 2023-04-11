@@ -150,7 +150,7 @@ export const SpacesApi = {
             path: pathObj,
           },
         },
-        reaction: 'spaces-reaction.delete',
+        reaction: 'spaces-reaction.remove',
         onReaction: (data: any) => {
           resolve(data);
         },

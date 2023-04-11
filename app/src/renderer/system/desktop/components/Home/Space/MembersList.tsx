@@ -144,7 +144,7 @@ const MembersListPresenter = () => {
       <WindowedList
         width={298}
         data={listData}
-        rowRenderer={(rowData) => {
+        itemContent={(_, rowData) => {
           if (rowData.type === 'title') {
             const title = rowData.data as string;
             return <TitleRow title={title} />;

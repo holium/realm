@@ -95,13 +95,14 @@ export type PeerModelType = Instance<typeof PeerModel>;
 
 // Path row metadata
 export const ChatMetadataModel = types.model({
-  title: types.string, // group title
-  description: types.maybe(types.string), // not used
-  image: types.maybe(types.string), // image url
-  creator: types.string, // ship of the creator
-  peer: types.maybe(types.string), // ship of the peer only for DMs
+  title: types.string,
+  description: types.maybe(types.string),
+  image: types.maybe(types.string),
+  creator: types.string,
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
+  peer: types.maybe(types.string),
+  space: types.maybe(types.string),
 });
 
 export type ChatMetadata = Instance<typeof ChatMetadataModel>;
@@ -212,6 +213,7 @@ export const Chat = types
         createdAt: types.number,
       })
     ),
+    lastUpdatedAt: types.maybeNull(types.number),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -291,7 +293,6 @@ export const Chat = types
         console.error(error);
       }
     }),
-
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
@@ -319,6 +320,7 @@ export const Chat = types
           contents: lastContents,
           createdAt: new Date().getTime(),
         };
+        self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
         yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
@@ -368,6 +370,7 @@ export const Chat = types
           createdAt: message.createdAt,
         };
       }
+      // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
@@ -464,6 +467,11 @@ export const Chat = types
       self.isReacting = undefined;
     },
     setEditing(message: ChatMessageType) {
+      if (self.editingMsg !== null) {
+        /* workaround for chat getting updated when going
+        from one edit message to another */
+        localStorage.removeItem(self.path);
+      }
       self.editingMsg = message;
     },
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {

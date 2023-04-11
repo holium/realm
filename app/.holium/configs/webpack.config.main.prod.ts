@@ -64,8 +64,8 @@ const configuration: webpack.Configuration = {
       INSTALL_MOON:
         process.env.RELEASE_CHANNEL === 'latest' ||
         process.env.RELEASE_CHANNEL === 'hotfix'
-          ? '~hostyv:realm,courier'
-          : '~nimwyd-ramwyl-dozzod-hostyv:realm,courier',
+          ? '~hostyv:realm'
+          : '~nimwyd-ramwyl-dozzod-hostyv:realm',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
     }),
   ],

@@ -21,6 +21,8 @@ const DesktopPresenter = () => {
     roomsManager,
   });
 
+  console.log('DesktopPresenter', shellStore.isHomePaneOpen);
+
   return (
     <Fill>
       <Layer zIndex={15}>

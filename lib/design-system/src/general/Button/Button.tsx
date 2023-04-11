@@ -26,7 +26,7 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
-import { ColorProps, colorStyle } from '../../util/colors';
+import { ColorProps, colorStyle, ColorVariants } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -225,7 +225,7 @@ const TextButton = styled(Base)<TextButtonProps>`
 export type IconButtonProps = ButtonProps & {
   showOnHover?: boolean;
   isSelected?: boolean;
-  customColor?: string;
+  customColor?: ColorVariants;
 };
 
 const IconButton = styled(Base)<IconButtonProps>`
@@ -261,10 +261,6 @@ const IconButton = styled(Base)<IconButtonProps>`
         : 'rgba(var(--rlm-icon-rgba), 0.7)'};
   }
 `;
-
-// IconButton.defaultProps = {
-//   size: 24
-// }
 
 export const Button = {
   Base,

@@ -8,11 +8,10 @@ import {
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
 import { MembersStore, VisaModel } from './members.model';
-import { Theme } from './theme.model';
+import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
 import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
-import { defaultTheme } from '@holium/shared';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -135,6 +134,11 @@ export const SpacesStore = types
       return Array.from(self.spaces.values()).filter(
         (space: SpaceModelType) => space.type === 'our'
       )[0];
+    },
+    getSpaceByChatPath(chatPath: string) {
+      const pathArr = chatPath.split('/');
+      const path = `/${pathArr[2]}/${pathArr[3]}`;
+      return self.spaces.get(path);
     },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our.path) {

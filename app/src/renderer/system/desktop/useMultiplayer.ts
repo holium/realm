@@ -79,32 +79,34 @@ export const useMultiplayer = ({
 
       closeEphemeralChatDebounced(); // Refresh the 5s countdown.
 
-      if (key === '/') {
-        chat.current = '';
-        window.electron.app.realmToAppEphemeralChat(patp, '');
-        broadcastChat(patp, '');
-        if (ephemeralChat.isOn) {
+      if (ephemeralChat.isOn) {
+        if (key === '/') {
+          chat.current = '';
+          window.electron.app.realmToAppEphemeralChat(patp, '');
+          broadcastChat(patp, '');
           ephemeralChat.toggleOff();
           window.electron.app.toggleOffEphemeralChat();
+        } else if (key === 'Backspace') {
+          const newChat = chat.current.slice(0, -1);
+          chat.current = newChat;
+          window.electron.app.realmToAppEphemeralChat(patp, newChat);
+          broadcastChat(patp, newChat);
         } else {
+          let newKey = key;
+          // If the key is not a regular character, ignore it.
+          if (newKey.length > 1) return;
+
+          const newChat = chat.current + newKey;
+          chat.current = newChat;
+
+          window.electron.app.realmToAppEphemeralChat(patp, newChat);
+          broadcastChat(patp, newChat);
+        }
+      } else {
+        if (key === '/') {
           ephemeralChat.toggleOn();
           window.electron.app.toggleOnEphemeralChat();
         }
-      } else if (key === 'Backspace') {
-        const newChat = chat.current.slice(0, -1);
-        chat.current = newChat;
-        window.electron.app.realmToAppEphemeralChat(patp, newChat);
-        broadcastChat(patp, newChat);
-      } else {
-        let newKey = key;
-        // If the key is not a regular character, ignore it.
-        if (newKey.length > 1) return;
-
-        const newChat = chat.current + newKey;
-        chat.current = newChat;
-
-        window.electron.app.realmToAppEphemeralChat(patp, newChat);
-        broadcastChat(patp, newChat);
       }
     },
     [patp, isInRoom, ephemeralChat.isOn, isMultiplayerEnabled]

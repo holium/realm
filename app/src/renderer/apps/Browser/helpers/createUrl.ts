@@ -16,9 +16,9 @@ const isLocaHostOrIpAddress = (query: string) =>
   Boolean(query.match(/^(localhost)/gi)) ||
   Boolean(query.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::\d+)?$/gi));
 
-export const homePage = 'https://neeva.com';
+export const homePage = 'https://duckduckgo.com';
 
-const searchBase = `${homePage}/search?q=`;
+const searchBase = `${homePage}/?q=`;
 
 export const createUrl = (query: string) => {
   let potentialUrl = query;

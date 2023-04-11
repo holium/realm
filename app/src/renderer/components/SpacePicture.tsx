@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { Crest } from 'renderer/components';
 import { Flex, Text, Icon } from '@holium/design-system';
@@ -33,9 +32,7 @@ const FadeInMotion = {
   transition: { opacity: { duration: 1, ease: 'easeIn' } },
 };
 
-export const SpacePicture: FC<SpacePictureProps> = (
-  props: SpacePictureProps
-) => {
+export const SpacePicture = (props: SpacePictureProps) => {
   const { space, size, membersCount } = props;
 
   return (
@@ -95,8 +92,4 @@ export const SpacePicture: FC<SpacePictureProps> = (
       </Flex>
     </Flex>
   );
-};
-
-SpacePicture.defaultProps = {
-  size: 32,
 };

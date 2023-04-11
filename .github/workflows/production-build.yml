@@ -43,7 +43,8 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const result = script({github, context}, 'production-build.yml')
+            const args = { workflowId: 'production-build.yml' }
+            const result = script({github, context}, args)
             console.log(result)
             return result
         env:

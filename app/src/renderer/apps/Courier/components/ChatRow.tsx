@@ -40,7 +40,7 @@ export const ChatRowPresenter = ({
   onClick,
 }: ChatRowProps) => {
   const { shellStore } = useAppState();
-  const { ship, notifStore, chatStore } = useShipStore();
+  const { ship, notifStore, chatStore, spacesStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -59,6 +59,7 @@ export const ChatRowPresenter = ({
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
   const isMuted = isChatMuted(path);
+  const isSpaceChat = type === 'space';
 
   const chat = inbox.find((c) => c.path === path);
   const lastMessageUpdated: React.ReactNode = useMemo(() => {
@@ -102,7 +103,9 @@ export const ChatRowPresenter = ({
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState(
     timelineDate(
       new Date(
-        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) ||
+          (chat && chat.createdAt) ||
+          timestamp
       )
     )
   );
@@ -166,22 +169,23 @@ export const ChatRowPresenter = ({
         toggleMuted(path, !isMuted);
       },
     });
-    menu.push({
-      id: `${chatRowId}-leave-chat`,
-      label: isAdmin ? 'Delete chat' : 'Leave chat',
-      icon: isAdmin ? 'Trash' : 'Logout',
-      iconColor: '#ff6240',
-      labelColor: '#ff6240',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
-        shellStore.setIsBlurred(true);
-        shellStore.openDialogWithStringProps('leave-chat-dialog', {
-          path,
-          amHost: isAdmin.toString(),
-          our: ship.patp,
-        });
-      },
-    });
+    if (!isSpaceChat)
+      menu.push({
+        id: `${chatRowId}-leave-chat`,
+        label: isAdmin ? 'Delete chat' : 'Leave chat',
+        icon: isAdmin ? 'Trash' : 'Logout',
+        iconColor: '#ff6240',
+        labelColor: '#ff6240',
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-chat-dialog', {
+            path,
+            amHost: isAdmin.toString(),
+            our: ship.patp,
+          });
+        },
+      });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [path, isPinned, isMuted]);
 
@@ -197,6 +201,35 @@ export const ChatRowPresenter = ({
     return getChatHeader(path);
   }, [path, window.ship]);
 
+  let spaceHeader = null;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spacesStore.getSpaceByChatPath(path);
+
+    if (!space) {
+      spaceHeader = null;
+    } else {
+      spaceHeader = (
+        <Text.Custom
+          textAlign="left"
+          layoutId={`chat-${path}-pretitle`}
+          layout="preserve-aspect"
+          transition={{
+            duration: 0.15,
+          }}
+          width={210}
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 0.5, lineHeight: '1' }}
+          fontWeight={500}
+          fontSize={1}
+        >
+          {space.name}
+        </Text.Custom>
+      );
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = useMemo(
     () =>
       title &&
@@ -209,6 +242,7 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={image}
+          color={avatarColor}
           metadata={metadata}
           canEdit={false}
         />
@@ -244,6 +278,11 @@ export const ChatRowPresenter = ({
             {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {spaceHeader && (
+              <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+                {spaceHeader}
+              </Flex>
+            )}
             <Text.Custom
               layoutId={`chat-${path}-name`}
               layout="preserve-aspect"
@@ -268,6 +307,7 @@ export const ChatRowPresenter = ({
               transition={{
                 duration: 0.1,
               }}
+              initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}
               exit={{ opacity: 0 }}
               fontSize={2}

@@ -16,6 +16,7 @@ import {
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { ErrorBoundary } from '../../../../logic/ErrorBoundary';
 
 const CURSOR_WIDTH = 10;
 
@@ -356,11 +357,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           onMaximize={onMaximize}
           onMinimize={onMinimize}
         />
-        <AppWindowByType
-          isResizing={resizing.isOn}
-          isDragging={dragging.isOn}
-          appWindow={appWindow}
-        />
+        <ErrorBoundary>
+          <AppWindowByType
+            isResizing={resizing.isOn}
+            isDragging={dragging.isOn}
+            appWindow={appWindow}
+          />
+        </ErrorBoundary>
         <AppWindowResizeHandles
           zIndex={appWindow.zIndex + 1}
           topRight={{

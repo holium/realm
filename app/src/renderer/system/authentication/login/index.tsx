@@ -1,28 +1,30 @@
-import { useRef, useEffect, useState, useContext } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
-import { AnimatePresence } from 'framer-motion';
 import {
   Avatar,
   Flex,
   Box,
-  MenuItem,
-  Portal,
   Spinner,
   TextInput,
   Text,
   Button,
   Icon,
-  Menu,
 } from '@holium/design-system';
 import { ShipSelector } from './ShipSelector';
-import { trackEvent } from 'renderer/logic/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
-import { AuthIPC } from 'renderer/stores/ipc';
 
 interface LoginProps {
   addShip: () => void;
 }
+
+export type LoginError =
+  | 'bad-gateway'
+  | 'password'
+  | 'missing'
+  | 'code'
+  | 'unknown'
+  | '';
 
 const LoginPresenter = ({ addShip }: LoginProps) => {
   const { setTheme, authStore } = useAppState();
@@ -33,7 +35,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef(null);
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState<LoginError>('');
 
   // Setting up options menu
   const menuWidth = 180;
@@ -266,8 +268,13 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     }
                   />
 
-                  {(['password', 'missing', 'code'].indexOf(loginError) !==
-                    -1 ||
+                  {([
+                    'bad-gateway',
+                    'password',
+                    'missing',
+                    'code',
+                    'unknown',
+                  ].indexOf(loginError) !== -1 ||
                     hasFailed) && (
                     <Text.Hint
                       style={{
@@ -278,6 +285,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       color="intent-alert"
                     >
                       {hasFailed && 'Connection to your ship has been refused.'}
+                      {loginError === 'missing' &&
+                        'Unable to connect to ship - error code 400.'}
+                      {loginError === 'bad-gateway' &&
+                        'Ship is unreachable - error code 502.'}
                       {loginError === 'password' && 'Incorrect password.'}
                       {loginError === 'missing' && 'Unable to connect to ship.'}
                       {loginError === 'code' && 'Error saving new ship code'}
