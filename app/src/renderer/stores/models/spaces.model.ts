@@ -66,7 +66,6 @@ export const SpaceModel = types
     }),
     reorderPinnedApps: flow(function* (dock: string[]) {
       try {
-        s;
         applySnapshot(self.dock, dock);
 
         return yield BazaarIPC.reorderPinnedApps(
@@ -129,6 +128,11 @@ export const SpacesStore = types
       return Array.from(self.spaces.values()).filter(
         (space: SpaceModelType) => space.type === 'our'
       )[0];
+    },
+    getSpaceByChatPath(chatPath: string) {
+      const pathArr = chatPath.split('/');
+      const path = `/${pathArr[2]}/${pathArr[3]}`;
+      return self.spaces.get(path);
     },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our.path) {

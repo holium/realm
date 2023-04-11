@@ -11,10 +11,8 @@ import {
 // import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
-import InboxList from '../components/InboxList';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 const rowHeight = 52;

@@ -18,7 +18,6 @@ import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { useChatStore } from '../store';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { FileUploadParams } from 'os/services/ship/models/ship';
@@ -31,6 +30,7 @@ import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { ShipIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -66,6 +66,7 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
+  const { theme } = useAppState();
   const { ship, chatStore, spacesStore } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
@@ -451,7 +452,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     style={{
                       borderColor: 'rgba(0, 0, 0, 0.1)',
                       backgroundColor:
-                        theme.currentTheme.mode === 'dark'
+                        theme.mode === 'dark'
                           ? 'rgba(0, 0, 0, 0.125)'
                           : 'rgba(0, 0, 0, 0.065)',
                     }}

@@ -21,6 +21,7 @@ import { PinnedContainer } from '../components/PinnedMessage';
 import { ChatMessageType } from '../models';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatLogList } from './ChatLogList';
+import { useAppState } from 'renderer/stores/app.store';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   position: absolute;
@@ -36,6 +37,7 @@ type ChatLogProps = {
 };
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
+  const { theme } = useAppState();
   const { dimensions } = useTrayApps();
   const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
@@ -316,7 +318,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <ChatInputBox
           storage={storage}
           selectedChat={selectedChat}
-          themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+          themeMode={theme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
           editMessage={selectedChat.editingMsg}

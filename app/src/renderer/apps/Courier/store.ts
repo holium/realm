@@ -11,7 +11,7 @@ import {
 import { Chat, ChatModelType } from './models';
 import { shipStore, ShipStore } from '../../stores/ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { RealmUpdateTypes } from 'os/realm.service';
+import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 import { toJS } from 'mobx';
 
@@ -103,7 +103,11 @@ export const ChatStore = types
           image: avatar || chat.metadata.image,
         };
       } else if (chat.type === 'space') {
-        const space = servicesStore.spaces.getSpaceByChatPath(chat.path);
+        const spacesStore: SpacesStoreType = getParentOfType(
+          self,
+          ShipStore
+        ).spacesStore;
+        const space = spacesStore.getSpaceByChatPath(chat.path);
         return {
           title: chat.metadata.title,
           image: space?.picture,
