@@ -11,27 +11,20 @@ yarn storybook
 
 ```
 /src
+  /blocks
+  /general
+  /input
+  /navigation
+  /os
+  /util
+  index.ts    (@holium/design-system)
 
-  /general - multipurpose components
-    /index.ts - exports general components
-
-  /input - input components
-    /index.ts - exports input components
-
-  /os - core realm components
-    /index.ts - exports os components
-
-  /util - internal helpers
-
-  index.ts - exports all components
-
-general.ts - exports all general components
-
-input.ts - exports all input components
-
-os.ts - exports all os components
-
-util.ts - exports all util components
+blocks.ts     (@holium/design-system/blocks)
+general.ts    (@holium/design-system/general)
+input.ts      (@holium/design-system/input)
+navigation.ts (@holium/design-system/navigation)
+os.ts         (@holium/design-system/os)
+util.ts       (@holium/design-system/util)
 ```
 
 ## Component structure
