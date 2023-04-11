@@ -1,1 +1,1 @@
-../../../base-dev/lib/language-server/json.hoon
+../../../urbit/pkg/base-dev/lib/language-server/json.hoon

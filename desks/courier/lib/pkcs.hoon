@@ -1,1 +1,1 @@
-../../base-dev/lib/pkcs.hoon
+../../../urbit/pkg/base-dev/lib/pkcs.hoon

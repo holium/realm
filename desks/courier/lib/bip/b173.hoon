@@ -1,1 +1,1 @@
-../../../base-dev/lib/bip/b173.hoon
+../../../urbit/pkg/base-dev/lib/bip/b173.hoon

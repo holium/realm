@@ -1,1 +1,1 @@
-../../base-dev/mar/kelvin.hoon
+../../../urbit/pkg/base-dev/mar/kelvin.hoon

@@ -1,1 +1,1 @@
-../../../base-dev/lib/language-server/easy-print.hoon
+../../../urbit/pkg/base-dev/lib/language-server/easy-print.hoon

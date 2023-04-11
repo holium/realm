@@ -1,1 +1,1 @@
-../../base-dev/lib/mip.hoon
+../../../urbit/pkg/base-dev/lib/mip.hoon

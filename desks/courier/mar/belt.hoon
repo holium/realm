@@ -1,1 +1,1 @@
-../../base-dev/mar/belt.hoon
+../../../urbit/pkg/base-dev/mar/belt.hoon

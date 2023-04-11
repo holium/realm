@@ -1,1 +1,1 @@
-../../base-dev/mar/atom.hoon
+../../../urbit/pkg/base-dev/mar/atom.hoon

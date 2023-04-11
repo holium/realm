@@ -1,1 +1,1 @@
-../../base-dev/sur/bitcoin.hoon
+../../../urbit/pkg/base-dev/sur/bitcoin.hoon

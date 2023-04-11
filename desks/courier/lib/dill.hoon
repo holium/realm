@@ -1,1 +1,1 @@
-../../base-dev/lib/dill.hoon
+../../../urbit/pkg/base-dev/lib/dill.hoon

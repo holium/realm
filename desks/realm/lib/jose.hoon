@@ -1,1 +1,1 @@
-../../base-dev/lib/jose.hoon
+../../../urbit/pkg/base-dev/lib/jose.hoon

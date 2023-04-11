@@ -1,1 +1,1 @@
-../../base-dev/sur/sole.hoon
+../../../urbit/pkg/base-dev/sur/sole.hoon

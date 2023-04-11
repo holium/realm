@@ -1,1 +1,1 @@
-../../base-dev/sur/spider.hoon
+../../../urbit/pkg/base-dev/sur/spider.hoon

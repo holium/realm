@@ -1,1 +1,1 @@
-../../base-dev/mar/thread-fail.hoon
+../../../urbit/pkg/base-dev/mar/thread-fail.hoon

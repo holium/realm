@@ -1,1 +1,1 @@
-../../base-dev/mar/woff2.hoon
+../../../urbit/pkg/base-dev/mar/woff2.hoon

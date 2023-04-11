@@ -1,1 +1,1 @@
-../../../base-dev/mar/sole/effect.hoon
+../../../urbit/pkg/base-dev/mar/sole/effect.hoon

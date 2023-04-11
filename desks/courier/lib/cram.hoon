@@ -1,1 +1,1 @@
-../../base-dev/lib/cram.hoon
+../../../urbit/pkg/base-dev/lib/cram.hoon

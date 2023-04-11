@@ -1,1 +1,1 @@
-../../base-dev/lib/server.hoon
+../../../urbit/pkg/base-dev/lib/server.hoon

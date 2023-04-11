@@ -1,1 +1,1 @@
-../../base-dev/mar/hymn.hoon
+../../../urbit/pkg/base-dev/mar/hymn.hoon

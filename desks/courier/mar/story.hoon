@@ -1,1 +1,1 @@
-../../base-dev/mar/story.hoon
+../../../urbit/pkg/base-dev/mar/story.hoon

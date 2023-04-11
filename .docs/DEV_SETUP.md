@@ -8,7 +8,6 @@ mkdir ships
 cd ships
 # Download latest Urbit binary
 https://urbit.org/getting-started/cli
-# TODO: update when we have preboot
 
 # pull down the Urbit repo
 git submodule foreach git pull origin master
@@ -32,7 +31,7 @@ Now you should have the urbit files in the `ships` folder. This folder is ignore
 Now, you want to start your dev ship `zod`.
 
 ```zsh
-./urbit zod
+./zod/.run
 ```
 
 Once started, you should run the following commands on your ship.
@@ -44,12 +43,6 @@ For `%realm`:
 > |mount %realm
 ```
 
-Then we want to delete the contents of the mounted folder now in `ships/zod/realm`.
-
-```zsh
-sudo rm -r ships/zod/realm/*
-```
-
 For `%courier`:
 
 ```hoon
@@ -58,36 +51,7 @@ For `%courier`:
 ```
 
 ```zsh
-sudo rm -r ships/zod/courier/*
-```
-
-### Copying the dev desk to a fake ship.
-
-There is a script called `./copy-desk.sh` that takes a ship name and app name. It should also copy all files needed from `base`, `garden`, and `landscape`.
-
-First we need to mount `base`, `garden`, and `landscape` in `~zod` so our script can copy dependencies over.
-
-```hoon
-|mount %garden
-|mount %landscape
-```
-
-Now we can run the copy script.
-
-```zsh
-# Only have to run the first time
-chmod +x ./copy-desk.sh
-# this will copy the desk
 watch cp -LR 
-./copy-desk.sh zod realm
-./copy-desk.sh zod courier
-```
-
-This is how we can update and write new code from a dev folder. To have the updates take effect in our ship, run:
-
-```hoon
-|commit %realm
-|commit %courier
 ```
 
 #### Installing %realm and %courier

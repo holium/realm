@@ -1,1 +1,1 @@
-../../base-dev/sur/keygen.hoon
+../../../urbit/pkg/base-dev/sur/keygen.hoon

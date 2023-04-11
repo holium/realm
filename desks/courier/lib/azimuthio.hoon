@@ -1,1 +1,1 @@
-../../base-dev/lib/azimuthio.hoon
+../../../urbit/pkg/base-dev/lib/azimuthio.hoon
