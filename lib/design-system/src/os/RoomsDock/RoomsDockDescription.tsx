@@ -1,4 +1,5 @@
-import { Flex, Icon, Text, pluralize } from '../../index';
+import { Flex, Icon, Text } from '../../../general';
+import { pluralize } from '../../../util';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 type Props = {

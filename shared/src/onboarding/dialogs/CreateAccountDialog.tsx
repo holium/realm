@@ -1,11 +1,7 @@
 import { ChangeEvent, useRef } from 'react';
-import {
-  Flex,
-  HoliumButton,
-  Anchor,
-  useToggle,
-  isValidEmail,
-} from '@holium/design-system';
+import { HoliumButton } from '@holium/design-system/os';
+import { Flex, Anchor } from '@holium/design-system/general';
+import { isValidEmail, useToggle } from '@holium/design-system/util';
 import {
   OnboardDialogDescription,
   OnboardDialogInput,

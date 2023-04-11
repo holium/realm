@@ -1,4 +1,4 @@
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { ProductCard } from './ProductCard';
 import { ThirdEarthProduct } from '../../types/index';
 

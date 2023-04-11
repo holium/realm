@@ -1,4 +1,4 @@
-import { Flex, Text } from '../../general';
+import { Flex, Text } from '../../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { motion } from 'framer-motion';
 

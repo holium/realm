@@ -7,7 +7,7 @@ import {
   BoxProps,
   Icon,
   Button,
-} from '../../general';
+} from '../../../general';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 
 const widths = {

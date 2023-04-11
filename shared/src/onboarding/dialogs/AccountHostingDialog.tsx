@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex, Button, Text } from '@holium/design-system';
+import { Flex, Button, Text } from '@holium/design-system/general';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
