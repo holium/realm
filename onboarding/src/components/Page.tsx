@@ -4,7 +4,7 @@ import NextHead from 'next/head';
 import { Rubik } from 'next/font/google';
 import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
-import { api } from '../util/constants';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 const Main = styled.main`
@@ -36,7 +36,7 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
 
     const refreshAndStoreToken = async (token: string) => {
       try {
-        const response = await api.refreshToken(token);
+        const response = await thirdEarthApi.refreshToken(token);
         localStorage.setItem('email', response.email);
         localStorage.setItem('token', response.token);
         authenticated.toggleOn();

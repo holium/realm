@@ -1,6 +1,6 @@
 import { LoginDialog } from '@holium/shared';
 import { Page } from '../components/Page';
-import { api } from '../util/constants';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 export default function Login() {
@@ -10,7 +10,7 @@ export default function Login() {
 
   const onLogin = async (email: string, password: string) => {
     try {
-      const response = await api.login(email, password);
+      const response = await thirdEarthApi.login(email, password);
       localStorage.setItem('token', response.token);
 
       goToPage('/account');

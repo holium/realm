@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { PaymentDialog, ThirdEarthProduct } from '@holium/shared';
 import { Page } from '../components/Page';
-import { api, constants } from '../util/constants';
+import { constants } from '../util/constants';
 import { useNavigation } from '../util/useNavigation';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];
 };
 
 export async function getServerSideProps() {
-  const products = await api.getProducts();
+  const products = await thirdEarthApi.getProducts();
 
   return {
     props: {
@@ -44,7 +45,7 @@ export default function Payment({ products }: ServerSideProps) {
     setToken(token);
 
     const getSecretAndSetupStripe = async () => {
-      const response = await api.stripeMakePayment(
+      const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
         patp
@@ -76,9 +77,9 @@ export default function Payment({ products }: ServerSideProps) {
     if (!token || !patp || !invoiceId || !productId) return false;
 
     try {
-      await api.updatePaymentStatus(token, invoiceId, 'OK');
-      await api.updatePlanetStatus(token, patp, 'sold');
-      await api.ship(token, patp, productId.toString(), invoiceId);
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
+      await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
 
       goToPage('/booting');
 

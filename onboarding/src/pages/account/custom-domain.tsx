@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AccountCustomDomainDialog } from '@holium/shared';
 import { useUser, UserContextProvider } from '../../util/UserContext';
-import { api } from '../../util/constants';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
@@ -23,7 +23,7 @@ const CustomDomainPresenter = () => {
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
 
-    const result = await api.setCustomDomain(
+    const result = await thirdEarthApi.setCustomDomain(
       token,
       domain,
       ship.droplet_id.toString(),

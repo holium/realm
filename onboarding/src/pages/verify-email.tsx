@@ -1,6 +1,6 @@
 import { VerifyEmailDialog } from '@holium/shared';
 import { Page } from '../components/Page';
-import { api } from '../util/constants';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 export default function VerifyEmail() {
@@ -12,7 +12,7 @@ export default function VerifyEmail() {
 
     if (email && password) {
       try {
-        api.register(email, password);
+        thirdEarthApi.register(email, password);
       } catch (error) {
         console.error(error);
         goToPage('/');
@@ -24,7 +24,7 @@ export default function VerifyEmail() {
 
   const onNext = async (verificationcode: string) => {
     try {
-      const result = await api.verifyEmail(verificationcode);
+      const result = await thirdEarthApi.verifyEmail(verificationcode);
       localStorage.setItem('token', result.token);
 
       goToPage('/choose-id');

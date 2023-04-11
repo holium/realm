@@ -3,7 +3,7 @@ import { BootingDialog } from '@holium/shared';
 import { useToggle } from '@holium/design-system/util';
 import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
-import { api } from '../util/constants';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 
 export default function Booting() {
   const { goToPage } = useNavigation();
@@ -18,7 +18,7 @@ export default function Booting() {
 
     if (!patp || !token) return;
 
-    const ships = await api.getUserShips(token);
+    const ships = await thirdEarthApi.getUserShips(token);
     const ship = Object.values(ships).find((s) => s.patp === patp);
 
     if (!ship) return;
