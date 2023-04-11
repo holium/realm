@@ -2,7 +2,11 @@ import { Ref } from 'react';
 import styled from 'styled-components';
 import { Virtuoso, VirtuosoProps, VirtuosoHandle } from 'react-virtuoso';
 
-const Container = styled.div<{ hideScrollbar?: boolean }>`
+const SCROLLBAR_WIDTH = 12;
+
+const Container = styled.div<{
+  hideScrollbar?: boolean;
+}>`
   position: relative;
   width: 100%;
   height: 100%;
@@ -13,7 +17,7 @@ const Container = styled.div<{ hideScrollbar?: boolean }>`
 
     /* custom scrollbar */
     ::-webkit-scrollbar {
-      width: 12px;
+      width: ${SCROLLBAR_WIDTH}px;
     }
 
     ::-webkit-scrollbar-thumb {
@@ -35,15 +39,15 @@ const Container = styled.div<{ hideScrollbar?: boolean }>`
   &:hover {
     > :nth-child(1) {
       ::-webkit-scrollbar-thumb {
-        background-color: rgba(var(--rlm-text-rgba), 0.5);
+        background-color: rgba(var(--rlm-text-rgba), 0.3);
       }
 
       ::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(var(--rlm-text-rgba), 1);
+        background-color: rgba(var(--rlm-text-rgba), 0.6);
       }
 
       ::-webkit-scrollbar-track:hover {
-        background-color: rgba(var(--rlm-input-rgba), 0.5);
+        background-color: rgba(var(--rlm-input-rgba), 0.3);
       }
     }
   }
@@ -52,14 +56,22 @@ const Container = styled.div<{ hideScrollbar?: boolean }>`
 export type WindowedListRef = VirtuosoHandle;
 
 type Props<ItemData = any, Context = any> = VirtuosoProps<ItemData, Context> & {
+  width?: number;
+  height?: number;
+  data: ItemData[];
   innerRef?: Ref<WindowedListRef>;
+  chatMode?: boolean;
+  shiftScrollbar?: boolean;
   hideScrollbar?: boolean;
 };
 
 export const WindowedList = <ItemData, Context = any>({
+  data,
   innerRef,
-  width = '100%',
-  height = '100%',
+  width,
+  height,
+  chatMode = false,
+  shiftScrollbar = false,
   hideScrollbar = false,
   style,
   ...props
@@ -67,9 +79,13 @@ export const WindowedList = <ItemData, Context = any>({
   <Container hideScrollbar={hideScrollbar}>
     <Virtuoso
       ref={innerRef}
+      data={data}
+      followOutput={chatMode}
+      initialTopMostItemIndex={chatMode ? data.length - 1 : 0}
       style={{
-        width,
-        height,
+        width: width ? width + (shiftScrollbar ? SCROLLBAR_WIDTH : 0) : '100%',
+        height: height ?? '100%',
+        marginRight: -(shiftScrollbar ? SCROLLBAR_WIDTH : 0),
         ...style,
       }}
       {...props}

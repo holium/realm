@@ -40,6 +40,7 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
+let updater: AppUpdater;
 let mainWindow: BrowserWindow;
 
 if (process.defaultApp) {
@@ -231,23 +232,36 @@ const createMouseOverlayWindow = () => {
 };
 
 app.on('window-all-closed', () => {
-  // Respect the OSX convention of having the application in memory even
-  // after all windows have been closed
-  if (!isMac) app.quit();
+  if (!updater.checkingForUpdates) {
+    // Respect the OSX convention of having the application in memory even
+    // after all windows have been closed
+    if (!isMac) app.quit();
+  }
 });
-
 // quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
 // do our cleanup, and then re-emit and actually quit it
 let lastQuitSignal: number = 0;
 app.on('before-quit', (event) => {
-  if (lastQuitSignal === 0) {
-    lastQuitSignal = new Date().getTime() - 1;
-    event.preventDefault();
-    mainWindow.webContents.send('realm.before-quit');
-    setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+  if (!updater.checkingForUpdates) {
+    if (lastQuitSignal === 0) {
+      lastQuitSignal = new Date().getTime() - 1;
+      event.preventDefault();
+      mainWindow.webContents.send('realm.before-quit');
+      setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+    }
   }
 });
-ipcMain.on('realm.app.quit', app.quit);
+
+ipcMain.on('realm.app.quit', (_event) => {
+  if (!updater.checkingForUpdates) app.quit();
+});
+
+ipcMain.on('download-url-as-file', (_event, { url }) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    download(win, url, { saveAs: true });
+  }
+});
 
 ipcMain.on('download-url-as-file', (_event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();
@@ -259,7 +273,10 @@ ipcMain.on('download-url-as-file', (_event, { url }) => {
 app
   .whenReady()
   .then(() => {
-    new AppUpdater().checkForUpdates().then(() => {
+    updater = new AppUpdater();
+    updater.checkingForUpdates = true;
+    updater.checkForUpdates().then(() => {
+      updater.checkingForUpdates = false;
       createWindow();
       createMouseOverlayWindow();
     });

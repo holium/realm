@@ -27,6 +27,7 @@ declare global {
     friendDb: typeof friendsPreload;
     realm: typeof realmPreload;
     spacesService: typeof spacesPreload;
+    twttr: any;
   }
 }
 

@@ -24,7 +24,7 @@ function versionDiff(a, b) {
   }
 }
 
-module.exports = async ({ github, context }, workflowId) => {
+module.exports = async ({ github, context }, args) => {
   // console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
@@ -140,19 +140,23 @@ module.exports = async ({ github, context }, workflowId) => {
     //     direction: 'desc',
     //   }
     // );
-    const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
-      owner: 'holium',
-      repo: 'realm',
-      per_page: 1, // only give the last result
-      sort: 'created',
-      direction: 'desc',
-    });
-    if (tags.data.length > 0) {
-      // if there is at least one release, use it's tag name to determine next version
-      buildVersion = tags.data[0].name;
+    if (args && args.version) {
+      buildVersion = args.version;
     } else {
-      // otherwise if no releases found, use the version string from package.json
-      buildVersion = pkg.version;
+      const tags = await github.request('GET /repos/{owner}/{repo}/tags', {
+        owner: 'holium',
+        repo: 'realm',
+        per_page: 1, // only give the last result
+        sort: 'created',
+        direction: 'desc',
+      });
+      if (tags.data.length > 0) {
+        // if there is at least one release, use it's tag name to determine next version
+        buildVersion = tags.data[0].name;
+      } else {
+        // otherwise if no releases found, use the version string from package.json
+        buildVersion = pkg.version;
+      }
     }
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
@@ -163,7 +167,7 @@ module.exports = async ({ github, context }, workflowId) => {
       ci.channel = 'alpha';
     } else {
       // channel set to branch name
-      ci.channel = 'draft';
+      ci.channel = (args && args.channel) || 'draft';
       // const tic = context.ref.lastIndexOf('/');
       // if (tic !== -1) {
       //   ci.channel = context.ref.substring(tic + 1);

@@ -203,7 +203,7 @@
                       %paths
                         =/  pathrow  path-row.db-row.ch
                         =/  pathpeers  (scry-peers:lib path.pathrow bowl)
-                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db-sur =(role.p %host))))
                         ?:  =(patp.host our.bowl) :: if it's our own creation, don't do anything
                           ~
                         =/  send-status-message

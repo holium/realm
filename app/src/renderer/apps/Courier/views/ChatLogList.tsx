@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { RefObject } from 'react';
 import {
   Box,
   Text,
@@ -11,24 +11,26 @@ import { ChatMessageType, ChatModelType } from '../models';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
+  listRef: RefObject<WindowedListRef>;
   width: number;
   height: number;
   messages: ChatMessageType[];
   selectedChat: ChatModelType;
   ourColor: string;
+  endOfListPadding?: number;
+  topOfListPadding?: number;
 };
 
 export const ChatLogList = ({
+  listRef,
   width,
   height,
   messages,
   selectedChat,
   ourColor,
+  endOfListPadding,
+  topOfListPadding,
 }: Props) => {
-  const listRef = useRef<WindowedListRef>(null);
-
-  const scrollbarWidth = 12;
-
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
 
@@ -40,19 +42,27 @@ export const ChatLogList = ({
       row.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
-    const topSpacing = isPrevGrouped ? '3px' : 2;
-    const bottomSpacing = isNextGrouped ? '3px' : 2;
+    let topSpacing = isPrevGrouped ? '3px' : 2;
+    let bottomSpacing = isNextGrouped ? '3px' : 2;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
     const showDate = index === 0 || thisMsgDate !== prevMsgDate;
+    if (index === messages.length - 1 && endOfListPadding) {
+      bottomSpacing = endOfListPadding;
+    }
+
+    if (index === 0 && topOfListPadding) {
+      topSpacing = topOfListPadding;
+    }
 
     return (
       <Box
         key={row.id}
         mx="1px"
+        animate={false}
         pt={topSpacing}
         pb={isLast ? bottomSpacing : 0}
       >
@@ -77,10 +87,7 @@ export const ChatLogList = ({
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
-
-            console.log('reply index', replyIndex);
-
-            listRef.current?.scrollToIndex({
+            listRef?.current?.scrollToIndex({
               index: replyIndex,
               align: 'start',
               behavior: 'smooth',
@@ -96,12 +103,12 @@ export const ChatLogList = ({
       <WindowedList
         innerRef={listRef}
         data={messages}
-        followOutput="auto"
-        width={width + scrollbarWidth}
+        width={width}
         height={height}
-        style={{ marginRight: -scrollbarWidth }}
-        initialTopMostItemIndex={messages.length - 1}
+        atBottomThreshold={100}
         itemContent={renderChatRow}
+        chatMode
+        shiftScrollbar
       />
     </Gallery>
   );

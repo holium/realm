@@ -10,10 +10,13 @@ import {
   FragmentImage,
 } from './fragment-lib';
 import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
+import { useMemo } from 'react';
+import { convertDarkText } from '../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
   blockquote {
     margin: 0px 0px;
   }
@@ -26,6 +29,8 @@ export type ReplyProps = {
   authorColor?: string;
   sentAt: string;
   message?: FragmentType[];
+  containerWidth?: number;
+  themeMode?: 'light' | 'dark';
   onClick?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
   onCancel?: () => void;
 } & BoxProps;
@@ -36,10 +41,18 @@ export const Reply = (props: ReplyProps) => {
     author,
     authorColor,
     message,
+    containerWidth,
+    themeMode,
     onClick = () => {},
     onCancel,
   } = props;
 
+  const authorColorDisplay = useMemo(
+    () =>
+      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      'rgba(var(--rlm-text-rgba))',
+    [authorColor]
+  );
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
   let replyContent = null;
@@ -68,22 +81,30 @@ export const Reply = (props: ReplyProps) => {
           id={'pin-image-preview'}
           src={link}
           style={{ display: 'block' }}
+          // width={100}
+          // height={100}
           draggable={false}
         />
       </Box>
     );
   } else {
-    replyContent = renderFragment(id, message[0], 0, author);
+    replyContent = renderFragment(
+      id,
+      message[0],
+      0,
+      author,
+      containerWidth ? containerWidth - 16 - 22 : undefined
+    );
   }
+  let additionalWidth = mediaContent ? 100 : 0;
   return (
     <ReplyContainer
       id={id}
       key={id}
-      initial={{ opacity: 0, height: 25 }}
       animate={{ opacity: 1, height: 46 }}
-      exit={{ opacity: 0, height: 25 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
+      width={containerWidth}
     >
       <FragmentBlock
         id={id}
@@ -91,38 +112,53 @@ export const Reply = (props: ReplyProps) => {
           display: 'inline-flex',
           flexDirection: 'row',
           alignItems: 'center',
-          width: '100%',
+          // width: containerWidth,
           gap: 8,
         }}
       >
-        <Icon name="Reply" size={22} color="accent" />
         <FragmentBlockquote
           id={id}
           className="pinned-or-reply-message"
           style={{
             paddingRight: 6,
+            borderRadius: 10,
+            alignItems: 'center',
             borderLeft: `2px solid ${
-              authorColor || 'rgba(var(--rlm-accent-rgba))'
+              authorColorDisplay || 'rgba(var(--rlm-accent-rgba))'
             }`,
-            width: 'calc(100% - 60px)',
+            width: containerWidth ? containerWidth - 16 : '100%',
           }}
         >
+          <Icon name="Reply" size={22} iconColor={authorColorDisplay} />
           {mediaContent}
           <Flex
             flex={1}
             flexDirection="column"
+            justifyContent="center"
             className="fragment-reply pinned"
-            maxWidth="100%"
+            width={containerWidth ? containerWidth - 16 - 22 : '100%'}
           >
-            <BubbleAuthor id={id} authorColor={authorColor}>
+            <BubbleAuthor
+              id={id}
+              fontSize="0.8125rem"
+              authorColor={authorColorDisplay}
+            >
               {author}
             </BubbleAuthor>
-            <Text.Custom truncate overflow="hidden" maxWidth="100%">
+            <Text.Custom
+              truncate
+              overflow="hidden"
+              fontSize="0.8125rem"
+              width={
+                containerWidth ? containerWidth - 104 - additionalWidth : '100%'
+              }
+            >
               {replyContent}
             </Text.Custom>
           </Flex>
           {onCancel && (
             <Button.IconButton
+              mr="4px"
               onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
                 evt.stopPropagation();
                 onCancel();
