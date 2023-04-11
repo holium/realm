@@ -20,8 +20,8 @@ done
 echo "Watching for changes to copy to ${PIER}..."
 while [ 0 ]
   do
-  cp -LR realm/* $PIER/
-  cp -LR courier/* $PIER/
+  cp -LR realm/* $PIER/realm/
+  cp -LR courier/* $PIER/courier/
   sleep 0.8
 done
 
