@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
+// import { toJS } from 'mobx';
 import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { Chat, ChatModelType } from './models';
@@ -8,7 +8,7 @@ import { servicesStore } from 'renderer/logic/store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
-const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+export const sortByUpdatedAt = (a: any, b: any) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -36,14 +36,63 @@ const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
+    get sortedChatList() {
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        const selectedPath = servicesStore.spaces.selected?.path;
+
+        // Check if the chats are space chats and match the selected space
+        const isASpaceChatAndSelected =
+          a.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(a.path)?.path;
+        const isBSpaceChatAndSelected =
+          b.type === 'space' &&
+          selectedPath ===
+            servicesStore.spaces.getSpaceByChatPath(b.path)?.path;
+
+        // Compare the boolean values
+        if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
+          return isBSpaceChatAndSelected ? 1 : -1;
+        }
+
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
+    },
     get pinnedChatList() {
       return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path))
+        .filter(
+          (c) =>
+            self.pinnedChats.includes(c.path) ||
+            (c.type === 'space' &&
+              servicesStore.spaces?.selected?.path &&
+              c.path.includes(servicesStore.spaces.selected.path))
+        )
         .sort(sortByUpdatedAt);
     },
     get unpinnedChatList() {
       return self.inbox
         .filter((c) => !self.pinnedChats.includes(c.path))
+        .filter(
+          (c) =>
+            !(
+              self.pinnedChats.includes(c.path) ||
+              (c.type === 'space' &&
+                servicesStore.spaces?.selected?.path &&
+                c.path.includes(servicesStore.spaces.selected.path))
+            )
+        )
         .sort(sortByUpdatedAt);
     },
     getChatHeader(path: string): {
@@ -66,6 +115,12 @@ const ChatStore = types
             nickname: nickname || '',
           },
           image: avatar || chat.metadata.image,
+        };
+      } else if (chat.type === 'space') {
+        const space = servicesStore.spaces.getSpaceByChatPath(chat.path);
+        return {
+          title: chat.metadata.title,
+          image: space?.picture,
         };
       } else {
         return {
@@ -166,6 +221,10 @@ const ChatStore = types
       try {
         const chat = self.inbox.find((chat) => chat.path === path);
         if (chat) {
+          if (self.selectedChat?.path === path) {
+            self.selectedChat = undefined;
+            self.subroute = 'inbox';
+          }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
           yield ChatDBActions.leaveChat(path);
@@ -177,7 +236,6 @@ const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
@@ -243,11 +301,11 @@ OSActions.onLogout((_event: any) => {
 // Listen for changes
 ChatDBActions.onDbChange((_evt, type, data) => {
   if (type === 'path-added') {
-    console.log('onPathsAdded', toJS(data));
+    // console.log('onPathsAdded', toJS(data));
     chatStore.onPathsAdded(data);
   }
   if (type === 'path-deleted') {
-    console.log('onPathDeleted', data);
+    // console.log('onPathDeleted', data);
     chatStore.onPathDeleted(data);
   }
   if (type === 'message-deleted') {
@@ -277,13 +335,13 @@ ChatDBActions.onDbChange((_evt, type, data) => {
       (chat) => chat.path === data.path
     );
     if (!selectedChat) return;
-    console.log('onPeerAdded', toJS(data));
+    // console.log('onPeerAdded', toJS(data));
     selectedChat.onPeerAdded(data.ship, data.role);
   }
   if (type === 'peer-deleted') {
     const selectedChat = chatStore.inbox.find((chat) => chat.path === data.row);
     if (!selectedChat) return;
-    console.log('onPeerDeleted', toJS(data));
+    // console.log('onPeerDeleted', toJS(data));
     selectedChat.onPeerDeleted(data.ship);
   }
 });

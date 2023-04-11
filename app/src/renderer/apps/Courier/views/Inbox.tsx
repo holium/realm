@@ -6,6 +6,7 @@ import {
   TextInput,
   Box,
   Text,
+  WindowedList,
 } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
@@ -14,32 +15,21 @@ import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
 import { useServices } from 'renderer/logic/store';
-import InboxList from '../components/InboxList';
 const rowHeight = 52;
 
-const sortFunction = (a: ChatModelType, b: ChatModelType) => {
-  if (
-    (a.createdAt || a.metadata.timestamp) >
-    (b.createdAt || b.metadata.timestamp)
-  ) {
-    return -1;
-  }
-  if (
-    (a.createdAt || a.metadata.timestamp) <
-    (b.createdAt || b.metadata.timestamp)
-  ) {
-    return 1;
-  }
-  return 0;
-};
+const scrollbarWidth = 12;
+const heightPadding = 12;
+const searchHeight = 40;
 
 export const InboxPresenter = () => {
-  const { ship } = useServices();
+  const { ship, spaces, theme } = useServices();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
-  const { inbox, pinnedChatList, unpinnedChatList, setChat, setSubroute } =
+  const { inbox, sortedChatList, setChat, setSubroute, isChatPinned } =
     useChatStore();
   const [searchString, setSearchString] = useState<string>('');
+
+  const currentSpace = spaces.selected;
 
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
@@ -54,8 +44,8 @@ export const InboxPresenter = () => {
 
   const listWidth = useMemo(() => dimensions.width - 26, [dimensions.width]);
   const listHeight = useMemo(
-    () => 544 - pinnedChatList.length * 56,
-    [pinnedChatList]
+    () => dimensions.height - heightPadding - searchHeight,
+    [dimensions.height]
   );
 
   return (
@@ -71,7 +61,7 @@ export const InboxPresenter = () => {
         setShowList(true);
       }}
     >
-      <Flex zIndex={1} mb={1} ml={1} flexDirection="row" alignItems="center">
+      <Flex zIndex={1} mb={2} ml={1} flexDirection="row" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -128,80 +118,94 @@ export const InboxPresenter = () => {
         </Flex>
       ) : (
         showList && (
-          <Box height={544} width={dimensions.width - 26}>
-            <Flex
-              style={{
-                background: 'rgba(0,0,0,0.03)',
-              }}
-              flexDirection="column"
-              mb={1}
-              borderRadius={6}
-            >
-              {pinnedChatList.map((chat) => {
-                const isAdmin = ship ? chat.isHost(ship.patp) : false;
-                return (
-                  <Box
-                    key={`${window.ship}-${chat.path}-pinned`}
-                    zIndex={2}
-                    height={rowHeight}
-                    alignItems="center"
-                    layoutId={`chat-${chat.path}-container`}
-                  >
-                    <ChatRow
-                      height={rowHeight}
-                      path={chat.path}
-                      title={chat.metadata.title}
-                      isAdmin={isAdmin}
-                      peers={chat.peers.map((peer) => peer.ship)}
-                      type={chat.type}
-                      timestamp={chat.createdAt || chat.metadata.timestamp}
-                      metadata={chat.metadata}
-                      peersGetBacklog={chat.peersGetBacklog}
-                      muted={chat.muted}
-                      onClick={(evt) => {
-                        evt.stopPropagation();
-                        setChat(chat.path);
-                      }}
-                    />
-                  </Box>
-                );
-              })}
-            </Flex>
-            <InboxList
-              items={unpinnedChatList}
-              itemHeight={rowHeight}
-              width={listWidth}
+          <Box height={dimensions.height - heightPadding} width={listWidth}>
+            <WindowedList
+              data={sortedChatList.filter(searchFilter)}
+              followOutput="smooth"
+              width={listWidth + scrollbarWidth}
+              hideScrollbar
               height={listHeight}
-              filterFunction={searchFilter}
-              sortFunction={sortFunction}
-              renderItem={(chat) => {
+              increaseViewportBy={{
+                top: 300,
+                bottom: 300,
+              }}
+              alignToBottom={false}
+              style={{ marginRight: -scrollbarWidth }}
+              itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                const height = chat.type === 'space' ? 70 : rowHeight;
+                const isLast = index === sortedChatList.length - 1;
+                const isSelectedSpaceChat =
+                  chat.metadata.space === currentSpace?.path;
+                const isPinned = isChatPinned(chat.path);
+                let customStyle = {};
+                let outerStyle = {};
+                if (isSelectedSpaceChat) {
+                  outerStyle = {
+                    paddingBottom: 8,
+                    height: height + 8,
+                    marginBottom: 8,
+                    borderBottom: '1px solid rgba(var(--rlm-border-rgba), 0.8)',
+                  };
+                  customStyle = {
+                    borderRadius: 6,
+                  };
+                } else if (isPinned) {
+                  outerStyle = {
+                    height,
+                    // height: height + 4,
+                    // marginBottom: 4,
+                  };
+                  customStyle = {
+                    borderRadius: 6,
+                    height,
+                    background:
+                      theme.currentTheme.mode === 'dark'
+                        ? 'rgba(0,0,0,0.07)'
+                        : 'rgba(0,0,0,0.03)',
+                  };
+                } else if (isLast) {
+                  outerStyle = {
+                    height: height + 16,
+                    paddingBottom: 16,
+                  };
+                } else {
+                  outerStyle = {
+                    height,
+                  };
+                }
+
                 return (
                   <Box
-                    key={`${window.ship}-${chat.path}-unpinned`}
-                    width={listWidth}
-                    zIndex={2}
-                    layout="preserve-aspect"
-                    alignItems="center"
-                    height={rowHeight}
-                    layoutId={`chat-${chat.path}-container`}
+                    style={outerStyle}
+                    key={`${window.ship}-${chat.path}-${index}-unpinned`}
                   >
-                    <ChatRow
-                      height={rowHeight}
-                      path={chat.path}
-                      title={chat.metadata.title}
-                      peers={chat.peers.map((peer) => peer.ship)}
-                      isAdmin={isAdmin}
-                      type={chat.type}
-                      timestamp={chat.createdAt || chat.metadata.timestamp}
-                      metadata={chat.metadata}
-                      peersGetBacklog={chat.peersGetBacklog}
-                      muted={chat.muted}
-                      onClick={(evt) => {
-                        evt.stopPropagation();
-                        setChat(chat.path);
-                      }}
-                    />
+                    <Box
+                      key={`${window.ship}-${chat.path}-${index}-unpinned`}
+                      width={listWidth}
+                      zIndex={2}
+                      layout="preserve-aspect"
+                      alignItems="center"
+                      layoutId={`chat-${chat.path}-container`}
+                      style={customStyle}
+                    >
+                      <ChatRow
+                        height={height}
+                        path={chat.path}
+                        title={chat.metadata.title}
+                        peers={chat.peers.map((peer) => peer.ship)}
+                        isAdmin={isAdmin}
+                        type={chat.type}
+                        timestamp={chat.createdAt || chat.metadata.timestamp}
+                        metadata={chat.metadata}
+                        peersGetBacklog={chat.peersGetBacklog}
+                        muted={chat.muted}
+                        onClick={(evt) => {
+                          evt.stopPropagation();
+                          setChat(chat.path);
+                        }}
+                      />
+                    </Box>
                   </Box>
                 );
               }}

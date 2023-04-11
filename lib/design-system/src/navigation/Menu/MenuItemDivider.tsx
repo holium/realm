@@ -7,7 +7,7 @@ type Props = {
 export const MenuItemDivider = styled.hr<Props>`
   border: 0;
   height: 1px;
-  margin: 4px 8px;
+  margin: 8px;
   background: ${({ textColor }) => textColor || 'var(--rlm-text-color)'};
   opacity: 0.2;
 `;

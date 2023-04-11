@@ -14,7 +14,6 @@ interface IPersonRow {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  style?: any;
   rowBg: string;
   theme?: ThemeType;
   contextMenuOptions?: MenuItemProps[];
@@ -28,7 +27,6 @@ export const PersonRow = ({
   avatar,
   nickname,
   description,
-  style,
   rowBg,
   contextMenuOptions,
   children,
@@ -59,7 +57,7 @@ export const PersonRow = ({
   }, [contextMenuOptions, getOptions, id, setOptions]);
 
   return (
-    <Flex key={id} style={{ position: 'relative', ...style }}>
+    <Flex key={id} style={{ position: 'relative' }}>
       <Row
         id={id}
         ref={rowRef}

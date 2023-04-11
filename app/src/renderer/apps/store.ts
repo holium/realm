@@ -19,7 +19,7 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
-import { DmApp } from './Messages/store';
+// import { DmApp } from './Messages/store';
 import { Dimensions } from '@holium/design-system';
 
 const TrayAppCoords = types.model({
@@ -54,7 +54,7 @@ const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
-    dmApp: DmApp,
+    // dmApp: DmApp,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -168,9 +168,9 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: walletAppDefault,
-  dmApp: {
-    currentView: 'dm-list',
-  },
+  // dmApp: {
+  //   currentView: 'dm-list',
+  // },
 });
 
 onSnapshot(trayStore, (snapshot) => {

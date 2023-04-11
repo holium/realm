@@ -127,9 +127,8 @@ const FriendsListPresenter = () => {
       <Flex flexDirection="column" flex={1}>
         <WindowedList
           width={298}
-          rowHeight={38}
           data={listData}
-          rowRenderer={(rowData) => {
+          itemContent={(_, rowData) => {
             if (rowData.type === 'friend') {
               const friend = rowData.data;
               return <FriendRow friend={friend} />;

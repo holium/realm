@@ -20,7 +20,7 @@ export const BrowserModel = types
   .model('BrowserModel', {
     currentTab: types.optional(TabModel, {
       id: 'tab-0',
-      url: 'https://neeva.com',
+      url: 'https://duckduckgo.com',
       isSafe: true,
       loader: { state: 'initial' },
     }),

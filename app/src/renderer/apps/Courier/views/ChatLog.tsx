@@ -1,16 +1,16 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
 import {
-  Box,
   Flex,
-  WindowedList,
   Text,
-  Reply,
   measureImage,
   fetchOGData,
   extractOGData,
+  parseMediaType,
+  measureTweet,
+  WindowedListRef,
 } from '@holium/design-system';
 import { useChatStore } from '../store';
 import { useTrayApps } from 'renderer/apps/store';
@@ -18,14 +18,18 @@ import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
-import { ChatMessage } from '../components/ChatMessage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { useServices } from 'renderer/logic/store';
-import { ChatMessageType, ChatModelType } from '../models';
+import { ChatMessageType } from '../models';
 import { useAccountStore } from 'renderer/apps/Account/store';
-import { displayDate } from 'os/lib/time';
+import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
+  position: absolute;
+  z-index: 16;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
 `;
 
@@ -33,15 +37,14 @@ type ChatLogProps = {
   storage: IuseStorage;
 };
 
-const replyHeight = 50;
-const pinHeight = 46;
-
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { dimensions } = useTrayApps();
   const { selectedChat, getChatHeader, setSubroute } = useChatStore();
   const accountStore = useAccountStore();
-  const { ship, friends } = useServices();
+  const { ship, friends, spaces, theme } = useServices();
   const [showAttachments, setShowAttachments] = useState(false);
+
+  const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
     if (!ship) return { color: '#000' };
@@ -55,6 +58,13 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     if (unreadCount > 0) {
       accountStore.readPath('realm-chat', selectedChat.path);
     }
+    setTimeout(() => {
+      listRef.current?.scrollToIndex({
+        index: messages.length - 1,
+        align: 'start',
+        behavior: 'auto',
+      });
+    }, 350);
   }, [selectedChat?.path]);
 
   const { title, sigil, image } = useMemo(() => {
@@ -62,11 +72,40 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);
 
+  let replyToFormatted = useMemo(() => {
+    if (selectedChat?.replyingMsg) {
+      const {
+        color: authorColor,
+        nickname,
+        patp,
+      } = friends.getContactAvatarMetadata(selectedChat.replyingMsg.sender);
+      return {
+        id: selectedChat.replyingMsg.id,
+        author: nickname || patp,
+        authorColor,
+        sentAt: selectedChat.replyingMsg.updatedAt.toString(),
+        message: selectedChat.replyingMsg.contents,
+      };
+    }
+    return null;
+  }, [selectedChat?.replyingMsg, listRef.current]);
+
   if (!selectedChat || !ship) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
+
+  let spaceTitle = undefined;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spaces.getSpaceByChatPath(path);
+    if (space) {
+      spaceTitle = space.name;
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = (
     <ChatAvatar
       sigil={sigil}
@@ -75,6 +114,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
       peers={peers.map((p) => p.ship)}
       image={image}
       metadata={metadata}
+      color={avatarColor}
       canEdit={false}
     />
   );
@@ -94,16 +134,26 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           metadata = { width, height };
         }
         if (Object.keys(frag)[0] === 'link') {
-          const result = await fetchOGData(frag.link);
-          if (result.linkType === 'opengraph') {
-            metadata = {
-              linkType: 'opengraph',
-              ogData: JSON.stringify(extractOGData(result.data)) as string,
-            };
+          const { linkType } = parseMediaType(frag.link);
+          if (linkType === 'twitter') {
+            // premeasure twitter
+            const { width, height } = await measureTweet(
+              frag.link,
+              containerWidth
+            );
+            metadata = { linkType: 'twitter', width, height };
           } else {
-            metadata = {
-              linkType: 'url',
-            };
+            const result = await fetchOGData(frag.link);
+            if (result.linkType === 'opengraph') {
+              metadata = {
+                linkType: 'opengraph',
+                ogData: JSON.stringify(extractOGData(result.data)) as string,
+              };
+            } else {
+              metadata = {
+                linkType: 'url',
+              };
+            }
           }
         }
         return {
@@ -134,21 +184,58 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   };
 
-  let height = dimensions.height - 104;
+  const height = dimensions.height - 104;
 
+  let topPadding;
+  let endPadding;
   if (showPin) {
-    height = height - pinHeight;
-  }
-  if (selectedChat.replyingMsg) {
-    height = height - replyHeight;
+    topPadding = 50;
   }
   if (showAttachments) {
-    height = height - 110;
+    endPadding = 136;
+  }
+  if (selectedChat.replyingMsg) {
+    endPadding = 70;
   }
 
+  let pretitle;
   let subtitle;
-  if (selectedChat.peers.length > 1 && selectedChat.type !== 'dm') {
-    subtitle = `${selectedChat.peers.length} members`;
+  if (selectedChat.peers.length > 1 && selectedChat.type === 'group') {
+    subtitle = (
+      <Text.Custom
+        textAlign="left"
+        layoutId={`chat-${path}-subtitle`}
+        layout="preserve-aspect"
+        transition={{
+          duration: 0.15,
+        }}
+        width={210}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5, lineHeight: '1' }}
+        fontSize={2}
+      >
+        {selectedChat.peers.length} members
+      </Text.Custom>
+    );
+  }
+  if (selectedChat.type === 'space') {
+    pretitle = (
+      <Text.Custom
+        textAlign="left"
+        layoutId={`chat-${path}-pretitle`}
+        layout="preserve-aspect"
+        transition={{
+          duration: 0.15,
+        }}
+        width={210}
+        initial={{ opacity: 0.5 }}
+        animate={{ opacity: 0.5, lineHeight: '1' }}
+        fontSize={1}
+        fontWeight={500}
+      >
+        {spaceTitle}
+      </Text.Custom>
+    );
   }
 
   return (
@@ -165,6 +252,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           onBack={() => setSubroute('inbox')}
           hasMenu
           avatar={chatAvatarEl}
+          pretitle={pretitle}
           subtitle={subtitle}
         />
         <Flex
@@ -190,7 +278,17 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
               </Text.Custom>
             </Flex>
           ) : (
-            <Flex flexDirection="column" width="100%">
+            <Flex position="relative" flexDirection="column" width="100%">
+              <ChatLogList
+                listRef={listRef}
+                messages={messages}
+                topOfListPadding={topPadding}
+                endOfListPadding={endPadding}
+                selectedChat={selectedChat}
+                width={containerWidth}
+                height={dimensions.height - 104}
+                ourColor={ourColor}
+              />
               {showPin && (
                 <FullWidthAnimatePresence>
                   <PinnedContainer
@@ -198,67 +296,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                   />
                 </FullWidthAnimatePresence>
               )}
-              <WindowedList
-                key={`${path}-${selectedChat.lastFetch}-${messages.length}`}
-                startAtBottom
-                hideScrollbar
-                width={containerWidth}
-                height={height}
-                data={messages}
-                rowRenderer={(row, index, measure) => {
-                  const isLast = selectedChat
-                    ? index === messages.length - 1
-                    : false;
-
-                  const isNextGrouped =
-                    index < messages.length - 1 &&
-                    row.sender === messages[index + 1].sender;
-
-                  const isPrevGrouped =
-                    index > 0 &&
-                    row.sender === messages[index - 1].sender &&
-                    Object.keys(messages[index - 1].contents[0])[0] !==
-                      'status';
-
-                  const topSpacing = isPrevGrouped ? '3px' : 2;
-                  const bottomSpacing = isNextGrouped ? '3px' : 2;
-
-                  const thisMsgDate = new Date(row.createdAt).toDateString();
-                  const prevMsgDate =
-                    messages[index - 1] &&
-                    new Date(messages[index - 1].createdAt).toDateString();
-                  const showDate: boolean =
-                    index === 0 || thisMsgDate !== prevMsgDate;
-                  return (
-                    <Box
-                      mx="1px"
-                      pt={topSpacing}
-                      pb={isLast ? bottomSpacing : 0}
-                    >
-                      {showDate && (
-                        <Text.Custom
-                          opacity={0.5}
-                          fontSize="12px"
-                          fontWeight={500}
-                          textAlign="center"
-                          mt={2}
-                          mb={2}
-                        >
-                          {displayDate(row.createdAt)}
-                        </Text.Custom>
-                      )}
-                      <ChatMessage
-                        isPrevGrouped={isPrevGrouped}
-                        isNextGrouped={isNextGrouped}
-                        containerWidth={containerWidth}
-                        message={row as ChatMessageType}
-                        ourColor={ourColor}
-                        measure={measure}
-                      />
-                    </Box>
-                  );
-                }}
-              />
             </Flex>
           )}
         </Flex>
@@ -266,6 +303,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
       <Flex
         position="absolute"
         flexDirection="column"
+        mt={6}
         bottom={12}
         left={12}
         right={12}
@@ -278,35 +316,30 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
           duration: 0.1,
         }}
       >
-        {selectedChat.replyingMsg && (
-          <Flex position="relative" flexDirection="column" zIndex={16} mb={1}>
-            <ReplySection
-              selectedChat={selectedChat}
-              onClick={(msgId) => {
-                if (!selectedChat) return;
-                console.log('go to message', msgId);
-                // selectedChat.replyToMessage(msgId);
-              }}
-              onCancel={() => selectedChat.clearReplying()}
-            />
-          </Flex>
-        )}
         <ChatInputBox
           storage={storage}
+          selectedChat={selectedChat}
+          themeMode={theme.currentTheme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
+          editMessage={selectedChat.editingMsg}
+          replyTo={replyToFormatted}
+          containerWidth={containerWidth}
+          onCancelEdit={(evt) => {
+            evt.stopPropagation();
+            if (!selectedChat) return;
+            selectedChat.cancelEditing();
+          }}
           onAttachmentChange={(attachmentCount) => {
             if (attachmentCount > 0) {
               setShowAttachments(true);
             } else {
               setShowAttachments(false);
             }
-          }}
-          editMessage={selectedChat.editingMsg}
-          onCancelEdit={(evt) => {
-            evt.stopPropagation();
-            if (!selectedChat) return;
-            selectedChat.cancelEditing();
+            // Wait for transition to finish, then scroll to bottom.
+            setTimeout(() => {
+              listRef.current?.scrollToIndex(messages.length - 1);
+            }, 250);
           }}
         />
       </Flex>
@@ -315,36 +348,3 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 };
 
 export const ChatLog = observer(ChatLogPresenter);
-
-type ReplySectionProps = {
-  selectedChat: ChatModelType;
-  onCancel: () => void;
-  onClick?: (evt: React.MouseEvent<HTMLDivElement>) => void;
-};
-
-const ReplySection = ({ selectedChat, onCancel }: ReplySectionProps) => {
-  const { friends } = useServices();
-
-  const replyTo = selectedChat.replyingMsg;
-  if (!replyTo) return null;
-  const { color: authorColor } = friends.getContactAvatarMetadata(
-    replyTo.sender
-  );
-  return (
-    <Flex
-      height={replyHeight}
-      flexDirection="column"
-      justifyContent="flex-end"
-      alignItems="center"
-    >
-      <Reply
-        id={replyTo.id}
-        author={replyTo.sender}
-        authorColor={authorColor}
-        message={replyTo.contents}
-        sentAt={replyTo.updatedAt.toString()}
-        onCancel={onCancel}
-      />
-    </Flex>
-  );
-};

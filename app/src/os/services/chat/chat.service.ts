@@ -40,6 +40,7 @@ export type ChatPathMetadata = {
   timestamp: string;
   reactions?: string;
   peer?: string; // if type is dm, this is the peer
+  space?: string; // the space path if type is space
 };
 
 const parseMetadata = (metadata: string) => {
@@ -197,8 +198,8 @@ export class ChatService extends BaseService {
     const peers = await this.fetchPeers();
     const messages = await this.fetchMessages();
     const deleteLogs = await this.fetchDeleteLogs();
-    this.insertMessages(messages);
     this.insertPaths(paths);
+    this.insertMessages(messages);
     this.insertPeers(peers);
     // Missed delete events must be applied after inserts
     this.applyDeleteLogs(deleteLogs).then(() => {
@@ -243,6 +244,7 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
     return response.tables.paths;
   }
 
@@ -252,6 +254,7 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
     return response.tables.peers;
   }
 
@@ -261,6 +264,8 @@ export class ChatService extends BaseService {
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
+
     return response;
   }
 
@@ -582,7 +587,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%' AND content_type != 'react' AND content_type != 'status'
+                WHERE (path LIKE '%realm-chat%' OR path LIKE '/spaces/%/chats/%') AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -640,13 +645,13 @@ export class ChatService extends BaseService {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
-      WHERE paths.path LIKE '%realm-chat%'
+      WHERE paths.path LIKE '%realm-chat%' OR paths.path LIKE '/spaces/%/chats/%'
       ORDER BY
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
@@ -672,6 +677,7 @@ export class ChatService extends BaseService {
   }
 
   getChat(path: string) {
+    console.log('getChat', path);
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
       WITH formed_messages AS (
@@ -679,7 +685,7 @@ export class ChatService extends BaseService {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%' AND content_type != 'react' AND content_type != 'status'
+                WHERE (path LIKE '%realm-chat%' OR path LIKE '/spaces/%/chats/%') AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -737,8 +743,8 @@ export class ChatService extends BaseService {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths

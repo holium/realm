@@ -214,7 +214,7 @@ export class Conduit extends EventEmitter {
         onreconnect: () => console.log('SSE RECONNECTED!!'),
       });
 
-      this.sse.onopen = async (response: any) => {
+      this.sse.onopen = async (response) => {
         console.log('ON SSE OPEN', response);
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
@@ -299,7 +299,7 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
-      this.sse.onerror = async (error: any) => {
+      this.sse.onerror = async (error) => {
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
@@ -313,6 +313,7 @@ export class Conduit extends EventEmitter {
         if (error.status === '404') {
           return;
         }
+        // @ts-expect-error
         if (error.status >= 500) {
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
@@ -351,7 +352,6 @@ export class Conduit extends EventEmitter {
       mark: params.mark,
       json: params.json,
     };
-    console.log('sending poke', message.app, message.mark, message.json);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }

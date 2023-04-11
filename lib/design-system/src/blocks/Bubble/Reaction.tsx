@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Box, Icon, Text, Portal, Card } from '../../general';
+import { Flex, Box, Icon, Text, Portal, Card } from '../../../general';
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
