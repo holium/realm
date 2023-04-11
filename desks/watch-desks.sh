@@ -20,7 +20,8 @@ done
 echo "Watching for changes to copy to ${PIER}..."
 while [ 0 ]
   do
+  cp -LR realm/* $PIER/
+  cp -LR courier/* $PIER/
   sleep 0.8
-  rsync -r --exclude '.*' --exclude '*.sh' --exclude '*.md' * $PIER/
 done
 
