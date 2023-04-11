@@ -14,7 +14,11 @@ export const useNavigation = () => {
   const router = useRouter();
 
   const goToPage = useCallback(
-    (page: OnboardingPage) => router.push(page),
+    (page: OnboardingPage, params?: Record<string, string>) => {
+      const path =
+        page + (params ? `?${new URLSearchParams(params).toString()}` : '');
+      return router.push(path);
+    },
     [router]
   );
 

@@ -1,7 +1,7 @@
 import { MutableRefObject, useMemo, useState } from 'react';
 import { Item } from 'react-photoswipe-gallery';
 import 'photoswipe/dist/photoswipe.css';
-import { Flex, Text } from '../../general';
+import { Flex, Text } from '../../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 

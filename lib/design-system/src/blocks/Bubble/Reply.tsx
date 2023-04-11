@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Flex, Box, BoxProps, Button, Icon } from '../../general';
+import { Text, Flex, Box, BoxProps, Button, Icon } from '../../../general';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { BubbleAuthor } from './Bubble.styles';
 import {

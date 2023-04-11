@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex, Icon, Spinner, Text } from '@holium/design-system';
+import { Flex, Icon, Spinner, Text } from '@holium/design-system/general';
 import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {

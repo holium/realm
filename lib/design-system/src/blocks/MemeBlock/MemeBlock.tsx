@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, Text } from '../../general';
+import { Flex, Text } from '../../../general';
 import { BlockProps, Block } from '../Block/Block';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { Reactions, OnReactionPayload } from '../Bubble/Reaction';

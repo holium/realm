@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Box, Flex, skeletonStyle, Text } from '../../general';
+import { Box, Flex, skeletonStyle, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { ImageBlock } from '../ImageBlock/ImageBlock';

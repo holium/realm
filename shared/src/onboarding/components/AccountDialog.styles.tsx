@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import {
   MOBILE_WIDTH,
   OnboardDialogCard,

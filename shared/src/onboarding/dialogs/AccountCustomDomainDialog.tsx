@@ -1,12 +1,8 @@
 import { FormEvent, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  ErrorBox,
-  SuccessBox,
-  Flex,
-  Input,
-  useToggle,
-} from '@holium/design-system';
+import { ErrorBox, SuccessBox, Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+import { Input } from '@holium/design-system/inputs';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { SubmitButton } from '../components/hosting/SubmitButton';

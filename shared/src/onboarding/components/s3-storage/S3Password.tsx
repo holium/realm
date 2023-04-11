@@ -1,10 +1,6 @@
-import {
-  Button,
-  Flex,
-  Icon,
-  TextInput,
-  useToggle,
-} from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
 
 type Props = {
