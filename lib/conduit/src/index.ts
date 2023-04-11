@@ -457,6 +457,34 @@ export class Conduit extends EventEmitter {
     return false;
   }
 
+  async channelState(): Promise<any> {
+    try {
+      if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
+      const response = await axios.get(
+        `${this.url}/~debug/eyre/channels.json`,
+        {
+          headers: {
+            ...this.headers,
+            Cookie: this.headers.Cookie,
+          },
+        }
+      );
+      return response.data;
+    } catch {
+      console.log('Failed to scry channel state');
+    }
+  }
+
+  async checkStale(): Promise<boolean> {
+    const channelState = await this.channelState();
+    if (!channelState) return true;
+    const realmChannel = channelState.find(
+      (channel: any) => channel.session === this.uid
+    );
+    if (!realmChannel) return true;
+    return !realmChannel.connected;
+  }
+
   /**
    * scry
    *
@@ -465,32 +493,28 @@ export class Conduit extends EventEmitter {
    */
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
-    const timeout = 2000;
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Stale connection')), timeout);
-      });
-
-      const response: any = await Promise.race([
-        axios.get(`${this.url}/~/scry/${app}${path}.json`, {
+      const staleConnection = await this.checkStale();
+      console.log('stale?', staleConnection);
+      if (staleConnection) {
+        this.updateStatus(ConduitState.Stale);
+        this.reconnectToChannel();
+      }
+      const response = await axios.get(
+        `${this.url}/~/scry/${app}${path}.json`,
+        {
           headers: {
             ...this.headers,
             Cookie: this.headers.Cookie,
           },
-        }),
-        timeoutPromise,
-      ]);
+        }
+      );
 
       return response.data;
     } catch (err: any) {
-      if (err.message === 'Stale connection') {
-        console.error('Connection is stale. Reconnecting...');
-        this.reconnectToChannel();
-      } else {
-        console.error('scry error', app, path, err.response);
-      }
+      console.error('scry error', app, path, err.response);
     }
   }
 
