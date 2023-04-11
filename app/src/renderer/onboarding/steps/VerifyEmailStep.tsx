@@ -7,7 +7,7 @@ export const VerifyEmailStep = ({ setStep }: StepProps) => {
   };
 
   const onBack = () => {
-    setStep('/login');
+    setStep('/');
   };
 
   const onNext = () => {

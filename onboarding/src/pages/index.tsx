@@ -15,7 +15,7 @@ export default function CreateAccount() {
 
     try {
       const result = await api.register(email, password);
-      goToPage('/verify-email');
+      if (Boolean(result)) goToPage('/verify-email');
       return Boolean(result);
     } catch (error) {
       console.error(error);
