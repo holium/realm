@@ -19,7 +19,7 @@ const GetHostingButton = styled(Button.TextButton)`
 
 const AddExistingServerButton = styled(GetHostingButton)`
   font-weight: 400;
-  color: rgba(51, 51, 51, 0.5);
+  color: rgba(var(--rlm-text-rgba), 0.5);
   background-color: rgba(182, 182, 182, 0.12);
 
   &:hover:not([disabled]) {
