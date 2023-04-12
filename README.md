@@ -34,7 +34,7 @@ yarn start
 
 ### Dev setup
 
-1. In order to run Urbit locally, you will need to create a local fake ship. To setup a fake ship see [`/.docs/DEV_SETUP.md`](/.docs/DEV_SETUP.md)
+1. Follow [`/.docs/DEV_SETUP.md`](/.docs/DEV_SETUP.md) to setup fakeships and pull the Urbit submodule down into the Realm repo.
 
 2. Once these ships are created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
 

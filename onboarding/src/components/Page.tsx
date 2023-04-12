@@ -3,7 +3,7 @@ import { track } from '@amplitude/analytics-browser';
 import NextHead from 'next/head';
 import { Rubik } from 'next/font/google';
 import styled from 'styled-components';
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
 

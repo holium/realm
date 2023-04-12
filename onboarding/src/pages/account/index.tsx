@@ -8,7 +8,7 @@ import {
   ChangePasswordModal,
   EjectIdModal,
 } from '@holium/shared';
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { api } from '../../util/api';

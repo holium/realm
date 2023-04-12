@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { IdentityIcon } from '../icons/IdentityIcon';
 import {
   OnboardDialogTitle,

@@ -31,7 +31,14 @@ export const accountPageUrl: Record<string, AccountPage> = {
 export const useNavigation = () => {
   const router = useRouter();
 
-  const goToPage = useCallback((page: Page) => router.push(page), [router]);
+  const goToPage = useCallback(
+    (page: Page, params?: Record<string, string>) => {
+      const path =
+        page + (params ? `?${new URLSearchParams(params).toString()}` : '');
+      return router.push(path);
+    },
+    [router]
+  );
 
   const logout = useCallback(() => {
     goToPage('/');

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import styled from 'styled-components';
-import { Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 
 const DownloadButtonStyled = styled(Button.Primary)`

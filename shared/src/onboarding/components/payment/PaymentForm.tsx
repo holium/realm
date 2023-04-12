@@ -3,7 +3,7 @@ import {
   CardCvcElement,
   CardExpiryElement,
 } from '@stripe/react-stripe-js';
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 import styled, { css } from 'styled-components';
 

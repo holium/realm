@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Flex, BoxProps, Text } from '../../general';
+import { Flex, BoxProps, Text } from '../../../general';
 
 type SectionDividerProps = {
   alignment?: 'left' | 'center' | 'right';

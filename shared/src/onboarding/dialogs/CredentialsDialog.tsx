@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CopyButton, Flex, Text } from '@holium/design-system';
+import { CopyButton, Flex, Text } from '@holium/design-system/general';
 import { CredentialsIcon } from '../icons/CredentialsIcon';
 import {
   OnboardDialogDescription,

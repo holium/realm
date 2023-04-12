@@ -1,5 +1,6 @@
 import { useRef } from 'react';
-import { Anchor, Flex, HoliumButton } from '@holium/design-system';
+import { Anchor, Flex } from '@holium/design-system/general';
+import { HoliumButton } from '@holium/design-system/os';
 import {
   OnboardDialogDescription,
   OnboardDialogInput,

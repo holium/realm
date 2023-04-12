@@ -5,7 +5,7 @@ import {
   useElements,
   Elements,
 } from '@stripe/react-stripe-js';
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system/general';
 import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
 import { PaymentIcon } from '../icons/PaymentIcon';
 import { OnboardDialog } from '../components/OnboardDialog';

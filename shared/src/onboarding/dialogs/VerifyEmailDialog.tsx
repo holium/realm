@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Anchor, Input, Icon } from '@holium/design-system';
+import { Anchor, Icon } from '@holium/design-system/general';
+import { Input } from '@holium/design-system/inputs';
 import {
   OnboardDialogDescription,
   OnboardDialogTitle,
