@@ -25,12 +25,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin staging
+        with:
+          ref: staging
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -69,6 +65,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: staging
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -102,11 +100,6 @@ jobs:
         run: npm install -g yarn
       - name: Install app dependencies
         run: yarn install
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin staging
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -269,19 +262,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          ref: staging
+          # Urbit symlink fetching
+          submodules: 'true'
+      #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global submodule.recurse true
-          git pull origin staging
       #
       - name: Bump desks version
         uses: actions/github-script@v6
@@ -293,13 +282,6 @@ jobs:
             console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      #
-      # - name: Push desk version update
-      #   run: |
-      #     git add ./desks/realm/desk.docket-0
-      #     git commit -m "patch realm desk version"
-      #     git push
-
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
@@ -349,6 +331,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: staging
       #
       - name: Setup node
         uses: actions/setup-node@v3
@@ -402,6 +386,8 @@ jobs:
       #
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: staging
       #
       - name: Run post-deploy script
         uses: actions/github-script@v6
