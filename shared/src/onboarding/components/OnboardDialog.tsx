@@ -16,6 +16,7 @@ type Props = {
   icon?: ReactNode;
   nextText?: string;
   nextIcon?: ReactNode;
+  hideNextButton?: boolean;
   onBack?: () => void;
   onNext?: () => Promise<boolean>;
 };
@@ -25,6 +26,7 @@ export const OnboardDialog = ({
   icon,
   nextText = 'Next',
   nextIcon,
+  hideNextButton,
   onBack,
   onNext,
 }: Props) => {
@@ -64,14 +66,14 @@ export const OnboardDialog = ({
               </OnboardDialogBackButton>
             )}
           </Flex>
-          <Flex alignItems="center" justifyContent="space-between">
+          {!hideNextButton && (
             <SubmitButton
               text={nextText}
               icon={nextIcon}
               submitting={submitting.isOn}
               disabled={!onNext}
             />
-          </Flex>
+          )}
         </Flex>
       </OnboardDialogFooter>
     </OnboardDialogCard>

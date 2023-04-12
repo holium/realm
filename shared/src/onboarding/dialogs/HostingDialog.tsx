@@ -60,6 +60,7 @@ export const HostingDialog = ({
         </Flex>
       </Flex>
     }
+    hideNextButton
     onBack={onBack}
   />
 );

@@ -11,6 +11,7 @@ import { OnboardDialog } from '../components/OnboardDialog';
 const InstallRealmButton = styled(Button.TextButton)`
   position: relative;
   width: 201px;
+  margin-top: 12px;
   padding: 10px 8px;
   font-weight: 500;
   font-size: 16px;
