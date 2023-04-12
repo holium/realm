@@ -27,11 +27,11 @@ const RoomPresenter = () => {
     return roomsManager?.live.room;
   }, [roomsManager?.live.room]);
 
-  const [readChat, setReadChat] = useState(roomsManager?.live.chat.slice());
+  const [readChat, setReadChat] = useState(roomsManager?.live.chat?.slice());
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsManager?.live.chat.slice();
+    const latestChat = roomsManager?.live.chat?.slice();
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -44,7 +44,7 @@ const RoomPresenter = () => {
           : 0
       );
     }
-  }, [roomView, roomsManager?.live.chat.length]);
+  }, [roomView, roomsManager?.live.chat?.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');

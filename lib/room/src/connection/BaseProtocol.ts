@@ -20,9 +20,9 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   campfireLocal: LocalPeer | null = null;
   dataLocal: LocalPeer | null = null;
   provider: string; // default is our
-  presentRoom: RoomType | null = null;
-  presentCampfire: RoomType | null = null;
-  presentData: Map<string, RoomType> = new Map();
+  presentRoom: string | null = null;
+  presentCampfire: string | null = null;
+  presentData: string[] = [];
   rooms: RoomMap;
   peers: Map<string, Map<Patp, RemotePeer>> = new Map();
   rtc: RTCConfiguration = {
@@ -60,11 +60,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
       leave: action.bound,
     });
   }
-  abstract registerLocals(
-    local: LocalPeer,
-    campfireLocal: LocalPeer,
-    dataLocal: LocalPeer
-  ): void;
+  abstract registerLocals(local: LocalPeer, campfireLocal: LocalPeer): void;
   abstract setProvider(provider: Patp): Promise<RoomType[]>;
   abstract createRoom(
     title: string,

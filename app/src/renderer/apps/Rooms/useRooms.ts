@@ -54,7 +54,6 @@ export const createManager = (our: Patp) => {
   });
 
   manager.on(RoomManagerEvent.DeletedRoom, (room: RoomType) => {
-    console.log('MANAGER GOT DELETE');
     if (room.type !== 'data') SoundActions.playRoomLeave();
   });
 

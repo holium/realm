@@ -25,10 +25,10 @@
 ^-  agent:gall
 ::
 =<
-  |_  =bowl:gall
+  |_  bol=bowl:gall
   +*  this  .
-      def  ~(. (default-agent this %|) bowl)
-      hol   ~(. +> [bowl ~])
+      def  ~(. (default-agent this %|) bol)
+      hol   ~(. +> [bol ~])
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -51,7 +51,7 @@
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
+    %+  turn  ~(tap in ~(key by wex.bol))
     |=  [=wire =ship =term]
     ^-  card
     [%pass wire %agent [ship term] %leave ~]
@@ -77,7 +77,7 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
         [%x %session ~]  ::  ~/scry/rooms/session.json
-      ?>  =(our.bowl src.bowl)
+      ?>  =(our.bol src.bol)
       ``rooms-v2-view+!>([%session session.state])
     ==
   ::
@@ -87,17 +87,19 @@
     =/  cards=(list card)
       ?+  path                  (on-watch:def path)
           [%lib ~]
-        ?>  =(our.bol src.bowl)
+        ?>  =(our.bol src.bol)
         [%give %fact [/lib ~] rooms-v2-view+!>([%session session.state])]~
       ::
           [%provider-updates @ ~]  ::  subscribe to updates for a specific provider
-        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates for {<our.bowl>}"
-        ?<  (is-banned:hol src.bowl)
+        ~&  >>  "{<dap.bol>}: [on-watch]. {<src.bol>} subscribing to updates for {<our.bol>}"
+        ?<  (is-banned:hol src.bol)
         ~
       ::
           [%room-updates @ ~]  ::  subscribe to updates for a specific room
-        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates for room" :: {<room>}"
-        ?<  (is-banned:hol src.bowl)
+        ~&  'fullpath'
+        ~&  path
+        ~&  >>  "{<dap.bol>}: [on-watch]. {<src.bol>} subscribing to updates for room {<i.t.path>}"
+        ?<  (is-banned:hol src.bol)
         ~
       ==
     [cards this]
@@ -106,16 +108,16 @@
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
     =/  wirepath  `path`wire
-    ?+    wire  (on-agent:def wire sign)
+    ?+  wire  (on-agent:def wire sign)
       [%provider-updates @ ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
-            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to rooms" ~)  `this
-            ~&  >>>  "{<dap.bowl>}: rooms subscription failed"
+            ?~  p.sign  %-  (slog leaf+"{<dap.bol>}: {<src.bol>} subscribed to rooms" ~)  `this
+            ~&  >>>  "{<dap.bol>}: rooms subscription failed"
             `this
           ::
           %kick
-            ~&  >  "{<dap.bowl>}: rooms kicked us, resubscribing..."
+            ~&  >  "{<dap.bol>}: rooms kicked us, resubscribing..."
             =/  host         `@p`(slav %p i.t.wire)
             =/  watch-path    [/provider-updates/(scot %p host)]
             :_  this
@@ -132,12 +134,12 @@
       [%room-updates @ ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
-            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to rooms" ~)  `this
-            ~&  >>>  "{<dap.bowl>}: rooms subscription failed"
+            ?~  p.sign  %-  (slog leaf+"{<dap.bol>}: subscribed to room {<i.t.wire>}" ~)  `this
+            ~&  >>>  "{<dap.bol>}: rooms subscription failed"
             `this
           ::
           %kick
-            ~&  >  "{<dap.bowl>}: rooms kicked us, resubscribing..."
+            ~&  >  "{<dap.bol>}: rooms kicked us, resubscribing..."
             =/  watch-path    wire
             :_  this
             [%pass watch-path %agent [src.bol %rooms-v2] %watch watch-path]~
@@ -346,7 +348,12 @@
           =.  rooms.provider.state    (~(put by rooms.provider.state) [rid room])
           :_  state
           ^-  (list card)
-          [%give %fact fact-path rooms-v2-reaction+!>([%room-created room])]~
+          ?:  =(%rooms type)
+            [%give %fact fact-path rooms-v2-reaction+!>([%room-created room])]~
+          :~  =/  watch-path  [/room-updates/[rid]]
+              [%pass watch-path %agent [our.bol %rooms-v2] %watch watch-path]
+              [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-created room])]
+          ==
       ::
       ++  edit-room
         |=  [=rid:store =title:store =access:store]
@@ -521,31 +528,6 @@
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%kicked rid ship])]~
     ::
     --
-  ::
-  ++  helpers
-    |%
-    ::
-    ++  get-present-room
-      |=  =ship
-      ^-  (unit room:store)
-      =/  rooms=(list room=room:store)
-        %+  skim  ~(val by rooms.provider.state)
-          |=  =room:store
-          (skim-present-rooms ship room)
-      ?:  =((lent rooms) 0)  ~
-      (some (rear rooms))
-    ::
-    ++  skim-present-rooms
-      |=  [=ship =room:store]
-      ^-  ?
-      (~(has in present.room) ship)
-    ::
-    ++  skim-self
-      |=  =ship
-      ^-  ?
-      ?!  =(ship our.bol)
-    ::
-    --
 ::
 ++  can-enter
   |=  [=rid:store =ship]
@@ -580,7 +562,7 @@
 ++  get-fact-path
   |=  =room:store
   ^-  (list path)
-  ?.  =(%room type.room)
+  ?:  =(%rooms type.room)
     [/provider-updates/(scot %p our.bol) ~]
   [/room-updates/[rid.room] ~]
 --

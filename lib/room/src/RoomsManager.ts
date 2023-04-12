@@ -14,13 +14,11 @@ import { RoomManagerEvent } from './events';
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
   campfireLocal: LocalPeer;
-  dataLocal: LocalPeer;
   protocol: BaseProtocol;
   live: {
     room?: RoomType;
     chat?: ChatModelType[];
   };
-  // campfire rooms are provided one at a time, not shared as rooms
   campfire: {
     room?: RoomType;
     chat?: ChatModelType[];
@@ -51,12 +49,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       audio: true,
       video: true,
     });
-    this.dataLocal = new LocalPeer(this.protocol, this.protocol.our, {
-      isHost: false,
-      rtc: this.protocol.rtc,
-      audio: false,
-      video: false,
-    });
 
     this.live = {
       room: undefined,
@@ -73,11 +65,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       list: Array.from(this.protocol.rooms.values()),
     };
 
-    this.protocol.registerLocals(
-      this.local,
-      this.campfireLocal,
-      this.dataLocal
-    );
+    this.protocol.registerLocals(this.local, this.campfireLocal);
 
     // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
@@ -159,6 +147,13 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
         return this.leaveRoom();
       }
     }
+    if (this.campfire.room) {
+      if (this.campfire.room.creator === this.our) {
+        return this.deleteRoom(this.campfire.room.rid);
+      } else {
+        return this.leaveRoom();
+      }
+    }
     for (let dataRoom of Object.values(this.dataRooms)) {
       if (dataRoom.provider === this.our) {
         return this.deleteRoom(dataRoom.rid);
@@ -195,15 +190,19 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   get presentRoom(): RoomType | null {
-    return this.protocol.presentRoom;
+    return (
+      (this.protocol.presentRoom &&
+        this.protocol.rooms.get(this.protocol.presentRoom)) ||
+      null
+    );
   }
 
   get presentCampfire(): RoomType | null {
-    return this.protocol.presentCampfire;
-  }
-
-  get presentData(): Map<string, RoomType> {
-    return this.protocol.presentData;
+    return (
+      (this.protocol.presentCampfire &&
+        this.protocol.rooms.get(this.protocol.presentCampfire)) ||
+      null
+    );
   }
 
   /**
@@ -255,13 +254,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   updateRoom(room: RoomType) {
     if (room.type === 'rooms') {
-      console.log('setting rooms room');
       this.live.room = room;
     } else if (room.type === 'campfire') {
-      console.log('setting campfire room');
       this.campfire.room = room;
     } else if (room.type === 'data') {
-      console.log('setting data room');
       this.dataRooms[room.rid] = room;
     }
   }
@@ -315,12 +311,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   async deleteRoom(rid: string) {
     if (this.presentRoom?.rid === rid) {
-      console.log('deleting presentRoom');
       this.emit(RoomManagerEvent.DeletedRoom, this.presentRoom);
       this.clearLiveRoom();
     }
     if (this.presentCampfire?.rid === rid) {
-      console.log('deleting campfire blah');
       this.emit(RoomManagerEvent.DeletedRoom, this.presentCampfire);
       this.clearCampfireRoom();
     }

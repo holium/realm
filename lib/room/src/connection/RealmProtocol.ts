@@ -2,7 +2,7 @@ import { PeerEvent } from '../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { action, makeObservable, observable, observe, runInAction } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
@@ -112,9 +112,7 @@ export class RealmProtocol extends BaseProtocol {
         const session = data['session'];
         const currentRoom = session.rooms[session.current];
         this.provider = session.provider;
-        /*if (this.presentRoom) {*/
         await this.leave(data['session'].rid);
-        /*}*/
         this.rooms = new Map(Object.entries(session.rooms));
         if (currentRoom) {
           // if we are in a room, send the event up to RoomManager
@@ -200,13 +198,6 @@ export class RealmProtocol extends BaseProtocol {
             this.emit(ProtocolEvent.RoomEntered, room);
             this.transitions.entering = null;
           }
-          // else {
-          //   // if we are not in the room, we need to connect
-          //   console.log('we arent in the room yet', payload.rid);
-          //   if (payload.ship === this.our) {
-          //     this.connect(room);
-          //   }
-          // }
         }
       }
       if (data['room-left']) {
@@ -264,31 +255,26 @@ export class RealmProtocol extends BaseProtocol {
     }
   }
 
-  registerLocals(
-    local: LocalPeer,
-    campfireLocal: LocalPeer,
-    dataLocal: LocalPeer
-  ) {
+  registerLocals(local: LocalPeer, campfireLocal: LocalPeer) {
     this.local = local;
     this.campfireLocal = campfireLocal;
-    this.dataLocal = dataLocal;
     this.local.on(PeerEvent.AudioTrackAdded, () => {
       if (this.presentRoom) {
-        this.peers.get(this.presentRoom.rid)?.forEach((peer: RemotePeer) => {
+        this.peers.get(this.presentRoom)?.forEach((peer: RemotePeer) => {
           this.local?.streamTracks(peer);
         });
       }
     });
     this.local.on(PeerEvent.VideoTrackAdded, () => {
       if (this.presentRoom) {
-        this.peers.get(this.presentRoom.rid)?.forEach((peer: RemotePeer) => {
+        this.peers.get(this.presentRoom)?.forEach((peer: RemotePeer) => {
           this.local?.streamTracks(peer);
         });
       }
     });
     this.local.on(PeerEvent.Muted, () => {
       if (this.presentRoom) {
-        this.sendData(this.presentRoom.rid, {
+        this.sendData(this.presentRoom, {
           kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: true },
         });
@@ -296,7 +282,7 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.local.on(PeerEvent.Unmuted, () => {
       if (this.presentRoom) {
-        this.sendData(this.presentRoom.rid, {
+        this.sendData(this.presentRoom, {
           kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: false },
         });
@@ -304,7 +290,7 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.local.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
       if (this.presentRoom) {
-        this.sendData(this.presentRoom.rid, {
+        this.sendData(this.presentRoom, {
           kind: DataPacket_Kind.SPEAKING_CHANGED,
           value: { data: speaking },
         });
@@ -312,25 +298,21 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.campfireLocal.on(PeerEvent.AudioTrackAdded, () => {
       if (this.presentCampfire) {
-        this.peers
-          .get(this.presentCampfire.rid)
-          ?.forEach((peer: RemotePeer) => {
-            this.local?.streamTracks(peer);
-          });
+        this.peers.get(this.presentCampfire)?.forEach((peer: RemotePeer) => {
+          this.local?.streamTracks(peer);
+        });
       }
     });
     this.campfireLocal.on(PeerEvent.VideoTrackAdded, () => {
       if (this.presentCampfire) {
-        this.peers
-          .get(this.presentCampfire.rid)
-          ?.forEach((peer: RemotePeer) => {
-            this.local?.streamTracks(peer);
-          });
+        this.peers.get(this.presentCampfire)?.forEach((peer: RemotePeer) => {
+          this.local?.streamTracks(peer);
+        });
       }
     });
     this.campfireLocal.on(PeerEvent.Muted, () => {
       if (this.presentCampfire) {
-        this.sendData(this.presentCampfire.rid, {
+        this.sendData(this.presentCampfire, {
           kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: true },
         });
@@ -338,7 +320,7 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.campfireLocal.on(PeerEvent.Unmuted, () => {
       if (this.presentCampfire) {
-        this.sendData(this.presentCampfire.rid, {
+        this.sendData(this.presentCampfire, {
           kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: false },
         });
@@ -346,7 +328,7 @@ export class RealmProtocol extends BaseProtocol {
     });
     this.campfireLocal.on(PeerEvent.IsSpeakingChanged, (speaking: boolean) => {
       if (this.presentCampfire) {
-        this.sendData(this.presentCampfire.rid, {
+        this.sendData(this.presentCampfire, {
           kind: DataPacket_Kind.SPEAKING_CHANGED,
           value: { data: speaking },
         });
@@ -368,18 +350,18 @@ export class RealmProtocol extends BaseProtocol {
     }
     runInAction(() => {
       if (room.type === 'rooms') {
-        this.presentRoom = room;
-        this.disposePresentRoom = observe(this.presentRoom, (change) => {
+        this.presentRoom = room.rid;
+        /*this.disposePresentRoom = observe(this.presentRoom, (change) => {
           this.emit(ProtocolEvent.RoomUpdated, change.object);
-        });
+        });*/
       } else if (room.type === 'campfire') {
-        this.presentCampfire = room;
-        this.disposePresentCampfire = observe(
+        this.presentCampfire = room.rid;
+        /*this.disposePresentCampfire = observe(
           this.presentCampfire,
           (change) => {
             this.emit(ProtocolEvent.RoomUpdated, change.object);
           }
-        );
+        );*/
       }
     });
 
@@ -636,24 +618,3 @@ export class RealmProtocol extends BaseProtocol {
     });
   }
 }
-
-// const retry = (callback: any, times = 3) => {
-//   let numberOfTries = 0;
-//   return new Promise((resolve) => {
-//     const interval = setInterval(async () => {
-//       numberOfTries++;
-//       if (numberOfTries === times) {
-//         console.log(`Trying for the last time... (${times})`);
-//         clearInterval(interval);
-//       }
-//       try {
-//         await callback();
-//         clearInterval(interval);
-//         console.log(`Operation successful, retried ${numberOfTries} times.`);
-//         resolve(null);
-//       } catch (err) {
-//         console.log(`Unsuccessful, retried ${numberOfTries} times... ${err}`);
-//       }
-//     }, 2500);
-//   });
-// };
