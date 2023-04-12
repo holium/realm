@@ -55,7 +55,7 @@ export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
           <OnboardDialogDescription textAlign="center">
             In Realm, a passport is like an account.
             <br />
-            It allows p2p payments, DMs, etc. make it yours.
+            It allows p2p payments, DMs, etc. Make it yours.
           </OnboardDialogDescription>
           <PassportCard
             patp={patp}

@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import styled from 'styled-components';
-import { Flex, Button } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
 import { AccountDialogSubtitle } from './AccountDialog.styles';
 import { PassportCardAvatar } from './PassportCardAvatar';
@@ -12,21 +12,6 @@ const PassportCardContainer = styled(Flex)`
   border-radius: 9px;
   border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: rgba(var(--rlm-window-rgba));
-`;
-
-const AddImageButton = styled(Button.IconButton)`
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(var(--rlm-input-rgba));
-
-  &:hover:not(:disabled) {
-    filter: brightness(0.9);
-    background: rgba(var(--rlm-input-rgba));
-  }
 `;
 
 const UsernameInput = styled(Input)`
@@ -49,7 +34,7 @@ type Props = {
   description: string;
   setUsername: (username: string) => void;
   setDescription: (description: string) => void;
-  onSetAvatar: () => void;
+  onSetAvatar: (src?: string) => void;
 };
 
 export const PassportCard = ({
