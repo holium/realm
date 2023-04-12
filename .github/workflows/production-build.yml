@@ -57,7 +57,7 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
+          gh release create $BUILD_VERSION ./app/release/build/*.* --target production --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
@@ -134,6 +134,7 @@ jobs:
         run: |
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
+          GH_DEBUG: api
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
@@ -183,9 +184,26 @@ jobs:
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
+          GH_DEBUG: api
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      # all builds should produce the same sourcemaps; therefore only need to create the Sentry
+      #   release one time. Use linux build since Sentry action only runs on linux
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          # SENTRY_URL: https://sentry.io/
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          SENTRY_LOG_LEVEL: debug
+        with:
+          environment: production
+          sourcemaps: './app/release/app/dist'
+          version: ${{ needs.pre-deploy.outputs.build_version }}
+          ignore_empty: true
   #
   build-windows:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -274,6 +292,7 @@ jobs:
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_DEBUG: api
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
@@ -306,14 +325,6 @@ jobs:
             console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      #
-      # - name: Push desk version update
-      #   if: ${{ fromJSON(steps.bump-desks.outputs.result).updated }}
-      #   run: |
-      #     git add ./desks/realm/desk.docket-0
-      #     git commit -m "patch realm desk version"
-      #     git push
-      #
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
@@ -392,6 +403,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:

@@ -21,9 +21,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    // Set `sourceRoot` to  `/` to strip the build path prefix from
-    // generated source code references. This allows Sentry to match source files
-    // relative to your source root folder.
     "sourceRoot": "/",
     "strict": true,
     "strictFunctionTypes": true,
