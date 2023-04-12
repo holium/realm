@@ -25,7 +25,6 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, args) => {
-  console.log('event => %o', github.event);
   console.log('context => %o', context);
   console.log('args => %o', args);
   let ci = {
@@ -164,18 +163,12 @@ module.exports = async ({ github, context }, args) => {
       ci.channel = 'draft';
     } else if (
       (context.eventName === 'pull_request' && context.ref === 'master') ||
-      (context.eventName === 'push' && context.ref_name === 'staging')
+      (context.eventName === 'push' && context.ref.endsWith('/staging'))
     ) {
       ci.channel = 'alpha';
     } else {
       // channel set to branch name
       ci.channel = (args && args.channel) || 'draft';
-      // const tic = context.ref.lastIndexOf('/');
-      // if (tic !== -1) {
-      //   ci.channel = context.ref.substring(tic + 1);
-      // } else {
-      //   ci.channel = context.ref;
-      // }
     }
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
