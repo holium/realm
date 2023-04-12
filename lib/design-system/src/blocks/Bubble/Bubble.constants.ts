@@ -1,4 +1,4 @@
-import { pxToRem } from '../../util';
+import { pxToRem } from '../../../util';
 
 export const STATUS_HEIGHT = 24;
 

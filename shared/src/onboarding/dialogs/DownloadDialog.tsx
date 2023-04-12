@@ -1,4 +1,4 @@
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { DownloadButton } from '../components/DownloadButton';
 import {
   OnboardDialogTitle,

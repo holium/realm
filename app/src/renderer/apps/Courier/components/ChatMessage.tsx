@@ -270,7 +270,9 @@ export const ChatMessagePresenter = ({
 
   let mergedContents: any | undefined = useMemo(() => {
     const replyTo = message.replyToMsgId;
-    let replyToObj;
+    let replyToObj = {
+      reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
+    };
     if (replyTo) {
       const originalMsg = toJS(messages.find((m) => m.id === replyTo));
       if (originalMsg) {

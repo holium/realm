@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Favicon, Flex, BoxProps, Icon } from '../../general';
+import { Text, Favicon, Flex, BoxProps, Icon } from '../../../general';
 
 const BookmarkRow = styled(Flex)`
   border-radius: 6px;

@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
-import { Text, Flex, useToggle } from '@holium/design-system';
+import { Text, Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
 
 import { SubmitButton } from '../SubmitButton';

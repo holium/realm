@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Input, Text } from '@holium/design-system';
+import { Text } from '@holium/design-system/general';
+import { Input } from '@holium/design-system/inputs';
 
 export const TABLET_WIDTH = 800;
 export const MOBILE_WIDTH = 400;

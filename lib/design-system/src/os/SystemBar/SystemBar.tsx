@@ -1,5 +1,5 @@
 import { BarStyle } from '../Bar/Bar';
-import { Avatar, Flex, Icon } from '../../index';
+import { Avatar, Flex, Icon } from '../../../general';
 import { HoliumButton } from './HoliumButton';
 import { BarButton } from './BarButton';
 import { RoomsDock } from '../RoomsDock/RoomsDock';
