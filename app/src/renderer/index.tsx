@@ -21,12 +21,13 @@ if (sentryDsn) {
         'useLayoutEffect',
       ],
     };
-    if (process.env.BUILD_VERSION) {
-      console.log(
-        `Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`
-      );
-      cfg.release = process.env.BUILD_VERSION;
-    }
+    // removing until further review for windows
+    // if (process.env.BUILD_VERSION) {
+    //   console.log(
+    //     `Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`
+    //   );
+    //   cfg.release = process.env.BUILD_VERSION;
+    // }
     Sentry.init(cfg);
 } else {
   console.warn('Environment variable for Sentry is undefined.');
