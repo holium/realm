@@ -89,9 +89,8 @@ type Props = {
 };
 
 export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
-  const avatarModal = useToggle(true);
-  const [generatedImages, setGeneratedImages] =
-    useState<string[]>(defaultImages);
+  const avatarModal = useToggle(false);
+  const [generatedImages, setGeneratedImages] = useState<string[]>();
 
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -100,16 +99,18 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
 
   const refreshImages = async () => {
     setSelectedImage(0);
-    // const keyword = keywords[Math.floor(Math.random() * keywords.length)];
-    // const apiKey = 'I6E9qHPG0kE-vtOzR3Jbpj1mAAOgYtBpIkdAVwVIOrw';
-    // const apiUrl = `https://api.unsplash.com/photos/random?client_id=${apiKey}&query=${keyword}&orientation=squarish&count=19`;
-    // fetch(apiUrl)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const newImages = data.map((image: any) => image.urls.small);
-    //     setGeneratedImages(newImages);
-    //   })
-    //   .catch((error) => console.log(error));
+    const keyword = keywords[Math.floor(Math.random() * keywords.length)];
+    const apiUrl = `https://api.unsplash.com/photos/random?client_id=${process.env.UNSPLASH_KEY}&query=${keyword}&orientation=squarish&count=19`;
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        const newImages = data.map((image: any) => image.urls.small);
+        setGeneratedImages(newImages);
+      })
+      .catch((error) => {
+        console.log(error);
+        setGeneratedImages(defaultImages);
+      });
   };
 
   const handleSetAvatar = (index: number) => {
@@ -117,7 +118,7 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
     if (index === 0) {
       onSetAvatar(undefined);
     } else {
-      onSetAvatar(generatedImages[index - 1]);
+      onSetAvatar(generatedImages?.[index - 1]);
     }
   };
 
@@ -167,7 +168,7 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
             >
               <Avatar patp={patp} sigilColor={['black', 'white']} size={50} />
             </AvatarBox>
-            {generatedImages.map((src, index) => (
+            {generatedImages?.map((src, index) => (
               <AvatarBox
                 key={index + 1}
                 isSelected={selectedImage === index + 1}
@@ -189,7 +190,7 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
       {selectedImage === 0 ? (
         <Avatar patp={patp} sigilColor={['black', 'white']} size={68} />
       ) : (
-        <GeneratedImage src={generatedImages[selectedImage - 1]} size={68} />
+        <GeneratedImage src={generatedImages?.[selectedImage - 1]} size={68} />
       )}
     </Flex>
   );
