@@ -25,9 +25,9 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, args) => {
-  console.log('context.eventName => %o', context.eventName);
-  console.log('context.ref_name => %o', context.ref_name);
-  console.log('context.ref => %o', context.ref);
+  console.log('event => %o', github.event);
+  console.log('context => %o', context);
+  console.log('args => %o', args);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
