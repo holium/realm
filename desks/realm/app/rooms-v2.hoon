@@ -86,20 +86,25 @@
     |=  =path
     ^-  (quip card _this)
     =/  cards=(list card)
-    ?+  path                  (on-watch:def path)
-      ::
-      [%lib ~]
+      ?+  path                  (on-watch:def path)
+          [%lib ~]
         ?>  (is-our:hol src.bowl)
         [%give %fact [/lib ~] rooms-v2-view+!>([%session session.state])]~
       ::
-      [%provider-updates @ ~]  ::  subscribe to updates for a specific provider
+          [%provider-updates @ ~]  ::  subscribe to updates for a specific provider
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates for {<our.bowl>}"
         =/  host      `@p`(slav %p i.t.path)
         ?<  (is-banned:hol src.bowl)
-        =/  rooms         rooms.provider.state
-        [%give %fact ~ rooms-v2-reaction+!>([%provider-changed host rooms])]~
+        ~
+        :: shouldn't need a reaction here
+        :: =/  rooms         rooms.provider.state
+        :: [%give %fact ~ rooms-v2-reaction+!>([%provider-changed host rooms])]~
       ::
-    ==
+          [%room-updates @ ~]  ::  subscribe to updates for a specific room
+        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates for room" :: {<room>}"
+        ?<  (is-banned:hol src.bowl)
+        ~
+      ==
     [cards this]
   ::
   ++  on-agent
@@ -120,6 +125,27 @@
             =/  watch-path    [/provider-updates/(scot %p host)]
             :_  this
             [%pass watch-path %agent [host %rooms-v2] %watch watch-path]~
+          ::
+          %fact
+            ?+    p.cage.sign   (on-agent:def wire sign)
+                %rooms-v2-reaction
+              =^  cards  state
+                (reaction:rooms:hol !<(=reaction:store q.cage.sign))
+              [cards this]
+            ==
+        ==
+      [%room-updates @ ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to rooms" ~)  `this
+            ~&  >>>  "{<dap.bowl>}: rooms subscription failed"
+            `this
+          ::
+          %kick
+            ~&  >  "{<dap.bowl>}: rooms kicked us, resubscribing..."
+            =/  watch-path    wire
+            :_  this
+            [%pass watch-path %agent [src.bol %rooms-v2] %watch watch-path]~
           ::
           %fact
             ?+    p.cage.sign   (on-agent:def wire sign)
@@ -199,8 +225,8 @@
       ::  Receiving a signal from another ship
       :_  state
       ?.  (~(has by rooms.session.state) rid)
-        [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
-      [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
+        [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
+      [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
     ::
     --
   --

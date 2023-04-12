@@ -493,20 +493,6 @@ export class RealmProtocol extends BaseProtocol {
     });
   }
 
-  /**
-   * sendChat - Send data to all peers
-   * @param data: DataPacket
-   */
-  /*sendChat(content: string) {
-    this.poke({
-      app: 'rooms-v2',
-      mark: 'rooms-v2-session-action',
-      json: {
-        'send-chat': content,
-      },
-    });
-  }*/
-
   dial(rid: string, peer: Patp, isHost: boolean): RemotePeer {
     if (!this.local) {
       throw new Error('No local peer created');
