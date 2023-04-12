@@ -25,7 +25,9 @@ function versionDiff(a, b) {
 }
 
 module.exports = async ({ github, context }, args) => {
-  // console.log('context.ref => %o', context.ref);
+  console.log('context.eventName => %o', context.eventName);
+  console.log('context.ref_name => %o', context.ref_name);
+  console.log('context.ref => %o', context.ref);
   let ci = {
     // if running from release title or default build with package.json version update
     isNewBuild: false,
@@ -161,8 +163,8 @@ module.exports = async ({ github, context }, args) => {
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
     } else if (
-      context.eventName === 'pull_request' &&
-      context.ref === 'master'
+      (context.eventName === 'pull_request' && context.ref === 'master') ||
+      (context.eventName === 'push' && context.ref_name === 'staging')
     ) {
       ci.channel = 'alpha';
     } else {
