@@ -126,7 +126,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+        run: npx cross-env yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -179,7 +179,7 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          GH_TOKEN=$GH_TOKEN npx yarn package:prerelease:linux
+          npx yarn package:prerelease:linux
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       #
@@ -248,7 +248,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
+          npx cross-env sudo yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
