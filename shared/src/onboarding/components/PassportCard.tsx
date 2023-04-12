@@ -34,7 +34,7 @@ type Props = {
   description: string;
   setUsername: (username: string) => void;
   setDescription: (description: string) => void;
-  onSetAvatar: (src?: string) => void;
+  setAvatarSrc: (src?: string) => void;
 };
 
 export const PassportCard = ({
@@ -43,7 +43,7 @@ export const PassportCard = ({
   description,
   setUsername,
   setDescription,
-  onSetAvatar,
+  setAvatarSrc,
 }: Props) => {
   const onChangeDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
@@ -51,7 +51,7 @@ export const PassportCard = ({
 
   return (
     <PassportCardContainer>
-      <PassportCardAvatar patp={patp} onSetAvatar={onSetAvatar} />
+      <PassportCardAvatar patp={patp} setAvatarSrc={setAvatarSrc} />
       <Flex flex={1} flexDirection="column" gap={16}>
         <Flex flexDirection="column" gap={6}>
           <UsernameInput

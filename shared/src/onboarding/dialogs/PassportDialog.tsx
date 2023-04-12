@@ -27,15 +27,20 @@ const ListItem = styled(AccountDialogSubtitle)`
 type Props = {
   patp: string;
   onBack: () => void;
-  onNext: (username: string, description?: string) => Promise<boolean>;
+  onNext: (
+    username: string,
+    description?: string,
+    avatarSrc?: string
+  ) => Promise<boolean>;
 };
 
 export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
   const [username, setUsername] = useState('');
   const [description, setDescription] = useState('');
+  const [avatarSrc, setAvatarSrc] = useState<string>();
 
   const handleOnNext = () => {
-    if (username && description) return onNext(username, description);
+    if (username) return onNext(username, description, avatarSrc);
     return Promise.resolve(false);
   };
 
@@ -63,13 +68,13 @@ export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
             description={description}
             setUsername={setUsername}
             setDescription={setDescription}
-            onSetAvatar={() => {}}
+            setAvatarSrc={setAvatarSrc}
           />
           <List>
             <ListItem as="li">A username can be changed later</ListItem>
             <ListItem as="li">
               <Box display="inline-flex" alignItems="center" style={{ gap: 4 }}>
-                Select an avatar by clicking on the <AddImageIcon /> icon abbove
+                Select an avatar by clicking on the <AddImageIcon /> icon above
               </Box>
             </ListItem>
             <ListItem as="li">

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
 import { Flex, Avatar, Button, Icon } from '@holium/design-system/general';
+import { Input } from '@holium/design-system/inputs';
 import { AddImageIcon } from '../icons/AddImageIcon';
 import { MOBILE_WIDTH, OnboardDialogDescription } from './OnboardDialog.styles';
 
@@ -9,7 +10,10 @@ const AvatarBox = styled(Flex)<{ isSelected: boolean }>`
   width: 54px;
   height: 54px;
   border: 2px solid transparent;
+  border-radius: var(--rlm-border-radius-4);
   background-color: rgba(var(--rlm-border-rgba));
+  cursor: pointer;
+
   ${({ isSelected }) =>
     isSelected &&
     css`
@@ -17,10 +21,27 @@ const AvatarBox = styled(Flex)<{ isSelected: boolean }>`
     `};
 `;
 
-const GeneratedImage = styled.img<{ size?: number }>`
+const FileInput = styled(Input)`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  padding: 14px;
+  max-width: 230px;
+`;
+
+const Divider = styled.hr`
+  width: 100%;
+  height: 1px;
+  margin: 12px 0;
+  border: none;
+  background-color: rgba(var(--rlm-icon-rgba), 0.2);
+`;
+
+const CustomImage = styled.img<{ size?: number }>`
   width: ${({ size = 50 }) => size}px;
   height: ${({ size = 50 }) => size}px;
   border-radius: var(--rlm-border-radius-4);
+  object-fit: cover;
 `;
 
 const SourceText = styled(OnboardDialogDescription)`
@@ -85,20 +106,22 @@ const defaultImages = [
 
 type Props = {
   patp: string;
-  onSetAvatar: (url?: string) => void;
+  setAvatarSrc: (src?: string) => void;
 };
 
-export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
+export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarModal = useToggle(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>();
 
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<number>(0);
+  const [uploadedImage, setUploadedImage] = useState<string>();
 
   const modalButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const refreshImages = async () => {
-    setSelectedImage(0);
+    if (selectedImage < 21) setSelectedImage(0);
     const keyword = keywords[Math.floor(Math.random() * keywords.length)];
     const apiUrl = `https://api.unsplash.com/photos/random?client_id=${process.env.UNSPLASH_KEY}&query=${keyword}&orientation=squarish&count=19`;
     fetch(apiUrl)
@@ -115,10 +138,29 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
 
   const handleSetAvatar = (index: number) => {
     setSelectedImage(index);
+    setUploadedImage(undefined);
+
+    fileInputRef.current?.value && (fileInputRef.current.value = '');
+
     if (index === 0) {
-      onSetAvatar(undefined);
+      setAvatarSrc(undefined);
     } else {
-      onSetAvatar(generatedImages?.[index - 1]);
+      setAvatarSrc(generatedImages?.[index - 1]);
+    }
+  };
+
+  const onChooseFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const url = e.target?.result as string;
+        if (url) {
+          setSelectedImage(21);
+          setUploadedImage(url);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -174,10 +216,24 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
                 isSelected={selectedImage === index + 1}
                 onClick={() => handleSetAvatar(index + 1)}
               >
-                <GeneratedImage src={src} />
+                <CustomImage src={src} />
               </AvatarBox>
             ))}
           </div>
+          <Divider />
+          <Flex flexDirection="column" alignItems="center" gap={8} my={16}>
+            <OnboardDialogDescription>
+              Upload a custom image
+            </OnboardDialogDescription>
+            <Flex>
+              {uploadedImage && <CustomImage src={uploadedImage} />}
+              <FileInput
+                ref={fileInputRef}
+                type="file"
+                onChange={onChooseFile}
+              />
+            </Flex>
+          </Flex>
         </PassportAvatarModal>
       )}
       <AddImageButton
@@ -187,11 +243,13 @@ export const PassportCardAvatar = ({ patp, onSetAvatar }: Props) => {
       >
         <AddImageIcon />
       </AddImageButton>
-      {selectedImage === 0 ? (
+      {selectedImage === 0 && (
         <Avatar patp={patp} sigilColor={['black', 'white']} size={68} />
-      ) : (
-        <GeneratedImage src={generatedImages?.[selectedImage - 1]} size={68} />
       )}
+      {selectedImage > 0 && selectedImage < 21 && (
+        <CustomImage src={generatedImages?.[selectedImage - 1]} size={68} />
+      )}
+      {uploadedImage && <CustomImage src={uploadedImage} size={68} />}
     </Flex>
   );
 };
