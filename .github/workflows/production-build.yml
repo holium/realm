@@ -254,7 +254,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env sudo yarn package:release:win
+          npx cross-env BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL sudo yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
