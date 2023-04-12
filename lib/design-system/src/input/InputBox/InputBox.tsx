@@ -101,7 +101,7 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   svg {
     display: block;
@@ -175,13 +175,13 @@ export const InputBox = ({
     )}
     <Box display="flex" flexDirection="row" flex={1} height="100%">
       {leftAdornment && (
-        <Adornment mr={1} disabled={disabled} pb={2}>
+        <Adornment mr={1} disabled={disabled}>
           {leftAdornment}
         </Adornment>
       )}
       {children}
       {rightAdornment && (
-        <Adornment ml={1} disabled={disabled} pb={2}>
+        <Adornment ml={1} disabled={disabled}>
           {rightAdornment}
         </Adornment>
       )}

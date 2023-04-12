@@ -162,6 +162,8 @@ export const spacesDialogs: DialogRenderers = {
       const createForm: NewSpace = state;
       shipStore.spacesStore.createSpace(createForm).then(() => {
         setState({ loading: false });
+        appState.shellStore.closeDialog();
+        appState.shellStore.setIsBlurred(false);
       });
     },
     onPrevious: () => {

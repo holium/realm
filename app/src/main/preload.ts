@@ -11,9 +11,9 @@ import './helpers/keyListener';
 import { shipPreload } from '../os/services-new/ship/ship.service';
 import { authPreload } from '../os/services-new/auth/auth.service';
 import { roomsPreload } from '../os/services-new/ship/rooms.service';
-import { notifPreload } from '../os/services-new/ship/notifications.service';
-import { chatPreload } from './../os/services-new/ship/chat.service';
-import { friendsPreload } from './../os/services-new/ship/models/friends.model';
+import { notifPreload } from '../os/services-new/ship/notifications/notifications.service';
+import { chatPreload } from '../os/services-new/ship/chat/chat.service';
+import { friendsPreload } from '../os/services-new/ship/friends.table';
 import { spacesPreload } from 'os/services-new/ship/spaces/spaces.service';
 import { bazaarPreload } from 'os/services-new/ship/spaces/bazaar.service';
 

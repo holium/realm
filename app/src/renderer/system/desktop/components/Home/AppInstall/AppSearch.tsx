@@ -110,15 +110,15 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
           background: 'transparent',
         }}
         leftAdornment={
-          <>
+          <Flex height="100%" col justify="center">
             {searchMode === 'dev-app-search' && selectedShip !== '' ? (
-              <Text.Custom color="accent" fontWeight={500}>
+              <Text.Custom color="accent" mr={0} pb={0} fontWeight={500}>
                 Apps by {selectedShip}
               </Text.Custom>
             ) : (
               <></>
             )}
-          </>
+          </Flex>
         }
         onKeyDown={(evt: any) => {
           evt.stopPropagation();

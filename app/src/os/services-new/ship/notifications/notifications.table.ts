@@ -228,9 +228,9 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
       SELECT max(updated_at) as lastTimestamp
       FROM notifications;
     `);
-    const result = query.all();
+    const result: any = query.all();
     // add 1 to avoid getting same timestamp again
-    return result[0].lastTimestamp + 1 || 0;
+    return result[0]?.lastTimestamp + 1 || 0;
   }
 
   getUnreads(appTag: string, path?: string) {

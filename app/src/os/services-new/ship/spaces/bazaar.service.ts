@@ -44,22 +44,34 @@ export class BazaarService extends AbstractService {
           this.tables?.appCatalog.insertAll(data['initial']);
           break;
         case 'app-install-update':
-          // this.spacesDB?.insert(data['add']);
+          //  installed, uninstalled, started, etc.
+          // eslint-disable-next-line no-case-declarations
+          const { appId, app, grid } = data['app-install-update'];
+          // model._setAppStatus(
+          //   installUpdate.appId,
+          //   installUpdate.app,
+          //   installUpdate.grid
+          // );
           break;
         case 'pinned':
-          // this.spacesDB?.remove(data['remove']);
+          // model._addPinned(data.pinned);
           break;
         case 'unpinned':
-          // this.spacesDB?.replace(data['replace']);
+          // model._removePinned(data.unpinned);
           break;
         case 'pins-reodered':
-          // when a remote space is added, we need to add it to our local db
+          if (data['pins-reodered']) {
+            // model._reorderPins(data['pins-reodered'])
+          }
           break;
         case 'suite-added':
+          // model._suiteAdded(data['suite-added']);
           break;
         case 'suite-removed':
+          // model._suiteRemoved(data['suite-removed']);
           break;
         case 'recommended':
+          // model._addRecommended(data.recommended);
           break;
         case 'unrecommended':
           // model._removeRecommended(data.unrecommended);
@@ -74,11 +86,12 @@ export class BazaarService extends AbstractService {
           // model._treatiesLoaded();
           break;
         case 'new-ally':
-          // const ally = data['new-ally'];
+          const ally = data['new-ally'];
           // model._allyAdded(ally.ship, ally.desks);
           break;
         case 'ally-deleted':
           // console.log(data);
+          const ship = data['ally-deleted'].ship;
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
         case 'rebuild-catalog':

@@ -125,6 +125,9 @@ export const UrbitApp = types
     setConfig(config: any) {
       self.config = config;
     },
+    setStatus(status: InstallStatus) {
+      self.installStatus = status;
+    },
   }));
 
 const NativeApp = types.model('NativeApp', {
@@ -175,7 +178,6 @@ export const BazaarStore = types
   .actions((self) => ({
     init: flow(function* () {
       const data = yield BazaarIPC.fetchAppCatalog() as Promise<any>;
-      console.log('catalog', data);
       applySnapshot(self.catalog, data);
       // const { apps, gridIndex, recentApps, recentDevs } = data;
       // self.catalog.clear();
@@ -371,14 +373,21 @@ export const BazaarStore = types
       }
     }),
     uninstallApp: flow(function* (desk: string) {
-      // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
-      //   if (app.id === value) self.gridIndex.delete(key);
-      // });
-      try {
-        // self.installations.delete(body.desk);
-        return yield BazaarIPC.uninstallApp(desk) as Promise<any>;
-      } catch (error) {
-        console.error(error);
+      Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
+        if (desk === value) self.gridIndex.delete(key);
+      });
+      const app = self.catalog.get(desk);
+      if (app) {
+        app.setStatus(InstallStatus.uninstalled);
+        self.gridIndex.delete(desk);
+        console.log('uninstalling app', desk);
+        try {
+          return yield BazaarIPC.uninstallApp(desk) as Promise<any>;
+        } catch (error) {
+          console.error(error);
+          self.gridIndex.set(`${self.gridIndex.size + 1}`, desk);
+          app.setStatus(InstallStatus.installed);
+        }
       }
     }),
     suspendApp: flow(function* (desk: string) {

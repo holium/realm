@@ -107,8 +107,7 @@ export const spacesInvitationsInitSql = `
       picture text,
       color text,
       invitedAt integer not null,
-      primary key (path, patp),
-      foreign key (path) references spaces (path) on delete cascade
+      primary key (path, patp)
   );
   create unique index if not exists spaces_invitations_patp_uindex on spaces_invitations (patp, path);
 `;

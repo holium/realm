@@ -74,7 +74,6 @@ export const SelectRow = (props: ISelectRow) => {
         </Flex>
         {onButtonClick && (
           <Button.TextButton
-            fontSize={2}
             onClick={(evt: any) => {
               evt.stopPropagation();
               onButtonClick(title);

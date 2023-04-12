@@ -1,8 +1,8 @@
 import { Database } from 'better-sqlite3-multiple-ciphers';
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import APIConnection from '../conduit';
-import { chatDBPreload, ChatDB } from './models/chat.model';
-import { ChatPathMetadata, ChatPathType } from './models/chat.types';
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import APIConnection from '../../conduit';
+import { chatDBPreload, ChatDB } from './chat.db';
+import { ChatPathMetadata, ChatPathType } from './chat.types';
 import { InvitePermissionType } from 'renderer/apps/Courier/models';
 
 export class ChatService extends AbstractService {

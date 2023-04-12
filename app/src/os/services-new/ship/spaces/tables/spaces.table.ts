@@ -1,7 +1,7 @@
+import log from 'electron-log';
 import { Database } from 'better-sqlite3';
 import AbstractDataAccess from '../../../abstract.db';
 import { cleanNounColor } from '../../../../lib/color';
-// import { ThemeType } from 'renderer/stores/models/theme.model';
 
 export interface Space {
   path: string;
@@ -14,7 +14,7 @@ export interface Space {
   access: string;
   theme: any;
   // createdAt: number;
-  // updatedAt: number;
+  updatedAt: number;
 }
 
 export class SpacesDB extends AbstractDataAccess<Space> {
@@ -36,13 +36,14 @@ export class SpacesDB extends AbstractDataAccess<Space> {
       picture: row.picture,
       access: row.access,
       theme: JSON.parse(row.theme),
-      // updatedAt: row.updatedAt,
+      updatedAt: row.updatedAt,
       // createdAt: row.createdAt,
     };
   }
 
-  public insertAll(spaces: Space[]) {
+  public insertAll(spaces: { [path: string]: Space }) {
     if (!this.db) throw new Error('No db connection');
+
     const insert = this.db.prepare(
       `REPLACE INTO spaces (
         path,
@@ -53,7 +54,8 @@ export class SpacesDB extends AbstractDataAccess<Space> {
         archetype,
         picture,
         access,
-        theme
+        theme,
+        updatedAt
       ) VALUES (
         @path,
         @name,
@@ -63,7 +65,8 @@ export class SpacesDB extends AbstractDataAccess<Space> {
         @archetype,
         @picture,
         @access,
-        @theme
+        @theme,
+        @updatedAt
       )`
     );
     const insertMany = this.db.transaction((spaces) => {
@@ -78,6 +81,7 @@ export class SpacesDB extends AbstractDataAccess<Space> {
           picture: space.picture,
           access: space.access,
           theme: JSON.stringify(space.theme),
+          updatedAt: space.updatedAt,
         });
       });
     });
@@ -158,7 +162,8 @@ export const spacesInitSql = `
     archetype       text,
     picture         text,
     access          text,
-    theme           text
+    theme           text,
+    updatedAt       integer
   );
   create unique index if not exists spaces_path_uindex on spaces (path);
 `;

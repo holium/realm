@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text, NoScrollBar } from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
@@ -55,7 +55,7 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
 
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
-      <Flex
+      <NoScrollBar
         flex={1}
         overflowY="auto"
         height="100%"
@@ -196,7 +196,7 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
           )}
           {sidebarComponent}
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 };

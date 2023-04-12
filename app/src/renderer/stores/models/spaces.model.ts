@@ -5,6 +5,7 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
+import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
 import { MembersStore, VisaModel } from './members.model';
@@ -191,7 +192,7 @@ export const SpacesStore = types
     joinSpace: flow(function* (spacePath: string) {
       self.join.set('loading');
       try {
-        const space = yield SpacesIPC.join(spacePath) as Promise<any>;
+        const space = yield SpacesIPC.joinSpace(spacePath) as Promise<any>;
         self.join.set('loaded');
         return space;
       } catch (e) {
@@ -209,9 +210,13 @@ export const SpacesStore = types
             ...newSpace,
             path: spacePath,
             theme: defaultTheme,
+            stall: StallModel.create({}),
+            docks: [],
           })
         );
         self.spaces.set(spacePath, created);
+        self.selected = self.spaces.get(spacePath);
+        if (self.selected) appState.setTheme(self.selected.theme);
         self.creating.set('loaded');
         return spacePath;
       } catch (e) {
@@ -221,38 +226,48 @@ export const SpacesStore = types
       }
     }),
     updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
+      console.log(toJS(space));
+      const oldSpace = self.spaces.get(spacePath);
+      const updatedSpace = self.spaces.get(spacePath);
+      if (!oldSpace || !updatedSpace) return;
+      space.path = spacePath;
+      updatedSpace.access = space.access;
+      updatedSpace.description = space.description;
+      updatedSpace.name = space.name;
       try {
-        yield SpacesIPC.update(spacePath, space) as Promise<any>;
-        self.spaces.set(spacePath, space);
+        self.spaces.set(spacePath, updatedSpace);
+        yield SpacesIPC.updateSpace(spacePath, space) as Promise<any>;
       } catch (e) {
-        // TODO notify user it failed
+        self.spaces.set(spacePath, oldSpace);
         console.error(e);
       }
     }),
     deleteSpace: flow(function* (spacePath: string) {
-      // TODO loading states
+      const deletedSpace = self.spaces.get(spacePath);
+      if (!deletedSpace) return;
       try {
-        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
+        self.spaces.delete(spacePath);
         if (self.selected === self.spaces.get(spacePath)) {
           self.selected = self.ourSpace;
         }
-        self.spaces.delete(spacePath);
+        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
       } catch (e) {
         console.error(e);
-        // TODO notify user it failed
+        self.spaces.set(spacePath, deletedSpace);
       }
     }),
     leaveSpace: flow(function* (spacePath: string) {
-      // TODO loading states
+      const leftSpace = self.spaces.get(spacePath);
+      if (!leftSpace) return;
       try {
-        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
+        self.spaces.delete(spacePath);
         if (self.selected === self.spaces.get(spacePath)) {
           self.selected = self.ourSpace;
         }
-        self.spaces.delete(spacePath);
+        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
       } catch (e) {
         console.error(e);
-        // TODO notify user it failed
+        self.spaces.set(spacePath, leftSpace);
       }
     }),
 
@@ -270,43 +285,6 @@ export const SpacesStore = types
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
       self.subscription.set(newSubscriptionStatus);
-    },
-    _addSpace: (addReaction: { space: any; members: any }) => {
-      const space = addReaction.space;
-      const newSpace = SpaceModel.create({
-        ...space,
-        theme: {
-          id: space.path,
-          ...space.theme,
-        },
-      });
-      // newSpace.members?.initial(addReaction.members);
-      self.spaces.set(space.path, newSpace);
-      return newSpace.path;
-    },
-    _updateSpace: (replaceReaction: { space: any }) => {
-      const members = self.spaces.get(replaceReaction.space.path)?.members;
-      replaceReaction.space.theme.id = replaceReaction.space.path;
-      self.spaces.set(replaceReaction.space.path, {
-        ...replaceReaction.space,
-        members,
-      });
-    },
-    _deleteSpace: (
-      ourSpace: string,
-      deleteReaction: { 'space-path': string },
-      setTheme: (theme: any) => void
-    ) => {
-      const path = deleteReaction['space-path'];
-      //
-      if (path === self.selected?.path) {
-        // set to our space
-        self.selected = self.spaces.get(ourSpace);
-        console.log(self.selected?.path);
-        setTheme(self.selected?.theme);
-      }
-      self.spaces.delete(path);
-      return path;
     },
   }));
 

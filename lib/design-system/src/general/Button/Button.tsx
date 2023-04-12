@@ -234,6 +234,7 @@ const IconButton = styled(Base)<IconButtonProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  flex-flow: wrap;
   background: ${(props) => {
     if (props.customColor) {
       return props.customColor;
@@ -255,6 +256,7 @@ const IconButton = styled(Base)<IconButtonProps>`
     background: rgba(var(--rlm-overlay-active-rgba));
   }
   svg {
+    pointer-events: none;
     fill: ${(props) =>
       props.customColor
         ? props.customColor

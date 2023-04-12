@@ -19,15 +19,15 @@ import {
   UpdateMessage,
 } from './chat.types';
 
-type ChatUpdateType =
-  | 'message-received'
-  | 'message-edited'
-  | 'message-deleted'
-  | 'path-added'
-  | 'path-updated'
-  | 'path-deleted'
-  | 'peer-added'
-  | 'peer-deleted';
+// type ChatUpdateType =
+//   | 'message-received'
+//   | 'message-edited'
+//   | 'message-deleted'
+//   | 'path-added'
+//   | 'path-updated'
+//   | 'path-deleted'
+//   | 'peer-added'
+//   | 'peer-deleted';
 
 interface ChatRow {
   id: number;
@@ -55,7 +55,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
     super(params);
     if (params.preload) return;
     this._onQuit = this._onQuit.bind(this);
-    this._onQuit = this._onQuit.bind(this);
+    this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
@@ -64,7 +64,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       path: '/db',
       onEvent: this._onDbUpdate,
       onQuit: this._onQuit,
-      onError: this._onQuit,
+      onError: this._onError,
     });
     this.init();
   }
@@ -384,9 +384,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
-    const result = query.all();
+    const result: any = query.all();
 
-    return result.map((row) => {
+    return result.map((row: any) => {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
@@ -481,12 +481,12 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
-    const result = query.all(
+    const result: any = query.all(
       `~${APIConnection.getInstance().conduit.ship}`,
       path
     );
 
-    const rows = result.map((row) => {
+    const rows = result.map((row: any) => {
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
         lastMessage.contents = JSON.parse(lastMessage.contents).map(
@@ -566,8 +566,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         GROUP BY formed_fragments.msg_id
         ORDER BY createdAt;
     `);
-    const result = query.all(path);
-    return result.map((row) => {
+    const result: any = query.all(path);
+    return result.map((row: any) => {
       return {
         ...row,
         metadata: row.metadata ? this._parseMetadata(row.metadata) : [null],
@@ -617,8 +617,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       GROUP BY msg_id
       ORDER BY created_at;
     `);
-    const result = query.all(msgId);
-    const rows = result.map((row) => {
+    const result: any = query.all(msgId);
+    const rows = result.map((row: any) => {
       return {
         ...row,
         contents: row.contents
@@ -645,9 +645,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       SELECT max(${column}) as lastTimestamp
       FROM ${table};
     `);
-    const result = query.all();
+    const result: any = query.all();
     // add 1 to avoid getting same timestamp again
-    return result[0].lastTimestamp + 1 || 0;
+    return result[0]?.lastTimestamp + 1 || 0;
   }
 
   getChatPeers(path: string) {

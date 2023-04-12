@@ -32,20 +32,10 @@ const SpaceTitlebarPresenter = (props: SpaceTitlebarProps) => {
       <Flex alignItems="center" gap={12}>
         <AppSearchApp mode="space" />
         <Flex flex={1} gap={8} justifyContent="flex-end">
-          <Button.IconButton
-            // size={3}
-            // color={showAppGrid ? highlightColor : theme.iconColor}
-            onClick={onToggleApps}
-          >
+          <Button.IconButton size={32} onClick={onToggleApps}>
             <Icon name="AppGrid" size={22} />
           </Button.IconButton>
-          <Button.IconButton
-            size={32}
-            // size={3}
-            // customBg={iconHoverColor}
-            // color={showMembers ? highlightColor : theme.iconColor}
-            onClick={onMemberClick}
-          >
+          <Button.IconButton size={32} onClick={onMemberClick}>
             <Icon name="Members" size={22} opacity={0.7} />
           </Button.IconButton>
         </Flex>

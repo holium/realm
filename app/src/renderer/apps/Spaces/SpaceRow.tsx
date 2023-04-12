@@ -102,6 +102,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
       onClick={(evt: any) => {
         // If a menu item is clicked
         if (!contextMenuButtonIds.includes(evt.target.id)) {
+          console.log('clicking on spacerow', space.path);
           onSelect(space.path);
         }
       }}

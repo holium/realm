@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../../abstract.db';
@@ -255,7 +256,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
   }
 }
 
-export const bazaarInitSql = `
+export const bazaarTablesInitSql = `
 create table if not exists app_catalog (
     id                TEXT PRIMARY KEY,
     title             TEXT NOT NULL,
@@ -283,12 +284,7 @@ create unique index if not exists grid_uindex on app_grid (idx, appId);
 create table if not exists docks (
     space             TEXT NOT NULL,
     id                TEXT NOT NULL,
-<<<<<<< HEAD
-    idx               INTEGER NOT NULL,
-=======
->>>>>>> rebuilt-os-process
-    FOREIGN KEY (space) REFERENCES spaces (path),
-    FOREIGN KEY (id) REFERENCES app_catalog (id)
+    idx               INTEGER NOT NULL
 );
 
 create unique index if not exists docks_uindex on docks (space, id);
@@ -302,8 +298,7 @@ create unique index if not exists recommendations_uindex on recommendations (id)
 create table if not exists stalls (
     space             TEXT NOT NULL,
     suite             TEXT NOT NULL,
-    recommended       TEXT NOT NULL,
-    FOREIGN KEY (space) REFERENCES spaces (path)
+    recommended       TEXT NOT NULL
 );
 create unique index if not exists stalls_uindex on stalls (space);
 

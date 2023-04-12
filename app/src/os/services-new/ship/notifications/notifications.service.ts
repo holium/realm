@@ -1,5 +1,5 @@
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import { notifDBPreload, NotificationsDB } from './models/notifications.model';
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import { notifDBPreload, NotificationsDB } from './notifications.table';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 
 export class NotificationsService extends AbstractService {

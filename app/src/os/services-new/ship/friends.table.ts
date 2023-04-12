@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3';
-import APIConnection from '../../conduit';
-import AbstractDataAccess from '../../abstract.db';
-import { cleanNounColor } from '../../../lib/color';
+import APIConnection from '../conduit';
+import AbstractDataAccess from '../abstract.db';
+import { cleanNounColor } from '../../lib/color';
 
 export interface Friend {
   patp: string;
@@ -76,11 +76,13 @@ export class Friends extends AbstractDataAccess<Friend> {
           pinned: friend.pinned ? 1 : 0,
           tags: JSON.stringify(friend.tags),
           status: friend.status,
-          nickname: friend.contactInfo.nickname,
-          avatar: friend.contactInfo.avatar,
-          bio: friend.contactInfo.bio,
-          color: cleanNounColor(friend.contactInfo.color),
-          cover: friend.contactInfo.cover,
+          nickname: friend.contactInfo ? friend.contactInfo.nickname : '',
+          avatar: friend.contactInfo ? friend.contactInfo.avatar : '',
+          bio: friend.contactInfo ? friend.contactInfo.bio : '',
+          color: friend.contactInfo
+            ? cleanNounColor(friend.contactInfo.color)
+            : '#000',
+          cover: friend.contactInfo ? friend.contactInfo.cover : '',
         });
       });
     });

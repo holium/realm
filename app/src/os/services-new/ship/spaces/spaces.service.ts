@@ -2,11 +2,12 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import APIConnection from '../../conduit';
-import { SpacesDB } from './tables/spaces.table';
-import { MembersDB } from './tables/members.table';
+import { SpacesDB, spacesInitSql } from './tables/spaces.table';
+import { MembersDB, spacesMembersInitSql } from './tables/members.table';
 import { humanFriendlySpaceNameSlug } from '../../../lib/text';
 import { snakeify } from '../../../lib/obj';
 import { pathToObj } from '../../..//lib/path';
+import { spacesInvitationsInitSql } from './tables/visas.table';
 
 export class SpacesService extends AbstractService {
   private shipDB?: Database;
@@ -44,21 +45,39 @@ export class SpacesService extends AbstractService {
       switch (spacesType) {
         case 'initial':
           this.spacesDB?.insertAll(data['initial'].spaces);
-          this.membersDB?.insertAll(data['initial'].membership);
           this.spacesDB?.setCurrent(data['initial'].current.path);
+          this.membersDB?.insertAll(data['initial'].membership);
           break;
         case 'add':
-          // this.spacesDB?.insert(data['add']);
+          const addedSpace = data['add'];
+          addedSpace.current = 1;
+          const addedPath = addedSpace.space.path;
+          this.spacesDB?.insertAll({ [addedPath]: addedSpace.space });
+          this.spacesDB?.setCurrent(addedPath);
+          this.membersDB?.insertAll({
+            [addedPath]: addedSpace.members,
+          });
+          // TODO: send members update to the frontend
           break;
         case 'remove':
-          // this.spacesDB?.remove(data['remove']);
+          this.spacesDB?.delete(data['remove']['space-path']);
           break;
         case 'replace':
           // this.spacesDB?.replace(data['replace']);
+          const replacePayload = data['replace'];
+          log.info('replace', replacePayload);
+          // todo update spaces
           break;
         case 'remote-space':
           // when a remote space is added, we need to add it to our local db
-          // this.spacesDB?.remove(data['remote-space']);
+          const remoteSpace = data['remote-space'];
+          this.spacesDB?.insertAll({ [remoteSpace.path]: remoteSpace.space });
+          this.spacesDB?.setCurrent(remoteSpace.path);
+          this.membersDB?.insertAll({
+            [remoteSpace.path]: remoteSpace.members,
+          });
+          // todo insert members
+          // todo insert spaces
           break;
         default:
           break;
@@ -254,12 +273,12 @@ export class SpacesService extends AbstractService {
         LEFT JOIN dock_agg da ON s.path = da.space
         LEFT JOIN stall_agg sa ON s.path = sa.space;
     `);
-    const result = query.all();
-    const currentSpace = result.filter((row) => row.current === 1)[0];
+    const result: any = query.all();
+    const currentSpace = result.filter((row: any) => row.current === 1)[0];
 
     return {
       current: currentSpace ? currentSpace.path : null,
-      spaces: result.map((row) => {
+      spaces: result.map((row: any) => {
         return {
           ...row,
           current: row.current === 1,
@@ -277,6 +296,7 @@ export class SpacesService extends AbstractService {
 
   public async setSelectedSpace(path: string) {
     this.spacesDB?.setCurrent(path);
+    console.log('setting current space to', path, pathToObj(path));
     APIConnection.getInstance().conduit.poke({
       app: 'spaces',
       mark: 'spaces-action',
@@ -312,6 +332,8 @@ export class SpacesService extends AbstractService {
         },
         reaction: 'spaces-reaction.add',
         onReaction: (data: any) => {
+          // TODO: add to db
+          log.info('created space', data.add.space.path);
           resolve(data.add.space.path);
         },
         onError: (e: any) => {
@@ -321,12 +343,43 @@ export class SpacesService extends AbstractService {
     });
     return spacePath;
   }
+
+  public async joinSpace(path: string): Promise<void> {
+    return await new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          join: {
+            path: pathToObj(path),
+          },
+        },
+        reaction: 'spaces-reaction.remote-space',
+        onReaction: (data: any) => {
+          console.log('joined space -> success');
+          // TODO: add to db
+          // check if matches path
+          resolve(data);
+        },
+        onError: (e: any) => {
+          log.info('failed to join space', e);
+          reject(e);
+        },
+      });
+    });
+  }
+
   public async updateSpace(path: string, payload: any): Promise<string> {
     return await new Promise((resolve, reject) => {
       console.log({
-        update: {
-          path: pathToObj(path),
-          payload: snakeify(payload.payload),
+        path: pathToObj(path),
+        payload: {
+          name: payload.name,
+          description: payload.description,
+          access: payload.access,
+          picture: payload.picture,
+          color: payload.color,
+          theme: snakeify(payload.theme),
         },
       });
       APIConnection.getInstance().conduit.poke({
@@ -335,11 +388,20 @@ export class SpacesService extends AbstractService {
         json: {
           update: {
             path: pathToObj(path),
-            payload: snakeify(payload.payload),
+            payload: {
+              name: payload.name,
+              description: payload.description,
+              access: payload.access,
+              picture: payload.picture,
+              color: payload.color,
+              theme: snakeify(payload.theme),
+            },
           },
         },
         reaction: 'spaces-reaction.replace',
         onReaction: (data: any) => {
+          // TODO: update the db
+          console.log('updated space -> success');
           resolve(data);
         },
         onError: (e: any) => {
@@ -361,6 +423,8 @@ export class SpacesService extends AbstractService {
         },
         reaction: 'spaces-reaction.remove',
         onReaction: (data: any) => {
+          // TODO: remove from db
+          console.log('deleted space -> success');
           resolve(data);
         },
         onError: (e: any) => {
@@ -377,39 +441,17 @@ export class SpacesService extends AbstractService {
         app: 'spaces',
         mark: 'spaces-action',
         json: {
-          remove: {
-            leave: pathToObj(path),
+          leave: {
+            path: pathToObj(path),
           },
         },
         reaction: 'spaces-reaction.delete',
         onReaction: (data: any) => {
+          // TODO: remove from db
+          console.log('deleted space -> success');
           resolve(data);
         },
         onError: (e: any) => {
-          reject(e);
-        },
-      });
-    });
-  }
-
-  public async joinSpace(path: string): Promise<void> {
-    return await new Promise((resolve, reject) => {
-      APIConnection.getInstance().conduit.poke({
-        app: 'spaces',
-        mark: 'spaces-action',
-        json: {
-          remove: {
-            leave: pathToObj(path),
-          },
-        },
-        reaction: 'spaces-reaction.remote-space',
-        onReaction: (data: any) => {
-          console.log('joined space', data);
-          // check if matches path
-          resolve(data);
-        },
-        onError: (e: any) => {
-          log.info('failed to join space', e);
           reject(e);
         },
       });
@@ -423,6 +465,12 @@ export default SpacesService;
 export const spacesPreload = SpacesService.preload(
   new SpacesService({ preload: true })
 );
+
+export const spacesTablesInitSql = `
+ ${spacesInitSql}
+ ${spacesInvitationsInitSql}
+ ${spacesMembersInitSql}
+`;
 
 export type NewSpace = {
   name: string;

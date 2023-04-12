@@ -7,9 +7,9 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
 import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
-import NotificationsService from './notifications.service';
-import ChatService from './chat.service';
-import { Friends } from './models/friends.model';
+import NotificationsService from './notifications/notifications.service';
+import ChatService from './chat/chat.service';
+import { Friends } from './friends.table';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../s3/S3Client';
 import BazaarService from './spaces/bazaar.service';
@@ -47,6 +47,19 @@ export class ShipService extends AbstractService {
         this.shipDB?.setCredentials(session.url, session.code, session.cookie);
       }
     );
+
+    // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
+    try {
+      this.shipDB.db.exec(`
+        DELETE FROM docks;
+        DELETE FROM stalls;
+        DELETE FROM app_catalog;
+        DELETE FROM spaces_members;
+        DELETE FROM spaces;
+      `);
+    } catch (e) {
+      log.error(e);
+    }
 
     this.services = {
       rooms: new RoomsService(),
