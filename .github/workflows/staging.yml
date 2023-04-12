@@ -115,7 +115,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=alpha APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:prerelease:mac
+        run: npx cross-env RELEASE_CHANNEL=alpha yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -354,11 +354,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
-      - run: |
-          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      # - run: |
+      #     gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
       #
       - name: Create Sentry release
         uses: getsentry/action-release@v1
