@@ -12,40 +12,18 @@ export type ColorVariants =
   | 'text'
   | 'icon'
   | 'dock'
+  | 'mouse'
+  | 'brand'
   | 'intent-alert'
   | 'intent-success'
   | 'intent-warning'
   | 'intent-info';
 
-type ThemeVar = 'theme-mode';
-type StyleVars = ColorVariants | ThemeVar;
-
-const variantToRgbCssVar = (colorVariant: ColorVariants) => {
-  return `--rlm-${colorVariant}-rgba`;
-};
-
-const variantToCssVar = (variable: ThemeVar) => {
-  return `--rlm-${variable}`;
-};
-
-export const getVar = (variable: StyleVars) => {
-  let cssVar: string;
-  if (variable === 'theme-mode') {
-    cssVar = variantToCssVar(variable);
-  } else {
-    cssVar = variantToRgbCssVar(variable);
-  }
-
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(cssVar)
-    .replace(/\s/g, '');
-
-  return value;
-};
-
 export interface ColorProps {
   bg?: ColorVariants;
+  fill?: ColorVariants;
   color?: ColorVariants;
+  stroke?: ColorVariants;
   borderColor?: ColorVariants;
 }
 
@@ -53,17 +31,17 @@ export const colorStyle = css<ColorProps>`
   ${(props) =>
     props.bg &&
     css`
-      background-color: rgba(var(${variantToRgbCssVar(props.bg)}));
+      background-color: rgba(var(--rlm-${props.bg}-rgba));
     `}
   ${(props) =>
     props.color &&
     css`
-      color: rgba(var(${variantToRgbCssVar(props.color)}));
+      color: rgba(var(--rlm-${props.color}-rgba));
     `}
   ${(props) =>
     props.borderColor &&
     css`
-      border-color: rgba(var(${variantToRgbCssVar(props.borderColor)}));
+      border-color: rgba(var(--rlm-${props.borderColor}-rgba));
     `}
 `;
 
@@ -116,3 +94,6 @@ export function convertDarkText(hexColor: string, themeMode: string = 'light') {
 
   return color;
 }
+
+export const opacifyHexColor = (hexColor: string, opacity: number) =>
+  hexColor + Math.round(opacity * 255).toString(16);

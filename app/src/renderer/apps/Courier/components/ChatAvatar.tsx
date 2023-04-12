@@ -9,10 +9,12 @@ type ChatAvatarProps = {
   sigil?: {
     patp: string;
     color: [string, string];
+    nickname?: string;
   };
   type: string;
   path: string;
   image?: string;
+  color?: string;
   canEdit?: boolean;
   metadata?: any;
   size?: number;
@@ -25,6 +27,7 @@ export const ChatAvatar = ({
   type,
   path,
   peers,
+  color,
   image,
   onUpload,
   canEdit = false,
@@ -54,8 +57,17 @@ export const ChatAvatar = ({
       />
     );
   }
-  if (!image && type === 'space') {
-    // todo: add space sigil
+  if (type === 'space' && !image && color) {
+    avatarElement = (
+      <motion.div
+        style={{
+          borderRadius: 4,
+          backgroundColor: color,
+          width: size,
+          height: size,
+        }}
+      />
+    );
   }
   if (image) {
     avatarElement = (

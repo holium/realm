@@ -161,7 +161,7 @@ const RemoveWrapper = styled(motion.div)`
   .new-chat-remove-ship {
     justify-content: center;
     align-items: center;
-    background-color: var(--rlm-intent-alert-color);
+    background-color: rgba(var(--rlm-intent-alert-rgba));
     svg {
       fill: #fff;
     }

@@ -76,7 +76,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getAnchorPointByTarget } from '../../util/position';
-import { Dimensions, Position } from '../../util';
+import { Dimensions, Position } from '../../../util';
 import ReactDOM from 'react-dom';
 
 interface MenuState {

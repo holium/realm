@@ -98,9 +98,10 @@ export const ChatMetadataModel = types.model({
   description: types.maybe(types.string),
   image: types.maybe(types.string),
   creator: types.string,
-  peer: types.maybe(types.string),
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
+  peer: types.maybe(types.string),
+  space: types.maybe(types.string),
 });
 
 export type ChatMetadata = Instance<typeof ChatMetadataModel>;
@@ -148,6 +149,9 @@ export const ChatMessage = types
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
       self.updatedAt = updatedAt;
+    },
+    setMetadata(metadata: any) {
+      self.metadata = metadata;
     },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
@@ -208,6 +212,7 @@ export const Chat = types
         createdAt: types.number,
       })
     ),
+    lastUpdatedAt: types.maybeNull(types.number),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -244,7 +249,7 @@ export const Chat = types
       );
     },
     isEditing(msgId: string) {
-      return self.editingMsg?.id === msgId;
+      return self.editingMsg?.id === msgId || false;
     },
     // Check if the pinned message is hidden locally
     isPinLocallyHidden() {
@@ -287,7 +292,6 @@ export const Chat = types
         console.error(error);
       }
     }),
-
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
@@ -315,6 +319,7 @@ export const Chat = types
           contents: lastContents,
           createdAt: new Date().getTime(),
         };
+        self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
         yield ChatDBActions.sendMessage(path, fragments);
       } catch (error) {
@@ -364,6 +369,7 @@ export const Chat = types
           createdAt: message.createdAt,
         };
       }
+      // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
@@ -460,11 +466,25 @@ export const Chat = types
       self.isReacting = undefined;
     },
     setEditing(message: ChatMessageType) {
+      if (self.editingMsg !== null) {
+        /* workaround for chat getting updated when going
+        from one edit message to another */
+        localStorage.removeItem(self.path);
+      }
       self.editingMsg = message;
     },
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
       const oldMessages = self.messages;
       try {
+        // find the message and update it
+        const message = self.messages.find((m) => m.id === messageId);
+        if (!message) return;
+        self.editingMsg = null;
+        message.setMetadata({ edited: 'true' });
+        message.updateContents(
+          contents.map((frag) => frag.content),
+          Date.now()
+        );
         yield ChatDBActions.editMessage(
           self.path,
           messageId,
@@ -473,8 +493,6 @@ export const Chat = types
             metadata: { edited: 'true' },
           }))
         );
-        // todo intermeidate state?
-        self.editingMsg = null;
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);

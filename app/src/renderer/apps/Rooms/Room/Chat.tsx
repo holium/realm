@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { WindowedList } from '@holium/design-system';
-import { RoomChatMessage } from './RoomChatMessage';
+import { RoomChatMessage } from '../components/RoomChatMessage';
 import { useRooms } from '../useRooms';
 
 export const chatForm = (
@@ -78,9 +78,8 @@ const RoomChatPresenter = () => {
       <WindowedList
         width={354}
         height={listHeight}
-        data={chats}
-        sort={(a, b) => a.timeReceived - b.timeReceived}
-        rowRenderer={(chat, index) => (
+        data={chats.sort((a, b) => a.timeReceived - b.timeReceived)}
+        itemContent={(index, chat) => (
           <RoomChatMessage
             key={chat.index}
             chat={chat}
@@ -93,7 +92,6 @@ const RoomChatPresenter = () => {
             }
           />
         )}
-        startAtBottom
       />
     );
   }, [chats]);

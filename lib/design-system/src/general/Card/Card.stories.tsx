@@ -11,7 +11,7 @@ export const Demo: ComponentStory<typeof Card> = () => (
       <div> Hello card </div>
     </Card>
     <div style={{ marginTop: 10 }} />
-    <Card fill p={4} borderRadius={9} elevation={1}>
+    <Card p={4} borderRadius={9} elevation={1}>
       <div> Fill width more padding </div>
     </Card>
   </>

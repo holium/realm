@@ -15,7 +15,7 @@ import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import { getCookie } from '../../lib/shipHelpers';
 import { EncryptedStore } from '../../lib/encryptedStore';
 import { ThemeSnapshotType } from 'renderer/logic/theme';
-import { defaultTheme } from '@holium/shared';
+import { defaultTheme } from '../theme.model';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
@@ -35,6 +35,7 @@ export class AuthService extends BaseService {
     'realm.auth.get-ships': this.getShips,
     'realm.auth.set-first-time': this.setFirstTime,
     'realm.auth.set-selected': this.setSelected,
+    'realm.auth.get-selected': this.getSelected,
     'realm.auth.set-order': this.setOrder,
     'realm.auth.shutdown': this.shutdown,
     'realm.auth.login': this.login,
@@ -65,6 +66,8 @@ export class AuthService extends BaseService {
       await ipcRenderer.invoke('realm.auth.set-first-time'),
     cancelLogin: async () =>
       await ipcRenderer.invoke('realm.auth.cancel-login'),
+    getSelected: async () =>
+      await ipcRenderer.invoke('realm.auth.get-selected'),
     setSelected: async (ship: string) =>
       await ipcRenderer.invoke('realm.auth.set-selected', ship),
     setOrder: async (order: any[]) =>
@@ -376,7 +379,6 @@ export class AuthService extends BaseService {
     try {
       const shipId = `auth${patp}`;
       this.state.setLoader('loading');
-
       const ship = this.state.ships.get(`auth${patp}`);
       if (!ship) {
         throw new Error('ship not found');
@@ -386,25 +388,20 @@ export class AuthService extends BaseService {
         throw new Error('login: passwordHash is null');
       }
       const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
-
       if (!passwordCorrect) {
-        throw new Error('login: password is incorrect');
+        this.state.setLoader('error');
+        return 'error:password';
       }
 
       this.core.passwords.setPassword(patp, password);
-
       this.state.login(shipId);
-
       this.core.services.shell.setBlur(null, false);
-
       const credentials = this.readCredentials(patp, password);
-
       const cookie = await getCookie({
         patp,
         url: ship.url,
         code: credentials.code,
       });
-
       this.core.setSession({
         ship: ship.patp,
         url: ship.url,
@@ -443,6 +440,10 @@ export class AuthService extends BaseService {
 
     this.state.completeSignup(newShip.id);
     return newShip;
+  }
+
+  async getSelected(_event: any): Promise<string | undefined> {
+    return this.state.selected?.patp;
   }
 
   async setSelected(_event: any, ship: string): Promise<void> {

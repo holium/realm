@@ -11,6 +11,7 @@ declare global {
     };
     audio: any;
     ship: string;
+    twttr: any;
   }
 }
 

@@ -1,18 +1,21 @@
-import { FC, useMemo, useState } from 'react';
-import Spotify from 'react-spotify-embed';
-import ReactPlayer from 'react-player';
-import { Flex, Icon, isSpotifyLink, Text } from '../..';
-import { BlockProps, Block } from '../Block/Block';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import ReactPlayer from 'react-player';
+import { Flex, Icon, Text } from '../../../general';
+import { isSpotifyLink } from '../../util/links';
+import { BlockProps, Block } from '../Block/Block';
 
 type MediaBlockProps = {
   url: string;
   height?: number;
 } & BlockProps;
 
-export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
-  const { url, height = 230, onLoaded, ...rest } = props;
-
+export const MediaBlock = ({
+  url,
+  height = 230,
+  onLoaded,
+  ...rest
+}: MediaBlockProps) => {
   const [isError, setIsError] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -22,6 +25,7 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
   if (isSpotify) {
     heightOverride = 80;
     const width = 300;
+    const spotifyLink = new URL(url);
     return (
       <MediaWrapper
         {...rest}
@@ -29,11 +33,17 @@ export const MediaBlock: FC<MediaBlockProps> = (props: MediaBlockProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ opacity: 0.2 }}
-        onAnimationComplete={() => {
-          onLoaded && onLoaded();
-        }}
       >
-        <Spotify link={url} width={width} height={heightOverride} />
+        <webview
+          id={rest.id}
+          src={`https://open.spotify.com/embed${spotifyLink.pathname}`}
+          style={{
+            borderRadius: '4px',
+            overflow: 'hidden',
+            width: width,
+            height: heightOverride,
+          }}
+        />
       </MediaWrapper>
     );
   }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital, wght@0, 400;0, 500;0, 600;0, 700;0, 800;0, 900;1, 400;1, 500;1, 600;1, 700;1, 800;1, 900&display=swap');
+
 :root {
   --theme-mode: 'dark';
   --blur: blur(24px);
@@ -19,10 +21,13 @@
   --rlm-input-rgba: 26, 37, 46;
   --rlm-border-rgba: 0, 0, 0, 0.2;
   --rlm-window-rgba: 33, 45, 54;
+  --rlm-window-bg-rgba: 33, 45, 54, 0.9;
   --rlm-dock-rgba: 42, 56, 67, 0.45;
   --rlm-card-rgba: 42, 56, 67;
   --rlm-text-rgba: 255, 255, 255;
   --rlm-icon-rgba: 162, 168, 172;
+  --rlm-mouse-rgba: 0, 0, 0;
+  --rlm-brand-rgba: 240, 135, 53;
   --rlm-intent-alert-rgba: 255, 98, 64;
   --rlm-intent-caution-rgba: 255, 188, 50;
   --rlm-intent-success-rgba: 15, 195, 131;

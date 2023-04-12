@@ -30,35 +30,20 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    ~&  wex.bowl
     :: do a quick check to make sure we are subbed to /db in %chat-db
     =/  cards  ?:  =(wex.bowl ~)  
       [%pass /db %agent [our.bowl %chat-db] %watch /db]~
     ~
-    :: REMOVE THIS SECTION WHEN YOU DONT WANT TO AUTO-BORK STATE EVERY TIME
-    =/  default-state=state-0
-      :*  %0
-          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
-          (sham our.bowl)                         :: uuid:notify
-          *devices:notify
-          %.y            :: push-enabled
-          ~              :: set of muted chats
-          ~              :: set of pinned chats
-          %.n            :: msg-preview-notif
-      ==
-    [cards this(state default-state)]
-    :: UNCOMMENT WHEN NOT UNDER ACTIVE DEVELOPMENT
-    ::=/  old  !<(versioned-state old-state)
-    ::?-  -.old
-    ::  %0  [cards this(state old)]
-    ::==
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  [cards this(state old)]
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?>  ?=(%chat-action mark)
     =/  act  !<(action vase)
-    ~&  >  "%realm-chat poked {<-.act>}"
     =^  cards  state
     ?-  -.act  :: each handler function here should return [(list card) state]
       :: meta-chat management pokes
@@ -165,8 +150,6 @@
           %fact
             ?+    p.cage.sign  `this
               %chat-db-dump
-                ::~&  >>>  'we got a new db-dump thing'
-                ::~&  >>>  !<(db-dump:db-sur q.cage.sign)
                 `this
               %chat-db-change
                 =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
@@ -211,9 +194,7 @@
                 =/  cards=(list card)
                   %-  zing
                   %+  turn
-                    %+  skim
-                      thechange 
-                    |=(ch=db-change-type:db-sur =(-.ch %add-row))
+                    thechange 
                   |=  ch=db-change-type:db-sur
                   ^-  (list card)
                   ?+  -.ch  ~
@@ -222,13 +203,26 @@
                       %paths
                         =/  pathrow  path-row.db-row.ch
                         =/  pathpeers  (scry-peers:lib path.pathrow bowl)
-                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db-sur =(role.p %host))))
                         ?:  =(patp.host our.bowl) :: if it's our own creation, don't do anything
                           ~
                         =/  send-status-message
                           !>([%send-message path.pathrow ~[[[%status (crip "{(scow %p our.bowl)} joined the chat")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                     ==
+
+                    %upd-paths-row
+                      =/  pathpeers  (scry-peers:lib path.path-row.ch bowl)
+                      =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                      ?:  ?&  =(patp.host our.bowl) :: only host will send the status update
+                              ?!(=(max-expires-at-duration.path-row.ch max-expires-at-duration.old.ch)) :: only do the status if the max duration changed
+                          ==
+                        =/  send-status-message
+                          ?:  =(max-expires-at-duration.path-row.ch *@dr)
+                            !>([%send-message path.path-row.ch ~[[[%status (crip "Messages now last forever")] ~ ~]] *@dr])
+                          !>([%send-message path.path-row.ch ~[[[%status (crip "You set disappearing messages to {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
+                        [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
+                      ~
                   ==
                 [(weld cards new-msg-notif-cards) this]
             ==

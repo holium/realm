@@ -34,6 +34,5 @@ export * from './SpacePicture';
 export * from './AppTile/AppTile';
 export * from './Notification/InnerNotification';
 export * from './ConnectionStatus';
-export * from './CopyButton';
 export * from './urbitSvg';
 export * from './NoScrollbar';

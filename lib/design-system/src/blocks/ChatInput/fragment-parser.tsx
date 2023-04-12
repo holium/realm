@@ -61,7 +61,7 @@ const parserRules: ParserRules = {
     priority: 0,
   },
   blockquote: {
-    token: '> ',
+    token: /(^|\n)> /,
     tokenLength: 2,
     ender: /\n|$/,
     enderLength: 1,
@@ -89,7 +89,7 @@ const parserRules: ParserRules = {
   },
   link: {
     regex:
-      /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
+      /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
     // regex:
     //   /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}(\b|(\/([-a-zA-Z0-9()@:%_+.~#?&//=]*)+))/i,
     recurse: false,
@@ -171,7 +171,7 @@ const eatSpecialType = (
           ? possibleMatch.index
           : -1;
       if (startIndex >= 0) {
-        startTokenLength = possibleMatch[0].length;
+        startTokenLength = possibleMatch?.[0].length ?? 0;
       }
     } else {
       throw new Error('should not be possible to reach this');

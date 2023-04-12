@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import {
   Row,
   Flex,
@@ -41,7 +41,7 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { ship, spaces } = useServices();
   const {
     inbox,
     getChatHeader,
@@ -60,6 +60,72 @@ export const ChatRowPresenter = ({
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
   const isMuted = isChatMuted(path);
+  const isSpaceChat = type === 'space';
+
+  const chat = inbox.find((c) => c.path === path);
+  const lastMessageUpdated: React.ReactNode = useMemo(() => {
+    if (!chat) return null;
+    if (!chat.lastMessage) return 'No messages yet';
+    return (
+      <span>
+        {chat.lastMessage &&
+          chat.lastMessage.contents.map(
+            (content: { [key: string]: string }, idx: number) => {
+              if (!chat.lastMessage) return null;
+              let type = Object.keys(content)[0];
+              const value = content[type];
+              if (TEXT_TYPES.includes(type)) {
+                return (
+                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
+                    {value}
+                  </span>
+                );
+              } else {
+                if (type === 'code') type = 'code block';
+                return (
+                  <span
+                    style={{
+                      marginLeft: 2,
+                      marginRight: 2,
+                      fontStyle: 'italic',
+                    }}
+                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
+                  >
+                    {type}
+                  </span>
+                );
+              }
+            }
+          )}
+      </span>
+    );
+  }, [chat?.lastMessage?.id]);
+
+  const [lastMessageTimestamp, setLastMessageTimestamp] = useState(
+    timelineDate(
+      new Date(
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) ||
+          (chat && chat.createdAt) ||
+          timestamp
+      )
+    )
+  );
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    function initClock() {
+      clearTimeout(timer);
+      const sentDate = new Date(
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+      );
+      const interval: number = (60 - sentDate.getSeconds()) * 1000 + 5;
+      setLastMessageTimestamp(timelineDate(sentDate));
+      timer = setTimeout(initClock, interval);
+    }
+    initClock();
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [chat?.lastMessage?.id]);
 
   const contextMenuOptions = useMemo(() => {
     if (!ship) return [];
@@ -104,22 +170,23 @@ export const ChatRowPresenter = ({
         toggleMuted(path, !isMuted);
       },
     });
-    menu.push({
-      id: `${chatRowId}-leave-chat`,
-      label: isAdmin ? 'Delete chat' : 'Leave chat',
-      icon: isAdmin ? 'Trash' : 'Logout',
-      iconColor: '#ff6240',
-      labelColor: '#ff6240',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
-          path,
-          amHost: isAdmin.toString(),
-          our: ship.patp,
-        });
-      },
-    });
+    if (!isSpaceChat)
+      menu.push({
+        id: `${chatRowId}-leave-chat`,
+        label: isAdmin ? 'Delete chat' : 'Leave chat',
+        icon: isAdmin ? 'Trash' : 'Logout',
+        iconColor: '#ff6240',
+        labelColor: '#ff6240',
+        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+            path,
+            amHost: isAdmin.toString(),
+            our: ship.patp,
+          });
+        },
+      });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [path, isPinned, isMuted]);
 
@@ -135,6 +202,35 @@ export const ChatRowPresenter = ({
     return getChatHeader(path);
   }, [path, window.ship]);
 
+  let spaceHeader = null;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spaces.getSpaceByChatPath(path);
+
+    if (!space) {
+      spaceHeader = null;
+    } else {
+      spaceHeader = (
+        <Text.Custom
+          textAlign="left"
+          layoutId={`chat-${path}-pretitle`}
+          layout="preserve-aspect"
+          transition={{
+            duration: 0.15,
+          }}
+          width={210}
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 0.5, lineHeight: '1' }}
+          fontWeight={500}
+          fontSize={1}
+        >
+          {space.name}
+        </Text.Custom>
+      );
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = useMemo(
     () =>
       title &&
@@ -147,57 +243,13 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={image}
+          color={avatarColor}
           metadata={metadata}
           canEdit={false}
         />
       ),
     [title, path, type, peers, sigil, image]
   );
-
-  const chat = inbox.find((c) => c.path === path);
-  const lastMessageUpdated: React.ReactNode = useMemo(() => {
-    if (!chat) return null;
-    if (!chat.lastMessage) return 'No messages yet';
-    return (
-      <span>
-        {chat.lastMessage &&
-          chat.lastMessage.contents.map(
-            (content: { [key: string]: string }, idx: number) => {
-              if (!chat.lastMessage) return null;
-              let type = Object.keys(content)[0];
-              const value = content[type];
-              if (TEXT_TYPES.includes(type)) {
-                return (
-                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
-                    {value}
-                  </span>
-                );
-              } else {
-                if (type === 'code') type = 'code block';
-                return (
-                  <span
-                    style={{
-                      marginLeft: 2,
-                      marginRight: 2,
-                      fontStyle: 'italic',
-                    }}
-                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
-                  >
-                    {type}
-                  </span>
-                );
-              }
-            }
-          )}
-      </span>
-    );
-  }, [chat?.lastMessage?.id]);
-
-  const lastMessageTimestamp = useMemo(() => {
-    if (!chat || !chat.lastMessage) return timelineDate(new Date(timestamp));
-
-    return timelineDate(new Date(chat.lastMessage.createdAt));
-  }, [chat?.lastMessage?.id]);
 
   return (
     <Row
@@ -227,6 +279,11 @@ export const ChatRowPresenter = ({
             {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {spaceHeader && (
+              <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+                {spaceHeader}
+              </Flex>
+            )}
             <Text.Custom
               layoutId={`chat-${path}-name`}
               layout="preserve-aspect"
@@ -251,6 +308,7 @@ export const ChatRowPresenter = ({
               transition={{
                 duration: 0.1,
               }}
+              initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}
               exit={{ opacity: 0 }}
               fontSize={2}

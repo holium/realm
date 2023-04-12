@@ -1,6 +1,6 @@
-import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { Flex, Icons, Text, Crest } from 'renderer/components';
+import { Icon } from '@holium/design-system';
+import { Flex, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { pluralize } from 'renderer/logic/lib/text';
 
@@ -8,7 +8,6 @@ interface SpacePictureProps {
   space: SpaceModelType;
   size?: number;
   membersCount?: number;
-  textColor: string;
 }
 
 interface PictureProps {
@@ -33,84 +32,65 @@ const FadeInMotion = {
   transition: { opacity: { duration: 1, ease: 'easeIn' } },
 };
 
-export const SpacePicture: FC<SpacePictureProps> = (
-  props: SpacePictureProps
-) => {
-  const { space, size, membersCount, textColor } = props;
-
-  return (
-    <Flex gap={12} flexDirection="row" alignItems="center">
-      {/* Outer row */}
-      {space.picture || space.color ? (
-        <Crest
-          color={space.color || ''}
-          picture={space.picture || ''}
-          size="sm2"
-        />
-      ) : (
-        <EmptyPicture size={size} />
-      )}
-      <Flex
-        flexDirection="column"
-        justifyContent="center"
-        gap={4}
-        {...FadeInMotion}
+export const SpacePicture = ({
+  space,
+  size = 32,
+  membersCount,
+}: SpacePictureProps) => (
+  <Flex gap={12} flexDirection="row" alignItems="center">
+    {/* Outer row */}
+    {space.picture || space.color ? (
+      <Crest
+        color={space.color || ''}
+        picture={space.picture || ''}
+        size="sm2"
+      />
+    ) : (
+      <EmptyPicture size={size} />
+    )}
+    <Flex
+      flexDirection="column"
+      justifyContent="center"
+      gap={4}
+      {...FadeInMotion}
+    >
+      {/* Title column */}
+      <Text
+        transition={{ color: { duration: 0.5 } }}
+        fontSize={4}
+        fontWeight={500}
       >
-        {/* Title column */}
-        <Text
-          initial={{ color: textColor }}
-          animate={{ color: textColor }}
-          transition={{ color: { duration: 0.5 } }}
-          fontSize={4}
-          fontWeight={500}
-        >
-          {space.name}
-        </Text>
-        <Flex gap={10} alignItems="center">
-          {/* Subtitle row */}
+        {space.name}
+      </Text>
+      <Flex gap={10} alignItems="center">
+        {/* Subtitle row */}
+        <Flex gap={4} alignItems="center">
+          {/* Member count */}
+          <Icon name="Members" size="14px" opacity={0.7} />
+          <Text
+            transition={{ color: { duration: 0.5 } }}
+            opacity={0.7}
+            fontSize={2}
+            fontWeight={400}
+          >
+            {membersCount} {membersCount && pluralize('member', membersCount)}
+          </Text>
+        </Flex>
+        {space.token && (
           <Flex gap={4} alignItems="center">
-            {/* Member count */}
-            <Icons
-              name="Members"
-              size="14px"
-              initial={{ fill: textColor }}
-              animate={{ fill: textColor }}
-              transition={{ fill: { duration: 0.5 } }}
-              opacity={0.7}
-            />
+            {/* Token info */}
+            <Icon name="Coins" size="14px" fill="text" opacity={0.7} />
             <Text
-              initial={{ color: textColor }}
-              animate={{ color: textColor }}
               transition={{ color: { duration: 0.5 } }}
               opacity={0.7}
               fontSize={2}
               fontWeight={400}
             >
-              {membersCount} {membersCount && pluralize('member', membersCount)}
+              {space.token?.symbol}
             </Text>
           </Flex>
-          {space.token && (
-            <Flex gap={4} alignItems="center">
-              {/* Token info */}
-              <Icons name="Coins" size="14px" fill={textColor} opacity={0.7} />
-              <Text
-                initial={{ color: textColor }}
-                animate={{ color: textColor }}
-                transition={{ color: { duration: 0.5 } }}
-                opacity={0.7}
-                fontSize={2}
-                fontWeight={400}
-              >
-                {space.token?.symbol}
-              </Text>
-            </Flex>
-          )}
-        </Flex>
+        )}
       </Flex>
     </Flex>
-  );
-};
-
-SpacePicture.defaultProps = {
-  size: 32,
-};
+  </Flex>
+);

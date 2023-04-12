@@ -14,3 +14,7 @@ export const pluralize = (word: string, amount: number) => {
 export const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+export const isValidEmail = (email: string) => emailRegex.test(email);

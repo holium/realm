@@ -166,7 +166,7 @@ export const ShipBarPresenter = () => {
     <BarStyle
       id={id}
       pl="3px"
-      pr="6px"
+      pr="3px"
       flexDirection="column"
       justifyContent="flex-end"
       width={width}
