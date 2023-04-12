@@ -371,7 +371,7 @@ jobs:
           SENTRY_LOG_LEVEL: debug
         with:
           environment: staging
-          sourcemaps: './app/release/app/dist/main' './app/release/app/dist/renderer'
+          sourcemaps: './app/release/app/dist'
           version: ${{ needs.pre-deploy.outputs.build_version }}
           ignore_empty: true
 
