@@ -19,4 +19,6 @@ $: cd urbit/pkg
 $: ./symbolic-merge.sh base-dev ../../desks/realm
 $: ./symbolic-merge.sh base-dev ../../desks/courier
 ```
+Note: don't change realm/sur/hood/hoon.
+
 Now you'll want to commit the desks to a fakezod, and look for any errors or bugs before deploying.
