@@ -3,6 +3,7 @@ import { CreateAccountDialog } from '../CreateAccountDialog';
 import { OnboardingDialogWrapper } from './helpers';
 import { PassportDialog } from '../PassportDialog';
 import { HostingDialog } from '../HostingDialog';
+import { InstallationDialog } from '../InstallationDialog';
 
 export default {
   component: CreateAccountDialog,
@@ -34,3 +35,17 @@ export const PassportDialogStory: ComponentStory<
 );
 
 PassportDialogStory.storyName = 'Create your Passport';
+
+export const InstallationDialogStory: ComponentStory<
+  typeof InstallationDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <InstallationDialog
+      onBack={() => {}}
+      onInstallRealm={() => Promise.resolve(false)}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+InstallationDialogStory.storyName = 'Installation';
