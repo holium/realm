@@ -6,7 +6,7 @@
     "declaration": false,
     "disableSizeLimit": true,
     "esModuleInterop": true,
-    // "inlineSources": true,
+    "inlineSources": true,
     "jsx": "react-jsx",
     "lib": ["dom", "es2021"],
     "moduleResolution": "node",
