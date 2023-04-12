@@ -9,10 +9,11 @@ import { VerifyEmailDialog } from '../VerifyEmailDialog';
 import { OnboardingDialogWrapper } from './helpers';
 import { ThirdEarthProduct } from '../../types/index';
 import { PassportDialog } from '../PassportDialog';
+import { HostingDialog } from '../HostingDialog';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Signup flow',
+  title: 'Onboarding/Signup flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const CreateAccountDialogStory: ComponentStory<
@@ -188,3 +189,13 @@ export const PassportDialogStory: ComponentStory<
 );
 
 PassportDialogStory.storyName = '8. Create your Passport';
+
+export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
+  <OnboardingDialogWrapper>
+    <HostingDialog
+      onBack={() => {}}
+      onGetHosting={() => {}}
+      onAddExistingUrbit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
