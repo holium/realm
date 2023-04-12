@@ -30,12 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin production
+        with:
+          ref: production
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -75,6 +71,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -108,11 +106,6 @@ jobs:
         run: npm install -g yarn
       - name: Install app dependencies
         run: yarn install
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin production
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -128,13 +121,13 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
+        run: npx cross-env yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
@@ -151,6 +144,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -178,9 +173,9 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN npx yarn package:release:linux
+          npx yarn package:release:linux
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
@@ -201,19 +196,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global --add safe.directory '*'
-          git pull origin production
       #
       - name: Install yarn
         run: npm install -g yarn
@@ -246,10 +236,9 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:release:win
+          npx cross-env sudo yarn package:release:win
         env:
-          USERNAME: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Download and install code signing tool
@@ -298,19 +287,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          ref: production
+          # Urbit symlink fetching
+          submodules: 'true'
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global submodule.recurse true
-          git pull origin production
       #
       - name: Bump desks version
         uses: actions/github-script@v6
@@ -380,6 +364,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       #
       - name: Setup node
         uses: actions/setup-node@v3
@@ -416,6 +402,8 @@ jobs:
       #
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       #
       - name: Run post-deploy script
         uses: actions/github-script@v6
