@@ -8,6 +8,7 @@ import { PaymentDialog } from '../PaymentDialog';
 import { VerifyEmailDialog } from '../VerifyEmailDialog';
 import { OnboardingDialogWrapper } from './helpers';
 import { ThirdEarthProduct } from '../../types/index';
+import { PassportDialog } from '../PassportDialog';
 
 export default {
   component: CreateAccountDialog,
@@ -172,4 +173,18 @@ export const DownloadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-DownloadDialogStory.storyName = '7. Download';
+DownloadDialogStory.storyName = '7. Download Realm for Desktop';
+
+export const PassportDialogStory: ComponentStory<
+  typeof PassportDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <PassportDialog
+      patp="~pasren-satmex"
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+PassportDialogStory.storyName = '8. Create your Passport';

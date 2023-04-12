@@ -12,8 +12,8 @@ import {
 import { SubmitButton } from './hosting/SubmitButton';
 
 type Props = {
-  icon: ReactNode;
   body: ReactNode;
+  icon?: ReactNode;
   nextText?: string;
   nextIcon?: ReactNode;
   onBack?: () => void;
@@ -21,8 +21,8 @@ type Props = {
 };
 
 export const OnboardDialog = ({
-  icon,
   body,
+  icon,
   nextText = 'Next',
   nextIcon,
   onBack,
@@ -45,7 +45,9 @@ export const OnboardDialog = ({
   return (
     <OnboardDialogCard onSubmit={onNext ? handleSubmit : undefined}>
       <OnboardDialogBody>
-        <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
+        {icon && (
+          <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
+        )}
         <OnboardDialogBodyContainer>{body}</OnboardDialogBodyContainer>
       </OnboardDialogBody>
       <OnboardDialogFooter>
