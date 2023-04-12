@@ -174,6 +174,7 @@ export class DesktopService extends BaseService {
   openAppWindow(_event: IpcRendererEvent, selectedApp: AppType) {
     const desktopDimensions = this.core.services.shell.desktopDimensions;
     if (!desktopDimensions) throw new Error('No desktop dimensions found');
+    console.log('selected', selectedApp);
     const newWindow = this.state.openWindow(selectedApp, desktopDimensions);
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials;

@@ -36,9 +36,11 @@ const CallerPresenter = (props: ICaller) => {
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
+  const rid = roomsManager.campfire.room?.rid;
+  if (!rid) throw new Error("Can't find room id for campfire caller");
   const peer = isOur
     ? roomsManager.protocol.local
-    : roomsManager.protocol.peers.get(person);
+    : roomsManager.protocol.peers.get(rid)?.get(person);
 
   const contextMenuOptions = useMemo(
     () =>
@@ -48,7 +50,7 @@ const CallerPresenter = (props: ICaller) => {
           label: 'Reconnect',
           disabled: peer?.status === PeerConnectionState.Connected,
           onClick: (evt: any) => {
-            (roomsManager.protocol as RealmProtocol).retry(person);
+            (roomsManager.protocol as RealmProtocol).retry(rid, person);
             evt.stopPropagation();
           },
         },
@@ -60,7 +62,7 @@ const CallerPresenter = (props: ICaller) => {
           loading: false,
           onClick: (evt: any) => {
             evt.stopPropagation();
-            roomsManager.protocol.kick(person);
+            roomsManager.protocol.kick(rid, person);
           },
         },
       ].filter(Boolean) as ContextMenuOption[],

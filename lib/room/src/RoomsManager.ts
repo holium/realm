@@ -171,11 +171,19 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.local?.mute();
   }
 
+  muteCampfire() {
+    this.protocol.campfireLocal?.mute();
+  }
+
   /**
    * unmute - Unmutes local peer
    */
   unmute() {
     this.protocol.local?.unmute();
+  }
+
+  unmuteCampfire() {
+    this.protocol.campfireLocal?.unmute();
   }
 
   /**

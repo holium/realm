@@ -11,7 +11,6 @@ import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
 import { ThemeType } from 'renderer/logic/theme';
 import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
-import { CampfireActions } from 'renderer/logic/actions/campfire';
 
 type Props = {
   appWindow: AppWindowType;
@@ -95,7 +94,6 @@ export const TitlebarByType = ({
           maximizeButton={maximizeButton}
           minimizeButton
           closeButton
-          backButton={backButton}
           noTitlebar={noTitlebar}
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
@@ -106,7 +104,6 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
-          onBack={() => CampfireActions.setView('landing')}
           theme={currentTheme}
           appWindow={appWindow}
         />

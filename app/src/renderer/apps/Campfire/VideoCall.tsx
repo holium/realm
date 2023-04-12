@@ -90,9 +90,29 @@ export const VideoCall = observer(() => {
   console.log('present room', presentRoom);
   if (!presentRoom) return <div />;
   const { rid, creator } = presentRoom;
-  const isMuted = roomsManager?.protocol.local?.isMuted;
+  const isMuted = roomsManager?.protocol.campfireLocal?.isMuted;
 
   const ourName = ship?.nickname || ship?.patp || '';
+
+  const getVideoInputDevices = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log('devices', devices);
+    return await devices.filter((device) => device.kind === 'videoinput');
+  };
+
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchVideoDevices = async () => {
+      const devices = await getVideoInputDevices();
+      const videoDevice =
+        devices.find((device) => device.label.includes('FaceTime')) ||
+        devices[0];
+      setSelectedDevice(videoDevice.deviceId);
+    };
+
+    fetchVideoDevices();
+  }, []);
 
   return (
     <Flex flexDirection="row" flex={1}>
@@ -107,10 +127,10 @@ export const VideoCall = observer(() => {
         gap={20}
       >
         <Flex maxHeight="90%">
-          {video ? (
+          {video && selectedDevice ? (
             <Webcam
               videoConstraints={{
-                facingMode: 'user',
+                deviceId: { exact: selectedDevice },
               }}
               audio={false}
               screenshotFormat="image/jpeg"
@@ -212,9 +232,9 @@ export const VideoCall = observer(() => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
-                  roomsManager?.unmute();
+                  roomsManager?.unmuteCampfire();
                 } else {
-                  roomsManager?.mute();
+                  roomsManager?.muteCampfire();
                 }
               }}
             />

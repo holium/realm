@@ -1001,7 +1001,7 @@
         =.  title.native-app            'Campfire'
         =.  color.native-app            '#FFC179'
         =.  icon.native-app             'AppIconCampfire'
-        =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
+        =.  config.native-app           [size=[6 10] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-campfire [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-campfire grid-index.init)
       =|  =native-app:store

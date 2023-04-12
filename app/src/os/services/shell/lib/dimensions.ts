@@ -8,7 +8,7 @@ const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   },
   campfire: {
     width: 1200,
-    height: 1000,
+    height: 900,
   },
   escape: {
     width: 1200,
