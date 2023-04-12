@@ -40,14 +40,17 @@
   [cards new-chat]
 
 :: matching members are status %joined or %host AND have
-:: either %member or %owner roles
+:: either %member or %admin or %owner roles
 ++  skim-init-members
   |=  =members:mstore
   ^-  (list [ship member:mstore])
   %+  skim  ~(tap by members)
     |=  kv=[k=ship v=member:mstore]
     ?&  |(=(status.v.kv %joined) =(status.v.kv %host))
-        |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %owner))
+        ?|  (~(has in roles.v.kv) %member)
+            (~(has in roles.v.kv) %admin)
+            (~(has in roles.v.kv) %owner)
+        ==
     ==
   
 ++  skim-joined-members
@@ -56,7 +59,10 @@
   %+  skim  ~(tap by members)
     |=  kv=[k=ship v=member:mstore]
     ?&  =(status.v.kv %joined)
-        |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %admin))
+        ?|  (~(has in roles.v.kv) %member)
+            (~(has in roles.v.kv) %admin)
+            (~(has in roles.v.kv) %owner)
+        ==
     ==
 
 ++  create-channel-pokes
