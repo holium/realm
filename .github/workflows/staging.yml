@@ -261,83 +261,84 @@ jobs:
   #         BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
   #         BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
-  # deploy-desks:
-  #   needs: [pre-deploy, build-mac]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.GH_TOKEN }}
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '14'
-  #         cache: 'npm'
-  #     #
-  #     - name: Pull latest
-  #       run: |
-  #         git config --global user.email realm-builder-no-reply@holium.com
-  #         git config --global user.name ${{ github.actor }}
-  #         git pull origin staging
-  #     #
-  #     - name: Bump desks version
-  #       uses: actions/github-script@v6
-  #       id: bump-desks
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/bump-desk-version.js')
-  #           console.log(process.env.CI_ENV)
-  #           console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
-  #       env:
-  #         CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-  #     #
-  #     # - name: Push desk version update
-  #     #   run: |
-  #     #     git add ./desks/realm/desk.docket-0
-  #     #     git commit -m "patch realm desk version"
-  #     #     git push
-  #     #
-  #     # publish latest agent udpates for realm, courier, and usher
-  #     - name: Publish ship updates
-  #       run: |
-  #         mkdir ~/.ssh
-  #         # ensure private key
-  #         echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-  #         chmod 600 ~/.ssh/usher_rsa
-  #         ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-  #         ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/courier/*"
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-  #         ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-  #       env:
-  #         DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
-  #         DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
-  #         DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
-  #     #
-  #     # poke remote endpoint in usher agent which will run clay commit
-  #     #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
-  #     #  for more information
-  #     - name: Deploy ship updates
-  #       uses: actions/github-script@v6
-  #       env:
-  #         DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP_STAGING }}
-  #         DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE_STAGING }}
-  #         DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL_STAGING }}
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/deploy.js')
-  #           console.log(script({github}, {
-  #             ship: process.env.DEPLOY_SHIP,
-  #             code: process.env.DEPLOY_SHIP_CODE,
-  #             rootUrl: process.env.DEPLOY_ROOT_URL,
-  #             mounts: ['usher', 'realm', 'courier']
-  #           }))
-  #     # Workaround to avoid "Post Run actions/setup-node" failures.
-  #     # See: https://codesti.com/issue/actions/setup-node/317
-  #     - run: mkdir -p /home/runner/.npm
-  #       continue-on-error: true
+  deploy-desks:
+    needs: [pre-deploy, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Pull latest
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git config --global submodule.recurse true
+          git pull origin staging
+      #
+      - name: Bump desks version
+        uses: actions/github-script@v6
+        id: bump-desks
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/bump-desk-version.js')
+            console.log(process.env.CI_ENV)
+            console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
+        env:
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      # - name: Push desk version update
+      #   run: |
+      #     git add ./desks/realm/desk.docket-0
+      #     git commit -m "patch realm desk version"
+      #     git push
+      #
+      # publish latest agent udpates for realm, courier, and usher
+      - name: Publish ship updates
+        run: |
+          mkdir ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/courier/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+      #
+      # poke remote endpoint in usher agent which will run clay commit
+      #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+      #  for more information
+      - name: Deploy ship updates
+        uses: actions/github-script@v6
+        env:
+          DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP_STAGING }}
+          DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE_STAGING }}
+          DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL_STAGING }}
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/deploy.js')
+            console.log(script({github}, {
+              ship: process.env.DEPLOY_SHIP,
+              code: process.env.DEPLOY_SHIP_CODE,
+              rootUrl: process.env.DEPLOY_ROOT_URL,
+              mounts: ['usher', 'realm', 'courier']
+            }))
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://codesti.com/issue/actions/setup-node/317
+      - run: mkdir -p /home/runner/.npm
+        continue-on-error: true
   #
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
