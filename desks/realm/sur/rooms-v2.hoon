@@ -34,13 +34,11 @@
 ::
 +$  session-state
   $:  provider=ship
-      current=(unit rid)
       =rooms
   ==
 :: 
 +$  provider-state
   $:  =rooms
-      online=?
       banned=(set ship)
   ==
 ::
@@ -75,8 +73,7 @@
   ==
 ::
 +$  provider-action
-  $%  [%set-online online=?]
-      [%ban =ship]
+  $%  [%ban =ship]
       [%unban =ship]
   ==
 ::

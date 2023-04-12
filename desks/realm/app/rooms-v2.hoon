@@ -164,11 +164,11 @@
   ::
   ++  provider-init
     ^-  provider-state:store
-    [rooms=[~] online=%.y banned=~]
+    [rooms=[~] banned=~]
   ::
   ++  session-init
     ^-  session-state:store
-    [provider=our.bol current=~ rooms=[~]]
+    [provider=our.bol rooms=[~]]
 ::
 ++  signal
   |%
@@ -198,8 +198,7 @@
         [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
-      ?:  ?~  current.session  %.n
-          =(u.current.session rid)
+      ?.  (~(has by rooms.session.state) rid)
         [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
       [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
     ::
@@ -213,15 +212,9 @@
       |=  act=provider-action:store
       ^-  (quip card _state)
       ?-  -.act
-        %set-online   (set-online +.act)
         %ban          (ban +.act)
         %unban        (unban +.act)
       ==
-      ::
-      ++  set-online
-        |=  [online=?]
-        =.  online.provider.state   online
-        `state
       ::
       ++  ban
         |=  [=ship]
@@ -254,9 +247,6 @@
         =/  old-provider   provider.session.state
         :: if its the same provider, don't change
         ?:  =(new-provider old-provider)  `state
-        =/  leave-cards
-          ?~  current.session.state  [~]
-          [%pass / %agent [old-provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room u.current.session.state])]~
         ::
         =/  old-wire       [/provider-updates/(scot %p old-provider)]
         =/  wire           [/provider-updates/(scot %p new-provider)]
@@ -278,7 +268,6 @@
           ==
         :_  state
         %+  weld  outgoing-sub-wire-leave-cards
-          %+  weld  leave-cards
             ^-  (list card)
             :~
               [%pass old-wire %agent [old-provider %rooms-v2] %leave ~]
@@ -288,7 +277,6 @@
       ++  reset-provider
         =/  old-provider            provider.session.state
         =.  provider.session.state  our.bol
-        =.  current.session.state   ~
         =.  rooms.session.state     ~
         =/  old-wire       [/provider-updates/(scot %p old-provider)]
         =/  wire           [/provider-updates/(scot %p our.bol)]
@@ -381,9 +369,10 @@
       ::
       ++  delete-room
         |=  =rid:store
-        =/  provider      provider.session.state
         ~&  >>  "{<dap.bol>}: [delete-room]. {<src.bol>} deleting room {<rid>}"
         ?.  (is-provider:hol src.bol rid)
+          =/  provider  provider:(~(got by rooms.session.state) rid)
+          ?<  =(our.bol provider)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~
         ::
@@ -406,8 +395,9 @@
       ::
       ++  enter-room
         |=  =rid:store
-        =/  provider      provider.session.state
         ?.  (is-provider:hol src.bol rid)
+          =/  provider  provider:(~(got by rooms.session.state) rid)
+          ?<  =(our.bol provider)
           :_  state
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
@@ -439,8 +429,9 @@
       ::
       ++  leave-room
         |=  =rid:store
-        =/  provider      provider.session.state
         ?.  (is-provider:hol src.bol rid)
+          =/  provider  provider:(~(got by rooms.session.state) rid)
+          ?<  =(our.bol provider)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
         ::
@@ -495,10 +486,7 @@
     ::
     ++  on-created
       |=  [=room:store]
-      =.  current.session.state
-        ::  if we created the room, update our current
-        ?:  =(our.bol creator.room)  (some rid.room)  current.session.state
-      ~&  >>  "on-created: current={<current.session.state>}"
+      ~&  >>  "on-created: room={<rid.room>}"
       =.  rooms.session.state    (~(put by rooms.session.state) [rid.room room])
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-created room])]~
@@ -511,8 +499,6 @@
     ::
     ++  on-deleted
       |=  [=rid:store]
-      =.  current.session.state
-        ?:  =(current.session.state (some rid))  ~  current.session.state
       =.  rooms.session.state   (~(del by rooms.session.state) rid)
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-deleted rid])]~
@@ -520,10 +506,6 @@
     ++  on-entered
       |=  [=rid:store =ship]
       ^-  (quip card _state)
-      =.  current.session.state
-        ::  if the entered ship is us, update our current
-        ?:  =(our.bol ship)  (some rid)  current.session.state
-      ::
       ~&  >>  ['on-entered' ship rid]
       =/  room                  (~(got by rooms.session.state) rid)
       =.  present.room          (~(put in present.room) ship)
@@ -534,14 +516,6 @@
     ::
     ++  on-left
       |=  [=rid:store =ship]
-      =.  current.session.state
-        ::  if the left ship is us, update our current
-        ?:
-          ?&
-            =(our.bol ship)
-            =((some rid) current.session.state)
-          ==
-          ~  current.session.state
       ~&  >>  "on-left: rid={<rid>} ship={<ship>}"
       =/  room                  (~(got by rooms.session.state) rid)
       =.  present.room          (~(del in present.room) ship)
@@ -553,21 +527,12 @@
       |=  [provider=ship =rooms:store]
       =.  provider.session.state    provider
       =.  rooms.session.state       rooms
-      =.  current.session.state
-        ::  if the provider has actually changed, clear our current
-        ?:  ?!(=(provider provider.session.state))  ~  current.session.state
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%provider-changed provider rooms])]~
     ::
     ++  on-kicked
       |=  [=rid:store =ship]
       ~&  >>  "on-kicked: rid={<rid>} ship={<ship>}"
-      =?  current.session.state  ::  if the left ship is us, update our current
-          ?&
-            =(our.bol ship)
-            =((some rid) current.session.state)
-          ==
-        ~
       =/  room                  (~(got by rooms.session.state) rid)
       =.  present.room          (~(del in present.room) ship)
       =.  rooms.session.state   (~(put by rooms.session.state) [rid room])
@@ -578,12 +543,6 @@
   ::
   ++  helpers
     |%
-    ++  gen-leave-cards
-      |=  [=rid:store provider=ship]
-      ^-  (list card)
-      ?:  =(current.session.state rid)
-        [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
-      [~]
     ::
     ++  get-present-room
       |=  =ship

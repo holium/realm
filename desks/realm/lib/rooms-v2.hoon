@@ -111,7 +111,6 @@
     %-  pairs
     :~
       ['provider' s+(scot %p provider.ses)]
-      ['current' (current current.ses)]
       ['rooms' (rooms rooms.ses)]
     ==
   ::
@@ -256,8 +255,7 @@
     |%
     ++  decode
       %-  of
-      :~  [%set-online bo]
-          [%ban patp]
+      :~  [%ban patp]
           [%unban patp]
       ==
     ::
