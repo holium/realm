@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 import { paths, IconPathsType } from './icons';
 import { Flex } from '../Flex/Flex';
 import { Text } from '../Text/Text';
-import { TextInput } from '../../input';
+import { TextInput } from '../../../inputs';
 
 export default {
   component: Icon,

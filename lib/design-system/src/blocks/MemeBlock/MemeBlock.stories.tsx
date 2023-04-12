@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
-import { Flex } from '../../general';
+import { Flex } from '../../../general';
 import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';

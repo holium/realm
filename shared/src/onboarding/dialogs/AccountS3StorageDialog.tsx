@@ -5,7 +5,7 @@ import { AccountDialogTable } from './AccountHostingDialog';
 import { S3Password } from '../components/s3-storage/S3Password';
 import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
 import { DataSentIndicator } from '../components/s3-storage/DataSentIndicator';
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system/general';
 
 type Props = {
   patps: string[];

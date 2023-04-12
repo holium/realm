@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 export const OnboardingDialogWrapper = ({
   children,
