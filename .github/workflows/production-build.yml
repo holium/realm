@@ -121,8 +121,9 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
+        run: npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
@@ -174,8 +175,9 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          npx cross-env BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL yarn package:release:linux
+          npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL yarn package:release:linux
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
@@ -254,10 +256,11 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL sudo yarn package:release:win
+          npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL sudo yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       #
       - name: Download and install code signing tool
         run: |
