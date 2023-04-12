@@ -124,7 +124,7 @@ export const ChatInput = ({
   useEffect(() => {
     if (editingMessage) {
       const parsedFragments = convertFragmentsToText(editingMessage);
-      if (inputRef.current && isFocused) {
+      if (inputRef.current && !isFocused) {
         inputRef.current.value = parsedFragments;
         changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();

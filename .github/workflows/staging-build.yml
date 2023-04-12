@@ -286,6 +286,7 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
+          git config --global submodule.recurse true
           git pull origin master
       #
       - name: Bump desks version
