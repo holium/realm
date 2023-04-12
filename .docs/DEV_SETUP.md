@@ -7,13 +7,14 @@ First, run the following one-time setup commands:
 
 ```bash
 # Make ships folder
-mkdir ships && cd ships
+$: mkdir ships && cd ships
 
 # Download latest Urbit binary to the ships folder
 https://urbit.org/getting-started/cli
 
-# also, pull down the Urbit repo
-git submodule foreach git pull origin master
+# have `git pull` also get the pinned commit of the Urbit submodule
+$: git config --global submodule.recurse true
+$: git pull
 ```
 
 ### Build a fake ship for development
@@ -22,20 +23,20 @@ The following steps will need to be run semi-regularly, as ships become stale.
 
 ```bash
 # Build a new fakezod
-./urbit -F zod
+$: ./urbit -F zod
 
 # Optional:
 #   Fake bus for testing networking
-./urbit -F bus
+$: ./urbit -F bus
 ```
 
 [See more docs for working with the developer environment.](https://developers.urbit.org/guides/core/environment)
 
 On subsequent boots, you can:
 ```bash
-./zod/.run
+$: ./zod/.run
 # and
-./bus/.run
+$: ./bus/.run
 ```
 
 ### Holium Desks
