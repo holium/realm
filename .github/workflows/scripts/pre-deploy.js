@@ -34,6 +34,8 @@ module.exports = async ({ github, context }, args) => {
     releaseName: undefined,
     // version either set by PR title or calculated (build # incremented) if based on package.json version
     buildVersion: undefined,
+    // used by windows code signing step when moving artifacts. electron-builder drops the 'v' from all artifact names
+    artifactVersion: undefined,
     // version object - with major, minor, build #
     version: {
       major: undefined,
