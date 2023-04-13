@@ -1,9 +1,8 @@
 import { RealmIPC } from './ipc';
-import { defaultTheme } from '@holium/shared';
 import { createContext, useContext } from 'react';
 import { Instance, types, clone } from 'mobx-state-tree';
 import { AccountModelType } from './models/account.model';
-import { Theme, ThemeType } from './models/theme.model';
+import { defaultTheme, Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
 import { ShellModel } from './models/shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';

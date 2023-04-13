@@ -8,7 +8,7 @@ import {
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
-import { MembersStore, VisaModel } from './members.model';
+import { MembersStore, VisaModel } from './invitations.model';
 import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
@@ -115,6 +115,10 @@ export const SpacesStore = types
     join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
+    invitations: types.optional(VisaModel, {
+      outgoing: {},
+      incoming: {},
+    }),
     subscription: types.optional(SubscriptionModel, {
       state: 'subscribing',
     }),
@@ -270,7 +274,6 @@ export const SpacesStore = types
         self.spaces.set(spacePath, leftSpace);
       }
     }),
-
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;
     },
@@ -285,6 +288,10 @@ export const SpacesStore = types
       newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
     ) => {
       self.subscription.set(newSubscriptionStatus);
+    },
+    // Data handler
+    _onInitialInvitationsUpdate: (invitations: any) => {
+      self.invitations.initialIncoming(invitations);
     },
   }));
 

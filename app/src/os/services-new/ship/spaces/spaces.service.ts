@@ -7,23 +7,26 @@ import { MembersDB, spacesMembersInitSql } from './tables/members.table';
 import { humanFriendlySpaceNameSlug } from '../../../lib/text';
 import { snakeify } from '../../../lib/obj';
 import { pathToObj } from '../../..//lib/path';
-import { spacesInvitationsInitSql } from './tables/visas.table';
+import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
+import { spacesModelQuery } from './spaces.query';
 
 export class SpacesService extends AbstractService {
   private shipDB?: Database;
   public spacesDB?: SpacesDB;
   public membersDB?: MembersDB;
+  public invitationsDB?: InvitationDB;
 
   constructor(options?: ServiceOptions, db?: Database) {
     super('spacesService', options);
-    if (options?.preload) {
-      return;
-    }
+    if (options?.preload) return;
+
     this.shipDB = db;
     this.spacesDB = new SpacesDB(false, db);
     this.membersDB = new MembersDB(false, db);
+    this.invitationsDB = new InvitationDB(false, db);
 
     this._onEvent = this._onEvent.bind(this);
+
     APIConnection.getInstance().conduit.watch({
       app: 'spaces',
       path: `/updates`,
@@ -33,10 +36,28 @@ export class SpacesService extends AbstractService {
     });
   }
 
+  public async init() {
+    this.fetchInviteData();
+  }
+
+  public async fetchInviteData() {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: `/invitations`,
+    });
+    const invites = this.invitationsDB?.insertAll(response.invitations);
+    console.log('sending update invites', invites);
+    this.sendUpdate({
+      type: 'invitations',
+      payload: invites,
+    });
+  }
+
   reset(): void {
     super.reset();
     this.spacesDB?.reset();
     this.membersDB?.reset();
+    this.invitationsDB?.reset();
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
@@ -47,6 +68,10 @@ export class SpacesService extends AbstractService {
           this.spacesDB?.insertAll(data['initial'].spaces);
           this.spacesDB?.setCurrent(data['initial'].current.path);
           this.membersDB?.insertAll(data['initial'].membership);
+          this.sendUpdate({
+            type: 'initial',
+            payload: data['initial'],
+          });
           break;
         case 'add':
           const addedSpace = data['add'];
@@ -56,6 +81,10 @@ export class SpacesService extends AbstractService {
           this.spacesDB?.setCurrent(addedPath);
           this.membersDB?.insertAll({
             [addedPath]: addedSpace.members,
+          });
+          this.sendUpdate({
+            type: 'add',
+            payload: data['initial'],
           });
           // TODO: send members update to the frontend
           break;
@@ -70,6 +99,7 @@ export class SpacesService extends AbstractService {
           break;
         case 'remote-space':
           // when a remote space is added, we need to add it to our local db
+          console.log('remote-space', data['remote-space']);
           const remoteSpace = data['remote-space'];
           this.spacesDB?.insertAll({ [remoteSpace.path]: remoteSpace.space });
           this.spacesDB?.setCurrent(remoteSpace.path);
@@ -84,21 +114,69 @@ export class SpacesService extends AbstractService {
       }
     }
     if (mark === 'visa-reaction') {
-      const visaType = Object.keys(data)[0];
+      const visaData = data[mark];
+      const visaType = Object.keys(visaData)[0];
+
       switch (visaType) {
         case 'invite-sent':
+          const sentPayload = visaData['invite-sent'];
+          // state.addMember(
+          //   sentPayload.path,
+          //   sentPayload.ship,
+          //   sentPayload.member
+          // );
+          log.info('invite-sent', sentPayload);
           break;
         case 'invite-accepted':
+          const acceptedPayload = visaData['invite-accepted'];
+          // const reactionData = data[mark][visaType];
+          log.info('invite-accepted', acceptedPayload);
+          // this.membersDB.updateMember()
+
           break;
         case 'invite-received':
+          const receivedPayload = visaData[visaType];
+          log.info('invite-received', visaData[visaType]);
+          const invites = this.invitationsDB?.insertAll({
+            [receivedPayload.path]: receivedPayload.invite,
+          });
+          this.sendUpdate({
+            type: 'invitations',
+            payload: invites,
+          });
           break;
         case 'invite-removed':
+          // this is when an invite is declined by our or after we have accepted it
+          log.info('invite-removed', visaData[visaType]);
+          const path = visaData[visaType].path;
+          this.invitationsDB?.removeInvite(path);
+          this.fetchInviteData();
           break;
         case 'kicked':
+          const kickedPayload = visaData.kicked;
+          // if (`~${ship}` === kickedPayload.ship) {
+          //   spacesState.deleteSpace(
+          //     `/~${ship}/our`,
+          //     {
+          //       'space-path': kickedPayload.path,
+          //     },
+          //     setTheme
+          //   );
+          // }
+          // state.removeMember(kickedPayload.path, kickedPayload.ship);
           break;
         case 'edited':
+          const editedPayload = visaData.edited;
+          // state.editMember(
+          //   editedPayload.path,
+          //   editedPayload.ship,
+          //   editedPayload.roles
+          // );
           break;
         case 'invite-declined':
+          log.info('invite-declined', visaData[visaType]);
+          // this.invitationsDB?.removeInvite(path);
+
           break;
         case 'invite-expired':
           break;
@@ -118,161 +196,7 @@ export class SpacesService extends AbstractService {
 
   public async getInitial() {
     if (!this.shipDB) return;
-    const query = this.shipDB.prepare(`
-        WITH member_agg AS (
-          SELECT
-            space,
-            json_group_array(
-              json_object(
-                'patp', patp,
-                'roles', json(roles),
-                'alias', alias,
-                'status', status
-              )
-            ) AS members
-          FROM spaces_members
-          GROUP BY space
-        ),
-        dock_agg AS (
-          SELECT
-              space,
-              CASE
-                WHEN COUNT(id) > 0
-                  THEN json_group_array(
-                      json_object(
-                        'id', id,
-                        'title', title,
-                        'href', json(href),
-                        'favicon', favicon,
-                        'type', type,
-                        'config', json(config),
-                        'installStatus', installStatus,
-                        'info', info,
-                        'color', color,
-                        'image', image,
-                        'version', version,
-                        'website', website,
-                        'license', license,
-                        'host', host,
-                        'icon', icon,
-                        'dockIndex', docks.idx
-                      )
-                    )
-                ELSE json('[]')
-              END AS dock
-          FROM (
-                SELECT
-                  docks.space,
-                  docks.idx,
-                  ac.*
-                FROM docks
-                LEFT JOIN app_catalog ac ON docks.id = ac.id
-                LEFT JOIN app_grid ag ON ac.id = ag.appId
-                WHERE ag.idx IS NOT NULL
-                ORDER BY docks.space, docks.idx
-          ) AS docks
-          GROUP BY space
-        ),
-        ranked_apps AS (
-          SELECT
-            space,
-            sub.key,
-            sub.value,
-            ROW_NUMBER() OVER (PARTITION BY space ORDER BY sub.value DESC) as rank
-          FROM stalls,
-            json_each(json(stalls.recommended)) as sub
-          ORDER BY sub.value DESC
-        ),
-        recs_agg AS (
-            SELECT
-              space,
-              json_group_array(
-                  json_object(
-                      'id', ac.id,
-                      'title', ac.title,
-                      'href', json(ac.href),
-                      'favicon', ac.favicon,
-                      'type', ac.type,
-                      'config', json(ac.config),
-                      'installStatus', ac.installStatus,
-                      'info', ac.info,
-                      'color', ac.color,
-                      'image', ac.image,
-                      'version', ac.version,
-                      'website', ac.website,
-                      'license', ac.license,
-                      'host', ac.host,
-                      'icon', ac.icon,
-                      'rank', rank
-                  )) recommended
-            FROM ranked_apps
-              LEFT JOIN app_catalog ac ON key = ac.id
-            WHERE rank <= 4
-            GROUP BY space
-        ),
-        joined_suite AS (
-            SELECT
-              space,
-              sub.key,
-              sub.value,
-              json_object(
-                  'id', ac.id,
-                  'title', ac.title,
-                  'href', json(ac.href),
-                  'favicon', ac.favicon,
-                  'type', ac.type,
-                  'config', json(ac.config),
-                  'installStatus', ac.installStatus,
-                  'info', ac.info,
-                  'color', ac.color,
-                  'image', ac.image,
-                  'version', ac.version,
-                  'website', ac.website,
-                  'license', ac.license,
-                  'host', ac.host,
-                  'icon', ac.icon
-              ) app
-            FROM stalls,
-              json_each(json(stalls.suite)) as sub
-              LEFT JOIN app_catalog ac ON sub.value = ac.id
-            GROUP BY sub.key, space
-        ),
-        suite_agg as (
-            SELECT space, json_group_object(key, json(app)) suite
-            FROM joined_suite
-            GROUP BY space
-        ),
-        stall_agg AS (
-          SELECT
-            stalls.space,
-            json_object(
-              'suite', ifnull(json(suite_agg.suite), json('{}')),
-              'recommended', ifnull(json(recs_agg.recommended), json('[]'))
-            ) AS stall
-          FROM stalls
-          LEFT JOIN recs_agg ON recs_agg.space = stalls.space
-          LEFT JOIN suite_agg ON suite_agg.space = stalls.space
-          GROUP BY stalls.space
-        )
-        SELECT
-          s.current,
-          s.path,
-          s.name,
-          s.description,
-          s.color,
-          s.type,
-          s.archetype,
-          s.picture,
-          s.access,
-          json(s.theme) as theme,
-          ifnull(ma.members, json('[]')) AS members,
-          ifnull(da.dock, json('[]')) AS dock,
-          ifnull(sa.stall, json('{"suite": {}, "recommended": []}')) AS stall
-        FROM spaces s
-        LEFT JOIN member_agg ma ON s.path = ma.space
-        LEFT JOIN dock_agg da ON s.path = da.space
-        LEFT JOIN stall_agg sa ON s.path = sa.space;
-    `);
+    const query = this.shipDB.prepare(spacesModelQuery);
     const result: any = query.all();
     const currentSpace = result.filter((row: any) => row.current === 1)[0];
 
@@ -291,6 +215,27 @@ export class SpacesService extends AbstractService {
             : { suite: {}, recommended: {} },
         };
       }),
+    };
+  }
+
+  public async getSpace(path: string) {
+    if (!this.shipDB) return;
+    const query = this.shipDB.prepare(`
+        ${spacesModelQuery}
+        WHERE path = ?
+    `);
+    const result: any = query.all(path);
+
+    return {
+      ...result,
+      current: result.current === 1,
+      archetype: result.archetype || 'community',
+      theme: result.theme ? JSON.parse(result.theme) : null,
+      members: result.members ? JSON.parse(result.members) : null,
+      dock: result.dock ? JSON.parse(result.dock) : [],
+      stall: result.stall
+        ? JSON.parse(result.stall)
+        : { suite: {}, recommended: {} },
     };
   }
 
@@ -456,6 +401,41 @@ export class SpacesService extends AbstractService {
         },
       });
     });
+  }
+
+  // Invitations
+  public async acceptInvite(path: string): Promise<void> {
+    try {
+      const response = await APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'accept-invite': {
+            path: pathToObj(path),
+          },
+        },
+      });
+      // this.invitationsDB?.delete(path);
+      return response;
+    } catch (e) {
+      log.error(e);
+    }
+  }
+  public async declineInvite(path: string): Promise<void> {
+    try {
+      const response = await APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'decline-invite': {
+            path: pathToObj(path),
+          },
+        },
+      });
+      return response;
+    } catch (e) {
+      log.error(e);
+    }
   }
 }
 

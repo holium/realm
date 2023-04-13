@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
-import { Instance, types, flow } from 'mobx-state-tree';
+import { Instance, types, flow, onSnapshot, SnapshotIn } from 'mobx-state-tree';
 import { ChatStore } from '../apps/Courier/store';
-import { NotifIPC, RealmIPC, ShipIPC } from './ipc';
+import { NotifIPC, RealmIPC, ShipIPC, SpacesIPC } from './ipc';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStore } from './models/spaces.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
-import { BazaarStore } from './models/bazaar.model';
+import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -80,20 +80,20 @@ export const ShipStore = types
 
 // TODO better snapshot loading
 
-// const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
-//   const recentDevsSnapshot = localStorage.getItem('recentAppDevs');
-//   const recentAppsSnapshot = localStorage.getItem('recentApps');
-//   let recentDevs: string[] = [];
-//   let recentApps: string[] = [];
-//   if (recentDevsSnapshot) recentDevs = JSON.parse(recentDevsSnapshot);
-//   if (recentAppsSnapshot) recentApps = JSON.parse(recentAppsSnapshot);
+const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
+  const recentDevsSnapshot = localStorage.getItem('recentAppDevs');
+  const recentAppsSnapshot = localStorage.getItem('recentApps');
+  let recentDevs: string[] = [];
+  let recentApps: string[] = [];
+  if (recentDevsSnapshot) recentDevs = JSON.parse(recentDevsSnapshot);
+  if (recentAppsSnapshot) recentApps = JSON.parse(recentAppsSnapshot);
 
-//   return {
-//     recentDevs: recentDevs || [],
-//     recentApps: recentApps || [],
-//     catalog: {},
-//   };
-// };
+  return {
+    recentDevs: recentDevs || [],
+    recentApps: recentApps || [],
+    catalog: {},
+  };
+};
 
 const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
@@ -112,21 +112,19 @@ export const shipStore = ShipStore.create({
   spacesStore: {
     spaces: {},
   },
-  bazaarStore: {
-    catalog: {},
-  },
+  bazaarStore: loadBazaarSnapshot(),
 });
 
-// onSnapshot(shipStore, (snapshot) => {
-//   localStorage.setItem(
-//     'recentApps',
-//     JSON.stringify(snapshot.bazaarStore.recentApps)
-//   );
-//   localStorage.setItem(
-//     'recentDevs',
-//     JSON.stringify(snapshot.bazaarStore.recentDevs)
-//   );
-// });
+onSnapshot(shipStore, (snapshot) => {
+  localStorage.setItem(
+    'recentApps',
+    JSON.stringify(snapshot.bazaarStore.recentApps)
+  );
+  localStorage.setItem(
+    'recentAppDevs',
+    JSON.stringify(snapshot.bazaarStore.recentDevs)
+  );
+});
 // -------------------------------
 // Create core context
 // -------------------------------
@@ -155,6 +153,31 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
     shipStore.setShip(update.payload);
   }
 });
+
+SpacesIPC.onUpdate((_event: any, update: any) => {
+  const { type, payload } = update;
+  console.log('spaces update', update);
+  // on update we need to requery the store
+  switch (type) {
+    case 'initial':
+      shipStore.spacesStore.init();
+      break;
+    case 'invitations':
+      console.log('invitations', payload);
+      shipStore.spacesStore._onInitialInvitationsUpdate(payload);
+      break;
+    case 'space-added':
+      // shipStore.spacesStore.onSpaceAdded(payload);
+      break;
+    case 'space-updated':
+      // shipStore.spacesStore.onSpaceUpdated(payload);
+      break;
+    case 'space-deleted':
+      // shipStore.spacesStore.onSpaceDeleted(payload);
+      break;
+  }
+});
+
 NotifIPC.onUpdate(({ type, payload }: any) => {
   switch (type) {
     case 'notification-added':

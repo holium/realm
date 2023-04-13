@@ -1,4 +1,4 @@
-import log from 'electron-log';
+// import log from 'electron-log';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../../abstract.db';
@@ -274,6 +274,7 @@ create table if not exists app_catalog (
     host              TEXT,
     icon              TEXT
 );
+
 create table if not exists app_grid (
     idx               INTEGER NOT NULL,
     appId             TEXT NOT NULL
@@ -286,7 +287,6 @@ create table if not exists docks (
     id                TEXT NOT NULL,
     idx               INTEGER NOT NULL
 );
-
 create unique index if not exists docks_uindex on docks (space, id);
 
 

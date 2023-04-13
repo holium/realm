@@ -1,4 +1,4 @@
-import RealmProcess from '../background/realm.process';
+// import RealmProcess from '../background/realm.process';
 import { app } from 'electron';
 import log from 'electron-log';
 import AbstractService, {
@@ -45,6 +45,7 @@ export class RealmService extends AbstractService {
     let session;
     if (hasSession) {
       session = this._hydrateSessionIfExists();
+      this.services?.ship?.init();
     }
 
     this.sendUpdate({

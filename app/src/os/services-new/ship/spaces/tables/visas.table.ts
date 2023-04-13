@@ -1,16 +1,16 @@
+import log from 'electron-log';
 import { Database } from 'better-sqlite3';
 import AbstractDataAccess from '../../../abstract.db';
 
 export interface Invitation {
   path: string;
-  patp: string;
-  inviter: string;
   role: string;
   message: string;
   name: string;
   type: string;
   picture?: string;
   color?: string;
+  inviter: string;
   invitedAt: number;
   // createdAt: number;
   // updatedAt: number;
@@ -32,26 +32,24 @@ export class InvitationDB extends AbstractDataAccess<Invitation> {
   protected mapRow(row: any): Invitation {
     return {
       path: row.path,
-      patp: row.patp,
-      inviter: row.inviter,
       role: row.role,
       message: row.message,
       name: row.name,
       type: row.type,
       picture: row.picture,
       color: row.color,
+      inviter: row.inviter,
       invitedAt: row.invitedAt,
       // updatedAt: row.updatedAt,
       // createdAt: row.createdAt,
     };
   }
 
-  public insertAll(spacesInvitations: { [key: string]: Invitation[] }) {
+  public insertAll(spacesInvitations: { [key: string]: Invitation }) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO spaces_invitations (
         path,
-        patp,
         inviter,
         role,
         message,
@@ -62,7 +60,6 @@ export class InvitationDB extends AbstractDataAccess<Invitation> {
         invitedAt
       ) VALUES (
         @path,
-        @patp,
         @inviter,
         @role,
         @message,
@@ -73,43 +70,49 @@ export class InvitationDB extends AbstractDataAccess<Invitation> {
         @invitedAt
       )`
     );
-    console.log('insertAll', spacesInvitations);
-    // const insertMany = this.db.transaction((spacesMembers) => {
-    //   Object.entries<any>(spacesMembers).forEach(([space, memberList]) => {
-    //     Object.entries<any>(memberList).forEach(([patp, member]) => {
-    //       insert.run({
-    //         space,
-    //         patp: patp,
-    //         roles: JSON.stringify(member.roles),
-    //         alias: member.alias || '',
-    //         status: member.status,
-    //       });
-    //     });
-    //   });
-    // });
-    // insertMany(spacesMembers);
-    // this.sendUpdate({
-    //   type: 'insert',
-    //   payload: this.find(),
-    // });
+
+    const insertMany = this.db.transaction((spacesMembers) => {
+      Object.entries<Invitation>(spacesMembers).forEach(([space, invite]) => {
+        insert.run({
+          path: space,
+          name: invite.name,
+          role: invite.role,
+          picture: invite.picture,
+          message: invite.message,
+          color: invite.color,
+          type: invite.type,
+          inviter: invite.inviter,
+          invitedAt: invite.invitedAt,
+        });
+      });
+    });
+    insertMany(spacesInvitations);
+    return spacesInvitations;
+  }
+
+  removeInvite(path: string) {
+    if (!this.db) throw new Error('No db connection');
+    const deleteInvite = this.db.prepare(
+      `DELETE FROM spaces_invitations WHERE path = ?`
+    );
+    deleteInvite.run(path);
   }
 }
 
 export const spacesInvitationsInitSql = `
   create table if not exists spaces_invitations (
       path text not null,
-      patp text not null,
-      inviter text not null,
-      role text not null,
-      message text not null,
       name text not null,
-      type text not null,
+      role text not null,
       picture text,
+      message text not null,
       color text,
+      type text not null,
+      inviter text not null,
       invitedAt integer not null,
-      primary key (path, patp)
+      primary key (path)
   );
-  create unique index if not exists spaces_invitations_patp_uindex on spaces_invitations (patp, path);
+  create unique index if not exists spaces_invitations_uindex on spaces_invitations (path);
 `;
 
 export const spacesMembersDBPreload = InvitationDB.preload(

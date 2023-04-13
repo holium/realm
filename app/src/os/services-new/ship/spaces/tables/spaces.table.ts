@@ -1,4 +1,4 @@
-import log from 'electron-log';
+// import log from 'electron-log';
 import { Database } from 'better-sqlite3';
 import AbstractDataAccess from '../../../abstract.db';
 import { cleanNounColor } from '../../../../lib/color';

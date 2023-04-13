@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios';
 import { Conduit, ConduitState } from '@holium/conduit';
 import log from 'electron-log';
 

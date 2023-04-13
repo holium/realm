@@ -12,7 +12,7 @@ export class RoomsService extends AbstractService {
       app: 'rooms-v2',
       path: '/lib',
       onEvent: async (data, _id, mark) => {
-        this.sendUpdate({ mark, data });
+        this.sendUpdate({ type: mark, data });
       },
       onError: () => console.log('rooms subscription rejected'),
       onQuit: () => {

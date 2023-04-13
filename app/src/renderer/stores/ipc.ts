@@ -8,3 +8,5 @@ export const NotifIPC = window.notifService;
 export const FriendsIPC = window.friendDb;
 export const SpacesIPC = window.spacesService;
 export const BazaarIPC = window.bazaarService;
+
+console.log(SpacesIPC);

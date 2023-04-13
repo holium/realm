@@ -76,6 +76,11 @@ export class ShipService extends AbstractService {
     });
   }
 
+  // TODO initialize the ship services here
+  public init() {
+    this.services?.spaces.init();
+  }
+
   get credentials() {
     return this.shipDB?.getCredentials();
   }
@@ -100,7 +105,6 @@ export class ShipService extends AbstractService {
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path
     });
-    console.log(response);
     // return response.groups;
     return Array.from(Object.values(response.groups));
   }

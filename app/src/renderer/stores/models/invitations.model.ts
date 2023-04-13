@@ -4,8 +4,11 @@ import {
   cast,
   Instance,
   types,
+  flow,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
+import { SpacesIPC } from '../ipc';
+import { LoaderModel } from './common.model';
 
 const Roles = types.enumeration([
   'initiate',
@@ -201,6 +204,7 @@ export const VisaModel = types
   .model('VisaModel', {
     incoming: types.map(Visa), // Map<SpacePath, Invite>
     outgoing: types.map(types.map(Visa)), // Map<SpacePath, Map<Patp, Invite>>
+    pending: types.map(LoaderModel),
   })
   .views((self) => ({
     get invitations() {
@@ -214,6 +218,39 @@ export const VisaModel = types
     },
   }))
   .actions((self) => ({
+    acceptInvite: flow(function* (path: string) {
+      const invite = self.incoming.get(path);
+      const loader = LoaderModel.create();
+      if (invite) {
+        loader.set('loading');
+        self.pending.set(path, loader);
+        try {
+          yield SpacesIPC.acceptInvite(path) as Promise<void>;
+          // loader.set('loaded');
+        } catch (e) {
+          console.error(e);
+          loader.set('error');
+        }
+      }
+    }),
+    declineInvite: flow(function* (path: string) {
+      const invite = self.incoming.get(path);
+      const loader = LoaderModel.create();
+      if (invite) {
+        loader.set('loading');
+        self.pending.set(path, loader);
+        try {
+          yield SpacesIPC.declineInvite(path) as Promise<void>;
+          loader.set('loaded');
+          self.incoming.delete(path);
+        } catch (e) {
+          console.error(e);
+          loader.set('error');
+        }
+      }
+    }),
+
+    // OLD
     initial(_data: any) {
       // console.log(data);
       // set initial data

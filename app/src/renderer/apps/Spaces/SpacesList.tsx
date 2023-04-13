@@ -1,13 +1,20 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Icon, WindowedList } from '@holium/design-system';
-// import { ActionButton } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Button,
+  Icon,
+  WindowedList,
+  Box,
+} from '@holium/design-system';
 import { SpaceRow } from './SpaceRow';
 import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useAppState } from 'renderer/stores/app.store';
 import { useTrayApps } from '../store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export interface Space {
   color?: string;
@@ -33,14 +40,14 @@ const SpacesListPresenter = ({
   onFindMore,
 }: SpacesListProps) => {
   const { shellStore } = useAppState();
-  // const { visas } = spacesStore;
+  const { spacesStore } = useShipStore();
+  const { invitations } = spacesStore;
   const { dimensions } = useTrayApps();
-  const visas = { incoming: new Map() };
   const listWidth = useMemo(() => dimensions.width - 28, [dimensions.width]);
 
   const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
-  const incoming = Array.from(visas.incoming.values());
+  const incoming = Array.from(invitations.incoming.values());
 
   type SpaceRowValue = (typeof spaces)[number];
   type VisaRowValue = (typeof incoming)[number];
@@ -121,7 +128,7 @@ const SpacesListPresenter = ({
       width={listWidth + scrollbarWidth}
       data={rows}
       style={{ marginRight: -scrollbarWidth }}
-      itemContent={(_, { space, visa }) => {
+      itemContent={(index, { space, visa }) => {
         if (space) {
           return (
             <SpaceRow
@@ -133,16 +140,27 @@ const SpacesListPresenter = ({
           );
         }
         const visaRowValue = visa as VisaRowValue;
+        let dividerStyle = {};
+        if (index < rows.length - 1) {
+          dividerStyle = {
+            paddingBottom: 8,
+            marginBottom: 8,
+            borderBottom: '1px solid rgba(var(--rlm-border-rgba), 0.8)',
+          };
+        }
+
         return (
-          <VisaRow
-            key={`visa-${visaRowValue.path}`}
-            image={visaRowValue.picture}
-            color={visaRowValue.color}
-            path={visaRowValue.path}
-            customBg={highlightColor}
-            invitedBy={visaRowValue.inviter}
-            title={visaRowValue.name}
-          />
+          <Box style={dividerStyle} key={`visa-${visaRowValue.path}`}>
+            <VisaRow
+              key={`visa-${visaRowValue.path}`}
+              image={visaRowValue.picture}
+              color={visaRowValue.color}
+              path={visaRowValue.path}
+              customBg={highlightColor}
+              invitedBy={visaRowValue.inviter}
+              title={visaRowValue.name}
+            />
+          </Box>
         );
       }}
     />
