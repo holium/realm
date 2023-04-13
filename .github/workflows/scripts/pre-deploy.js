@@ -170,6 +170,7 @@ module.exports = async ({ github, context }, args) => {
       // channel set to branch name
       ci.channel = (args && args.channel) || 'draft';
     }
+    console.log('matching [tag] buildVersion => %o', buildVersion);
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
       /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
