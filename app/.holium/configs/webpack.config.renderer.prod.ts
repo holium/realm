@@ -106,6 +106,8 @@ const configuration: webpack.Configuration = {
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
+      // removing until further review for windows
+      // BUILD_VERSION: process.env.BUILD_VERSION,
     }),
     new MiniCssExtractPlugin({
       filename: '[name].style.css',

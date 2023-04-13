@@ -32,6 +32,7 @@ type ContextMenuContextValue = {
   setOptions: (containerId: string, Options: ContextMenuOption[]) => void;
   getColors: (containerId: string) => ColorConfig;
   setColors: (containerId: string, colors: ColorConfig) => void;
+  defaultOptions: ContextMenuOption[];
 };
 
 const ContextMenuContext = createContext<ContextMenuContextValue>({} as any);
@@ -185,6 +186,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         setOptions,
         getColors,
         setColors,
+        defaultOptions,
       }}
     >
       {children}
