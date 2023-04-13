@@ -305,14 +305,11 @@ export const ShipBarPresenter = () => {
                 animate={{ opacity: 0.7 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
-                onClick={() => {
-                  const val = undefined;
-                  // @ts-ignore
-                  val.crash = true;
+                onClick={() =>
                   DesktopActions.openAppWindow(
                     nativeApps['os-settings'] as AppType
-                  );
-                }}
+                  )
+                }
               >
                 <Icon name="Settings" size={22} />
               </Button.IconButton>
