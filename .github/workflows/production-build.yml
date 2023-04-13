@@ -259,12 +259,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win
           sudo yarn package:release:win
-        env:
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       #
       - name: Download and install code signing tool
         run: |
