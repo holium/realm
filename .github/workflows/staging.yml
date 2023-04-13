@@ -34,7 +34,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'staging.yml', version: '0.9.1-hotfix' }
+            const args = { workflowId: 'staging.yml' }
             const result = script({github, context}, args)
             console.log(result)
             return result
