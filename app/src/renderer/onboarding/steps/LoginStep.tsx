@@ -29,5 +29,5 @@ export const LoginStep = ({ setStep }: StepProps) => {
     }
   };
 
-  return <LoginDialog onNoAccount={onNoAccount} onLogin={onLogin} />;
+  return <LoginDialog showTerms onNoAccount={onNoAccount} onLogin={onLogin} />;
 };

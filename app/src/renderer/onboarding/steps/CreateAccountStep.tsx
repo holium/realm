@@ -30,6 +30,7 @@ export const CreateAccountStep = ({ setStep }: StepProps) => {
 
   return (
     <CreateAccountDialog
+      showTerms
       onAlreadyHaveAccount={onAlreadyHaveAccount}
       onNext={onNext}
     />
