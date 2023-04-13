@@ -22,7 +22,7 @@ const InstallRealmButton = styled(Button.TextButton)`
 type Props = {
   onInstallRealm: () => Promise<boolean>;
   onBack: () => void;
-  onNext: () => Promise<boolean>;
+  onNext: () => void;
 };
 
 export const InstallationDialog = ({

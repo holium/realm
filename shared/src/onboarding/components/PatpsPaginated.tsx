@@ -1,4 +1,4 @@
-import { Icon } from '@holium/design-system/general';
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useState } from 'react';
 import { PatpCard } from './PatpCard';
 import styled from 'styled-components';
@@ -27,6 +27,14 @@ export const PatpsPaginated = ({
   const totalPages = Math.ceil(patps.length / pageSize);
   const paginatedPatps = patps.slice(page * pageSize, (page + 1) * pageSize);
   const pages = Array.from({ length: totalPages }).map((_, i) => i);
+
+  if (!patps.length) {
+    return (
+      <Flex justifyContent="center">
+        <Spinner size={3} />
+      </Flex>
+    );
+  }
 
   return (
     <div

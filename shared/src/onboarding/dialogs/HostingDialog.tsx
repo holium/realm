@@ -33,13 +33,13 @@ const AddExistingServerButton = styled(GetHostingButton)`
 type Props = {
   onBack: () => void;
   onGetHosting: () => void;
-  onAddExistingUrbit: () => void;
+  onAddExistingServer: () => void;
 };
 
 export const HostingDialog = ({
   onBack,
   onGetHosting,
-  onAddExistingUrbit,
+  onAddExistingServer,
 }: Props) => (
   <OnboardDialog
     icon={<HostingIcon />}
@@ -54,7 +54,7 @@ export const HostingDialog = ({
           <GetHostingButton type="button" onClick={onGetHosting}>
             Get hosting
           </GetHostingButton>
-          <AddExistingServerButton type="button" onClick={onAddExistingUrbit}>
+          <AddExistingServerButton type="button" onClick={onAddExistingServer}>
             Add existing server
           </AddExistingServerButton>
         </Flex>

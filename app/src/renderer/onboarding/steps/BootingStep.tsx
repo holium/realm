@@ -57,7 +57,7 @@ export const BootingStep = ({ setStep }: StepProps) => {
   }, [setStep]);
 
   useEffect(() => {
-    track('Booting');
+    track('Onboarding / Booting');
   });
 
   useEffect(() => {

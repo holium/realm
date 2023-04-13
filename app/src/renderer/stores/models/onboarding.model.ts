@@ -2,7 +2,7 @@ import { types, Instance } from 'mobx-state-tree';
 
 const OnboardingStep = types.enumeration('OnboardingStep', [
   '/login',
-  '/add-ship',
+  '/add-server',
   '/passport',
   '/hosting',
   '/choose-id',

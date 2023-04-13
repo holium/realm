@@ -5,7 +5,7 @@ import { StepProps } from './types';
 
 export const HostingStep = ({ setStep }: StepProps) => {
   useEffect(() => {
-    track('Hosting');
+    track('Onboarding / Hosting');
   });
 
   const onBack = () => {
@@ -16,15 +16,15 @@ export const HostingStep = ({ setStep }: StepProps) => {
     setStep('/choose-id');
   };
 
-  const onAddExistingUrbit = () => {
-    setStep('/add-ship');
+  const onAddExistingServer = () => {
+    setStep('/add-server');
   };
 
   return (
     <HostingDialog
       onBack={onBack}
       onGetHosting={onGetHosting}
-      onAddExistingUrbit={onAddExistingUrbit}
+      onAddExistingServer={onAddExistingServer}
     />
   );
 };

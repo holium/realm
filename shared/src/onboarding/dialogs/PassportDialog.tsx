@@ -7,7 +7,7 @@ import {
 } from '../components/OnboardDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';
 import { AccountDialogSubtitle } from '../components/AccountDialog.styles';
-import { PassportCard } from 'onboarding/components/PassportCard';
+import { PassportCard } from '../components/PassportCard';
 import { AddImageIcon } from '../icons/AddImageIcon';
 
 const List = styled.li`

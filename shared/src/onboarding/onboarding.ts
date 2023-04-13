@@ -21,6 +21,7 @@ export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 export { HostingDialog } from './dialogs/HostingDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
+export { PassportDialog } from './dialogs/PassportDialog';
 
 export type {
   ThirdEarthShip,

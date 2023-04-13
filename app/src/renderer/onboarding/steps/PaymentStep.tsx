@@ -17,7 +17,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
 
-  const [productId, setProductId] = useState(products[0]?.id);
+  const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export const PaymentStep = ({ setStep }: StepProps) => {
   const [products, setProducts] = useState<ThirdEarthProduct[]>([]);
 
   useEffect(() => {
-    track('Payment');
+    track('Onboarding / Payment');
   });
 
   useEffect(() => {

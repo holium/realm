@@ -11,17 +11,17 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
   });
 
   const onBack = () => {
-    setStep('/');
+    setStep('/booting');
   };
 
   const onNext = () => {
-    setStep('/login');
+    setStep('/passport');
 
     return Promise.resolve(false);
   };
 
   useEffect(() => {
-    track('Credentials');
+    track('Onboarding / Credentials');
   });
 
   useEffect(() => {

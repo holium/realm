@@ -8,7 +8,7 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
   const [patps, setPatps] = useState<string[]>([]);
 
   useEffect(() => {
-    track('Choose ID');
+    track('Onboarding / Choose ID');
   });
 
   useEffect(() => {

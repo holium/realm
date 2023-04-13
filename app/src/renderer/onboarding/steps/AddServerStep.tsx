@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { AddShipDialog } from '@holium/shared';
+import { AddServerDialog } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
 
-export const AddShipStep = ({ setStep }: StepProps) => {
+export const AddServerStep = ({ setStep }: StepProps) => {
   useEffect(() => {
-    track('Add ship');
+    track('Onboarding / Add Server');
   });
 
   const onBack = () => {
@@ -18,5 +18,5 @@ export const AddShipStep = ({ setStep }: StepProps) => {
     return Promise.resolve(true);
   };
 
-  return <AddShipDialog onBack={onBack} onNext={onNext} />;
+  return <AddServerDialog onBack={onBack} onNext={onNext} />;
 };
