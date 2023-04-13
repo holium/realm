@@ -213,9 +213,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: electronuserland/builder:wine
-      env:
-        BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-        RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -259,7 +256,16 @@ jobs:
       #
       - name: Build and install
         run: |
-          sudo yarn package:release:win
+          set BUILD_VERSION=$BUILD_VERSION
+          set RELEASE_CHANNEL=$RELEASE_CHANNEL
+          yarn build:multiplayer
+          yarn build:conduit
+          yarn build:room
+          yarn build:design-system
+          yarn workspace @holium/realm package:release:win
+        env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Download and install code signing tool
         run: |
