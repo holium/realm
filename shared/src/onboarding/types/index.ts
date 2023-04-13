@@ -84,19 +84,3 @@ type OnboardingSignupPage =
   | '/download';
 
 export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
-
-export const onboardingPages: OnboardingPage[] = [
-  '/',
-  '/login',
-  '/verify-email',
-  '/choose-id',
-  '/payment',
-  '/booting',
-  '/credentials',
-  '/download',
-  '/account',
-  '/account/custom-domain',
-  '/account/download-realm',
-  '/account/s3-storage',
-  '/account/statistics',
-];

@@ -1,4 +1,5 @@
-import { LoginDialog } from '@holium/shared';
+import { Anchor } from '@holium/design-system/general';
+import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -25,7 +26,15 @@ export default function Login() {
 
   return (
     <Page title="Login">
-      <LoginDialog onNoAccount={onNoAccount} onLogin={onLogin} />
+      <LoginDialog
+        label={
+          <OnboardDialogDescription>
+            Don't have an account yet?{' '}
+            <Anchor onClick={onNoAccount}>Sign up</Anchor>.
+          </OnboardDialogDescription>
+        }
+        onLogin={onLogin}
+      />
     </Page>
   );
 }

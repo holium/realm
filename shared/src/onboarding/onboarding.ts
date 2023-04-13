@@ -1,3 +1,4 @@
+export { AddServerDialog } from './dialogs/AddServerDialog';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomainDialog';
 export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealmDialog';
 export { AccountHostingDialog } from './dialogs/AccountHostingDialog';
@@ -17,13 +18,12 @@ export { VerifyEmailModal } from './components/hosting/modals/VerifyEmailModal';
 export { ChangePasswordModal } from './components/hosting/modals/ChangePasswordModal';
 export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
 export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
-
-export { ThirdEarth } from './services/ThirdEarth';
+export { HostingDialog } from './dialogs/HostingDialog';
+export { OnboardDialogDescription } from './components/OnboardDialog.styles';
+export { ThirdEarthApi } from './services/ThirdEarthApi';
 
 export type {
   ThirdEarthShip,
   ThirdEarthProduct,
   ThirdEarthPortalSession,
-  OnboardingPage,
 } from './types';
-export { onboardingPages } from './types';

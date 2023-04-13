@@ -1,23 +1,20 @@
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import {
-  BootingStep,
-  ChooseIdStep,
-  CreateAccountStep,
-  LoginStep,
-  PaymentStep,
-  VerifyEmailStep,
-} from './steps';
+import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { CredentialsStep } from './steps/CredentialsStep';
+import { HostingStep } from './steps/HostingStep';
 
 export const OnboardingStepPresenter = () => {
   const { onboarding } = useServices();
 
   switch (onboarding.currentStep) {
-    case '/':
-      return <CreateAccountStep setStep={onboarding.setStep} />;
-    case '/verify-email':
-      return <VerifyEmailStep setStep={onboarding.setStep} />;
+    case '/login':
+      return <LoginStep setStep={onboarding.setStep} />;
+    case '/add-ship':
+    case '/passport':
+    case '/installation':
+    case '/hosting':
+      return <HostingStep setStep={onboarding.setStep} />;
     case '/choose-id':
       return <ChooseIdStep setStep={onboarding.setStep} />;
     case '/payment':
@@ -26,8 +23,6 @@ export const OnboardingStepPresenter = () => {
       return <BootingStep setStep={onboarding.setStep} />;
     case '/credentials':
       return <CredentialsStep setStep={onboarding.setStep} />;
-    case '/login':
-      return <LoginStep setStep={onboarding.setStep} />;
     default:
       return <LoginStep setStep={onboarding.setStep} />;
   }

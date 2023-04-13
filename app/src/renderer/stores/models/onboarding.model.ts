@@ -1,7 +1,16 @@
-import { onboardingPages } from '@holium/shared';
 import { types, Instance } from 'mobx-state-tree';
 
-const OnboardingStep = types.enumeration('OnboardingStep', onboardingPages);
+const OnboardingStep = types.enumeration('OnboardingStep', [
+  '/login',
+  '/add-ship',
+  '/passport',
+  '/hosting',
+  '/choose-id',
+  '/payment',
+  '/booting',
+  '/credentials',
+  '/installation',
+]);
 
 export type OnboardingStepType = Instance<typeof OnboardingStep>;
 

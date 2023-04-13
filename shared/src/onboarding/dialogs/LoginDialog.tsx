@@ -1,9 +1,8 @@
-import { useRef } from 'react';
-import { Anchor, Flex } from '@holium/design-system/general';
+import { ReactNode, useRef } from 'react';
+import { Flex } from '@holium/design-system/general';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
 import {
-  OnboardDialogDescription,
   OnboardDialogInput,
   OnboardDialogInputLabel,
 } from '../components/OnboardDialog.styles';
@@ -14,15 +13,11 @@ import { TermsDisclaimer } from '../components/TermsDisclaimer';
 type Props = {
   // Terms are only necessary in Realm, not on the web.
   showTerms?: boolean;
-  onNoAccount: () => void;
+  label?: ReactNode;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
-export const LoginDialog = ({
-  showTerms = false,
-  onNoAccount,
-  onLogin,
-}: Props) => {
+export const LoginDialog = ({ showTerms = false, label, onLogin }: Props) => {
   const terms = useToggle(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -62,10 +57,7 @@ export const LoginDialog = ({
                 placeholder="• • • • • • • •"
               />
             </Flex>
-            <OnboardDialogDescription>
-              Don't have an account yet?{' '}
-              <Anchor onClick={onNoAccount}>Sign up</Anchor>.
-            </OnboardDialogDescription>
+            {label}
           </>
         }
         footerText={showTerms && <TermsDisclaimer onClick={terms.toggleOn} />}

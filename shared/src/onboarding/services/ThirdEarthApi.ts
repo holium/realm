@@ -7,6 +7,8 @@ import { http } from './http';
 
 type LoginResponse = {
   token: string;
+  email: string;
+  client_side_encryption_key: string;
 };
 
 type RegisterResponse = {
@@ -97,7 +99,7 @@ type EjectShipResponse = {
   message: string;
 };
 
-export class ThirdEarth {
+export class ThirdEarthApi {
   private apiBaseUrl: string;
   private headersClientId: string;
   private headersVersion: string;
@@ -129,14 +131,20 @@ export class ThirdEarth {
     }
   }
 
-  login(email: string, password: string) {
+  login(
+    email: string,
+    password: string,
+    reveal_realm_key = false,
+    keepLogged = true
+  ) {
     return http<LoginResponse>(`${this.apiBaseUrl}/login`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({
         email,
         password,
-        keepLogged: true,
+        reveal_realm_key,
+        keepLogged,
       }),
     });
   }

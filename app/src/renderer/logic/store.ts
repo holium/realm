@@ -97,7 +97,7 @@ const services = Services.create({
     },
   },
   onboarding: {
-    step: '/',
+    step: '/login',
   },
   ship: undefined,
   spaces: {
