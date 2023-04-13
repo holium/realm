@@ -133,3 +133,11 @@ export const OnboardDialogFooter = styled.footer`
   width: 100%;
   height: 30px;
 `;
+
+export const OnboardDialogButtonText = styled(Text.Body)`
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  color: rgba(var(--rlm-accent-rgba));
+  user-select: none;
+`;

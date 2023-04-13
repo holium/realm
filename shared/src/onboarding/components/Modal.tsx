@@ -3,12 +3,12 @@ import styled from 'styled-components';
 import { Button, Icon } from '@holium/design-system/general';
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 
-const ModalContainer = styled.div`
+const ModalContainer = styled.div<{ maxWidth?: number }>`
   display: flex;
   position: absolute;
   z-index: 100;
   width: 100%;
-  max-width: ${MOBILE_WIDTH}px;
+  max-width: ${({ maxWidth }) => `${maxWidth ?? MOBILE_WIDTH}px`};
   padding: 32px;
   border-radius: 11px;
   background-color: rgba(var(--rlm-window-rgba));
@@ -48,17 +48,24 @@ const CloseFormContainer = styled.div`
 type Props = {
   isOpen: boolean;
   children: ReactNode;
+  maxWidth?: number;
   onDismiss: () => void;
   onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
 };
 
-export const Modal = ({ isOpen, children, onDismiss, onSubmit }: Props) => {
+export const Modal = ({
+  isOpen,
+  children,
+  maxWidth,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   if (!isOpen) return null;
 
   return (
     <>
       <Overlay onClick={onDismiss} />
-      <ModalContainer>
+      <ModalContainer maxWidth={maxWidth}>
         <Form onSubmit={onSubmit}>
           <CloseFormContainer>
             <Button.Transparent onClick={onDismiss}>

@@ -17,6 +17,7 @@ type Props = {
   nextText?: string;
   nextIcon?: ReactNode;
   hideNextButton?: boolean;
+  footerText?: ReactNode;
   onBack?: () => void;
   onNext?: () => Promise<boolean>;
 };
@@ -27,6 +28,7 @@ export const OnboardDialog = ({
   nextText = 'Next',
   nextIcon,
   hideNextButton,
+  footerText,
   onBack,
   onNext,
 }: Props) => {
@@ -53,8 +55,8 @@ export const OnboardDialog = ({
         <OnboardDialogBodyContainer>{body}</OnboardDialogBodyContainer>
       </OnboardDialogBody>
       <OnboardDialogFooter>
-        <Flex flex={1} justifyContent="space-between">
-          <Flex alignItems="center">
+        <Flex flex={1}>
+          <Flex flex={3} alignItems="center">
             {onBack && (
               <OnboardDialogBackButton onClick={onBack} type="button">
                 <Icon
@@ -66,14 +68,19 @@ export const OnboardDialog = ({
               </OnboardDialogBackButton>
             )}
           </Flex>
-          {!hideNextButton && (
-            <SubmitButton
-              text={nextText}
-              icon={nextIcon}
-              submitting={submitting.isOn}
-              disabled={!onNext}
-            />
-          )}
+          <Flex flex={5}>
+            <Flex flex={1} alignItems="center">
+              {footerText}
+            </Flex>
+            {!hideNextButton && (
+              <SubmitButton
+                text={nextText}
+                icon={nextIcon}
+                submitting={submitting.isOn}
+                disabled={!onNext}
+              />
+            )}
+          </Flex>
         </Flex>
       </OnboardDialogFooter>
     </OnboardDialogCard>
