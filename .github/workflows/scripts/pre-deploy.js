@@ -107,12 +107,9 @@ module.exports = async ({ github, context }, args) => {
     ci.isNewBuild = true;
     ci.releaseName = `${matches[2]}${matches[3]}.${matches[4]}.${matches[5]}-${matches[1]}`;
     ci.buildVersion = tagName;
-    ci.artifactVersion = ci.buildVersion;
     // electron-builder drops the 'v' when naming artifacts. unfortunately we need
     //  to reference this name when code signing the windows build; hence
-    if (ci.artifactVersion.startsWith('v')) {
-      ci.artifactVersion = ci.artifactVersion.substring(1);
-    }
+    ci.artifactVersion = ci.buildVersion.substring(1);
     switch (matches[1]) {
       // test and staging builds produce alphas. the only difference is
       // that 'draft' stays in draft mode and sets the release channel used by auto-updater
@@ -184,12 +181,9 @@ module.exports = async ({ github, context }, args) => {
     let buildNumber = parseInt(matches[4]) + 1;
     // if building from package.json version, bump the build # by 1
     ci.buildVersion = `${matches[1]}${matches[2]}.${matches[3]}.${buildNumber}-${ci.channel}`;
-    ci.artifactVersion = ci.buildVersion;
     // electron-builder drops the 'v' when naming artifacts. unfortunately we need
     //  to reference this name when code signing the windows build; hence
-    if (ci.artifactVersion.startsWith('v')) {
-      ci.artifactVersion = ci.artifactVersion.substring(1);
-    }
+    ci.artifactVersion = ci.buildVersion.substring(1);
     ci.isNewBuild = true;
     ci.releaseName = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
