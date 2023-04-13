@@ -1,7 +1,14 @@
 ## Getting started
 
 So, you've just cloned down the Realm monorepo.  What now?
-### Fake ships and Urbit
+
+## Pull Urbit submodule
+```bash
+# have `git pull` also get the pinned commit of the Urbit submodule
+$: git config --global submodule.recurse true
+$: git pull
+```
+### Urbit binary
 
 First, run the following one-time setup commands:
 
@@ -11,10 +18,6 @@ $: mkdir ships && cd ships
 
 # Download latest Urbit binary to the ships folder
 https://urbit.org/getting-started/cli
-
-# have `git pull` also get the pinned commit of the Urbit submodule
-$: git config --global submodule.recurse true
-$: git pull
 ```
 
 ### Build a fake ship for development

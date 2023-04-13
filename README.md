@@ -32,7 +32,7 @@ cd ..
 yarn start
 ```
 
-### Dev setup
+## Dev setup
 
 1. Follow [`/.docs/DEV_SETUP.md`](/.docs/DEV_SETUP.md) to setup fakeships and pull the Urbit submodule down into the Realm repo.
 
