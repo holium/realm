@@ -111,6 +111,8 @@ const configuration: webpack.Configuration = {
       API_HEADERS_VERSION: "2",
       STRIPE_KEY: "pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM",
       UNSPLASH_KEY: "QQd_ZQ6ji5LOoryWoYIqdZNYgFVV6axaFyrp_NHZ_ME",
+      // removing until further review for windows
+      // BUILD_VERSION: process.env.BUILD_VERSION,
     }),
     new MiniCssExtractPlugin({
       filename: '[name].style.css',

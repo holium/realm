@@ -115,9 +115,6 @@ dist
 /ships
 /globs
 
-# Hide urbit repo
-/urbit
-
 .env
 .env.moon1
 .env.moon2

@@ -74,7 +74,9 @@ export const ChatRowPresenter = ({
               if (!chat.lastMessage) return null;
               let type = Object.keys(content)[0];
               const value = content[type];
-              if (TEXT_TYPES.includes(type)) {
+              if (type === 'break') {
+                return ' ';
+              } else if (TEXT_TYPES.includes(type) || type === 'link') {
                 return (
                   <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
                     {value}

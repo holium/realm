@@ -321,36 +321,43 @@
   [gives state]
 ::
 ++  insert-backlog
-:: :chat-db &db-action [%insert-backlog some msg-part]
-  |=  [msg=msg-part:sur state=state-1 =bowl:gall]
+:: :chat-db &db-action [%insert-backlog list-of-msg-parts]
+  |=  [=message:sur state=state-1 =bowl:gall]
   ^-  (quip card state-1)
-  ::
-  :: backlog-pokes are only allowed if all the following are true:
-  ::
-  :: we already have that path in our table, and the associated peers
-  =/  pathrow   (~(got by paths-table.state) path.msg)
-  =/  peers     (~(got by peers-table.state) path.msg)
-  :: the created-at of our peer-row for the path is gth
-  :: created-at.msg (because the message was from *before* we
-  :: joined the chat)
-  =/  us-peer   (snag 0 (skim peers |=(p=peer-row:sur =(patp.p our.bowl))))
-  ?>  (gth created-at.us-peer created-at.msg)
-  :: has to be from a ship that has invite-potential in the path
-  ?>  (is-valid-inviter pathrow peers src.bowl)
-  :: the path has to be %.y on peers-get-backlog
-  ?>  peers-get-backlog.pathrow
+  =/  index=@ud   0
+  =/  changes=db-change:sur  *db-change:sur
+  =/  changes-and-state=[db-change:sur state-1]
+    |-
+      ?:  =(index (lent message))
+        [changes state]
+      =/  msg=msg-part:sur  (snag index message)
+      ::
+      :: backlog-pokes are only allowed if all the following are true:
+      ::
+      :: we already have that path in our table, and the associated peers
+      =/  pathrow   (~(got by paths-table.state) path.msg)
+      =/  peers     (~(got by peers-table.state) path.msg)
+      :: the created-at of our peer-row for the path is gth
+      :: created-at.msg (because the message was from *before* we
+      :: joined the chat)
+      =/  us-peer   (snag 0 (skim peers |=(p=peer-row:sur =(patp.p our.bowl))))
+      ?>  (gth created-at.us-peer created-at.msg)
+      :: has to be from a ship that has invite-potential in the path
+      ?>  (is-valid-inviter pathrow peers src.bowl)
+      :: the path has to be %.y on peers-get-backlog
+      ?>  peers-get-backlog.pathrow
 
-  =.  messages-table.state  (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg)
+      $(messages-table.state (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg), index +(index), changes [[%add-row %messages msg] changes])
 
-  =/  thechange  chat-db-change+!>([%add-row %messages msg]~)
+  =/  thechange  chat-db-change+!>(-.changes-and-state)
   :: message-paths is all the sup.bowl paths that start with
   :: /db/messages/start since every new message will need to go out to
   :: those subscriptions
   =/  message-paths  (messages-start-paths bowl)
   =/  gives  :~
-    [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg) ~])) thechange]
+    [%give %fact (weld message-paths (limo [/db (weld /db/path path:(snag 0 message)) ~])) thechange]
   ==
-  [gives state]
+  [gives +.changes-and-state]
 ::
 ++  edit
 ::  :chat-db &db-action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
