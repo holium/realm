@@ -256,6 +256,7 @@ jobs:
           #  variables across scripts and commands is complex. this file is referenced by the Dotenv webpack plugin
           cat << EOF > .env
           BUILD_VERSION=$BUILD_VERSION
+          ARTIFACT_VERSION=$ARTIFACT_VERSION
           RELEASE_CHANNEL=$RELEASE_CHANNEL
           EOF
           cd ../
@@ -263,6 +264,7 @@ jobs:
         env:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
