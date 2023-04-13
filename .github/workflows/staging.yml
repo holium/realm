@@ -35,7 +35,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'staging.yml', version: 'v0.9.1-alpha' }
+            const args = { workflowId: 'staging.yml' }
             const result = script({github, context}, args)
             console.log(result)
             return result
@@ -264,6 +264,7 @@ jobs:
         env:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
