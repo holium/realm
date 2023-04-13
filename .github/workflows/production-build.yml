@@ -258,11 +258,11 @@ jobs:
         run: |
           set BUILD_VERSION=$BUILD_VERSION
           set RELEASE_CHANNEL=$RELEASE_CHANNEL
-          yarn build:multiplayer
-          yarn build:conduit
-          yarn build:room
-          yarn build:design-system
-          yarn workspace @holium/realm package:release:win
+          sudo yarn build:multiplayer
+          sudo yarn build:conduit
+          sudo yarn build:room
+          sudo yarn build:design-system
+          sudo yarn workspace @holium/realm package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
