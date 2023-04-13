@@ -256,13 +256,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          set BUILD_VERSION=$BUILD_VERSION
-          set RELEASE_CHANNEL=$RELEASE_CHANNEL
-          sudo yarn build:multiplayer
-          sudo yarn build:conduit
-          sudo yarn build:room
-          sudo yarn build:design-system
-          sudo yarn workspace @holium/realm package:release:win
+          npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
