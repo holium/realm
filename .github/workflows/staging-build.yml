@@ -120,7 +120,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env yarn package:prerelease:mac
+        run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true npx cross-env yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
