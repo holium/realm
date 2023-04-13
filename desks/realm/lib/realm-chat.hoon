@@ -56,7 +56,7 @@
   ==
 ::
 ++  into-backlog-msg-poke
-  |=  [m=msg-part:db =ship]
+  |=  [m=message:db =ship]
   [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%insert-backlog m])]
 ::
 ++  into-insert-message-poke
@@ -210,7 +210,7 @@
   [cards state]
 ::
 ++  add-ship-to-chat
-::  :realm-chat &action [%add-ship-to-chat /realm-chat/path-id ~bus]
+::realm-chat &chat-action [%add-ship-to-chat /realm-chat/path-id ~bus]
   |=  [act=[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   =/  pathrow  (scry-path-row path.act bowl)
@@ -222,7 +222,7 @@
 
   =/  backlog-poke-cards
     ?.  peers-get-backlog.pathrow  ~
-    (turn (scry-messages-for-path path.act bowl) |=([k=uniq-id:db v=msg-part:db] (into-backlog-msg-poke v ship.act)))
+    (limo [(into-backlog-msg-poke (turn (scry-messages-for-path path.act bowl) |=([k=uniq-id:db v=msg-part:db] v)) ship.act) ~])
 
   =/  cards
     %+  weld

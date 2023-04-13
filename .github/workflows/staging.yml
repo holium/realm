@@ -141,6 +141,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: staging
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -200,80 +202,74 @@ jobs:
           version: ${{ needs.pre-deploy.outputs.build_version }}
           ignore_empty: true
   #
-  # build-windows:
-  #   needs: [pre-deploy]
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: electronuserland/builder:wine
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     #
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '14'
-  #         cache: 'npm'
-  #     #
-  #     - name: Pull latest
-  #       run: |
-  #         git config --global user.email realm-builder-no-reply@holium.com
-  #         git config --global user.name ${{ github.actor }}
-  #         git config --global --add safe.directory '*'
-  #         git pull origin staging
-  #     #
-  #     - name: Install yarn
-  #       run: npm install -g yarn
-  #     #
-  #     - name: Install app dependencies
-  #       run: yarn install
-  #     #
-  #     - name: Install gh cli
-  #       run: |
-  #         apt-get update && apt-get -y install sudo
-  #         type -p curl >/dev/null || sudo apt install curl -y
-  #         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-  #         && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-  #         && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-  #         && sudo apt update \
-  #         && sudo apt install gh -y
-  #     #
-  #     - name: Run pre-deploy script
-  #       uses: actions/github-script@v6
-  #       id: pre-windows
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/pre-platform.js')
-  #           const result = script({github, context}, 'staging.yml', 'windows', JSON.parse(process.env.CI_ENV))
-  #           console.log(result)
-  #           return result
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-  #     #
-  #     - name: Build and install
-  #       run: |
-  #         npx cross-env RELEASE_CHANNEL=$RELEASE_CHANNEL GH_TOKEN=$GH_TOKEN sudo yarn package:prerelease:win
-  #       env:
-  #         USERNAME: ${{ github.actor }}
-  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-  #     #
-  #     - name: Deploy binaries and other artifacts to draft release
-  #       run: |
-  #         # rename the latest.yml (windows) file to alpha.yml for staging builds
-  #         mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-  #         gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         GH_DEBUG: api
-  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-  #         BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
-  #         BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
-  #         BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
+  build-windows:
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: staging
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
+        run: |
+          apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build and install
+        run: |
+          npx cross-env sudo yarn package:prerelease:win
+        env:
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      #
+      - name: Deploy binaries and other artifacts to draft release
+        run: |
+          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_DEBUG: api
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
+          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
+          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-linux]
+    needs: [pre-deploy, build-mac, build-linux, build-windows]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -343,7 +339,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, build-linux, deploy-desks]
+    needs: [pre-deploy, build-mac, build-linux, build-windows, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -370,13 +366,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      #
-      # - run: |
-      #     gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #     BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-      #
 
   #
   # this will run even if the build is canceled or fails

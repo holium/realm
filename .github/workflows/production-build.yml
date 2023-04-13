@@ -30,12 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin production
+        with:
+          ref: production
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -61,7 +57,7 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
+          gh release create $BUILD_VERSION ./app/release/build/*.* --target production --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
@@ -75,6 +71,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -108,11 +106,6 @@ jobs:
         run: npm install -g yarn
       - name: Install app dependencies
         run: yarn install
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git pull origin production
       #
       - name: Run pre-deploy script
         uses: actions/github-script@v6
@@ -130,17 +123,19 @@ jobs:
       - name: Build and publish
         run: npx cross-env yarn package:release:mac
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
         run: |
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
+          GH_DEBUG: api
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
@@ -151,6 +146,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -180,7 +177,7 @@ jobs:
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
           npx yarn package:release:linux
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Deploy binaries and other artifacts to draft release
@@ -188,9 +185,26 @@ jobs:
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
+          GH_DEBUG: api
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      # all builds should produce the same sourcemaps; therefore only need to create the Sentry
+      #   release one time. Use linux build since Sentry action only runs on linux
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          # SENTRY_URL: https://sentry.io/
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          SENTRY_LOG_LEVEL: debug
+        with:
+          environment: production
+          sourcemaps: './app/release/app/dist'
+          version: ${{ needs.pre-deploy.outputs.build_version }}
+          ignore_empty: true
   #
   build-windows:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -201,19 +215,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
+      - run: git config --global --add safe.directory '*'
       #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global --add safe.directory '*'
-          git pull origin production
       #
       - name: Install yarn
         run: npm install -g yarn
@@ -248,8 +258,7 @@ jobs:
         run: |
           npx cross-env sudo yarn package:release:win
         env:
-          USERNAME: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
       - name: Download and install code signing tool
@@ -268,11 +277,12 @@ jobs:
         run: |
           chmod +x ./signer/CodeSignTool.sh
           mkdir -p ./app/release/build/signed
-          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
           SSLCOM_SIGNING_SECRET: ${{ secrets.SSLCOM_SIGNING_SECRET }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
@@ -280,11 +290,12 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
-          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe ./app/release/build/Realm-Setup-$BUILD_VERSION_MAJOR.$BUILD_VERSION_MINOR.$BUILD_VERSION_BUILD.exe
+          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
+          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION.exe ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_DEBUG: api
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
@@ -298,19 +309,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          ref: production
+          # Urbit symlink fetching
+          submodules: 'true'
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: '14'
           cache: 'npm'
-      #
-      - name: Pull latest
-        run: |
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git config --global submodule.recurse true
-          git pull origin production
       #
       - name: Bump desks version
         uses: actions/github-script@v6
@@ -322,14 +328,6 @@ jobs:
             console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      #
-      # - name: Push desk version update
-      #   if: ${{ fromJSON(steps.bump-desks.outputs.result).updated }}
-      #   run: |
-      #     git add ./desks/realm/desk.docket-0
-      #     git commit -m "patch realm desk version"
-      #     git push
-      #
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
@@ -380,6 +378,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       #
       - name: Setup node
         uses: actions/setup-node@v3
@@ -406,6 +406,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  #
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:
@@ -416,6 +417,8 @@ jobs:
       #
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: production
       #
       - name: Run post-deploy script
         uses: actions/github-script@v6

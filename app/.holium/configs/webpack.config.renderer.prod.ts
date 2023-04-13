@@ -15,6 +15,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+const Dotenv = require('dotenv-webpack');
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -107,6 +108,15 @@ const configuration: webpack.Configuration = {
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
       BUILD_VERSION: process.env.BUILD_VERSION,
+    }),
+    // load environment variables from .env file generated in the CI workflow
+    new Dotenv({
+      path: '.env',
+      // safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
+      // allowEmptyValues: false, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
+      // systemvars: false, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
+      // silent: false, // hide any errors
+      // defaults: false, // load '.env.defaults' as the default values if empty.
     }),
     new MiniCssExtractPlugin({
       filename: '[name].style.css',
