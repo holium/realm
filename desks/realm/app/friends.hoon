@@ -41,6 +41,12 @@
 ::     copying over the previous's logic and making the necessary changes.    ::
 ::     Update the /~/current-version/ scry to latest.                         ::
 ::                                                                            ::
+::  TODO: consider rolling a lot of this boilerplate into an
+::  agent transformer.  The transformer could track incoming
+::  and outgoing to be logged somewhere.
+::  It would shuttle pokes / scries / etc to the correct
+::  versioned core.
+::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
 :: Potential bugs list (04/10/2023):
@@ -209,6 +215,7 @@
         updated-at=now.bowl
         phone-number=~
         relationship=%our
+        status=%offline
         contact-info=~
     ==
   ::
@@ -279,6 +286,7 @@
                         %contact    %know
                         %our        %our
                       ==
+                      %offline
                       ~
     ==        ==  ==
   ::
@@ -419,6 +427,7 @@
             updated-at=now.bowl
             phone-number=~
             relationship=%know
+            status=%offline
             contact-info=~
         ==
       ::
@@ -467,6 +476,7 @@
             updated-at=now.bowl
             phone-number=phone-number.fren
             relationship=%know
+            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -493,6 +503,7 @@
             updated-at=now.bowl
             phone-number=phone-number.fren
             relationship=%blocked
+            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -517,15 +528,50 @@
               updated-at=now.bowl
               phone-number=phone-number.fren
               relationship=%know
+              status=status.fren
               contact-info=contact-info.fren
           ==
         ::
         core(friends (~(put by friends) ship.act fren-upd))
       ==
     ::
-        %save-passport
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-save-passport' !!)
-      core
+        %set-passport
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-passport' !!)
+      =/  us  (~(got by friends) our.bowl)
+      ::
+      =/  us-upd
+        :*  pinned=pinned.us
+            tags=tags.us
+            created-at=created-at.us
+            updated-at=now.bowl
+            phone-number=phone-number.us
+            relationship=%our
+            status=status.us
+            ::
+            contact-info=(some contact-info.act)
+            ::
+        ==
+      ::
+      core(friends (~(put by friends) our.bowl us-upd))
+    ::
+        %set-status
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-status' !!)
+      =/  us  (~(got by friends) our.bowl)
+      ::
+      =/  us-upd
+        :*  pinned=pinned.us
+            tags=tags.us
+            created-at=created-at.us
+            updated-at=now.bowl
+            phone-number=phone-number.us
+            relationship=%our
+            ::
+            status=status.act
+            ::
+            contact-info=contact-info.us
+        ==
+      ::
+      core(friends (~(put by friends) our.bowl us-upd))
     ::
         %sent-friend
       ::  Receive a new friend request from another ship.
@@ -548,6 +594,7 @@
                 updated-at=now.bowl
                 phone-number=phone-number.fren
                 relationship=%received
+                status=status.fren
                 contact-info=contact-info.fren
             ==
           core(friends (~(put by friends) src.bowl fren-upd))
@@ -562,6 +609,7 @@
             updated-at=now.bowl
             phone-number=~
             relationship=%received
+            status=%offline
             contact-info=~
         ==
       core(friends (~(put by friends) src.bowl fren))
@@ -584,6 +632,7 @@
               updated-at=now.bowl
               phone-number=phone-number.fren
               relationship=%fren
+              status=status.fren
               contact-info=contact-info.fren
           ==
         core(friends (~(put by friends) src.bowl fren-upd))
@@ -611,6 +660,7 @@
             updated-at=now.bowl
             phone-number=phone-number.fren
             relationship=%know
+            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -647,6 +697,7 @@
                   updated-at=now.bowl
                   phone-number=phone-number.fren
                   relationship=%sent
+                  status=status.fren
                   contact-info=contact-info.fren
               ==
             ::  TODO, emit any necessary cards
@@ -678,6 +729,7 @@
                   updated-at=now.bowl
                   phone-number=phone-number.fren
                   relationship=%fren
+                  status=status.fren
                   contact-info=contact-info.fren
               ==
             ::  TODO, emit any necessary cards

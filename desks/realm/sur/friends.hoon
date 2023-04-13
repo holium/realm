@@ -5,6 +5,7 @@
 ::
 +$  friends    (map ship friend)
 +$  tags       (set @t)
++$  status     ?(%online %away %dnd %offline %invisible)
 ::
 ::  $friend: these values are mostly used by us for bookkeeping on peers.
 ::  contact-info and status are updated by peers - should be done via SSS.
@@ -45,7 +46,7 @@
       relationship=?(%our %fren %received %sent %know %blocked)
       :: %invisible is used by us only, communicated to peers as %offline
       :: defaults to %offline
-      :: status=?(%online %away %dnd %offline %invisible)
+      =status
       ::
       :: Taking live status updates further:
       :: These are decent ideas but we need to weigh 
@@ -69,7 +70,7 @@
 ::
 +$  contact-info
   $:  nickname=@t    :: passport set name (required)
-      color=@t             :: passport set color
+      color=@t           :: passport set color
       twitter=(unit @t)  :: twitter handle
       bio=(unit @t)
       avatar=(unit @t)
@@ -100,7 +101,8 @@
       :: editing our own passport information
       :: could support diffs, but this is simpler
       ::
-      [%save-passport =contact-info]
+      [%set-passport =contact-info]
+      [%set-status =status]
       ::  `fren` actions are sent agent to agent
       ::
       ::  sent-friend: ship sends you friend request
