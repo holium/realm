@@ -10,25 +10,24 @@ const isProd = environment === 'production';
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
   let cfg: Sentry.BrowserOptions = {
-      environment,
-      dsn: process.env.SENTRY_DSN,
-      integrations: [new BrowserTracing()],
-      tracesSampleRate: 1,
-      ignoreErrors: [
-        // Remove when we've done the window system refactor and are no longer using webviews.
-        'GUEST_VIEW_MANAGER_CALL',
-        // False alarm caused by react-dom/server renderToString.
-        'useLayoutEffect',
-      ],
-    };
-    // removing until further review for windows
-    // if (process.env.BUILD_VERSION) {
-    //   console.log(
-    //     `Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`
-    //   );
-    //   cfg.release = process.env.BUILD_VERSION;
-    // }
-    Sentry.init(cfg);
+    environment,
+    dsn: process.env.SENTRY_DSN,
+    integrations: [new BrowserTracing()],
+    tracesSampleRate: 1,
+    ignoreErrors: [
+      // Remove when we've done the window system refactor and are no longer using webviews.
+      'GUEST_VIEW_MANAGER_CALL',
+      // False alarm caused by react-dom/server renderToString.
+      'useLayoutEffect',
+    ],
+  };
+  if (process.env.BUILD_VERSION) {
+    console.log(
+      `Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`
+    );
+    cfg.release = process.env.BUILD_VERSION;
+  }
+  Sentry.init(cfg);
 } else {
   console.warn('Environment variable for Sentry is undefined.');
 }

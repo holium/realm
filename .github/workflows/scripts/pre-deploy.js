@@ -34,6 +34,8 @@ module.exports = async ({ github, context }, args) => {
     releaseName: undefined,
     // version either set by PR title or calculated (build # incremented) if based on package.json version
     buildVersion: undefined,
+    // used by windows code signing step when moving artifacts. electron-builder drops the 'v' from all artifact names
+    artifactVersion: undefined,
     // version object - with major, minor, build #
     version: {
       major: undefined,
@@ -69,16 +71,14 @@ module.exports = async ({ github, context }, args) => {
 
   // does the PR title match our required naming convention for manual staging/production builds?
   let matches = buildTitle.match(
-    /(draft|release|staging|hotfix)-(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+    /(draft|release|staging|hotfix)-(v)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   );
   // matches null if no match
   if (matches) {
     console.log(
       `init.js: '${buildTitle}' matches version format. using as version string.`
     );
-    const tagName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
-      matches[5]
-    }${
+    const tagName = `${matches[2]}${matches[3]}.${matches[4]}.${matches[5]}${
       matches[1] === 'staging'
         ? '-alpha'
         : matches[1] === 'hotfix'
@@ -105,10 +105,11 @@ module.exports = async ({ github, context }, args) => {
       );
     }
     ci.isNewBuild = true;
-    ci.releaseName = `${matches[2] ? 'v' : ''}${matches[3]}.${matches[4]}.${
-      matches[5]
-    }-${matches[1]}`;
+    ci.releaseName = `${matches[2]}${matches[3]}.${matches[4]}.${matches[5]}-${matches[1]}`;
     ci.buildVersion = tagName;
+    // electron-builder drops the 'v' when naming artifacts. unfortunately we need
+    //  to reference this name when code signing the windows build; hence
+    ci.artifactVersion = ci.buildVersion.substring(1);
     switch (matches[1]) {
       // test and staging builds produce alphas. the only difference is
       // that 'draft' stays in draft mode and sets the release channel used by auto-updater
@@ -170,17 +171,19 @@ module.exports = async ({ github, context }, args) => {
       // channel set to branch name
       ci.channel = (args && args.channel) || 'draft';
     }
+    console.log('matching [tag] buildVersion => %o', buildVersion);
     // sanity check to ensure version coming in from package.json matches expected semantic version convention
     matches = buildVersion.match(
-      /(v|)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+      /(v)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
     );
     if (!matches) throw Error("error: 'buildVersion' format unexpected");
     // always bump version
     let buildNumber = parseInt(matches[4]) + 1;
     // if building from package.json version, bump the build # by 1
-    ci.buildVersion = `${matches[1] ? 'v' : ''}${matches[2]}.${
-      matches[3]
-    }.${buildNumber}-${ci.channel}`;
+    ci.buildVersion = `${matches[1]}${matches[2]}.${matches[3]}.${buildNumber}-${ci.channel}`;
+    // electron-builder drops the 'v' when naming artifacts. unfortunately we need
+    //  to reference this name when code signing the windows build; hence
+    ci.artifactVersion = ci.buildVersion.substring(1);
     ci.isNewBuild = true;
     ci.releaseName = `${matches[1] ? 'v' : ''}${matches[2]}.${
       matches[3]
