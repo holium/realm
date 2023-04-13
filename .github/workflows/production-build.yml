@@ -22,6 +22,7 @@ jobs:
       ci: ${{ steps.ci.outputs.result }}
       release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
       build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      artifact_version: ${{ fromJSON(steps.ci.outputs.result).artifactVersion }}
       package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
       build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
       build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
@@ -290,13 +291,14 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
-          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION.exe ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
+          rm -f ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
+          mv ./app/release/build/signed/Realm-Setup-$ARTIFACT_VERSION.exe ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_DEBUG: api
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}

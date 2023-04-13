@@ -17,6 +17,7 @@ jobs:
       ci: ${{ steps.ci.outputs.result }}
       release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
       build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      artifact_version: ${{ fromJSON(steps.ci.outputs.result).artifactVersion }}
       package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
       build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
       build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
@@ -34,7 +35,7 @@ jobs:
         with:
           script: |
             const script = require('./.github/workflows/scripts/pre-deploy.js')
-            const args = { workflowId: 'staging.yml' }
+            const args = { workflowId: 'staging.yml', version: 'v0.9.2-alpha' }
             const result = script({github, context}, args)
             console.log(result)
             return result
