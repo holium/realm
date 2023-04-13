@@ -8,7 +8,7 @@ We use yarn workspace to manage the multiple modules.
 
 ```
 - app/ - the Realm desktop client
-- onboarding/ – holium.network
+- onboarding/ – the web onboarding flow
 - shared/ - shared code in the monorepo
 - lib/ - outwards facing packages that are published to npmjs.com
   - conduit/ – SSE event handler
