@@ -6,11 +6,9 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ShipSearch } from 'renderer/components';
 import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { shipStore, useShipStore } from 'renderer/stores/ship.store';
 
 const HomeSidebar = styled(motion.div)`
   position: relative;
@@ -76,13 +74,10 @@ const MembersPresenter = ({ our }: IMembers) => {
     const patp = ship[0];
     const nickname = ship[1];
     if (our) {
-      ShipActions.addFriend(patp);
+      shipStore.friends.addFriend(patp);
     } else {
-      SpacesActions.inviteMember(currentSpace.path ?? '', {
-        patp,
-        role: 'member',
-        message: '',
-      });
+      currentSpace.path &&
+        shipStore.spacesStore.inviteMember(currentSpace.path, patp);
     }
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);

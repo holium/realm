@@ -1,5 +1,5 @@
 import { Patp } from 'os/types';
-import { useState } from 'react';
+import { observer } from 'mobx-react';
 import {
   Flex,
   Spinner,
@@ -8,7 +8,7 @@ import {
   Button,
   Row,
 } from '@holium/design-system';
-import { shipStore } from 'renderer/stores/ship.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { EmptyGroup } from '../SpaceRow';
 
 interface IVisaRow {
@@ -28,7 +28,7 @@ interface IVisaRow {
   onButtonClick?: (data: any) => void;
 }
 
-export const VisaRow = ({
+export const VisaRowPresenter = ({
   disabled,
   image,
   color,
@@ -37,31 +37,30 @@ export const VisaRow = ({
   invitedBy,
   onClick,
 }: IVisaRow) => {
-  const [declining, setDeclining] = useState(false);
-  const [joining, setJoining] = useState(false);
+  const { spacesStore } = useShipStore();
+  const acceptLoader = spacesStore.invitations.pendingAccept.get(path);
+  const declineLoader = spacesStore.invitations.pendingDecline.get(path);
 
   const onDecline = async () => {
-    setDeclining(true);
-    shipStore.spacesStore.invitations
+    spacesStore.invitations
       .declineInvite(path)
-      .then(() => {
-        setDeclining(false);
-      })
+      // .then(() => {
+      //   spacesStore.invitations.pendingDecline.get(path)?.set('loaded');
+      // })
       .catch((err) => {
         console.error(err);
-        setDeclining(false);
+        // spacesStore.invitations.pendingDecline.get(path)?.set('error');
       });
   };
   const onJoin = async () => {
-    setJoining(true);
-    shipStore.spacesStore.invitations
+    spacesStore.invitations
       .acceptInvite(path)
-      .then(() => {
-        setJoining(false);
-      })
+      // .then(() => {
+      //   spacesStore.invitations.pendingAccept.get(path)?.set('loaded');
+      // })
       .catch((err) => {
         console.error(err);
-        setJoining(false);
+        // spacesStore.invitations.pendingAccept.get(path)?.set('error');
       });
   };
   return (
@@ -123,7 +122,7 @@ export const VisaRow = ({
             onDecline();
           }}
         >
-          {declining ? <Spinner size={0} /> : 'Decline'}
+          {declineLoader?.isLoading ? <Spinner size={0} /> : 'Decline'}
         </Button.TextButton>
         <Button.TextButton
           style={{ borderRadius: 6 }}
@@ -132,9 +131,11 @@ export const VisaRow = ({
             onJoin();
           }}
         >
-          {joining ? <Spinner size={0} /> : 'Accept'}
+          {acceptLoader?.isLoading ? <Spinner size={0} /> : 'Accept'}
         </Button.TextButton>
       </Flex>
     </Row>
   );
 };
+
+export const VisaRow = observer(VisaRowPresenter);

@@ -3,16 +3,36 @@ import {
   types,
   flow,
   applySnapshot,
+  cast,
   castToSnapshot,
+  getSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
-import { MembersStore, VisaModel } from './invitations.model';
+import {
+  MembersModel,
+  MembersStore,
+  RolesType,
+  VisaModel,
+} from './invitations.model';
 import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
 import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
+import { shipStore } from '../ship.store';
+
+const spaceRowToModel = (space: any) => {
+  return {
+    ...space,
+    members: {
+      all: space.members.reduce((map: any, mem: any) => {
+        map[mem.patp] = mem;
+        return map;
+      }, {}),
+    },
+  };
+};
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -110,7 +130,7 @@ export type SpaceModelType = Instance<typeof SpaceModel>;
 
 export const SpacesStore = types
   .model('SpacesStore', {
-    loader: types.optional(LoaderModel, { state: 'initial' }),
+    loader: types.optional(LoaderModel, { state: 'loading' }),
     creating: types.optional(LoaderModel, { state: 'initial' }),
     join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
@@ -164,15 +184,7 @@ export const SpacesStore = types
           yield SpacesIPC.getInitial() as Promise<any>;
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
-          const spaceModel = SpaceModel.create({
-            ...space,
-            members: {
-              all: space.members.reduce((map: any, mem: any) => {
-                map[mem.patp] = mem;
-                return map;
-              }, {}),
-            },
-          });
+          const spaceModel = SpaceModel.create(spaceRowToModel(space));
           self.spaces.set(space.path, spaceModel);
         });
         self.selected = self.spaces.get(current);
@@ -250,10 +262,11 @@ export const SpacesStore = types
       const deletedSpace = self.spaces.get(spacePath);
       if (!deletedSpace) return;
       try {
-        self.spaces.delete(spacePath);
         if (self.selected === self.spaces.get(spacePath)) {
+          appState.setTheme(self.ourSpace.theme);
           self.selected = self.ourSpace;
         }
+        self.spaces.delete(spacePath);
         yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
       } catch (e) {
         console.error(e);
@@ -264,16 +277,64 @@ export const SpacesStore = types
       const leftSpace = self.spaces.get(spacePath);
       if (!leftSpace) return;
       try {
-        self.spaces.delete(spacePath);
         if (self.selected === self.spaces.get(spacePath)) {
+          appState.setTheme(self.ourSpace.theme);
           self.selected = self.ourSpace;
         }
+        self.spaces.delete(spacePath);
         yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
       } catch (e) {
         console.error(e);
         self.spaces.set(spacePath, leftSpace);
       }
     }),
+    inviteMember: flow(function* (spacePath: string, patp: string) {
+      const space = self.spaces.get(spacePath);
+      if (!space) return;
+      try {
+        space.members.add(
+          patp,
+          MembersModel.create({
+            alias: '',
+            status: 'invited',
+            roles: ['member'],
+          })
+        );
+        yield SpacesIPC.inviteMember(spacePath, {
+          patp,
+          role: 'member',
+          message: '',
+        }) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+        space.members.remove(patp);
+      }
+    }),
+    kickMember: flow(function* (spacePath: string, patp: string) {
+      const space = self.spaces.get(spacePath);
+      if (!space) return;
+      const member = space.members.all.get(patp);
+      try {
+        space.members.remove(patp);
+        yield SpacesIPC.kickMember(spacePath, patp) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+        space.members.add(patp, MembersModel.create(member));
+      }
+    }),
+    setRoles: flow(function* (
+      spacePath: string,
+      patp: string,
+      roles: string[]
+    ) {
+      try {
+        yield SpacesIPC.setRoles(spacePath, patp, roles) as Promise<any>;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
+
+    // Setters
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;
     },
@@ -293,6 +354,91 @@ export const SpacesStore = types
     _onInitialInvitationsUpdate: (invitations: any) => {
       self.invitations.initialIncoming(invitations);
     },
+    _onSpaceAdded: (addPayload: any) => {
+      console.log(addPayload);
+      // Set pending space to loaded
+      self.spaces.set(addPayload.path, spaceRowToModel(addPayload));
+      // if the space is set to current, set it as selected
+      const pendingAcceptLoader = self.invitations.pendingAccept.get(
+        addPayload.path
+      );
+      if (pendingAcceptLoader) {
+        pendingAcceptLoader.set('loaded');
+        self.invitations.incoming.delete(addPayload.path);
+      }
+      if (addPayload.current) {
+        self.selected = self.spaces.get(addPayload.path);
+        if (self.selected) {
+          appState.setTheme(self.selected.theme);
+        }
+      }
+    },
+    _onSpaceUpdated: (updatePayload: any) => {
+      console.log(updatePayload);
+      // self.invitations.initialIncoming(invitations);
+    },
+    _onSpaceRemoved: (removePayload: any) => {
+      if (!removePayload.path.includes(shipStore.ship?.patp)) {
+        // TODO its not our space so we need to notify the user they were kicked
+        console.warn('we were kicked from a space', removePayload.path);
+      }
+      if (self.selected === self.spaces.get(removePayload.path)) {
+        appState.setTheme(self.ourSpace.theme);
+        self.selected = self.ourSpace;
+      }
+      shipStore.spacesStore.spaces.delete(removePayload.path);
+    },
+    _onSpaceMemberAdded: (addPayload: any) => {
+      const space = self.spaces.get(addPayload.path);
+      if (!space) return;
+      space.members.add(addPayload.ship, addPayload.member);
+    },
+    _onSpaceMemberUpdated: (updatePayload: any) => {
+      const space = self.spaces.get(updatePayload.path);
+      if (!space) return;
+      space.members.update(updatePayload.ship, updatePayload.member);
+    },
+    _onSpaceMemberKicked: (kickPayload: any) => {
+      const space = self.spaces.get(kickPayload.path);
+      if (!space) return;
+      space.members.remove(kickPayload.ship);
+    },
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
+
+SpacesIPC.onUpdate((_event: any, update: any) => {
+  const { type, payload } = update;
+  console.log('spaces update', update);
+  // on update we need to requery the store
+  switch (type) {
+    case 'initial':
+      shipStore.spacesStore.init();
+      break;
+    case 'invitations':
+      console.log('invitations', payload);
+      shipStore.spacesStore._onInitialInvitationsUpdate(payload);
+      break;
+    case 'invite-sent':
+      shipStore.spacesStore._onSpaceMemberAdded(payload);
+      break;
+    case 'invite-updated':
+      shipStore.spacesStore._onSpaceMemberUpdated(payload);
+      break;
+    case 'kicked':
+      shipStore.spacesStore._onSpaceMemberKicked(payload);
+      break;
+    case 'edited':
+      shipStore.spacesStore._onSpaceMemberUpdated(payload);
+      break;
+    case 'add':
+      shipStore.spacesStore._onSpaceAdded(payload);
+      break;
+    case 'replace':
+      shipStore.spacesStore._onSpaceUpdated(payload);
+      break;
+    case 'remove':
+      shipStore.spacesStore._onSpaceRemoved(payload);
+      break;
+  }
+});

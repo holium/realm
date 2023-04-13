@@ -13,6 +13,7 @@ export interface Space {
   picture: string;
   access: string;
   theme: any;
+  current: boolean;
   // createdAt: number;
   updatedAt: number;
 }
@@ -36,6 +37,7 @@ export class SpacesDB extends AbstractDataAccess<Space> {
       picture: row.picture,
       access: row.access,
       theme: JSON.parse(row.theme),
+      current: row.current === 1,
       updatedAt: row.updatedAt,
       // createdAt: row.createdAt,
     };

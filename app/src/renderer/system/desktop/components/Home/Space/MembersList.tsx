@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { PersonRow } from 'renderer/components';
 import { Flex, Text, WindowedList } from '@holium/design-system';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { Member } from 'os/types';
 import { MemberType } from 'os/services/spaces/models/members';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -82,15 +81,17 @@ const MembersListPresenter = () => {
         activeRole = 'initiate';
       }
     }
+
+    if (!ship) return null;
+    if (!currentSpace) return null;
+
     const setNewRole = (role: Roles) => {
       const newRoles = roles
         ? [...roles.filter((role) => role !== activeRole), role]
         : [role];
-      SpacesActions.setRoles(member.patp, newRoles);
+      currentSpace.path &&
+        spacesStore.setRoles(currentSpace.path, member.patp, newRoles);
     };
-
-    if (!ship) return null;
-    if (!currentSpace) return null;
 
     return (
       <PersonRow
@@ -120,10 +121,8 @@ const MembersListPresenter = () => {
                 {
                   label: 'Kick',
                   onClick: () => {
-                    SpacesActions.kickMember(
-                      currentSpace.path ?? '',
-                      member.patp
-                    );
+                    currentSpace.path &&
+                      spacesStore.kickMember(currentSpace.path, member.patp);
                   },
                 },
               ]

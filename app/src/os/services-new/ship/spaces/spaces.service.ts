@@ -9,17 +9,19 @@ import { snakeify } from '../../../lib/obj';
 import { pathToObj } from '../../..//lib/path';
 import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
 import { spacesModelQuery } from './spaces.query';
+import { MemberRole } from '../../../types';
 
 export class SpacesService extends AbstractService {
   private shipDB?: Database;
   public spacesDB?: SpacesDB;
   public membersDB?: MembersDB;
   public invitationsDB?: InvitationDB;
+  private patp?: string;
 
-  constructor(options?: ServiceOptions, db?: Database) {
+  constructor(options?: ServiceOptions, db?: Database, patp?: string) {
     super('spacesService', options);
     if (options?.preload) return;
-
+    this.patp = patp;
     this.shipDB = db;
     this.spacesDB = new SpacesDB(false, db);
     this.membersDB = new MembersDB(false, db);
@@ -63,6 +65,7 @@ export class SpacesService extends AbstractService {
   private _onEvent = (data: any, _id?: number, mark?: string) => {
     if (mark === 'spaces-reaction') {
       const spacesType = Object.keys(data)[0];
+      // log.info('spaces-reaction', spacesType, data[spacesType]);
       switch (spacesType) {
         case 'initial':
           this.spacesDB?.insertAll(data['initial'].spaces);
@@ -84,15 +87,23 @@ export class SpacesService extends AbstractService {
           });
           this.sendUpdate({
             type: 'add',
-            payload: data['initial'],
+            payload: this.getSpace(addedPath),
           });
-          // TODO: send members update to the frontend
           break;
         case 'remove':
+          const removedPath = data['remove']['space-path'];
+          let resetToHomeSpace = false;
+          if (this.spacesDB?.findOne(removedPath)?.current) {
+            this.setSelectedSpace(`/${this.patp}/our`);
+            resetToHomeSpace = true;
+          }
           this.spacesDB?.delete(data['remove']['space-path']);
+          this.sendUpdate({
+            type: 'remove',
+            payload: { path: removedPath, resetToHomeSpace },
+          });
           break;
         case 'replace':
-          // this.spacesDB?.replace(data['replace']);
           const replacePayload = data['replace'];
           log.info('replace', replacePayload);
           // todo update spaces
@@ -106,8 +117,10 @@ export class SpacesService extends AbstractService {
           this.membersDB?.insertAll({
             [remoteSpace.path]: remoteSpace.members,
           });
-          // todo insert members
-          // todo insert spaces
+          this.sendUpdate({
+            type: 'add',
+            payload: this.getSpace(remoteSpace.path),
+          });
           break;
         default:
           break;
@@ -119,19 +132,39 @@ export class SpacesService extends AbstractService {
 
       switch (visaType) {
         case 'invite-sent':
+          log.info('invite-sent', visaData[visaType]);
           const sentPayload = visaData['invite-sent'];
-          // state.addMember(
-          //   sentPayload.path,
-          //   sentPayload.ship,
-          //   sentPayload.member
-          // );
-          log.info('invite-sent', sentPayload);
+          this.membersDB?.createMember({
+            space: sentPayload.path,
+            patp: sentPayload.ship,
+            ...sentPayload.member,
+          });
+          this.sendUpdate({
+            type: 'invite-sent',
+            payload: sentPayload,
+          });
           break;
         case 'invite-accepted':
           const acceptedPayload = visaData['invite-accepted'];
           // const reactionData = data[mark][visaType];
           log.info('invite-accepted', acceptedPayload);
-          // this.membersDB.updateMember()
+          const updated = this.membersDB?.updateMember(
+            acceptedPayload.path,
+            acceptedPayload.ship,
+            acceptedPayload.member
+          );
+          this.sendUpdate({
+            type: 'invite-updated',
+            payload: {
+              path: acceptedPayload.path,
+              ship: acceptedPayload.ship,
+              member: {
+                alias: updated?.alias,
+                roles: updated?.roles,
+                status: updated?.status,
+              },
+            },
+          });
 
           break;
         case 'invite-received':
@@ -145,28 +178,23 @@ export class SpacesService extends AbstractService {
             payload: invites,
           });
           break;
-        case 'invite-removed':
-          // this is when an invite is declined by our or after we have accepted it
+        case 'invite-removed': // this is when an invite is declined by our or after we have accepted it
           log.info('invite-removed', visaData[visaType]);
           const path = visaData[visaType].path;
           this.invitationsDB?.removeInvite(path);
-          this.fetchInviteData();
           break;
         case 'kicked':
           const kickedPayload = visaData.kicked;
-          // if (`~${ship}` === kickedPayload.ship) {
-          //   spacesState.deleteSpace(
-          //     `/~${ship}/our`,
-          //     {
-          //       'space-path': kickedPayload.path,
-          //     },
-          //     setTheme
-          //   );
-          // }
-          // state.removeMember(kickedPayload.path, kickedPayload.ship);
+          log.info('kicked', kickedPayload);
+          this.membersDB?.deleteMember(kickedPayload.path, kickedPayload.ship);
+          this.sendUpdate({
+            type: 'kicked',
+            payload: kickedPayload,
+          });
           break;
         case 'edited':
           const editedPayload = visaData.edited;
+          log.info('edited', editedPayload);
           // state.editMember(
           //   editedPayload.path,
           //   editedPayload.ship,
@@ -218,7 +246,7 @@ export class SpacesService extends AbstractService {
     };
   }
 
-  public async getSpace(path: string) {
+  public getSpace(path: string) {
     if (!this.shipDB) return;
     const query = this.shipDB.prepare(`
         ${spacesModelQuery}
@@ -226,15 +254,17 @@ export class SpacesService extends AbstractService {
     `);
     const result: any = query.all(path);
 
+    const space = result[0];
+
     return {
-      ...result,
-      current: result.current === 1,
-      archetype: result.archetype || 'community',
-      theme: result.theme ? JSON.parse(result.theme) : null,
-      members: result.members ? JSON.parse(result.members) : null,
-      dock: result.dock ? JSON.parse(result.dock) : [],
-      stall: result.stall
-        ? JSON.parse(result.stall)
+      ...space,
+      current: space.current === 1,
+      archetype: space.archetype || 'community',
+      theme: space.theme ? JSON.parse(space.theme) : null,
+      members: space.members ? JSON.parse(space.members) : null,
+      dock: space.dock ? JSON.parse(space.dock) : [],
+      stall: space.stall
+        ? JSON.parse(space.stall)
         : { suite: {}, recommended: {} },
     };
   }
@@ -429,6 +459,66 @@ export class SpacesService extends AbstractService {
         json: {
           'decline-invite': {
             path: pathToObj(path),
+          },
+        },
+      });
+      return response;
+    } catch (e) {
+      log.error(e);
+    }
+  }
+
+  public async inviteMember(
+    path: string,
+    payload: { patp: string; role: MemberRole; message: string }
+  ) {
+    try {
+      const response = await APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'send-invite': {
+            path: pathToObj(path),
+            ship: payload.patp,
+            role: payload.role,
+            message: payload.message,
+          },
+        },
+      });
+      return response;
+    } catch (e) {
+      log.error(e);
+    }
+  }
+
+  public async kickMember(path: string, patp: string) {
+    try {
+      const response = await APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'kick-member': {
+            path: pathToObj(path),
+            ship: patp,
+          },
+        },
+      });
+      return response;
+    } catch (e) {
+      log.error(e);
+    }
+  }
+
+  public async setRoles(path: string, patp: string, roles: MemberRole[]) {
+    try {
+      const response = await APIConnection.getInstance().conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'edit-member-role': {
+            path: pathToObj(path),
+            ship: patp,
+            roles,
           },
         },
       });

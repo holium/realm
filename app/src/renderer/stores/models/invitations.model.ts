@@ -204,7 +204,8 @@ export const VisaModel = types
   .model('VisaModel', {
     incoming: types.map(Visa), // Map<SpacePath, Invite>
     outgoing: types.map(types.map(Visa)), // Map<SpacePath, Map<Patp, Invite>>
-    pending: types.map(LoaderModel),
+    pendingAccept: types.map(LoaderModel),
+    pendingDecline: types.map(LoaderModel),
   })
   .views((self) => ({
     get invitations() {
@@ -223,7 +224,7 @@ export const VisaModel = types
       const loader = LoaderModel.create();
       if (invite) {
         loader.set('loading');
-        self.pending.set(path, loader);
+        self.pendingAccept.set(path, loader);
         try {
           yield SpacesIPC.acceptInvite(path) as Promise<void>;
           // loader.set('loaded');
@@ -238,7 +239,7 @@ export const VisaModel = types
       const loader = LoaderModel.create();
       if (invite) {
         loader.set('loading');
-        self.pending.set(path, loader);
+        self.pendingDecline.set(path, loader);
         try {
           yield SpacesIPC.declineInvite(path) as Promise<void>;
           loader.set('loaded');

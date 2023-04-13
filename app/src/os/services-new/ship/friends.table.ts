@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3';
 import APIConnection from '../conduit';
 import AbstractDataAccess from '../abstract.db';
-import { cleanNounColor } from '../../lib/color';
+import { cleanNounColor, removeHash } from '../../lib/color';
 
 export interface Friend {
   patp: string;
@@ -90,6 +90,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   }
 
   private async _fetchFriends() {
+    // Get last timestamp
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'friends',
       path: '/all',
@@ -99,6 +100,71 @@ export class Friends extends AbstractDataAccess<Friend> {
 
   public async getFriends() {
     return this.find();
+  }
+
+  public async addFriend(patp: string) {
+    const response = await APIConnection.getInstance().conduit.poke({
+      app: 'friends',
+      mark: 'friend-action',
+      json: {
+        'add-friend': {
+          ship: patp,
+        },
+      },
+    });
+    return response;
+  }
+
+  public async editFriend(
+    patp: string,
+    payload: { pinned: boolean; tags: string[] }
+  ) {
+    const response = await APIConnection.getInstance().conduit.poke({
+      app: 'friends',
+      mark: 'friend-action',
+      json: {
+        'edit-friend': {
+          ship: patp,
+          pinned: payload.pinned,
+          tags: payload.tags || [],
+        },
+      },
+    });
+    return response;
+  }
+
+  public async removeFriend(patp: string) {
+    const response = await APIConnection.getInstance().conduit.poke({
+      app: 'friends',
+      mark: 'friend-action',
+      json: {
+        'remove-friend': {
+          ship: patp,
+        },
+      },
+    });
+    return response;
+  }
+
+  public async saveContact(patp: string, data: any) {
+    const preparedData = {
+      nickname: data.nickname,
+      color: removeHash(data.color),
+      avatar: data.avatar,
+      bio: data.bio || null,
+      cover: data.cover || null,
+    };
+    const response = await APIConnection.getInstance().conduit.poke({
+      app: 'friends',
+      mark: 'friend-action',
+      json: {
+        'set-contact': {
+          ship: patp,
+          'contact-info': preparedData,
+        },
+      },
+    });
+    return response;
   }
 
   public findOne(patp: string): Friend | null {

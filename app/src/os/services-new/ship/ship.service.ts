@@ -66,7 +66,7 @@ export class ShipService extends AbstractService {
       notifications: new NotificationsService(undefined, this.shipDB.db),
       chat: new ChatService(undefined, this.shipDB.db),
       friends: new Friends(false, this.shipDB.db),
-      spaces: new SpacesService(undefined, this.shipDB.db),
+      spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
       bazaar: new BazaarService(undefined, this.shipDB.db),
     };
 

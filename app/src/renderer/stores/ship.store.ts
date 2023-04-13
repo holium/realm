@@ -154,30 +154,6 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   }
 });
 
-SpacesIPC.onUpdate((_event: any, update: any) => {
-  const { type, payload } = update;
-  console.log('spaces update', update);
-  // on update we need to requery the store
-  switch (type) {
-    case 'initial':
-      shipStore.spacesStore.init();
-      break;
-    case 'invitations':
-      console.log('invitations', payload);
-      shipStore.spacesStore._onInitialInvitationsUpdate(payload);
-      break;
-    case 'space-added':
-      // shipStore.spacesStore.onSpaceAdded(payload);
-      break;
-    case 'space-updated':
-      // shipStore.spacesStore.onSpaceUpdated(payload);
-      break;
-    case 'space-deleted':
-      // shipStore.spacesStore.onSpaceDeleted(payload);
-      break;
-  }
-});
-
 NotifIPC.onUpdate(({ type, payload }: any) => {
   switch (type) {
     case 'notification-added':

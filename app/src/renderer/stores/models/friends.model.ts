@@ -5,7 +5,7 @@ import {
   types,
   flow,
 } from 'mobx-state-tree';
-import { FriendsIPC } from '../ipc';
+import { FriendsIPC, ShipIPC } from '../ipc';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',
@@ -91,6 +91,14 @@ export const FriendsStore = types
     initial(friends: typeof self.all) {
       applySnapshot(self.all, castToSnapshot(friends));
     },
+    addFriend: flow(function* (patp: string) {
+      try {
+        const friend = yield FriendsIPC.addFriend(patp) as Promise<any>;
+        self.all.push(friend);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     add(patp: string, friend: FriendType) {
       self.all.push(friend);
     },

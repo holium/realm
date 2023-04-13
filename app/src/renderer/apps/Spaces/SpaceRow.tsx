@@ -26,7 +26,7 @@ interface SpaceRowProps {
 
 const SpaceRowPresenter = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { shellStore } = useAppState();
+  const { shellStore, theme } = useAppState();
   const { ship, spacesStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
@@ -83,7 +83,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
     }
 
     return menu.filter(Boolean) as ContextMenuOption[];
-  }, [spacesStore.spaces, roles, ship, space.name, space.path]);
+  }, [spacesStore.spaces, roles, ship, space.name, space.path, theme]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(spaceRowId)) {
@@ -92,7 +92,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   }, [contextMenuOptions, getOptions, setOptions, spaceRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-  const memberCount = spacesStore.spaces.get(space.path)?.members.all.size;
+  const memberCount = members?.all.size;
   return (
     <Row
       id={spaceRowId}
