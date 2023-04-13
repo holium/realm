@@ -107,7 +107,6 @@ const configuration: webpack.Configuration = {
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
-      BUILD_VERSION: process.env.BUILD_VERSION,
     }),
     // load environment variables from .env file generated in the CI workflow
     new Dotenv({
@@ -115,7 +114,7 @@ const configuration: webpack.Configuration = {
       // safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
       // allowEmptyValues: false, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
       // systemvars: false, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-      // silent: false, // hide any errors
+      silent: true, // hide any errors
       // defaults: false, // load '.env.defaults' as the default values if empty.
     }),
     new MiniCssExtractPlugin({
