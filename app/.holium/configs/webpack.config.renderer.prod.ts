@@ -15,6 +15,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+const Dotenv = require('dotenv-webpack');
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -111,8 +112,20 @@ const configuration: webpack.Configuration = {
       API_HEADERS_VERSION: "2",
       STRIPE_KEY: "pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM",
       UNSPLASH_KEY: "QQd_ZQ6ji5LOoryWoYIqdZNYgFVV6axaFyrp_NHZ_ME",
-      // removing until further review for windows
-      // BUILD_VERSION: process.env.BUILD_VERSION,
+      ...(process.env.BUILD_VERSION
+        ? {
+            BUILD_VERSION: process.env.BUILD_VERSION,
+          }
+        : {}),
+    }),
+    // load environment variables from .env file generated in the CI workflow
+    new Dotenv({
+      path: '.env',
+      // safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
+      // allowEmptyValues: false, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
+      // systemvars: false, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
+      silent: true, // hide any errors
+      // defaults: false, // load '.env.defaults' as the default values if empty.
     }),
     new MiniCssExtractPlugin({
       filename: '[name].style.css',
