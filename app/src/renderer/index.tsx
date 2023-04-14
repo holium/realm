@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import * as Amplitude from '@amplitude/analytics-browser';
-import { BrowserTracing } from '@sentry/tracing';
+import { BrowserTracing } from '@sentry/browser';
 import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations';
 import { App } from './App';
 
@@ -29,10 +29,17 @@ if (sentryDsn) {
           // },
           if (frame.abs_path) {
             // strip everything between the file:// and the /dist folder
+            const abs_path = frame.abs_path;
+            console.log('mapping frame');
             const idx = frame.abs_path.lastIndexOf('/dist/');
             if (idx !== 1) {
               frame.abs_path = frame.abs_path.substring(idx + 1);
             }
+            console.log(
+              `mapping stack trace frame '%o' to '%o`,
+              abs_path,
+              frame.abs_path
+            );
           }
           return frame;
         },
