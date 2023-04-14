@@ -1,5 +1,4 @@
 import { observer } from 'mobx-react';
-import { useEffect } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { WalletNetwork } from './Network';
@@ -28,9 +27,9 @@ export const WalletFooterPresenter = ({
 }: WalletFooterProps) => {
   const { walletApp } = useTrayApps();
 
-  useEffect(() => {
+  /*useEffect(() => {
     WalletActions.uqbarDeskExists();
-  }, []);
+  }, []);*/
 
   return (
     <Wrapper hidden={hidden}>

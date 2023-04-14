@@ -19,9 +19,9 @@ const CreatePresenter = (props: CreateProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text.Body mt="100px" variant="h4">
+        <Text.H4 mt="100px" variant="h4">
           No Wallet Found
-        </Text.Body>
+        </Text.H4>
         <Text.Body
           px="30px"
           mt={2}
@@ -52,7 +52,7 @@ const CreatePresenter = (props: CreateProps) => {
           <Icon name="InfoCircle" color={themeData.colors.brand.secondary} />
         </Box>
         <Box>
-          <Text.Body
+          <Text.Hint
             ml={2}
             variant="hint"
             justifyContent="flex-end"
@@ -60,7 +60,7 @@ const CreatePresenter = (props: CreateProps) => {
           >
             You are using pre-release software. Only use for development
             purposes.
-          </Text.Body>
+          </Text.Hint>
         </Box>
       </Flex>
     </Flex>

@@ -9,6 +9,7 @@ import { notifPreload } from 'os/services-new/ship/notifications/notifications.s
 import { friendsPreload } from 'os/services-new/ship/friends.table';
 import { spacesPreload } from 'os/services-new/ship/spaces/spaces.service';
 import { bazaarPreload } from 'os/services-new/ship/spaces/bazaar.service';
+import { walletPreload } from 'os/services-new/ship/spaces/wallet.service';
 
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 
@@ -25,6 +26,7 @@ declare global {
     authService: typeof authPreload;
     roomsService: typeof roomsPreload;
     chatService: typeof chatPreload;
+    walletService: typeof walletPreload;
     notifService: typeof notifPreload;
     friendDb: typeof friendsPreload;
     realm: typeof realmPreload;

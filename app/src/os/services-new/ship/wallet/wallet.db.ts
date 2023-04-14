@@ -815,7 +815,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 }
 
-export const chatInitSql = `
+export const walletInitSql = `
   create table if not exists wallet_wallets
   (
       path         TEXT    not null,

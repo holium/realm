@@ -8,6 +8,7 @@ import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { notifInitSql } from './notifications/notifications.table';
 import { chatInitSql } from './chat/chat.db';
 import { friendsInitSql } from './friends.table';
+import { walletInitSql } from './wallet/wallet.db';
 
 export class ShipDB {
   private shipDB: sqlite3.Database;
@@ -89,6 +90,7 @@ ${chatInitSql}
 ${notifInitSql}
 ${friendsInitSql}
 ${spacesTablesInitSql}
+${walletInitSql}
 create table if not exists credentials (
   url       text primary key,
   code      text,
