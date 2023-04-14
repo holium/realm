@@ -1,12 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Flex,
-  Text,
-  Button,
-  FormControl,
-  TextInput,
-} from '@holium/design-system';
+import { Flex, Text, Button, TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
@@ -72,8 +66,6 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
           <Button.TextButton
             id="submit"
             width="100%"
-            isLoading={loading}
-            disabled={!form.computed.isValid}
             onClick={form.actions.submit}
           >
             Create

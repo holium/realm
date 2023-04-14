@@ -1,4 +1,3 @@
-import { darken } from 'polished';
 import { observer } from 'mobx-react';
 import { Box, Flex, Text } from '@holium/design-system';
 import { ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
@@ -16,7 +15,6 @@ export const WalletNetwork = observer((props: WalletNetworkProps) => {
       alignItems="center"
       justifyContent="center"
       borderRadius="33px"
-      background={darken(0.03, theme.currentTheme.windowColor)}
       //onClick={WalletActions.toggleNetwork}
     >
       <Box
