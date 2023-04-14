@@ -21,7 +21,6 @@ import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
-import { CourierStore } from 'os/services/ship/models/courier';
 import {
   NotificationStore,
   NotificationStoreType,
@@ -48,7 +47,6 @@ const Services = types
     membership: MembershipStore,
     visas: VisaModel,
     // docket: DocketStore,
-    courier: CourierStore,
     friends: FriendsStore,
     beacon: NotificationStore,
     bulletin: BulletinStore,
@@ -68,7 +66,6 @@ const Services = types
       });
       self.bazaar = castToSnapshot({});
       self.membership = castToSnapshot({});
-      self.courier = castToSnapshot({});
       self.friends = castToSnapshot({});
       self.beacon = castToSnapshot({});
       self.visas = castToSnapshot({
@@ -109,7 +106,6 @@ const services = Services.create({
     incoming: {},
     outgoing: {},
   },
-  courier: {},
   friends: {},
   beacon: { notes: {} },
   bulletin: {},
@@ -217,12 +213,6 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
-    if (response.models.courier) {
-      applySnapshot(
-        servicesStore.courier,
-        castToSnapshot(response.models.courier)
-      );
-    }
   }
   if (response.ship) {
     window.ship = response.ship.patp;
@@ -316,12 +306,6 @@ OSActions.onConnected(
       beacon: NotificationStoreType;
     }
   ) => {
-    if (initials.models.courier) {
-      applySnapshot(
-        servicesStore.courier,
-        castToSnapshot(initials.models.courier)
-      );
-    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
@@ -385,9 +369,6 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'visas') {
       applyPatch(servicesStore.visas, value.patch);
     }
-    if (value.resource === 'courier') {
-      applyPatch(servicesStore.courier, value.patch);
-    }
     if (value.resource === 'friends') {
       applyPatch(servicesStore.friends, value.patch);
     }
@@ -400,9 +381,6 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
     }
-    // if (value.resource === 'courier') {
-    //   applySnapshot(servicesStore.courier, value.model);
-    // }
     // if (value.resource === 'ship') {
     //   servicesStore.setShip(ShipModel.create(value.model));
     // }

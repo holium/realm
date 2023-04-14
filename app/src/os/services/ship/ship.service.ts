@@ -17,14 +17,6 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
 import { ChatStoreType } from './models/dms';
-import { CourierApi } from '../../api/courier';
-import {
-  CourierStore,
-  CourierStoreType,
-  DMLogType,
-  PreviewGroupDMType,
-} from './models/courier';
-import { toJS } from 'mobx';
 import { DiskStore } from '../base.store';
 
 // upload support
@@ -33,7 +25,6 @@ const fs = require('fs');
 export interface ShipModels {
   friends: FriendsType;
   chat?: ChatStoreType;
-  courier?: CourierStoreType;
 }
 
 /**
@@ -57,26 +48,15 @@ export class ShipService extends BaseService {
   wallet: WalletService;
 
   handlers = {
-    'realm.ship.get-dms': this.getDMs,
-    'realm.ship.get-dm-log': this.getDmLog,
-    'realm.ship.send-dm': this.sendDm,
     'realm.ship.get-metadata': this.getMetadata,
     'realm.ship.get-contact': this.getContact,
     'realm.ship.save-my-contact': this.saveMyContact,
-    'realm.ship.draft-dm': this.draftNewDm,
-    'realm.ship.accept-dm-request': this.acceptDm,
-    'realm.ship.decline-dm-request': this.declineDm,
-    'realm.ship.accept-group-dm-request': this.acceptGroupDm,
-    'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
-    // 'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
     'realm.ship.add-friend': this.addFriend,
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
-    'realm.ship.read-dm': this.readDm,
-    'realm.ship.read-group-dm': this.readGroupDm,
     'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
     'realm.ship.upload-file': this.uploadFile,
@@ -113,46 +93,6 @@ export class ShipService extends BaseService {
         profileData
       );
     },
-    getDMs: async () => {
-      return await ipcRenderer.invoke('realm.ship.get-dms');
-    },
-    getDmLog: async (path: string): Promise<DMLogType> => {
-      return await ipcRenderer.invoke('realm.ship.get-dm-log', path);
-    },
-    acceptDm: async (toShip: string) => {
-      return await ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
-    },
-    declineDm: async (toShip: string) => {
-      return await ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
-    },
-    acceptGroupDm: async (path: string) => {
-      return await ipcRenderer.invoke(
-        'realm.ship.accept-group-dm-request',
-        path
-      );
-    },
-    declineGroupDm: async (path: string) => {
-      return await ipcRenderer.invoke(
-        'realm.ship.decline-group-dm-request',
-        path
-      );
-    },
-    setScreen: async (screen: boolean) => {
-      return await ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
-    },
-    sendDm: async (path: string, contents: any[]) => {
-      return await ipcRenderer.invoke('realm.ship.send-dm', path, contents);
-    },
-    draftDm: async (patps: Patp[], metadata: any[]) => {
-      return await ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
-    },
-    removeDm: async (ship: string, index: any) => {
-      return await ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
-    },
-    readDm: async (ship: Patp) =>
-      await ipcRenderer.invoke('realm.ship.read-dm', ship),
-    readGroupDm: async (path: string) =>
-      await ipcRenderer.invoke('realm.ship.read-group-dm', path),
     getFriends: async () => {
       return await ipcRenderer.invoke('realm.ship.get-friends');
     },
@@ -186,7 +126,6 @@ export class ShipService extends BaseService {
 
   get modelSnapshots() {
     return {
-      courier: this.models.courier ? getSnapshot(this.models.courier) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
     };
   }
@@ -225,13 +164,6 @@ export class ShipService extends BaseService {
     });
     this.state.loader.set('loading');
 
-    const courierStore = new DiskStore(
-      'courier',
-      ship,
-      secretKey,
-      CourierStore
-    );
-    this.models.courier = courierStore.model;
     const friendsStore = new DiskStore(
       'friends',
       ship,
@@ -242,7 +174,6 @@ export class ShipService extends BaseService {
     this.models.friends = friendsStore.model;
 
     secretKey = null;
-    courierStore.registerPatches(this.core.onEffect);
     friendsStore.registerPatches(this.core.onEffect);
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
@@ -269,8 +200,6 @@ export class ShipService extends BaseService {
       FriendsApi.getContact(this.core.conduit, ship).then((value: any) => {
         this.state?.setOurMetadata(value);
       });
-      // register dm update handler
-      if (!this.models.courier) throw new Error('No courier found');
       this.state.loader.set('loaded');
 
       this.rooms?.watch();
@@ -315,7 +244,6 @@ export class ShipService extends BaseService {
     this.db = undefined;
     this.state = undefined;
     this.models.chat = undefined;
-    this.models.courier = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
     this.wallet.logout();
   }
@@ -423,118 +351,6 @@ export class ShipService extends BaseService {
 
   getMetadata(_event: any, path: string): any {
     return this.metadataStore.graph[path];
-  }
-
-  // async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
-  //   return await DocketApi.requestTreaty(
-  //     ship,
-  //     desk,
-  //     this.models.bazaar,
-  //     this.core.conduit,
-  //     this.metadataStore
-  //   );
-  // }
-
-  async getDMs() {
-    if (!this.core.conduit) {
-      return;
-    }
-    return await CourierApi.getDmList(this.core.conduit);
-  }
-
-  async getDmLog(_event: any, ship: Patp) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    const dmLog = await CourierApi.getDmLog(this.core.conduit, ship);
-    this.models.courier?.setDmLog(dmLog);
-    return dmLog;
-  }
-
-  async acceptDm(_event: any, toShip: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    return await CourierApi.acceptDm(this.core.conduit, toShip);
-  }
-
-  async declineDm(_event: any, toShip: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    return await CourierApi.declineDm(this.core.conduit, toShip);
-  }
-
-  /**
-   * Sets the unread count of a dm inbox to 0
-   *
-   * @param _event
-   * @param toShip
-   * @returns
-   */
-  async readDm(_event: any, toShip: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    CourierApi.readDm(this.core.conduit, toShip);
-  }
-
-  /**
-   * Sets the unread count of a group dm channel to 0
-   *
-   * @param _event
-   * @param path
-   * @returns
-   */
-  async readGroupDm(_event: any, path: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    const split = path.split('/');
-    const host = split[0];
-    const timestamp = split[1];
-    return await CourierApi.readGroupDm(this.core.conduit, host, timestamp);
-  }
-
-  async acceptGroupDm(_event: any, path: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    const inviteId = this.models.courier?.previews.get(path)?.inviteId;
-    console.log('acceptingDM', path, inviteId);
-    if (inviteId) {
-      return await CourierApi.acceptGroupDm(this.core.conduit, inviteId);
-    }
-  }
-
-  async declineGroupDm(_event: any, path: string) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    const inviteId = this.models.courier?.previews.get(path)?.inviteId;
-    console.log('rejectingDM', path, inviteId);
-    if (inviteId) {
-      await CourierApi.declineGroupDm(this.core.conduit, inviteId);
-      return this.models.courier?.declineDm(path);
-    }
-  }
-
-  async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    let draft;
-    if (patps.length > 1) {
-      const reaction: any = await CourierApi.createGroupDm(
-        this.core.conduit,
-        patps
-      );
-      draft = this.models.courier?.draftGroupDm(
-        reaction['group-dm-created'] as PreviewGroupDMType
-      );
-    } else {
-      // single dm
-      draft = this.models.courier?.draftDm(patps, metadata);
-    }
-    return toJS(draft);
-  }
-
-  async sendDm(_event: any, path: string, contents: any[]) {
-    if (!this.core.conduit) throw new Error('No conduit found');
-    const dmLog = this.models.courier?.dms.get(path);
-    if (!dmLog) throw new Error('DM log not found, check path');
-    if (!this.state?.patp) throw new Error('No patp found');
-
-    return dmLog.sendDm(this.core.conduit, this.state.patp, path, contents);
-  }
-
-  async removeDm(_event: any, toShip: string, removeIndex: any) {
-    const ourShip = this.state?.patp;
-    console.log('removingDM', ourShip, toShip, removeIndex);
   }
 
   async getS3Bucket(_event: any = undefined) {
