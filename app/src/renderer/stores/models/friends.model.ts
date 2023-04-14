@@ -5,7 +5,7 @@ import {
   types,
   flow,
 } from 'mobx-state-tree';
-import { FriendsIPC, ShipIPC } from '../ipc';
+import { FriendsIPC } from '../ipc';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',

@@ -57,7 +57,7 @@ export const SpaceModel = types
   })
   .views((self) => ({
     isPinned(appId: string) {
-      return self.dock.map((app) => app.id === appId);
+      return self.dock.some((app) => app.id === appId);
     },
     get dockAppIds() {
       return self.dock
@@ -86,8 +86,15 @@ export const SpaceModel = types
       }
     }),
     reorderPinnedApps: flow(function* (dock: string[]) {
+      // sort the dock apps by the dock id array
+      const dockApps = self.dock.sort((a, b) => {
+        const aIndex = dock.findIndex((appId) => appId === a.id);
+        const bIndex = dock.findIndex((appId) => appId === b.id);
+        return aIndex - bIndex;
+      });
+
       try {
-        applySnapshot(self.dock, dock);
+        applySnapshot(self.dock, dockApps);
         return yield BazaarIPC.reorderPinnedApps(
           self.path,
           dock
@@ -117,6 +124,19 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
+    // addPinned(app: any) {
+    //   self.dock.push(app);
+    // },
+    // removePinned(appId: string) {
+    //   const index = self.dock.findIndex((app) => app.id === appId);
+    //   self.dock.splice(index, 1);
+    // },
+    _setDock(dock: any) {
+      self.dock = dock;
+    },
+    _setStall(stall: any) {
+      self.stall = StallModel.create(stall);
+    },
   }));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
@@ -180,6 +200,7 @@ export const SpacesStore = types
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
           self.spaces.set(space.path, spaceModel);
         });
+        console.log(toJS(self.spaces));
         self.selected = self.spaces.get(current);
         if (self.selected) {
           appState.setTheme(self.selected.theme);
@@ -402,6 +423,16 @@ export const SpacesStore = types
       if (!space) return;
       space.members.remove(kickPayload.ship);
     },
+    _onDockUpdate: (dockPayload: any) => {
+      const space = self.spaces.get(dockPayload.path);
+      if (!space) return;
+      space._setDock(dockPayload.dock);
+    },
+    _onStallUpdate: (stallPayload: any) => {
+      const space = self.spaces.get(stallPayload.path);
+      if (!space) return;
+      space._setStall(stallPayload.stall);
+    },
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
@@ -436,6 +467,22 @@ SpacesIPC.onUpdate((_event: any, update: any) => {
       break;
     case 'remove':
       shipStore.spacesStore._onSpaceRemoved(payload);
+      break;
+  }
+});
+
+BazaarIPC.onUpdate((_event: any, update: any) => {
+  const { type, payload } = update;
+  // on update we need to requery the store
+  switch (type) {
+    case 'dock-update':
+      shipStore.spacesStore._onDockUpdate(payload);
+      break;
+    case 'stall-update':
+      shipStore.spacesStore._onStallUpdate(payload);
+      break;
+    case 'pins-reordered':
+      shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
       break;
   }
 });

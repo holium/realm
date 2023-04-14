@@ -50,7 +50,7 @@ const SearchModesPresenter = () => {
           bazaarStore
             .addAlly(selectedShip)
             .then(() => {
-              // SpacesActions.scryTreaties(selectedShip);
+              bazaarStore.scryTreaties(selectedShip);
             })
             .catch((e) => console.error(e));
           // .finally(() => appInstaller.setLoadingState(''));

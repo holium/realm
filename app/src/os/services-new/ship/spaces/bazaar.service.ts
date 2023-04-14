@@ -43,67 +43,158 @@ export class BazaarService extends AbstractService {
         case 'initial':
           this.tables?.appCatalog.insertAll(data['initial']);
           break;
-        case 'app-install-update':
-          //  installed, uninstalled, started, etc.
-          // eslint-disable-next-line no-case-declarations
+        case 'app-install-update': //  installed, uninstalled, started, etc.
           const { appId, app, grid } = data['app-install-update'];
-          // model._setAppStatus(
-          //   installUpdate.appId,
-          //   installUpdate.app,
-          //   installUpdate.grid
-          // );
+          this.tables?.appCatalog.updateApp(appId, app);
+          this.tables?.appCatalog.updateGrid(grid);
+          const updatedApp = this.tables?.appCatalog.getApp(appId);
+          this.sendUpdate({
+            type: 'installation-update',
+            payload: updatedApp,
+          });
           break;
         case 'pinned':
-          // model._addPinned(data.pinned);
+          const pinnedDock = this.tables?.appCatalog.updatePinned(
+            data.pinned,
+            'add'
+          );
+          this.sendUpdate({
+            type: 'dock-update',
+            payload: {
+              path: data.pinned.path,
+              dock: pinnedDock,
+            },
+          });
           break;
         case 'unpinned':
-          // model._removePinned(data.unpinned);
+          const unpinnedDock = this.tables?.appCatalog.updatePinned(
+            data.unpinned,
+            'remove'
+          );
+          this.sendUpdate({
+            type: 'dock-update',
+            payload: {
+              path: data.unpinned.path,
+              dock: unpinnedDock,
+            },
+          });
           break;
         case 'pins-reodered':
-          if (data['pins-reodered']) {
-            // model._reorderPins(data['pins-reodered'])
-          }
+          // TODO
+          log.info('pins-reodered => %o', data['pins-reodered']);
           break;
         case 'suite-added':
-          // model._suiteAdded(data['suite-added']);
+          const addedStall = this.tables?.appCatalog.updateSuite(
+            data['suite-added'],
+            'add'
+          );
+          this.sendUpdate({
+            type: 'stall-update',
+            payload: {
+              path: data['suite-added'].path,
+              stall: addedStall,
+            },
+          });
           break;
         case 'suite-removed':
-          // model._suiteRemoved(data['suite-removed']);
+          const removedStall = this.tables?.appCatalog.updateSuite(
+            data['suite-removed'],
+            'remove'
+          );
+          this.sendUpdate({
+            type: 'stall-update',
+            payload: {
+              path: data['suite-removed'].path,
+              stall: removedStall,
+            },
+          });
           break;
         case 'recommended':
-          // model._addRecommended(data.recommended);
+          this.tables?.appCatalog.updateRecommendations(
+            data.recommended,
+            'add'
+          );
+          this.sendUpdate({
+            type: 'recommended',
+            payload: {
+              appId: data.recommended.id,
+            },
+          });
           break;
         case 'unrecommended':
-          // model._removeRecommended(data.unrecommended);
+          this.tables?.appCatalog.updateRecommendations(
+            data.unrecommended,
+            'remove'
+          );
+          this.sendUpdate({
+            type: 'unrecommended',
+            payload: {
+              appId: data.unrecommended.id,
+            },
+          });
           break;
         case 'stall-update':
-          // model._updateStall(data['stall-update']);
+          const stallUpdate = data['stall-update'];
+          // TODO come up with better solution for p2p app discovery
+          if ('add-app' in stallUpdate) {
+            const app = stallUpdate['add-app'];
+            this.tables?.appCatalog.updateApp(app.id, app);
+            // send new app to app catalog
+            const updatedApp = this.tables?.appCatalog.getApp(app.id);
+            this.sendUpdate({
+              type: 'installation-update',
+              payload: updatedApp,
+            });
+          } else if ('remove-app' in data) {
+            // this breaks the app catalog
+            // const appId: string = data['remove-app'];
+          }
+          const updatedStall = this.tables?.appCatalog.updateStall(
+            stallUpdate.path,
+            stallUpdate.stall
+          );
+          this.sendUpdate({
+            type: 'stall-update',
+            payload: {
+              path: stallUpdate.path,
+              stall: updatedStall,
+            },
+          });
+
           break;
         case 'joined-bazaar':
+          log.info('joined-bazaar => %o', data['joined-bazaar']);
           // model._addJoined(data['joined-bazaar']);
           break;
         case 'treaties-loaded':
+          log.info('treaties-loaded => %o', data['treaties-loaded']);
           // model._treatiesLoaded();
           break;
         case 'new-ally':
+          log.info('new-ally => %o', data['new-ally']);
           const ally = data['new-ally'];
           // model._allyAdded(ally.ship, ally.desks);
           break;
         case 'ally-deleted':
+          log.info('ally-deleted => %o', data['ally-deleted']);
           // console.log(data);
           const ship = data['ally-deleted'].ship;
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
         case 'rebuild-catalog':
+          log.info('rebuild-catalog => %o', data['rebuild-catalog']);
+
           // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
           // model._rebuildCatalog(data['rebuild-catalog']);
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
         case 'rebuild-stall':
+          log.info('rebuild-stall => %o', data['rebuild-stall']);
           // model._allyDeleted(data['ally-deleted'].ship);
           // model._rebuildStall(data['rebuild-stall']);
           break;
         case 'clear-stall':
+          log.info('clear-stall => %o', data['clear-stall']);
           // model._clearStall(data['clear-stall']);
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
@@ -206,7 +297,7 @@ export class BazaarService extends AbstractService {
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
-        unpin: {
+        'reorder-pins': {
           path: pathToObj(path),
           dock,
         },
@@ -262,13 +353,26 @@ export class BazaarService extends AbstractService {
   }
 
   async addAlly(ship: string) {
-    return APIConnection.getInstance().conduit.poke({
+    const ally = APIConnection.getInstance().conduit.poke({
       app: 'treaty',
       mark: 'ally-update-0',
       json: {
         add: ship,
       },
     });
+    log.info('addAlly', ally);
+  }
+
+  async removeAlly(ship: string) {
+    const ally = APIConnection.getInstance().conduit.poke({
+      app: 'treaty',
+      mark: 'ally-update-0',
+      json: {
+        del: ship,
+      },
+    });
+
+    log.info('removeAlly', ally);
   }
 
   async scryHash(app: string) {

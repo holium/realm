@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
@@ -45,7 +45,7 @@ const AppDockViewPresenter = ({
   const onOrderUpdate = useCallback(() => {
     // First we update the dock locally so the user doesn't have to
     // wait for the subscription to come back from Hoon side.
-    spacesStore.selected?.reorderPinnedApps(localDockAppIds);
+    currentSpace?.reorderPinnedApps(localDockAppIds);
   }, [localDockAppIds]);
 
   const pinnedAppTiles = pinnedDockApps.map((app) => {
