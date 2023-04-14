@@ -34,7 +34,7 @@ let cfg: Sentry.BrowserOptions = {
           console.log('mapping frame');
           const idx = filename.lastIndexOf('/dist/');
           if (idx !== 1) {
-            frame.filename = `${filename.substring(idx)}`;
+            frame.filename = `~${filename.substring(idx)}`;
           }
           console.log(
             `mapping stack trace frame '%o' to '%o`,
