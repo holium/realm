@@ -1,11 +1,13 @@
 import { Flex, Text, Icons } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { PasscodeInput } from '../../components/PasscodeInput';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { observer } from 'mobx-react';
 
-export const Locked = () => {
+export const Locked = observer(() => {
+  const { walletStore } = useShipStore();
   const unlock = () => {
-    WalletActions.navigateBack();
-    WalletActions.watchUpdates();
+    walletStore.navigateBack();
+    walletStore.watchUpdates();
   };
 
   return (
@@ -29,4 +31,4 @@ export const Locked = () => {
       </Flex>
     </Flex>
   );
-};
+});

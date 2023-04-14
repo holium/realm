@@ -2,7 +2,6 @@ import { observer } from 'mobx-react';
 import { Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
 import { toJS } from 'mobx';
-import { useTrayApps } from 'renderer/apps/store';
 import {
   monthNames,
   formatEthAmount,
@@ -10,11 +9,11 @@ import {
   convertEthAmountToUsd,
   shortened,
 } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   TransactionType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
@@ -23,7 +22,7 @@ interface TransactionProps {
   transaction: TransactionType;
 }
 const TransactionPresenter = (props: TransactionProps) => {
-  const { walletApp } = useTrayApps();
+  const walletStore = useShipStore();
   const { transaction, isCoin } = props;
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
@@ -38,11 +37,11 @@ const TransactionPresenter = (props: TransactionProps) => {
 
   const onClick = () => {
     console.log('clicked', toJS(transaction));
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: {
         type: 'transaction',
-        txtype: (walletApp.navState.detail?.txtype as TxType) || 'general',
-        coinKey: walletApp.navState.detail?.coinKey,
+        txtype: (walletStore.navState.detail?.txtype as TxType) || 'general',
+        coinKey: walletStore.navState.detail?.coinKey,
         key: transaction.hash,
       },
     });
@@ -96,7 +95,7 @@ const TransactionPresenter = (props: TransactionProps) => {
               {isEth &&
                 `${convertEthAmountToUsd(
                   ethAmount,
-                  walletApp.ethereum.conversions.usd
+                  walletStore.ethereum.conversions.usd
                 )} USD`}
             </Text.Hint>
           )}

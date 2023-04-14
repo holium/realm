@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
 import { NewWalletScreen } from './index';
 import { VerifyPasscode } from './VerifyPasscode';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const NoResize = styled(Flex)`
   textarea {
@@ -20,6 +20,7 @@ interface RecoverExistingProps {
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
   (props: RecoverExistingProps) => {
+    const { walletStore } = useShipStore();
     const [phrase, setPhrase] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -33,14 +34,13 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
 
     const recoverSeedPhrase = async (passcode: number[]) => {
       setLoading(true);
-      const correct = await WalletActions.checkMnemonic(phrase);
+      const correct = await walletStore.checkMnemonic(phrase);
       setLoading(false);
 
       if (correct) {
         props.setSeedPhrase(phrase, passcode);
-        WalletActions.watchUpdates();
+        walletStore.watchUpdates();
         props.setScreen(NewWalletScreen.FINALIZING);
-        // WalletActions.navigate(WalletView.LIST);
         setError('');
       } else {
         setError(

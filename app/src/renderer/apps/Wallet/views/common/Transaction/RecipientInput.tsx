@@ -4,7 +4,6 @@ import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { Icons, Text } from 'renderer/components';
 import { shortened } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { ContainerFlex } from './styled';
 import { Avatar, Flex, Box, Input, Spinner } from '@holium/design-system';
@@ -59,7 +58,7 @@ export const RecipientInput = observer(
           }, 5000);
 
           try {
-            WalletActions.getRecipient(patp).then((details) => {
+            walletStore.getRecipient(patp).then((details) => {
               timer && clearTimeout(timer);
               resolve(details);
             });

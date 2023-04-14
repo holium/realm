@@ -1,10 +1,7 @@
 import { FC } from 'react';
-import { darken } from 'polished';
 
 import { Flex, Text, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   ERC20Type,
   WalletView,
@@ -16,9 +13,8 @@ interface CoinListProps {
 }
 
 export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
-  const { theme } = useServices();
-
   const Coin = (props: { details: ERC20Type }) => {
+    const { walletStore } = useShipStore();
     const coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
     const amount = formatCoinAmount(
       props.details.balance,
@@ -26,10 +22,8 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
     );
     return (
       <Row
-        baseBg={darken(0.03, theme.currentTheme.windowColor)}
-        customBg={darken(0.0325, theme.currentTheme.windowColor)}
         onClick={async () => {
-          await WalletActions.navigate(WalletView.WALLET_DETAIL, {
+          await walletStore.navigate(WalletView.WALLET_DETAIL, {
             detail: {
               type: 'coin',
               txtype: 'coin',
@@ -54,11 +48,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
               </Text>
             </Flex>
           </Flex>
-          <Icons
-            name="ChevronRight"
-            color={theme.currentTheme.iconColor}
-            height={20}
-          />
+          <Icons name="ChevronRight" height={20} />
         </Flex>
       </Row>
     );
@@ -69,12 +59,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
       {props.coins.length ? (
         props.coins.map((coin, index) => <Coin details={coin} key={index} />)
       ) : (
-        <Text
-          mt={6}
-          variant="h5"
-          textAlign="center"
-          color={theme.currentTheme.iconColor}
-        >
+        <Text mt={6} variant="h5" textAlign="center">
           No Coins
         </Text>
       )}

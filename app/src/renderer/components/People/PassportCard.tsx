@@ -3,7 +3,6 @@ import { rgba, darken } from 'polished';
 import { Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { Avatar } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -31,7 +30,7 @@ const PassportCardPresenter = ({
   onClose,
 }: IPassport) => {
   const { setActiveApp } = useTrayApps();
-  const { walletStore } = useShipStore;
+  const { walletStore } = useShipStore();
 
   const iconColor = rgba(theme.textColor, 0.7);
   const buttonColor = darken(0.1, theme.windowColor);
@@ -83,7 +82,7 @@ const PassportCardPresenter = ({
                   },
                 });
                 // TODO: placeholder, we need to implement the actual send coins functionality
-                WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+                walletStore.navigate(WalletView.TRANSACTION_SEND, {
                   walletIndex: '0',
                   to: patp,
                 });

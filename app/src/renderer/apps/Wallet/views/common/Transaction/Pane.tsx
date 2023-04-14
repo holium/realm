@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { Flex, Box, Icon, Text, Button, Avatar } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
 import {
@@ -53,13 +52,13 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
 
     const next = () => {
       if (walletStore.navState.protocol === ProtocolType.UQBAR) {
-        WalletActions.enqueueUqbarTransaction(
+        walletStore.enqueueUqbarTransaction(
           walletStore.navState.walletIndex ?? '',
           props.transactionAmount
         );
       } else {
         const wallet = walletStore.currentWallet;
-        WalletActions.navigate(WalletView.TRANSACTION_CONFIRM, {
+        walletStore.navigate(WalletView.TRANSACTION_CONFIRM, {
           walletIndex: `${wallet?.index}`,
           protocol: walletStore.navState.protocol,
           ...(coin && {
@@ -76,7 +75,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     };
 
     const prev = () => {
-      WalletActions.navigate(WalletView.TRANSACTION_SEND);
+      walletStore.navigate(WalletView.TRANSACTION_SEND);
       props.onScreenChange('initial');
     };
 

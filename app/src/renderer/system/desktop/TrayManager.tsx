@@ -3,7 +3,6 @@ import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ErrorBoundary } from '../../logic/ErrorBoundary';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -13,7 +12,7 @@ const TrayManagerPresenter = () => {
   const [walletForceActive, setWalletForceActive] = useState(false);
 
   if (walletForceActive && activeApp !== 'wallet-tray') {
-    WalletActions.setForceActive(false);
+    walletStore.setForceActive(false);
     setWalletForceActive(false);
   }
   if (walletStore.forceActive && !walletForceActive) {

@@ -5,7 +5,6 @@ import {
   formatEthAmount,
   formatBtcAmount,
 } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletView,
   TransactionType,
@@ -50,7 +49,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   const { walletStore } = useShipStore();
 
   const goToTransaction = () => {
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',

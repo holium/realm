@@ -1,6 +1,6 @@
 import { rgba } from 'polished';
 import { Icon, Flex, Button, Text } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type Network = 'ethereum' | 'bitcoin';
 
@@ -26,6 +26,8 @@ export const WalletHeader = ({
   isOnboarding,
   onAddWallet,
 }: Props) => {
+  const { walletStore } = useShipStore();
+
   if (hide) return null;
 
   return (
@@ -40,7 +42,7 @@ export const WalletHeader = ({
         <Button.IconButton
           size={26}
           mt={isOnboarding ? 1 : 0}
-          onClick={async () => await WalletActions.navigateBack()}
+          onClick={async () => await walletStore.navigateBack()}
         >
           <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
         </Button.IconButton>

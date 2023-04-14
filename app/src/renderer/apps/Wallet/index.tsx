@@ -10,9 +10,7 @@ import { CreateWallet } from './views/common/Create';
 import { NFTDetail } from './views/common/NFTDetail';
 import { Locked } from './views/common/Locked';
 import { WalletHeader } from './views/common/Header';
-import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
-import { WalletActions } from '../../logic/actions/wallet';
 import {
   EthWalletType,
   BitcoinWalletType,
@@ -40,7 +38,6 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 });
 
 const WalletAppPresenter = (props: any) => {
-  const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
 
   const { walletStore } = useShipStore();
@@ -124,22 +121,20 @@ const WalletAppPresenter = (props: any) => {
     <Flex
       onClick={(evt: any) => evt.stopPropagation()}
       position="relative"
-      height={dimensions.height - 24}
       width="100%"
       flexDirection="column"
     >
       <WalletHeader
         isOnboarding={WalletView.NEW === walletStore.navState.view}
         showBack={walletStore.navState.view !== WalletView.LIST}
-        theme={theme.currentTheme}
         network={
           walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
         }
         onAddWallet={async () =>
-          await WalletActions.navigate(WalletView.CREATE_WALLET)
+          await walletStore.navigate(WalletView.CREATE_WALLET)
         }
         onSetNetwork={async (network: any) =>
-          await WalletActions.setNetwork(network)
+          await walletStore.setNetwork(network)
         }
         hide={hideHeader}
       />

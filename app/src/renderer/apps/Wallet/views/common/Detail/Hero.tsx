@@ -29,7 +29,6 @@ import {
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { motion } from 'framer-motion';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletCardStyle,
   walletCardStyleTransition,
@@ -196,13 +195,13 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       try {
         if (walletStore.navState.network === NetworkType.ETHEREUM) {
           if (walletStore.navState.protocol === ProtocolType.UQBAR) {
-            await WalletActions.submitUqbarTransaction(
+            await walletStore.submitUqbarTransaction(
               walletStore.currentWallet?.index.toString() ?? '',
               passcode
             );
           } else {
             props.coin
-              ? await WalletActions.sendERC20Transaction(
+              ? await walletStore.sendERC20Transaction(
                   walletStore.currentWallet?.index.toString() ?? '',
                   transactionRecipient.address ??
                     transactionRecipient.patpAddress ??
@@ -212,7 +211,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                   passcode,
                   transactionRecipient.patp
                 )
-              : await WalletActions.sendEthereumTransaction(
+              : await walletStore.sendEthereumTransaction(
                   walletStore.currentWallet?.index.toString() ?? '',
                   transactionRecipient.address ||
                     transactionRecipient.patpAddress ||

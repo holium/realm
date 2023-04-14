@@ -2,14 +2,15 @@ import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface CreateWalletProps {
   network: NetworkType;
 }
 
 export const CreateWallet = observer((props: CreateWalletProps) => {
+  const { walletStore } = useShipStore();
   const [loading, setLoading] = useState(false);
   const form = useForm({
     async onSubmit({ values }) {
@@ -17,7 +18,7 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
         setLoading(true);
         try {
           console.log(`creating wallet ${values.nickname}`);
-          await WalletActions.createWallet(values.nickname);
+          await walletStore.createWallet(values.nickname);
           setLoading(false);
         } catch (reason) {
           console.error(reason);

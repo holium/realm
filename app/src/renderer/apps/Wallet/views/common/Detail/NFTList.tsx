@@ -1,30 +1,23 @@
 import { FC } from 'react';
-import { darken } from 'polished';
 
 import { Flex, Text, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   ERC721Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { Row } from 'renderer/components/NewRow';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface NFTListProps {
   nfts: ERC721Type[];
 }
 export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-
+  const { walletStore } = useShipStore();
   const NFT = (props: any) => {
     return (
       <Row
-        baseBg={darken(0.03, theme.currentTheme.windowColor)}
-        customBg={darken(0.0325, theme.currentTheme.windowColor)}
         onClick={async () =>
-          await WalletActions.navigate(WalletView.NFT_DETAIL, {
+          await walletStore.navigate(WalletView.NFT_DETAIL, {
             detail: {
               type: 'nft',
               txtype: 'nft',
@@ -56,11 +49,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
               alignItems="flex-start"
             >
               <Flex flexDirection="column" justifyContent="center">
-                <Text
-                  variant="body"
-                  fontSize={1}
-                  color={baseTheme.colors.text.secondary}
-                >
+                <Text variant="body" fontSize={1}>
                   {props.details.collectionName
                     ? props.details.collectionName
                     : 'Name'}
@@ -83,11 +72,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
             </Flex> */}
             </Flex>
           </Flex>
-          <Icons
-            name="ChevronRight"
-            color={theme.currentTheme.iconColor}
-            height={20}
-          />
+          <Icons name="ChevronRight" height={20} />
         </Flex>
       </Row>
     );
@@ -98,12 +83,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
       {props.nfts.length ? (
         props.nfts.map((nft, index) => <NFT details={nft} key={index} />)
       ) : (
-        <Text
-          mt={6}
-          variant="h5"
-          textAlign="center"
-          color={theme.currentTheme.iconColor}
-        >
+        <Text mt={6} variant="h5" textAlign="center">
           No NFTs
         </Text>
       )}

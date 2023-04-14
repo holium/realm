@@ -29,8 +29,6 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
             onSuccess={(passcode: number[]) => {
               props.onSuccess(passcode);
               props.setScreen(NewWalletScreen.FINALIZING);
-              // WalletActions.setMnemonic(props.seedPhrase, props.correctPasscode);
-              // WalletActions.watchUpdates();
             }}
           />
         </Flex>

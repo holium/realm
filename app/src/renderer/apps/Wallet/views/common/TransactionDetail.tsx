@@ -9,7 +9,6 @@ import {
   Icon,
   Spinner,
 } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -28,14 +27,16 @@ import {
   ProtocolType,
   WalletStoreType,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useShipStore } from 'renderer/stores/ship.store';
 
-const getTransaction = (walletApp: WalletStoreType): TransactionType | null => {
-  const isEthereum = walletApp.navState.network === NetworkType.ETHEREUM;
-  const isCoin = walletApp.navState.detail?.txtype === 'coin';
-  const currentWallet = walletApp.currentWallet;
+const getTransaction = (
+  walletStore: WalletStoreType
+): TransactionType | null => {
+  const isEthereum = walletStore.navState.network === NetworkType.ETHEREUM;
+  const isCoin = walletStore.navState.detail?.txtype === 'coin';
+  const currentWallet = walletStore.currentWallet;
 
-  if (!walletApp.navState.detail?.key) return null;
+  if (!walletStore.navState.detail?.key) return null;
 
   if (isEthereum) {
     const walletData = (currentWallet as EthWalletType).data;
@@ -43,20 +44,24 @@ const getTransaction = (walletApp: WalletStoreType): TransactionType | null => {
       if (!walletData) return null;
 
       const transactions = walletData
-        .get(walletApp.navState.protocol)
-        ?.coins?.get(walletApp.navState.detail?.coinKey ?? '')
+        .get(walletStore.navState.protocol)
+        ?.coins?.get(walletStore.navState.detail?.coinKey ?? '')
         ?.transactionList.transactions;
 
       if (!transactions) return null;
 
-      return transactions.get(walletApp.navState.detail.key) as TransactionType;
+      return transactions.get(
+        walletStore.navState.detail.key
+      ) as TransactionType;
     } else {
-      const transactions = walletData.get(walletApp.navState.protocol)
+      const transactions = walletData.get(walletStore.navState.protocol)
         ?.transactionList.transactions;
 
       if (!transactions) return null;
 
-      return transactions.get(walletApp.navState.detail.key) as TransactionType;
+      return transactions.get(
+        walletStore.navState.detail.key
+      ) as TransactionType;
     }
   }
 
@@ -65,13 +70,13 @@ const getTransaction = (walletApp: WalletStoreType): TransactionType | null => {
 
   if (!transactions) return null;
 
-  return transactions.get(walletApp.navState.detail.key) as TransactionType;
+  return transactions.get(walletStore.navState.detail.key) as TransactionType;
 };
 
 const TransactionDetailPresenter = () => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
 
-  let transaction = getTransaction(walletApp);
+  let transaction = getTransaction(walletStore);
 
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);
@@ -81,7 +86,7 @@ const TransactionDetailPresenter = () => {
 
   const saveNotes = () => {
     setLoading(true);
-    WalletActions.saveTransactionNotes(notes).then(() => {
+    walletStore.saveTransactionNotes(notes).then(() => {
       setLoading(false);
     });
   };
@@ -150,17 +155,17 @@ const TransactionDetailPresenter = () => {
           >
             {wasSent && '-'} {amountDisplay}
           </Text.Custom>
-          {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+          {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
             <Text.Custom fontSize={2} color={themeData.colors.text.secondary}>
               $
               {isEth
                 ? convertEthAmountToUsd(
                     ethAmount,
-                    walletApp.ethereum.conversions.usd
+                    walletStore.ethereum.conversions.usd
                   )
                 : convertBtcAmountToUsd(
                     btcAmount,
-                    walletApp.bitcoin.conversions.usd
+                    walletStore.bitcoin.conversions.usd
                   )}
             </Text.Custom>
           )}

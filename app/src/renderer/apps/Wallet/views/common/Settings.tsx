@@ -12,7 +12,6 @@ import {
   Spinner,
   TextInput,
 } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletCreationMode,
   SharingMode,
@@ -36,7 +35,7 @@ const WalletSettingsPresenter = () => {
   const [saving, setSaving] = useState(false);
 
   const network = walletStore.navState.network;
-  const walletStore =
+  const walletNetworkStore =
     network === 'ethereum' ? walletStore.ethereum : walletStore.bitcoin;
   const settings = walletStore.settings;
   const wallets = walletStore.list
@@ -48,29 +47,6 @@ const WalletSettingsPresenter = () => {
     provider: settings.provider ?? '',
     blocked: [...walletStore.blacklist],
   });
-
-  // async function setProvider(newProviderURL: string) {
-  //   setProviderInput(newProviderURL);
-  //   if (newProviderURL === '') {
-  //     setProviderError('');
-  //     return;
-  //   } else if (!validUrl.isUri(newProviderURL)) {
-  //     setProviderError('Invalid URL.');
-  //     return;
-  //   }
-
-  //   const validProvider = await WalletActions.checkProviderURL(newProviderURL);
-
-  //   if (validProvider) {
-  //     setState({
-  //       ...state,
-  //       provider: newProviderURL,
-  //     });
-  //     setProviderError('');
-  //   } else {
-  //     setProviderError('No valid provider found at that URL.');
-  //   }
-  // }
 
   function setCreationMode(newMode: string) {
     setState({ ...state, walletCreationMode: newMode as WalletCreationMode });
@@ -102,7 +78,7 @@ const WalletSettingsPresenter = () => {
     setSaving(true);
     const { walletCreationMode, sharingMode, defaultIndex, provider, blocked } =
       state;
-    await WalletActions.setSettings(network, {
+    await walletStore.setSettings(network, {
       provider,
       walletCreationMode,
       sharingMode,
@@ -110,7 +86,7 @@ const WalletSettingsPresenter = () => {
       blocked,
     });
     setSaving(false);
-    WalletActions.navigateBack();
+    walletStore.navigateBack();
   }
 
   const [settingScreen, setSettingScreen] = useState<SettingScreen>(
@@ -118,9 +94,9 @@ const WalletSettingsPresenter = () => {
   );
   const deleteWallet = (passcode: number[]) => {
     if (settingScreen === SettingScreen.LOCAL) {
-      WalletActions.deleteLocalWallet(passcode);
+      walletStore.deleteLocalWallet(passcode);
     } else if (settingScreen === SettingScreen.AGENT) {
-      WalletActions.deleteShipWallet(passcode);
+      walletStore.deleteShipWallet(passcode);
     }
   };
 
@@ -150,7 +126,7 @@ const WalletSettingsPresenter = () => {
           <Flex alignItems="center">
             <Button.IconButton
               size={26}
-              onClick={async () => await WalletActions.navigateBack()}
+              onClick={async () => await walletStore.navigateBack()}
             >
               <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
             </Button.IconButton>

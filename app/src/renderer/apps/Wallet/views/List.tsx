@@ -7,7 +7,6 @@ import {
   NetworkType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export const WalletList = observer(() => {
@@ -31,7 +30,7 @@ export const WalletList = observer(() => {
               key={walletEntry.address}
               walletKey={walletEntry.key}
               onSelect={() => {
-                WalletActions.navigate(WalletView.WALLET_DETAIL, {
+                walletStore.navigate(WalletView.WALLET_DETAIL, {
                   walletIndex: walletEntry.key,
                 });
               }}
@@ -44,7 +43,7 @@ export const WalletList = observer(() => {
 
   const Empty = () => {
     const onClick = () => {
-      WalletActions.navigate(WalletView.CREATE_WALLET);
+      walletStore.navigate(WalletView.CREATE_WALLET);
     };
 
     return (

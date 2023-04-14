@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Box, Spinner, Text } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { PasscodeDisplay } from './PasscodeDisplay';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const PASSCODE_LENGTH = 6;
 
@@ -15,6 +15,7 @@ interface PasscodeInputProps {
 }
 
 export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
+  const { walletStore } = useShipStore();
   const [inputCode, setInputCode] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -38,7 +39,7 @@ export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
       let codeIsCorrect = true;
       if (props.checkStored) {
         setLoading(true);
-        codeIsCorrect = await WalletActions.checkPasscode(newInputCode);
+        codeIsCorrect = await walletStore.checkPasscode(newInputCode);
         if (!props.keepLoading) {
           setLoading(false);
         }

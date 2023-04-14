@@ -2,13 +2,7 @@ import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Box, Button, Text } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { ThemeModelType } from 'os/services/theme.model';
-import {
-  getBaseTheme,
-  getTransactions,
-  getCoins,
-  getNfts,
-} from '../../../lib/helpers';
+import { getTransactions, getCoins, getNfts } from '../../../lib/helpers';
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
 import {
@@ -20,12 +14,10 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
 interface DetailProps {
-  theme: ThemeModelType;
   hidePending: boolean;
 }
 const DetailPresenter = (props: DetailProps) => {
@@ -117,7 +109,7 @@ const DetailPresenter = (props: DetailProps) => {
         onScreenChange={onScreenChange}
         setSendTrans={(send: boolean) => {
           if (send) {
-            WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+            walletStore.navigate(WalletView.TRANSACTION_SEND, {
               walletIndex: `${wallet.index}`,
               protocol: walletStore.navState.protocol,
               ...(coin && {
@@ -130,7 +122,7 @@ const DetailPresenter = (props: DetailProps) => {
               }),
             });
           } else {
-            WalletActions.navigateBack();
+            walletStore.navigateBack();
           }
         }}
         close={close}
@@ -198,20 +190,13 @@ interface ListSelectorProps {
   network: string;
 }
 function ListSelector(props: ListSelectorProps) {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-
   const MenuButton = (props: any) => {
     return props.selected ? (
       <Button.TextButton onClick={props.onClick}>
         {props.children}
       </Button.TextButton>
     ) : (
-      <Button.TextButton
-        onClick={props.onClick}
-        textColor={baseTheme.colors.text.disabled}
-        fontWeight={500}
-      >
+      <Button.TextButton onClick={props.onClick} fontWeight={500}>
         {props.children}
       </Button.TextButton>
     );
