@@ -1,17 +1,14 @@
 import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { darken, lighten, rgba } from 'polished';
+import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
-import { walletStore}
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import {
   shortened,
   formatEthAmount,
   formatZigAmount,
-  getBaseTheme,
   getMockCoinIcon,
   formatCoinAmount,
   convertBtcAmountToUsd,
@@ -71,13 +68,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
     const { walletStore } = useShipStore();
     const { coinView } = props;
-
-    const themeData = getBaseTheme(theme.currentTheme);
-    const panelBorder = darken(0.08, theme.currentTheme.windowColor);
-    const fadedTextColor = useMemo(
-      () => rgba(theme.currentTheme.textColor, 0.4),
-      [theme.currentTheme.textColor]
-    );
 
     const [showPasscode, setShowPasscode] = useState(false);
 
@@ -173,7 +163,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           <Text
             fontSize={2}
             style={{
-              color: themeData.colors.text.secondary,
               marginLeft: '4px',
             }}
           >
@@ -273,27 +262,12 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             </Flex>
             <Flex>
               {props.sendTrans ? (
-                <Icons
-                  name="ChevronDown"
-                  color={themeData.colors.text.disabled}
-                />
+                <Icons name="ChevronDown" />
               ) : (
                 <>
-                  <CopyButton
-                    content={props.wallet.address}
-                    colors={themeData.colors}
-                  />
+                  <CopyButton content={props.wallet.address} />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
-                    <Icons
-                      ml={2}
-                      name="QRCode"
-                      height="20px"
-                      color={
-                        props.QROpen
-                          ? themeData.colors.brand.primary
-                          : themeData.colors.text.disabled
-                      }
-                    />
+                    <Icons ml={2} name="QRCode" height="20px" />
                   </Box>
                 </>
               )}
@@ -329,7 +303,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             coin={props.coin}
             amountDisplay={amountDisplay}
             amountUsdDisplay={amountUsdDisplay}
-            colors={themeData.colors}
           />
         </Box>
         <Flex
@@ -344,7 +317,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <SendReceiveButtons
             hidden={props.sendTrans}
-            windowColor={theme.currentTheme.windowColor}
             send={() => props.setSendTrans(true)}
             receive={() => props.setQROpen(true)}
           />

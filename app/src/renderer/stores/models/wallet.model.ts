@@ -4,6 +4,7 @@ import {
   Instance,
   getSnapshot,
   cast,
+  flow,
 } from 'mobx-state-tree';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
@@ -1008,6 +1009,34 @@ export const WalletStore = types
       reset: (initialState: any) => {
         applySnapshot(self, initialState);
       },
+      setMnemonic: flow(function* (mnemonic: string, passcode: number[]) {
+        const passcodeString = passcode.map(String).join('');
+        (self.signer as RealmSigner).setMnemonic(
+          mnemonic,
+          self.ourPatp ?? '',
+          passcodeString
+        );
+        const passcodeHash = yield bcrypt.hash(passcodeString, 12);
+        yield WalletIPC.setPasscodeHash(passcodeHash);
+        const ethPath = "m/44'/60'/0'";
+        const btcPath = "m/44'/0'/0'";
+        const btcTestnetPath = "m/44'/1'/0'";
+        let xpub: string;
+        // eth
+        xpub = self.signer.getXpub(ethPath, self.ourPatp ?? '', passcodeString);
+        yield WalletIPC.setXpub('ethereum', xpub);
+        // btc
+        xpub = self.signer.getXpub(btcPath, self.ourPatp ?? '', passcodeString);
+        yield WalletIPC.setXpub('bitcoin', xpub);
+        // btc testnet
+        xpub = self.signer.getXpub(
+          btcTestnetPath,
+          self.ourPatp ?? '',
+          passcodeString
+        );
+        yield WalletIPC.setXpub('btctestnet', xpub);
+        self.navigate(WalletView.LIST);
+      }),
     };
   });
 

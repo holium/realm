@@ -93,7 +93,6 @@ const EthNewPresenter = () => {
       ) && (
         <Flex
           position="absolute"
-          top={dimensions.height - 54}
           zIndex={999}
           onClick={() =>
             setScreen(

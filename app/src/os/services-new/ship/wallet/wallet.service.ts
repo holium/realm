@@ -2,6 +2,7 @@ import APIConnection from '../../conduit';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
+import { WalletApi } from '../../../api/wallet';
 
 export class WalletService extends AbstractService {
   constructor(options?: ServiceOptions, db?: Database) {
@@ -31,6 +32,17 @@ export class WalletService extends AbstractService {
 
   async uqbarDeskExists(_evt: any) {
     return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);
+  }
+
+  async setPasscodeHash(passcodeHash: string) {
+    await WalletApi.setPasscodeHash(
+      APIConnection.getInstance().conduit,
+      passcodeHash
+    );
+  }
+
+  async setXpub(network: string, hash: string) {
+    await WalletApi.setXpub(APIConnection.getInstance().conduit, network, hash);
   }
 }
 
