@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box, TextButton } from 'renderer/components';
-import { Text } from '@holium/design-system';
+import { Flex, Box, Button, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -203,15 +202,17 @@ function ListSelector(props: ListSelectorProps) {
 
   const MenuButton = (props: any) => {
     return props.selected ? (
-      <TextButton onClick={props.onClick}>{props.children}</TextButton>
+      <Button.TextButton onClick={props.onClick}>
+        {props.children}
+      </Button.TextButton>
     ) : (
-      <TextButton
+      <Button.TextButton
         onClick={props.onClick}
         textColor={baseTheme.colors.text.disabled}
         fontWeight={500}
       >
         {props.children}
-      </TextButton>
+      </Button.TextButton>
     );
   };
   return (

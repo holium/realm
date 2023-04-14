@@ -1,13 +1,6 @@
 import { useMemo, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Box,
-  Icons,
-  TextButton,
-} from 'renderer/components';
+import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
@@ -26,10 +19,10 @@ const CreatePresenter = (props: CreateProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text mt="100px" variant="h4">
+        <Text.Body mt="100px" variant="h4">
           No Wallet Found
-        </Text>
-        <Text
+        </Text.Body>
+        <Text.Body
           px="30px"
           mt={2}
           mb={5}
@@ -38,27 +31,28 @@ const CreatePresenter = (props: CreateProps) => {
           textAlign="center"
         >
           You haven't yet configured your Realm wallet.
-        </Text>
+        </Text.Body>
         <Box mt={9}>
-          <Button onClick={() => props.setScreen(NewWalletScreen.BACKUP)}>
+          <Button.TextButton
+            onClick={() => props.setScreen(NewWalletScreen.BACKUP)}
+          >
             Create a new wallet
-          </Button>
+          </Button.TextButton>
         </Box>
-        <Box mt={3}>
-          <TextButton
-            textColor={themeData.colors.text.secondary}
+        <Box>
+          <Button.TextButton
             onClick={() => props.setScreen(NewWalletScreen.IMPORT)}
           >
             Or import an existing wallet
-          </TextButton>
+          </Button.TextButton>
         </Box>
       </Flex>
       <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
         <Box>
-          <Icons name="InfoCircle" color={themeData.colors.brand.secondary} />
+          <Icon name="InfoCircle" color={themeData.colors.brand.secondary} />
         </Box>
         <Box>
-          <Text
+          <Text.Body
             ml={2}
             variant="hint"
             justifyContent="flex-end"
@@ -66,7 +60,7 @@ const CreatePresenter = (props: CreateProps) => {
           >
             You are using pre-release software. Only use for development
             purposes.
-          </Text>
+          </Text.Body>
         </Box>
       </Flex>
     </Flex>

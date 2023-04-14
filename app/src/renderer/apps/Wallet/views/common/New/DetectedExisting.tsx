@@ -7,7 +7,7 @@ import {
   Box,
   Icons,
   TextButton,
-} from 'renderer/components';
+} from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
