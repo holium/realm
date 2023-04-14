@@ -1,12 +1,20 @@
 import { createContext, useContext } from 'react';
 import { Instance, types, flow, onSnapshot, SnapshotIn } from 'mobx-state-tree';
 import { ChatStore } from '../apps/Courier/store';
-import { NotifIPC, RealmIPC, ShipIPC, SpacesIPC } from './ipc';
+import { NotifIPC, RealmIPC, ShipIPC } from './ipc';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStore } from './models/spaces.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
+import {
+  NetworkStoreType,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+  WalletStore,
+  WalletView,
+} from './models/wallet.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -35,6 +43,7 @@ export const ShipStore = types
     chatStore: ChatStore,
     spacesStore: SpacesStore,
     bazaarStore: BazaarStore,
+    walletStore: WalletStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -113,6 +122,54 @@ export const shipStore = ShipStore.create({
     spaces: {},
   },
   bazaarStore: loadBazaarSnapshot(),
+  walletStore: {
+    navState: {
+      view: WalletView.NEW,
+      protocol: ProtocolType.ETH_GORLI,
+      lastEthProtocol: ProtocolType.ETH_GORLI,
+      btcNetwork: NetworkStoreType.BTC_MAIN,
+      // transSend: false,
+    },
+    ethereum: {
+      // block: 0,
+      gorliBlock: 0,
+      protocol: ProtocolType.ETH_GORLI,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      initialized: false,
+      conversions: {},
+    },
+    bitcoin: {
+      block: 0,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      conversions: {},
+    },
+    btctest: {
+      block: 0,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      conversions: {},
+    },
+    navHistory: [],
+    creationMode: 'default',
+    sharingMode: 'anybody',
+    lastInteraction: Date.now(),
+    initialized: false,
+    settings: {
+      passcodeHash: '',
+    },
+    forceActive: false,
+  },
 });
 
 onSnapshot(shipStore, (snapshot) => {
