@@ -1,26 +1,28 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
-import { rgba } from 'polished';
-import { Flex, Spinner } from '@holium/design-system';
-import { Text, Button, NoScrollBar } from 'renderer/components';
+import {
+  Flex,
+  Spinner,
+  Text,
+  Button,
+  InstallStatus,
+} from '@holium/design-system';
+import { NoScrollBar } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import {
-  InstallStatus,
-  UrbitAppType,
-  DocketAppType,
-  AppType,
-} from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { toJS } from 'mobx';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { appState } from 'renderer/stores/app.store';
+import {
+  AppMobxType,
+  DocketAppType,
+} from 'renderer/stores/models/bazaar.model';
 
 const SearchModesPresenter = () => {
-  const { bazaar, theme } = useServices();
+  const { bazaarStore } = useShipStore();
   const [data, setData] = useState<any>([]);
   const {
     searchMode,
@@ -33,18 +35,20 @@ const SearchModesPresenter = () => {
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
-      SpacesActions.scryTreaties(selectedShip)
+      bazaarStore
+        .scryTreaties(selectedShip)
         .catch((e) => console.error(e))
         .finally(() => setLoadingState(''));
     }
-  }, [bazaar.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
+  }, [bazaarStore.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
-      if (!bazaar.hasAlly(selectedShip)) {
+      if (!bazaarStore.hasAlly(selectedShip)) {
         if (loadingState !== 'loading-published-apps') {
           setLoadingState('loading-published-apps');
-          SpacesActions.addAlly(selectedShip)
+          bazaarStore
+            .addAlly(selectedShip)
             .then(() => {
               // SpacesActions.scryTreaties(selectedShip);
             })
@@ -52,41 +56,41 @@ const SearchModesPresenter = () => {
           // .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
-        SpacesActions.scryTreaties(selectedShip);
+        bazaarStore.scryTreaties(selectedShip);
       }
     }
-  }, [bazaar, loadingState, searchMode, selectedShip, setLoadingState]);
+  }, [bazaarStore, loadingState, searchMode, selectedShip, setLoadingState]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
-      const apps = bazaar.searchApps(searchString);
+      const apps = bazaarStore.searchApps(searchString);
       setData(apps);
     } else if (searchMode === 'dev-app-search') {
-      const apps = bazaar.searchTreaties(selectedShip, searchString);
+      const apps = bazaarStore.searchTreaties(selectedShip, searchString);
       setData(apps);
     }
-  }, [bazaar, searchMode, searchString, selectedShip]);
+  }, [bazaarStore, searchMode, searchString, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'ship-search') {
       setData([]);
-      const allies = bazaar.getAllies();
+      const allies = bazaarStore.getAllies();
       setData(allies);
     } else if (searchMode === 'dev-app-detail') {
       setData([]);
-      const treaty = bazaar.getTreaty(selectedShip, selectedDesk);
+      const treaty = bazaarStore.getTreaty(selectedShip, selectedDesk);
       if (treaty) {
         setData([treaty]);
       }
     }
-  }, [bazaar, searchMode, selectedDesk, selectedShip]);
+  }, [bazaarStore, searchMode, selectedDesk, selectedShip]);
 
   return (
     <>
       {searchMode === 'start' && <AppInstallStart />}
       {searchMode === 'ship-search' && <ShipSearch />}
       {searchMode === 'dev-app-search' && <DevAppSearch />}
-      {searchMode === 'app-search' && renderAppSearch(data, theme.currentTheme)}
+      {searchMode === 'app-search' && renderAppSearch(data)}
       {searchMode === 'app-summary' && renderAppSummary()}
     </>
   );
@@ -95,38 +99,34 @@ const SearchModesPresenter = () => {
 export const SearchModes = observer(SearchModesPresenter);
 
 const AppInstallStartPresenter = () => {
-  const { bazaar, theme } = useServices();
+  const { bazaarStore } = useShipStore();
   const appInstaller = useAppInstaller();
 
-  const textFaded = useMemo(
-    () => rgba(theme.currentTheme.textColor, 0.7),
-    [theme.currentTheme.textColor]
-  );
   return (
     <NoScrollBar flexDirection="column">
       <Flex flexDirection="column" gap={12}>
-        <Text color={textFaded} fontWeight={500}>
+        <Text.Custom opacity={0.7} fontWeight={500}>
           Recent Apps
-        </Text>
+        </Text.Custom>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(bazaar.getRecentApps() as AppType[], theme.currentTheme)}
+          {renderApps(bazaarStore.getRecentApps() as AppMobxType[])}
         </Flex>
       </Flex>
       <div style={{ marginTop: '16px', marginBottom: '16px' }}>
         <hr
           style={{
-            backgroundColor: rgba(theme.currentTheme.iconColor, 0.1),
+            backgroundColor: 'rgba(var(--rlm-icon-rgba), 0.1)',
             height: '1px',
             border: 0,
           }}
         />
       </div>
       <Flex flexDirection="column" gap={12}>
-        <Text color={textFaded} fontWeight={500}>
+        <Text.Custom opacity={0.7} fontWeight={500}>
           Recent Developers
-        </Text>
+        </Text.Custom>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaar.recentDevs, theme.currentTheme, appInstaller)}
+          {renderDevs(bazaarStore.recentDevs, appInstaller)}
         </Flex>
       </Flex>
     </NoScrollBar>
@@ -135,11 +135,9 @@ const AppInstallStartPresenter = () => {
 
 const AppInstallStart = observer(AppInstallStartPresenter);
 
-const renderApps = (apps: AppType[], theme: any) => {
-  const secondaryTextColor = rgba(theme.textColor, 0.4);
-
+const renderApps = (apps: AppMobxType[]) => {
   if (!apps || apps.length === 0) {
-    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
+    return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;
   }
 
   const installedApps = apps?.filter(
@@ -148,7 +146,7 @@ const renderApps = (apps: AppType[], theme: any) => {
       (app.type !== 'urbit' || app.installStatus === InstallStatus.installed)
   );
   if (!installedApps || installedApps.length === 0) {
-    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
+    return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;
   }
 
   return installedApps.map((app: any, index: number) => (
@@ -157,8 +155,8 @@ const renderApps = (apps: AppType[], theme: any) => {
       app={app}
       descriptionWidth={450}
       onClick={() => {
-        DesktopActions.openAppWindow(toJS(app));
-        DesktopActions.closeHomePane();
+        appState.shellStore.openWindow(toJS(app));
+        appState.shellStore.closeHomePane();
       }}
     />
   ));
@@ -174,13 +172,10 @@ const renderAppSummary = () => {
 
 const renderDevs = (
   devs: any,
-  theme: any,
   appInstaller: ReturnType<typeof useAppInstaller>
 ) => {
-  const secondaryTextColor = rgba(theme.textColor, 0.4);
-
   if (!devs || devs.length === 0) {
-    return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
+    return <Text.Custom opacity={0.4}>{`No recent devs`}</Text.Custom>;
   }
   const onProviderClick = (ship: string) => {
     if (isValidPatp(ship)) {
@@ -206,20 +201,20 @@ const renderDevs = (
     );
   });
 };
-const renderAppSearch = (apps: AppType[], theme: any) => {
+const renderAppSearch = (apps: AppMobxType[]) => {
   return (
     <Flex flexDirection="column" gap={12}>
-      <Text fontWeight={'bold'} mb={1}>
+      <Text.Custom fontWeight={500} mb={1}>
         Installed Apps
-      </Text>
-      {renderApps(apps, theme)}
+      </Text.Custom>
+      {renderApps(apps)}
     </Flex>
   );
 };
 
 const AppProvidersPresenter = () => {
   const appInstaller = useAppInstaller();
-  const { bazaar } = useServices();
+  const { bazaarStore } = useShipStore();
   const onProviderClick = (ship: string) => {
     if (isValidPatp(ship)) {
       appInstaller.setSearchMode('dev-app-search');
@@ -227,13 +222,13 @@ const AppProvidersPresenter = () => {
       appInstaller.setSelectedShip(ship);
       appInstaller.setSearchModeArgs([ship]);
       appInstaller.setSearchString('');
-      SpacesActions.addRecentDev(ship);
+      bazaarStore.addRecentDev(ship);
     }
   };
   return (
-    bazaar.allies && (
+    bazaarStore.allies && (
       <>
-        {Array.from(bazaar.allies.values())
+        {Array.from(bazaarStore.allies.values())
           .filter(
             (item: any) =>
               item.ship && item.ship.startsWith(appInstaller.searchString)
@@ -257,13 +252,11 @@ const AppProvidersPresenter = () => {
 const AppProviders = observer(AppProvidersPresenter);
 
 const ShipSearchPresenter = () => {
-  const { theme } = useServices();
-
   return (
     <Flex flexDirection="column" gap={12}>
-      <Text color={rgba(theme.currentTheme.textColor, 0.7)} fontWeight={500}>
+      <Text.Custom opacity={0.7} fontWeight={500}>
         Searching Software Providers
-      </Text>
+      </Text.Custom>
       <Flex flexDirection="column" gap={2}>
         <AppProviders />
       </Flex>
@@ -274,7 +267,7 @@ const ShipSearchPresenter = () => {
 const ShipSearch = observer(ShipSearchPresenter);
 
 const DevAppsPresenter = () => {
-  const { theme, bazaar } = useServices();
+  const { bazaarStore } = useShipStore();
   const {
     searchString,
     selectedShip,
@@ -284,57 +277,53 @@ const DevAppsPresenter = () => {
     setApp,
   } = useAppInstaller();
 
-  const secondaryTextColor = useMemo(
-    () => rgba(theme.currentTheme.textColor, 0.5),
-    [theme.currentTheme.textColor]
-  );
-  const apps: DocketAppType[] = bazaar.searchTreaties(
+  const apps: DocketAppType[] = bazaarStore.searchTreaties(
     selectedShip,
     searchString
   );
 
-  if (bazaar.loadingTreaties) {
+  if (bazaarStore.loadingTreaties) {
     return (
       <Flex flex={1} verticalAlign="middle">
         <Spinner size={0} />
-        <Text
+        <Text.Custom
           marginLeft={2}
-          color={secondaryTextColor}
-        >{`Loading published apps...`}</Text>
+          opacity={0.4}
+        >{`Loading published apps...`}</Text.Custom>
       </Flex>
     );
   }
 
   const InstallButton = ({ app }: any) => {
-    const { bazaar } = useServices();
+    const { bazaarStore } = useShipStore();
     const parts = app.id.split('/');
     let appEntry;
     let installed = false;
-    if (bazaar.catalog.has(parts[1])) {
-      appEntry = bazaar.catalog.get(parts[1]) as UrbitAppType;
+    if (bazaarStore.catalog.has(parts[1])) {
+      appEntry = bazaarStore.catalog.get(parts[1]) as AppMobxType;
       installed = appEntry.installStatus === 'installed';
     }
     return (
-      <Button
+      <Button.Primary
         borderRadius={6}
         paddingTop="6px"
         paddingBottom="6px"
-        variant={installed ? 'disabled' : 'minimal'}
+        disabled={installed}
         fontWeight={500}
         onClick={(e) => {
           e.stopPropagation();
-          !installed && SpacesActions.installApp(parts[0], parts[1]);
+          !installed && bazaarStore.installApp(parts[0], parts[1]);
           // TODO should we close app search on install?
           setSearchMode('none');
         }}
       >
         {installed ? 'Installed' : 'Install'}
-      </Button>
+      </Button.Primary>
     );
   };
 
   if (!apps || apps.length === 0) {
-    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
+    return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;
   }
 
   const onAppClick = (app: DocketAppType) => {
@@ -376,20 +365,14 @@ const DevAppsPresenter = () => {
 const DevApps = observer(DevAppsPresenter);
 
 const DevAppSearchPresenter = () => {
-  const { theme } = useServices();
   const { selectedShip } = useAppInstaller();
-
-  const textFaded = useMemo(
-    () => rgba(theme.currentTheme.textColor, 0.7),
-    [theme.currentTheme.textColor]
-  );
 
   return (
     <Flex flexDirection="column" gap={12}>
-      <Text
+      <Text.Custom
         fontWeight={500}
-        color={textFaded}
-      >{`Software developed by ${selectedShip}...`}</Text>
+        opacity={0.7}
+      >{`Software developed by ${selectedShip}...`}</Text.Custom>
       <Flex flexDirection="column" gap={12}>
         <DevApps />
       </Flex>

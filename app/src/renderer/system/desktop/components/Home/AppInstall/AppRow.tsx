@@ -1,11 +1,7 @@
-import { useRef, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Icons, Box } from 'renderer/components';
-import { ThemeType } from '../../../../../theme';
-import { DocketAppType } from 'os/services/spaces/models/bazaar';
+import { useRef } from 'react';
+import styled from 'styled-components';
+import { Flex, Text, Icon, Box, Row } from '@holium/design-system';
+import { DocketAppType } from 'renderer/stores/models/bazaar.model';
 
 const sizes = {
   sm: 32,
@@ -40,38 +36,6 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-interface RowProps {
-  theme: ThemeType;
-  selected?: boolean;
-  customBg: string;
-}
-
-export const AppRowStyle = styled(motion.div)<RowProps>`
-  height: 48px;
-  position: relative;
-  border-radius: 8px;
-  padding: 0 8px;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  overflow: visible;
-  align-items: center;
-  transition: ${(props: RowProps) => props.theme.transition};
-  ${(props: RowProps) =>
-    props.selected
-      ? css`
-          background-color: ${darken(0.03, props.customBg)};
-        `
-      : css`
-          &:hover {
-            transition: ${(props: RowProps) => props.theme.transition};
-            background-color: ${props.customBg
-              ? darken(0.025, props.customBg)
-              : 'inherit'};
-          }
-        `}
-`;
-
 interface AppRowProps {
   app: any;
   descriptionWidth?: number;
@@ -85,9 +49,7 @@ export const AppRow = ({
   onClick,
   actionRenderer,
 }: AppRowProps) => {
-  const { theme } = useServices();
   const rowRef = useRef<any>(null);
-  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   let image = app.image;
   if (app && !app.image && app.href && app.href.site) {
     // for the case an image is served by the ship
@@ -100,12 +62,7 @@ export const AppRow = ({
   }
 
   return (
-    <AppRowStyle
-      id={`app-row-${app.id}`}
-      ref={rowRef}
-      className="realm-cursor-hover"
-      customBg={currentTheme.windowColor}
-    >
+    <Row id={`app-row-${app.id}`} ref={rowRef} className="realm-cursor-hover">
       <Flex
         flexDirection="row"
         justifyContent="space-between"
@@ -131,10 +88,10 @@ export const AppRow = ({
             style={{
               borderRadius: radius.sm,
               overflow: 'hidden',
+              backgroundColor: app.color || '#F2F3EF',
             }}
             height={sizes.sm}
             width={sizes.sm}
-            backgroundColor={app.color || '#F2F3EF'}
           >
             {image && (
               <img
@@ -146,12 +103,12 @@ export const AppRow = ({
                 alt="app tile icon"
               />
             )}
-            {app.icon && <Icons name={app.icon} height={16} width={16} />}
+            {app.icon && <Icon name={app.icon} size={16} />}
           </TileStyle>
           <Flex flexDirection="column" overflow="hidden">
-            <Text
+            <Text.Custom
               fontWeight={500}
-              color={currentTheme.textColor}
+              fontSize={3}
               style={{
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -160,8 +117,8 @@ export const AppRow = ({
               }}
             >
               {title}
-            </Text>
-            <Text
+            </Text.Custom>
+            <Text.Custom
               mt="2px"
               style={{
                 width: descriptionWidth || 'fit-content',
@@ -171,16 +128,16 @@ export const AppRow = ({
                 maxWidth: '100%',
               }}
               fontSize={2}
-              color={rgba(currentTheme.textColor, 0.4)}
+              opacity={0.4}
             >
               {app.info}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
         {actionRenderer && (
           <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer(app)}</div>
         )}
       </Flex>
-    </AppRowStyle>
+    </Row>
   );
 };

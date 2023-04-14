@@ -1,5 +1,6 @@
+import { Flex, Skeleton, Text } from '@holium/design-system';
 import styled from 'styled-components';
-import { Flex, EmbedBox, Text, Skeleton } from '..';
+import { EmbedBox } from '..';
 
 interface GroupViewProps {
   loading?: boolean;
@@ -47,19 +48,19 @@ export const GroupLink = (props: GroupViewProps) => {
               width={48}
               height={48}
               src={props.picture}
-              alt="group link image"
+              alt="group link"
             />
           ) : (
             <EmptyGroup color={props.color} />
           )}
         </Flex>
         <Flex justifyContent="center" flexDirection="column">
-          <Text fontWeight={400} fontSize={2}>
+          <Text.Custom fontWeight={400} fontSize={2}>
             {props.title}
-          </Text>
-          <Text opacity={0.4} fontSize={2} fontWeight={400}>
+          </Text.Custom>
+          <Text.Custom opacity={0.4} fontSize={2} fontWeight={400}>
             {props.description || `0 peers`}
-          </Text>
+          </Text.Custom>
         </Flex>
       </>
     );
@@ -72,7 +73,6 @@ export const GroupLink = (props: GroupViewProps) => {
       p={2}
       canHover={!props.loading}
       customTextColor={props.textColor}
-      customBg={props.bgColor}
       onClick={(evt: any) => {
         evt.preventDefault();
         // TODO make this open groups app and load url

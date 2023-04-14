@@ -122,7 +122,8 @@ const SpacesTrayAppPresenter = () => {
                   disabled={!isValidSpace(searchString)}
                   onClick={() => {
                     spacesStore.setJoin('loading');
-                    spacesStore.joinSpace(searchString);
+                    console.log('joining space: ', searchString);
+                    spacesStore.joinSpace(`/${searchString}`);
                   }}
                 >
                   {spacesStore.join.state === 'loading' ? (
@@ -135,7 +136,7 @@ const SpacesTrayAppPresenter = () => {
               onKeyDown={(evt: any) => {
                 if (evt.key === 'Enter' && isValidSpace(searchString)) {
                   spacesStore.setJoin('loading');
-                  spacesStore.joinSpace(searchString);
+                  spacesStore.joinSpace(`/${searchString}`);
                 }
               }}
             />
@@ -172,6 +173,7 @@ const SpacesTrayAppPresenter = () => {
           position="absolute"
           width="100%"
           style={{ bottom: bottomHeight, top: 34, left: 0, right: 0 }}
+          overflowX="hidden"
           overflowY="hidden"
         >
           <SpacesList

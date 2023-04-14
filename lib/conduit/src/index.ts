@@ -349,7 +349,6 @@ export class Conduit extends EventEmitter {
       mark: params.mark,
       json: params.json,
     };
-    console.log('sending poke', message.app, message.mark, message.json);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }

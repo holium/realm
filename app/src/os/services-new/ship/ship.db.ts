@@ -3,9 +3,11 @@ import fs from 'fs';
 import { app } from 'electron';
 import sqlite3 from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
-import { notifInitSql } from './models/notifications.model';
-import { chatInitSql } from './models/chat.model';
-import { friendsInitSql } from './models/friends.model';
+import { spacesTablesInitSql } from './spaces/spaces.service';
+import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
+import { notifInitSql } from './notifications/notifications.table';
+import { chatInitSql } from './chat/chat.db';
+import { friendsInitSql } from './friends.table';
 
 export class ShipDB {
   private shipDB: sqlite3.Database;
@@ -38,6 +40,9 @@ export class ShipDB {
     } else {
       log.info('ship db file exists');
       this.shipDB = this.open();
+      if (this.isDev) {
+        this.shipDB.exec(initSql);
+      }
       this.decrypt(password);
     }
   }
@@ -47,7 +52,7 @@ export class ShipDB {
   }
 
   getCredentials() {
-    const result = this.shipDB
+    const result: any = this.shipDB
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();
     return { ...result, ship: this.patp };
@@ -79,9 +84,11 @@ export class ShipDB {
 }
 
 const initSql = `
+${bazaarTablesInitSql}
 ${chatInitSql}
 ${notifInitSql}
 ${friendsInitSql}
+${spacesTablesInitSql}
 create table if not exists credentials (
   url       text primary key,
   code      text,

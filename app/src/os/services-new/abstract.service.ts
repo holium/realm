@@ -5,7 +5,6 @@ import {
   IpcMainInvokeEvent,
   BrowserWindow,
 } from 'electron';
-import log from 'electron-log';
 
 export interface ServiceOptions {
   preload: boolean;

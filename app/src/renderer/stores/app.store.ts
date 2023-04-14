@@ -1,21 +1,9 @@
-import { AuthIPC, RealmIPC, ShipIPC } from './ipc';
+import { RealmIPC } from './ipc';
 import { createContext, useContext } from 'react';
-import {
-  applyPatch,
-  Instance,
-  types,
-  onSnapshot,
-  applySnapshot,
-  getSnapshot,
-  clone,
-} from 'mobx-state-tree';
-
-import { OSActions } from '../logic/actions/os';
+import { Instance, types, clone } from 'mobx-state-tree';
 import { AccountModelType } from './models/account.model';
-import { Theme, ThemeType } from './models/theme.model';
-import { defaultTheme } from '@holium/shared';
+import { defaultTheme, Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
-
 import { ShellModel } from './models/shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { RealmUpdateTypes } from 'os/realm.types';
@@ -133,11 +121,13 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 window.addEventListener('beforeunload', function (event) {
   if (event.type === 'beforeunload') {
     console.log('refreshing');
+    appState.shellStore.closeDialog();
     // appState.reset();
     // The event was triggered by a refresh or navigation
     // Your code to handle the refresh event here
   } else {
     console.log('closing');
+    appState.shellStore.closeDialog();
     // The event was triggered by a window/tab close
     // Your code to handle the close event here
   }

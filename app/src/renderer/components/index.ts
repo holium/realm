@@ -31,7 +31,7 @@ export * from './Crest';
 export * from './ShipSearch';
 export * from './People';
 export * from './SpacePicture';
-export * from './AppTile/AppTile';
+export * from '../system/desktop/components/Home/AppTile';
 export * from './Notification/InnerNotification';
 export * from './ConnectionStatus';
 export * from './urbitSvg';

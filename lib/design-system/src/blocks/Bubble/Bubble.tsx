@@ -165,13 +165,17 @@ export const Bubble = ({
       if (contentType === 'status') {
         return (
           <Flex
+            id={id}
             ref={innerRef}
             key={id}
             display="inline-flex"
             height={STATUS_HEIGHT}
             justifyContent={isOur ? 'flex-end' : 'flex-start'}
           >
-            <InlineStatus text={(message[0] as FragmentStatusType).status} />
+            <InlineStatus
+              id={id}
+              text={(message[0] as FragmentStatusType).status}
+            />
           </Flex>
         );
       }

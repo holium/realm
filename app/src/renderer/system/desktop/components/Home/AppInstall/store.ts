@@ -1,8 +1,7 @@
 import { createContext, useContext } from 'react';
 import { Instance, types, onSnapshot } from 'mobx-state-tree';
-import { Patp } from 'os/types';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
-import { DocketApp, DocketAppType } from 'os/services/spaces/models/bazaar';
+import { DocketAppType, DocketApp } from 'renderer/stores/models/bazaar.model';
 
 const searchMode = types.enumeration([
   'none',
@@ -94,7 +93,7 @@ export const AppInstallStore = types
     setSearchPlaceholder(placeholder: any) {
       self.searchPlaceholder = placeholder;
     },
-    setSelectedShip(ship: Patp) {
+    setSelectedShip(ship: string) {
       self.selectedShip = ship;
     },
     setSelectedDesk(desk: string) {

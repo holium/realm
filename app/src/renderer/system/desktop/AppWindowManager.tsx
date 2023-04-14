@@ -2,8 +2,6 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { AppWindow } from './components/AppWindow/AppWindow';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import {
   ContextMenuOption,
   useContextMenu,
@@ -65,7 +63,7 @@ const AppWindowManagerPresenter = () => {
         left: 0,
         top: 0,
         right: 0,
-        height: `calc(100vh - ${0}px)`,
+        height: '100vh',
         paddingTop: shellStore.isFullscreen ? 0 : 30,
       }}
     >

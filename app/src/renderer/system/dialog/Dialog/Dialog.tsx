@@ -10,8 +10,8 @@ import {
 import styled from 'styled-components';
 import { Button, Icon, Flex, Spinner } from '@holium/design-system';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { useServices } from 'renderer/logic/store';
 import { AppWindowType } from 'os/services/shell/desktop.model';
+import { useAppState } from 'renderer/stores/app.store';
 
 export interface DialogViewProps {
   appWindow: AppWindowType;
@@ -19,7 +19,6 @@ export interface DialogViewProps {
 
 type ViewProps = {
   ref: RefObject<HTMLDivElement>;
-  background: string;
   hasTitleBar?: boolean;
   children?: ReactNode;
 };
@@ -35,11 +34,12 @@ const View = styled.div<ViewProps>`
   width: inherit;
   height: inherit;
   padding: 24px 24px;
-  background: ${(props) => props.background};
+  background: rgba(var(--rlm-window-rgba), 0.9);
+  backdrop-filter: blur(24px);
 `;
 
 export const DialogView = ({ appWindow }: DialogViewProps) => {
-  const { theme, shell } = useServices();
+  const { shellStore } = useAppState();
   const elementRef = useRef(null);
 
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
@@ -49,15 +49,15 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
     const dialogRenderer = dialogRenderers[appWindow.appId];
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
-        ? dialogRenderer(shell.dialogProps.toJSON())
+        ? dialogRenderer(shellStore.dialogProps.toJSON())
         : dialogRenderer;
     return dialogConfig.component;
-  }, [appWindow.appId, shell.dialogProps.toJSON()]);
+  }, [appWindow.appId, shellStore.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[appWindow.appId];
   const dialogConfig: DialogConfig =
     dialogRenderer instanceof Function
-      ? dialogRenderer(shell.dialogProps.toJSON())
+      ? dialogRenderer(shellStore.dialogProps.toJSON())
       : dialogRenderer;
   const {
     workflow,
@@ -80,7 +80,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
   }, [isValidated, workflowState]);
 
   return (
-    <View ref={elementRef} background={theme.currentTheme.windowColor}>
+    <View ref={elementRef}>
       <Flex
         flex={1}
         flexDirection="column"
@@ -99,7 +99,6 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
               onPrevious={onPrevious}
               setState={setWorkflowState}
               workflowState={workflowState}
-              theme={theme.currentTheme}
             />
           )}
         </Flex>

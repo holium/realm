@@ -53,6 +53,7 @@ const FeaturedListPresenter = () => {
         itemContent={(_, data) => {
           const onJoin = async () => {
             setJoining(true);
+            console.log('joining', data.path.substring(1));
             spacesStore
               .joinSpace(data.path.substring(1))
               .then(() => {

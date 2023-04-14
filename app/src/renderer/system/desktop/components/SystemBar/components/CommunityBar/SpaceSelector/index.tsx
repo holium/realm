@@ -9,10 +9,9 @@ import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { BarButton } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
+import { SystemTrayRegistry } from 'renderer/apps/registry';
 
-const position = 'top-right';
-const anchorOffset = { x: 4, y: 16 };
-const dimensions = { height: 500, width: 380 };
+const { position, anchorOffset, dimensions } = SystemTrayRegistry.spaces;
 
 const SpaceSelectorPresenter = () => {
   const { theme } = useAppState();

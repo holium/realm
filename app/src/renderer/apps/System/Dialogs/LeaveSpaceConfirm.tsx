@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type LeaveSpaceDialogConfigComponentProps = {
   path: string;
@@ -16,10 +16,12 @@ const LeaveSpaceDialogConfigComponent = ({
   ...props
 }: LeaveSpaceDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
+  const { spacesStore } = useShipStore();
+
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
-      SpacesActions.leaveSpace(path).then(() => {
+      spacesStore.leaveSpace(path).then(() => {
         setLoading(false);
       });
     }

@@ -1,14 +1,15 @@
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { BarStyle, HoliumButton } from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
 
 const HomeButtonPresenter = () => {
-  const { desktop } = useServices();
+  const { shellStore } = useAppState();
 
   const onHome = () => {
-    if (desktop.isHomePaneOpen) DesktopActions.closeHomePane();
-    else DesktopActions.openHomePane();
+    console.log('onHome', shellStore.isHomePaneOpen);
+    if (shellStore.isHomePaneOpen) {
+      shellStore.closeHomePane();
+    } else shellStore.openHomePane();
   };
 
   return (

@@ -7,11 +7,12 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
 import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
-import NotificationsService from './notifications.service';
-import ChatService from './chat.service';
-import { Friends } from './models/friends.model';
-import SpacesService from './spaces.service';
+import NotificationsService from './notifications/notifications.service';
+import ChatService from './chat/chat.service';
+import { Friends } from './friends.table';
+import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../s3/S3Client';
+import BazaarService from './spaces/bazaar.service';
 
 export class ShipService extends AbstractService {
   private patp: string;
@@ -22,6 +23,7 @@ export class ShipService extends AbstractService {
     chat: ChatService;
     friends: Friends;
     spaces: SpacesService;
+    bazaar: BazaarService;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -46,18 +48,37 @@ export class ShipService extends AbstractService {
       }
     );
 
+    // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
+    try {
+      this.shipDB.db.exec(`
+        DELETE FROM docks;
+        DELETE FROM stalls;
+        DELETE FROM app_catalog;
+        DELETE FROM spaces_members;
+        DELETE FROM spaces;
+      `);
+    } catch (e) {
+      log.error(e);
+    }
+
     this.services = {
       rooms: new RoomsService(),
       notifications: new NotificationsService(undefined, this.shipDB.db),
       chat: new ChatService(undefined, this.shipDB.db),
       friends: new Friends(false, this.shipDB.db),
-      spaces: new SpacesService(undefined, this.shipDB.db),
+      spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
+      bazaar: new BazaarService(undefined, this.shipDB.db),
     };
 
     app.on('quit', () => {
       this.shipDB?.disconnect();
       APIConnection.getInstance(credentials).conduit.removeAllListeners();
     });
+  }
+
+  // TODO initialize the ship services here
+  public init() {
+    this.services?.spaces.init();
   }
 
   get credentials() {
@@ -76,7 +97,33 @@ export class ShipService extends AbstractService {
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
+    this.services?.bazaar.reset();
   }
+
+  public async getOurGroups(): Promise<{ [path: string]: any }> {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: '/groups', // the spaces scry is at the root of the path
+    });
+    // return response.groups;
+    return Array.from(Object.values(response.groups));
+  }
+  public async getGroup(path: string): Promise<{ [path: string]: any }> {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: `/groups${path}`, // the spaces scry is at the root of the path
+    });
+    return response;
+    // return Array.from(Object.values(response.groups));
+  }
+  public async getGroupMembers(path: string): Promise<{ [path: string]: any }> {
+    return await APIConnection.getInstance().conduit.scry({
+      app: 'spaces',
+      path: `/groups${path}/members`, // the spaces scry is at the root of the path
+    });
+    // return Array.from(Object.values(response.groups));
+  }
+
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------

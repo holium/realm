@@ -14,6 +14,7 @@ export const FriendsApi = {
       color: contact.color && cleanNounColor(contact.color),
     };
   },
+
   saveContact: async (conduit: Conduit, ship: string, data: any) => {
     const preparedData = {
       nickname: data.nickname,

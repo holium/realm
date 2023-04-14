@@ -7,7 +7,6 @@ import { AppWindowByType } from './AppWindowByType';
 import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { useToggle } from '@holium/design-system';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
@@ -16,6 +15,8 @@ import {
 } from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { ErrorBoundary } from '../../../../logic/ErrorBoundary';
 
 const CURSOR_WIDTH = 10;
 
@@ -28,13 +29,13 @@ type Props = {
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
   const { shellStore } = useAppState();
-  const { bazaar } = useServices();
+  const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
   const resizing = useToggle(false);
   const dragging = useToggle(false);
 
-  const appInfo = bazaar.getApp(appWindow.appId);
+  const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
   const bounds = useMemo(
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
@@ -293,12 +294,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, [webViewId]);
 
   const onMouseDown = () => shellStore.setActive(appWindow.appId);
-  console.log(
-    'rendering window',
-    appWindow.appId,
-    'is active?',
-    appWindow.isActive
-  );
+
   return (
     <AppWindowContainer
       id={windowId}
@@ -361,11 +357,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           onMaximize={onMaximize}
           onMinimize={onMinimize}
         />
-        <AppWindowByType
-          isResizing={resizing.isOn}
-          isDragging={dragging.isOn}
-          appWindow={appWindow}
-        />
+        <ErrorBoundary>
+          <AppWindowByType
+            isResizing={resizing.isOn}
+            isDragging={dragging.isOn}
+            appWindow={appWindow}
+          />
+        </ErrorBoundary>
         <AppWindowResizeHandles
           zIndex={appWindow.zIndex + 1}
           topRight={{

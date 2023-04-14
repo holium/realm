@@ -138,7 +138,10 @@ export const InputBox = ({
   error,
   children,
   borderRadius = '6px',
+  background = 'currentColor',
   style,
+  px,
+  py,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
@@ -147,11 +150,14 @@ export const InputBox = ({
     height={height}
     error={error}
     borderRadius={borderRadius}
+    background={background}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}
     fontSize={boxProps.fontSize || '14px'}
     textAlign={boxProps.textAlign || 'left'}
+    px={px}
+    py={py}
   >
     {label && label !== 'none' && (
       <Text.Label

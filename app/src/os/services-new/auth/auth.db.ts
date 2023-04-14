@@ -25,7 +25,7 @@ export class AuthDB {
     this.authDB.pragma('foreign_keys = ON');
     this.authDB.exec(initSql);
 
-    const result = this.authDB
+    const result: any = this.authDB
       .prepare('SELECT migrated FROM accounts_meta LIMIT 1;')
       .all();
 

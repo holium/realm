@@ -1,14 +1,23 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
+// import { toJS } from 'mobx';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  destroy,
+  getParentOfType,
+} from 'mobx-state-tree';
 import { Chat, ChatModelType } from './models';
-import { shipStore } from '../../stores/ship.store';
+import { shipStore, ShipStore } from '../../stores/ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { RealmUpdateTypes } from 'os/realm.service';
+import { RealmUpdateTypes } from 'os/realm.types';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+import { toJS } from 'mobx';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
-const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+export const sortByUpdatedAt = (a: any, b: any) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -36,16 +45,42 @@ export const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
-    get pinnedChatList() {
-      return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path))
-        .sort(sortByUpdatedAt);
+    get sortedChatList() {
+      const spacesStore: SpacesStoreType = getParentOfType(
+        self,
+        ShipStore
+      ).spacesStore;
+      const selectedPath = spacesStore.selected?.path;
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        // Check if the chats are space chats and match the selected space
+        const isASpaceChatAndSelected =
+          a.type === 'space' &&
+          selectedPath === spacesStore.getSpaceByChatPath(a.path)?.path;
+        const isBSpaceChatAndSelected =
+          b.type === 'space' &&
+          selectedPath === spacesStore.getSpaceByChatPath(b.path)?.path;
+
+        // Compare the boolean values
+        if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
+          return isBSpaceChatAndSelected ? 1 : -1;
+        }
+
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
     },
-    get unpinnedChatList() {
-      return self.inbox
-        .filter((c) => !self.pinnedChats.includes(c.path))
-        .sort(sortByUpdatedAt);
-    },
+
     getChatHeader(path: string): {
       title: string;
       sigil?: any;
@@ -66,6 +101,16 @@ export const ChatStore = types
             nickname: nickname || '',
           },
           image: avatar || chat.metadata.image,
+        };
+      } else if (chat.type === 'space') {
+        const spacesStore: SpacesStoreType = getParentOfType(
+          self,
+          ShipStore
+        ).spacesStore;
+        const space = spacesStore.getSpaceByChatPath(chat.path);
+        return {
+          title: chat.metadata.title,
+          image: space?.picture,
         };
       } else {
         return {
@@ -181,7 +226,6 @@ export const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
@@ -221,8 +265,9 @@ export const chatStore = ChatStore.create({
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext =
-  createContext<null | ChatStoreInstance>(chatStore);
+export const ChatStoreContext = createContext<null | ChatStoreInstance>(
+  chatStore
+);
 
 export const ChatProvider = ChatStoreContext.Provider;
 export function useChatStore() {

@@ -125,7 +125,7 @@
   $%
     [%add-row =db-row]
     [%upd-messages =msg-id =message]
-    [%upd-paths-row =path-row]
+    [%upd-paths-row =path-row old=path-row]
     [%del-paths-row =path timestamp=@da]
     [%del-peers-row =path =ship timestamp=@da]
     [%del-messages-row =path =uniq-id timestamp=@da]
@@ -138,4 +138,15 @@
 +$  db-change  (list db-change-type)
 +$  del-log  ((mop time db-change-type) gth)
 ++  delon  ((on time db-change-type) gth)
+:: old versions
++$  del-log-0  ((mop time db-change-type-0) gth)
++$  db-change-type-0
+  $%
+    [%add-row =db-row]
+    [%upd-messages =msg-id =message]
+    [%upd-paths-row =path-row]
+    [%del-paths-row =path timestamp=@da]
+    [%del-peers-row =path =ship timestamp=@da]
+    [%del-messages-row =path =uniq-id timestamp=@da]
+  ==
 --

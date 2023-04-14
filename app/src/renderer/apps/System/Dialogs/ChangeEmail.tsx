@@ -1,28 +1,25 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
+import { Label, BigInput } from 'renderer/components';
 import {
-  Input,
-  TextButton,
+  TextInput,
   Text,
-  Label,
-  BigInput,
   Button,
-} from 'renderer/components';
-import { Box, Flex, Spinner } from '@holium/design-system';
-import { ThemeType } from 'renderer/theme';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
+  Box,
+  Flex,
+  Spinner,
+} from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
   onClose: () => {
-    ShellActions.closeDialog();
-    ShellActions.setBlur(false);
+    appState.shellStore.closeDialog();
+    appState.shellStore.setIsBlurred(false);
   },
   getWindowProps: (desktopDimensions) => ({
     appId: 'change-email-dialog',
@@ -45,8 +42,6 @@ export const ChangeEmailDialogConfig: DialogConfig = {
 };
 
 const ChangeEmailDialogPresenter = () => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
 
   const transitionToVerify = () => {
@@ -56,17 +51,15 @@ const ChangeEmailDialogPresenter = () => {
   const emailVerified = () => {
     setView('success');
     setTimeout(() => {
-      ShellActions.closeDialog();
-      ShellActions.setBlur(false);
+      appState.shellStore.closeDialog();
+      appState.shellStore.setIsBlurred(false);
     }, 2000);
   };
 
   const screens = {
-    initial: <InitialScreen done={transitionToVerify} baseTheme={baseTheme} />,
-    verify: (
-      <VerifyScreen done={emailVerified} theme={baseTheme as ThemeType} />
-    ),
-    success: <SuccessScreen baseTheme={baseTheme} />,
+    initial: <InitialScreen done={transitionToVerify} />,
+    verify: <VerifyScreen done={emailVerified} />,
+    success: <SuccessScreen />,
   };
 
   const Screen = screens[view as 'initial' | 'verify' | 'success'];
@@ -80,9 +73,11 @@ const ChangeEmailDialogPresenter = () => {
 
 const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
-function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
-  const { identity } = useServices();
-  const [email, setEmail] = useState(identity.auth.email);
+function InitialScreen(props: { done: any }) {
+  // TODO: add email validation --------------------
+  // const { identity } = useServices();
+  const currentEmail = 'email@email.com';
+  const [email, setEmail] = useState(currentEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -109,39 +104,40 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
   return (
     <>
       <Flex flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
+        <Text.Custom fontSize={3} fontWeight={500} mb={20}>
           Change Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
           Which email would you like to use for your account?
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex mt={8} flexDirection="column">
         <Label mb={3} required={true}>
           Email
         </Label>
-        <Input onChange={onChange} type="email" required={true} />
+        <TextInput
+          id="email-change"
+          name="email-change"
+          type="email"
+          required={true}
+          onChange={onChange}
+        />
         <Box mt={7} width="100%">
-          <Button
+          <Button.Primary
             width="100%"
             disabled={
               !email ||
               !emailValidator.validate(email) ||
-              email.toLowerCase() === identity.auth.email?.toLowerCase()
+              email.toLowerCase() === currentEmail?.toLowerCase()
             }
-            isLoading={loading}
             onClick={onClick}
           >
-            Submit
-          </Button>
+            {loading ? <Spinner color="white" size={0} /> : 'Submit'}
+          </Button.Primary>
         </Box>
-        <Text
-          variant="body"
-          color={props.baseTheme.colors.text.error}
-          fontSize={1}
-        >
+        <Text.Custom variant="body" fontSize={1}>
           {error}
-        </Text>
+        </Text.Custom>
       </Flex>
     </>
   );
@@ -150,7 +146,7 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
 const validChars =
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-function VerifyScreen(props: { theme: ThemeType; done: any }) {
+function VerifyScreen(props: { done: any }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
 
@@ -176,13 +172,13 @@ function VerifyScreen(props: { theme: ThemeType; done: any }) {
   return (
     <>
       <Flex mt={7} mb={5} flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
+        <Text.Custom fontSize={3} fontWeight={500} mb={20}>
           Verify Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
           We sent a verification code to your email. Once you receive the code,
           confirm it below.
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex flexDirection="column">
         <Flex mt={5} width="100%" justifyContent="center">
@@ -194,17 +190,17 @@ function VerifyScreen(props: { theme: ThemeType; done: any }) {
           />
         </Flex>
         <Flex mt={4} flexDirection="column">
-          <ResendCodeButton theme={props.theme} />
-          <Text mt={3} fontSize={1} color={props.theme.colors.text.error}>
+          <ResendCodeButton />
+          <Text.Custom mt={3} fontSize={1} color="intent-alert">
             {error && 'Verification code was incorrect.'}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
     </>
   );
 }
 
-function ResendCodeButton(props: { theme: ThemeType }) {
+function ResendCodeButton() {
   const [state, setState] = useState('initial');
 
   const resendCode = async () => {
@@ -226,41 +222,26 @@ function ResendCodeButton(props: { theme: ThemeType }) {
     >
       {state === 'initial' || state === 'loading' ? (
         <>
-          <TextButton
+          <Button.TextButton
             fontSize={1}
             fontWeight={400}
             disabled={state === 'loading'}
-            textColor={
-              state === 'loading'
-                ? props.theme.colors.text.disabled
-                : props.theme.colors.brand.secondary
-            }
             onClick={resendCode}
           >
             send another code
-          </TextButton>
-          {state === 'loading' && (
-            <Spinner
-              ml={1}
-              size="8px"
-              color={props.theme.colors.brand.secondary}
-            />
-          )}
+          </Button.TextButton>
+          {state === 'loading' && <Spinner ml={1} size={0} />}
         </>
       ) : (
-        <Text
-          variant="body"
-          fontSize={1}
-          color={props.theme.colors.text.success}
-        >
+        <Text.Custom variant="body" fontSize={1} color="intent-success">
           Another verification code was sent.
-        </Text>
+        </Text.Custom>
       )}
     </Flex>
   );
 }
 
-function SuccessScreen(props: { baseTheme: ThemeType }) {
+function SuccessScreen() {
   return (
     <Flex
       width="100%"
@@ -268,9 +249,7 @@ function SuccessScreen(props: { baseTheme: ThemeType }) {
       justifyContent="center"
       alignItems="center"
     >
-      <Text color={props.baseTheme.colors.text.success}>
-        Email successfully updated.
-      </Text>
+      <Text.Custom fontSize={3}>Email successfully updated.</Text.Custom>
     </Flex>
   );
 }

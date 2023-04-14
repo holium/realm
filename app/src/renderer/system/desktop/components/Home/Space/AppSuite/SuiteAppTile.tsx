@@ -7,17 +7,12 @@ import {
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import {
   ContextMenuOption,
   IconButton,
   Icons,
   AppTile,
 } from 'renderer/components';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { getAppTileFlags } from 'renderer/logic/lib/app';
 import {
   handleInstallation,
@@ -26,6 +21,10 @@ import {
   installLabel,
 } from '../../AppInstall/helpers';
 import { Box } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   index: number;
@@ -35,7 +34,9 @@ type Props = {
 };
 
 const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
-  const { bazaar } = useServices();
+  const { shellStore } = useAppState();
+  const { bazaarStore, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
 
   const appHost = useMemo(() => {
     if (app.type !== 'urbit') return null;
@@ -49,8 +50,8 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     [isLight]
   );
 
-  const isPinned = bazaar.isPinned(space.path, app.id);
-  const weRecommended = bazaar.isRecommended(app.id);
+  const isPinned = currentSpace?.isPinned(app.id);
+  const weRecommended = bazaarStore.isRecommended(app.id);
   const installStatus =
     ((app as UrbitAppType).installStatus as InstallStatus) ||
     InstallStatus.installed;
@@ -74,8 +75,8 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           onClick: (evt: any) => {
             evt.stopPropagation();
             isPinned
-              ? SpacesActions.unpinApp(space.path, app.id)
-              : SpacesActions.pinApp(space.path, app.id, null);
+              ? currentSpace?.unpinApp(app.id)
+              : currentSpace?.pinApp(app.id);
           },
         },
         {
@@ -83,8 +84,8 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           onClick: (evt: any) => {
             evt.stopPropagation();
             weRecommended
-              ? SpacesActions.unrecommendApp(app.id)
-              : SpacesActions.recommendApp(app.id);
+              ? bazaarStore.unrecommendApp(app.id)
+              : bazaarStore.recommendApp(app.id);
           },
         },
         {
@@ -92,7 +93,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           disabled: app.type === 'dev',
           onClick: (evt: any) => {
             evt.stopPropagation();
-            ShellActions.openDialogWithStringProps('app-detail-dialog', {
+            shellStore.openDialogWithStringProps('app-detail-dialog', {
               appId: app.id,
             });
           },
@@ -101,7 +102,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           label: 'Remove from suite',
           onClick: (evt: any) => {
             evt.stopPropagation();
-            SpacesActions.removeFromSuite(space.path, index);
+            currentSpace?.removeFromSuite(index);
           },
         },
         app.type === 'urbit' &&
@@ -162,13 +163,13 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
       <AppTile
         tileId={`${app.id}-app`}
         tileSize="xl1"
-        app={app}
+        app={app as AppMobxType}
         isAnimated={isInstalled}
         installStatus={installStatus}
         contextMenuOptions={contextMenuOptions}
-        onAppClick={(selectedApp: AppType) => {
-          DesktopActions.openAppWindow(selectedApp);
-          DesktopActions.closeHomePane();
+        onAppClick={(selectedApp: AppMobxType) => {
+          shellStore.openWindow(selectedApp);
+          shellStore.closeHomePane();
         }}
       />
     </Box>

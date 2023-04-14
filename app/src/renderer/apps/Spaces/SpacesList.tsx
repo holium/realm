@@ -1,12 +1,19 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Icon, WindowedList } from '@holium/design-system';
-// import { ActionButton } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Button,
+  Icon,
+  WindowedList,
+  Box,
+} from '@holium/design-system';
 import { SpaceRow } from './SpaceRow';
 import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useAppState } from 'renderer/stores/app.store';
+import { useTrayApps } from '../store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export interface Space {
@@ -24,6 +31,7 @@ interface SpacesListProps {
   onSelect: (spaceKey: string) => void;
   onFindMore: () => void;
 }
+const scrollbarWidth = 12;
 
 const SpacesListPresenter = ({
   selected,
@@ -33,12 +41,13 @@ const SpacesListPresenter = ({
 }: SpacesListProps) => {
   const { shellStore } = useAppState();
   const { spacesStore } = useShipStore();
-  // const { visas } = spacesStore;
-  const visas = { incoming: new Map() };
+  const { invitations } = spacesStore;
+  const { dimensions } = useTrayApps();
+  const listWidth = useMemo(() => dimensions.width - 28, [dimensions.width]);
 
   const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
-  const incoming = Array.from(visas.incoming.values());
+  const incoming = Array.from(invitations.incoming.values());
 
   type SpaceRowValue = (typeof spaces)[number];
   type VisaRowValue = (typeof incoming)[number];
@@ -66,6 +75,7 @@ const SpacesListPresenter = ({
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        width={dimensions.width - 28}
         gap={24}
       >
         <Text.Custom width={200} textAlign="center" opacity={0.5}>
@@ -113,28 +123,34 @@ const SpacesListPresenter = ({
   }
 
   return (
-    <Flex
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.1, duration: 0.1 }}
-    >
-      <WindowedList
-        key={`${spaces.length}-${incoming.length}`}
-        width={354}
-        data={rows}
-        itemContent={(_, { space, visa }) => {
-          if (space) {
-            return (
-              <SpaceRow
-                key={`space-${space.path}`}
-                space={space}
-                selected={selected?.path === space.path}
-                onSelect={onSelect}
-              />
-            );
-          }
-          const visaRowValue = visa as VisaRowValue;
+    <WindowedList
+      key={`${spaces.length}-${incoming.length}`}
+      width={listWidth + scrollbarWidth}
+      data={rows}
+      style={{ marginRight: -scrollbarWidth }}
+      itemContent={(index, { space, visa }) => {
+        if (space) {
           return (
+            <SpaceRow
+              key={`space-${space.path}`}
+              space={space}
+              selected={selected?.path === space.path}
+              onSelect={onSelect}
+            />
+          );
+        }
+        const visaRowValue = visa as VisaRowValue;
+        let dividerStyle = {};
+        if (index < rows.length - 1) {
+          dividerStyle = {
+            paddingBottom: 8,
+            marginBottom: 8,
+            borderBottom: '1px solid rgba(var(--rlm-border-rgba), 0.8)',
+          };
+        }
+
+        return (
+          <Box style={dividerStyle} key={`visa-${visaRowValue.path}`}>
             <VisaRow
               key={`visa-${visaRowValue.path}`}
               image={visaRowValue.picture}
@@ -144,10 +160,10 @@ const SpacesListPresenter = ({
               invitedBy={visaRowValue.inviter}
               title={visaRowValue.name}
             />
-          );
-        }}
-      />
-    </Flex>
+          </Box>
+        );
+      }}
+    />
   );
 };
 

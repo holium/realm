@@ -23,7 +23,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
-import { RealmIPC } from 'renderer/stores/ipc';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';

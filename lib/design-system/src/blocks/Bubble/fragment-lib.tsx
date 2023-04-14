@@ -174,14 +174,16 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   border-left: 2px solid rgba(var(--rlm-accent-rgba));
   padding-left: 6px;
   padding-right: 8px;
-  border-radius: 3px;
+  border-radius: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   background-color: rgba(0, 0, 0, 0.1);
 
   .fragment-reply {
     border-radius: 4px;
-    height: 2rem;
 
     ${FragmentBase} {
       font-size: 0.82rem;
@@ -209,8 +211,8 @@ export const FragmentBlockquote = styled(motion.blockquote)`
     &.pinned {
       gap: 0px;
       ${Text.Custom} {
-        line-height: inherit;
-        font-size: 0.8em;
+        /* line-height: inherit; */
+        /* font-size: 0.8em; */
       }
     }
   }
@@ -413,7 +415,7 @@ export const renderFragment = (
 
       return (
         <FragmentBlockquote
-          style={{ height: 42 }}
+          style={{ height: 46 }}
           id={id}
           key={`${author + index}-reply`}
           onClick={() => onReplyClick?.(replyId)}

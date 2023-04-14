@@ -1,4 +1,3 @@
-import { MouseEventHandler } from 'react';
 import styled, { css } from 'styled-components';
 import { Flex, Row, Text, Icon, TextProps } from '../../general';
 import { IconPathsType } from '../../general/Icon/icons';
@@ -12,7 +11,10 @@ export type MenuItemProps = {
   backgroundColor?: string;
   disabled?: boolean;
   section?: number;
-  onClick: MouseEventHandler<HTMLElement>;
+  onClick: (
+    evt: React.MouseEvent<HTMLButtonElement>,
+    elem?: HTMLElement
+  ) => void;
 };
 
 type MenuItemLabelProps = {
@@ -45,7 +47,9 @@ export const MenuItem = ({
       disabled={disabled}
       className="nav-menu-item"
       backgroundColor={backgroundColor}
-      onClick={(evt) => !disabled && onClick(evt)}
+      onClick={(evt) =>
+        !disabled && onClick(evt as React.MouseEvent<HTMLButtonElement>)
+      }
     >
       <Flex
         pointerEvents={disabled ? 'none' : 'all'}

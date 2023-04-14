@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Flex, Text, Button } from 'renderer/components';
 import { SuiteApp } from './SuiteApp';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { AppRow } from '../../AppInstall/AppRow';
-import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { darken, rgba } from 'polished';
 import { RealmPopover } from '../../Popover';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
+import { Flex, Text, Button } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface AppSuiteProps {
   patp: string;
@@ -91,25 +89,17 @@ const dimensions = {
 };
 
 const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
-  const { theme, bazaar, spaces } = useServices();
+  const { bazaarStore, spacesStore } = useShipStore();
 
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
   const [coords, setCoords] = useState({ left: 0, top: 0 });
-  const { accentColor, textColor } = theme.currentTheme;
 
   const isOpen = searchMode !== 'none';
-  const backgroundColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? theme.currentTheme.windowColor
-        : darken(0.1, theme.currentTheme.windowColor),
-    [theme.currentTheme]
-  );
 
-  const space = spaces.selected;
-  const suite = bazaar.getSuite(space?.path ?? '');
-  const apps = bazaar.installed;
+  const currentSpace = spacesStore.selected;
+  const suite = currentSpace?.stall.suite;
+  const apps = bazaarStore.installed;
 
   const popoverId = `app-suite-${suiteIndex}`;
   const popover = useMemo(
@@ -129,15 +119,14 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
           borderRadius: 12,
           maxHeight: dimensions.height,
           overflowY: 'auto',
-          background: backgroundColor,
         }}
       >
         <Flex flexDirection="column" gap={12}>
-          <Text variant="h6" mb={1} fontWeight={500} color={textColor}>
+          <Text.Custom variant="h6" mb={1} fontWeight={500}>
             Installed Apps
-          </Text>
+          </Text.Custom>
           {(apps.length === 0 && (
-            <Text color={rgba(textColor, 0.4)}>No apps found</Text>
+            <Text.Custom opacity={0.4}>No apps found</Text.Custom>
           )) || (
             <Flex flexDirection={'column'} gap={10}>
               {apps.map((item, index) => (
@@ -146,20 +135,16 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
                   app={item}
                   descriptionWidth={dimensions.width - 225}
                   actionRenderer={() => (
-                    <Button
+                    <Button.Primary
                       borderRadius={6}
                       onClick={() => {
                         setSearchMode('none');
                         setSuiteIndex(-1);
-                        SpacesActions.addToSuite(
-                          space?.path ?? '',
-                          item?.id ?? '',
-                          suiteIndex
-                        );
+                        currentSpace?.addToSuite(item?.id ?? '', suiteIndex);
                       }}
                     >
                       Add to Suite
-                    </Button>
+                    </Button.Primary>
                   )}
                   onClick={() => {}}
                 />
@@ -169,19 +154,10 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
         </Flex>
       </RealmPopover>
     ),
-    [
-      apps,
-      backgroundColor,
-      coords,
-      isOpen,
-      popoverId,
-      space?.path ?? '',
-      suiteIndex,
-      textColor,
-    ]
+    [apps, coords, isOpen, popoverId, currentSpace, suiteIndex]
   );
 
-  if (!space) return null;
+  if (!currentSpace) return null;
 
   const AppTile = ({ app, index }: { app: any | null; index: number }) => {
     if (app) {
@@ -191,9 +167,8 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
           index={index}
           id={`app-suite-${index}-trigger`}
           isAdmin={isAdmin}
-          space={space}
+          space={currentSpace}
           selected={index === suiteIndex}
-          accentColor={accentColor}
           app={app}
         />
       );
@@ -204,9 +179,8 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
         key={index}
         index={index}
         id={`app-suite-${index}-trigger`}
-        space={space}
+        space={currentSpace}
         selected={index === suiteIndex}
-        accentColor={accentColor}
         app={undefined}
         isAdmin={isAdmin}
         onClick={(evt: React.MouseEvent<any>) => {
@@ -232,9 +206,9 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
   return (
     <Flex flexDirection="column" position="relative" gap={20} mb={60}>
       <Flex>
-        <Text variant="h3" fontWeight={500}>
+        <Text.Custom variant="h3" fontWeight={500}>
           App Suite
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex
         flexGrow={1}

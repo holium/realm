@@ -1,18 +1,14 @@
 import { RealmIPC } from './ipc';
 import {
-  applyPatch,
-  Instance,
   types,
-  onSnapshot,
   applySnapshot,
   clone,
   flow,
   getSnapshot,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
 import { AccountModel, AccountModelType } from './models/account.model';
-import { AuthUpdateLogin } from 'os/services-new/auth/auth.service';
+// import { AuthUpdateLogin } from 'os/services-new/auth/auth.service';
 import { trackEvent } from 'renderer/logic/lib/track';
 
 export const LoginStatus = types.enumeration([
@@ -49,11 +45,11 @@ export const AuthenticationModel = types
         self.session = null;
       }
     },
-    _authSuccess(data: AuthUpdateLogin) {
-      // self.session = account;
-    },
-    _authError(data: AuthUpdateLogin) {},
-    //
+    // _authSuccess(data: AuthUpdateLogin) {
+    //   // self.session = account;
+    // },
+    // _authError(data: AuthUpdateLogin) {},
+    // //
     setAccountCurrentTheme(theme: any) {
       const account = self.accounts.find((a) => a.patp === self.session?.patp);
       if (account) {
@@ -85,6 +81,18 @@ export const AuthenticationModel = types
     logout: flow(function* () {
       try {
         yield RealmIPC.logout(self.session?.patp) as Promise<any>;
+        self.session = null;
+        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
+        self.status = 'initial';
+        self.session = null;
+      } catch (e) {
+        console.log(e);
+      }
+    }),
+    shutdown: flow(function* () {
+      // TODO implement
+      try {
+        // yield RealmIPC.shutdown(self.session?.patp) as Promise<any>;
         self.session = null;
         trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
         self.status = 'initial';
