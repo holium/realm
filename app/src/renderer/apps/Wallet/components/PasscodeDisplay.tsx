@@ -1,8 +1,6 @@
 import { FC } from 'react';
 import { Flex, Box } from 'renderer/components';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../lib/helpers';
+import { transparentize } from 'polished';
 
 interface PasscodeDisplayProps {
   digits: number;
@@ -12,25 +10,16 @@ interface PasscodeDisplayProps {
 export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
   props: PasscodeDisplayProps
 ) => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-
   const Filled = () => (
     <Flex
       mx="6px"
       height={35}
       width={32}
-      border={`solid 2px ${baseTheme.colors.brand.primary}`}
       borderRadius={4}
       alignItems="center"
       justifyContent="center"
     >
-      <Box
-        height="8px"
-        width="8px"
-        backgroundColor={baseTheme.colors.text.primary}
-        borderRadius="50%"
-      ></Box>
+      <Box height="8px" width="8px" borderRadius="50%"></Box>
     </Flex>
   );
 
@@ -54,7 +43,6 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
           <Empty
             key={index}
             border={`2px solid ${transparentize(0.9, '#000000')}`}
-            background={darken(0.02, theme.currentTheme.windowColor)}
           />
         );
       })}

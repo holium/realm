@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box, Spinner } from '@holium/design-system';
-import { Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../lib/helpers';
+import { Flex, Box, Spinner, Text } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { PasscodeDisplay } from './PasscodeDisplay';
 
@@ -21,9 +18,6 @@ export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
   const [inputCode, setInputCode] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
 
   const listener = async (event: KeyboardEvent) => {
     if (event.key === 'Backspace' || event.key === 'Delete') {
@@ -76,9 +70,9 @@ export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
           <Spinner size={1} />
         </Box>
         <Box hidden={!error}>
-          <Text variant="body" fontSize={1} color={baseTheme.colors.text.error}>
+          <Text.Body variant="body" fontSize={1}>
             That passcode was incorrect.
-          </Text>
+          </Text.Body>
         </Box>
       </Flex>
     </Flex>
