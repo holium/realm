@@ -48,12 +48,12 @@ $: ./bus/.run
 Create and mount `%realm` and `%courier` on `zod` only:
 
 ```hoon
-> |new-desk %realm
-> |mount %realm
+|new-desk %realm
+|mount %realm
 ```
 ```hoon
-> |new-desk %courier
-> |mount %courier
+|new-desk %courier
+|mount %courier
 ```
 Watch the desks into your `zod`, so they are always up to date:
 ```bash
@@ -62,12 +62,12 @@ $: ./watch-desks.sh ../ships/zod
 ```
 Now the files are on your ship, commit and start the agents:
 ```hoon
-> |commit %realm
-> |revive %realm
+|commit %realm
+|revive %realm
 ```
 ```hoon
-> |commit %courier
-> |revive %revive
+|commit %courier
+|revive %courier
 ```
 To test your changes, save the files in your IDE, and then `|commit %<desk-name>` to apply.
 
@@ -78,15 +78,15 @@ The best way to update all your test ships at once is to publish `%realm` from `
 From `~zod`:
 
 ```hoon
-> :treaty|publish %realm
-> :treaty|publish %courier
+:treaty|publish %realm
+:treaty|publish %courier
 ```
 
 From `~bus`:
 
 ```hoon
-> |install ~zod %realm
-> |install ~zod %courier
+|install ~zod %realm
+|install ~zod %courier
 ```
 
 #### Allow origin (CORS)
@@ -94,19 +94,19 @@ From `~bus`:
 For `~zod`:
 
 ```hoon
-> |pass [%e [%approve-origin 'http://localhost:3000']]
+|pass [%e [%approve-origin 'http://localhost:3000']]
 ```
 
 For `~bus`:
 
 ```hoon
-> |pass [%e [%approve-origin 'http://localhost:3001']]
+|pass [%e [%approve-origin 'http://localhost:3001']]
 ```
 
 For `~dev`:
 
 ```hoon
-> |pass [%e [%approve-origin 'http://localhost:3002']]
+|pass [%e [%approve-origin 'http://localhost:3002']]
 ```
 
 READ: https://github.com/urbit/create-landscape-app/tree/master/full
