@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
-import { Text } from '@holium/design-system';
+import { Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
 import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
@@ -67,24 +66,14 @@ const TransactionPresenter = (props: TransactionProps) => {
               : 'Receiving'}
           </Text.Custom>
           <Flex>
-            <OldText
-              variant="body"
-              fontSize={1}
-              color={
-                transaction.status !== 'pending'
-                  ? wasSent
-                    ? 'text.error'
-                    : 'text.success'
-                  : 'brand.primary'
-              }
-            >
+            <Text.Body variant="body" fontSize={1}>
               {`${
                 monthNames[completedDate.getMonth()]
               } ${completedDate.getDate()}`}
-            </OldText>
-            <OldText mx={1} variant="body" fontSize={1} color="text.disabled">
+            </Text.Body>
+            <Text.Body mx={1} variant="body" fontSize={1}>
               ·
-            </OldText>
+            </Text.Body>
             <Text.Custom
               truncate
               width={130}
@@ -131,7 +120,6 @@ interface TransactionListProps {
 }
 const TransactionListPresenter = (props: TransactionListProps) => {
   const { height = 230, ethType } = props;
-  const { theme } = useServices();
 
   const pending = props.transactions.filter(
     (tx) => tx.status === 'pending'
@@ -162,23 +150,14 @@ const TransactionListPresenter = (props: TransactionListProps) => {
             />
           ))
         ) : (
-          <OldText
-            mt={6}
-            variant="h5"
-            textAlign="center"
-            color={theme.currentTheme.iconColor}
-          >
+          <Text.H5 mt={6} variant="h5" textAlign="center">
             No transactions
-          </OldText>
+          </Text.H5>
         )}
       </NoScrollBar>
       {transactions.length > 4 && (
         <Flex pt="2px" width="100%" justifyContent="center">
-          <Icons
-            name="ChevronDown"
-            size={1}
-            color={theme.currentTheme.iconColor}
-          />
+          <Icon name="ChevronDown" size={1} />
         </Flex>
       )}
     </>

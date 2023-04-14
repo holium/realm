@@ -1,8 +1,7 @@
 import { FC, useMemo } from 'react';
 import { darken, lighten, rgba } from 'polished';
-import { Text, Flex } from 'renderer/components';
+import { Text, Flex } from '@holium/design-system';
 import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
   formatEthAmount,
@@ -36,7 +35,6 @@ export const WalletCard: FC<WalletCardProps> = ({
   isSelected,
   onSelect,
 }: WalletCardProps) => {
-  const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
@@ -90,7 +88,7 @@ export const WalletCard: FC<WalletCardProps> = ({
         isSelected={!!isSelected}
         onClick={onSelect}
       >
-        <Text
+        <Text.Body
           layoutId={`wallet-name-${wallet?.address}`}
           layout="position"
           transition={{ duration: 0.1 }}
@@ -99,8 +97,8 @@ export const WalletCard: FC<WalletCardProps> = ({
           style={{ textTransform: 'uppercase' }}
         >
           {wallet?.nickname}
-        </Text>
-        <Text
+        </Text.Body>
+        <Text.Body
           mt={1}
           layoutId={`wallet-balance-${wallet?.address}`}
           transition={{ duration: 0.1 }}
@@ -108,7 +106,7 @@ export const WalletCard: FC<WalletCardProps> = ({
           fontSize={7}
         >
           {amountDisplay}
-        </Text>
+        </Text.Body>
         <Flex
           // layout="position"
           initial={{ opacity: 0 }}
@@ -132,14 +130,14 @@ export const WalletCard: FC<WalletCardProps> = ({
                   />
                 ))}
             {coins && coins.length > 6 && (
-              <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+              <Text.Body ml={1} variant="body">
                 +{coins.length - 6}
-              </Text>
+              </Text.Body>
             )}
           </Flex>
-          <Text variant="body" color={theme.currentTheme.iconColor}>
+          <Text.Body variant="body" color={theme.currentTheme.iconColor}>
             {transactions.length} Transactions
-          </Text>
+          </Text.Body>
         </Flex>
       </WalletCardStyle>
     ),

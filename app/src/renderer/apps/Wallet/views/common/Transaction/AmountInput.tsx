@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 
-import { Flex, Box, Icons, Text } from 'renderer/components';
+import { Flex, Box, Icon, Text, Input } from '@holium/design-system';
 import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Input } from '@holium/design-system';
 import { ContainerFlex, FlexHider } from './styled';
 import {
   ERC20Type,
@@ -102,13 +101,13 @@ export const AmountInput = observer(
           justifyContent="space-evenly"
           alignItems="center"
         >
-          <Text
+          <Text.Body
             fontSize={1}
             variant="body"
             color={themeData.colors.text.secondary}
           >
             AMOUNT
-          </Text>
+          </Text.Body>
           <ContainerFlex
             className="realm-cursor-hover"
             focusBorder={themeData.colors.brand.primary}
@@ -144,9 +143,9 @@ export const AmountInput = observer(
                 />
               ) : (
                 <Flex>
-                  <Text pt="2px" fontSize="12px">
+                  <Text.Body pt="2px" fontSize="12px">
                     $
-                  </Text>
+                  </Text.Body>
                   <Input
                     autoFocus
                     ref={amountRef}
@@ -160,7 +159,7 @@ export const AmountInput = observer(
               )}
               {showUsd && (
                 <Box hidden={!amount}>
-                  <Text fontSize="11px" color={themeData.colors.text.disabled}>
+                  <Text.Body fontSize="11px">
                     {walletApp.ethereum.conversions.usd &&
                       (inCrypto
                         ? `$${ethToUsd(
@@ -182,7 +181,7 @@ export const AmountInput = observer(
                                     | 'ethereum'
                                 ]
                           }`)}
-                  </Text>
+                  </Text.Body>
                 </Box>
               )}
             </Flex>
@@ -195,7 +194,7 @@ export const AmountInput = observer(
               borderRadius="5px"
               onClick={toggleInCrypto}
             >
-              <Text variant="body" fontSize="12px">
+              <Text.Body variant="body" fontSize="12px">
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
@@ -205,19 +204,19 @@ export const AmountInput = observer(
                         walletApp.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}
-              </Text>
-              {showUsd && <Icons ml={1} name="UpDown" size="12px" />}
+              </Text.Body>
+              {showUsd && <Icon ml={1} name="UpDown" size="12px" />}
             </Flex>
           </ContainerFlex>
         </FlexHider>
         <Box mt={2} ml="72px" width="100%">
-          <Text
+          <Text.Body
             variant="body"
             fontSize="11px"
             color={themeData.colors.text.error}
           >
             {amountError && 'Amount greater than wallet balance.'}
-          </Text>
+          </Text.Body>
         </Box>
       </Flex>
     );

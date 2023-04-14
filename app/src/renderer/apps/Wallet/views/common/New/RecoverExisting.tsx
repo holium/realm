@@ -1,19 +1,9 @@
-import {
-  FC,
-  useMemo,
-  Dispatch,
-  SetStateAction,
-  useState,
-  ChangeEvent,
-} from 'react';
+import { FC, Dispatch, SetStateAction, useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
 import { NewWalletScreen } from './index';
-import { TextInput } from '@holium/design-system';
 import { VerifyPasscode } from './VerifyPasscode';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
@@ -30,11 +20,6 @@ interface RecoverExistingProps {
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer(
   (props: RecoverExistingProps) => {
-    const { theme } = useServices();
-    const themeData = useMemo(
-      () => getBaseTheme(theme.currentTheme),
-      [theme.currentTheme]
-    );
     const [phrase, setPhrase] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -72,17 +57,15 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
       />
     ) : (
       <NoResize width="100%" height="100%" flexDirection="column">
-        <Text mt={6} variant="h4">
+        <Text.H4 mt={6} variant="h4">
           Recover Wallet
-        </Text>
-        <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
+        </Text.H4>
+        <Text.Body mt={2} variant="body">
           Please enter the mnemonic seed phrase for your existing wallet.
-        </Text>
+        </Text.Body>
         <Flex mt={9} width="100%" flexDirection="column">
-          <Label mb={1} required={true}>
-            Seed phrase
-          </Label>
-          <TextInput
+          <Text.Label mb={1}>Seed phrase</Text.Label>
+          <Text.TextInput
             id="seed-phrase"
             name="seed-phrase"
             height="72px"
@@ -98,23 +81,18 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
           />
 
           <Box mt={3} hidden={error === ''}>
-            <Text
-              variant="body"
-              fontSize={1}
-              color={themeData.colors.text.error}
-            >
+            <Text.Body variant="body" fontSize={1}>
               {error}
-            </Text>
+            </Text.Body>
           </Box>
           <Flex mt={7} width="100%">
-            <Button
+            <Button.TextButton
               width="100%"
               disabled={!ethers.utils.isValidMnemonic(phrase)}
               onClick={() => setShowPasscode(true)}
-              isLoading={loading}
             >
               Recover
-            </Button>
+            </Button.TextButton>
           </Flex>
         </Flex>
         <Flex
@@ -123,11 +101,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
           zIndex={999}
           onClick={() => props.setScreen(NewWalletScreen.DETECTED_EXISTING)}
         >
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            color={theme.currentTheme.iconColor}
-          />
+          <Icon name="ArrowLeftLine" size={2} />
         </Flex>
       </NoResize>
     );

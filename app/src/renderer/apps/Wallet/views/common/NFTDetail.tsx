@@ -1,6 +1,6 @@
 import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
-import { Flex, Text, Anchor, Icons } from 'renderer/components';
+import { Flex, Text, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 
@@ -23,24 +23,23 @@ export const NFTDetail = () => {
       </Flex>
 
       <Flex mt={8} flexDirection="column" alignItems="center">
-        <Text
+        <Text.Body
           variant="body"
           fontSize={1}
           color={baseTheme.colors.text.secondary}
         >
           {nft.collectionName || 'NFT'}
-        </Text>
-        <Text variant="h5">{nft.name}</Text>
+        </Text.Body>
+        <Text.H5 variant="h5">{nft.name}</Text.H5>
       </Flex>
 
       <Flex mt={4} position="relative" justifyContent="center">
-        <Anchor
+        <Text.Anchor
           fontSize={1}
-          color={baseTheme.colors.text.primary}
           href={`https://etherscan.io/token/${nft.address}?a=${nft.tokenId}`}
         >
-          {nft.address.slice(0, 18)}... <Icons mb={1} name="Link" size={1} />
-        </Anchor>
+          {nft.address.slice(0, 18)}... <Icon mb={1} name="Link" size={1} />
+        </Text.Anchor>
       </Flex>
     </Flex>
   );

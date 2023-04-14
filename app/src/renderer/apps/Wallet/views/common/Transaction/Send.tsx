@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box } from 'renderer/components';
-import { Text } from '@holium/design-system';
+import { Flex, Box, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import {

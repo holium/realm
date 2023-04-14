@@ -1,4 +1,4 @@
-import { Flex, Text, Icons } from 'renderer/components';
+import { Flex, Text, Icons } from '@holium/design-system';
 import { PasscodeInput } from '../../components/PasscodeInput';
 
 interface PasscodeProps {

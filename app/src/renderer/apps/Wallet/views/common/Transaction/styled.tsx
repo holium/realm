@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 
 export const ContainerFlex = styled(Flex)<{ focusBorder: string }>`
   background-color: rgba(var(--rlm-input-rgba));

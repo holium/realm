@@ -1,4 +1,4 @@
-import { Flex, Text, Icons } from 'renderer/components';
+import { Flex, Text, Icons } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { PasscodeInput } from '../../components/PasscodeInput';
 
@@ -17,14 +17,14 @@ export const Locked = () => {
         alignItems="center"
       >
         <Icons name="Locked" size={36} />
-        <Text mt={2} variant="h3">
+        <Text.H3 mt={2} variant="h3">
           Wallet Locked
-        </Text>
+        </Text.H3>
       </Flex>
       <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text mb={8} variant="body">
+        <Text.Body mb={8} variant="body">
           Enter your passcode to continue.
-        </Text>
+        </Text.Body>
         <PasscodeInput checkStored={true} onSuccess={unlock} />
       </Flex>
     </Flex>

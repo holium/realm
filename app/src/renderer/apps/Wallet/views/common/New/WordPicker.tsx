@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box } from 'renderer/components';
+import { Flex, Text, Box } from '@holium/design-system';
 import { transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
@@ -86,22 +86,17 @@ export const WordPicker: FC<WordPickerProps> = observer(
           px="8px"
           py="6px"
           border={props.border}
-          backgroundColor={props.background}
           borderRadius={6}
           onClick={props.onClick}
         >
-          <Text variant="body">{props.word}</Text>
+          <Text.Body variant="body">{props.word}</Text.Body>
         </Box>
       );
       const Unavailable = (props: any) => (
         <Box m="6px" px="8px" py="6px" borderRadius={6}>
-          <Text
-            variant="body"
-            color={theme.currentTheme.iconColor}
-            style={{ textDecoration: 'line-through' }}
-          >
+          <Text.Body variant="body" style={{ textDecoration: 'line-through' }}>
             {props.word}
-          </Text>
+          </Text.Body>
         </Box>
       );
 
@@ -154,16 +149,11 @@ export const WordPicker: FC<WordPickerProps> = observer(
           justifyContent="center"
           alignItems="center"
         >
-          <Text variant="body">{props.children}</Text>
+          <Text.Body variant="body">{props.children}</Text.Body>
           {props.removeable ? (
-            <Text
-              ml="6px"
-              variant="body"
-              color={theme.currentTheme.iconColor}
-              onClick={deselectWord}
-            >
+            <Text.Body ml="6px" variant="body" onClick={deselectWord}>
               x
-            </Text>
+            </Text.Body>
           ) : (
             <></>
           )}
@@ -178,7 +168,6 @@ export const WordPicker: FC<WordPickerProps> = observer(
           alignItems="center"
           flexWrap="wrap"
           border={props.border}
-          backgroundColor={props.background}
           borderRadius={6}
         >
           {[...Array(12).keys()].map((index) => {
@@ -223,9 +212,9 @@ export const WordPicker: FC<WordPickerProps> = observer(
           background={props.background}
           theme={theme.currentTheme}
         />
-        <Text mt={1} variant="body" color={themeData.colors.text.error}>
+        <Text.Body mt={1} variant="body" color={themeData.colors.text.error}>
           {error}
-        </Text>
+        </Text.Body>
       </>
     );
   }

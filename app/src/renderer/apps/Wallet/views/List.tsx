@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button } from 'renderer/components';
+import { Flex, Text, Button } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
 import {
@@ -55,11 +55,11 @@ export const WalletList = observer(() => {
         justifyContent="center"
         alignItems="center"
       >
-        <Text variant="h3" textAlign="center">
+        <Text.H3 variant="h3" textAlign="center">
           No addresses
-        </Text>
+        </Text.H3>
         <Flex width="80%" justifyContent="center">
-          <Text mt={4} variant="body" textAlign="center">
+          <Text.Body mt={4} variant="body" textAlign="center">
             You haven't created any{' '}
             {walletApp.navState.network === 'ethereum'
               ? 'Ethereum'
@@ -67,10 +67,12 @@ export const WalletList = observer(() => {
               ? 'Bitcoin'
               : 'Bitcoin Testnet'}{' '}
             addresses yet.
-          </Text>
+          </Text.Body>
         </Flex>
         <Flex mt={9} justifyContent="center">
-          <Button onClick={onClick}>Create address</Button>
+          <Button.TextButton onClick={onClick}>
+            Create address
+          </Button.TextButton>
         </Flex>
       </Flex>
     );
@@ -94,9 +96,9 @@ export const WalletList = observer(() => {
           justifyContent="center"
           alignItems="center"
         >
-          <Text variant="h3" textAlign="center">
+          <Text.H3 variant="h3" textAlign="center">
             Coming soon...
-          </Text>{' '}
+          </Text.H3>{' '}
         </Flex>
       ) : (
         // @ts-ignore

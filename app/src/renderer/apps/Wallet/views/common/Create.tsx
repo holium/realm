@@ -1,7 +1,12 @@
 import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, FormControl } from 'renderer/components';
-import { TextInput } from '@holium/design-system';
+import {
+  Flex,
+  Text,
+  Button,
+  FormControl,
+  TextInput,
+} from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
@@ -41,18 +46,18 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
 
   return (
     <Flex p={1} height="100%" width="100%" flexDirection="column">
-      <Text mt={2} variant="h4">
+      <Text.H4 mt={2} variant="h4">
         Create Address
-      </Text>
-      <Text mt={3} variant="body">
+      </Text.H4>
+      <Text.Body mt={3} variant="body">
         A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
         will be created. Give it a memorable nickname.
-      </Text>
+      </Text.Body>
       <FormControl.FieldSet mt={8}>
         <FormControl.Field>
-          <Label mb={1} required={true}>
+          <Text.Label mb={1} required={true}>
             Nickname
-          </Label>
+          </Text.Label>
           <TextInput
             id="wallet-nickname"
             name="wallet-nickname"
@@ -64,7 +69,7 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
           />
         </FormControl.Field>
         <Flex mt={5} width="100%">
-          <Button
+          <Button.TextButton
             id="submit"
             width="100%"
             isLoading={loading}
@@ -72,7 +77,7 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
             onClick={form.actions.submit}
           >
             Create
-          </Button>
+          </Button.TextButton>
         </Flex>
       </FormControl.FieldSet>
     </Flex>

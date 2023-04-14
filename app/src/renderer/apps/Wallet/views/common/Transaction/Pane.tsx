@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Box, Icons, Text, Button } from 'renderer/components';
+import { Flex, Box, Icon, Text, Button, Avatar } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
@@ -13,7 +13,6 @@ import {
   ERC20Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { Avatar } from '@holium/design-system';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -128,7 +127,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           <Flex mt={7} flexDirection="column">
             {!props.uqbarContract && (
               <>
-                <Text
+                <Text.Body
                   opacity={0.9}
                   fontWeight={600}
                   fontSize={7}
@@ -140,16 +139,16 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     : walletApp.navState.protocol === ProtocolType.UQBAR
                     ? 'zigs'
                     : abbrMap[walletApp.navState.network]}
-                </Text>
+                </Text.Body>
                 {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
-                  <Text mt={1} color={themeData.colors.text.disabled}>
+                  <Text.Body mt={1}>
                     $
                     {ethToUsd(
                       props.transactionAmount,
                       walletApp.ethereum.conversions.usd ?? 0
                     )}{' '}
                     USD
-                  </Text>
+                  </Text.Body>
                 )}
                 <Flex
                   mt={7}
@@ -159,12 +158,12 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   alignItems="center"
                 >
                   <Flex width="100%" justifyContent="space-between">
-                    <Text
+                    <Text.Body
                       variant="body"
                       color={themeData.colors.text.secondary}
                     >
                       TO
-                    </Text>
+                    </Text.Body>
                     <Flex justifyContent="center">
                       <Flex mr={2}>
                         {!props.transactionRecipient.patp &&
@@ -173,14 +172,14 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                               flexDirection="column"
                               justifyContent="center"
                             >
-                              <Icons
+                              <Icon
                                 name="Spy"
                                 size="24px"
                                 color={themeData.colors.text.secondary}
                               />
-                              <Text variant="body">
+                              <Text.Body variant="body">
                                 {shortened(props.transactionRecipient.address)}
-                              </Text>
+                              </Text.Body>
                             </Flex>
                           )}
                         {props.transactionRecipient.patp &&
@@ -199,17 +198,17 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                                 flexDirection="column"
                                 justifyContent="center"
                               >
-                                <Text variant="body">
+                                <Text.Body variant="body">
                                   {props.transactionRecipient.patp}
-                                </Text>
-                                <Text
+                                </Text.Body>
+                                <Text.Body
                                   variant="body"
                                   color={themeData.colors.text.tertiary}
                                 >
                                   {shortened(
                                     props.transactionRecipient.address
                                   )}
-                                </Text>
+                                </Text.Body>
                               </Flex>
                             </Flex>
                           )}
@@ -236,55 +235,49 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text
+                    <Text.Body
                       variant="body"
                       color={themeData.colors.text.secondary}
                     >
                       NETWORK FEE
-                    </Text>
+                    </Text.Body>
                     <Flex flexDirection="column">
-                      <Text variant="body">0.001 ETH</Text>
+                      <Text.Body variant="body">0.001 ETH</Text.Body>
                       {walletApp.navState.protocol ===
                         ProtocolType.ETH_MAIN && (
-                        <Text
-                          fontSize={1}
-                          color={themeData.colors.text.secondary}
-                        >
+                        <Text.Body fontSize={1}>
                           ≈{' '}
                           {ethToUsd(
                             0.0005,
                             walletApp.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
-                        </Text>
+                        </Text.Body>
                       )}
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text
+                    <Text.Body
                       variant="body"
                       color={themeData.colors.text.secondary}
                     >
                       TOTAL
-                    </Text>
+                    </Text.Body>
                     <Flex flexDirection="column">
-                      <Text variant="body">
+                      <Text.Body variant="body">
                         {props.transactionAmount + 0.0005}{' '}
                         {props.coin ? props.coin.name : 'ETH'}
-                      </Text>
+                      </Text.Body>
                       {walletApp.navState.protocol ===
                         ProtocolType.ETH_MAIN && (
-                        <Text
-                          fontSize={1}
-                          color={themeData.colors.text.secondary}
-                        >
+                        <Text.Body fontSize={1}>
                           ≈{' '}
                           {ethToUsd(
                             props.transactionAmount + 0.0005,
                             walletApp.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
-                        </Text>
+                        </Text.Body>
                       )}
                     </Flex>
                   </Flex>
@@ -292,15 +285,15 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               </>
             )}
             <Flex mt={7} justifyContent="space-between">
-              <Button variant="transparent" onClick={() => prev()}>
+              <Button.TextButton variant="transparent" onClick={() => prev()}>
                 Reject
-              </Button>
-              <Button
+              </Button.TextButton>
+              <Button.TextButton
                 px={2}
                 onClick={props.onConfirm} // sendTransaction}
               >
                 Confirm
-              </Button>
+              </Button.TextButton>
             </Flex>
           </Flex>
         )}

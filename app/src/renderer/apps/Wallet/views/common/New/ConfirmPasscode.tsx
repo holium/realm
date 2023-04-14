@@ -1,6 +1,6 @@
 import { FC, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text } from 'renderer/components';
+import { Flex, Text } from '@holium/design-system';
 import { NewWalletScreen } from './index';
 import { PasscodeInput } from '../../../components/PasscodeInput';
 
@@ -17,8 +17,10 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
       <Flex width="100%" height="100%" flexDirection="column" flex={5}>
         <Flex flex={1} flexDirection="column">
           <Flex gap={12} flexDirection="column">
-            <Text variant="h5">Confirm passcode</Text>
-            <Text variant="body">Please retype your passcode to confirm.</Text>
+            <Text.H5 variant="h5">Confirm passcode</Text.H5>
+            <Text.Body variant="body">
+              Please retype your passcode to confirm.
+            </Text.Body>
           </Flex>
         </Flex>
         <Flex flex={4} justifyContent="center" alignItems="center">

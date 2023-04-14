@@ -1,8 +1,6 @@
 import { darken } from 'polished';
 import { observer } from 'mobx-react';
-import { Box, Flex, Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
+import { Box, Flex, Text } from '@holium/design-system';
 import { ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface WalletNetworkProps {
@@ -10,9 +8,6 @@ interface WalletNetworkProps {
 }
 
 export const WalletNetwork = observer((props: WalletNetworkProps) => {
-  const { theme } = useServices();
-  const themeData = getBaseTheme(theme.currentTheme);
-
   return (
     <Flex
       width="fit-content"
@@ -31,9 +26,7 @@ export const WalletNetwork = observer((props: WalletNetworkProps) => {
         borderRadius="50%"
         background="#4CDD86"
       />
-      <Text fontSize="12px" color={themeData.colors.ui.secondary}>
-        {props.network}
-      </Text>
+      <Text.Body fontSize="12px">{props.network}</Text.Body>
     </Flex>
   );
 });

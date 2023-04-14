@@ -1,6 +1,5 @@
 import { useState, ChangeEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Anchor } from 'renderer/components';
 import {
   Avatar,
   TextInput,
@@ -224,14 +223,13 @@ const TransactionDetailPresenter = () => {
           HASH
         </Text.Custom>
         <Flex position="relative" left="10px">
-          <Anchor
+          <Text.Anchor
             fontSize={1}
-            color={themeData.colors.text.primary}
             href={`https://goerli.etherscan.io/tx/${transaction.hash}`}
           >
             {transaction.hash.slice(0, 12)}...{' '}
             <Icon mb={1} name="Link" size={16} opacity={0.5} />
-          </Anchor>
+          </Text.Anchor>
         </Flex>
       </Flex>
       <Flex flexDirection="column" mt={8}>
