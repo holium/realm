@@ -132,3 +132,6 @@ lib/room/test-ui/public/ships.json
 
 # Storybook
 storybook-static
+
+# submodule
+urbit/*
