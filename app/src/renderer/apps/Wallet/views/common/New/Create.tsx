@@ -1,8 +1,6 @@
-import { useMemo, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
 
 interface CreateProps {
@@ -10,26 +8,13 @@ interface CreateProps {
 }
 
 const CreatePresenter = (props: CreateProps) => {
-  const { theme } = useServices();
-  const themeData = useMemo(
-    () => getBaseTheme(theme.currentTheme),
-    [theme.currentTheme]
-  );
-
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex flex={4} flexDirection="column" alignItems="center">
         <Text.H4 mt="100px" variant="h4">
           No Wallet Found
         </Text.H4>
-        <Text.Body
-          px="30px"
-          mt={2}
-          mb={5}
-          variant="body"
-          color={themeData.colors.text.secondary}
-          textAlign="center"
-        >
+        <Text.Body px="30px" mt={2} mb={5} variant="body" textAlign="center">
           You haven't yet configured your Realm wallet.
         </Text.Body>
         <Box mt={9}>
@@ -49,15 +34,10 @@ const CreatePresenter = (props: CreateProps) => {
       </Flex>
       <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
         <Box>
-          <Icon name="InfoCircle" color={themeData.colors.brand.secondary} />
+          <Icon name="InfoCircle" />
         </Box>
         <Box>
-          <Text.Hint
-            ml={2}
-            variant="hint"
-            justifyContent="flex-end"
-            color={themeData.colors.brand.secondary}
-          >
+          <Text.Hint ml={2} variant="hint" justifyContent="flex-end">
             You are using pre-release software. Only use for development
             purposes.
           </Text.Hint>

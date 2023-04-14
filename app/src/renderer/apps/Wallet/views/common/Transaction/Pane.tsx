@@ -111,16 +111,19 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               <RecipientInput setValid={recipientValidator} />
             </Box>
             <Flex mt={7} justifyContent="space-between">
-              <Button variant="transparent" onClick={() => props.close()}>
+              <Button.TextButton
+                variant="transparent"
+                onClick={() => props.close()}
+              >
                 Cancel
-              </Button>
-              <Button
+              </Button.TextButton>
+              <Button.TextButton
                 px={4}
                 disabled={!recipientValid || !amountValid}
                 onClick={next}
               >
                 Next
-              </Button>
+              </Button.TextButton>
             </Flex>
           </Flex>
         ) : (

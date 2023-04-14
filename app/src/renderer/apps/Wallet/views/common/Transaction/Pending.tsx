@@ -1,10 +1,7 @@
-import { FC, useMemo } from 'react';
-import { darken, lighten } from 'polished';
+import { FC } from 'react';
 import { Flex, Spinner, Icon, Text, Button } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import {
   shortened,
-  getBaseTheme,
   formatEthAmount,
   formatBtcAmount,
 } from '../../../lib/helpers';
@@ -50,9 +47,7 @@ interface PendingTransactionProps {
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
-  const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  const { colors } = getBaseTheme(theme.currentTheme);
 
   const goToTransaction = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
@@ -86,14 +81,6 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
             ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
 
-  const bgColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? darken(0.04, theme.currentTheme.windowColor)
-        : lighten(0.02, theme.currentTheme.windowColor),
-    [theme.currentTheme.windowColor]
-  );
-
   return (
     <Flex
       mx={2}
@@ -101,7 +88,6 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
       px={2}
       width="100%"
       justifyContent="space-between"
-      background={bgColor}
       borderRadius="9px"
     >
       <Flex
@@ -111,27 +97,22 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
         onClick={goToTransaction}
       >
         <Flex mr={4} height="100%" alignItems="center">
-          <Spinner size={0} color={colors.brand.primary} />
+          <Spinner size={0} />
         </Flex>
         <Flex flexDirection="column">
-          <Text variant="body" color={colors.brand.primary}>
+          <Text.Body variant="body">
             {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
             {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
-          </Text>
-          <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
+          </Text.Body>
+          <Text.Body pt={1} variant="body" fontSize={1}>
             {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
             <Icon ml="7px" name="ShareBox" size="15px" />
-          </Text>
+          </Text.Body>
         </Flex>
       </Flex>
       <Flex justifyContent="center" alignItems="center">
         <Button.IconButton onClick={props.hide} mr={1}>
-          <Icon
-            opacity={0.7}
-            name="Close"
-            size="15px"
-            color={colors.text.disabled}
-          />
+          <Icon opacity={0.7} name="Close" size="15px" />
         </Button.IconButton>
       </Flex>
     </Flex>

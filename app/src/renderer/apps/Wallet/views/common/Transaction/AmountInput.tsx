@@ -5,7 +5,6 @@ import { darken } from 'polished';
 import { Flex, Box, Icon, Text, Input } from '@holium/design-system';
 import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
 import { ContainerFlex, FlexHider } from './styled';
 import {
   ERC20Type,
@@ -30,7 +29,6 @@ export const AmountInput = observer(
     coin?: ERC20Type | null;
   }) => {
     const amountRef = React.createRef<HTMLInputElement>();
-    const { theme } = useServices();
     const { walletApp } = useTrayApps();
 
     const [inCryptoToggle, setInCryptoToggle] = useState(true);

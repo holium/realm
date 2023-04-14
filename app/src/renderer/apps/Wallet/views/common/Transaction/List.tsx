@@ -1,9 +1,7 @@
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 import { Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
 import { Row } from 'renderer/components/NewRow';
 import { toJS } from 'mobx';
-import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import {
   monthNames,
@@ -25,9 +23,7 @@ interface TransactionProps {
   transaction: TransactionType;
 }
 const TransactionPresenter = (props: TransactionProps) => {
-  const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  const hoverBackground = darken(0.0325, theme.currentTheme.windowColor);
   const { transaction, isCoin } = props;
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
@@ -53,7 +49,7 @@ const TransactionPresenter = (props: TransactionProps) => {
   };
 
   return (
-    <Row customBg={hoverBackground} onClick={onClick}>
+    <Row onClick={onClick}>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Flex flexDirection="column" justifyContent="center">
           <Text.Custom fontWeight={500} fontSize={3}>

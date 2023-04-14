@@ -2,11 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
 import { Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
-import { shortened, getBaseTheme } from '../../../lib/helpers';
+import { shortened } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { ContainerFlex } from './styled';
@@ -24,7 +22,6 @@ export const RecipientInput = observer(
       }
     ) => void;
   }) => {
-    const { theme } = useServices();
     const { walletApp } = useTrayApps();
 
     const [icon, setIcon] = useState('blank');
@@ -46,9 +43,6 @@ export const RecipientInput = observer(
     const [currPromise, setCurrPromise] =
       useState<Promise<RecipientPayload> | null>(null);
     const loading = currPromise !== null;
-
-    const themeData = getBaseTheme(theme.currentTheme);
-    const panelBackground = darken(0.04, theme.currentTheme.windowColor);
 
     const stateRef = useRef();
     /* @ts-expect-error */
@@ -173,68 +167,28 @@ export const RecipientInput = observer(
         );
       }
 
-      if (props.icon === 'spy')
-        return (
-          <Icons
-            name="Spy"
-            size="24px"
-            color={themeData.colors.text.secondary}
-          />
-        );
+      if (props.icon === 'spy') return <Icons name="Spy" size="24px" />;
 
       if (props.icon === 'sigil')
-        return (
-          <Avatar
-            sigilColor={
-              theme.currentTheme.mode === 'light'
-                ? ['black', 'white']
-                : ['white', 'black']
-            }
-            simple={true}
-            size={24}
-            patp={valueCache}
-          />
-        );
+        return <Avatar simple={true} size={24} patp={valueCache} />;
 
-      const blankBg =
-        theme.currentTheme.mode === 'light'
-          ? lighten(0.1, themeData.colors.text.disabled)
-          : darken(0.04, themeData.colors.text.disabled);
-      return (
-        <Box
-          background={blankBg}
-          height="24px"
-          width="24px"
-          borderRadius="5px"
-        />
-      );
+      return <Box height="24px" width="24px" borderRadius="5px" />;
     };
 
     return (
       <Flex flexDirection="column">
         <Flex width="100%" justifyContent="space-evenly" alignItems="center">
-          <Text
-            fontSize={1}
-            variant="body"
-            color={themeData.colors.text.secondary}
-          >
+          <Text fontSize={1} variant="body">
             TO
           </Text>
           <ContainerFlex
             className="realm-cursor-hover"
-            focusBorder={themeData.colors.brand.primary}
             px={1}
             py={1}
             width="240px"
             height="45px"
             borderRadius="7px"
             alignItems="center"
-            background={panelBackground}
-            border={`solid 1px ${
-              recipientError
-                ? themeData.colors.text.error
-                : themeData.colors.ui.borderColor
-            }`}
           >
             <Flex ml={1} mr={2}>
               <RecipientIcon icon={icon} />
@@ -248,33 +202,20 @@ export const RecipientInput = observer(
                 onChange={onChange}
               />
               {recipientDetails.details?.address && (
-                <Text
-                  fontSize={1}
-                  variant="body"
-                  opacity={0.7}
-                  color={themeData.colors.text.tertiary}
-                >
+                <Text fontSize={1} variant="body" opacity={0.7}>
                   {shortened(recipientDetails.details?.address)}
                 </Text>
               )}
             </Flex>
             {loading && (
               <Flex mr={2}>
-                <Spinner
-                  ml={2}
-                  size="14px"
-                  color={themeData.colors.brand.primary}
-                />
+                <Spinner ml={2} size="14px" />
               </Flex>
             )}
           </ContainerFlex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="flex-end">
-          <Text
-            variant="body"
-            fontSize="11px"
-            color={themeData.colors.text.error}
-          >
+          <Text variant="body" fontSize="11px">
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
               `${recipient} doesn't have a Realm wallet.`}

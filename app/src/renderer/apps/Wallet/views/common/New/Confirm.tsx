@@ -1,8 +1,7 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text } from '@holium/design-system';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
+import { transparentize } from 'polished';
 import { WordPicker } from './WordPicker';
 import { NewWalletScreen } from './index';
 
@@ -13,9 +12,7 @@ interface ConfirmProps {
 
 const ConfirmPresenter = (props: ConfirmProps) => {
   const [valid, setValid] = useState(false);
-  const { theme } = useServices();
 
-  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
   return (
@@ -37,7 +34,6 @@ const ConfirmPresenter = (props: ConfirmProps) => {
         <WordPicker
           seedPhrase={props.seedPhrase}
           border={panelBorder}
-          background={panelBackground}
           onValidChange={setValid}
         />
       </Flex>
