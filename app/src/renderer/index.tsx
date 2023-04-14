@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import * as Amplitude from '@amplitude/analytics-browser';
 import { BrowserTracing } from '@sentry/tracing';
+import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations';
 import { App } from './App';
 
 const environment = process.env.NODE_ENV;
@@ -12,7 +13,31 @@ if (sentryDsn) {
   let cfg: Sentry.BrowserOptions = {
     environment,
     dsn: process.env.SENTRY_DSN,
-    integrations: [new BrowserTracing()],
+    integrations: [
+      new BrowserTracing(),
+      new RewriteFramesIntegration({
+        // function that takes the frame, applies a transformation, and returns it
+        iteratee: (frame: any) => {
+          // example frame contents from crash
+          // {
+          //   "function": "HTMLDivElement.r",
+          //   "filename": "/Applications/Realm.app/Contents/Resources/app.asar/dist/renderer/app.renderer.js",
+          //   "abs_path": "file:///Applications/Realm.app/Contents/Resources/app.asar/dist/renderer/app.renderer.js",
+          //   "lineno": 2,
+          //   "colno": 397144,
+          //   "in_app": true
+          // },
+          if (frame.abs_path) {
+            // strip everything between the file:// and the /dist folder
+            const idx = frame.abs_path.lastIndexOf('/dist/');
+            if (idx !== 1) {
+              frame.abs_path = frame.abs_path.substring(idx + 1);
+            }
+          }
+          return frame;
+        },
+      }),
+    ],
     tracesSampleRate: 1,
     ignoreErrors: [
       // Remove when we've done the window system refactor and are no longer using webviews.

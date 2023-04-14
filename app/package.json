@@ -27,6 +27,7 @@
     "@amplitude/analytics-browser": "^1.6.6",
     "@cliqz/adblocker-electron": "^1.23.8",
     "@radix-ui/react-popover": "^1.0.0",
+    "@sentry/integrations": "^7.48.0",
     "@sentry/react": "^7.24.2",
     "@sentry/tracing": "^7.24.2",
     "@stitches/react": "^1.2.8",
