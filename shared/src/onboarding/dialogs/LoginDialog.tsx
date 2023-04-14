@@ -11,13 +11,19 @@ import { TermsModal } from '../components/TermsModal';
 import { TermsDisclaimer } from '../components/TermsDisclaimer';
 
 type Props = {
+  prefilledEmail?: string;
   // Terms are only necessary in Realm, not on the web.
   showTerms?: boolean;
   label?: ReactNode;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
-export const LoginDialog = ({ showTerms = false, label, onLogin }: Props) => {
+export const LoginDialog = ({
+  prefilledEmail,
+  showTerms = false,
+  label,
+  onLogin,
+}: Props) => {
   const terms = useToggle(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -43,6 +49,7 @@ export const LoginDialog = ({ showTerms = false, label, onLogin }: Props) => {
               </OnboardDialogInputLabel>
               <OnboardDialogInput
                 ref={emailRef}
+                defaultValue={prefilledEmail}
                 type="email"
                 placeholder="name@email.com"
               />

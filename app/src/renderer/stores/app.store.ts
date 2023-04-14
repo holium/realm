@@ -5,8 +5,7 @@ import { Instance, types, clone } from 'mobx-state-tree';
 import { AccountModelType } from './models/account.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
-
-import { ShellModel } from './models/shell.model';
+import { ShellModel } from './models/Shell.model';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { defaultTheme } from '../../os/services/theme.model';

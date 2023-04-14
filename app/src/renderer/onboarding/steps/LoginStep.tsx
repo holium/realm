@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { Anchor } from '@holium/design-system';
+import { Anchor } from '@holium/design-system/general';
 import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
+import { RealmIPC } from 'renderer/stores/ipc';
 
 export const LoginStep = ({ setStep }: StepProps) => {
   useEffect(() => {
@@ -33,7 +34,17 @@ export const LoginStep = ({ setStep }: StepProps) => {
       const hasShips = userShips.length > 0;
 
       if (hasShips) {
-        // If the (every) ship has a passport, go to the app.
+        const patp = userShips[0].patp;
+        const url = userShips[0].link;
+        // Now we need to create a local Realm account from the ThirdEarth account.
+        RealmIPC.createAccount({
+          patp,
+          url,
+          email: response.email,
+          password,
+          encryptionKey: response.client_side_encryption_key,
+        });
+        // We also need to populate the local Realm account with the ships from the ThirdEarth account.
       } else {
         // Go to the hosted / self hosted step.
         setStep('/hosting');
@@ -49,6 +60,7 @@ export const LoginStep = ({ setStep }: StepProps) => {
 
   return (
     <LoginDialog
+      prefilledEmail={localStorage.getItem('email') ?? ''}
       showTerms
       label={
         <OnboardDialogDescription>

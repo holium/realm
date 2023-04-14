@@ -1,36 +1,54 @@
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
 import { AddServerStep } from './steps/AddServerStep';
 import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
+import { useState } from 'react';
+
+type Step =
+  | '/login'
+  | '/add-server'
+  | '/passport'
+  | '/hosting'
+  | '/choose-id'
+  | '/payment'
+  | '/booting'
+  | '/credentials'
+  | '/installation';
 
 export const OnboardingStepPresenter = () => {
-  const { onboarding } = useServices();
+  const [step, setStep] = useState<Step>(
+    (localStorage.getItem('onboardingStep') as Step | undefined) ?? '/login'
+  );
 
-  switch (onboarding.currentStep) {
+  const handleSetStep = (step: Step) => {
+    setStep(step);
+    localStorage.setItem('onboardingStep', step);
+  };
+
+  switch (step) {
     case '/login':
-      return <LoginStep setStep={onboarding.setStep} />;
+      return <LoginStep setStep={handleSetStep} />;
     case '/hosting':
-      return <HostingStep setStep={onboarding.setStep} />;
+      return <HostingStep setStep={handleSetStep} />;
     case '/add-server':
-      return <AddServerStep setStep={onboarding.setStep} />;
+      return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={onboarding.setStep} />;
+      return <PassportStep setStep={handleSetStep} />;
     case '/installation':
-      return <InstallationStep setStep={onboarding.setStep} />;
+      return <InstallationStep setStep={handleSetStep} />;
     case '/choose-id':
-      return <ChooseIdStep setStep={onboarding.setStep} />;
+      return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':
-      return <PaymentStep setStep={onboarding.setStep} />;
+      return <PaymentStep setStep={handleSetStep} />;
     case '/booting':
-      return <BootingStep setStep={onboarding.setStep} />;
+      return <BootingStep setStep={handleSetStep} />;
     case '/credentials':
-      return <CredentialsStep setStep={onboarding.setStep} />;
+      return <CredentialsStep setStep={handleSetStep} />;
     default:
-      return <LoginStep setStep={onboarding.setStep} />;
+      return <LoginStep setStep={handleSetStep} />;
   }
 };
 

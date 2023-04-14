@@ -64,7 +64,7 @@ abstract class AbstractDataAccess<T> {
     const placeholders = Object.keys(values)
       .map(() => '?')
       .join(', ');
-    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
+    const query = `REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
     const stmt = this.prepare(query);
 
     const result = stmt.run(Object.values(values));

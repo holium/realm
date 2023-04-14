@@ -126,7 +126,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  const realmService = new RealmService();
+  new RealmService();
   // realmService.login('~lomder-librun', 'password');
 
   // TODO why is this rendering multiple times?

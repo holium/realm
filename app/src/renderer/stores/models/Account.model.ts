@@ -1,5 +1,5 @@
 import { Instance, types } from 'mobx-state-tree';
-import { Theme } from './theme.model';
+import { Theme } from '../../logic/theme';
 
 export const AccountModel = types.model('AccountModel', {
   onboardingId: types.maybeNull(types.string),

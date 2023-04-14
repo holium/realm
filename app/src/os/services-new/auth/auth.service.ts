@@ -6,7 +6,7 @@ import Store from 'electron-store';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
-import { AccountModelType } from 'renderer/stores/models/account.model';
+import { AccountModelType } from '../../../renderer/stores/models/Account.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
 
@@ -85,7 +85,7 @@ export class AuthService extends AbstractService {
     return this.authDB.tables.accounts.findOne(patp);
   }
 
-  public async createMasterAccount(mAccount: MasterAccount) {
+  public async createMasterAccount(mAccount: Omit<MasterAccount, 'id'>) {
     if (!this.authDB) return;
     // if a master account already exists, return
 
@@ -98,6 +98,8 @@ export class AuthService extends AbstractService {
         payload: this.getAccounts(),
       });
     }
+
+    return newAccount;
   }
 
   public async setAccountTheme(patp: string, theme: ThemeType) {
@@ -111,37 +113,38 @@ export class AuthService extends AbstractService {
   }
 
   // Call this from onboarding.
-  // public createAccount(
-  //   patp: string,
-  //   password: string,
-  //   email: string,
-  //   ship: string
-  // ): boolean {
-  //   if (!this.authDB) return false;
-  //   const account = this.authDB.tables.accounts.findOne(patp);
-  //   if (account) {
-  //     log.info(`Account already exists for ${patp}`);
-  //     return false;
-  //   }
-  //   const passwordHash = this._hashPassword(password);
-  //   const newAccount = this.authDB.tables.accounts.create({
-  //     patp,
-  //     passwordHash,
-  //     email,
-  //     ship,
-  //   });
-  //   if (newAccount) {
-  //     this.sendUpdate({
-  //       type: 'init',
+  public createAccount({
+    accountId,
+    patp,
+    passwordHash,
+    url,
+  }: Pick<Account, 'accountId' | 'patp' | 'passwordHash' | 'url'>): boolean {
+    if (!this.authDB) return false;
+    const account = this.authDB.tables.accounts.findOne(patp);
+    if (account) {
+      log.info(`Account already exists for ${patp}`);
+      return false;
+    }
 
-  //       payload: this.getAccounts(),
-  //     });
-  //     return true;
-  //   } else {
-  //     log.info(`Failed to create account for ${patp}`);
-  //     return false;
-  //   }
-  // }
+    const newAccount = this.authDB.tables.accounts.create({
+      accountId,
+      patp,
+      url,
+      passwordHash,
+    });
+
+    if (newAccount) {
+      this.sendUpdate({
+        type: 'init',
+        payload: this.getAccounts(),
+      });
+      return true;
+    } else {
+      log.info(`Failed to create account for ${patp}`);
+      return false;
+    }
+  }
+
   /**
    *
    * @param patp

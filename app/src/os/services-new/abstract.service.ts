@@ -5,7 +5,6 @@ import {
   IpcMainInvokeEvent,
   BrowserWindow,
 } from 'electron';
-import log from 'electron-log';
 
 export interface ServiceOptions {
   preload: boolean;
@@ -121,9 +120,7 @@ abstract class AbstractService extends EventEmitter {
    * @param service
    * @returns a map of method names to functions
    */
-  static preload(
-    service: AbstractService
-  ): Record<string, (...args: any[]) => Promise<any> | void> {
+  static preload(service: AbstractService) {
     const serviceName = service.serviceName;
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(service)
@@ -134,20 +131,18 @@ abstract class AbstractService extends EventEmitter {
         typeof (service as any)[method] === 'function'
     );
 
-    const mappedMethods: Record<
-      string,
-      (...args: any[]) => Promise<any> | void
-    > = {};
-    methods.forEach((method) => {
-      mappedMethods[method] = async (...args: any[]) => {
-        return await ipcRenderer.invoke(`${serviceName}.${method}`, ...args);
+    const mappedMethods = methods.reduce((acc, method) => {
+      acc[method] = (...args: any[]) => {
+        return ipcRenderer.invoke(`${serviceName}.${method}`, ...args);
       };
-    });
+      return acc;
+    }, {} as Record<string, (...args: any[]) => Promise<any> | void>);
 
     const callbacks = service._registerIpcRendererCallbacks();
     Object.keys(callbacks).forEach((event) => {
       mappedMethods[event] = callbacks[event];
     });
+
     return mappedMethods;
   }
 }

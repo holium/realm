@@ -1,4 +1,4 @@
-import RealmProcess from '../background/realm.process';
+import bcrypt from 'bcryptjs';
 import { app } from 'electron';
 import log from 'electron-log';
 import AbstractService, {
@@ -8,6 +8,14 @@ import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import APIConnection from './services-new/conduit';
+
+type CreateAccountPayload = {
+  patp: string;
+  password: string;
+  encryptionKey: string;
+  email: string;
+  url: string;
+};
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -75,6 +83,29 @@ export class RealmService extends AbstractService {
       };
     }
     return null;
+  }
+
+  public async createAccount({
+    patp,
+    password,
+    encryptionKey,
+    email,
+  }: CreateAccountPayload) {
+    if (!this.services) return Promise.resolve(false);
+
+    const masterAcc = await this.services.auth.createMasterAccount({
+      email,
+      encryptionKey,
+    });
+
+    if (!masterAcc) return Promise.resolve(false);
+
+    return this.services.auth.createAccount({
+      accountId: masterAcc.id,
+      patp,
+      passwordHash: bcrypt.hashSync(password, 10),
+      url: '',
+    });
   }
 
   async login(patp: string, password: string): Promise<boolean> {
@@ -180,7 +211,17 @@ export class RealmService extends AbstractService {
   // }
 }
 
+type RealmServicePublicMethods = Pick<
+  RealmService,
+  | 'boot'
+  | 'login'
+  | 'logout'
+  | 'createAccount'
+  | 'getReleaseChannel'
+  | 'setReleaseChannel'
+>;
+
 // Generate preload
 export const realmPreload = RealmService.preload(
   new RealmService({ preload: true })
-);
+) as RealmServicePublicMethods;
