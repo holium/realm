@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import { darken, lighten } from 'polished';
-import { Flex, Spinner } from '@holium/design-system';
-import { Icons, Text, IconButton } from 'renderer/components';
+import { Flex, Spinner, Icon, Text, Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -121,19 +120,19 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
           </Text>
           <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
             {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
-            <Icons ml="7px" name="ShareBox" size="15px" />
+            <Icon ml="7px" name="ShareBox" size="15px" />
           </Text>
         </Flex>
       </Flex>
       <Flex justifyContent="center" alignItems="center">
-        <IconButton onClick={props.hide} mr={1}>
-          <Icons
+        <Button.IconButton onClick={props.hide} mr={1}>
+          <Icon
             opacity={0.7}
             name="Close"
             size="15px"
             color={colors.text.disabled}
           />
-        </IconButton>
+        </Button.IconButton>
       </Flex>
     </Flex>
   );

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Flex, Icons, IconButton } from 'renderer/components';
+import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { Create } from './Create';
 import { Backup } from './Backup';
 import { Import } from './Import';
@@ -12,7 +12,6 @@ import { Finalizing } from './Finalizing';
 import { DetectedExisting } from './DetectedExisting';
 import { RecoverExisting } from './RecoverExisting';
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
 
 export enum NewWalletScreen {
   CREATE = 'create',
@@ -27,7 +26,6 @@ export enum NewWalletScreen {
 }
 
 const EthNewPresenter = () => {
-  const { theme } = useServices();
   const { walletApp, dimensions } = useTrayApps();
   const initialScreen = walletApp.initialized
     ? NewWalletScreen.DETECTED_EXISTING
@@ -105,7 +103,7 @@ const EthNewPresenter = () => {
             )
           }
         >
-          <IconButton
+          <Button.IconButton
             onClick={() =>
               setScreen(
                 walletApp.initialized
@@ -114,12 +112,8 @@ const EthNewPresenter = () => {
               )
             }
           >
-            <Icons
-              name="ArrowLeftLine"
-              size={1}
-              color={theme.currentTheme.iconColor}
-            />
-          </IconButton>
+            <Icon name="ArrowLeftLine" size={1} />
+          </Button.IconButton>
         </Flex>
       )}
     </Box>
