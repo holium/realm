@@ -2,7 +2,6 @@ import { useMemo, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
-import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
 import { darken } from 'polished';
 import { RoomType } from '@holium/realm-room';
@@ -11,6 +10,8 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;
@@ -28,14 +29,15 @@ const RoomRowPresenter = ({
   onClick,
   rightChildren,
 }: RoomRowProps) => {
-  const { theme, ship } = useServices();
+  const { theme } = useAppState();
+  const { ship } = useShipStore();
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
   );
 
-  const { dockColor, windowColor } = theme.currentTheme;
+  const { dockColor, windowColor } = theme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);

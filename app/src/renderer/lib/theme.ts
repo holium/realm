@@ -1,21 +1,8 @@
-import { DesktopActions } from './actions/desktop';
-import { average } from 'color.js';
-import {
-  types,
-  flow,
-  Instance,
-  applySnapshot,
-  getSnapshot,
-  SnapshotOut,
-} from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
-import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
-import { LoaderModel } from '../../os/services/common.model';
-import { toJS } from 'mobx';
-import { ThemeType as ThemeModelType } from '../stores/models/theme.model';
-import { defaultTheme } from '../../os/services/theme.model';
+import { ThemeType } from 'renderer/stores/models/theme.model';
+import { toRgbaString } from '../../os/lib/color';
 
-export const genCSSVariables = (theme: ThemeModelType) => {
+export const genCSSVariables = (theme: ThemeType) => {
   /**
    * NOTE: app developers depend on these, change with care.
    *
@@ -39,19 +26,10 @@ export const genCSSVariables = (theme: ThemeModelType) => {
   const windowBgColor = rgba(theme.windowColor, 0.9);
   const dockColor = rgba(theme.windowColor, 0.65);
   const cardColor = isLight
-    ? toRgbaString(lighten(0.05, theme.windowColor))
-    : toRgbaString(darken(0.025, theme.windowColor));
-  const textColor = toRgbaString(theme.textColor);
-  const iconColor = toRgbaString(
-    isLight ? lighten(0.1, theme.textColor) : darken(0.1, theme.textColor)
-  );
-  // const mouseColor = toRgbaString(theme.mouseColor);
-  // const realmBrandColor = toRgbaString('#F08735');
-  // const intentAlertColor = toRgbaString('#ff6240');
-  // const intentCautionColor = toRgbaString('#ffbc32');
-  // const intentSuccessColor = toRgbaString('#0fc383');
-  // const overlayHoverColor = isLight ? '0, 0, 0, 0.04' : '255, 255, 255, 0.06';
-  // const overlayActiveColor = isLight ? '0, 0, 0, 0.06' : '255, 255, 255, 0.09';
+    ? lighten(0.05, theme.windowColor)
+    : darken(0.025, theme.windowColor);
+  const textColor = theme.textColor;
+  const iconColor = rgba(theme.textColor, 0.7);
   const mouseColor = theme.mouseColor;
   const realmBrandColor = '#F08735';
   const intentAlertColor = '#ff6240';
@@ -144,7 +122,10 @@ export const genCSSVariables = (theme: ThemeModelType) => {
   `;
 };
 
-const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
+export const generateColors = (
+  baseColor: string,
+  bgLuminosity: 'light' | 'dark'
+) => {
   const windowColor =
     bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
   return {
@@ -170,113 +151,3 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
         : rgba(darken(0.4, baseColor), 0.3),
   };
 };
-
-export const Theme = types
-  .model('Theme', {
-    id: types.identifier,
-    mode: types.optional(
-      types.enumeration(['light', 'dark']),
-      defaultTheme.mode
-    ),
-    backgroundColor: types.optional(types.string, defaultTheme.backgroundColor),
-    accentColor: types.optional(types.string, defaultTheme.accentColor),
-    inputColor: types.optional(types.string, defaultTheme.inputColor),
-    dockColor: types.optional(types.string, defaultTheme.dockColor),
-    iconColor: types.optional(types.string, defaultTheme.iconColor),
-    textColor: types.optional(types.string, defaultTheme.textColor),
-    windowColor: types.optional(types.string, defaultTheme.windowColor),
-    wallpaper: types.optional(types.string, defaultTheme.wallpaper),
-    mouseColor: types.optional(types.string, defaultTheme.mouseColor),
-  })
-  .views((self) => ({
-    get values() {
-      return {
-        id: self.id,
-        backgroundColor: self.backgroundColor,
-        accentColor: self.accentColor,
-        inputColor: self.inputColor,
-        dockColor: self.dockColor,
-        windowColor: self.windowColor,
-        mode: self.mode,
-        textColor: self.textColor,
-        iconColor: self.iconColor,
-        mouseColor: self.mouseColor,
-        wallpaper: self.wallpaper,
-      };
-    },
-  }))
-  .actions((self) => ({
-    setMouseColor(color: string) {
-      self.mouseColor = color;
-    },
-    setAccentColor(color: string) {
-      self.accentColor = color;
-    },
-    setWallpaper(path: string, color: string, wallpaper: string) {
-      const bgLuminosity = bgIsLightOrDark(color.toString());
-      const windowTheme = generateColors(color, bgLuminosity);
-      const theme = Theme.create({
-        id: path,
-        ...windowTheme,
-        wallpaper,
-      });
-      applySnapshot(self, getSnapshot(theme));
-      return self;
-    },
-  }));
-
-export type ThemeType = Instance<typeof Theme>;
-export type ThemeSnapshotType = SnapshotOut<typeof Theme>;
-
-export const ThemeStore = types
-  .model({
-    loader: types.optional(LoaderModel, { state: 'initial' }),
-    currentTheme: types.reference(Theme),
-    themes: types.map(Theme),
-    // ships: types.map(Theme),
-    // spaces: types.map(Theme),
-  })
-  .views((self) => ({
-    get theme() {
-      return self.currentTheme;
-    },
-  }))
-  .actions((self) => ({
-    setCurrentTheme: (theme: ThemeType) => {
-      self.themes.set(theme.id, theme);
-      self.currentTheme = Theme.create(theme);
-      return self.currentTheme;
-    },
-    // setCurrentSpaceTheme(spaceId: string,theme?: ThemeType) {
-    //   if (theme) {
-    //     self.spaces.set(spaceId,theme);
-    //   }
-    //   self.currentTheme = self.spaces.get(spaceId);
-    //   return self.currentTheme;
-    // },
-    setWallpaper: flow(function* (id: string, wallpaper: string) {
-      // console.log(themeId);
-      const color = yield average(wallpaper, { group: 10, format: 'hex' });
-      const bgLuminosity = bgIsLightOrDark(color.toString());
-      const windowTheme = generateColors(color, bgLuminosity);
-      const theme = Theme.create({
-        id,
-        ...windowTheme,
-        wallpaper,
-      });
-      self.themes.set(id, theme);
-      self.currentTheme = theme;
-      yield DesktopActions.changeWallpaper(id, toJS(theme));
-      return self.currentTheme;
-      //   // if (config.patp) {
-      //   //   self.ships.set(themeId,theme);
-      //   //   self.currentTheme = self.ships.get(themeId);
-      //   // }
-      //   // if (config.spaceId) {
-      //   //   self.spaces.set(themeId,theme);
-      //   //   self.currentTheme = self.ships.get(themeId);
-      //   // }
-    }),
-  }));
-
-export type ThemeStoreType = Instance<typeof ThemeStore>;

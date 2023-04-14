@@ -1,4 +1,3 @@
-import { rgba } from 'polished';
 import { MouseEventHandler } from 'react';
 import { Button, Icon, IconPathsType } from '@holium/design-system';
 

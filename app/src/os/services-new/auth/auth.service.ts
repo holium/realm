@@ -2,13 +2,13 @@ import log from 'electron-log';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
-
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
 import { AccountModelType } from 'renderer/stores/models/account.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
+// import { getCookie } from 'os/lib/shipHelpers';
 
 export type AuthUpdateInit = {
   type: 'init';
@@ -169,6 +169,68 @@ export class AuthService extends AbstractService {
       log.info(`Failed to authenticate ${patp}`);
       return false;
     }
+  }
+
+  // TODO FINISH THIS FUNCTION REFACTOR
+  public async updateShipCode(
+    patp: string,
+    password: string,
+    code: string
+  ): string {
+    let result = '';
+    try {
+      const ship = this.authDB?.tables.accounts.findOne(patp);
+      if (!ship) {
+        throw new Error('ship not found');
+      }
+
+      if (ship.passwordHash === null) {
+        throw new Error('login: passwordHash is null');
+      }
+
+      const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
+      if (!passwordCorrect) {
+        throw new Error('login: password is incorrect');
+      }
+
+      // this.core.passwords.setPassword(patp, password);
+
+      // this.core.services.identity.auth.storeCredentials(ship.patp, password, {
+      //   code: code,
+      // });
+
+      let cookie = null,
+        connectConduit = false;
+      // in the case of development or DEBUG_PROD builds, we auto connect at startup; therefore
+      //  when this is the case, get a new cookie in order to refresh the conduit
+      if (
+        process.env.NODE_ENV === 'development' ||
+        process.env.DEBUG_PROD === 'true'
+      ) {
+        // cookie = await getCookie({
+        //   patp,
+        //   url: ship.url,
+        //   code: code,
+        // });
+        // connectConduit = true;
+      }
+
+      // this.core.setSession(
+      //   {
+      //     ship: ship.patp,
+      //     url: ship.url,
+      //     code,
+      //     cookie: cookie ?? '',
+      //   },
+      //   connectConduit
+      // );
+      result = 'success';
+    } catch (e) {
+      // this.core.sendLog(e);
+      // this.state.setLoader('error');
+      result = 'error';
+    }
+    return result;
   }
 
   public _setSession(patp: string, key: string) {

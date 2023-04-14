@@ -37,6 +37,7 @@ export class BazaarService extends AbstractService {
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
+    // log.info('bazaar event => %o', data);
     if (mark === 'bazaar-reaction') {
       const spacesType = Object.keys(data)[0];
       switch (spacesType) {
@@ -134,6 +135,7 @@ export class BazaarService extends AbstractService {
           });
           break;
         case 'stall-update':
+          log.info('stall-update => %o', data['stall-update']);
           const stallUpdate = data['stall-update'];
           // TODO come up with better solution for p2p app discovery
           if ('add-app' in stallUpdate) {
@@ -162,28 +164,23 @@ export class BazaarService extends AbstractService {
           });
 
           break;
-        case 'joined-bazaar':
-          log.info('joined-bazaar => %o', data['joined-bazaar']);
-          // model._addJoined(data['joined-bazaar']);
-          break;
-        case 'treaties-loaded':
-          log.info('treaties-loaded => %o', data['treaties-loaded']);
-          // model._treatiesLoaded();
-          break;
-        case 'new-ally':
-          log.info('new-ally => %o', data['new-ally']);
-          const ally = data['new-ally'];
-          // model._allyAdded(ally.ship, ally.desks);
-          break;
-        case 'ally-deleted':
-          log.info('ally-deleted => %o', data['ally-deleted']);
-          // console.log(data);
-          const ship = data['ally-deleted'].ship;
-          // model._allyDeleted(data['ally-deleted'].ship);
+        case 'joined-bazaar': // stall, path, catalog
+          const joinedBazaar = data['joined-bazaar'];
+          this.tables?.appCatalog.updateCatalog(joinedBazaar.catalog);
+          const joinedStallUpdate = this.tables?.appCatalog.updateStall(
+            joinedBazaar.path,
+            joinedBazaar.stall
+          );
+          this.sendUpdate({
+            type: 'stall-update',
+            payload: {
+              path: joinedBazaar.path,
+              stall: joinedStallUpdate,
+            },
+          });
           break;
         case 'rebuild-catalog':
           log.info('rebuild-catalog => %o', data['rebuild-catalog']);
-
           // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
           // model._rebuildCatalog(data['rebuild-catalog']);
           // model._allyDeleted(data['ally-deleted'].ship);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
-import { Label, BigInput } from 'renderer/components';
+import { BigInput } from 'renderer/components';
 import {
   TextInput,
   Text,
@@ -11,9 +11,8 @@ import {
   Spinner,
 } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
@@ -91,14 +90,14 @@ function InitialScreen(props: { done: any }) {
     if (!email) return;
     console.log(`setting email: ${email}`);
     setLoading(true);
-    const result = await AuthActions.changeEmail(email);
+    // const result = await AuthActions.changeEmail(email);
     setLoading(false);
 
-    if (result.verificationCode) {
-      props.done();
-    } else {
-      setError(result.error || 'Something went wrong, please try again.');
-    }
+    // if (result.verificationCode) {
+    //   props.done();
+    // } else {
+    //   setError(result.error || 'Something went wrong, please try again.');
+    // }
   };
 
   return (
@@ -112,9 +111,9 @@ function InitialScreen(props: { done: any }) {
         </Text.Custom>
       </Flex>
       <Flex mt={8} flexDirection="column">
-        <Label mb={3} required={true}>
-          Email
-        </Label>
+        <Text.Label mb={3}>
+          Email <span style={{ opacity: 0.5, fontWeight: '500' }}>*</span>
+        </Text.Label>
         <TextInput
           id="email-change"
           name="email-change"
@@ -151,7 +150,8 @@ function VerifyScreen(props: { done: any }) {
   const [error, setError] = useState(false);
 
   const submit = async (code: string) => {
-    const wasCorrect = await AuthActions.verifyNewEmail(code);
+    // const wasCorrect = await AuthActions.verifyNewEmail(code);
+    const wasCorrect = true;
     wasCorrect ? props.done() : setError(true);
   };
 
@@ -205,7 +205,7 @@ function ResendCodeButton() {
 
   const resendCode = async () => {
     setState('loading');
-    await AuthActions.resendNewEmailVerificationCode();
+    // await AuthActions.resendNewEmailVerificationCode();
     setState('resent');
   };
 

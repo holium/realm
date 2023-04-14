@@ -6,10 +6,9 @@ import {
   flow,
   SnapshotOut,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
 import { cleanNounColor } from 'os/lib/color';
 import { BazaarIPC } from '../ipc';
-import { shipStore } from '../ship.store';
+import { Glob } from './docket.model';
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -34,24 +33,6 @@ export enum AppTypes {
   Web = 'web',
   Dev = 'dev',
 }
-
-export const Glob = types.model('Glob', {
-  site: types.maybe(types.string),
-  glob: types.maybe(
-    types.model({
-      base: types.string,
-      'glob-reference': types.model({
-        location: types.model({
-          http: types.maybe(types.string),
-          ames: types.maybe(types.string),
-        }),
-        hash: types.string,
-      }),
-    })
-  ),
-});
-
-export type GlobMobxType = Instance<typeof Glob>;
 
 export const RealmConfig = types.model('RealmConfig', {
   size: types.array(types.number),
@@ -344,18 +325,6 @@ export const BazaarStore = types
     //   });
     //   self.stalls.set(data.path, data.stall);
     // },
-    // _updateStall(data: any) {
-    //   if ('add-app' in data) {
-    //     const app: AppType = data['add-app'];
-    //     if (app.type === 'urbit') {
-    //       app.color = cleanNounColor(app.color);
-    //     }
-    //     self.catalog.set(app.id, app);
-    //   } else if ('remove-app' in data) {
-    //     // const appId: string = data['remove-app'];
-    //   }
-    //   self.stalls.set(data.path, data.stall);
-    // },
     // _rebuildCatalog(data: any) {
     //   if (data.catalog) {
     //     for (let i = 0; i < data.catalog.length; i++) {
@@ -422,10 +391,7 @@ export const BazaarStore = types
     //   self.recommendations.splice(removeIndex, 1);
     //   applySnapshot(self.stalls, data.stalls);
     // },
-    // _treatiesLoaded() {
-    //   self.loadingTreaties = false;
-    //   self.treatiesLoaded = !self.treatiesLoaded;
-    // },
+
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
       if (self.recentApps.length >= 5) {
@@ -700,29 +666,3 @@ export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
 export type BazaarStoreType = Instance<typeof BazaarStore>;
 export type RealmConfigType = Instance<typeof RealmConfig>;
-
-BazaarIPC.onUpdate((_event: any, update: any) => {
-  const { type, payload } = update;
-  // on update we need to requery the store
-  switch (type) {
-    case 'initial':
-      // shipStore.bazaarStore.loadDevApps(payload.devApps);
-      // shipStore.bazaarStore.loadDevs(payload.devs);
-      break;
-    case 'installation-update':
-      shipStore.bazaarStore._onInstallationUpdate(payload);
-      break;
-    case 'recommended':
-      shipStore.bazaarStore._onRecommendedUpdate(payload.appId);
-      break;
-    case 'unrecommended':
-      shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
-      break;
-    case 'pinned-update':
-      shipStore.bazaarStore._onPinnedUpdate(payload.app.id, payload.index);
-      break;
-    case 'pins-reordered':
-      shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
-      break;
-  }
-});

@@ -34,7 +34,6 @@ export class ShipService extends AbstractService {
     }
     this.shipDB = new ShipDB(this.patp, password);
     const credentials = this.shipDB.getCredentials();
-    log.info('credentials', credentials);
     if (
       !this.shipDB ||
       !credentials.code ||

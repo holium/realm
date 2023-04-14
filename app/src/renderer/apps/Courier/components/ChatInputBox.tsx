@@ -7,9 +7,9 @@ import {
 } from 'react';
 import { Box, ChatInput } from '@holium/design-system';
 import { ChatMessageType, ChatModelType } from '../models';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { ShipIPC } from 'renderer/stores/ipc';
 
 type CourierInputProps = {

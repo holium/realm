@@ -2,10 +2,10 @@ import { useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
-import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 import { ThemeType } from '../../../../../theme';
 import { Avatar } from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface RowProps {
   theme: ThemeType;
@@ -46,9 +46,9 @@ interface ProviderRowProps {
 }
 
 export const ProviderRow = ({ id, ship, color, onClick }: ProviderRowProps) => {
-  const { theme } = useServices();
+  const { theme } = useAppState();
   const rowRef = useRef<any>(null);
-  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   return (
     <ProviderRowStyle
       id={`provider-row-${id}`}

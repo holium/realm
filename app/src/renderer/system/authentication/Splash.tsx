@@ -1,24 +1,25 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { Flex } from 'renderer/components';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { Flex } from '@holium/design-system';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   HoliumAnimated,
   SplashWordMark,
 } from 'renderer/components/Icons/holium';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { SoundActions } from 'renderer/logic/actions/sound';
+// import { useAppState } from 'renderer/stores/app.store';
+import { SoundActions } from 'renderer/lib/sound';
+// import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+// import { SoundActions } from 'renderer/logic/actions/sound';
 
 const SplashPresenter = () => {
+  // const { shellStore } = useAppState();
   useEffect(() => {
     SoundActions.playStartup();
 
     setTimeout(() => {
-      ShellActions.openDialog(OnboardingStep.DISCLAIMER);
-      OnboardingActions.setSeenSplash();
+      // shellStore.openDialog(OnboardingStep.DISCLAIMER);
+      // shellStore.setSeenSplash();
     }, 5000);
   }, []);
 

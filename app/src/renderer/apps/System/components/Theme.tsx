@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Text, Card, TextButton, Input } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { lighten } from 'polished';
-
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
-import { Member } from 'os/types';
-import { ShipModelType } from 'os/services/ship/models/ship';
-import { MembershipType } from 'os/services/spaces/models/members';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { ThemeStoreType } from 'renderer/logic/theme';
-import { Flex, RadioImages } from '@holium/design-system';
-import { AuthActions } from 'renderer/logic/actions/auth';
+import {
+  Flex,
+  RadioImages,
+  Text,
+  Card,
+  Button,
+  TextInput,
+} from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
+import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { Theme, ThemeType } from 'renderer/stores/models/theme.model';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -55,26 +57,25 @@ const wpGallery: { [key: string]: string } = {
 };
 
 type ThemePanelPresenterViewProps = {
-  theme: ThemeStoreType;
-  ship: ShipModelType;
+  theme: ThemeType;
+  ship: ShipMobxType;
   space: SpaceModelType;
-  membership: MembershipType;
 };
 
 const ThemePanelPresenterView = ({
   theme,
   ship,
-  membership,
   space,
 }: ThemePanelPresenterViewProps) => {
-  const { windowColor, accentColor, inputColor } = theme.currentTheme;
+  const { setTheme } = useAppState();
+  const { windowColor, inputColor } = theme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
   const wpGalleryKeys = Object.keys(wpGallery);
 
-  const members = Array.from(membership.getMembersList(space.path));
+  const members = space.members.list;
   const me = members.find(
-    (member: Member) =>
+    (member) =>
       member.patp === ship.patp && member.roles.indexOf('admin') !== -1
   );
   // is 'me' (currently logged in user) an admin?
@@ -99,7 +100,7 @@ const ThemePanelPresenterView = ({
         console.log('wallpaper was undefined.');
         return;
       }
-      AuthActions.setShipTheme(me.patp, newTheme.values);
+      setTheme(Theme.create(newTheme.values));
 
       // TODO doesnt work
       // could probably be made to work, but it would be pretty hacky
@@ -136,21 +137,18 @@ const ThemePanelPresenterView = ({
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
       <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
-        <Text fontSize={7} fontWeight={600}>
+        <Text.Custom fontSize={7} fontWeight={600}>
           Theme
-        </Text>
+        </Text.Custom>
 
         {canEditSpace && (
-          <TextButton
+          <Button.TextButton
             style={{ fontWeight: 400 }}
-            showBackground
-            textColor={accentColor}
-            highlightColor={accentColor}
             disabled={!themeForm.computed.isValid || !canEditSpace}
             onClick={themeForm.actions.submit}
           >
             Save
-          </TextButton>
+          </Button.TextButton>
         )}
       </Flex>
 
@@ -245,15 +243,15 @@ const ThemePanelPresenterView = ({
       </Text> */}
 
       <Card p="20px" width="100%" customBg={cardColor} flexDirection={'column'}>
-        <Text mb={4} fontWeight={500}>
+        <Text.Custom mb={4} fontWeight={500}>
           Current
-        </Text>
+        </Text.Custom>
 
-        <WallpaperPreview src={theme.currentTheme.wallpaper} />
+        <WallpaperPreview src={theme.wallpaper} />
 
-        <Text mt={6} mb={2} fontWeight={500}>
+        <Text.Custom mt={6} mb={2} fontWeight={500}>
           Gallery
-        </Text>
+        </Text.Custom>
 
         <RadioImages
           // customBg={windowColor}
@@ -272,13 +270,15 @@ const ThemePanelPresenterView = ({
           }}
         />
 
-        <Text my={4} fontWeight={500}>
+        <Text.Custom my={4} fontWeight={500}>
           Custom
-        </Text>
-        <Input
+        </Text.Custom>
+        <TextInput
+          id="customWallpaper"
+          name="customWallpaper"
           type="text"
           placeholder="Paste url here"
-          wrapperStyle={{
+          style={{
             borderRadius: 9,
             backgroundColor: inputColor,
           }}
@@ -294,16 +294,16 @@ const ThemePanelPresenterView = ({
 };
 
 const ThemePanelPresenter = () => {
-  const { theme, ship, spaces, membership } = useServices();
+  const { theme } = useAppState();
+  const { ship, spacesStore } = useShipStore();
 
-  if (!spaces.selected || !ship || !membership) return null;
+  if (!spacesStore.selected || !ship) return null;
 
   return (
     <ThemePanelPresenterView
       theme={theme}
       ship={ship}
-      space={spaces.selected}
-      membership={membership}
+      space={spacesStore.selected}
     />
   );
 };

@@ -213,6 +213,11 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
     return updated;
   }
 
+  public updateCatalog(catalogUpdate: { [appId: string]: App }) {
+    if (!this.db) throw new Error('No db connection');
+    this._insertAppCatalog(catalogUpdate);
+  }
+
   public updateApp(appId: string, app: App) {
     if (!this.db) throw new Error('No db connection');
     this._insertAppCatalog({ [appId]: app });

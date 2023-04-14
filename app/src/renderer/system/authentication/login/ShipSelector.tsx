@@ -28,8 +28,6 @@ const ShipSelectorPresenter = ({
   selectedShip: AccountModelType;
   onSelect: (account: AccountModelType) => void;
 }) => {
-  // const { identity, theme } = useServices();
-  // const { auth } = identity;
   const { setTheme, authStore } = useAppState();
   const { accounts } = authStore;
 

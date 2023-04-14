@@ -8,14 +8,14 @@ import {
   Text,
   Icon,
 } from '@holium/design-system';
-import { Label, FormControl } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { FormControl } from 'renderer/components';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { ship } = useServices();
+  const { ship } = useShipStore();
   const roomsManager = useRooms(ship?.patp);
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
@@ -66,7 +66,7 @@ const SettingsPresenter = () => {
       <Flex flex={1} flexDirection="column">
         <FormControl.FieldSet>
           <FormControl.Field>
-            <Label>Audio input</Label>
+            <Text.Label>Audio input</Text.Label>
             <Select
               id="rooms-settings-audio-input"
               options={audioSourceOptions}

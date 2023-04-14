@@ -1,4 +1,3 @@
-// import { osState, shipState } from './../store';
 import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
 import {
   AppWindowMobxType,
@@ -6,8 +5,7 @@ import {
   AppWindowProps,
   BoundsModelType,
 } from './window.model';
-import { getInitialWindowBounds } from '../lib/window-manager';
-import { AppType } from './bazaar.model';
+import { getInitialWindowBounds } from '../../lib/window-manager';
 import { toJS } from 'mobx';
 
 export const ShellModel = types
@@ -70,6 +68,14 @@ export const ShellModel = types
       window.electron.app.setMouseColor(mouseColor);
       self.mouseColor = mouseColor;
     },
+    toggleIsolationMode: () => {
+      if (self.isolationMode) {
+        window.electron.app.disableIsolationMode();
+      } else {
+        window.electron.app.enableIsolationMode();
+      }
+      self.isolationMode = !self.isolationMode;
+    },
     enableIsolationMode: () => {
       return window.electron.app.enableIsolationMode();
     },
@@ -118,7 +124,7 @@ export const ShellModel = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: AppType) {
+    openWindow(app: any) {
       let glob;
       let href;
       if (app.type === 'urbit') {

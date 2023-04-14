@@ -7,12 +7,11 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
-import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
+import { UrbitApp } from './bazaar.model';
 import { MembersModel, MembersStore, VisaModel } from './invitations.model';
 import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
-import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
 import { shipStore } from '../ship.store';
 
 const spaceRowToModel = (space: any) => {
@@ -26,10 +25,6 @@ const spaceRowToModel = (space: any) => {
     },
   };
 };
-
-export const DocketMap = types.map(
-  types.union({ eager: false }, DocketApp, WebApp)
-);
 
 const StallModel = types.model('StallModel', {
   suite: types.map(UrbitApp),
@@ -231,7 +226,7 @@ export const SpacesStore = types
         // TODO notify user it failed
       }
     }),
-    createSpace: flow(function* (newSpace: NewSpace) {
+    createSpace: flow(function* (newSpace: any) {
       self.creating.set('loading');
       try {
         const spacePath = yield SpacesIPC.createSpace(newSpace) as Promise<any>;
@@ -436,53 +431,3 @@ export const SpacesStore = types
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
-
-SpacesIPC.onUpdate((_event: any, update: any) => {
-  const { type, payload } = update;
-  // on update we need to requery the store
-  switch (type) {
-    case 'initial':
-      shipStore.spacesStore.init();
-      break;
-    case 'invitations':
-      shipStore.spacesStore._onInitialInvitationsUpdate(payload);
-      break;
-    case 'invite-sent':
-      shipStore.spacesStore._onSpaceMemberAdded(payload);
-      break;
-    case 'invite-updated':
-      shipStore.spacesStore._onSpaceMemberUpdated(payload);
-      break;
-    case 'kicked':
-      shipStore.spacesStore._onSpaceMemberKicked(payload);
-      break;
-    case 'edited':
-      shipStore.spacesStore._onSpaceMemberUpdated(payload);
-      break;
-    case 'add':
-      shipStore.spacesStore._onSpaceAdded(payload);
-      break;
-    case 'replace':
-      shipStore.spacesStore._onSpaceUpdated(payload);
-      break;
-    case 'remove':
-      shipStore.spacesStore._onSpaceRemoved(payload);
-      break;
-  }
-});
-
-BazaarIPC.onUpdate((_event: any, update: any) => {
-  const { type, payload } = update;
-  // on update we need to requery the store
-  switch (type) {
-    case 'dock-update':
-      shipStore.spacesStore._onDockUpdate(payload);
-      break;
-    case 'stall-update':
-      shipStore.spacesStore._onStallUpdate(payload);
-      break;
-    case 'pins-reordered':
-      shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
-      break;
-  }
-});

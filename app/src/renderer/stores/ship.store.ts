@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
 import { Instance, types, flow, onSnapshot, SnapshotIn } from 'mobx-state-tree';
 import { ChatStore } from '../apps/Courier/store';
-import { NotifIPC, RealmIPC, ShipIPC, SpacesIPC } from './ipc';
-import { RealmUpdateTypes } from 'os/realm.types';
+import { ShipIPC } from './ipc';
 import { SpacesStore } from './models/spaces.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
+import { FeaturedStore } from './models/featured.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -35,6 +35,7 @@ export const ShipStore = types
     chatStore: ChatStore,
     spacesStore: SpacesStore,
     bazaarStore: BazaarStore,
+    featuredStore: FeaturedStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -113,6 +114,9 @@ export const shipStore = ShipStore.create({
     spaces: {},
   },
   bazaarStore: loadBazaarSnapshot(),
+  featuredStore: {
+    spaces: {},
+  },
 });
 
 onSnapshot(shipStore, (snapshot) => {
@@ -141,35 +145,3 @@ export function useShipStore() {
   }
   return store;
 }
-
-// updates
-RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-  if (update.type === 'booted') {
-    if (update.payload.session) {
-      shipStore.setShip(update.payload.session);
-    }
-  }
-  if (update.type === 'authenticated') {
-    shipStore.setShip(update.payload);
-  }
-});
-
-NotifIPC.onUpdate(({ type, payload }: any) => {
-  switch (type) {
-    case 'notification-added':
-      shipStore.notifStore.onNotifAdded(payload);
-      if (
-        shipStore.chatStore.isChatSelected(payload.path) &&
-        payload.app === 'realm-chat'
-      ) {
-        shipStore.notifStore.readPath(payload.app, payload.path);
-      }
-      break;
-    case 'notification-updated':
-      shipStore.notifStore.onNotifUpdated(payload);
-      break;
-    case 'notification-deleted':
-      shipStore.notifStore.onNotifDeleted(payload);
-      break;
-  }
-});

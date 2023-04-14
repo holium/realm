@@ -1,18 +1,15 @@
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import { nativeApps } from '../nativeApps';
 import { observer } from 'mobx-react';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
 const AccountTrayAppPresenter = () => {
-  const { shellStore } = useAppState();
+  const { shellStore, authStore } = useAppState();
   const { ship } = useShipStore();
   const { setActiveApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
@@ -80,7 +77,7 @@ const AccountTrayAppPresenter = () => {
             className="realm-cursor-hover"
             onClick={() => {
               roomsManager.cleanup();
-              AuthActions.logout(ship.patp);
+              authStore.logout();
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
@@ -92,7 +89,7 @@ const AccountTrayAppPresenter = () => {
             className="realm-cursor-hover"
             onClick={() => {
               roomsManager.cleanup();
-              AuthActions.logout(ship.patp);
+              authStore.logout();
               setActiveApp(null);
               // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}

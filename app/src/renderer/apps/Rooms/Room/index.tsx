@@ -4,20 +4,22 @@ import { darken } from 'polished';
 import { Badge } from 'renderer/components';
 import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { useRooms } from '../useRooms';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { ship, theme, desktop } = useServices();
+  const { theme, shellStore } = useAppState();
+  const { ship } = useShipStore();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const { dockColor, mode } = theme.currentTheme;
+  const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsManager?.protocol.local?.isMuted;
   const commButtonBg =
@@ -180,9 +182,9 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
-              icon={desktop.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
+              icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               customBg={commButtonBg}
-              onClick={desktop.toggleMultiplayer}
+              onClick={shellStore.toggleMultiplayer}
             />
             {/* <CommButton
               icon="HeadphoneLine"

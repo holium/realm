@@ -1,7 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, PersonRow } from 'renderer/components';
-import { ShipActions } from 'renderer/logic/actions/ship';
 import { FriendType } from 'os/services/ship/models/friends';
 import { WindowedList } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -104,7 +103,7 @@ const FriendsListPresenter = () => {
           {
             label: 'Remove',
             onClick: (_evt: any) => {
-              ShipActions.removeFriend(friend.patp);
+              friends.removeFriend(friend.patp);
             },
           },
         ]}

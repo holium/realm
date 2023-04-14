@@ -7,11 +7,11 @@ import {
 } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Input } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
 import { ToolbarLockIcon } from './ToolbarLockIcon';
 import { ToolbarSearchIcon } from './ToolbarSearchIcon';
+import { useAppState } from 'renderer/stores/app.store';
 
 type Props = {
   innerRef: RefObject<HTMLDivElement>;
@@ -19,7 +19,7 @@ type Props = {
 };
 
 const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
-  const { theme } = useServices();
+  const { theme } = useAppState();
   const { currentTab, setUrl } = useBrowser();
   const [input, setInput] = useState(currentTab.url ?? '');
 
@@ -74,7 +74,7 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
         wrapperStyle={{
           borderRadius: '20px',
           height: 32,
-          backgroundColor: theme.currentTheme.inputColor,
+          backgroundColor: theme.inputColor,
         }}
         value={input}
         onChange={onInputChange}

@@ -16,7 +16,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { ChatMessageType } from '../models';
 import { useShipStore } from 'renderer/stores/ship.store';

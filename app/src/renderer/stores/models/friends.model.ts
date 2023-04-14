@@ -14,7 +14,7 @@ const FriendStatus = types.enumeration('FriendStatus', [
   'contact',
   'our',
 ]);
-export type FriendStatus = Instance<typeof FriendStatus>;
+export type FriendStatusType = Instance<typeof FriendStatus>;
 
 export const FriendModel = types.model({
   patp: types.identifier,
@@ -97,6 +97,19 @@ export const FriendsStore = types
         self.all.push(friend);
       } catch (error) {
         console.error(error);
+      }
+    }),
+    removeFriend: flow(function* (patp: string) {
+      const delIdx = self.all.findIndex((f) => patp === f.patp);
+      const oldFriend = self.all[delIdx];
+      try {
+        yield FriendsIPC.removeFriend(patp) as Promise<any>;
+        if (delIdx !== -1) {
+          self.all.splice(delIdx, 1);
+        }
+      } catch (error) {
+        console.error(error);
+        self.all.splice(delIdx, 0, oldFriend);
       }
     }),
     add(patp: string, friend: FriendType) {

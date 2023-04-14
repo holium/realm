@@ -16,12 +16,12 @@ import {
 import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
+import { openChatToPath } from 'renderer/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
 
 type ExpandBarStyles = {

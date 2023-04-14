@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { applyStyleOverrides } from './applyStyleOverrides';
-import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
+import { genCSSVariables } from 'renderer/lib/theme';
 
 const AppViewContainer = styled.div`
   overflow: hidden;

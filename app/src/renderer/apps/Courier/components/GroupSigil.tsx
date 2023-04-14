@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { Flex } from 'renderer/components';
 import { Patp } from 'os/types';
 import { Avatar } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface GroupSigilProps {
   path: string;
@@ -15,7 +15,7 @@ export const GroupSigil: FC<GroupSigilProps> = ({
   patps,
   size = 36,
 }: GroupSigilProps) => {
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   const len = patps.length;
   const renderSigil = (data: any, index: number) => {

@@ -4,7 +4,7 @@ import { AppWindowIcon } from '../AppWindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
-import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 
 type Props = {
   zIndex: number;

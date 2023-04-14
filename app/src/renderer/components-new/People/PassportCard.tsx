@@ -1,11 +1,8 @@
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Box, Text, Icons } from '../';
+import { darken } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Box, Flex, Icon, Text } from '@holium/design-system';
 
 interface IPassport {
   patp: string;
@@ -31,7 +28,6 @@ const PassportCardPresenter = ({
 }: IPassport) => {
   const { setActiveApp, walletApp } = useTrayApps();
 
-  const iconColor = rgba(theme.textColor, 0.7);
   const buttonColor = darken(0.1, theme.windowColor);
 
   return (
@@ -50,17 +46,17 @@ const PassportCardPresenter = ({
         <Flex flexDirection="column" gap={4}>
           {nickname ? (
             <>
-              <Text fontWeight={500} fontSize={3}>
+              <Text.Custom fontWeight={500} fontSize={3}>
                 {nickname.substring(0, 30)} {nickname.length > 31 && '...'}
-              </Text>
-              <Text fontSize={2} opacity={0.6}>
+              </Text.Custom>
+              <Text.Custom fontSize={2} opacity={0.6}>
                 {patp}
-              </Text>
+              </Text.Custom>
             </>
           ) : (
-            <Text fontWeight={500} fontSize={3}>
+            <Text.Custom fontWeight={500} fontSize={3}>
               {patp}
-            </Text>
+            </Text.Custom>
           )}
         </Flex>
       </Flex>
@@ -81,15 +77,15 @@ const PassportCardPresenter = ({
                   },
                 });
                 // TODO: placeholder, we need to implement the actual send coins functionality
-                WalletActions.navigate(WalletView.TRANSACTION_SEND, {
-                  walletIndex: '0',
-                  to: patp,
-                });
+                // WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+                //   walletIndex: '0',
+                //   to: patp,
+                // });
                 onClose();
                 evt.stopPropagation();
               }}
             >
-              <Icons name="SendCoins" color={iconColor} size="16px" />
+              <Icon name="SendCoins" size={16} opacity={0.7} />
             </PassportButton>
           )}
           {/* TODO re-enable */}
@@ -119,7 +115,7 @@ const PassportCardPresenter = ({
         </Flex>
         {description && (
           <Flex flexDirection="column" gap={4}>
-            <Text fontSize={2}>{description}</Text>
+            <Text.Custom fontSize={2}>{description}</Text.Custom>
           </Flex>
         )}
       </Flex>

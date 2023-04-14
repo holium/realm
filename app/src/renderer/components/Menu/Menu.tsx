@@ -1,6 +1,6 @@
+import { Card } from '@holium/design-system';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MenuWrapper } from './Menu.styles';
 
 interface IProps {
   id: any;
@@ -70,11 +70,11 @@ export class Menu extends React.PureComponent<IProps, IState> {
   };
 
   render() {
-    const { customBg, children, style, isOpen, id } = this.props;
+    const { children, style, isOpen, id } = this.props;
     return (
-      <MenuWrapper
+      <Card
         id={id}
-        customBg={customBg}
+        elevation={2}
         initial={{
           opacity: 0,
         }}
@@ -91,11 +91,15 @@ export class Menu extends React.PureComponent<IProps, IState> {
           },
         }}
         ref={(node) => (this.menuRef.current = node)}
-        style={{ display: isOpen ? 'flex' : 'none', ...style }}
+        style={{
+          display: isOpen ? 'flex' : 'none',
+          borderColor: 'rgba(var(--rlm-border-rgba))',
+          ...style,
+        }}
         role="list"
       >
         {children}
-      </MenuWrapper>
+      </Card>
     );
   }
 }

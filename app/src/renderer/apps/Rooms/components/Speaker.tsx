@@ -2,7 +2,6 @@ import { useRef, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
-import { useServices } from 'renderer/logic/store';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { darken } from 'polished';
 import { useRooms } from '../useRooms';
@@ -12,6 +11,8 @@ import {
 } from 'renderer/components/ContextMenu';
 import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
 import { AudioWave } from './AudioWave';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface ISpeaker {
   person: string;
@@ -28,7 +29,8 @@ const speakerType = {
 
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, theme, friends } = useServices();
+  const { theme } = useAppState();
+  const { ship, friends } = useShipStore();
   const speakerRef = useRef<any>(null);
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
@@ -102,7 +104,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
       id={`room-speaker-${person}`}
       // data-close-tray="false"
       ref={speakerRef}
-      hoverBg={darken(0.04, theme.currentTheme.windowColor)}
+      hoverBg={darken(0.04, theme.windowColor)}
       key={person}
       gap={4}
       flexDirection="column"

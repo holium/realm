@@ -3,11 +3,11 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { RealmActions } from 'renderer/logic/actions/main';
-import { OSActions } from 'renderer/logic/actions/os';
 import { CheckBox, Flex, Spinner } from '@holium/design-system';
 import { MediaAccess, MediaAccessStatus } from 'os/types';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
+// import { useShipStore } from 'renderer/stores/ship.store';
 
 const colorMap: Record<MediaAccessStatus, string> = {
   granted: '#39a839',
@@ -26,9 +26,9 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
 `;
 
 const SystemPanelPresenter = () => {
-  const { theme, courier, bazaar, bulletin, friends, spaces, desktop } =
-    useServices();
-  const { windowColor, accentColor } = theme.currentTheme;
+  const { theme, shellStore } = useAppState();
+  // const { bazaarStore, friends, spacesStore, bulletinStore } = useShipStore();
+  const { windowColor, accentColor } = theme;
 
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
     camera: 'unknown',
@@ -38,49 +38,51 @@ const SystemPanelPresenter = () => {
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   useEffect(() => {
-    RealmActions.getMediaStatus().then(setMediaStatus);
+    MainIPC.getMediaStatus().then(setMediaStatus);
   }, []);
 
-  const apps = [
-    {
-      name: '%spaces',
-      path: '/updates',
-      subscriptionState: spaces.subscriptionState,
-      subscribing: () => spaces.setSubscriptionStatus('subscribing'),
-    },
-    {
-      name: '%bazaar',
-      path: '/updates',
-      subscriptionState: bazaar.subscriptionState,
-      subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
-    },
-    {
-      name: '%courier',
-      path: '/updates',
-      subscriptionState: courier.subscriptionState,
-      subscribing: () => courier.setSubscriptionStatus('subscribing'),
-    },
-    {
-      name: '%bulletin',
-      path: '/ui',
-      subscriptionState: bulletin.subscriptionState,
-      subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
-    },
-    {
-      name: '%friends',
-      path: '/all',
-      subscriptionState: friends.subscriptionState,
-      subscribing: () => friends.setSubscriptionStatus('subscribing'),
-    },
+  const apps: any = [
+    // {
+    //   name: '%spaces',
+    //   path: '/updates',
+    //   subscriptionState: spaces.subscriptionState,
+    //   subscribing: () => spaces.setSubscriptionStatus('subscribing'),
+    // },
+    // {
+    //   name: '%bazaar',
+    //   path: '/updates',
+    //   subscriptionState: bazaar.subscriptionState,
+    //   subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
+    // },
+    // {
+    //   name: '%courier',
+    //   path: '/updates',
+    //   subscriptionState: courier.subscriptionState,
+    //   subscribing: () => courier.setSubscriptionStatus('subscribing'),
+    // },
+    // {
+    //   name: '%bulletin',
+    //   path: '/ui',
+    //   subscriptionState: bulletin.subscriptionState,
+    //   subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
+    // },
+    // {
+    //   name: '%friends',
+    //   path: '/all',
+    //   subscriptionState: friends.subscriptionState,
+    //   subscribing: () => friends.setSubscriptionStatus('subscribing'),
+    // },
   ];
 
   const resubscribe = async (appName: string) => {
-    const app = apps.find((a) => a.name === appName);
+    const app = apps.find((a: any) => a.name === appName);
     if (app) app.subscribing();
-    await OSActions.resubscribe(appName);
+    // await OSActions.resubscribe(appName);
   };
 
-  const isSubscribing = apps.some((a) => a.subscriptionState === 'subscribing');
+  const isSubscribing = apps.some(
+    (a: any) => a.subscriptionState === 'subscribing'
+  );
 
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
@@ -95,8 +97,8 @@ const SystemPanelPresenter = () => {
         <CheckBox
           title="Isolation Mode"
           label="Prevents the native OS from causing edge events and notifications."
-          isChecked={desktop.isIsolationMode}
-          onChange={desktop.toggleIsolationMode}
+          isChecked={shellStore.isIsolationMode}
+          onChange={shellStore.toggleIsolationMode}
         />
       </Card>
 
@@ -134,7 +136,7 @@ const SystemPanelPresenter = () => {
                   highlightColor={accentColor}
                   disabled={mediaStatus.mic === 'granted'}
                   onClick={() => {
-                    RealmActions.askForMicrophone().then((status) => {
+                    MainIPC.askForMicrophone().then((status) => {
                       setMediaStatus({ ...mediaStatus, mic: status });
                     });
                   }}
@@ -172,7 +174,7 @@ const SystemPanelPresenter = () => {
                   highlightColor={accentColor}
                   // disabled={mediaStatus.camera === 'granted'}
                   onClick={() => {
-                    RealmActions.askForCamera().then((status) => {
+                    MainIPC.askForCamera().then((status) => {
                       setMediaStatus({ ...mediaStatus, camera: status });
                     });
                   }}
@@ -196,7 +198,7 @@ const SystemPanelPresenter = () => {
         customBg={cardColor}
         flexDirection={'column'}
       >
-        {apps.map((app) => (
+        {apps.map((app: any) => (
           <Flex
             key={app.name}
             flexDirection="row"
