@@ -47,31 +47,29 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
         A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
         will be created. Give it a memorable nickname.
       </Text.Body>
-      <FormControl.FieldSet mt={8}>
-        <FormControl.Field>
-          <Text.Label mb={1} required={true}>
-            Nickname
-          </Text.Label>
-          <TextInput
-            id="wallet-nickname"
-            name="wallet-nickname"
-            value={nickname.state.value}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              nickname.actions.onChange(e.target.value)
-            }
-            placeholder="Fort Knox"
-          />
-        </FormControl.Field>
-        <Flex mt={5} width="100%">
-          <Button.TextButton
-            id="submit"
-            width="100%"
-            onClick={form.actions.submit}
-          >
-            Create
-          </Button.TextButton>
-        </Flex>
-      </FormControl.FieldSet>
+      {/*<FormControl.FieldSet mt={8}>
+        <FormControl.Field>*/}
+      <Text.Label mb={1}>Nickname</Text.Label>
+      <TextInput
+        id="wallet-nickname"
+        name="wallet-nickname"
+        value={nickname.state.value}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          nickname.actions.onChange(e.target.value)
+        }
+        placeholder="Fort Knox"
+      />
+      {/*</FormControl.Field>*/}
+      <Flex mt={5} width="100%">
+        <Button.TextButton
+          id="submit"
+          width="100%"
+          onClick={form.actions.submit}
+        >
+          Create
+        </Button.TextButton>
+      </Flex>
+      {/*</Flex></FormControl.FieldSet>*/}
     </Flex>
   );
 });

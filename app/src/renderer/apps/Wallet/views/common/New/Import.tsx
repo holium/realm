@@ -33,35 +33,33 @@ const ImportPresenter = (props: ImportProps) => {
         If you have an existing mnemonic seed phrase, you can load it into Realm
         now.
       </Text.Body>
-      <FormControl.FieldSet mt={9} width="100%" flexDirection="column">
-        <FormControl.Field>
-          <Text.Label mb={1} required={true}>
-            Seed phrase
-          </Text.Label>
-          <TextInput
-            id="seed-phrase"
-            name="seed-phrase"
-            height="72px"
-            required={true}
-            type="textarea"
-            value={phrase}
-            cols={50}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPhrase(e.target.value)
-            }
-            // autoFocus={true}
-          />
-        </FormControl.Field>
-        <Flex mt={7} width="100%">
-          <Button.TextButton
-            width="100%"
-            disabled={!ethers.utils.isValidMnemonic(phrase)}
-            onClick={saveSeedPhrase}
-          >
-            Save
-          </Button.TextButton>
-        </Flex>
-      </FormControl.FieldSet>
+      {/*<FormControl.FieldSet mt={9} width="100%" flexDirection="column">
+        <FormControl.Field>*/}
+      <Text.Label mb={1}>Seed phrase</Text.Label>
+      <TextInput
+        id="seed-phrase"
+        name="seed-phrase"
+        height="72px"
+        required={true}
+        type="textarea"
+        value={phrase}
+        cols={50}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPhrase(e.target.value)
+        }
+        // autoFocus={true}
+      />
+      {/*</FormControl.Field>*/}
+      <Flex mt={7} width="100%">
+        <Button.TextButton
+          width="100%"
+          disabled={!ethers.utils.isValidMnemonic(phrase)}
+          onClick={saveSeedPhrase}
+        >
+          Save
+        </Button.TextButton>
+      </Flex>
+      {/*</FormControl.FieldSet>*/}
     </NoResize>
   );
 };
