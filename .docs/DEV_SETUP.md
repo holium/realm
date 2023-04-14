@@ -6,6 +6,8 @@ So, you've just cloned down the Realm monorepo.  What now?
 ```bash
 # have `git pull` also get the pinned commit of the Urbit submodule
 $: git config --global submodule.recurse true
+# init submodule, and then pull it
+$: git submodule update --init --recursive
 $: git pull
 ```
 ### Urbit binary
