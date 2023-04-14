@@ -70,19 +70,19 @@
         (delete-backlog:lib +.act state bowl)
       :: notification preferences pokes
       %disable-push
-        (disable-push:lib state)
+        (disable-push:lib state bowl)
       %enable-push
-        (enable-push:lib state)
+        (enable-push:lib state bowl)
       %remove-device
-        (remove-device:lib +.act state)
+        (remove-device:lib +.act state bowl)
       %set-device
-        (set-device:lib +.act state)
+        (set-device:lib +.act state bowl)
       %mute-chat
-        (mute-chat:lib +.act state)
+        (mute-chat:lib +.act state bowl)
       %pin-chat
-        (pin-chat:lib +.act state)
+        (pin-chat:lib +.act state bowl)
       %toggle-msg-preview-notif
-        (toggle-msg-preview-notif:lib +.act state)
+        (toggle-msg-preview-notif:lib +.act state bowl)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
