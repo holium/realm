@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
+import { walletStore}
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -27,7 +28,6 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
-import { useTrayApps } from 'renderer/apps/store';
 import { motion } from 'framer-motion';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
@@ -35,6 +35,7 @@ import {
   walletCardStyleTransition,
 } from '../../../components/WalletCardWrapper';
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const BreadCrumb = styled(Text)`
   transition: var(--transition);
@@ -69,8 +70,7 @@ interface DetailHeroProps {
 
 export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
-    const { theme } = useServices();
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
     const { coinView } = props;
 
     const themeData = getBaseTheme(theme.currentTheme);
@@ -83,18 +83,18 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const [showPasscode, setShowPasscode] = useState(false);
 
     const amountDisplay =
-      walletApp.navState.network === NetworkType.ETHEREUM
+      walletStore.navState.network === NetworkType.ETHEREUM
         ? !props.coin
-          ? walletApp.navState.protocol === ProtocolType.UQBAR
+          ? walletStore.navState.protocol === ProtocolType.UQBAR
             ? `${formatZigAmount(
                 (props.wallet as EthWalletType).data.get(
-                  walletApp.navState.protocol
+                  walletStore.navState.protocol
                 )?.balance ?? ''
               )} zigs`
             : `${
                 formatEthAmount(
                   (props.wallet as EthWalletType).data.get(
-                    walletApp.navState.protocol
+                    walletStore.navState.protocol
                   )?.balance ?? ''
                 ).eth
               } ETH`
@@ -106,17 +106,17 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           } BTC`;
 
     const amountUsdDisplay =
-      walletApp.navState.network === 'ethereum'
+      walletStore.navState.network === 'ethereum'
         ? !props.coin
-          ? walletApp.ethereum.conversions.usd
+          ? walletStore.ethereum.conversions.usd
             ? '$' +
               `${convertEthAmountToUsd(
                 formatEthAmount(
                   (props.wallet as EthWalletType).data.get(
-                    walletApp.navState.protocol
+                    walletStore.navState.protocol
                   )?.balance ?? ''
                 ),
-                walletApp.ethereum.conversions.usd
+                walletStore.ethereum.conversions.usd
               )}`
             : ''
           : props.coin.conversions.usd
@@ -126,11 +126,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               props.coin.conversions.usd
             )}`
           : ''
-        : walletApp.bitcoin.conversions.usd
+        : walletStore.bitcoin.conversions.usd
         ? '$' +
           `${convertBtcAmountToUsd(
             formatBtcAmount((props.wallet as BitcoinWalletType).balance),
-            walletApp.bitcoin.conversions.usd
+            walletStore.bitcoin.conversions.usd
           )}`
         : '';
 
@@ -160,7 +160,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             fontSize={2}
             color={fadedTextColor}
             style={{ textTransform: 'uppercase' }}
-            onClick={WalletActions.navigateBack}
+            onClick={walletStore.navigateBack}
           >
             {`${props.wallet.nickname}`}
           </BreadCrumb>
@@ -194,16 +194,16 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const sendTransaction = async (passcode: number[]) => {
       try {
-        if (walletApp.navState.network === NetworkType.ETHEREUM) {
-          if (walletApp.navState.protocol === ProtocolType.UQBAR) {
+        if (walletStore.navState.network === NetworkType.ETHEREUM) {
+          if (walletStore.navState.protocol === ProtocolType.UQBAR) {
             await WalletActions.submitUqbarTransaction(
-              walletApp.currentWallet?.index.toString() ?? '',
+              walletStore.currentWallet?.index.toString() ?? '',
               passcode
             );
           } else {
             props.coin
               ? await WalletActions.sendERC20Transaction(
-                  walletApp.currentWallet?.index.toString() ?? '',
+                  walletStore.currentWallet?.index.toString() ?? '',
                   transactionRecipient.address ??
                     transactionRecipient.patpAddress ??
                     '',
@@ -213,7 +213,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                   transactionRecipient.patp
                 )
               : await WalletActions.sendEthereumTransaction(
-                  walletApp.currentWallet?.index.toString() ?? '',
+                  walletStore.currentWallet?.index.toString() ?? '',
                   transactionRecipient.address ||
                     transactionRecipient.patpAddress ||
                     '',
@@ -248,13 +248,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         height="auto"
         width="100%"
         isSelected
-        mode={theme.currentTheme.mode}
-        customBg={lighten(0.04, theme.currentTheme.windowColor)}
-        borderColor={
-          theme.currentTheme.mode === 'dark'
-            ? darken(0.1, theme.currentTheme.backgroundColor)
-            : darken(0.1, theme.currentTheme.windowColor)
-        }
       >
         <Flex
           p={2}
@@ -262,11 +255,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           width="100%"
           minHeight="38px"
           style={{ height: props.QROpen ? 242 : 38 }}
-          background={
-            theme.currentTheme.mode === 'dark'
-              ? lighten(0.025, theme.currentTheme.inputColor)
-              : darken(0.025, theme.currentTheme.inputColor)
-          }
           border={`solid 1px ${panelBorder}`}
           borderRadius="8px"
           flexDirection="column"
@@ -275,7 +263,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
-              {walletApp.navState.network === NetworkType.ETHEREUM ? (
+              {walletStore.navState.network === NetworkType.ETHEREUM ? (
                 <Icons name="Ethereum" height="20px" mr={2} />
               ) : (
                 <Icons name="Bitcoin" height="20px" mr={2} />

@@ -11,7 +11,7 @@ import { ConfirmPasscode } from './ConfirmPasscode';
 import { Finalizing } from './Finalizing';
 import { DetectedExisting } from './DetectedExisting';
 import { RecoverExisting } from './RecoverExisting';
-import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export enum NewWalletScreen {
   CREATE = 'create',
@@ -26,8 +26,8 @@ export enum NewWalletScreen {
 }
 
 const EthNewPresenter = () => {
-  const { walletApp, dimensions } = useTrayApps();
-  const initialScreen = walletApp.initialized
+  const { walletStore } = useShipStore();
+  const initialScreen = walletStore.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;
 
@@ -97,7 +97,7 @@ const EthNewPresenter = () => {
           zIndex={999}
           onClick={() =>
             setScreen(
-              walletApp.initialized
+              walletStore.initialized
                 ? NewWalletScreen.DETECTED_EXISTING
                 : NewWalletScreen.CREATE
             )
@@ -106,7 +106,7 @@ const EthNewPresenter = () => {
           <Button.IconButton
             onClick={() =>
               setScreen(
-                walletApp.initialized
+                walletStore.initialized
                   ? NewWalletScreen.DETECTED_EXISTING
                   : NewWalletScreen.CREATE
               )

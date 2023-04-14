@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
 import {
   NetworkStoreType,
@@ -9,10 +8,11 @@ import {
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const WalletList = observer(() => {
-  const { walletApp } = useTrayApps();
-  const list = walletApp.currentStore.list;
+  const { walletStore } = useShipStore();
+  const list = walletStore.currentStore.list;
 
   const List: FC = () => {
     return (
@@ -61,9 +61,9 @@ export const WalletList = observer(() => {
         <Flex width="80%" justifyContent="center">
           <Text.Body mt={4} variant="body" textAlign="center">
             You haven't created any{' '}
-            {walletApp.navState.network === 'ethereum'
+            {walletStore.navState.network === 'ethereum'
               ? 'Ethereum'
-              : walletApp.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+              : walletStore.navState.btcNetwork === NetworkStoreType.BTC_MAIN
               ? 'Bitcoin'
               : 'Bitcoin Testnet'}{' '}
             addresses yet.
@@ -88,7 +88,7 @@ export const WalletList = observer(() => {
       flexDirection="column"
       alignItems="center"
     >
-      {walletApp.navState.network === NetworkType.BITCOIN ? (
+      {walletStore.navState.network === NetworkType.BITCOIN ? (
         <Flex
           width="100%"
           height="100%"
@@ -102,7 +102,7 @@ export const WalletList = observer(() => {
         </Flex>
       ) : (
         // @ts-ignore
-        <Empty network={walletApp.navState.network} />
+        <Empty network={walletStore.navState.network} />
       )}
     </Flex>
   );

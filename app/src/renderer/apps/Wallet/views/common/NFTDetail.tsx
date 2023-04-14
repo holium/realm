@@ -1,14 +1,14 @@
 import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Icon } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const NFTDetail = () => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
 
-  const wallet = walletApp.currentWallet as EthWalletType;
+  const wallet = walletStore.currentWallet as EthWalletType;
   const nft = wallet.data
-    .get(walletApp.navState.protocol)
-    ?.nfts.get(walletApp.navState.detail?.key ?? '');
+    .get(walletStore.navState.protocol)
+    ?.nfts.get(walletStore.navState.detail?.key ?? '');
 
   if (!nft) return null;
 

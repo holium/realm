@@ -11,8 +11,8 @@ import {
   TransactionType,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
 import { TxType } from './List';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -47,15 +47,15 @@ interface PendingTransactionProps {
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
 
   const goToTransaction = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: walletApp.navState.detail?.txtype as TxType,
-        coinKey: walletApp.navState.detail?.coinKey,
+        txtype: walletStore.navState.detail?.txtype as TxType,
+        coinKey: walletStore.navState.detail?.coinKey,
         key: props.transaction.hash,
       },
     });
@@ -72,12 +72,12 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     console.log(props.transaction.ethType);
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? walletApp.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.navState.protocol === ProtocolType.UQBAR
           ? 'zigs'
           : 'ETH'
-        : walletApp.ethereum.wallets
+        : walletStore.ethereum.wallets
             ?.get(props.transaction.walletIndex.toString())
-            ?.data.get(walletApp.navState.protocol)
+            ?.data.get(walletStore.navState.protocol)
             ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
 

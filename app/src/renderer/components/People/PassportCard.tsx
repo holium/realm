@@ -6,6 +6,7 @@ import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { Avatar } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface IPassport {
   patp: string;
@@ -29,7 +30,8 @@ const PassportCardPresenter = ({
   theme,
   onClose,
 }: IPassport) => {
-  const { setActiveApp, walletApp } = useTrayApps();
+  const { setActiveApp } = useTrayApps();
+  const { walletStore } = useShipStore;
 
   const iconColor = rgba(theme.textColor, 0.7);
   const buttonColor = darken(0.1, theme.windowColor);
@@ -66,7 +68,7 @@ const PassportCardPresenter = ({
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          {walletApp.initialized && (
+          {walletStore.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}
               data-prevent-menu-close="true"

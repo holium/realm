@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Box, Button, Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { ThemeModelType } from 'os/services/theme.model';
 import {
   getBaseTheme,
@@ -30,33 +29,35 @@ interface DetailProps {
   hidePending: boolean;
 }
 const DetailPresenter = (props: DetailProps) => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
   const [QROpen, setQROpen] = useState(false);
   const sendTrans =
-    walletApp.navState.view === WalletView.TRANSACTION_SEND ||
-    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
+    walletStore.navState.view === WalletView.TRANSACTION_SEND ||
+    walletStore.navState.view === WalletView.TRANSACTION_CONFIRM;
   const hideWalletHero =
-    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
+    walletStore.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
   const onScreenChange = () => {};
   const close = async () => {
-    await WalletActions.navigateBack();
+    await walletStore.navigateBack();
   };
 
-  const wallet = walletApp.currentWallet;
+  const wallet = walletStore.currentWallet;
   let coins = null;
   let nfts = null;
   const hasCoin =
-    walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
+    walletStore.navState.detail && walletStore.navState.detail.type === 'coin';
   let coin: ERC20Type | null = null;
-  if (walletApp.navState.network === 'ethereum') {
+  if (walletStore.navState.network === 'ethereum') {
     const ethWalletData = (wallet as EthWalletType).data.get(
-      walletApp.navState.protocol
+      walletStore.navState.protocol
     );
     if (ethWalletData) {
-      if (hasCoin && walletApp.navState.detail?.key) {
-        const newCoin = ethWalletData.coins.get(walletApp.navState.detail?.key);
+      if (hasCoin && walletStore.navState.detail?.key) {
+        const newCoin = ethWalletData.coins.get(
+          walletStore.navState.detail?.key
+        );
         if (newCoin) coin = newCoin;
       }
       coins = getCoins(ethWalletData.coins);
@@ -65,12 +66,12 @@ const DetailPresenter = (props: DetailProps) => {
   }
 
   const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
+    walletStore.navState.network === NetworkType.ETHEREUM
       ? coin
         ? (wallet as EthWalletType).data
-            ?.get(walletApp.navState.protocol ?? '')
+            ?.get(walletStore.navState.protocol ?? '')
             ?.coins.get(coin.address)?.transactionList.transactions
-        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+        : (wallet as EthWalletType).data.get(walletStore.navState.protocol)
             ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
@@ -118,7 +119,7 @@ const DetailPresenter = (props: DetailProps) => {
           if (send) {
             WalletActions.navigate(WalletView.TRANSACTION_SEND, {
               walletIndex: `${wallet.index}`,
-              protocol: walletApp.navState.protocol,
+              protocol: walletStore.navState.protocol,
               ...(coin && {
                 detail: {
                   type: 'coin',
@@ -168,7 +169,7 @@ const DetailPresenter = (props: DetailProps) => {
           {!coin && (
             <>
               <ListSelector
-                network={walletApp.navState.network}
+                network={walletStore.navState.network}
                 selected={listView}
                 onChange={(newView: DisplayType) => setListView(newView)}
               />

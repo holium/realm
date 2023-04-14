@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
 import { useEffect, useState, useMemo } from 'react';
-import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail/Detail';
 import { WalletList } from './views/List';
@@ -22,6 +21,7 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
@@ -43,32 +43,32 @@ const WalletAppPresenter = (props: any) => {
   const { theme } = useServices();
   const [hidePending, setHidePending] = useState(true);
 
-  const { walletApp, dimensions } = useTrayApps();
+  const { walletStore } = useShipStore();
   let transactions: any = [];
-  for (const key of walletApp.currentStore.wallets.keys()) {
-    const wallet = walletApp.currentStore.wallets.get(key);
+  for (const key of walletStore.currentStore.wallets.keys()) {
+    const wallet = walletStore.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      (walletApp.navState.network === NetworkType.ETHEREUM
-        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+      (walletStore.navState.network === NetworkType.ETHEREUM
+        ? (wallet as EthWalletType).data.get(walletStore.navState.protocol)
             ?.transactionList.transactions
         : (wallet as BitcoinWalletType).transactionList.transactions) ||
         new Map()
     );
-    if (walletApp.navState.network === NetworkType.ETHEREUM) {
-      for (const key of walletApp.currentStore.wallets.keys()) {
+    if (walletStore.navState.network === NetworkType.ETHEREUM) {
+      for (const key of walletStore.currentStore.wallets.keys()) {
         const coinKeys = (
-          walletApp.currentStore.wallets.get(key) as EthWalletType
+          walletStore.currentStore.wallets.get(key) as EthWalletType
         ).data
-          .get(walletApp.navState.protocol)
+          .get(walletStore.navState.protocol)
           ?.coins.keys();
         if (!coinKeys) continue;
 
         for (const coin of coinKeys) {
           const coinTransactions = (
-            walletApp.currentStore.wallets.get(key) as EthWalletType
+            walletStore.currentStore.wallets.get(key) as EthWalletType
           ).data
-            .get(walletApp.navState.protocol)
+            .get(walletStore.navState.protocol)
             ?.coins.get(coin)
             ?.transactionList.transactions.values();
           if (!coinTransactions) continue;
@@ -99,10 +99,10 @@ const WalletAppPresenter = (props: any) => {
     WalletView.NEW,
     WalletView.LOCKED,
     WalletView.SETTINGS,
-  ].includes(walletApp.navState.view);
+  ].includes(walletStore.navState.view);
 
   const hideHeader = [WalletView.LOCKED, WalletView.SETTINGS].includes(
-    walletApp.navState.view
+    walletStore.navState.view
   );
 
   const pendingIsVisible = [
@@ -110,14 +110,14 @@ const WalletAppPresenter = (props: any) => {
     WalletView.WALLET_DETAIL,
     WalletView.TRANSACTION_DETAIL,
     WalletView.NFT_DETAIL,
-  ].includes(walletApp.navState.view);
+  ].includes(walletStore.navState.view);
 
   const viewComponent: WalletView =
-    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM
+    walletStore.navState.view === WalletView.TRANSACTION_CONFIRM
       ? WalletView.TRANSACTION_SEND
-      : walletApp.navState.view;
+      : walletStore.navState.view;
   const View = useMemo(() => {
-    return WalletViews(walletApp.navState.network)[viewComponent];
+    return WalletViews(walletStore.navState.network)[viewComponent];
   }, [viewComponent]);
 
   return (
@@ -129,11 +129,11 @@ const WalletAppPresenter = (props: any) => {
       flexDirection="column"
     >
       <WalletHeader
-        isOnboarding={WalletView.NEW === walletApp.navState.view}
-        showBack={walletApp.navState.view !== WalletView.LIST}
+        isOnboarding={WalletView.NEW === walletStore.navState.view}
+        showBack={walletStore.navState.view !== WalletView.LIST}
         theme={theme.currentTheme}
         network={
-          walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
+          walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
         }
         onAddWallet={async () =>
           await WalletActions.navigate(WalletView.CREATE_WALLET)
@@ -145,7 +145,7 @@ const WalletAppPresenter = (props: any) => {
       />
       {pendingIsVisible &&
         !hidePending &&
-        walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
+        walletStore.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />

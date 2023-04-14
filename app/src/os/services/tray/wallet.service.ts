@@ -871,11 +871,6 @@ export class WalletService extends BaseService {
     this.state.navigate(view, options);
   }
 
-  navigateBack() {
-    if (!this.state) throw new Error('Wallet state not loaded');
-    this.state.navigateBack();
-  }
-
   toggleNetwork(_evt: any) {
     if (!this.state) throw new Error('Wallet state not loaded');
     if (!this.wallet) throw new Error('Wallet not loaded');

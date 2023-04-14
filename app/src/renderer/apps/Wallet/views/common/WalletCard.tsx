@@ -1,6 +1,5 @@
 import { FC, useMemo } from 'react';
 import { Text, Flex } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import {
   formatEthAmount,
   formatZigAmount,
@@ -19,6 +18,7 @@ import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../components/WalletCardWrapper';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface WalletCardProps {
   // wallet: EthWalletType | BitcoinWalletType;
@@ -32,35 +32,35 @@ export const WalletCard: FC<WalletCardProps> = ({
   isSelected,
   onSelect,
 }: WalletCardProps) => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
 
-  const wallet = walletApp.currentStore.wallets.get(walletKey);
+  const wallet = walletStore.currentStore.wallets.get(walletKey);
 
   let coins: any = null;
-  if (walletApp.navState.network === NetworkType.ETHEREUM) {
+  if (walletStore.navState.network === NetworkType.ETHEREUM) {
     const ethWallet = wallet as EthWalletType;
-    const coinMap = ethWallet.data.get(walletApp.navState.protocol)?.coins;
+    const coinMap = ethWallet.data.get(walletStore.navState.protocol)?.coins;
     if (coinMap) coins = getCoins(coinMap);
   }
 
   const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+    walletStore.navState.network === NetworkType.ETHEREUM
+      ? (wallet as EthWalletType).data.get(walletStore.navState.protocol)
           ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
   const transactions = getTransactions(walletTransactions || new Map());
 
   const amountDisplay =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? walletApp.navState.protocol === ProtocolType.UQBAR
+    walletStore.navState.network === NetworkType.ETHEREUM
+      ? walletStore.navState.protocol === ProtocolType.UQBAR
         ? `${formatZigAmount(
-            (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+            (wallet as EthWalletType).data.get(walletStore.navState.protocol)
               ?.balance ?? ''
           )} zigs`
         : `${
             formatEthAmount(
-              (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+              (wallet as EthWalletType).data.get(walletStore.navState.protocol)
                 ?.balance ?? ''
             ).eth
           } ETH`

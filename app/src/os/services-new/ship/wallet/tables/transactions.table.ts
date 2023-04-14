@@ -16,8 +16,8 @@ export class TransactionsDB extends AbstractDataAccess<Transaction> {
     super({
       preload: preload,
       db,
-      name: 'membersDB',
-      tableName: 'spaces_members',
+      name: 'transactionsDB',
+      tableName: 'wallet_transactions',
     });
     if (preload) {
       return;
@@ -73,7 +73,7 @@ export class TransactionsDB extends AbstractDataAccess<Transaction> {
     });
   }
 
-  public createMember(values: Partial<Transaction>): Transaction {
+  public createTransaction(values: Partial<Transaction>): Transaction {
     if (values.roles) values.roles = JSON.stringify(values.roles);
     const columns = Object.keys(values).join(', ');
     const placeholders = Object.keys(values)
@@ -89,7 +89,7 @@ export class TransactionsDB extends AbstractDataAccess<Transaction> {
     return created;
   }
 
-  public getMember(path: string, patp: string): Transaction | null {
+  public getTransaction(path: string, patp: string): Transaction | null {
     const query = `SELECT * FROM ${this.tableName} WHERE space = ? and patp = ?`;
     const stmt = this.prepare(query);
     const row = stmt.get(path, patp);
@@ -170,6 +170,6 @@ create unique index if not exists hash_network_uindex
     on  (hash, network);
 `;
 
-export const spacesMembersDBPreload = TransactionsDB.preload(
+export const walletTransactionsDBPreload = TransactionsDB.preload(
   new TransactionsDB(true)
 );

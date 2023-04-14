@@ -12,7 +12,6 @@ import {
   Spinner,
   TextInput,
 } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletCreationMode,
@@ -20,6 +19,7 @@ import {
   UISettingsType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 import { DeletePasscode } from './DeletePasscode';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
@@ -30,14 +30,14 @@ enum SettingScreen {
 }
 
 const WalletSettingsPresenter = () => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
   // const [providerInput, setProviderInput] = useState('');
   // const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const network = walletApp.navState.network;
+  const network = walletStore.navState.network;
   const walletStore =
-    network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
+    network === 'ethereum' ? walletStore.ethereum : walletStore.bitcoin;
   const settings = walletStore.settings;
   const wallets = walletStore.list
     .map((wallet) => walletStore.wallets.get(wallet.key))
@@ -46,7 +46,7 @@ const WalletSettingsPresenter = () => {
   const [state, setState] = useState<UISettingsType>({
     ...settings,
     provider: settings.provider ?? '',
-    blocked: [...walletApp.blacklist],
+    blocked: [...walletStore.blacklist],
   });
 
   // async function setProvider(newProviderURL: string) {

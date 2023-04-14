@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Box, Icon, Text, Button, Avatar } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
@@ -38,10 +37,10 @@ interface TransactionPaneProps {
 export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
     const { coin } = props;
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
 
     const screen =
-      walletApp.navState.view === WalletView.TRANSACTION_SEND
+      walletStore.navState.view === WalletView.TRANSACTION_SEND
         ? 'initial'
         : 'confirm';
 
@@ -53,16 +52,16 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
 
     const next = () => {
-      if (walletApp.navState.protocol === ProtocolType.UQBAR) {
+      if (walletStore.navState.protocol === ProtocolType.UQBAR) {
         WalletActions.enqueueUqbarTransaction(
-          walletApp.navState.walletIndex ?? '',
+          walletStore.navState.walletIndex ?? '',
           props.transactionAmount
         );
       } else {
-        const wallet = walletApp.currentWallet;
+        const wallet = walletStore.currentWallet;
         WalletActions.navigate(WalletView.TRANSACTION_CONFIRM, {
           walletIndex: `${wallet?.index}`,
-          protocol: walletApp.navState.protocol,
+          protocol: walletStore.navState.protocol,
           ...(coin && {
             detail: {
               type: 'coin',
@@ -139,16 +138,16 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   {props.transactionAmount}{' '}
                   {props.coin
                     ? props.coin.name
-                    : walletApp.navState.protocol === ProtocolType.UQBAR
+                    : walletStore.navState.protocol === ProtocolType.UQBAR
                     ? 'zigs'
-                    : abbrMap[walletApp.navState.network]}
+                    : abbrMap[walletStore.navState.network]}
                 </Text.Body>
-                {walletApp.navState.protocol === ProtocolType.ETH_MAIN && (
+                {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
                   <Text.Body mt={1}>
                     $
                     {ethToUsd(
                       props.transactionAmount,
-                      walletApp.ethereum.conversions.usd ?? 0
+                      walletStore.ethereum.conversions.usd ?? 0
                     )}{' '}
                     USD
                   </Text.Body>
@@ -246,13 +245,13 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     </Text.Body>
                     <Flex flexDirection="column">
                       <Text.Body variant="body">0.001 ETH</Text.Body>
-                      {walletApp.navState.protocol ===
+                      {walletStore.navState.protocol ===
                         ProtocolType.ETH_MAIN && (
                         <Text.Body fontSize={1}>
                           ≈{' '}
                           {ethToUsd(
                             0.0005,
-                            walletApp.ethereum.conversions.usd ?? 0
+                            walletStore.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
                         </Text.Body>
@@ -271,13 +270,13 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         {props.transactionAmount + 0.0005}{' '}
                         {props.coin ? props.coin.name : 'ETH'}
                       </Text.Body>
-                      {walletApp.navState.protocol ===
+                      {walletStore.navState.protocol ===
                         ProtocolType.ETH_MAIN && (
                         <Text.Body fontSize={1}>
                           ≈{' '}
                           {ethToUsd(
                             props.transactionAmount + 0.0005,
-                            walletApp.ethereum.conversions.usd ?? 0
+                            walletStore.ethereum.conversions.usd ?? 0
                           )}{' '}
                           USD
                         </Text.Body>

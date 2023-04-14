@@ -3,8 +3,8 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
 import styled from 'styled-components';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const Wrapper = styled(Box)`
   position: absolute;
@@ -25,7 +25,7 @@ interface WalletFooterProps {
 export const WalletFooterPresenter = ({
   hidden = false,
 }: WalletFooterProps) => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
 
   /*useEffect(() => {
     WalletActions.uqbarDeskExists();
@@ -35,7 +35,7 @@ export const WalletFooterPresenter = ({
     <Wrapper hidden={hidden}>
       <Flex justifyContent="space-between">
         <Box mr={1}>
-          <WalletNetwork network={walletApp.navState.protocol} />
+          <WalletNetwork network={walletStore.navState.protocol} />
         </Box>
         <Flex>
           <Flex mr="10px">

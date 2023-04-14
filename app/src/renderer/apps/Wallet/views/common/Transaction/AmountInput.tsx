@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 
 import { Flex, Box, Icon, Text, Input } from '@holium/design-system';
-import { getBaseTheme } from '../../../lib/helpers';
-import { useTrayApps } from 'renderer/apps/store';
 import { ContainerFlex, FlexHider } from './styled';
 import {
   ERC20Type,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 // TODO: replace with actual exchange rate
 const ethToUsd = (eth: number, currentPrice: number) =>
@@ -29,26 +27,23 @@ export const AmountInput = observer(
     coin?: ERC20Type | null;
   }) => {
     const amountRef = React.createRef<HTMLInputElement>();
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
 
     const [inCryptoToggle, setInCryptoToggle] = useState(true);
     const showUsd =
-      walletApp.navState.protocol === ProtocolType.ETH_MAIN ||
-      (walletApp.navState.protocol === ProtocolType.ETH_GORLI && !props.coin);
+      walletStore.navState.protocol === ProtocolType.ETH_MAIN ||
+      (walletStore.navState.protocol === ProtocolType.ETH_GORLI && !props.coin);
 
     const inCrypto = showUsd ? inCryptoToggle : true;
 
     const [amount, setAmount] = useState<string | number>(0);
     const [amountError, setAmountError] = useState(false);
 
-    const themeData = getBaseTheme(theme.currentTheme);
-    const panelBackground = darken(0.04, theme.currentTheme.windowColor);
-
     const check = (inCrypto: boolean, value: string | number) => {
       const numVal = Number(value);
       let amountInCrypto = numVal;
-      if (walletApp.ethereum.conversions.usd && !inCrypto) {
-        amountInCrypto = usdToEth(numVal, walletApp.ethereum.conversions.usd);
+      if (walletStore.ethereum.conversions.usd && !inCrypto) {
+        amountInCrypto = usdToEth(numVal, walletStore.ethereum.conversions.usd);
         // inCrypto ? numVal : usdToEth(numVal, currentPrice);
       }
       if (amountInCrypto > props.max) {
@@ -99,16 +94,11 @@ export const AmountInput = observer(
           justifyContent="space-evenly"
           alignItems="center"
         >
-          <Text.Body
-            fontSize={1}
-            variant="body"
-            color={themeData.colors.text.secondary}
-          >
+          <Text.Body fontSize={1} variant="body">
             AMOUNT
           </Text.Body>
           <ContainerFlex
             className="realm-cursor-hover"
-            focusBorder={themeData.colors.brand.primary}
             px={1}
             py={1}
             onClick={inputContainerClicked}
@@ -116,12 +106,6 @@ export const AmountInput = observer(
             height="40px"
             justifyContent="space-between"
             borderRadius="7px"
-            background={panelBackground}
-            border={`solid 1px ${
-              amountError
-                ? themeData.colors.text.error
-                : themeData.colors.ui.borderColor
-            }`}
           >
             <Flex
               px={1}
@@ -158,23 +142,23 @@ export const AmountInput = observer(
               {showUsd && (
                 <Box hidden={!amount}>
                   <Text.Body fontSize="11px">
-                    {walletApp.ethereum.conversions.usd &&
+                    {walletStore.ethereum.conversions.usd &&
                       (inCrypto
                         ? `$${ethToUsd(
                             Number(amount),
-                            walletApp.ethereum.conversions.usd
+                            walletStore.ethereum.conversions.usd
                           )} USD`
                         : `${usdToEth(
                             Number(amount),
-                            walletApp.ethereum.conversions.usd
+                            walletStore.ethereum.conversions.usd
                           )} ${
                             props.coin
                               ? props.coin.name
-                              : walletApp.navState.protocol ===
+                              : walletStore.navState.protocol ===
                                 ProtocolType.UQBAR
                               ? 'zigs'
                               : abbrMap[
-                                  walletApp.navState.network as
+                                  walletStore.navState.network as
                                     | 'bitcoin'
                                     | 'ethereum'
                                 ]
@@ -187,19 +171,17 @@ export const AmountInput = observer(
               p="4px"
               justifyContent="center"
               alignItems="center"
-              background={theme.currentTheme.windowColor}
-              border={`solid 1px ${themeData.colors.ui.borderColor}`}
               borderRadius="5px"
               onClick={toggleInCrypto}
             >
-              <Text.Body variant="body" fontSize="12px">
+              <Text.Body fontSize="12px">
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
-                    : walletApp.navState.protocol === ProtocolType.UQBAR
+                    : walletStore.navState.protocol === ProtocolType.UQBAR
                     ? 'zigs'
                     : abbrMap[
-                        walletApp.navState.network as 'bitcoin' | 'ethereum'
+                        walletStore.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}
               </Text.Body>

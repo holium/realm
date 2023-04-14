@@ -3,12 +3,12 @@ import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { Icons, Text } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
 import { shortened } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { ContainerFlex } from './styled';
 import { Avatar, Flex, Box, Input, Spinner } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const RecipientInput = observer(
   (props: {
@@ -22,16 +22,16 @@ export const RecipientInput = observer(
       }
     ) => void;
   }) => {
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
 
     const [icon, setIcon] = useState('blank');
     const [valueCache, setValueCache] = useState('');
     const [recipient, setRecipient] = useState('');
     const [recipientError, setRecipientError] = useState('');
     useEffect(() => {
-      if (walletApp.navState.to) {
-        setRecipient(walletApp.navState.to);
-        onChange({ target: { value: walletApp.navState.to } });
+      if (walletStore.navState.to) {
+        setRecipient(walletStore.navState.to);
+        onChange({ target: { value: walletStore.navState.to } });
       }
     }, []);
 
@@ -119,7 +119,7 @@ export const RecipientInput = observer(
     const onChange = (e: any) => {
       const value: string = e.target.value;
       const validAddress =
-        walletApp.navState.network === 'ethereum'
+        walletStore.navState.network === 'ethereum'
           ? ethers.utils.isAddress(value)
           : false; // TODO add bitcoin validation
       const validPatp = isValidPatp(value);

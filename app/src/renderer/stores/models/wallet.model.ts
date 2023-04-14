@@ -5,6 +5,8 @@ import {
   getSnapshot,
   cast,
 } from 'mobx-state-tree';
+import { WalletIPC } from '../ipc';
+import { shipStore } from '../ship.store';
 // import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
@@ -1017,8 +1019,10 @@ export const initialWalletState = (ship: string) => ({
     protocol: ProtocolType.ETH_GORLI,
     lastEthProtocol: ProtocolType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,
+    // transSend: false,
   },
   ethereum: {
+    // block: 0,
     gorliBlock: 0,
     protocol: ProtocolType.ETH_GORLI,
     settings: {
@@ -1055,6 +1059,18 @@ export const initialWalletState = (ship: string) => ({
   settings: {
     passcodeHash: '',
   },
-  ourPatp: ship,
   forceActive: false,
+});
+
+WalletIPC.onUpdate((_event: any, update: any) => {
+  const { type, payload } = update;
+  // on update we need to requery the store
+  switch (type) {
+    case 'initial':
+      shipStore.walletStore.init();
+      break;
+    case 'invitations':
+      shipStore.walletStore._onInitialInvitationsUpdate(payload);
+      break;
+  }
 });
